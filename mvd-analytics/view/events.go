@@ -45,9 +45,13 @@ type TaggedEvent struct {
 
 // Default Types when EventsFilter.Types is empty (D15: omit the
 // high-frequency change events that drown the discrete-event story).
+// airgib and pause join the default set as rare, discrete key-moment /
+// match-shaping events (same rationale as demomark): airgib surfaces a
+// direct airborne rocket hit; pause marks a game-clock freeze segment and
+// carries no player (so a players= filter naturally excludes it).
 var defaultEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
-	"pickup", "demomark",
+	"pickup", "demomark", "airgib", "pause",
 }
 
 // KnownEventTypes is every event type Events recognises: the default
@@ -55,10 +59,11 @@ var defaultEventTypes = []string{
 // dedicated-lens types (damage, telefrag, stomp, health, armor, loc). An
 // EventsFilter.Types value outside this set is rejected (the handler turns
 // the returned error into 400 invalid_param). The openapi EventTypes enum is
-// drift-pinned to this slice.
+// drift-pinned to this slice. Note pause is playerless: a players= filter
+// excludes it (its Player field is "", which no explicit filter matches).
 var KnownEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
-	"pickup", "demomark", "damage", "telefrag", "stomp", "health", "armor", "loc",
+	"pickup", "demomark", "airgib", "pause", "damage", "telefrag", "stomp", "health", "armor", "loc",
 }
 
 // Events returns a time-ordered list of events matching the filter.
@@ -184,6 +189,59 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			events = append(events, TaggedEvent{
 				T: ts, Type: "demomark", Player: dm.PlayerName, Detail: detail,
+			})
+		}
+	}
+	if want["airgib"] && r.TimelineAnalysis != nil {
+		for _, ag := range r.TimelineAnalysis.Airgibs {
+			ts := ag.Time
+			if !inWindow(ts, filter.StartTime, end) {
+				continue
+			}
+			// The player filter matches the attacker (the rocketeer), the
+			// TaggedEvent.Player.
+			if !pf.accepts(ag.Attacker) {
+				continue
+			}
+			detail := map[string]any{
+				"victim": ag.Victim,
+				"height": ag.Height,
+				"damage": ag.Damage,
+			}
+			if ag.AttackerTeam != "" {
+				detail["attackerTeam"] = ag.AttackerTeam
+			}
+			if ag.VictimTeam != "" {
+				detail["victimTeam"] = ag.VictimTeam
+			}
+			if ag.HeightAboveAttacker != 0 {
+				detail["heightAboveAttacker"] = ag.HeightAboveAttacker
+			}
+			if ag.Loc != "" {
+				detail["loc"] = ag.Loc
+			}
+			if ag.Lethal {
+				detail["lethal"] = true
+			}
+			events = append(events, TaggedEvent{
+				T: ts, Type: "airgib", Player: ag.Attacker, Detail: detail,
+			})
+		}
+	}
+	if want["pause"] && r.Streams != nil {
+		// Pauses come from the streams global section (r.Streams.Global.Pauses).
+		// A pause has no player; pf.accepts("") is true when no players= filter
+		// is set and false when one is, so an explicit filter excludes it.
+		for _, p := range r.Streams.Global.Pauses {
+			ts := p.AtMs
+			if !inWindow(ts, filter.StartTime, end) {
+				continue
+			}
+			if !pf.accepts("") {
+				continue
+			}
+			events = append(events, TaggedEvent{
+				T: ts, Type: "pause", Detail: map[string]any{"durationMs": p.DurationMs},
 			})
 		}
 	}
