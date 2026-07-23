@@ -5,7 +5,7 @@ import "testing"
 // newStreakTestAnalyzer builds a TimelineAnalyzer wired just far enough
 // for detectFragStreaks: match timing set, slot→name resolution via
 // playerNames, and the canonical frag log via CoreOutputs.
-func newStreakTestAnalyzer(startTime, endTime float64, names map[int]string, frags []FragEntry) *TimelineAnalyzer {
+func newStreakTestAnalyzer(startTime, endTime int32, names map[int]string, frags []FragEntry) *TimelineAnalyzer {
 	a := NewTimelineAnalyzer()
 	a.ctx = &Context{}
 	a.timing.Started = true
@@ -44,20 +44,20 @@ func TestFragStreaks_InitialSpawnRun(t *testing.T) {
 		{Time: 200000, Killer: "prey", Victim: "dom", Weapon: "rl"},
 		{Time: 250000, Killer: "dom", Victim: "prey", Weapon: "rl"},
 	}
-	a := newStreakTestAnalyzer(10.0, 310.0, map[int]string{0: "dom", 1: "prey"}, frags)
+	a := newStreakTestAnalyzer(10000, 310000, map[int]string{0: "dom", 1: "prey"}, frags)
 
 	// dom's only death/respawn cycle. prey dies five times, respawning
 	// two seconds after each death; prey's initial spawn is likewise
 	// unrecorded.
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 200.0, PlayerNum: 0})
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 202.0, PlayerNum: 0})
-	for _, dt := range []float64{30, 60, 90, 120, 150} {
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 200000, PlayerNum: 0})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 202000, PlayerNum: 0})
+	for _, dt := range []int32{30000, 60000, 90000, 120000, 150000} {
 		a.rawDeaths = append(a.rawDeaths, deathEvent{Time: dt, PlayerNum: 1})
-		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2, PlayerNum: 1})
+		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2000, PlayerNum: 1})
 	}
 	// prey also dies once more mid-match after dom's respawn.
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 250.0, PlayerNum: 1})
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 252.0, PlayerNum: 1})
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 250000, PlayerNum: 1})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 252000, PlayerNum: 1})
 
 	streaks := a.detectFragStreaks(10, nil, map[string]int{})
 
@@ -89,10 +89,10 @@ func TestFragStreaks_NeverDiedPlayer(t *testing.T) {
 		{Time: 40000, Killer: "dom", Victim: "prey", Weapon: "rl"},
 		{Time: 60000, Killer: "dom", Victim: "prey", Weapon: "rl"},
 	}
-	a := newStreakTestAnalyzer(10.0, 300.0, map[int]string{0: "dom", 1: "prey"}, frags)
-	for _, dt := range []float64{20, 40, 60} {
+	a := newStreakTestAnalyzer(10000, 300000, map[int]string{0: "dom", 1: "prey"}, frags)
+	for _, dt := range []int32{20000, 40000, 60000} {
 		a.rawDeaths = append(a.rawDeaths, deathEvent{Time: dt, PlayerNum: 1})
-		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2, PlayerNum: 1})
+		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2000, PlayerNum: 1})
 	}
 
 	streaks := a.detectFragStreaks(10, nil, map[string]int{})
@@ -119,17 +119,17 @@ func TestFragStreaks_MatchStartResetKill(t *testing.T) {
 		{Time: 30000, Killer: "nlk", Victim: "prey", Weapon: "rl"},
 		{Time: 60000, Killer: "nlk", Victim: "prey", Weapon: "sg"},
 	}
-	a := newStreakTestAnalyzer(10.0, 300.0, map[int]string{0: "nlk", 1: "prey"}, frags)
+	a := newStreakTestAnalyzer(10000, 300000, map[int]string{0: "nlk", 1: "prey"}, frags)
 
 	// Reset kill at exactly match start, respawn, then a real
 	// death/respawn cycle.
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 10.0, PlayerNum: 0})
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 10.5, PlayerNum: 0})
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 40.0, PlayerNum: 0})
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 42.0, PlayerNum: 0})
-	for _, dt := range []float64{20, 30, 60} {
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 10000, PlayerNum: 0})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 10500, PlayerNum: 0})
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 40000, PlayerNum: 0})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 42000, PlayerNum: 0})
+	for _, dt := range []int32{20000, 30000, 60000} {
 		a.rawDeaths = append(a.rawDeaths, deathEvent{Time: dt, PlayerNum: 1})
-		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2, PlayerNum: 1})
+		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2000, PlayerNum: 1})
 	}
 
 	streaks := a.detectFragStreaks(10, nil, map[string]int{})
@@ -166,10 +166,10 @@ func TestFragStreaks_MidMatchJoinerUnaffected(t *testing.T) {
 	frags := []FragEntry{
 		{Time: 120000, Killer: "late", Victim: "prey", Weapon: "rl"},
 	}
-	a := newStreakTestAnalyzer(10.0, 300.0, map[int]string{2: "late", 1: "prey"}, frags)
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 100.0, PlayerNum: 2})
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 120.0, PlayerNum: 1})
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 122.0, PlayerNum: 1})
+	a := newStreakTestAnalyzer(10000, 300000, map[int]string{2: "late", 1: "prey"}, frags)
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 100000, PlayerNum: 2})
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 120000, PlayerNum: 1})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 122000, PlayerNum: 1})
 
 	streaks := a.detectFragStreaks(10, nil, map[string]int{})
 

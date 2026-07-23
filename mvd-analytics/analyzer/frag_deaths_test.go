@@ -19,9 +19,9 @@ func TestFragDeaths_TeamkillVictimCountedViaDeathEvent(t *testing.T) {
 	a.timing.Started = true // simulate match running
 
 	// Teamkill obituary that names only the attacker.
-	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "killa mows down a teammate\n", Time: 10})
+	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "killa mows down a teammate\n", TimeMs: 10000})
 	// The protocol death for the (unnamed) victim on slot 2.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 2, Time: 10, TimeMs: 10_000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 2, TimeMs: 10_000})
 
 	a.UseCoreOutputs(&CoreOutputs{Slots: map[int]SlotInfo{
 		1: {Name: "killa", Team: "red"},
@@ -53,14 +53,14 @@ func TestFragDeaths_GatedToMatchTime(t *testing.T) {
 	co := &CoreOutputs{Slots: map[int]SlotInfo{3: {Name: "p", Team: "red"}}}
 
 	// Warmup death (before any start print): ignored.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, Time: 1, TimeMs: 1_000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, TimeMs: 1_000})
 	// Match starts.
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", Time: 5})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
 	// In-match death: counted.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, Time: 6, TimeMs: 6_000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, TimeMs: 6_000})
 	// Match ends (intermission), then a post-match death: ignored.
-	_ = a.OnEvent(&events.IntermissionEvent{Time: 20})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, Time: 21, TimeMs: 21_000})
+	_ = a.OnEvent(&events.IntermissionEvent{TimeMs: 20000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, TimeMs: 21_000})
 
 	a.UseCoreOutputs(co)
 	var res Result

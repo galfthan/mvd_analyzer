@@ -1321,13 +1321,12 @@ truth. Integer storage:
 
 1. **Storage**: `int32` ms in the result schema. Same JSON-key shape
    as adjacent fields.
-2. **Producer** (`mvd-analytics/analyzer/`): if the source event has
-   a `TimeMs int32` field, use that directly. Otherwise convert at
-   the write site via `msTime(e.Time)` (defined in
-   [`analyzer/timeline_streams.go`](analyzer/timeline_streams.go);
-   `int32(math.Round(t*1000))` — well-conditioned because the
-   float64-seconds view derives once from the decoder's int32-ms
-   accumulator).
+2. **Producer** (`mvd-analytics/analyzer/`): every source event
+   carries `TimeMs int32` (`e.EventTimeMs()` on the interface) — use
+   it directly. The analyzers consume integer ms end to end; there is
+   no float-seconds time intermediate. `events.Sec(ms)` exists only to
+   format human-readable seconds at a presentation edge (never in a
+   result field).
 3. **Postprocess** (`normalizeMatchRelativeTimes` in
    `analyzer/postprocess.go`): if the field shifts with match start,
    add it there. Everything works in int32 ms;

@@ -48,8 +48,10 @@ func NewDecoder(r io.Reader) *Decoder {
 }
 
 // CurrentTime returns the current demo time as float64 seconds. This is a
-// derived view over the canonical int32-ms accumulator; do not rely on it
-// for comparisons against persisted int32-ms values.
+// derived debug accessor over the canonical int32-ms accumulator (see
+// CurrentTimeMs); it exists for human-readable diagnostics only. Do not
+// rely on it for comparisons against persisted int32-ms values, and do not
+// reintroduce it into the event/pipeline path — demo time is integer ms.
 func (d *Decoder) CurrentTime() float64 {
 	return float64(d.timeMs) * 0.001
 }
@@ -108,7 +110,6 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 			PlayerNum:   playerNum,
 		},
 		TimeMs: d.timeMs,
-		Time:   d.CurrentTime(),
 	}
 
 	// Handle each message type

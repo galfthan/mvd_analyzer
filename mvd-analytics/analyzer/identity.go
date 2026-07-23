@@ -111,7 +111,7 @@ func (a *IdentityAnalyzer) onUserInfo(e *events.UserInfoEvent) {
 		return
 	}
 	uid := e.Player.UserID
-	tMs := msTime(e.Time)
+	tMs := e.TimeMs
 
 	cur := a.open[slot]
 	if cur == nil {

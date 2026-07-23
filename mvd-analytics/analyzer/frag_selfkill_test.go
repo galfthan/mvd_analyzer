@@ -31,7 +31,7 @@ func TestFragSelfKillWeaponLabels(t *testing.T) {
 			_ = a.Init(ctx)
 			a.timing.Started = true
 
-			_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: tc.msg + "\n", Time: 1})
+			_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: tc.msg + "\n", TimeMs: 1000})
 			var res Result
 			if err := a.Finalize(&res); err != nil {
 				t.Fatal(err)
@@ -65,8 +65,8 @@ func TestFragByWeaponEnemyKillsOnly(t *testing.T) {
 	_ = a.Init(ctx)
 	a.timing.Started = true
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "prey was nailed by killa\n", Time: 1})
-	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "killa discovers blast radius\n", Time: 2})
+	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "prey was nailed by killa\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "killa discovers blast radius\n", TimeMs: 2000})
 	var res Result
 	if err := a.Finalize(&res); err != nil {
 		t.Fatal(err)

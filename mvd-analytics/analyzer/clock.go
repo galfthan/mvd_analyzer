@@ -22,7 +22,7 @@ import (
 // than a missed entry in one giant function.
 type Clock struct {
 	// MatchStartMs is the demo-clock ms at which the match started
-	// (msTime of the detector's StartTime). 0 when no match start was
+	// (the detector's StartTime). 0 when no match start was
 	// detected — in which case ToMatch is the identity and no producer
 	// shifts, exactly as the old rebase returned early on matchStart<=0.
 	MatchStartMs int32
@@ -89,7 +89,7 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.PlayerPositionEvent:
 		// Mirror the timeline's stream gate (timeline.go handlePositionUpdate):
 		// only in-match samples feed the match-end fallback, keyed on the same
@@ -109,7 +109,7 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	case *events.PausedDurationEvent:
 		// mvdhidden 0x000A: one real-ms sample per idle frame while the game
 		// clock is paused. Collect raw; coalesced per-pause at Finalize.
-		a.rawPauses = append(a.rawPauses, pauseSample{Time: e.Time, DurationMs: e.DurationMs})
+		a.rawPauses = append(a.rawPauses, pauseSample{Time: e.TimeMs, DurationMs: e.DurationMs})
 	case *events.StuffTextEvent:
 		// The bulk cvar dump `fullserverinfo "\...\epoch\<secs>\..."` carries
 		// the whole-second wall-clock fallback. Same source metadata parses.
@@ -138,16 +138,13 @@ func (a *ClockAnalyzer) Finalize(result *Result) error { return nil }
 func (a *ClockAnalyzer) PopulateCore(co *CoreOutputs) {
 	// Effective match end: the explicit detector end, or the latest in-match
 	// position sample when the demo was cut before intermission (F13). This
-	// mirrors the timeline's own computation (timeline_finalize.go).
-	matchEnd := a.timing.EndTime
-	if matchEnd == 0 {
-		matchEnd = float64(a.maxInMatchPosMs) * 0.001
-	}
-	matchStartMs := msTime(a.timing.StartTime)
+	// mirrors the timeline's own computation (timeline_finalize.go), sharing
+	// MatchTimingDetector.EffectiveEndMs.
+	matchStartMs := a.timing.StartTime
 
 	clk := &Clock{
 		MatchStartMs: matchStartMs,
-		MatchEndMs:   msTime(matchEnd),
+		MatchEndMs:   a.timing.EffectiveEndMs(a.maxInMatchPosMs),
 		Pauses:       coalescePauses(a.rawPauses),
 	}
 	if matchStartMs > 0 {

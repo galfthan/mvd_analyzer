@@ -19,6 +19,10 @@ var errUnknownSvc = errors.New("unknown svc command")
 type Event interface {
 	EventType() EventType
 	EventTime() float64
+	// EventTimeMs is the canonical integer-millisecond event timestamp.
+	// EventTime() is its float-seconds presentation twin (float64(TimeMs)*0.001);
+	// the pipeline consumes ms and only formats seconds at the edges.
+	EventTimeMs() int32
 }
 
 // EventType identifies the type of event
@@ -62,11 +66,12 @@ const (
 // or fraglimit is hit and the scoreboard camera takes over; downstream
 // analyzers use it to stop sampling player state.
 type IntermissionEvent struct {
-	Time float64
+	TimeMs int32
 }
 
 func (e *IntermissionEvent) EventType() EventType { return EventIntermission }
-func (e *IntermissionEvent) EventTime() float64   { return e.Time }
+func (e *IntermissionEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *IntermissionEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // StuffTextEvent is emitted for svc_stufftext (cmd 9). The server pushes
 // console commands into the client this way — at connection time it sends
@@ -75,11 +80,12 @@ func (e *IntermissionEvent) EventTime() float64   { return e.Time }
 // downloadable map / sound hints.
 type StuffTextEvent struct {
 	Command string
-	Time    float64
+	TimeMs  int32
 }
 
 func (e *StuffTextEvent) EventType() EventType { return EventStuffText }
-func (e *StuffTextEvent) EventTime() float64   { return e.Time }
+func (e *StuffTextEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *StuffTextEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // CenterPrintEvent is emitted for svc_centerprint (cmd 26). KTX uses this
 // during the match countdown to render the full match settings table
@@ -88,24 +94,26 @@ func (e *StuffTextEvent) EventTime() float64   { return e.Time }
 // match settings in a demo.
 type CenterPrintEvent struct {
 	Message string
-	Time    float64
+	TimeMs  int32
 }
 
 func (e *CenterPrintEvent) EventType() EventType { return EventCenterPrint }
-func (e *CenterPrintEvent) EventTime() float64   { return e.Time }
+func (e *CenterPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *CenterPrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ServerInfoEvent is emitted for svc_serverinfo (cmd 52), which is a
 // single-key/value serverinfo update sent mid-game (status changes,
 // matchtag, fpd flags, mode, etc). The initial bulk serverinfo is sent
 // via `fullserverinfo` stufftext, not via this command.
 type ServerInfoEvent struct {
-	Key   string
-	Value string
-	Time  float64
+	Key    string
+	Value  string
+	TimeMs int32
 }
 
 func (e *ServerInfoEvent) EventType() EventType { return EventServerInfo }
-func (e *ServerInfoEvent) EventTime() float64   { return e.Time }
+func (e *ServerInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ServerInfoEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // maxHiddenBlockSize caps the length of a single hidden-message block
 // (dem_multiple with player_mask=0). The largest legitimate block in the
@@ -166,8 +174,7 @@ type Parser struct {
 	currentEntities        map[int]*EntityState
 	spawnedItems           map[int]string // ent -> kind, set once per item
 	spawnedMovers          map[int]int    // ent -> BSP submodel index, set once per inline brush entity
-	lastEntityPacketTime   float64        // time of the packet we're currently processing
-	lastEntityPacketTimeMs int32          // same instant in wire-native demo ms
+	lastEntityPacketTimeMs int32          // wire-native demo ms of the packet we're currently processing
 }
 
 // NewParser creates a new parser
@@ -260,20 +267,20 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 
 		switch cmd {
 		case mvd.SvcServerData:
-			if err := p.parseServerData(r, msg.Time); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_serverdata: %v", err)
+			if err := p.parseServerData(r, msg.TimeMs); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_serverdata: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateUserInfo:
-			if err := p.parseUserInfo(r, msg.Time); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_updateuserinfo: %v", err)
+			if err := p.parseUserInfo(r, msg.TimeMs); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_updateuserinfo: %v", err)
 				return nil
 			}
 
 		case mvd.SvcSetInfo:
-			if err := p.parseSetInfo(r, msg.Time); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_setinfo: %v", err)
+			if err := p.parseSetInfo(r, msg.TimeMs); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_setinfo: %v", err)
 				return nil
 			}
 
@@ -282,73 +289,73 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			if msg.Header.MessageType == mvd.DemSingle {
 				target = msg.Header.PlayerNum
 			}
-			if err := p.parsePrint(r, msg.Time, msg.TimeMs, target); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_print: %v", err)
+			if err := p.parsePrint(r, msg.TimeMs, target); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_print: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateStat:
-			if err := p.parseUpdateStat(r, msg.Time, msg.TimeMs, msg.Header.PlayerNum); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_updatestat: %v", err)
+			if err := p.parseUpdateStat(r, msg.TimeMs, msg.Header.PlayerNum); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_updatestat: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateStatLong:
-			if err := p.parseUpdateStatLong(r, msg.Time, msg.TimeMs, msg.Header.PlayerNum); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_updatestatlong: %v", err)
+			if err := p.parseUpdateStatLong(r, msg.TimeMs, msg.Header.PlayerNum); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_updatestatlong: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateFrags:
-			if err := p.parseUpdateFrags(r, msg.Time); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_updatefrags: %v", err)
+			if err := p.parseUpdateFrags(r, msg.TimeMs); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_updatefrags: %v", err)
 				return nil
 			}
 
 		case mvd.SvcPlayerInfo:
-			if err := p.parsePlayerInfo(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_playerinfo: %v", err)
+			if err := p.parsePlayerInfo(r, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_playerinfo: %v", err)
 				return nil
 			}
 
 		case mvd.SvcModelList:
 			if err := p.parseModelList(r); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_modellist: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_modellist: %v", err)
 				return nil
 			}
 
 		case mvd.SvcSoundList:
 			if err := p.parseSoundList(r); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_soundlist: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_soundlist: %v", err)
 				return nil
 			}
 
 		case mvd.SvcSound:
-			if err := p.parseSound(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_sound: %v", err)
+			if err := p.parseSound(r, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_sound: %v", err)
 				return nil
 			}
 
 		case mvd.SvcTempEntity:
-			if teType, err := p.parseTempEntity(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
+			if teType, err := p.parseTempEntity(r, msg.TimeMs, p.floatCoords); err != nil {
 				if errors.Is(err, errUnknownTE) {
-					p.warn(msg.Time, "unknown_te", "temp entity type %d, %d bytes remaining in payload abandoned", teType, r.Remaining())
+					p.warn(msg.TimeMs, "unknown_te", "temp entity type %d, %d bytes remaining in payload abandoned", teType, r.Remaining())
 				} else {
-					p.warn(msg.Time, "parse_error", "svc_temp_entity type %d: %v", teType, err)
+					p.warn(msg.TimeMs, "parse_error", "svc_temp_entity type %d: %v", teType, err)
 				}
 				return nil
 			}
 
 		case mvd.SvcNails, mvd.SvcNails2:
-			if err := p.parseNails(r, cmd == mvd.SvcNails2, msg.Time, msg.TimeMs); err != nil {
-				p.warn(msg.Time, "parse_error", "%s: %v", SvcName(cmd), err)
+			if err := p.parseNails(r, cmd == mvd.SvcNails2, msg.TimeMs); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "%s: %v", SvcName(cmd), err)
 				return nil
 			}
 
 		case mvd.SvcDisconnect:
 			message, err := r.ReadString()
 			if err != nil {
-				p.warn(msg.Time, "parse_error", "svc_disconnect: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_disconnect: %v", err)
 				return nil
 			}
 			if message == "EndOfDemo" {
@@ -370,10 +377,10 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			// We don't need the pose but we do need to signal intermission to
 			// downstream analyzers so they can stop sampling player state.
 			if err := r.Skip(9); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_intermission: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_intermission: %v", err)
 				return nil
 			}
-			if err := p.emit(&IntermissionEvent{Time: msg.Time}); err != nil {
+			if err := p.emit(&IntermissionEvent{TimeMs: msg.TimeMs}); err != nil {
 				return err
 			}
 
@@ -383,13 +390,13 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			// hints, weapon-stat tickers, and download requests.
 			s, err := r.ReadString()
 			if err != nil {
-				p.warn(msg.Time, "parse_error", "svc_stufftext: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_stufftext: %v", err)
 				return nil
 			}
-			if err := p.emit(&StuffTextEvent{Command: s, Time: msg.Time}); err != nil {
+			if err := p.emit(&StuffTextEvent{Command: s, TimeMs: msg.TimeMs}); err != nil {
 				return err
 			}
-			if err := p.tryEmitKtxHints(s, msg.Time); err != nil {
+			if err := p.tryEmitKtxHints(s, msg.TimeMs); err != nil {
 				return err
 			}
 
@@ -398,10 +405,10 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			// during the countdown.
 			s, err := r.ReadString()
 			if err != nil {
-				p.warn(msg.Time, "parse_error", "svc_centerprint: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_centerprint: %v", err)
 				return nil
 			}
-			if err := p.emit(&CenterPrintEvent{Message: s, Time: msg.Time}); err != nil {
+			if err := p.emit(&CenterPrintEvent{Message: s, TimeMs: msg.TimeMs}); err != nil {
 				return err
 			}
 
@@ -411,59 +418,57 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			// command at connection time.
 			k, err := r.ReadString()
 			if err != nil {
-				p.warn(msg.Time, "parse_error", "svc_serverinfo key: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_serverinfo key: %v", err)
 				return nil
 			}
 			v, err := r.ReadString()
 			if err != nil {
-				p.warn(msg.Time, "parse_error", "svc_serverinfo value: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_serverinfo value: %v", err)
 				return nil
 			}
-			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, Time: msg.Time}); err != nil {
+			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, TimeMs: msg.TimeMs}); err != nil {
 				return err
 			}
 
 		case mvd.SvcSpawnBaseline:
-			if err := p.parseSpawnBaseline(r, msg.Time, p.floatCoords); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_spawnbaseline: %v", err)
+			if err := p.parseSpawnBaseline(r, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_spawnbaseline: %v", err)
 				return nil
 			}
 
 		case mvd.SvcFTESpawnBaseline2:
-			if err := p.parseSpawnBaseline2(r, msg.Time, p.floatCoords); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_fte_spawnbaseline2: %v", err)
+			if err := p.parseSpawnBaseline2(r, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.TimeMs, "parse_error", "svc_fte_spawnbaseline2: %v", err)
 				return nil
 			}
 
 		case mvd.SvcPacketEntities:
-			p.lastEntityPacketTime = msg.Time
 			p.lastEntityPacketTimeMs = msg.TimeMs
 			if err := p.parsePacketEntities(r, false, p.floatCoords, p.fteExtensions); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_packetentities: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_packetentities: %v", err)
 				return nil
 			}
 
 		case mvd.SvcDeltaPacketEntities:
-			p.lastEntityPacketTime = msg.Time
 			p.lastEntityPacketTimeMs = msg.TimeMs
 			if err := p.parsePacketEntities(r, true, p.floatCoords, p.fteExtensions); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_deltapacketentities: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_deltapacketentities: %v", err)
 				return nil
 			}
 
 		case mvd.SvcFTEModelListShort:
 			if err := p.parseModelList(r); err != nil {
-				p.warn(msg.Time, "parse_error", "svc_fte_modellistshort: %v", err)
+				p.warn(msg.TimeMs, "parse_error", "svc_fte_modellistshort: %v", err)
 				return nil
 			}
 
 		default:
 			if err := p.skipCommand(r, cmd); err != nil {
 				if errors.Is(err, errUnknownSvc) {
-					p.warn(msg.Time, "unknown_svc", "%s (cmd %d), %d bytes remaining in payload abandoned",
+					p.warn(msg.TimeMs, "unknown_svc", "%s (cmd %d), %d bytes remaining in payload abandoned",
 						SvcName(cmd), cmd, r.Remaining())
 				} else {
-					p.warn(msg.Time, "parse_error", "%s (cmd %d): %v, %d bytes remaining in payload abandoned",
+					p.warn(msg.TimeMs, "parse_error", "%s (cmd %d): %v, %d bytes remaining in payload abandoned",
 						SvcName(cmd), cmd, err, r.Remaining())
 				}
 				return nil
@@ -487,7 +492,7 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 //     expected end of the message and is NOT logged.
 func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 	r := mvd.NewBufferReader(msg.Payload)
-	time := msg.Time
+	timeMs := msg.TimeMs
 
 	// Malformed paused-duration block workaround. mvdsv's
 	// SV_MVDWritePausedTimeToStreams (sv_demo.c:559) hand-writes the
@@ -502,7 +507,7 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 	// MVDHiddenPausedDuration case in the loop instead.
 	if len(msg.Payload) == 3 &&
 		uint16(msg.Payload[0])|uint16(msg.Payload[1])<<8 == mvd.MVDHiddenPausedDuration {
-		return p.emit(&PausedDurationEvent{DurationMs: int(msg.Payload[2]), Time: time})
+		return p.emit(&PausedDurationEvent{DurationMs: int(msg.Payload[2]), TimeMs: timeMs})
 	}
 
 	for r.Remaining() > 0 {
@@ -511,21 +516,21 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 		// clean end (the loop condition would have caught a clean end).
 		blockLen, err := r.ReadUint32()
 		if err != nil {
-			p.warn(time, "parse_error", "hidden block: truncated length header (%v)", err)
+			p.warn(timeMs, "parse_error", "hidden block: truncated length header (%v)", err)
 			return nil
 		}
 		// blockLen counts the bytes after the type_id. 1 is legitimate (a
 		// single-byte payload, e.g. a correctly-framed paused_duration block);
 		// 0 is a degenerate empty block we refuse.
 		if blockLen < 1 || blockLen > maxHiddenBlockSize {
-			p.warn(time, "parse_error", "hidden block with invalid length %d", blockLen)
+			p.warn(timeMs, "parse_error", "hidden block with invalid length %d", blockLen)
 			return nil
 		}
 
 		// Read type ID (2 bytes)
 		typeID, err := r.ReadUint16()
 		if err != nil {
-			p.warn(time, "parse_error", "hidden block typeID read failed: %v", err)
+			p.warn(timeMs, "parse_error", "hidden block typeID read failed: %v", err)
 			return nil
 		}
 
@@ -535,18 +540,18 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 		// Parse based on type
 		switch typeID {
 		case mvd.MVDHiddenDmgDone:
-			if err := p.parseHiddenDamage(r, time, dataLen); err != nil {
-				p.warn(time, "parse_error", "hidden dmgdone: %v", err)
+			if err := p.parseHiddenDamage(r, timeMs, dataLen); err != nil {
+				p.warn(timeMs, "parse_error", "hidden dmgdone: %v", err)
 				return nil
 			}
 		case mvd.MVDHiddenDemoInfo:
-			if err := p.parseHiddenDemoInfo(r, time, dataLen); err != nil {
-				p.warn(time, "parse_error", "hidden demoinfo: %v", err)
+			if err := p.parseHiddenDemoInfo(r, timeMs, dataLen); err != nil {
+				p.warn(timeMs, "parse_error", "hidden demoinfo: %v", err)
 				return nil
 			}
 		case mvd.MVDHiddenDemoStartTimestampMs:
-			if err := p.parseHiddenDemoStart(r, time, dataLen); err != nil {
-				p.warn(time, "parse_error", "hidden demo_start_timestamp_ms: %v", err)
+			if err := p.parseHiddenDemoStart(r, timeMs, dataLen); err != nil {
+				p.warn(timeMs, "parse_error", "hidden demo_start_timestamp_ms: %v", err)
 				return nil
 			}
 		case mvd.MVDHiddenPausedDuration:
@@ -555,15 +560,15 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 			// is what QW-Group/mvdsv PR #210 emits once merged; the bare,
 			// header-less form current mvdsv writes is handled up front in
 			// parseHiddenMessage. Both decode to the same PausedDurationEvent.
-			if err := p.parseHiddenPausedDuration(r, time, dataLen); err != nil {
-				p.warn(time, "parse_error", "hidden paused_duration: %v", err)
+			if err := p.parseHiddenPausedDuration(r, timeMs, dataLen); err != nil {
+				p.warn(timeMs, "parse_error", "hidden paused_duration: %v", err)
 				return nil
 			}
 		default:
-			p.warn(time, "unknown_hidden", "unknown hidden message type 0x%04x, %d bytes skipped", typeID, dataLen)
+			p.warn(timeMs, "unknown_hidden", "unknown hidden message type 0x%04x, %d bytes skipped", typeID, dataLen)
 			if dataLen > 0 {
 				if err := r.Skip(dataLen); err != nil {
-					p.warn(time, "parse_error", "hidden block 0x%04x: skip past end of payload (%v)", typeID, err)
+					p.warn(timeMs, "parse_error", "hidden block 0x%04x: skip past end of payload (%v)", typeID, err)
 					return nil
 				}
 			}
@@ -576,7 +581,7 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 // parseHiddenDamage parses mvdhidden_dmgdone (0x0007)
 // Format: single 8-byte record: <short: flags|deathtype> <short: attacker> <short: victim> <short: damage>
 // Note: Each block contains exactly one damage record (8 bytes)
-func (p *Parser) parseHiddenDamage(r *mvd.BufferReader, time float64, dataLen int) error {
+func (p *Parser) parseHiddenDamage(r *mvd.BufferReader, timeMs int32, dataLen int) error {
 	// Read exactly one damage record (8 bytes)
 	if dataLen < 8 {
 		return r.Skip(dataLen)
@@ -640,7 +645,7 @@ func (p *Parser) parseHiddenDamage(r *mvd.BufferReader, time float64, dataLen in
 			Damage:    int(damage),
 			DeathType: deathType,
 			IsSplash:  isSplash,
-			Time:      time,
+			TimeMs:    timeMs,
 		})
 	}
 
@@ -650,7 +655,7 @@ func (p *Parser) parseHiddenDamage(r *mvd.BufferReader, time float64, dataLen in
 // parseHiddenDemoInfo parses mvdhidden_demoinfo (0x0003)
 // Format: <short: block_number> <bytes: json_content>
 // JSON may be split across multiple blocks
-func (p *Parser) parseHiddenDemoInfo(r *mvd.BufferReader, time float64, dataLen int) error {
+func (p *Parser) parseHiddenDemoInfo(r *mvd.BufferReader, timeMs int32, dataLen int) error {
 	if dataLen < 2 {
 		return r.Skip(dataLen)
 	}
@@ -677,7 +682,7 @@ func (p *Parser) parseHiddenDemoInfo(r *mvd.BufferReader, time float64, dataLen 
 	return p.emit(&DemoInfoEvent{
 		BlockNum: int(blockNum),
 		Content:  content,
-		Time:     time,
+		TimeMs:   timeMs,
 	})
 }
 
@@ -686,7 +691,7 @@ func (p *Parser) parseHiddenDemoInfo(r *mvd.BufferReader, time float64, dataLen 
 // one paused idle frame. This handles the standard-framed form emitted by
 // QW-Group/mvdsv PR #210 (length=1, one body byte); the bare, header-less form
 // current mvdsv actually emits is decoded up front in parseHiddenMessage.
-func (p *Parser) parseHiddenPausedDuration(r *mvd.BufferReader, time float64, dataLen int) error {
+func (p *Parser) parseHiddenPausedDuration(r *mvd.BufferReader, timeMs int32, dataLen int) error {
 	if dataLen < 1 {
 		return r.Skip(dataLen)
 	}
@@ -699,7 +704,7 @@ func (p *Parser) parseHiddenPausedDuration(r *mvd.BufferReader, time float64, da
 			return err
 		}
 	}
-	return p.emit(&PausedDurationEvent{DurationMs: int(dur), Time: time})
+	return p.emit(&PausedDurationEvent{DurationMs: int(dur), TimeMs: timeMs})
 }
 
 // parseHiddenDemoStart parses mvdhidden_demo_start_timestamp_ms (0x000B).
@@ -713,7 +718,7 @@ func (p *Parser) parseHiddenPausedDuration(r *mvd.BufferReader, time float64, da
 // This is the only sub-second-accurate demo-start anchor; the serverinfo
 // `epoch` cvar carries the same instant truncated to whole seconds. Absent on
 // demos recorded before mvdsv added the block.
-func (p *Parser) parseHiddenDemoStart(r *mvd.BufferReader, time float64, dataLen int) error {
+func (p *Parser) parseHiddenDemoStart(r *mvd.BufferReader, timeMs int32, dataLen int) error {
 	if dataLen <= 0 {
 		return nil
 	}
@@ -724,7 +729,7 @@ func (p *Parser) parseHiddenDemoStart(r *mvd.BufferReader, time float64, dataLen
 		return err
 	}
 
-	return p.emit(&DemoStartTimestampEvent{UnixMs: int64(decodeULEB128(body)), Time: time})
+	return p.emit(&DemoStartTimestampEvent{UnixMs: int64(decodeULEB128(body)), TimeMs: timeMs})
 }
 
 // decodeULEB128 decodes an unsigned LEB128 varint: low-order group first, 7

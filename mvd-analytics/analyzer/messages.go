@@ -59,7 +59,7 @@ func (a *MessagesAnalyzer) handlePrint(e *events.PrintEvent) error {
 	// Level 3 is PRINT_CHAT (mm1/mm2 messages)
 	if e.Level == events.PrintChat {
 		// Parse chat message format: "name: message" or "(team) name: message"
-		event := a.parseChatMessage(msg, e.Time)
+		event := a.parseChatMessage(msg, e.TimeMs)
 		if event != nil && !a.seenChat(event) {
 			a.appendEvent(event)
 		}
@@ -68,7 +68,7 @@ func (a *MessagesAnalyzer) handlePrint(e *events.PrintEvent) error {
 
 	// Try to parse as frag (levels 1-2 are typically obituaries)
 	if e.Level <= 2 {
-		frag := a.parseObituarySimple(msg, e.Time)
+		frag := a.parseObituarySimple(msg, e.TimeMs)
 		if frag != nil {
 			a.appendEvent(frag)
 		}
@@ -116,7 +116,7 @@ func (a *MessagesAnalyzer) seenChat(ev *MatchEvent) bool {
 }
 
 // parseChatMessage parses a chat message and extracts player, team, and text
-func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEvent {
+func (a *MessagesAnalyzer) parseChatMessage(msg string, timeMs int32) *MatchEvent {
 	// Skip server messages and status messages
 	if strings.HasPrefix(msg, "[") || strings.Contains(msg, " joined the game") ||
 		strings.Contains(msg, " left the game") || strings.Contains(msg, " is ready") ||
@@ -135,7 +135,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 			team := a.getPlayerTeam(playerName)
 
 			return &MatchEvent{
-				Time:    msTime(time),
+				Time:    timeMs,
 				Type:    "teamsay",
 				Player:  playerName,
 				Team:    team,
@@ -151,7 +151,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 			team := a.getPlayerTeam(playerName)
 
 			return &MatchEvent{
-				Time:    msTime(time),
+				Time:    timeMs,
 				Type:    "teamsay",
 				Player:  playerName,
 				Team:    team,
@@ -173,7 +173,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 	team := a.getPlayerTeam(playerName)
 
 	return &MatchEvent{
-		Time:    msTime(time),
+		Time:    timeMs,
 		Type:    "chat",
 		Player:  playerName,
 		Team:    team,
@@ -187,7 +187,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 // generic "teammate" placeholder for the party the obituary didn't name;
 // every other kind needs both parties to resolve to real names (MatchEvent
 // carries no IsTeamKill flag, so a membership test isn't needed here).
-func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchEvent {
+func (a *MessagesAnalyzer) parseObituarySimple(msg string, timeMs int32) *MatchEvent {
 	o := parseObituaryLine(msg)
 	if o == nil {
 		return nil
@@ -201,7 +201,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 				return nil
 			}
 			return &MatchEvent{
-				Time: msTime(time), Type: "frag",
+				Time: timeMs, Type: "frag",
 				Player: o.Killer, Team: a.getPlayerTeam(o.Killer),
 				Message: msg, Victim: o.Victim, Weapon: o.Weapon,
 			}
@@ -211,7 +211,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			return nil
 		}
 		return &MatchEvent{
-			Time: msTime(time), Type: "frag",
+			Time: timeMs, Type: "frag",
 			Player: o.Killer, Team: a.getPlayerTeam(o.Victim),
 			Message: msg, Victim: o.Victim, Weapon: o.Weapon,
 		}
@@ -222,7 +222,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 		return nil
 	}
 	return &MatchEvent{
-		Time: msTime(time), Type: "frag",
+		Time: timeMs, Type: "frag",
 		Player: o.Killer, Team: a.getPlayerTeam(o.Killer),
 		Message: msg, Victim: o.Victim, Weapon: o.Weapon,
 	}

@@ -59,7 +59,7 @@ func TestMoverSpawn_FromBaseline(t *testing.T) {
 	p, spawns, states := moverTestParser()
 
 	origin := [3]float32{16, -32, 64}
-	if err := p.registerBaseline(42, moverBaseline(2, origin), 0.5); err != nil {
+	if err := p.registerBaseline(42, moverBaseline(2, origin), 500); err != nil {
 		t.Fatalf("registerBaseline: %v", err)
 	}
 	if len(*spawns) != 1 {
@@ -74,7 +74,7 @@ func TestMoverSpawn_FromBaseline(t *testing.T) {
 	}
 
 	// Identical resend: no second spawn, no state change.
-	if err := p.registerBaseline(42, moverBaseline(2, origin), 0.6); err != nil {
+	if err := p.registerBaseline(42, moverBaseline(2, origin), 600); err != nil {
 		t.Fatalf("registerBaseline resend: %v", err)
 	}
 	if len(*spawns) != 1 || len(*states) != 0 {
@@ -82,7 +82,7 @@ func TestMoverSpawn_FromBaseline(t *testing.T) {
 	}
 
 	// Non-mover models fire nothing.
-	if err := p.registerBaseline(43, moverBaseline(3, origin), 0.5); err != nil {
+	if err := p.registerBaseline(43, moverBaseline(3, origin), 500); err != nil {
 		t.Fatalf("registerBaseline player model: %v", err)
 	}
 	if len(*spawns) != 1 {
@@ -101,7 +101,7 @@ func TestMoverState_OriginChange(t *testing.T) {
 
 	// The lift rises 8 units.
 	moved := [3]float32{16, -32, 8}
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 1.234, 1234
+	p.lastEntityPacketTimeMs = 1234
 	r := mvd.NewBufferReader(fullPacketWithOrigin(42, moved))
 	if err := p.parsePacketEntities(r, false, false, 0); err != nil {
 		t.Fatalf("parsePacketEntities: %v", err)
@@ -115,7 +115,7 @@ func TestMoverState_OriginChange(t *testing.T) {
 	}
 
 	// Same pose next frame: no event.
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 1.3, 1300
+	p.lastEntityPacketTimeMs = 1300
 	r = mvd.NewBufferReader(fullPacketWithOrigin(42, moved))
 	if err := p.parsePacketEntities(r, false, false, 0); err != nil {
 		t.Fatalf("parsePacketEntities repeat: %v", err)
@@ -135,7 +135,7 @@ func TestMoverState_VisibilityFlip(t *testing.T) {
 	}
 
 	// Full packet without the entity → invisible.
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 2.0, 2000
+	p.lastEntityPacketTimeMs = 2000
 	if err := p.parsePacketEntities(mvd.NewBufferReader(emptyFullPacket()), false, false, 0); err != nil {
 		t.Fatalf("parsePacketEntities empty: %v", err)
 	}
@@ -144,7 +144,7 @@ func TestMoverState_VisibilityFlip(t *testing.T) {
 	}
 
 	// Reappears (delta from baseline state) → visible again.
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 2.5, 2500
+	p.lastEntityPacketTimeMs = 2500
 	if err := p.parsePacketEntities(mvd.NewBufferReader(fullPacketWithOrigin(42, base)), false, false, 0); err != nil {
 		t.Fatalf("parsePacketEntities reappear: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestMoverSpawn_BaselineBeforeModelList(t *testing.T) {
 	}
 
 	p.modelList = []string{"", "maps/dm2.bsp", "*1", "progs/player.mdl"}
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 3.0, 3000
+	p.lastEntityPacketTimeMs = 3000
 	if err := p.parsePacketEntities(mvd.NewBufferReader(fullPacketWithOrigin(42, base)), false, false, 0); err != nil {
 		t.Fatalf("parsePacketEntities: %v", err)
 	}

@@ -127,10 +127,11 @@ func (s *Source) Close() error {
 	return nil
 }
 
-// CurrentTime reports the decoder's current demo time. Useful when
-// finalizing an analysis that needs the total stream duration.
-func (s *Source) CurrentTime() float64 {
-	return s.decoder.CurrentTime()
+// CurrentTimeMs reports the decoder's current demo time in integer
+// milliseconds — the canonical, wire-native value. Useful when finalizing
+// an analysis that needs the total stream duration.
+func (s *Source) CurrentTimeMs() int32 {
+	return s.decoder.CurrentTimeMs()
 }
 
 // Parser returns the underlying parser. Exposed for diagnostic tooling

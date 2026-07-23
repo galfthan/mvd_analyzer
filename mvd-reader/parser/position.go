@@ -6,11 +6,10 @@ import (
 
 // PlayerPositionEvent is emitted when a player position is updated.
 //
-// Time is float64 seconds (the derived ergonomic view); TimeMs is the
-// canonical wire-native value in integer milliseconds — consumers that
-// persist this into the result schema or compare against other ms
-// timestamps must use TimeMs to avoid the float-precision drift that
-// caused spurious spawn/death-boundary crossings.
+// TimeMs is the canonical wire-native demo time in integer milliseconds —
+// the only demo-time representation the event carries (use events.Sec for a
+// human-readable seconds view). Integer ms avoids the float-precision drift
+// that caused spurious spawn/death-boundary crossings.
 type PlayerPositionEvent struct {
 	PlayerNum int
 	Origin    [3]float32 // X, Y, Z world coordinates
@@ -20,15 +19,15 @@ type PlayerPositionEvent struct {
 	// float(uint16(v)) * 360/65536; values land in [0,360), so a pitch
 	// > 180 means looking up. Roll is always 0 (the server zeroes it).
 	Angles [3]int16
-	Time   float64
 	TimeMs int32
 }
 
 func (e *PlayerPositionEvent) EventType() EventType { return EventPlayerInfo }
-func (e *PlayerPositionEvent) EventTime() float64   { return e.Time }
+func (e *PlayerPositionEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *PlayerPositionEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parsePlayerInfo parses svc_playerinfo message and emits position events
-func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, timeMs int32, floatCoords bool) error {
+func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {
 	playerNum, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -119,7 +118,6 @@ func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, timeMs int32
 			PlayerNum: int(playerNum),
 			Origin:    origin,
 			Angles:    angles,
-			Time:      time,
 			TimeMs:    timeMs,
 		}); err != nil {
 			return err
@@ -145,13 +143,13 @@ func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, timeMs int32
 		// First sample alive — synthesise a SpawnEvent so analytics has
 		// a starting boundary for the player. Deduped against stats.go
 		// in case StatHealth has already fired.
-		return p.maybeEmitSpawn(int(playerNum), time, timeMs)
+		return p.maybeEmitSpawn(int(playerNum), timeMs)
 	}
 	if isDead != p.playerDead[playerNum] {
 		if isDead {
-			return p.maybeEmitDeath(int(playerNum), time, timeMs)
+			return p.maybeEmitDeath(int(playerNum), timeMs)
 		}
-		return p.maybeEmitSpawn(int(playerNum), time, timeMs)
+		return p.maybeEmitSpawn(int(playerNum), timeMs)
 	}
 	return nil
 }

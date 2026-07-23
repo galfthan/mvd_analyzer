@@ -26,6 +26,10 @@ that downstream consumers render, summarise, or feed to an agent.
   v57, the pure-ms model — no seconds surfaces except `/demoinfo`'s
   KTX-native island). See [RESULT_SCHEMA.md](RESULT_SCHEMA.md) §"Time
   units". Full field reference in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
+  Internally too the analyzers consume integer ms end to end: every
+  event carries `TimeMs int32` (`EventTimeMs()`), so there are no
+  float-seconds time intermediates in the pipeline — `events.Sec(ms)`
+  is a presentation-only helper for human-readable tooling.
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a
@@ -739,20 +743,20 @@ stay in the output so frontends can still surface denial semantics
 
 ```go
 type WeaponPickup struct {
-    Time          float64 // pickup time (match-relative)
-    Player        string  // picker display name
+    Time          int32  // pickup time, match-relative int32 ms
+    Player        string // picker display name
     Team          string
-    Weapon        string  // "rl","lg","gl","ssg","sng","ng"
-    Source        string  // "world" | "backpack"
-    HadBefore     bool    // picker already owned the weapon
-    Kills         int     // kills with Weapon before NextDeathTime
-    NextDeathTime float64 // 0 if picker never died before match end
+    Weapon        string // "rl","lg","gl","ssg","sng","ng"
+    Source        string // "world" | "backpack"
+    HadBefore     bool   // picker already owned the weapon
+    Kills         int    // kills with Weapon before NextDeathTime
+    NextDeathTime int32  // ms; 0 if picker never died before match end
 
     // Backpack-source only:
-    BackpackEnt int     // join key with BackpackDrop.EntNum
+    BackpackEnt int    // join key with BackpackDrop.EntNum
     Dropper     string
     DropperTeam string
-    DropTime    float64
+    DropTime    int32  // ms
 }
 ```
 

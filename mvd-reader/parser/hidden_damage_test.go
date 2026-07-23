@@ -32,14 +32,14 @@ func TestParseHiddenDamage_PlayerToPlayer(t *testing.T) {
 	// attacker ent 4 (slot 3), victim ent 1 (slot 0), 89 RL damage, splash
 	const splash = 1 << 15
 	payload := dmgRecord(uint16(splash|mvd.DtRL), 4, 1, 89)
-	if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 12.5, len(payload)); err != nil {
+	if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 12500, len(payload)); err != nil {
 		t.Fatalf("parseHiddenDamage: %v", err)
 	}
 	if got == nil {
 		t.Fatal("no DamageEvent emitted")
 	}
 	if got.Attacker != 3 || got.Victim != 0 || got.Damage != 89 ||
-		got.DeathType != mvd.DtRL || !got.IsSplash || got.Time != 12.5 {
+		got.DeathType != mvd.DtRL || !got.IsSplash || got.TimeMs != 12500 {
 		t.Errorf("got %+v", got)
 	}
 }
@@ -68,7 +68,7 @@ func TestParseHiddenDamage_WorldInflictorEmitsSentinel(t *testing.T) {
 				return nil
 			})
 			payload := dmgRecord(tc.deathType, tc.attackerEnt, 2 /*victim slot 1*/, 25)
-			if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 3.0, len(payload)); err != nil {
+			if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 3000, len(payload)); err != nil {
 				t.Fatalf("parseHiddenDamage: %v", err)
 			}
 			if got == nil {
@@ -94,7 +94,7 @@ func TestParseHiddenDamage_ZeroDamageDropped(t *testing.T) {
 		return nil
 	})
 	payload := dmgRecord(mvd.DtRL, 1, 2, 0)
-	if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 1.0, len(payload)); err != nil {
+	if err := p.parseHiddenDamage(mvd.NewBufferReader(payload), 1000, len(payload)); err != nil {
 		t.Fatalf("parseHiddenDamage: %v", err)
 	}
 	if emitted != 0 {

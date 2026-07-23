@@ -22,14 +22,14 @@ func TestTryEmitPickupPrint_Armor(t *testing.T) {
 				}
 				return nil
 			})
-			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 3, 42.5); err != nil {
+			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 3, 42500); err != nil {
 				t.Fatalf("tryEmitPickupPrint: %v", err)
 			}
 			if captured == nil {
 				t.Fatalf("no event for %q", tc.msg)
 			}
-			if captured.Kind != tc.kind || captured.PlayerNum != 3 || captured.Time != 42.5 {
-				t.Errorf("got %+v, want {PlayerNum=3, Kind=%q, Time=42.5}", captured, tc.kind)
+			if captured.Kind != tc.kind || captured.PlayerNum != 3 || captured.TimeMs != 42500 {
+				t.Errorf("got %+v, want {PlayerNum=3, Kind=%q, TimeMs=42500}", captured, tc.kind)
 			}
 		})
 	}
@@ -54,7 +54,7 @@ func TestTryEmitPickupPrint_Weapons(t *testing.T) {
 				}
 				return nil
 			})
-			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 5, 10); err != nil {
+			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 5, 10000); err != nil {
 				t.Fatalf("tryEmitPickupPrint: %v", err)
 			}
 			if captured == nil || captured.Kind != tc.kind {
@@ -145,7 +145,7 @@ func TestTryEmitPickupPrint_Healths(t *testing.T) {
 				}
 				return nil
 			})
-			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 2, 11.1); err != nil {
+			if err := p.tryEmitPickupPrint(mvd.PrintLow, tc.msg, 2, 11100); err != nil {
 				t.Fatalf("tryEmitPickupPrint: %v", err)
 			}
 			if captured == nil || captured.Kind != tc.kind {
@@ -186,14 +186,14 @@ func TestTryEmitPickupPrint_Backpack(t *testing.T) {
 	// The opener arrives as its own svc_print; subsequent per-piece
 	// prints ("the Rocket Launcher", ", 25 rockets") are separate and
 	// not matched here by design.
-	if err := p.tryEmitPickupPrint(mvd.PrintLow, "You get ", 4, 3.14); err != nil {
+	if err := p.tryEmitPickupPrint(mvd.PrintLow, "You get ", 4, 3140); err != nil {
 		t.Fatalf("tryEmitPickupPrint: %v", err)
 	}
 	if captured == nil {
 		t.Fatal("no backpack pickup event")
 	}
-	if captured.PlayerNum != 4 || captured.Time != 3.14 {
-		t.Errorf("got %+v, want {PlayerNum=4, Time=3.14}", captured)
+	if captured.PlayerNum != 4 || captured.TimeMs != 3140 {
+		t.Errorf("got %+v, want {PlayerNum=4, TimeMs=3140}", captured)
 	}
 }
 

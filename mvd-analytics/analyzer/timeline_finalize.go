@@ -95,11 +95,11 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// to the player's name by the roster (co.TeamFor) in 1v1s.
 	fragEvents := make([]TimelineFragEvent, 0, len(a.rawFrags))
 	for _, raw := range a.rawFrags {
-		playerName, team := a.resolveAt(raw.PlayerNum, msTime(raw.Time))
+		playerName, team := a.resolveAt(raw.PlayerNum, raw.Time)
 
 		if playerName != "" {
 			fragEvents = append(fragEvents, TimelineFragEvent{
-				Time:   msTime(raw.Time),
+				Time:   raw.Time,
 				Player: playerName,
 				Team:   a.core.TeamFor(playerName, team),
 				Delta:  raw.Delta,
@@ -114,10 +114,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// KTX efficiency = frags/(frags+deaths)).
 	deathEvents := make([]TimelineDeathEvent, 0, len(a.rawDeaths))
 	for _, raw := range a.rawDeaths {
-		playerName, team := a.resolveAt(raw.PlayerNum, msTime(raw.Time))
+		playerName, team := a.resolveAt(raw.PlayerNum, raw.Time)
 		if playerName != "" {
 			deathEvents = append(deathEvents, TimelineDeathEvent{
-				Time:   msTime(raw.Time),
+				Time:   raw.Time,
 				Player: playerName,
 				Team:   a.core.TeamFor(playerName, team),
 			})
@@ -160,19 +160,18 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// before intermission closes quad/pent/ring at one time and rl/lg/gl/…
 	// at another (F13). timing.EndTime is the explicit end; without it we
 	// fall back to the GLOBAL latest position sample (not any single
-	// player's) so every player's intervals close at the same time. posT is
-	// int32 ms (schema v8); EndTime is float64 seconds, converted here.
-	matchEnd := a.timing.EndTime
-	if matchEnd == 0 {
-		for _, state := range a.playerState {
-			if n := len(state.streams.posT); n > 0 {
-				if t := float64(state.streams.posT[n-1]) * 0.001; t > matchEnd {
-					matchEnd = t
-				}
+	// player's) so every player's intervals close at the same time. posT and
+	// EndTime are both int32 ms (schema v8); shares the clock's
+	// MatchTimingDetector.EffectiveEndMs.
+	var maxPosMs int32
+	for _, state := range a.playerState {
+		if n := len(state.streams.posT); n > 0 {
+			if t := state.streams.posT[n-1]; t > maxPosMs {
+				maxPosMs = t
 			}
 		}
 	}
-	matchEndMs := msTime(matchEnd)
+	matchEndMs := a.timing.EffectiveEndMs(maxPosMs)
 
 	// Detect powerup pickup events for Key Moments
 	powerupEvents := a.detectPowerupEvents(matchEndMs)
@@ -302,10 +301,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		PlayerUserIDs: playerUserIDsByName,
 	}
 
-	// matchEnd (and matchEndMs) were computed once above and already fed the
-	// powerup-close pass; buildStreamsResult reuses the same value so weapon
-	// and powerup intervals close consistently (F13).
-	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEnd); streams != nil {
+	// matchEndMs was computed once above and already fed the powerup-close
+	// pass; buildStreamsResult reuses the same value so weapon and powerup
+	// intervals close consistently (F13).
+	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEndMs); streams != nil {
 		result.Streams = streams
 
 		// As of schema v23 the demo/wall-clock anchor lives on Streams.Global —
@@ -607,14 +606,14 @@ func synthesizeMatchStartSpawns(streams *Streams) {
 	}
 }
 
-// pauseCoalesceGapSec separates one pause from the next. mvdsv emits a
+// pauseCoalesceGapMs separates one pause from the next. mvdsv emits a
 // paused_duration sample per idle frame (idlefps 4–30, so ≤250ms apart) and
 // the game clock is frozen across a pause, so intra-pause samples cluster
 // within a few hundred ms; distinct pauses are separated by real gameplay
 // (seconds). 0.5s cleanly splits them. A pause/unpause/pause cycle shorter
 // than this merges into one segment — acceptable, the summed duration is
 // preserved.
-const pauseCoalesceGapSec = 0.5
+const pauseCoalesceGapMs int32 = 500
 
 // coalescePauses folds the raw per-idle-frame paused_duration samples into one
 // segment per pause. AtMs is the frozen game time the pause sits at (the latest
@@ -635,12 +634,12 @@ func coalescePauses(samples []pauseSample) []TimelinePause {
 		// Latest sample time is the frozen plateau; the leading transition
 		// frame sits a few ms earlier.
 		pauses = append(pauses, TimelinePause{
-			AtMs:       msTime(samples[end-1].Time),
+			AtMs:       samples[end-1].Time,
 			DurationMs: int32(dur),
 		})
 	}
 	for i := 1; i < len(samples); i++ {
-		if samples[i].Time-samples[i-1].Time > pauseCoalesceGapSec {
+		if samples[i].Time-samples[i-1].Time > pauseCoalesceGapMs {
 			flush(i)
 			runStartIdx = i
 		}

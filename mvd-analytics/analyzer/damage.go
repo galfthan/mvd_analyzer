@@ -134,7 +134,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.StuffTextEvent:
 		// Serverinfo capture for the bounded arithmetic (teamplay,
 		// k_midair/k_instagib/k_dmgfrags) — same sources as MetadataAnalyzer.
@@ -169,7 +169,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 				// as the frame's overkill signal for the bounded arithmetic.
 				if e.Value <= 0 {
 					a.deaths[e.PlayerNum] = append(a.deaths[e.PlayerNum],
-						deathMarker{tMs: msTime(e.Time), value: e.Value})
+						deathMarker{tMs: e.TimeMs, value: e.Value})
 				}
 			}
 		case events.StatArmor:
@@ -191,7 +191,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 			damage:       e.Damage,
 			deathType:    e.DeathType,
 			isSplash:     e.IsSplash,
-			tMs:          msTime(e.Time),
+			tMs:          e.TimeMs,
 			victimItem:   a.items[e.Victim],
 			victimHealth: v.health,
 			victimArmor:  v.armor,
@@ -290,9 +290,9 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// unchanged); started with no detected end (demo cut before intermission) is
 	// unbounded above, so late in-match hits survive as they did under the flag.
 	started := a.timing.Started
-	matchStartMs := msTime(a.timing.StartTime)
+	matchStartMs := a.timing.StartTime
 	ended := a.timing.Ended
-	matchEndMs := msTime(a.timing.EndTime)
+	matchEndMs := a.timing.EndTime
 	inMatchWindow := func(tMs int32) bool {
 		if !started || tMs < matchStartMs {
 			return false

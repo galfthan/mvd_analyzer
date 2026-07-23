@@ -1,7 +1,6 @@
 package analyzer
 
 import (
-	"math"
 	"sort"
 	"strconv"
 
@@ -10,22 +9,6 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
-
-// msTime converts a float64-seconds event timestamp into the canonical
-// int32 milliseconds used throughout schema v8. Event Time is the
-// derived view of the decoder's int32-ms accumulator
-// (msg.Time = float64(d.timeMs)*0.001); math.Round inverts that exactly
-// for any integer-ms value representable in float64 (up to ~285 years
-// — comfortably more than any conceivable match).
-//
-// Events that carry an explicit TimeMs field (PlayerPositionEvent,
-// SpawnEvent, DeathEvent) bypass this helper and use TimeMs directly;
-// the other event types haven't been plumbed yet, so producers convert
-// here at the analyzer write site. The round-trip is mathematically
-// lossless when math.Round is used.
-func msTime(t float64) int32 {
-	return int32(math.Round(t * 1000))
-}
 
 // Streams emission for the timeline analyzer.
 //
@@ -463,12 +446,10 @@ type streamGroup struct {
 //
 // Disambiguation: if two distinct identities resolve to the same display
 // name, the later one carries a "#slot" suffix (per D12).
-func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToTeam map[int]string, matchStart, matchEnd float64) *result.Streams {
+func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToTeam map[int]string, matchStartMs, matchEndMs int32) *result.Streams {
 	if len(a.playerState) == 0 {
 		return nil
 	}
-	matchStartMs := msTime(matchStart)
-	matchEndMs := msTime(matchEnd)
 
 	// Close any still-open intervals at match end before partitioning so
 	// the per-slot builders carry complete interval lists; the slice

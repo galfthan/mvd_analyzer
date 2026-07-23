@@ -6,15 +6,16 @@ import (
 
 // ServerDataEvent is emitted when server data is parsed
 type ServerDataEvent struct {
-	Data *mvd.ServerData
-	Time float64
+	Data   *mvd.ServerData
+	TimeMs int32
 }
 
 func (e *ServerDataEvent) EventType() EventType { return EventServerData }
-func (e *ServerDataEvent) EventTime() float64   { return e.Time }
+func (e *ServerDataEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ServerDataEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseServerData parses svc_serverdata message
-func (p *Parser) parseServerData(r *mvd.BufferReader, time float64) error {
+func (p *Parser) parseServerData(r *mvd.BufferReader, timeMs int32) error {
 	sd := &mvd.ServerData{}
 	ext := &mvd.Extensions{}
 
@@ -101,7 +102,7 @@ func (p *Parser) parseServerData(r *mvd.BufferReader, time float64) error {
 	p.serverData = sd
 
 	// Emit event
-	return p.emit(&ServerDataEvent{Data: sd, Time: time})
+	return p.emit(&ServerDataEvent{Data: sd, TimeMs: timeMs})
 }
 
 // parseModelList decodes svc_modellist / svc_fte_modellistshort. The

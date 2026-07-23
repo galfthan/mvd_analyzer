@@ -104,7 +104,7 @@ disagreement.
 2. `ItemStateEvent{Taken=true}` closes the current available phase
    with `TakenAt`, runs the layered attribution pipeline above to
    resolve the picker slot, and stamps `RespawnAt` from the
-   `kindRespawnSec` table (armor: 20 s, weapons: 30 s, quad: 60 s,
+   `kindRespawnMs` table (armor: 20 s, weapons: 30 s, quad: 60 s,
    pent/ring: 300 s).
 3. `ItemStateEvent{Taken=false}` opens a new phase at `AvailableFrom`.
 4. **MH semantics**: the megahealth respawn timer starts when the

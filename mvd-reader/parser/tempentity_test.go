@@ -36,7 +36,7 @@ func TestParseTempEntity_LightningBeam(t *testing.T) {
 	end := [3]float32{100, -40, 16}
 	// TE_LIGHTNING2 (6), entity 4 (player slot 3).
 	payload := lightningPayload(6, 4, start, end)
-	if teType, err := p.parseTempEntity(mvd.NewBufferReader(payload), 2.0, 2000, false); err != nil {
+	if teType, err := p.parseTempEntity(mvd.NewBufferReader(payload), 2000, false); err != nil {
 		t.Fatalf("parseTempEntity: type %d err %v", teType, err)
 	}
 	if got == nil {
@@ -45,8 +45,8 @@ func TestParseTempEntity_LightningBeam(t *testing.T) {
 	if got.Ent != 4 || got.Type != 6 || got.Start != start || got.End != end {
 		t.Errorf("beam = %+v, want ent 4 type 6 start %v end %v", got, start, end)
 	}
-	if got.Time != 2.0 || got.TimeMs != 2000 {
-		t.Errorf("beam time = %v/%d, want 2.0/2000", got.Time, got.TimeMs)
+	if got.TimeMs != 2000 {
+		t.Errorf("beam time = %d, want 2000", got.TimeMs)
 	}
 }
 
@@ -64,7 +64,7 @@ func TestParseTempEntity_SignedBeamEnt(t *testing.T) {
 	})
 
 	payload := lightningPayload(5, -3, [3]float32{1, 2, 3}, [3]float32{4, 5, 6})
-	if teType, err := p.parseTempEntity(mvd.NewBufferReader(payload), 1.0, 1000, false); err != nil {
+	if teType, err := p.parseTempEntity(mvd.NewBufferReader(payload), 1000, false); err != nil {
 		t.Fatalf("parseTempEntity: type %d err %v", teType, err)
 	}
 	if got == nil {
@@ -80,13 +80,13 @@ func TestParseTempEntity_SignedBeamEnt(t *testing.T) {
 // diagnostic unknown_te vs parse_error.
 func TestParseTempEntity_UnknownVsTruncated(t *testing.T) {
 	p := NewParser(nil)
-	teType, err := p.parseTempEntity(mvd.NewBufferReader([]byte{42}), 1.0, 1000, false)
+	teType, err := p.parseTempEntity(mvd.NewBufferReader([]byte{42}), 1000, false)
 	if teType != 42 || !errors.Is(err, errUnknownTE) {
 		t.Fatalf("unknown type: got type %d err %v, want 42 errUnknownTE", teType, err)
 	}
 
 	truncated := lightningPayload(6, 4, [3]float32{1, 2, 3}, [3]float32{4, 5, 6})[:5]
-	teType, err = p.parseTempEntity(mvd.NewBufferReader(truncated), 1.0, 1000, false)
+	teType, err = p.parseTempEntity(mvd.NewBufferReader(truncated), 1000, false)
 	if teType != 6 || err == nil || errors.Is(err, errUnknownTE) {
 		t.Fatalf("truncated known type: got type %d err %v, want 6 and a non-errUnknownTE error", teType, err)
 	}
@@ -108,7 +108,7 @@ func TestParseTempEntity_PointEffectNoBeam(t *testing.T) {
 		payload = appendCoord(payload, v)
 	}
 	r := mvd.NewBufferReader(payload)
-	if teType, err := p.parseTempEntity(r, 1.0, 1000, false); err != nil || teType != 3 {
+	if teType, err := p.parseTempEntity(r, 1000, false); err != nil || teType != 3 {
 		t.Fatalf("parseTempEntity: type %d err %v", teType, err)
 	}
 	if fired {

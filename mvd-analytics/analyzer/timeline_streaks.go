@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"math"
+	"slices"
 	"sort"
 )
 
@@ -12,24 +13,24 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 	// Build per-player sorted spawn and death time lists, resolving each
 	// spawn/death to the identity on the slot *at that time* so a streak
 	// that straddles a reconnect stays one run under one player name.
-	spawnsByName := make(map[string][]float64)
-	deathsByName := make(map[string][]float64)
+	spawnsByName := make(map[string][]int32)
+	deathsByName := make(map[string][]int32)
 
 	for _, s := range a.rawSpawns {
-		if name, _ := a.resolveAt(s.PlayerNum, msTime(s.Time)); name != "" {
+		if name, _ := a.resolveAt(s.PlayerNum, s.Time); name != "" {
 			spawnsByName[name] = append(spawnsByName[name], s.Time)
 		}
 	}
 	for _, d := range a.rawDeaths {
-		if name, _ := a.resolveAt(d.PlayerNum, msTime(d.Time)); name != "" {
+		if name, _ := a.resolveAt(d.PlayerNum, d.Time); name != "" {
 			deathsByName[name] = append(deathsByName[name], d.Time)
 		}
 	}
 	for name := range spawnsByName {
-		sort.Float64s(spawnsByName[name])
+		slices.Sort(spawnsByName[name])
 	}
 	for name := range deathsByName {
-		sort.Float64s(deathsByName[name])
+		slices.Sort(deathsByName[name])
 	}
 
 	// Earliest credited frag per killer, from the canonical frag log.
@@ -55,8 +56,8 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 	type run struct {
 		playerName string
 		team       string
-		spawnTime  float64
-		deathTime  float64
+		spawnTime  int32
+		deathTime  int32
 	}
 	var runs []run
 
@@ -93,20 +94,20 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 		// pair the synthetic spawn with the *next* death and shift
 		// every later run of the player off by one life.
 		if a.timing.Started {
-			startMs := msTime(a.timing.StartTime)
+			startMs := a.timing.StartTime
 			firstSpawnMs := int32(math.MaxInt32)
 			if len(spawns) > 0 {
-				firstSpawnMs = msTime(spawns[0])
+				firstSpawnMs = spawns[0]
 			}
 			evidenceMs := int32(math.MaxInt32)
 			if len(deaths) > 0 {
-				evidenceMs = msTime(deaths[0])
+				evidenceMs = deaths[0]
 			}
 			if t, ok := firstFragMs[name]; ok && t < evidenceMs {
 				evidenceMs = t
 			}
 			if evidenceMs > startMs && evidenceMs < firstSpawnMs {
-				spawns = append([]float64{a.timing.StartTime}, spawns...)
+				spawns = append([]int32{a.timing.StartTime}, spawns...)
 			}
 		}
 
@@ -117,7 +118,7 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 			for di < len(deaths) && deaths[di] <= spawnT {
 				di++
 			}
-			deathT := 0.0
+			deathT := int32(0)
 			if di < len(deaths) {
 				deathT = deaths[di]
 				di++
@@ -145,8 +146,8 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 		frags := 0
 		weaponCounts := make(map[string]int)
 
-		spawnTimeMs := msTime(r.spawnTime)
-		deathTimeMs := msTime(r.deathTime)
+		spawnTimeMs := r.spawnTime
+		deathTimeMs := r.deathTime
 		for _, fe := range fragEntries {
 			if fe.Killer != r.playerName {
 				continue

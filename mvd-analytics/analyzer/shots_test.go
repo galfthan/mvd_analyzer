@@ -25,7 +25,7 @@ func newTestShotsAnalyzer() (*ShotsAnalyzer, *Context) {
 func weaponSound(ent int, name string, tMs int32) *events.SoundEvent {
 	return &events.SoundEvent{
 		Ent: ent, Channel: chanWeapon, Name: name,
-		Time: float64(tMs) / 1000, TimeMs: tMs,
+		TimeMs: tMs,
 	}
 }
 
@@ -83,13 +83,13 @@ func TestShots_HitscanLinking(t *testing.T) {
 
 	// SG fire by slot 3 at 1000ms; two pellets-worth of damage to two victims.
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 1000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 20, Time: 1.0})
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 1, DeathType: mvd.DtSG, Damage: 12, Time: 1.012})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 20, TimeMs: 1000})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 1, DeathType: mvd.DtSG, Damage: 12, TimeMs: 1012})
 
 	// RL fire by slot 3 at 2000ms with same-frame RL damage — must NOT link
 	// (projectile, handled by entity tracking, not same-frame).
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 2000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtRL, Damage: 80, Time: 2.0})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtRL, Damage: 80, TimeMs: 2000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -134,13 +134,13 @@ func TestShots_HitscanLinking(t *testing.T) {
 
 // projSpawn / projDespawn build the entity-tracking events for one flight.
 func projSpawn(ent int, kind string, origin [3]float32, tMs int32) *events.ProjectileSpawnEvent {
-	return &events.ProjectileSpawnEvent{EntNum: ent, Kind: kind, Origin: origin, Time: float64(tMs) / 1000, TimeMs: tMs}
+	return &events.ProjectileSpawnEvent{EntNum: ent, Kind: kind, Origin: origin, TimeMs: tMs}
 }
 func projDespawn(ent int, kind string, tMs int32) *events.ProjectileDespawnEvent {
-	return &events.ProjectileDespawnEvent{EntNum: ent, Kind: kind, Time: float64(tMs) / 1000, TimeMs: tMs}
+	return &events.ProjectileDespawnEvent{EntNum: ent, Kind: kind, TimeMs: tMs}
 }
 func rlDamage(attacker, victim int, tMs int32) *events.DamageEvent {
-	return &events.DamageEvent{Attacker: attacker, Victim: victim, DeathType: mvd.DtRL, Damage: 80, Time: float64(tMs) / 1000}
+	return &events.DamageEvent{Attacker: attacker, Victim: victim, DeathType: mvd.DtRL, Damage: 80, TimeMs: tMs}
 }
 
 // TestShots_ProjectileBracketDisambiguation is the core Phase-2 case: one
@@ -225,7 +225,7 @@ func TestShots_ProjectileMiss(t *testing.T) {
 func lgBeam(ent int, tMs int32) *events.BeamEvent {
 	return &events.BeamEvent{
 		Ent: ent, Type: 6, Start: [3]float32{0, 0, 0}, End: [3]float32{100, 0, 0},
-		Time: float64(tMs) / 1000, TimeMs: tMs,
+		TimeMs: tMs,
 	}
 }
 
@@ -236,7 +236,7 @@ func TestShots_LGBeam(t *testing.T) {
 	a, _ := newTestShotsAnalyzer()
 
 	_ = a.OnEvent(lgBeam(4, 1000)) // slot 3 fires LG
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtLGBeam, Damage: 7, Time: 1.0})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtLGBeam, Damage: 7, TimeMs: 1000})
 	_ = a.OnEvent(lgBeam(4, 1100)) // fires again, misses
 	// TE_LIGHTNING1 (non-player bolt) and a world entity: ignored.
 	_ = a.OnEvent(&events.BeamEvent{Ent: 4, Type: 5, TimeMs: 1200})
@@ -275,7 +275,7 @@ func TestShots_SpatialStreams(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000))
 	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{10, 20, 30}, 1000))
 	_ = a.OnEvent(&events.ProjectileDespawnEvent{
-		EntNum: 50, Kind: "rl", Origin: [3]float32{100, 20, 30}, Time: 1.5, TimeMs: 1500,
+		EntNum: 50, Kind: "rl", Origin: [3]float32{100, 20, 30}, TimeMs: 1500,
 	})
 	_ = a.OnEvent(lgBeam(4, 2000)) // start {0,0,0} end {100,0,0}
 
@@ -321,9 +321,9 @@ func TestShots_NailLinking(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 1000)) // sng fire, slot 3
 	_ = a.OnEvent(projSpawn(60, "nail", [3]float32{0, 0, 0}, 1000))
 	_ = a.OnEvent(&events.ProjectileDespawnEvent{
-		EntNum: 60, Kind: "nail", Origin: [3]float32{50, 0, 0}, Time: 1.1, TimeMs: 1100,
+		EntNum: 60, Kind: "nail", Origin: [3]float32{50, 0, 0}, TimeMs: 1100,
 	})
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, Time: 1.1})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, TimeMs: 1100})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -343,7 +343,7 @@ func TestShots_NailLinking(t *testing.T) {
 func TestShots_NailLinkingGatedOff(t *testing.T) {
 	a, _ := newTestShotsAnalyzer() // ctx.Nails defaults false
 	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 1000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, Time: 1.1})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, TimeMs: 1100})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -370,11 +370,11 @@ func TestShots_VictimKindClassification(t *testing.T) {
 
 	// 1. SG hit on an enemy: all-enemy kinds are encoded as absence.
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 1000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 12, Time: 1.0})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 12, TimeMs: 1000})
 
 	// 2. SG hit on a teammate (slot 2, same team as the shooter).
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 2000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 2, DeathType: mvd.DtSG, Damage: 8, Time: 2.0})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 2, DeathType: mvd.DtSG, Damage: 8, TimeMs: 2000})
 
 	// 3. RL self-splash (rocket jump): victim slot == attacker slot.
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 3000))
@@ -463,7 +463,7 @@ func TestShots_DuelSharedTeamBornEnemy(t *testing.T) {
 
 	// alice (slot 3) shotguns bob (slot 0).
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 1000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 20, Time: 1.0})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSG, Damage: 20, TimeMs: 1000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -506,7 +506,7 @@ func TestShots_WarmupGating(t *testing.T) {
 	a.timing.Started = false // start in warmup
 
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 100)) // warmup rl
-	_ = a.OnEvent(&events.PrintEvent{Message: "fight!", Time: 0.2})
+	_ = a.OnEvent(&events.PrintEvent{Message: "fight!", TimeMs: 200})
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 300)) // match rl
 
 	r := &Result{}

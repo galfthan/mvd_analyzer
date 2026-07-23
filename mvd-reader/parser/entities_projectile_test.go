@@ -41,11 +41,11 @@ func TestProjectile_SpawnThenDespawn(t *testing.T) {
 	})
 
 	origin := [3]float32{100, 200, 50}
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 1.0, 1000
+	p.lastEntityPacketTimeMs = 1000
 	if err := p.parsePacketEntities(mvd.NewBufferReader(projPacket(50, 2, origin)), false, false, 0); err != nil {
 		t.Fatalf("spawn packet: %v", err)
 	}
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 1.5, 1500
+	p.lastEntityPacketTimeMs = 1500
 	if err := p.parsePacketEntities(mvd.NewBufferReader(emptyFullPacket()), false, false, 0); err != nil {
 		t.Fatalf("despawn packet: %v", err)
 	}
@@ -79,7 +79,7 @@ func TestProjectile_NonProjectileIgnored(t *testing.T) {
 		}
 		return nil
 	})
-	p.lastEntityPacketTime, p.lastEntityPacketTimeMs = 1.0, 1000
+	p.lastEntityPacketTimeMs = 1000
 	if err := p.parsePacketEntities(mvd.NewBufferReader(projPacket(60, 3, [3]float32{1, 2, 3})), false, false, 0); err != nil {
 		t.Fatalf("packet: %v", err)
 	}

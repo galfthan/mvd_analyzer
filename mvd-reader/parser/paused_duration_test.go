@@ -29,15 +29,15 @@ func TestParseHiddenPausedDuration_BareForm(t *testing.T) {
 	payload[2] = 104 // real ms for this idle frame, as seen in duel-with-pauses.mvd
 
 	msg := &mvd.DemoMessage{Payload: payload}
-	msg.Time = 28.465
+	msg.TimeMs = 28465
 	if err := p.parseHiddenMessage(msg); err != nil {
 		t.Fatalf("parseHiddenMessage: %v", err)
 	}
 	if got == nil {
 		t.Fatal("no PausedDurationEvent emitted for bare 0x000A block")
 	}
-	if got.DurationMs != 104 || got.Time != 28.465 {
-		t.Errorf("got %+v, want {DurationMs:104 Time:28.465}", got)
+	if got.DurationMs != 104 || got.TimeMs != 28465 {
+		t.Errorf("got %+v, want {DurationMs:104 TimeMs:28465}", got)
 	}
 }
 
@@ -63,14 +63,14 @@ func TestParseHiddenPausedDuration_StandardForm(t *testing.T) {
 	payload[6] = 97
 
 	msg := &mvd.DemoMessage{Payload: payload}
-	msg.Time = 12.0
+	msg.TimeMs = 12000
 	if err := p.parseHiddenMessage(msg); err != nil {
 		t.Fatalf("parseHiddenMessage: %v", err)
 	}
 	if got == nil {
 		t.Fatal("no PausedDurationEvent emitted for standard-framed 0x000A block")
 	}
-	if got.DurationMs != 97 || got.Time != 12.0 {
-		t.Errorf("got %+v, want {DurationMs:97 Time:12}", got)
+	if got.DurationMs != 97 || got.TimeMs != 12000 {
+		t.Errorf("got %+v, want {DurationMs:97 TimeMs:12000}", got)
 	}
 }

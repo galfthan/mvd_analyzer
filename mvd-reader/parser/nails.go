@@ -19,12 +19,12 @@ type Nail struct {
 // — nails are high volume, so the default parse skips them.
 type NailsFrameEvent struct {
 	Nails  []Nail
-	Time   float64
 	TimeMs int32
 }
 
 func (e *NailsFrameEvent) EventType() EventType { return EventNails }
-func (e *NailsFrameEvent) EventTime() float64   { return e.Time }
+func (e *NailsFrameEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *NailsFrameEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // SetDecodeNails opts the parser into nail tracking. It enables both nail
 // sources: decoding svc_nails / svc_nails2 into NailsFrameEvent (non-nailhack
@@ -41,7 +41,7 @@ func (p *Parser) SetDecodeNails(enabled bool) { p.decodeNails = enabled }
 // origin + angles. When nail decoding is disabled it consumes the payload
 // without emitting (the skip path), so the byte cursor stays aligned either
 // way.
-func (p *Parser) parseNails(r *mvd.BufferReader, indexed bool, time float64, timeMs int32) error {
+func (p *Parser) parseNails(r *mvd.BufferReader, indexed bool, timeMs int32) error {
 	count, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -84,5 +84,5 @@ func (p *Parser) parseNails(r *mvd.BufferReader, indexed bool, time float64, tim
 			Origin: [3]float32{float32(ox), float32(oy), float32(oz)},
 		})
 	}
-	return p.emit(&NailsFrameEvent{Nails: nails, Time: time, TimeMs: timeMs})
+	return p.emit(&NailsFrameEvent{Nails: nails, TimeMs: timeMs})
 }

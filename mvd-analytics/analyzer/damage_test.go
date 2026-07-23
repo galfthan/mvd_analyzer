@@ -57,13 +57,13 @@ func TestDamageAnalyzer_EWepBucketsByVictimWeapon(t *testing.T) {
 
 	// alpha RLs each enemy for 100.
 	for slot := 1; slot <= 5; slot++ {
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: slot, Damage: 100, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: slot, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 	}
 	// self-damage and team-damage (must not enter the enemy buckets).
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 50, DeathType: dtRLTest, Time: 11})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, Time: 12})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 50, DeathType: dtRLTest, TimeMs: 11000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 12000})
 	// world damage to alpha (env, non-player attacker).
-	a.OnEvent(&events.DamageEvent{Attacker: -1, Victim: 0, Damage: 25, DeathType: dtFallTest, Time: 13})
+	a.OnEvent(&events.DamageEvent{Attacker: -1, Victim: 0, Damage: 25, DeathType: dtFallTest, TimeMs: 13000})
 
 	a.UseCoreOutputs(damageCore())
 	var res Result
@@ -140,13 +140,13 @@ func TestDamageAnalyzer_OutOfMatchDroppedEverywhere(t *testing.T) {
 	_ = a.Init(ctx)
 
 	// Pre-match (warmup) hit — dropped from BOTH the aggregates AND the log.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtSGTest, Time: 1})
-	a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", Time: 5})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtSGTest, TimeMs: 1000})
+	a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
 	// In-match hit — counts and appears in the log.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtSGTest, Time: 6})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtSGTest, TimeMs: 6000})
 	// Post-match hit — also dropped everywhere.
-	a.OnEvent(&events.IntermissionEvent{Time: 10})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 25, DeathType: dtSGTest, Time: 11})
+	a.OnEvent(&events.IntermissionEvent{TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 25, DeathType: dtSGTest, TimeMs: 11000})
 
 	a.UseCoreOutputs(&CoreOutputs{Slots: map[int]SlotInfo{
 		0: {Name: "alpha", Team: "red"}, 1: {Name: "bravo", Team: "blue"},
@@ -176,10 +176,10 @@ func TestDamageAnalyzer_PositionalKillsSeparated(t *testing.T) {
 	// erl (slot 4) holds an RL; alpha RLs erl for 100 (real damage), then
 	// telefrags erl (deathtype tele, reported as the 9999 sentinel).
 	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: events.ITRocketLauncher})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 100, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, Time: 11})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, TimeMs: 11000})
 	// A stomp (10 HP in normal play) is a positional kill, not weapon damage.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 10, DeathType: dtStompTest, Time: 12})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 10, DeathType: dtStompTest, TimeMs: 12000})
 
 	a.UseCoreOutputs(damageCore())
 	var res Result
@@ -239,7 +239,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// Enemy telefrag through armor: bounded = full armor + remaining health.
 	a := buildDamageAnalyzer()
 	seedVitals(a, 4, 80, 150, events.ITArmor3)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, TimeMs: 10000})
 	d := finalizeDamage(t, a)
 	alpha := d.ByPlayer["alpha"]
 	if alpha.Given != 230 {
@@ -261,7 +261,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// Team telefrag: GivenTeam in both families; the credit counter stays 0.
 	a = buildDamageAnalyzer()
 	seedVitals(a, 6, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 9999, DeathType: dtTeleTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 9999, DeathType: dtTeleTest, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	alpha = d.ByPlayer["alpha"]
 	if alpha.GivenTeam != 100 || alpha.Bounded == nil || alpha.Bounded.GivenTeam != 100 {
@@ -279,7 +279,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// as attacker — the arriving mortal's spawn state folds in.
 	a = buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 9999, DeathType: events.DtTele2, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 9999, DeathType: events.DtTele2, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	if got := d.ByPlayer["alpha"].Given; got != 100 {
 		t.Errorf("deflect Given = %d, want 100", got)
@@ -292,8 +292,8 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// bounded value comes from the death broadcast (raw 10 + death −1 = 9).
 	a = buildDamageAnalyzer()
 	seedVitals(a, 1, 3, 40, events.ITArmor2)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 10, DeathType: dtStompTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -1, Time: 10}) // 3 - 4 take -> -1
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 10, DeathType: dtStompTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -1, TimeMs: 10000}) // 3 - 4 take -> -1
 	d = finalizeDamage(t, a)
 	alpha = d.ByPlayer["alpha"]
 	if alpha.Given != 10 || alpha.Bounded.Given != 9 {
@@ -307,7 +307,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// too — KTX's dmg_eweapon has no deathtype gate (combat.c:1073).
 	a = buildDamageAnalyzer()
 	seedVitals(a, 4, 60, 0, events.ITRocketLauncher)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	alpha = d.ByPlayer["alpha"]
 	if alpha.EnemyVsRL != 60 || alpha.EWep != 60 || alpha.Bounded.EWep != 60 {
@@ -324,7 +324,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	// (combat.c:728-737): take is zeroed, dmg_dealt = the armor alone.
 	a = buildDamageAnalyzer()
 	seedVitals(a, 4, 80, 150, events.ITArmor3|events.ITInvulnerability)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: events.DtTele3, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: events.DtTele3, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	if got := d.ByPlayer["alpha"].Given; got != 150 {
 		t.Errorf("dtTELE3 fold = %d, want 150 (armor only — pent zeroes the health share)", got)
@@ -340,7 +340,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	a = buildDamageAnalyzer()
 	seedVitals(a, 4, 100, 120, events.ITArmor3|events.ITRocketLauncher)
 	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatHealth, Value: -7})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	alpha = d.ByPlayer["alpha"]
 	if alpha.Given != 100 || killBounded(d.Telefrags[0]) != 100 {
@@ -354,7 +354,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 	a = buildDamageAnalyzer()
 	a.OnEvent(&events.ServerInfoEvent{Key: "k_midair", Value: "1"})
 	seedVitals(a, 4, 80, 150, events.ITArmor3)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 9999, DeathType: dtTeleTest, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	if alpha := d.ByPlayer["alpha"]; alpha.Given != 0 || alpha.Bounded != nil {
 		t.Errorf("skipped-mode tele folded anyway: given=%d bounded=%+v", alpha.Given, alpha.Bounded)
@@ -378,7 +378,7 @@ func TestDamageAnalyzer_DuelSharedTeamClassifiedEnemy(t *testing.T) {
 		_ = a.Init(ctx)
 		a.timing.Started = true
 		a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatItems, Value: events.ITRocketLauncher})
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 		a.UseCoreOutputs(&CoreOutputs{Slots: map[int]SlotInfo{
 			0: {Name: "alpha", Team: "green"}, 1: {Name: "bravo", Team: "green"},
 		}})
@@ -432,7 +432,7 @@ func TestDamageAnalyzer_DuelSharedTeamClassifiedEnemy(t *testing.T) {
 func TestDamageAnalyzer_ScoreboardReconciliation(t *testing.T) {
 	a := buildDamageAnalyzer()
 	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: events.ITRocketLauncher})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 100, DeathType: dtRLTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 
 	co := damageCore()
 	co.DemoInfo = &DemoInfoResult{Players: []DemoInfoPlayer{
@@ -510,12 +510,12 @@ func TestDamageAnalyzer_BoundedArmorTiers(t *testing.T) {
 	seedVitals(a, 2, 10, 100, events.ITArmor2) // YA 0.6: save 60, take 40 -> health -30
 	seedVitals(a, 3, 10, 100, events.ITArmor3) // RA 0.8: save 80, take 20 -> health -10
 	for slot := 1; slot <= 3; slot++ {
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: slot, Damage: 100, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: slot, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 	}
 	// End-of-frame death broadcasts (same frame as the hits) carry the overkill.
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -60, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: -30, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: -10, Time: 10})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -60, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: -30, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: -10, TimeMs: 10000})
 	d := finalizeDamage(t, a)
 	want := map[string]int{"bsg": 40, "cmid": 70, "dlg": 90} // raw 100 + deathValue
 	for _, e := range d.Events {
@@ -542,10 +542,10 @@ func TestDamageAnalyzer_BoundedArmorTiers(t *testing.T) {
 func TestDamageAnalyzer_BoundedArmorBreakSequential(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 5, events.ITArmor2) // YA, 5 armor left
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, TimeMs: 10000})
 	// health 100 - (55 take + 60 take) = -15; one death value covers the frame.
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -15, Time: 10})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -15, TimeMs: 10000})
 	d := finalizeDamage(t, a)
 	if len(d.Events) != 2 {
 		t.Fatalf("events = %d, want 2", len(d.Events))
@@ -567,9 +567,9 @@ func TestDamageAnalyzer_BoundedOverkillAndOmitWhenEqual(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 30, 0, 0)
 	seedVitals(a, 2, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -70, Time: 10}) // 30 - 100
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 2, Damage: 27, DeathType: dtSGTest, Time: 11})    // survives
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -70, TimeMs: 10000}) // 30 - 100
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 2, Damage: 27, DeathType: dtSGTest, TimeMs: 11000})    // survives
 	d := finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 30 {
 		t.Errorf("overkill bounded = %d, want 30 (raw 100 + death −70)", got)
@@ -590,8 +590,8 @@ func TestDamageAnalyzer_BoundedOverkillAndOmitWhenEqual(t *testing.T) {
 func TestDamageAnalyzer_BoundedPent(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 100, events.ITArmor3|events.ITInvulnerability)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 	d := finalizeDamage(t, a)
 	// Hit 1: save=80, take zeroed -> bounded 80.
 	if got := boundedOf(d.Events[0]); got != 80 {
@@ -617,7 +617,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// tp1 team hit: no armor -> bounded 0 (a real zero, not omitted).
 	d := run("1", func(a *DamageAnalyzer) {
 		seedVitals(a, 6, 100, 0, 0)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	})
 	if got := boundedOf(d.Events[0]); got != 0 || d.Events[0].Bounded == nil {
 		t.Errorf("tp1 team hit bounded = %d (ptr %v), want explicit 0", got, d.Events[0].Bounded)
@@ -626,7 +626,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// tp1 self hit: also nullified ((tp_num()==1) has no targ!=attacker guard).
 	d = run("1", func(a *DamageAnalyzer) {
 		seedVitals(a, 0, 100, 0, 0)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	})
 	if got := boundedOf(d.Events[0]); got != 0 {
 		t.Errorf("tp1 self hit bounded = %d, want 0", got)
@@ -635,7 +635,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// tp3 self hit: self still takes damage (tp3 requires targ != attacker).
 	d = run("3", func(a *DamageAnalyzer) {
 		seedVitals(a, 0, 100, 0, 0)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	})
 	if d.Events[0].Bounded != nil {
 		t.Errorf("tp3 self hit bounded = %d, want nil (== raw 30)", *d.Events[0].Bounded)
@@ -644,7 +644,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// tp3 team hit: nullified.
 	d = run("3", func(a *DamageAnalyzer) {
 		seedVitals(a, 6, 100, 0, 0)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	})
 	if got := boundedOf(d.Events[0]); got != 0 {
 		t.Errorf("tp3 team hit bounded = %d, want 0", got)
@@ -653,7 +653,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// tp4 team hit: armor untouched too -> bounded 0 even with RA.
 	d = run("4", func(a *DamageAnalyzer) {
 		seedVitals(a, 6, 100, 100, events.ITArmor3)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	})
 	if got := boundedOf(d.Events[0]); got != 0 {
 		t.Errorf("tp4 team hit bounded = %d, want 0 (no armor consumption either)", got)
@@ -662,7 +662,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	// dtSUICIDE under tp1: exempt from nullification.
 	d = run("1", func(a *DamageAnalyzer) {
 		seedVitals(a, 0, 100, 0, 0)
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: events.DtSuicide, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 30, DeathType: events.DtSuicide, TimeMs: 10000})
 	})
 	if d.Events[0].Bounded != nil {
 		t.Errorf("suicide bounded = %d, want nil (nullification skipped)", *d.Events[0].Bounded)
@@ -674,7 +674,7 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	a := buildDamageAnalyzer()
 	a.OnEvent(&events.ServerInfoEvent{Key: "teamplay", Value: "1"})
 	seedVitals(a, 6, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
 	co := damageCore()
 	co.DemoInfo = &DemoInfoResult{Mode: "ffa", Players: []DemoInfoPlayer{
 		{Name: "alpha", Team: "red"}, {Name: "gmate", Team: "red"}, {Name: "bsg", Team: "blue"},
@@ -699,8 +699,8 @@ func TestDamageAnalyzer_BoundedStatSentinelsRejected(t *testing.T) {
 	// neither poisons the shadow nor registers as a death marker.
 	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 1042})
 	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatArmor, Value: 1080})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -60, Time: 10}) // 40 - 100
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -60, TimeMs: 10000}) // 40 - 100
 	d := finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 40 {
 		t.Errorf("bounded = %d, want 40 (raw 100 + real death −60, sentinels ignored)", got)
@@ -712,9 +712,9 @@ func TestDamageAnalyzer_BoundedStatSentinelsRejected(t *testing.T) {
 func TestDamageAnalyzer_BoundedSameFrameSequentialCap(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -20, Time: 10}) // 100 - 120
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -20, TimeMs: 10000}) // 100 - 120
 	d := finalizeDamage(t, a)
 	if d.Events[0].Bounded != nil {
 		t.Errorf("hit1 bounded = %d, want nil (== raw 60; overkill lands on hit 2)", *d.Events[0].Bounded)
@@ -732,11 +732,11 @@ func TestDamageAnalyzer_BoundedSurvivedStaleShadow(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 0, 0)
 	// First death, its overkill capped by the death value.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 150, DeathType: dtRLTest, Time: 5})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -50, Time: 5})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 150, DeathType: dtRLTest, TimeMs: 5000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -50, TimeMs: 5000})
 	// No respawn checkpoint arrives — the shadow stays at −50. The victim
 	// silently respawned; a later hit lands with no death marker.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtRLTest, Time: 20})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtRLTest, TimeMs: 20000})
 	d := finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 100 {
 		t.Errorf("kill bounded = %d, want 100 (raw 150 + death −50)", got)
@@ -751,12 +751,12 @@ func TestDamageAnalyzer_BoundedSurvivedStaleShadow(t *testing.T) {
 func TestDamageAnalyzer_BoundedTwoDeaths(t *testing.T) {
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 100, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 150, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -50, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 150, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -50, TimeMs: 10000})
 	// Respawn checkpoint.
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 100, Time: 15})
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 120, DeathType: dtRLTest, Time: 20})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -20, Time: 20})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 100, TimeMs: 15000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 120, DeathType: dtRLTest, TimeMs: 20000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -20, TimeMs: 20000})
 	d := finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 100 {
 		t.Errorf("first kill bounded = %d, want 100 (raw 150 + death −50)", got)
@@ -776,7 +776,7 @@ func TestDamageAnalyzer_BoundedSkippedModes(t *testing.T) {
 		a.OnEvent(&events.ServerInfoEvent{Key: tc.cvar, Value: "1"})
 		seedVitals(a, 1, 30, 0, 0)
 		// Overkill hit that WOULD get a bounded value in standard mode.
-		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, Time: 10})
+		a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
 		co := damageCore()
 		co.DemoInfo = &DemoInfoResult{Players: []DemoInfoPlayer{
 			{Name: "alpha", Team: "red", Dmg: &DemoInfoDmg{Given: 30}},
@@ -815,10 +815,10 @@ func TestDamageAnalyzer_BoundedScoreboardDelta(t *testing.T) {
 	seedVitals(a, 4, 100, 0, 0)
 	seedVitals(a, 6, 100, 0, 0)
 	// Enemy overkill: raw 150, death −50 -> bounded 100.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 150, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatHealth, Value: -50, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 150, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatHealth, Value: -50, TimeMs: 10000})
 	// Team hit: survives (bounded 40 == raw), tp 0 here so no nullification.
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 40, DeathType: dtRLTest, Time: 11})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 40, DeathType: dtRLTest, TimeMs: 11000})
 
 	co := damageCore()
 	co.DemoInfo = &DemoInfoResult{Players: []DemoInfoPlayer{
@@ -860,8 +860,8 @@ func TestDamageAnalyzer_BoundedClampCeiling(t *testing.T) {
 	// but the clamp proves bounded <= 250-99 = 151.
 	a := buildDamageAnalyzer()
 	seedVitals(a, 1, 200, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 250, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 250, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, TimeMs: 10000})
 	d := finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 151 {
 		t.Errorf("clamped-kill bounded = %d, want 151 (raw 250 - proven overkill 99, not the stale shadow 200)", got)
@@ -871,8 +871,8 @@ func TestDamageAnalyzer_BoundedClampCeiling(t *testing.T) {
 	// estimate; the shadow's 40 already deducts more than 99.
 	a = buildDamageAnalyzer()
 	seedVitals(a, 1, 40, 0, 0)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 250, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 250, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 40 {
 		t.Errorf("clamped-kill low-shadow bounded = %d, want 40 (ceiling never inflates)", got)
@@ -884,8 +884,8 @@ func TestDamageAnalyzer_BoundedClampCeiling(t *testing.T) {
 	// estimate is 130 and the ceiling still doesn't bite; sanity both.
 	a = buildDamageAnalyzer()
 	seedVitals(a, 1, 200, 100, events.ITArmor3)
-	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 500, DeathType: dtRLTest, Time: 10})
-	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, Time: 10})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 500, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: -99, TimeMs: 10000})
 	d = finalizeDamage(t, a)
 	if got := boundedOf(d.Events[0]); got != 300 {
 		t.Errorf("clamped-kill armored bounded = %d, want 300 (save 100 + shadow health 200; ceiling 401 not binding)", got)

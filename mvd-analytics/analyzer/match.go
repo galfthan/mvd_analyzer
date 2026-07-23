@@ -10,10 +10,10 @@ import (
 
 // MatchAnalyzer extracts match summary information
 type MatchAnalyzer struct {
-	ctx      *Context
-	core     *CoreOutputs
-	duration float64
-	timing   MatchTimingDetector
+	ctx        *Context
+	core       *CoreOutputs
+	durationMs int32
+	timing     MatchTimingDetector
 
 	// frags is the per-slot svc_updatefrags scoreboard, frozen at match
 	// end (see OnEvent) so post-match slot re-inits cannot clobber the
@@ -38,13 +38,13 @@ func (a *MatchAnalyzer) Init(ctx *Context) error {
 }
 
 func (a *MatchAnalyzer) OnEvent(event events.Event) error {
-	a.duration = event.EventTime()
+	a.durationMs = event.EventTimeMs()
 
 	switch e := event.(type) {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.EventTime())
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.FragUpdateEvent:
 		// The match scoreboard is immutable once the match ends; a frag
 		// update after that is next-game bookkeeping, most commonly a
@@ -67,18 +67,18 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 
 func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// Calculate actual match duration
-	matchDuration := a.duration
+	matchDuration := a.durationMs
 	if a.timing.Started && a.timing.StartTime > 0 {
 		if a.timing.EndTime > a.timing.StartTime {
 			matchDuration = a.timing.EndTime - a.timing.StartTime
 		} else {
 			// No end detected, use total - start
-			matchDuration = a.duration - a.timing.StartTime
+			matchDuration = a.durationMs - a.timing.StartTime
 		}
 	}
 
 	mr := &MatchResult{
-		Duration: msTime(matchDuration),
+		Duration: matchDuration,
 	}
 
 	// Get map name from server data

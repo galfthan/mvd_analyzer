@@ -231,7 +231,7 @@ Bits 3-7: Additional data (for dem_single and dem_stats: player number)
 
 **Important**: The first message typically has `time_delta = 0`. Subsequent messages accumulate time deltas to track demo time.
 
-The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is exposed for callers that prefer seconds arithmetic, but persistence-layer consumers should use the integer-ms value to avoid float-precision drift across boundary comparisons. The analytics layer's schema v8 stores **every** timestamped result field as `int32` ms for the same reason — the wire format's integer unit flows end-to-end through the pipeline.
+The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is retained only as a human-readable diagnostics accessor — pipeline code must use the integer-ms value; float seconds is never a pipeline representation. The analytics layer's schema v8 stores **every** timestamped result field as `int32` ms for the same reason — the wire format's integer unit flows end-to-end through the pipeline.
 
 ### Message Types
 
@@ -2485,9 +2485,9 @@ Resolve `modelindex` → path via the `svc_modellist` table. Index 0 is reserved
 **Implementation pattern** (see `mvd-reader/parser/entities.go`):
 
 1. On `svc_modellist` / `svc_fte_modellistshort`: populate `modelList[modelindex] = path`.
-2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, Time}`.
+2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, TimeMs}`.
 3. On `svc_packetentities` (full) / `svc_deltapacketentities` (delta): maintain a rolling `currentEntities` map. Full packets replace it; deltas copy from previous and apply per-entity updates. `U_REMOVE` deletes; other flags update fields.
-4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, Time}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
+4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
 
 Baselines seed the "initial" state so items at match start are already "up". Non-item entities (players, lights) pass through the item classifier as empty kind and are silently filtered — except inline brush-model entities (which feed the mover events below) and slow projectiles (which feed the projectile events below).
 
@@ -2517,8 +2517,8 @@ Origin unpack (whole-unit precision): `x = ((bits[0] + ((bits[1] & 15) << 8)) <<
 
 **Inline brush-model entities (movers).** An entity whose model path is `"*N"` references submodel N of the map BSP itself (the `dmodel_t` array) rather than a separate model file: func_plat, func_door, func_train, func_button, func_wall, func_illusionary. Their geometry is compiled in world coordinates; the entity origin is a *translation offset* from that compiled position (a door at rest has origin `0 0 0`), which is exactly how the client poses their collision hulls for prediction (`CL_SetSolidEntities`, ezquake `cl_ents.c` — `VectorCopy(state->origin, physent.origin)` and trace in model-local space). Trigger volumes are also `"*N"` submodels in the BSP but never appear in the entity stream: Quake progs `InitTrigger` (`subs.qc`) clears `modelindex`/`model` after `setmodel`, and mvdsv only writes entities with a non-zero modelindex and model string (`sv_ents.c:790`). MVD packets have no PVS filtering, so every visible mover is in every frame; delta compression means its origin is re-sent only when it changes. The parser synthesises:
 
-- `MoverSpawnEvent{EntNum, Model, SubModel, Origin, Time, TimeMs}` — once per entity, at its baseline (or first packet appearance if the baseline preceded the model list).
-- `MoverStateEvent{EntNum, Origin, Visible, Time, TimeMs}` — on every origin change (one per frame while a lift/door/train travels — observed wire origins step at the 1/8-unit coord resolution) and on visibility flips (`U_REMOVE` / modelindex cleared, then restored). Holding the last event's origin between events reproduces the pose exactly.
+- `MoverSpawnEvent{EntNum, Model, SubModel, Origin, TimeMs}` — once per entity, at its baseline (or first packet appearance if the baseline preceded the model list).
+- `MoverStateEvent{EntNum, Origin, Visible, TimeMs}` — on every origin change (one per frame while a lift/door/train travels — observed wire origins step at the 1/8-unit coord resolution) and on visibility flips (`U_REMOVE` / modelindex cleared, then restored). Holding the last event's origin between events reproduces the pose exactly.
 
 **Known limitation — insta-regrab invisibility**: If an item respawns and is immediately touched within the same server tick (player camping the spawn), the end-of-tick state is "modelindex 0, still absent from packet." The delta compressor has no new bits to emit, and the wire never shows the "respawned then retaken" transition. KTX's `//ktx took` print fires on every touch regardless, so it *does* count those pickups; the entity-state stream does not. For "when is the item practically available?" questions this is actually the more useful signal (the RA was never effectively up during a hotly-contested window), but for per-touch pickup *counts* the KTX stream is more complete for the item classes it covers (armors, MH, weapons, powerups — not small health or ammo).
 
@@ -2539,7 +2539,13 @@ Both paths terminate cleanly: a wire `Taken=false` cancels any pending schedule 
 - **DeathEvent** fires when StatHealth crosses from >0 to ≤0.
 - **SpawnEvent** fires when StatHealth crosses from ≤0 to >0.
 
-Both carry `{PlayerNum, Time}` at the exact stat-update tick. The value of this over "compare prevHealth vs. health at each 50 ms sample" is the **instant-respawn** case: a player gibbed deep-negative (e.g. `health = -60`) can be respawned in the same 50 ms window (KTX forcerespawn on gib), and sample-based detection would see `prevHealth = 100, health = 100` at the next boundary and miss both transitions. The parser, looking at every stat update as it arrives, catches the `100 → -60` and `-60 → 100` pair independently.
+Both carry `{PlayerNum, TimeMs}` at the exact stat-update tick. Like
+every parser event, the timestamp is integer milliseconds (`TimeMs
+int32`, accessor `EventTimeMs()`); no derived event carries a
+float-seconds `Time`. The analytics layer consumes these ms directly —
+`events.Sec(ms)` is only for human-readable formatting. The value of
+this over "compare prevHealth vs. health at each 50 ms sample" is the
+**instant-respawn** case: a player gibbed deep-negative (e.g. `health = -60`) can be respawned in the same 50 ms window (KTX forcerespawn on gib), and sample-based detection would see `prevHealth = 100, health = 100` at the next boundary and miss both transitions. The parser, looking at every stat update as it arrives, catches the `100 → -60` and `-60 → 100` pair independently.
 
 Consumers that want **killer / weapon attribution** still go to the obituary parser (see [Obituary Messages (Frag Detection)](#obituary-messages-frag-detection) and [Obituary Message Patterns (KTX)](#obituary-message-patterns-ktx)) — attribution is KTX-mod-specific text parsing, not a protocol signal.
 

@@ -80,7 +80,7 @@ func (a *FragAnalyzer) OnEvent(event events.Event) error {
 		a.timing.OnPrint(e)
 		a.handleObituaryPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.DeathEvent:
 		// Count authoritative deaths during the match. KTX bumps
 		// targ->deaths for every death (ktx/src/client.c:5124), but
@@ -115,7 +115,7 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 		return
 	}
 
-	frag := a.parseObituary(e.Message, e.Time)
+	frag := a.parseObituary(e.Message, e.TimeMs)
 	if frag == nil {
 		return
 	}
@@ -350,13 +350,13 @@ func isGenericPlayer(name string) bool {
 // old per-checker code did — IsSuicide comes straight from the parse, and a
 // non-phrasing kill's teamkill flag is decided by the team-membership test
 // against ctx.Players.
-func (a *FragAnalyzer) parseObituary(msg string, time float64) *FragEntry {
+func (a *FragAnalyzer) parseObituary(msg string, timeMs int32) *FragEntry {
 	o := parseObituaryLine(msg)
 	if o == nil {
 		return nil
 	}
 	f := &FragEntry{
-		Time:      msTime(time),
+		Time:      timeMs,
 		Killer:    o.Killer,
 		Victim:    o.Victim,
 		Weapon:    o.Weapon,

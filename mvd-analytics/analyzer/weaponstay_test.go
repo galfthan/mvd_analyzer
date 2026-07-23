@@ -68,40 +68,40 @@ func TestPosTrackerMinDistSqIn(t *testing.T) {
 		t.Fatal("empty tracker should report no sample")
 	}
 
-	p.Record(0, [3]float32{0, 0, 0}, 1.0)   // dist² = 10000
-	p.Record(0, [3]float32{90, 0, 0}, 1.2)  // dist² = 100
-	p.Record(0, [3]float32{500, 0, 0}, 1.4) // dist² = 160000
+	p.Record(0, [3]float32{0, 0, 0}, 1000)   // dist² = 10000
+	p.Record(0, [3]float32{90, 0, 0}, 1200)  // dist² = 100
+	p.Record(0, [3]float32{500, 0, 0}, 1400) // dist² = 160000
 
-	d, ok := p.MinDistSqIn(0, 0.9, 1.5, target)
+	d, ok := p.MinDistSqIn(0, 900, 1500, target)
 	if !ok || d != 100 {
 		t.Fatalf("MinDistSqIn = (%v, %v), want (100, true)", d, ok)
 	}
 
 	// Window excludes the near sample → the min comes from what's left.
-	d, ok = p.MinDistSqIn(0, 1.3, 1.5, target)
+	d, ok = p.MinDistSqIn(0, 1300, 1500, target)
 	if !ok || d != 160000 {
 		t.Fatalf("MinDistSqIn = (%v, %v), want (160000, true)", d, ok)
 	}
 
 	// Window with no samples at all.
-	if _, ok := p.MinDistSqIn(0, 2.0, 3.0, target); ok {
+	if _, ok := p.MinDistSqIn(0, 2000, 3000, target); ok {
 		t.Fatal("window past all samples should report no sample")
 	}
 
 	// Other slot untouched.
-	if _, ok := p.MinDistSqIn(1, 0, 2, target); ok {
+	if _, ok := p.MinDistSqIn(1, 0, 2000, target); ok {
 		t.Fatal("unknown slot should report no sample")
 	}
 }
 
 func TestPosTrackerPrunesOldSamples(t *testing.T) {
 	var p posTracker
-	p.Record(0, [3]float32{1, 0, 0}, 1.0)
-	p.Record(0, [3]float32{2, 0, 0}, 5.0) // prunes everything older than 4.0
-	if _, ok := p.MinDistSqIn(0, 0.5, 1.5, [3]float32{0, 0, 0}); ok {
+	p.Record(0, [3]float32{1, 0, 0}, 1000)
+	p.Record(0, [3]float32{2, 0, 0}, 5000) // prunes everything older than 4000
+	if _, ok := p.MinDistSqIn(0, 500, 1500, [3]float32{0, 0, 0}); ok {
 		t.Fatal("sample older than the 1s horizon should have been pruned")
 	}
-	if _, ok := p.MinDistSqIn(0, 4.5, 5.5, [3]float32{0, 0, 0}); !ok {
+	if _, ok := p.MinDistSqIn(0, 4500, 5500, [3]float32{0, 0, 0}); !ok {
 		t.Fatal("recent sample should survive pruning")
 	}
 }

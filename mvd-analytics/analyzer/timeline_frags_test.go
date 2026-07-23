@@ -34,31 +34,31 @@ func TestFragUpdate_ReconnectRebasesScore(t *testing.T) {
 	a.timing.Started = true
 
 	feed := func(ev events.Event) { _ = a.OnEvent(ev) }
-	userinfo := func(slot, uid int, name string, tt float64) {
+	userinfo := func(slot, uid int, name string, tMs int32) {
 		feed(&events.UserInfoEvent{Player: &events.PlayerInfo{
 			Slot: slot, UserID: uid, Name: name, Team: "jah",
-		}, Time: tt})
+		}, TimeMs: tMs})
 	}
-	frag := func(slot, frags int, tt float64) {
-		feed(&events.FragUpdateEvent{PlayerNum: slot, Frags: frags, Time: tt})
+	frag := func(slot, frags int, tMs int32) {
+		feed(&events.FragUpdateEvent{PlayerNum: slot, Frags: frags, TimeMs: tMs})
 	}
 
 	// First half: rusti on slot 7, 16 kills.
 	userinfo(7, 8, "rusti", 0)
 	for f := 1; f <= 16; f++ {
-		frag(7, f, float64(f))
+		frag(7, f, int32(f)*1000)
 	}
 
 	// A spectator already holds slot 2; then rusti reconnects onto it with
 	// a new userid. The userid change after match start is the handoff
 	// signal.
-	userinfo(2, 13, "Evil_ua", 600)
-	userinfo(2, 14, "rusti", 613)
+	userinfo(2, 13, "Evil_ua", 600000)
+	userinfo(2, 14, "rusti", 613000)
 
 	// KTX restores the 16-frag total, then two real kills.
-	frag(2, 16, 613) // restore — must NOT emit and must rebase to 16
-	frag(2, 17, 629)
-	frag(2, 18, 631)
+	frag(2, 16, 613000) // restore — must NOT emit and must rebase to 16
+	frag(2, 17, 629000)
+	frag(2, 18, 631000)
 
 	n7, sum7 := sumDeltasForSlot(a, 7)
 	if n7 != 16 || sum7 != 16 {
@@ -84,14 +84,14 @@ func TestFragUpdate_TransientCorruptionStillRejected(t *testing.T) {
 	a := NewTimelineAnalyzer()
 	a.timing.Started = true
 	feed := func(ev events.Event) { _ = a.OnEvent(ev) }
-	feed(&events.UserInfoEvent{Player: &events.PlayerInfo{Slot: 3, UserID: 42, Name: "p", Team: "red"}, Time: 0})
+	feed(&events.UserInfoEvent{Player: &events.PlayerInfo{Slot: 3, UserID: 42, Name: "p", Team: "red"}, TimeMs: 0})
 
 	// Climb to 9 the honest way (+1 each), so the baseline is legitimately 9.
 	for f := 1; f <= 9; f++ {
-		feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: f, Time: float64(f)})
+		feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: f, TimeMs: int32(f) * 1000})
 	}
-	feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: 272, Time: 100}) // garbage: rejected, baseline held at 9
-	feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: 10, Time: 101})  // +1 from the held 9: accepted
+	feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: 272, TimeMs: 100000}) // garbage: rejected, baseline held at 9
+	feed(&events.FragUpdateEvent{PlayerNum: 3, Frags: 10, TimeMs: 101000})  // +1 from the held 9: accepted
 
 	n, sum := sumDeltasForSlot(a, 3)
 	if n != 10 || sum != 10 {

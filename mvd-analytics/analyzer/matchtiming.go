@@ -25,8 +25,8 @@ import (
 type MatchTimingDetector struct {
 	Started   bool
 	Ended     bool
-	StartTime float64
-	EndTime   float64
+	StartTime int32 // demo-clock ms of the match-start print
+	EndTime   int32 // demo-clock ms of the match-end print / intermission (0 if unseen)
 }
 
 // matchStartPatterns is the canonical Layer 1 table (events.MatchStartPatterns),
@@ -61,7 +61,7 @@ func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
 		for _, p := range matchStartPatterns {
 			if strings.Contains(msg, p) {
 				d.Started = true
-				d.StartTime = e.Time
+				d.StartTime = e.TimeMs
 				return
 			}
 		}
@@ -73,7 +73,7 @@ func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
 	for _, p := range matchEndPatterns {
 		if strings.Contains(msg, p) {
 			d.Ended = true
-			d.EndTime = e.Time
+			d.EndTime = e.TimeMs
 			return
 		}
 	}
@@ -83,9 +83,20 @@ func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
 // svc_intermission. KTX emits this on timelimit/fraglimit hit even when
 // there is no matching bprint string, so it is a more reliable end
 // signal than print-keyword scanning alone.
-func (d *MatchTimingDetector) OnIntermission(t float64) {
+func (d *MatchTimingDetector) OnIntermission(tMs int32) {
 	if d.Started && !d.Ended {
 		d.Ended = true
-		d.EndTime = t
+		d.EndTime = tMs
 	}
+}
+
+// EffectiveEndMs returns the match end on the demo clock (ms): the detector's
+// explicit EndTime, or the supplied fallback — the latest in-match position
+// sample — when the demo was cut before intermission (F13). Shared by the
+// clock and the timeline so both close intervals at the same instant.
+func (d *MatchTimingDetector) EffectiveEndMs(fallbackMs int32) int32 {
+	if !d.Ended {
+		return fallbackMs
+	}
+	return d.EndTime
 }
