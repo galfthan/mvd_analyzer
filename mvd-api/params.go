@@ -65,61 +65,39 @@ func parseBool(q url.Values, key string) bool {
 	return false
 }
 
-// parseLocIndex reads ?loc=name|index. Empty or "name" → false
-// (resolved loc names, the default); "index" → true (raw LocTable
-// indices, decode via /loc-table). Any other value is an error.
-func parseLocIndex(q url.Values) (bool, error) {
-	switch strings.ToLower(strings.TrimSpace(ciGet(q, "loc"))) {
-	case "", "name", "names":
-		return false, nil
-	case "index", "indices", "li":
-		return true, nil
-	default:
-		return false, fmt.Errorf("invalid loc=%q (want 'name' or 'index')", ciGet(q, "loc"))
+// parseEnum reads a closed-vocabulary string param (loc/layout/dmg/regions).
+// The raw value is TrimSpace+lowercased, then: empty → def (the param's absent
+// default); a spelling present in canon → its canonical value (canon folds
+// aliases, e.g. "li"→"index"); anything else → an error "invalid <key>=%q
+// (<wantMsg>)" carrying the ORIGINAL-case value. One mechanism for the four
+// enum params; each qp accessor pins its own canon table + wantMsg.
+func parseEnum(q url.Values, key, def string, canon map[string]string, wantMsg string) (string, error) {
+	if v := strings.ToLower(strings.TrimSpace(ciGet(q, key))); v == "" {
+		return def, nil
+	} else if c, ok := canon[v]; ok {
+		return c, nil
 	}
+	return "", fmt.Errorf("invalid %s=%q (%s)", key, ciGet(q, key), wantMsg)
 }
 
-// parseLayout reads ?layout=row|column. Empty → "column" (the compact
-// column-major ColumnarBuckets, the default); "row" → the bucket-major
-// BucketsView. Any other value is an error.
-func parseLayout(q url.Values) (string, error) {
-	switch strings.ToLower(strings.TrimSpace(ciGet(q, "layout"))) {
-	case "", "column", "columnar":
-		return "column", nil
-	case "row":
-		return "row", nil
-	default:
-		return "", fmt.Errorf("invalid layout=%q (want 'row' or 'column')", ciGet(q, "layout"))
-	}
-}
-
-// parseDmg reads ?dmg=raw|bounded|both. Empty → "" (the handler resolves the
-// default: "bounded", for both summary and full-log requests). Any
-// other value is an error.
-func parseDmg(q url.Values) (string, error) {
-	v := strings.ToLower(strings.TrimSpace(ciGet(q, "dmg")))
-	switch v {
-	case "", "raw", "bounded", "both":
-		return v, nil
-	}
-	return "", fmt.Errorf("invalid dmg=%q (want 'raw', 'bounded' or 'both')", ciGet(q, "dmg"))
-}
-
-// parseRegions reads ?regions=full|summary|none. Empty → "full" (the default,
-// backward-compatible: the full ControlRegion list including polygon Points).
-// "summary" keeps each region's name/locs/centroids but strips its Points
-// polygon; "none" omits the regions list entirely. Any other value is an error.
-func parseRegions(q url.Values) (string, error) {
-	switch strings.ToLower(strings.TrimSpace(ciGet(q, "regions"))) {
-	case "", "full":
-		return "full", nil
-	case "summary":
-		return "summary", nil
-	case "none":
-		return "none", nil
-	}
-	return "", fmt.Errorf("invalid regions=%q (want 'full', 'summary' or 'none')", ciGet(q, "regions"))
-}
+// The canon tables for the four enum params. Keys are the accepted lower-case
+// spellings (aliases included); values are the canonical token each resolves
+// to. The absent default is passed separately (parseEnum's def) so it need not
+// appear here.
+var (
+	// loc: name (resolved loc names, the default) vs index (raw LocTable
+	// indices, decode via /loc-table).
+	locCanon = map[string]string{"name": "name", "names": "name", "index": "index", "indices": "index", "li": "index"}
+	// layout: column-major ColumnarBuckets (default) vs the bucket-major
+	// BucketsView.
+	layoutCanon = map[string]string{"column": "column", "columnar": "column", "row": "row"}
+	// dmg: raw | bounded | both (empty → "", the handler resolves the default
+	// to "bounded" for both summary and full-log requests).
+	dmgCanon = map[string]string{"raw": "raw", "bounded": "bounded", "both": "both"}
+	// regions: full (default; the full ControlRegion list with polygon Points)
+	// | summary (name/locs/centroids kept, Points stripped) | none (list omitted).
+	regionsCanon = map[string]string{"full": "full", "summary": "summary", "none": "none"}
+)
 
 // parseReducers parses a comma-separated list of "field=name" pairs.
 // Empty → nil. Malformed → error.
@@ -192,6 +170,14 @@ func (p *qp) Str(key string) string {
 // ignored legacy params (e.g. `nails` on /shots) and zero-param endpoints
 // that want a specific param whitelisted. One mechanism, no separate helper.
 func (p *qp) Accept(keys ...string) { p.mark(keys...) }
+
+// Present reports whether key appears in the query string with a non-empty
+// value (case-insensitively, matching ciGet's resolution). It does NOT mark
+// the key as consumed — only the value accessor that reads it does — so a
+// handler uses Present purely to tell an explicit value apart from an absent
+// one (an explicit limit=0 / windowMs=0 vs an omitted param) alongside the
+// normal accessor, which still parses the value and records the key.
+func (p *qp) Present(key string) bool { return ciGet(p.q, key) != "" }
 
 // Unknown reports the first query key (sorted) whose lowercase form was not
 // consumed by any accessor and is not globally allowed, naming the offender
@@ -292,58 +278,42 @@ func (p *qp) Bool(key string) bool {
 	return parseBool(p.q, key)
 }
 
-// LocIndex reads ?loc=name|index. No-op after a prior error.
-func (p *qp) LocIndex() bool {
-	p.mark("loc")
+// enum reads a closed-vocabulary string param through parseEnum: it marks the
+// key, no-ops (returning def) after a prior error, and records the first parse
+// error. The four enum accessors below are one-liners over it.
+func (p *qp) enum(key, def string, canon map[string]string, wantMsg string) string {
+	p.mark(key)
 	if p.err != nil {
-		return false
+		return def
 	}
-	v, err := parseLocIndex(p.q)
+	v, err := parseEnum(p.q, key, def, canon, wantMsg)
 	if err != nil {
 		p.err = err
 	}
 	return v
 }
 
+// LocIndex reads ?loc=name|index (empty → false, resolved names). No-op after
+// a prior error.
+func (p *qp) LocIndex() bool {
+	return p.enum("loc", "name", locCanon, "want 'name' or 'index'") == "index"
+}
+
 // Layout reads ?layout=row|column (empty → "column"). No-op after error.
 func (p *qp) Layout() string {
-	p.mark("layout")
-	if p.err != nil {
-		return "column"
-	}
-	v, err := parseLayout(p.q)
-	if err != nil {
-		p.err = err
-	}
-	return v
+	return p.enum("layout", "column", layoutCanon, "want 'row' or 'column'")
 }
 
 // Dmg reads ?dmg=raw|bounded|both (empty → "", the handler resolves the
 // default to "bounded"). No-op after a prior error.
 func (p *qp) Dmg() string {
-	p.mark("dmg")
-	if p.err != nil {
-		return ""
-	}
-	v, err := parseDmg(p.q)
-	if err != nil {
-		p.err = err
-	}
-	return v
+	return p.enum("dmg", "", dmgCanon, "want 'raw', 'bounded' or 'both'")
 }
 
 // Regions reads ?regions=full|summary|none (empty → "full"). No-op after a
 // prior error.
 func (p *qp) Regions() string {
-	p.mark("regions")
-	if p.err != nil {
-		return "full"
-	}
-	v, err := parseRegions(p.q)
-	if err != nil {
-		p.err = err
-	}
-	return v
+	return p.enum("regions", "full", regionsCanon, "want 'full', 'summary' or 'none'")
 }
 
 // Reducers reads the "field=name,..." reducer-override param. No-op after

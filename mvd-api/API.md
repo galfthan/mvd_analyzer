@@ -210,7 +210,8 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   ⚠️ **Defaults to 50 ms when omitted** — on a 20-minute match that is
   ~24,000 windows per field per player. Always pass an explicit
   `windowMs` sized to your question (the hosted MCP layer injects 5000).
-  All time params are ms: `windowMs`, `from`, and `to` alike.
+  All time params are ms: `windowMs`, `from`, and `to` alike. An explicit
+  `windowMs=0` is rejected with `400 invalid_param` (omit it for the default).
 - **There is deliberately no `limit`/`offset` pagination** on the
   per-demo endpoints: the data is time-series, so the size controls are
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
@@ -303,7 +304,7 @@ Non-2xx responses use a stable envelope:
 | HTTP | `code` | Meaning |
 |---|---|---|
 | 400 | `invalid_demo_id` | malformed `{id}` |
-| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, an unknown enum value (e.g. `/events`/`/chat` `types`), or a `weapons` token outside the endpoint's closed vocabulary |
+| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, an unknown enum value (e.g. `/events`/`/chat` `types`), a `weapons` token outside the endpoint's closed vocabulary, an out-of-range `limit`/`offset` (or explicit `limit=0`), or an explicit `windowMs=0` |
 | 400 | `unknown_param` | an unrecognised query parameter **name** — the message names the offending key and the endpoint's accepted keys. The global `label` traffic-source tag is accepted everywhere |
 | 400 | `missing_param` | required param absent (e.g. `time` on `/state-at`) |
 | 401 | `unauthorized` | **auth mode only** — missing / invalid / revoked API key on a protected route. Carries `WWW-Authenticate: Bearer`. The body is deliberately generic and never says whether the key was absent vs revoked (see §2.5). |

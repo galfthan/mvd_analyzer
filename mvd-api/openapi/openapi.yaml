@@ -1680,7 +1680,8 @@ components:
         Window size, integer MILLISECONDS. ⚠️ Defaults to 50 ms — on a
         20-minute match that is ~24,000 windows per field per player.
         Always pass a windowMs sized to your question. All time params are
-        ms: windowMs, from, and to alike.
+        ms: windowMs, from, and to alike. Omit it for the default; an
+        explicit windowMs=0 is rejected with 400 invalid_param.
       schema:
         type: integer
         default: 50

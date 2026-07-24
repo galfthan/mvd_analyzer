@@ -1104,6 +1104,29 @@ func TestBuckets_BadLayout(t *testing.T) {
 	}
 }
 
+// TestBuckets_WindowMsZero pins the HTTP-boundary rejection of an explicit
+// windowMs=0 (400 invalid_param with the omit-hint); an OMITTED windowMs keeps
+// the default 50 (200). The view-level <=0 → 50 coercion is unchanged — this is
+// only the HTTP surface.
+func TestBuckets_WindowMsZero(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=0&fields=h,a")
+	if status != 400 {
+		t.Fatalf("windowMs=0 status = %d; want 400 (body=%s)", status, body)
+	}
+	if code := errBodyCode(t, body); code != "invalid_param" {
+		t.Errorf("windowMs=0 code = %q, want invalid_param", code)
+	}
+	if !strings.Contains(string(body), "omit it for the default 50") {
+		t.Errorf("windowMs=0 body missing omit-hint: %s", body)
+	}
+	// Absent windowMs still serves the default 50 → 200.
+	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?fields=h,a"); status != 200 {
+		t.Errorf("absent windowMs status = %d; want 200", status)
+	}
+}
+
 func TestEvents_Default(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
@@ -1689,6 +1712,29 @@ func TestRegionControl_RegionsParam(t *testing.T) {
 	// The stored Result's polygon points must be intact after the summary read.
 	if pts := store.byID["gameId:42"].TimelineAnalysis.RegionControl.Regions[0].Points; len(pts) != 1 {
 		t.Errorf("stored Result regions were mutated: points=%v", pts)
+	}
+}
+
+// TestRegionControl_WindowMsZero pins the HTTP-boundary rejection of an explicit
+// windowMs=0 (400 invalid_param with the omit-hint); an OMITTED windowMs keeps
+// the default 50 (200). Param hygiene runs before the availability check, so a
+// windowMs=0 on a region-bearing demo 400s here.
+func TestRegionControl_WindowMsZero(t *testing.T) {
+	srv := newTestServer(t, storeWithRegions())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/region-control?windowMs=0")
+	if status != 400 {
+		t.Fatalf("windowMs=0 status = %d; want 400 (body=%s)", status, body)
+	}
+	if code := errBodyCode(t, body); code != "invalid_param" {
+		t.Errorf("windowMs=0 code = %q, want invalid_param", code)
+	}
+	if !strings.Contains(string(body), "omit it for the default 50") {
+		t.Errorf("windowMs=0 body missing omit-hint: %s", body)
+	}
+	// Absent windowMs still serves the default 50 → 200.
+	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/region-control"); status != 200 {
+		t.Errorf("absent windowMs status = %d; want 200", status)
 	}
 }
 

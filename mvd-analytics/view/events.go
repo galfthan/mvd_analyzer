@@ -1,7 +1,6 @@
 package view
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -74,32 +73,20 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	if r == nil {
 		return &EventsView{Events: []TaggedEvent{}}, nil
 	}
+	// Enum values are case-insensitive, matching every other token filter
+	// (players/weapons/loc). An explicit list is validated through the shared
+	// validateEnum so a typo returns the ErrInvalidFilter 400 message instead of
+	// silently matching nothing (the silent-enum gap); the want-map keys are
+	// then lowercased+trimmed so they line up with the lowercase vocabulary.
 	types := filter.Types
 	if len(types) == 0 {
 		types = defaultEventTypes
-	} else {
-		// Enum values are case-insensitive, matching every other token
-		// filter (players/weapons/loc): lowercase before validating AND
-		// before use so the want-map keys line up with the lowercase
-		// KnownEventTypes vocabulary. An explicit list is validated so a
-		// typo 400s instead of silently matching nothing (the silent-enum gap).
-		known := make(map[string]bool, len(KnownEventTypes))
-		for _, t := range KnownEventTypes {
-			known[t] = true
-		}
-		lowered := make([]string, len(types))
-		for i, t := range types {
-			lt := strings.ToLower(t)
-			if !known[lt] {
-				return nil, fmt.Errorf("unknown event type %q; valid: %s", t, strings.Join(KnownEventTypes, ", "))
-			}
-			lowered[i] = lt
-		}
-		types = lowered
+	} else if err := validateEnum(types, KnownEventTypes, "event type"); err != nil {
+		return nil, err
 	}
 	want := make(map[string]bool, len(types))
 	for _, t := range types {
-		want[t] = true
+		want[strings.ToLower(strings.TrimSpace(t))] = true
 	}
 	pf := newPlayerFilter(filter.Players)
 	// Pure-ms model (schema v57): filter bounds, stream times, and the
