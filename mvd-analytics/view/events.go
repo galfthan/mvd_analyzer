@@ -638,3 +638,13 @@ func inferMatchEnd(r *result.Result) int32 {
 	}
 	return 0
 }
+
+// matchEndMs resolves the match-end instant (int32 ms): the stream global
+// when present, else inferMatchEnd. Used to recognise an explicit whole-match
+// to= window as unfiltered.
+func matchEndMs(r *result.Result) int32 {
+	if r.Streams != nil && r.Streams.Global.MatchEnd != 0 {
+		return r.Streams.Global.MatchEnd
+	}
+	return inferMatchEnd(r)
+}

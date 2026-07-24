@@ -242,7 +242,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/streams/nails` | — | `{ "nails": ProjectileStreams\|null }` — ng/sng spike flights, from the always-full base parse |
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
-| GET | `/v1/demos/{id}/region-control` | `windowMs` | `result.RegionControlResult` |
+| GET | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions` | `result.RegionControlResult` |
 | GET | `/v1/demos/{id}/airgibs` | — | `{timeUnit, airgibs: []result.AirgibEvent}` (Key Moments: direct rocket hits on airborne victims, height-sorted; empty without the map BSP) |
 | GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |

@@ -948,6 +948,17 @@ func TestOverviewMapTitle(t *testing.T) {
 	if ov.Map != "dm6" || ov.MapTitle != "" {
 		t.Errorf("degraded map/mapTitle = %q/%q; want dm6/\"\" (fallback to Match.Map)", ov.Map, ov.MapTitle)
 	}
+
+	// Case-only difference (demoinfo "aerowalk" vs BSP LevelName "Aerowalk"):
+	// same map, so mapTitle is elided (case-insensitive compare).
+	caseOnly := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "aerowalk"},
+		Match:    &result.MatchResult{Map: "Aerowalk"},
+	}
+	ov = BuildOverview(caseOnly)
+	if ov.Map != "aerowalk" || ov.MapTitle != "" {
+		t.Errorf("case-only map/mapTitle = %q/%q; want aerowalk/\"\" (title elided on case-only diff)", ov.Map, ov.MapTitle)
+	}
 }
 
 // TestOverviewTiming checks that BuildOverview surfaces the wall-clock anchor
@@ -1844,6 +1855,58 @@ func TestDamage_FullAndFilters(t *testing.T) {
 	if st, _ := sw["stomps"].([]any); len(st) != 1 {
 		t.Errorf("weapon=stomp stomps = %d, want 1", len(st))
 	}
+}
+
+// TestDamage_WholeMatchWindow pins that an explicit to= window covering the
+// whole match is NOT a restrictive filter: it takes the unfiltered fast path,
+// so the scoreboard survives and the body is byte-identical to the no-window
+// request (incident: an explicit to=matchEnd must not degrade the response).
+func TestDamage_WholeMatchWindow(t *testing.T) {
+	r := damageResult()
+	r.Streams = &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 200000}}
+	r.Damage.Scoreboard = &result.DamageReconciliation{
+		ByPlayer: map[string]*result.DamageDelta{
+			"alpha": {StreamGiven: 200, ScoreGiven: 200},
+			"bravo": {StreamGiven: 100, ScoreGiven: 100},
+		},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	// dmg=raw keeps the machinery deterministic (no bounded reconstruction on
+	// this fixture); the fast-path change is what's under test.
+	unfiltered := getJSON(t, srv.URL+"/v1/demos/gameId:42/damage?dmg=raw", 200)
+	if _, ok := unfiltered["scoreboard"]; !ok {
+		t.Fatalf("unfiltered: scoreboard missing")
+	}
+	// to=matchEnd must behave identically — scoreboard present, same body.
+	windowed, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/damage?dmg=raw&to=200000")
+	if status != 200 {
+		t.Fatalf("to=matchEnd status = %d; want 200 (body=%s)", status, windowed)
+	}
+	var win map[string]any
+	if err := json.Unmarshal(windowed, &win); err != nil {
+		t.Fatalf("to=matchEnd decode: %v (body=%s)", err, windowed)
+	}
+	if _, ok := win["scoreboard"]; !ok {
+		t.Fatalf("to=matchEnd: scoreboard omitted; a whole-match window must not degrade the response")
+	}
+	ub, _ := json.Marshal(unfiltered)
+	if string(ub) != string(mustReencode(t, windowed)) {
+		t.Fatalf("to=matchEnd body != unfiltered body:\nfull= %s\nwin=  %s", ub, mustReencode(t, windowed))
+	}
+}
+
+// mustReencode round-trips a JSON body through map[string]any → bytes so it
+// can be compared key-order-independently with another re-encoded body.
+func mustReencode(t *testing.T, b []byte) []byte {
+	t.Helper()
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatalf("reencode: %v", err)
+	}
+	out, _ := json.Marshal(m)
+	return out
 }
 
 // --- CORS (F17) ---

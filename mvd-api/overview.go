@@ -2,6 +2,7 @@ package main
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
@@ -131,7 +132,11 @@ func BuildOverview(r *result.Result) Overview {
 		if ov.Map == "" {
 			ov.Map = r.Match.Map
 		}
-		if r.Match.Map != "" && r.Match.Map != ov.Map {
+		// Elide the title only on a case-only difference (demoinfo "aerowalk"
+		// vs BSP LevelName "Aerowalk"): those are the same map, not a distinct
+		// pretty title. A near-echo like "Bravado -" is deliberately NOT
+		// elided — case-only is the one fixed class we collapse.
+		if r.Match.Map != "" && !strings.EqualFold(r.Match.Map, ov.Map) {
 			ov.MapTitle = r.Match.Map
 		}
 		ov.GameDir = r.Match.GameDir

@@ -536,9 +536,11 @@ paths:
         enemyVsSg/enemyVsMid/enemyVsLg/enemyVsRl/enemyVsBoth, with
         ewep = lg+rl+both. Filters recompute aggregates like /frags. The
         `scoreboard` cross-check is a KTX whole-match figure with no per-event
-        provenance, so it CANNOT be recomputed against a `weapons` or `from`/`to`
-        window: it is narrowed by a players-only filter but OMITTED entirely once
-        a weapons or time-window filter is active. An unset
+        provenance, so it CANNOT be recomputed against a `weapons` or a
+        RESTRICTIVE time window: it is narrowed by a players-only filter but
+        OMITTED entirely once a `weapons` or a restrictive time filter is active
+        (an explicit `from`/`to` window covering the whole match counts as
+        unfiltered). An unset
         `dmg` defaults to `bounded` for both the summary and the full log; an
         unfiltered bounded/both SUMMARY sources its per-player bounded figures
         from the exact KTX end-of-match scoreboard when the demo carries
@@ -3016,7 +3018,7 @@ components:
             - "null"
             - array
         scoreboard:
-          description: "Stream-derived totals vs the KTX end-of-match scoreboard (diagnostic only). Whole-match, no per-event provenance: narrowed by a players-only filter, but omitted entirely when a weapons or from/to filter is active."
+          description: "Stream-derived totals vs the KTX end-of-match scoreboard (diagnostic only). Whole-match, no per-event provenance: narrowed by a players-only filter, but omitted entirely when a weapons or a RESTRICTIVE time filter is active (an explicit from/to window covering the whole match counts as unfiltered)."
           additionalProperties: false
           properties:
             byPlayer:

@@ -337,7 +337,16 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	players := toSet(opts.Players)
 	weapons := toLowerSet(opts.Weapons)
 
-	if len(players) == 0 && len(weapons) == 0 && opts.From == 0 && opts.To == 0 {
+	// An explicit whole-match window is not a restrictive filter: from<=0 with
+	// to either unset or at/after a KNOWN match end selects every in-match hit,
+	// so it must take the unfiltered fast path — otherwise to=matchEnd would
+	// drop the scoreboard and the KTX-exact bounded summary (incident: an
+	// explicit to=matchEnd must not degrade the response). When the match end
+	// is unknown (me==0) a non-zero to stays a genuine filter — we can't prove
+	// it covers the match.
+	me := matchEndMs(r)
+	unfilteredWindow := opts.From <= 0 && (opts.To == 0 || (me > 0 && opts.To >= me))
+	if len(players) == 0 && len(weapons) == 0 && unfilteredWindow {
 		// Unfiltered: serve the stored aggregates, transformed to the requested
 		// family. "both" (and raw on a bounded-less demo — nothing to strip) may
 		// alias the stored Result by reference; raw/bounded on a bounded-carrying

@@ -213,7 +213,7 @@ a `frag` event.
 | Matrix | `matrix` | []DamagePair (attacker→victim totals) |
 | Telefrags | `telefrags` | []PositionalKill (omitempty — instant kills, separate from damage) |
 | Stomps | `stomps` | []PositionalKill (omitempty — head-stomp kills, separate from damage) |
-| Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or `from`/`to` filter OMITS it entirely, since it cannot be recomputed against those filters) |
+| Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or a RESTRICTIVE time filter OMITS it entirely, since it cannot be recomputed against those filters; an explicit `from`/`to` window covering the whole match counts as unfiltered) |
 | Dmg | `dmg` | string (omitempty — family echo: `both` as stored, `bounded` from the view, absent on a raw view) |
 | BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:midair`/`skipped:instagib`/`skipped:dmgfrags`) |
 | BoundedSource | `boundedSource` | string (omitempty — provenance of a SUMMARY response's per-player bounded figures: `ktx` when substituted with KTX's exact end-of-match scoreboard totals, else `reconstructed`; set by the view ONLY on an unfiltered summary serving the bounded family — `dmg=bounded`/`dmg=both`; the stored Result never carries it) |

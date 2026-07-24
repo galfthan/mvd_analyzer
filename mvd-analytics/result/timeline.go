@@ -99,7 +99,7 @@ type ControlRegion struct {
 // "Armed" = carrying RL or LG. TeamA / TeamB name which match.teams[]
 // entry the encoding mapped to "A" and "B".
 type RegionControlResult struct {
-	Regions      []ControlRegion        `json:"regions"`
+	Regions      []ControlRegion        `json:"regions,omitempty"`
 	TeamA        string                 `json:"teamA,omitempty"`
 	TeamB        string                 `json:"teamB,omitempty"`
 	BucketStates map[string]string      `json:"bucketStates,omitempty"`

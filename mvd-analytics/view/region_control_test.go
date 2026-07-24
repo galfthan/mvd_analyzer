@@ -170,3 +170,76 @@ func TestRegionControlStatsSubGridPrecision(t *testing.T) {
 		t.Fatalf("blue1 never entered mid; should have no ByPlayer entry")
 	}
 }
+
+// TestRegionControlStatsCoarseSubWindow: a sub-window narrower than windowMs
+// rounds the display grid to zero buckets (from=60000&to=62000 at
+// windowMs=5000: (2000+2500)/5000 == 0). Stats are windowMs-independent, so
+// they must still be computed and equal the fine-grid stats over the same
+// sub-window; only bucketStates is absent.
+func TestRegionControlStatsCoarseSubWindow(t *testing.T) {
+	r := makeRegionResult()
+	sub := func(windowMs int) RegionControlOptions {
+		o := regionOpts(windowMs)
+		o.StartTime = 60000
+		o.EndTime = 62000
+		return o
+	}
+
+	fine, err := RegionControl(r, sub(50))
+	if err != nil {
+		t.Fatalf("RegionControl(50): %v", err)
+	}
+	coarse, err := RegionControl(r, sub(5000))
+	if err != nil {
+		t.Fatalf("RegionControl(5000): %v", err)
+	}
+
+	if coarse.Stats == nil {
+		t.Fatalf("coarse Stats nil; must be computed independent of the display grid")
+	}
+	if !reflect.DeepEqual(coarse.Stats, fine.Stats) {
+		t.Fatalf("coarse Stats != fine Stats:\ncoarse=%+v\nfine=  %+v", coarse.Stats, fine.Stats)
+	}
+	if len(coarse.BucketStates) != 0 {
+		t.Fatalf("coarse BucketStates = %v; want absent (grid rounds to 0 buckets)", coarse.BucketStates)
+	}
+	// Sanity: the fine grid over the same window does have buckets.
+	if len(fine.BucketStates["mid"]) == 0 {
+		t.Fatalf("fine BucketStates empty; windowMs=50 over [60000,62000) should have buckets")
+	}
+}
+
+// TestRegionControlNoMatchingPlayers: when no roster-mapped player has
+// positions in the window (v58's empty:100 case), stats are still present —
+// every region at Empty:100 with no ByPlayer — and bucketStates is all '_'
+// where the grid has buckets. The pre-fix `len(players)==0` early return
+// dropped the stats entirely.
+func TestRegionControlNoMatchingPlayers(t *testing.T) {
+	r := makeRegionResult()
+	opts := regionOpts(50)
+	opts.TeamOf = func(string) string { return "" } // nobody maps to a team
+
+	rc, err := RegionControl(r, opts)
+	if err != nil {
+		t.Fatalf("RegionControl: %v", err)
+	}
+	mid, ok := rc.Stats["mid"]
+	if !ok {
+		t.Fatalf("no stats for region mid; empty roster must still emit stats")
+	}
+	if mid.Empty != 100 {
+		t.Fatalf("region mid Empty = %.1f; want 100 (empty roster)", mid.Empty)
+	}
+	if mid.ByPlayer != nil {
+		t.Fatalf("region mid ByPlayer = %v; want nil (no player presence)", mid.ByPlayer)
+	}
+	bs, ok := rc.BucketStates["mid"]
+	if !ok || len(bs) == 0 {
+		t.Fatalf("bucketStates for mid missing/empty; windowMs=50 over [0,200000) has buckets")
+	}
+	for i := 0; i < len(bs); i++ {
+		if bs[i] != RegionStateEmpty {
+			t.Fatalf("bucketStates[%d] = %q; want '_' (empty roster)", i, bs[i])
+		}
+	}
+}

@@ -38,10 +38,10 @@ corpus was regenerated.
   `suicide` causes).
 - **Filtered `/damage` no longer ships the full-match scoreboard.**
   The KTX end-of-match cross-check has no per-event provenance, so it
-  cannot be recomputed against a `weapons` or `from`/`to` filter; it is
-  now omitted under those filters (players-only filtering still narrows
-  it as before) instead of riding whole-match totals along a small
-  filtered payload.
+  cannot be recomputed against a `weapons` or a *restrictive* time
+  filter; it is now omitted under those filters (players-only filtering
+  still narrows it as before) instead of riding whole-match totals along
+  a small filtered payload.
 - **MCP tool descriptions caught up with the surface.** The `getEvents`
   `types` description now lists the full 12-type default set (it had
   never learned `demomark`/`airgib`/`pause` — the runtime error was the
@@ -87,6 +87,16 @@ corpus was regenerated.
   defaults to `summary` (same divergent default as `getItems`; a
   defaulted response carries a `hint`) — pass `regions:'full'` for the
   points. The stored Result's regions are never mutated.
+
+A second code-review pass tightened the above: region-control `stats`
+are now computed independently of the display grid, so a coarse
+`windowMs` whose sub-window rounds to zero buckets — and the
+empty-roster case that used to yield `empty:100` rows — still return
+stats; an explicit whole-match `/damage` `to=` window is treated as
+unfiltered, so it keeps the scoreboard and the KTX-exact bounded
+summary instead of taking the recompute path; and the `mapTitle`
+elision is case-insensitive (`aerowalk` vs `Aerowalk` no longer emits a
+spurious title).
 
 Deferred from the audit (tracked, not shipped here): a warming/retry
 response for cold-start analysis timeouts, hub-side `limit=0`
