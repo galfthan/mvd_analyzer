@@ -2,217 +2,278 @@ package parser
 
 import "strings"
 
-// ObituaryPattern is one death-print marker. KTX's obituaries always
-// follow the form "<victim> <marker> [<killer suffix>]" — `Marker` is
-// the substring that identifies the obit kind; `Weapon` is the
-// canonical short code for downstream attribution (rl, lg, sg, …, plus
-// the synthetic "suicide", "water", "lava", "world", "fall", "squish",
-// "teamkill"); `Suicide` and `TeamKill` flag the variants the
-// FragAnalyzer needs to bucket separately.
+// This file hosts the single canonical obituary (death-print) table for
+// the whole project. The ground truth for the marker strings and their
+// weapon codes is the KTX server mod (ktx/src/client.c death-message
+// table). The table lives in Layer 1 (mvd-reader) and is consumed by two
+// sides:
 //
-// The list below is the single source of truth for victim-prefix
-// obituaries. Both this parser (to fire DeathEvent via maybeEmitDeath
-// when neither STAT_HEALTH nor DF_DEAD caught the transition) and the
-// FragAnalyzer downstream walk the same table — keeping them aligned
-// removes the silent drift risk of two parallel copies.
+//   - Layer 1, here: FindObituaryVictim projects the victim-prefix subset
+//     to recover a dying player's name for the parser's corroborating
+//     DeathEvent (print.go's maybeEmitDeath path). Only the *name* is used
+//     by the parser; the weapon/suicide/teamkill classification is carried
+//     for the benefit of Layer 2.
+//   - Layer 2, mvd-analytics/analyzer/obituary_parse.go: builds every frag
+//     and message matcher by filtering this table by Kind (analytics may
+//     import mvd-reader; the reverse is forbidden). That analyzer owns the
+//     killer-name resolution and the one bespoke splash parser (" ate N
+//     loads of X's buckshot"), which is not a marker→weapon mapping and so
+//     has no row here — everything that *is* a marker→classification
+//     mapping lives in this one table.
 //
-// Pattern order matters: more specific patterns precede their generic
-// supersets so the more informative attribution wins (e.g. " was
-// telefragged by his teammate" must be checked before " was telefragged
-// by "). The composite slice ObituaryVictimPatterns is the
-// canonically-ordered list a caller iterates left-to-right.
+// A previous cleanup left a comment here claiming the two sides already
+// shared one table; they did not, and the copies had drifted (" becomes
+// bored with life" resolved to "suicide" here vs "rl" in analytics; this
+// table lacked the killer-first, teamkill-killer, and CRMod/splash forms).
+// This is the real unification: analytics semantics are the reference
+// (the golden frag log pins them), so the values below are the analytics
+// values.
+
+// ObituaryKind classifies how the victim (and killer) name sits around a
+// marker, so each consumer knows how to extract the name(s).
+type ObituaryKind uint8
+
+const (
+	// ObituarySuicide: "<victim> <marker>" — self-kill; the victim is the
+	// whole prefix and there is no killer.
+	ObituarySuicide ObituaryKind = iota
+	// ObituaryKill: "<victim> <marker> <killer suffix>" — the victim is the
+	// prefix; the killer's name follows the marker (resolved by the
+	// analytics extractor from the trailing weapon suffix).
+	ObituaryKill
+	// ObituaryGibbed: like ObituaryKill, but the weapon depends on the
+	// trailing suffix ("'s rocket" → rl, "'s grenade" → gl). Kept a distinct
+	// kind so the analytics kill loop does not pin it to one weapon.
+	ObituaryGibbed
+	// ObituaryTeamkillVictim: "<victim> <marker>" phrasing teamkill that
+	// names only the victim; the killer is the generic "teammate".
+	ObituaryTeamkillVictim
+	// ObituaryTeamkillKiller: "<killer> <marker>" phrasing teamkill that
+	// names only the killer; the victim is the generic "teammate".
+	ObituaryTeamkillKiller
+	// ObituaryKillerFirst: "<killer> <marker> <victim>[<suffix>]" — the
+	// killer is the prefix and the victim follows the marker (bounded by
+	// Suffix when set, else the rest of the line).
+	ObituaryKillerFirst
+	// ObituaryInfix: "<marker><victim><suffix>" — the victim is bracketed by
+	// a fixed prefix (Marker) and Suffix (KTX's Satan's-power self-telefrag).
+	ObituaryInfix
+)
+
+// ObituaryPattern is one death-print marker with its classification.
+// `Marker` is the identifying substring; `Suffix` bounds the victim for
+// the infix / killer-first kinds (empty otherwise); `Weapon` is the
+// canonical short code for downstream attribution (rl, lg, sg, …, plus the
+// synthetic "suicide", "water", "lava", "world", "fall", "squish",
+// "tele", "teamkill", "unknown"); `Suicide` / `TeamKill` flag the variants
+// consumers bucket separately.
 type ObituaryPattern struct {
 	Marker   string
-	Weapon   string
-	Suicide  bool
-	TeamKill bool
-}
-
-// teamKillVictimObituaries are the "<victim> was X by his/her teammate"
-// forms — must be matched before the corresponding non-teammate kill
-// pattern so the more specific obit wins.
-var teamKillVictimObituaries = []ObituaryPattern{
-	{Marker: " was telefragged by his teammate", Weapon: "teamkill", TeamKill: true},
-	{Marker: " was telefragged by her teammate", Weapon: "teamkill", TeamKill: true},
-	{Marker: " was crushed by his teammate", Weapon: "teamkill", TeamKill: true},
-	{Marker: " was crushed by her teammate", Weapon: "teamkill", TeamKill: true},
-	{Marker: " was jumped by his teammate", Weapon: "teamkill", TeamKill: true},
-	{Marker: " was jumped by her teammate", Weapon: "teamkill", TeamKill: true},
-}
-
-// suicideObituaries: the player killed themselves. Self-RL, self-GL,
-// LG discharge in liquid, environmental damage (lava/slime/water/fall),
-// and the explicit `kill` console command. Every entry produces a
-// death and a respawn for the player.
-var suicideObituaries = []ObituaryPattern{
-	{Marker: " suicides", Weapon: "suicide", Suicide: true},
-
-	{Marker: " discovers blast radius", Weapon: "suicide", Suicide: true},
-	// KTX's catch-all self-kill (ktx/src/client.c:5254). Must precede the
-	// shorter " becomes bored with life" it contains, or that pattern
-	// would match first and leave "… somehow" stuck on the victim name.
-	{Marker: " somehow becomes bored with life", Weapon: "suicide", Suicide: true},
-	{Marker: " becomes bored with life", Weapon: "suicide", Suicide: true},
-
-	{Marker: " tries to put the pin back in", Weapon: "suicide", Suicide: true},
-
-	{Marker: " electrocutes himself", Weapon: "suicide", Suicide: true},
-	{Marker: " electrocutes herself", Weapon: "suicide", Suicide: true},
-	{Marker: " heats up the water", Weapon: "suicide", Suicide: true},
-	{Marker: " discharges into the water", Weapon: "suicide", Suicide: true},
-	{Marker: " discharges into the slime", Weapon: "suicide", Suicide: true},
-	{Marker: " discharges into the lava", Weapon: "suicide", Suicide: true},
-
-	{Marker: " sleeps with the fishes", Weapon: "water", Suicide: true},
-	{Marker: " sucks it down", Weapon: "water", Suicide: true},
-
-	{Marker: " gulped a load of slime", Weapon: "slime", Suicide: true},
-	{Marker: " can't exist on slime alone", Weapon: "slime", Suicide: true},
-
-	{Marker: " burst into flames", Weapon: "lava", Suicide: true},
-	{Marker: " turned into hot slag", Weapon: "lava", Suicide: true},
-	{Marker: " visits the Volcano God", Weapon: "lava", Suicide: true},
-
-	{Marker: " cratered", Weapon: "fall", Suicide: true},
-	{Marker: " fell to his death", Weapon: "fall", Suicide: true},
-	{Marker: " fell to her death", Weapon: "fall", Suicide: true},
-
-	{Marker: " was spiked", Weapon: "world", Suicide: true},
-	{Marker: " was zapped", Weapon: "world", Suicide: true},
-	{Marker: " ate a lavaball", Weapon: "world", Suicide: true},
-	{Marker: " blew up", Weapon: "world", Suicide: true},
-	{Marker: " was squished", Weapon: "squish", Suicide: true},
-	{Marker: " tried to leave", Weapon: "world", Suicide: true},
-
-	{Marker: " blew himself up", Weapon: "rl", Suicide: true},
-	{Marker: " blew herself up", Weapon: "rl", Suicide: true},
-	{Marker: " finds a way out", Weapon: "suicide", Suicide: true},
-
-	// KTX k_spawnicide variants (dtTELE4 — ktx/src/client.c:5164).
-	// Fire only when k_spawnicide is enabled; otherwise the server uses
-	// the regular " was telefragged by " pattern. Rare in pickup
-	// matches; common in some pug rulesets.
-	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Suicide: true},
-	{Marker: " got too close to the baby factory", Weapon: "tele", Suicide: true},
-	{Marker: " was fragged by poor life choices", Weapon: "tele", Suicide: true},
-}
-
-// killObituaries: another player killed the victim. Marker order
-// matches the KTX client.c death-type table; weapons follow KTX's
-// canonical short codes.
-var killObituaries = []ObituaryPattern{
-	{Marker: " was telefragged by ", Weapon: "tele"},
-
-	{Marker: " accepts ", Weapon: "lg"},
-	{Marker: " gets a natural disaster from ", Weapon: "lg"},
-	{Marker: " drains ", Weapon: "lg"},
-
-	{Marker: " rides ", Weapon: "rl"},
-	{Marker: " was brutalized by ", Weapon: "rl"},
-	{Marker: " was smeared by ", Weapon: "rl"},
-
-	{Marker: " eats ", Weapon: "gl"},
-
-	{Marker: " was body pierced by ", Weapon: "ng"},
-	{Marker: " was nailed by ", Weapon: "ng"},
-
-	{Marker: " was straw-cuttered by ", Weapon: "sng"},
-	{Marker: " was perforated by ", Weapon: "sng"},
-	{Marker: " was punctured by ", Weapon: "sng"},
-	{Marker: " was ventilated by ", Weapon: "sng"},
-
-	{Marker: " chewed on ", Weapon: "sg"},
-	{Marker: " was lead poisoned by ", Weapon: "sg"},
-	{Marker: " was instagibbed by ", Weapon: "sg"},
-
-	{Marker: " was ax-murdered by ", Weapon: "axe"},
-	{Marker: " was axed to pieces by ", Weapon: "axe"},
-
-	{Marker: " was hooked by ", Weapon: "hook"},
-
-	{Marker: " was railed by ", Weapon: "rail"},
-
-	{Marker: " softens ", Weapon: "stomp"},
-	{Marker: " tried to catch ", Weapon: "stomp"},
-	{Marker: " was literally stomped into particles by ", Weapon: "stomp"},
-	{Marker: " was jumped by ", Weapon: "stomp"},
-	{Marker: " was crushed by ", Weapon: "stomp"},
-
-	{Marker: " was killed by ", Weapon: "unknown"},
-	{Marker: " was fragged by ", Weapon: "unknown"},
-
-	// "was gibbed by" handled specially below — weapon depends on
-	// whether the suffix is "'s rocket" (rl) or "'s grenade" (gl).
-	{Marker: " was gibbed by ", Weapon: "rl"},
-
-	// CRMod-added obituary variants (kept here because servers running
-	// the CR ruleset still produce these strings; KTX retains them in
-	// the fragfile table). For each, the victim is the prefix before
-	// Marker; the suffix that disambiguates the weapon is handled in
-	// the analyzer's frag.go (parser-side only needs the victim).
-	{Marker: " was disembowled by ", Weapon: "sg"},             // CRMod misspelling [sic]; suffix "'s shotgun"
-	{Marker: " eats 2 scoops of ", Weapon: "ssg"},              // suffix "'s lead shot"
-	{Marker: " is shish-kebabed by ", Weapon: "rl"},            // suffix "'s rocket"
-	{Marker: " was blown to chunks by ", Weapon: "rl"},         // suffix "'s rocket" or "'s grenade" (disambiguate in analyzer)
-	{Marker: " gets intimate with ", Weapon: "gl"},             // suffix "'s grenade"
-	{Marker: " gets a warm fuzzy feeling from ", Weapon: "lg"}, // no suffix
-}
-
-// ObituaryVictimPatterns is the canonically-ordered union of every
-// victim-prefix obituary (team kills first to win the "telefragged by
-// his teammate" disambiguation, then suicides, then kills). Callers
-// scan left-to-right and accept the first match.
-var ObituaryVictimPatterns = func() []ObituaryPattern {
-	out := make([]ObituaryPattern, 0, len(teamKillVictimObituaries)+len(suicideObituaries)+len(killObituaries))
-	out = append(out, teamKillVictimObituaries...)
-	out = append(out, suicideObituaries...)
-	out = append(out, killObituaries...)
-	return out
-}()
-
-// ObituaryInfixPattern describes obit forms where the victim's name
-// sits between a fixed prefix and a fixed suffix rather than at the
-// start of the line. The canonical case is KTX's pentagram-deflection
-// telefrag: when a player tries to telefrag someone wearing pent, the
-// would-be telefragger dies and the obit is "Satan's power deflects
-// <victim>'s telefrag\n" (ktx/src/client.c:5143 — the death is
-// attributed to `targ`, i.e. the named player, with a frags -= 1
-// penalty). The victim-prefix scan would never pick that up, so it
-// rides on this separate list.
-type ObituaryInfixPattern struct {
-	Prefix   string
 	Suffix   string
 	Weapon   string
 	Suicide  bool
 	TeamKill bool
+	Kind     ObituaryKind
 }
 
-// ObituaryInfixPatterns is the canonical infix-form obit list. Kept
-// short: only patterns confirmed against KTX source go here. Mirrors
-// (with Weapon attribution) any matching pattern in the analyzer's
-// FragAnalyzer.
-var ObituaryInfixPatterns = []ObituaryInfixPattern{
-	{Prefix: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele"},
+// ObituaryPatterns is the canonical table. Order within a Kind is
+// load-bearing: more specific markers precede the generic supersets they
+// contain (e.g. " somehow becomes bored with life" before " becomes bored
+// with life"; " eats 2 scoops of " before " eats "). Do not reorder a
+// within-Kind run without re-checking the golden corpus.
+var ObituaryPatterns = []ObituaryPattern{
+	// --- Suicides (self-kill; victim is the whole prefix). --------------
+	// The /kill console command (dtSUICIDE, −2 frags).
+	{Marker: " suicides", Weapon: "suicide", Suicide: true, Kind: ObituarySuicide},
+
+	// Rocket Launcher self-damage.
+	{Marker: " discovers blast radius", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
+	// KTX catch-all self-kill of unknown cause (client.c:5254). Must precede
+	// the shorter " becomes bored with life" substring it contains; cause
+	// unknown, so it stays "suicide".
+	{Marker: " somehow becomes bored with life", Weapon: "suicide", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " becomes bored with life", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
+
+	// Grenade Launcher self-damage.
+	{Marker: " tries to put the pin back in", Weapon: "gl", Suicide: true, Kind: ObituarySuicide},
+
+	// Lightning Gun discharge self-damage.
+	{Marker: " electrocutes himself", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " electrocutes herself", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " heats up the water", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the water", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the slime", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the lava", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+
+	// Water drowning.
+	{Marker: " sleeps with the fishes", Weapon: "water", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " sucks it down", Weapon: "water", Suicide: true, Kind: ObituarySuicide},
+
+	// Slime.
+	{Marker: " gulped a load of slime", Weapon: "slime", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " can't exist on slime alone", Weapon: "slime", Suicide: true, Kind: ObituarySuicide},
+
+	// Lava.
+	{Marker: " burst into flames", Weapon: "lava", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " turned into hot slag", Weapon: "lava", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " visits the Volcano God", Weapon: "lava", Suicide: true, Kind: ObituarySuicide},
+
+	// Fall.
+	{Marker: " cratered", Weapon: "fall", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " fell to his death", Weapon: "fall", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " fell to her death", Weapon: "fall", Suicide: true, Kind: ObituarySuicide},
+
+	// Environmental (world).
+	{Marker: " was spiked", Weapon: "world", Suicide: true, Kind: ObituarySuicide},     // nails from world
+	{Marker: " was zapped", Weapon: "world", Suicide: true, Kind: ObituarySuicide},     // laser
+	{Marker: " ate a lavaball", Weapon: "world", Suicide: true, Kind: ObituarySuicide}, // fireball
+	{Marker: " blew up", Weapon: "world", Suicide: true, Kind: ObituarySuicide},        // explosive box
+	{Marker: " was squished", Weapon: "squish", Suicide: true, Kind: ObituarySuicide},  // squish
+	{Marker: " tried to leave", Weapon: "world", Suicide: true, Kind: ObituarySuicide}, // changelevel
+
+	// Legacy.
+	{Marker: " blew himself up", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " blew herself up", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " finds a way out", Weapon: "suicide", Suicide: true, Kind: ObituarySuicide},
+
+	// KTX k_spawnicide variants (client.c:5164, dtTELE4). Only emitted when
+	// k_spawnicide is enabled; counted as a suicide (KTX logfrag(targ, targ)).
+	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " got too close to the baby factory", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " was fragged by poor life choices", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+
+	// --- Kills (victim is the prefix; killer follows the marker). -------
+	// Telefrag (dtTELE1).
+	{Marker: " was telefragged by ", Weapon: "tele", Kind: ObituaryKill},
+
+	// Lightning Gun (dtLG_BEAM, dtLG_DIS).
+	{Marker: " accepts ", Weapon: "lg", Kind: ObituaryKill},                      // "accepts X's shaft"
+	{Marker: " gets a natural disaster from ", Weapon: "lg", Kind: ObituaryKill}, // quad gib
+	{Marker: " drains ", Weapon: "lg", Kind: ObituaryKill},                       // "drains X's batteries" (discharge kill)
+
+	// Rocket Launcher (dtRL).
+	{Marker: " rides ", Weapon: "rl", Kind: ObituaryKill},             // "rides X's rocket"
+	{Marker: " was brutalized by ", Weapon: "rl", Kind: ObituaryKill}, // quad gib variant
+	{Marker: " was smeared by ", Weapon: "rl", Kind: ObituaryKill},    // quad gib variant
+
+	// CRMod SSG ("X eats 2 scoops of Y's lead shot") must precede the generic
+	// GL " eats " below: strings.Index would otherwise hit the shorter
+	// " eats " first and mislabel the kill "gl".
+	{Marker: " eats 2 scoops of ", Weapon: "ssg", Kind: ObituaryKill}, // suffix "'s lead shot"
+
+	// Grenade Launcher (dtGL).
+	{Marker: " eats ", Weapon: "gl", Kind: ObituaryKill}, // "eats X's pineapple"
+
+	// Nailgun (dtNG) — before SNG.
+	{Marker: " was body pierced by ", Weapon: "ng", Kind: ObituaryKill},
+	{Marker: " was nailed by ", Weapon: "ng", Kind: ObituaryKill},
+
+	// Super Nailgun (dtSNG).
+	{Marker: " was straw-cuttered by ", Weapon: "sng", Kind: ObituaryKill}, // quad gib
+	{Marker: " was perforated by ", Weapon: "sng", Kind: ObituaryKill},
+	{Marker: " was punctured by ", Weapon: "sng", Kind: ObituaryKill},
+	{Marker: " was ventilated by ", Weapon: "sng", Kind: ObituaryKill},
+
+	// Shotgun (dtSG).
+	{Marker: " chewed on ", Weapon: "sg", Kind: ObituaryKill},            // "chewed on X's boomstick"
+	{Marker: " was lead poisoned by ", Weapon: "sg", Kind: ObituaryKill}, // gib
+	{Marker: " was instagibbed by ", Weapon: "sg", Kind: ObituaryKill},   // instagib mode
+
+	// Axe (dtAXE).
+	{Marker: " was ax-murdered by ", Weapon: "axe", Kind: ObituaryKill},
+	{Marker: " was axed to pieces by ", Weapon: "axe", Kind: ObituaryKill}, // instagib
+
+	// Grappling Hook (dtHOOK).
+	{Marker: " was hooked by ", Weapon: "hook", Kind: ObituaryKill},
+
+	// Rail Gun (sv_mod_frags.h, DMM8/TF).
+	{Marker: " was railed by ", Weapon: "rail", Kind: ObituaryKill},
+
+	// Stomp kills (dtSTOMP).
+	{Marker: " softens ", Weapon: "stomp", Kind: ObituaryKill}, // "X softens Y's fall"
+	{Marker: " tried to catch ", Weapon: "stomp", Kind: ObituaryKill},
+	{Marker: " was literally stomped into particles by ", Weapon: "stomp", Kind: ObituaryKill}, // instagib
+	{Marker: " was jumped by ", Weapon: "stomp", Kind: ObituaryKill},
+	{Marker: " was crushed by ", Weapon: "stomp", Kind: ObituaryKill},
+
+	// CRMod obituary variants. " was blown to chunks by " is shared rl/gl and
+	// is disambiguated by suffix in the analytics kill matcher.
+	{Marker: " was disembowled by ", Weapon: "sg", Kind: ObituaryKill},             // [sic] CRMod misspelling; suffix "'s shotgun"
+	{Marker: " is shish-kebabed by ", Weapon: "rl", Kind: ObituaryKill},            // suffix "'s rocket"
+	{Marker: " was blown to chunks by ", Weapon: "rl", Kind: ObituaryKill},         // suffix "'s rocket" — fixed up to gl when suffix is "'s grenade"
+	{Marker: " gets intimate with ", Weapon: "gl", Kind: ObituaryKill},             // suffix "'s grenade"
+	{Marker: " gets a warm fuzzy feeling from ", Weapon: "lg", Kind: ObituaryKill}, // no weapon suffix; rest is just the killer name
+
+	// Generic.
+	{Marker: " was killed by ", Weapon: "unknown", Kind: ObituaryKill},
+	{Marker: " was fragged by ", Weapon: "unknown", Kind: ObituaryKill},
+
+	// --- Gibbed-by (victim prefix; weapon depends on the suffix). -------
+	{Marker: " was gibbed by ", Weapon: "rl", Kind: ObituaryGibbed}, // "'s rocket" → rl, "'s grenade" → gl
+
+	// --- Phrasing teamkills naming only the victim. --------------------
+	// Must precede the non-team " was telefragged by " / " was crushed by "
+	// / " was jumped by " kill markers so those don't steal the line.
+	{Marker: " was telefragged by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was telefragged by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+
+	// --- Phrasing teamkills naming only the killer. --------------------
+	// " gets a frag for the other team" is a self-inflicted team frag; the
+	// analytics frag mapper tags it suicide until the real victim is
+	// recovered (recoverTeamkills).
+	{Marker: " gets a frag for the other team", Weapon: "teamkill", Suicide: true, TeamKill: true, Kind: ObituaryTeamkillKiller},
+	{Marker: " mows down a teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
+	{Marker: " squished a teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
+	{Marker: " checks his glasses", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
+	{Marker: " checks her glasses", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
+	{Marker: " loses another friend", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
+
+	// --- Killer-first kills ("killer <verb> victim"). ------------------
+	{Marker: " rips ", Suffix: " a new one", Weapon: "rl", Kind: ObituaryKillerFirst}, // "X rips Y a new one" (quad RL)
+	{Marker: " stomps ", Weapon: "stomp", Kind: ObituaryKillerFirst},                  // "X stomps Y"
+	{Marker: " squishes ", Weapon: "squish", Kind: ObituaryKillerFirst},               // "X squishes Y"
+
+	// --- Infix (victim bracketed by prefix + suffix). ------------------
+	// KTX pentagram-deflection self-telefrag (dtTELE2, client.c:5141): the
+	// would-be telefragger dies, booked as a suicide.
+	{Marker: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele", Suicide: true, Kind: ObituaryInfix},
 }
 
-// FindObituaryVictim scans `msg` against the canonical obituary
-// patterns. On the first match it returns the victim's display name
-// (everything in `msg` before the matched marker, with surrounding
-// whitespace trimmed) and a pointer to the matched pattern. Returns
-// ("", nil) when no obituary pattern fits.
+// obituaryVictimScan is the victim-prefix subset in the order
+// FindObituaryVictim must try it: phrasing teamkills first (so "<victim>
+// was telefragged by his teammate" wins over the shorter " was telefragged
+// by " kill marker), then suicides, then kills, then the gibbed-by form.
+// Killer-first and killer-named teamkill forms are excluded — their victim
+// is not the prefix, so the parser (which needs the victim) never derives a
+// death from them; analytics handles those directly.
+var obituaryVictimScan = func() []ObituaryPattern {
+	var out []ObituaryPattern
+	for _, k := range []ObituaryKind{ObituaryTeamkillVictim, ObituarySuicide, ObituaryKill, ObituaryGibbed} {
+		for i := range ObituaryPatterns {
+			if ObituaryPatterns[i].Kind == k {
+				out = append(out, ObituaryPatterns[i])
+			}
+		}
+	}
+	return out
+}()
+
+// FindObituaryVictim scans `msg` against the canonical obituary patterns
+// and, on the first match, returns the victim's display name (the text
+// before the matched marker, trimmed) and a pointer to the matched pattern.
+// Returns ("", nil) when no pattern fits.
 //
-// Callers that need only "did somebody die" can ignore the pattern
-// pointer; callers building a frag log read Weapon / Suicide / TeamKill
-// off the returned pattern.
-//
-// Lookups are tried in order: victim-prefix first (the bulk of KTX's
-// fragfile lines), then infix patterns (Satan's-deflection-style
-// obits where the victim is bracketed by a fixed prefix and suffix).
-// Infix matches are synthesized into a returned *ObituaryPattern so
-// callers don't need to branch on which list matched.
+// Callers that need only "did somebody die" can ignore the pattern pointer.
+// Victim-prefix patterns are tried first (the bulk of KTX's fragfile
+// lines), then infix patterns (Satan's-deflection obits where the victim is
+// bracketed by a fixed prefix and suffix).
 func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
-	for i := range ObituaryVictimPatterns {
-		p := &ObituaryVictimPatterns[i]
+	for i := range obituaryVictimScan {
+		p := &obituaryVictimScan[i]
 		idx := strings.Index(msg, p.Marker)
 		if idx <= 0 {
 			continue
@@ -223,13 +284,16 @@ func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 		}
 		return victim, p
 	}
-	for i := range ObituaryInfixPatterns {
-		ip := &ObituaryInfixPatterns[i]
-		if !strings.HasPrefix(msg, ip.Prefix) {
+	for i := range ObituaryPatterns {
+		p := &ObituaryPatterns[i]
+		if p.Kind != ObituaryInfix {
 			continue
 		}
-		rest := msg[len(ip.Prefix):]
-		suffixIdx := strings.Index(rest, ip.Suffix)
+		if !strings.HasPrefix(msg, p.Marker) {
+			continue
+		}
+		rest := msg[len(p.Marker):]
+		suffixIdx := strings.Index(rest, p.Suffix)
 		if suffixIdx <= 0 {
 			continue
 		}
@@ -237,13 +301,7 @@ func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 		if victim == "" {
 			continue
 		}
-		synthesized := ObituaryPattern{
-			Marker:   ip.Prefix + ip.Suffix,
-			Weapon:   ip.Weapon,
-			Suicide:  ip.Suicide,
-			TeamKill: ip.TeamKill,
-		}
-		return victim, &synthesized
+		return victim, p
 	}
 	return "", nil
 }

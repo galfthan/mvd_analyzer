@@ -375,25 +375,6 @@ func (a *FragAnalyzer) parseObituary(msg string, timeMs int32) *FragEntry {
 	return f
 }
 
-// satanDeflectVictim returns the dying player's name for a dtTELE2
-// "Satan's power deflects X's telefrag" obituary (a self-telefrag booked
-// as a suicide, ktx/src/client.c:5141), or "" if msg isn't that form. The
-// victim sits between a fixed prefix and suffix (infix), so prefix-based
-// suicide scans miss it. Shared by the messages analyzer.
-func satanDeflectVictim(msg string) string {
-	const prefix = "Satan's power deflects "
-	const suffix = "'s telefrag"
-	if !strings.HasPrefix(msg, prefix) {
-		return ""
-	}
-	rest := msg[len(prefix):]
-	end := strings.Index(rest, suffix)
-	if end <= 0 {
-		return ""
-	}
-	return strings.TrimSpace(rest[:end])
-}
-
 // isTeamKill checks if killer and victim are on the same team
 func (a *FragAnalyzer) isTeamKill(victim, killer string) bool {
 	var victimTeam, killerTeam string
