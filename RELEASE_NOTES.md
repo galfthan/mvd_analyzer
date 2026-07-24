@@ -53,6 +53,16 @@ corpus was regenerated.
   pure-ms wording.
 - The `artifact_unknown` 404 now points MCP callers at `listArtifacts`
   (the old hint named only `GET /v1/artifacts`, unreachable over MCP).
+- **`/events` damage rows surface the stored bounded value.** The
+  opt-in `damage` events mirror the per-hit log: `detail.damage` stays
+  the unbounded wire value, and the new `detail.bounded` passes the
+  stored KTX-scoreboard reconstruction through (present only when it
+  differs; absent on `skipped:*` demos) — so an events reader can
+  cross-check `/damage`'s bounded-family figures without a second
+  fetch. KTX's own demoinfo dmg is bounded semantics
+  (`ktx/src/combat.c`: armor absorbed in full + health damage capped at
+  the victim's remaining health), which is why bounded is the family
+  the scoreboard-minded reader wants.
 - **`searchGames`/`/v1/games/search` reject an explicit `limit=0`.** An
   explicit `limit=0` in the query string is distinguishable from an
   absent limit, so it now 400s `invalid_param` ("omit it for the default

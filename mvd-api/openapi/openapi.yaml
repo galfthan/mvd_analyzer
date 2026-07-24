@@ -5280,7 +5280,7 @@ components:
                   team: { type: string, description: "Team name." }
                   delta: { type: integer, description: frag delta (frag) or value change (health/armor) }
                   value: { type: integer, description: new value (health/armor/loc index) }
-                  bounded: { type: integer, description: reconstructed bounded kill value (telefrag/stomp events); absent when the bounded reconstruction was skipped; 0 is a real nullified-stomp value }
+                  bounded: { type: integer, description: KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value }
                   powerup: { type: string, description: "Powerup type." }
                   endTime: { type: integer, description: int32 ms (powerup/streak) }
                   frags: { type: integer, description: frags during the powerup run }
@@ -5288,7 +5288,7 @@ components:
                   duration: { type: integer, description: streak duration, int32 ms }
                   weapon: { type: string, description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)." }
                   victim: { type: string, description: "Victim (killed player) name." }
-                  damage: { type: integer, description: "Raw/unbound damage amount, including overkill." }
+                  damage: { type: integer, description: "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value)." }
                   isSplash: { type: boolean, description: "Indirect hit (e.g. rocket splash)." }
                   isEnv: { type: boolean, description: "Environmental / world-sourced." }
                   isSelf: { type: boolean, description: "Attacker == victim." }

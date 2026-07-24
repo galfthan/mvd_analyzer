@@ -1579,6 +1579,14 @@ when the fold ran; `0` is a real nullified-stomp value), and a stomp
 adds `damage` when its raw fold diverged from `bounded`. Mirrors the
 `telefrags[]`/`stomps[]` entries in the damage section.
 
+The opt-in `damage` events mirror the stored per-hit log (schema v59):
+`detail.damage` is the **unbounded wire value** and `detail.bounded` is
+the stored KTX-scoreboard reconstruction, passed through with the same
+omitted-when-equal convention as `damage.events[].bounded` (absent
+entirely on `skipped:*` demos). `/damage` defaults to the bounded
+family, so cross-check its figures against `detail.bounded`, not
+`detail.damage`.
+
 The default set also includes `airgib` and `pause` (view-layer change,
 no schema bump — they surface existing Result data on the MCP-reachable
 event stream). An `airgib` event is a direct enemy rocket hit on an

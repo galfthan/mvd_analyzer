@@ -260,6 +260,13 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 				"damage": d.Damage,
 				"weapon": d.Weapon,
 			}
+			// damage is the unbounded wire value; bounded is the stored
+			// KTX-scoreboard reconstruction, passed through with its
+			// omitted-when-equal pointer convention (absent on skipped:*
+			// demos), so the event feed and the getDamage log stay 1:1.
+			if d.Bounded != nil {
+				detail["bounded"] = *d.Bounded
+			}
 			if d.IsSplash {
 				detail["isSplash"] = true
 			}
