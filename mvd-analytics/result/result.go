@@ -314,7 +314,7 @@ package result
 //     mirroring the engine's PM_CategorizePosition probes against the
 //     map's render BSP), type LqWater/LqSlime/LqLava (water 5/6/7,
 //     slime 9/10/11, lava 13/14/15; 0 = dry). Decode with
-//     result.LqLevel / result.LqType. Additive (omitempty); absent when
+//     result.LqLevel (type = Lq >> 2). Additive (omitempty); absent when
 //     no BSP is provisioned.
 //   - H interacts with liquids: a sample in liquid (Lq level >= 1)
 //     reads H = 0 by definition (the surface is the support — swimmers

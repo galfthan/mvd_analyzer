@@ -47,26 +47,6 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-// CurrentTime returns the current demo time as float64 seconds. This is a
-// derived debug accessor over the canonical int32-ms accumulator (see
-// CurrentTimeMs); it exists for human-readable diagnostics only. Do not
-// rely on it for comparisons against persisted int32-ms values, and do not
-// reintroduce it into the event/pipeline path — demo time is integer ms.
-func (d *Decoder) CurrentTime() float64 {
-	return float64(d.timeMs) * 0.001
-}
-
-// CurrentTimeMs returns the current demo time in integer milliseconds —
-// the canonical value, exact, wire-native.
-func (d *Decoder) CurrentTimeMs() int32 {
-	return d.timeMs
-}
-
-// Extensions returns the detected protocol extensions
-func (d *Decoder) Extensions() *Extensions {
-	return d.extensions
-}
-
 // SetExtensions sets the protocol extensions (called after parsing svc_serverdata)
 func (d *Decoder) SetExtensions(ext *Extensions) {
 	d.extensions = ext
@@ -187,29 +167,4 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 // IsHiddenMessage returns true if this is a hidden message (dem_multiple with player_mask == 0)
 func (m *DemoMessage) IsHiddenMessage() bool {
 	return m.Header.MessageType == DemMultiple && m.PlayerMask == 0
-}
-
-// MessageTypeName returns a human-readable name for the message type
-func (m *DemoMessage) MessageTypeName() string {
-	switch m.Header.MessageType {
-	case DemCmd:
-		return "dem_cmd"
-	case DemRead:
-		return "dem_read"
-	case DemSet:
-		return "dem_set"
-	case DemMultiple:
-		if m.PlayerMask == 0 {
-			return "dem_multiple (hidden)"
-		}
-		return "dem_multiple"
-	case DemSingle:
-		return "dem_single"
-	case DemStats:
-		return "dem_stats"
-	case DemAll:
-		return "dem_all"
-	default:
-		return "unknown"
-	}
 }

@@ -664,8 +664,8 @@ Coverage caveats:
 - **RL and LG only — drops *and* pickups.** KTX only emits `//ktx
   drop` and `//ktx bp` for packs containing RL or LG, and on
   competitive demos there is no other authoritative wire signal
-  for non-RL/LG packs (`BackpackPickupPrintEvent` would help, but
-  `SV_ClientPrintf` strips PRINT_LOW prints before the MVD write
+  for non-RL/LG packs (KTX's `"You get "` backpack-opener print
+  would help, but `SV_ClientPrintf` strips PRINT_LOW prints before the MVD write
   whenever the picker has `msg >= 1`, and competitive players
   overwhelmingly run `msg 2`). See
   [`mvd-reader/MVD_FORMAT.md` → Practical gap — non-RL/LG backpack

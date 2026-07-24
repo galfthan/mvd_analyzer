@@ -174,29 +174,6 @@ func TestTryEmitPickupPrint_HealthNonStandardAmount(t *testing.T) {
 	}
 }
 
-func TestTryEmitPickupPrint_Backpack(t *testing.T) {
-	p := NewParser(nil)
-	var captured *BackpackPickupPrintEvent
-	p.OnEvent(func(e Event) error {
-		if h, ok := e.(*BackpackPickupPrintEvent); ok {
-			captured = h
-		}
-		return nil
-	})
-	// The opener arrives as its own svc_print; subsequent per-piece
-	// prints ("the Rocket Launcher", ", 25 rockets") are separate and
-	// not matched here by design.
-	if err := p.tryEmitPickupPrint(mvd.PrintLow, "You get ", 4, 3140); err != nil {
-		t.Fatalf("tryEmitPickupPrint: %v", err)
-	}
-	if captured == nil {
-		t.Fatal("no backpack pickup event")
-	}
-	if captured.PlayerNum != 4 || captured.TimeMs != 3140 {
-		t.Errorf("got %+v, want {PlayerNum=4, TimeMs=3140}", captured)
-	}
-}
-
 func TestTryEmitPickupPrint_BroadcastIgnored(t *testing.T) {
 	// targetPlayerNum = -1 means dem_all / dem_multiple — broadcast
 	// prints never carry authoritative attribution.
@@ -261,19 +238,21 @@ func TestTryEmitPickupPrint_UnknownItem(t *testing.T) {
 	}
 }
 
-func TestTryEmitPickupPrint_BackpackContentsNotBackpackEvent(t *testing.T) {
-	// A stray ", 25 rockets" or "the Rocket Launcher" that arrives as
-	// a continuation of the backpack sequence must NOT be treated as
-	// a fresh backpack pickup — only the literal "You get " opener is.
+func TestTryEmitPickupPrint_BackpackContentsNotItemEvent(t *testing.T) {
+	// A stray ", 25 rockets" / "the Rocket Launcher" / "You get " that
+	// arrives as part of the backpack print sequence must NOT be matched
+	// as an item pickup — only "You got the <item>" / "You receive N
+	// health" fire ItemPickupPrintEvent.
 	p := NewParser(nil)
 	emitted := 0
 	p.OnEvent(func(e Event) error {
-		if _, ok := e.(*BackpackPickupPrintEvent); ok {
+		if _, ok := e.(*ItemPickupPrintEvent); ok {
 			emitted++
 		}
 		return nil
 	})
 	for _, msg := range []string{
+		"You get ",
 		", 25 rockets",
 		"the Rocket Launcher",
 		"50 shells",
@@ -284,6 +263,6 @@ func TestTryEmitPickupPrint_BackpackContentsNotBackpackEvent(t *testing.T) {
 		}
 	}
 	if emitted != 0 {
-		t.Errorf("continuation messages should not emit a backpack event (got %d)", emitted)
+		t.Errorf("backpack-sequence messages should not emit a pickup event (got %d)", emitted)
 	}
 }

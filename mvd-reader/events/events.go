@@ -68,7 +68,6 @@ type (
 	BackpackPickupHintEvent  = parser.BackpackPickupHintEvent
 	DemoMarkEvent            = parser.DemoMarkEvent
 	ItemPickupPrintEvent     = parser.ItemPickupPrintEvent
-	BackpackPickupPrintEvent = parser.BackpackPickupPrintEvent
 	DemoStartTimestampEvent  = parser.DemoStartTimestampEvent
 	PausedDurationEvent      = parser.PausedDurationEvent
 	MoverSpawnEvent          = parser.MoverSpawnEvent

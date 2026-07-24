@@ -1199,8 +1199,9 @@ probes (feet z−23, waist z+4, eyes z+22) against the map's render BSP:
 `0` = dry, otherwise `(type << 2) | level` with level 1–3
 (feet/waist/eyes submerged) and type 1 water / 2 slime / 3 lava — so
 water reads 5/6/7, slime 9/10/11, lava 13/14/15. Decode with `lq & 3`
-(level) and `lq >> 2` (type); Go consumers use `result.LqLevel` /
-`result.LqType` and the `result.LqWater/LqSlime/LqLava` constants.
+(level) and `lq >> 2` (type); Go consumers use `result.LqLevel` for the
+level and `lq >> 2` with the `result.LqWater/LqSlime/LqLava` constants
+for the type.
 Same length as `t`; absent when no BSP is provisioned. (One deliberate
 deviation from the engine predicate: `CONTENTS_SKY` does **not** count
 as liquid — the physics treats sky like water for drag, but a

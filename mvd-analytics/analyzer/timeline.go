@@ -167,13 +167,6 @@ func (a *TimelineAnalyzer) Init(ctx *Context) error {
 	return nil
 }
 
-// SetLocFinder sets the visibility-aware location finder for map
-// position lookups. Used by callers that have already loaded the loc
-// corpus (e.g. tooling that pre-builds finders for many maps).
-func (a *TimelineAnalyzer) SetLocFinder(finder *locvis.Finder) {
-	a.locFinder = finder
-}
-
 func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.StatUpdateEvent:

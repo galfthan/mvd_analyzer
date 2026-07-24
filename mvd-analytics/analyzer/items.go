@@ -89,8 +89,7 @@ type ItemAnalyzer struct {
 	// again in the same server frame, the entity-state stream shows no
 	// transition, but the predicted time + a player at the spawn point
 	// + a matching stat delta is enough to infer the pickup.
-	syntheticEnabled bool
-	syntheticChain   map[int]*syntheticSchedule // entNum -> next predicted pickup
+	syntheticChain map[int]*syntheticSchedule // entNum -> next predicted pickup
 	// nextDue is the earliest (predicted + settle) time across syntheticChain,
 	// or maxInt32 when the chain is empty. processSyntheticRespawns early-returns
 	// while currentT < nextDue instead of sorting the chain on every event.
@@ -245,16 +244,10 @@ func NewItemAnalyzer() *ItemAnalyzer {
 		packWeapon:          make(map[int]string),
 		recentPackGrant:     make(map[int]map[string]int32),
 		attrCounts:          make(map[string]int),
-		syntheticEnabled:    true,
 		syntheticChain:      make(map[int]*syntheticSchedule),
 		nextDue:             maxInt32,
 	}
 }
-
-// SetSyntheticPickups toggles the insta-regrab synthesis pass. Default
-// is on; tests that want to compare against the wire-only baseline
-// (e.g. golden-corpus parity with the prior behaviour) can disable it.
-func (a *ItemAnalyzer) SetSyntheticPickups(enabled bool) { a.syntheticEnabled = enabled }
 
 func (a *ItemAnalyzer) Name() string { return "items" }
 
@@ -471,9 +464,6 @@ func (a *ItemAnalyzer) positionAt(slot int, t int32) ([3]float32, bool) {
 // Otherwise processSyntheticRespawns will try to synthesize a pickup
 // once the predicted moment plus settle window has passed.
 func (a *ItemAnalyzer) scheduleSyntheticRespawn(ent int, predicted int32, chainLen int) {
-	if !a.syntheticEnabled {
-		return
-	}
 	if chainLen >= syntheticMaxChain {
 		delete(a.syntheticChain, ent)
 		return
@@ -491,7 +481,7 @@ func (a *ItemAnalyzer) scheduleSyntheticRespawn(ent int, predicted int32, chainL
 // syntheticSettleWindow ago. The settle window lets stat-update events
 // that lag the touch instant land before we make the call.
 func (a *ItemAnalyzer) processSyntheticRespawns(currentT int32) {
-	if !a.syntheticEnabled || !a.timing.Started || a.timing.Ended {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	// Nothing due yet: skip the sort/scan. nextDue is a conservative lower
@@ -757,16 +747,14 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 	if slot < 0 || slot >= len(a.ctx.Players) {
 		return
 	}
-	if a.syntheticEnabled {
-		if it := a.items[e.ItemEnt]; it != nil && len(it.phases) > 0 {
-			last := it.phases[len(it.phases)-1]
-			if last.TakenAt > 0 {
-				// Wire is still showing the entity as taken from
-				// the previous phase, but KTX says it just got
-				// touched again — must be an insta-regrab.
-				a.recordSyntheticTakeFromHint(e.ItemEnt, e.TimeMs, slot)
-				return
-			}
+	if it := a.items[e.ItemEnt]; it != nil && len(it.phases) > 0 {
+		last := it.phases[len(it.phases)-1]
+		if last.TakenAt > 0 {
+			// Wire is still showing the entity as taken from
+			// the previous phase, but KTX says it just got
+			// touched again — must be an insta-regrab.
+			a.recordSyntheticTakeFromHint(e.ItemEnt, e.TimeMs, slot)
+			return
 		}
 	}
 	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: e.TimeMs}
@@ -1210,11 +1198,11 @@ func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing int32) {
 	delete(a.heldMHs, slot)
 }
 
-// AttributionCounts returns the per-source attribution tally
-// (hint / print / stat / distance / none). Used by the diagnostic
-// harness to monitor signal coverage across the corpus. The map is
-// safe to read after Finalize.
-func (a *ItemAnalyzer) AttributionCounts() map[string]int {
+// attributionCounts returns the per-source attribution tally
+// (hint / print / stat / distance / none). Used by the analyzer's
+// unit tests to monitor signal coverage. The map is safe to read
+// after Finalize.
+func (a *ItemAnalyzer) attributionCounts() map[string]int {
 	out := make(map[string]int, len(a.attrCounts))
 	for k, v := range a.attrCounts {
 		out[k] = v

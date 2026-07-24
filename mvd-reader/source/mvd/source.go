@@ -29,7 +29,6 @@ import (
 // avoid per-event allocations along the hot path.
 type Source struct {
 	closer  io.Closer
-	decoder *mvd.Decoder
 	parser  *parser.Parser
 	queue   []events.Event
 	head    int
@@ -68,7 +67,7 @@ func NewFromReader(r io.Reader) (*Source, error) {
 func newSource(r io.Reader, closer io.Closer) *Source {
 	dec := mvd.NewDecoder(r)
 	p := parser.NewParser(dec)
-	src := &Source{closer: closer, decoder: dec, parser: p}
+	src := &Source{closer: closer, parser: p}
 	p.OnEvent(func(e parser.Event) error {
 		src.queue = append(src.queue, e)
 		return nil
@@ -125,13 +124,6 @@ func (s *Source) Close() error {
 		return err
 	}
 	return nil
-}
-
-// CurrentTimeMs reports the decoder's current demo time in integer
-// milliseconds — the canonical, wire-native value. Useful when finalizing
-// an analysis that needs the total stream duration.
-func (s *Source) CurrentTimeMs() int32 {
-	return s.decoder.CurrentTimeMs()
 }
 
 // Parser returns the underlying parser. Exposed for diagnostic tooling

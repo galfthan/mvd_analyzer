@@ -184,8 +184,7 @@ the two pickers apart (net zero in total count). Two *different*-count
 boxes coalescing into one >25 jump (e.g. two h25s) now attribute
 correctly — see the +26..50 two-row evidence rule above.
 
-Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
-when wire-only behaviour is needed for comparison.
+Synthesis always runs; there is no wire-only toggle.
 
 ## Weapon-stay synthesis
 

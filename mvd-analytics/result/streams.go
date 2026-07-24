@@ -316,7 +316,7 @@ type GlobalStream struct {
 // against the map's render BSP (bspvis.WaterLevel): 0 = dry, else
 // (type << 2) | level with level 1–3 (feet / waist / eyes submerged)
 // and type LqWater/LqSlime/LqLava — so water reads 5/6/7, slime
-// 9/10/11, lava 13/14/15. Decode with LqLevel / LqType. Samples with
+// 9/10/11, lava 13/14/15. Decode the level with LqLevel (type = Lq >> 2). Samples with
 // Lq level >= 1 have H = 0 by definition (the liquid surface is the
 // support); when a player is airborne ABOVE liquid, H measures down to
 // the liquid surface if it is the highest support under them.
@@ -375,12 +375,9 @@ const (
 )
 
 // LqLevel extracts the submersion level (0 none, 1 feet, 2 waist,
-// 3 eyes) from a PositionTrack.Lq value.
+// 3 eyes) from a PositionTrack.Lq value. The liquid type occupies the
+// high bits (LqWater/LqSlime/LqLava = v >> 2, 0 when dry).
 func LqLevel(v int8) int { return int(v & 3) }
-
-// LqType extracts the liquid type (LqWater/LqSlime/LqLava, 0 when dry)
-// from a PositionTrack.Lq value.
-func LqType(v int8) int { return int(v >> 2) }
 
 // NoFloor is the sentinel in PositionTrack.H for a sample with no floor
 // beneath it (over a void/pit, or an embedded/zero origin) — the height

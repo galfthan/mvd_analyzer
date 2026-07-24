@@ -178,31 +178,6 @@ func (p *proxyBackend) fetchOpaque(ctx context.Context, method, path string, q u
 	return out, nil
 }
 
-// fetchOpaqueList is fetchOpaque for the /chat, /backpacks, and
-// /weapon-pickups endpoints. Since v56 these REST bodies are already
-// `{timeUnit, <list>}` objects (keyed `messages` / `backpacks` /
-// `pickups`), so the object branch below now handles every real response
-// and passes it through untouched — the MCP structuredContent object
-// constraint is satisfied by the envelope itself. The array-wrapping
-// branch is retained as dead-code defence: if a REST body ever regressed
-// to a bare top-level array (which the MCP SDK rejects with "expected
-// record, received array"), it is wrapped under `key` at the MCP boundary
-// rather than reshaping the REST contract. `key` still matches the
-// envelope's list key so both paths yield the same shape.
-func (p *proxyBackend) fetchOpaqueList(ctx context.Context, method, path string, q url.Values, key string) (any, error) {
-	var out any
-	if err := p.do(ctx, method, path, q, &out); err != nil {
-		return nil, err
-	}
-	if _, isObject := out.(map[string]any); isObject {
-		return out, nil
-	}
-	if out == nil {
-		out = []any{}
-	}
-	return map[string]any{key: out}, nil
-}
-
 // query is a url.Values with conditional setters that mirror the REST
 // param encoding: each setter no-ops on its zero value, so an unset MCP
 // input stays out of the query string and the REST default applies. set
@@ -410,7 +385,7 @@ func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error
 	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("types", in.Types)
-	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "messages")
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
 func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (any, error) {
@@ -423,7 +398,7 @@ func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (
 	q.csv("weapons", in.Weapons)
 	q.ms("from", in.StartTime)
 	q.ms("to", in.EndTime)
-	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "backpacks")
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
 func (p *proxyBackend) GetItems(ctx context.Context, in GetItemsInput) (any, error) {
@@ -464,7 +439,7 @@ func (p *proxyBackend) GetWeaponPickups(ctx context.Context, in GetWeaponPickups
 	q.str("source", in.Source)
 	q.ms("from", in.StartTime)
 	q.ms("to", in.EndTime)
-	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "pickups")
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
 func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any, error) {

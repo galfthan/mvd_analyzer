@@ -29,7 +29,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"os"
 )
 
 // Vec3 is a 3D vector in world units (the same scale as the rest of the
@@ -140,17 +139,8 @@ const (
 	modelSize = 64
 )
 
-// Load reads a BSP file from disk and returns the lumps required for
-// PointInLeaf / RayHitsSolid / PVS lookups.
-func Load(path string) (*BSP, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("bspvis: read %s: %w", path, err)
-	}
-	return LoadBytes(data)
-}
-
-// LoadBytes is the in-memory variant of Load — used by the WASM loader
+// LoadBytes reads a BSP from an in-memory buffer, returning the lumps
+// required for PointInLeaf / RayHitsSolid / PVS lookups — used by the WASM loader
 // (host fetchBspSync returns raw bytes) and by tests that synthesise a
 // fixture.
 func LoadBytes(data []byte) (*BSP, error) {

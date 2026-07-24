@@ -367,7 +367,7 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
-`ItemPickupPrintEvent`, `BackpackPickupPrintEvent`,
+`ItemPickupPrintEvent`,
 `DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
@@ -395,14 +395,14 @@ prints, no BSP preprocessing. `ItemPickupHintEvent` /
 authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
 touch-level pickup attribution that entity-state alone can only
 approximate. They only fire on KTX servers; non-KTX sources get
-entity-state and stats deltas. `ItemPickupPrintEvent` /
-`BackpackPickupPrintEvent` parse the per-client "You got the X"
-prints that target the picking player via `dem_single`; they fill
-the gap where `//ktx took` is silent (ammo boxes, H15/H25, non-RL/LG
-backpacks) but only survive to the MVD for players who set `msg 0`
-in their client config (see `mvd-reader/MVD_FORMAT.md` for the
-server-side `messagelevel` filter that strips PRINT_LOW in most
-competitive demos).
+entity-state and stats deltas. `ItemPickupPrintEvent` parses the
+per-client "You got the X" / "You receive N health" prints that
+target the picking player via `dem_single`; it fills the gap where
+`//ktx took` is silent (ammo boxes, H15/H25) but only survives to
+the MVD for players who set `msg 0` in their client config (see
+`mvd-reader/MVD_FORMAT.md` for the server-side `messagelevel` filter
+that strips PRINT_LOW in most competitive demos). KTX's `"You get "`
+backpack opener is not decoded into a typed event — see MVD_FORMAT.md.
 
 To write a new source: implement `events.Source`, emit the concrete event
 types as you decode your wire format. That's it. See
