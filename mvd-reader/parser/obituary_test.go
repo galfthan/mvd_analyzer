@@ -25,6 +25,12 @@ func TestFindObituaryVictim(t *testing.T) {
 		{"chat looking like obit", "(sailorman): nice rocket\n", ""},
 		{"empty", "", ""},
 
+		// Killer-first forms: the victim FOLLOWS the marker (killer is the
+		// prefix — must NOT be returned as the victim).
+		{"killer-first stomp", "razor stomps XantoM\n", "XantoM"},
+		{"killer-first squish", "razor squishes XantoM\n", "XantoM"},
+		{"killer-first quad rl", "razor rips XantoM a new one\n", "XantoM"},
+
 		// Infix-form: Satan's-power-deflect (KTX dtTELE2).
 		{"pent deflect", "Satan's power deflects nlk's telefrag\n", "nlk"},
 

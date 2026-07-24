@@ -284,6 +284,38 @@ func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 		}
 		return victim, p
 	}
+	// Killer-first forms ("X stomps Y"): the victim FOLLOWS the marker,
+	// bounded by Suffix when set (" rips Y a new one") else the line end.
+	// Scanned after the victim-prefix kinds so an overlapping victim-prefix
+	// marker (" was literally stomped into particles by ") wins first.
+	// ObituaryTeamkillKiller is deliberately excluded: its victim is the
+	// generic "teammate", not a name. The one classifier-known form with no
+	// victim row anywhere is the bespoke " ate N loads of X's buckshot"
+	// splash sub-parse (analytics matchAte) — those victims stay invisible
+	// to this scan, as they always were.
+	for i := range ObituaryPatterns {
+		p := &ObituaryPatterns[i]
+		if p.Kind != ObituaryKillerFirst {
+			continue
+		}
+		idx := strings.Index(msg, p.Marker)
+		if idx <= 0 {
+			continue
+		}
+		rest := msg[idx+len(p.Marker):]
+		if p.Suffix != "" {
+			end := strings.Index(rest, p.Suffix)
+			if end <= 0 {
+				continue
+			}
+			rest = rest[:end]
+		}
+		victim := strings.TrimSpace(rest)
+		if victim == "" {
+			continue
+		}
+		return victim, p
+	}
 	for i := range ObituaryPatterns {
 		p := &ObituaryPatterns[i]
 		if p.Kind != ObituaryInfix {
