@@ -91,10 +91,10 @@ degrades by marking families `src: "derived"`.
                 "src": "ktx" },
 
     "accuracy": { "rl": { "attacks": 88, "hits": 41, "real": 33, "virtual": 8 }, ...,
-                  "src": "ktx" },
+                  "src": "ktx" },       // KTX-only — the whole family is omitted on old demos
 
     "pickups": { "ra": { "took": 6 }, "mh": { "took": 4 },
-                 "rl": { "took": 4, "dropped": 3, "xfer": 1 }, ...,
+                 "rl": { "took": 4, "dropped": 3, "xfer": 1, "xferSelf": 0 }, ...,
                  "src": "ktx" },
 
     "hold": {
@@ -167,11 +167,55 @@ field. The `dmg.taken` trap is already documented at
 | `score` (frags/kills/deaths/suicides/tk) | **always derived** | KTX over-counts pentagram-deflect telefrags / `dtTELE2` and resets after a reconnect; `match.players` + the corrected frag log are right. Already the web's behaviour (`app.js:1316` comment). |
 | `damage.given` / `givenTeam` / `givenSelf` / `enemyWeapons` / `takenToDie` | KTX when present, else bounded reconstruction | server-side accounting we cannot fully see; reuses `view.applyKTXBoundedSummary`'s rules. |
 | `damage.taken` | **always derived** (all sources) | KTX's `dmg.taken` is enemy-only. Emitted separately as `takenEnemy`. |
-| `accuracy` | KTX when present, else the `shots` analyzer's derived accuracy | KTX counts pellets server-side (SG/SSG `attacks` is a pellet count); the derived figure is a wire-inferred approximation and must be marked as such. |
-| `pickups` (took/dropped/xfer) | KTX when present, else derived from `items` + `weaponPickups` | direct server-side counters, semantics identical. `xferRL`/`xferLG` are KTX-only for now — no derived equivalent, omitted on old demos. |
+| `accuracy` | **KTX-only** | KTX counts pellets server-side (SG/SSG `attacks` is a pellet count). The `shots`-derived figure is a wire-inferred approximation on a different footing, and a caller comparing accuracies across a new and an old demo would silently compare two different measurements. The family is **omitted entirely** on demos without a KTX block. |
+| `pickups` (took/dropped) | KTX when present, else derived from `items` + `weaponPickups` | direct server-side counters, semantics identical. |
+| `pickups.xfer` / `xferSelf` | **always derived** (see §4.1) | we can decompose what KTX conflates. |
 | `hold.armor` / `hold.weapons` | **always derived** | KTX has no weapon time in the block at all, and its armor clock overcounts (§1b). Deviating from the server's own end-of-match table will surprise people — say why in RESULT_SCHEMA.md. |
 | `hold.powerups` | **always derived** | KTX is correct here, but deriving keeps it consistent with the timeline's powerup runs. |
 | `ping` / `handicap` / `login` / `bot` / `control` / `speed` | KTX-only | not on the wire; omitted on old demos. |
+
+### 4.1 Pack transfers, derived
+
+KTX's `xferRL` / `xferLG` (`ps.transferred_RLpacks`, `src/items.c:2586-2615`)
+count: in **teamplay only** (`isTeam()`), a dropped pack whose contents are
+*exactly* the RL (or exactly the LG) is picked up by someone on the
+**dropper's team**, credited to **the dropper**.
+
+We already carry every input. `BackpackDrop` has the dropper, their team,
+the weapon and `EntNum`; `WeaponPickup` with `Source == "backpack"` has
+`Dropper`, `DropperTeam`, `Player`, `Team` and `BackpackEnt` joining back
+to the drop. So:
+
+```
+xfer[dropper][w] = |{ WeaponPickup : Source=="backpack" ∧ Weapon==w
+                      ∧ Team == DropperTeam ∧ Player != Dropper }|
+xferSelf[dropper][w] = same, but Player == Dropper
+```
+
+Four details that make this exact rather than approximate:
+
+1. **Packs hold one weapon.** `DropBackpack` sets
+   `item->s.v.items = self->s.v.weapon` (`src/items.c`) — the weapon the
+   player was *wielding*, not their inventory (fairpacks `k_fairpack 1`
+   overrides it to the best weapon with ammo). So KTX's exact-equality
+   test `items == IT_ROCKET_LAUNCHER` is normally satisfied for an RL pack,
+   and there is no mixed-contents ambiguity to model. This is also the
+   other half of the wielding decision in §2: the autoswitch-to-SG habit
+   shows up here, as a pack that contains an SG and generates no drop hint,
+   no pickup row and no transfer.
+2. **KTX counts self-recovery as a transfer.** There is no
+   `other != dropper` check, so a player who dies, respawns and re-takes
+   their own pack increments their own `xferRL`. We split that out as
+   `xferSelf`; `xfer + xferSelf` reproduces the KTX number exactly, which
+   makes the two directly checkable against each other.
+3. **Teamplay gate.** Mirror `isTeam()`. Without it, duels would count
+   every self-recovery as a transfer, since the roster stamps
+   `team == name` for 1v1 and `Team == DropperTeam` is then trivially true.
+4. **Availability.** This derivation needs the `//ktx bp` + `//ktx drop`
+   hints, not the demoinfo block — a *wider* set of demos than KTX stats
+   cover, but not all of them. Omit the fields (don't emit zeros) when the
+   hints are absent, and only RL/LG packs ever emit them
+   (`src/items.c:2465-2472`), matching KTX's own RL/LG-only accounting.
 
 ## 5. Work breakdown
 
@@ -244,6 +288,10 @@ top-level `README.md` (section list), `mvd-api/API.md`
   (`ga+ya+ra+none == aliveMs`), `runs`/`longestMs` edges.
 - **Cross-artifact invariants**: powerup hold vs the timeline's powerup
   runs; `score` vs `match.players`; hold ≤ aliveMs ≤ presentMs ≤ matchMs.
+- **Transfers** (§4.1): on a teamplay demo that carries both the hints and
+  a KTX block, assert `xfer + xferSelf == demoInfo xferRL/xferLG` per
+  player — the decomposition must reproduce the server's total exactly.
+  Plus unit cases for the duel gate (always 0) and self-recovery.
 - **View** (`view/player_stats_test.go`): provenance stamping under
   present/absent/partial KTX blocks; `taken` vs `takenEnemy` never
   collapsed.
@@ -267,18 +315,18 @@ top-level `README.md` (section list), `mvd-api/API.md`
 
 Plus the golden regeneration diff, which is large but mechanical.
 
-## 8. Open questions
+## 8. Resolved
 
-1. Endpoint name: `/player-stats` (explicit) vs `/stats` (shorter, but
-   "stats" is overloaded — KTX calls its own block stats too). Leaning
-   `/player-stats`.
-2. Do team aggregates belong in this artifact (`teams[]`, as drafted) or
-   should the caller sum? Drafted as included — the web needs them and
-   summing hold shares correctly (over summed alive time, not averaged
-   shares) is exactly the kind of thing to do once in Go.
-3. Should `accuracy` fall back to the derived `shots` figure at all, or
-   just be absent on old demos? Fallback drafted in, marked
-   `src: "derived"`; the risk is a caller comparing a wire-inferred
-   accuracy against a KTX one across demos without reading `src`.
-4. `xferRL`/`xferLG` have no derived equivalent today. Leave KTX-only, or
-   derive from `backpacks` + `weaponPickups` in a later phase?
+1. **Endpoint name `/player-stats`.** `/stats` is overloaded — KTX calls
+   its own block stats too.
+2. **Team aggregates ship inside this artifact** as `teams[]`. A section
+   named "player stats" carrying team rows is a mild wart, accepted
+   knowingly: the web needs both, and summing hold shares correctly (over
+   summed alive time — *not* averaging per-player shares) is exactly the
+   arithmetic to do once in Go rather than in every consumer. Revisit only
+   if a `/team-stats` consumer appears that wants nothing per-player.
+3. **`accuracy` is KTX-only and omitted on old demos.** No `shots`
+   fallback — see the substitution table for why.
+4. **`xfer` is derived**, decomposed into `xfer` / `xferSelf` — §4.1.
+
+Nothing is open. Implementation can start at Phase 1.
