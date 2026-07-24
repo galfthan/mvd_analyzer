@@ -93,7 +93,7 @@ func TestEventsDamageOptIn(t *testing.T) {
 		Streams: &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000}},
 		Damage: &result.DamageResult{
 			Events: []result.DamageEntry{
-				{Time: 2000, Attacker: "killer", Victim: "target", Weapon: "rl", Damage: 89, VictimWep: "rl"},
+				{Time: 2000, Attacker: "killer", Victim: "target", Weapon: "rl", Damage: 89, VictimWep: "rl", Bounded: intPtr(64)},
 			},
 		},
 	}
@@ -124,6 +124,11 @@ func TestEventsDamageOptIn(t *testing.T) {
 	if e.Detail["victim"] != "target" || e.Detail["damage"] != 89 ||
 		e.Detail["weapon"] != "rl" || e.Detail["victimWep"] != "rl" {
 		t.Errorf("detail = %v", e.Detail)
+	}
+	// The stored bounded value passes through (omitted-when-equal is the
+	// storage layer's convention — a non-nil pointer always surfaces).
+	if e.Detail["bounded"] != 64 {
+		t.Errorf("detail bounded = %v, want 64", e.Detail["bounded"])
 	}
 
 	// A player filter matches damage they received, not just dealt.

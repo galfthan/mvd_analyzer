@@ -586,6 +586,53 @@ func TestEnumValues_Rejected(t *testing.T) {
 	}
 }
 
+// TestWeaponVocabulary_Rejected: an unknown weapons token 400s with
+// invalid_param on every filtering endpoint (frags/damage/backpacks/
+// weapon-pickups), not a silent all-filtered 200. A valid token still 200s.
+func TestWeaponVocabulary_Rejected(t *testing.T) {
+	// frags + damage carry their sections in fragDamageStore; backpacks +
+	// weapon-pickups in storeWithStub's stub.
+	fd := newTestServer(t, fragDamageStore())
+	defer fd.Close()
+	sw := newTestServer(t, storeWithStub())
+	defer sw.Close()
+
+	bogus := []struct {
+		srv *httptest.Server
+		u   string
+	}{
+		{fd, "frags?weapons=bfg"},
+		{fd, "damage?weapons=bfg"},
+		{sw, "backpacks?weapons=gl"},      // backpacks only takes rl/lg
+		{sw, "weapon-pickups?weapons=sg"}, // sg is not a pickup
+	}
+	for _, tc := range bogus {
+		body, status := getRaw(t, tc.srv.URL+"/v1/demos/gameId:42/"+tc.u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", tc.u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("%s: code = %q, want invalid_param", tc.u, code)
+		}
+	}
+
+	// Valid tokens still 200 (case-insensitive).
+	for _, tc := range []struct {
+		srv *httptest.Server
+		u   string
+	}{
+		{fd, "frags?weapons=RL"},
+		{fd, "damage?weapons=rl,tele"},
+		{sw, "backpacks?weapons=LG"},
+		{sw, "weapon-pickups?weapons=rl"},
+	} {
+		if _, status := getRaw(t, tc.srv.URL+"/v1/demos/gameId:42/"+tc.u); status != 200 {
+			t.Errorf("%s: status = %d, want 200", tc.u, status)
+		}
+	}
+}
+
 // TestEnumValues_CaseInsensitive: /events and /chat type enums are
 // case-insensitive (matching every other token filter). Mixed/upper case
 // values validate and are lowercased before use.
@@ -864,6 +911,53 @@ func TestOverview(t *testing.T) {
 	errs, _ := resp["errors"].([]any)
 	if len(errs) != 1 || errs[0] != "itemAnalyzer: respawn before pickup" {
 		t.Errorf("errors = %v; want the one stub analyzer error", resp["errors"])
+	}
+}
+
+// TestOverviewMapTitle pins the map/mapTitle split (v59): `map` is the
+// canonical shortname from EffectiveMap (demoinfo → serverinfo), `mapTitle`
+// the BSP's pretty title, elided when the two are identical.
+func TestOverviewMapTitle(t *testing.T) {
+	// Distinct title: demoinfo resolves the shortname "dm2", Match.Map carries
+	// the pretty BSP title.
+	distinct := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "dm2"},
+		Match:    &result.MatchResult{Map: "Claustrophobopolis"},
+	}
+	ov := BuildOverview(distinct)
+	if ov.Map != "dm2" {
+		t.Errorf("map = %q; want dm2 (EffectiveMap shortname)", ov.Map)
+	}
+	if ov.MapTitle != "Claustrophobopolis" {
+		t.Errorf("mapTitle = %q; want Claustrophobopolis", ov.MapTitle)
+	}
+
+	// Identical (or no distinct title): mapTitle elided.
+	same := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "dm3"},
+		Match:    &result.MatchResult{Map: "dm3"},
+	}
+	ov = BuildOverview(same)
+	if ov.Map != "dm3" || ov.MapTitle != "" {
+		t.Errorf("map/mapTitle = %q/%q; want dm3/\"\" (title elided when identical)", ov.Map, ov.MapTitle)
+	}
+
+	// Degraded: no shortname source — fall back to Match.Map, no mapTitle.
+	degraded := &result.Result{Match: &result.MatchResult{Map: "dm6"}}
+	ov = BuildOverview(degraded)
+	if ov.Map != "dm6" || ov.MapTitle != "" {
+		t.Errorf("degraded map/mapTitle = %q/%q; want dm6/\"\" (fallback to Match.Map)", ov.Map, ov.MapTitle)
+	}
+
+	// Case-only difference (demoinfo "aerowalk" vs BSP LevelName "Aerowalk"):
+	// same map, so mapTitle is elided (case-insensitive compare).
+	caseOnly := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "aerowalk"},
+		Match:    &result.MatchResult{Map: "Aerowalk"},
+	}
+	ov = BuildOverview(caseOnly)
+	if ov.Map != "aerowalk" || ov.MapTitle != "" {
+		t.Errorf("case-only map/mapTitle = %q/%q; want aerowalk/\"\" (title elided on case-only diff)", ov.Map, ov.MapTitle)
 	}
 }
 
@@ -1532,6 +1626,72 @@ func TestRegionControl_Unavailable(t *testing.T) {
 	}
 }
 
+// storeWithRegions serves a demo carrying a region-control layout whose regions
+// have polygon Points — the fixture for the regions=full|summary|none modes.
+func storeWithRegions() *fakeStore {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Streams:       &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 60000}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			RegionControl: &result.RegionControlResult{
+				Regions: []result.ControlRegion{
+					{Name: "mid", Locs: []string{"mid"}, CentroidX: 10, CentroidY: 20,
+						Points: []result.MapLocation{{X: 1, Y: 2, Z: 3, Name: "mid"}}},
+				},
+			},
+		},
+	}
+	return &fakeStore{byID: map[string]*result.Result{"gameId:42": r}}
+}
+
+// TestRegionControl_RegionsParam pins the regions=full|summary|none view modes
+// (v59): full keeps the polygon points, summary strips them (centroids kept),
+// none omits the regions list entirely, and a bogus value 400s. The stored
+// Result's regions must never be mutated.
+func TestRegionControl_RegionsParam(t *testing.T) {
+	store := storeWithRegions()
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	// full (default): points present.
+	full := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=full", 200)
+	regs := full["regions"].([]any)
+	rg := regs[0].(map[string]any)
+	if pts, _ := rg["points"].([]any); len(pts) != 1 {
+		t.Errorf("regions=full: expected 1 point, got %v", rg["points"])
+	}
+
+	// summary: points stripped (null), centroid + name kept.
+	sum := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=summary", 200)
+	srg := sum["regions"].([]any)[0].(map[string]any)
+	if pts, ok := srg["points"].([]any); ok && len(pts) != 0 {
+		t.Errorf("regions=summary: points should be stripped, got %v", srg["points"])
+	}
+	if srg["centroidX"].(float64) != 10 || srg["name"] != "mid" {
+		t.Errorf("regions=summary dropped centroid/name: %+v", srg)
+	}
+
+	// none: regions omitted from the response entirely.
+	none := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=none", 200)
+	if _, present := none["regions"]; present {
+		t.Errorf("regions=none: regions key should be absent, got %v", none["regions"])
+	}
+
+	// bogus value 400s invalid_param naming the valid set.
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=bogus")
+	if status != 400 {
+		t.Fatalf("regions=bogus status = %d; want 400 (body=%s)", status, body)
+	}
+	if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "summary") {
+		t.Errorf("bogus regions body missing invalid_param/valid-set detail: %s", body)
+	}
+
+	// The stored Result's polygon points must be intact after the summary read.
+	if pts := store.byID["gameId:42"].TimelineAnalysis.RegionControl.Regions[0].Points; len(pts) != 1 {
+		t.Errorf("stored Result regions were mutated: points=%v", pts)
+	}
+}
+
 // --- HTTP cache semantics ---
 
 func TestETag_304(t *testing.T) {
@@ -1695,6 +1855,58 @@ func TestDamage_FullAndFilters(t *testing.T) {
 	if st, _ := sw["stomps"].([]any); len(st) != 1 {
 		t.Errorf("weapon=stomp stomps = %d, want 1", len(st))
 	}
+}
+
+// TestDamage_WholeMatchWindow pins that an explicit to= window covering the
+// whole match is NOT a restrictive filter: it takes the unfiltered fast path,
+// so the scoreboard survives and the body is byte-identical to the no-window
+// request (incident: an explicit to=matchEnd must not degrade the response).
+func TestDamage_WholeMatchWindow(t *testing.T) {
+	r := damageResult()
+	r.Streams = &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 200000}}
+	r.Damage.Scoreboard = &result.DamageReconciliation{
+		ByPlayer: map[string]*result.DamageDelta{
+			"alpha": {StreamGiven: 200, ScoreGiven: 200},
+			"bravo": {StreamGiven: 100, ScoreGiven: 100},
+		},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	// dmg=raw keeps the machinery deterministic (no bounded reconstruction on
+	// this fixture); the fast-path change is what's under test.
+	unfiltered := getJSON(t, srv.URL+"/v1/demos/gameId:42/damage?dmg=raw", 200)
+	if _, ok := unfiltered["scoreboard"]; !ok {
+		t.Fatalf("unfiltered: scoreboard missing")
+	}
+	// to=matchEnd must behave identically — scoreboard present, same body.
+	windowed, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/damage?dmg=raw&to=200000")
+	if status != 200 {
+		t.Fatalf("to=matchEnd status = %d; want 200 (body=%s)", status, windowed)
+	}
+	var win map[string]any
+	if err := json.Unmarshal(windowed, &win); err != nil {
+		t.Fatalf("to=matchEnd decode: %v (body=%s)", err, windowed)
+	}
+	if _, ok := win["scoreboard"]; !ok {
+		t.Fatalf("to=matchEnd: scoreboard omitted; a whole-match window must not degrade the response")
+	}
+	ub, _ := json.Marshal(unfiltered)
+	if string(ub) != string(mustReencode(t, windowed)) {
+		t.Fatalf("to=matchEnd body != unfiltered body:\nfull= %s\nwin=  %s", ub, mustReencode(t, windowed))
+	}
+}
+
+// mustReencode round-trips a JSON body through map[string]any → bytes so it
+// can be compared key-order-independently with another re-encoded body.
+func mustReencode(t *testing.T, b []byte) []byte {
+	t.Helper()
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatalf("reencode: %v", err)
+	}
+	out, _ := json.Marshal(m)
+	return out
 }
 
 // --- CORS (F17) ---

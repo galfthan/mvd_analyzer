@@ -17741,7 +17741,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -36421,14 +36421,14 @@
         "LG": {
           "byPlayer": {
             "mj": {
-              "armed": 1640,
+              "armed": 81954,
               "team": "mj",
-              "unarmed": 553
+              "unarmed": 27607
             },
             "speedball": {
-              "armed": 2078,
+              "armed": 104130,
               "team": "speedball",
-              "unarmed": 116
+              "unarmed": 5850
             }
           },
           "contested": 1.7,
@@ -36442,40 +36442,40 @@
         "QUAD": {
           "byPlayer": {
             "mj": {
-              "armed": 122,
+              "armed": 6042,
               "team": "mj",
-              "unarmed": 78
+              "unarmed": 3859
             },
             "speedball": {
-              "armed": 67,
+              "armed": 3274,
               "team": "speedball",
               "unarmed": 0
             }
           },
           "contested": 0,
           "empty": 97.8,
-          "teamAControl": 0.6,
+          "teamAControl": 0.5,
           "teamAWeakControl": 0,
           "teamBControl": 1,
-          "teamBWeakControl": 0.7,
+          "teamBWeakControl": 0.6,
           "weakContested": 0
         },
         "RA": {
           "byPlayer": {
             "mj": {
-              "armed": 435,
+              "armed": 21574,
               "team": "mj",
               "unarmed": 0
             },
             "speedball": {
-              "armed": 908,
+              "armed": 45287,
               "team": "speedball",
               "unarmed": 0
             }
           },
           "contested": 0,
-          "empty": 88.8,
-          "teamAControl": 7.6,
+          "empty": 88.9,
+          "teamAControl": 7.5,
           "teamAWeakControl": 0,
           "teamBControl": 3.6,
           "teamBWeakControl": 0,
@@ -36484,14 +36484,14 @@
         "RL": {
           "byPlayer": {
             "mj": {
-              "armed": 1489,
+              "armed": 74538,
               "team": "mj",
-              "unarmed": 310
+              "unarmed": 15384
             },
             "speedball": {
-              "armed": 781,
+              "armed": 38966,
               "team": "speedball",
-              "unarmed": 43
+              "unarmed": 2132
             }
           },
           "contested": 0.9,
@@ -36505,21 +36505,21 @@
         "low.RL": {
           "byPlayer": {
             "mj": {
-              "armed": 1415,
+              "armed": 70904,
               "team": "mj",
-              "unarmed": 193
+              "unarmed": 9727
             },
             "speedball": {
-              "armed": 1724,
+              "armed": 86022,
               "team": "speedball",
-              "unarmed": 76
+              "unarmed": 3726
             }
           },
           "contested": 2.1,
           "empty": 74.4,
           "teamAControl": 12.3,
           "teamAWeakControl": 0.5,
-          "teamBControl": 9.7,
+          "teamBControl": 9.8,
           "teamBWeakControl": 1,
           "weakContested": 0
         }

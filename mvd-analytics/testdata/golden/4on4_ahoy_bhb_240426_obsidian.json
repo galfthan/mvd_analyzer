@@ -93234,7 +93234,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -432240,95 +432240,95 @@
         "QUAD": {
           "byPlayer": {
             "Doomie": {
-              "armed": 91,
+              "armed": 4571,
               "team": "BhB",
-              "unarmed": 2055
+              "unarmed": 102693
             },
             "KreatoR": {
-              "armed": 40,
+              "armed": 1996,
               "team": "BhB",
-              "unarmed": 2270
+              "unarmed": 113356
             },
             "ThundeR": {
-              "armed": 388,
+              "armed": 19384,
               "team": "BhB",
-              "unarmed": 1356
+              "unarmed": 67777
             },
             "[nW].Veggie": {
               "armed": 0,
               "team": "ahoy",
-              "unarmed": 1677
+              "unarmed": 83989
             },
             "nexus": {
-              "armed": 212,
+              "armed": 10591,
               "team": "ahoy",
-              "unarmed": 1735
+              "unarmed": 86904
             },
             "ocoini": {
-              "armed": 189,
+              "armed": 9417,
               "team": "ahoy",
-              "unarmed": 1861
+              "unarmed": 93152
             },
             "rghst": {
-              "armed": 59,
+              "armed": 2953,
               "team": "BhB",
-              "unarmed": 2477
+              "unarmed": 123855
             },
             "sailorman": {
-              "armed": 641,
+              "armed": 32147,
               "team": "ahoy",
-              "unarmed": 1207
+              "unarmed": 60354
             }
           },
           "contested": 0.2,
-          "empty": 56.6,
+          "empty": 56.5,
           "teamAControl": 4.2,
-          "teamAWeakControl": 13,
-          "teamBControl": 2.2,
+          "teamAWeakControl": 13.1,
+          "teamBControl": 2.3,
           "teamBWeakControl": 16.9,
           "weakContested": 6.9
         },
         "RL": {
           "byPlayer": {
             "Doomie": {
-              "armed": 264,
+              "armed": 13161,
               "team": "BhB",
-              "unarmed": 3070
+              "unarmed": 153524
             },
             "KreatoR": {
-              "armed": 962,
+              "armed": 48196,
               "team": "BhB",
-              "unarmed": 4013
+              "unarmed": 200587
             },
             "ThundeR": {
-              "armed": 447,
+              "armed": 22317,
               "team": "BhB",
-              "unarmed": 1859
+              "unarmed": 93079
             },
             "[nW].Veggie": {
-              "armed": 231,
+              "armed": 11588,
               "team": "ahoy",
-              "unarmed": 3347
+              "unarmed": 167323
             },
             "nexus": {
-              "armed": 1177,
+              "armed": 58764,
               "team": "ahoy",
-              "unarmed": 3824
+              "unarmed": 191279
             },
             "ocoini": {
-              "armed": 364,
+              "armed": 18205,
               "team": "ahoy",
-              "unarmed": 3752
+              "unarmed": 187835
             },
             "rghst": {
-              "armed": 350,
+              "armed": 17543,
               "team": "BhB",
-              "unarmed": 3223
+              "unarmed": 161126
             },
             "sailorman": {
-              "armed": 669,
+              "armed": 33414,
               "team": "ahoy",
-              "unarmed": 3618
+              "unarmed": 180917
             }
           },
           "contested": 0,
@@ -432342,44 +432342,44 @@
         "YA": {
           "byPlayer": {
             "Doomie": {
-              "armed": 199,
+              "armed": 9886,
               "team": "BhB",
-              "unarmed": 5423
+              "unarmed": 271068
             },
             "KreatoR": {
-              "armed": 791,
+              "armed": 39584,
               "team": "BhB",
-              "unarmed": 2192
+              "unarmed": 109669
             },
             "ThundeR": {
-              "armed": 1151,
+              "armed": 57490,
               "team": "BhB",
-              "unarmed": 4910
+              "unarmed": 245424
             },
             "[nW].Veggie": {
               "armed": 0,
               "team": "ahoy",
-              "unarmed": 4503
+              "unarmed": 225169
             },
             "nexus": {
-              "armed": 2399,
+              "armed": 119889,
               "team": "ahoy",
-              "unarmed": 2276
+              "unarmed": 113819
             },
             "ocoini": {
-              "armed": 497,
+              "armed": 24796,
               "team": "ahoy",
-              "unarmed": 3977
+              "unarmed": 198796
             },
             "rghst": {
-              "armed": 1229,
+              "armed": 61372,
               "team": "BhB",
-              "unarmed": 3540
+              "unarmed": 177071
             },
             "sailorman": {
-              "armed": 1881,
+              "armed": 94061,
               "team": "ahoy",
-              "unarmed": 1899
+              "unarmed": 94718
             }
           },
           "contested": 1.3,
@@ -432388,7 +432388,7 @@
           "teamAWeakControl": 13.3,
           "teamBControl": 12.2,
           "teamBWeakControl": 23.5,
-          "weakContested": 12.9
+          "weakContested": 12.8
         }
       },
       "teamA": "ahoy",

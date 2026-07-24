@@ -78,7 +78,7 @@ type GetEventsInput struct {
 	StartTime int32    `json:"startTime,omitempty"`
 	EndTime   int32    `json:"endTime,omitempty"`
 	Players   []string `json:"players,omitempty"`
-	Types     []string `json:"types,omitempty" jsonschema:"event types. Default set (when empty): frag, powerup, streak, spawn, death, weapon, item, chat, pickup. Opt-in (pass explicitly): loc, health, armor, damage, telefrag, stomp. pickup = identity-rich takes: world takes detail{item, kind, entNum, loc?, source:'world'}, backpack/unknown grants detail{item, kind, source, entNum?, dropper?} (no loc); weapon/item = held-interval gain/lose (the holding story). spawn carries detail{loc} and includes the synthesized match-start spawn at t=0. A damage event carries detail{victim, damage, weapon, isSplash?, ...}; telefrag/stomp carry detail{victim, isTeam?} with player = the killer (the kill is already in the frag feed, hence opt-in)"`
+	Types     []string `json:"types,omitempty" jsonschema:"event types. Default set (when empty): frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause. Opt-in (pass explicitly): loc, health, armor, damage, telefrag, stomp. pickup = identity-rich takes: world takes detail{item, kind, entNum, loc?, source:'world'}, backpack/unknown grants detail{item, kind, source, entNum?, dropper?} (no loc); weapon/item = held-interval gain/lose (the holding story). spawn carries detail{loc} and includes the synthesized match-start spawn at t=0. demomark = a /demomark bookmark inserted during play, detail carries spectator:true when a spectator inserted it. airgib = direct enemy rocket hit on an airborne victim, player = attacker, detail{victim, height, damage, lethal?}. pause = game-clock freeze segment, no player (so a players= filter excludes it), detail{durationMs}. A damage event carries detail{victim, damage, weapon, isSplash?, ...} where damage is the UNBOUNDED wire value (e.g. squish 1000) and detail.bounded is the KTX-scoreboard value, present only when it differs (absent on midair/instagib/dmgfrags demos) — getDamage defaults to the bounded family, so cross-check against its bounded figures, not raw damage. telefrag/stomp carry detail{victim, isTeam?} with player = the killer (the kill is already in the frag feed, hence opt-in)"`
 	Loc       string   `json:"loc,omitempty" jsonschema:"loc-event representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
 }
 
@@ -123,6 +123,7 @@ type GetRegionControlInput struct {
 	WindowMs  int    `json:"windowMs,omitempty" jsonschema:"bucket size in MILLISECONDS (startTime/endTime are ALSO integer milliseconds); default 5000 (5 s) for the per-region state strings — finer resolution multiplies the bucketStates string length"`
 	StartTime int32  `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer)"`
 	EndTime   int32  `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
+	Regions   string `json:"regions,omitempty" jsonschema:"polygon detail: 'full' (each region's ~6KB polygon points included — needed only for drawing the map overlay), 'summary' (points stripped; name/locs/centroids kept), 'none' (regions list omitted). MCP default 'summary' for token economy (REST differs: full); pass 'full' when you need the points."`
 }
 
 // GetDemoInfoInput identifies a demo for the KTX demoinfo blob.
@@ -143,7 +144,7 @@ type GetMetadataInput struct {
 type GetFragsInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict aggregates + kill log to entries involving these players (killer OR victim)"`
-	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict aggregates + kill log to these weapon codes (rl, lg, gl, ssg, sng, ng, axe, sg, ...)"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict aggregates + kill log to these weapon codes. Full set: rl, lg, gl, ssg, sng, ng, sg, axe, hook, rail, tele, stomp, squish, fall, lava, slime, water, world, unknown, suicide, teamkill. Unknown tokens are rejected 400 invalid_param naming the valid set"`
 	StartTime int32    `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer) (frags at or after this time)"`
 	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer) (frags at or before this time)"`
 	Summary   bool     `json:"summary,omitempty" jsonschema:"return only aggregates, dropping the big per-event kill log (avoids overflowing context)"`
@@ -156,7 +157,7 @@ type GetFragsInput struct {
 type GetDamageInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict aggregates + damage log to entries involving these players (attacker OR victim)"`
-	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict aggregates + damage log to these attacker weapon codes (rl, lg, gl, ssg, sng, sg, tele, ...)"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict aggregates + damage log to these attacker weapon codes. Full set: rl, lg, gl, ssg, sng, ng, sg, axe, squish, explobox, lava, slime, drown, fall, trigger, suicide, unknown, plus the pseudo-codes tele/stomp selecting the positional instant kills. Unknown tokens are rejected 400 invalid_param naming the valid set"`
 	StartTime int32    `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer) (hits at or after this time)"`
 	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer) (hits at or before this time)"`
 	Summary   *bool    `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): aggregates only, the big per-hit damage log dropped. Pass false for the full log."`
@@ -222,7 +223,7 @@ type GetMapEntitiesByMapInput struct {
 type GetWeaponPickupsInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict to picks by these names"`
-	Weapons   []string `json:"weapons,omitempty" jsonschema:"weapon codes: rl, lg, gl, ssg, sng, ng"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"weapon codes: ssg, ng, sng, gl, rl, lg; unknown tokens are rejected 400 invalid_param"`
 	Source    string   `json:"source,omitempty" jsonschema:"'world' (spawner) or 'backpack' (RL/LG drop)"`
 	StartTime int32    `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer) (pickups at or after this time)"`
 	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
@@ -254,7 +255,7 @@ type SearchGamesInput struct {
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
 	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
-	Limit    int      `json:"limit,omitempty"    jsonschema:"max rows (default 20, max 100; larger values rejected 400 invalid_param)"`
+	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 100, larger values rejected 400 invalid_param"`
 	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
 	Roster   bool     `json:"roster,omitempty"   jsonschema:"true = verbatim hub rows with full roster detail (per-player ping, color arrays, name_color). Default = compact rows: players projected to {name, team, frags}"`
 }

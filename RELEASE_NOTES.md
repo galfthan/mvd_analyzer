@@ -5,6 +5,105 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-23 (tweak-mcp) — audit fixes, schema v59
+
+Closes out an external MCP-consumer audit (12 findings). Most changes
+are view-layer only; the region-control stats change moves served
+values, so `CurrentSchemaVersion` bumps to **v59** and the golden
+corpus was regenerated.
+
+- **Region-control stats are now an exact time-weighted integral.**
+  `stats` (the match-aggregate percentages + `byPlayer` tallies) is
+  computed by walking the union of every player's native Position
+  sample times and their RL/LG armed-interval boundaries, classifying
+  each constant-state interval once and accumulating its **real
+  duration** — no grid at all. This replaces the interim fixed native
+  50 ms stats grid: because that grid still quantized presence to 50 ms
+  quanta, its percentages were an approximation. Two consequences: the
+  state percentages shift slightly (de-quantized), and
+  `RegionStats.byPlayer.armed`/`unarmed` change **units** from
+  50 ms-bucket counts to integer **milliseconds** of presence (Go field
+  type unchanged, `int`; value ~50× larger). `bucketStates` still honours
+  the caller's `windowMs` and is unchanged — `windowMs` now affects only
+  that display grid. As a result the `windowMs=50` output is **no longer
+  byte-identical** to prior versions (schema v59; goldens regenerated).
+- **`weapons=` filters validate against closed vocabularies.**
+  `/frags`, `/damage`, `/backpacks`, `/weapon-pickups` now reject an
+  unknown weapon token with `400 invalid_param` naming the valid set —
+  the same treatment `/events` `types` already got — instead of
+  silently matching nothing. Each vocabulary is pinned to its producing
+  analyzer code (`view.fragWeaponVocab` et al.); RESULT_SCHEMA's frag
+  weapon vocabulary was corrected against the code (`axe` not `ax`,
+  plus the previously undocumented `hook`/`rail`/`stomp`/`unknown`/
+  `suicide` causes).
+- **Filtered `/damage` no longer ships the full-match scoreboard.**
+  The KTX end-of-match cross-check has no per-event provenance, so it
+  cannot be recomputed against a `weapons` or a *restrictive* time
+  filter; it is now omitted under those filters (players-only filtering
+  still narrows it as before) instead of riding whole-match totals along
+  a small filtered payload.
+- **MCP tool descriptions caught up with the surface.** The `getEvents`
+  `types` description now lists the full 12-type default set (it had
+  never learned `demomark`/`airgib`/`pause` — the runtime error was the
+  only place the list existed); weapons params list their full
+  vocabularies; the `getRegionControl` description documents the
+  `bucketStates` alphabet and the counts-vs-percentages split in
+  `stats`; the `teamkill` frag token and `searchGames` `limit=0`
+  semantics are documented; the stale "v57" pin is gone from the
+  pure-ms wording.
+- The `artifact_unknown` 404 now points MCP callers at `listArtifacts`
+  (the old hint named only `GET /v1/artifacts`, unreachable over MCP).
+- **`/events` damage rows surface the stored bounded value.** The
+  opt-in `damage` events mirror the per-hit log: `detail.damage` stays
+  the unbounded wire value, and the new `detail.bounded` passes the
+  stored KTX-scoreboard reconstruction through (present only when it
+  differs; absent on `skipped:*` demos) — so an events reader can
+  cross-check `/damage`'s bounded-family figures without a second
+  fetch. KTX's own demoinfo dmg is bounded semantics
+  (`ktx/src/combat.c`: armor absorbed in full + health damage capped at
+  the victim's remaining health), which is why bounded is the family
+  the scoreboard-minded reader wants.
+- **`searchGames`/`/v1/games/search` reject an explicit `limit=0`.** An
+  explicit `limit=0` in the query string is distinguishable from an
+  absent limit, so it now 400s `invalid_param` ("omit it for the default
+  20") rather than being silently treated as the default — the v57
+  reject-loudly posture. An omitted limit still defaults to 20; negative
+  and `>100` still 400. The MCP `searchGames` `limit` field became a
+  `*int` so an explicit `0` forwards to the REST boundary instead of
+  being dropped as the Go zero value.
+- **`/overview` `map` is the canonical shortname; new `mapTitle`.**
+  `map` now carries the map shortname from `EffectiveMap` (demoinfo →
+  serverinfo fallback — the same value `searchGames` rows and
+  `/metadata` serverinfo carry, so a consumer can join on it), where it
+  previously echoed the BSP's pretty title (`Claustrophobopolis` on
+  dm2). The pretty title moves to an additive `mapTitle`, omitted when
+  identical to `map`. View-layer only — stored `Result.Match.Map` is
+  unchanged.
+- **`/region-control` gains a `regions` param.** `full` (REST default;
+  backward-compatible — the region polygon `points` included), `summary`
+  (points stripped; name/locs/centroids kept), `none` (regions list
+  omitted). Trims the ~6 KB polygon payload for stats-only consumers;
+  `bucketStates`/`stats` are unaffected. The MCP `getRegionControl`
+  defaults to `summary` (same divergent default as `getItems`; a
+  defaulted response carries a `hint`) — pass `regions:'full'` for the
+  points. The stored Result's regions are never mutated.
+
+A second code-review pass tightened the above: region-control `stats`
+are now computed independently of the display grid, so a coarse
+`windowMs` whose sub-window rounds to zero buckets — and the
+empty-roster case that used to yield `empty:100` rows — still return
+stats; an explicit whole-match `/damage` `to=` window is treated as
+unfiltered, so it keeps the scoreboard and the KTX-exact bounded
+summary instead of taking the recompute path; and the `mapTitle`
+elision is case-insensitive (`aerowalk` vs `Aerowalk` no longer emits a
+spurious title).
+
+Deferred from the audit (tracked, not shipped here): a warming/retry
+response for cold-start analysis timeouts, hub-side `limit=0`
+semantics beyond the boundary rejection above, recovering the real
+weapon behind `teamkill` frag rows, and a `mapTitle` on `searchGames`
+rows (overview now has it).
+
 ## 2026-07-23 (add-airgib-pause-events) — view-layer change, no schema bump
 
 Put **airgibs and pauses on the default event stream**. Both signals

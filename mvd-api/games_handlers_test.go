@@ -116,9 +116,9 @@ func TestGamesSearch_InvalidParam(t *testing.T) {
 }
 
 // limit/offset are bounded at the API boundary rather than silently clamped
-// downstream (v57 reject-loudly posture): limit>100 and negative limit/offset
-// 400 invalid_param; limit=0 stays the default; a valid limit reaches the
-// searcher unchanged.
+// downstream (v57 reject-loudly posture): limit>100, an explicit limit=0, and
+// negative limit/offset all 400 invalid_param; an omitted limit keeps the
+// default; a valid limit reaches the searcher unchanged.
 func TestGamesSearch_LimitOffsetBounds(t *testing.T) {
 	t.Run("limit-too-large", func(t *testing.T) {
 		sr := &capturingSearcher{}
@@ -151,16 +151,36 @@ func TestGamesSearch_LimitOffsetBounds(t *testing.T) {
 		}
 	})
 
-	t.Run("limit-zero-default", func(t *testing.T) {
+	t.Run("limit-zero-rejected", func(t *testing.T) {
 		sr := &capturingSearcher{}
 		srv := newSearchServer(t, sr)
 		defer srv.Close()
 
-		getJSON(t, srv.URL+"/v1/games/search?limit=0", 200)
-		if !sr.seen {
-			t.Fatal("searcher was not invoked for limit=0")
+		// An EXPLICIT limit=0 is distinguishable from an absent limit and is
+		// rejected loudly (v57 posture) rather than treated as the default.
+		body, status := getRaw(t, srv.URL+"/v1/games/search?limit=0")
+		if status != 400 {
+			t.Fatalf("status = %d, want 400 (body=%s)", status, body)
 		}
-		// 0 is passed through as "default"; hubfetch resolves it to 20.
+		if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "omit it for the default 20") {
+			t.Errorf("body missing invalid_param/omit-hint detail: %s", body)
+		}
+		if sr.seen {
+			t.Error("searcher must not be called when limit=0")
+		}
+	})
+
+	t.Run("limit-absent-reaches-searcher-as-default", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		// No limit param: 0 flows to the searcher as the "default" sentinel
+		// (hubfetch resolves it to 20).
+		getJSON(t, srv.URL+"/v1/games/search", 200)
+		if !sr.seen {
+			t.Fatal("searcher was not invoked for an absent limit")
+		}
 		if sr.got.Limit != 0 {
 			t.Errorf("limit = %d; want 0 (default sentinel)", sr.got.Limit)
 		}

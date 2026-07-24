@@ -90806,7 +90806,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -228248,44 +228248,44 @@
         "Cathedral": {
           "byPlayer": {
             ".N3ophyt3.": {
-              "armed": 4351,
+              "armed": 217518,
               "team": "'tbg",
-              "unarmed": 2265
+              "unarmed": 113419
             },
             "DobeZz": {
-              "armed": 1289,
+              "armed": 64474,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 2739
+              "unarmed": 136951
             },
             "anni": {
-              "armed": 1261,
+              "armed": 63047,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 2936
+              "unarmed": 146967
             },
             "biggz": {
-              "armed": 2771,
+              "armed": 138603,
               "team": "'tbg",
-              "unarmed": 3742
+              "unarmed": 187110
             },
             "gore": {
-              "armed": 631,
+              "armed": 31515,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3126
+              "unarmed": 156096
             },
             "nexus": {
-              "armed": 3707,
+              "armed": 185391,
               "team": "'tbg",
-              "unarmed": 2683
+              "unarmed": 134215
             },
             "ocoini": {
-              "armed": 770,
+              "armed": 38531,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3294
+              "unarmed": 164861
             },
             "paniagua": {
-              "armed": 4192,
+              "armed": 209647,
               "team": "'tbg",
-              "unarmed": 1612
+              "unarmed": 80551
             }
           },
           "contested": 4.6,
@@ -228299,44 +228299,44 @@
         "QUAD": {
           "byPlayer": {
             ".N3ophyt3.": {
-              "armed": 4353,
+              "armed": 217571,
               "team": "'tbg",
-              "unarmed": 2015
+              "unarmed": 100540
             },
             "DobeZz": {
-              "armed": 913,
+              "armed": 45671,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3250
+              "unarmed": 162601
             },
             "anni": {
-              "armed": 2138,
+              "armed": 106997,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3004
+              "unarmed": 150287
             },
             "biggz": {
-              "armed": 1997,
+              "armed": 99747,
               "team": "'tbg",
-              "unarmed": 2451
+              "unarmed": 122442
             },
             "gore": {
-              "armed": 1596,
+              "armed": 79873,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 2685
+              "unarmed": 134418
             },
             "nexus": {
-              "armed": 4458,
+              "armed": 222651,
               "team": "'tbg",
-              "unarmed": 1196
+              "unarmed": 59777
             },
             "ocoini": {
-              "armed": 769,
+              "armed": 38527,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 4097
+              "unarmed": 204822
             },
             "paniagua": {
-              "armed": 3523,
+              "armed": 176022,
               "team": "'tbg",
-              "unarmed": 2832
+              "unarmed": 141841
             }
           },
           "contested": 10,
@@ -228350,44 +228350,44 @@
         "RA": {
           "byPlayer": {
             ".N3ophyt3.": {
-              "armed": 1751,
+              "armed": 87446,
               "team": "'tbg",
-              "unarmed": 1854
+              "unarmed": 92632
             },
             "DobeZz": {
-              "armed": 1704,
+              "armed": 85163,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 1663
+              "unarmed": 83169
             },
             "anni": {
-              "armed": 2675,
+              "armed": 133915,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 2103
+              "unarmed": 105186
             },
             "biggz": {
-              "armed": 2140,
+              "armed": 107024,
               "team": "'tbg",
-              "unarmed": 1776
+              "unarmed": 88885
             },
             "gore": {
-              "armed": 1134,
+              "armed": 56705,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3524
+              "unarmed": 176209
             },
             "nexus": {
-              "armed": 4841,
+              "armed": 241872,
               "team": "'tbg",
-              "unarmed": 719
+              "unarmed": 36007
             },
             "ocoini": {
-              "armed": 1570,
+              "armed": 78487,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 3103
+              "unarmed": 155002
             },
             "paniagua": {
-              "armed": 2878,
+              "armed": 144041,
               "team": "'tbg",
-              "unarmed": 1900
+              "unarmed": 95115
             }
           },
           "contested": 2.3,
@@ -228401,44 +228401,44 @@
         "Tower": {
           "byPlayer": {
             ".N3ophyt3.": {
-              "armed": 1809,
+              "armed": 90581,
               "team": "'tbg",
-              "unarmed": 2267
+              "unarmed": 113310
             },
             "DobeZz": {
-              "armed": 872,
+              "armed": 43651,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 7652
+              "unarmed": 382291
             },
             "anni": {
-              "armed": 1752,
+              "armed": 87483,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 4053
+              "unarmed": 202437
             },
             "biggz": {
-              "armed": 1303,
+              "armed": 65143,
               "team": "'tbg",
-              "unarmed": 3382
+              "unarmed": 169217
             },
             "gore": {
-              "armed": 1371,
+              "armed": 68548,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 7363
+              "unarmed": 368120
             },
             "nexus": {
-              "armed": 1412,
+              "armed": 70582,
               "team": "'tbg",
-              "unarmed": 1982
+              "unarmed": 99208
             },
             "ocoini": {
-              "armed": 945,
+              "armed": 47223,
               "team": "'\u003e\u003c\u003e",
-              "unarmed": 5198
+              "unarmed": 259963
             },
             "paniagua": {
-              "armed": 1520,
+              "armed": 75903,
               "team": "'tbg",
-              "unarmed": 1896
+              "unarmed": 94763
             }
           },
           "contested": 3.8,

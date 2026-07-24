@@ -333,6 +333,11 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 	}
 	out, err := view.Frags(res, opts)
 	if err != nil {
+		// A bogus weapons token is a 400, not the 422 no-frag-log path.
+		if errors.Is(err, view.ErrInvalidFilter) {
+			writeInvalidParam(w, err)
+			return
+		}
 		s.writeUnavailable(w, r, err, "frags_unavailable", "this demo has no frag log")
 		return
 	}
@@ -410,6 +415,12 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 		out, err = view.Damage(res, opts)
 	}
 	if err != nil {
+		// A bogus weapons token is a 400 — it does not wrap ErrUnavailable, so
+		// it is checked first (and never triggered the bounded fallback above).
+		if errors.Is(err, view.ErrInvalidFilter) {
+			writeInvalidParam(w, err)
+			return
+		}
 		// ErrBoundedUnavailable wraps ErrUnavailable, so it must be singled out
 		// before the generic writeUnavailable. Only an explicit dmg=bounded
 		// reaches here. Name the demo's boundedMode so the caller learns why the
@@ -602,7 +613,11 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: view.Backpacks(res, opts)})
+	bp, err := view.Backpacks(res, opts)
+	if writeInvalidParam(w, err) { // only ErrInvalidFilter (bogus weapons token) → 400
+		return
+	}
+	writeJSON(w, http.StatusOK, view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: bp})
 }
 
 // handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
@@ -703,7 +718,11 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("unknown source %q; valid: world, backpack, unknown", opts.Source))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: view.WeaponPickups(res, opts)})
+	wp, err := view.WeaponPickups(res, opts)
+	if writeInvalidParam(w, err) { // only ErrInvalidFilter (bogus weapons token) → 400
+		return
+	}
+	writeJSON(w, http.StatusOK, view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: wp})
 }
 
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
@@ -1021,6 +1040,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		StartTime: p.Ms("from", 0),
 		EndTime:   p.Ms("to", 0),
 	}
+	regionsMode := p.Regions()
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -1035,7 +1055,27 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: rcv})
+	// Shallow value copy of the view result so we can vary Regions per mode
+	// without mutating the stored Result — embedding the copy keeps the body
+	// in lock-step with the RegionControlResult shape (no shadow envelope).
+	body := *rcv
+	switch regionsMode {
+	case "summary":
+		// Copy each region and drop its Points polygon (~6KB total) — never
+		// mutate the stored Result's slice. name/locs/centroids are kept.
+		slim := make([]result.ControlRegion, len(rcv.Regions))
+		for i, rg := range rcv.Regions {
+			rg.Points = nil
+			slim[i] = rg
+		}
+		body.Regions = slim
+	case "none":
+		// Regions omitted from the response entirely (regions,omitempty).
+		body.Regions = nil
+	default: // "full"
+		// body.Regions is already rcv.Regions.
+	}
+	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: &body})
 }
 
 // handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list

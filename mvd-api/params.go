@@ -105,6 +105,22 @@ func parseDmg(q url.Values) (string, error) {
 	return "", fmt.Errorf("invalid dmg=%q (want 'raw', 'bounded' or 'both')", ciGet(q, "dmg"))
 }
 
+// parseRegions reads ?regions=full|summary|none. Empty → "full" (the default,
+// backward-compatible: the full ControlRegion list including polygon Points).
+// "summary" keeps each region's name/locs/centroids but strips its Points
+// polygon; "none" omits the regions list entirely. Any other value is an error.
+func parseRegions(q url.Values) (string, error) {
+	switch strings.ToLower(strings.TrimSpace(ciGet(q, "regions"))) {
+	case "", "full":
+		return "full", nil
+	case "summary":
+		return "summary", nil
+	case "none":
+		return "none", nil
+	}
+	return "", fmt.Errorf("invalid regions=%q (want 'full', 'summary' or 'none')", ciGet(q, "regions"))
+}
+
 // parseReducers parses a comma-separated list of "field=name" pairs.
 // Empty → nil. Malformed → error.
 func parseReducers(v string) (map[string]string, error) {
@@ -310,6 +326,20 @@ func (p *qp) Dmg() string {
 		return ""
 	}
 	v, err := parseDmg(p.q)
+	if err != nil {
+		p.err = err
+	}
+	return v
+}
+
+// Regions reads ?regions=full|summary|none (empty → "full"). No-op after a
+// prior error.
+func (p *qp) Regions() string {
+	p.mark("regions")
+	if p.err != nil {
+		return "full"
+	}
+	v, err := parseRegions(p.q)
 	if err != nil {
 		p.err = err
 	}

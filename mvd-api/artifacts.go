@@ -134,7 +134,7 @@ func (s *server) handleArtifact(w http.ResponseWriter, r *http.Request) {
 	meta, ok := analyzer.ServableArtifact(name)
 	if !ok {
 		writeError(w, http.StatusNotFound, "artifact_unknown",
-			fmt.Sprintf("no servable artifact %q (see GET /v1/artifacts)", name))
+			fmt.Sprintf("no servable artifact %q (discover names via GET /v1/artifacts or the listArtifacts MCP tool)", name))
 		return
 	}
 	// Artifacts are parameter-free; parameterised reads are the view endpoints

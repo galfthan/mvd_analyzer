@@ -89806,7 +89806,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -253334,44 +253334,44 @@
         "LG": {
           "byPlayer": {
             "[cmd] witka": {
-              "armed": 115,
+              "armed": 5702,
               "team": ".ra.",
-              "unarmed": 329
+              "unarmed": 16459
             },
             "apa": {
-              "armed": 79,
+              "armed": 3885,
               "team": "oSaMs",
-              "unarmed": 471
+              "unarmed": 23515
             },
             "clox": {
-              "armed": 142,
+              "armed": 7024,
               "team": "oSaMs",
-              "unarmed": 831
+              "unarmed": 41560
             },
             "doberman": {
-              "armed": 138,
+              "armed": 6868,
               "team": ".ra.",
-              "unarmed": 662
+              "unarmed": 33134
             },
             "lakso": {
               "armed": 0,
               "team": "oSaMs",
-              "unarmed": 137
+              "unarmed": 6864
             },
             "marksuzu": {
-              "armed": 184,
+              "armed": 9090,
               "team": "oSaMs",
-              "unarmed": 192
+              "unarmed": 9553
             },
             "nlk": {
-              "armed": 227,
+              "armed": 11289,
               "team": ".ra.",
-              "unarmed": 566
+              "unarmed": 28201
             },
             "sCorp": {
-              "armed": 176,
+              "armed": 8827,
               "team": ".ra.",
-              "unarmed": 225
+              "unarmed": 11245
             }
           },
           "contested": 0,
@@ -253385,44 +253385,44 @@
         "QUAD": {
           "byPlayer": {
             "[cmd] witka": {
-              "armed": 421,
+              "armed": 21083,
               "team": ".ra.",
-              "unarmed": 1803
+              "unarmed": 90265
             },
             "apa": {
-              "armed": 1020,
+              "armed": 50887,
               "team": "oSaMs",
-              "unarmed": 1315
+              "unarmed": 65855
             },
             "clox": {
-              "armed": 469,
+              "armed": 23504,
               "team": "oSaMs",
-              "unarmed": 1415
+              "unarmed": 70760
             },
             "doberman": {
-              "armed": 924,
+              "armed": 46156,
               "team": ".ra.",
-              "unarmed": 1002
+              "unarmed": 50231
             },
             "lakso": {
-              "armed": 1397,
+              "armed": 69748,
               "team": "oSaMs",
-              "unarmed": 1508
+              "unarmed": 75284
             },
             "marksuzu": {
-              "armed": 713,
+              "armed": 35690,
               "team": "oSaMs",
-              "unarmed": 1150
+              "unarmed": 57551
             },
             "nlk": {
-              "armed": 918,
+              "armed": 45893,
               "team": ".ra.",
-              "unarmed": 1057
+              "unarmed": 52789
             },
             "sCorp": {
-              "armed": 1846,
+              "armed": 92368,
               "team": ".ra.",
-              "unarmed": 660
+              "unarmed": 32955
             }
           },
           "contested": 1.8,
@@ -253436,44 +253436,44 @@
         "RA": {
           "byPlayer": {
             "[cmd] witka": {
-              "armed": 1838,
+              "armed": 91891,
               "team": ".ra.",
-              "unarmed": 3463
+              "unarmed": 173076
             },
             "apa": {
-              "armed": 2078,
+              "armed": 103968,
               "team": "oSaMs",
-              "unarmed": 4026
+              "unarmed": 201357
             },
             "clox": {
-              "armed": 112,
+              "armed": 5588,
               "team": "oSaMs",
-              "unarmed": 1819
+              "unarmed": 90912
             },
             "doberman": {
-              "armed": 1858,
+              "armed": 93023,
               "team": ".ra.",
-              "unarmed": 2098
+              "unarmed": 104799
             },
             "lakso": {
-              "armed": 1787,
+              "armed": 89414,
               "team": "oSaMs",
-              "unarmed": 1731
+              "unarmed": 86518
             },
             "marksuzu": {
-              "armed": 2448,
+              "armed": 122446,
               "team": "oSaMs",
-              "unarmed": 1935
+              "unarmed": 96758
             },
             "nlk": {
-              "armed": 1614,
+              "armed": 80672,
               "team": ".ra.",
-              "unarmed": 773
+              "unarmed": 38651
             },
             "sCorp": {
-              "armed": 1732,
+              "armed": 86561,
               "team": ".ra.",
-              "unarmed": 278
+              "unarmed": 13876
             }
           },
           "contested": 1.7,
@@ -253487,50 +253487,50 @@
         "RL": {
           "byPlayer": {
             "[cmd] witka": {
-              "armed": 691,
+              "armed": 34605,
               "team": ".ra.",
-              "unarmed": 2772
+              "unarmed": 138646
             },
             "apa": {
-              "armed": 63,
+              "armed": 3128,
               "team": "oSaMs",
-              "unarmed": 1692
+              "unarmed": 84451
             },
             "clox": {
-              "armed": 723,
+              "armed": 36131,
               "team": "oSaMs",
-              "unarmed": 1644
+              "unarmed": 82075
             },
             "doberman": {
-              "armed": 282,
+              "armed": 14113,
               "team": ".ra.",
-              "unarmed": 2641
+              "unarmed": 132040
             },
             "lakso": {
-              "armed": 328,
+              "armed": 16335,
               "team": "oSaMs",
-              "unarmed": 2475
+              "unarmed": 123838
             },
             "marksuzu": {
-              "armed": 374,
+              "armed": 18680,
               "team": "oSaMs",
-              "unarmed": 1319
+              "unarmed": 65889
             },
             "nlk": {
-              "armed": 1425,
+              "armed": 71160,
               "team": ".ra.",
-              "unarmed": 2140
+              "unarmed": 107116
             },
             "sCorp": {
-              "armed": 921,
+              "armed": 46100,
               "team": ".ra.",
-              "unarmed": 904
+              "unarmed": 45232
             }
           },
           "contested": 0.4,
           "empty": 41.6,
           "teamAControl": 12.4,
-          "teamAWeakControl": 18.2,
+          "teamAWeakControl": 18.3,
           "teamBControl": 5.8,
           "teamBWeakControl": 14.1,
           "weakContested": 7.5
@@ -253538,44 +253538,44 @@
         "YA": {
           "byPlayer": {
             "[cmd] witka": {
-              "armed": 1242,
+              "armed": 62158,
               "team": ".ra.",
-              "unarmed": 2094
+              "unarmed": 104636
             },
             "apa": {
-              "armed": 940,
+              "armed": 46953,
               "team": "oSaMs",
-              "unarmed": 1169
+              "unarmed": 58438
             },
             "clox": {
-              "armed": 960,
+              "armed": 48090,
               "team": "oSaMs",
-              "unarmed": 1723
+              "unarmed": 86253
             },
             "doberman": {
-              "armed": 1339,
+              "armed": 66983,
               "team": ".ra.",
-              "unarmed": 1374
+              "unarmed": 68560
             },
             "lakso": {
-              "armed": 1043,
+              "armed": 52252,
               "team": "oSaMs",
-              "unarmed": 1734
+              "unarmed": 86777
             },
             "marksuzu": {
-              "armed": 829,
+              "armed": 41458,
               "team": "oSaMs",
-              "unarmed": 1634
+              "unarmed": 81687
             },
             "nlk": {
-              "armed": 1730,
+              "armed": 86413,
               "team": ".ra.",
-              "unarmed": 970
+              "unarmed": 48575
             },
             "sCorp": {
-              "armed": 2460,
+              "armed": 122943,
               "team": ".ra.",
-              "unarmed": 1608
+              "unarmed": 80438
             }
           },
           "contested": 0.9,

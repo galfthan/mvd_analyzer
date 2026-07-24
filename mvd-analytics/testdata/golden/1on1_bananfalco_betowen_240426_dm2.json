@@ -10813,7 +10813,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -285152,12 +285152,12 @@
         "Backroom": {
           "byPlayer": {
             "banan falco": {
-              "armed": 789,
+              "armed": 39460,
               "team": "banan falco",
               "unarmed": 0
             },
             "betowen": {
-              "armed": 1004,
+              "armed": 50249,
               "team": "betowen",
               "unarmed": 0
             }
@@ -285173,35 +285173,35 @@
         "QUAD": {
           "byPlayer": {
             "banan falco": {
-              "armed": 1213,
+              "armed": 60559,
               "team": "banan falco",
-              "unarmed": 45
+              "unarmed": 2234
             },
             "betowen": {
-              "armed": 886,
+              "armed": 44383,
               "team": "betowen",
-              "unarmed": 245
+              "unarmed": 12236
             }
           },
           "contested": 0.5,
           "empty": 81,
           "teamAControl": 6.9,
           "teamAWeakControl": 1.6,
-          "teamBControl": 9.7,
+          "teamBControl": 9.6,
           "teamBWeakControl": 0.4,
           "weakContested": 0
         },
         "Secret": {
           "byPlayer": {
             "banan falco": {
-              "armed": 254,
+              "armed": 12732,
               "team": "banan falco",
               "unarmed": 0
             },
             "betowen": {
-              "armed": 132,
+              "armed": 6550,
               "team": "betowen",
-              "unarmed": 6
+              "unarmed": 274
             }
           },
           "contested": 0,
@@ -285215,19 +285215,19 @@
         "Tele": {
           "byPlayer": {
             "banan falco": {
-              "armed": 1106,
+              "armed": 55332,
               "team": "banan falco",
-              "unarmed": 795
+              "unarmed": 39714
             },
             "betowen": {
-              "armed": 863,
+              "armed": 43113,
               "team": "betowen",
-              "unarmed": 1271
+              "unarmed": 63589
             }
           },
           "contested": 0.8,
           "empty": 68.9,
-          "teamAControl": 6.4,
+          "teamAControl": 6.3,
           "teamAWeakControl": 9.5,
           "teamBControl": 8.4,
           "teamBWeakControl": 6,
@@ -285236,14 +285236,14 @@
         "high.RL": {
           "byPlayer": {
             "banan falco": {
-              "armed": 347,
+              "armed": 17312,
               "team": "banan falco",
-              "unarmed": 59
+              "unarmed": 2994
             },
             "betowen": {
-              "armed": 150,
+              "armed": 7455,
               "team": "betowen",
-              "unarmed": 38
+              "unarmed": 1908
             }
           },
           "contested": 0.4,
@@ -285257,14 +285257,14 @@
         "low.RL": {
           "byPlayer": {
             "banan falco": {
-              "armed": 1268,
+              "armed": 63344,
               "team": "banan falco",
-              "unarmed": 82
+              "unarmed": 4131
             },
             "betowen": {
-              "armed": 1254,
+              "armed": 62736,
               "team": "betowen",
-              "unarmed": 209
+              "unarmed": 10461
             }
           },
           "contested": 0.9,

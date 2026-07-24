@@ -30497,7 +30497,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -129802,24 +129802,24 @@
         "LG": {
           "byPlayer": {
             "SS": {
-              "armed": 155,
+              "armed": 7722,
               "team": "nAnI",
               "unarmed": 0
             },
             "gLAd": {
-              "armed": 457,
+              "armed": 22853,
               "team": "nAnI",
-              "unarmed": 14
+              "unarmed": 669
             },
             "kippo": {
-              "armed": 638,
+              "armed": 31905,
               "team": "pora",
-              "unarmed": 4
+              "unarmed": 176
             },
             "rusti": {
-              "armed": 134,
+              "armed": 6676,
               "team": "pora",
-              "unarmed": 2
+              "unarmed": 149
             }
           },
           "contested": 0.4,
@@ -129833,31 +129833,31 @@
         "RA": {
           "byPlayer": {
             "SS": {
-              "armed": 5489,
+              "armed": 274598,
               "team": "nAnI",
-              "unarmed": 572
+              "unarmed": 28544
             },
             "gLAd": {
-              "armed": 4301,
+              "armed": 215149,
               "team": "nAnI",
-              "unarmed": 225
+              "unarmed": 11297
             },
             "kippo": {
-              "armed": 2677,
+              "armed": 133980,
               "team": "pora",
-              "unarmed": 824
+              "unarmed": 41107
             },
             "rusti": {
-              "armed": 4473,
+              "armed": 223388,
               "team": "pora",
-              "unarmed": 442
+              "unarmed": 22092
             }
           },
           "contested": 23.7,
           "empty": 10.7,
           "teamAControl": 37.2,
           "teamAWeakControl": 1.8,
-          "teamBControl": 25.2,
+          "teamBControl": 25.1,
           "teamBWeakControl": 1.3,
           "weakContested": 0.1
         }

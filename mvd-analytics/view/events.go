@@ -260,6 +260,13 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 				"damage": d.Damage,
 				"weapon": d.Weapon,
 			}
+			// damage is the unbounded wire value; bounded is the stored
+			// KTX-scoreboard reconstruction, passed through with its
+			// omitted-when-equal pointer convention (absent on skipped:*
+			// demos), so the event feed and the getDamage log stay 1:1.
+			if d.Bounded != nil {
+				detail["bounded"] = *d.Bounded
+			}
 			if d.IsSplash {
 				detail["isSplash"] = true
 			}
@@ -630,4 +637,14 @@ func inferMatchEnd(r *result.Result) int32 {
 		return r.Match.Duration
 	}
 	return 0
+}
+
+// matchEndMs resolves the match-end instant (int32 ms): the stream global
+// when present, else inferMatchEnd. Used to recognise an explicit whole-match
+// to= window as unfiltered.
+func matchEndMs(r *result.Result) int32 {
+	if r.Streams != nil && r.Streams.Global.MatchEnd != 0 {
+		return r.Streams.Global.MatchEnd
+	}
+	return inferMatchEnd(r)
 }

@@ -202,7 +202,7 @@ getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
 getLocTrails, getLocGraph) and carries match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
-int32 ms (schema v57, pure-ms model). getLocGraph is on that list because
+int32 ms (pure-ms model). getLocGraph is on that list because
 its node weights are int32-ms durations, and getArtifact responses carry
 the echo for every time-bearing section too. The exceptions:
 getDemoInfo is the KTX island (mixed KTX-native units), and
@@ -228,7 +228,7 @@ All fields optional; an empty filter returns the most recent matches.
 | `matchtag` | `string`   | — | Tournament/event tag, case-insensitive substring (e.g. `qwsl`) |
 | `from`     | `string`   | — | ISO date lower bound, inclusive (YYYY-MM-DD) |
 | `to`       | `string`   | — | ISO date upper bound, inclusive (YYYY-MM-DD) |
-| `limit`    | `int`      | 20 | Max rows; capped at 100 |
+| `limit`    | `int`      | 20 | Max rows; capped at 100. Omit for the default; an explicit `0` is rejected `400 invalid_param` |
 | `offset`   | `int`      | 0 | Pagination offset |
 | `roster`   | `bool`     | `false` | `true` = verbatim hub rows with full roster detail (per-player `ping`, `color` arrays, `name_color`, `team_color`, `is_bot`). Default = compact rows: `players` projected to `{name, team, frags}`. |
 
@@ -501,7 +501,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
@@ -547,13 +547,14 @@ intervals to membership; position to nearest sample.
 Output: `view.LocTrailsView` —
 `{ players: [{ name, sequence: [{ start, end, loc }, …] }, …] }`.
 
-#### `getRegionControl({demoId, windowMs?, startTime?, endTime?})`
+#### `getRegionControl({demoId, windowMs?, startTime?, endTime?, regions?})`
 
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`   | `string` (required) | — | — |
 | `windowMs` | `int` | **5000** (MCP default) | Bucket size for the per-region state strings. Same MCP-vs-REST split as `getBuckets`: REST default is 50, MCP proxy injects 5000 to keep `bucketStates` lengths manageable (a 20-min match: 240 chars per region instead of 24K). |
 | `startTime`/`endTime` | `integer` | full match | Match-relative **milliseconds**; windows the bucket range |
+| `regions` | `string` | **`summary`** (MCP default) | Polygon detail: `full` (each region's ~6 KB `points` polygon included — needed only to draw the map overlay), `summary` (points stripped; `name`/`locs`/`centroidX`/`centroidY` kept), `none` (regions list omitted). Same MCP-vs-REST divergent default as `getItems` `summary`: REST defaults to `full`, the MCP proxy injects `summary` and a defaulted response carries a `hint`. Pass `regions:'full'` for the points. |
 
 Output: `result.RegionControlResult`. Errors with
 `region_control_unavailable` (HTTP 422) if the demo's map has no

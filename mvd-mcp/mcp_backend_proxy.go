@@ -220,8 +220,8 @@ func (q query) csv(key string, vals []string) {
 	}
 }
 
-// ms encodes a match-relative time in integer milliseconds (schema v57
-// pure-ms model); 0 means "unset" (as every REST from/to defaults to the
+// ms encodes a match-relative time in integer milliseconds (pure-ms
+// model); 0 means "unset" (as every REST from/to defaults to the
 // full window).
 func (q query) ms(key string, t int32) {
 	if t != 0 {
@@ -258,6 +258,16 @@ func withSummaryHint(out any, add bool, dropped string) any {
 func (q query) intv(key string, n int) {
 	if n != 0 {
 		q.set(key, strconv.Itoa(n))
+	}
+}
+
+// intp encodes an optional integer: nil stays out of the query (the REST
+// default applies), but a non-nil pointer is forwarded verbatim — INCLUDING an
+// explicit 0, so a caller-supplied limit:0 reaches the REST boundary and earns
+// its 400 instead of being silently dropped like intv would.
+func (q query) intp(key string, n *int) {
+	if n != nil {
+		q.set(key, strconv.Itoa(*n))
 	}
 }
 
@@ -648,9 +658,25 @@ func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControl
 	if windowMs <= 0 {
 		windowMs = 5000
 	}
+	// Token-economy default (same divergent-default pattern as getItems
+	// summary): strip the ~6KB region polygon points unless the caller asks
+	// for them. REST defaults to full; the MCP layer defaults to summary. An
+	// explicit regions value wins, and a defaulted summary carries a hint.
+	regions := in.Regions
+	defaulted := regions == ""
+	if defaulted {
+		regions = "summary"
+	}
 	q := query{}
 	q.intv("windowMs", windowMs)
 	q.ms("from", in.StartTime)
 	q.ms("to", in.EndTime)
-	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+	q.str("regions", regions)
+	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
+	if defaulted && err == nil {
+		if m, ok := out.(map[string]any); ok {
+			m["hint"] = "regions=summary is the MCP default (polygon points stripped); pass regions:'full' for the points, needed only to draw the map overlay"
+		}
+	}
+	return out, err
 }
