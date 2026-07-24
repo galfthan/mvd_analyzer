@@ -245,3 +245,6 @@ the forcing function that keeps that invariant true.
 - [MVD_FORMAT.md](MVD_FORMAT.md) — the MVD binary format specification
   with ezQuake source references. The authority for anything the wire
   decoder in `mvd/` does.
+- [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — deliberate, bounded gaps in the
+  derived events (death-detection sampling corners, the ate-form
+  obituary backstop gap) with blast radius and fix shapes.
