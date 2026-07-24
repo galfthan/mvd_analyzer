@@ -88,11 +88,14 @@ var backpackWeaponVocab = []string{"rl", "lg"}
 // (mvd-analytics/analyzer/weapon_pickups.go weaponKindsOrdered).
 var weaponPickupVocab = []string{"ssg", "ng", "sng", "gl", "rl", "lg"}
 
-// validateWeapons rejects any token (matched case-insensitively, as the filters
-// themselves are) outside vocab, returning an ErrInvalidFilter-wrapped,
-// events.go-style error that names the offending token and the valid set. An
-// empty filter — and empty/whitespace tokens — pass.
-func validateWeapons(tokens []string, vocab []string) error {
+// validateEnum rejects any token outside vocab, returning an
+// ErrInvalidFilter-wrapped error that names the offending token, the label, and
+// the valid set. Tokens are matched case-insensitively (TrimSpace + ToLower, as
+// the filters themselves are); empty / whitespace-only tokens and an empty
+// token list pass. It is the one enum-token validator the filter views share —
+// the Weapons vocabularies (via validateWeapons) and the Events type set
+// (events.go) both route through it, so their 400 messages stay in one shape.
+func validateEnum(tokens, vocab []string, label string) error {
 	if len(tokens) == 0 {
 		return nil
 	}
@@ -105,9 +108,15 @@ func validateWeapons(tokens []string, vocab []string) error {
 		if lt == "" || set[lt] {
 			continue
 		}
-		return &invalidFilterError{fmt.Sprintf("unknown weapon %q; valid: %s", t, strings.Join(vocab, ", "))}
+		return &invalidFilterError{fmt.Sprintf("unknown %s %q; valid: %s", label, t, strings.Join(vocab, ", "))}
 	}
 	return nil
+}
+
+// validateWeapons validates a Weapons filter against its closed vocabulary —
+// validateEnum with the "weapon" label. An empty filter passes.
+func validateWeapons(tokens, vocab []string) error {
+	return validateEnum(tokens, vocab, "weapon")
 }
 
 // FragOptions filters FragResult. Empty fields mean "no filter". From/To

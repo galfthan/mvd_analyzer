@@ -27,12 +27,13 @@ func bspsDir(t *testing.T) string {
 func requireBSP(t *testing.T, name string) *BSP {
 	t.Helper()
 	path := filepath.Join(bspsDir(t), name)
-	if _, err := os.Stat(path); err != nil {
+	data, err := os.ReadFile(path)
+	if err != nil {
 		t.Skipf("BSP %s not available (%v) — run `make bsps` to populate the bsps/ directory", name, err)
 	}
-	b, err := Load(path)
+	b, err := LoadBytes(data)
 	if err != nil {
-		t.Fatalf("Load(%s): %v", path, err)
+		t.Fatalf("LoadBytes(%s): %v", path, err)
 	}
 	return b
 }

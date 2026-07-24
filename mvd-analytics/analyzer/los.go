@@ -474,38 +474,6 @@ func activeMoversAt(movers []losMover, t int32, dst []posedMover) []posedMover {
 	return dst
 }
 
-// computeLosAB returns the half-open [Start,End) intervals during which looker
-// a had a clear sightline to target b. It is a single-pair wrapper over
-// losForLooker (the production path handles every opponent in one pass); kept
-// for direct unit testing.
-func computeLosAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
-	two := []result.PlayerStream{*a, *b}
-	entLeaves := buildEntityLeaves(vb, two)
-	los, _ := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), entLeaves)
-	for _, tr := range los {
-		if tr.Other == 1 {
-			return tr.Iv
-		}
-	}
-	return nil
-}
-
-// computePvsAB is the pvs-metric counterpart of computeLosAB: the half-open
-// intervals during which looker a had target b in its potentially-visible set
-// (before the raycast narrows it to actual line of sight). Kept for direct unit
-// testing.
-func computePvsAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
-	two := []result.PlayerStream{*a, *b}
-	entLeaves := buildEntityLeaves(vb, two)
-	_, pvs := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), entLeaves)
-	for _, tr := range pvs {
-		if tr.Other == 1 {
-			return tr.Iv
-		}
-	}
-	return nil
-}
-
 // losSeesTargets reports whether the looker at eye can reach any of the 9
 // precomputed target points (8 bbox corners + midpoint) unblocked — early-out
 // on the first clear ray.

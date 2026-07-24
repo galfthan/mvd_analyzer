@@ -17,11 +17,6 @@ type byteSource interface {
 	ReadUint32() (uint32, error)
 }
 
-func readInt8(s byteSource) (int8, error) {
-	b, err := s.ReadByte()
-	return int8(b), err
-}
-
 func readInt16(s byteSource) (int16, error) {
 	v, err := s.ReadUint16()
 	return int16(v), err
@@ -49,22 +44,6 @@ func readCoord(s byteSource) (float32, error) {
 		return 0, err
 	}
 	return float32(v) / 8.0, nil
-}
-
-func readAngle(s byteSource) (float32, error) {
-	b, err := s.ReadByte()
-	if err != nil {
-		return 0, err
-	}
-	return float32(b) * (360.0 / 256.0), nil
-}
-
-func readAngle16(s byteSource) (float32, error) {
-	v, err := s.ReadUint16()
-	if err != nil {
-		return 0, err
-	}
-	return float32(v) * (360.0 / 65536.0), nil
 }
 
 // BinaryReader wraps an io.Reader for reading binary data
@@ -129,40 +108,6 @@ func (br *BinaryReader) ReadUint32() (uint32, error) {
 	return binary.LittleEndian.Uint32(br.buf[:4]), nil
 }
 
-// ReadString reads a null-terminated string.
-func (br *BinaryReader) ReadString() (string, error) {
-	var result []byte
-	for {
-		b, err := br.ReadByte()
-		if err != nil {
-			return "", err
-		}
-		if b == 0 {
-			break
-		}
-		result = append(result, b)
-	}
-	return string(result), nil
-}
-
-// The remaining typed readers all delegate to the shared free functions.
-func (br *BinaryReader) ReadInt8() (int8, error)       { return readInt8(br) }
-func (br *BinaryReader) ReadInt16() (int16, error)     { return readInt16(br) }
-func (br *BinaryReader) ReadInt32() (int32, error)     { return readInt32(br) }
-func (br *BinaryReader) ReadFloat32() (float32, error) { return readFloat32(br) }
-func (br *BinaryReader) ReadCoord() (float32, error)   { return readCoord(br) }
-func (br *BinaryReader) ReadFloatCoord() (float32, error) {
-	return br.ReadFloat32()
-}
-func (br *BinaryReader) ReadAngle() (float32, error)   { return readAngle(br) }
-func (br *BinaryReader) ReadAngle16() (float32, error) { return readAngle16(br) }
-
-// Skip skips n bytes
-func (br *BinaryReader) Skip(n int) error {
-	_, err := br.ReadBytes(n)
-	return err
-}
-
 // BufferReader wraps a byte slice for reading
 type BufferReader struct {
 	data   []byte
@@ -212,14 +157,6 @@ func (br *BufferReader) ReadBytes(n int) ([]byte, error) {
 	return result, nil
 }
 
-// PeekByte peeks at the next byte without consuming it
-func (br *BufferReader) PeekByte() (byte, error) {
-	if br.offset >= len(br.data) {
-		return 0, io.EOF
-	}
-	return br.data[br.offset], nil
-}
-
 // ReadUint16 reads an unsigned 16-bit little-endian integer.
 func (br *BufferReader) ReadUint16() (uint16, error) {
 	if br.offset+2 > len(br.data) {
@@ -255,7 +192,6 @@ func (br *BufferReader) ReadString() (string, error) {
 }
 
 // The remaining typed readers all delegate to the shared free functions.
-func (br *BufferReader) ReadInt8() (int8, error)       { return readInt8(br) }
 func (br *BufferReader) ReadInt16() (int16, error)     { return readInt16(br) }
 func (br *BufferReader) ReadInt32() (int32, error)     { return readInt32(br) }
 func (br *BufferReader) ReadFloat32() (float32, error) { return readFloat32(br) }
@@ -263,8 +199,6 @@ func (br *BufferReader) ReadCoord() (float32, error)   { return readCoord(br) }
 func (br *BufferReader) ReadFloatCoord() (float32, error) {
 	return br.ReadFloat32()
 }
-func (br *BufferReader) ReadAngle() (float32, error)   { return readAngle(br) }
-func (br *BufferReader) ReadAngle16() (float32, error) { return readAngle16(br) }
 
 // Skip skips n bytes
 func (br *BufferReader) Skip(n int) error {

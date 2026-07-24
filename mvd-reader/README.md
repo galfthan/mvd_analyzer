@@ -84,7 +84,6 @@ The concrete event list, in stable order:
 | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
 | `DemoMarkEvent` | KTX `//demomark[ <args>]` stufftext: `(PlayerSlot, Label)` — player-inserted bookmark. Slot is the dem_single block target (the only attribution channel), -1 if not slot-addressed; `Label` is the optional HoonyMode argument tail. Fires even out of match; not deduped |
 | `ItemPickupPrintEvent` | Per-client `svc_print` "You got the X" / "You receive N health" — covers ammo boxes and H15/H25 that `//ktx took` misses. **Subject to per-client `msg` cvar filter; frequently absent in competitive demos.** |
-| `BackpackPickupPrintEvent` | Per-client `svc_print` "You get " backpack opener — covers all backpack classes, including the SSG/NG/GL packs that `//ktx bp` skips. Same server-side-filter caveat as `ItemPickupPrintEvent`. |
 | `DemoStartTimestampEvent` | mvdhidden `0x000B`: wall-clock (Unix epoch ms, ULEB128) at demo open — anchor for syncing the demo to real time |
 | `PausedDurationEvent` | mvdhidden `0x000A`: real wall-clock ms for one paused idle frame. One per frame while paused (clock frozen); sum a run for the pause length. Note the non-standard, length-header-less framing — see [MVD_FORMAT.md](MVD_FORMAT.md#hidden-message-types) |
 | `MoverSpawnEvent` | Inline brush-model ("*N") entity observed — lift/door/train identity: entnum, BSP submodel index, baseline origin |
@@ -118,9 +117,14 @@ They fire at the exact event time, so analytics don't have to reconstruct
 death/spawn by comparing health samples across the sampling boundary
 (including the instant-respawn case where a gib and respawn land in the
 same 50 ms window). See `parser/stats.go` and `parser/print.go` for the
-emission logic; consumers that want killer / weapon attribution still go
-to the analyzer-layer obituary parser (that's KTX-mod-specific text, not
-a protocol signal).
+emission logic. The canonical obituary marker→classification table lives
+here in the parser (`parser/obituary.go`, `ObituaryPatterns`); this layer
+projects its victim-prefix subset (`FindObituaryVictim`) to recover the
+dying player's name, while the analyzer layer builds its full killer /
+weapon attribution matchers from that same table (KTX-mod-specific text
+parsing, not a protocol signal — so the derivation logic stays in
+mvd-analytics, but there is now a single shared table, not two drifting
+copies).
 
 `ItemSpawnEvent` and `ItemStateEvent` are derived events synthesised
 from the entity-state stream (`svc_spawnbaseline`,
@@ -168,13 +172,15 @@ symmetric to the existing `//ktx drop` hint. Both are
 will not emit them, in which case consumers fall back to
 `ItemStateEvent` + heuristics or to per-player stats deltas.
 
-`ItemPickupPrintEvent` and `BackpackPickupPrintEvent` complement
-the hints by parsing KTX's per-client pickup prints
-(`"You got the Red Armor"`, `"You receive 25 health"`,
-`"You get "` backpack opener). They cover categories `//ktx took`
-misses — ammo boxes (`ammo_touch` has no hint call), H15/H25, and
-all backpack classes including SSG/NG/GL packs. `PrintEvent.TargetPlayerNum`
-carries the `dem_single` slot the server addressed. **Caveat:** mvdsv's
+`ItemPickupPrintEvent` complements the hints by parsing KTX's
+per-client pickup prints (`"You got the Red Armor"`,
+`"You receive 25 health"`). It covers categories `//ktx took`
+misses — ammo boxes (`ammo_touch` has no hint call) and H15/H25.
+The `"You get "` backpack opener is deliberately *not* decoded into a
+typed event: its ammo breakdown arrives as separate per-piece prints
+that would need stateful reassembly, and no consumer uses it.
+`PrintEvent.TargetPlayerNum` carries the `dem_single` slot the server
+addressed. **Caveat:** mvdsv's
 `SV_ClientPrintf` (`mvdsv/src/sv_send.c:225`) drops prints where
 `level < cl->messagelevel` before recording, so players with `msg 1`
 or higher contribute *no* pickup prints to the MVD. Competitive
@@ -239,3 +245,6 @@ the forcing function that keeps that invariant true.
 - [MVD_FORMAT.md](MVD_FORMAT.md) — the MVD binary format specification
   with ezQuake source references. The authority for anything the wire
   decoder in `mvd/` does.
+- [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — deliberate, bounded gaps in the
+  derived events (death-detection sampling corners, the ate-form
+  obituary backstop gap) with blast radius and fix shapes.

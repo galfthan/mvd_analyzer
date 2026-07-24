@@ -63,33 +63,6 @@ func (e *ItemPickupPrintEvent) EventType() EventType { return EventItemPickupPri
 func (e *ItemPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 func (e *ItemPickupPrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
-// BackpackPickupPrintEvent fires when KTX's backpack opener line
-// `"You get "` (ktx/src/items.c:2404) is addressed to a specific
-// player. Unlike BackpackPickupHintEvent (which only fires for RL or
-// LG packs via the `//ktx bp` STUFFCMD_DEMOONLY directive), this
-// event covers *every* backpack pickup when present — including
-// SSG/NG/SNG/GL packs and ammo-only packs that have no //ktx bp at
-// all. **Subject to the same PRINT_LOW server-side filter as
-// ItemPickupPrintEvent** (see that doc comment); absent on demos
-// where the picking players have `msg >= 1`.
-//
-// Contents are NOT parsed: the ammo breakdown arrives as subsequent
-// separate svc_print messages (lines 2480-2618 in items.c issue one
-// G_sprint per piece: "the Rocket Launcher", ", 25 rockets", etc.,
-// then a trailing "\n") which would require stateful reassembly per
-// player per tick. Consumers that need exact contents should
-// correlate with per-player stats deltas (STAT_SHELLS / STAT_NAILS /
-// STAT_ROCKETS / STAT_CELLS / STAT_ITEMS bitfield changes on the same
-// tick), which the MVD already transports for every player.
-type BackpackPickupPrintEvent struct {
-	PlayerNum int // 0-based slot
-	TimeMs    int32
-}
-
-func (e *BackpackPickupPrintEvent) EventType() EventType { return EventBackpackPickupPrint }
-func (e *BackpackPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
-func (e *BackpackPickupPrintEvent) EventTimeMs() int32   { return e.TimeMs }
-
 // ktxNetnameToKind maps KTX item `netname` strings (the %s in
 // `"You got the %s\n"`) to the Kind vocabulary. Source refs are
 // ktx/src/items.c self->netname assignments.
@@ -125,7 +98,6 @@ var ktxNetnameToKind = map[string]string{
 const (
 	ktxGotThePrefix  = "You got the "
 	ktxReceivePrefix = "You receive "
-	ktxBackpackOpen  = "You get "
 )
 
 // tryEmitPickupPrint matches a `dem_single`-targeted svc_print payload
@@ -169,17 +141,6 @@ func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, 
 		return p.emit(&ItemPickupPrintEvent{
 			PlayerNum: targetPlayerNum,
 			Kind:      kind,
-			TimeMs:    timeMs,
-		})
-	}
-
-	// "You get " — backpack opener (items.c:2404). Subsequent
-	// per-piece prints ("the Rocket Launcher", ", 25 rockets") are
-	// separate svc_print messages and deliberately ignored; see the
-	// BackpackPickupPrintEvent doc comment.
-	if strings.HasPrefix(trimmed, ktxBackpackOpen) {
-		return p.emit(&BackpackPickupPrintEvent{
-			PlayerNum: targetPlayerNum,
 			TimeMs:    timeMs,
 		})
 	}

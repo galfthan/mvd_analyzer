@@ -5,6 +5,21 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-24 (cleanup-dedup) — reject explicit `windowMs=0` (no schema bump)
+
+HTTP-boundary validation only; no schema change, goldens unchanged.
+
+- **`/buckets` and `/region-control` now reject an explicit
+  `windowMs=0`** with `400 invalid_param`
+  (`windowMs must be >= 1; omit it for the default 50`), instead of
+  silently coercing it to the default 50 — the same reject-loudly
+  posture the games-search `limit=0` rejection already took. An
+  **omitted** `windowMs` still defaults to 50, and the view-level
+  `<=0 → 50` coercion is unchanged (it remains the programmatic-caller
+  default for the WASM / `qw-analyze` in-process paths); this is only
+  the HTTP surface. Approved as a breaking change to the (rare)
+  `windowMs=0` case.
+
 ## 2026-07-23 (tweak-mcp) — audit fixes, schema v59
 
 Closes out an external MCP-consumer audit (12 findings). Most changes

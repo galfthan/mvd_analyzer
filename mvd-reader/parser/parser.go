@@ -49,7 +49,6 @@ const (
 	EventItemPickupHint
 	EventBackpackPickupHint
 	EventItemPickupPrint
-	EventBackpackPickupPrint
 	EventDemoStartTimestamp
 	EventPausedDuration
 	EventMoverSpawn

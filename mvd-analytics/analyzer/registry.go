@@ -41,7 +41,6 @@ type Registry struct {
 	// assembled Result and refining it in place. They are ordered, like
 	// everything else, by their declared edges — not by being "last".
 	postProcessors []ResultPostProcessor
-	Config         *config.Config
 
 	// specs is the registration-order node list with declared artifact
 	// edges; nodes is that list in validated topological execution order.
@@ -101,12 +100,11 @@ func postProcName(p ResultPostProcessor) string {
 	return name
 }
 
-// NewRegistry creates an empty analyzer registry seeded with the
-// embedded default config. No analysers or post-processors are
-// registered — callers wire those up explicitly (or use
-// NewDefaultRegistry).
+// NewRegistry creates an empty analyzer registry. No analysers or
+// post-processors are registered — callers wire those up explicitly
+// (or use NewDefaultRegistry).
 func NewRegistry() *Registry {
-	return &Registry{Config: config.Default()}
+	return &Registry{}
 }
 
 // Register adds an event-reading analyzer node. Whether it publishes
@@ -323,11 +321,9 @@ func canonicalizeErrors(errs []string) {
 }
 
 // NewDefaultRegistry creates a registry with all default analyzers,
-// configured from the embedded defaults in qwanalytics/config. Callers
-// that want to override config values should construct this registry
-// and mutate r.Config fields before calling Analyze — analyzers pick
-// up their configured values from the registry at construction time,
-// so further mutations are applied here via targeted setters.
+// configured from the constants in qwanalytics/config. Analyzers pick
+// up their configured values at construction time via targeted setters
+// (e.g. SetBlipThresholdMs below).
 func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
 
@@ -360,7 +356,7 @@ func NewDefaultRegistry() *Registry {
 	r.Register(NewMatchAnalyzer())
 	r.Register(NewMessagesAnalyzer())
 	ta := NewTimelineAnalyzer()
-	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
+	ta.SetBlipThresholdMs(config.BlipThresholdMs)
 	r.Register(ta)
 	r.Register(NewItemAnalyzer())
 	r.Register(NewDamageAnalyzer())

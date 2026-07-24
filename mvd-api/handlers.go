@@ -179,6 +179,23 @@ func writeUnknownParam(w http.ResponseWriter, err error) bool {
 	return true
 }
 
+// windowMsZero rejects an explicit windowMs=0 at the HTTP boundary with a 400
+// invalid_param (v57 reject-loudly posture, mirroring the games-search limit=0
+// rejection): a caller who typed 0 wants zero-width buckets, which is never
+// useful, so point them at omitting the param. An OMITTED windowMs keeps the
+// default 50 (p.Int already resolved it). The view-level <=0 → default
+// coercion stays — it is the programmatic-caller default for WASM / qw-analyze;
+// this rejection is only the HTTP surface. Reports whether it wrote, so callers
+// do `if windowMsZero(w, p, opts.WindowMs) { return }`.
+func windowMsZero(w http.ResponseWriter, p *qp, windowMs int) bool {
+	if p.Present("windowMs") && windowMs == 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			"windowMs must be >= 1; omit it for the default 50")
+		return true
+	}
+	return false
+}
+
 // cacheState is the X-Cache value for the tier that served meta.
 func cacheState(meta democache.CacheMeta) string {
 	switch {
@@ -748,6 +765,9 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
+	if windowMsZero(w, p, opts.WindowMs) {
+		return
+	}
 	if opts.Layout == "column" {
 		cb, err := view.BucketsColumnar(res, opts)
 		if writeInvalidParam(w, err) {
@@ -1045,6 +1065,9 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if windowMsZero(w, p, opts.WindowMs) {
 		return
 	}
 	if err := view.RegionControlAvailable(res); err != nil {

@@ -53,7 +53,7 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 	// one (both parse to 0 through p.Int) — capture presence so an explicit
 	// limit=0 can be rejected loudly below while an omitted limit keeps the
 	// downstream default.
-	limitPresent := ciGet(r.URL.Query(), "limit") != ""
+	limitPresent := p.Present("limit")
 	params := hubfetch.SearchParams{
 		Players:  p.CSV("players"),
 		Teams:    p.CSV("teams"),

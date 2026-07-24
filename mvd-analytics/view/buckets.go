@@ -658,7 +658,7 @@ func firstLiquid(pt *result.PositionTrack, bStart, bEnd int32) any {
 		// int16 (not int8) so the value boxes identically in the row and
 		// columnar paths — the parity test deep-equals the two, and the
 		// columnar i16 column can't represent int8 distinctly. The lq
-		// codes (0–15) are unchanged; decode with result.LqLevel/LqType.
+		// codes (0–15) are unchanged; decode with result.LqLevel (type = Lq >> 2).
 		return int16(pt.Lq[i])
 	}
 	return nil

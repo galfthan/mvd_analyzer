@@ -186,12 +186,6 @@ const (
 // MaxClients is the maximum number of players
 const MaxClients = 32
 
-// Vec3 represents a 3D vector
-type Vec3 [3]float32
-
-// Angle3 represents 3 angles (pitch, yaw, roll)
-type Angle3 [3]float32
-
 // MessageHeader represents a demo message header
 type MessageHeader struct {
 	TimeDelta   uint8

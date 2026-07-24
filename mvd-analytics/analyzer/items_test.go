@@ -305,7 +305,7 @@ func TestItemAnalyzer_LayeredAttribution_HintWins(t *testing.T) {
 	if p0.TakenBy != "far_picker" {
 		t.Errorf("hint should override distance, got %q", p0.TakenBy)
 	}
-	if got := a.AttributionCounts()["hint"]; got != 1 {
+	if got := a.attributionCounts()["hint"]; got != 1 {
 		t.Errorf("hint count = %d, want 1", got)
 	}
 }
@@ -328,7 +328,7 @@ func TestItemAnalyzer_LayeredAttribution_PrintWhenNoHint(t *testing.T) {
 	if got := r.Items.Items[0].Phases[0].TakenBy; got != "msg0player" {
 		t.Errorf("print should attribute slot 1, got %q", got)
 	}
-	if got := a.AttributionCounts()["print"]; got != 1 {
+	if got := a.attributionCounts()["print"]; got != 1 {
 		t.Errorf("print count = %d, want 1", got)
 	}
 }
@@ -355,7 +355,7 @@ func TestItemAnalyzer_LayeredAttribution_StatDeltaWhenNoHintNoPrint(t *testing.T
 	if got := r.Items.Items[0].Phases[0].TakenBy; got != "real_picker" {
 		t.Errorf("stat-delta should attribute slot 4, got %q", got)
 	}
-	if got := a.AttributionCounts()["stat"]; got != 1 {
+	if got := a.attributionCounts()["stat"]; got != 1 {
 		t.Errorf("stat count = %d, want 1", got)
 	}
 }
@@ -395,7 +395,7 @@ func TestItemAnalyzer_LayeredAttribution_DistanceFallbackUnderRadius(t *testing.
 	if got := r.Items.Items[0].Phases[0].TakenBy; got != "close" {
 		t.Errorf("distance fallback within radius should attribute slot 0, got %q", got)
 	}
-	if got := a.AttributionCounts()["distance"]; got != 1 {
+	if got := a.attributionCounts()["distance"]; got != 1 {
 		t.Errorf("distance count = %d, want 1", got)
 	}
 }
@@ -416,7 +416,7 @@ func TestItemAnalyzer_LayeredAttribution_DistanceRefusedBeyondRadius(t *testing.
 	if p0.TakenBy != "" {
 		t.Errorf("beyond-radius pickup should yield empty TakenBy, got %q", p0.TakenBy)
 	}
-	if got := a.AttributionCounts()["none"]; got != 1 {
+	if got := a.attributionCounts()["none"]; got != 1 {
 		t.Errorf("none count = %d, want 1", got)
 	}
 }

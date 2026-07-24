@@ -54,16 +54,16 @@ func cannedAPI(t *testing.T, recordAuth *string) *httptest.Server {
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"regions":[],"stats":{}}`))
 	})
-	// These three mvd-api endpoints return top-level JSON arrays; the
-	// proxy must wrap them so the MCP SDK accepts the structuredContent.
+	// Since v56 these mvd-api endpoints return `{timeUnit, <list>}`
+	// objects; the proxy passes the envelope through untouched.
 	mux.HandleFunc("GET /v1/demos/{id}/chat", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`[{"type":"chat","player":"bps"}]`))
+		w.Write([]byte(`{"timeUnit":"ms","messages":[{"type":"chat","player":"bps"}]}`))
 	})
 	mux.HandleFunc("GET /v1/demos/{id}/backpacks", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`[{"weapon":"rl","player":"bps"}]`))
+		w.Write([]byte(`{"timeUnit":"ms","backpacks":[{"weapon":"rl","player":"bps"}]}`))
 	})
 	mux.HandleFunc("GET /v1/demos/{id}/weapon-pickups", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`[]`))
+		w.Write([]byte(`{"timeUnit":"ms","pickups":[]}`))
 	})
 	// Stage-4 generic artifact surface.
 	mux.HandleFunc("GET /v1/artifacts", func(w http.ResponseWriter, r *http.Request) {
@@ -428,9 +428,10 @@ func TestProxy_AllView(t *testing.T) {
 	}
 }
 
-// The array-bodied endpoints must come back wrapped in an object under a
-// named key — a bare array fails the MCP SDK's structuredContent check.
-func TestProxy_ListEndpointsWrapped(t *testing.T) {
+// The list endpoints return v56+ `{timeUnit, <list>}` envelopes; the
+// proxy passes the object through so the named list key survives — a
+// structuredContent object, never a bare array (which the MCP SDK rejects).
+func TestProxy_ListEndpointsPassthrough(t *testing.T) {
 	srv := cannedAPI(t, nil)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)
 	ctx := context.Background()
