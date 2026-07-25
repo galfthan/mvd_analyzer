@@ -148,6 +148,12 @@ func (s *intervalState) closeAtMatchEnd(tMs int32) {
 // left on 100 health gets no health sample at all, so their stream fragment
 // opens empty and every reader has to guess. The cut makes the first sample
 // after a handover unconditional and leaves dedup intact from there on.
+//
+// Every column appended during the event pass can be cut by length here.
+// The loc column cannot: it is derived from the position samples in
+// finalize, so at this point it is still empty and its length carries no
+// information. Its cut is recorded as a timestamp in occCuts and replayed
+// by resolveLocsAndFilterBlips when the column is actually built.
 func (b *streamBuilder) endOccupancy(tMs int32) {
 	b.rl.closeAtMatchEnd(tMs)
 	b.lg.closeAtMatchEnd(tMs)
@@ -161,12 +167,12 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 		health:    len(b.health),
 		armor:     len(b.armor),
 		armorType: len(b.armorType),
-		loc:       len(b.loc),
 		shells:    len(b.shells),
 		nails:     len(b.nails),
 		rockets:   len(b.rockets),
 		cells:     len(b.cells),
 	}
+	b.occCuts = append(b.occCuts, tMs)
 }
 
 // recordItemFlags is a one-shot helper called from the analyzer's
@@ -765,13 +771,31 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() []string {
 	// the (now-smoothed) Li column. Both pt.T and the Loc change
 	// stream are int32 ms in schema v8 — no conversion needed.
 	for _, slot := range slots {
-		state := a.playerState[slot]
-		b := &state.streams
-		for i := range b.posT {
-			state.streams.recordLoc(b.posT[i], b.posLi[i])
-		}
+		a.playerState[slot].streams.emitLocStream()
 	}
 	return locTable
+}
+
+// emitLocStream turns the resolved (and blip-filtered) Li column into the
+// sparse loc change stream.
+//
+// It is also where the loc column gets the occupancy-handover dedup cut
+// every other change stream got in endOccupancy. Position samples are
+// time-ascending per slot, so walking occCuts alongside them and raising
+// the floor to the column's current length makes the first sample of each
+// new occupant unconditional. Without it a player who takes over a slot
+// while standing where its previous occupant last stood gets no loc sample
+// at all and their stream fragment opens blank — the same defect
+// endOccupancy fixes for health/armor/ammo.
+func (b *streamBuilder) emitLocStream() {
+	ci := 0
+	for i := range b.posT {
+		for ci < len(b.occCuts) && b.occCuts[ci] <= b.posT[i] {
+			b.dedupBase.loc = len(b.loc)
+			ci++
+		}
+		b.recordLoc(b.posT[i], b.posLi[i])
+	}
 }
 
 // resolveFloorHeights populates each player's PositionTrack.H column —

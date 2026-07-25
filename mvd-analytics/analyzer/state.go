@@ -101,6 +101,12 @@ type streamBuilder struct {
 	// dedupBase is the per-column cut made at the last occupancy handover;
 	// see streamBuilder.endOccupancy and appendChangeI16.
 	dedupBase changeDedupBase
+	// occCuts holds the timestamp of every occupancy handover on this slot,
+	// ascending. The loc column is the one change stream not appended during
+	// the event pass — it is derived from the position samples in finalize,
+	// long after endOccupancy could have measured its length — so its cut is
+	// replayed from these timestamps instead. See resolveLocsAndFilterBlips.
+	occCuts []int32
 }
 
 // changeDedupBase records, for every change stream, the column length at
@@ -110,7 +116,7 @@ type streamBuilder struct {
 // sample would be dropped and their stream fragment would start with no
 // value at all. Dedup is therefore only applied above this cut.
 type changeDedupBase struct {
-	health, armor, armorType, loc  int
+	health, armor, armorType, loc int
 	shells, nails, rockets, cells int
 }
 
