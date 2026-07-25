@@ -36,17 +36,53 @@ type UserInfoEvent struct {
 	//
 	//   - the MVD header's full-state block writes one for every
 	//     unoccupied slot (sv_demo.c:1438-1467 iterates all MAX_CLIENTS
-	//     regardless of client state);
-	//   - 2002-era servers periodically re-broadcast every *occupied* slot
-	//     as `svc_updateuserinfo <slot> 0 ""` immediately followed by the
-	//     real string (seen for all eight players at t=25867 and t=87091 on
-	//     demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd).
+	//     regardless of client state). The entry is NOT zeroed: svs.clients
+	//     is only cleared when a new connection lands on the slot
+	//     (SVC_DirectConnect, mvdsv/src/sv_main.c:1351), so a slot whose
+	//     previous occupant left before the recording started still carries
+	//     that client's stale userid — observed as
+	//     `t=0 slot=15 uid=5081 info=""` on
+	//     demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd. The
+	//     userid is therefore no help here; only "the slot was never
+	//     occupied in this recording" identifies it.
+	//   - the server's per-client replay of the whole client table, which
+	//     writes `svc_updateuserinfo <slot> 0 ""` for every occupied slot
+	//     immediately followed by the real string. This is a dem_single
+	//     block addressed at ONE client (mvdsv's equivalent is SV_Spawn_f's
+	//     SV_FullClientUpdateToClient loop, sv_user.c:833-841), not a
+	//     broadcast: on 4on4_l_vs_la[e1m2] it appears 24 times, every one of
+	//     them a dem_single aimed at the same spectator in slot 12, each
+	//     emptying all eight in-game slots for one frame.
 	//
 	// A genuine drop always carries the departing client's own userid,
 	// because SV_DropClient clears the name and userinfo but not the
 	// userid. Userid 0 on an empty userinfo therefore means "resend", the
 	// same convention the rest of the pipeline applies to userid 0.
 	Vacated bool
+
+	// Partial marks an event synthesised from svc_setinfo (one key/value)
+	// rather than decoded from a full svc_updateuserinfo. It matters
+	// because the Player snapshot on a partial event is mostly CACHE, not
+	// wire: parseSetInfo overwrites exactly the one key the server sent and
+	// leaves every other field — crucially UserID — at whatever the last
+	// full userinfo put there.
+	//
+	// That makes a partial event useless as a slot-occupancy boundary, and
+	// actively misleading as one. mvdsv emits `svc_setinfo <slot> "*auth"
+	// ""` from SV_Logout (sv_login.c:644-646), which runs both when a
+	// client is dropped (SV_DropClient, sv_main.c:410) AND during the next
+	// client's connect handshake (SV_Login, sv_login.c:588 — "called on
+	// connect after cmd new is issued"). The second one lands on a slot the
+	// parser still remembers as the departed client, so its synthesised
+	// event looks exactly like the departed client's userid coming back.
+	// Observed on hub gameId 216835 slot 7: rusti is dropped at t=613452
+	// and the only later wire message for the slot before Luk's real
+	// userinfo at t=766898 is `svc_setinfo 7 "*auth" ""` at t=685676.
+	//
+	// Consumers that track occupancy must therefore treat a partial event
+	// as an in-place update to whoever already holds the slot, never as a
+	// connect, drop or handover.
+	Partial bool
 }
 
 func (e *UserInfoEvent) EventType() EventType { return EventUserInfo }
@@ -146,7 +182,7 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 		return nil
 	}
 
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Partial: true})
 }
 
 // parseUserInfoString parses a backslash-delimited userinfo string

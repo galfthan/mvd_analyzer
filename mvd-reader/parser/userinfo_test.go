@@ -159,4 +159,65 @@ func TestParseUserInfo_EmptyStringFlagsVacated(t *testing.T) {
 		t.Errorf("UserID = %d, want the departing client's own %d",
 			got[1].Player.UserID, got[0].Player.UserID)
 	}
+	for i, ui := range got {
+		if ui.Partial {
+			t.Errorf("event %d: svc_updateuserinfo must not be flagged Partial", i)
+		}
+	}
+}
+
+// An svc_setinfo event is a synthesis over the parser's cached PlayerInfo:
+// it carries whatever userid the last full userinfo left on the slot, so
+// the userid on it was never on the wire. Partial says so — without the
+// flag, the `svc_setinfo <slot> "*auth" ""` mvdsv emits during the NEXT
+// client's connect handshake (SV_Login -> SV_Logout, sv_login.c:588 and
+// :644-646) reads as the departed client's own userid returning, and an
+// occupancy tracker resumes a connection that is long gone.
+//
+// Ground truth, hub gameId 216835 slot 7: rusti's drop at t=613452, then
+// `svc_setinfo 7 "*auth" ""` at t=685676 with no userinfo of any kind
+// between them, then Luk's real userinfo at t=766898.
+func TestParseSetInfo_FlagsPartialAndReplaysCachedUserID(t *testing.T) {
+	p := NewParser(nil)
+	var got []*UserInfoEvent
+	p.OnEvent(func(e Event) error {
+		if ui, ok := e.(*UserInfoEvent); ok {
+			got = append(got, ui)
+		}
+		return nil
+	})
+
+	buf := append([]byte{7}, 8, 0, 0, 0) // slot 7, userid 8
+	buf = append(buf, "\\name\\rusti\\team\\jah"...)
+	buf = append(buf, 0)
+	if err := p.parseUserInfo(mvd.NewBufferReader(buf), 0); err != nil {
+		t.Fatalf("parseUserInfo: %v", err)
+	}
+	// The drop clears the slot but leaves the parser's cache in place.
+	buf = append([]byte{7}, 8, 0, 0, 0)
+	buf = append(buf, 0)
+	if err := p.parseUserInfo(mvd.NewBufferReader(buf), 613452); err != nil {
+		t.Fatalf("parseUserInfo (drop): %v", err)
+	}
+	// The next client's connect handshake: svc_setinfo 7 "*auth" "".
+	set := append([]byte{7}, "*auth"...)
+	set = append(set, 0, 0)
+	if err := p.parseSetInfo(mvd.NewBufferReader(set), 685676); err != nil {
+		t.Fatalf("parseSetInfo: %v", err)
+	}
+
+	if len(got) != 3 {
+		t.Fatalf("event count = %d, want 3", len(got))
+	}
+	last := got[2]
+	if !last.Partial {
+		t.Errorf("svc_setinfo must be flagged Partial")
+	}
+	if last.Vacated {
+		t.Errorf("svc_setinfo can never carry an empty userinfo string, so it is never Vacated")
+	}
+	if last.Player.UserID != 8 {
+		t.Errorf("UserID = %d, want the cached 8 — this is exactly the trap Partial exists to mark",
+			last.Player.UserID)
+	}
 }
