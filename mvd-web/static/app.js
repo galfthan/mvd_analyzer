@@ -933,7 +933,7 @@ function sortByFragsDesc(players) {
 // browser is already merged — every family carries `src` saying whether the
 // numbers came from KTX's demoinfo block or from this pipeline's
 // reconstruction. The summary tab reads it and nothing else; the old
-// five-source join across match.players / frags.byPlayer / frags.frags /
+// four-source join across match.players / frags.byPlayer / frags.frags /
 // demoInfo now lives in Go.
 
 // Rows for the per-player tables. Empty array when the section is absent
@@ -1171,7 +1171,7 @@ function displayResults(result) {
 
     updateTopbarDemoInfo(result);
 
-    // Summary tab, all six tables, from the canonical playerStats section.
+    // Summary tab, all eight tables, from the canonical playerStats section.
     // It is computed for EVERY demo — a missing KTX block degrades families
     // to src:"derived" rather than dropping them — so there is no
     // scoreboard-only fallback path any more. The one demo class with no
@@ -1475,7 +1475,12 @@ function displayHoldTable(rows) {
 }
 
 function displayHoldTeamsTable(teamRows) {
-    renderTableRows('hold-team-body', teamRows, team => {
+    // teamRowsInColourOrder, like every other per-team table: playerStats
+    // emits teams in stream order while timelineState.teams is frag-sorted,
+    // so passing the rows through raw would stripe this panel differently
+    // from the three beside it whenever the winning team is not the first
+    // to appear in the demo. See CLAUDE.md "Team colors".
+    renderTableRows('hold-team-body', teamRowsInColourOrder(teamRows), team => {
         const h = team.hold || {};
         const w = h.weapons || {};
         const a = h.armor || {};
@@ -1753,7 +1758,7 @@ function getTeamOrder(sortedPlayers) {
 
 // ─── Per-team aggregate tables ─────────────────────────────────────────────
 
-// The three per-team tables render playerStats.teams verbatim. The sums
+// The four per-team tables render playerStats.teams verbatim. The sums
 // are done ONCE in Go (analyzer aggregateTeamRows / view reaggregateTeams)
 // rather than re-derived per panel here: hold shares in particular must be
 // recomputed over the team's summed alive time, and averaging per-player

@@ -163,8 +163,8 @@ strip above the main pane.
 ### The Summary tab reads `playerStats`, and only `playerStats`
 
 Every table on the Summary tab — Basic Stats, Possession, Weapon Stats,
-Item Pickups, and the three per-team variants — renders
-`result.playerStats` (schema v60). It replaced a five-source join across
+Item Pickups, and the four per-team variants — renders
+`result.playerStats` (schema v60). It replaced a four-source join across
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
 merge now happens once, in Go.

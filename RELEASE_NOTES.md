@@ -10,7 +10,7 @@ detail.
 Still schema **v61** (additive within the same unmerged branch); golden
 corpus regenerated for the two new maps.
 
-- **The five-source JavaScript join is gone.** Every Summary-tab table —
+- **The four-source JavaScript join is gone.** Every Summary-tab table —
   Basic Stats, Weapon Stats, Item Pickups and their per-team variants —
   now renders `result.playerStats` instead of joining `match.players`,
   `frags.byPlayer`, `frags.frags` and `demoInfo` in `app.js`. The merge
