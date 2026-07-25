@@ -93,6 +93,15 @@ consumers (web UI, CLI) read first.
   suicides 1 → 0 in the *same* frame as his drop has two changes at that
   timestamp, and only the last is rolled back. He is reported on 1. The mod's
   departure broadcast, where present, overrides this with the correct value.
+
+  A sanity rule of the shape "reject a broadcast that states *fewer* frags
+  than the rolled-back cursor" was considered and **declined**, and this
+  limitation is the strongest reason why: that is exactly the case where the
+  broadcast is right and the cursor is wrong. The rollback returns the
+  pre-suicide value (1); the mod prints the post-suicide one (0) straight
+  off the edict. The rule would veto the correct answer in the one situation
+  where the two disagree for a knowable reason. `announcedFrags` therefore
+  takes the broadcast unconditionally within its window.
 - **FFA emits a one-team table.** Team rollup keys on a non-empty team name,
   and in FFA most players have none, so `ffa_5[dm4]` reports 5 players and 29
   frags but `teams: [{"sdf", 4}]` — the one player who happened to have a

@@ -1073,16 +1073,34 @@ netnames they know by longest prefix.
 
 The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count) — and when the player never comes back it is the **only** place the wire states their final score, because the drop that follows immediately zeroes the slot (see "Departure" below). To attribute correctly, track per-slot **occupancy sessions** (split on userid change *and* on the drop broadcast), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
 
-**A ghost is also published on a spare client slot.** So that the scoreboard shows who is expected back, KTX writes the ghost as a client-slot userinfo with **userid 0** and the netname prefixed by the `\203` glyph (which `Q_normalizetext` folds to `#`), then clears it in the same frame. On gameId 216835:
+**A ghost is also published on a spare client slot.** So that the scoreboard shows who is expected back, KTX writes the ghost as a client-slot userinfo with **userid 0** and the netname prefixed by the `\203` glyph (which `Q_normalizetext` folds to `#`). The publisher is **`ghost2scores`** (`ktx/src/g_utils.c:2272-2356`), driven by `update_ghosts` (`:2357-2365`) from `GAME_CLIENT_CONNECT` / `GAME_CLIENT_DISCONNECT` (`g_main.c:240`, `:284`) — *not* `MakeGhost` (`client.c:2729-2799`), which only spawns the ghost edict and writes a `localinfo` key. It emits, on a free client slot:
+
+```c
+WriteByte(to, SVC_UPDATEUSERINFO);
+WriteByte(to, cl_slot);
+WriteLong(to, 0);                                     // hardcoded userid
+WriteString(to, va("\\name\\\x83 %s\\team\\%s\\...", getname(g), getteam(g)));
+WriteByte(to, SVC_UPDATEFRAGS);
+WriteByte(to, cl_slot);
+WriteShort(to, g->s.v.frags);                         // a COPY of his score
+```
+
+On gameId 216835:
 
 ```
 613452  svc_updateuserinfo 10 0 "\name\<0x83> rusti\team\jah\topcolor\13\bottomcolor\3"
 613452  svc_updateuserinfo 10 0 "\name\"
 ```
 
-Its frag count is a **copy** of the departing player's, so a consumer that treats it as a client double-counts him. The userid of 0 is the reliable discriminator: every real connection gets a userid from `SV_GenerateUserID`, which returns `1..99`.
+Whether a ghost exists at all is gated by `k_lockmode` and `k_matchLess` (`MakeGhost`) and by `k_no_scoreboard_ghosts`, `isRA()` and `isCA()` (`ghost2scores`) — no ghost row in RA or CA, and none in matchless mode.
+
+The frag count is a **copy** of the departing player's, so a consumer that treats the row as a client double-counts him. **Userid 0 is a reliable discriminator, not a heuristic:** `ghost2scores` and `ghostClearScores` (`g_utils.c:2238-2270`) are KTX's only two `SVC_UPDATEUSERINFO` writers and both hardcode `WriteLong(to, 0)`, so a ghost can never carry a non-zero userid; every real connection gets one from `SV_GenerateUserID` (`mvdsv/src/sv_main.c:538-556`), which never returns 0.
+
+The second line above is `ghostClearScores`, and it is **not** a property of the mechanism to rely on. It writes `"\name\"`, not `""`, so it is not a `Vacated` broadcast and does not close the occupancy; and it runs only from the *rejoin* path (`client.c:1464`) — a player who never comes back leaves his ghost row alive to the end of the demo, still carrying his frags. It shares a timestamp with the ghost only because rusti happened to reconnect inside the same (paused) server frame; the drop, the ghost, the rejoin print and the clear all land on t=613452 on this demo. That the row is harmless here — the ghost's normalised name folds into rusti's own row and its frag copy equals his announced total — is a property of *this* demo, not of the mechanism.
 
 That restore also lands as the new slot's **first `svc_updatefrags`**, carrying the whole `N` (not a `+1`). A consumer that derives running score from per-slot frag *deltas* must **rebase** the slot's baseline to `N` on the handoff and emit no kill for it — otherwise the restore reads as a large delta, any corruption guard that rejects big jumps drops it, and (if that guard also declines to advance the baseline) every later real `+1` keeps reading as a huge delta and is dropped too, freezing the player's score at the pre-reconnect total. The timeline analyser keys this rebase off the userid change (`mvd-analytics/analyzer/timeline.go`, `fragResetPending`).
+
+**Which slot the reconnect lands on is not a free choice.** `SV_DropClient` leaves the departing client in `cs_zombie` (`mvdsv/src/sv_main.c:412`), and `SVC_DirectConnect` takes the slot `CountPlayersSpecsVips` hands it — the **first `cs_free`** entry in `svs.clients` (`sv_main.c:1137-1145`). A returning player therefore takes the lowest index nobody is on, which is systematically a *different*, usually lower, slot than the one he just vacated, and on a recording that began mid-game may be a slot with no earlier occupancy in the demo at all. A rebase rule conditioned on the receiving slot having been occupied before is therefore wrong: on gameId 216835 rusti is dropped from slot 7 and comes back on slot 2, which only carries an earlier occupancy (the spectator `Evil_ua`) because the recording started early enough to see it. Arming the rebase on *every* mid-match connect costs nothing — a genuinely new client's first `svc_updatefrags` is the server's own `0`, so the rebase adopts a value the cursor already holds.
 
 ### Departure: the slot is cleared, and the score with it
 
@@ -1138,13 +1156,20 @@ filtering is the analytics layer's job
 (`mvd-analytics/analyzer/occupancy.go`).
 
 **A userid is not a durable identity.** `SV_GenerateUserID`
-(`sv_main.c:538-556`) hands out ids from a rotating `1..99` pool and checks
-uniqueness only against clients that are not `cs_free`, so ids are reused
-within a single demo. A *change* of userid on a slot is a reliable handover
-signal; equality across a gap is not evidence of the same connection, and
-nothing on the wire ever re-broadcasts a dropped client's userinfo. What can
-look like one is an `svc_setinfo` synthesis — see "svc_setinfo carries no
-identity" below.
+(`sv_main.c:538-556`) increments `svs.lastuserid`, wraps it to 1 at
+`MAXUSERID` (99), and tests uniqueness **only against clients whose `state
+!= cs_free`**. So a userid is unique among *live* connections, not across a
+demo: once a slot is freed its id can be handed straight back out. A
+*change* of userid on a slot is a reliable handover signal; equality across
+a gap is not evidence of the same connection, and nothing on the wire ever
+re-broadcasts a dropped client's userinfo. What can look like one is an
+`svc_setinfo` synthesis — see "svc_setinfo carries no identity" below.
+
+The `1..99` range is **not** portable. It is a property of the current
+mvdsv; `4on4_l_vs_la[e1m2]` (2002-era server) carries userids 4609…5796.
+The universal, load-bearing claim is only that a real connection's userid is
+**non-zero** — that is what separates it from a resend and from a KTX ghost
+row.
 
 #### `svc_setinfo` carries no identity
 
@@ -1159,9 +1184,10 @@ That matters because mvdsv emits `svc_setinfo <slot> "*auth" ""` from
 
 - inside `SV_DropClient` (`sv_main.c:410`), just before the drop's empty
   userinfo, and
-- inside `SV_Login` (`sv_login.c:588`) — "called on connect after cmd new is
-  issued" — i.e. during the **next** client's connect handshake, while the
-  slot still holds the departed client's cached identity.
+- inside `SV_Login` (`sv_login.c:579`, which calls `SV_Logout` at `:588`) —
+  the function's own comment at `:576` is "called on connect after cmd new
+  is issued" — i.e. during the **next** client's connect handshake, while
+  the slot still holds the departed client's cached identity.
 
 On gameId 216835 slot 7 the complete wire history is:
 
@@ -1191,6 +1217,33 @@ Two consequences for a consumer:
    possession is derived from `STAT_ITEMS` bit flips, so a departing player's
    open intervals stay open on the slot; the next connection inherits a full
    stale inventory from the instant its userinfo lands.
+
+#### A frag reset is not proof of a departure
+
+Three mvdsv paths zero a client's `old_frags` while leaving it **connected**,
+each commented in the source *"this is like SVC_DirectConnect"*:
+
+| Site | Trigger |
+|---|---|
+| `Cmd_Join_f` (`sv_user.c:2667`) | spectator → player |
+| `Cmd_Observe_f` (`sv_user.c:2752`) | player → spectator |
+| `PlayerCheckPing()` failure (`sv_user.c:442`) | a connecting player forced to spectator |
+
+All three then broadcast a full client update, so the wire carries
+`svc_updatefrags <slot> 0` inside a **non-empty** userinfo update — no empty
+info string, no `Vacated`. A reader that infers a departure from the frag
+reset alone invents one. The wire's only end-of-occupancy marker remains the
+empty userinfo; conversely a rollback rule keyed on "a frag update sharing
+the drop's timestamp" deliberately does not fire here, because there is no
+drop to share a timestamp with.
+
+#### A demo can simply end with occupancies open
+
+`SV_Shutdown` (`sv_main.c:254-271`) `memset`s `sv` and `svs.clients` and
+broadcasts nothing at all — no per-client update, no drop. A recording that
+runs to server shutdown (or that is simply truncated) therefore ends with
+every occupancy still open. Consumers must close them at the demo's last
+timestamp rather than wait for a marker that never comes.
 
 ### Connections that never enter the game
 

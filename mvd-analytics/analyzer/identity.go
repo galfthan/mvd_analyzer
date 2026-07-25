@@ -18,9 +18,11 @@ import (
 // they vacated may be taken by someone else (or stamped with a late
 // userinfo name), so their earlier events get relabelled with the wrong
 // player. KTX itself unifies the player via its ghost mechanism
-// (MakeGhost snapshots the departing player at ktx/src/client.c:2729-2799
-// and the next connection with the same netname restores it, :1464-1490);
-// this analyzer reproduces that unification for the pipeline.
+// (MakeGhost snapshots the departing player onto a ghost edict,
+// ktx/src/client.c:2729-2799, and the next connection with the same
+// netname restores it, :1464-1490 — the scoreboard row for that edict is
+// published separately by ghost2scores, g_utils.c:2272-2356); this
+// analyzer reproduces that unification for the pipeline.
 //
 // It does two things during the event pass:
 //

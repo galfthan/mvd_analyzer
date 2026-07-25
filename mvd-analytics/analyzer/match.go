@@ -232,8 +232,9 @@ func (a *MatchAnalyzer) closeOccupancy(rec *occupancyRecord, tMs int32) {
 // The broadcast only identifies a netname, so on a demo where two people
 // share one it would otherwise bleed across occupancies. For a *vacated*
 // record the window is therefore a single frame: SV_DropClient runs
-// ClientDisconnect's bprint and SV_FullClientUpdate's empty userinfo in the
-// same server frame (mvdsv/src/sv_main.c:395-428), so the announcement and
+// ClientDisconnect's bprint (via PR_GameClientDisconnect) and
+// SV_FullClientUpdate's empty userinfo in the same server frame
+// (mvdsv/src/sv_main.c:388-428), so the announcement and
 // the close carry the same timestamp — verified on both real departures in
 // the local corpus (4on4_l_vs_la[e1m2]: DARKLORD announced and dropped at
 // t=1088539, shiva at t=1096572; hub 216835: rusti at t=613452).
@@ -312,11 +313,17 @@ func (a *MatchAnalyzer) participated(rec *occupancyRecord, sc *occupancyScore) b
 // to nothing at all once the slot has changed hands, and the caller drops
 // it. Every naming source would otherwise hand it the wrong human: the
 // identity table extends each slot's last session to +inf
-// (identity.go:249-254), so an anonymous record starting *after* a drop
+// (identity.go:233-238), so an anonymous record starting *after* a drop
 // resolves to the player who just left — and then wins the roster
 // tie-break below on its later startMs and replaces his recovered score
-// with 0. No local demo produces play events on a slot after its vacate,
-// so this is a guard, not a fix.
+// with 0.
+//
+// The gate is load-bearing, not defensive. Measured over the 54 local
+// demos: 15 of them deliver a frag update on a slot whose occupancy has
+// already closed, and on 1on1_]apollyon[_vs_jogi_[dm4] four anonymous
+// records (slots 3-6, opened by the spawn events the header's full-state
+// block replays at t=0) reach the roster stage as participants on 0 frags.
+// This test is the only thing keeping them off the scoreboard.
 func (a *MatchAnalyzer) resolveOccupant(rec *occupancyRecord) (name, team string) {
 	if !rec.sawInfo && !a.soleOccupancy(rec.slot) {
 		return "", ""
@@ -380,13 +387,24 @@ type rosterWindow struct {
 // two of those routinely coexist with a real one:
 //
 //   - KTX publishes a departed player's *ghost* onto a spare client slot so
-//     the scoreboard shows who is expected back (MakeGhost,
-//     ktx/src/client.c:2729-2799). On hub gameId 216835 that is
+//     the scoreboard shows who is expected back. The publisher is
+//     `ghost2scores` (ktx/src/g_utils.c:2272-2356), called from
+//     `update_ghosts` (:2357-2365) on every GAME_CLIENT_CONNECT /
+//     GAME_CLIENT_DISCONNECT (g_main.c:240, :284). It writes
+//     SVC_UPDATEUSERINFO with a hardcoded `WriteLong(to, 0)` userid and the
+//     `\x83`-prefixed netname, then SVC_UPDATEFRAGS with the ghost edict's
+//     frags. On hub gameId 216835 that is
 //     `svc_updateuserinfo 10 0 "\name\<0x83> rusti\team\jah\..."` at
-//     t=613452, cleared to `"\name\"` in the same frame — userid 0, and the
-//     0x83 glyph normalises to '#'. Its frag count is a COPY of the
-//     departing player's, so treating it as a second human double-counts
-//     him and invents a row.
+//     t=613452 — the 0x83 glyph normalises to '#'. Its frag count is a COPY
+//     of the departing player's, so treating it as a second human
+//     double-counts him and invents a row.
+//
+//     The userid test is not a heuristic here: `ghost2scores` and
+//     `ghostClearScores` (:2238-2270) are KTX's only two SVC_UPDATEUSERINFO
+//     writers and both hardcode 0, so a ghost can never carry a non-zero
+//     userid. (Whether a ghost exists at all is gated by `k_lockmode`,
+//     `k_matchLess`, `k_no_scoreboard_ghosts`, `isRA()` and `isCA()`.)
+//
 //   - occupancyTracker.ensure opens a record with userid 0 whenever a frag
 //     or position event lands on a slot with no userinfo, which the MVD
 //     header's full-state dump does for every free slot.

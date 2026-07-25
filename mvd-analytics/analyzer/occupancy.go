@@ -17,12 +17,15 @@ import (
 // occupancy, and both are needed:
 //
 //   - a *userid change* on the slot's svc_updateuserinfo — a fresh
-//     connection took the slot (mvdsv hands out userids from a rotating
-//     1..99 pool, SV_GenerateUserID, mvdsv/src/sv_main.c:538-556, checking
-//     uniqueness only against clients that are not cs_free — so a userid
-//     is unique among *live* connections, not unique over the demo. A
-//     change of userid is still a reliable handover signal; equality
-//     across a gap is not evidence of the same connection);
+//     connection took the slot (SV_GenerateUserID, mvdsv/src/sv_main.c:538-556,
+//     hands out ids from a rotating pool and checks uniqueness only against
+//     clients that are not cs_free — so a userid is unique among *live*
+//     connections, not unique over the demo, and a freed slot's id can be
+//     reissued. A change of userid is still a reliable handover signal;
+//     equality across a gap is not evidence of the same connection. The
+//     pool's 1..99 range is modern-mvdsv only — 2002-era demos carry
+//     four-digit ids — so the only portable claim is that a real
+//     connection's userid is non-zero);
 //   - a *vacate* — the empty-userinfo broadcast the server sends when it
 //     drops a client (see events.UserInfoEvent.Vacated). This one is the
 //     only signal available when nobody takes the freed slot afterwards,
@@ -50,8 +53,8 @@ import (
 //
 // Scalars are copied off events.PlayerInfo rather than referenced: the
 // parser mutates the same *PlayerInfo in place on the next occupancy
-// (mvd-reader/parser/userinfo.go:84-91), so a retained pointer would later
-// read the *next* player's identity.
+// (mvd-reader/parser/userinfo.go:120-127), so a retained pointer would
+// later read the *next* player's identity.
 type occupancyRecord struct {
 	slot    int
 	userID  int
@@ -241,8 +244,9 @@ func (t *occupancyTracker) open(slot, uid int, p *events.PlayerInfo, tMs int32) 
 // note folds one userinfo snapshot into a record. Name/team/auth are
 // carry-forward (a userinfo resend can omit a key), the spectator flag is
 // absolute — svc_updateuserinfo replaces the whole string, so an absent
-// *spectator key means "not a spectator" (parseUserInfoString,
-// mvd-reader/parser/userinfo.go:152-157).
+// *spectator key means "not a spectator" (parseUserInfoString resets it at
+// mvd-reader/parser/userinfo.go:203 and only the `*spectator` key at
+// :230-237 can set it again).
 func (t *occupancyTracker) note(r *occupancyRecord, p *events.PlayerInfo) {
 	if p == nil {
 		return

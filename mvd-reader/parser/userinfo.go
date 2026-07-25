@@ -71,8 +71,9 @@ type UserInfoEvent struct {
 	// actively misleading as one. mvdsv emits `svc_setinfo <slot> "*auth"
 	// ""` from SV_Logout (sv_login.c:644-646), which runs both when a
 	// client is dropped (SV_DropClient, sv_main.c:410) AND during the next
-	// client's connect handshake (SV_Login, sv_login.c:588 — "called on
-	// connect after cmd new is issued"). The second one lands on a slot the
+	// client's connect handshake (SV_Login, sv_login.c:579, calls it at
+	// :588; the function's own comment at :576 is "called on connect after
+	// cmd new is issued"). The second one lands on a slot the
 	// parser still remembers as the departed client, so its synthesised
 	// event looks exactly like the departed client's userid coming back.
 	// Observed on hub gameId 216835 slot 7: rusti is dropped at t=613452
