@@ -58,8 +58,11 @@ was regenerated (one demo changed).
   value, which belongs to the previous occupant, so an arriving player
   whose first sample equalled the departing player's last got no sample at
   all and their stream fragment opened empty. The handover now cuts the
-  dedup floor per column. No demo in the local corpus hits that collision,
-  so no served value moves; it is a latent fix with a unit test.
+  dedup floor per column, `loc` included — it is the one column built in
+  finalize rather than the event pass, so its cut is replayed from the
+  recorded handover timestamps instead of measured as a column length. No
+  demo in the local corpus hits the collision on any column, so no served
+  value moves; it is a latent fix with unit tests.
 
 Supporting changes:
 
@@ -93,8 +96,11 @@ Supporting changes:
   and match analysers, so the three cannot drift apart. A drop ends an
   occupancy unconditionally: there is no "the same userid came back so the
   drop did not count" rule, because nothing on the wire re-broadcasts a
-  dropped client's userinfo and `SV_GenerateUserID` recycles ids out of a
-  1..99 pool anyway (`sv_main.c:538-556`). Five demos —
+  dropped client's userinfo and `SV_GenerateUserID` recycles ids anyway
+  (`sv_main.c:538-556` checks uniqueness only against clients that are not
+  `cs_free`, so a freed slot's id can be reissued; the pool is 1..99 on
+  modern mvdsv but four-digit on the 2002-era demos, so the only portable
+  claim is "non-zero"). Five demos —
   `4on4_oeks_vs_tsq[dm2]`, hub 212545, 216268, 216835 and 218909 (three
   times) — had a real departure erased by the previous rule.
 - **Two occupancies that were live at the same instant are two people.**
@@ -116,7 +122,19 @@ Supporting changes:
   with no open followed by an open with no close. The restore then read as a
   large delta, the ±5 corruption guard rejected it, and — because that guard
   deliberately does not advance the cursor — every later real +1 was
-  rejected too.
+  rejected too. Every mid-match connect arms the rebase, including one onto
+  a slot the recording has never seen occupied: a reconnect takes the first
+  `cs_free` slot (`CountPlayersSpecsVips`, `sv_main.c:1137-1145`) rather
+  than the one it just vacated, so on a demo that started mid-game the
+  receiving slot may carry no occupancy history at all. It costs nothing on
+  a genuinely new connection, whose first `svc_updatefrags` is the server's
+  own 0.
+- **A roster broadcast can state a negative frag count.** `"<name> left the
+  game with -3 frags"` is what a player who suicided below zero is
+  announced with — both the departure and the rejoin lines print the edict
+  value verbatim — and the parser's digit scan rejected the sign, so
+  `FragsKnown` came back false and the consumer silently fell back to its
+  own reconstruction. No local demo carries one.
 - New `mvd-analytics/corpus/` invariant harness walks
   `demo-test-data/mvd/special-cases/` when present (no-op when absent, like
   `mvd-analytics/diagnostic/`) and asserts team totals against the
