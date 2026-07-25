@@ -82,6 +82,9 @@ that downstream consumers render, summarise, or feed to an agent.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
   through the parser in warning-collection mode and runs data-quality
   checks on the analysis result.
+- `corpus/` — special-cases invariant harness over
+  `demo-test-data/mvd/special-cases/`; skips when that per-machine
+  directory is absent.
 - `cmd/mapgen/` — developer tool: reads BSP + loc files, writes per-loc
   floor-polygon JSON for the web viewer
   (`mvd-web/static/maps/<name>.json`). Geometry version 4: triangles
@@ -291,10 +294,10 @@ flowchart TB
   subgraph d1["depth 1"]
     identity["identity"]
     roster["roster"]
-    match["match"]
   end
   subgraph d2["depth 2"]
     frag["frag"]
+    match["match"]
     messages["messages"]
     items["items"]
     damage["damage"]
@@ -350,6 +353,7 @@ flowchart TB
   identity -->|"identity"| damage
   identity -->|"identity"| frag
   identity -->|"identity"| items
+  identity -->|"identity"| match
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
@@ -1021,7 +1025,7 @@ code (and `-include velocity`).
 go test ./mvd-analytics/...
 ```
 
-Three layers exercise different things:
+Four layers exercise different things:
 
 1. **Per-analyzer unit tests** (`*_test.go` next to each analyzer) drive
    each analyzer with synthetic event streams and assert on its
@@ -1083,6 +1087,17 @@ Three layers exercise different things:
    cp ~/quake/demos/*.mvd.gz mvd-analytics/diagnostic/testdata/
    go test -v -run TestDiagnosticParseDemos ./mvd-analytics/diagnostic/
    ```
+
+4. **Special-cases invariants** (`corpus/corpus_test.go`) run over
+   `demo-test-data/mvd/special-cases/` — the demos that exercise what
+   the (uniformly modern) golden corpus cannot: a player who times out
+   mid-match, a connection the server refuses while the match is locked,
+   an FFA game where nobody has a team, a POV recording where only the
+   recorder has stat streams. It asserts oracles rather than bytes:
+   team frag totals against the serverinfo `score` key and against the
+   KTX demoinfo scoreboard, one stream per roster row, and item
+   intervals only for a player the wire saw play. Skips when the
+   directory (provided per machine) is absent.
 
 ## Module boundary
 

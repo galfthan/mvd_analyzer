@@ -634,6 +634,7 @@ mvd-analyzer/
     mapbsp/                Shared best-effort BSP-bytes loader (locvis + mapclip)
     mapclip/               Worldspawn player clip hull + downward floor trace (pos.h)
     diagnostic/            Opt-in bulk validation harness
+    corpus/                Special-cases invariant harness (roster / frag oracles)
     cmd/mapgen/            Developer tool: BSP → per-loc floor-polygon JSON
     cmd/qw-analyze/        Offline CLI: demo → json|md|events
 
@@ -676,7 +677,20 @@ make test                                               # all modules
 go test ./mvd-analytics/analyzer/                         # single package
 go test -v -run TestDiagnosticParseDemos \
     ./mvd-analytics/diagnostic/                           # opt-in demo corpus
+go test ./mvd-analytics/corpus/                           # special-cases invariants
 ```
+
+### Special-cases invariants
+
+`mvd-analytics/corpus/` walks `demo-test-data/mvd/special-cases/` — the
+per-machine drop of demos that exercise the degradation paths the golden
+corpus does not (a player who times out, a connection the server refuses,
+an FFA game where nobody has a team, a POV recording) — and asserts
+invariants rather than pinning bytes: team frag totals reconcile with the
+serverinfo `score` key and with the KTX demoinfo scoreboard, every roster
+row has a matching player stream, and item-possession intervals only exist
+for a player the wire actually saw play. It skips when the directory is
+absent.
 
 ### Golden corpus
 
@@ -764,6 +778,17 @@ diff -r /tmp/before /tmp/after
    signal to link the two names and will not unify. See
    [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) (search "reconnect")
    and [mvd-analytics/analyzer/identity.md](mvd-analytics/analyzer/identity.md).
+
+   The mirror case is a player who leaves and **never** returns. The
+   server clears the slot's score before broadcasting the departure, so
+   the final total survives only in the mod's `left the game with N frags`
+   print or by rolling back the reset that shares the drop's timestamp;
+   the match analyser does both. Residual gaps: a slot handed over without
+   the wire ever changing its userid cannot be split, and a mod that
+   neither prints the departure nor drops the client leaves nothing to
+   recover from. See [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md)
+   (search "Departure") and
+   [mvd-analytics/analyzer/match.md](mvd-analytics/analyzer/match.md).
 
 4. **Same-tick item insta-regrab**: If an item respawns and is picked up
    again within a single server tick (camped spawn), the wire never

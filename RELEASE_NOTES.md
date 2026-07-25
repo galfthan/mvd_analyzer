@@ -5,6 +5,73 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-25 (fix-roster-frags) — scoreboard by occupancy, schema v60
+
+Three pre-existing defects in the roster / frag path, found by auditing
+player counts across all 51 locally available demos: 47 agree and are
+sensible, four disagree, by three distinct mechanisms. No field was added,
+removed or retyped — `CurrentSchemaVersion` bumps to **v60** because served
+*values* move and the API cache is keyed on the version. The golden corpus
+was regenerated (one demo changed).
+
+- **A departing player keeps their score.** When the server drops a client
+  it zeroes the slot's frags and broadcasts the cleared state in the same
+  frame (`SV_DropClient` → `SV_FullClientUpdate`,
+  `mvdsv/src/sv_main.c:419-428`, `:487-513`), and because that happens
+  *before* match end the zero used to be recorded as the final score. The
+  scoreboard now takes the count from the mod's own departure broadcast —
+  `"<name> left the game with N frags"` (`ktx/src/client.c:2843`) — and,
+  where no broadcast exists, rolls back the reset that shares the drop's
+  timestamp. Never the occupancy maximum: a frag is legitimately lost to a
+  suicide. On `4on4_l_vs_la[e1m2]`, `shiva` (26) and `DARKLORD` (21) come
+  back, and team `|l|` goes 57 → **104**, exactly the value the serverinfo
+  `score=[.la.]230:[ |l|]104` key states.
+
+- **Participation is evidence of play inside the match window**, replacing
+  the end-of-demo `spectator` / empty-team gates. Those were wrong in both
+  directions. A participant who goes spectator after the match lost their
+  entire row — live in the committed golden corpus, where hub 212535's
+  `wd.dilbert` was pinned at **0** frags with team `pys` on 50; he now
+  reads **21** (the value his last in-match `svc_updatefrags` carried, and
+  the value KTX's own demoinfo block states) and `pys` reads **71**. In
+  FFA, where nobody has a team, an empty team read as "spectator" and
+  deleted four of five players from `ffa_5[dm4]`; the roster is now
+  complete. Meanwhile a connection the server *refused* — the match was
+  locked, so it allocated a slot and emitted an `svc_updateuserinfo`
+  without ever entering the game — used to inherit the scoreboard row of
+  whoever had just left. Those rows and the phantom one-person teams they
+  created are gone (`4on4_l_vs_la[e1m2]` is now the 4v4 it is: 8 players,
+  2 teams; `dag_caps_e1m2` drops `jOn`).
+
+- **Item possession no longer leaks across a slot handover.** Possession,
+  armor and powerup intervals are driven by `STAT_ITEMS` bit flips, so a
+  departing player's open intervals stayed open *on the slot* and the next
+  occupant inherited a full stale inventory from the instant their
+  userinfo landed — 3520 ms of RL/SNG/SSG "possession" (a `shareAlive` of
+  1.0) for a refused connection on `4on4_l_vs_la[e1m2]`. Intervals now
+  close at the handover and the held state is cleared, which also means a
+  departing player's own intervals end when they left rather than at match
+  end (`shiva`'s RL run is 17.8 s shorter, and correct).
+
+Supporting changes:
+
+- `UserInfoEvent.Vacated` (Layer 1) flags the empty-userinfo broadcast the
+  server sends when it drops a client — the wire's own end-of-occupancy
+  marker. `mvd-reader/MVD_FORMAT.md` gains a "Departure" section covering
+  it, the `timed out` path, refused connections, the `-999` spectator
+  sentinel some pre-KTX mods publish, and the serverinfo `score` key as an
+  independent oracle.
+- A single `occupancyTracker` (`mvd-analytics/analyzer/occupancy.go`) now
+  owns the "where does one occupancy end" rule for the identity, timeline
+  and match analysers, so the three cannot drift apart.
+- New `mvd-analytics/corpus/` invariant harness walks
+  `demo-test-data/mvd/special-cases/` when present (no-op when absent, like
+  `mvd-analytics/diagnostic/`) and asserts team totals against the
+  serverinfo `score` key and the KTX demoinfo scoreboard, that every roster
+  row has a matching player stream, and that item intervals only exist for
+  a player the wire actually saw play. It fails on all three defects above
+  when run against the previous code.
+
 ## 2026-07-24 (cleanup-dedup) — reject explicit `windowMs=0` (no schema bump)
 
 HTTP-boundary validation only; no schema change, goldens unchanged.

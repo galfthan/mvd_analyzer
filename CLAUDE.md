@@ -103,7 +103,12 @@ belongs in the frontend.
      `mvd-analytics/testdata/cache/` (gitignored), and pins the full
      pipeline output to `mvd-analytics/testdata/golden/<label>.json`
      (committed). Steady-state runs are offline.
-  3. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
+  3. **Special-cases invariants** in `mvd-analytics/corpus/` — walks
+     `demo-test-data/mvd/special-cases/` (per-machine, no-op when
+     absent) and asserts roster/frag oracles: team totals vs the
+     serverinfo `score` key and the KTX demoinfo scoreboard, one stream
+     per roster row, item intervals only where the wire saw play.
+  4. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
      `TestDiagnosticParseDemos` runs every `.mvd` / `.mvd.gz` dropped
      into its `testdata/` through the parser in warning-collecting
      mode and applies data-quality invariants on the result. No-op
