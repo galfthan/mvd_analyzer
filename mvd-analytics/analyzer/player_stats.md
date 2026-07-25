@@ -52,11 +52,19 @@ golden corpus always say what this pipeline actually computed.
    kills/deaths/suicides), `frags:final` (team-kills) and the damage
    reconstruction's **bounded** family — bounded is KTX-scoreboard
    semantics, which is what the KTX overlay replaces it with.
-4. **Pickups.** Non-weapon kinds from the item timeline; weapons from
+   `takenEnemy` is re-summed from the per-hit log over enemy hits only
+   (KTX's `dmg_t` is enemy-only, `ktx/src/combat.c:1069`, while our
+   `taken` counts every source), with enemy telefrags and stomps folded
+   back in since they live outside `Events` but do count in KTX's total;
+   `takenToDie` is that divided by the corrected death count.
+4. **Accuracy / login.** Accuracy from the fire stream, login from the
+   `*auth` userinfo key — both so a demo with no KTX block degrades to a
+   rougher number rather than to a missing field.
+5. **Pickups.** Non-weapon kinds from the item timeline; weapons from
    `weaponPickups` (a weapon can also arrive in a backpack, which the
    item timeline never sees); `dropped` from `backpacks`; transfers
    joined from backpack-sourced pickups.
-5. **Teams.** Summed per team, with hold shares recomputed over team
+6. **Teams.** Summed per team, with hold shares recomputed over team
    time — never averaged from per-player shares. The `shareMatch`
    denominator counts only members who were actually in the match, so a
    scoreboard-only row (`presentMs` 0) cannot dilute it; `members` is
@@ -119,11 +127,18 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   `ng` key. KTX's own text table does track it
   (`ktx/src/statsTables.c:394`); matching that means adding the stream
   first.
-- **`accuracy` is KTX-only** and omitted on demos without a demoinfo
-  block, deliberately — see `RESULT_SCHEMA.md` for why there is no
-  derived fallback.
-- **`takenEnemy` / `takenToDie`** are KTX-only: the reconstruction
-  cannot split taken damage by source.
+- **Derived `accuracy` is only as good as the shot attribution.** With
+  no KTX block the family is reconstructed from the decoded fire stream
+  (`src: "derived"`), which counts trigger pulls rather than KTX's
+  pellets and inherits `/shots`' own attribution limits — on gameId
+  71035 one player's 552 fires are all labelled `sg`. `hits` is omitted
+  entirely when the demo has no damage stream to link fires against,
+  since a zero there would read as "shot and never hit".
+- **`ping`, `handicap` and `bot` stay KTX-only.** `handicap` and `bot`
+  are server-side state with no wire signal. `ping` IS on the wire
+  (`svc_updateping`) but the parser skips it
+  (`mvd-reader/parser/parser.go:787`) — decoding it is a Layer-1 change
+  left for a follow-up.
 
 ## Reference
 

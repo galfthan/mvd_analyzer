@@ -56595,6 +56595,7 @@
     "players": [
       {
         "bottomColor": 16,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 2845,
           "given": 6620,
@@ -56757,6 +56758,7 @@
       },
       {
         "bottomColor": 16,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 4626,
           "given": 8442,
@@ -56936,6 +56938,7 @@
       },
       {
         "bottomColor": 13,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 2022,
           "given": 5708,
@@ -57102,6 +57105,7 @@
       },
       {
         "bottomColor": 16,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 3491,
           "given": 7671,
@@ -57276,6 +57280,7 @@
       },
       {
         "bottomColor": 11,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 1882,
           "given": 9911,
@@ -57461,6 +57466,7 @@
       },
       {
         "bottomColor": 11,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 2297,
           "given": 10900,
@@ -57625,6 +57631,7 @@
       },
       {
         "bottomColor": 11,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 3456,
           "given": 11298,
@@ -57800,6 +57807,7 @@
       },
       {
         "bottomColor": 11,
+        "control": 0,
         "dmg": {
           "enemy-weapons": 3014,
           "given": 11030,
@@ -90809,13 +90817,40 @@
   "playerStats": {
     "players": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 2,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 82,
+              "hits": 49
+            },
+            "sg": {
+              "attacks": 461,
+              "hits": 175
+            },
+            "sng": {
+              "attacks": 97,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 22,
+              "hits": 14
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 2845,
           "given": 6620,
           "givenSelf": 365,
           "givenTeam": 278,
           "src": "derived",
-          "taken": 12447
+          "taken": 12447,
+          "takenEnemy": 11708,
+          "takenToDie": 144
         },
         "hold": {
           "armor": {
@@ -90952,13 +90987,44 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 31,
+              "hits": 11
+            },
+            "ng": {
+              "attacks": 1,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 129,
+              "hits": 76
+            },
+            "sg": {
+              "attacks": 280,
+              "hits": 120
+            },
+            "sng": {
+              "attacks": 162,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 36,
+              "hits": 27
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 1882,
           "given": 9909,
           "givenSelf": 984,
           "givenTeam": 829,
           "src": "derived",
-          "taken": 8818
+          "taken": 8818,
+          "takenEnemy": 6904,
+          "takenToDie": 168
         },
         "hold": {
           "armor": {
@@ -91115,13 +91181,40 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 21,
+              "hits": 5
+            },
+            "rl": {
+              "attacks": 80,
+              "hits": 47
+            },
+            "sg": {
+              "attacks": 507,
+              "hits": 236
+            },
+            "sng": {
+              "attacks": 141,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 38,
+              "hits": 25
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 4625,
           "given": 8438,
           "givenSelf": 472,
           "givenTeam": 137,
           "src": "derived",
-          "taken": 12777
+          "taken": 12777,
+          "takenEnemy": 11964,
+          "takenToDie": 130
         },
         "hold": {
           "armor": {
@@ -91268,13 +91361,40 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 20,
+              "hits": 3
+            },
+            "rl": {
+              "attacks": 75,
+              "hits": 36
+            },
+            "sg": {
+              "attacks": 374,
+              "hits": 171
+            },
+            "sng": {
+              "attacks": 5,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 5,
+              "hits": 2
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 2022,
           "given": 5708,
           "givenSelf": 270,
           "givenTeam": 273,
           "src": "derived",
-          "taken": 9989
+          "taken": 9989,
+          "takenEnemy": 9324,
+          "takenToDie": 137
         },
         "hold": {
           "armor": {
@@ -91407,13 +91527,36 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 2,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 193,
+              "hits": 105
+            },
+            "sg": {
+              "attacks": 205,
+              "hits": 107
+            },
+            "ssg": {
+              "attacks": 55,
+              "hits": 43
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 2297,
           "given": 10898,
           "givenSelf": 1231,
           "givenTeam": 1012,
           "src": "derived",
-          "taken": 8457
+          "taken": 8457,
+          "takenEnemy": 6451,
+          "takenToDie": 208
         },
         "hold": {
           "armor": {
@@ -91556,13 +91699,40 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 23,
+              "hits": 7
+            },
+            "rl": {
+              "attacks": 121,
+              "hits": 61
+            },
+            "sg": {
+              "attacks": 319,
+              "hits": 162
+            },
+            "sng": {
+              "attacks": 169,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 27,
+              "hits": 13
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 3490,
           "given": 7668,
           "givenSelf": 769,
           "givenTeam": 477,
           "src": "derived",
-          "taken": 11113
+          "taken": 11113,
+          "takenEnemy": 10129,
+          "takenToDie": 174
         },
         "hold": {
           "armor": {
@@ -91699,13 +91869,40 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 16,
+              "hits": 3
+            },
+            "rl": {
+              "attacks": 172,
+              "hits": 105
+            },
+            "sg": {
+              "attacks": 299,
+              "hits": 176
+            },
+            "sng": {
+              "attacks": 115,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 35,
+              "hits": 29
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 3456,
           "given": 11292,
           "givenSelf": 691,
           "givenTeam": 661,
           "src": "derived",
-          "taken": 9120
+          "taken": 9120,
+          "takenEnemy": 8050,
+          "takenToDie": 206
         },
         "hold": {
           "armor": {
@@ -91852,13 +92049,40 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 8,
+              "hits": 2
+            },
+            "rl": {
+              "attacks": 138,
+              "hits": 84
+            },
+            "sg": {
+              "attacks": 484,
+              "hits": 270
+            },
+            "sng": {
+              "attacks": 66,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 36,
+              "hits": 27
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "enemyWeapons": 3014,
           "given": 11026,
           "givenSelf": 395,
           "givenTeam": 503,
           "src": "derived",
-          "taken": 8484
+          "taken": 8484,
+          "takenEnemy": 7029,
+          "takenToDie": 137
         },
         "hold": {
           "armor": {
@@ -92006,6 +92230,7 @@
       }
     ],
     "sources": {
+      "accuracy": "derived",
       "damage": "derived",
       "hold": "derived",
       "pickups": "derived",
@@ -92019,7 +92244,8 @@
           "givenSelf": 1876,
           "givenTeam": 1165,
           "src": "derived",
-          "taken": 46326
+          "taken": 46326,
+          "takenEnemy": 43125
         },
         "hold": {
           "armor": {
@@ -92172,7 +92398,8 @@
           "givenSelf": 3301,
           "givenTeam": 3005,
           "src": "derived",
-          "taken": 34879
+          "taken": 34879,
+          "takenEnemy": 28434
         },
         "hold": {
           "armor": {

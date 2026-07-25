@@ -1,6 +1,8 @@
 package view
 
 import (
+	"math"
+
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -40,7 +42,14 @@ func PlayerStats(r *result.Result, opts PlayerStatsOptions) (*result.PlayerStats
 	if len(opts.Players) > 0 || len(opts.Teams) > 0 {
 		players := toSet(opts.Players)
 		teams := toSet(opts.Teams)
-		filtered := &result.PlayerStatsResult{Sources: out.Sources}
+		// Empty slices, not nil: a filter that matches nothing returns
+		// `"players": []`, never `null`. The schema declares the key
+		// required and array-typed, and a null there breaks a caller that
+		// ranges over it.
+		filtered := &result.PlayerStatsResult{
+			Sources: out.Sources,
+			Players: []result.PlayerStatsRow{},
+		}
 		for i := range out.Players {
 			row := &out.Players[i]
 			if len(players) > 0 && !players[row.Name] {
@@ -92,19 +101,26 @@ var ktxItemKind = map[string]string{
 //   - score: NEVER overlaid. KTX over-counts pentagram-deflect telefrags
 //     (dtTELE2), credits world-dealt suicides to the world entity
 //     (ktx/src/client.c:5132), and resets after a reconnect.
-//   - damage: given / givenTeam / givenSelf / enemyWeapons come from KTX;
-//     takenEnemy and takenToDie are KTX-only fields with no derived
-//     equivalent. `taken` STAYS DERIVED — KTX's dmg.taken is enemy-only
-//     (ktx/src/combat.c:1083) while ours counts every source, so folding
-//     one into the other would silently change what the field means.
-//   - accuracy: KTX-only. No derived fallback by design.
+//   - damage: given / givenTeam / givenSelf / enemyWeapons / teamWeapons
+//     come from KTX. takenEnemy and takenToDie prefer KTX's but fall back
+//     to the analyzer's reconstruction from the per-hit log, so they are
+//     no longer KTX-only. `taken` STAYS DERIVED — KTX's dmg.taken is
+//     enemy-only (ktx/src/combat.c:1069) while ours counts every source,
+//     so folding one into the other would silently change what the field
+//     means.
+//   - accuracy: KTX's whole block wins when present; the analyzer's
+//     fire-stream reconstruction stands when it is not. The two are
+//     different measurements, which is what `src` is for — see
+//     result.PlayerStatsAccuracy.
 //   - pickups: took / totalTook / dropped from KTX; xfer / xferSelf stay
 //     derived (KTX conflates the two). Ammo kinds have no KTX counterpart
 //     and stay derived — so `src: "ktx"` on this family means "KTX
 //     wherever KTX carries the kind".
 //   - hold: NEVER overlaid. KTX has no weapon hold time in the block, and
 //     its armor hold time overcounts (see result.PlayerStatsResult).
-//   - identity (ping / handicap / login / bot): KTX-only passthrough.
+//   - identity: ping / handicap / bot / controlMs / speed are KTX-only
+//     passthrough. `login` prefers KTX's but keeps the analyzer's *auth
+//     login when KTX carries none.
 func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 	stored := r.PlayerStats
 	out := &result.PlayerStatsResult{
@@ -129,7 +145,25 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		if di == nil {
 			continue
 		}
-		row.Ping, row.Handicap, row.Login, row.Bot = di.Ping, di.Handicap, di.Login, di.Bot
+		row.Ping, row.Handicap, row.Bot = di.Ping, di.Handicap, di.Bot
+		if di.Login != "" {
+			// KTX's login wins, but a blank one must not erase the *auth
+			// login the analyzer already read off the wire.
+			row.Login = di.Login
+		}
+		// Presence, not non-zero-ness: KTX writes both blocks
+		// unconditionally, so 0 control time and a 0/0 speed pair are
+		// measurements, not gaps. Suppressing them would hide exactly the
+		// player the stat is most informative about.
+		if di.Control != nil {
+			ms := int32(math.Round(*di.Control * 1000))
+			row.ControlMs = &ms
+		}
+		if di.Speed != nil {
+			row.Speed = &result.PlayerStatsSpeed{
+				Max: float32(di.Speed.Max), Avg: float32(di.Speed.Avg),
+			}
+		}
 
 		if d := overlayDamage(row.Damage, di); d != nil {
 			row.Damage = d
@@ -173,19 +207,51 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 	out := result.PlayerStatsDamage{Src: result.SrcKTX}
 	if derived != nil {
 		// Taken keeps the derived all-sources value: KTX's is enemy-only.
+		// When there is no derived row it stays ABSENT — a demo with a KTX
+		// block but no damage stream genuinely has no all-sources figure,
+		// and a zero would read as "took no damage at all".
 		out.Taken = derived.Taken
 	}
 	out.Given = di.Dmg.Given
 	out.GivenTeam = di.Dmg.Team
 	out.GivenSelf = di.Dmg.Self
 	out.EnemyWeapons = di.Dmg.EnemyWeapons
+	if di.Dmg.TeamWeapons != 0 {
+		tw := di.Dmg.TeamWeapons
+		out.TeamWeapons = &tw
+	}
 	takenEnemy := di.Dmg.Taken
 	out.TakenEnemy = &takenEnemy
-	if di.Dmg.TakenToDie != 0 {
+	switch {
+	case di.Dmg.TakenToDie == ktxNoDeathsSentinel:
+		// KTX writes 99999 rather than dividing by zero
+		// (ktx/src/stats_json.c:357). It is a sentinel, not a measurement,
+		// so it must not reach a consumer as a number — fall through to the
+		// derived value, which omits the field when the player never died.
+		out.TakenToDie = derivedTakenToDie(derived)
+	case di.Dmg.TakenToDie != 0:
 		ttd := di.Dmg.TakenToDie
 		out.TakenToDie = &ttd
+	default:
+		out.TakenToDie = derivedTakenToDie(derived)
 	}
 	return &out
+}
+
+// ktxNoDeathsSentinel is the value KTX writes for taken-to-die when the
+// player never died (ktx/src/stats_json.c:357) instead of dividing by
+// zero. It is not a damage figure and must never be served as one.
+const ktxNoDeathsSentinel = 99999
+
+// derivedTakenToDie carries the reconstructed average forward when KTX has
+// none to give, so the field's presence tracks "did this player die",
+// not "which source was available".
+func derivedTakenToDie(derived *result.PlayerStatsDamage) *int {
+	if derived == nil || derived.TakenToDie == nil {
+		return nil
+	}
+	v := *derived.TakenToDie
+	return &v
 }
 
 // overlayAccuracy lifts KTX's per-weapon acc blocks. Returns nil when the
@@ -195,12 +261,21 @@ func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 	if len(di.Weapons) == 0 {
 		return nil
 	}
-	byWeapon := map[string]result.DemoInfoAcc{}
+	byWeapon := map[string]result.PlayerStatsAcc{}
 	for w, wv := range di.Weapons {
 		if wv == nil || wv.Acc == nil {
 			continue
 		}
-		byWeapon[w] = *wv.Acc
+		hits := wv.Acc.Hits
+		e := result.PlayerStatsAcc{Attacks: wv.Acc.Attacks, Hits: &hits}
+		// KTX omits the real/virtual split entirely unless it recorded one
+		// (`if (stats->rhits || stats->vhits)`, ktx/src/stats_json.c:146) —
+		// carry the distinction rather than zero-filling.
+		if wv.Acc.Real != 0 || wv.Acc.Virtual != 0 {
+			real, virtual := wv.Acc.Real, wv.Acc.Virtual
+			e.Real, e.Virtual = &real, &virtual
+		}
+		byWeapon[w] = e
 	}
 	if len(byWeapon) == 0 {
 		return nil
@@ -222,6 +297,7 @@ func overlayPickups(derived *result.PlayerStatsPickups, di *result.DemoInfoPlaye
 		}
 	}
 
+	contributed := false
 	for k, item := range di.Items {
 		if item == nil {
 			continue
@@ -233,6 +309,7 @@ func overlayPickups(derived *result.PlayerStatsPickups, di *result.DemoInfoPlaye
 		e := byKind[kind]
 		e.Took = item.Took
 		byKind[kind] = e
+		contributed = true
 	}
 
 	for w, wv := range di.Weapons {
@@ -244,9 +321,31 @@ func overlayPickups(derived *result.PlayerStatsPickups, di *result.DemoInfoPlaye
 		e.TotalTook = wv.Pickups.TotalTaken
 		e.Dropped = wv.Pickups.Dropped
 		byKind[w] = e
+		contributed = true
 	}
 
+	// A player whose KTX entry carries only acc blocks contributed no
+	// pickup counter at all — labelling the family "ktx" there would put a
+	// KTX badge on numbers this pipeline derived.
+	if !contributed {
+		return nil
+	}
 	return &result.PlayerStatsPickups{Src: result.SrcKTX, ByKind: byKind}
+}
+
+// sumOptional adds an optional member counter into an optional team
+// total, keeping "absent" only while every member is absent — so a team
+// figure reads as measured if any member's was.
+func sumOptional(dst, src *int) *int {
+	if src == nil {
+		return dst
+	}
+	if dst == nil {
+		v := *src
+		return &v
+	}
+	*dst += *src
+	return dst
 }
 
 // reaggregateTeams re-sums the team rows from overlaid player rows,
@@ -276,15 +375,9 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 				dmg.GivenTeam += p.Damage.GivenTeam
 				dmg.GivenSelf += p.Damage.GivenSelf
 				dmg.EnemyWeapons += p.Damage.EnemyWeapons
-				dmg.Taken += p.Damage.Taken
-				if p.Damage.TakenEnemy != nil {
-					v := *p.Damage.TakenEnemy
-					if dmg.TakenEnemy == nil {
-						dmg.TakenEnemy = &v
-					} else {
-						*dmg.TakenEnemy += v
-					}
-				}
+				dmg.Taken = sumOptional(dmg.Taken, p.Damage.Taken)
+				dmg.TakenEnemy = sumOptional(dmg.TakenEnemy, p.Damage.TakenEnemy)
+				dmg.TeamWeapons = sumOptional(dmg.TeamWeapons, p.Damage.TeamWeapons)
 				// TakenToDie is an average; averaging averages across
 				// players with different death counts is meaningless, so a
 				// team row deliberately carries none.

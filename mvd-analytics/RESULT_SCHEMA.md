@@ -665,7 +665,20 @@ carries: possession time.
 this section is diffable against — use it when you want exactly KTX's
 numbers.
 
-### Provenance
+### Provenance, and degrading rather than disappearing
+
+The section keeps ONE SHAPE across demo ages. Where a wire-side
+reconstruction is possible at all it is emitted and marked
+`src: "derived"`, rather than the field vanishing on demos recorded
+before KTX embedded its block — a response whose shape changes with the
+demo's age forces every consumer into two code paths, and the old-demo
+path is the one nobody tests.
+
+The limit is honesty, not effort: a value that cannot be MEASURED stays
+absent rather than becoming a zero. Hence `accuracy.byWeapon[].hits` is
+omitted (not zeroed) when there is no damage stream to link fires
+against, and KTX's `taken-to-die` 99999 no-deaths sentinel is never
+served as a number.
 
 Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
 wire) or `"ktx"` (the demoinfo block). The stored artifact is always
@@ -677,8 +690,13 @@ top level is the roll-up.
 |---|---|---|
 | `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
-| `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. `takenToDie` is likewise KTX-only. |
-| `accuracy` | **ktx-only**, family **omitted** without a block | KTX counts pellets server-side (`attacks` is a pellet count for sg/ssg). There is deliberately no derived fallback: it would let a caller compare a server-side count against a wire-inferred approximation across demos without noticing. |
+| `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
+| `accuracy` | **ktx** when present, else **derived** from the fire stream | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. |
+| `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
+| `damage.teamWeapons` | **ktx-only** | KTX's `dmg_tweapon` (`ktx/src/combat.c:1063`), the friendly-fire mirror of `enemyWeapons`. The reconstruction does not bucket team damage by the victim's inventory. |
+| `login` | **ktx** when present, else the `*auth` userinfo login | genuinely on the wire (`mvd-reader/parser/userinfo.go:102`). |
+| `controlMs` / `speed` | **ktx-only** | KTX's own control clock and speed summary; no wire-side equivalent is computed today. |
+| `ping` / `handicap` / `bot` | **ktx-only** | server-side state with no wire signal. (`svc_updateping` does carry ping, but the parser skips it today — `mvd-reader/parser/parser.go:787`.) |
 | `pickups` took / totalTook / dropped | **ktx** when present, else derived from `items` + `weaponPickups` + `backpacks` | direct server-side counters, identical semantics. |
 | `pickups` xfer / xferSelf | always **derived** | we can decompose what KTX conflates — see below. |
 | `hold` | always **derived** | KTX has no weapon hold time in the block at all, and its armor hold time overcounts — see below. |
@@ -723,14 +741,34 @@ stays consistent with the timeline's powerup runs.
 |---|---|---|---|
 | Name | `name` | string | Player name; on a team row, the team name. |
 | Team | `team` | string | Omitted on team rows. |
-| Ping / Handicap / Login / Bot | `ping`, `handicap`, `login`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. |
+| Ping / Handicap / Bot | `ping`, `handicap`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. |
+| Login | `login` | string | The player's authenticated login: KTX's when present, else the `*auth` userinfo key off the wire. |
+| ControlMs | `controlMs` | int32 ms | **KTX-only**: KTX's own map-control clock (it writes float seconds; converted to ms here). Not the same measure as the region-control view. |
+| Speed | `speed` | *PlayerStatsSpeed | **KTX-only**: `max` / `avg` in Quake units/second. The position streams could support a derived version — a follow-up. |
 | Members | `members` | int | TEAM rows only: how many players were folded in, and the count `shareMatch`'s denominator rests on. |
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score), `kills`, `deaths`, `suicides`, `teamKills`, `efficiency`. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map of KTX acc blocks. KTX-only. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map. `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
+
+#### `accuracy.real` / `accuracy.virtual` are not a hit split
+
+KTX's `rhits` / `vhits` (`ktx/src/combat.c:1085,1100`) exist on **rl and
+gl only** and count **victims damaged by a blast**, not rockets that hit:
+one rocket splashing three players adds three. They therefore routinely
+EXCEED `hits`, which for rl/gl is the *direct-impact* count — the rocket
+entity touching a player (`ktx/src/weapons.c:994`). A 2022 dm3 demo in
+the corpus reads `rl: {attacks: 110, hits: 13, real: 55, virtual: 55}`;
+that is not a contradiction, it is three different counters.
+
+`real` counts victims who actually lost health or armor. `virtual`
+counts victims who *would* have, latched before godmode / pentagram /
+teamplay damage-avoidance zeroed the damage (`virtual_take`,
+`ktx/src/combat.c:719`) — so `virtual >= real`, and the gap is damage
+that was *prevented*, not missed. Neither divided by `attacks` is an
+accuracy.
 
 **`efficiency` is a RATIO in [0,1]**, not a percentage —
 `kills / (kills + deaths)`, 0 when the player neither killed nor died.

@@ -87,10 +87,24 @@ type PlayerStatsRow struct {
 	Login    string       `json:"login,omitempty"`
 	Bot      *DemoInfoBot `json:"bot,omitempty"`
 
-	// Members is the number of players folded into a TEAM row, and the
-	// count the row's ShareMatch denominator (match window x members)
-	// rests on — published so a consumer can recompute or re-scale it.
-	// Absent on player rows.
+	// ControlMs is KTX's "control time" — how long the player held map
+	// control by its own reckoning (ktx/src/stats_json.c writes it as
+	// float seconds; converted to int32 ms here for the pure-ms model).
+	// KTX-only: there is no wire-side equivalent. Our own control
+	// measure is the region-control view, which is not the same thing.
+	ControlMs *int32 `json:"controlMs,omitempty"`
+	// Speed is KTX's per-player speed summary in Quake units/second.
+	// KTX-only today; the position streams could support a derived
+	// version, which is left for a follow-up.
+	Speed *PlayerStatsSpeed `json:"speed,omitempty"`
+
+	// Members is the number of players on a TEAM row that were actually
+	// in the match (PresentMs > 0) — exactly the count its ShareMatch
+	// denominator (match window x members) rests on, published so a
+	// consumer can recompute or re-scale it. A scoreboard-only row
+	// (connected, never streamed) is summed into the team's totals but
+	// does NOT count here, because it contributed no time anyone could
+	// have played. Absent on player rows.
 	Members int `json:"members,omitempty"`
 
 	Window PlayerStatsWindow `json:"window"`
@@ -163,11 +177,21 @@ type PlayerStatsDamage struct {
 	// EnemyWeapons is enemy damage dealt to victims holding RL and/or LG
 	// (KTX dmg_eweapon / "ewep").
 	EnemyWeapons int `json:"enemyWeapons"`
+	// TeamWeapons is the same measure for TEAMMATES holding RL/LG (KTX
+	// dmg_tweapon, ktx/src/combat.c:1063) — the friendly-fire mirror of
+	// EnemyWeapons. KTX-only: our reconstruction does not bucket team
+	// damage by the victim's inventory.
+	TeamWeapons *int `json:"teamWeapons,omitempty"`
 	// Taken counts damage from ALL sources — enemy, team, self and
 	// environment. It is deliberately NOT the same quantity as KTX's
 	// dmg.taken, which is enemy-only (ktx/src/combat.c:1069); that one
 	// lands in TakenEnemy so the two are never silently conflated.
-	Taken int `json:"taken"`
+	//
+	// A POINTER because only our per-hit reconstruction measures it: on a
+	// demo that carries a KTX block but no damage stream, KTX supplies
+	// every other field here and this one is genuinely unmeasured. A zero
+	// would read as "took no damage at all".
+	Taken *int `json:"taken,omitempty"`
 	// TakenEnemy is KTX's enemy-only damage taken. KTX-only: the
 	// reconstruction cannot split taken damage by source, so this is
 	// absent (not zero) on demos without a demoinfo block.
@@ -178,19 +202,65 @@ type PlayerStatsDamage struct {
 }
 
 // PlayerStatsAccuracy is the per-weapon shot accounting, keyed by weapon
-// ("sg", "ssg", "ng", "sng", "gl", "rl", "lg"). KTX-only — see
-// PlayerStatsRow.Accuracy.
+// ("axe", "sg", "ssg", "ng", "sng", "gl", "rl", "lg" — KTX records axe
+// swings too, ktx/src/weapons.c:85).
+//
+// Src decides what the numbers MEAN, and the two sources are not the same
+// measurement:
+//
+//   - "ktx": KTX's own server-side counters, verbatim. Attacks is a PELLET
+//     count for sg/ssg (`attacks += bullets`, ktx/src/weapons.c:812; a fire
+//     count for every other weapon) and Hits counts pellets that connected
+//     (ktx/src/weapons.c:387). Real / Virtual are a SEPARATE rl/gl-only
+//     counter, NOT a split of Hits — see below.
+//   - "derived": reconstructed from the decoded fire stream. Attacks is
+//     always a TRIGGER-PULL count, and Hits counts fires that produced at
+//     least one linked damage event — so shotgun accuracy in particular
+//     reads on a different scale. Real/Virtual have no equivalent and are
+//     absent.
+//
+// So compare accuracies across demos only after checking Src. The derived
+// form is offered because a demo with no KTX block should degrade to a
+// rougher number rather than to a missing field — but it is only as good
+// as the shot attribution underneath it (see the /shots section's own
+// caveats), which on some older demos mislabels a player's weapon.
 type PlayerStatsAccuracy struct {
-	Src string `json:"src"`
-	// ByWeapon carries KTX's acc block verbatim. Attacks is a PELLET
-	// count for sg/ssg, not a trigger-pull count.
-	ByWeapon map[string]DemoInfoAcc `json:"byWeapon"`
+	Src      string                    `json:"src"`
+	ByWeapon map[string]PlayerStatsAcc `json:"byWeapon"`
+}
+
+// PlayerStatsAcc is one weapon's shot accounting for one player.
+type PlayerStatsAcc struct {
+	// Attacks is pellets (KTX, sg/ssg) or trigger pulls (derived, and KTX
+	// for every other weapon) — see PlayerStatsAccuracy.Src.
+	Attacks int `json:"attacks"`
+	// Hits is ABSENT rather than zero when there is nothing to count it
+	// against: a derived block on a demo with no damage stream can count
+	// fires but can link none of them, and a zero there would read as "shot
+	// and never hit" instead of "not measurable".
+	Hits *int `json:"hits,omitempty"`
+	// Real and Virtual are KTX's rhits / vhits (ktx/src/combat.c:1085,1100),
+	// present on rl and gl only. They count VICTIMS DAMAGED BY A BLAST, not
+	// rockets that hit — one rocket splashing three players adds three — so
+	// they routinely EXCEED Hits, which for rl/gl is the direct-impact count
+	// (the rocket entity touching a player, ktx/src/weapons.c:994). They are
+	// not a direct/splash split of Hits, and the ratio Real/Attacks is not an
+	// accuracy.
+	//
+	// Real counts victims who actually lost health or armor. Virtual counts
+	// victims who WOULD have, measured before godmode / pentagram / teamplay
+	// damage-avoidance zeroed the damage out (`virtual_take` is latched at
+	// ktx/src/combat.c:719, ahead of those checks), so Virtual >= Real and
+	// the gap is damage that was prevented rather than missed.
+	Real    *int `json:"real,omitempty"`
+	Virtual *int `json:"virtual,omitempty"`
 }
 
 // PlayerStatsPickups is the per-kind pickup tally, keyed by this repo's
 // item-kind vocabulary ("ra", "ya", "ga", "mh", "h15", "h25", "quad",
 // "pent", "ring", "rl", "lg", "gl", "ssg", "sng", "ng", ammo kinds) —
-// NOT KTX's demoinfo keys. view.PlayerStats maps the KTX keys onto this
+// NOT KTX's demoinfo keys. A KTX overlay can additionally introduce
+// "sg" and "axe", which KTX counts and this pipeline does not derive. view.PlayerStats maps the KTX keys onto this
 // vocabulary when it overlays them (health_100→mh, q/p/r→quad/pent/ring).
 type PlayerStatsPickups struct {
 	Src    string                       `json:"src"`
@@ -247,6 +317,12 @@ type PlayerStatsHold struct {
 	Armor map[string]HoldStat `json:"armor,omitempty"`
 	// Powerups is keyed "quad","pent","ring".
 	Powerups map[string]HoldStat `json:"powerups,omitempty"`
+}
+
+// PlayerStatsSpeed is KTX's speed summary, Quake units per second.
+type PlayerStatsSpeed struct {
+	Max float32 `json:"max"`
+	Avg float32 `json:"avg"`
 }
 
 // HoldStat is one item's possession time for one player.

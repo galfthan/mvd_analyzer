@@ -104,7 +104,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 
 	// Match-start phrase flips the gate.
-	p.updateMatchStartedFromPrint("The match has begun!\n")
+	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match has begun!\n")
 	if !p.matchStarted {
 		t.Fatalf("matchStarted gate did not flip on start phrase")
 	}
@@ -115,6 +115,43 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 	if deaths != 1 {
 		t.Errorf("post-match deaths = %d, want 1", deaths)
+	}
+}
+
+// Older server mods announce the MODE rather than the word "match":
+// kmod 1.58 / qwe 0.170 broadcast "The duel has begun!". The pattern
+// table used to require "match has begun", so a 2003 kmod duel never
+// opened this gate — the demo reported zero deaths and, because stream
+// sampling is gated on the same start, produced no streams at all.
+// Regression: 1on1_]apollyon[_vs_jogi_[dm4], t=10.022s.
+func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
+	for _, msg := range []string{
+		"The match has begun!\n",
+		"The duel has begun!\n",
+		"The team match has begun!\n",
+		"Fight!\n",
+	} {
+		p := NewParser(nil)
+		p.updateMatchStartedFromPrint(mvd.PrintHigh, msg)
+		if !p.matchStarted {
+			t.Errorf("matchStarted did not flip on %q", msg)
+		}
+	}
+
+	// A line that merely mentions the match must not open the gate.
+	p := NewParser(nil)
+	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match will begin when both players are ready\n")
+	if p.matchStarted {
+		t.Errorf("matchStarted flipped on a non-start line")
+	}
+
+	// Chat must never open it. The gate never resets, so one prewar
+	// "go go go!" would otherwise arm the obituary-death path for the
+	// whole demo.
+	chat := NewParser(nil)
+	chat.updateMatchStartedFromPrint(mvd.PrintChat, "lets go! the duel has begun i guess\n")
+	if chat.matchStarted {
+		t.Errorf("matchStarted flipped on a PRINT_CHAT line")
 	}
 }
 

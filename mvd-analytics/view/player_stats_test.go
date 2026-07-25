@@ -9,6 +9,8 @@ import (
 
 // storedResult is a two-player teamplay Result carrying the derived
 // section the analyzer would have stored, plus (optionally) a KTX block.
+func intp(v int) *int { return &v }
+
 func storedResult(withKTX bool) *result.Result {
 	xfer, xferSelf := 2, 1
 	r := &result.Result{
@@ -18,7 +20,7 @@ func storedResult(withKTX bool) *result.Result {
 					Name: "alpha", Team: "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
 					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20},
-					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: 5500, GivenTeam: 100, GivenSelf: 50, EnemyWeapons: 3000},
+					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: intp(5500), GivenTeam: 100, GivenSelf: 50, EnemyWeapons: 3000},
 					Pickups: &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: map[string]result.PlayerStatsPickup{
 						"ra":     {Took: 5},
 						"rl":     {Took: 3, TotalTook: 4, Dropped: 2, Xfer: &xfer, XferSelf: &xferSelf},
@@ -33,7 +35,7 @@ func storedResult(withKTX bool) *result.Result {
 					Name: "beta", Team: "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
 					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30},
-					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: 6000},
+					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: intp(6000)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
@@ -42,14 +44,14 @@ func storedResult(withKTX bool) *result.Result {
 					Name:   "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000},
 					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20},
-					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: 5500},
+					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: intp(5500)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 				{
 					Name:   "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000},
 					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30},
-					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: 6000},
+					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: intp(6000)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
@@ -92,12 +94,6 @@ func TestPlayerStatsNoKTXStaysDerived(t *testing.T) {
 	if got.Sources.Damage != result.SrcDerived {
 		t.Errorf("damage src = %q, want derived", got.Sources.Damage)
 	}
-	if got.Sources.Accuracy != "" {
-		t.Errorf("accuracy src = %q, want empty — the family is KTX-only and absent here", got.Sources.Accuracy)
-	}
-	if got.Players[0].Accuracy != nil {
-		t.Error("accuracy present without a KTX block — there is deliberately no derived fallback")
-	}
 	if got.Players[0].Ping != 0 {
 		t.Error("ping present without a KTX block")
 	}
@@ -126,8 +122,8 @@ func TestPlayerStatsKTXOverlay(t *testing.T) {
 	}
 	// taken keeps the DERIVED all-sources value; KTX's enemy-only number
 	// lands in takenEnemy. Conflating them is the whole trap.
-	if alpha.Damage.Taken != 5500 {
-		t.Errorf("taken = %d, want the derived 5500 (KTX's 5000 is enemy-only)", alpha.Damage.Taken)
+	if alpha.Damage.Taken == nil || *alpha.Damage.Taken != 5500 {
+		t.Errorf("taken = %v, want the derived 5500 (KTX's 5000 is enemy-only)", alpha.Damage.Taken)
 	}
 	if alpha.Damage.TakenEnemy == nil || *alpha.Damage.TakenEnemy != 5000 {
 		t.Errorf("takenEnemy = %v, want 5000", alpha.Damage.TakenEnemy)
@@ -138,6 +134,12 @@ func TestPlayerStatsKTXOverlay(t *testing.T) {
 	// Accuracy appears only now.
 	if alpha.Accuracy == nil || alpha.Accuracy.ByWeapon["rl"].Attacks != 90 {
 		t.Errorf("accuracy not lifted: %+v", alpha.Accuracy)
+	}
+	if h := alpha.Accuracy.ByWeapon["rl"].Hits; h == nil || *h != 40 {
+		t.Errorf("accuracy hits = %v, want 40", h)
+	}
+	if r := alpha.Accuracy.ByWeapon["rl"].Real; r == nil || *r != 33 {
+		t.Errorf("accuracy real = %v, want 33 — KTX's direct/splash split must survive", r)
 	}
 	// Pickups: KTX counters win, KTX item keys map to our vocabulary.
 	if got := alpha.Pickups.ByKind["ra"].Took; got != 8 {
@@ -223,6 +225,53 @@ func TestPlayerStatsTeamsReaggregatedAfterOverlay(t *testing.T) {
 	}
 }
 
+// A KTX block with a dmg blob but no derived damage row (a demo that
+// carries the block but no damage stream) must not fabricate an
+// all-sources `taken` of zero.
+func TestPlayerStatsTakenAbsentWithoutDerivedRow(t *testing.T) {
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Damage = nil
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	d := got.Players[0].Damage
+	if d == nil || d.Src != result.SrcKTX {
+		t.Fatalf("damage = %+v, want a KTX-sourced row", d)
+	}
+	if d.Taken != nil {
+		t.Errorf("taken = %v, want absent — nothing measured it, and 0 would read as 'took no damage'", *d.Taken)
+	}
+	if d.TakenEnemy == nil {
+		t.Error("takenEnemy should still come from KTX")
+	}
+}
+
+// An empty filter match is [], never null: the key is required and
+// array-typed, and a null breaks a caller that ranges over it.
+func TestPlayerStatsEmptyFilterYieldsEmptySlice(t *testing.T) {
+	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{Players: []string{"nobody"}})
+	if got.Players == nil {
+		t.Fatal("players = null, want []")
+	}
+	if len(got.Players) != 0 {
+		t.Errorf("players = %v, want empty", got.Players)
+	}
+}
+
+// The overlay must not write through to the cached Result via the team
+// rows or a shared transfer counter either.
+func TestPlayerStatsOverlayLeavesTeamsAndCountersAlone(t *testing.T) {
+	r := storedResult(true)
+	stored := r.PlayerStats
+	beforeXfer := *stored.Players[0].Pickups.ByKind["rl"].Xfer
+	beforeTeamGiven := stored.Teams[0].Damage.Given
+	_, _ = PlayerStats(r, PlayerStatsOptions{})
+	if got := *stored.Players[0].Pickups.ByKind["rl"].Xfer; got != beforeXfer {
+		t.Errorf("stored xfer counter mutated: %d -> %d", beforeXfer, got)
+	}
+	if got := stored.Teams[0].Damage.Given; got != beforeTeamGiven {
+		t.Errorf("stored team row mutated: %d -> %d", beforeTeamGiven, got)
+	}
+}
+
 func TestPlayerStatsFilters(t *testing.T) {
 	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{Players: []string{"alpha"}})
 	if len(got.Players) != 1 || got.Players[0].Name != "alpha" {
@@ -269,5 +318,95 @@ func TestPlayerStatsUnmatchedKTXPlayerIgnored(t *testing.T) {
 	}
 	if got.Sources.Damage != result.SrcDerived {
 		t.Errorf("damage src = %q, want derived — nothing was overlaid", got.Sources.Damage)
+	}
+}
+
+// KTX writes 99999 for taken-to-die rather than dividing by zero
+// (ktx/src/stats_json.c:357). It is a sentinel, not a measurement, and
+// must never reach a consumer as a number — the overlay falls through to
+// the derived average, which itself omits when the player never died.
+func TestPlayerStatsNoDeathsSentinelNeverServed(t *testing.T) {
+	t.Run("falls through to the derived average", func(t *testing.T) {
+		r := storedResult(true)
+		r.PlayerStats.Players[0].Damage.TakenToDie = intp(275)
+		r.DemoInfo.Players[0].Dmg.TakenToDie = 99999
+
+		got := mustPlayerStats(t, r, PlayerStatsOptions{})
+		ttd := got.Players[0].Damage.TakenToDie
+		if ttd == nil || *ttd != 275 {
+			t.Fatalf("takenToDie = %v, want the derived 275", ttd)
+		}
+	})
+
+	t.Run("omitted when nothing derived it either", func(t *testing.T) {
+		r := storedResult(true)
+		r.PlayerStats.Players[0].Damage.TakenToDie = nil
+		r.DemoInfo.Players[0].Dmg.TakenToDie = 99999
+
+		got := mustPlayerStats(t, r, PlayerStatsOptions{})
+		if ttd := got.Players[0].Damage.TakenToDie; ttd != nil {
+			t.Fatalf("takenToDie = %d, want ABSENT — 99999 is a sentinel, not a reading", *ttd)
+		}
+	})
+}
+
+// KTX writes control and speed unconditionally (ktx/src/stats_json.c:362,
+// unlike the conditional handicap below them), so a player who never held
+// control has a measured 0. Suppressing it as "absent" would hide exactly
+// the player the stat says the most about.
+func TestPlayerStatsControlAndSpeedZeroIsAMeasurement(t *testing.T) {
+	r := storedResult(true)
+	zero := 0.0
+	r.DemoInfo.Players[0].Control = &zero
+	r.DemoInfo.Players[0].Speed = &result.DemoInfoSpeed{Max: 0, Avg: 0}
+
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	row := got.Players[0]
+	if row.ControlMs == nil || *row.ControlMs != 0 {
+		t.Errorf("controlMs = %v, want an observed 0", row.ControlMs)
+	}
+	if row.Speed == nil {
+		t.Error("speed absent though KTX recorded a 0/0 pair")
+	}
+
+	// A build that never wrote the key at all is genuinely unmeasured.
+	r2 := storedResult(true)
+	r2.DemoInfo.Players[0].Control = nil
+	if ms := mustPlayerStats(t, r2, PlayerStatsOptions{}).Players[0].ControlMs; ms != nil {
+		t.Errorf("controlMs = %d, want absent when KTX wrote no control key", *ms)
+	}
+}
+
+// KTX's login wins, but a KTX block that carries none must not erase the
+// *auth login the analyzer already read off the wire.
+func TestPlayerStatsBlankKTXLoginKeepsWireAuth(t *testing.T) {
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Login = "wire@auth"
+	r.DemoInfo.Players[0].Login = ""
+
+	if got := mustPlayerStats(t, r, PlayerStatsOptions{}).Players[0].Login; got != "wire@auth" {
+		t.Errorf("login = %q, want the wire *auth login preserved", got)
+	}
+}
+
+// Real/virtual are KTX's rl/gl-only rhits/vhits. KTX omits the pair
+// entirely unless it recorded one (stats_json.c:146), so a weapon without
+// them must carry nil rather than a fabricated 0/0 split.
+func TestPlayerStatsOverlayRealVirtualNotZeroFilled(t *testing.T) {
+	r := storedResult(true)
+	r.DemoInfo.Players[0].Weapons["lg"] = &result.DemoInfoWeapon{
+		Acc: &result.DemoInfoAcc{Attacks: 169, Hits: 53},
+	}
+
+	acc := mustPlayerStats(t, r, PlayerStatsOptions{}).Players[0].Accuracy
+	lg := acc.ByWeapon["lg"]
+	if lg.Hits == nil || *lg.Hits != 53 {
+		t.Fatalf("lg hits = %v, want 53", lg.Hits)
+	}
+	if lg.Real != nil || lg.Virtual != nil {
+		t.Error("lg carries a real/virtual split KTX never recorded")
+	}
+	if rl := acc.ByWeapon["rl"]; rl.Real == nil || *rl.Real != 33 {
+		t.Errorf("rl real = %v, want 33 carried through", rl.Real)
 	}
 }

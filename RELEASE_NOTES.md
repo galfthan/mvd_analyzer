@@ -47,11 +47,54 @@ corpus was regenerated.
   pipeline computed. KTX wins on damage given/team/self/ewep, accuracy,
   and pickup counts; `taken` stays derived (KTX's is enemy-only and
   lands separately in `takenEnemy`); score and hold are never overlaid.
-- **`/demoinfo` is unchanged** — still the verbatim KTX pass-through,
-  now explicitly positioned as the audit trail `playerStats` is
-  diffable against.
+- **The section keeps ONE SHAPE across demo ages.** Where a wire-side
+  reconstruction is possible at all it is emitted and marked
+  `src: "derived"` rather than the field vanishing on a demo recorded
+  before KTX embedded its block: `accuracy` from the decoded fire stream,
+  `takenEnemy` / `takenToDie` from the per-hit damage log, `login` from
+  the `*auth` userinfo key. A response whose shape changes with the
+  demo's age forces every consumer into two code paths, and the old-demo
+  path is the one nobody tests. The limit is honesty, not effort — a
+  value that cannot be measured stays ABSENT rather than becoming a
+  zero, so `accuracy.byWeapon[].hits` is omitted when there is no damage
+  stream to link fires against, and KTX's `taken-to-die` 99999
+  no-deaths sentinel is never served as a number.
+- **`/demoinfo` stays the verbatim KTX pass-through**, now explicitly
+  positioned as the audit trail `playerStats` is diffable against. One
+  fidelity fix: `control` was a `float64` behind `omitempty`, so a KTX
+  block recording `"control": 0.0` came out with the key *dropped* —
+  indistinguishable from an older build that never wrote it. It is a
+  pointer now, and a measured zero is served as `0`. Every demo in the
+  golden corpus carries `"control": 0`, so this key reappears there.
+- **Match start is detected on `"has begun"`, not `"match has begun"`.**
+  kmod 1.58 / qwe 0.170 (2003-era) broadcast `"The duel has begun!"` —
+  they announce the *mode*, not the word "match". The narrower pattern
+  missed it, and because both stream sampling and the parser's
+  obituary-death gate hang off that flag, such a demo silently produced
+  **no streams at all and zero deaths**. A 2003 dm4 duel now reports
+  48/13 and 10/52 with full possession times where it previously had no
+  `playerStats` section and a 0-death scoreboard. No golden output moved
+  — every corpus demo uses KTX's own phrasing.
+- **`accuracy.real` / `virtual` are documented correctly.** They are
+  KTX's `rhits` / `vhits`, present on rl/gl only, and count *victims
+  damaged by a blast* — not a direct/splash split of `hits`, which for
+  rl/gl is the direct-impact count. One rocket splashing three players
+  adds three, so `real` routinely exceeds `hits` (a 2022 dm3 demo reads
+  `rl: {attacks: 110, hits: 13, real: 55, virtual: 55}`). `virtual` is
+  latched before godmode / pentagram / teamplay damage-avoidance, so the
+  gap to `real` is damage *prevented*, not missed.
+- **Pack transfers are gated on the MODE, not the `teamplay` cvar.** KTX
+  gates on `isTeam()`; an FFA server can still run `teamplay 2`, and
+  trusting the cvar there made "the dropper's team" trivially true and
+  invented a transfer for every backpack anyone picked up. CTF keeps
+  counting — its teams are real, KTX simply declines to measure them —
+  so the `xfer + xferSelf == xferRL` identity holds on team games only.
 - Verified end-to-end on gameId 71035 (a 2019 4on4 with no demoinfo
-  block): full scoreboard, pickups, transfers and hold times.
+  block): full scoreboard, pickups, transfers and hold times. Also on a
+  13-demo local corpus spanning 2003 kmod, 2022 KTX, CTF, wipeout,
+  hoonymode, FFA and race: the `xfer + xferSelf == KTX xferRL/xferLG`
+  identity holds exactly for all 16 players across the two team demos
+  carrying both signals.
 
 ## 2026-07-25 (fix-roster-frags) — scoreboard by occupancy, schema v60
 

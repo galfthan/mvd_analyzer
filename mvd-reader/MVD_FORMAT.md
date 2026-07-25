@@ -1367,12 +1367,21 @@ The match officially starts when one of these messages appears:
 
 | Pattern | Server Type | Notes |
 |---------|-------------|-------|
-| `"The match has begun!"` | KTX | Most common |
-| `"match has begun"` | KTX variants | Substring match recommended |
+| `"The match has begun!"` | KTX | Most common (`ktx/src/match.c:1173`) |
+| `"The duel has begun!"` | kmod / qwe | Older mods announce the **mode**, not "match" |
+| `"has begun"` | all of the above | What we actually match on — see below |
 | `"Fight!"` | KTX/MVDSV | End of countdown |
 | `"Go!"` | Some servers | Alternative to "Fight!" |
 
-**Implementation note**: Use substring matching (e.g., `contains(msg, "match has begun")`) rather than exact matching to handle variations.
+**Implementation note**: match on the substring `"has begun"`, not
+`"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast
+`"The duel has begun!"` — the narrower pattern misses it, and because
+stream sampling is gated on the match being started, missing it drops the
+entire streams-derived half of the pipeline (possession times, positions,
+armor/weapon transitions) *and* leaves the parser's obituary-death gate
+shut, so the demo also reports zero deaths. Both failures are silent.
+The canonical table is `parser.MatchStartPatterns` (`mvd-reader/parser/print.go`),
+shared with the analytics `MatchTimingDetector`.
 
 **Critical**: All player state (items, health, armor, ammo) before match start should be **discarded**. Players spawn fresh with:
 - 100 health

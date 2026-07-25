@@ -2492,7 +2492,11 @@ components:
                 description: "Player pants colour index."
                 type: integer
               control:
-                description: "KTX map-control share."
+                description: >
+                  KTX map-control time, seconds. Written unconditionally by
+                  KTX builds that record it, so a `0` here is a measured
+                  reading (the player never held control), not a gap; the
+                  key is absent only on builds that never wrote it.
                 type: number
               dmg:
                 description: "Damage stat block (KTX)."
@@ -5333,7 +5337,7 @@ components:
           properties:
             score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx] }
             damage: { description: "Provenance of the damage family.", type: string, enum: [derived, ktx] }
-            accuracy: { description: "Provenance of the accuracy family (KTX-only when present).", type: string, enum: [derived, ktx] }
+            accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx] }
             hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx] }
           required: [score, hold]
@@ -5351,13 +5355,13 @@ components:
         name: { description: "Player name, or team name on a team row.", type: string }
         team: { description: "Team name.", type: string }
         ping:
-          description: "KTX-only: end-of-match ping. Absent without a demoinfo block."
+          description: "KTX-only: end-of-match ping. Absent without a demoinfo block (svc_updateping carries it on the wire but the parser skips it today)."
           type: [integer, "null"]
         handicap:
           description: "KTX-only: handicap, omitted by KTX at the default 100."
           type: [integer, "null"]
         login:
-          description: "KTX-only: authenticated login name."
+          description: "Authenticated login name: KTX's when present, else the *auth userinfo key off the wire."
           type: [string, "null"]
         bot:
           description: "KTX-only: present when the slot was held by a frogbot."
@@ -5369,8 +5373,21 @@ components:
               required: [skill, customised]
               type: object
             - type: "null"
+        controlMs:
+          description: "KTX-only: KTX's own map-control time in milliseconds. Not the same measure as the region-control view, and absent without a demoinfo block."
+          type: integer
+        speed:
+          description: "KTX-only: per-player speed summary in Quake units per second. Absent without a demoinfo block."
+          oneOf:
+            - additionalProperties: false
+              properties:
+                max: { description: "Peak speed observed.", type: number }
+                avg: { description: "Average speed.", type: number }
+              required: [max, avg]
+              type: object
+            - type: "null"
         members:
-          description: "TEAM rows only: how many players were folded in, and the count shareMatch's denominator (matchMs x members) rests on."
+          description: "TEAM rows only: how many players were folded in that were actually in the match (presentMs > 0) — exactly the count shareMatch's denominator (matchMs x members) rests on. A scoreboard-only row is summed into the team's totals but does not count here."
           type: integer
         window: { $ref: "#/components/schemas/PlayerStatsWindow" }
         score:
@@ -5399,37 +5416,49 @@ components:
                 givenSelf: { description: "Dealt to self.", type: integer }
                 enemyWeapons: { description: "Enemy damage dealt to victims holding RL and/or LG (KTX ewep).", type: integer }
                 taken:
-                  description: "From ALL sources (enemy + team + self + env) — NOT the same quantity as KTX dmg.taken."
+                  description: >
+                    From ALL sources (enemy + team + self + env) — NOT the same
+                    quantity as KTX dmg.taken. Only the per-hit reconstruction
+                    measures it, so it is ABSENT (not zero) on a demo that
+                    carries a KTX block but no damage stream.
+                  type: integer
+                teamWeapons:
+                  description: "KTX-only: damage dealt to TEAMMATES holding RL and/or LG (KTX twep) — the friendly-fire mirror of enemyWeapons. The reconstruction does not bucket team damage by the victim's inventory, so this is absent without a demoinfo block."
                   type: integer
                 takenEnemy:
-                  description: "KTX-only: enemy-only damage taken (KTX dmg.taken). Absent, not zero, without a demoinfo block."
+                  description: "Enemy-only damage taken (KTX dmg.taken). KTX's when present, else reconstructed from the per-hit log. Absent, not zero, when the demo carries no damage information."
                   type: integer
                 takenToDie:
-                  description: "KTX-only: average damage absorbed per death."
+                  description: "Average damage absorbed per death (takenEnemy / deaths). Absent when the player never died — KTX's 99999 no-deaths sentinel is never served as a number."
                   type: integer
-              required: [src, given, givenTeam, givenSelf, enemyWeapons, taken]
+              required: [src, given, givenTeam, givenSelf, enemyWeapons]
               type: object
             - type: "null"
         accuracy:
           description: >
-            KTX-only per-weapon shot accounting; the whole family is absent on
-            demos without a demoinfo block (no derived fallback by design —
-            KTX counts pellets server-side and a wire-inferred approximation
-            under the same key would be silently incomparable).
+            Per-weapon shot accounting. src=ktx is KTX's server-side counter
+            (attacks = PELLETS for sg/ssg, with a real/virtual split);
+            src=derived is reconstructed from the decoded fire stream
+            (attacks = TRIGGER PULLS, no real/virtual, and hits absent when
+            the demo has no damage stream to link against). The two are NOT
+            the same measurement, so check src before comparing accuracies
+            across demos — but the family is emitted either way, so a demo
+            with no KTX block degrades to a rougher number rather than to a
+            missing field.
           oneOf:
             - additionalProperties: false
               properties:
                 src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
                 byWeapon:
-                  description: "KTX acc block per weapon key (sg, ssg, ng, sng, gl, rl, lg)."
+                  description: "Per weapon key (axe, sg, ssg, ng, sng, gl, rl, lg — KTX counts axe swings too). What the numbers mean depends on src — see the family description."
                   additionalProperties:
                     additionalProperties: false
                     properties:
-                      attacks: { description: "PELLET count for sg/ssg, not trigger pulls.", type: integer }
-                      hits: { description: "Hits landed.", type: integer }
-                      real: { description: "Direct (non-splash) hits.", type: integer }
-                      virtual: { description: "Splash hits.", type: integer }
-                    required: [attacks, hits]
+                      attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
+                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no damage stream to link fires against — a zero would read as 'shot and never hit'.", type: integer }
+                      real: { description: "KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
+                      virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
+                    required: [attacks]
                     type: object
                   type: object
               required: [src, byWeapon]

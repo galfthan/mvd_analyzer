@@ -404,6 +404,30 @@ func TestIsTeamplayGate(t *testing.T) {
 	}
 }
 
+// KTX gates its transfer counters on the MODE (isTeam(), k_mode ==
+// gtTeam), not on the teamplay cvar, and the two disagree: the
+// ffa_5[dm4] corpus demo runs FFA with `teamplay 2` set. Trusting the
+// cvar there made DropperTeam == Team trivially true (most players carry
+// no team at all) and invented a transfer for every backpack picked up.
+func TestIsTeamplayGate_FFAModeBeatsTeamplayCvar(t *testing.T) {
+	ffa := &Result{Metadata: &result.MetadataResult{
+		MatchSettings: &result.MatchSettings{Mode: "FFA", Teamplay: 2},
+		ServerInfo:    map[string]string{"teamplay": "2"},
+	}}
+	if isTeamplay(ffa, &CoreOutputs{}) {
+		t.Error("FFA must not count as teamplay even with teamplay 2 — KTX's isTeam() is mode-gated")
+	}
+	// CTF is deliberately NOT in the non-team list: its teams are real and
+	// the transfers happened, even though KTX's isTeam() declines to count
+	// them. Unrecognised modes fall through to the cvar.
+	ctf := &Result{Metadata: &result.MetadataResult{
+		MatchSettings: &result.MatchSettings{Mode: "CTF", Teamplay: 2},
+	}}
+	if !isTeamplay(ctf, &CoreOutputs{}) {
+		t.Error("CTF should still count as teamplay")
+	}
+}
+
 // --- team aggregation ---------------------------------------------------
 
 func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
@@ -474,5 +498,131 @@ func TestTeamAggregationPreservesXferObservability(t *testing.T) {
 	}
 	if *players[0].Pickups.ByKind["rl"].Xfer != 1 {
 		t.Error("aggregation mutated a member's counter through the shared pointer")
+	}
+}
+
+// --- takenEnemy reconstruction ------------------------------------------
+
+func ptrInt(v int) *int { return &v }
+
+// deriveTakenEnemy reconstructs KTX's dmg_t, which accumulates ONLY in
+// the enemy branch (ktx/src/combat.c:1069). Every other source our own
+// `taken` counts — team, self, environment — must be excluded, or the two
+// fields silently become the same number under different names.
+func TestDeriveTakenEnemyExcludesNonEnemySources(t *testing.T) {
+	res := &Result{Damage: &result.DamageResult{
+		Events: []result.DamageEntry{
+			{Attacker: "b", Victim: "a", Damage: 40},
+			{Attacker: "b", Victim: "a", Damage: 60, Bounded: ptrInt(25)}, // overkill capped
+			{Attacker: "mate", Victim: "a", Damage: 30, IsTeam: true},
+			{Attacker: "a", Victim: "a", Damage: 20, IsSelf: true},
+			{Attacker: "world", Victim: "a", Damage: 15, IsEnv: true},
+		},
+		ByPlayer: map[string]*result.PlayerDamage{"a": {}, "b": {}, "quiet": {}},
+	}}
+
+	got := deriveTakenEnemy(res)
+	if got["a"] != 65 {
+		t.Errorf("takenEnemy[a] = %d, want 65 (40 + bounded 25; team/self/env excluded)", got["a"])
+	}
+	// Every player in the damage table reads as an observed zero rather
+	// than as unknown — the stream measured them, they just took nothing.
+	if v, ok := got["quiet"]; !ok || v != 0 {
+		t.Errorf("takenEnemy[quiet] = %v (present=%v), want an observed 0", v, ok)
+	}
+}
+
+// Telefrags and stomps live outside Events but do fold into KTX's dmg_t,
+// so they are added back — except the ones KTX's enemy branch never sees.
+// PositionalKill carries no IsSelf/IsEnv flag, so the test is on the names.
+func TestDeriveTakenEnemyFoldsPositionalKillsButNotSelfOrWorld(t *testing.T) {
+	res := &Result{Damage: &result.DamageResult{
+		ByPlayer: map[string]*result.PlayerDamage{"a": {}},
+		Telefrags: []result.PositionalKill{
+			{Attacker: "b", Victim: "a", Bounded: ptrInt(100)},
+			{Attacker: "mate", Victim: "a", IsTeam: true, Bounded: ptrInt(100)},
+			{Attacker: "a", Victim: "a", Bounded: ptrInt(100)},     // self-telefrag
+			{Attacker: "world", Victim: "a", Bounded: ptrInt(100)}, // degenerate world attacker
+			{Attacker: "b", Victim: "a"},                           // no bounded reconstruction
+		},
+		Stomps: []result.PositionalKill{
+			{Attacker: "b", Victim: "a", Bounded: ptrInt(30)},
+		},
+	}}
+
+	if got := deriveTakenEnemy(res)["a"]; got != 130 {
+		t.Errorf("takenEnemy[a] = %d, want 130 (enemy telefrag 100 + stomp 30 only)", got)
+	}
+}
+
+func TestDeriveTakenEnemyNilWithoutDamageStream(t *testing.T) {
+	if got := deriveTakenEnemy(&Result{}); got != nil {
+		t.Errorf("deriveTakenEnemy without a damage stream = %v, want nil", got)
+	}
+}
+
+// --- derived accuracy ---------------------------------------------------
+
+// The flagship "absent, not zero" case: with no damage stream there is
+// nothing to link fires against, so `hits` must be omitted rather than
+// reading as "shot and never hit". `attacks` still stands on its own.
+func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
+	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
+		Player:   "a",
+		ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 63, Hits: 0}},
+	}}}
+
+	acc := deriveAccuracy(&Result{Shots: shots}, "a")
+	if acc == nil {
+		t.Fatal("derived accuracy is nil — the family must survive a missing damage stream")
+	}
+	if acc.Src != result.SrcDerived {
+		t.Errorf("src = %q, want %q", acc.Src, result.SrcDerived)
+	}
+	rl := acc.ByWeapon["rl"]
+	if rl.Attacks != 63 {
+		t.Errorf("attacks = %d, want 63", rl.Attacks)
+	}
+	if rl.Hits != nil {
+		t.Errorf("hits = %d, want ABSENT without a damage stream", *rl.Hits)
+	}
+	if rl.Real != nil || rl.Virtual != nil {
+		t.Error("real/virtual are KTX-only and must never appear on a derived block")
+	}
+
+	// With a damage stream the link is meaningful, so hits appears.
+	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{}}, "a")
+	if h := withDmg.ByWeapon["rl"].Hits; h == nil || *h != 0 {
+		t.Errorf("hits with a damage stream = %v, want an observed 0", h)
+	}
+}
+
+func TestDeriveAccuracyNilForUnknownPlayer(t *testing.T) {
+	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
+		Player: "a", ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 1}},
+	}}}
+	if got := deriveAccuracy(&Result{Shots: shots}, "nobody"); got != nil {
+		t.Errorf("deriveAccuracy for an unknown player = %v, want nil", got)
+	}
+}
+
+// --- login ---------------------------------------------------------------
+
+// Two identities can share a display name with different *auth logins.
+// Map iteration is randomised, so first-wins must be resolved in slot
+// order or the attribution flips between runs of the same demo.
+func TestDeriveLoginsIsDeterministicOnNameCollision(t *testing.T) {
+	co := &CoreOutputs{Sessions: map[int][]ResolvedSession{
+		5: {{Name: "player", Auth: "late"}},
+		1: {{Name: "player", Auth: "early"}},
+		3: {{Name: "other", Auth: ""}},
+	}}
+	for i := 0; i < 32; i++ {
+		if got := deriveLogins(co)["player"]; got != "early" {
+			t.Fatalf("login = %q, want %q (lowest slot wins, deterministically)", got, "early")
+		}
+	}
+	if _, ok := deriveLogins(co)["other"]; ok {
+		t.Error("a player with no *auth key must get no login entry at all")
 	}
 }

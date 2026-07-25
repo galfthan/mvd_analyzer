@@ -229,6 +229,7 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 			EndMs:       s.endMs,
 			Name:        g.name,
 			Team:        g.team,
+			Auth:        s.auth,
 			IdentityKey: identityKey(root),
 		})
 	}

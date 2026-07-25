@@ -77,7 +77,8 @@ degrades by marking families `src: "derived"`.
 {
   "players": [{
     "name": "...", "team": "...",
-    "ping": 13, "handicap": 0, "login": "...", "bot": {...},   // KTX-only, omitted when absent
+    "ping": 13, "handicap": 0, "bot": {...},   // KTX-only, omitted when absent
+    "login": "...",                            // KTX's, else the *auth userinfo key
 
     "window": { "matchMs": 600000, "presentMs": 600000, "aliveMs": 511000, "deadMs": 89000 },
 
@@ -90,8 +91,8 @@ degrades by marking families `src: "derived"`.
                 "takenEnemy": 3702,     // enemy-only (KTX dmg.taken) — distinct field, never coerced
                 "src": "ktx" },
 
-    "accuracy": { "rl": { "attacks": 88, "hits": 41, "real": 33, "virtual": 8 }, ...,
-                  "src": "ktx" },       // KTX-only — the whole family is omitted on old demos
+    "accuracy": { "byWeapon": { "rl": { "attacks": 88, "hits": 41, "real": 33, "virtual": 8 } },
+                  "src": "ktx" },       // derived from the fire stream when KTX has none (§4.2)
 
     "pickups": { "ra": { "took": 6 }, "mh": { "took": 4 },
                  "rl": { "took": 4, "dropped": 3, "xfer": 1, "xferSelf": 0 }, ...,
@@ -167,12 +168,45 @@ field. The `dmg.taken` trap is already documented at
 | `score` (frags/kills/deaths/suicides/tk) | **always derived** | KTX over-counts pentagram-deflect telefrags / `dtTELE2` and resets after a reconnect; `match.players` + the corrected frag log are right. Already the web's behaviour (`app.js:1316` comment). |
 | `damage.given` / `givenTeam` / `givenSelf` / `enemyWeapons` / `takenToDie` | KTX when present, else bounded reconstruction | server-side accounting we cannot fully see; reuses `view.applyKTXBoundedSummary`'s rules. |
 | `damage.taken` | **always derived** (all sources) | KTX's `dmg.taken` is enemy-only. Emitted separately as `takenEnemy`. |
-| `accuracy` | **KTX-only** | KTX counts pellets server-side (SG/SSG `attacks` is a pellet count). The `shots`-derived figure is a wire-inferred approximation on a different footing, and a caller comparing accuracies across a new and an old demo would silently compare two different measurements. The family is **omitted entirely** on demos without a KTX block. |
+| `accuracy` | KTX when present, else the `shots`-derived approximation, marked `src: "derived"` | see §4.2 — the earlier "omit it entirely" ruling was reversed. |
 | `pickups` (took/dropped) | KTX when present, else derived from `items` + `weaponPickups` | direct server-side counters, semantics identical. |
 | `pickups.xfer` / `xferSelf` | **always derived** (see §4.1) | we can decompose what KTX conflates. |
 | `hold.armor` / `hold.weapons` | **always derived** | KTX has no weapon time in the block at all, and its armor clock overcounts (§1b). Deviating from the server's own end-of-match table will surprise people — say why in RESULT_SCHEMA.md. |
 | `hold.powerups` | **always derived** | KTX is correct here, but deriving keeps it consistent with the timeline's powerup runs. |
-| `ping` / `handicap` / `login` / `bot` / `control` / `speed` | KTX-only | not on the wire; omitted on old demos. |
+| `damage.takenEnemy` / `takenToDie` | KTX when present, else derived from the per-hit log | see §4.2. |
+| `login` | KTX when present, else the `*auth` userinfo login | genuinely on the wire (`parser/userinfo.go:102`) — there was never a reason to treat it as KTX-only. |
+| `ping` / `handicap` / `bot` / `control` / `speed` | KTX-only | `handicap`/`bot`/`control`/`speed` are server-side state with no wire signal. `ping` IS on the wire (`svc_updateping`) but the parser currently skips it (`mvd-reader/parser/parser.go:787`); decoding it is a Layer-1 change left for a follow-up. |
+
+### 4.2 Degrade, don't disappear
+
+The rule above ("KTX wins only where the definition is identical, otherwise
+expose both") governs which NUMBER wins. It does not license dropping a
+field on demos KTX never touched. A response whose *shape* changes with the
+demo's age forces every consumer to write two code paths, and the old-demo
+path is the one nobody tests.
+
+So the standing rule is: **where a wire-side reconstruction is possible at
+all, emit it, marked `src: "derived"`.** A rougher number a caller can see
+the provenance of beats an absent field. This reverses an earlier decision
+to omit `accuracy` on pre-KTX-block demos.
+
+Three consequences, all implemented:
+
+- **`accuracy`** is derived from the decoded fire stream when there is no
+  KTX block. It is NOT the same measurement — KTX counts pellets
+  server-side for sg/ssg while ours counts trigger pulls — so `src` is
+  load-bearing and the schema spells the difference out.
+- **`takenEnemy` / `takenToDie`** are reconstructed from the per-hit
+  damage log (enemy-only hits; `takenEnemy / deaths`, matching
+  `ktx/src/stats_json.c:357`).
+- **`login`** comes from the `*auth` userinfo key, which the parser
+  already reads.
+
+The limit is honesty, not effort: a value that cannot be measured stays
+ABSENT rather than becoming a zero. Two cases in this section:
+`accuracy.byWeapon[].hits` is omitted on a demo with no damage stream to
+link fires against (a zero would read as "shot and never hit"), and KTX's
+`taken-to-die` 99999 no-deaths sentinel is never served as a number.
 
 ### 4.1 Pack transfers, derived
 
@@ -325,8 +359,9 @@ Plus the golden regeneration diff, which is large but mechanical.
    summed alive time — *not* averaging per-player shares) is exactly the
    arithmetic to do once in Go rather than in every consumer. Revisit only
    if a `/team-stats` consumer appears that wants nothing per-player.
-3. **`accuracy` is KTX-only and omitted on old demos.** No `shots`
-   fallback — see the substitution table for why.
+3. ~~**`accuracy` is KTX-only and omitted on old demos.**~~ **REVERSED**
+   — see §4.2. It is derived from the fire stream when KTX has none, and
+   `src` tells the caller which measurement they are looking at.
 4. **`xfer` is derived**, decomposed into `xfer` / `xferSelf` — §4.1.
 
 Nothing is open. Implementation can start at Phase 1.

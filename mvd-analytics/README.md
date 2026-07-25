@@ -364,6 +364,7 @@ flowchart TB
   identity -->|"identity"| frag
   identity -->|"identity"| items
   identity -->|"identity"| match
+  identity -->|"identity"| player_stats
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
@@ -384,6 +385,7 @@ flowchart TB
   roster -->|"roster"| timeline
   roster -->|"roster"| weapon_pickups
   shots -->|"shots"| aim
+  shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
   timeline -->|"timeline"| airgibs
   timeline -->|"timeline"| frags_final

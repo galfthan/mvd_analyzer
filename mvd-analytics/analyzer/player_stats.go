@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -47,10 +48,14 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 	if pickups != nil {
 		ps.Sources.Pickups = result.SrcDerived
 	}
+	takenEnemy := deriveTakenEnemy(res)
+	logins := deriveLogins(co)
 
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
-		ps.Players = append(ps.Players, buildPlayerStatsRow(res, p, matchMs, pickups))
+		row := buildPlayerStatsRow(res, p, matchMs, pickups, takenEnemy)
+		row.Login = logins[row.Name]
+		ps.Players = append(ps.Players, row)
 	}
 	// A scoreboard player who produced no stream (connected but never
 	// spawned, or a slot the stream builder never saw) still gets a row —
@@ -68,11 +73,13 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 			row := result.PlayerStatsRow{
 				Name:   mp.Name,
 				Team:   mp.Team,
+				Login:  logins[mp.Name],
 				Window: result.PlayerStatsWindow{MatchMs: matchMs},
 				Score:  deriveScore(res, mp.Name),
 				Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 			}
-			row.Damage = deriveDamage(res, mp.Name)
+			row.Damage = deriveDamage(res, mp.Name, takenEnemy)
+			row.Accuracy = deriveAccuracy(res, mp.Name)
 			row.Pickups = pickupsFor(pickups, mp.Name)
 			ps.Players = append(ps.Players, row)
 		}
@@ -81,6 +88,12 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 	for i := range ps.Players {
 		if ps.Players[i].Damage != nil {
 			ps.Sources.Damage = result.SrcDerived
+			break
+		}
+	}
+	for i := range ps.Players {
+		if ps.Players[i].Accuracy != nil {
+			ps.Sources.Accuracy = result.SrcDerived
 			break
 		}
 	}
@@ -93,7 +106,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 }
 
 // buildPlayerStatsRow assembles one streamed player's row.
-func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup) result.PlayerStatsRow {
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int) result.PlayerStatsRow {
 	present := presenceWindow(p, matchMs)
 	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
 
@@ -105,13 +118,14 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 	w.DeadMs = w.PresentMs - w.AliveMs
 
 	row := result.PlayerStatsRow{
-		Name:    p.Name,
-		Team:    p.Team,
-		Window:  w,
-		Score:   deriveScore(res, p.Name),
-		Damage:  deriveDamage(res, p.Name),
-		Pickups: pickupsFor(pickups, p.Name),
-		Hold:    deriveHold(p, alive, w),
+		Name:     p.Name,
+		Team:     p.Team,
+		Window:   w,
+		Score:    deriveScore(res, p.Name),
+		Damage:   deriveDamage(res, p.Name, takenEnemy),
+		Accuracy: deriveAccuracy(res, p.Name),
+		Pickups:  pickupsFor(pickups, p.Name),
+		Hold:     deriveHold(p, alive, w),
 	}
 	return row
 }
@@ -154,7 +168,7 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 // family: bounded is KTX-scoreboard semantics (armor absorbed, health
 // capped to remaining), which is what these fields mean and what the KTX
 // overlay in view.PlayerStats replaces them with.
-func deriveDamage(res *Result, name string) *result.PlayerStatsDamage {
+func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.PlayerStatsDamage {
 	if res.Damage == nil {
 		return nil
 	}
@@ -166,14 +180,181 @@ func deriveDamage(res *Result, name string) *result.PlayerStatsDamage {
 	if pd.Bounded != nil {
 		src = pd.Bounded
 	}
-	return &result.PlayerStatsDamage{
+	taken := src.Taken
+	out := &result.PlayerStatsDamage{
 		Src:          result.SrcDerived,
 		Given:        src.Given,
 		GivenTeam:    src.GivenTeam,
 		GivenSelf:    src.GivenSelf,
 		EnemyWeapons: src.EWep,
-		Taken:        src.Taken,
+		Taken:        &taken,
 	}
+	// TakenEnemy and TakenToDie were KTX-only until we reconstructed them
+	// from the per-hit log: a demo without a demoinfo block should degrade
+	// to a worse number, not to a missing field, or the old-demo response
+	// becomes a different shape to program against.
+	if te, ok := takenEnemy[name]; ok {
+		out.TakenEnemy = &te
+		// KTX's taken-to-die is integer dmg_t / deaths
+		// (ktx/src/stats_json.c:357), with a 99999 sentinel when the player
+		// never died. We omit instead of copying the sentinel — absent is
+		// what "no deaths to average over" means.
+		if d := deathsOf(res, name); d > 0 {
+			ttd := te / d
+			out.TakenToDie = &ttd
+		}
+	}
+	return out
+}
+
+// deriveTakenEnemy reconstructs KTX's dmg_t — damage taken from ENEMY
+// players only (ktx/src/combat.c:1069 accumulates it in the enemy branch)
+// — per victim, from the per-hit log. Our PlayerDamage.Taken counts every
+// source (enemy + team + self + environment), so the two are different
+// quantities and both are surfaced; this is the one comparable to KTX's.
+//
+// Uses the bounded value per hit (KTX-scoreboard semantics: armor absorbed,
+// health capped to remaining), falling back to the wire value where no
+// reconstruction was made. Positional kills live outside Events but do fold
+// into KTX's dmg_t, so enemy telefrags and stomps are added back.
+//
+// Returns nil when the demo carries no damage stream.
+func deriveTakenEnemy(res *Result) map[string]int {
+	if res.Damage == nil {
+		return nil
+	}
+	out := map[string]int{}
+	for i := range res.Damage.Events {
+		ev := &res.Damage.Events[i]
+		if ev.IsTeam || ev.IsSelf || ev.IsEnv {
+			continue
+		}
+		v := ev.Damage
+		if ev.Bounded != nil {
+			v = *ev.Bounded
+		}
+		out[ev.Victim] += v
+	}
+	for _, list := range [][]result.PositionalKill{res.Damage.Telefrags, res.Damage.Stomps} {
+		for i := range list {
+			pk := &list[i]
+			if pk.IsTeam || pk.Bounded == nil {
+				continue
+			}
+			// PositionalKill has no IsSelf/IsEnv flag, so the enemy test is
+			// on the names. KTX accumulates dmg_t only in the enemy branch
+			// (ktx/src/combat.c:1069 sits in the else of the same-team
+			// test; the self branch at 1046 never touches it), and the
+			// damage analyzer's own enemyTakenBounded makes the same two
+			// exclusions — a self-telefrag through a teleporter, or the
+			// degenerate world attacker, would otherwise inflate takenEnemy
+			// by a full armor+health and drag takenToDie with it.
+			if pk.Attacker == pk.Victim || pk.Attacker == "world" {
+				continue
+			}
+			out[pk.Victim] += *pk.Bounded
+		}
+	}
+	// Every player in the damage table gets an entry, so a player who took
+	// no enemy damage reads as an observed zero rather than as unknown.
+	for name := range res.Damage.ByPlayer {
+		if _, ok := out[name]; !ok {
+			out[name] = 0
+		}
+	}
+	return out
+}
+
+// deathsOf is the corrected death count the taken-to-die average divides
+// by, from the same scoreboard the score family reports.
+func deathsOf(res *Result, name string) int {
+	if res.Match != nil {
+		for i := range res.Match.Players {
+			if res.Match.Players[i].Name == name {
+				return res.Match.Players[i].Deaths
+			}
+		}
+	}
+	if res.Frags != nil {
+		if pf := res.Frags.ByPlayer[name]; pf != nil {
+			return pf.Deaths
+		}
+	}
+	return 0
+}
+
+// deriveAccuracy reconstructs the per-weapon accuracy block from the shot
+// stream, so a demo with no KTX demoinfo still answers "how well did they
+// aim" instead of dropping the field.
+//
+// It is NOT the same measurement as KTX's, and the family's Src says so.
+// KTX counts server-side: for the shotgun and super shotgun its `attacks`
+// is a PELLET count and `hits` counts pellets that connected. Ours counts
+// TRIGGER PULLS and the fires that produced at least one linked damage
+// event — so shotgun accuracy in particular reads on a different scale,
+// and the two must never be compared across demos without reading Src.
+// For the single-projectile weapons (rl, lg, gl, ng, sng) the two count
+// the same events and are broadly comparable.
+//
+// Returns nil when the demo decoded no weapon fires for this player.
+func deriveAccuracy(res *Result, name string) *result.PlayerStatsAccuracy {
+	if res.Shots == nil {
+		return nil
+	}
+	for i := range res.Shots.ByPlayer {
+		ps := &res.Shots.ByPlayer[i]
+		if ps.Player != name {
+			continue
+		}
+		// Hits come from linking each fire to a damage event, so they are
+		// only meaningful when the demo carries a damage stream at all.
+		// Without one every weapon would read hits=0, i.e. "shot and never
+		// hit" — a fabricated zero where the honest answer is "not
+		// measurable". Attacks still stand on their own.
+		linkable := res.Damage != nil
+		byWeapon := map[string]result.PlayerStatsAcc{}
+		for _, w := range ps.ByWeapon {
+			if w.Shots == 0 {
+				continue
+			}
+			e := result.PlayerStatsAcc{Attacks: w.Shots}
+			if linkable {
+				hits := w.Hits
+				e.Hits = &hits
+			}
+			byWeapon[w.Weapon] = e
+		}
+		if len(byWeapon) == 0 {
+			return nil
+		}
+		return &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: byWeapon}
+	}
+	return nil
+}
+
+// deriveLogins maps player name to the `*auth` login from userinfo — the
+// wire-side source for the login KTX's demoinfo block also carries, so an
+// old demo can still say who was playing. Empty for unauthenticated
+// players and on servers that do not set it.
+func deriveLogins(co *CoreOutputs) map[string]string {
+	// Slot order, not map order: two identities can share a display name
+	// with different *auth values, and first-wins over a randomised range
+	// would then flip the attribution between runs of the same demo.
+	slots := make([]int, 0, len(co.Sessions))
+	for slot := range co.Sessions {
+		slots = append(slots, slot)
+	}
+	sort.Ints(slots)
+
+	out := map[string]string{}
+	for _, slot := range slots {
+		for _, s := range co.Sessions[slot] {
+			if s.Auth != "" && out[s.Name] == "" {
+				out[s.Name] = s.Auth
+			}
+		}
+	}
+	return out
 }
 
 // derivePickups tallies every acquisition per player per item kind.
@@ -229,6 +410,13 @@ func derivePickups(res *Result, xferOK bool) map[string]map[string]result.Player
 		}
 
 		// Transfers are credited to the DROPPER, not the picker.
+		//
+		// On a CTF demo this deliberately DIVERGES from KTX, which gates the
+		// counter on isTeam() and so reports 0 transfers for every CTF game
+		// (ktx/src/items.c:2587 — isCTF() is a separate mode). The teams in
+		// CTF are real and the transfers happened; KTX simply declines to
+		// count them, so the §6 cross-check "xfer + xferSelf == KTX xferRL"
+		// holds on team games only.
 		if !xferOK || wp.Source != "backpack" || wp.Dropper == "" {
 			continue
 		}
@@ -670,13 +858,26 @@ func longestMs(iv []result.Interval) int32 {
 // isTeam() gate on the transfer counters. The serverinfo/countdown
 // teamplay cvar is the direct signal; the roster's duel verdict and a
 // team-membership count back it up on demos that carry neither.
+//
+// KTX's own gate is the MODE (`k_mode == gtTeam`, ktx/src/g_utils.c:1581),
+// not the cvar, and the two disagree: an FFA server can run with
+// `teamplay 2` set — the ffa_5[dm4] demo in the test corpus does — and
+// then every player sits on their own "team" (often the empty string).
+// Trusting the cvar there made `DropperTeam == Team` trivially true and
+// invented a pack transfer for every backpack anyone picked up. So a mode
+// KTX would not count for is rejected before the cvar is consulted.
 func isTeamplay(res *Result, co *CoreOutputs) bool {
 	if co.IsDuel() {
 		return false
 	}
 	if res.Metadata != nil {
-		if ms := res.Metadata.MatchSettings; ms != nil && ms.Teamplay > 0 {
-			return true
+		if ms := res.Metadata.MatchSettings; ms != nil {
+			if isNonTeamMode(ms.Mode) {
+				return false
+			}
+			if ms.Teamplay > 0 {
+				return true
+			}
 		}
 		if tp, ok := res.Metadata.ServerInfo["teamplay"]; ok {
 			return tp != "" && tp != "0"
@@ -698,6 +899,19 @@ func isTeamplay(res *Result, co *CoreOutputs) bool {
 		if n > 1 {
 			return true
 		}
+	}
+	return false
+}
+
+// isNonTeamMode reports whether the countdown's Mode line names a mode
+// where every player fights alone, so "the dropper's team" is not a real
+// team. The names come from KTX's countdown centerprint (metadata.go
+// flattens "F F A" to "FFA"); anything unrecognised — including CTF, where
+// the teams ARE real — falls through to the cvar and roster checks.
+func isNonTeamMode(mode string) bool {
+	switch strings.ToLower(mode) {
+	case "ffa", "duel", "1on1", "race", "bloodfest":
+		return true
 	}
 	return false
 }
@@ -754,8 +968,9 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				dmg.GivenTeam += m.Damage.GivenTeam
 				dmg.GivenSelf += m.Damage.GivenSelf
 				dmg.EnemyWeapons += m.Damage.EnemyWeapons
-				dmg.Taken += m.Damage.Taken
+				dmg.Taken = addPtr(dmg.Taken, m.Damage.Taken)
 				dmg.TakenEnemy = addPtr(dmg.TakenEnemy, m.Damage.TakenEnemy)
+				dmg.TeamWeapons = addPtr(dmg.TeamWeapons, m.Damage.TeamWeapons)
 			}
 			if m.Pickups != nil {
 				if pickups == nil {
@@ -789,7 +1004,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				present++
 			}
 		}
-		row.Members = len(members)
+		row.Members = present
 		row.Hold = aggregateHold(members, row.Window.AliveMs, matchMs*int32(present))
 		out = append(out, row)
 	}

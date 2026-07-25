@@ -150,10 +150,16 @@ func (co *CoreOutputs) IsDuel() bool {
 // stable within a single analysis run and equal for every session the
 // same human played, so stream merging can group on it.
 type ResolvedSession struct {
-	StartMs     int32
-	EndMs       int32
-	Name        string
-	Team        string
+	StartMs int32
+	EndMs   int32
+	Name    string
+	Team    string
+	// Auth is the `*auth` login from userinfo, set by mvdsv for
+	// authenticated players (mvd-reader parser/userinfo.go:102). It is the
+	// wire-side source for the login the KTX demoinfo block also carries,
+	// so a demo without that block can still report who was playing.
+	// Empty for unauthenticated players and on servers that do not set it.
+	Auth        string
 	IdentityKey string
 }
 
