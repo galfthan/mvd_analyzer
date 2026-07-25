@@ -368,6 +368,11 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
 `ItemPickupPrintEvent`,
+`PlayerDepartureEvent` / `PlayerRejoinEvent` (the KTX/kmod roster
+broadcasts — "left the game with N frags", "rejoins the game with N
+frags", "reenters the game without stats"; decoded once in the parser
+because the wire fragments them at arbitrary points, including inside
+the number),
 `DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),

@@ -8,7 +8,7 @@ detail.
 ## 2026-07-25 (fix-roster-frags) — scoreboard by occupancy, schema v60
 
 Three pre-existing defects in the roster / frag path, found by auditing
-player counts across all 51 locally available demos: 47 agree and are
+player counts across all 54 locally available demos: 50 agree and are
 sensible, four disagree, by three distinct mechanisms. No field was added,
 removed or retyped — `CurrentSchemaVersion` bumps to **v60** because served
 *values* move and the API cache is keyed on the version. The golden corpus
@@ -17,7 +17,8 @@ was regenerated (one demo changed).
 - **A departing player keeps their score.** When the server drops a client
   it zeroes the slot's frags and broadcasts the cleared state in the same
   frame (`SV_DropClient` → `SV_FullClientUpdate`,
-  `mvdsv/src/sv_main.c:419-428`, `:487-513`), and because that happens
+  `mvdsv/src/sv_main.c:419-428`, `:490-492` and `:509-511`), and because that
+  happens
   *before* match end the zero used to be recorded as the final score. The
   scoreboard now takes the count from the mod's own departure broadcast —
   `"<name> left the game with N frags"` (`ktx/src/client.c:2843`) — and,
@@ -43,15 +44,22 @@ was regenerated (one demo changed).
   created are gone (`4on4_l_vs_la[e1m2]` is now the 4v4 it is: 8 players,
   2 teams; `dag_caps_e1m2` drops `jOn`).
 
-- **Item possession no longer leaks across a slot handover.** Possession,
-  armor and powerup intervals are driven by `STAT_ITEMS` bit flips, so a
-  departing player's open intervals stayed open *on the slot* and the next
-  occupant inherited a full stale inventory from the instant their
+- **Per-slot state no longer leaks across a slot handover.** Weapon
+  possession and powerup *intervals* are driven by `STAT_ITEMS` bit flips,
+  so a departing player's open intervals stayed open *on the slot* and the
+  next occupant inherited a full stale inventory from the instant their
   userinfo landed — 3520 ms of RL/SNG/SSG "possession" (a `shareAlive` of
   1.0) for a refused connection on `4on4_l_vs_la[e1m2]`. Intervals now
   close at the handover and the held state is cleared, which also means a
   departing player's own intervals end when they left rather than at match
-  end (`shiva`'s RL run is 17.8 s shorter, and correct).
+  end (`shiva`'s RL run is 17.8 s shorter, and correct). The *change*
+  streams — health, armor, armor type, loc and the four ammo counts — had
+  the mirror-image defect one level down: they dedup against the previous
+  value, which belongs to the previous occupant, so an arriving player
+  whose first sample equalled the departing player's last got no sample at
+  all and their stream fragment opened empty. The handover now cuts the
+  dedup floor per column. No demo in the local corpus hits that collision,
+  so no served value moves; it is a latent fix with a unit test.
 
 Supporting changes:
 
@@ -61,16 +69,64 @@ Supporting changes:
   it, the `timed out` path, refused connections, the `-999` spectator
   sentinel some pre-KTX mods publish, and the serverinfo `score` key as an
   independent oracle.
+- `UserInfoEvent.Partial` (Layer 1) flags an event synthesised from
+  `svc_setinfo`. Such an event carries the parser's *cached* player
+  snapshot for every field the server did not just set, userid included —
+  and mvdsv emits `svc_setinfo <slot> "*auth" ""` from `SV_Logout` both
+  when a client is dropped and during the **next** client's connect
+  handshake (`sv_login.c:588`, `:644-646`). Occupancy tracking now ignores
+  partial events as boundaries, so a drop stays a drop.
+- **`PlayerDepartureEvent` / `PlayerRejoinEvent` (Layer 1).** The
+  `left the game with N frags` / `rejoins the game with N frags` /
+  `reenters the game without stats` family is one wire grammar that two
+  analysers were scanning with two different parsers and two different
+  guards. It is decoded once in the parser now, with the wire's awkward
+  properties handled in one place: old servers fragment a broadcast across
+  several `svc_print` messages and split it at arbitrary points, including
+  inside the number (`4on4_l_vs_la[e1m2]` emits a team score as
+  `"Team [.la.] = "`, `""`, `"2"`, `"2"`, `"7"`, `"\n"`), so a frag count
+  is only trusted when `" frag"` follows the digits and `FragsKnown`
+  reports the difference. `PRINT_CHAT` is excluded, which also closes a
+  hole where a chat line could poison identity's reconnect set.
 - A single `occupancyTracker` (`mvd-analytics/analyzer/occupancy.go`) now
   owns the "where does one occupancy end" rule for the identity, timeline
-  and match analysers, so the three cannot drift apart.
+  and match analysers, so the three cannot drift apart. A drop ends an
+  occupancy unconditionally: there is no "the same userid came back so the
+  drop did not count" rule, because nothing on the wire re-broadcasts a
+  dropped client's userinfo and `SV_GenerateUserID` recycles ids out of a
+  1..99 pool anyway (`sv_main.c:538-556`). Five demos —
+  `4on4_oeks_vs_tsq[dm2]`, hub 212545, 216268, 216835 and 218909 (three
+  times) — had a real departure erased by the previous rule.
+- **Two occupancies that were live at the same instant are two people.**
+  Without demoinfo, `*auth` or a KTX reconnect print the identity key
+  degrades to the normalized netname, which strips case and punctuation, so
+  a demo with two players called `Player` and `player!` produced one
+  scoreboard row and lost a team. The merge is now refused on overlap —
+  but only between occupancies that each carry a userid of their own, since
+  KTX also publishes a departed player's *ghost* on a spare client slot
+  (userid 0, netname prefixed with the `\203` glyph that normalises to `#`)
+  carrying a copy of his frags.
+- **The departure broadcast is bounded.** It names only a netname, so for an
+  occupancy the server dropped it is accepted only in the same frame as the
+  drop, and never after the match has ended (KTX guards its own print on
+  `match_in_progress == 2`; the pre-KTX mods do not).
+- **A reconnecting player's timeline score no longer freezes.** The
+  frag-reset rebase was armed only on the takeover shape, but the common
+  reconnect is vacate-then-connect, which the tracker reports as a close
+  with no open followed by an open with no close. The restore then read as a
+  large delta, the ±5 corruption guard rejected it, and — because that guard
+  deliberately does not advance the cursor — every later real +1 was
+  rejected too.
 - New `mvd-analytics/corpus/` invariant harness walks
   `demo-test-data/mvd/special-cases/` when present (no-op when absent, like
   `mvd-analytics/diagnostic/`) and asserts team totals against the
-  serverinfo `score` key and the KTX demoinfo scoreboard, that every roster
-  row has a matching player stream, and that item intervals only exist for
-  a player the wire actually saw play. It fails on all three defects above
-  when run against the previous code.
+  serverinfo `score` key and the KTX demoinfo scoreboard, that the roster
+  and the player streams name the same people (both directions), and that
+  item intervals only exist for a player the wire actually saw play. It
+  fails on all three defects above when run against the previous code.
+  Run it with `-count=1` — `go test` caches the skip it takes when the
+  demo directory is absent and never invalidates it when the demos
+  appear; `make test` passes the flag.
 
 ## 2026-07-24 (cleanup-dedup) — reject explicit `windowMs=0` (no schema bump)
 

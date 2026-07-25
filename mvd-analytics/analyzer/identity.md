@@ -1,7 +1,7 @@
 # identity analyser
 
 **Phase:** Core (registered right after `demoinfo`)
-**Inputs:** `UserInfoEvent`, `PrintEvent`
+**Inputs:** `UserInfoEvent`, `PlayerRejoinEvent`
 **Writes to Result:** nothing
 **Writes to CoreOutputs:** `co.Sessions` + the `co.SlotIdentityAt(slot, tMs)` resolver it backs
 
@@ -13,8 +13,9 @@ gets a *new* wire slot (and a new userid); the slot they vacated is often
 reused by someone else or stamped with a late userinfo name. The old
 slot→final-name resolution (`co.Slots`) then relabels the player's
 pre-reconnect events with the wrong name. KTX itself unifies the player
-via its ghost mechanism (restore-stats-by-netname on reconnect,
-`ktx/src/client.c:1513-1538`); this analyser reproduces that unification.
+via its ghost mechanism (`MakeGhost` snapshots the departing player at
+`ktx/src/client.c:2729-2799`, and the next connection with the same netname
+restores it at `:1464-1490`); this analyser reproduces that unification.
 
 ## How it works
 
@@ -27,13 +28,18 @@ via its ghost mechanism (restore-stats-by-netname on reconnect,
    (`UserInfoEvent.Vacated` — an empty userinfo string carrying the
    client's own userid) also ends a session, so a player who times out
    stops owning the slot at the moment they left rather than when the
-   next connection lands on it; the same userid coming back reopens the
-   session instead of splitting it. Scalars are copied off `e.Player` —
-   the parser mutates that struct in place on the next occupancy
+   next connection lands on it. A drop is final: nothing on the wire
+   re-broadcasts a dropped client's userinfo, and an `svc_setinfo`
+   synthesis that looks like it (`UserInfoEvent.Partial`) is not an
+   occupancy boundary at all. Scalars are copied off `e.Player` — the
+   parser mutates that struct in place on the next occupancy
    (`mvd-reader/parser/userinfo.go`, `parseUserInfo`).
-2. **Reconnect prints.** `rejoins the game with …` / `reenters the game
-   without stats` broadcasts are recorded (already Q-normalised to
-   ASCII, so the `[team]` brackets and redtext fold to plain text).
+2. **Reconnect broadcasts.** `PlayerRejoinEvent.Prefix` is recorded — the
+   parser decodes the `rejoins the game with …` / `reenters the game
+   without stats` family and applies the `PRINT_CHAT` exclusion, so a chat
+   line quoting the marker can no longer enter the reconnect set. The
+   prefix is `<name>` or `<name> [<team>]` with no delimiter, so it is
+   resolved against known netnames by longest prefix in `PopulateCore`.
 3. **Unification (`PopulateCore`).** Sessions are folded into canonical
    identities via union-find over four signals, in priority order:
    (1) shared nonzero `*auth` login; (2) same demoinfo player (login or
@@ -69,6 +75,8 @@ via its ghost mechanism (restore-stats-by-netname on reconnect,
 
 ## Reference
 
-- KTX ghost restore + rejoin/reenter prints: `ktx/src/client.c:1490-1556`
-- KTX leave print: `ktx/src/client.c:2948`, `ktx/src/bot_commands.c:401`
+- KTX ghost snapshot: `ktx/src/client.c:2729-2799` (`MakeGhost`)
+- KTX ghost restore: `ktx/src/client.c:1464-1490`; rejoin prints `:1481`
+  (team) / `:1487` (non-team); reenter-without-stats `:1502` / `:1506`
+- KTX leave print: `ktx/src/client.c:2843`, `ktx/src/bot_commands.c:388`
 - Wire format: [`mvd-reader/MVD_FORMAT.md`](../../mvd-reader/MVD_FORMAT.md) (search "reconnect")

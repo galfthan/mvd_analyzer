@@ -64,7 +64,7 @@ normalisation `startTime` was always 0 and `endTime` always equalled
 |---|---|---|---|
 | Name | `name` | string | Display name. |
 | Team | `team` | string | Team name. |
-| Frags | `frags` | int | Canonical QW net score (from the `svc_updatefrags` scoreboard). |
+| Frags | `frags` | int | Canonical QW net score. Normally the `svc_updatefrags` scoreboard cursor, frozen at match end. For a player the server dropped mid-match it is the mod's own departure broadcast (`"<name> left the game with N frags"`) when the demo carries one, because `SV_DropClient` zeroes the slot's scoreboard entry in the same server frame as the drop — see [`analyzer/match.md`](analyzer/match.md). |
 | Kills | `kills` | int | Gross kills, frag-log-corrected. Supersedes KTX demoinfo `stats.kills` (which over-counts pentagram-deflect telefrags); `0` when the demo had no frag log. |
 | Deaths | `deaths` | int | Deaths, frag-log-corrected. `0` when the demo had no frag log. |
 | Suicides | `suicides` | int | Self-inflicted deaths, frag-log-corrected. Counts every `IsSuicide` frag entry (incl. fall / lava / squish / drown), which KTX demoinfo `stats.suicides` undercounts — world-dealt deaths bump the world entity's counter, not the victim's (`ktx/src/client.c:5132`). `0` when the demo had no frag log. |
