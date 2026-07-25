@@ -121,11 +121,13 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 // the svc_updatefrags net score; FragResult carries the team-kill count.
 func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	s := result.PlayerStatsScore{Src: result.SrcDerived}
+	onScoreboard := false
 	if res.Match != nil {
 		for i := range res.Match.Players {
 			if res.Match.Players[i].Name == name {
 				mp := &res.Match.Players[i]
 				s.Frags, s.Kills, s.Deaths, s.Suicides = mp.Frags, mp.Kills, mp.Deaths, mp.Suicides
+				onScoreboard = true
 				break
 			}
 		}
@@ -133,10 +135,13 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	if res.Frags != nil {
 		if pf := res.Frags.ByPlayer[name]; pf != nil {
 			s.TeamKills = pf.TeamKills
-			// A player absent from the scoreboard (never joined a team,
-			// or a name the match analyzer did not resolve) still has a
-			// frag-log line; use it rather than reporting zeros.
-			if res.Match == nil {
+			// A player absent from the scoreboard — no Match section at
+			// all, or a streamed name the match analyzer did not resolve
+			// into a row — still has a frag-log line. Use it rather than
+			// reporting zeros for someone the demo plainly recorded
+			// killing and dying. Frags (the net score) has no frag-log
+			// equivalent and stays 0.
+			if !onScoreboard {
 				s.Kills, s.Deaths = pf.Kills, pf.Deaths
 			}
 		}
@@ -452,6 +457,19 @@ func armorRuns(at []result.ChangeStr, matchMs int32) []armorRun {
 // dead: the alive-interval rule (see aliveIntervals) treats "no death yet"
 // as alive since match start, which is right for someone who was there and
 // wrong for someone who had not connected.
+//
+// It is a SINGLE interval, so a mid-match absence is bridged rather than
+// excluded — a player who disconnects and rejoins counts as present
+// throughout. That is deliberate for want of a better signal, not an
+// oversight: the pipeline has no disconnect record to key on. The
+// identity analyser's Sessions look like one but are not — their first
+// and last bounds are widened to ±inf so a lookup at any time resolves
+// (analyzer/identity.go:311) — and splitting on a position-track gap
+// would need an invented threshold, which is the kind of made-up filter
+// this repo avoids. Measured on the reconnect corpus demo (gameId
+// 216835) the position track has no gap at all to split on: 56 ms is the
+// largest interval between samples for every player, reconnects
+// included. See player_stats.md for the resulting limitation.
 func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
 	full := []result.Interval{{Start: 0, End: matchMs}}
 
@@ -504,8 +522,17 @@ func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
 // deliberately does NOT require a recorded match-start spawn — KTX emits a
 // player's first spawn only on their first RESPAWN, so keying off "most
 // recent spawn" would mark everyone dead until minutes into the match.
-// Keep this in sync with losAliveAt and view.playerActiveInWindow; the
-// unit tests assert this function and losAliveAt agree pointwise.
+// Keep this in sync with losAliveAt and view.playerActiveInWindow. The
+// unit tests assert this function and losAliveAt agree pointwise on every
+// case where the two can agree — with ONE deliberate divergence, also
+// pinned by a test: when a death and the spawn it triggers land on the
+// same millisecond, this function reports the player ALIVE from that
+// instant while losAliveAt (and aimcore's copy) report them dead, because
+// both use a strict `lastSpawn > lastDeath`. A player who respawns
+// instantly is alive, so the tie-break here is the correct one; the other
+// two are left alone rather than quietly changed, since altering them
+// moves every line-of-sight and aim figure in the golden corpus. If they
+// are ever fixed, fix them together.
 func aliveIntervals(spawns, deaths []int32, matchMs int32) []result.Interval {
 	type ev struct {
 		t     int32
@@ -750,7 +777,20 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 		if pickups != nil {
 			row.Pickups = &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: pickups}
 		}
-		row.Hold = aggregateHold(members, row.Window.AliveMs, matchMs*int32(len(members)))
+		// The match-time denominator counts only members who were
+		// actually in the match. A scoreboard-only row (connected, never
+		// streamed, presentMs 0) would otherwise dilute every hold share
+		// on the team by a whole match window of time nobody could have
+		// played. Members is published so the denominator stays
+		// recoverable from the row itself.
+		present := 0
+		for _, m := range members {
+			if m.Window.PresentMs > 0 {
+				present++
+			}
+		}
+		row.Members = len(members)
+		row.Hold = aggregateHold(members, row.Window.AliveMs, matchMs*int32(present))
 		out = append(out, row)
 	}
 	return out

@@ -38383,10 +38383,10 @@
           "src": "derived"
         },
         "score": {
-          "deaths": 0,
-          "efficiency": 0,
+          "deaths": 79,
+          "efficiency": 0.2404,
           "frags": 0,
-          "kills": 0,
+          "kills": 25,
           "src": "derived",
           "suicides": 0,
           "teamKills": 2
@@ -38488,6 +38488,7 @@
             }
           }
         },
+        "members": 2,
         "name": "wd",
         "pickups": {
           "byKind": {
@@ -38640,6 +38641,7 @@
             }
           }
         },
+        "members": 2,
         "name": "pys",
         "pickups": {
           "byKind": {
@@ -38696,10 +38698,10 @@
           "src": "derived"
         },
         "score": {
-          "deaths": 52,
-          "efficiency": 0.514,
+          "deaths": 131,
+          "efficiency": 0.3791,
           "frags": 50,
-          "kills": 55,
+          "kills": 80,
           "src": "derived",
           "suicides": 2,
           "teamKills": 5

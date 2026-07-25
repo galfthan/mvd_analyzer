@@ -87,6 +87,12 @@ type PlayerStatsRow struct {
 	Login    string       `json:"login,omitempty"`
 	Bot      *DemoInfoBot `json:"bot,omitempty"`
 
+	// Members is the number of players folded into a TEAM row, and the
+	// count the row's ShareMatch denominator (match window x members)
+	// rests on — published so a consumer can recompute or re-scale it.
+	// Absent on player rows.
+	Members int `json:"members,omitempty"`
+
 	Window PlayerStatsWindow `json:"window"`
 	Score  PlayerStatsScore  `json:"score"`
 	// Damage is omitted when the demo carries no damage information at
@@ -129,7 +135,7 @@ type PlayerStatsWindow struct {
 // PlayerStatsScore is the scoreboard line. Always derived: the KTX
 // demoinfo stats over-count pentagram-deflect telefrags (dtTELE2), credit
 // world-dealt suicides to the world entity rather than the victim
-// (ktx/src/client.c:5132), and reset after a reconnect. MatchResult's
+// (ktx/src/client.c:4951), and reset after a reconnect. MatchResult's
 // frag-log-corrected counts are right — see PlayerStat.
 type PlayerStatsScore struct {
 	Src string `json:"src"`
@@ -159,7 +165,7 @@ type PlayerStatsDamage struct {
 	EnemyWeapons int `json:"enemyWeapons"`
 	// Taken counts damage from ALL sources — enemy, team, self and
 	// environment. It is deliberately NOT the same quantity as KTX's
-	// dmg.taken, which is enemy-only (ktx/src/combat.c:1083); that one
+	// dmg.taken, which is enemy-only (ktx/src/combat.c:1069); that one
 	// lands in TakenEnemy so the two are never silently conflated.
 	Taken int `json:"taken"`
 	// TakenEnemy is KTX's enemy-only damage taken. KTX-only: the
@@ -226,9 +232,13 @@ type PlayerStatsPickup struct {
 // here (see PlayerStatsResult). Always derived.
 type PlayerStatsHold struct {
 	Src string `json:"src"`
-	// Weapons is keyed "rl","lg","gl","ssg","sng","ng". The shotgun and
-	// axe are deliberately absent: every player holds them for the whole
-	// match, so the column would carry no information.
+	// Weapons is keyed "rl","lg","gl","ssg","sng". The shotgun and axe
+	// are deliberately absent: every player holds them for the whole
+	// match, so the column would carry no information. The NAILGUN is
+	// absent for a different reason — PlayerStream tracks no NG
+	// possession interval (result/streams.go records rl/lg/gl/ssg/sng
+	// only), so there is nothing to integrate. Adding it means adding
+	// that stream first.
 	Weapons map[string]HoldStat `json:"weapons,omitempty"`
 	// Armor is keyed "ra","ya","ga" plus "none" — the alive-time
 	// complement, i.e. how long the player ran around with no armor at

@@ -94486,6 +94486,7 @@
             }
           }
         },
+        "members": 4,
         "name": "ahoy",
         "pickups": {
           "byKind": {
@@ -94638,6 +94639,7 @@
             }
           }
         },
+        "members": 4,
         "name": "BhB",
         "pickups": {
           "byKind": {

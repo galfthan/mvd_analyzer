@@ -68,7 +68,7 @@ normalisation `startTime` was always 0 and `endTime` always equalled
 | Frags | `frags` | int | Canonical QW net score. Normally the `svc_updatefrags` scoreboard cursor, frozen at match end. For a player the server dropped mid-match it is the mod's own departure broadcast (`"<name> left the game with N frags"`) when the demo carries one, because `SV_DropClient` zeroes the slot's scoreboard entry in the same server frame as the drop — see [`analyzer/match.md`](analyzer/match.md). |
 | Kills | `kills` | int | Gross kills, frag-log-corrected. Supersedes KTX demoinfo `stats.kills` (which over-counts pentagram-deflect telefrags); `0` when the demo had no frag log. |
 | Deaths | `deaths` | int | Deaths, frag-log-corrected. `0` when the demo had no frag log. |
-| Suicides | `suicides` | int | Self-inflicted deaths, frag-log-corrected. Counts every `IsSuicide` frag entry (incl. fall / lava / squish / drown), which KTX demoinfo `stats.suicides` undercounts — world-dealt deaths bump the world entity's counter, not the victim's (`ktx/src/client.c:5132`). `0` when the demo had no frag log. |
+| Suicides | `suicides` | int | Self-inflicted deaths, frag-log-corrected. Counts every `IsSuicide` frag entry (incl. fall / lava / squish / drown), which KTX demoinfo `stats.suicides` undercounts — world-dealt deaths bump the world entity's counter, not the victim's (`ktx/src/client.c:4951`). `0` when the demo had no frag log. |
 
 `MatchResult` is the non-KTX-fallback view: it works on any MVD source.
 `Frags`/`Kills`/`Deaths` are the **corrected scoreboard** — net frags from
@@ -675,9 +675,9 @@ top level is the roll-up.
 
 | Family | Winner | Why |
 |---|---|---|
-| `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:5132`), and resets after a reconnect. `match` carries the frag-log-corrected counts. |
+| `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
-| `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1083`). It is surfaced separately as `takenEnemy` so the two are never conflated. `takenToDie` is likewise KTX-only. |
+| `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. `takenToDie` is likewise KTX-only. |
 | `accuracy` | **ktx-only**, family **omitted** without a block | KTX counts pellets server-side (`attacks` is a pellet count for sg/ssg). There is deliberately no derived fallback: it would let a caller compare a server-side count against a wire-inferred approximation across demos without noticing. |
 | `pickups` took / totalTook / dropped | **ktx** when present, else derived from `items` + `weaponPickups` + `backpacks` | direct server-side counters, identical semantics. |
 | `pickups` xfer / xferSelf | always **derived** | we can decompose what KTX conflates — see below. |
@@ -724,6 +724,7 @@ stays consistent with the timeline's powerup runs.
 | Name | `name` | string | Player name; on a team row, the team name. |
 | Team | `team` | string | Omitted on team rows. |
 | Ping / Handicap / Login / Bot | `ping`, `handicap`, `login`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. |
+| Members | `members` | int | TEAM rows only: how many players were folded in, and the count `shareMatch`'s denominator rests on. |
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score), `kills`, `deaths`, `suicides`, `teamKills`, `efficiency`. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. |
@@ -756,16 +757,24 @@ alive from match start, a death starts a dead period, the next spawn
 ends it — deliberately **not** requiring a recorded match-start spawn,
 since KTX emits a player's first spawn only on their first *respawn*.
 
-On a **team row** the windows are member sums, and hold shares use team
-time: `shareAlive` over the summed alive time, `shareMatch` over
-`matchMs × member count`. They are never averages of per-player shares,
-which would weight a player who was dead most of the match equally with
-one who was not.
+On a **team row** `presentMs` / `aliveMs` / `deadMs` are member sums
+while `matchMs` stays the match window (it is the same value on every
+row, player or team). Hold shares use team time: `shareAlive` over the
+summed alive time, `shareMatch` over `matchMs × members`, where
+`members` is published on the row. Only members who were actually in the
+match count toward that denominator — a scoreboard-only row (connected,
+never streamed, `presentMs` 0) would otherwise dilute every team share by
+a whole match window of time nobody could have played. Shares are never
+averages of per-player shares, which would weight a player who was dead
+most of the match equally with one who was not.
 
 ### PlayerStatsHold / HoldStat
 
 `weapons` is keyed `rl`, `lg`, `gl`, `ssg`, `sng` — the shotgun and axe
-are deliberately absent (every player holds them all match). `armor` is
+are deliberately absent (every player holds them all match), and the
+**nailgun** is absent because `PlayerStream` tracks no NG possession
+interval (`streams` records rl/lg/gl/ssg/sng only), so there is nothing
+to integrate; adding it means adding that stream first. `armor` is
 keyed `ra`, `ya`, `ga` and **`none`**, the alive-time complement: how
 long the player ran with no armor at all, a stat KTX structurally
 cannot produce. `ga + ya + ra + none == aliveMs` exactly.
@@ -2117,7 +2126,7 @@ records what each bump changed, for consumers migrating across versions.
 | v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each direct enemy rocket hit (splash excluded) whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |
 | v24 | `PositionTrack` gains an `h` column: the player's height above the floor directly beneath them at each native-rate sample (feet above the nearest solid surface below), from a straight-down trace through the map's worldspawn player clip hull (parsed from BSP `CLIPNODES` at analyze time by the new `mvd-analytics/mapclip` package; BSPs come from the same best-effort source as the visibility-aware loc filter via the shared `mvd-analytics/mapbsp` loader). Reads ~0 grounded and grows during a jump / airborne hit (airgib); absolute floor is `z − 24 − h` if needed. Sentinel `-2147483648` (`result.NoFloor`) marks samples with no floor to measure from (void/pit, or a moving brush model such as the dm2 lift, which the worldspawn-only hull excludes). Additive (`omitempty`); absent when no BSP is provisioned for the map. |
 | v20 | New `Damage` section: per-hit damage log + aggregates (attacker→victim `matrix`, per-weapon, given/taken, and the **EWep** victim-weapon buckets `enemyVsSg/Mid/Lg/Rl/Both` where `ewep=lg+rl+both`) reconstructed from the KTX `mvdhidden_dmgdone` stream, plus a `scoreboard` cross-check vs `demoInfo.players[].dmg`. Amounts are unbound (include overkill). **Positional kills** — telefrags (deathtype `tele`, the 9999 instakill sentinel) and stomps (deathtype `stomp`) — are excluded from all damage figures and surfaced separately as `damage.telefrags`/`damage.stomps` + `PlayerDamage.telefrags`/`.stomps` + the opt-in `telefrag`/`stomp` events. Also a Layer-1 change: world/environmental damage-taken (lava/fall/trigger) is now emitted with an `Attacker == -1` "world" sentinel rather than dropped. Additive (`omitempty`); absent when the demo lacks the KTX hidden-damage stream. |
-| v19 | `MatchResult.PlayerStat` gains `kills`, `deaths` and `suicides` — the frag-log-corrected counts, making `match.players` a complete corrected scoreboard rather than just the net frag tally. They supersede the KTX demoinfo `stats`, which credit several self / positional deaths to the wrong entity: pentagram-deflect telefrags (`dtTELE2`) inflate the deflector's kills, and world-dealt suicides (fall / lava / squish / drown) bump the world entity's counter instead of the victim's (`ktx/src/client.c:5132`), so demoinfo undercounts suicides. `0` when the demo carried no frag log. Filled by the `scoreboardStatsPost` post-processor (kills/deaths from `Frags.ByPlayer` joined on the final display name; suicides counted from the `IsSuicide` frag entries). The API `/overview` player rows surface the same `kills`/`deaths`/`suicides`, so non-web consumers get the correction the web Summary already applied. Field additions only. |
+| v19 | `MatchResult.PlayerStat` gains `kills`, `deaths` and `suicides` — the frag-log-corrected counts, making `match.players` a complete corrected scoreboard rather than just the net frag tally. They supersede the KTX demoinfo `stats`, which credit several self / positional deaths to the wrong entity: pentagram-deflect telefrags (`dtTELE2`) inflate the deflector's kills, and world-dealt suicides (fall / lava / squish / drown) bump the world entity's counter instead of the victim's (`ktx/src/client.c:4951`), so demoinfo undercounts suicides. `0` when the demo carried no frag log. Filled by the `scoreboardStatsPost` post-processor (kills/deaths from `Frags.ByPlayer` joined on the final display name; suicides counted from the `IsSuicide` frag entries). The API `/overview` player rows surface the same `kills`/`deaths`/`suicides`, so non-web consumers get the correction the web Summary already applied. Field additions only. |
 | v18 | `TimelineAnalysis` gains `KillEvents`: a per-player enemy-kill stream (`{time, player, team}`) keyed on the killer, parallel to `DeathEvents`, from the canonical frag log filtered to real enemy kills (suicides/teamkills excluded). Cumulative `killEvents` per player reconciles with `frags.byPlayer[].kills` and the kills-based efficiency; the Timeline per-player drill-down plots `killEvents − deathEvents` as a windowed +/-. `team` is best-effort and, unlike `deathEvents`, ungated. Additive (`omitempty`). |
 | v17 | Self-kill weapon labels in `Frags.Frags` are no longer flattened to `suicide`: only the `/kill` console command (KTX "X suicides", −2 frags) keeps weapon `suicide`; weapon self-detonations carry their real weapon (`rl`/`gl`/`lg`) with `isSuicide` set. `Frags.ByWeapon` is now enemy kills only (suicides/teamkills excluded). Recovered teamkills no longer carry a stale `isSuicide`. |
 | v16 | `PlayerFrags` gains `teamkills` (KTX "tk"), and teamkills whose obituary names only one party re-enter `Frags.Frags` as complete killer↔victim pairs (killer-named recover the victim from the coincident `DeathEvent`; victim-named recover the killer via position co-location + the teamkiller's −1 frag-delta). Brings per-player teamkills to an exact match with KTX's `tk`. |

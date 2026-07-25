@@ -5369,6 +5369,9 @@ components:
               required: [skill, customised]
               type: object
             - type: "null"
+        members:
+          description: "TEAM rows only: how many players were folded in, and the count shareMatch's denominator (matchMs x members) rests on."
+          type: integer
         window: { $ref: "#/components/schemas/PlayerStatsWindow" }
         score:
           description: "Scoreboard line. Always derived — the KTX stats over-count telefrags and reset after a reconnect."
@@ -5451,7 +5454,7 @@ components:
           properties:
             src: { description: "Provenance of this family (always derived).", type: string, enum: [derived, ktx] }
             weapons:
-              description: "Keyed rl/lg/gl/ssg/sng/ng. Shotgun and axe are deliberately absent (held all match by everyone)."
+              description: "Keyed rl/lg/gl/ssg/sng. Shotgun and axe are deliberately absent (held all match by everyone); the nailgun is absent because the streams track no NG possession interval."
               additionalProperties: { $ref: "#/components/schemas/HoldStat" }
               type: object
             armor:

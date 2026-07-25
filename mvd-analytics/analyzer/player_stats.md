@@ -30,7 +30,14 @@ golden corpus always say what this pipeline actually computed.
    (position track, else spawn/death markers, else the whole match).
    `aliveIntervals` converts the spawn/death markers into alive
    intervals using the repo's canonical liveness rule — the interval
-   form of `losAliveAt` (`los.go`), which a unit test pins pointwise.
+   form of `losAliveAt` (`los.go`), which a unit test pins pointwise,
+   with one deliberate divergence also pinned by a test: a death and the
+   spawn it triggers on the same millisecond leave the player ALIVE here
+   and dead in `losAliveAt` / `aimcore`, which both use a strict
+   `lastSpawn > lastDeath`. Instant respawn means alive, so this is the
+   correct tie-break; the other two are left alone rather than quietly
+   changed, since altering them moves every LOS and aim figure in the
+   golden corpus.
    Alive is then intersected with presence, which is what stops a late
    joiner being credited alive time from match start (the liveness rule
    says "no death yet ⇒ alive since match start", right for a player
@@ -50,7 +57,10 @@ golden corpus always say what this pipeline actually computed.
    item timeline never sees); `dropped` from `backpacks`; transfers
    joined from backpack-sourced pickups.
 5. **Teams.** Summed per team, with hold shares recomputed over team
-   time — never averaged from per-player shares.
+   time — never averaged from per-player shares. The `shareMatch`
+   denominator counts only members who were actually in the match, so a
+   scoreboard-only row (`presentMs` 0) cannot dilute it; `members` is
+   published on the row so the denominator stays recoverable.
 
 ## Why our hold times differ from KTX's
 
@@ -77,7 +87,10 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   KTX's exact-equality test has no mixed-contents case to model.
 - KTX has no `other != dropper` check, so re-taking your own pack counts.
   We split that into `xferSelf`; `xfer + xferSelf` reproduces KTX
-  exactly (a unit test pins the decomposition).
+  exactly. A unit test pins the decomposition and
+  `TestCorpusTransferIdentity` pins the identity against KTX's own
+  numbers on every teamplay demo in the golden corpus — it currently
+  holds for every player and both weapons.
 - The counters are **pointers**: absent means the demo carries no
   backpack hints, i.e. transfers are unobservable — a different fact
   from an observed zero.
@@ -88,9 +101,24 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   weapon from spawn, so weapon hold time reads ~100% for all players.
   That is the truth about the mode; it is not suppressed.
 - **Presence** is inferred from stream activity, not from a connect /
-  disconnect record. A player who idles out of the position stream
-  without disconnecting will show a shorter `presentMs` than they were
-  actually connected for.
+  disconnect record — the pipeline has none. It errs in both directions.
+  A player who idles out of the position stream without disconnecting
+  shows a shorter `presentMs` than they were connected for; and because
+  presence is a single first-to-last interval, a mid-match absence is
+  **bridged** rather than excluded, so a player who disconnects and
+  rejoins counts as present (and, absent a death marker, alive)
+  throughout. Neither is fixable with what we have: the identity
+  analyser's `Sessions` look like a presence record but their outer
+  bounds are widened to ±inf so lookups always resolve
+  (`identity.go:311`), and splitting on a position-track gap would need
+  an invented threshold. On the one reconnect demo in the corpus
+  (gameId 216835) there is no gap to split on anyway — the largest
+  interval between position samples is 56 ms for every player.
+- **The nailgun has no hold time.** `PlayerStream` carries no NG
+  possession interval (only rl/lg/gl/ssg/sng), so `hold.weapons` has no
+  `ng` key. KTX's own text table does track it
+  (`ktx/src/statsTables.c:394`); matching that means adding the stream
+  first.
 - **`accuracy` is KTX-only** and omitted on demos without a demoinfo
   block, deliberately — see `RESULT_SCHEMA.md` for why there is no
   derived fallback.
