@@ -46,13 +46,19 @@ import (
 //
 //   - The marker match tolerates the truncated tail ("frag", not "frags"),
 //     otherwise the two real departures on that demo decode as nothing.
-//   - The frag count is accepted only when the digit run is followed by
-//     " frag". A number cut mid-digits — "…with 2" then "6 frags\n" —
+//   - The frag count is accepted only when the number is followed by
+//     " frag". The guard is not specific to fragmentation — it rejects
+//     anything that is not the mods' own grammar — but that is the case it
+//     exists for: a number cut mid-digits ("…with 2" then "6 frags\n")
 //     would otherwise decode as 2 and silently overwrite the correct 26.
-//     Both genuine forms ("26 frags\n", "21 frag") satisfy the guard; the
-//     truncated one cannot, and FragsKnown reports the difference so a
-//     consumer falls back to its own reconstruction instead of trusting a
-//     wrong number.
+//     Every genuine form ("26 frags\n", "21 frag", "-3 frags\n") satisfies
+//     the guard; the truncated one cannot, and FragsKnown reports the
+//     difference so a consumer falls back to its own reconstruction
+//     instead of trusting a wrong number.
+//
+//     The count is signed. Both lines print the edict's frag value
+//     verbatim ("%.0f" / "%d"), so a player who suicided below zero is
+//     announced as "-3 frags".
 //
 // # PRINT_CHAT exclusion
 //
@@ -152,25 +158,41 @@ func (p *Parser) tryEmitRosterPrint(level int, msg string, timeMs int32) error {
 	return nil
 }
 
-// parseBroadcastFrags reads the leading digit run of s and reports whether
-// it is a whole number rather than the head of one a fragmenting server cut
-// in half. The test is that " frag" follows the digits, which is true of
-// every complete form the mods emit ("26 frags\n", "21 frag") and false of
-// a truncation ("…with 2" as its own print).
+// parseBroadcastFrags reads the leading (optionally negative) number of s
+// and reports whether it is complete rather than the head of one something
+// cut short. The test is that " frag" follows the digits, which is true of
+// every complete form the mods emit ("26 frags\n", "21 frag", "-3 frags\n")
+// and false both of a fragmented print ("…with 2" as its own print) and of
+// anything else that happens to start with digits.
+//
+// The leading '-' is not decoration: both broadcasts render the edict's
+// frag count verbatim ("%.0f" from ClientDisconnect, ktx/src/client.c:2843;
+// "%d" from the rejoin lines, :1481/:1487), and a player who suicides below
+// zero carries a negative one. Without it FragsKnown comes back false and
+// the consumer silently falls back to its own reconstruction.
 func parseBroadcastFrags(s string) (int, bool) {
 	j := 0
+	neg := false
+	if strings.HasPrefix(s, "-") {
+		neg = true
+		j++
+	}
+	digits := j
 	for j < len(s) && s[j] >= '0' && s[j] <= '9' {
 		j++
 	}
-	if j == 0 || !strings.HasPrefix(s[j:], " frag") {
+	if j == digits || !strings.HasPrefix(s[j:], " frag") {
 		return 0, false
 	}
 	n := 0
-	for _, c := range []byte(s[:j]) {
+	for _, c := range []byte(s[digits:j]) {
 		n = n*10 + int(c-'0')
 		if n > 1<<20 {
 			return 0, false
 		}
+	}
+	if neg {
+		n = -n
 	}
 	return n, true
 }

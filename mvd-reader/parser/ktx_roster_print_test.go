@@ -50,6 +50,10 @@ func TestRosterPrint_Departure(t *testing.T) {
 		{"shiva left the game with 26 frag", "shiva", 26},
 		{"wd.dilbert left the game with 0 frags\n", "wd.dilbert", 0},
 		{"/ tin can left the game with 8 frags\n", "/ tin can", 8},
+		// Both lines render the edict's frag count verbatim ("%.0f" from
+		// ClientDisconnect, "%d" from the rejoin lines), so a player who
+		// suicided below zero is announced with a leading '-'.
+		{"kalle left the game with -3 frags\n", "kalle", -3},
 	}
 	for _, tc := range cases {
 		t.Run(tc.msg, func(t *testing.T) {
@@ -80,6 +84,16 @@ func TestRosterPrint_DepartureRejectsNumberCutMidDigits(t *testing.T) {
 	// The continuation fragment on its own names nobody and says nothing.
 	if evs := rosterEvents(t, mvd.PrintHigh, "6 frags\n", 1096572); len(evs) != 0 {
 		t.Errorf("the tail fragment produced %d events, want 0", len(evs))
+	}
+	// A lone minus, and a minus with the digits cut off, are equally
+	// untrusted — the sign alone is not a number.
+	for _, msg := range []string{
+		"shiva left the game with -",
+		"shiva left the game with -1",
+	} {
+		if e := departureOf(t, msg); e.FragsKnown {
+			t.Errorf("%q: got %+v, want FragsKnown=false", msg, e)
+		}
 	}
 }
 
