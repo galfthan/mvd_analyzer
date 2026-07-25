@@ -163,6 +163,13 @@ type PlayerStatsScore struct {
 	// Efficiency is kills / (kills + deaths) as a RATIO in [0,1] — not a
 	// percentage. 0 when the player neither killed nor died.
 	Efficiency Share `json:"efficiency"`
+	// ByWeapon is enemy kills split by the weapon that dealt them, keyed
+	// like the rest of this section ("rl", "lg", "sg", ...). From the
+	// corrected frag log, so it is on the same footing as Kills above and
+	// never overlaid — KTX's per-weapon kills inherit the same reconnect
+	// and telefrag over-counting the top-level stats do. Weapons the
+	// player never killed with are omitted, not zero-filled.
+	ByWeapon map[string]int `json:"byWeapon,omitempty"`
 }
 
 // PlayerStatsDamage is the damage line under KTX scoreboard semantics
@@ -177,6 +184,17 @@ type PlayerStatsDamage struct {
 	// EnemyWeapons is enemy damage dealt to victims holding RL and/or LG
 	// (KTX dmg_eweapon / "ewep").
 	EnemyWeapons int `json:"enemyWeapons"`
+	// ByWeapon is enemy damage GIVEN split by the attacker's weapon, keyed
+	// like the rest of this section. Follows Src with the family: KTX's
+	// weapons[w].damage.enemy when the block carries it, else the bounded
+	// reconstruction's PlayerDamage.ByWeapon. Weapons the player dealt no
+	// damage with are omitted, not zero-filled.
+	//
+	// NOTE this splits GIVEN only. There is no by-weapon split of taken
+	// damage on either side — KTX does not record one and the victim's
+	// per-hit log would answer a different question (who shot me with
+	// what), so the absence is a real gap, not an oversight.
+	ByWeapon map[string]int `json:"byWeapon,omitempty"`
 	// TeamWeapons is the same measure for TEAMMATES holding RL/LG (KTX
 	// dmg_tweapon, ktx/src/combat.c:1063) — the friendly-fire mirror of
 	// EnemyWeapons. KTX-only: our reconstruction does not bucket team

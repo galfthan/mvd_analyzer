@@ -1,6 +1,21 @@
 # Plan: a canonical `playerStats` artifact
 
-Status: proposed. Branch `plan-playerstats`, cut from `main` @ 53fb84a.
+Status: **phases 1-3 done**; phase 4 deferred by request. Branch
+`plan-playerstats`, cut from `main` @ 53fb84a.
+
+| phase | scope | state |
+|---|---|---|
+| 1 | the artifact, derived-only (schema v60) | done — `a76a8c4` |
+| 2 | KTX merge + REST/MCP serving | done — `aa632e7`, `5c78772`, `7ec14ef` |
+| 3 | web summary tab onto `playerStats` | done |
+| 4 | `?diagnostics=1` per-family `ktxDelta` | **deferred**, not started |
+
+Three amendments were made during implementation, each recorded at the
+point it applies: §4.2 reverses the "omit `accuracy` on old demos"
+ruling; §5 Phase 3 item 9 notes the one demo class that legitimately has
+no section; and §5 Phase 3 gained `score.byWeapon` / `damage.byWeapon`,
+without which the weapon-stats table could not have been moved off the
+JS join.
 
 ## 1. Why
 
@@ -286,7 +301,29 @@ Four details that make this exact rather than approximate:
 9. `displayScoreboardFallback` is **deleted**: `playerStats` always
    exists, so a pre-KTX-block demo renders a full summary tab (the visible
    win of this whole change).
+
+   **Amended during implementation.** "Always exists" is true of a
+   missing KTX block, which is what this item is about, but not of a
+   demo that produced no player streams at all — a race demo has no
+   match, so there is nothing to key a row on. Those render as empty
+   tables rather than via a fallback path: a race has no scoreboard to
+   show, so a second renderer for it would be a code path with no
+   readers. The fallback is deleted as planned.
+
+   Two Layer-1/2 fixes came out of testing this and are in `7ec14ef`:
+   the match-start pattern table missed kmod/qwe's "The duel has begun!",
+   which left a 2003 duel with no streams AND no deaths, and the
+   transfer gate trusted the `teamplay` cvar rather than the mode.
 10. New columns: RL / LG hold %, armor hold, **time with no armor**.
+    Shipped as a Possession panel of its own (per-team + per-player)
+    rather than extra columns on an already-16-wide scoreboard.
+
+    Also added, without which item 8 is not achievable: `score.byWeapon`
+    (per-weapon enemy kills, always from the corrected frag log) and
+    `damage.byWeapon` (per-weapon enemy damage given, KTX-overlaid weapon
+    by weapon). The weapon-stats table needs both, and reproducing
+    today's KTX-sourced numbers in JS would have rebuilt exactly the join
+    this phase deletes. Additive; schema stays v60.
 11. `isDuel()` (`app.js:1392`) stops reading `demoInfo.players` — read
     `playerStats` rows (roster already stamps `team === name` for duels).
 12. **Team-colour invariant**: `timelineState.teams` must stay the

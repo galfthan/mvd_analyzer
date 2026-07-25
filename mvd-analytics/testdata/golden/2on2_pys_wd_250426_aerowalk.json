@@ -37814,6 +37814,12 @@
           "src": "derived"
         },
         "damage": {
+          "byWeapon": {
+            "gl": 231,
+            "lg": 1900,
+            "rl": 4405,
+            "sg": 319
+          },
           "enemyWeapons": 5636,
           "given": 6855,
           "givenSelf": 1001,
@@ -37951,6 +37957,11 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 13,
+            "rl": 32,
+            "sg": 4
+          },
           "deaths": 56,
           "efficiency": 0.4667,
           "frags": 43,
@@ -37994,6 +38005,11 @@
           "src": "derived"
         },
         "damage": {
+          "byWeapon": {
+            "lg": 1648,
+            "rl": 5836,
+            "sg": 179
+          },
           "enemyWeapons": 6152,
           "given": 7663,
           "givenSelf": 887,
@@ -38131,6 +38147,11 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 11,
+            "rl": 42,
+            "sg": 2
+          },
           "deaths": 52,
           "efficiency": 0.514,
           "frags": 50,
@@ -38170,6 +38191,12 @@
           "src": "derived"
         },
         "damage": {
+          "byWeapon": {
+            "lg": 3371,
+            "rl": 6116,
+            "sg": 12,
+            "sng": 72
+          },
           "enemyWeapons": 6822,
           "given": 9571,
           "givenSelf": 1614,
@@ -38307,6 +38334,10 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 26,
+            "rl": 47
+          },
           "deaths": 34,
           "efficiency": 0.6822,
           "frags": 69,
@@ -38350,6 +38381,12 @@
           "src": "derived"
         },
         "damage": {
+          "byWeapon": {
+            "gl": 65,
+            "lg": 541,
+            "rl": 4945,
+            "sg": 203
+          },
           "enemyWeapons": 5098,
           "given": 5754,
           "givenSelf": 720,
@@ -38487,6 +38524,11 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 2,
+            "rl": 22,
+            "sg": 1
+          },
           "deaths": 79,
           "efficiency": 0.2404,
           "frags": 0,
@@ -38514,6 +38556,13 @@
     "teams": [
       {
         "damage": {
+          "byWeapon": {
+            "gl": 231,
+            "lg": 5271,
+            "rl": 10521,
+            "sg": 331,
+            "sng": 72
+          },
           "enemyWeapons": 12458,
           "given": 16426,
           "givenSelf": 2615,
@@ -38651,6 +38700,11 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 39,
+            "rl": 79,
+            "sg": 4
+          },
           "deaths": 90,
           "efficiency": 0.5755,
           "frags": 112,
@@ -38668,6 +38722,12 @@
       },
       {
         "damage": {
+          "byWeapon": {
+            "gl": 65,
+            "lg": 2189,
+            "rl": 10781,
+            "sg": 382
+          },
           "enemyWeapons": 11250,
           "given": 13417,
           "givenSelf": 1607,
@@ -38805,6 +38865,11 @@
           "src": "derived"
         },
         "score": {
+          "byWeapon": {
+            "lg": 13,
+            "rl": 64,
+            "sg": 3
+          },
           "deaths": 131,
           "efficiency": 0.3791,
           "frags": 50,

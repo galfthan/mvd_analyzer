@@ -211,6 +211,22 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 		// block but no damage stream genuinely has no all-sources figure,
 		// and a zero would read as "took no damage at all".
 		out.Taken = derived.Taken
+		// A COPY: the loop below writes into this map, and the derived one
+		// belongs to the stored artifact that every later read starts from.
+		out.ByWeapon = cloneCounts(derived.ByWeapon)
+	}
+	// KTX's own per-weapon enemy damage wins where it carries one, weapon
+	// by weapon rather than family-wide: a block can record damage for the
+	// weapons a player killed with and omit the rest, and dropping the
+	// reconstruction for those would lose real data.
+	for w, wv := range di.Weapons {
+		if wv == nil || wv.Damage == nil || wv.Damage.Enemy == 0 {
+			continue
+		}
+		if out.ByWeapon == nil {
+			out.ByWeapon = map[string]int{}
+		}
+		out.ByWeapon[w] = wv.Damage.Enemy
 	}
 	out.Given = di.Dmg.Given
 	out.GivenTeam = di.Dmg.Team
@@ -333,6 +349,19 @@ func overlayPickups(derived *result.PlayerStatsPickups, di *result.DemoInfoPlaye
 	return &result.PlayerStatsPickups{Src: result.SrcKTX, ByKind: byKind}
 }
 
+// cloneCounts copies a per-weapon map so the overlay can write into it
+// without reaching back into the stored artifact. nil in, nil out.
+func cloneCounts(src map[string]int) map[string]int {
+	if src == nil {
+		return nil
+	}
+	out := make(map[string]int, len(src))
+	for k, v := range src {
+		out[k] = v
+	}
+	return out
+}
+
 // sumOptional adds an optional member counter into an optional team
 // total, keeping "absent" only while every member is absent — so a team
 // figure reads as measured if any member's was.
@@ -378,6 +407,12 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 				dmg.Taken = sumOptional(dmg.Taken, p.Damage.Taken)
 				dmg.TakenEnemy = sumOptional(dmg.TakenEnemy, p.Damage.TakenEnemy)
 				dmg.TeamWeapons = sumOptional(dmg.TeamWeapons, p.Damage.TeamWeapons)
+				for w, n := range p.Damage.ByWeapon {
+					if dmg.ByWeapon == nil {
+						dmg.ByWeapon = map[string]int{}
+					}
+					dmg.ByWeapon[w] += n
+				}
 				// TakenToDie is an average; averaging averages across
 				// players with different death counts is meaningless, so a
 				// team row deliberately carries none.

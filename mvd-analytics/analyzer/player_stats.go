@@ -158,6 +158,15 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 			if !onScoreboard {
 				s.Kills, s.Deaths = pf.Kills, pf.Deaths
 			}
+			for w, n := range pf.ByWeapon {
+				if n == 0 {
+					continue
+				}
+				if s.ByWeapon == nil {
+					s.ByWeapon = map[string]int{}
+				}
+				s.ByWeapon[w] = n
+			}
 		}
 	}
 	s.Efficiency = result.NewShare(int32(s.Kills), int32(s.Kills+s.Deaths))
@@ -188,6 +197,15 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 		GivenSelf:    src.GivenSelf,
 		EnemyWeapons: src.EWep,
 		Taken:        &taken,
+	}
+	for w, n := range src.ByWeapon {
+		if n == 0 {
+			continue
+		}
+		if out.ByWeapon == nil {
+			out.ByWeapon = map[string]int{}
+		}
+		out.ByWeapon[w] = n
 	}
 	// TakenEnemy and TakenToDie were KTX-only until we reconstructed them
 	// from the per-hit log: a demo without a demoinfo block should degrade
@@ -959,6 +977,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 			row.Score.Deaths += m.Score.Deaths
 			row.Score.Suicides += m.Score.Suicides
 			row.Score.TeamKills += m.Score.TeamKills
+			row.Score.ByWeapon = addWeaponCounts(row.Score.ByWeapon, m.Score.ByWeapon)
 
 			if m.Damage != nil {
 				if dmg == nil {
@@ -971,6 +990,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				dmg.Taken = addPtr(dmg.Taken, m.Damage.Taken)
 				dmg.TakenEnemy = addPtr(dmg.TakenEnemy, m.Damage.TakenEnemy)
 				dmg.TeamWeapons = addPtr(dmg.TeamWeapons, m.Damage.TeamWeapons)
+				dmg.ByWeapon = addWeaponCounts(dmg.ByWeapon, m.Damage.ByWeapon)
 			}
 			if m.Pickups != nil {
 				if pickups == nil {
@@ -1060,5 +1080,21 @@ func addPtr(dst, src *int) *int {
 		return &v
 	}
 	*dst += *src
+	return dst
+}
+
+// addWeaponCounts folds a member's per-weapon map into a team total,
+// allocating a FRESH destination on first use so a one-member team never
+// ends up sharing (and then mutating) that member's own map.
+func addWeaponCounts(dst, src map[string]int) map[string]int {
+	if len(src) == 0 {
+		return dst
+	}
+	if dst == nil {
+		dst = make(map[string]int, len(src))
+	}
+	for w, n := range src {
+		dst[w] += n
+	}
 	return dst
 }

@@ -5403,6 +5403,14 @@ components:
             efficiency:
               description: "kills / (kills + deaths) as a RATIO in [0,1], not a percentage."
               type: number
+            byWeapon:
+              description: >
+                Enemy kills split by the weapon that dealt them, keyed rl/lg/gl/sg/ssg/sng/ng/axe.
+                From the corrected frag log, so it is on the same footing as `kills` and is never
+                overlaid with KTX's per-weapon counts. Weapons the player never killed with are
+                omitted, not zero-filled.
+              additionalProperties: { type: integer }
+              type: object
           required: [src, frags, kills, deaths, suicides, teamKills, efficiency]
           type: object
         damage:
@@ -5425,6 +5433,14 @@ components:
                 teamWeapons:
                   description: "KTX-only: damage dealt to TEAMMATES holding RL and/or LG (KTX twep) — the friendly-fire mirror of enemyWeapons. The reconstruction does not bucket team damage by the victim's inventory, so this is absent without a demoinfo block."
                   type: integer
+                byWeapon:
+                  description: >
+                    Enemy damage GIVEN split by the attacker's weapon, keyed rl/lg/gl/sg/ssg/sng/ng/axe.
+                    Follows src with the family: KTX's per-weapon enemy damage where the block carries
+                    it, else the bounded reconstruction. Weapons the player dealt no damage with are
+                    omitted. There is no by-weapon split of damage TAKEN on either side.
+                  additionalProperties: { type: integer }
+                  type: object
                 takenEnemy:
                   description: "Enemy-only damage taken (KTX dmg.taken). KTX's when present, else reconstructed from the per-hit log. Absent, not zero, when the demo carries no damage information."
                   type: integer

@@ -5,6 +5,52 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-25 (playerstats) — the web summary tab moves onto `playerStats`
+
+Still schema **v61** (additive within the same unmerged branch); golden
+corpus regenerated for the two new maps.
+
+- **The five-source JavaScript join is gone.** Every Summary-tab table —
+  Basic Stats, Weapon Stats, Item Pickups and their per-team variants —
+  now renders `result.playerStats` instead of joining `match.players`,
+  `frags.byPlayer`, `frags.frags` and `demoInfo` in `app.js`. The merge
+  happens once in Go, so the REST and MCP consumers get the same numbers
+  the web shows.
+- **A demo with no KTX block renders the full tab.** `displayScoreboardFallback`
+  — frags only, no weapon or item tables — is deleted. A 2003 kmod duel
+  now shows a complete scoreboard, possession times, per-weapon accuracy
+  and item tallies where it previously showed a bare frag list.
+- **New Possession panel**: RL / LG hold, RA / YA / GA hold, **time with
+  no armor**, and quad / pent / ring, all as a share of time *alive*.
+  Weapon hold time is absent from KTX's demoinfo block on a demo of any
+  age, and "no armor" is a figure KTX structurally cannot produce.
+- **The WASM entry point applies the KTX overlay before marshalling**
+  (`withPlayerStatsOverlay`). The analyzer still stores the fully derived
+  section; the overlay is a read-time step, and this is the web's read
+  boundary, exactly as the REST handler is the API's.
+- **`score.byWeapon` and `damage.byWeapon`** are new: per-weapon enemy
+  kills (always from the corrected frag log) and per-weapon enemy damage
+  given (KTX's where the block carries it, merged weapon by weapon). The
+  Weapon Stats table's kills column previously showed KTX's count while
+  the scoreboard beside it showed the frag log's — the two now agree.
+- **Three visible number changes on the scoreboard**, all deliberate:
+  `Taken` is now our ALL-SOURCES figure rather than KTX's enemy-only one
+  (they are different quantities; the tooltip says so); team rows show a
+  `Players` count instead of an average ping, and no `ToDie`, because
+  averaging per-player averages across different death counts is
+  meaningless; powerup seconds come from our hold integral rather than
+  KTX's `item.time`, so they agree with the Possession panel (measured
+  identical on the test corpus).
+- **`isDuel()` reads `playerStats`**, so a pre-KTX-block 1v1 collapses
+  the team panels correctly instead of falling through and rendering
+  them. The canonical team→colour order (`timelineState.teams`,
+  frag-sorted, winner at index 0) is seeded from `playerStats` too — the
+  CLAUDE.md invariant is unchanged, only its input.
+- Verified in a headless browser across 13 demos spanning 2003 kmod,
+  2022 KTX, CTF, wipeout, hoonymode, FFA and race: no page errors, team
+  colours consistent between the Teams box and every table, and the race
+  demo (no match, hence no section) renders empty tables cleanly.
+
 ## 2026-07-25 (playerstats) — canonical `playerStats` section, schema v61
 
 Adds a per-player and per-team statistics section computed for **every**

@@ -231,10 +231,10 @@
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
                                 <th title="Damage given to enemies">Dmg</th>
-                                <th title="Damage taken from enemies">Taken</th>
+                                <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
                                 <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
-                                <th title="Average damage taken to die">ToDie</th>
-                                <th title="Average ping">Ping</th>
+                                <th title="Average damage taken to die — per-player only, since averaging averages across players with different death counts is meaningless">ToDie</th>
+                                <th title="Players folded into this team's totals that were actually in the match">Players</th>
                             </tr>
                         </thead>
                         <tbody id="player-stats-team-body"></tbody>
@@ -255,13 +255,57 @@
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
                                 <th title="Damage given to enemies">Dmg</th>
-                                <th title="Damage taken from enemies">Taken</th>
+                                <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
                                 <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
                                 <th title="Average damage taken to die">ToDie</th>
                                 <th>Ping</th>
                             </tr>
                         </thead>
                         <tbody id="scoreboard-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="hold-panel" class="panel">
+                    <h3>Possession</h3>
+                    <p class="panel-note">Share of time <em>alive</em> spent holding each item. Computed from the
+                        position/inventory streams, not from KTX — KTX writes no weapon hold time at all, and its
+                        armor clock keeps counting after the armor is chewed to zero. &ldquo;No armor&rdquo; is the
+                        alive-time complement, a figure KTX structurally cannot produce.</p>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="hold-team-table" class="stats-table team-aggregate-table">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th title="Share of alive time holding a rocket launcher">RL</th>
+                                <th title="Share of alive time holding a lightning gun">LG</th>
+                                <th title="Share of alive time wearing red armor">RA</th>
+                                <th title="Share of alive time wearing yellow armor">YA</th>
+                                <th title="Share of alive time wearing green armor">GA</th>
+                                <th title="Share of alive time wearing NO armor — the alive-time complement">None</th>
+                                <th title="Share of alive time under quad damage">Quad</th>
+                                <th title="Share of alive time under pentagram">Pent</th>
+                                <th title="Share of alive time under ring of shadows">Ring</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hold-team-body"></tbody>
+                    </table>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <table id="hold-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th title="Share of alive time holding a rocket launcher">RL</th>
+                                <th title="Share of alive time holding a lightning gun">LG</th>
+                                <th title="Share of alive time wearing red armor">RA</th>
+                                <th title="Share of alive time wearing yellow armor">YA</th>
+                                <th title="Share of alive time wearing green armor">GA</th>
+                                <th title="Share of alive time wearing NO armor — the alive-time complement">None</th>
+                                <th title="Share of alive time under quad damage">Quad</th>
+                                <th title="Share of alive time under pentagram">Pent</th>
+                                <th title="Share of alive time under ring of shadows">Ring</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hold-body"></tbody>
                     </table>
                 </div>
 
