@@ -93234,6 +93234,1483 @@
       }
     ]
   },
+  "playerStats": {
+    "players": [
+      {
+        "damage": {
+          "enemyWeapons": 744,
+          "given": 7716,
+          "givenSelf": 418,
+          "givenTeam": 195,
+          "src": "derived",
+          "taken": 8507
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 45458,
+              "ms": 105120,
+              "runs": 4,
+              "shareAlive": 0.0934,
+              "shareMatch": 0.0876
+            },
+            "none": {
+              "longestMs": 51069,
+              "ms": 883099,
+              "runs": 67,
+              "shareAlive": 0.7847,
+              "shareMatch": 0.7358
+            },
+            "ya": {
+              "longestMs": 98887,
+              "ms": 137225,
+              "runs": 5,
+              "shareAlive": 0.1219,
+              "shareMatch": 0.1143
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 29984,
+              "ms": 59961,
+              "runs": 2,
+              "shareAlive": 0.0533,
+              "shareMatch": 0.05
+            },
+            "ring": {
+              "longestMs": 30017,
+              "ms": 89506,
+              "runs": 3,
+              "shareAlive": 0.0795,
+              "shareMatch": 0.0746
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 35363,
+              "ms": 89194,
+              "runs": 4,
+              "shareAlive": 0.0793,
+              "shareMatch": 0.0743
+            },
+            "rl": {
+              "longestMs": 40202,
+              "ms": 141107,
+              "runs": 9,
+              "shareAlive": 0.1254,
+              "shareMatch": 0.1176
+            },
+            "sng": {
+              "longestMs": 96309,
+              "ms": 263779,
+              "runs": 12,
+              "shareAlive": 0.2344,
+              "shareMatch": 0.2198
+            },
+            "ssg": {
+              "longestMs": 87518,
+              "ms": 229240,
+              "runs": 11,
+              "shareAlive": 0.2037,
+              "shareMatch": 0.191
+            }
+          }
+        },
+        "name": "ocoini",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 4
+            },
+            "gl": {
+              "took": 1,
+              "totalTook": 1
+            },
+            "h15": {
+              "took": 19
+            },
+            "h25": {
+              "took": 20
+            },
+            "mh": {
+              "took": 3
+            },
+            "nails": {
+              "took": 5
+            },
+            "quad": {
+              "took": 2
+            },
+            "ring": {
+              "took": 3
+            },
+            "rl": {
+              "dropped": 4,
+              "took": 9,
+              "totalTook": 10,
+              "xfer": 2,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 1
+            },
+            "shells": {
+              "took": 7
+            },
+            "sng": {
+              "took": 10,
+              "totalTook": 12
+            },
+            "ssg": {
+              "took": 7,
+              "totalTook": 8
+            },
+            "ya": {
+              "took": 6
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 65,
+          "efficiency": 0.4492,
+          "frags": 44,
+          "kills": 53,
+          "src": "derived",
+          "suicides": 5,
+          "teamKills": 4
+        },
+        "team": "ahoy",
+        "window": {
+          "aliveMs": 1125444,
+          "deadMs": 74585,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 1990,
+          "given": 10626,
+          "givenSelf": 538,
+          "givenTeam": 466,
+          "src": "derived",
+          "taken": 9882
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 64186,
+              "ms": 180276,
+              "runs": 7,
+              "shareAlive": 0.1572,
+              "shareMatch": 0.1502
+            },
+            "none": {
+              "longestMs": 44759,
+              "ms": 776326,
+              "runs": 68,
+              "shareAlive": 0.677,
+              "shareMatch": 0.6469
+            },
+            "ya": {
+              "longestMs": 87013,
+              "ms": 190191,
+              "runs": 9,
+              "shareAlive": 0.1658,
+              "shareMatch": 0.1585
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 30032,
+              "ms": 30511,
+              "runs": 2,
+              "shareAlive": 0.0266,
+              "shareMatch": 0.0254
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 74568,
+              "ms": 193155,
+              "runs": 12,
+              "shareAlive": 0.1684,
+              "shareMatch": 0.1609
+            },
+            "rl": {
+              "longestMs": 132865,
+              "ms": 289243,
+              "runs": 6,
+              "shareAlive": 0.2522,
+              "shareMatch": 0.241
+            },
+            "sng": {
+              "longestMs": 49645,
+              "ms": 141773,
+              "runs": 7,
+              "shareAlive": 0.1236,
+              "shareMatch": 0.1181
+            },
+            "ssg": {
+              "longestMs": 123225,
+              "ms": 458754,
+              "runs": 14,
+              "shareAlive": 0.4,
+              "shareMatch": 0.3823
+            }
+          }
+        },
+        "name": "ThundeR",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 7
+            },
+            "gl": {
+              "took": 8,
+              "totalTook": 8
+            },
+            "h15": {
+              "took": 36
+            },
+            "h25": {
+              "took": 29
+            },
+            "mh": {
+              "took": 5
+            },
+            "nails": {
+              "took": 8
+            },
+            "quad": {
+              "took": 2
+            },
+            "rl": {
+              "dropped": 1,
+              "took": 6,
+              "totalTook": 6,
+              "xfer": 0,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 4
+            },
+            "shells": {
+              "took": 3
+            },
+            "sng": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "ssg": {
+              "took": 8,
+              "totalTook": 9
+            },
+            "ya": {
+              "took": 11
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 66,
+          "efficiency": 0.5286,
+          "frags": 68,
+          "kills": 74,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 5
+        },
+        "team": "BhB",
+        "window": {
+          "aliveMs": 1146793,
+          "deadMs": 53236,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 778,
+          "given": 5398,
+          "givenSelf": 57,
+          "givenTeam": 100,
+          "src": "derived",
+          "taken": 8192
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 16810,
+              "ms": 52553,
+              "runs": 6,
+              "shareAlive": 0.0459,
+              "shareMatch": 0.0438
+            },
+            "none": {
+              "longestMs": 98787,
+              "ms": 1057603,
+              "runs": 64,
+              "shareAlive": 0.9241,
+              "shareMatch": 0.8812
+            },
+            "ya": {
+              "longestMs": 25427,
+              "ms": 34283,
+              "runs": 2,
+              "shareAlive": 0.03,
+              "shareMatch": 0.0286
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 29986,
+              "ms": 29986,
+              "runs": 1,
+              "shareAlive": 0.0262,
+              "shareMatch": 0.025
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 14084,
+              "ms": 30194,
+              "runs": 3,
+              "shareAlive": 0.0264,
+              "shareMatch": 0.0252
+            },
+            "rl": {
+              "longestMs": 51309,
+              "ms": 186462,
+              "runs": 6,
+              "shareAlive": 0.1629,
+              "shareMatch": 0.1554
+            },
+            "sng": {
+              "longestMs": 68974,
+              "ms": 152694,
+              "runs": 4,
+              "shareAlive": 0.1334,
+              "shareMatch": 0.1272
+            },
+            "ssg": {
+              "longestMs": 34195,
+              "ms": 171764,
+              "runs": 14,
+              "shareAlive": 0.1501,
+              "shareMatch": 0.1431
+            }
+          }
+        },
+        "name": "KreatoR",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 6
+            },
+            "gl": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "h15": {
+              "took": 23
+            },
+            "h25": {
+              "took": 26
+            },
+            "mh": {
+              "took": 4
+            },
+            "nails": {
+              "took": 13
+            },
+            "quad": {
+              "took": 1
+            },
+            "rl": {
+              "dropped": 2,
+              "took": 6,
+              "totalTook": 7,
+              "xfer": 0,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 2
+            },
+            "shells": {
+              "took": 6
+            },
+            "sng": {
+              "took": 4,
+              "totalTook": 4
+            },
+            "ssg": {
+              "took": 10,
+              "totalTook": 10
+            },
+            "ya": {
+              "took": 2
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 63,
+          "efficiency": 0.3298,
+          "frags": 30,
+          "kills": 31,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 0
+        },
+        "team": "BhB",
+        "window": {
+          "aliveMs": 1144439,
+          "deadMs": 55590,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 1816,
+          "given": 11194,
+          "givenSelf": 478,
+          "givenTeam": 739,
+          "src": "derived",
+          "taken": 8445
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 56281,
+              "ms": 78596,
+              "runs": 4,
+              "shareAlive": 0.0685,
+              "shareMatch": 0.0655
+            },
+            "none": {
+              "longestMs": 48309,
+              "ms": 759242,
+              "runs": 56,
+              "shareAlive": 0.6616,
+              "shareMatch": 0.6326
+            },
+            "ya": {
+              "longestMs": 84780,
+              "ms": 309711,
+              "runs": 8,
+              "shareAlive": 0.2699,
+              "shareMatch": 0.2581
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 30019,
+              "ms": 36632,
+              "runs": 2,
+              "shareAlive": 0.0319,
+              "shareMatch": 0.0305
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 68984,
+              "ms": 178794,
+              "runs": 9,
+              "shareAlive": 0.1558,
+              "shareMatch": 0.149
+            },
+            "rl": {
+              "longestMs": 92560,
+              "ms": 382372,
+              "runs": 9,
+              "shareAlive": 0.3332,
+              "shareMatch": 0.3186
+            },
+            "sng": {
+              "longestMs": 87797,
+              "ms": 316753,
+              "runs": 12,
+              "shareAlive": 0.276,
+              "shareMatch": 0.2639
+            },
+            "ssg": {
+              "longestMs": 109927,
+              "ms": 368622,
+              "runs": 13,
+              "shareAlive": 0.3212,
+              "shareMatch": 0.3072
+            }
+          }
+        },
+        "name": "sailorman",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 4
+            },
+            "gl": {
+              "took": 4,
+              "totalTook": 5
+            },
+            "h15": {
+              "took": 33
+            },
+            "h25": {
+              "took": 36
+            },
+            "mh": {
+              "took": 3
+            },
+            "nails": {
+              "took": 8
+            },
+            "quad": {
+              "took": 2
+            },
+            "rl": {
+              "dropped": 5,
+              "took": 10,
+              "totalTook": 10,
+              "xfer": 1,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 6
+            },
+            "shells": {
+              "took": 10
+            },
+            "sng": {
+              "took": 12,
+              "totalTook": 14
+            },
+            "ssg": {
+              "took": 6,
+              "totalTook": 9
+            },
+            "ya": {
+              "took": 11
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 53,
+          "efficiency": 0.6045,
+          "frags": 74,
+          "kills": 81,
+          "src": "derived",
+          "suicides": 2,
+          "teamKills": 5
+        },
+        "team": "ahoy",
+        "window": {
+          "aliveMs": 1147549,
+          "deadMs": 52480,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 1253,
+          "given": 7504,
+          "givenSelf": 271,
+          "givenTeam": 352,
+          "src": "derived",
+          "taken": 9458
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 18406,
+              "ms": 49035,
+              "runs": 4,
+              "shareAlive": 0.0441,
+              "shareMatch": 0.0409
+            },
+            "none": {
+              "longestMs": 37834,
+              "ms": 784270,
+              "runs": 71,
+              "shareAlive": 0.7052,
+              "shareMatch": 0.6535
+            },
+            "ya": {
+              "longestMs": 71179,
+              "ms": 278826,
+              "runs": 8,
+              "shareAlive": 0.2507,
+              "shareMatch": 0.2323
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 30033,
+              "ms": 155393,
+              "runs": 6,
+              "shareAlive": 0.1397,
+              "shareMatch": 0.1295
+            },
+            "ring": {
+              "longestMs": 30004,
+              "ms": 30004,
+              "runs": 1,
+              "shareAlive": 0.027,
+              "shareMatch": 0.025
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 68925,
+              "ms": 171201,
+              "runs": 6,
+              "shareAlive": 0.1539,
+              "shareMatch": 0.1427
+            },
+            "rl": {
+              "longestMs": 46571,
+              "ms": 189013,
+              "runs": 9,
+              "shareAlive": 0.17,
+              "shareMatch": 0.1575
+            },
+            "sng": {
+              "longestMs": 74869,
+              "ms": 272147,
+              "runs": 11,
+              "shareAlive": 0.2447,
+              "shareMatch": 0.2268
+            },
+            "ssg": {
+              "longestMs": 18450,
+              "ms": 105216,
+              "runs": 13,
+              "shareAlive": 0.0946,
+              "shareMatch": 0.0877
+            }
+          }
+        },
+        "name": "rghst",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 4
+            },
+            "gl": {
+              "took": 5,
+              "totalTook": 5
+            },
+            "h15": {
+              "took": 34
+            },
+            "h25": {
+              "took": 23
+            },
+            "mh": {
+              "took": 3
+            },
+            "nails": {
+              "took": 7
+            },
+            "quad": {
+              "took": 6
+            },
+            "ring": {
+              "took": 1
+            },
+            "rl": {
+              "dropped": 6,
+              "took": 9,
+              "totalTook": 10,
+              "xfer": 1,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 6
+            },
+            "shells": {
+              "took": 10
+            },
+            "sng": {
+              "took": 7,
+              "totalTook": 10
+            },
+            "ssg": {
+              "took": 7,
+              "totalTook": 7
+            },
+            "ya": {
+              "took": 10
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 67,
+          "efficiency": 0.437,
+          "frags": 47,
+          "kills": 52,
+          "src": "derived",
+          "suicides": 2,
+          "teamKills": 3
+        },
+        "team": "BhB",
+        "window": {
+          "aliveMs": 1112131,
+          "deadMs": 87898,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 718,
+          "given": 9077,
+          "givenSelf": 389,
+          "givenTeam": 468,
+          "src": "derived",
+          "taken": 7781
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 5532,
+              "ms": 11102,
+              "runs": 3,
+              "shareAlive": 0.0097,
+              "shareMatch": 0.0093
+            },
+            "none": {
+              "longestMs": 63245,
+              "ms": 986800,
+              "runs": 61,
+              "shareAlive": 0.8596,
+              "shareMatch": 0.8222
+            },
+            "ya": {
+              "longestMs": 59595,
+              "ms": 150012,
+              "runs": 5,
+              "shareAlive": 0.1307,
+              "shareMatch": 0.125
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 10337,
+              "ms": 21011,
+              "runs": 3,
+              "shareAlive": 0.0183,
+              "shareMatch": 0.0175
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 70921,
+              "ms": 118612,
+              "runs": 5,
+              "shareAlive": 0.1033,
+              "shareMatch": 0.0988
+            },
+            "rl": {
+              "longestMs": 91163,
+              "ms": 386933,
+              "runs": 11,
+              "shareAlive": 0.3371,
+              "shareMatch": 0.3224
+            },
+            "sng": {
+              "longestMs": 50107,
+              "ms": 239601,
+              "runs": 12,
+              "shareAlive": 0.2087,
+              "shareMatch": 0.1996
+            },
+            "ssg": {
+              "longestMs": 42816,
+              "ms": 323396,
+              "runs": 14,
+              "shareAlive": 0.2817,
+              "shareMatch": 0.2695
+            }
+          }
+        },
+        "name": "nexus",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 3
+            },
+            "gl": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "h15": {
+              "took": 29
+            },
+            "h25": {
+              "took": 24
+            },
+            "mh": {
+              "took": 5
+            },
+            "nails": {
+              "took": 9
+            },
+            "quad": {
+              "took": 3
+            },
+            "rl": {
+              "dropped": 5,
+              "took": 11,
+              "totalTook": 13,
+              "xfer": 1,
+              "xferSelf": 1
+            },
+            "rockets": {
+              "took": 5
+            },
+            "shells": {
+              "took": 6
+            },
+            "sng": {
+              "took": 11,
+              "totalTook": 11
+            },
+            "ssg": {
+              "took": 8,
+              "totalTook": 8
+            },
+            "ya": {
+              "took": 5
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 57,
+          "efficiency": 0.5649,
+          "frags": 67,
+          "kills": 74,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 6
+        },
+        "team": "ahoy",
+        "window": {
+          "aliveMs": 1147914,
+          "deadMs": 52115,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 585,
+          "given": 6007,
+          "givenSelf": 133,
+          "givenTeam": 251,
+          "src": "derived",
+          "taken": 7747
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 47231,
+              "ms": 251428,
+              "runs": 14,
+              "shareAlive": 0.2199,
+              "shareMatch": 0.2095
+            },
+            "none": {
+              "longestMs": 56693,
+              "ms": 821366,
+              "runs": 51,
+              "shareAlive": 0.7183,
+              "shareMatch": 0.6844
+            },
+            "ya": {
+              "longestMs": 34707,
+              "ms": 70655,
+              "runs": 3,
+              "shareAlive": 0.0618,
+              "shareMatch": 0.0589
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 29993,
+              "ms": 39329,
+              "runs": 2,
+              "shareAlive": 0.0344,
+              "shareMatch": 0.0328
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 45231,
+              "ms": 132123,
+              "runs": 8,
+              "shareAlive": 0.1155,
+              "shareMatch": 0.1101
+            },
+            "rl": {
+              "longestMs": 25938,
+              "ms": 39763,
+              "runs": 2,
+              "shareAlive": 0.0348,
+              "shareMatch": 0.0331
+            },
+            "sng": {
+              "longestMs": 80984,
+              "ms": 158149,
+              "runs": 9,
+              "shareAlive": 0.1383,
+              "shareMatch": 0.1318
+            },
+            "ssg": {
+              "longestMs": 65846,
+              "ms": 252207,
+              "runs": 9,
+              "shareAlive": 0.2206,
+              "shareMatch": 0.2102
+            }
+          }
+        },
+        "name": "[nW].Veggie",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 15
+            },
+            "gl": {
+              "took": 6,
+              "totalTook": 6
+            },
+            "h15": {
+              "took": 45
+            },
+            "h25": {
+              "took": 39
+            },
+            "mh": {
+              "took": 2
+            },
+            "nails": {
+              "took": 15
+            },
+            "quad": {
+              "took": 2
+            },
+            "rl": {
+              "took": 2,
+              "totalTook": 2
+            },
+            "rockets": {
+              "took": 5
+            },
+            "shells": {
+              "took": 9
+            },
+            "sng": {
+              "took": 8,
+              "totalTook": 8
+            },
+            "ssg": {
+              "took": 7,
+              "totalTook": 9
+            },
+            "ya": {
+              "took": 3
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 49,
+          "efficiency": 0.4556,
+          "frags": 39,
+          "kills": 41,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 1
+        },
+        "team": "ahoy",
+        "window": {
+          "aliveMs": 1143449,
+          "deadMs": 56580,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 954,
+          "given": 5749,
+          "givenSelf": 113,
+          "givenTeam": 448,
+          "src": "derived",
+          "taken": 9257
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 17093,
+              "ms": 53960,
+              "runs": 6,
+              "shareAlive": 0.0475,
+              "shareMatch": 0.045
+            },
+            "none": {
+              "longestMs": 39954,
+              "ms": 960675,
+              "runs": 75,
+              "shareAlive": 0.8457,
+              "shareMatch": 0.8005
+            },
+            "ya": {
+              "longestMs": 45422,
+              "ms": 121362,
+              "runs": 4,
+              "shareAlive": 0.1068,
+              "shareMatch": 0.1011
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 29977,
+              "ms": 38911,
+              "runs": 2,
+              "shareAlive": 0.0343,
+              "shareMatch": 0.0324
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 36008,
+              "ms": 140740,
+              "runs": 10,
+              "shareAlive": 0.1239,
+              "shareMatch": 0.1173
+            },
+            "rl": {
+              "longestMs": 24762,
+              "ms": 71235,
+              "runs": 6,
+              "shareAlive": 0.0627,
+              "shareMatch": 0.0594
+            },
+            "sng": {
+              "longestMs": 74856,
+              "ms": 125094,
+              "runs": 4,
+              "shareAlive": 0.1101,
+              "shareMatch": 0.1042
+            },
+            "ssg": {
+              "longestMs": 56268,
+              "ms": 213906,
+              "runs": 11,
+              "shareAlive": 0.1883,
+              "shareMatch": 0.1782
+            }
+          }
+        },
+        "name": "Doomie",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 6
+            },
+            "gl": {
+              "took": 5,
+              "totalTook": 6
+            },
+            "h15": {
+              "took": 27
+            },
+            "h25": {
+              "took": 19
+            },
+            "mh": {
+              "took": 2
+            },
+            "nails": {
+              "took": 9
+            },
+            "quad": {
+              "took": 2
+            },
+            "rl": {
+              "dropped": 2,
+              "took": 6,
+              "totalTook": 6,
+              "xfer": 1,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 2
+            },
+            "shells": {
+              "took": 6
+            },
+            "sng": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "ssg": {
+              "took": 8,
+              "totalTook": 8
+            },
+            "ya": {
+              "took": 6
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 73,
+          "efficiency": 0.3652,
+          "frags": 34,
+          "kills": 42,
+          "src": "derived",
+          "suicides": 4,
+          "teamKills": 4
+        },
+        "team": "BhB",
+        "window": {
+          "aliveMs": 1135997,
+          "deadMs": 64032,
+          "matchMs": 1200128,
+          "presentMs": 1200029
+        }
+      }
+    ],
+    "sources": {
+      "damage": "derived",
+      "hold": "derived",
+      "pickups": "derived",
+      "score": "derived"
+    },
+    "teams": [
+      {
+        "damage": {
+          "enemyWeapons": 3863,
+          "given": 33994,
+          "givenSelf": 1418,
+          "givenTeam": 1653,
+          "src": "derived",
+          "taken": 32480
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 56281,
+              "ms": 446246,
+              "runs": 25,
+              "shareAlive": 0.0978,
+              "shareMatch": 0.093
+            },
+            "none": {
+              "longestMs": 63245,
+              "ms": 3450507,
+              "runs": 235,
+              "shareAlive": 0.756,
+              "shareMatch": 0.7188
+            },
+            "ya": {
+              "longestMs": 98887,
+              "ms": 667603,
+              "runs": 21,
+              "shareAlive": 0.1463,
+              "shareMatch": 0.1391
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 30019,
+              "ms": 156933,
+              "runs": 9,
+              "shareAlive": 0.0344,
+              "shareMatch": 0.0327
+            },
+            "ring": {
+              "longestMs": 30017,
+              "ms": 89506,
+              "runs": 3,
+              "shareAlive": 0.0196,
+              "shareMatch": 0.0186
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 70921,
+              "ms": 518723,
+              "runs": 26,
+              "shareAlive": 0.1136,
+              "shareMatch": 0.1081
+            },
+            "rl": {
+              "longestMs": 92560,
+              "ms": 950175,
+              "runs": 31,
+              "shareAlive": 0.2082,
+              "shareMatch": 0.1979
+            },
+            "sng": {
+              "longestMs": 96309,
+              "ms": 978282,
+              "runs": 45,
+              "shareAlive": 0.2143,
+              "shareMatch": 0.2038
+            },
+            "ssg": {
+              "longestMs": 109927,
+              "ms": 1173465,
+              "runs": 47,
+              "shareAlive": 0.2571,
+              "shareMatch": 0.2444
+            }
+          }
+        },
+        "name": "ahoy",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 26
+            },
+            "gl": {
+              "took": 14,
+              "totalTook": 15
+            },
+            "h15": {
+              "took": 126
+            },
+            "h25": {
+              "took": 119
+            },
+            "mh": {
+              "took": 13
+            },
+            "nails": {
+              "took": 37
+            },
+            "quad": {
+              "took": 9
+            },
+            "ring": {
+              "took": 3
+            },
+            "rl": {
+              "dropped": 14,
+              "took": 32,
+              "totalTook": 35,
+              "xfer": 4,
+              "xferSelf": 1
+            },
+            "rockets": {
+              "took": 17
+            },
+            "shells": {
+              "took": 32
+            },
+            "sng": {
+              "took": 41,
+              "totalTook": 45
+            },
+            "ssg": {
+              "took": 28,
+              "totalTook": 34
+            },
+            "ya": {
+              "took": 25
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 224,
+          "efficiency": 0.5264,
+          "frags": 224,
+          "kills": 249,
+          "src": "derived",
+          "suicides": 9,
+          "teamKills": 16
+        },
+        "window": {
+          "aliveMs": 4564356,
+          "deadMs": 235760,
+          "matchMs": 1200128,
+          "presentMs": 4800116
+        }
+      },
+      {
+        "damage": {
+          "enemyWeapons": 4975,
+          "given": 29277,
+          "givenSelf": 979,
+          "givenTeam": 1366,
+          "src": "derived",
+          "taken": 36789
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 64186,
+              "ms": 335824,
+              "runs": 23,
+              "shareAlive": 0.074,
+              "shareMatch": 0.07
+            },
+            "none": {
+              "longestMs": 98787,
+              "ms": 3578874,
+              "runs": 278,
+              "shareAlive": 0.7884,
+              "shareMatch": 0.7455
+            },
+            "ya": {
+              "longestMs": 87013,
+              "ms": 624662,
+              "runs": 23,
+              "shareAlive": 0.1376,
+              "shareMatch": 0.1301
+            }
+          },
+          "powerups": {
+            "quad": {
+              "longestMs": 30033,
+              "ms": 254801,
+              "runs": 11,
+              "shareAlive": 0.0561,
+              "shareMatch": 0.0531
+            },
+            "ring": {
+              "longestMs": 30004,
+              "ms": 30004,
+              "runs": 1,
+              "shareAlive": 0.0066,
+              "shareMatch": 0.0063
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 74568,
+              "ms": 535290,
+              "runs": 31,
+              "shareAlive": 0.1179,
+              "shareMatch": 0.1115
+            },
+            "rl": {
+              "longestMs": 132865,
+              "ms": 735953,
+              "runs": 27,
+              "shareAlive": 0.1621,
+              "shareMatch": 0.1533
+            },
+            "sng": {
+              "longestMs": 74869,
+              "ms": 691708,
+              "runs": 26,
+              "shareAlive": 0.1524,
+              "shareMatch": 0.1441
+            },
+            "ssg": {
+              "longestMs": 123225,
+              "ms": 949640,
+              "runs": 52,
+              "shareAlive": 0.2092,
+              "shareMatch": 0.1978
+            }
+          }
+        },
+        "name": "BhB",
+        "pickups": {
+          "byKind": {
+            "ga": {
+              "took": 23
+            },
+            "gl": {
+              "took": 21,
+              "totalTook": 22
+            },
+            "h15": {
+              "took": 120
+            },
+            "h25": {
+              "took": 97
+            },
+            "mh": {
+              "took": 14
+            },
+            "nails": {
+              "took": 37
+            },
+            "quad": {
+              "took": 11
+            },
+            "ring": {
+              "took": 1
+            },
+            "rl": {
+              "dropped": 11,
+              "took": 27,
+              "totalTook": 29,
+              "xfer": 2,
+              "xferSelf": 0
+            },
+            "rockets": {
+              "took": 14
+            },
+            "shells": {
+              "took": 25
+            },
+            "sng": {
+              "took": 17,
+              "totalTook": 20
+            },
+            "ssg": {
+              "took": 33,
+              "totalTook": 34
+            },
+            "ya": {
+              "took": 29
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 269,
+          "efficiency": 0.4252,
+          "frags": 179,
+          "kills": 199,
+          "src": "derived",
+          "suicides": 8,
+          "teamKills": 12
+        },
+        "window": {
+          "aliveMs": 4539360,
+          "deadMs": 260756,
+          "matchMs": 1200128,
+          "presentMs": 4800116
+        }
+      }
+    ]
+  },
   "schemaVersion": 60,
   "shots": {
     "byPlayer": [

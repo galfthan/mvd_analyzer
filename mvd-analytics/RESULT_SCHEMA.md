@@ -33,6 +33,7 @@ analyzer are also covered there.
 | Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
+| PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v60). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
 
 All sub-result fields are pointers and use `omitempty`, so a missing
@@ -647,6 +648,174 @@ Top-level fields (`version`, `date`, `map`, `hostname`, `ip`, `port`,
 
 For the full nested table, see `result/demoinfo.go` directly — every
 field is documented inline.
+
+## PlayerStatsResult (`playerStats`)
+
+Defined in `result/player_stats.go`. Schema v60. Present on **every**
+demo — it never depends on the KTX demoinfo block being there.
+
+This is the canonical answer to "how did this player do". `demoInfo` is
+KTX's own end-of-match accounting (authoritative for the server-side
+counters the wire hides, absent on older demos); the stream / frag /
+item artifacts are present everywhere but leave the join to the caller.
+This section is that join, done once, plus the family neither source
+carries: possession time.
+
+**`/demoinfo` is unchanged and still verbatim.** It is the audit trail
+this section is diffable against — use it when you want exactly KTX's
+numbers.
+
+### Provenance
+
+Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
+wire) or `"ktx"` (the demoinfo block). The stored artifact is always
+fully derived; `view.PlayerStats` applies the KTX overlay at read time,
+mirroring how `view.Damage` applies `boundedSource`. `sources` at the
+top level is the roll-up.
+
+| Family | Winner | Why |
+|---|---|---|
+| `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:5132`), and resets after a reconnect. `match` carries the frag-log-corrected counts. |
+| `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
+| `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1083`). It is surfaced separately as `takenEnemy` so the two are never conflated. `takenToDie` is likewise KTX-only. |
+| `accuracy` | **ktx-only**, family **omitted** without a block | KTX counts pellets server-side (`attacks` is a pellet count for sg/ssg). There is deliberately no derived fallback: it would let a caller compare a server-side count against a wire-inferred approximation across demos without noticing. |
+| `pickups` took / totalTook / dropped | **ktx** when present, else derived from `items` + `weaponPickups` + `backpacks` | direct server-side counters, identical semantics. |
+| `pickups` xfer / xferSelf | always **derived** | we can decompose what KTX conflates — see below. |
+| `hold` | always **derived** | KTX has no weapon hold time in the block at all, and its armor hold time overcounts — see below. |
+
+### Hold time: why ours differs from KTX's
+
+KTX tracks weapon hold time internally (`ps.wpn[].time`) but
+`json_weap_detail` never writes it to the demoinfo block
+(`ktx/src/stats_json.c:126-205` emits acc/kills/deaths/pickups/damage
+only); it reaches just the end-of-match text tables
+(`ktx/src/statsTables.c:390`). **No demo of any age carries weapon hold
+time.**
+
+Armor hold time *is* in the block, and it overcounts. KTX opens the
+clock at pickup and closes it only on death or on picking up a
+different armor type (`ktx/src/items.c:505-522`,
+`ktx/src/client.c:4600`) — never when the armor is chewed to zero by
+damage. Our `armorType` stream goes to `""` when the item bits clear,
+so our integral is exact and reads **lower**. Measured on gameId 212423
+(1on1, dm2): KTX `ra` 213 s vs ours 129 s for one player, 317 s vs
+266 s for the other. That gap is the correction, not a bug — expect a
+KTX end-of-match table to disagree, and expect ours to be the one that
+matches how long the player actually had armor on.
+
+Powerup hold time is correct in KTX (its powerup clocks *do* close on
+expiry, `ktx/src/client.c:3823/3868/3920`); we derive it anyway so it
+stays consistent with the timeline's powerup runs.
+
+### Shape
+
+```jsonc
+{
+  "players": [ PlayerStatsRow, … ],   // Streams.Players order + any scoreboard-only player
+  "teams":   [ PlayerStatsRow, … ],   // omitted on duels / FFA
+  "sources": { "score": "derived", "damage": "ktx", "hold": "derived", … }
+}
+```
+
+### PlayerStatsRow
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Name | `name` | string | Player name; on a team row, the team name. |
+| Team | `team` | string | Omitted on team rows. |
+| Ping / Handicap / Login / Bot | `ping`, `handicap`, `login`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. |
+| Window | `window` | PlayerStatsWindow | The denominators — see below. |
+| Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score), `kills`, `deaths`, `suicides`, `teamKills`, `efficiency`. |
+| Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map of KTX acc blocks. KTX-only. |
+| Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
+| Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
+
+**`efficiency` is a RATIO in [0,1]**, not a percentage —
+`kills / (kills + deaths)`, 0 when the player neither killed nor died.
+So are `shareAlive` / `shareMatch`. All three serialize at 4-decimal
+precision (`result.Share`, mirroring `Coord`).
+
+### PlayerStatsWindow — the denominators
+
+Match-relative int32 **ms** on the game clock, so pauses are already
+excluded. Nothing in this section has an implicit denominator: KTX's
+hold clocks stop at death, making alive time their unstated divisor,
+and that silence is exactly what makes two "RA control" numbers from
+different tools incomparable.
+
+| Field | Meaning |
+|---|---|
+| `matchMs` | The whole match window. Identical on every row. |
+| `presentMs` | First to last activity, clipped to the match — separates a late joiner or early quitter from someone present the whole time. |
+| `aliveMs` | Time alive within `presentMs`. |
+| `deadMs` | `presentMs - aliveMs`. |
+
+Liveness follows the repo's canonical rule (`analyzer.losAliveAt`):
+alive from match start, a death starts a dead period, the next spawn
+ends it — deliberately **not** requiring a recorded match-start spawn,
+since KTX emits a player's first spawn only on their first *respawn*.
+
+On a **team row** the windows are member sums, and hold shares use team
+time: `shareAlive` over the summed alive time, `shareMatch` over
+`matchMs × member count`. They are never averages of per-player shares,
+which would weight a player who was dead most of the match equally with
+one who was not.
+
+### PlayerStatsHold / HoldStat
+
+`weapons` is keyed `rl`, `lg`, `gl`, `ssg`, `sng` — the shotgun and axe
+are deliberately absent (every player holds them all match). `armor` is
+keyed `ra`, `ya`, `ga` and **`none`**, the alive-time complement: how
+long the player ran with no armor at all, a stat KTX structurally
+cannot produce. `ga + ya + ra + none == aliveMs` exactly.
+`powerups` is keyed `quad`, `pent`, `ring`. A key the player never held
+is **omitted**, not zero-filled (`none` is the exception — it is always
+present, including at zero).
+
+| Field | Meaning |
+|---|---|
+| `ms` | Possession time: the integral over native-rate possession intervals, clipped to the match window and intersected with the player's alive intervals. |
+| `runs` | Number of disjoint possession spells (summed over members on a team row). |
+| `longestMs` | Longest single spell (**max** over members on a team row, not summed). |
+| `shareAlive` / `shareMatch` | `ms` over `window.aliveMs` / `window.matchMs`. |
+
+### PlayerStatsPickups
+
+`byKind` uses **this repo's item-kind vocabulary** (`ra`, `ya`, `ga`,
+`mh`, `h15`, `h25`, `quad`, `pent`, `ring`, `rl`, `lg`, `gl`, `ssg`,
+`sng`, `ng`, ammo kinds) — not KTX's demoinfo keys. `view.PlayerStats`
+maps KTX's onto it when overlaying (`health_100`→`mh`, `q`/`p`/`r`→
+`quad`/`pent`/`ring`).
+
+| Field | Meaning |
+|---|---|
+| `took` | Acquisitions that granted the item — for weapons, pickups where the player did not already hold it (KTX `wpn.tooks`). |
+| `totalTook` | Every touch including redundant ones (KTX `wpn.ttooks`). Weapons only. |
+| `dropped` | Backpacks left on death carrying this weapon. |
+| `xfer` / `xferSelf` | Pack transfers **credited to this player as the dropper** — see below. |
+
+Non-weapon tallies come from the item timeline; weapon tallies come
+from `weaponPickups`, because a weapon can also arrive in a backpack,
+which the item timeline never sees and KTX's `wpn.tooks` does count
+(`TookWeaponHandler` runs on backpack touch, `ktx/src/items.c:2470`).
+
+**Transfers.** KTX's `xferRL`/`xferLG` (`ktx/src/items.c:2586-2615`)
+credit the dropper when a pack whose contents are exactly the RL (or
+exactly the LG) is taken by someone on the dropper's team, in teamplay
+only (`isTeam()`). KTX has no `other != dropper` check, so re-taking
+your own pack increments your own counter. We split that out:
+`xfer + xferSelf` reproduces the KTX number exactly, while `xfer`
+alone answers the question people actually mean.
+
+`xfer` / `xferSelf` are **pointers**: absent means "this demo carries
+no backpack hints, so transfers are unobservable", which is a different
+fact from an observed zero. They are teamplay-only, exactly like KTX's
+gate — absent on duels and FFA. Note a pack holds the weapon the player
+was *wielding* (`DropBackpack`: `item->s.v.items = self->s.v.weapon`),
+one bit, which is why KTX's exact-equality test has no mixed-contents
+case — and why the autoswitch-to-SG habit produces a pack that yields
+no hint, no pickup row and no transfer.
 
 ## TimelineAnalysisResult (`timelineAnalysis`)
 

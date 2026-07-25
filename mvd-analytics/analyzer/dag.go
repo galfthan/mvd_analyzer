@@ -185,6 +185,12 @@ var postNodeMeta = map[string]nodeMeta{
 		requires: []string{"timeline", "match", "demoinfo"},
 		desc:     "Folds the default-window region-control aggregation into the timeline (arbitrary windows are a view, not an artifact).",
 	},
+	"playerStatsPost": {
+		name:      "player-stats",
+		requires:  []string{"clock", "roster", "timeline", "match:final", "frags:final", "damage", "items", "weapon-pickups", "backpacks", "metadata"},
+		resultKey: "playerStats",
+		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo; the KTX overlay is applied at read time by view.PlayerStats.",
+	},
 	"openingPost": {
 		name: "opening", mutates: true,
 		requires:  []string{"timeline", "items"},

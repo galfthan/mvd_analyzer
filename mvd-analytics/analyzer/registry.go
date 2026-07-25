@@ -388,6 +388,11 @@ func NewDefaultRegistry() *Registry {
 	r.RegisterPostProcessor(locGraphPost)
 	r.RegisterPostProcessor(regionControlPost)
 	r.RegisterPostProcessor(openingPost)
+	// Player stats join the corrected scoreboard, damage, pickups and the
+	// possession streams into one canonical per-player section. It reads
+	// match:final / frags:final, so the DAG runs it after the two fix-up
+	// nodes.
+	r.RegisterPostProcessor(playerStatsPost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

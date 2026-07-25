@@ -1,0 +1,809 @@
+package analyzer
+
+import (
+	"sort"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
+
+// Player statistics (schema v60). playerStatsPost joins the artifacts that
+// each hold a piece of "how did this player do" — the corrected scoreboard,
+// the frag log, the damage reconstruction, the item and weapon-pickup
+// timelines, the backpack drops — and adds the family none of them carry:
+// possession time, integrated from the native-rate streams.
+//
+// It produces the fully DERIVED form. The KTX overlay (where the demoinfo
+// block is the better source for a family) is applied at read time by
+// view.PlayerStats, exactly as view.Damage overlays the KTX bounded summary
+// — so the stored artifact and the golden corpus always say what this
+// pipeline actually computed. See result.PlayerStatsResult for the schema
+// and mvd-analytics/RESULT_SCHEMA.md for the family-by-family merge rules.
+func playerStatsPost(res *Result, co *CoreOutputs) {
+	if res.Streams == nil {
+		// Every family here is keyed on the stream roster and every hold
+		// figure integrates a stream. Without them there is nothing to
+		// join, and an empty section would be indistinguishable from a
+		// match where nobody did anything.
+		return
+	}
+
+	matchMs := res.Streams.Global.MatchEnd - res.Streams.Global.MatchStart
+	if matchMs < 0 {
+		matchMs = 0
+	}
+
+	teamplay := isTeamplay(res, co)
+	xferOK := teamplay && len(res.Backpacks) > 0
+
+	ps := &result.PlayerStatsResult{
+		Sources: result.PlayerStatsSources{
+			Score: result.SrcDerived,
+			Hold:  result.SrcDerived,
+		},
+	}
+
+	// Derived inputs shared across rows.
+	pickups := derivePickups(res, xferOK)
+	if pickups != nil {
+		ps.Sources.Pickups = result.SrcDerived
+	}
+
+	for i := range res.Streams.Players {
+		p := &res.Streams.Players[i]
+		ps.Players = append(ps.Players, buildPlayerStatsRow(res, p, matchMs, pickups))
+	}
+	// A scoreboard player who produced no stream (connected but never
+	// spawned, or a slot the stream builder never saw) still gets a row —
+	// dropping them would silently shrink the roster relative to /overview.
+	seen := make(map[string]bool, len(ps.Players))
+	for i := range ps.Players {
+		seen[ps.Players[i].Name] = true
+	}
+	if res.Match != nil {
+		for i := range res.Match.Players {
+			mp := &res.Match.Players[i]
+			if seen[mp.Name] {
+				continue
+			}
+			row := result.PlayerStatsRow{
+				Name:   mp.Name,
+				Team:   mp.Team,
+				Window: result.PlayerStatsWindow{MatchMs: matchMs},
+				Score:  deriveScore(res, mp.Name),
+				Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+			}
+			row.Damage = deriveDamage(res, mp.Name)
+			row.Pickups = pickupsFor(pickups, mp.Name)
+			ps.Players = append(ps.Players, row)
+		}
+	}
+
+	for i := range ps.Players {
+		if ps.Players[i].Damage != nil {
+			ps.Sources.Damage = result.SrcDerived
+			break
+		}
+	}
+
+	if teamplay {
+		ps.Teams = aggregateTeamRows(ps.Players, matchMs)
+	}
+
+	res.PlayerStats = ps
+}
+
+// buildPlayerStatsRow assembles one streamed player's row.
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup) result.PlayerStatsRow {
+	present := presenceWindow(p, matchMs)
+	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
+
+	w := result.PlayerStatsWindow{
+		MatchMs:   matchMs,
+		PresentMs: totalMs(present),
+		AliveMs:   totalMs(alive),
+	}
+	w.DeadMs = w.PresentMs - w.AliveMs
+
+	row := result.PlayerStatsRow{
+		Name:    p.Name,
+		Team:    p.Team,
+		Window:  w,
+		Score:   deriveScore(res, p.Name),
+		Damage:  deriveDamage(res, p.Name),
+		Pickups: pickupsFor(pickups, p.Name),
+		Hold:    deriveHold(p, alive, w),
+	}
+	return row
+}
+
+// deriveScore reads the corrected scoreboard. MatchResult carries the
+// frag-log-corrected kills/deaths/suicides (match-final post-processor) and
+// the svc_updatefrags net score; FragResult carries the team-kill count.
+func deriveScore(res *Result, name string) result.PlayerStatsScore {
+	s := result.PlayerStatsScore{Src: result.SrcDerived}
+	if res.Match != nil {
+		for i := range res.Match.Players {
+			if res.Match.Players[i].Name == name {
+				mp := &res.Match.Players[i]
+				s.Frags, s.Kills, s.Deaths, s.Suicides = mp.Frags, mp.Kills, mp.Deaths, mp.Suicides
+				break
+			}
+		}
+	}
+	if res.Frags != nil {
+		if pf := res.Frags.ByPlayer[name]; pf != nil {
+			s.TeamKills = pf.TeamKills
+			// A player absent from the scoreboard (never joined a team,
+			// or a name the match analyzer did not resolve) still has a
+			// frag-log line; use it rather than reporting zeros.
+			if res.Match == nil {
+				s.Kills, s.Deaths = pf.Kills, pf.Deaths
+			}
+		}
+	}
+	s.Efficiency = result.NewShare(int32(s.Kills), int32(s.Kills+s.Deaths))
+	return s
+}
+
+// deriveDamage reads the damage reconstruction, preferring the bounded
+// family: bounded is KTX-scoreboard semantics (armor absorbed, health
+// capped to remaining), which is what these fields mean and what the KTX
+// overlay in view.PlayerStats replaces them with.
+func deriveDamage(res *Result, name string) *result.PlayerStatsDamage {
+	if res.Damage == nil {
+		return nil
+	}
+	pd := res.Damage.ByPlayer[name]
+	if pd == nil {
+		return nil
+	}
+	src := pd
+	if pd.Bounded != nil {
+		src = pd.Bounded
+	}
+	return &result.PlayerStatsDamage{
+		Src:          result.SrcDerived,
+		Given:        src.Given,
+		GivenTeam:    src.GivenTeam,
+		GivenSelf:    src.GivenSelf,
+		EnemyWeapons: src.EWep,
+		Taken:        src.Taken,
+	}
+}
+
+// derivePickups tallies every acquisition per player per item kind.
+//
+// Two sources, split by what each one actually observes: non-weapon kinds
+// come from the item timeline (which is the pickup record for world
+// spawners), weapons from WeaponPickups — because a weapon can also arrive
+// in a backpack, which the item timeline knows nothing about and KTX's
+// wpn.tooks does count (TookWeaponHandler runs on backpack touch too,
+// ktx/src/items.c:2470).
+//
+// Returns nil when the demo carries neither source.
+func derivePickups(res *Result, xferOK bool) map[string]map[string]result.PlayerStatsPickup {
+	if res.Items == nil && res.WeaponPickups == nil && res.Backpacks == nil {
+		return nil
+	}
+	acc := map[string]map[string]*result.PlayerStatsPickup{}
+	get := func(player, kind string) *result.PlayerStatsPickup {
+		byKind := acc[player]
+		if byKind == nil {
+			byKind = map[string]*result.PlayerStatsPickup{}
+			acc[player] = byKind
+		}
+		e := byKind[kind]
+		if e == nil {
+			e = &result.PlayerStatsPickup{}
+			byKind[kind] = e
+		}
+		return e
+	}
+
+	if res.Items != nil {
+		for i := range res.Items.Items {
+			it := &res.Items.Items[i]
+			if isWeaponKind(it.Kind) {
+				continue // weapons are counted from WeaponPickups
+			}
+			for _, ph := range it.Phases {
+				if ph.TakenBy == "" {
+					continue
+				}
+				get(ph.TakenBy, it.Kind).Took++
+			}
+		}
+	}
+
+	for i := range res.WeaponPickups {
+		wp := &res.WeaponPickups[i]
+		e := get(wp.Player, wp.Weapon)
+		e.TotalTook++
+		if !wp.HadBefore {
+			e.Took++
+		}
+
+		// Transfers are credited to the DROPPER, not the picker.
+		if !xferOK || wp.Source != "backpack" || wp.Dropper == "" {
+			continue
+		}
+		if wp.DropperTeam == "" || wp.DropperTeam != wp.Team {
+			continue // taken by an opponent — a denial, not a transfer
+		}
+		d := get(wp.Dropper, wp.Weapon)
+		if wp.Player == wp.Dropper {
+			d.XferSelf = incPtr(d.XferSelf)
+		} else {
+			d.Xfer = incPtr(d.Xfer)
+		}
+	}
+
+	for i := range res.Backpacks {
+		bp := &res.Backpacks[i]
+		get(bp.Player, bp.Weapon).Dropped++
+	}
+
+	out := make(map[string]map[string]result.PlayerStatsPickup, len(acc))
+	for player, byKind := range acc {
+		flat := make(map[string]result.PlayerStatsPickup, len(byKind))
+		for kind, e := range byKind {
+			// Zero-fill the transfer counters for anyone who dropped a pack
+			// of this weapon that nobody on their team recovered: where
+			// transfers ARE observable, an unrecovered pack is an observed
+			// zero, and the pointer must say so rather than reading as
+			// "unobservable".
+			if xferOK && e.Dropped > 0 {
+				if e.Xfer == nil {
+					e.Xfer = new(int)
+				}
+				if e.XferSelf == nil {
+					e.XferSelf = new(int)
+				}
+			}
+			flat[kind] = *e
+		}
+		out[player] = flat
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func incPtr(p *int) *int {
+	if p == nil {
+		v := 1
+		return &v
+	}
+	*p++
+	return p
+}
+
+func pickupsFor(pickups map[string]map[string]result.PlayerStatsPickup, name string) *result.PlayerStatsPickups {
+	byKind := pickups[name]
+	if len(byKind) == 0 {
+		return nil
+	}
+	return &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: byKind}
+}
+
+// isWeaponKind reports whether an item kind is a slot weapon, i.e. one
+// whose pickups WeaponPickups (not the item timeline) accounts for.
+// Mirrors result.ItemTimeline.Category()'s "weapon" class.
+func isWeaponKind(kind string) bool {
+	switch kind {
+	case "rl", "lg", "gl", "ssg", "sng", "ng":
+		return true
+	}
+	return false
+}
+
+// deriveHold integrates the possession streams. Every integral is clipped
+// to the player's alive intervals: inventory bits clear on death, so the
+// clip is normally a no-op, but it is the guarantee that a stream artefact
+// (a bit that survives a death, a re-grant recorded a frame early) can
+// never inflate a hold figure past the time the player was actually
+// playing.
+func deriveHold(p *result.PlayerStream, alive []result.Interval, w result.PlayerStatsWindow) result.PlayerStatsHold {
+	h := result.PlayerStatsHold{Src: result.SrcDerived}
+
+	addWeapon := func(kind string, iv []result.Interval) {
+		if st, ok := holdStat(iv, alive, w); ok {
+			if h.Weapons == nil {
+				h.Weapons = map[string]result.HoldStat{}
+			}
+			h.Weapons[kind] = st
+		}
+	}
+	addWeapon("rl", p.RL)
+	addWeapon("lg", p.LG)
+	addWeapon("gl", p.GL)
+	addWeapon("ssg", p.SSG)
+	addWeapon("sng", p.SNG)
+
+	addPowerup := func(kind string, iv []result.Interval) {
+		if st, ok := holdStat(iv, alive, w); ok {
+			if h.Powerups == nil {
+				h.Powerups = map[string]result.HoldStat{}
+			}
+			h.Powerups[kind] = st
+		}
+	}
+	addPowerup("quad", p.Quad)
+	addPowerup("pent", p.Pent)
+	addPowerup("ring", p.Ring)
+
+	// Armor is a run-length stream, not intervals: consecutive samples of
+	// the same type collapse into one possession run.
+	armor := map[string][]result.Interval{}
+	for _, kind := range armorRuns(p.ArmorType, w.MatchMs) {
+		armor[kind.kind] = append(armor[kind.kind], kind.iv)
+	}
+	var armorTotal int32
+	for _, kind := range []string{"ra", "ya", "ga"} {
+		if st, ok := holdStat(armor[kind], alive, w); ok {
+			if h.Armor == nil {
+				h.Armor = map[string]result.HoldStat{}
+			}
+			h.Armor[kind] = st
+			armorTotal += st.Ms
+		}
+	}
+	// "none" is the alive-time complement — the stat KTX structurally
+	// cannot produce, since its armor clocks never close on the armor
+	// being chewed to zero. Emitted whenever we know the alive window,
+	// including the all-alive-with-no-armor case (a full-match "none" is
+	// a real and interesting reading, not a missing value).
+	if w.AliveMs > 0 {
+		none := w.AliveMs - armorTotal
+		if none < 0 {
+			// Overlapping armor runs would be a stream-builder bug; clamp
+			// rather than emit a negative duration, and let the invariant
+			// test catch it.
+			none = 0
+		}
+		if h.Armor == nil {
+			h.Armor = map[string]result.HoldStat{}
+		}
+		noneRuns := complementIntervals(mergeIntervals(flattenArmor(armor)), alive)
+		h.Armor["none"] = result.HoldStat{
+			Ms:         none,
+			Runs:       len(noneRuns),
+			LongestMs:  longestMs(noneRuns),
+			ShareAlive: result.NewShare(none, w.AliveMs),
+			ShareMatch: result.NewShare(none, w.MatchMs),
+		}
+	}
+	return h
+}
+
+func flattenArmor(armor map[string][]result.Interval) []result.Interval {
+	var all []result.Interval
+	for _, iv := range armor {
+		all = append(all, iv...)
+	}
+	return all
+}
+
+// holdStat integrates one item's possession intervals against the alive
+// window. Reports ok=false when the player never held the item, so the
+// caller can omit the key rather than emit a zero row for every weapon
+// nobody touched.
+func holdStat(iv, alive []result.Interval, w result.PlayerStatsWindow) (result.HoldStat, bool) {
+	if len(iv) == 0 {
+		return result.HoldStat{}, false
+	}
+	held := clipIntervals(mergeIntervals(iv), alive)
+	if len(held) == 0 {
+		return result.HoldStat{}, false
+	}
+	ms := totalMs(held)
+	return result.HoldStat{
+		Ms:         ms,
+		Runs:       len(held),
+		LongestMs:  longestMs(held),
+		ShareAlive: result.NewShare(ms, w.AliveMs),
+		ShareMatch: result.NewShare(ms, w.MatchMs),
+	}, true
+}
+
+type armorRun struct {
+	kind string
+	iv   result.Interval
+}
+
+// armorRuns converts the ArmorType transition stream into per-type
+// possession intervals. A run ends at the next transition (of any type)
+// and the last run is closed at match end. Samples outside [0, matchEnd]
+// are clipped; the empty-string value means "no armor" and opens no run.
+func armorRuns(at []result.ChangeStr, matchMs int32) []armorRun {
+	var runs []armorRun
+	for i := range at {
+		kind := at[i].V
+		if kind == "" {
+			continue
+		}
+		start := at[i].T
+		end := matchMs
+		if i+1 < len(at) {
+			end = at[i+1].T
+		}
+		if start < 0 {
+			start = 0
+		}
+		if end > matchMs {
+			end = matchMs
+		}
+		if end <= start {
+			continue
+		}
+		runs = append(runs, armorRun{kind: kind, iv: result.Interval{Start: start, End: end}})
+	}
+	return runs
+}
+
+// presenceWindow is the span of the match this player was in it, as a
+// single interval. Presence is read off the position track — the one
+// stream sampled at native rate for as long as a player exists, and always
+// populated in memory during the pipeline run — falling back to the
+// spawn/death markers and finally to the whole match.
+//
+// It is what separates a late joiner from a player who was present and
+// dead: the alive-interval rule (see aliveIntervals) treats "no death yet"
+// as alive since match start, which is right for someone who was there and
+// wrong for someone who had not connected.
+func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
+	full := []result.Interval{{Start: 0, End: matchMs}}
+
+	first, last, ok := int32(0), int32(0), false
+	note := func(t int32) {
+		if !ok {
+			first, last, ok = t, t, true
+			return
+		}
+		if t < first {
+			first = t
+		}
+		if t > last {
+			last = t
+		}
+	}
+	if p.Position != nil && len(p.Position.T) > 0 {
+		note(p.Position.T[0])
+		note(p.Position.T[len(p.Position.T)-1])
+	}
+	if len(p.Spawns) > 0 {
+		note(p.Spawns[0])
+		note(p.Spawns[len(p.Spawns)-1])
+	}
+	if len(p.Deaths) > 0 {
+		note(p.Deaths[0])
+		note(p.Deaths[len(p.Deaths)-1])
+	}
+	if !ok {
+		return full
+	}
+	if first < 0 {
+		first = 0
+	}
+	if last > matchMs {
+		last = matchMs
+	}
+	if last <= first {
+		return nil
+	}
+	return []result.Interval{{Start: first, End: last}}
+}
+
+// aliveIntervals converts the spawn / death markers into alive intervals
+// over [0, matchMs].
+//
+// The liveness rule is the repo's canonical one, stated at
+// analyzer.losAliveAt: a player is alive from match start and stays alive
+// until a death; each death begins a dead period the next spawn ends. It
+// deliberately does NOT require a recorded match-start spawn — KTX emits a
+// player's first spawn only on their first RESPAWN, so keying off "most
+// recent spawn" would mark everyone dead until minutes into the match.
+// Keep this in sync with losAliveAt and view.playerActiveInWindow; the
+// unit tests assert this function and losAliveAt agree pointwise.
+func aliveIntervals(spawns, deaths []int32, matchMs int32) []result.Interval {
+	type ev struct {
+		t     int32
+		alive bool
+	}
+	evs := make([]ev, 0, len(spawns)+len(deaths))
+	for _, t := range spawns {
+		evs = append(evs, ev{t: t, alive: true})
+	}
+	for _, t := range deaths {
+		evs = append(evs, ev{t: t, alive: false})
+	}
+	// Stable order with deaths before spawns at an identical timestamp: a
+	// death and the respawn it triggers can share a millisecond, and the
+	// player is alive after that pair, not dead.
+	sort.SliceStable(evs, func(i, j int) bool {
+		if evs[i].t != evs[j].t {
+			return evs[i].t < evs[j].t
+		}
+		return !evs[i].alive && evs[j].alive
+	})
+
+	var out []result.Interval
+	alive := true
+	start := int32(0)
+	for _, e := range evs {
+		if e.t < 0 || e.t > matchMs {
+			continue
+		}
+		if e.alive == alive {
+			continue
+		}
+		if alive {
+			if e.t > start {
+				out = append(out, result.Interval{Start: start, End: e.t})
+			}
+		} else {
+			start = e.t
+		}
+		alive = e.alive
+	}
+	if alive && matchMs > start {
+		out = append(out, result.Interval{Start: start, End: matchMs})
+	}
+	return out
+}
+
+// mergeIntervals sorts and unions overlapping / touching intervals.
+func mergeIntervals(iv []result.Interval) []result.Interval {
+	if len(iv) < 2 {
+		return append([]result.Interval(nil), iv...)
+	}
+	cp := append([]result.Interval(nil), iv...)
+	sort.Slice(cp, func(i, j int) bool { return cp[i].Start < cp[j].Start })
+	out := cp[:1]
+	for _, v := range cp[1:] {
+		last := &out[len(out)-1]
+		if v.Start <= last.End {
+			if v.End > last.End {
+				last.End = v.End
+			}
+			continue
+		}
+		out = append(out, v)
+	}
+	return out
+}
+
+// clipIntervals intersects a (sorted, merged) interval list with a window
+// list. Both inputs are treated as half-open [Start, End).
+func clipIntervals(iv, window []result.Interval) []result.Interval {
+	if len(iv) == 0 || len(window) == 0 {
+		return nil
+	}
+	var out []result.Interval
+	for _, a := range iv {
+		for _, b := range window {
+			s, e := a.Start, a.End
+			if b.Start > s {
+				s = b.Start
+			}
+			if b.End < e {
+				e = b.End
+			}
+			if e > s {
+				out = append(out, result.Interval{Start: s, End: e})
+			}
+		}
+	}
+	return mergeIntervals(out)
+}
+
+// complementIntervals returns the parts of window not covered by iv.
+func complementIntervals(iv, window []result.Interval) []result.Interval {
+	var out []result.Interval
+	for _, w := range window {
+		cur := w.Start
+		for _, a := range iv {
+			if a.End <= cur || a.Start >= w.End {
+				continue
+			}
+			if a.Start > cur {
+				out = append(out, result.Interval{Start: cur, End: a.Start})
+			}
+			if a.End > cur {
+				cur = a.End
+			}
+		}
+		if cur < w.End {
+			out = append(out, result.Interval{Start: cur, End: w.End})
+		}
+	}
+	return out
+}
+
+func totalMs(iv []result.Interval) int32 {
+	var sum int32
+	for _, v := range iv {
+		sum += v.End - v.Start
+	}
+	return sum
+}
+
+func longestMs(iv []result.Interval) int32 {
+	var max int32
+	for _, v := range iv {
+		if d := v.End - v.Start; d > max {
+			max = d
+		}
+	}
+	return max
+}
+
+// isTeamplay reports whether this match had real teams, mirroring KTX's
+// isTeam() gate on the transfer counters. The serverinfo/countdown
+// teamplay cvar is the direct signal; the roster's duel verdict and a
+// team-membership count back it up on demos that carry neither.
+func isTeamplay(res *Result, co *CoreOutputs) bool {
+	if co.IsDuel() {
+		return false
+	}
+	if res.Metadata != nil {
+		if ms := res.Metadata.MatchSettings; ms != nil && ms.Teamplay > 0 {
+			return true
+		}
+		if tp, ok := res.Metadata.ServerInfo["teamplay"]; ok {
+			return tp != "" && tp != "0"
+		}
+	}
+	// No cvar: fall back to the roster shape — teams exist and at least
+	// one holds more than a single player (an FFA scoreboard lists each
+	// player under their own colour, which is not teamplay).
+	if res.Match == nil {
+		return false
+	}
+	counts := map[string]int{}
+	for i := range res.Match.Players {
+		if t := res.Match.Players[i].Team; t != "" {
+			counts[t]++
+		}
+	}
+	for _, n := range counts {
+		if n > 1 {
+			return true
+		}
+	}
+	return false
+}
+
+// aggregateTeamRows sums the player rows per team. Hold shares are
+// recomputed over TEAM time — summed alive time, and match window times
+// member count — never averaged from the per-player shares, which would
+// weight a player who was dead most of the match equally with one who was
+// not.
+func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.PlayerStatsRow {
+	order := []string{}
+	byTeam := map[string][]*result.PlayerStatsRow{}
+	for i := range players {
+		t := players[i].Team
+		if t == "" {
+			continue
+		}
+		if _, ok := byTeam[t]; !ok {
+			order = append(order, t)
+		}
+		byTeam[t] = append(byTeam[t], &players[i])
+	}
+	if len(order) == 0 {
+		return nil
+	}
+
+	var out []result.PlayerStatsRow
+	for _, team := range order {
+		members := byTeam[team]
+		row := result.PlayerStatsRow{
+			Name:   team,
+			Window: result.PlayerStatsWindow{MatchMs: matchMs},
+			Score:  result.PlayerStatsScore{Src: result.SrcDerived},
+			Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+		}
+		var dmg *result.PlayerStatsDamage
+		var pickups map[string]result.PlayerStatsPickup
+
+		for _, m := range members {
+			row.Window.PresentMs += m.Window.PresentMs
+			row.Window.AliveMs += m.Window.AliveMs
+			row.Window.DeadMs += m.Window.DeadMs
+			row.Score.Frags += m.Score.Frags
+			row.Score.Kills += m.Score.Kills
+			row.Score.Deaths += m.Score.Deaths
+			row.Score.Suicides += m.Score.Suicides
+			row.Score.TeamKills += m.Score.TeamKills
+
+			if m.Damage != nil {
+				if dmg == nil {
+					dmg = &result.PlayerStatsDamage{Src: result.SrcDerived}
+				}
+				dmg.Given += m.Damage.Given
+				dmg.GivenTeam += m.Damage.GivenTeam
+				dmg.GivenSelf += m.Damage.GivenSelf
+				dmg.EnemyWeapons += m.Damage.EnemyWeapons
+				dmg.Taken += m.Damage.Taken
+				dmg.TakenEnemy = addPtr(dmg.TakenEnemy, m.Damage.TakenEnemy)
+			}
+			if m.Pickups != nil {
+				if pickups == nil {
+					pickups = map[string]result.PlayerStatsPickup{}
+				}
+				for kind, e := range m.Pickups.ByKind {
+					agg := pickups[kind]
+					agg.Took += e.Took
+					agg.TotalTook += e.TotalTook
+					agg.Dropped += e.Dropped
+					agg.Xfer = addPtr(agg.Xfer, e.Xfer)
+					agg.XferSelf = addPtr(agg.XferSelf, e.XferSelf)
+					pickups[kind] = agg
+				}
+			}
+		}
+		row.Score.Efficiency = result.NewShare(int32(row.Score.Kills), int32(row.Score.Kills+row.Score.Deaths))
+		row.Damage = dmg
+		if pickups != nil {
+			row.Pickups = &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: pickups}
+		}
+		row.Hold = aggregateHold(members, row.Window.AliveMs, matchMs*int32(len(members)))
+		out = append(out, row)
+	}
+	return out
+}
+
+// aggregateHold sums each member's hold figures. TakenToDie is deliberately
+// not aggregated anywhere: it is an average, and averaging averages across
+// players with different death counts is arithmetic nobody wants.
+func aggregateHold(members []*result.PlayerStatsRow, aliveDen, matchDen int32) result.PlayerStatsHold {
+	h := result.PlayerStatsHold{Src: result.SrcDerived}
+	fold := func(dst *map[string]result.HoldStat, src map[string]result.HoldStat) {
+		for kind, st := range src {
+			if *dst == nil {
+				*dst = map[string]result.HoldStat{}
+			}
+			agg := (*dst)[kind]
+			agg.Ms += st.Ms
+			agg.Runs += st.Runs
+			if st.LongestMs > agg.LongestMs {
+				agg.LongestMs = st.LongestMs
+			}
+			(*dst)[kind] = agg
+		}
+	}
+	for _, m := range members {
+		fold(&h.Weapons, m.Hold.Weapons)
+		fold(&h.Armor, m.Hold.Armor)
+		fold(&h.Powerups, m.Hold.Powerups)
+	}
+	rescale := func(m map[string]result.HoldStat) {
+		for kind, st := range m {
+			st.ShareAlive = result.NewShare(st.Ms, aliveDen)
+			st.ShareMatch = result.NewShare(st.Ms, matchDen)
+			m[kind] = st
+		}
+	}
+	rescale(h.Weapons)
+	rescale(h.Armor)
+	rescale(h.Powerups)
+	return h
+}
+
+// addPtr sums two optional counters, preserving "absent" only when both
+// sides are absent — so a team aggregate reads as observable if any member
+// was.
+func addPtr(dst, src *int) *int {
+	if src == nil {
+		return dst
+	}
+	if dst == nil {
+		v := *src
+		return &v
+	}
+	*dst += *src
+	return dst
+}

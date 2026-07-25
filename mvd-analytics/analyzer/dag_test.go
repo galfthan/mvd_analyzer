@@ -20,7 +20,7 @@ var registrationOrder = []string{
 	"shots", "map-entities", "backpacks", "weapon-pickups",
 	// post-processors
 	"frags-final", "aim", "airgibs",
-	"match-final", "loc-graph", "region-control", "opening",
+	"match-final", "loc-graph", "region-control", "opening", "player-stats",
 }
 
 func nodeNames(specs []nodeSpec) []string {

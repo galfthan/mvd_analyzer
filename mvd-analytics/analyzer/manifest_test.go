@@ -40,6 +40,7 @@ func TestArtifactManifestServability(t *testing.T) {
 		"items": "items", "damage": "damage", "shots": "shots",
 		"map-entities": "mapEntities", "backpacks": "backpacks",
 		"weapon-pickups": "weaponPickups", "aim": "aim", "loc-graph": "locGraph",
+		"player-stats": "playerStats",
 	}
 	for name, key := range wantKey {
 		m := byName[name]

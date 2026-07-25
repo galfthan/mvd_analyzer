@@ -756,7 +756,24 @@ package result
 // reset at a handover, so `streams.players[].rl|lg|gl|ssg|sng|quad|pent|
 // ring` no longer leak a departing player's inventory into the next
 // occupant. See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 60
+//
+// v61 adds PlayerStats: the canonical per-player (and per-team) statistics
+// section, computed for EVERY demo, with per-stat-family provenance
+// ("derived" | "ktx"). Additive — no existing field changed shape.
+//   - It carries the join that consumers previously re-implemented: the
+//     corrected scoreboard, the damage reconstruction, the pickup tallies
+//     and the KTX identity fields in one row per player.
+//   - It adds POSSESSION TIME, which no prior surface had: time with each
+//     weapon, each armor type, and with NO armor, as exact integrals over
+//     the native-rate streams, with explicit denominators (match / present
+//     / alive ms). KTX never writes weapon hold time to the demoinfo block
+//     at all, and its armor hold time overcounts (the clock closes only on
+//     death or a different-type pickup, never when armor is chewed to
+//     zero) — so these figures are ours, and read lower than a KTX
+//     end-of-match table by design. See result/player_stats.go.
+//   - /demoinfo is unchanged: it stays the verbatim KTX pass-through, the
+//     audit trail this section is diffable against.
+const CurrentSchemaVersion = 61
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -784,6 +801,7 @@ type Result struct {
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`
 	Opening          *OpeningResult          `json:"opening,omitempty"`
+	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }

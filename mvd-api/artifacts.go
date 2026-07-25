@@ -87,6 +87,10 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
 	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
 	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
+	// player-stats is computed for every demo, so it never 422s. echoMs
+	// covers window.*Ms and hold.*.ms/longestMs; the shares and efficiency
+	// are unitless ratios.
+	"player-stats": {extract: func(r *result.Result) (any, error) { return r.PlayerStats, nil }, echoMs: true},
 }
 
 // handleArtifactsManifest: GET /v1/artifacts — the manifest of every DAG node

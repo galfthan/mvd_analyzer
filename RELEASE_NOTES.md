@@ -5,6 +5,43 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-25 (playerstats) — canonical `playerStats` section, schema v61
+
+Adds a per-player and per-team statistics section computed for **every**
+demo, with per-family provenance. Additive — no existing field changed
+shape — but `CurrentSchemaVersion` bumps to **v61** and the golden
+corpus was regenerated.
+
+- **New `playerStats` section / `player-stats` artifact.** One row per
+  player (and per team) carrying the corrected scoreboard, damage,
+  pickup tallies, the KTX-only identity fields, and possession time.
+  Each stat family carries `src` (`"derived"` | `"ktx"`), with a
+  `sources` roll-up — the same provenance pattern `damage.boundedSource`
+  established. The stored artifact is always fully derived; the KTX
+  overlay is applied at read time.
+- **Possession time is new information, not a re-shaping.** "Time with
+  RL", "time with RA", and "time with **no armor**" are exact integrals
+  over the native-rate possession streams, with explicit denominators
+  (`window.matchMs` / `presentMs` / `aliveMs`) instead of KTX's unstated
+  alive-time divisor. KTX never writes weapon hold time into the
+  demoinfo block at all (`ktx/src/stats_json.c` emits acc/kills/deaths/
+  pickups/damage only), so this was unavailable on demos of any age.
+- **Our armor hold time is lower than KTX's, on purpose.** KTX's armor
+  clock closes only on death or a different-type pickup, never when the
+  armor is chewed to zero, so it keeps counting after the armor is gone.
+  Measured on gameId 212423: KTX `ra` 213 s vs 129 s, 317 s vs 266 s.
+  Expect a KTX end-of-match table to disagree.
+- **Pack transfers are decomposed.** `xfer` (a teammate took your pack)
+  and `xferSelf` (you took it back) sum to KTX's `xferRL`/`xferLG`,
+  which conflates them. Derived, so they work on demos that carry the
+  `//ktx bp` / `//ktx drop` hints but no demoinfo block; absent (not
+  zero) when the hints are missing, and teamplay-only like KTX's gate.
+- **`/demoinfo` is unchanged** — still the verbatim KTX pass-through,
+  now explicitly positioned as the audit trail `playerStats` is
+  diffable against.
+- Verified end-to-end on gameId 71035 (a 2019 4on4 with no demoinfo
+  block): full scoreboard, pickups, transfers and hold times.
+
 ## 2026-07-25 (fix-roster-frags) — scoreboard by occupancy, schema v60
 
 Three pre-existing defects in the roster / frag path, found by auditing

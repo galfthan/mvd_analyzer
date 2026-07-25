@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "60"
+  version: "61"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -1205,6 +1205,7 @@ paths:
         | aim | /aim | aim | 422 aim_unavailable |
         | loc-graph | /loc-graph | locGraph | 422 locgraph_unavailable |
         | opening | — (artifact only) | opening | 422 opening_unavailable |
+        | player-stats | /player-stats | playerStats | 200 (computed for every demo) |
         | los | /los | — (serves the /los body, no envelope key) | 422 los_unavailable (map has no usable visibility BSP) |
       parameters:
         - $ref: "#/components/parameters/DemoId"
@@ -1388,6 +1389,7 @@ components:
           - aim
           - loc-graph
           - opening
+          - player-stats
           - los
           # artifact-enum:end
     MapName:
@@ -5249,6 +5251,245 @@ components:
         - players
         - firstTakes
       type: object
+    PlayerStats:
+      description: >
+        Canonical per-player and per-team statistics, computed for EVERY
+        demo. Each stat family carries `src` ("derived" | "ktx") naming
+        where its numbers came from; `sources` is the roll-up. /demoinfo
+        remains the verbatim KTX pass-through this is diffable against.
+      additionalProperties: false
+      properties:
+        players:
+          description: "One row per participant."
+          items: { $ref: "#/components/schemas/PlayerStatsRow" }
+          type: array
+        teams:
+          description: "Per-team aggregate rows; omitted on duels and FFA."
+          items: { $ref: "#/components/schemas/PlayerStatsRow" }
+          type: array
+        sources:
+          description: "Per-family provenance roll-up."
+          additionalProperties: false
+          properties:
+            score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx] }
+            damage: { description: "Provenance of the damage family.", type: string, enum: [derived, ktx] }
+            accuracy: { description: "Provenance of the accuracy family (KTX-only when present).", type: string, enum: [derived, ktx] }
+            pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx] }
+            hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx] }
+          required: [score, hold]
+          type: object
+      required:
+        - players
+        - sources
+      type: object
+    PlayerStatsRow:
+      description: >
+        One player's canonical statistics. On a team row `name` is the team
+        name and `team` / `ping` / `handicap` / `login` / `bot` are absent.
+      additionalProperties: false
+      properties:
+        name: { description: "Player name, or team name on a team row.", type: string }
+        team: { description: "Team name.", type: string }
+        ping:
+          description: "KTX-only: end-of-match ping. Absent without a demoinfo block."
+          type: [integer, "null"]
+        handicap:
+          description: "KTX-only: handicap, omitted by KTX at the default 100."
+          type: [integer, "null"]
+        login:
+          description: "KTX-only: authenticated login name."
+          type: [string, "null"]
+        bot:
+          description: "KTX-only: present when the slot was held by a frogbot."
+          oneOf:
+            - additionalProperties: false
+              properties:
+                skill: { description: "Frogbot skill level.", type: integer }
+                customised: { description: "True when the bot's settings were customised.", type: boolean }
+              required: [skill, customised]
+              type: object
+            - type: "null"
+        window: { $ref: "#/components/schemas/PlayerStatsWindow" }
+        score:
+          description: "Scoreboard line. Always derived — the KTX stats over-count telefrags and reset after a reconnect."
+          additionalProperties: false
+          properties:
+            src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+            frags: { description: "svc_updatefrags net score.", type: integer }
+            kills: { description: "Frag-log-corrected kills.", type: integer }
+            deaths: { description: "Frag-log-corrected deaths.", type: integer }
+            suicides: { description: "Frag-log-corrected suicides (KTX credits world-dealt ones to the world entity).", type: integer }
+            teamKills: { description: "Teammates this player killed.", type: integer }
+            efficiency:
+              description: "kills / (kills + deaths) as a RATIO in [0,1], not a percentage."
+              type: number
+          required: [src, frags, kills, deaths, suicides, teamKills, efficiency]
+          type: object
+        damage:
+          description: "Damage under KTX bounded-scoreboard semantics. Absent when the demo carries no damage information at all."
+          oneOf:
+            - additionalProperties: false
+              properties:
+                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                given: { description: "Dealt to enemies.", type: integer }
+                givenTeam: { description: "Dealt to teammates.", type: integer }
+                givenSelf: { description: "Dealt to self.", type: integer }
+                enemyWeapons: { description: "Enemy damage dealt to victims holding RL and/or LG (KTX ewep).", type: integer }
+                taken:
+                  description: "From ALL sources (enemy + team + self + env) — NOT the same quantity as KTX dmg.taken."
+                  type: integer
+                takenEnemy:
+                  description: "KTX-only: enemy-only damage taken (KTX dmg.taken). Absent, not zero, without a demoinfo block."
+                  type: integer
+                takenToDie:
+                  description: "KTX-only: average damage absorbed per death."
+                  type: integer
+              required: [src, given, givenTeam, givenSelf, enemyWeapons, taken]
+              type: object
+            - type: "null"
+        accuracy:
+          description: >
+            KTX-only per-weapon shot accounting; the whole family is absent on
+            demos without a demoinfo block (no derived fallback by design —
+            KTX counts pellets server-side and a wire-inferred approximation
+            under the same key would be silently incomparable).
+          oneOf:
+            - additionalProperties: false
+              properties:
+                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                byWeapon:
+                  description: "KTX acc block per weapon key (sg, ssg, ng, sng, gl, rl, lg)."
+                  additionalProperties:
+                    additionalProperties: false
+                    properties:
+                      attacks: { description: "PELLET count for sg/ssg, not trigger pulls.", type: integer }
+                      hits: { description: "Hits landed.", type: integer }
+                      real: { description: "Direct (non-splash) hits.", type: integer }
+                      virtual: { description: "Splash hits.", type: integer }
+                    required: [attacks, hits]
+                    type: object
+                  type: object
+              required: [src, byWeapon]
+              type: object
+            - type: "null"
+        pickups:
+          description: "Per-kind pickup tallies, keyed by this repo's item-kind vocabulary (ra/ya/ga/mh/quad/rl/lg/…), not KTX's demoinfo keys."
+          oneOf:
+            - additionalProperties: false
+              properties:
+                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                byKind:
+                  description: "Tally per item kind."
+                  additionalProperties: { $ref: "#/components/schemas/PlayerStatsPickup" }
+                  type: object
+              required: [src, byKind]
+              type: object
+            - type: "null"
+        hold:
+          description: "Possession time by item — the family no other source carries."
+          additionalProperties: false
+          properties:
+            src: { description: "Provenance of this family (always derived).", type: string, enum: [derived, ktx] }
+            weapons:
+              description: "Keyed rl/lg/gl/ssg/sng/ng. Shotgun and axe are deliberately absent (held all match by everyone)."
+              additionalProperties: { $ref: "#/components/schemas/HoldStat" }
+              type: object
+            armor:
+              description: "Keyed ra/ya/ga plus `none`, the alive-time complement. ga+ya+ra+none == window.aliveMs."
+              additionalProperties: { $ref: "#/components/schemas/HoldStat" }
+              type: object
+            powerups:
+              description: "Keyed quad/pent/ring."
+              additionalProperties: { $ref: "#/components/schemas/HoldStat" }
+              type: object
+          required: [src]
+          type: object
+      required:
+        - name
+        - window
+        - score
+        - hold
+      type: object
+    PlayerStatsWindow:
+      description: >
+        The denominators every rate in the row can be read against, int32 ms
+        on the game clock (pauses already excluded). Nothing here has an
+        implicit denominator.
+      additionalProperties: false
+      properties:
+        matchMs:
+          description: "The whole match window. Identical on every row."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        presentMs:
+          description: "First to last activity, clipped to the match — separates a late joiner from someone present the whole time."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        aliveMs:
+          description: "Time alive within presentMs."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        deadMs:
+          description: "presentMs - aliveMs."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+      required: [matchMs, presentMs, aliveMs, deadMs]
+      type: object
+    PlayerStatsPickup:
+      description: "One item kind's tally for one player."
+      additionalProperties: false
+      properties:
+        took:
+          description: "Acquisitions that granted the item — for weapons, pickups where the player did not already hold it (KTX wpn.tooks)."
+          type: integer
+        totalTook:
+          description: "Every touch including redundant ones (KTX wpn.ttooks). Weapons only."
+          type: integer
+        dropped:
+          description: "Backpacks left on death carrying this weapon."
+          type: integer
+        xfer:
+          description: >
+            Pack transfers credited to this player AS THE DROPPER: a pack they
+            dropped that a teammate took. ABSENT (not zero) when the demo
+            carries no backpack hints, i.e. transfers are unobservable.
+            Teamplay-only, like KTX's isTeam() gate.
+          type: integer
+        xferSelf:
+          description: >
+            Same, but the dropper took their own pack back. KTX's xferRL/xferLG
+            is xfer + xferSelf — it has no other!=dropper check.
+          type: integer
+      type: object
+    HoldStat:
+      description: "One item's possession time for one player (or team)."
+      additionalProperties: false
+      properties:
+        ms:
+          description: "Possession time: an exact integral over native-rate possession intervals, clipped to the match window and intersected with alive intervals."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        runs:
+          description: "Number of disjoint possession spells (summed over members on a team row)."
+          type: integer
+        longestMs:
+          description: "Longest single spell (MAX over members on a team row, not summed)."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        shareAlive:
+          description: "ms / window.aliveMs, a ratio in [0,1]. On a team row the denominator is the team's summed alive time."
+          type: number
+        shareMatch:
+          description: "ms / window.matchMs, a ratio in [0,1]. On a team row the denominator is matchMs x member count."
+          type: number
+      required: [ms, runs, longestMs, shareAlive, shareMatch]
+      type: object
     Events:
       type: object
       description: >
@@ -6826,5 +7067,15 @@ components:
               description: Slot-weapon pickup list (null on demos without it).
               type: [array, "null"]
               items: { $ref: "#/components/schemas/WeaponPickup" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        - type: object
+          required: [playerStats, timeUnit]
+          additionalProperties: false
+          properties:
+            playerStats:
+              description: Canonical per-player statistics section (null only on a degraded result with no streams).
+              oneOf:
+                - $ref: "#/components/schemas/PlayerStats"
+                - type: "null"
             timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - $ref: "#/components/schemas/Los"
