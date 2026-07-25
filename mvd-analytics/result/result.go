@@ -742,6 +742,7 @@ package result
 //     unknown query keys/enum values; `los_unavailable` 422 (no-BSP /los, never
 //     persisted/latched); `server_hostname` in search rows; `/artifacts`
 //     echoing `timeUnit:"ms"`.
+//
 // v60: match scoreboard built per slot occupancy (values only; no field
 // changed). `match.players` / `match.teams` are keyed on wire-slot
 // OCCUPANCIES rather than on the slot's final occupant, and participation

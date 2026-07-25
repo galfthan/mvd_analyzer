@@ -224,12 +224,12 @@ type PlayerInfo struct {
 
 // ServerData represents server initialization data
 type ServerData struct {
-	ProtocolVersion   int
-	FTEExtensions     uint32
-	FTE2Extensions    uint32
-	MVD1Extensions    uint32
-	ServerCount       int
-	GameDir           string
+	ProtocolVersion int
+	FTEExtensions   uint32
+	FTE2Extensions  uint32
+	MVD1Extensions  uint32
+	ServerCount     int
+	GameDir         string
 	// ServerTime is the id1 svc_serverdata level time in float seconds,
 	// exactly as it comes off the wire (a native float field of the
 	// protocol). It is the one deliberately-retained wire-float time; every

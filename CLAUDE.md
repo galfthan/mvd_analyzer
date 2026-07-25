@@ -88,7 +88,8 @@ belongs in the frontend.
 - **Always run tests.** `make test` (which runs
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...`)
   before every commit, no exceptions for "trivial" changes. If a test you
-  don't understand fails, surface it — don't skip it.
+  don't understand fails, surface it — don't skip it. `make test` also
+  gates on `gofmt -l` before running anything; `make fmt` fixes it.
 - Tests come in four layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),

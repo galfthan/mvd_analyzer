@@ -374,8 +374,8 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 		ssv, err := view.StreamSlice(res, view.StreamSliceOptions{
 			Start:   int32(vopts.from.Milliseconds()),
 			End:     int32(vopts.to.Milliseconds()),
-			Players:   vopts.players,
-			Fields:    vopts.fields,
+			Players: vopts.players,
+			Fields:  vopts.fields,
 		})
 		if err != nil {
 			return err

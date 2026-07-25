@@ -47,39 +47,39 @@ func Sec(ms int32) float64 { return float64(ms) * 0.001 }
 
 // Concrete event types emitted on the Source.
 type (
-	ServerDataEvent          = parser.ServerDataEvent
-	UserInfoEvent            = parser.UserInfoEvent
-	PrintEvent               = parser.PrintEvent
-	StatUpdateEvent          = parser.StatUpdateEvent
-	FragUpdateEvent          = parser.FragUpdateEvent
-	PlayerPositionEvent      = parser.PlayerPositionEvent
-	DamageEvent              = parser.DamageEvent
-	DemoInfoEvent            = parser.DemoInfoEvent
-	IntermissionEvent        = parser.IntermissionEvent
-	StuffTextEvent           = parser.StuffTextEvent
-	CenterPrintEvent         = parser.CenterPrintEvent
-	ServerInfoEvent          = parser.ServerInfoEvent
-	DeathEvent               = parser.DeathEvent
-	SpawnEvent               = parser.SpawnEvent
-	ItemSpawnEvent           = parser.ItemSpawnEvent
-	ItemStateEvent           = parser.ItemStateEvent
-	BackpackDropHintEvent    = parser.BackpackDropHintEvent
-	ItemPickupHintEvent      = parser.ItemPickupHintEvent
-	BackpackPickupHintEvent  = parser.BackpackPickupHintEvent
-	DemoMarkEvent            = parser.DemoMarkEvent
-	ItemPickupPrintEvent     = parser.ItemPickupPrintEvent
-	PlayerDepartureEvent     = parser.PlayerDepartureEvent
-	PlayerRejoinEvent        = parser.PlayerRejoinEvent
-	DemoStartTimestampEvent  = parser.DemoStartTimestampEvent
-	PausedDurationEvent      = parser.PausedDurationEvent
-	MoverSpawnEvent          = parser.MoverSpawnEvent
-	MoverStateEvent          = parser.MoverStateEvent
-	SoundEvent               = parser.SoundEvent
-	ProjectileSpawnEvent     = parser.ProjectileSpawnEvent
-	ProjectileDespawnEvent   = parser.ProjectileDespawnEvent
-	BeamEvent                = parser.BeamEvent
-	NailsFrameEvent          = parser.NailsFrameEvent
-	Nail                     = parser.Nail
+	ServerDataEvent         = parser.ServerDataEvent
+	UserInfoEvent           = parser.UserInfoEvent
+	PrintEvent              = parser.PrintEvent
+	StatUpdateEvent         = parser.StatUpdateEvent
+	FragUpdateEvent         = parser.FragUpdateEvent
+	PlayerPositionEvent     = parser.PlayerPositionEvent
+	DamageEvent             = parser.DamageEvent
+	DemoInfoEvent           = parser.DemoInfoEvent
+	IntermissionEvent       = parser.IntermissionEvent
+	StuffTextEvent          = parser.StuffTextEvent
+	CenterPrintEvent        = parser.CenterPrintEvent
+	ServerInfoEvent         = parser.ServerInfoEvent
+	DeathEvent              = parser.DeathEvent
+	SpawnEvent              = parser.SpawnEvent
+	ItemSpawnEvent          = parser.ItemSpawnEvent
+	ItemStateEvent          = parser.ItemStateEvent
+	BackpackDropHintEvent   = parser.BackpackDropHintEvent
+	ItemPickupHintEvent     = parser.ItemPickupHintEvent
+	BackpackPickupHintEvent = parser.BackpackPickupHintEvent
+	DemoMarkEvent           = parser.DemoMarkEvent
+	ItemPickupPrintEvent    = parser.ItemPickupPrintEvent
+	PlayerDepartureEvent    = parser.PlayerDepartureEvent
+	PlayerRejoinEvent       = parser.PlayerRejoinEvent
+	DemoStartTimestampEvent = parser.DemoStartTimestampEvent
+	PausedDurationEvent     = parser.PausedDurationEvent
+	MoverSpawnEvent         = parser.MoverSpawnEvent
+	MoverStateEvent         = parser.MoverStateEvent
+	SoundEvent              = parser.SoundEvent
+	ProjectileSpawnEvent    = parser.ProjectileSpawnEvent
+	ProjectileDespawnEvent  = parser.ProjectileDespawnEvent
+	BeamEvent               = parser.BeamEvent
+	NailsFrameEvent         = parser.NailsFrameEvent
+	Nail                    = parser.Nail
 )
 
 // Domain types carried by events — not MVD-specific, shared across all
