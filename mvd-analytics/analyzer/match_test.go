@@ -146,7 +146,7 @@ func TestMatchAnalyzer_DepartureFragsFromBroadcast(t *testing.T) {
 // otherwise hand each other their scores.
 //
 // SV_DropClient prints ClientDisconnect's bprint and broadcasts the empty
-// userinfo in the same server frame (mvdsv/src/sv_main.c:395-428), which is
+// userinfo in the same server frame (mvdsv/src/sv_main.c:388-428), which is
 // what makes the same-frame rule safe: both real departures in the local
 // corpus satisfy it.
 func TestMatchAnalyzer_DepartureBroadcastDoesNotBleedToAnotherOccupancy(t *testing.T) {
@@ -277,6 +277,48 @@ func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
 	}
 }
 
+// The mirror of the above, and the only shape that pins the *other* half of
+// the veto's `w.identified && rec.identified()`: the unidentified record is
+// seen FIRST, so it is the one that opened the roster row and the real
+// connection is the record being folded in. Nothing stops a ghost landing
+// on a lower slot than the connection it shadows — ghost2scores picks the
+// spare slot, not a higher one — and on a recording that began after the
+// original stint the ghost can be the earlier record outright.
+//
+// Backing out either conjunct of the veto splits rusti in two: without
+// rec.identified() the previous test fails, without w.identified this one
+// does.
+func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	a.UseCoreOutputs(&CoreOutputs{Sessions: map[int][]ResolvedSession{
+		3: {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
+		7: {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
+	}})
+
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	// The ghost first, on the lower slot, carrying a copy of the frags.
+	_ = a.OnEvent(matchUserInfo(3, 0, "# rusti", "jah", 2000))
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 16, TimeMs: 2000})
+	// Then the connection it shadows, still live at the same instant.
+	_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 3000))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 3100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 17, TimeMs: 60000})
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 {
+		t.Fatalf("match.players = %+v, want one row — the ghost is not a second human", res.Match.Players)
+	}
+	if got := res.Match.Players[0].Frags; got != 17 {
+		t.Errorf("frags = %d, want 17 — the later real occupancy owns the row, not the ghost's copy", got)
+	}
+}
+
 // The same identity key on two occupancies that do NOT overlap is one
 // human reconnecting, and stays one row carrying the later stint's score.
 func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
@@ -390,6 +432,34 @@ func TestMatchAnalyzer_SpectatorFragSentinelIgnored(t *testing.T) {
 	}
 	if len(res.Match.Players) != 0 {
 		t.Errorf("match.players = %+v, want none — a -999 sort marker is not a score and not evidence of play",
+			res.Match.Players)
+	}
+}
+
+// The same sentinel down the departure-broadcast path. That recovery
+// adopts the announced count outright, so a mod that announces a departing
+// spectator on its sort marker would write -999 into the roster row and
+// sum it into the team total — the one number in this file that no later
+// stage re-checks.
+func TestMatchAnalyzer_SpectatorFragSentinelIgnoredInDepartureBroadcast(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 26, TimeMs: 60000})
+	_ = a.OnEvent(departure("shiva", -999, 90000))
+	_ = a.OnEvent(matchVacate(7, 4948, "shiva", "|l|", 90000))
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 26 {
+		t.Errorf("match.players = %+v, want shiva on 26 — the marker must not become his final score",
 			res.Match.Players)
 	}
 }

@@ -60,11 +60,16 @@ type leaveBroadcast struct {
 // spectatorFragSentinel — pre-KTX mods publish a spectator's scoreboard
 // entry with a large negative frag count so clients sort them below every
 // player (observed as -999 five times on dag_caps_e1m2; the same demo
-// family's 4on4_l_vs_la[e1m2] happens to carry none). mvdsv relays the
-// mod's edict value verbatim to the demo (SV_UpdateClientsFrags,
-// mvdsv/src/sv_send.c:985-1006). No real player can suicide their way to
-// four figures, so a value at or below this is a marker, not a score:
-// it is neither recorded as a score nor counted as evidence of play.
+// family's 4on4_l_vs_la[e1m2] happens to carry none). No real player can
+// suicide their way to four figures, so a value at or below this is a
+// marker, not a score: it is neither recorded as a score, nor adopted from
+// a departure broadcast, nor counted as evidence of play.
+//
+// mvdsv relays the mod's edict value verbatim to the demo: the broadcast
+// path is SV_UpdateToReliableMessages (mvdsv/src/sv_send.c:965), whose
+// old_frags-changed block writes the live `ent->v->frags` at :985-1006.
+// (SV_FullClientUpdate writes the *cached* old_frags instead,
+// sv_main.c:490-492.)
 const spectatorFragSentinel = -900
 
 // UseCoreOutputs lets Match read demoinfo-resolved display names from
@@ -184,8 +189,20 @@ func (a *MatchAnalyzer) notePlay(slot int, tMs int32) {
 // that resets between games. KTX itself never emits the line then (it
 // guards on `match_in_progress == 2`, ktx/src/client.c:2841), but the
 // pre-KTX mods this recovery exists for have no such guard.
+//
+// The spectator sentinel is rejected here for the same reason onFragUpdate
+// rejects it: the line renders the edict's frag count verbatim
+// (`"%.0f"`, ktx/src/client.c:2843), so a mod that parks a spectator on
+// -999 announces exactly that — and this value is adopted as an
+// occupancy's final score without further test, then summed into the team
+// total. The sentinel is real on this demo family (five times on
+// `dag_caps_e1m2`); it just happens not to co-occur with a departure line
+// there.
 func (a *MatchAnalyzer) noteLeaveBroadcast(e *events.PlayerDepartureEvent) {
 	if a.timing.Ended || !e.FragsKnown {
+		return
+	}
+	if e.Frags <= spectatorFragSentinel {
 		return
 	}
 	a.leaves = append(a.leaves, leaveBroadcast{name: e.Name, frags: e.Frags, tMs: e.TimeMs})
@@ -313,17 +330,23 @@ func (a *MatchAnalyzer) participated(rec *occupancyRecord, sc *occupancyScore) b
 // to nothing at all once the slot has changed hands, and the caller drops
 // it. Every naming source would otherwise hand it the wrong human: the
 // identity table extends each slot's last session to +inf
-// (identity.go:233-238), so an anonymous record starting *after* a drop
+// (identity.go:239), so an anonymous record starting *after* a drop
 // resolves to the player who just left — and then wins the roster
 // tie-break below on its later startMs and replaces his recovered score
 // with 0.
 //
-// The gate is load-bearing, not defensive. Measured over the 54 local
-// demos: 15 of them deliver a frag update on a slot whose occupancy has
-// already closed, and on 1on1_]apollyon[_vs_jogi_[dm4] four anonymous
-// records (slots 3-6, opened by the spawn events the header's full-state
-// block replays at t=0) reach the roster stage as participants on 0 frags.
-// This test is the only thing keeping them off the scoreboard.
+// The gate is defence in depth, and the local corpus does not exercise it.
+// Measured over the 54 demos: 15 of them deliver a frag update on a slot
+// whose occupancy has already closed, and on 1on1_]apollyon[_vs_jogi_[dm4]
+// four anonymous records (slots 3-6, opened by the spawn events the
+// header's full-state block replays at t=0) reach the roster stage as
+// participants on 0 frags — but all four also resolve to the empty name, so
+// Finalize's `name == ""` skip drops them anyway, and deleting these three
+// lines leaves the Result byte-identical on all 54 demos. They stay because
+// the hazard above is a property of the identity table rather than of the
+// corpus: any demo whose session tail covers an anonymous post-drop record
+// turns that record into a *named* 0-frag row that outranks the real one.
+// Re-measure before removing them.
 func (a *MatchAnalyzer) resolveOccupant(rec *occupancyRecord) (name, team string) {
 	if !rec.sawInfo && !a.soleOccupancy(rec.slot) {
 		return "", ""

@@ -125,9 +125,10 @@ func (t *occupancyTracker) current(slot int) *occupancyRecord {
 // all returns every record in observation order.
 func (t *occupancyTracker) all() []*occupancyRecord { return t.records }
 
-// countForSlot returns how many occupancies the slot has had so far. Two or
-// more means the slot changed hands at least once, which is what separates
-// a handover from a slot's first-ever occupant.
+// countForSlot returns how many occupancies the slot has had so far. Its
+// one caller is MatchAnalyzer.soleOccupancy, which tests for exactly 1:
+// anything else means the slot changed hands, so slot-keyed state (the
+// caller's SlotName / ctx.Players tables) names the wrong occupant.
 func (t *occupancyTracker) countForSlot(slot int) int {
 	n := 0
 	for _, r := range t.records {
@@ -179,7 +180,7 @@ func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened *
 		// :509-511), whereas an empty userinfo with userid 0 is the
 		// per-client client-table replay described on
 		// events.UserInfoEvent.Vacated: every occupied slot emptied for one
-		// dem_single frame and immediately restated (24 times on
+		// dem_single frame and immediately restated (25 times on
 		// demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd, all eight
 		// players at once). Treating those as drops would shred every
 		// occupancy on the demo.
@@ -245,8 +246,8 @@ func (t *occupancyTracker) open(slot, uid int, p *events.PlayerInfo, tMs int32) 
 // carry-forward (a userinfo resend can omit a key), the spectator flag is
 // absolute — svc_updateuserinfo replaces the whole string, so an absent
 // *spectator key means "not a spectator" (parseUserInfoString resets it at
-// mvd-reader/parser/userinfo.go:203 and only the `*spectator` key at
-// :230-237 can set it again).
+// mvd-reader/parser/userinfo.go:204 and only the `*spectator` key at
+// :231-237 can set it again).
 func (t *occupancyTracker) note(r *occupancyRecord, p *events.PlayerInfo) {
 	if p == nil {
 		return
