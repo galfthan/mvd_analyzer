@@ -11,6 +11,42 @@ import (
 type UserInfoEvent struct {
 	Player *mvd.PlayerInfo
 	TimeMs int32
+
+	// Vacated marks the svc_updateuserinfo that announces a client slot
+	// going *empty* rather than a live userinfo change. When the server
+	// drops a client it clears the client's name and both userinfo
+	// contexts and then broadcasts a full client update
+	// (mvdsv/src/sv_main.c:419-428, SV_DropClient), so the drop reaches
+	// the demo as
+	//
+	//	svc_updatefrags   <slot> 0        (client->old_frags, just zeroed)
+	//	svc_updateuserinfo <slot> <userid> ""
+	//
+	// back to back in the same server frame (SV_FullClientUpdate,
+	// sv_main.c:487-513). An empty userinfo string is therefore the wire's
+	// own end-of-occupancy marker, and the frag reset that precedes it in
+	// the same frame is slot bookkeeping, not a score.
+	//
+	// The parser deliberately keeps the last known name/team/colors on the
+	// PlayerInfo (parseUserInfoString returns early on an empty string), so
+	// a consumer can still tell *who* left.
+	//
+	// Vacated reports the wire fact (an empty userinfo string) and nothing
+	// more; two of them are not drops and a consumer must filter both:
+	//
+	//   - the MVD header's full-state block writes one for every
+	//     unoccupied slot (sv_demo.c:1438-1467 iterates all MAX_CLIENTS
+	//     regardless of client state);
+	//   - 2002-era servers periodically re-broadcast every *occupied* slot
+	//     as `svc_updateuserinfo <slot> 0 ""` immediately followed by the
+	//     real string (seen for all eight players at t=25867 and t=87091 on
+	//     demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd).
+	//
+	// A genuine drop always carries the departing client's own userid,
+	// because SV_DropClient clears the name and userinfo but not the
+	// userid. Userid 0 on an empty userinfo therefore means "resend", the
+	// same convention the rest of the pipeline applies to userid 0.
+	Vacated bool
 }
 
 func (e *UserInfoEvent) EventType() EventType { return EventUserInfo }
@@ -54,8 +90,10 @@ func (p *Parser) parseUserInfo(r *mvd.BufferReader, timeMs int32) error {
 	player.UserID = int(userID)
 	parseUserInfoString(userinfo, player)
 
-	// Emit event
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
+	// Emit event. An empty userinfo string is the server's drop broadcast
+	// (see UserInfoEvent.Vacated); svc_setinfo can never carry it, so only
+	// this path sets the flag.
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Vacated: userinfo == ""})
 }
 
 // parseSetInfo parses svc_setinfo (single key/value update for a player).

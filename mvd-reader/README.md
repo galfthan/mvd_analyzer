@@ -64,7 +64,7 @@ The concrete event list, in stable order:
 | Type | Purpose |
 |---|---|
 | `ServerDataEvent` | Connection-time server data block |
-| `UserInfoEvent` | Player slot userinfo bind / rebind |
+| `UserInfoEvent` | Player slot userinfo bind / rebind. `Vacated` flags the empty-string form the server broadcasts when it drops a client (see [MVD_FORMAT.md](MVD_FORMAT.md), "Departure"). |
 | `PrintEvent` | Text messages (chat, obituaries, system) |
 | `StatUpdateEvent` | Per-player stat delta (health, armor, weapons, ...) |
 | `FragUpdateEvent` | Frag count changes (server-authoritative) |

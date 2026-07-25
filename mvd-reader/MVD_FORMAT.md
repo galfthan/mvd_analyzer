@@ -1042,9 +1042,111 @@ The reconnect is visible on the wire as KTX broadcast prints (`G_bprint`, `PRINT
 | Rejoin (non-team) | `client.c:1536` | `<name> rejoins the game with <N> frags` |
 | Reconnect, ghost expired | `client.c:1550/1555` | `<name> [<team>] reenters the game without stats` |
 
-The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count). To attribute correctly, track per-slot **occupancy sessions** (split on userid change), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
+The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count) — and when the player never comes back it is the **only** place the wire states their final score, because the drop that follows immediately zeroes the slot (see "Departure" below). To attribute correctly, track per-slot **occupancy sessions** (split on userid change *and* on the drop broadcast), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
 
 That restore also lands as the new slot's **first `svc_updatefrags`**, carrying the whole `N` (not a `+1`). A consumer that derives running score from per-slot frag *deltas* must **rebase** the slot's baseline to `N` on the handoff and emit no kill for it — otherwise the restore reads as a large delta, any corruption guard that rejects big jumps drops it, and (if that guard also declines to advance the baseline) every later real `+1` keeps reading as a huge delta and is dropped too, freezing the player's score at the pre-reconnect total. The timeline analyser keys this rebase off the userid change (`mvd-analytics/analyzer/timeline.go`, `fragResetPending`).
+
+### Departure: the slot is cleared, and the score with it
+
+Not every occupancy ends in a reconnect. When the server drops a client — a
+`/quit`, a kick, or a link timeout (`SV_BroadcastPrintf(PRINT_HIGH, "%s timed
+out\n", cl->name)` then `SV_DropClient`, `mvdsv/src/sv_main.c:3067`) — it
+**clears the slot's scoreboard and userinfo** and broadcasts the cleared state:
+
+```c
+drop->old_frags = 0;
+drop->edict->v->frags = 0.0;
+drop->name[0] = 0;
+Info_RemoveAll(&drop->_userinfo_ctx_);
+Info_RemoveAll(&drop->_userinfoshort_ctx_);
+SV_FullClientUpdate(drop, &sv.reliable_datagram);   // sv_main.c:419-428
+```
+
+`SV_FullClientUpdate` (`sv_main.c:487-513`) writes, in one server frame:
+
+```
+svc_updatefrags    <slot> 0                 <- the just-zeroed old_frags
+svc_updateping/pl/entertime <slot> …
+svc_updateuserinfo <slot> <userid> ""       <- empty info string
+```
+
+So the wire's own end-of-occupancy marker is **`svc_updateuserinfo` with an
+empty userinfo string carrying the client's own userid**, and the `0` in front
+of it is slot bookkeeping rather than a score. Two shapes are *not* drops and
+must be filtered:
+
+- the MVD header's full-state block writes one for every **unoccupied** slot
+  (`sv_demo.c:1438-1467` iterates all `MAX_CLIENTS` regardless of client
+  state);
+- 2002-era servers periodically re-broadcast every **occupied** slot as
+  `svc_updateuserinfo <slot> 0 ""` immediately followed by the real string
+  (all eight players at once at t=25867 and t=87091 on
+  `demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd`).
+
+A userid is per-connection (`SV_GenerateUserID`, `sv_main.c:540`) and
+`SV_DropClient` does not clear it, so **userid 0 on an empty userinfo means
+"resend"** — the same convention that applies to userid 0 everywhere else.
+The parser surfaces the raw fact as `UserInfoEvent.Vacated`; the filtering is
+the analytics layer's job (`mvd-analytics/analyzer/occupancy.go`).
+
+Two consequences for a consumer:
+
+1. **Freeze the departing occupancy's score before the reset.** Prefer the
+   mod's `left the game with N frags` broadcast (`ktx/src/client.c:2843`,
+   emitted only while `match_in_progress == 2`); otherwise roll back the frag
+   update that shares the drop's timestamp. Never take the occupancy's
+   *maximum* — a frag is legitimately lost to a suicide, and on
+   `4on4_l_vs_la[e1m2]` `white` peaks at 38 and correctly finishes on 37.
+2. **Do not carry per-slot state into the next occupant.** Item/armor/powerup
+   possession is derived from `STAT_ITEMS` bit flips, so a departing player's
+   open intervals stay open on the slot; the next connection inherits a full
+   stale inventory from the instant its userinfo lands.
+
+### Connections that never enter the game
+
+A slot allocation is not a participation signal. KTX refuses a connection
+while a match is locked and drops it again, but the handshake still allocates
+a client slot and emits `svc_updateuserinfo` for it — with `*spectator` unset,
+because the refusal happens before any spectator key is written. The refusal
+itself is a targeted print, e.g. on `4on4_l_vs_la[e1m2]`:
+
+```
+1114326  tgt=7  "Match in progress, server locked."
+                "Set your team before connecting"
+                "or reconnect as spectator."
+```
+
+Matching that text is mod-specific and fragile. The robust test is
+**evidence of play**: a client that entered the game world produces
+`svc_playerinfo` position samples and health transitions (hence spawns and
+deaths); one that was refused, or that is spectating, produces none. Two
+refused connections on that demo took the slots freed by the two players who
+timed out, and inherited both their scoreboard rows and their item state.
+
+Related spectator markers on the wire:
+
+- **`-999` frags.** Pre-KTX mods (kmod / qwe) publish a spectator's scoreboard
+  entry with a large negative frag count so clients sort them below every
+  player; mvdsv relays the mod's edict value verbatim
+  (`SV_FullClientUpdate`, `sv_main.c:487-489`), so it reaches the demo as a
+  plain `svc_updatefrags`. Seen on `dag_caps_e1m2` and `4on4_l_vs_la[e1m2]`.
+  It is a marker, not a score.
+- **A post-match spectator transition resets the slot's frags.** A player who
+  subs out or goes spec after the match produces a `*spectator\1` userinfo
+  *and* a `svc_updatefrags <slot> 0`, both after the match ended (hub 212535:
+  `wd.dilbert` at t=613971, 13.9 s past match end). Reading participation or
+  score from end-of-demo state loses the whole row.
+
+### An independent oracle: the serverinfo `score` key
+
+Pre-KTX mods mirror the live team scores into the serverinfo `score` key as
+`[<teamA>]N:[<teamB>]M` (team names carry raw colour bytes), which mvdsv
+relays as `svc_serverinfo` updates, so the demo's last value is the final
+team score straight from the server. `4on4_l_vs_la[e1m2]` ends on
+`score=[.la.]230:[ |l|]104`. Modern KTX demos carry the equivalent in the
+demoinfo block's per-player `stats.frags`. Either is a free cross-check on a
+reconstructed scoreboard, and both are asserted in
+`mvd-analytics/corpus/corpus_test.go`.
 
 ---
 
