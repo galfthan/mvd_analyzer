@@ -175,6 +175,23 @@ func (co *CoreOutputs) SlotName(slot int) string {
 	return co.Slots[slot].Name
 }
 
+// SlotSessionAt returns the session covering slot at the given time and
+// whether one was found. It is SlotIdentityAt without the fallback, for
+// callers that need the session's IdentityKey (and so must be able to tell
+// "no session table" from "resolved").
+func (co *CoreOutputs) SlotSessionAt(slot int, tMs int32) (ResolvedSession, bool) {
+	if co == nil {
+		return ResolvedSession{}, false
+	}
+	for i := range co.Sessions[slot] {
+		s := co.Sessions[slot][i]
+		if tMs >= s.StartMs && tMs < s.EndMs {
+			return s, true
+		}
+	}
+	return ResolvedSession{}, false
+}
+
 // SlotIdentityAt returns the canonical identity that owned slot at the
 // given time (integer ms). It consults the per-slot session table so
 // events that happened before a reconnect/slot-reuse resolve to the
