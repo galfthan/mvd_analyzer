@@ -89,7 +89,7 @@ belongs in the frontend.
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...`)
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it.
-- Tests come in three layers:
+- Tests come in four layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),
      `mvd-analytics/analyzer/` (backpacks, duel normalisation, items,
@@ -106,8 +106,13 @@ belongs in the frontend.
   3. **Special-cases invariants** in `mvd-analytics/corpus/` — walks
      `demo-test-data/mvd/special-cases/` (per-machine, no-op when
      absent) and asserts roster/frag oracles: team totals vs the
-     serverinfo `score` key and the KTX demoinfo scoreboard, one stream
-     per roster row, item intervals only where the wire saw play.
+     serverinfo `score` key and the KTX demoinfo scoreboard, roster
+     and streams naming the same people, item intervals only where the
+     wire saw play. **Must run with `-count=1`** — `go test` caches the
+     skip and a directory listing is not a cache input, so once this
+     package has skipped on a machine it reports `ok (cached)` forever,
+     including after the demos are put in place. `make test` passes the
+     flag for this package.
   4. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
      `TestDiagnosticParseDemos` runs every `.mvd` / `.mvd.gz` dropped
      into its `testdata/` through the parser in warning-collecting

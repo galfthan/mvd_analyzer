@@ -114,6 +114,13 @@ serve: build
 # Run tests across every workspace module.
 test:
 	go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
+# The special-cases harness walks a per-machine demo directory and skips
+# when it is absent. `go test` caches that skip and does NOT invalidate it
+# when the demos later appear (a directory listing is not a cache input), so
+# the invariants would silently never run again on a machine that was once
+# without demos. -count=1 is the only reliable fix; it costs nothing when
+# the directory really is absent.
+	go test -count=1 ./mvd-analytics/corpus/
 
 # Remove dist/.
 clean:

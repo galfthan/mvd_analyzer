@@ -14,6 +14,25 @@
 // The directory is provided per-machine and is not part of the repo, so
 // the whole test skips when it is absent (CI and other machines stay
 // green). Mirrors the shape of mvd-analytics/diagnostic/.
+//
+// # Run it with -count=1
+//
+// `go test` caches the skip, and a directory listing is not one of the
+// inputs it tracks: once this package has skipped on a machine, it reports
+// `ok (cached)` forever — including after the demos are put in place, so
+// the invariants below silently never run again. `make test` therefore
+// passes -count=1 for this package. Verified: with a clean test cache, a
+// skipping run followed by creating the directory still yields `(cached)`.
+//
+// # What is actually an oracle here
+//
+// checkServerinfoScore (the mods' own `score` serverinfo key) and
+// checkDemoInfoScoreboard (KTX's end-of-match block) are external. The
+// others are self-consistency: they catch a value that disagrees with
+// itself, not a value that is uniformly wrong. And checkDemoInfoScoreboard
+// is tautological on the frag numbers for duels — see its doc comment — so
+// of the seven demos carrying a demoinfo block only the four non-duels are
+// independent frag oracles.
 package corpus
 
 import (
@@ -28,15 +47,44 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// specialCasesGlob is the per-machine demo drop the invariants run over.
-const specialCasesGlob = "../../demo-test-data/mvd/special-cases/*.mvd"
+// specialCasesDir is the per-machine demo drop the invariants run over.
+// Both the plain and the gzipped extension are picked up; the directory
+// also holds `*.mvd.ktxstats.json` sidecars, which are not demos.
+const specialCasesDir = "../../demo-test-data/mvd/special-cases"
+
+func specialCaseDemos() []string {
+	var out []string
+	for _, pat := range []string{"*.mvd", "*.mvd.gz"} {
+		m, _ := filepath.Glob(filepath.Join(specialCasesDir, pat))
+		out = append(out, m...)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// demosWithoutStreams are the local demos that produce a scoreboard but no
+// player streams at all (result.Streams nil, i.e. every merged stream
+// builder came out empty — timeline_streams.go:619-622). Both predate this
+// harness; the entries exist so the nil is an *expected* value for these
+// two files and a hard failure for any other, rather than something every
+// stream check silently returns on.
+//
+// This is a real known gap: a scoreboard row with no stream means we scored
+// a player we have no state record for. It is not analysed here.
+var demosWithoutStreams = map[string]string{
+	"1on1_]apollyon[_vs_jogi_[dm4].mvd": "2003 duel, match window 10022-610132 detected and 58 frag events " +
+		"recorded, but no identity resolves to a non-empty stream",
+	"race_us3[dungeonsurf_r02].mvd": "race mode: no match window and no per-player state at all",
+}
 
 func TestSpecialCasesInvariants(t *testing.T) {
-	demos, _ := filepath.Glob(specialCasesGlob)
+	demos := specialCaseDemos()
 	if len(demos) == 0 {
-		t.Skip("no demos in demo-test-data/mvd/special-cases/ — provide the directory to run these invariants")
+		t.Skip("no demos in " + specialCasesDir + " — provide the directory to run these invariants")
 	}
-	sort.Strings(demos)
+	// Logged so a run that silently covered nothing is visible in -v output.
+	// See the note in this package's doc comment on `go test` caching.
+	t.Logf("running invariants over %d demos in %s", len(demos), specialCasesDir)
 
 	for _, demo := range demos {
 		t.Run(filepath.Base(demo), func(t *testing.T) {
@@ -45,11 +93,27 @@ func TestSpecialCasesInvariants(t *testing.T) {
 			if err != nil {
 				t.Fatalf("analysis failed: %v", err)
 			}
+			// Every check below returns early on a nil section, so a
+			// regression that stops populating one would turn the whole
+			// harness green. Assert the sections exist first.
+			if res.Match == nil {
+				t.Fatal("result.Match is nil — the scoreboard was not produced at all")
+			}
+			if res.Streams == nil {
+				why, known := demosWithoutStreams[filepath.Base(demo)]
+				if !known {
+					t.Fatal("result.Streams is nil — no player streams were produced at all")
+				}
+				t.Skipf("no player streams on this demo (pre-existing, pinned here): %s", why)
+			}
+			if res.Metadata == nil {
+				t.Fatal("result.Metadata is nil — serverinfo is unavailable, so one oracle silently drops out")
+			}
 			checkRosterUnique(t, res)
 			checkTeamTotals(t, res)
 			checkServerinfoScore(t, res)
 			checkDemoInfoScoreboard(t, res)
-			checkRosterHasStream(t, res)
+			checkRosterMatchesStreams(t, res)
 			checkIntervalsHaveEvidence(t, res)
 			checkIntervalsInMatchWindow(t, res)
 		})
@@ -60,9 +124,6 @@ func TestSpecialCasesInvariants(t *testing.T) {
 // slot's occupancies were not folded back into one identity.
 func checkRosterUnique(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Match == nil {
-		return
-	}
 	seen := map[string]bool{}
 	for _, p := range res.Match.Players {
 		if p.Name == "" {
@@ -80,9 +141,6 @@ func checkRosterUnique(t *testing.T, res *result.Result) {
 // is dropped from one aggregation and not the other.
 func checkTeamTotals(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Match == nil {
-		return
-	}
 	sum := map[string]int{}
 	for _, p := range res.Match.Players {
 		if p.Team != "" {
@@ -110,9 +168,6 @@ func checkTeamTotals(t *testing.T, res *result.Result) {
 // so the comparison is on the multiset of numbers.
 func checkServerinfoScore(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Match == nil || res.Metadata == nil {
-		return
-	}
 	want, ok := parseServerinfoScore(res.Metadata.ServerInfo["score"])
 	if !ok {
 		return
@@ -131,26 +186,32 @@ func checkServerinfoScore(t *testing.T, res *result.Result) {
 // parseServerinfoScore pulls the frag numbers out of a `score` value like
 // `[\x0f\xec\xe1\x0f]230:[ \xfcl\xfc]104`. Returns false when the key is
 // absent, empty, or carries fewer than two numbers (a warmup value).
+//
+// Only a digit run *immediately following* a `]` counts. Harvesting every
+// digit run instead would pull digits out of the team names themselves —
+// `sf2`, `l33t`, `4on4` are ordinary QW clan tags — and inject phantom
+// numbers into the multiset, failing the comparison on a demo where nothing
+// is wrong. Team names may contain brackets of their own; a run that
+// follows one of those is not all-digits, so it is skipped anyway.
 func parseServerinfoScore(v string) ([]int, bool) {
-	if v == "" {
-		return nil, false
-	}
 	var out []int
-	for i := 0; i < len(v); {
-		if v[i] < '0' || v[i] > '9' {
-			i++
+	for i := 0; i+1 < len(v); i++ {
+		if v[i] != ']' {
 			continue
 		}
-		j := i
+		j := i + 1
 		for j < len(v) && v[j] >= '0' && v[j] <= '9' {
 			j++
 		}
-		n, err := strconv.Atoi(v[i:j])
+		if j == i+1 {
+			continue
+		}
+		n, err := strconv.Atoi(v[i+1 : j])
 		if err != nil {
 			return nil, false
 		}
 		out = append(out, n)
-		i = j
+		i = j - 1
 	}
 	if len(out) < 2 {
 		return nil, false
@@ -158,14 +219,48 @@ func parseServerinfoScore(v string) ([]int, bool) {
 	return out, true
 }
 
+func TestParseServerinfoScore(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want []int
+		ok   bool
+	}{
+		// The real value off 4on4_l_vs_la[e1m2], colour bytes and all.
+		{"l_vs_la", "[\x0f\xec\xe1\x0f]230:[ \xfcl\xfc]104", []int{230, 104}, true},
+		{"plain", "[la]230:[l]104", []int{230, 104}, true},
+		// Digits inside a team name are ordinary QW clan tags and must not
+		// be harvested — this is a false FAILURE, not a missed one.
+		{"digits in team name", "[sf2]12:[l33t]7", []int{12, 7}, true},
+		{"team name with brackets", "[]a[]230:[b]104", []int{230, 104}, true},
+		{"absent", "", nil, false},
+		{"warmup single value", "[la]0", nil, false},
+		{"no brackets", "230:104", nil, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := parseServerinfoScore(tc.in)
+			if ok != tc.ok || fmt.Sprint(got) != fmt.Sprint(tc.want) {
+				t.Errorf("parseServerinfoScore(%q) = %v,%v want %v,%v", tc.in, got, ok, tc.want, tc.ok)
+			}
+		})
+	}
+}
+
 // checkDemoInfoScoreboard — where KTX wrote a demoinfo block, its
 // end-of-match scoreboard is authoritative: every player it lists must
 // appear in our roster with the same frag count, and every roster row must
 // join it. A row KTX has no entry for is a phantom; a missing row is a
 // participant we dropped; a frag mismatch is an attribution bug.
+//
+// Caveat on duels: rebuildDuelMatch copies frags straight out of demoinfo,
+// so on a 1v1 with a demoinfo block this check compares demoinfo with
+// itself and can only fail on the roster membership, not on the numbers.
+// Of the demos carrying a demoinfo block, only the non-duel ones are
+// independent frag oracles.
 func checkDemoInfoScoreboard(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Match == nil || res.DemoInfo == nil || len(res.DemoInfo.Players) == 0 {
+	if res.DemoInfo == nil || len(res.DemoInfo.Players) == 0 {
 		return
 	}
 	ours := map[string]int{}
@@ -196,22 +291,29 @@ func checkDemoInfoScoreboard(t *testing.T, res *result.Result) {
 	}
 }
 
-// checkRosterHasStream — a scoreboard row must have a matching player
-// stream. The two are built from different evidence (svc_updatefrags plus
-// occupancy on one side, entity state on the other), so a row with no
-// stream is a player we scored but never saw play.
-func checkRosterHasStream(t *testing.T, res *result.Result) {
+// checkRosterMatchesStreams — the scoreboard and the player streams must
+// name the same set of people. The two are built from different evidence
+// (svc_updatefrags plus occupancy on one side, entity state on the other),
+// so a row with no stream is a player we scored but never saw play, and a
+// stream with no row is a player we watched play and then dropped from the
+// scoreboard. The second direction is the only oracle at all on the six
+// local demos that carry no demoinfo block.
+func checkRosterMatchesStreams(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Match == nil || res.Streams == nil {
-		return
-	}
-	have := map[string]bool{}
+	streamed := map[string]bool{}
 	for _, ps := range res.Streams.Players {
-		have[stripSlotSuffix(ps.Name)] = true
+		streamed[stripSlotSuffix(ps.Name)] = true
 	}
+	scored := map[string]bool{}
 	for _, p := range res.Match.Players {
-		if !have[p.Name] {
+		scored[p.Name] = true
+		if !streamed[p.Name] {
 			t.Errorf("match.players lists %q but streams.players has no such player", p.Name)
+		}
+	}
+	for name := range streamed {
+		if !scored[name] {
+			t.Errorf("streams.players carries %q but match.players has no such row", name)
 		}
 	}
 }
@@ -224,9 +326,6 @@ func checkRosterHasStream(t *testing.T, res *result.Result) {
 // per-slot item bits leaked across an occupancy handover.
 func checkIntervalsHaveEvidence(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Streams == nil {
-		return
-	}
 	for _, ps := range res.Streams.Players {
 		n := 0
 		for _, iv := range intervalSets(&ps) {
@@ -249,9 +348,6 @@ func checkIntervalsHaveEvidence(t *testing.T, res *result.Result) {
 // and attributed to whoever the slot resolved to.
 func checkIntervalsInMatchWindow(t *testing.T, res *result.Result) {
 	t.Helper()
-	if res.Streams == nil {
-		return
-	}
 	lo, hi := res.Streams.Global.MatchStart, res.Streams.Global.MatchEnd
 	if hi <= lo {
 		return
