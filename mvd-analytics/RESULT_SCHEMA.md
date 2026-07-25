@@ -74,9 +74,12 @@ normalisation `startTime` was always 0 and `endTime` always equalled
 `Frags`/`Kills`/`Deaths` are the **corrected scoreboard** — net frags from
 the scoreboard stream, kills/deaths from the frag log, both independent of
 the sometimes-wrong KTX demoinfo (which over-counts pentagram-deflect
-telefrags and resets after a reconnect). For per-weapon kills, accuracy, or
-damage read `Frags.ByPlayer` (parser-derived) or `DemoInfo.Players[].Stats`
-(KTX-authoritative, verbatim).
+telefrags and resets after a reconnect). For per-weapon kills, accuracy or
+damage the canonical answer is `playerStats` (`score.byWeapon`,
+`accuracy.byWeapon`, `damage.byWeapon`), which merges both sources and
+stamps `src` per family. `Frags.ByPlayer` (parser-derived) and
+`DemoInfo.Players[]` (KTX, verbatim) remain available for a consumer that
+wants one side unmerged.
 
 ### TeamStat
 
@@ -2112,7 +2115,7 @@ Pick the shape that matches your consumer:
 | Per-player deaths | `timelineAnalysis.deathEvents` | `frags.byPlayer[].deaths` | …you need per-death timing (not just totals); counts every death, no teamkill-victim drops. |
 | Per-player kills | `timelineAnalysis.killEvents` | `frags.byPlayer[].kills` | …you need per-kill timing keyed on the killer (enemy kills only); cumulative count reconciles with `byPlayer.kills`. |
 | Per-player stats | `match.players[]` | `demoInfo.players[]` | …you only need name/team/frags. |
-| Per-player stats | `demoInfo.players[]` | `match.players[]` | …you need accuracy / damage / pickups (KTX demos only). |
+| Per-player stats | `playerStats.players[]` | `match.players[]` | …you need accuracy / damage / pickups / possession time. Computed for EVERY demo — families degrade to `src: "derived"` rather than disappearing on a demo with no KTX block. `demoInfo.players[]` stays the verbatim KTX pass-through to diff against. |
 | Match length | `match.duration` | `demoInfo.duration` | …you want the parser-derived float. |
 | Match length | `demoInfo.duration` | `match.duration` | …you want the KTX integer. |
 | Loc names | `timelineAnalysis.locTable` | `locationData[].name` | …you need integer indexing from `Li`. |

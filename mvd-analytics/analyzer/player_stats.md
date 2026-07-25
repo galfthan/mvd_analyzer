@@ -1,9 +1,11 @@
 # player-stats post-processor
 
 **Phase:** Post-processor (non-event)
-**Inputs (artifacts):** `clock`, `roster`, `timeline` (for `Streams`),
-            `match:final`, `frags:final`, `damage`, `items`,
-            `weapon-pickups`, `backpacks`, `metadata`
+**Inputs (artifacts):** `clock`, `identity`, `roster`, `timeline` (for
+            `Streams`), `match:final`, `frags:final`, `damage`, `shots`,
+            `items`, `weapon-pickups`, `backpacks`, `metadata`
+            — `identity` supplies the `*auth` login, `shots` the fire
+            stream the derived accuracy is reconstructed from
 **Writes to Result:** `result.PlayerStats` (`*PlayerStatsResult`),
             schema v60
 

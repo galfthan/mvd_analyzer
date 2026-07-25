@@ -215,9 +215,13 @@ whole-Result rebase or duel rewrite.
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
 `scoreboardStatsPost`, `locGraphPost`, `regionControlPost`,
-`openingPost`, [`playerStatsPost`](analyzer/player_stats.md). Two publish a
-**named final artifact** rather than anonymously patching an earlier
-node's output: `recoverTelefragTeamkills` is node `frags-final`, which
+`openingPost`, [`playerStatsPost`](analyzer/player_stats.md). They come in
+three shapes. **One creates a section of its own**: `playerStatsPost` is
+node `player-stats`, publishing `playerStats` — it consumes twelve
+artifacts and writes a top-level section no other node touches, so it
+carries no `mutates` flag. **Two publish a named final artifact** rather
+than anonymously patching an earlier node's output:
+`recoverTelefragTeamkills` is node `frags-final`, which
 appends recovered telefrag team-kills to the raw `frag` log and publishes
 `frags:final`; `scoreboardStatsPost` is node `match-final`, which folds the
 corrected kills/deaths/suicides into `match` and publishes `match:final`.

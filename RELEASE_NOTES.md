@@ -5,6 +5,39 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-25 (playerstats) — the API cache stopped eating measured zeros
+
+No schema bump; the tier-2 cache-format counter goes to `f3`, so cached
+Results are re-parsed once on next touch.
+
+- **`GET /v1/demos/{id}/*` served different bytes depending on cache
+  warmth.** The tier-2 cache was a bare gob, and `encoding/gob` flattens
+  pointers and omits zero values — so a `*int` holding a **measured
+  zero** decoded as `nil`. Since every optional field in this schema
+  means "absent = not measurable", a cache hit answered a different
+  question than a cold parse: `damage.taken: 0` ("took no damage") came
+  back absent ("we could not tell"), and so did
+  `accuracy.byWeapon[].hits: 0` ("fired, never hit"),
+  `pickups.byKind[].xferSelf: 0`, `damage.events[].bounded: 0` and
+  `demoInfo.players[].control: 0`.
+- **Pre-existing, and widened by the playerStats work.**
+  `damage.events[].bounded` — whose own comment says "0 is a real value"
+  — has had this flaw for as long as the gob cache has existed; the
+  golden corpus (cold, JSON) carries 25 such events on one 4on4 that the
+  live API returned none of. The pointer-heavy playerStats section took
+  the exposure from 3 fields to 14, which is how it was noticed.
+- **Tier 2 is now JSON by default, gob only for `Streams`.** JSON
+  distinguishes `0` from absent and is the representation the golden
+  corpus and OpenAPI spec already pin; `Streams` is 97% of the payload
+  and decodes 40x slower as JSON, so it keeps gob. The failure mode is
+  now the safe one — an optional field added anywhere outside `Streams`
+  is correct by default, and `TestStreamsHasNoOptionalScalars` guards
+  the one section that carries the constraint. Cost: +2.6% on disk,
+  ~48 ms per tier-2 read.
+- `TestCacheRoundTripPreservesServedBytes` pins the real invariant on the
+  whole golden corpus: a cache hit must serve the same bytes as a cold
+  parse.
+
 ## 2026-07-25 (playerstats) — the web summary tab moves onto `playerStats`
 
 Still schema **v61** (additive within the same unmerged branch); golden

@@ -378,6 +378,24 @@ once on next touch. Served bodies are byte-identical (mvd-api enriched `/shots`
 and `/aim` on every request since phase 5.3), so this is a cache-locality bump,
 not a schema bump: the ETag stays `"<sha>-v<n>"`.
 
+`f3` changed the tier-2 **encoding**, and unlike `f2` it does move served
+bytes. The tier was a bare gob, and `encoding/gob` flattens pointers and
+omits zero values — so a `*int` holding a MEASURED ZERO decoded as `nil`.
+Every optional field in the schema means "absent = not measurable", so a
+cache hit silently answered a different question than a cold parse:
+`damage.taken: 0` ("took no damage") came back absent ("could not tell"),
+as did `accuracy.byWeapon[].hits: 0`, `pickups.xferSelf: 0`,
+`damage.events[].bounded: 0` and `demoInfo.players[].control: 0`. The
+same demo therefore served different bytes depending on cache warmth.
+
+Tier 2 is now `result.EncodeCache`: JSON for every section — which
+distinguishes `0` from absent and is the representation the golden corpus
+and OpenAPI spec already pin — plus gob for `Streams` alone, which is 97%
+of the payload (50.5 MB of 52.3 MB on a 4on4) and which JSON decodes 40x
+slower. Cost against the old bare gob: +2.6% on disk and ~48 ms per
+tier-2 read. Format-2 files cannot be repaired (the information is gone),
+so the bump re-parses them once on next touch.
+
 Tier 3 holds the lazily-materialised `los` artifact (per-player LOS/PVS) as a
 side-gob so its multi-second raycast survives a process restart or an LRU
 eviction: after the base `Result` is served from tier 2, `/los` splices the

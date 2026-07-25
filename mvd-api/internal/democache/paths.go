@@ -57,9 +57,20 @@ func mvdPath(root, sha string) string {
 // are byte-identical (mvd-api has served the enriched /shots and /aim on every
 // request since phase 5.3), so this is a cache-locality bump, not a schema one.
 //
+// Format 3 replaced the bare gob with result.EncodeCache — gob plus a JSON
+// patch of the sections carrying optional scalars. A bare gob drops any
+// pointer to a zero value (it flattens pointers and omits zero values), so
+// every format-2 gob on disk has already lost the difference between "we
+// measured zero" and "we could not measure it" for fields like
+// damage.taken, accuracy.byWeapon[].hits and pickups.xferSelf. Those files
+// cannot be repaired — the information is gone — so the bump moves the
+// tree (`results/v<N>f3/…`) and they are re-parsed on next touch. Unlike
+// the f1→f2 bump this one DOES change served bodies, which is the point.
+//
 // Bump this whenever the cached Result's populated-ness changes under a fixed
-// schema version (the "which optional passes are baked in" contract).
-const resultCacheFormat = 2
+// schema version (the "which optional passes are baked in" contract), or when
+// the tier-2 encoding itself changes.
+const resultCacheFormat = 3
 
 // resultsVersionName is the directory name of the tier-2 tree for a schema
 // version + the current cache-format generation — the single source of truth

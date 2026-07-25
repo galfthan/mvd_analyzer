@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/sha256"
-	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -179,24 +178,31 @@ func (id DemoID) String() string {
 	}
 }
 
-// encodeResult / decodeResult round-trip a *Result through gob. Used
-// for tier-2 disk storage. Gob is the right choice over JSON here:
-// faster, smaller on disk, and lossless for the numeric types in
-// Streams (which JSON would coerce to float64).
+// encodeResult / decodeResult round-trip a *Result for tier-2 disk
+// storage, via result.EncodeCache / result.DecodeCache.
+//
+// That codec is gob for the bulk plus a JSON patch of the few sections
+// carrying optional scalars. Plain gob is NOT lossless here, contrary to
+// what this comment used to claim: it flattens pointers and omits zero
+// values, so a *int holding a MEASURED ZERO decodes as nil — turning
+// "they took no damage" into "we could not measure it" on every cache
+// hit, while a cold parse answered correctly. See result/cache.go for
+// the full rationale; the encoding lives there because the section list
+// is a property of the schema, not of this cache.
 func encodeResult(r *result.Result) ([]byte, error) {
-	var buf bytes.Buffer
-	if err := gob.NewEncoder(&buf).Encode(r); err != nil {
-		return nil, fmt.Errorf("gob encode: %w", err)
+	b, err := result.EncodeCache(r)
+	if err != nil {
+		return nil, fmt.Errorf("encode result: %w", err)
 	}
-	return buf.Bytes(), nil
+	return b, nil
 }
 
 func decodeResult(data []byte) (*result.Result, error) {
-	var r result.Result
-	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&r); err != nil {
-		return nil, fmt.Errorf("gob decode: %w", err)
+	r, err := result.DecodeCache(data)
+	if err != nil {
+		return nil, fmt.Errorf("decode result: %w", err)
 	}
-	return &r, nil
+	return r, nil
 }
 
 // writeFileAtomic writes data to path via a temp file in the same
