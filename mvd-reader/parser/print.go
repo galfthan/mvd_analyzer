@@ -60,6 +60,9 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, timeMs int32, targetPlayerNum i
 	if err := p.tryEmitObituaryDeath(cleanedMessage, timeMs); err != nil {
 		return err
 	}
+	if err := p.tryEmitRosterPrint(int(level), cleanedMessage, timeMs); err != nil {
+		return err
+	}
 	return p.tryEmitPickupPrint(int(level), cleanedMessage, targetPlayerNum, timeMs)
 }
 
