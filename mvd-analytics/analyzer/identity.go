@@ -39,26 +39,14 @@ import (
 type IdentityAnalyzer struct {
 	ctx *Context
 
-	// open is the currently-open session per slot (nil = unoccupied).
-	open map[int]*rawSession
-	// sessions is every closed-or-open session, in observation order.
-	sessions []*rawSession
+	// occ is the shared wire-slot occupancy tracker (occupancy.go). One
+	// occupancy == one session here.
+	occ *occupancyTracker
 	// reconnectPrints are the verbatim rejoin/reenter broadcast lines;
 	// resolved to netnames in PopulateCore once every session netname is
 	// known (the userinfo precedes the bprint, but deferring keeps the
 	// prefix match robust against names that contain the marker words).
 	reconnectPrints []string
-}
-
-// rawSession is the mutable per-occupancy record built during OnEvent.
-type rawSession struct {
-	slot    int
-	userid  int
-	name    string // latest non-empty netname seen this occupancy
-	team    string // latest non-empty team
-	auth    string // latest non-empty *auth login
-	startMs int32
-	endMs   int32 // set when the session closes; math.MaxInt32 while open
 }
 
 // KTX reconnect broadcast markers (post Q-normalisation to ASCII; the
@@ -72,7 +60,7 @@ var reconnectMarkers = []string{
 }
 
 func NewIdentityAnalyzer() *IdentityAnalyzer {
-	return &IdentityAnalyzer{open: make(map[int]*rawSession)}
+	return &IdentityAnalyzer{occ: newOccupancyTracker()}
 }
 
 func (a *IdentityAnalyzer) Name() string { return "identity" }
@@ -97,63 +85,15 @@ func (a *IdentityAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-// onUserInfo opens / continues / rotates the session for a slot. It must
-// copy the scalar fields off e.Player rather than retain the pointer:
-// parseUserInfo mutates the same *PlayerInfo in place on the next
-// occupancy (mvd-reader/parser/userinfo.go:47-54), so a retained pointer
-// would later read the *next* player's identity.
+// onUserInfo opens / continues / rotates the session for a slot via the
+// shared occupancy tracker (occupancy.go), which splits an occupancy both
+// on a userid change and on the server's drop broadcast
+// (events.UserInfoEvent.Vacated) — so a player who times out stops owning
+// the slot at the moment they left rather than at whatever lands on it
+// next. The window between a drop and the next connection belongs to
+// nobody, which is correct: an empty slot produces no events.
 func (a *IdentityAnalyzer) onUserInfo(e *events.UserInfoEvent) {
-	if e.Player == nil {
-		return
-	}
-	slot := e.Player.Slot
-	if slot < 0 || slot >= events.MaxClients {
-		return
-	}
-	uid := e.Player.UserID
-	tMs := e.TimeMs
-
-	cur := a.open[slot]
-	if cur == nil {
-		a.open[slot] = a.openSession(slot, uid, e.Player, tMs)
-		return
-	}
-	// A genuinely different (both nonzero) userid means a fresh
-	// connection: close the old session and open a new one. userid==0 is
-	// a resend artefact (some servers null the id) — adopt it into the
-	// current session rather than splitting (mirrors timeline's
-	// "first valid UserID wins").
-	if uid != 0 && cur.userid != 0 && uid != cur.userid {
-		cur.endMs = tMs
-		a.open[slot] = a.openSession(slot, uid, e.Player, tMs)
-		return
-	}
-	if cur.userid == 0 && uid != 0 {
-		cur.userid = uid
-	}
-	if e.Player.Name != "" {
-		cur.name = e.Player.Name
-	}
-	if e.Player.Team != "" {
-		cur.team = e.Player.Team
-	}
-	if e.Player.Auth != "" {
-		cur.auth = e.Player.Auth
-	}
-}
-
-func (a *IdentityAnalyzer) openSession(slot, uid int, p *events.PlayerInfo, tMs int32) *rawSession {
-	s := &rawSession{
-		slot:    slot,
-		userid:  uid,
-		name:    p.Name,
-		team:    p.Team,
-		auth:    p.Auth,
-		startMs: tMs,
-		endMs:   math.MaxInt32,
-	}
-	a.sessions = append(a.sessions, s)
-	return s
+	a.occ.onUserInfo(e) //nolint:dogsled // boundaries are read from occ at PopulateCore
 }
 
 func (a *IdentityAnalyzer) onPrint(e *events.PrintEvent) {
@@ -170,7 +110,8 @@ func (a *IdentityAnalyzer) onPrint(e *events.PrintEvent) {
 // demoinfo analyser (identity declares a `requires` edge on `demoinfo`) so
 // a.ctx.DemoInfo is available for the join.
 func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
-	if len(a.sessions) == 0 {
+	sess := a.occ.all()
+	if len(sess) == 0 {
 		return
 	}
 
@@ -178,8 +119,8 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 
 	// Per-session demoinfo match (login → name). Distinct sessions that
 	// resolve to the same demoinfo entry are the same human.
-	demoMatch := make([]*DemoInfoPlayer, len(a.sessions))
-	for i, s := range a.sessions {
+	demoMatch := make([]*DemoInfoPlayer, len(sess))
+	for i, s := range sess {
 		if dp, ok := idx.resolve(s.name, s.auth); ok {
 			demoMatch[i] = dp
 		}
@@ -190,18 +131,18 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	// names containing spaces or marker words still resolve.
 	reconnected := a.reconnectedNames()
 	anyAuth := false
-	for _, s := range a.sessions {
+	for _, s := range sess {
 		if s.auth != "" {
 			anyAuth = true
 			break
 		}
 	}
 
-	uf := newUnionFind(len(a.sessions))
+	uf := newUnionFind(len(sess))
 
 	// Source 1 — same nonzero *auth login (authenticated identity).
 	byAuth := make(map[string]int)
-	for i, s := range a.sessions {
+	for i, s := range sess {
 		if s.auth == "" {
 			continue
 		}
@@ -226,7 +167,7 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	// Source 3 — KTX reconnect prints: every session whose netname KTX
 	// announced as reconnecting is the same human.
 	byReconName := make(map[string]int)
-	for i, s := range a.sessions {
+	for i, s := range sess {
 		norm := normalizePlayerName(s.name)
 		if !reconnected[norm] {
 			continue
@@ -243,7 +184,7 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	// modern demo where the richer signals apply.
 	if idx == nil && !anyAuth && len(reconnected) == 0 {
 		byName := make(map[string]int)
-		for i, s := range a.sessions {
+		for i, s := range sess {
 			norm := normalizePlayerName(s.name)
 			if j, ok := byName[norm]; ok {
 				uf.union(i, j)
@@ -261,7 +202,7 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 		lastStart  int32
 	}
 	groups := make(map[int]*ident)
-	for i, s := range a.sessions {
+	for i, s := range sess {
 		root := uf.find(i)
 		g := groups[root]
 		if g == nil {
@@ -294,7 +235,7 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	// last) still resolve.
 	sessions := make(map[int][]ResolvedSession)
 	identityKey := func(root int) string { return "id:" + strconv.Itoa(root) }
-	for i, s := range a.sessions {
+	for i, s := range sess {
 		root := uf.find(i)
 		g := groups[root]
 		sessions[s.slot] = append(sessions[s.slot], ResolvedSession{
@@ -327,9 +268,10 @@ func (a *IdentityAnalyzer) reconnectedNames() map[string]bool {
 		return out
 	}
 	// Distinct session netnames, longest first for prefix matching.
-	names := make([]string, 0, len(a.sessions))
+	recs := a.occ.all()
+	names := make([]string, 0, len(recs))
 	seen := make(map[string]bool)
-	for _, s := range a.sessions {
+	for _, s := range recs {
 		if s.name != "" && !seen[s.name] {
 			seen[s.name] = true
 			names = append(names, s.name)

@@ -20,11 +20,17 @@ via its ghost mechanism (restore-stats-by-netname on reconnect,
 
 1. **Sessions (during the event pass).** Each `UserInfoEvent` opens /
    continues / rotates a per-slot *session* (one contiguous occupancy by
-   a single userid). A new session opens when a slot's userid changes; a
-   plain name change with the same userid stays one session (a rename,
-   which final-name resolution already handled correctly). Scalars are
-   copied off `e.Player` — the parser mutates that struct in place on the
-   next occupancy (`mvd-reader/parser/userinfo.go:47-54`).
+   a single userid), via the shared [`occupancyTracker`](occupancy.go).
+   A new session opens when a slot's userid changes; a plain name change
+   with the same userid stays one session (a rename, which final-name
+   resolution already handled correctly). The server's drop broadcast
+   (`UserInfoEvent.Vacated` — an empty userinfo string carrying the
+   client's own userid) also ends a session, so a player who times out
+   stops owning the slot at the moment they left rather than when the
+   next connection lands on it; the same userid coming back reopens the
+   session instead of splitting it. Scalars are copied off `e.Player` —
+   the parser mutates that struct in place on the next occupancy
+   (`mvd-reader/parser/userinfo.go`, `parseUserInfo`).
 2. **Reconnect prints.** `rejoins the game with …` / `reenters the game
    without stats` broadcasts are recorded (already Q-normalised to
    ASCII, so the `[team]` brackets and redtext fold to plain text).
