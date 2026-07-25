@@ -124,6 +124,11 @@ func TestRosterPrint_RejoinAndReenter(t *testing.T) {
 	}{
 		{"rusti [jah] rejoins the game with 16 frags\n", "rusti [jah]", true, 16, true},
 		{"rusti rejoins the game with 1 frag\n", "rusti", true, 1, true},
+		// The rejoin lines render the edict value with "%d"
+		// (ktx/src/client.c:1481, :1487) and count_s only special-cases
+		// exactly 1 (g_utils.c:1827), so a player restored below zero is
+		// announced with a leading '-' and the plural "frags".
+		{"rusti [jah] rejoins the game with -3 frags\n", "rusti [jah]", true, -3, true},
 		{"rusti [jah] reenters the game without stats\n", "rusti [jah]", false, 0, false},
 		{"rusti reenters the game without stats\n", "rusti", false, 0, false},
 	}

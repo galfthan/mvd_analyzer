@@ -35,7 +35,7 @@ func TestParseUserInfoString_NoAuth(t *testing.T) {
 
 func TestParseUserInfoString_SpectatorStarKey(t *testing.T) {
 	// mvdsv rewrites the client's "spectator" key to the server-set star
-	// key "*spectator" before broadcast (sv_main.c:1065-1066), so full
+	// key "*spectator" before broadcast (sv_main.c:1039-1040), so full
 	// userinfo strings in MVDs carry the star spelling. A spectator whose
 	// flag is missed here leaks into match.players as a 0-frag player.
 	player := &mvd.PlayerInfo{}

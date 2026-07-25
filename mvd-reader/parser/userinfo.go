@@ -50,7 +50,7 @@ type UserInfoEvent struct {
 	//     immediately followed by the real string. This is a dem_single
 	//     block addressed at ONE client (mvdsv's equivalent is SV_Spawn_f's
 	//     SV_FullClientUpdateToClient loop, sv_user.c:833-841), not a
-	//     broadcast: on 4on4_l_vs_la[e1m2] it appears 24 times, every one of
+	//     broadcast: on 4on4_l_vs_la[e1m2] it appears 25 times, every one of
 	//     them a dem_single aimed at the same spectator in slot 12, each
 	//     emptying all eight in-game slots for one frame.
 	//
@@ -193,10 +193,10 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 // spectator flag is recomputed from scratch: absent key means not a
 // spectator. ezquake does the same on every update (CL_ProcessUserInfo,
 // cl_parse.c:2118-2123). Without the reset, a slot reused by a player after
-// a spectator disconnects — or a spectator who joins the game (mvdsv removes
-// the key rather than sending "*spectator\0", sv_user.c:2711) — inherits a
-// stale Spectator=true. Name/team/colors are left as carry-forward since
-// real userinfo strings always include them.
+// a spectator disconnects — or a spectator who joins the game (Cmd_Join_f
+// removes the key rather than sending "*spectator\0", sv_user.c:2671-2672)
+// — inherits a stale Spectator=true. Name/team/colors are left as
+// carry-forward since real userinfo strings always include them.
 func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 	if s == "" {
 		return
@@ -230,10 +230,10 @@ func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 			player.Auth = cleanString(value)
 		case "*spectator", "spectator":
 			// mvdsv strips the client-set "spectator" key and re-adds the
-			// server-set star key before broadcast (sv_main.c:1065-1066,
-			// Info_SetValueForStarKey(userinfo, "*spectator", "1")), so full
-			// userinfo strings in MVDs only ever carry "*spectator". The
-			// bare spelling is kept for non-mvdsv sources.
+			// server-set star key before broadcast (sv_main.c:1039-1040;
+			// SVC_DirectConnect sets it again at :1338 when the server is
+			// full), so full userinfo strings in MVDs only ever carry
+			// "*spectator". The bare spelling is kept for non-mvdsv sources.
 			player.Spectator = value == "1"
 		}
 	}

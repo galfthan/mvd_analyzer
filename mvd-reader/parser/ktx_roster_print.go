@@ -159,7 +159,7 @@ func (p *Parser) tryEmitRosterPrint(level int, msg string, timeMs int32) error {
 }
 
 // parseBroadcastFrags reads the leading (optionally negative) number of s
-// and reports whether it is complete rather than the head of one something
+// and reports whether it is a whole frag count rather than the head of one
 // cut short. The test is that " frag" follows the digits, which is true of
 // every complete form the mods emit ("26 frags\n", "21 frag", "-3 frags\n")
 // and false both of a fragmented print ("…with 2" as its own print) and of
