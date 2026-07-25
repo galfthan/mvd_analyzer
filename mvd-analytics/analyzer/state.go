@@ -97,6 +97,21 @@ type streamBuilder struct {
 
 	spawns []int32
 	deaths []int32
+
+	// dedupBase is the per-column cut made at the last occupancy handover;
+	// see streamBuilder.endOccupancy and appendChangeI16.
+	dedupBase changeDedupBase
+}
+
+// changeDedupBase records, for every change stream, the column length at
+// the moment the wire slot last changed hands. A change stream suppresses a
+// sample equal to the previous one, and the previous one may belong to the
+// *previous occupant* of the slot — in which case the new occupant's first
+// sample would be dropped and their stream fragment would start with no
+// value at all. Dedup is therefore only applied above this cut.
+type changeDedupBase struct {
+	health, armor, armorType, loc  int
+	shells, nails, rockets, cells int
 }
 
 // changeI16 / changeStr mirror result.ChangeI16 etc. Stored here in

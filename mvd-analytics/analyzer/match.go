@@ -3,7 +3,6 @@ package analyzer
 import (
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -47,32 +46,23 @@ type occupancyScore struct {
 	finalized bool
 }
 
-// leaveBroadcast is one parsed "<name> left the game with N frags" line.
+// leaveBroadcast is one events.PlayerDepartureEvent whose frag count the
+// parser could read (see events.PlayerDepartureEvent for the wire form, the
+// truncated-prefix tolerance and the guard against a number fragmented
+// mid-digits). It is the only place the wire states a departing player's
+// final score, because the drop that follows immediately zeroes the slot.
 type leaveBroadcast struct {
 	name  string
 	frags int
 	tMs   int32
 }
 
-// leaveMarker is the KTX / kmod departure broadcast. KTX emits it from
-// ClientDisconnect while a match is running
-// (ktx/src/client.c:2843, `G_bprint(PRINT_HIGH, "%s left the game with
-// %.0f frags\n", self->netname, self->s.v.frags)`; the bot path repeats it
-// at bot_commands.c:388), and the pre-KTX kmod/qwe mods use the same
-// wording. It is the only place the wire states a departing player's final
-// score, because the drop that follows immediately zeroes the slot.
-//
-// The trailing "frags" is deliberately truncated to "frag": old servers
-// split a broadcast across several svc_print fragments, so
-// 4on4_l_vs_la[e1m2] carries "DARKLORD left the game with 21 frag" and
-// "s\n" as two events.
-const leaveMarker = " left the game with "
-
 // spectatorFragSentinel — pre-KTX mods publish a spectator's scoreboard
 // entry with a large negative frag count so clients sort them below every
-// player (observed as -999 on dag_caps_e1m2 and 4on4_l_vs_la[e1m2]; mvdsv
-// relays the mod's edict value verbatim, SV_FullClientUpdate,
-// mvdsv/src/sv_main.c:487-489). No real player can suicide their way to
+// player (observed as -999 five times on dag_caps_e1m2; the same demo
+// family's 4on4_l_vs_la[e1m2] happens to carry none). mvdsv relays the
+// mod's edict value verbatim to the demo (SV_UpdateClientsFrags,
+// mvdsv/src/sv_send.c:985-1006). No real player can suicide their way to
 // four figures, so a value at or below this is a marker, not a score:
 // it is neither recorded as a score nor counted as evidence of play.
 const spectatorFragSentinel = -900
@@ -102,21 +92,13 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
+	case *events.PlayerDepartureEvent:
 		a.noteLeaveBroadcast(e)
 	case *events.IntermissionEvent:
 		a.timing.OnIntermission(e.TimeMs)
 	case *events.UserInfoEvent:
-		closed, _, reopened := a.occ.onUserInfo(e)
-		if closed != nil {
+		if closed, _ := a.occ.onUserInfo(e); closed != nil {
 			a.closeOccupancy(closed, e.TimeMs)
-		}
-		if reopened != nil {
-			// The drop did not end the occupancy after all — see
-			// occupancyTracker.onUserInfo. Un-freeze the score so the rest
-			// of the stint keeps counting.
-			if sc := a.scores[reopened]; sc != nil {
-				sc.finalized = false
-			}
 		}
 	case *events.FragUpdateEvent:
 		a.onFragUpdate(e)
@@ -193,31 +175,20 @@ func (a *MatchAnalyzer) notePlay(slot int, tMs int32) {
 	}
 }
 
-// noteLeaveBroadcast records a departure line's frag count. See
-// leaveMarker for the wire form and why the match is on a truncated
-// prefix.
-func (a *MatchAnalyzer) noteLeaveBroadcast(e *events.PrintEvent) {
-	if e.Level == events.PrintChat {
+// noteLeaveBroadcast records a departure line's frag count.
+//
+// Broadcasts after the match ends are ignored, for the same reason
+// onFragUpdate ignores post-match frag updates: the scoreboard is immutable
+// once the match is over, and a player who disconnects during intermission
+// is announced on whatever the mod has left in his edict — 0 under any mod
+// that resets between games. KTX itself never emits the line then (it
+// guards on `match_in_progress == 2`, ktx/src/client.c:2841), but the
+// pre-KTX mods this recovery exists for have no such guard.
+func (a *MatchAnalyzer) noteLeaveBroadcast(e *events.PlayerDepartureEvent) {
+	if a.timing.Ended || !e.FragsKnown {
 		return
 	}
-	i := strings.Index(e.Message, leaveMarker)
-	if i <= 0 {
-		return
-	}
-	name := e.Message[:i]
-	rest := e.Message[i+len(leaveMarker):]
-	j := 0
-	for j < len(rest) && rest[j] >= '0' && rest[j] <= '9' {
-		j++
-	}
-	if j == 0 {
-		return
-	}
-	n, err := strconv.Atoi(rest[:j])
-	if err != nil {
-		return
-	}
-	a.leaves = append(a.leaves, leaveBroadcast{name: name, frags: n, tMs: e.TimeMs})
+	a.leaves = append(a.leaves, leaveBroadcast{name: e.Name, frags: e.Frags, tMs: e.TimeMs})
 }
 
 // closeOccupancy freezes an occupancy's final score at the moment the slot
@@ -256,8 +227,21 @@ func (a *MatchAnalyzer) closeOccupancy(rec *occupancyRecord, tMs int32) {
 }
 
 // announcedFrags returns the frag count the server broadcast for this
-// occupancy's departure, if it announced one. The broadcast precedes the
-// drop in the same frame, so the search window is the occupancy itself.
+// occupancy's departure, if it announced one.
+//
+// The broadcast only identifies a netname, so on a demo where two people
+// share one it would otherwise bleed across occupancies. For a *vacated*
+// record the window is therefore a single frame: SV_DropClient runs
+// ClientDisconnect's bprint and SV_FullClientUpdate's empty userinfo in the
+// same server frame (mvdsv/src/sv_main.c:395-428), so the announcement and
+// the close carry the same timestamp — verified on both real departures in
+// the local corpus (4on4_l_vs_la[e1m2]: DARKLORD announced and dropped at
+// t=1088539, shiva at t=1096572; hub 216835: rusti at t=613452).
+//
+// A record closed by a *takeover* instead — a new userid appearing without
+// the server ever broadcasting a drop, which is what a demo that missed the
+// drop packet looks like — has no such anchor, so it keeps the whole
+// occupancy as its window.
 func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bool) {
 	if rec.name == "" {
 		return 0, false
@@ -265,7 +249,11 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 	want := normalizePlayerName(rec.name)
 	best, found := 0, false
 	for _, lv := range a.leaves {
-		if lv.tMs > tMs || lv.tMs < rec.startMs {
+		if rec.vacated {
+			if lv.tMs != tMs {
+				continue
+			}
+		} else if lv.tMs > tMs || lv.tMs < rec.startMs {
 			continue
 		}
 		if normalizePlayerName(lv.name) != want {
@@ -318,7 +306,21 @@ func (a *MatchAnalyzer) participated(rec *occupancyRecord, sc *occupancyScore) b
 // the occupancy come next, and co.SlotName / ctx.Players last — both key
 // on the slot's final occupant, so they are only consulted for a slot that
 // only ever had one.
+//
+// An occupancy the wire never sent a userinfo for (occupancyTracker.ensure
+// opened it because a frag or a position arrived on an empty slot) resolves
+// to nothing at all once the slot has changed hands, and the caller drops
+// it. Every naming source would otherwise hand it the wrong human: the
+// identity table extends each slot's last session to +inf
+// (identity.go:249-254), so an anonymous record starting *after* a drop
+// resolves to the player who just left — and then wins the roster
+// tie-break below on its later startMs and replaces his recovered score
+// with 0. No local demo produces play events on a slot after its vacate,
+// so this is a guard, not a fix.
 func (a *MatchAnalyzer) resolveOccupant(rec *occupancyRecord) (name, team string) {
+	if !rec.sawInfo && !a.soleOccupancy(rec.slot) {
+		return "", ""
+	}
 	if s, ok := a.core.SlotSessionAt(rec.slot, rec.startMs); ok {
 		name, team = s.Name, s.Team
 	}
@@ -347,13 +349,61 @@ func (a *MatchAnalyzer) resolveOccupant(rec *occupancyRecord) (name, team string
 // soleOccupancy reports whether slot was held by exactly one occupancy for
 // the whole demo, i.e. whether slot-keyed state can be read safely.
 func (a *MatchAnalyzer) soleOccupancy(slot int) bool {
-	n := 0
-	for _, rec := range a.occ.all() {
-		if rec.slot == slot {
-			n++
+	return a.occ.countForSlot(slot) == 1
+}
+
+// rosterRow is one scoreboard line under construction: the stat of the
+// latest occupancy folded into it, plus the window of every occupancy it
+// covers.
+type rosterRow struct {
+	stat    PlayerStat
+	slot    int
+	startMs int32
+	windows []rosterWindow
+}
+
+// rosterWindow is one folded occupancy's half-open [start, end) span, with
+// the userid that owned it.
+type rosterWindow struct {
+	start, end int32
+	identified bool
+}
+
+// rowForKey picks the roster row rec can be folded into: one that was not
+// live at the same time as rec. Returns nil when every candidate was, which
+// means rec is a different human who happens to share an identity key.
+//
+// The veto needs BOTH sides to be identified connections
+// (occupancyRecord.identified). Two occupancies with userids of their own
+// that were live at the same instant are two people, whatever the identity
+// key says — but a record with no userid is not a second connection, and
+// two of those routinely coexist with a real one:
+//
+//   - KTX publishes a departed player's *ghost* onto a spare client slot so
+//     the scoreboard shows who is expected back (MakeGhost,
+//     ktx/src/client.c:2729-2799). On hub gameId 216835 that is
+//     `svc_updateuserinfo 10 0 "\name\<0x83> rusti\team\jah\..."` at
+//     t=613452, cleared to `"\name\"` in the same frame — userid 0, and the
+//     0x83 glyph normalises to '#'. Its frag count is a COPY of the
+//     departing player's, so treating it as a second human double-counts
+//     him and invents a row.
+//   - occupancyTracker.ensure opens a record with userid 0 whenever a frag
+//     or position event lands on a slot with no userinfo, which the MVD
+//     header's full-state dump does for every free slot.
+func rowForKey(candidates []*rosterRow, rec *occupancyRecord) *rosterRow {
+	for _, c := range candidates {
+		live := false
+		for _, w := range c.windows {
+			if rec.startMs < w.end && w.start < rec.endMs && w.identified && rec.identified() {
+				live = true
+				break
+			}
+		}
+		if !live {
+			return c
 		}
 	}
-	return n == 1
+	return nil
 }
 
 // identityKey groups occupancies that belong to the same human. The
@@ -396,15 +446,10 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// scoring (a slot can change hands), but a player who reconnected onto
 	// another slot owns several of them and must appear once — with the
 	// score of their latest stint, which is the total the server restored
-	// and re-asserted (ktx/src/client.c:1513-1538).
+	// and re-asserted (ktx/src/client.c:1464-1490).
 	a.occ.closeOpen(a.durationMs)
-	type rosterRow struct {
-		stat    PlayerStat
-		slot    int
-		startMs int32
-	}
-	rows := make(map[string]*rosterRow)
-	var order []string
+	var rows []*rosterRow
+	byKey := make(map[string][]*rosterRow)
 	for _, rec := range a.occ.all() {
 		sc := a.scores[rec]
 		if sc == nil || !a.participated(rec, sc) {
@@ -416,28 +461,36 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		}
 		key := a.identityKey(rec, name)
 		stat := PlayerStat{Name: name, Team: team, Frags: sc.finalFrags()}
-		row := rows[key]
+		// Two occupancies that were live at the same instant cannot be the
+		// same human, whatever the identity key says. The key degrades to
+		// the display name on a demo with no demoinfo, no *auth and no KTX
+		// reconnect print — every pre-KTX demo, i.e. exactly the population
+		// this scoreboard was rebuilt for — and identity.go's Source 4 then
+		// unions sessions by normalized netname, which strips case and
+		// punctuation (names.go:16). Two people called "Player" and
+		// "player!" would otherwise collapse into one row, taking one of the
+		// two teams off the table with them.
+		row := rowForKey(byKey[key], rec)
 		if row == nil {
-			rows[key] = &rosterRow{stat: stat, slot: rec.slot, startMs: rec.startMs}
-			order = append(order, key)
-			continue
-		}
-		if rec.startMs >= row.startMs {
+			row = &rosterRow{stat: stat, slot: rec.slot, startMs: rec.startMs}
+			byKey[key] = append(byKey[key], row)
+			rows = append(rows, row)
+		} else if rec.startMs >= row.startMs {
 			row.stat, row.slot, row.startMs = stat, rec.slot, rec.startMs
 		}
+		row.windows = append(row.windows, rosterWindow{rec.startMs, rec.endMs, rec.identified()})
 	}
 	// Emit in wire-slot order of each identity's kept occupancy, which is
 	// the order the previous slot-keyed loop produced and is stable across
 	// runs.
-	sort.SliceStable(order, func(i, j int) bool {
-		ri, rj := rows[order[i]], rows[order[j]]
-		if ri.slot != rj.slot {
-			return ri.slot < rj.slot
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].slot != rows[j].slot {
+			return rows[i].slot < rows[j].slot
 		}
-		return ri.startMs < rj.startMs
+		return rows[i].startMs < rows[j].startMs
 	})
-	for _, key := range order {
-		stat := rows[key].stat
+	for _, row := range rows {
+		stat := row.stat
 		// A player who legitimately finishes on 0 frags (kills cancelled by
 		// suicides, a short but real appearance) is still a participant — the
 		// surface-authoritative-data policy says report them rather than guess

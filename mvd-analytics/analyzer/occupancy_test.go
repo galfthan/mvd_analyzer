@@ -1,7 +1,6 @@
 package analyzer
 
 import (
-	"math"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -20,19 +19,28 @@ func vacate(slot, uid int, name string, tMs int32) *events.UserInfoEvent {
 	return e
 }
 
+// setinfo builds the event parseSetInfo synthesises for one key/value:
+// the Player snapshot is the parser's cache, so uid is whatever the last
+// full userinfo left on the slot.
+func setinfo(slot, cachedUID int, cachedName string, tMs int32) *events.UserInfoEvent {
+	e := ui(slot, cachedUID, cachedName, tMs)
+	e.Partial = true
+	return e
+}
+
 // A fresh connection on a slot ends the previous occupancy and starts a
 // new one; a userid-0 resend does neither.
 func TestOccupancyTracker_UserIDChangeSplits(t *testing.T) {
 	tr := newOccupancyTracker()
 
-	if closed, opened, _ := tr.onUserInfo(ui(7, 4948, "shiva", 0)); closed != nil || opened == nil {
+	if closed, opened := tr.onUserInfo(ui(7, 4948, "shiva", 0)); closed != nil || opened == nil {
 		t.Fatalf("first userinfo: closed=%v opened=%v, want (nil, rec)", closed, opened)
 	}
 	// Resend with userid 0 — same occupancy.
-	if closed, opened, _ := tr.onUserInfo(ui(7, 0, "shiva", 25867)); closed != nil || opened != nil {
+	if closed, opened := tr.onUserInfo(ui(7, 0, "shiva", 25867)); closed != nil || opened != nil {
 		t.Errorf("userid-0 resend split the occupancy: closed=%v opened=%v", closed, opened)
 	}
-	closed, opened, _ := tr.onUserInfo(ui(7, 5796, "Sectoid", 1114326))
+	closed, opened := tr.onUserInfo(ui(7, 5796, "Sectoid", 1114326))
 	if closed == nil || opened == nil {
 		t.Fatalf("userid change: closed=%v opened=%v, want both", closed, opened)
 	}
@@ -53,7 +61,7 @@ func TestOccupancyTracker_VacateEndsOccupancy(t *testing.T) {
 	tr := newOccupancyTracker()
 	tr.onUserInfo(ui(13, 5046, "DARKLORD", 0))
 
-	closed, opened, _ := tr.onUserInfo(vacate(13, 5046, "DARKLORD", 1088539))
+	closed, opened := tr.onUserInfo(vacate(13, 5046, "DARKLORD", 1088539))
 	if closed == nil || opened != nil {
 		t.Fatalf("vacate: closed=%v opened=%v, want (rec, nil)", closed, opened)
 	}
@@ -67,13 +75,13 @@ func TestOccupancyTracker_VacateEndsOccupancy(t *testing.T) {
 
 // Two empty-userinfo shapes are NOT drops and must leave the occupancy
 // alone: the MVD header's enumeration of free slots, and the userid-0
-// re-broadcast old servers send for every occupied slot (t=25867 on
+// client-table replay old servers send for every occupied slot (t=25867 on
 // 4on4_l_vs_la[e1m2] does it for all eight players at once).
 func TestOccupancyTracker_VacateIgnoredWithoutUserID(t *testing.T) {
 	tr := newOccupancyTracker()
 
 	// Free slot in the header block.
-	if closed, opened, _ := tr.onUserInfo(vacate(20, 0, "", 0)); closed != nil || opened != nil {
+	if closed, opened := tr.onUserInfo(vacate(20, 0, "", 0)); closed != nil || opened != nil {
 		t.Errorf("vacate on an empty slot produced closed=%v opened=%v", closed, opened)
 	}
 	if n := len(tr.all()); n != 0 {
@@ -81,7 +89,7 @@ func TestOccupancyTracker_VacateIgnoredWithoutUserID(t *testing.T) {
 	}
 
 	tr.onUserInfo(ui(1, 5100, "space", 0))
-	if closed, _, _ := tr.onUserInfo(vacate(1, 0, "space", 25867)); closed != nil {
+	if closed, _ := tr.onUserInfo(vacate(1, 0, "space", 25867)); closed != nil {
 		t.Errorf("userid-0 empty userinfo closed the occupancy: %+v", closed)
 	}
 	if cur := tr.current(1); cur == nil || !cur.open() {
@@ -89,36 +97,81 @@ func TestOccupancyTracker_VacateIgnoredWithoutUserID(t *testing.T) {
 	}
 }
 
-// A userid is per-connection, so the departed client's own id coming back
-// on the slot means the drop did not end the occupancy (gameId 216835
-// re-broadcasts slot 7's userinfo 72 s after rusti's drop). Resuming keeps
-// the slot owned across the gap instead of leaving a hole nothing resolves
-// in.
-func TestOccupancyTracker_SameUserIDReopens(t *testing.T) {
+// A drop is a drop. The events that used to look like "the same connection
+// came back" are svc_setinfo syntheses replaying the parser's CACHED
+// userid, and mvdsv emits one during the NEXT client's connect handshake
+// (SV_Login -> SV_Logout -> `svc_setinfo <slot> "*auth" ""`,
+// mvdsv/src/sv_login.c:588 and :644-646). Reopening on them erased a real
+// departure on five of the local demos.
+//
+// Ground truth for the shape, hub gameId 216835 slot 7: two
+// svc_updateuserinfo only (rusti's at t=0 and the empty drop at t=613452);
+// the t=685676 message is `svc_setinfo 7 "*auth" ""`, and Luk's real
+// userinfo does not arrive until t=766898.
+func TestOccupancyTracker_SetInfoNeverReopensADrop(t *testing.T) {
 	tr := newOccupancyTracker()
 	tr.onUserInfo(ui(7, 8, "rusti", 0))
 	tr.onUserInfo(vacate(7, 8, "rusti", 613452))
 
-	closed, opened, reopened := tr.onUserInfo(ui(7, 8, "rusti", 685676))
-	if closed != nil || opened != nil || reopened == nil {
-		t.Fatalf("same-userid return: closed=%v opened=%v reopened=%v, want (nil,nil,rec)", closed, opened, reopened)
+	if closed, opened := tr.onUserInfo(setinfo(7, 8, "rusti", 685676)); closed != nil || opened != nil {
+		t.Fatalf("setinfo after a drop: closed=%v opened=%v, want (nil, nil)", closed, opened)
 	}
-	if reopened.endMs != math.MaxInt32 || reopened.vacated {
-		t.Errorf("reopened = %+v, want an open, non-vacated record", reopened)
+	if cur := tr.current(7); cur != nil {
+		t.Errorf("current(7) = %+v, want nil — the slot is empty until someone connects", cur)
 	}
-	if n := len(tr.all()); n != 1 {
-		t.Errorf("records = %d, want 1 — the occupancy never actually ended", n)
+	rec := tr.all()[0]
+	if !rec.vacated || rec.endMs != 613452 {
+		t.Errorf("rusti's record = %+v, want it still closed as vacated at 613452", rec)
 	}
 
-	// A *different* userid after the drop is a genuine new occupant.
-	tr2 := newOccupancyTracker()
-	tr2.onUserInfo(ui(7, 8, "rusti", 0))
-	tr2.onUserInfo(vacate(7, 8, "rusti", 613452))
-	if _, opened, _ := tr2.onUserInfo(ui(7, 15, "Luk", 700000)); opened == nil {
-		t.Errorf("a new userid after a drop did not open a new occupancy")
+	// The genuine next occupant still opens a record of their own.
+	_, opened := tr.onUserInfo(ui(7, 15, "Luk", 766898))
+	if opened == nil || opened.name != "Luk" || opened.startMs != 766898 {
+		t.Fatalf("Luk's userinfo opened %+v, want a record starting at 766898", opened)
 	}
-	if n := len(tr2.all()); n != 2 {
+	if n := len(tr.all()); n != 2 {
 		t.Errorf("records = %d, want 2", n)
+	}
+}
+
+// Even the departed client's own userid arriving on a full userinfo is a
+// new occupancy: mvdsv recycles userids out of a 1..99 pool and only checks
+// them against clients that are not cs_free (SV_GenerateUserID,
+// mvdsv/src/sv_main.c:538-556), so equality across a gap proves nothing.
+func TestOccupancyTracker_UserInfoAfterDropOpensNewRecord(t *testing.T) {
+	tr := newOccupancyTracker()
+	tr.onUserInfo(ui(7, 8, "rusti", 0))
+	tr.onUserInfo(vacate(7, 8, "rusti", 613452))
+
+	closed, opened := tr.onUserInfo(ui(7, 8, "someone else", 700000))
+	if closed != nil {
+		t.Errorf("closed = %+v, want nil — the previous record was already closed by the drop", closed)
+	}
+	if opened == nil || opened.startMs != 700000 {
+		t.Fatalf("opened = %+v, want a new record starting at 700000", opened)
+	}
+	if n := len(tr.all()); n != 2 {
+		t.Errorf("records = %d, want 2", n)
+	}
+}
+
+// A setinfo DOES refine the occupant who currently holds the slot — that is
+// the mid-stint rename / team switch parseSetInfo exists for.
+func TestOccupancyTracker_SetInfoUpdatesTheOpenOccupancy(t *testing.T) {
+	tr := newOccupancyTracker()
+	tr.onUserInfo(ui(3, 4609, "dag", 0))
+
+	renamed := setinfo(3, 4609, "dag2", 5000)
+	renamed.Player.Team = ".la."
+	if closed, opened := tr.onUserInfo(renamed); closed != nil || opened != nil {
+		t.Fatalf("setinfo rename: closed=%v opened=%v, want (nil, nil)", closed, opened)
+	}
+	cur := tr.current(3)
+	if cur == nil || cur.name != "dag2" || cur.team != ".la." {
+		t.Errorf("current(3) = %+v, want the same record renamed to dag2 on .la.", cur)
+	}
+	if n := len(tr.all()); n != 1 {
+		t.Errorf("records = %d, want 1", n)
 	}
 }
 

@@ -70,3 +70,108 @@ func TestStreams_ItemStateDoesNotCrossOccupancyHandover(t *testing.T) {
 		t.Errorf("shiva lost his own stream")
 	}
 }
+
+// Change streams dedup against the slot builder's last value, which spans
+// occupancies. If the arriving occupant's first value equals the departing
+// one's last, the sample is suppressed and the new player's stream fragment
+// starts with no value at all — the same leak the item intervals above fix,
+// one level down. The handover cuts the dedup floor.
+func TestStreams_ChangeStreamDedupResetsAtHandover(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 4948, Name: "shiva"},
+	})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	// shiva ends his stint on 100 health / 50 armour / 10 rockets.
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatHealth, Value: 100, TimeMs: 900_000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatArmor, Value: 50, TimeMs: 900_000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatRockets, Value: 10, TimeMs: 900_000})
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 4948, Name: "shiva"},
+		TimeMs: 1_000_000, Vacated: true,
+	})
+	// The next occupant spawns on exactly the same numbers.
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 5796, Name: "Sectoid"},
+		TimeMs: 1_010_000,
+	})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatHealth, Value: 100, TimeMs: 1_020_000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatArmor, Value: 50, TimeMs: 1_020_000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatRockets, Value: 10, TimeMs: 1_020_000})
+	// ... and a genuinely repeated value right after is still deduped.
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatHealth, Value: 100, TimeMs: 1_021_000})
+
+	b := a.playerState[7].streams
+	for _, tc := range []struct {
+		name string
+		col  []changeI16
+	}{
+		{"health", b.health}, {"armor", b.armor}, {"rockets", b.rockets},
+	} {
+		last := tc.col[len(tc.col)-1]
+		if last.t != 1_020_000 {
+			t.Errorf("%s stream ends at t=%d, want a sample at 1020000 for the new occupant (col=%v)",
+				tc.name, last.t, tc.col)
+		}
+	}
+	if n := len(b.health); n != 2 {
+		t.Errorf("health samples = %d (%v), want exactly 2 — one per occupant, the 1021000 repeat deduped", n, b.health)
+	}
+}
+
+// A mid-match reconnect arrives as vacate-then-connect: the tracker reports
+// a close with no open, then an open with no close. The frag-reset flag has
+// to be armed on that second event, otherwise the mod's stats restore
+// reaches the corruption guard in handleFragUpdate as a huge delta, is
+// rejected, and — because the guard deliberately leaves state.frags
+// untouched — every later real +1 is rejected too, freezing the player's
+// timeline score for the rest of the match.
+//
+// Shape from hub gameId 216835: rusti is dropped on 16 frags and KTX
+// restores the same 16 onto the next connection (ktx/src/client.c:1464-1490).
+func TestTimeline_FragResetArmedOnVacateThenReconnect(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 2000,
+	})
+	for i := 1; i <= 16; i++ {
+		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: i, TimeMs: int32(10_000 * i)})
+	}
+	// The drop, then the reconnect on a fresh userid.
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 613_452, Vacated: true,
+	})
+	if !a.fragResetPending[7] {
+		// A vacate closes the occupancy but opens nothing, so the flag is not
+		// armed yet — the connect below is what arms it.
+		_ = a.OnEvent(&events.UserInfoEvent{
+			Player: &events.PlayerInfo{Slot: 7, UserID: 21, Name: "rusti"}, TimeMs: 613_500,
+		})
+	}
+	if !a.fragResetPending[7] {
+		t.Fatal("the reconnect did not arm fragResetPending — the restore below will be rejected")
+	}
+	// KTX re-asserts the restored total, then rusti gets one more frag.
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 16, TimeMs: 614_000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 17, TimeMs: 629_000})
+
+	if got := a.playerState[7].frags; got != 17 {
+		t.Errorf("state.frags = %d, want 17 — the restore must rebase, not freeze the cursor", got)
+	}
+	sum := 0
+	for _, f := range a.rawFrags {
+		if f.PlayerNum == 7 {
+			sum += f.Delta
+		}
+	}
+	if sum != 17 {
+		t.Errorf("timeline frag deltas sum to %d, want 17", sum)
+	}
+}

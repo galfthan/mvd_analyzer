@@ -17,12 +17,23 @@ import (
 // occupancy, and both are needed:
 //
 //   - a *userid change* on the slot's svc_updateuserinfo — a fresh
-//     connection took the slot (mvdsv hands out a unique userid per
-//     connection, SV_GenerateUserID, mvdsv/src/sv_main.c:540);
+//     connection took the slot (mvdsv hands out userids from a rotating
+//     1..99 pool, SV_GenerateUserID, mvdsv/src/sv_main.c:538-556, checking
+//     uniqueness only against clients that are not cs_free — so a userid
+//     is unique among *live* connections, not unique over the demo. A
+//     change of userid is still a reliable handover signal; equality
+//     across a gap is not evidence of the same connection);
 //   - a *vacate* — the empty-userinfo broadcast the server sends when it
 //     drops a client (see events.UserInfoEvent.Vacated). This one is the
 //     only signal available when nobody takes the freed slot afterwards,
 //     which is the common case for a timeout near the end of a match.
+//
+// A drop ends an occupancy, full stop. There is no "the client came back
+// on the same userid so the drop did not count" rule: the wire never
+// re-broadcasts a dropped client's userinfo, and the events that look like
+// it are svc_setinfo syntheses carrying the parser's cached userid (see
+// events.UserInfoEvent.Partial). Such events are excluded here from
+// creating, closing or resuming a record.
 //
 // A userid of 0 is a resend artefact (some servers null the id on a
 // userinfo rebroadcast) and never splits an occupancy — it is adopted into
@@ -39,7 +50,7 @@ import (
 //
 // Scalars are copied off events.PlayerInfo rather than referenced: the
 // parser mutates the same *PlayerInfo in place on the next occupancy
-// (mvd-reader/parser/userinfo.go:72-82), so a retained pointer would later
+// (mvd-reader/parser/userinfo.go:84-91), so a retained pointer would later
 // read the *next* player's identity.
 type occupancyRecord struct {
 	slot    int
@@ -75,6 +86,15 @@ func (r *occupancyRecord) spectatorThroughout() bool { return r.sawInfo && !r.sa
 // open reports whether the occupancy has no recorded end yet.
 func (r *occupancyRecord) open() bool { return r.endMs == math.MaxInt32 }
 
+// identified reports whether the wire gave this occupancy a userid of its
+// own — i.e. whether it is a client connection rather than something that
+// merely addressed the slot. Three things land in a record with userid 0:
+// an occupancy `ensure` opened because a frag or a position arrived on a
+// slot with no userinfo, a userid-0 resend, and KTX's ghost scoreboard
+// entry (see the note in match.go's rowForKey). None of them is evidence of
+// a distinct connection.
+func (r *occupancyRecord) identified() bool { return r.userID != 0 }
+
 // covers reports whether tMs falls inside the half-open occupancy window.
 func (r *occupancyRecord) covers(tMs int32) bool {
 	return tMs >= r.startMs && tMs < r.endMs
@@ -91,9 +111,7 @@ func newOccupancyTracker() *occupancyTracker {
 }
 
 // current returns the open record for slot, or nil when the slot is empty
-// (never occupied, or dropped and not yet retaken). A dropped record stays
-// parked internally so the same connection can resume it — see
-// onUserInfo — but it is not the slot's current occupant.
+// (never occupied, or dropped and not yet retaken).
 func (t *occupancyTracker) current(slot int) *occupancyRecord {
 	if r := t.cur[slot]; r != nil && r.open() {
 		return r
@@ -104,80 +122,87 @@ func (t *occupancyTracker) current(slot int) *occupancyRecord {
 // all returns every record in observation order.
 func (t *occupancyTracker) all() []*occupancyRecord { return t.records }
 
+// countForSlot returns how many occupancies the slot has had so far. Two or
+// more means the slot changed hands at least once, which is what separates
+// a handover from a slot's first-ever occupant.
+func (t *occupancyTracker) countForSlot(slot int) int {
+	n := 0
+	for _, r := range t.records {
+		if r.slot == slot {
+			n++
+		}
+	}
+	return n
+}
+
 // onUserInfo applies one svc_updateuserinfo / svc_setinfo. It returns the
-// records it closed, opened and reopened, any of which may be nil:
+// records it closed and opened, either of which may be nil:
 //
-//	(nil, rec, nil)  a slot became occupied
-//	(old, new, nil)  a new connection took over an occupied slot
-//	(old, nil, nil)  the server dropped the slot's client
-//	(nil, nil, rec)  a dropped client's own userid came back on the slot,
-//	                 so the drop did not end the occupancy after all
-//	(nil, nil, nil)  a plain userinfo update to the open occupancy
-func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened, reopened *occupancyRecord) {
+//	(nil, rec)  a slot became occupied
+//	(old, new)  a new connection took over an occupied slot
+//	(old, nil)  the server dropped the slot's client
+//	(nil, nil)  a plain userinfo update to the open occupancy, or an event
+//	            that carries no occupancy information at all
+func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened *occupancyRecord) {
 	if e == nil || e.Player == nil {
-		return nil, nil, nil
+		return nil, nil
 	}
 	slot := e.Player.Slot
 	if slot < 0 || slot >= events.MaxClients {
-		return nil, nil, nil
+		return nil, nil
 	}
-	cur := t.cur[slot]
+	cur := t.current(slot)
 
 	uid := e.Player.UserID
+
+	// An svc_setinfo synthesis carries the parser's cached scalars, not a
+	// wire snapshot (events.UserInfoEvent.Partial). It may refine whoever
+	// currently holds the slot — a mid-stint rename or team switch — but it
+	// can never open, close or resume an occupancy, because its userid was
+	// never on the wire and mvdsv emits one (`*auth` cleared by SV_Logout,
+	// sv_login.c:644-646) both for the client being dropped and for the
+	// *next* client's connect handshake.
+	if e.Partial {
+		if cur != nil {
+			t.note(cur, e.Player)
+		}
+		return nil, nil
+	}
 
 	if e.Vacated {
 		// The server dropped this slot's client — but only when the update
 		// carries the client's own userid. SV_DropClient leaves userid set
 		// and SV_FullClientUpdate writes it (mvdsv/src/sv_main.c:419-428,
-		// :487-513), whereas an empty userinfo with userid 0 is a resend
-		// artefact of the same shape as the userid-0 rule above: 2002-era
-		// servers periodically re-broadcast every occupied slot as
-		// `svc_updateuserinfo <slot> 0 ""` immediately followed by the real
-		// string (observed at t=25867 and t=87091 on
-		// demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd, for all
-		// eight players at once). Treating those as drops would shred every
+		// :509-511), whereas an empty userinfo with userid 0 is the
+		// per-client client-table replay described on
+		// events.UserInfoEvent.Vacated: every occupied slot emptied for one
+		// dem_single frame and immediately restated (24 times on
+		// demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd, all eight
+		// players at once). Treating those as drops would shred every
 		// occupancy on the demo.
 		//
 		// A vacate on an already-empty slot is the MVD header's full-state
 		// block enumerating free slots and carries no information.
-		if cur == nil || uid == 0 || !cur.open() {
-			return nil, nil, nil
+		if cur == nil || uid == 0 {
+			return nil, nil
 		}
 		cur.endMs = e.TimeMs
 		cur.vacated = true
-		return cur, nil, nil
-	}
-
-	// A vacated record stays parked on the slot so the *same* connection
-	// coming back can resume it. A userid is per-connection
-	// (SV_GenerateUserID), so an update carrying the departed client's own
-	// id means the drop signal did not in fact end the occupancy — seen on
-	// gameId 216835, where slot 7's userinfo is re-broadcast 72 s after
-	// rusti's drop. Splitting there would leave the slot unowned across the
-	// gap and silently drop whatever the wire still says about it.
-	if cur != nil && !cur.open() {
-		if uid == 0 || uid == cur.userID {
-			cur.endMs = math.MaxInt32
-			cur.vacated = false
-			t.note(cur, e.Player)
-			return nil, nil, cur
-		}
-		delete(t.cur, slot)
-		cur = nil
+		return cur, nil
 	}
 
 	if cur == nil {
-		return nil, t.open(slot, uid, e.Player, e.TimeMs), nil
+		return nil, t.open(slot, uid, e.Player, e.TimeMs)
 	}
 	if uid != 0 && cur.userID != 0 && uid != cur.userID {
 		cur.endMs = e.TimeMs
-		return cur, t.open(slot, uid, e.Player, e.TimeMs), nil
+		return cur, t.open(slot, uid, e.Player, e.TimeMs)
 	}
 	if cur.userID == 0 && uid != 0 {
 		cur.userID = uid
 	}
 	t.note(cur, e.Player)
-	return nil, nil, nil
+	return nil, nil
 }
 
 // ensure returns the open record for slot, opening an anonymous one at tMs

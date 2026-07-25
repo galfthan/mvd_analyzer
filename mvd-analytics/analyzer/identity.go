@@ -18,7 +18,8 @@ import (
 // they vacated may be taken by someone else (or stamped with a late
 // userinfo name), so their earlier events get relabelled with the wrong
 // player. KTX itself unifies the player via its ghost mechanism
-// (restore-stats-by-netname on reconnect, ktx/src/client.c:1513-1538);
+// (MakeGhost snapshots the departing player at ktx/src/client.c:2729-2799
+// and the next connection with the same netname restores it, :1464-1490);
 // this analyzer reproduces that unification for the pipeline.
 //
 // It does two things during the event pass:
@@ -42,21 +43,13 @@ type IdentityAnalyzer struct {
 	// occ is the shared wire-slot occupancy tracker (occupancy.go). One
 	// occupancy == one session here.
 	occ *occupancyTracker
-	// reconnectPrints are the verbatim rejoin/reenter broadcast lines;
-	// resolved to netnames in PopulateCore once every session netname is
-	// known (the userinfo precedes the bprint, but deferring keeps the
-	// prefix match robust against names that contain the marker words).
-	reconnectPrints []string
-}
-
-// KTX reconnect broadcast markers (post Q-normalisation to ASCII; the
-// `\220`/`\221` team brackets fold to `[`/`]` and redtext folds to
-// plain — see mvd-reader/parser/userinfo.go qNormalizeTable). Pinned to
-// ktx/src/client.c:1529 (team rejoin), :1536 (non-team rejoin),
-// :1550/:1555 (reenter without stats).
-var reconnectMarkers = []string{
-	"rejoins the game with",
-	"reenters the game without stats",
+	// reconnectPrefixes are the leading texts of the rejoin / reenter
+	// broadcasts (events.PlayerRejoinEvent.Prefix — "<netname>" or
+	// "<netname> [<team>]"); they are resolved to netnames in PopulateCore
+	// once every session netname is known, since the userinfo precedes the
+	// bprint but deferring keeps the prefix match robust against names that
+	// contain the marker words.
+	reconnectPrefixes []string
 }
 
 func NewIdentityAnalyzer() *IdentityAnalyzer {
@@ -79,8 +72,8 @@ func (a *IdentityAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.UserInfoEvent:
 		a.onUserInfo(e)
-	case *events.PrintEvent:
-		a.onPrint(e)
+	case *events.PlayerRejoinEvent:
+		a.reconnectPrefixes = append(a.reconnectPrefixes, e.Prefix)
 	}
 	return nil
 }
@@ -93,16 +86,7 @@ func (a *IdentityAnalyzer) OnEvent(event events.Event) error {
 // next. The window between a drop and the next connection belongs to
 // nobody, which is correct: an empty slot produces no events.
 func (a *IdentityAnalyzer) onUserInfo(e *events.UserInfoEvent) {
-	a.occ.onUserInfo(e) //nolint:dogsled // boundaries are read from occ at PopulateCore
-}
-
-func (a *IdentityAnalyzer) onPrint(e *events.PrintEvent) {
-	for _, m := range reconnectMarkers {
-		if strings.Contains(e.Message, m) {
-			a.reconnectPrints = append(a.reconnectPrints, e.Message)
-			return
-		}
-	}
+	a.occ.onUserInfo(e) // boundaries are read from occ at PopulateCore
 }
 
 // PopulateCore folds sessions into canonical identities and writes the
@@ -256,15 +240,14 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.Sessions = sessions
 }
 
-// reconnectedNames resolves each stored rejoin/reenter line to the set
-// of normalized netnames that reconnected. A line renders as
-// "<name> [<team>] rejoins the game with N frags" (team) or
-// "<name> rejoins the game with N frags" (non-team); the netname can
-// itself contain spaces, so we match against the known session netnames
-// by longest prefix rather than trying to tokenize the line.
+// reconnectedNames resolves each stored rejoin/reenter prefix to the set
+// of normalized netnames that reconnected. The prefix is "<name>" or
+// "<name> [<team>]" with no delimiter between the two, and the netname can
+// itself contain spaces, so we match against the known session netnames by
+// longest prefix rather than trying to tokenize it.
 func (a *IdentityAnalyzer) reconnectedNames() map[string]bool {
 	out := make(map[string]bool)
-	if len(a.reconnectPrints) == 0 {
+	if len(a.reconnectPrefixes) == 0 {
 		return out
 	}
 	// Distinct session netnames, longest first for prefix matching.
@@ -279,9 +262,9 @@ func (a *IdentityAnalyzer) reconnectedNames() map[string]bool {
 	}
 	sort.Slice(names, func(i, j int) bool { return len(names[i]) > len(names[j]) })
 
-	for _, msg := range a.reconnectPrints {
+	for _, prefix := range a.reconnectPrefixes {
 		for _, n := range names {
-			if strings.HasPrefix(msg, n+" ") {
+			if prefix == n || strings.HasPrefix(prefix, n+" ") {
 				out[normalizePlayerName(n)] = true
 				break
 			}

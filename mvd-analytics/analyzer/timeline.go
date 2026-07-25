@@ -224,7 +224,25 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 		}
 	}
 
-	closed, opened, _ := a.occ.onUserInfo(e)
+	closed, opened := a.occ.onUserInfo(e)
+
+	// A fresh connection took over the slot mid-match: the next frag update
+	// is a KTX stats restore / initial scoreboard rather than a kill. Flag
+	// it so handleFragUpdate rebases instead of feeding the value to the
+	// corruption guard. Pre-match roster shuffles don't count (frags are 0
+	// then anyway), and neither does a slot's first-ever occupant — nothing
+	// was inherited there.
+	//
+	// This runs BEFORE the `closed == nil` return on purpose. The commonest
+	// reconnect shape is vacate-then-connect, which the tracker reports as
+	// two separate events — a close with no open, then an open with no
+	// close — so a check placed after that return never fires on it and the
+	// restore reaches the corruption guard as a large delta. See the
+	// comment in handleFragUpdate for what that costs.
+	if opened != nil && a.timing.Started && a.occ.countForSlot(slot) > 1 {
+		a.fragResetPending[slot] = true
+	}
+
 	if closed == nil {
 		return
 	}
@@ -252,15 +270,6 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 				state.frags = 0
 			}
 		}
-	}
-
-	// A fresh connection took the slot mid-match: the next frag update is a
-	// KTX stats restore / initial scoreboard rather than a kill. Flag it so
-	// handleFragUpdate rebases instead of feeding the value to the
-	// corruption guard. Pre-match roster shuffles don't count (frags are 0
-	// then anyway).
-	if opened != nil && a.timing.Started {
-		a.fragResetPending[slot] = true
 	}
 }
 

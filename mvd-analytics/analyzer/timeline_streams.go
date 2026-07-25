@@ -26,29 +26,49 @@ import (
 // from the last recorded value. All callers pass integer milliseconds
 // (schema v8). One helper per element type — the int16 vitals/ammo/loc
 // streams and the string armor-type stream.
-func appendChangeI16(col *[]changeI16, tMs int32, v int16) {
-	if n := len(*col); n > 0 && (*col)[n-1].v == v {
+//
+// base is the column's dedup floor (changeDedupBase): entries at or below
+// it belong to a previous occupant of the wire slot, so a value equal to
+// one of them is not a repeat and must be recorded.
+func appendChangeI16(col *[]changeI16, base int, tMs int32, v int16) {
+	if n := len(*col); n > base && (*col)[n-1].v == v {
 		return
 	}
 	*col = append(*col, changeI16{t: tMs, v: v})
 }
 
-func appendChangeStr(col *[]changeStr, tMs int32, v string) {
-	if n := len(*col); n > 0 && (*col)[n-1].v == v {
+func appendChangeStr(col *[]changeStr, base int, tMs int32, v string) {
+	if n := len(*col); n > base && (*col)[n-1].v == v {
 		return
 	}
 	*col = append(*col, changeStr{t: tMs, v: v})
 }
 
 // record* dedup against the last seen value before appending.
-func (b *streamBuilder) recordHealth(tMs int32, v int16)     { appendChangeI16(&b.health, tMs, v) }
-func (b *streamBuilder) recordArmor(tMs int32, v int16)      { appendChangeI16(&b.armor, tMs, v) }
-func (b *streamBuilder) recordArmorType(tMs int32, v string) { appendChangeStr(&b.armorType, tMs, v) }
-func (b *streamBuilder) recordLoc(tMs int32, v int16)        { appendChangeI16(&b.loc, tMs, v) }
-func (b *streamBuilder) recordShells(tMs int32, v int16)     { appendChangeI16(&b.shells, tMs, v) }
-func (b *streamBuilder) recordNails(tMs int32, v int16)      { appendChangeI16(&b.nails, tMs, v) }
-func (b *streamBuilder) recordRockets(tMs int32, v int16)    { appendChangeI16(&b.rockets, tMs, v) }
-func (b *streamBuilder) recordCells(tMs int32, v int16)      { appendChangeI16(&b.cells, tMs, v) }
+func (b *streamBuilder) recordHealth(tMs int32, v int16) {
+	appendChangeI16(&b.health, b.dedupBase.health, tMs, v)
+}
+func (b *streamBuilder) recordArmor(tMs int32, v int16) {
+	appendChangeI16(&b.armor, b.dedupBase.armor, tMs, v)
+}
+func (b *streamBuilder) recordArmorType(tMs int32, v string) {
+	appendChangeStr(&b.armorType, b.dedupBase.armorType, tMs, v)
+}
+func (b *streamBuilder) recordLoc(tMs int32, v int16) {
+	appendChangeI16(&b.loc, b.dedupBase.loc, tMs, v)
+}
+func (b *streamBuilder) recordShells(tMs int32, v int16) {
+	appendChangeI16(&b.shells, b.dedupBase.shells, tMs, v)
+}
+func (b *streamBuilder) recordNails(tMs int32, v int16) {
+	appendChangeI16(&b.nails, b.dedupBase.nails, tMs, v)
+}
+func (b *streamBuilder) recordRockets(tMs int32, v int16) {
+	appendChangeI16(&b.rockets, b.dedupBase.rockets, tMs, v)
+}
+func (b *streamBuilder) recordCells(tMs int32, v int16) {
+	appendChangeI16(&b.cells, b.dedupBase.cells, tMs, v)
+}
 
 // recordPosition appends every native sample (no dedup; D11
 // asymmetry). Time is integer milliseconds — the canonical wire-native
@@ -108,7 +128,8 @@ func (s *intervalState) closeAtMatchEnd(tMs int32) {
 }
 
 // endOccupancy closes every open interval at tMs and clears the held
-// state, so the slot's *next* occupant starts from an empty inventory.
+// state, so the slot's *next* occupant starts from an empty inventory. It
+// also cuts the change streams' dedup floor.
 //
 // The closed records belong to the occupant who just left (their session
 // window ends at tMs, so appendSlice keeps them); what must not survive is
@@ -120,6 +141,13 @@ func (s *intervalState) closeAtMatchEnd(tMs int32) {
 // stale inventory for any genuine mid-match slot handover. The wire never
 // says the new occupant holds anything; only their own svc_updatestat
 // StatItems may open an interval.
+//
+// The dedup cut is the same defect one level down. Change streams suppress
+// a sample equal to the previous one, and the previous one belongs to the
+// departing occupant: a new occupant who spawns on 100 health after one who
+// left on 100 health gets no health sample at all, so their stream fragment
+// opens empty and every reader has to guess. The cut makes the first sample
+// after a handover unconditional and leaves dedup intact from there on.
 func (b *streamBuilder) endOccupancy(tMs int32) {
 	b.rl.closeAtMatchEnd(tMs)
 	b.lg.closeAtMatchEnd(tMs)
@@ -129,6 +157,16 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 	b.quad.closeAtMatchEnd(tMs)
 	b.pent.closeAtMatchEnd(tMs)
 	b.ring.closeAtMatchEnd(tMs)
+	b.dedupBase = changeDedupBase{
+		health:    len(b.health),
+		armor:     len(b.armor),
+		armorType: len(b.armorType),
+		loc:       len(b.loc),
+		shells:    len(b.shells),
+		nails:     len(b.nails),
+		rockets:   len(b.rockets),
+		cells:     len(b.cells),
+	}
 }
 
 // recordItemFlags is a one-shot helper called from the analyzer's
