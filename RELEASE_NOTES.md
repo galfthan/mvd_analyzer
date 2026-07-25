@@ -12,7 +12,9 @@ player counts across all 54 locally available demos: 50 agree and are
 sensible, four disagree, by three distinct mechanisms. No field was added,
 removed or retyped — `CurrentSchemaVersion` bumps to **v60** because served
 *values* move and the API cache is keyed on the version. The golden corpus
-was regenerated (one demo changed).
+was regenerated; two demos carry real value changes
+(`2on2_pys_wd_250426_aerowalk` and `4on4_jah_ahoy_170526_defer_reconnect`),
+the other eight only the version field.
 
 - **A departing player keeps their score.** When the server drops a client
   it zeroes the slot's frags and broadcasts the cleared state in the same
@@ -48,8 +50,8 @@ was regenerated (one demo changed).
   possession and powerup *intervals* are driven by `STAT_ITEMS` bit flips,
   so a departing player's open intervals stayed open *on the slot* and the
   next occupant inherited a full stale inventory from the instant their
-  userinfo landed — 3520 ms of RL/SNG/SSG "possession" (a `shareAlive` of
-  1.0) for a refused connection on `4on4_l_vs_la[e1m2]`. Intervals now
+  userinfo landed — 3520 ms of RL/SNG/SSG "possession" spanning the whole
+  stint of a refused connection on `4on4_l_vs_la[e1m2]`. Intervals now
   close at the handover and the held state is cleared, which also means a
   departing player's own intervals end when they left rather than at match
   end (`shiva`'s RL run is 17.8 s shorter, and correct). The *change*
@@ -63,6 +65,13 @@ was regenerated (one demo changed).
   recorded handover timestamps instead of measured as a column length. No
   demo in the local corpus hits the collision on any column, so no served
   value moves; it is a latent fix with unit tests.
+
+  One consequence of the same split *does* move a served value, in
+  `locGraph`. Ending an occupancy breaks the position track, so a player's
+  exit from the slot he left is no longer joined to his re-entry on the slot
+  he came back on. `4on4_jah_ahoy_170526_defer_reconnect` loses the
+  `Quad.low → Pent.MH` **teleport** edge (`rusti`, `jah`, total 1) that the
+  join invented — rusti did not teleport, he reconnected.
 
 Supporting changes:
 
@@ -100,9 +109,10 @@ Supporting changes:
   (`sv_main.c:538-556` checks uniqueness only against clients that are not
   `cs_free`, so a freed slot's id can be reissued; the pool is 1..99 on
   modern mvdsv but four-digit on the 2002-era demos, so the only portable
-  claim is "non-zero"). Five demos —
-  `4on4_oeks_vs_tsq[dm2]`, hub 212545, 216268, 216835 and 218909 (three
-  times) — had a real departure erased by the previous rule.
+  claim is "non-zero"). Replaying the pre-fix code over the 54 local demos
+  counts **18 erased departures on 10 demos**: `4on4_oeks_vs_tsq[dm2]` 1,
+  hub 212545 1, 216268 1, 216835 2, 218909 3, 218932 1, 218936 3, 220508 3,
+  220517 2 and 220520 1.
 - **Two occupancies that were live at the same instant are two people.**
   Without demoinfo, `*auth` or a KTX reconnect print the identity key
   degrades to the normalized netname, which strips case and punctuation, so
@@ -115,7 +125,12 @@ Supporting changes:
 - **The departure broadcast is bounded.** It names only a netname, so for an
   occupancy the server dropped it is accepted only in the same frame as the
   drop, and never after the match has ended (KTX guards its own print on
-  `match_in_progress == 2`; the pre-KTX mods do not).
+  `match_in_progress == 2`; the pre-KTX mods do not). It is also refused
+  when it announces the `-999` spectator sort marker, the same value
+  `svc_updatefrags` is already screened for: the broadcast renders the edict
+  count verbatim, and this recovery adopts it as the occupancy's final score
+  without further test. No local demo announces one — `dag_caps_e1m2` has
+  the sentinel five times but never on a departure line.
 - **A reconnecting player's timeline score no longer freezes.** The
   frag-reset rebase was armed only on the takeover shape, but the common
   reconnect is vacate-then-connect, which the tracker reports as a close
@@ -126,9 +141,15 @@ Supporting changes:
   a slot the recording has never seen occupied: a reconnect takes the first
   `cs_free` slot (`CountPlayersSpecsVips`, `sv_main.c:1137-1145`) rather
   than the one it just vacated, so on a demo that started mid-game the
-  receiving slot may carry no occupancy history at all. It costs nothing on
-  a genuinely new connection, whose first `svc_updatefrags` is the server's
-  own 0.
+  receiving slot may carry no occupancy history at all. The arm is spent on
+  the very next `svc_updatefrags` for that slot and rebases only a value the
+  ±5 guard would have rejected anyway — it has to be that narrow, because
+  `SV_FullClientUpdate` writes the frag update *before* the userinfo
+  (`sv_main.c:481-513`, copied into the demo as one `dem_all` block by
+  `sv_send.c:1060-1064`), so a new client's own 0 arrives one event ahead of
+  the arm and the update after it is the player's first kill. No served
+  value moves on the 54 local demos: of the 26 arms consumed there, 24 carry
+  a delta of 0 and the two on 216835 are the +16 restore.
 - **A roster broadcast can state a negative frag count.** `"<name> left the
   game with -3 frags"` is what a player who suicided below zero is
   announced with — both the departure and the rejoin lines print the edict
