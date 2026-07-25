@@ -92,6 +92,13 @@ func (a *TimelineAnalyzer) SetRegionsOverride(regs []config.MapRegionOverride) {
 	a.regionsOverride = regs
 }
 
+// fragDeltaLimit is the largest scoreboard movement one svc_updatefrags can
+// honestly report. Nothing in QuakeWorld scores more than a handful of frags
+// in a single server frame, so a bigger jump is either a misaligned read or a
+// KTX stats restore onto a slot that just changed hands — see
+// handleFragUpdate, which is the only place that tells those two apart.
+const fragDeltaLimit = 5
+
 // fragEvent tracks a frag before team assignment
 type fragEvent struct {
 	Time      int32 // demo-clock ms
@@ -226,11 +233,10 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 
 	closed, opened := a.occ.onUserInfo(e)
 
-	// A fresh connection took the slot mid-match: the next frag update is a
-	// KTX stats restore / initial scoreboard rather than a kill. Flag it so
-	// handleFragUpdate rebases instead of feeding the value to the
-	// corruption guard. Pre-match roster shuffles don't count — frags are 0
-	// then anyway.
+	// A fresh connection took the slot mid-match: its next frag update may be
+	// a KTX stats restore rather than a kill. Flag it so handleFragUpdate can
+	// rebase that one value instead of feeding it to the corruption guard.
+	// Pre-match roster shuffles don't count — frags are 0 then anyway.
 	//
 	// Every mid-match connect arms it, including one onto a slot this
 	// recording has never seen occupied. A reconnect systematically lands on
@@ -243,10 +249,19 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	// the case the rebase exists for: replaying gameId 216835 without slot
 	// 2's pre-t=613452 userinfo (a demo whose recording began a few seconds
 	// later) leaves 34 frag updates rejected and rusti's 28 post-reconnect
-	// kills missing from the timeline. Arming on a first occupancy costs
-	// nothing in return: a genuinely new connection's first frag update is
-	// the server's own 0, so the rebase adopts the 0 the cursor already
-	// holds. Verified across the 54 local demos — no frag delta is eaten.
+	// kills missing from the timeline.
+	//
+	// Arming on every connect is only safe because handleFragUpdate consumes
+	// the flag on the *first* frag update that follows and rebases only when
+	// the value is one the corruption guard would have rejected anyway. It
+	// has to be that narrow: SV_FullClientUpdate writes svc_updatefrags
+	// FIRST and svc_updateuserinfo LAST into sv.reliable_datagram
+	// (mvdsv/src/sv_main.c:481-513), which SV_UpdateToReliableMessages
+	// flushes whole into the demo as a single dem_all block
+	// (sv_send.c:1059-1065), so a new client's own 0 arrives one event
+	// BEFORE this arm, not after it. The next frag update on the slot is
+	// therefore the player's first kill unless KTX restored a total in
+	// between — and an unconditional rebase would swallow it.
 	//
 	// This runs BEFORE the `closed == nil` return on purpose. The commonest
 	// reconnect shape is vacate-then-connect, which the tracker reports as
@@ -324,18 +339,32 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	}
 
 	// A mid-match occupant change on this wire slot (flagged by onUserInfo)
-	// means this frag value is a KTX stats restore / initial scoreboard for
-	// the new occupant, not a kill. Adopt it as the new baseline and emit
-	// nothing. Without this, a reconnecting player whose frag total KTX
-	// restores onto a new slot (gameId 216835: rusti rejoins onto a vacated
-	// spectator slot with 16 frags) reads as a huge +delta, gets rejected by
-	// the corruption guard below, and — because that guard leaves state.frags
-	// at 0 — every later real +1 keeps reading as a huge delta and is also
-	// rejected, freezing the player's timeline score for the rest of the match.
+	// turns the FIRST frag update that follows into a candidate KTX stats
+	// restore: adopt it as the new baseline and emit nothing, rather than
+	// letting the corruption guard reject it. Without this, a reconnecting
+	// player whose frag total KTX restores onto a new slot (gameId 216835:
+	// rusti rejoins onto a vacated spectator slot with 16 frags) reads as a
+	// huge +delta, gets rejected by the corruption guard below, and — because
+	// that guard leaves state.frags at 0 — every later real +1 keeps reading
+	// as a huge delta and is also rejected, freezing the player's timeline
+	// score for the rest of the match.
+	//
+	// Only a value the guard would reject is rebased. A connect's own
+	// svc_updatefrags precedes its svc_updateuserinfo on the wire (see the
+	// comment in handleUserInfo), so on a genuinely new connection the first
+	// update after the arm is the player's first kill: rebasing it
+	// unconditionally silently ate that frag. Restricting the rebase to
+	// out-of-range values loses nothing — a restore small enough to pass the
+	// guard cannot be told from a kill and is accepted either way — and it
+	// bounds the damage a stale arm can do, since the flag has no expiry
+	// (216268 slot 5 stays armed for 25 s) and would otherwise let a genuine
+	// misaligned read install itself as the baseline.
 	if a.fragResetPending[e.PlayerNum] {
 		a.fragResetPending[e.PlayerNum] = false
-		state.frags = e.Frags
-		return
+		if d := e.Frags - state.frags; d > fragDeltaLimit || d < -fragDeltaLimit {
+			state.frags = e.Frags
+			return
+		}
 	}
 
 	// Track frag changes (both increases and decreases)
@@ -344,12 +373,13 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 		delta := e.Frags - state.frags
 		// Sanity check: filter unreasonable deltas caused by parsing artifacts
 		// (e.g., misaligned reads producing garbage frag values).
-		// No player can gain or lose >5 frags in a single server frame.
+		// No player can gain or lose more than fragDeltaLimit frags in a
+		// single server frame.
 		// When a corrupt value arrives, do NOT update state.frags — keep the
 		// last known good value. The next valid update will naturally produce
 		// the correct cumulative delta (e.g., corrupt reads 9→272, correction
 		// reads 272→10, but by keeping state at 9 the correction gives delta +1).
-		if delta >= -5 && delta <= 5 {
+		if delta >= -fragDeltaLimit && delta <= fragDeltaLimit {
 			a.rawFrags = append(a.rawFrags, fragEvent{
 				Time:      e.TimeMs,
 				PlayerNum: e.PlayerNum,

@@ -13,7 +13,7 @@ import (
 // still open. Carrying that open anchor into the next occupancy makes the
 // new client appear to hold the item from the instant their userinfo lands
 // — on 4on4_l_vs_la[e1m2] that fabricated 3520 ms of RL/SNG/SSG possession
-// (and a shareAlive of 1.0) for a connection the server had refused. The
+// spanning the whole of a refused connection's stint. The
 // departing player keeps the interval, closed at the moment they left.
 func TestStreams_ItemStateDoesNotCrossOccupancyHandover(t *testing.T) {
 	a := NewTimelineAnalyzer()
@@ -139,9 +139,8 @@ func TestTimeline_FragResetArmedOnVacateThenReconnect(t *testing.T) {
 	}
 	// rusti's userinfo comes off the MVD header's full-state block, before
 	// the match starts — the real wire order on 216835 (MVD_FORMAT.md,
-	// "svc_setinfo carries no identity"). A connect during the match would
-	// arm the rebase, and the server's own svc_updatefrags 0 in the same
-	// frame would consume it; see TestTimeline_FragResetOnFreshConnectEatsNoDelta.
+	// "svc_setinfo carries no identity"), so nothing is armed for the first
+	// half.
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 0,
 	})
@@ -234,29 +233,39 @@ func TestTimeline_FragResetArmedOnFirstOccupancyOfSlot(t *testing.T) {
 
 // The other half of the same rule: a genuinely new connection mid-match
 // (nobody reconnecting, no stats to restore) must not lose its first real
-// frag to the rebase. The server's own first svc_updatefrags for a fresh
-// client is 0 — SVC_DirectConnect memsets the slot and SV_FullClientUpdate
-// writes old_frags — so the rebase adopts a value the cursor already holds
-// and the kill that follows still scores.
+// frag to the rebase.
+//
+// The order below is the wire's, not a convenient one. SV_FullClientUpdate
+// writes svc_updatefrags FIRST and svc_updateuserinfo LAST into a single
+// buffer (mvdsv/src/sv_main.c:481-513) which sv_send.c:1060-1064 copies
+// verbatim into the demo as one dem_all block, so the new client's own 0
+// arrives BEFORE the userinfo that arms the rebase — and the update AFTER
+// it is the player's first kill. A rebase that fires on any value therefore
+// eats that kill; only rebasing a value the corruption guard would have
+// rejected leaves it alone. Measured: with an unconditional rebase this
+// slot scores 15, not 16.
 func TestTimeline_FragResetOnFreshConnectEatsNoDelta(t *testing.T) {
 	a := NewTimelineAnalyzer()
 	if err := a.Init(&Context{}); err != nil {
 		t.Fatal(err)
 	}
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 300_000})
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 4, UserID: 31, Name: "latecomer"}, TimeMs: 300_000,
 	})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 300_000})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 1, TimeMs: 310_000})
-
-	sum := 0
-	for _, f := range a.rawFrags {
-		if f.PlayerNum == 4 {
-			sum += f.Delta
-		}
+	for i := 1; i <= 16; i++ {
+		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: i, TimeMs: int32(300_000 + 1000*i)})
 	}
-	if sum != 1 {
-		t.Errorf("slot 4 frag deltas sum to %d, want 1 — the rebase must not swallow the first real kill", sum)
+	// The arm is spent on the first update after the connect, so a garbage
+	// read later in the same occupancy is still the corruption guard's
+	// business — it must be rejected, not adopted as a baseline.
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 272, TimeMs: 400_000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 17, TimeMs: 401_000})
+
+	n, sum := sumDeltasForSlot(a, 4)
+	if n != 17 || sum != 17 {
+		t.Errorf("slot 4: %d frag events summing %d, want 17/17 — the rebase must not swallow the first real kill, "+
+			"and a stale arm must not adopt the 272", n, sum)
 	}
 }
