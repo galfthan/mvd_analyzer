@@ -226,12 +226,27 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 
 	closed, opened := a.occ.onUserInfo(e)
 
-	// A fresh connection took over the slot mid-match: the next frag update
-	// is a KTX stats restore / initial scoreboard rather than a kill. Flag
-	// it so handleFragUpdate rebases instead of feeding the value to the
-	// corruption guard. Pre-match roster shuffles don't count (frags are 0
-	// then anyway), and neither does a slot's first-ever occupant — nothing
-	// was inherited there.
+	// A fresh connection took the slot mid-match: the next frag update is a
+	// KTX stats restore / initial scoreboard rather than a kill. Flag it so
+	// handleFragUpdate rebases instead of feeding the value to the
+	// corruption guard. Pre-match roster shuffles don't count — frags are 0
+	// then anyway.
+	//
+	// Every mid-match connect arms it, including one onto a slot this
+	// recording has never seen occupied. A reconnect systematically lands on
+	// a *different* slot from the one just freed: SV_DropClient leaves the
+	// departing client in cs_zombie (mvdsv/src/sv_main.c:412) and
+	// CountPlayersSpecsVips hands SVC_DirectConnect the first cs_free slot
+	// (:1137-1145), so the returning player takes the lowest index nobody is
+	// on — which on a recording that started mid-game may carry no earlier
+	// occupancy at all. Gating on a prior occupancy therefore misses exactly
+	// the case the rebase exists for: replaying gameId 216835 without slot
+	// 2's pre-t=613452 userinfo (a demo whose recording began a few seconds
+	// later) leaves 34 frag updates rejected and rusti's 28 post-reconnect
+	// kills missing from the timeline. Arming on a first occupancy costs
+	// nothing in return: a genuinely new connection's first frag update is
+	// the server's own 0, so the rebase adopts the 0 the cursor already
+	// holds. Verified across the 54 local demos — no frag delta is eaten.
 	//
 	// This runs BEFORE the `closed == nil` return on purpose. The commonest
 	// reconnect shape is vacate-then-connect, which the tracker reports as
@@ -239,7 +254,7 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	// close — so a check placed after that return never fires on it and the
 	// restore reaches the corruption guard as a large delta. See the
 	// comment in handleFragUpdate for what that costs.
-	if opened != nil && a.timing.Started && a.occ.countForSlot(slot) > 1 {
+	if opened != nil && a.timing.Started {
 		a.fragResetPending[slot] = true
 	}
 

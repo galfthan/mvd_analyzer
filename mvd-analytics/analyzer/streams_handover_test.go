@@ -137,10 +137,15 @@ func TestTimeline_FragResetArmedOnVacateThenReconnect(t *testing.T) {
 	if err := a.Init(&Context{}); err != nil {
 		t.Fatal(err)
 	}
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	// rusti's userinfo comes off the MVD header's full-state block, before
+	// the match starts — the real wire order on 216835 (MVD_FORMAT.md,
+	// "svc_setinfo carries no identity"). A connect during the match would
+	// arm the rebase, and the server's own svc_updatefrags 0 in the same
+	// frame would consume it; see TestTimeline_FragResetOnFreshConnectEatsNoDelta.
 	_ = a.OnEvent(&events.UserInfoEvent{
-		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 2000,
+		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 0,
 	})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
 	for i := 1; i <= 16; i++ {
 		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: i, TimeMs: int32(10_000 * i)})
 	}
@@ -173,5 +178,85 @@ func TestTimeline_FragResetArmedOnVacateThenReconnect(t *testing.T) {
 	}
 	if sum != 17 {
 		t.Errorf("timeline frag deltas sum to %d, want 17", sum)
+	}
+}
+
+// The reconnect does not land on the slot that was just freed. SV_DropClient
+// leaves the departing client in cs_zombie (mvdsv/src/sv_main.c:412) and
+// SVC_DirectConnect takes the first cs_free slot (CountPlayersSpecsVips,
+// :1137-1145), so the returning player gets the lowest index nobody is on —
+// typically a *lower* one, and on a recording that started mid-game one with
+// no earlier occupancy in the demo at all.
+//
+// The rebase must therefore arm on a mid-match connect to a slot the demo
+// has never seen occupied. Shape from gameId 216835 with the recording
+// starting after the spectator on slot 2 had already left: rusti is dropped
+// from slot 7 on 16 frags and KTX restores them onto slot 2.
+func TestTimeline_FragResetArmedOnFirstOccupancyOfSlot(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 0,
+	})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	for i := 1; i <= 16; i++ {
+		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: i, TimeMs: int32(10_000 * i)})
+	}
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 613_452, Vacated: true,
+	})
+	// He comes back on slot 2, which this recording has never seen occupied.
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 2, UserID: 21, Name: "rusti"}, TimeMs: 613_500,
+	})
+	if !a.fragResetPending[2] {
+		t.Fatal("a first occupancy of slot 2 did not arm fragResetPending — the restore below will be rejected")
+	}
+	// KTX restores the 16 onto the new slot, then rusti gets one more frag.
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 2, Frags: 16, TimeMs: 614_000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 2, Frags: 17, TimeMs: 629_000})
+
+	if got := a.playerState[2].frags; got != 17 {
+		t.Errorf("state.frags = %d, want 17 — the restore must rebase, not freeze the cursor", got)
+	}
+	sum := 0
+	for _, f := range a.rawFrags {
+		if f.PlayerNum == 2 {
+			sum += f.Delta
+		}
+	}
+	if sum != 1 {
+		t.Errorf("slot 2 frag deltas sum to %d, want 1 — the restored 16 is a rebase, the later kill is a +1", sum)
+	}
+}
+
+// The other half of the same rule: a genuinely new connection mid-match
+// (nobody reconnecting, no stats to restore) must not lose its first real
+// frag to the rebase. The server's own first svc_updatefrags for a fresh
+// client is 0 — SVC_DirectConnect memsets the slot and SV_FullClientUpdate
+// writes old_frags — so the rebase adopts a value the cursor already holds
+// and the kill that follows still scores.
+func TestTimeline_FragResetOnFreshConnectEatsNoDelta(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 4, UserID: 31, Name: "latecomer"}, TimeMs: 300_000,
+	})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 300_000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 1, TimeMs: 310_000})
+
+	sum := 0
+	for _, f := range a.rawFrags {
+		if f.PlayerNum == 4 {
+			sum += f.Delta
+		}
+	}
+	if sum != 1 {
+		t.Errorf("slot 4 frag deltas sum to %d, want 1 — the rebase must not swallow the first real kill", sum)
 	}
 }

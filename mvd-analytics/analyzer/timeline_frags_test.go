@@ -31,7 +31,6 @@ func sumDeltasForSlot(a *TimelineAnalyzer, slot int) (int, int) {
 // the slot silently, so the post-reconnect kills accrue as +1 each.
 func TestFragUpdate_ReconnectRebasesScore(t *testing.T) {
 	a := NewTimelineAnalyzer()
-	a.timing.Started = true
 
 	feed := func(ev events.Event) { _ = a.OnEvent(ev) }
 	userinfo := func(slot, uid int, name string, tMs int32) {
@@ -43,8 +42,12 @@ func TestFragUpdate_ReconnectRebasesScore(t *testing.T) {
 		feed(&events.FragUpdateEvent{PlayerNum: slot, Frags: frags, TimeMs: tMs})
 	}
 
-	// First half: rusti on slot 7, 16 kills.
+	// First half: rusti on slot 7, 16 kills. His userinfo comes off the MVD
+	// header's full-state block, before the match starts — a connect *during*
+	// the match arms the rebase, and the server's own svc_updatefrags 0 in
+	// the same frame consumes it (see TestTimeline_FragResetOnFreshConnectEatsNoDelta).
 	userinfo(7, 8, "rusti", 0)
+	a.timing.Started = true
 	for f := 1; f <= 16; f++ {
 		frag(7, f, int32(f)*1000)
 	}
@@ -82,9 +85,10 @@ func TestFragUpdate_ReconnectRebasesScore(t *testing.T) {
 // held, so the correcting update produces the right cumulative delta.
 func TestFragUpdate_TransientCorruptionStillRejected(t *testing.T) {
 	a := NewTimelineAnalyzer()
-	a.timing.Started = true
 	feed := func(ev events.Event) { _ = a.OnEvent(ev) }
+	// Pre-match userinfo, as the header's full-state block delivers it.
 	feed(&events.UserInfoEvent{Player: &events.PlayerInfo{Slot: 3, UserID: 42, Name: "p", Team: "red"}, TimeMs: 0})
+	a.timing.Started = true
 
 	// Climb to 9 the honest way (+1 each), so the baseline is legitimately 9.
 	for f := 1; f <= 9; f++ {
