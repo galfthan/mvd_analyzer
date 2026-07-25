@@ -223,6 +223,60 @@ func TestMatchAnalyzer_OverlappingOccupanciesAreNotOneIdentity(t *testing.T) {
 	}
 }
 
+// The overlap veto needs BOTH sides to be identified connections. A record
+// with no userid of its own is not a second human, and KTX publishes
+// exactly such a thing: ghost2scores (ktx/src/g_utils.c:2272-2356) writes a
+// departed player's scoreboard row onto a spare client slot with a
+// hardcoded `WriteLong(to, 0)` userid, followed by SVC_UPDATEFRAGS carrying
+// a copy of his frags. It overlaps his own occupancy in time, so a veto
+// that ignored the userid would split him into two rows and double-count
+// the score.
+//
+// Shape from hub gameId 216835: rusti on slot 7, his ghost on slot 10.
+func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
+	// Both spellings resolve to one identity — the ghost's 0x83-prefixed
+	// netname normalises onto rusti's, which is what identity.go publishes.
+	sessions := map[int][]ResolvedSession{
+		7:  {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
+		10: {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
+	}
+	for _, tc := range []struct {
+		name     string
+		ghostUID int
+		want     int
+	}{
+		{"ghost (userid 0)", 0, 1},
+		// The contrast: give the second occupancy a userid of its own and
+		// it is a second human sharing a name, which must not be folded.
+		{"real connection (userid 12)", 12, 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMatchAnalyzer()
+			if err := a.Init(&Context{}); err != nil {
+				t.Fatal(err)
+			}
+			a.UseCoreOutputs(&CoreOutputs{Sessions: sessions})
+
+			_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 0))
+			_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 16, TimeMs: 60000})
+			// The ghost lands while slot 7's occupancy is still open.
+			_ = a.OnEvent(matchUserInfo(10, tc.ghostUID, "# rusti", "jah", 61000))
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 10, Frags: 16, TimeMs: 61000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 17, TimeMs: 90000})
+
+			var res Result
+			if err := a.Finalize(&res); err != nil {
+				t.Fatal(err)
+			}
+			if len(res.Match.Players) != tc.want {
+				t.Fatalf("match.players = %+v, want %d row(s)", res.Match.Players, tc.want)
+			}
+		})
+	}
+}
+
 // The same identity key on two occupancies that do NOT overlap is one
 // human reconnecting, and stays one row carrying the later stint's score.
 func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
