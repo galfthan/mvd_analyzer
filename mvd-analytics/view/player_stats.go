@@ -100,7 +100,7 @@ var ktxItemKind = map[string]string{
 //
 //   - score: NEVER overlaid. KTX over-counts pentagram-deflect telefrags
 //     (dtTELE2), credits world-dealt suicides to the world entity
-//     (ktx/src/client.c:5132), and resets after a reconnect.
+//     (ktx/src/client.c:4951), and resets after a reconnect.
 //   - damage: given / givenTeam / givenSelf / enemyWeapons / teamWeapons
 //     come from KTX. takenEnemy and takenToDie prefer KTX's but fall back
 //     to the analyzer's reconstruction from the per-hit log, so they are
@@ -232,24 +232,25 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 	out.GivenTeam = di.Dmg.Team
 	out.GivenSelf = di.Dmg.Self
 	out.EnemyWeapons = di.Dmg.EnemyWeapons
-	if di.Dmg.TeamWeapons != 0 {
-		tw := di.Dmg.TeamWeapons
-		out.TeamWeapons = &tw
-	}
+	// Presence, not non-zero-ness. KTX writes the whole dmg block in one
+	// unconditional statement (ktx/src/stats_json.c:353-357), so a non-nil
+	// di.Dmg means every field in it was measured — including a real 0. A
+	// `!= 0` test here would drop the friendly-fire figure for the player
+	// who dealt none, which is the same measured-zero-becomes-absent bug
+	// the cache codec exists to prevent (result/cache.go).
+	tw := di.Dmg.TeamWeapons
+	out.TeamWeapons = &tw
 	takenEnemy := di.Dmg.Taken
 	out.TakenEnemy = &takenEnemy
-	switch {
-	case di.Dmg.TakenToDie == ktxNoDeathsSentinel:
+	if di.Dmg.TakenToDie == ktxNoDeathsSentinel {
 		// KTX writes 99999 rather than dividing by zero
 		// (ktx/src/stats_json.c:357). It is a sentinel, not a measurement,
 		// so it must not reach a consumer as a number — fall through to the
 		// derived value, which omits the field when the player never died.
 		out.TakenToDie = derivedTakenToDie(derived)
-	case di.Dmg.TakenToDie != 0:
+	} else {
 		ttd := di.Dmg.TakenToDie
 		out.TakenToDie = &ttd
-	default:
-		out.TakenToDie = derivedTakenToDie(derived)
 	}
 	return &out
 }

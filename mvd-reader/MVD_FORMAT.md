@@ -1369,14 +1369,20 @@ The full table is `parser.MatchStartPatterns` (`mvd-reader/parser/print.go`),
 reproduced here in its entirety — all six entries, matched as
 case-insensitive substrings:
 
-| Pattern | Server Type | Notes |
-|---------|-------------|-------|
-| `"has begun"` | KTX, kmod, qwe | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1173`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" |
-| `"match started"` | misc | |
-| `"fight!"` | KTX/MVDSV | End of countdown |
-| `"go!"` | Some servers | Alternative to "Fight!" — the loosest entry in the table, which is why chat is refused (below) |
-| `"begins in 1"` | KTX | The final countdown line; fires ~1 s *before* the start print |
-| `"game start"` | misc | |
+| Pattern | Provenance | Notes |
+|---------|-----------|-------|
+| `"has begun"` | **verified** in `ktx/` | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1173`, a `G_bprint`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). This is the entry that fires on a modern KTX demo. |
+| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` (`ktx/src/arena.c:602-618`, `clan_arena.c`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
+| `"go!"` | unverified | The loosest entry in the table — a bare `"go!"` substring. It is why chat is refused (below). |
+| `"match started"` | unverified | Not found in `ktx/`, `mvdsv/` or `ezquake-source/`. |
+| `"begins in 1"` | unverified | Not found in the vendored trees. If some mod does emit it, note it fires ~1 s *before* the start proper. |
+| `"game start"` | unverified | Not found in the vendored trees. |
+
+The last four entries predate this table and are kept because removing a
+pattern can only lose match-start detection on a mod nobody here has a
+demo for. They are marked unverified rather than quietly attributed to
+KTX: the only phrase this repo can prove a current KTX server broadcasts
+is `"has begun"`.
 
 **Implementation note**: match on the substring `"has begun"`, not
 `"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast
@@ -1388,7 +1394,7 @@ shut, so the demo also reports zero deaths. Both failures are silent.
 The table is shared with the analytics `MatchTimingDetector`, so the two
 consumers cannot drift.
 
-**Chat is refused.** Every phrase above is a server broadcast
+**Chat is refused.** These phrases are meant to match server broadcasts
 (`G_bprint` at PRINT_MEDIUM/PRINT_HIGH), and the gate never resets once
 flipped, so a single prewar `"go go go!"` in `say_team` would open the
 obituary-death path for the rest of the demo. Both consumers skip
@@ -1424,9 +1430,12 @@ The match ends when one of these messages appears:
 [5.2s]   "The match begins in 10 seconds"
 [10.2s]  "The match begins in 5"
 ...
-[14.2s]  "The match begins in 1"   <- matchStartTime (matches "begins in 1")
-[15.2s]  "Fight!"                  <- would also have matched, but the gate
-                                     is idempotent and already flipped
+[14.2s]  "The match begins in 1"   <- matches the unverified "begins in 1"
+                                     entry, so the gate flips HERE on a mod
+                                     that emits this line
+[15.2s]  "The match has begun!"    <- matchStartTime on a real KTX demo
+                                     (KTX's own "FIGHT!" is a centerprint
+                                     and never reaches this matcher)
 [15.3s]  First valid player state updates
 ...
 [1215.2s] "The match is over"  <- matchEndTime (20 min match)

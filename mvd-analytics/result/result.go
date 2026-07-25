@@ -202,7 +202,7 @@ package result
 //     deaths to the wrong entity — pentagram-deflect telefrags (dtTELE2)
 //     inflate the deflector's kills, and world-dealt suicides (fall/lava/
 //     squish/drown) bump the world entity's counter, not the victim's
-//     (ktx/src/client.c:5132), so demoinfo undercounts suicides. 0 when the
+//     (ktx/src/client.c:4951), so demoinfo undercounts suicides. 0 when the
 //     demo carried no frag log. The API /overview player rows surface the
 //     same Kills/Deaths/Suicides so non-web consumers get the correction the
 //     web UI already applied. Field additions only.

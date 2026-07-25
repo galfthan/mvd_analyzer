@@ -710,7 +710,7 @@ top level is the roll-up.
 
 KTX tracks weapon hold time internally (`ps.wpn[].time`) but
 `json_weap_detail` never writes it to the demoinfo block
-(`ktx/src/stats_json.c:126-205` emits acc/kills/deaths/pickups/damage
+(`ktx/src/stats_json.c:132-217` emits acc/kills/deaths/pickups/damage
 only); it reaches just the end-of-match text tables
 (`ktx/src/statsTables.c:390`). **No demo of any age carries weapon hold
 time.**
@@ -754,7 +754,7 @@ stays consistent with the timeline's powerup runs.
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score), `kills`, `deaths`, `suicides`, `teamKills`, `efficiency`, plus `byWeapon` — enemy kills split by weapon, from the corrected frag log and never overlaid. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map. `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
 
@@ -764,7 +764,7 @@ KTX's `rhits` / `vhits` (`ktx/src/combat.c:1085,1100`) exist on **rl and
 gl only** and count **victims damaged by a blast**, not rockets that hit:
 one rocket splashing three players adds three. They therefore routinely
 EXCEED `hits`, which for rl/gl is the *direct-impact* count — the rocket
-entity touching a player (`ktx/src/weapons.c:994`). A 2022 dm3 demo in
+entity touching a player (`ktx/src/weapons.c:994 for rl, :1329 for gl`). A 2022 dm3 demo in
 the corpus reads `rl: {attacks: 110, hits: 13, real: 55, virtual: 55}`;
 that is not a contradiction, it is three different counters.
 
@@ -822,8 +822,12 @@ keyed `ra`, `ya`, `ga` and **`none`**, the alive-time complement: how
 long the player ran with no armor at all, a stat KTX structurally
 cannot produce. `ga + ya + ra + none == aliveMs` exactly.
 `powerups` is keyed `quad`, `pent`, `ring`. A key the player never held
-is **omitted**, not zero-filled (`none` is the exception — it is always
-present, including at zero).
+is **omitted**, not zero-filled. `none` is the near-exception: it is
+emitted at zero as well, since "never without armor" is a real reading —
+but only when the alive window is known. A row with `aliveMs` 0 (a
+scoreboard-only player who connected but never streamed) carries
+`hold: {"src": "derived"}` and no `armor` map at all, so read
+`hold.armor?.none` rather than assuming the key.
 
 | Field | Meaning |
 |---|---|
@@ -840,6 +844,19 @@ present, including at zero).
 maps KTX's onto it when overlaying (`health_100`→`mh`, `q`/`p`/`r`→
 `quad`/`pent`/`ring`).
 
+**The key SET depends on `src`.** A KTX overlay carries KTX's own weapon
+vocabulary (`WpName`, `ktx/src/stats.c:358`), which includes **`axe` and
+`sg`** — weapons the derived path never emits, since the shotgun and axe
+are spawn equipment nobody picks up. Iterate the map rather than
+assuming a fixed key list.
+
+Absence is not uniform in this struct, which is a wart worth stating
+plainly: `took` / `totalTook` / `dropped` are plain ints under
+`omitempty`, so **absent means zero** (a drop-only entry serializes as
+`{"dropped": 2}`). `xfer` / `xferSelf` are pointers, so **absent means
+unobservable** — the demo carried no `//ktx bp` hints. Read the first
+three with `?? 0` and the last two with an explicit null check.
+
 | Field | Meaning |
 |---|---|
 | `took` | Acquisitions that granted the item — for weapons, pickups where the player did not already hold it (KTX `wpn.tooks`). |
@@ -850,7 +867,7 @@ maps KTX's onto it when overlaying (`health_100`→`mh`, `q`/`p`/`r`→
 Non-weapon tallies come from the item timeline; weapon tallies come
 from `weaponPickups`, because a weapon can also arrive in a backpack,
 which the item timeline never sees and KTX's `wpn.tooks` does count
-(`TookWeaponHandler` runs on backpack touch, `ktx/src/items.c:2470`).
+(`TookWeaponHandler` runs on backpack touch, `ktx/src/items.c:2475`).
 
 **Transfers.** KTX's `xferRL`/`xferLG` (`ktx/src/items.c:2586-2615`)
 credit the dropper when a pack whose contents are exactly the RL (or

@@ -87,7 +87,8 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
 	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
 	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
-	// player-stats is computed for every demo, so it never 422s. It routes
+	// player-stats is computed for every demo that produced player streams,
+	// so a missing KTX block never 422s (only a stream-less parse does). It routes
 	// through the view so the artifact carries the same KTX overlay the
 	// curated endpoint serves — the stored section is derived-only, and
 	// serving it raw here would hand two different answers to the same

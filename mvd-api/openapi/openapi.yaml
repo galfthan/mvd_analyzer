@@ -490,7 +490,8 @@ paths:
 
 
         Available on EVERY demo, including ones with no KTX demoinfo block
-        (it never 422s). Each stat family carries `src` ("derived" | "ktx")
+        (a missing KTX block is never a reason to 422 — see the 422 response
+        below for the one case that is). Each stat family carries `src` ("derived" | "ktx")
         naming its source, with a `sources` roll-up; `/demoinfo` stays the
         verbatim KTX pass-through to diff against.
 
@@ -5487,7 +5488,11 @@ components:
               properties:
                 src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
                 byKind:
-                  description: "Tally per item kind."
+                  description: >
+                    Tally per item kind. With src=ktx the key set can additionally include
+                    `axe` and `sg`, which KTX counts (its WpName vocabulary, ktx/src/stats.c:358)
+                    and the derived path never emits — so the KEY SET depends on src, not just
+                    the values. Iterate the map; do not assume a fixed key list.
                   additionalProperties: { $ref: "#/components/schemas/PlayerStatsPickup" }
                   type: object
               required: [src, byKind]
@@ -7181,7 +7186,7 @@ components:
           additionalProperties: false
           properties:
             playerStats:
-              description: Canonical per-player statistics section (null only on a degraded result with no streams).
+              description: Canonical per-player statistics section. Never null — a degraded result with no player streams 422s instead.
               oneOf:
                 - $ref: "#/components/schemas/PlayerStats"
                 - type: "null"

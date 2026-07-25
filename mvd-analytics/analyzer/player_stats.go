@@ -382,7 +382,7 @@ func deriveLogins(co *CoreOutputs) map[string]string {
 // spawners), weapons from WeaponPickups — because a weapon can also arrive
 // in a backpack, which the item timeline knows nothing about and KTX's
 // wpn.tooks does count (TookWeaponHandler runs on backpack touch too,
-// ktx/src/items.c:2470).
+// ktx/src/items.c:2475).
 //
 // Returns nil when the demo carries neither source.
 func derivePickups(res *Result, xferOK bool) map[string]map[string]result.PlayerStatsPickup {
@@ -677,8 +677,6 @@ func armorRuns(at []result.ChangeStr, matchMs int32) []armorRun {
 // largest interval between samples for every player, reconnects
 // included. See player_stats.md for the resulting limitation.
 func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
-	full := []result.Interval{{Start: 0, End: matchMs}}
-
 	first, last, ok := int32(0), int32(0), false
 	note := func(t int32) {
 		if !ok {
@@ -705,7 +703,27 @@ func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
 		note(p.Deaths[len(p.Deaths)-1])
 	}
 	if !ok {
-		return full
+		// No position track, no spawns, no deaths. Falling back to the whole
+		// match here used to report such a player as alive for every
+		// millisecond of it — on 4on4_l_vs_la[e1m2], Sectoid's entire
+		// recorded existence is 3.5 s of possession at the very end of an
+		// 18-minute match, and he was served aliveMs = 1097743 with
+		// "no armor 100%". That is a fabricated maximum, and it also
+		// inflates the team's alive-time and matchMs x members denominators
+		// for everyone else.
+		//
+		// The possession streams ARE evidence of presence — deriveHold
+		// integrates them a few lines later — so use their extent. A player
+		// with no signal of any kind gets an empty window (presentMs 0),
+		// which is the scoreboard-only shape and reads as "we never saw
+		// them play" rather than "they played the whole match".
+		for _, iv := range possessionExtent(p) {
+			note(iv.Start)
+			note(iv.End)
+		}
+		if !ok {
+			return nil
+		}
 	}
 	if first < 0 {
 		first = 0
@@ -717,6 +735,25 @@ func presenceWindow(p *result.PlayerStream, matchMs int32) []result.Interval {
 		return nil
 	}
 	return []result.Interval{{Start: first, End: last}}
+}
+
+// possessionExtent returns the player's possession intervals across every
+// tracked item, as the last-resort presence signal for a stream that
+// carries no position track and no spawn/death markers. Not a presence
+// measurement in its own right — it is a floor: whatever else they did,
+// they demonstrably held these things at these times.
+func possessionExtent(p *result.PlayerStream) []result.Interval {
+	var all []result.Interval
+	for _, iv := range [][]result.Interval{p.RL, p.LG, p.GL, p.SSG, p.SNG, p.Quad, p.Pent, p.Ring} {
+		all = append(all, iv...)
+	}
+	// Armor is a transition stream, so the samples themselves are the
+	// evidence — armorRuns needs a match window to close the last run
+	// against and would clip them here.
+	for _, c := range p.ArmorType {
+		all = append(all, result.Interval{Start: c.T, End: c.T})
+	}
+	return all
 }
 
 // aliveIntervals converts the spawn / death markers into alive intervals

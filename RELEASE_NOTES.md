@@ -34,6 +34,12 @@ Results are re-parsed once on next touch.
   is correct by default, and `TestStreamsHasNoOptionalScalars` guards
   the one section that carries the constraint. Cost: +2.6% on disk,
   ~48 ms per tier-2 read.
+- **Two more served-byte changes come with it**, same root cause, for
+  anyone diffing responses across the deploy: a pointer to an all-zero
+  STRUCT was dropped whole and now survives (`playerStats.speed`
+  `{max: 0, avg: 0}`, `demoInfo.players[].bot` `{}`), and **negative zero**
+  is preserved rather than normalised to `0` (`mapEntities` coordinates —
+  obsidian's SNG spawner sits at `x: -0`).
 - `TestCacheRoundTripPreservesServedBytes` pins the real invariant on the
   whole golden corpus: a cache hit must serve the same bytes as a cold
   parse.
@@ -143,8 +149,10 @@ corpus was regenerated.
   fidelity fix: `control` was a `float64` behind `omitempty`, so a KTX
   block recording `"control": 0.0` came out with the key *dropped* —
   indistinguishable from an older build that never wrote it. It is a
-  pointer now, and a measured zero is served as `0`. Every demo in the
-  golden corpus carries `"control": 0`, so this key reappears there.
+  pointer now, and a measured zero is served as `0`. Seven of the eleven
+  golden demos record an all-zero control time and gain the key; three
+  duels record nonzero values that were always emitted; one carries no
+  `control` key at all and still doesn't.
 - **Match start is detected on `"has begun"`, not `"match has begun"`.**
   kmod 1.58 / qwe 0.170 (2003-era) broadcast `"The duel has begun!"` —
   they announce the *mode*, not the word "match". The narrower pattern

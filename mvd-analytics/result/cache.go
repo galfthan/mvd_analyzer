@@ -14,16 +14,17 @@ import (
 //
 // # Why this is not just gob
 //
-// encoding/gob FLATTENS POINTERS AND OMITS ZERO VALUES. Anything whose
-// value is the zero value is simply not transmitted, and on decode the
-// field is left as the zero value of ITS type — which for a pointer is
-// nil. Three consequences, all real in this schema:
+// encoding/gob FLATTENS POINTERS AND OMITS ZERO VALUES. A struct field
+// holding a pointer to a zero SCALAR is not transmitted, and on decode
+// the field is left nil. Two losses, both real in this schema:
 //
-//	Taken:   &0                 -> nil   (pointer to a zero scalar)
-//	Speed:   &Speed{0, 0}       -> nil   (pointer to a zero struct)
-//	X:       -0.0               -> 0.0   (negative zero == zero)
+//	Taken:   &0     -> nil   (pointer to a zero scalar)
+//	X:       -0.0   -> 0.0   (negative zero compares equal to zero)
 //
-// The first two are not rounding artifacts, they are changes of meaning.
+// (A pointer to an all-zero STRUCT does survive — gob transmits the
+// pointee once it is reached. Measured, not assumed.)
+//
+// The first is not a rounding artifact, it is a change of meaning.
 // This schema uses pointers precisely to separate "measured, and the
 // answer was zero" from "not measurable" — see RESULT_SCHEMA.md, "a value
 // that cannot be MEASURED stays absent rather than becoming a zero". A
@@ -37,10 +38,9 @@ import (
 // # Why not a gob-safe scalar type instead
 //
 // A custom optional-int type would make the FIRST case safe by
-// construction, but it addresses only that case: the pointer-to-zero-
-// struct and negative-zero losses above need the same fix again for every
-// struct and every float. It would also mean rewriting every read site of
-// every optional field. Fixing the ENCODING covers all three classes at
+// construction, but it does nothing for negative zero, and it would mean
+// rewriting every read site of every optional field across the analyzer,
+// the view layer and the API. Fixing the ENCODING covers both losses at
 // once and touches no caller.
 //
 // # The layout
@@ -58,6 +58,9 @@ import (
 // correct, and forgetting something costs milliseconds, not truth. Only
 // Streams carries the constraint, and TestStreamsHasNoOptionalScalars
 // enforces it on one section rather than asking a reader to audit twenty.
+// (It checks pointer-to-scalar only, which is the whole exposure given
+// the behaviour above; negative zero in Streams is theoretical, since
+// wire coordinates decode as +0.)
 //
 // One deliberate imprecision: Share (result.Share) rounds to 4 decimals
 // in MarshalJSON, so shares come back rounded. The invariant guaranteed

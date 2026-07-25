@@ -76,7 +76,7 @@ golden corpus always say what this pipeline actually computed.
 
 KTX tracks weapon hold time internally (`ps.wpn[].time`) but
 `json_weap_detail` never writes it into the demoinfo block
-(`ktx/src/stats_json.c:126-205`); it reaches only the end-of-match text
+(`ktx/src/stats_json.c:132-217`); it reaches only the end-of-match text
 tables (`ktx/src/statsTables.c:390`). **No demo of any age carries it.**
 
 Armor hold time *is* in the block and overcounts: the clock opens at

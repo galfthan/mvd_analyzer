@@ -243,12 +243,28 @@ func TestPresenceWindowLateJoiner(t *testing.T) {
 	wantIntervals(t, got, iv(300000, 590000), "late joiner")
 }
 
-func TestPresenceWindowFallsBackToWholeMatch(t *testing.T) {
-	// A synthetic stream with no position track and no markers has no
-	// presence signal at all; assuming the whole match beats inventing a
-	// window (and keeps hand-built test fixtures meaningful).
-	got := presenceWindow(newHoldPlayer(), 600000)
-	wantIntervals(t, got, iv(0, 600000), "no signal")
+// With no position track and no spawn/death markers, the possession
+// streams are the last presence signal available — and assuming the whole
+// match instead is a fabricated MAXIMUM. On 4on4_l_vs_la[e1m2], Sectoid's
+// entire recorded existence is 3.5 s of possession at the end of an
+// 18-minute match; the old fallback served him as alive for all 18
+// minutes at "no armor 100%", and inflated his team's denominators with
+// it.
+func TestPresenceWindowFallsBackToPossession(t *testing.T) {
+	p := newHoldPlayer()
+	p.RL = iv(560000, 562000)
+	p.ArmorType = []result.ChangeStr{{T: 555000, V: "ra"}}
+	got := presenceWindow(p, 600000)
+	wantIntervals(t, got, iv(555000, 562000), "possession-only presence")
+}
+
+// No signal of ANY kind means we never saw this player play. An empty
+// window (presentMs 0) is the scoreboard-only shape and says exactly
+// that; a full-match window would claim the opposite.
+func TestPresenceWindowEmptyWithoutAnySignal(t *testing.T) {
+	if got := presenceWindow(newHoldPlayer(), 600000); len(got) != 0 {
+		t.Errorf("no signal: got %v, want an empty window", got)
+	}
 }
 
 // A late joiner must not be credited alive time from match start: the

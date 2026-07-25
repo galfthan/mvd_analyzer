@@ -38,7 +38,7 @@ this artifact has to do.
 tracks it internally — `ps.wpn[i].time`, opened on a pickup the player
 didn't already have (`src/client.c:4583-4585`), closed on death
 (`StatsHandler`, `src/client.c:4604`) — but `json_weap_detail`
-(`src/stats_json.c:126-205`) emits only `acc` / `kills` / `deaths` /
+(`src/stats_json.c:132-217`) emits only `acc` / `kills` / `deaths` /
 `pickups` / `damage`. The number only ever reaches the end-of-match text
 tables (`src/statsTables.c:390-395`). So "time with RL / LG" is
 unavailable from `/demoinfo` on a 2026 demo exactly as much as on a 2015
@@ -264,7 +264,7 @@ Four details that make this exact rather than approximate:
    hints, not the demoinfo block — a *wider* set of demos than KTX stats
    cover, but not all of them. Omit the fields (don't emit zeros) when the
    hints are absent, and only RL/LG packs ever emit them
-   (`src/items.c:2465-2472`), matching KTX's own RL/LG-only accounting.
+   (`src/items.c:2738-2742`), matching KTX's own RL/LG-only accounting.
 
 ## 5. Work breakdown
 

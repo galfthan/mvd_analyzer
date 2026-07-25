@@ -113,11 +113,11 @@ type PlayerStatsRow struct {
 	// all — neither a KTX damage stream to reconstruct from nor a
 	// demoinfo block (common on pre-2020 demos).
 	Damage *PlayerStatsDamage `json:"damage,omitempty"`
-	// Accuracy is KTX-only and therefore omitted on demos without a
-	// demoinfo block. There is deliberately no derived fallback: KTX
-	// counts pellets server-side, so a wire-inferred approximation under
-	// the same key would let a caller compare two different measurements
-	// across demos without noticing.
+	// Accuracy is KTX's block where the demo carries one, else a
+	// reconstruction from the decoded fire stream — the two are different
+	// measurements and Src says which you have. Omitted only when the
+	// demo decoded no weapon fires for this player at all. See
+	// PlayerStatsAccuracy for what each source counts.
 	Accuracy *PlayerStatsAccuracy `json:"accuracy,omitempty"`
 	Pickups  *PlayerStatsPickups  `json:"pickups,omitempty"`
 	Hold     PlayerStatsHold      `json:"hold"`
@@ -261,7 +261,7 @@ type PlayerStatsAcc struct {
 	// present on rl and gl only. They count VICTIMS DAMAGED BY A BLAST, not
 	// rockets that hit — one rocket splashing three players adds three — so
 	// they routinely EXCEED Hits, which for rl/gl is the direct-impact count
-	// (the rocket entity touching a player, ktx/src/weapons.c:994). They are
+	// (the rocket entity touching a player, ktx/src/weapons.c:994 for rl, :1329 for gl). They are
 	// not a direct/splash split of Hits, and the ratio Real/Attacks is not an
 	// accuracy.
 	//

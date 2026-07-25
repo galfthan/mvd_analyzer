@@ -102,8 +102,9 @@ type DemoInfoWeapon struct {
 // exist on rl and gl only. They are NOT a direct/splash split of Hits:
 // they count VICTIMS DAMAGED BY A BLAST — one rocket splashing three
 // players adds three — while Hits for rl/gl is the direct-impact count
-// (ktx/src/weapons.c:994). Real therefore routinely exceeds Hits. Virtual
-// is latched before godmode / pentagram / teamplay damage-avoidance
+// (ktx/src/weapons.c:994 for rl, :1329 for gl). Real therefore routinely
+// exceeds Hits. Virtual is latched before godmode / pentagram / teamplay
+// damage-avoidance
 // (combat.c:719), so Virtual >= Real and the gap is damage prevented.
 type DemoInfoAcc struct {
 	Attacks int `json:"attacks"` // Pellet count for SG/SSG
