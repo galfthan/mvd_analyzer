@@ -107,6 +107,30 @@ func (s *intervalState) closeAtMatchEnd(tMs int32) {
 	}
 }
 
+// endOccupancy closes every open interval at tMs and clears the held
+// state, so the slot's *next* occupant starts from an empty inventory.
+//
+// The closed records belong to the occupant who just left (their session
+// window ends at tMs, so appendSlice keeps them); what must not survive is
+// the open `held` flag. Without this the item bits a departing player last
+// carried stay "on" for the slot, and the next occupant's session inherits
+// an interval that opens at the instant their userinfo lands and runs to
+// match end — 3.5 s of fabricated RL/SNG/SSG possession for the refused
+// connection that took shiva's slot on 4on4_l_vs_la[e1m2], and a full
+// stale inventory for any genuine mid-match slot handover. The wire never
+// says the new occupant holds anything; only their own svc_updatestat
+// StatItems may open an interval.
+func (b *streamBuilder) endOccupancy(tMs int32) {
+	b.rl.closeAtMatchEnd(tMs)
+	b.lg.closeAtMatchEnd(tMs)
+	b.gl.closeAtMatchEnd(tMs)
+	b.ssg.closeAtMatchEnd(tMs)
+	b.sng.closeAtMatchEnd(tMs)
+	b.quad.closeAtMatchEnd(tMs)
+	b.pent.closeAtMatchEnd(tMs)
+	b.ring.closeAtMatchEnd(tMs)
+}
+
 // recordItemFlags is a one-shot helper called from the analyzer's
 // stat-update path. It folds the parsed boolean state for every
 // inventory field into the corresponding interval streams.

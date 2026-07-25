@@ -29,11 +29,11 @@ type TimelineAnalyzer struct {
 	playerState   map[int]*timelinePlayerState
 	playerNames   map[int]string // Slot -> player name (from UserInfoEvent)
 	playerUserIDs map[int]int    // Slot -> UserID (for Hub viewer track param)
-	// slotUserID is the *current* occupant's userid per slot (last valid
-	// wins, unlike playerUserIDs which pins the first). It lets
-	// onUserInfo spot a mid-match handoff so handleFragUpdate can rebase
-	// a reconnecting player's restored frag total — see fragResetPending.
-	slotUserID map[int]int
+	// occ is the shared wire-slot occupancy tracker (occupancy.go). It
+	// spots a mid-match handoff so handleFragUpdate can rebase a
+	// reconnecting player's restored frag total (see fragResetPending) and
+	// so the per-slot stream state is reset at the handover.
+	occ *occupancyTracker
 	// fragResetPending[slot] means the slot's occupant just changed
 	// mid-match, so the next frag update is a KTX stats restore / initial
 	// scoreboard, not a kill. Consumed (cleared) by handleFragUpdate.
@@ -155,7 +155,7 @@ func NewTimelineAnalyzer() *TimelineAnalyzer {
 		playerState:      make(map[int]*timelinePlayerState),
 		playerNames:      make(map[int]string),
 		playerUserIDs:    make(map[int]int),
-		slotUserID:       make(map[int]int),
+		occ:              newOccupancyTracker(),
 		fragResetPending: make(map[int]bool),
 	}
 }
@@ -186,36 +186,7 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		// Track frag events from frag updates (more reliable than stat updates)
 		a.handleFragUpdate(e)
 	case *events.UserInfoEvent:
-		// Track player names and UserIDs for team resolution and Hub viewer links
-		if e.Player != nil && e.Player.Name != "" {
-			a.playerNames[e.Player.Slot] = e.Player.Name
-			// Only update UserID if we don't have one yet, or if the new one is valid
-			// Some servers resend userinfo with UserID=0 or corrupted values
-			// Keep the first valid UserID we see for each slot
-			newUserID := e.Player.UserID
-			existingUserID := a.playerUserIDs[e.Player.Slot]
-			if existingUserID == 0 && newUserID > 0 {
-				// No existing ID, use whatever we got (first valid value)
-				a.playerUserIDs[e.Player.Slot] = newUserID
-			}
-			// Otherwise keep existing UserID - first valid value wins
-
-			// Spot a mid-match occupant handoff: when the slot's live
-			// userid changes after match start (a reconnect, or a new
-			// player taking a vacated slot), the next frag update is a KTX
-			// stats restore / initial scoreboard rather than a kill. Flag
-			// it so handleFragUpdate rebases instead of feeding the value
-			// to the corruption guard. Pre-match roster shuffles don't
-			// count (frags are 0 then anyway); userid==0 resends are
-			// ignored so the live id keeps the last valid value.
-			if newUserID > 0 {
-				prev := a.slotUserID[e.Player.Slot]
-				if a.timing.Started && prev != 0 && newUserID != prev {
-					a.fragResetPending[e.Player.Slot] = true
-				}
-				a.slotUserID[e.Player.Slot] = newUserID
-			}
-		}
+		a.handleUserInfo(e)
 	case *events.PlayerPositionEvent:
 		// Track player positions
 		a.handlePositionUpdate(e)
@@ -233,6 +204,80 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		})
 	}
 	return nil
+}
+
+// handleUserInfo tracks display names / userids and, when the event ends a
+// slot occupancy, resets the per-slot state that must not cross the
+// handover.
+func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
+	if e.Player == nil {
+		return
+	}
+	slot := e.Player.Slot
+	if e.Player.Name != "" {
+		a.playerNames[slot] = e.Player.Name
+		// Keep the FIRST valid UserID per slot for the Hub viewer track
+		// param; some servers resend userinfo with UserID 0 or corrupted
+		// values.
+		if a.playerUserIDs[slot] == 0 && e.Player.UserID > 0 {
+			a.playerUserIDs[slot] = e.Player.UserID
+		}
+	}
+
+	closed, opened, _ := a.occ.onUserInfo(e)
+	if closed == nil {
+		return
+	}
+
+	// The slot changed hands, or the server dropped its client. Close the
+	// departing occupant's open item intervals here and clear the held
+	// state so the next occupant starts from an empty inventory rather
+	// than inheriting the slot's stale item bits. Only inside the match
+	// window: before it no interval is ever opened, and after it the
+	// streams are frozen and finalize closes them at the match end.
+	if a.timing.Started && !a.timing.Ended {
+		if state := a.playerState[slot]; state != nil {
+			state.streams.endOccupancy(e.TimeMs)
+			state.items = 0
+			if e.Vacated {
+				// SV_DropClient zeroes the slot's scoreboard and broadcasts it
+				// in the same server frame as this empty userinfo
+				// (mvdsv/src/sv_main.c:419-428 and :487-513), so the frag
+				// update that just arrived is slot bookkeeping, not a score.
+				// Drop the event it produced and rebase the cursor, otherwise
+				// a player who leaves on a low score contributes a phantom
+				// negative frag and the next occupant inherits a stale
+				// baseline.
+				a.dropFragEventsAt(slot, e.TimeMs)
+				state.frags = 0
+			}
+		}
+	}
+
+	// A fresh connection took the slot mid-match: the next frag update is a
+	// KTX stats restore / initial scoreboard rather than a kill. Flag it so
+	// handleFragUpdate rebases instead of feeding the value to the
+	// corruption guard. Pre-match roster shuffles don't count (frags are 0
+	// then anyway).
+	if opened != nil && a.timing.Started {
+		a.fragResetPending[slot] = true
+	}
+}
+
+// dropFragEventsAt removes the trailing raw frag events recorded for slot
+// at exactly tMs. Events arrive in time order, so they are at the tail.
+func (a *TimelineAnalyzer) dropFragEventsAt(slot int, tMs int32) {
+	i := len(a.rawFrags)
+	for i > 0 && a.rawFrags[i-1].Time == tMs {
+		i--
+	}
+	kept := a.rawFrags[:i]
+	for _, f := range a.rawFrags[i:] {
+		if f.PlayerNum != slot {
+			kept = append(kept, f)
+		}
+	}
+	a.rawFrags = kept
 }
 
 func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
