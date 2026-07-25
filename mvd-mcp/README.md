@@ -59,6 +59,7 @@ vocabulary, and the reducer registry.
 | `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
 | `getDemoInfo` | `mvd-api` `GET /v1/demos/{id}/demoinfo` |
+| `getPlayerStats` | `mvd-api` `GET /v1/demos/{id}/player-stats` |
 | `getMetadata` | `mvd-api` `GET /v1/demos/{id}/metadata` |
 | `getFrags` | `mvd-api` `GET /v1/demos/{id}/frags` |
 | `getDamage` | `mvd-api` `GET /v1/demos/{id}/damage` |
@@ -280,6 +281,39 @@ Output: `result.DemoInfoResult`. Per-player `Weapons.<rl|lg|gl|ssg|ng>.acc`
 `Dmg.taken/given`, `Spree.{quad,run,ring,pent}.{frags,duration}`,
 RL/LG transfers, etc. Errors with `demoinfo_unavailable` (422) if the
 demo has no KTX demoinfo block (rare; non-KTX or aborted matches).
+
+#### `getPlayerStats({demoId, players?, teams?})`
+
+The canonical per-player and per-team statistics — the one-call
+scoreboard, available on **every** demo including old ones with no KTX
+demoinfo block.
+
+| Param | Type | Description |
+|---|---|---|
+| `demoId` | `string` (required) | — |
+| `players` | `string[]` | restrict to these players; also drops the team rows, which are whole-team sums |
+| `teams` | `string[]` | restrict to these teams |
+
+Output: `result.PlayerStatsResult` — per row `score` (corrected
+frags/kills/deaths/suicides/teamKills + `efficiency`), `damage`,
+`accuracy`, `pickups.byKind`, and `hold` (`weapons` / `armor` /
+`powerups`), plus a `window` carrying the denominators
+(`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
+
+Every family carries `src` (`"derived"` | `"ktx"`), with a `sources`
+roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
+`efficiency`, `shareAlive` and `shareMatch` are RATIOS in [0,1], not
+percentages.
+
+**Possession time is unique to this tool.** KTX never writes weapon hold
+time into the demoinfo block, and its armor hold time overcounts (the
+clock keeps running after the armor is chewed to zero), so our armor
+numbers read LOWER than a KTX end-of-match table by design.
+`hold.armor.none` — time alive with no armor at all — has no KTX
+equivalent.
+
+Errors with `playerstats_unavailable` (422) only on a parse degraded to
+no player streams; a missing KTX block is served normally.
 
 #### `getMetadata({demoId})`
 

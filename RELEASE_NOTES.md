@@ -36,6 +36,17 @@ corpus was regenerated.
   which conflates them. Derived, so they work on demos that carry the
   `//ktx bp` / `//ktx drop` hints but no demoinfo block; absent (not
   zero) when the hints are missing, and teamplay-only like KTX's gate.
+- **`GET /v1/demos/{id}/player-stats` + MCP `getPlayerStats`** serve it,
+  with `players` / `teams` filters. A `players` filter drops the team
+  rows: they are whole-team sums and would misread as the filtered
+  subset's totals. 422 `playerstats_unavailable` fires only on a parse
+  degraded to no player streams — a missing KTX block is served
+  normally, which is the entire point.
+- **The KTX overlay is applied at read time**, in `view.PlayerStats`, so
+  the stored artifact and the golden corpus always record what the
+  pipeline computed. KTX wins on damage given/team/self/ewep, accuracy,
+  and pickup counts; `taken` stays derived (KTX's is enemy-only and
+  lands separately in `takenEnemy`); score and hold are never overlaid.
 - **`/demoinfo` is unchanged** — still the verbatim KTX pass-through,
   now explicitly positioned as the audit trail `playerStats` is
   diffable against.

@@ -221,6 +221,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
 | GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs, analyzer `errors`) |
+| GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard, damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" or "ktx") |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
 | GET | `/v1/demos/{id}/frags` | `players`, `weapons`, `from`, `to`, `summary` | `result.FragResult` (totalFrags + byPlayer + byWeapon + full kill log) |

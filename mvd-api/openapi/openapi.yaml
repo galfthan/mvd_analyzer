@@ -477,6 +477,53 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/player-stats:
+    get:
+      operationId: getPlayerStats
+      tags: [demo]
+      summary: Canonical per-player + per-team statistics
+      description: >
+        The one-call scoreboard: corrected frags/kills/deaths/suicides/
+        teamKills with efficiency, damage, per-weapon accuracy, per-kind
+        pickup tallies, and POSSESSION TIME — how long each player held
+        each weapon, each armor type, and NO armor.
+
+
+        Available on EVERY demo, including ones with no KTX demoinfo block
+        (it never 422s). Each stat family carries `src` ("derived" | "ktx")
+        naming its source, with a `sources` roll-up; `/demoinfo` stays the
+        verbatim KTX pass-through to diff against.
+
+
+        UNITS: `window.*Ms` and every `hold.*.ms` / `longestMs` are int32
+        MILLISECONDS; `efficiency`, `shareAlive` and `shareMatch` are
+        RATIOS in [0,1], not percentages. Prefer the emitted shares over
+        dividing yourself — on a team row the denominators are team time.
+
+
+        NOTE our armor hold time reads LOWER than a KTX end-of-match table
+        by design: KTX's armor clock keeps running after the armor is
+        chewed to zero (ktx/src/items.c:505-522).
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Players"
+        - $ref: "#/components/parameters/PlayerStatsTeams"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The player-stats section.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlayerStats" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/frags:
     get:
       operationId: getFrags
@@ -1205,7 +1252,7 @@ paths:
         | aim | /aim | aim | 422 aim_unavailable |
         | loc-graph | /loc-graph | locGraph | 422 locgraph_unavailable |
         | opening | — (artifact only) | opening | 422 opening_unavailable |
-        | player-stats | /player-stats | playerStats | 200 (computed for every demo) |
+        | player-stats | /player-stats | playerStats | 422 playerstats_unavailable (only a degraded no-streams parse; a missing KTX block is served normally) |
         | los | /los | — (serves the /los body, no envelope key) | 422 los_unavailable (map has no usable visibility BSP) |
       parameters:
         - $ref: "#/components/parameters/DemoId"
@@ -1415,6 +1462,17 @@ components:
         upper bound. A non-integer value 400s with code `invalid_param` and
         an `(integer milliseconds)` hint.
       schema: { type: integer, minimum: 0 }
+    PlayerStatsTeams:
+      name: teams
+      in: query
+      description: >
+        CSV of team names. Case-SENSITIVE. Restricts both the player rows
+        and the team aggregate rows. Omit for all teams.
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
     Players:
       name: players
       in: query
@@ -1935,6 +1993,7 @@ components:
         - metadata_unavailable
         - missing_param
         - opening_unavailable
+        - playerstats_unavailable
         - rate_limited
         - region_control_unavailable
         - shots_unavailable
@@ -5259,6 +5318,7 @@ components:
         remains the verbatim KTX pass-through this is diffable against.
       additionalProperties: false
       properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         players:
           description: "One row per participant."
           items: { $ref: "#/components/schemas/PlayerStatsRow" }

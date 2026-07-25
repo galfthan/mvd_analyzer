@@ -307,6 +307,17 @@ func (p *proxyBackend) GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (an
 	return p.fetchOpaque(ctx, "GET", path, nil)
 }
 
+func (p *proxyBackend) GetPlayerStats(ctx context.Context, in GetPlayerStatsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/player-stats")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("players", in.Players)
+	q.csv("teams", in.Teams)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
 func (p *proxyBackend) GetMetadata(ctx context.Context, in GetMetadataInput) (any, error) {
 	path, err := demoPath(in.DemoID, "/metadata")
 	if err != nil {

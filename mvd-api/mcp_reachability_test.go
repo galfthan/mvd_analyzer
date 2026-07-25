@@ -41,6 +41,7 @@ type mcpCoverage struct {
 var demoViewCoverage = map[string]mcpCoverage{
 	"/v1/demos/{id}/overview":       {tool: "getOverview"},
 	"/v1/demos/{id}/demoinfo":       {tool: "getDemoInfo"},
+	"/v1/demos/{id}/player-stats":   {tool: "getPlayerStats"},
 	"/v1/demos/{id}/metadata":       {tool: "getMetadata"},
 	"/v1/demos/{id}/frags":          {tool: "getFrags"},
 	"/v1/demos/{id}/damage":         {tool: "getDamage"},

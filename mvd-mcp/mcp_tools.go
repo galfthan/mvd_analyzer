@@ -61,6 +61,14 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	})
 
 	addTool(s, &mcp.Tool{
+		Name:        "getPlayerStats",
+		Description: "Canonical per-player and per-team statistics — the one-call scoreboard. Corrected frags/kills/deaths/suicides/teamKills + efficiency, damage, per-weapon accuracy, per-kind pickup tallies, and POSSESSION TIME: how long each player held each weapon, each armor type, and NO armor. Available on EVERY demo, including old ones with no KTX demoinfo block. Every stat family carries src ('derived' | 'ktx') naming its source; getDemoInfo remains the verbatim KTX block to diff against. Hold times are exact integrals with explicit denominators (window.matchMs / presentMs / aliveMs) — read shareAlive/shareMatch rather than dividing yourself. NOTE our armor hold time reads LOWER than a KTX end-of-match table on purpose: KTX's clock keeps running after the armor is chewed to zero. efficiency and the shares are RATIOS in [0,1], not percentages. Descriptive times are integer milliseconds; the response echoes this in timeUnit.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetPlayerStatsInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetPlayerStats(ctx, in)
+		return toolResult(out, err)
+	})
+
+	addTool(s, &mcp.Tool{
 		Name:        "getFrags",
 		Description: "Frag aggregates + full kill log. totalFrags + byPlayer (kills/deaths/byWeapon per player) + byWeapon (kills per weapon) + frags (every kill with time/killer/victim/weapon/isSuicide/isTeamKill). NOTE: unlike getDamage/getAim/getItems, summary defaults FALSE here — the kill log is small (one row per frag) and usually the point; pass summary:true to drop it. Optional players= / weapons= filters narrow both aggregates and log. Empty-log convention: frags is null when dropped by summary=true, [] when included but the filter matched nothing. The weapon token 'teamkill' appears on phrasing-only teamkill obituaries whose message text does not name the weapon, so the real weapon is unrecoverable from the wire. Use this instead of aggregating getEvents(types:['frag']) yourself. Descriptive times are integer milliseconds; the response echoes this in timeUnit.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetFragsInput) (*mcp.CallToolResult, any, error) {

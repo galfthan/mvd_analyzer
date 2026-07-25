@@ -152,6 +152,34 @@ func stubResult() *result.Result {
 				{Name: "valla", Team: "red"},
 			},
 		},
+		PlayerStats: &result.PlayerStatsResult{
+			Players: []result.PlayerStatsRow{
+				{
+					Name: "bps", Team: "blue",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
+					Hold: result.PlayerStatsHold{Src: result.SrcDerived,
+						Weapons: map[string]result.HoldStat{"rl": {Ms: 200000, Runs: 4, LongestMs: 90000, ShareAlive: 0.4, ShareMatch: 0.3333}},
+						Armor:   map[string]result.HoldStat{"ra": {Ms: 129000, Runs: 3, LongestMs: 60000, ShareAlive: 0.258, ShareMatch: 0.215}, "none": {Ms: 371000, Runs: 9, LongestMs: 80000, ShareAlive: 0.742, ShareMatch: 0.6183}},
+					},
+				},
+				{
+					Name: "valla", Team: "red",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30, Efficiency: 0.4118},
+					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+			},
+			Teams: []result.PlayerStatsRow{
+				{
+					Name:   "blue",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
+					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+			},
+			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Hold: result.SrcDerived},
+		},
 		Backpacks: []result.BackpackDrop{
 			{Time: 100000, Player: "bps", Team: "blue", Weapon: "rl", EntNum: 17},
 			{Time: 200000, Player: "valla", Team: "red", Weapon: "lg", EntNum: 23},
@@ -1271,6 +1299,80 @@ func TestDemoInfo(t *testing.T) {
 	if len(players) != 2 {
 		t.Errorf("len(players) = %d; want 2", len(players))
 	}
+}
+
+func TestPlayerStats(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	if resp["timeUnit"] != "ms" {
+		t.Errorf("timeUnit = %v; want ms", resp["timeUnit"])
+	}
+	players, _ := resp["players"].([]any)
+	if len(players) != 2 {
+		t.Fatalf("len(players) = %d; want 2", len(players))
+	}
+	bps, _ := players[0].(map[string]any)
+	hold, _ := bps["hold"].(map[string]any)
+	armor, _ := hold["armor"].(map[string]any)
+	if _, ok := armor["none"]; !ok {
+		t.Error(`hold.armor has no "none" key — the time-with-no-armor complement is the point`)
+	}
+	sources, _ := resp["sources"].(map[string]any)
+	if sources["hold"] != "derived" {
+		t.Errorf("sources.hold = %v; want derived", sources["hold"])
+	}
+}
+
+// The endpoint must serve a demo with no KTX demoinfo block — that is the
+// regression this whole section exists to prevent. Only a parse degraded
+// to no streams at all is a 422.
+func TestPlayerStats_NoKTXBlockStillServed(t *testing.T) {
+	r := stubResult()
+	r.DemoInfo = nil
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	players, _ := resp["players"].([]any)
+	if len(players) != 2 {
+		t.Errorf("len(players) = %d; want 2 even without a demoinfo block", len(players))
+	}
+}
+
+func TestPlayerStats_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no PlayerStats
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 422)
+	errObj, _ := resp["error"].(map[string]any)
+	if errObj["code"] != "playerstats_unavailable" {
+		t.Errorf("code = %v; want playerstats_unavailable", errObj["code"])
+	}
+}
+
+func TestPlayerStats_Filters(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?players=bps", 200)
+	players, _ := resp["players"].([]any)
+	if len(players) != 1 {
+		t.Errorf("len(players) = %d; want 1", len(players))
+	}
+	if teams, ok := resp["teams"].([]any); ok && len(teams) != 0 {
+		t.Errorf("teams = %v; want none alongside a players filter (they are whole-team sums)", teams)
+	}
+
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?teams=blue", 200)
+	players, _ = resp["players"].([]any)
+	if len(players) != 1 {
+		t.Errorf("teams filter: len(players) = %d; want 1", len(players))
+	}
+
+	// Unknown params are rejected, like everywhere else.
+	getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?nope=1", 400)
 }
 
 func TestDemoInfo_Unavailable(t *testing.T) {
