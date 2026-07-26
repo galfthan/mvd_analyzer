@@ -145,7 +145,8 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		if di == nil {
 			continue
 		}
-		row.Ping, row.Handicap, row.Bot = di.Ping, di.Handicap, di.Bot
+		ping := di.Ping
+		row.Ping, row.Handicap, row.Bot = &ping, di.Handicap, di.Bot
 		if di.Login != "" {
 			// KTX's login wins, but a blank one must not erase the *auth
 			// login the analyzer already read off the wire.

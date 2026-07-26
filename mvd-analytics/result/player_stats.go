@@ -82,7 +82,13 @@ type PlayerStatsRow struct {
 
 	// KTX-only identity fields, straight from the demoinfo block and
 	// absent on demos without one. Not derivable from the wire.
-	Ping     int          `json:"ping,omitempty"`
+	//
+	// Ping is a POINTER for the measured-zero rule: KTX writes the key
+	// unconditionally, so a 0 there would be a reading rather than a gap.
+	// (In practice unreachable — ping is measured over frame round-trips,
+	// so its floor is one frame, and KTX bots report synthetic nonzero
+	// pings. The pointer is for consistency, not for a live case.)
+	Ping     *int         `json:"ping,omitempty"`
 	Handicap int          `json:"handicap,omitempty"`
 	Login    string       `json:"login,omitempty"`
 	Bot      *DemoInfoBot `json:"bot,omitempty"`
@@ -104,14 +110,23 @@ type PlayerStatsRow struct {
 	// consumer can recompute or re-scale it. A scoreboard-only row
 	// (connected, never streamed) is summed into the team's totals but
 	// does NOT count here, because it contributed no time anyone could
-	// have played. Absent on player rows.
-	Members int `json:"members,omitempty"`
+	// have played.
+	//
+	// A POINTER, set on team rows and only there: an `omitempty` int
+	// dropped the key exactly when it mattered most — a team whose only
+	// member never streamed serializes with no `members` while every
+	// ShareMatch on it rests on matchMs x 0, so the one row whose
+	// denominator a consumer must check was the one that hid it.
+	Members *int `json:"members,omitempty"`
 
 	Window PlayerStatsWindow `json:"window"`
 	Score  PlayerStatsScore  `json:"score"`
 	// Damage is omitted when the demo carries no damage information at
 	// all — neither a KTX damage stream to reconstruct from nor a
-	// demoinfo block (common on pre-2020 demos).
+	// demoinfo block (common on pre-2020 demos). A player who neither
+	// dealt nor took a point of damage on a demo that DOES carry the
+	// stream gets a zeroed family, not an absent one: that is an observed
+	// zero, and it is a different fact from "unmeasurable".
 	Damage *PlayerStatsDamage `json:"damage,omitempty"`
 	// Accuracy is KTX's block where the demo carries one, else a
 	// reconstruction from the decoded fire stream — the two are different
@@ -151,18 +166,33 @@ type PlayerStatsWindow struct {
 // world-dealt suicides to the world entity rather than the victim
 // (ktx/src/client.c:4951), and reset after a reconnect. MatchResult's
 // frag-log-corrected counts are right — see PlayerStat.
+//
+// The two SIDES of this struct rest on different evidence, and only one
+// of them is always available. Frags is the svc_updatefrags net score,
+// straight off the wire; Deaths is counted from the protocol death
+// events. Both are measured on every demo. Everything else — kills,
+// suicides, teamKills, byWeapon and the efficiency computed from them —
+// is attributed from the OBITUARY-derived frag log, which some servers
+// never give us in a matchable form. Those fields are therefore
+// POINTERS: absent means kill attribution was not measurable on this
+// demo, which is a different fact from a player who killed nobody.
 type PlayerStatsScore struct {
 	Src string `json:"src"`
 	// Frags is the canonical QW net score from the svc_updatefrags
 	// scoreboard.
-	Frags     int `json:"frags"`
-	Kills     int `json:"kills"`
-	Deaths    int `json:"deaths"`
-	Suicides  int `json:"suicides"`
-	TeamKills int `json:"teamKills"`
+	Frags int `json:"frags"`
+	// Kills, Suicides and TeamKills come from the frag log. Absent
+	// together, whenever it carries no entries at all on a demo where
+	// players demonstrably died — serving 0 kills beside 121 deaths is
+	// byte-indistinguishable from a genuinely awful team.
+	Kills     *int `json:"kills,omitempty"`
+	Deaths    int  `json:"deaths"`
+	Suicides  *int `json:"suicides,omitempty"`
+	TeamKills *int `json:"teamKills,omitempty"`
 	// Efficiency is kills / (kills + deaths) as a RATIO in [0,1] — not a
-	// percentage. 0 when the player neither killed nor died.
-	Efficiency Share `json:"efficiency"`
+	// percentage. 0 when the player neither killed nor died; absent
+	// exactly when Kills is, since it is computed from it.
+	Efficiency *Share `json:"efficiency,omitempty"`
 	// ByWeapon is enemy kills split by the weapon that dealt them, keyed
 	// like the rest of this section ("rl", "lg", "sg", ...). From the
 	// corrected frag log, so it is on the same footing as Kills above and

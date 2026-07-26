@@ -19,7 +19,7 @@ func storedResult(withKTX bool) *result.Result {
 				{
 					Name: "alpha", Team: "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20},
 					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: intp(5500), GivenTeam: 100, GivenSelf: 50, EnemyWeapons: 3000},
 					Pickups: &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: map[string]result.PlayerStatsPickup{
 						"ra":     {Took: 5},
@@ -34,7 +34,7 @@ func storedResult(withKTX bool) *result.Result {
 				{
 					Name: "beta", Team: "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30},
 					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: intp(6000)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
@@ -43,14 +43,14 @@ func storedResult(withKTX bool) *result.Result {
 				{
 					Name:   "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20},
 					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000, Taken: intp(5500)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 				{
 					Name:   "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30},
 					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 3000, Taken: intp(6000)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
@@ -94,7 +94,7 @@ func TestPlayerStatsNoKTXStaysDerived(t *testing.T) {
 	if got.Sources.Damage != result.SrcDerived {
 		t.Errorf("damage src = %q, want derived", got.Sources.Damage)
 	}
-	if got.Players[0].Ping != 0 {
+	if got.Players[0].Ping != nil {
 		t.Error("ping present without a KTX block")
 	}
 }
@@ -105,11 +105,11 @@ func TestPlayerStatsKTXOverlay(t *testing.T) {
 	alpha := got.Players[0]
 
 	// Identity passthrough.
-	if alpha.Ping != 13 || alpha.Login != "alpha@qw" {
-		t.Errorf("identity not lifted: ping=%d login=%q", alpha.Ping, alpha.Login)
+	if alpha.Ping == nil || *alpha.Ping != 13 || alpha.Login != "alpha@qw" {
+		t.Errorf("identity not lifted: ping=%v login=%q", alpha.Ping, alpha.Login)
 	}
 	// Score is NEVER overlaid — KTX's 999s must not appear.
-	if alpha.Score.Frags != 30 || alpha.Score.Kills != 32 || alpha.Score.Deaths != 20 {
+	if alpha.Score.Frags != 30 || alpha.Score.Kills == nil || *alpha.Score.Kills != 32 || alpha.Score.Deaths != 20 {
 		t.Errorf("score was overlaid from KTX: %+v", alpha.Score)
 	}
 	if got.Sources.Score != result.SrcDerived {
@@ -184,7 +184,7 @@ func TestPlayerStatsOverlayDoesNotMutateStored(t *testing.T) {
 	if stored.Players[0].Damage.Given != 4000 {
 		t.Errorf("stored damage.given = %d, want the untouched derived 4000", stored.Players[0].Damage.Given)
 	}
-	if stored.Players[0].Ping != 0 {
+	if stored.Players[0].Ping != nil {
 		t.Error("stored row gained a KTX ping — the overlay wrote through")
 	}
 	if stored.Players[0].Pickups.ByKind["ra"].Took != 5 {

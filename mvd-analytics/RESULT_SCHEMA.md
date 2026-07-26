@@ -691,7 +691,7 @@ top level is the roll-up.
 
 | Family | Winner | Why |
 |---|---|---|
-| `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. |
+| `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. The kill side is optional — see "The kill side of `score` is optional" below. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
 | `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
 | `accuracy` | **ktx** when present, else **derived** from the fire stream | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. |
@@ -746,14 +746,14 @@ stays consistent with the timeline's powerup runs.
 |---|---|---|---|
 | Name | `name` | string | Player name; on a team row, the team name. |
 | Team | `team` | string | Omitted on team rows. |
-| Ping / Handicap / Bot | `ping`, `handicap`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. |
+| Ping / Handicap / Bot | `ping`, `handicap`, `bot` | | **KTX-only** identity fields, absent without a demoinfo block. `ping` is a pointer, so a KTX-measured 0 would survive as a reading (unreachable in practice — ping's floor is one frame). |
 | Login | `login` | string | The player's authenticated login: KTX's when present, else the `*auth` userinfo key off the wire. |
 | ControlMs | `controlMs` | int32 ms | **KTX-only**: KTX's own map-control clock (it writes float seconds; converted to ms here). Not the same measure as the region-control view. |
 | Speed | `speed` | *PlayerStatsSpeed | **KTX-only**: `max` / `avg` in Quake units/second. The position streams could support a derived version — a follow-up. |
-| Members | `members` | int | TEAM rows only: how many players were folded in, and the count `shareMatch`'s denominator rests on. |
+| Members | `members` | *int | TEAM rows only, and **always present** there (including 0): how many players were folded in, and the count `shareMatch`'s denominator rests on. Absent on player rows. |
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
-| Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score), `kills`, `deaths`, `suicides`, `teamKills`, `efficiency`, plus `byWeapon` — enemy kills split by weapon, from the corrected frag log and never overlaid. |
-| Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. |
+| Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency` and `byWeapon` **optional together** — see below. |
+| Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
 | Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
@@ -774,6 +774,24 @@ teamplay damage-avoidance zeroed the damage (`virtual_take`,
 `ktx/src/combat.c:719`) — so `virtual >= real`, and the gap is damage
 that was *prevented*, not missed. Neither divided by `attacks` is an
 accuracy.
+
+#### The kill side of `score` is optional
+
+The two halves of this family do not rest on the same evidence. `frags`
+is the `svc_updatefrags` net score and `deaths` is counted from the
+protocol death events — both measured on every demo. `kills`,
+`suicides`, `teamKills`, `byWeapon` and the `efficiency` computed from
+them are all attributed from the **obituary-derived frag log**, and some
+servers never emit obituaries this pipeline can match.
+
+Where the frag log is empty on a demo whose players demonstrably died,
+all five are **absent together**. Serving `kills: 0` and
+`efficiency: 0` beside 92 real deaths is byte-indistinguishable from a
+genuinely awful player — `4on4_l_vs_la[e1m2]` is exactly that demo: a
+full 4v4 scoreboard with 230 team frags and not one frag-log entry.
+Render `-`, not `0`. The condition is **demo-global**, so every row on a
+demo agrees and a team row can never mix a measured member with an
+unmeasured one.
 
 **`efficiency` is a RATIO in [0,1]**, not a percentage —
 `kills / (kills + deaths)`, 0 when the player neither killed nor died.

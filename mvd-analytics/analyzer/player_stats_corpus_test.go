@@ -173,9 +173,16 @@ func TestCorpusScoreMatchesScoreboard(t *testing.T) {
 			if !ok {
 				continue // streamed player with no scoreboard row
 			}
-			if row.Score.Frags != mp.Frags || row.Score.Kills != mp.Kills ||
-				row.Score.Deaths != mp.Deaths || row.Score.Suicides != mp.Suicides {
+			if row.Score.Frags != mp.Frags || row.Score.Deaths != mp.Deaths {
 				t.Errorf("%s %s: score %+v does not match match.players %+v", name, row.Name, row.Score, mp)
+			}
+			// The kill side is optional (absent where the frag log measured
+			// nothing); where it IS served it must be the scoreboard's.
+			if row.Score.Kills != nil && *row.Score.Kills != mp.Kills {
+				t.Errorf("%s %s: kills %d, match.players says %d", name, row.Name, *row.Score.Kills, mp.Kills)
+			}
+			if row.Score.Suicides != nil && *row.Score.Suicides != mp.Suicides {
+				t.Errorf("%s %s: suicides %d, match.players says %d", name, row.Name, *row.Score.Suicides, mp.Suicides)
 			}
 		}
 	}

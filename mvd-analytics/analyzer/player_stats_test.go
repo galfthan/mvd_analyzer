@@ -6,6 +6,8 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
+func intp(v int) *int { return &v }
+
 func iv(pairs ...int32) []result.Interval {
 	var out []result.Interval
 	for i := 0; i+1 < len(pairs); i += 2 {
@@ -470,6 +472,107 @@ func TestIsTeamplayGate_FFAModeBeatsTeamplayCvar(t *testing.T) {
 	}
 }
 
+// --- score --------------------------------------------------------------
+
+// deriveScore has two branches and, until this test, neither was covered.
+// The kill side is served only where the frag log measured something.
+func TestDeriveScoreKillSide(t *testing.T) {
+	base := func() *Result {
+		return &Result{
+			Match: &result.MatchResult{Players: []result.PlayerStat{
+				{Name: "a", Team: "red", Frags: 62, Kills: 40, Deaths: 18, Suicides: 2},
+			}},
+			Frags: &result.FragResult{
+				Frags: []result.FragEntry{{Killer: "a", Victim: "b", Weapon: "rl"}},
+				ByPlayer: map[string]*result.PlayerFrags{
+					"a": {Kills: 40, Deaths: 18, TeamKills: 3, ByWeapon: map[string]int{"rl": 30, "lg": 10, "gl": 0}},
+				},
+			},
+		}
+	}
+
+	t.Run("measured", func(t *testing.T) {
+		s := deriveScore(base(), "a")
+		if s.Frags != 62 || s.Deaths != 18 {
+			t.Errorf("frags/deaths = %d/%d, want 62/18", s.Frags, s.Deaths)
+		}
+		if s.Kills == nil || *s.Kills != 40 {
+			t.Fatalf("kills = %v, want 40", s.Kills)
+		}
+		if s.Suicides == nil || *s.Suicides != 2 {
+			t.Errorf("suicides = %v, want the scoreboard's 2", s.Suicides)
+		}
+		if s.TeamKills == nil || *s.TeamKills != 3 {
+			t.Errorf("teamKills = %v, want 3", s.TeamKills)
+		}
+		if s.Efficiency == nil || float64(*s.Efficiency) < 0.689 || float64(*s.Efficiency) > 0.690 {
+			t.Errorf("efficiency = %v, want 40/58", s.Efficiency)
+		}
+		// A weapon with a zero count is omitted, not zero-filled.
+		if got := s.ByWeapon; got["rl"] != 30 || got["lg"] != 10 || len(got) != 2 {
+			t.Errorf("byWeapon = %v, want rl/lg only", got)
+		}
+	})
+
+	t.Run("unmeasured: empty frag log beside real deaths", func(t *testing.T) {
+		r := base()
+		r.Frags.Frags = nil
+		s := deriveScore(r, "a")
+		// Both measured sides survive — this is the whole point of not
+		// dropping the family wholesale.
+		if s.Frags != 62 || s.Deaths != 18 {
+			t.Errorf("frags/deaths = %d/%d, want the measured 62/18", s.Frags, s.Deaths)
+		}
+		if s.Kills != nil || s.Suicides != nil || s.TeamKills != nil ||
+			s.Efficiency != nil || s.ByWeapon != nil {
+			t.Errorf("kill side served over an empty frag log: %+v", s)
+		}
+	})
+
+	t.Run("nobody died: honest zeros survive", func(t *testing.T) {
+		r := base()
+		r.Frags.Frags = nil
+		r.Match.Players[0].Kills, r.Match.Players[0].Deaths = 0, 0
+		r.Match.Players[0].Suicides = 0
+		s := deriveScore(r, "a")
+		if s.Kills == nil || *s.Kills != 0 {
+			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
+		}
+	})
+}
+
+// R3: a streamed player the match analyzer never resolved into a
+// scoreboard row recovers kills and deaths from the frag log — and must
+// recover suicides the same way instead of reporting a fabricated 0
+// beside them. Same count scoreboardStatsPost uses (postprocess.go:36-41).
+func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
+	r := &Result{
+		Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "someone else"}}},
+		Frags: &result.FragResult{
+			Frags: []result.FragEntry{
+				{Killer: "a", Victim: "a", Weapon: "rl", IsSuicide: true},
+				{Killer: "a", Victim: "a", Weapon: "gl", IsSuicide: true},
+				{Killer: "b", Victim: "b", Weapon: "rl", IsSuicide: true},
+				{Killer: "a", Victim: "b", Weapon: "lg"},
+			},
+			ByPlayer: map[string]*result.PlayerFrags{
+				"a": {Kills: 11, Deaths: 7, ByWeapon: map[string]int{"lg": 11}},
+			},
+		},
+	}
+	s := deriveScore(r, "a")
+	if s.Kills == nil || *s.Kills != 11 || s.Deaths != 7 {
+		t.Fatalf("kills/deaths = %v/%d, want the frag log's 11/7", s.Kills, s.Deaths)
+	}
+	if s.Suicides == nil || *s.Suicides != 2 {
+		t.Errorf("suicides = %v, want 2 counted off the log — b's must not leak in", s.Suicides)
+	}
+	// Frags (the net score) has no frag-log equivalent and stays 0.
+	if s.Frags != 0 {
+		t.Errorf("frags = %d, want 0 — there is no frag-log net score", s.Frags)
+	}
+}
+
 // --- team aggregation ---------------------------------------------------
 
 func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
@@ -478,7 +581,7 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 		{
 			Name: "a", Team: "red",
 			Window: result.PlayerStatsWindow{MatchMs: matchMs, PresentMs: matchMs, AliveMs: 400000, DeadMs: 200000},
-			Score:  result.PlayerStatsScore{Kills: 10, Deaths: 5},
+			Score:  result.PlayerStatsScore{Kills: intp(10), Deaths: 5},
 			Hold: result.PlayerStatsHold{Weapons: map[string]result.HoldStat{
 				"rl": {Ms: 200000, Runs: 3, LongestMs: 90000},
 			}},
@@ -486,7 +589,7 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 		{
 			Name: "b", Team: "red",
 			Window: result.PlayerStatsWindow{MatchMs: matchMs, PresentMs: matchMs, AliveMs: 200000, DeadMs: 400000},
-			Score:  result.PlayerStatsScore{Kills: 2, Deaths: 8},
+			Score:  result.PlayerStatsScore{Kills: intp(2), Deaths: 8},
 			Hold: result.PlayerStatsHold{Weapons: map[string]result.HoldStat{
 				"rl": {Ms: 100000, Runs: 1, LongestMs: 100000},
 			}},
@@ -518,8 +621,17 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 	if got := float64(rl.ShareMatch); got != 0.25 {
 		t.Errorf("team shareMatch = %v, want 0.25 over 2x match window", got)
 	}
-	if got := float64(red.Score.Efficiency); got < 0.4799 || got > 0.4801 {
+	if red.Score.Efficiency == nil {
+		t.Fatal("team efficiency absent though both members carry kills")
+	}
+	if got := float64(*red.Score.Efficiency); got < 0.4799 || got > 0.4801 {
 		t.Errorf("team efficiency = %v, want 12/25", got)
+	}
+	if red.Score.Kills == nil || *red.Score.Kills != 12 {
+		t.Errorf("team kills = %v, want 12", red.Score.Kills)
+	}
+	if red.Members == nil || *red.Members != 2 {
+		t.Errorf("team members = %v, want an always-present 2", red.Members)
 	}
 }
 
@@ -540,6 +652,41 @@ func TestTeamAggregationPreservesXferObservability(t *testing.T) {
 	}
 	if *players[0].Pickups.ByKind["rl"].Xfer != 1 {
 		t.Error("aggregation mutated a member's counter through the shared pointer")
+	}
+}
+
+// --- damage family ------------------------------------------------------
+
+// damage.go creates a per-player entry only on an actual hit, so a player
+// who neither dealt nor took a point of damage has none. On a demo that
+// carries the damage stream that is an OBSERVED all-zero row: collapsing
+// it into an absent family says "we could not tell", which is false, and
+// inverts what deriveTakenEnemy deliberately does two functions away.
+func TestDeriveDamageZeroRowIsObserved(t *testing.T) {
+	r := &Result{Damage: &result.DamageResult{
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 4000, Taken: 3000},
+		},
+	}}
+	takenEnemy := deriveTakenEnemy(r)
+
+	d := deriveDamage(r, "ghost", takenEnemy)
+	if d == nil {
+		t.Fatal("damage absent for a player the demo measured at zero")
+	}
+	if d.Given != 0 || d.GivenTeam != 0 || d.GivenSelf != 0 || d.EnemyWeapons != 0 {
+		t.Errorf("zeroed family is not zero: %+v", d)
+	}
+	if d.Taken == nil || *d.Taken != 0 {
+		t.Errorf("taken = %v, want an observed 0", d.Taken)
+	}
+	if d.ByWeapon != nil {
+		t.Errorf("byWeapon = %v, want absent — weapons with no damage are omitted", d.ByWeapon)
+	}
+
+	// A demo with no damage information at all is still the absent case.
+	if got := deriveDamage(&Result{}, "ghost", nil); got != nil {
+		t.Errorf("damage = %+v, want absent with no damage stream at all", got)
 	}
 }
 
