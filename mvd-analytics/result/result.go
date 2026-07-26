@@ -773,7 +773,29 @@ package result
 //     end-of-match table by design. See result/player_stats.go.
 //   - /demoinfo is unchanged: it stays the verbatim KTX pass-through, the
 //     audit trail this section is diffable against.
-const CurrentSchemaVersion = 61
+//
+// v62 amends v61 before it ships: the playerStats section learns to say
+// "not measured" for whole families rather than serving a confident zero.
+//   - score's KILL SIDE is optional. kills / suicides / teamKills /
+//     byWeapon / efficiency are attributed from the obituary-derived frag
+//     log and are omitted together where it measured nothing on a demo
+//     whose players demonstrably died; frags and deaths, which are
+//     measured on every demo, stay. Efficiency and ping become pointers,
+//     and members (team rows) is a pointer so it survives at 0.
+//   - hold.armor is omitted entirely when the armor stream carries no
+//     sample, instead of reporting a full-match "no armor".
+//   - damage.src gains "derived:unbounded" for the k_midair / k_instagib /
+//     k_dmgfrags demos where no bounded reconstruction exists and the
+//     figures are raw wire damage including overkill.
+//   - damage is emitted, zeroed, for a player who dealt and took nothing
+//     on a demo that carries the damage stream (an observed zero).
+//   - team rows carry accuracy (summed per weapon; hits absent unless
+//     every member measured it), which they never did.
+//   - sources is computed from the rows being served, after filtering,
+//     and can read "mixed" as a phantom-roster canary.
+//
+// See RELEASE_NOTES.md.
+const CurrentSchemaVersion = 62
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

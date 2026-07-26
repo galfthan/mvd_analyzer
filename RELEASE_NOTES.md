@@ -5,6 +5,99 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-26 (playerstats) — `playerStats` learns to say "not measured", schema v62
+
+Amends the v61 section before it ships. Every change below replaces a
+confident zero with an absence, or names a degradation that had none.
+Golden corpus regenerated: the only movement is `schemaVersion` and the
+new `accuracy` block on team rows.
+
+- **The kill side of `score` is optional.** `kills`, `suicides`,
+  `teamKills`, `byWeapon` and `efficiency` are all attributed from the
+  obituary-derived frag log; `frags` (the wire net score) and `deaths`
+  (protocol death events) are not. On a demo whose obituaries never
+  matched, the five are now **omitted together** instead of being served
+  as zeros. `4on4_l_vs_la[e1m2]` is the case: a full 4v4 scoreboard with
+  230 team frags and 121 deaths reported 0 kills and 0.0% efficiency on
+  every row, byte-indistinguishable from a genuinely awful team.
+  **Consumers must render `-`, not `0`.** The condition is demo-global,
+  so a team row never mixes a measured member with an unmeasured one.
+- **`hold.armor` is omitted when the armor stream is empty.** `none` is
+  the alive-time complement, and it was emitted whenever the alive
+  window was known — including when no armor sample had ever been
+  observed. On the POV recording `dag_caps_e1m2`, 7 of 8 rows asserted
+  100% no-armor while the same rows listed their armor pickups. A player
+  who genuinely never picked armor up still reports `none == aliveMs`;
+  the change stream always carries its first sample, so the two cases
+  are cleanly distinguishable.
+- **`damage.src` is three-valued: `"derived:unbounded"`.** On a
+  `k_midair` / `k_instagib` / `k_dmgfrags` demo the bounded
+  reconstruction is skipped entirely, and the damage family silently
+  became raw wire damage including overkill while still reading
+  `"derived"`. Measured on `4on4_oeks_vs_tsq[dm2]`: raw runs 38-44% above
+  bounded, and on instagib the wire value is a flat 5000/hit. Never
+  compare an unbounded row's damage with a bounded one's. No demo in the
+  test corpus carries those cvars, which is why the path went unmarked.
+- **A zero-damage player now gets a zeroed `damage` family** on a demo
+  that carries the damage stream. The reconstruction only creates an
+  entry on an actual hit, so the row vanished — collapsing an observed
+  zero into "unmeasurable", the inverse of what the same file does when
+  it zero-fills `takenEnemy`.
+- **Team rows carry `accuracy`.** They never did, so the web's per-team
+  Weapon Stats column rendered `-` beside per-player rows showing real
+  percentages — a regression against the deleted JavaScript, which summed
+  it. `attacks` and `hits` sum per weapon over members; `hits` stays
+  **absent** unless every contributing member measured it (mixing a
+  measured member with an unmeasured one understates the team hit-rate
+  under a number that looks measured), and `real`/`virtual` are not
+  aggregated, since KTX omits the pair unless it recorded one.
+- **`sources` is computed from the rows being served, after filtering.**
+  It previously read `"ktx"` for a family if *any* row matched the KTX
+  block, badging unmatched rows with a provenance they did not have, and
+  `PlayerStats()` copied the roll-up verbatim into filtered responses,
+  where it described rows that had been removed. It gains a third value,
+  `"mixed"`, reserved as a **canary**: on a demo with a KTX block every
+  roster row joins it, so a disagreement means a phantom roster row is
+  back. It should never appear on healthy data.
+- **KTX measured zeros in `damage.byWeapon` are no longer dropped.** The
+  overlay skipped a KTX weapon whose `damage.enemy` was 0 and kept the
+  reconstruction's number in its place — then stamped the family
+  `src: "ktx"`. KTX emits the `damage` sub-block whenever either counter
+  moved (`ktx/src/stats_json.c:208`), so `enemy: 0` is a measurement: a
+  GL used purely for team splash was served as 700 *enemy* damage under
+  a KTX badge, and `byWeapon` stopped summing to `given`. The non-KTX
+  residual keys (`unknown`, `stomp`, `tele`, `explobox`) are deliberately
+  kept — real measured damage, and on `1on1_bananfalco_betowen_240426_dm2`
+  the `unknown: 4` residual is what reconciles `byWeapon` with KTX's
+  `given`.
+- **Unfiltered `/player-stats` can no longer return `"players": null`.**
+  The filtered branch had built an empty slice since it was written; the
+  unfiltered one appended to a nil. `players` is declared required and
+  array-typed, so this was a live spec violation on any demo whose stream
+  roster came out empty.
+- **`accuracy` overlay documented and pinned.** KTX's block replaces the
+  derived one wholesale rather than merging per weapon, because KTX's
+  `attacks` is a pellet count for sg/ssg where ours is trigger pulls.
+  Measured across all 42 cached corpus demos (228 rows): **zero** weapons
+  present in the reconstruction and missing from KTX's `acc` set, so the
+  swap is lossless in practice and no per-entry `src` is introduced.
+- **Type changes** on the same fields, for measured-zero consistency:
+  `ping` `int` -> `*int`; `members` `int` -> `*int`, so a team row always
+  publishes it — including the `0` that a team whose only member never
+  streamed needs most, since every `shareMatch` on it rests on
+  `matchMs x 0`; `efficiency` `Share` -> `*Share`.
+- **Outside the section:** `frags.byWeapon` and
+  `frags.byPlayer[].byWeapon` now move with the Finalize teamkill
+  re-classification, which previously adjusted only `kills` — so
+  `sum(byWeapon) == kills` holds, as `score.byWeapon` claims. Fires on
+  auth-name servers; no golden demo reaches it.
+- **New regression net.** The `mvd-analytics/corpus/` special-cases
+  harness gains four playerStats invariants — a hold key implies a
+  non-empty stream, the kill side implies a non-empty frag log, a team
+  row carries every family its members carry, and on a demo with a KTX
+  block every roster row joins it with an agreeing `src`. They were red
+  on 8 of the 12 local demos before these fixes.
+
 ## 2026-07-25 (playerstats) — the API cache stopped eating measured zeros
 
 No schema bump; the tier-2 cache-format counter goes to `f3`, so cached

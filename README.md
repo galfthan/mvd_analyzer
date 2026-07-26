@@ -439,7 +439,7 @@ effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`), opening (schema v51 — each player's
 match-start spawn loc plus the first take of every contested spawner,
 the one-fetch answer to opening-race questions), and playerStats
-(schema v61 — the canonical per-player and per-team statistics row:
+(schema v62 — the canonical per-player and per-team statistics row:
 corrected scoreboard, damage, pickup tallies and **possession time**
 (time with each weapon, each armor type, and with **no armor**), each
 family tagged with whether it came from KTX or was derived here.

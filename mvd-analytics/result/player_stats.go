@@ -37,7 +37,7 @@ import (
 // integral, so it will legitimately read LOWER than a KTX end-of-match
 // table — that is the correction, not a bug.
 //
-// Schema v61.
+// Schema v62.
 type PlayerStatsResult struct {
 	// Players is one row per participant, in Streams.Players order (the
 	// canonical player order used across the Result), with any scoreboard
