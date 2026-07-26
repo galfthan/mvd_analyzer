@@ -362,7 +362,9 @@ type Source interface {
 ```
 
 Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
-`PrintEvent`, `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
+`PrintEvent` (one complete console *line*, reassembled from however many
+`svc_print` fragments the server split it into — old kmod/qwe emits an
+obituary as three), `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,

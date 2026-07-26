@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-reader/mvd"
@@ -12,6 +13,12 @@ import (
 // damage feedback, centerprint-equivalents). For broadcast prints
 // (`dem_all`, `dem_multiple`, or `dem_read` in non-MVD streams) the
 // field is -1 — no single target.
+//
+// Message is a complete console LINE, not necessarily one svc_print
+// payload: QuakeC emits a line as a run of `sprint`/`bprint` calls
+// ("DARKLORD", "'s rocket", "\n") and the parser reassembles them
+// before emitting. See assemblePrintLine for the rules and the
+// TimeMs convention.
 type PrintEvent struct {
 	Level           int
 	Message         string
@@ -27,14 +34,8 @@ func (e *PrintEvent) EventTimeMs() int32   { return e.TimeMs }
 // dem_single slot from the MVD container (or -1 for non-dem_single
 // wrappers); the caller in parser.go derives it from msg.Header.
 //
-// Aside from emitting PrintEvent (and any KTX pickup-print follow-up),
-// the broadcast obituary path is mined here for DeathEvent: KTX's
-// fragfile lines (X was rocketed by Y, etc.) are the only signal that
-// fires when the server compresses a death/respawn cycle into a single
-// svc_playerinfo gap — short enough that DF_DEAD never flips on the
-// wire and the dem_stats block carrying the health drop is addressed
-// to a different POV. maybeEmitDeath dedupes against the other two
-// sources so we don't double-count when they do fire.
+// The payload is a console *fragment*, not necessarily a line, so it
+// goes through assemblePrintLine before anything consumes it.
 func (p *Parser) parsePrint(r *mvd.BufferReader, timeMs int32, targetPlayerNum int) error {
 	level, err := r.ReadByte()
 	if err != nil {
@@ -46,24 +47,174 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, timeMs int32, targetPlayerNum i
 		return err
 	}
 
-	cleanedMessage := cleanString(message)
+	// cleanString is a per-byte map (plus NUL elision), so cleaning each
+	// fragment and concatenating is identical to concatenating the raw
+	// fragments and cleaning once — the assembly below can work on
+	// already-cleaned text. Byte 10 maps to '\n' (userinfo.go:261), so
+	// the line terminator survives normalisation.
+	return p.assemblePrintLine(int(level), cleanString(message), targetPlayerNum, timeMs)
+}
 
+// printLineKey is the buffer key for print-fragment assembly: the print
+// level plus the dem_single target slot (-1 for broadcasts).
+type printLineKey struct {
+	level  int
+	target int
+}
+
+// printLineBuf is a partially assembled line: text carries no '\n' (the
+// assembler always releases up to and including the last one), timeMs is
+// the wire time of its FIRST fragment.
+type printLineBuf struct {
+	text   string
+	timeMs int32
+}
+
+// assemblePrintLine buffers svc_print fragments into whole console lines
+// and hands each completed line to deliverPrintLine.
+//
+// WHY. QuakeC builds a console line out of several `sprint`/`bprint`
+// calls and each one becomes its own svc_print on the wire. Old
+// kmod/qwe progs print obituaries id1-style — `ktx/src/items.c:2404,
+// 2480, 2534, 2618` shows the same shape still alive in modern KTX for
+// the backpack pickup line ("You get ", "the %s", ", ", "20 shells",
+// "\n"). A consumer that matches per-svc_print therefore sees
+// "DARKLORD", "'s rocket" and "\n" and matches none of them: on
+// `4on4_l_vs_la[e1m2]` the obituary table matched zero of 368 deaths
+// before this assembly existed.
+//
+// HOW. This mirrors ezquake's client-side assembler, `CL_ProcessPrint`
+// (`ezquake-source/src/cl_parse.c:3072-3105`): append the fragment to a
+// buffer, and when the buffer contains a newline flush everything up to
+// and INCLUDING the last one (`qwcsrchr(cl.sprint_buf, '\n')`), keeping
+// the remainder for the next fragment. ezquake also flushes when the
+// print LEVEL changes (`cl.sprint_level`); we express the same rule by
+// keying a buffer per level instead of flushing one shared buffer, which
+// is equivalent for a single stream and necessary for ours (below).
+//
+// WHY THE KEY CARRIES THE TARGET TOO. ezquake is one client and sees one
+// stream: mvdsv has already routed away every dem_single addressed at
+// somebody else. We demultiplex the whole recording, so broadcast and
+// per-client fragments interleave in one call sequence — and they
+// genuinely interleave *inside* a single line: `ktx/src/items.c:2485`
+// emits mi_print to other clients between the "the %s" and ", " pieces
+// of the backpack line. Keying on level alone would splice a broadcast
+// into a personal line and vice versa, so the key is (level, target).
+// This is also what protects the KTX pickup prints ktx_pickup_print.go
+// consumes: those are dem_single PRINT_LOW and can never merge with a
+// broadcast fragment.
+//
+// FRAME BOUNDARY. A pending buffer is also released when a fragment for
+// the same key arrives with a different wire time. Every fragment of one
+// line is written inside the server frame that produced it, so a
+// same-key fragment in a later frame is definitionally a new line;
+// without this a line whose terminator never arrived would swallow an
+// unrelated print minutes later.
+//
+// TIME. The assembled event carries the wire time of the line's FIRST
+// fragment — the moment the server started saying it, and the only
+// choice that keeps an obituary's DeathEvent at the frame the kill
+// happened in.
+func (p *Parser) assemblePrintLine(level int, msg string, target int, timeMs int32) error {
+	key := printLineKey{level: level, target: target}
+
+	text := msg
+	start := timeMs
+	if buf, ok := p.printLines[key]; ok {
+		if buf.timeMs != timeMs {
+			delete(p.printLines, key)
+			if err := p.deliverPrintLine(level, buf.text, target, buf.timeMs); err != nil {
+				return err
+			}
+		} else {
+			text = buf.text + msg
+			start = buf.timeMs
+		}
+	}
+
+	nl := strings.LastIndexByte(text, '\n')
+	if nl < 0 {
+		if p.printLines == nil {
+			p.printLines = make(map[printLineKey]*printLineBuf)
+		}
+		p.printLines[key] = &printLineBuf{text: text, timeMs: start}
+		return nil
+	}
+	if rest := text[nl+1:]; rest != "" {
+		if p.printLines == nil {
+			p.printLines = make(map[printLineKey]*printLineBuf)
+		}
+		// The remainder came out of the fragment that just arrived, so it
+		// starts in the current frame, not the buffered one.
+		p.printLines[key] = &printLineBuf{text: rest, timeMs: timeMs}
+	} else {
+		delete(p.printLines, key)
+	}
+	return p.deliverPrintLine(level, text[:nl+1], target, start)
+}
+
+// flushPendingPrintLines releases every unterminated buffer. Called once
+// the stream is over (clean end of demo or truncation) so a line whose
+// terminating "\n" never made it into the recording is still reported
+// rather than silently dropped. Order is deterministic (time, level,
+// target) because Go map iteration is not.
+func (p *Parser) flushPendingPrintLines() error {
+	if len(p.printLines) == 0 {
+		return nil
+	}
+	keys := make([]printLineKey, 0, len(p.printLines))
+	for k := range p.printLines {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		a, b := keys[i], keys[j]
+		if ta, tb := p.printLines[a].timeMs, p.printLines[b].timeMs; ta != tb {
+			return ta < tb
+		}
+		if a.level != b.level {
+			return a.level < b.level
+		}
+		return a.target < b.target
+	})
+	pending := p.printLines
+	p.printLines = nil
+	for _, k := range keys {
+		buf := pending[k]
+		if err := p.deliverPrintLine(k.level, buf.text, k.target, buf.timeMs); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// deliverPrintLine emits one assembled console line and runs every
+// print-derived side effect on it.
+//
+// Aside from emitting PrintEvent (and any KTX pickup-print follow-up),
+// the broadcast obituary path is mined here for DeathEvent: KTX's
+// fragfile lines (X was rocketed by Y, etc.) are the only signal that
+// fires when the server compresses a death/respawn cycle into a single
+// svc_playerinfo gap — short enough that DF_DEAD never flips on the
+// wire and the dem_stats block carrying the health drop is addressed
+// to a different POV. maybeEmitDeath dedupes against the other two
+// sources so we don't double-count when they do fire.
+func (p *Parser) deliverPrintLine(level int, msg string, target int, timeMs int32) error {
 	if err := p.emit(&PrintEvent{
-		Level:           int(level),
-		Message:         cleanedMessage,
-		TargetPlayerNum: targetPlayerNum,
+		Level:           level,
+		Message:         msg,
+		TargetPlayerNum: target,
 		TimeMs:          timeMs,
 	}); err != nil {
 		return err
 	}
-	p.updateMatchStartedFromPrint(int(level), cleanedMessage)
-	if err := p.tryEmitObituaryDeath(cleanedMessage, timeMs); err != nil {
+	p.updateMatchStartedFromPrint(level, msg)
+	if err := p.tryEmitObituaryDeath(msg, timeMs); err != nil {
 		return err
 	}
-	if err := p.tryEmitRosterPrint(int(level), cleanedMessage, timeMs); err != nil {
+	if err := p.tryEmitRosterPrint(level, msg, timeMs); err != nil {
 		return err
 	}
-	return p.tryEmitPickupPrint(int(level), cleanedMessage, targetPlayerNum, timeMs)
+	return p.tryEmitPickupPrint(level, msg, target, timeMs)
 }
 
 // tryEmitObituaryDeath inspects an obituary print line, resolves the

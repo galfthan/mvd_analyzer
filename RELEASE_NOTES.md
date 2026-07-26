@@ -17,9 +17,12 @@ new `accuracy` block on team rows.
   obituary-derived frag log; `frags` (the wire net score) and `deaths`
   (protocol death events) are not. On a demo whose obituaries never
   matched, the five are now **omitted together** instead of being served
-  as zeros. `4on4_l_vs_la[e1m2]` is the case: a full 4v4 scoreboard with
-  230 team frags and 121 deaths reported 0 kills and 0.0% efficiency on
-  every row, byte-indistinguishable from a genuinely awful team.
+  as zeros. `4on4_l_vs_la[e1m2]` was the canonical case — a full 4v4
+  scoreboard with 230 team frags and 121 deaths reporting 0 kills and
+  0.0% efficiency on every row, byte-indistinguishable from a genuinely
+  awful team — until the frag-log recovery in the entry below made its
+  kill side measurable; the omission now guards any demo whose
+  obituaries genuinely cannot be matched.
   **Consumers must render `-`, not `0`.** The condition is demo-global,
   so a team row never mixes a measured member with an unmeasured one.
 - **`hold.armor` is omitted when the armor stream is empty.** `none` is
@@ -97,6 +100,39 @@ new `accuracy` block on team rows.
   row carries every family its members carry, and on a demo with a KTX
   block every roster row joins it with an agreeing `src`. They were red
   on 8 of the 12 local demos before these fixes.
+## 2026-07-26 (playerstats) — pre-KTX demos get their frag log back
+
+No schema bump. Layer 1 only; every consumer of `PrintEvent` benefits.
+
+- **A `svc_print` payload is a console fragment, not a line.** QuakeC
+  builds a line out of however many `sprint`/`bprint` calls the code path
+  makes, and each one becomes its own `svc_print`. Old kmod/qwe emits an
+  obituary id1-progs-style — `"DARKLORD"`, `"'s rocket"`, `"\n"` arrive as
+  three messages — while modern KTX prints obituaries whole. Both obituary
+  consumers (the parser's death-mining and the analytics frag log) matched
+  per-message, so on a pre-KTX demo **nothing ever matched**.
+- **`4on4_l_vs_la[e1m2]` went from an empty frag log to 368 entries**, one
+  per death counted from the death stream, every one naming killer, victim
+  and weapon. The 2003 duel `1on1_]apollyon[_vs_jogi_[dm4]` gains its
+  fragmented obituaries too. This is what `playerStats.score.kills` and
+  `efficiency` were reading as a confident `0` on all eight rows of a 4on4
+  that scored 230 frags.
+- **The parser now assembles fragments into lines** before emitting
+  `PrintEvent` and before any obituary / pickup / match-start matching,
+  following ezquake's `CL_ProcessPrint` rule
+  (`ezquake-source/src/cl_parse.c:3072-3105`) with the buffer keyed by
+  (print level, `dem_single` target) — ezquake sees one client's stream,
+  we demultiplex the whole recording. A line that is already whole passes
+  through byte-identically.
+- **Modern KTX demos are unaffected in the data**, and the golden corpus
+  is unchanged. Two families there were fragmented and now arrive as one
+  event instead of 6-14 (the `PRINT_LOW` backpack pickup line, still
+  `ktx/src/items.c:2404-2618`, and the end-of-match "top scorers" table);
+  neither carries an obituary, chat line or pickup match.
+- New regression net: `mvd-analytics/corpus/obituary_test.go` asserts a
+  frag-log floor on the pre-KTX special-case demos (0 entries before this
+  change), plus parser unit tests for fragmented obituaries, interleaved
+  levels/targets, and end-of-demo flush.
 
 ## 2026-07-25 (playerstats) — the API cache stopped eating measured zeros
 
