@@ -26,6 +26,13 @@ func storedResult(withKTX bool) *result.Result {
 						"rl":     {Took: 3, TotalTook: 4, Dropped: 2, Xfer: &xfer, XferSelf: &xferSelf},
 						"shells": {Took: 12},
 					}},
+					Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{
+						// Trigger pulls, not pellets — the reason the KTX
+						// block replaces this one wholesale rather than
+						// merging key by key.
+						"rl":  {Attacks: 61, Hits: intp(22)},
+						"ssg": {Attacks: 40, Hits: intp(18)},
+					}},
 					Hold: result.PlayerStatsHold{Src: result.SrcDerived, Armor: map[string]result.HoldStat{
 						"ra":   {Ms: 129000, Runs: 4},
 						"none": {Ms: 200000, Runs: 9},
@@ -55,7 +62,7 @@ func storedResult(withKTX bool) *result.Result {
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
-			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Damage: result.SrcDerived, Pickups: result.SrcDerived, Hold: result.SrcDerived},
+			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Damage: result.SrcDerived, Accuracy: result.SrcDerived, Pickups: result.SrcDerived, Hold: result.SrcDerived},
 		},
 	}
 	if withKTX {
@@ -409,4 +416,132 @@ func TestPlayerStatsOverlayRealVirtualNotZeroFilled(t *testing.T) {
 	if rl := acc.ByWeapon["rl"]; rl.Real == nil || *rl.Real != 33 {
 		t.Errorf("rl real = %v, want 33 carried through", rl.Real)
 	}
+}
+
+// T1.3: a KTX weapon entry carrying `damage: {enemy: 0, team: N}` is a
+// MEASURED zero — the weapon dealt team splash only. Treating it as
+// absent left the reconstruction's number in its place and then stamped
+// the whole family `src: "ktx"`, so the response asserted enemy damage
+// KTX had explicitly recorded as zero.
+//
+// KTX emits a weapon entry whenever the weapon was used at all
+// (ktx/src/stats_json.c:382) and the damage sub-block whenever either
+// counter moved (:208), so presence is the right test.
+func TestPlayerStatsOverlayKTXZeroEnemyDamageIsMeasured(t *testing.T) {
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Damage.ByWeapon = map[string]int{"gl": 700, "rl": 2000, "unknown": 4}
+	r.DemoInfo.Players[0].Weapons["gl"] = &result.DemoInfoWeapon{
+		Damage: &result.DemoInfoDamage{Enemy: 0, Team: 700},
+	}
+	r.DemoInfo.Players[0].Weapons["rl"].Damage = &result.DemoInfoDamage{Enemy: 1800}
+
+	bw := mustPlayerStats(t, r, PlayerStatsOptions{}).Players[0].Damage.ByWeapon
+	if got, ok := bw["gl"]; !ok || got != 0 {
+		t.Errorf("gl = %d (present=%v), want KTX's measured 0 — 700 was TEAM damage", got, ok)
+	}
+	if got := bw["rl"]; got != 1800 {
+		t.Errorf("rl = %d, want KTX's 1800", got)
+	}
+	// Keys outside KTX's vocabulary are real measured damage and survive:
+	// on 1on1_bananfalco_betowen_240426_dm2 the `unknown` residual is what
+	// reconciles byWeapon with KTX's `given`.
+	if got := bw["unknown"]; got != 4 {
+		t.Errorf("unknown = %d, want the derived 4 kept — KTX has no such key", got)
+	}
+}
+
+// T1.6: the unfiltered path must emit [] for an empty roster, not null.
+// playerStatsPost sets the section unconditionally, so a demo whose
+// stream roster came out empty reaches this path — and `players` is
+// declared required and array-typed.
+func TestPlayerStatsEmptyRosterYieldsEmptySlice(t *testing.T) {
+	r := &result.Result{PlayerStats: &result.PlayerStatsResult{
+		Sources: result.PlayerStatsSources{Score: result.SrcDerived, Hold: result.SrcDerived},
+	}}
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	if got.Players == nil {
+		t.Fatal("players = null on the unfiltered path, want []")
+	}
+	if len(got.Players) != 0 {
+		t.Errorf("players = %v, want empty", got.Players)
+	}
+	// A roster with no rows carries no family, so the overlayable keys are
+	// omitted rather than claiming a provenance for nothing.
+	if got.Sources.Damage != "" || got.Sources.Accuracy != "" || got.Sources.Pickups != "" {
+		t.Errorf("sources = %+v, want the overlayable families omitted", got.Sources)
+	}
+	if got.Sources.Score != result.SrcDerived || got.Sources.Hold != result.SrcDerived {
+		t.Errorf("sources = %+v, want score/hold derived", got.Sources)
+	}
+}
+
+// T2.3: the roll-up must describe the rows, not "any row matched KTX".
+// beta has no KTX entry in the fixture, so the families are genuinely
+// mixed and the canary must fire rather than badging everything ktx.
+func TestPlayerStatsSourcesRollUpFromRows(t *testing.T) {
+	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{})
+	if got.Sources.Damage != result.SrcMixed {
+		t.Errorf("damage src = %q, want mixed — alpha joined the KTX block and beta did not", got.Sources.Damage)
+	}
+	// Only alpha carries pickups and accuracy at all, and after the overlay
+	// both are KTX's. A row WITHOUT the family contributes no opinion — an
+	// absent family is not a third source.
+	if got.Sources.Pickups != result.SrcKTX {
+		t.Errorf("pickups src = %q, want ktx", got.Sources.Pickups)
+	}
+	if got.Sources.Accuracy != result.SrcKTX {
+		t.Errorf("accuracy src = %q, want ktx — beta carries no accuracy family to disagree with", got.Sources.Accuracy)
+	}
+}
+
+// ...and it is computed AFTER filtering, so it describes the rows served
+// rather than the ones a filter removed.
+func TestPlayerStatsSourcesComputedAfterFiltering(t *testing.T) {
+	r := storedResult(true)
+	// Unfiltered, damage is "mixed" (see above). Narrowed to one row it
+	// must describe that row, not the set the filter removed.
+	got := mustPlayerStats(t, r, PlayerStatsOptions{Players: []string{"alpha"}})
+	if got.Sources.Damage != result.SrcKTX {
+		t.Errorf("damage src = %q, want ktx — the only row served is KTX-sourced", got.Sources.Damage)
+	}
+	got = mustPlayerStats(t, r, PlayerStatsOptions{Players: []string{"beta"}})
+	if got.Sources.Damage != result.SrcDerived {
+		t.Errorf("damage src = %q, want derived — beta's row never joined the KTX block", got.Sources.Damage)
+	}
+	if got.Sources.Pickups != "" {
+		t.Errorf("pickups src = %q, want omitted — beta carries no pickups family", got.Sources.Pickups)
+	}
+}
+
+// T2.2: the accuracy overlay is a WHOLESALE swap, pinned here because the
+// alternative (a per-weapon merge) would put KTX pellet counts beside
+// derived trigger pulls under one src. Measured lossless on the cached
+// corpus — see overlayAccuracy.
+func TestPlayerStatsAccuracySwappedWholesale(t *testing.T) {
+	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{})
+	acc := got.Players[0].Accuracy
+	if acc == nil || acc.Src != result.SrcKTX {
+		t.Fatalf("accuracy = %+v, want the KTX block", acc)
+	}
+	if len(acc.ByWeapon) != 1 {
+		t.Errorf("byWeapon = %v, want KTX's rl alone — the derived block is replaced, not merged", acc.ByWeapon)
+	}
+	if _, ok := acc.ByWeapon["ssg"]; ok {
+		t.Error("derived ssg survived the swap: KTX counts pellets there and we count trigger pulls, " +
+			"so the two must never share a map")
+	}
+	if acc.ByWeapon["rl"].Attacks != 90 {
+		t.Errorf("rl attacks = %d, want KTX's 90 (the derived 61 must not win)", acc.ByWeapon["rl"].Attacks)
+	}
+	// The stored derived block is untouched.
+	if a := storedAccuracy(t); a.ByWeapon["ssg"].Attacks != 40 {
+		t.Error("the swap wrote through to the stored artifact")
+	}
+}
+
+func storedAccuracy(t *testing.T) *result.PlayerStatsAccuracy {
+	t.Helper()
+	r := storedResult(true)
+	_, _ = PlayerStats(r, PlayerStatsOptions{})
+	return r.PlayerStats.Players[0].Accuracy
 }

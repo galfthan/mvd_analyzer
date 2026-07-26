@@ -5333,14 +5333,21 @@ components:
           items: { $ref: "#/components/schemas/PlayerStatsRow" }
           type: array
         sources:
-          description: "Per-family provenance roll-up."
+          description: >
+            Per-family provenance roll-up, computed FROM THE ROWS this
+            response carries, after any filtering: all rows agree -> that
+            value, no row carries the family -> the key is omitted, rows
+            disagree -> "mixed". "mixed" is a canary and should never appear
+            on healthy data — on a demo with a KTX block every roster row
+            joins it, so a disagreement means a row the block has never
+            heard of.
           additionalProperties: false
           properties:
-            score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx] }
-            damage: { description: "Provenance of the damage family.", type: string, enum: [derived, ktx] }
-            accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx] }
-            pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx] }
-            hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx] }
+            score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx, mixed] }
+            damage: { description: "Provenance of the damage family.", type: string, enum: [derived, ktx, mixed] }
+            accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
+            pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
+            hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx, mixed] }
           required: [score, hold]
           type: object
       required:
@@ -5444,9 +5451,12 @@ components:
                   type: integer
                 byWeapon:
                   description: >
-                    Enemy damage GIVEN split by the attacker's weapon, keyed rl/lg/gl/sg/ssg/sng/ng/axe.
-                    Follows src with the family: KTX's per-weapon enemy damage where the block carries
-                    it, else the bounded reconstruction. Weapons the player dealt no damage with are
+                    Enemy damage GIVEN split by the attacker's weapon, keyed rl/lg/gl/sg/ssg/sng/ng/axe
+                    plus the non-KTX residual keys unknown/stomp/tele/explobox, which are real measured
+                    damage the reconstruction contributes. Follows src with the family: KTX's per-weapon
+                    enemy damage wherever the block carries a `damage` sub-block — including an
+                    `enemy: 0` there, which is a MEASURED zero (a weapon used for team splash only) —
+                    else the bounded reconstruction. Weapons the player dealt no damage with are
                     omitted. There is no by-weapon split of damage TAKEN on either side.
                   additionalProperties: { type: integer }
                   type: object
@@ -5469,7 +5479,12 @@ components:
             the same measurement, so check src before comparing accuracies
             across demos — but the family is emitted either way, so a demo
             with no KTX block degrades to a rougher number rather than to a
-            missing field.
+            missing field. When KTX carries an acc block the family is
+            replaced WHOLESALE, never merged per weapon: mixing pellet
+            counts with trigger pulls in one map under one src is the
+            coercion this section exists to avoid. Measured lossless across
+            the 42-demo cached corpus (228 rows, zero weapons present in the
+            reconstruction and missing from KTX).
           oneOf:
             - additionalProperties: false
               properties:

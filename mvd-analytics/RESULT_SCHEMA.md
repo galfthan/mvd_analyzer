@@ -686,18 +686,25 @@ served as a number.
 Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
 wire) or `"ktx"` (the demoinfo block). The stored artifact is always
 fully derived; `view.PlayerStats` applies the KTX overlay at read time,
-mirroring how `view.Damage` applies `boundedSource`. `sources` at the
-top level is the roll-up.
+mirroring how `view.Damage` applies `boundedSource`.
+
+`sources` at the top level is the roll-up, **computed from the rows the
+response actually carries, after any filtering**: all rows agree → that
+value, no row carries the family → the key is omitted, the rows disagree
+→ `"mixed"`. `"mixed"` is a **canary**, not a data condition — on a demo
+carrying a KTX block every roster row joins it, so a disagreement means
+a roster row KTX has never heard of, i.e. the phantom-row defect. It
+should never appear on healthy data.
 
 | Family | Winner | Why |
 |---|---|---|
 | `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. The kill side is optional — see "The kill side of `score` is optional" below. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
 | `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
-| `accuracy` | **ktx** when present, else **derived** from the fire stream | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. |
+| `accuracy` | **ktx** when present, else **derived** from the fire stream | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
 | `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
 | `damage.teamWeapons` | **ktx-only** | KTX's `dmg_tweapon` (`ktx/src/combat.c:1063`), the friendly-fire mirror of `enemyWeapons`. The reconstruction does not bucket team damage by the victim's inventory. |
-| `damage.byWeapon` | **ktx** per weapon when present, else the bounded reconstruction | enemy damage GIVEN split by attacker weapon. Merged weapon by weapon, not family-wide: a KTX block can record damage for some weapons and omit others, and dropping the reconstruction for the rest would lose real data. |
+| `damage.byWeapon` | **ktx** per weapon when present, else the bounded reconstruction | enemy damage GIVEN split by attacker weapon. Merged weapon by weapon, on **presence** of KTX's `damage` sub-block, not on its being non-zero: KTX emits a weapon entry whenever the weapon was used (`ktx/src/stats_json.c:382`) and a `damage` sub-block whenever either counter moved (`:208`), so `enemy: 0` there is a measured zero — a weapon used for team splash only. The reconstruction survives for keys outside KTX's vocabulary (`unknown`, `stomp`, `tele`, `explobox`), which are real measured damage. |
 | `score.byWeapon` | always **derived** | enemy kills split by weapon, from the corrected frag log — same footing as `score.kills`, which is why KTX's per-weapon counts (subject to the same reconnect / telefrag over-counting) never overlay it. |
 | `login` | **ktx** when present, else the `*auth` userinfo login | genuinely on the wire (`mvd-reader/parser/userinfo.go:102`). |
 | `controlMs` / `speed` | **ktx-only** | KTX's own control clock and speed summary; no wire-side equivalent is computed today. |
@@ -774,6 +781,23 @@ teamplay damage-avoidance zeroed the damage (`virtual_take`,
 `ktx/src/combat.c:719`) — so `virtual >= real`, and the gap is damage
 that was *prevented*, not missed. Neither divided by `attacks` is an
 accuracy.
+
+#### Why `accuracy` is swapped wholesale and `damage.byWeapon` is merged
+
+The two overlays resolve differently on purpose. Damage is the **same
+unit** in both sources, so merging key by key loses nothing and recovers
+the keys KTX has no vocabulary for. Accuracy is **not** the same unit:
+KTX's `attacks` is a pellet count for sg/ssg (`ktx/src/weapons.c:812`)
+where the reconstruction counts trigger pulls, so a per-weapon merge
+would put two scales in one map under one `src` — the coercion this
+section exists to prevent.
+
+The swap is only lossy if KTX omits a weapon the reconstruction saw
+fired. Measured across all 42 cached corpus demos (every one carrying a
+KTX block), 228 rows with a derived accuracy family: **zero** such
+weapons. That matches KTX's own emission rule — a weapon entry exists
+whenever the player used the weapon at all — so the loss is theoretical
+and no per-entry `src` is offered.
 
 #### The kill side of `score` is optional
 

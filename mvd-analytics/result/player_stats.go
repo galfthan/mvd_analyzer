@@ -62,11 +62,29 @@ const (
 	// SrcKTX: taken from the KTX demoinfo block, which counts it
 	// server-side.
 	SrcKTX = "ktx"
+	// SrcMixed appears in the Sources ROLL-UP only, never on a row, and
+	// means the rows disagreed about where the family came from.
+	//
+	// It is a CANARY, not a data condition. Measured across every local
+	// demo carrying a KTX block, the playerStats name set and the demoinfo
+	// name set are identical and every listed player carries both a dmg
+	// blob and an acc entry — so a demo either has the block for everyone
+	// or for nobody. The one way a mix ever arose was a roster row KTX had
+	// never heard of (a refused connection surfaced as a player), which is
+	// the phantom-roster defect. If this value is ever served, that defect
+	// is back.
+	SrcMixed = "mixed"
 )
 
 // PlayerStatsSources records, per family, which source the rows carry.
 // Families absent from every row (no KTX block and no derivable
 // equivalent) are omitted.
+//
+// COMPUTED FROM THE ROWS BEING SERVED, after any filtering: all rows KTX
+// -> "ktx", none -> "derived", disagreement -> "mixed". It used to be set
+// from an "any row matched KTX" flag on the unfiltered set, which both
+// over-reported (one KTX-matched row badged the whole family) and
+// described rows a filter had since removed.
 type PlayerStatsSources struct {
 	Score    string `json:"score"`
 	Damage   string `json:"damage,omitempty"`
