@@ -39,7 +39,8 @@ const CHAT_ITEM_HEIGHT  = 18;
 const DEATH_X_DURATION  = 2.0;  // seconds an "X" death marker stays on the map
 const PLAYBACK_FPS_MS   = 16;   // map playback throttle (~60 fps = 16 ms/frame)
 
-// Derive strong/weak color variants from a hex color for region control displays
+// Derive a strong (darkened) color variant from a hex color for region
+// control displays.
 function hexToRgb(hex) {
     return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
@@ -47,11 +48,6 @@ function teamStrongColor(hex) {
     const [r, g, b] = hexToRgb(hex);
     // Darken by 30% for strong control
     return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
-}
-function teamWeakColor(hex) {
-    const [r, g, b] = hexToRgb(hex);
-    // Lighten towards white for weak control
-    return `rgb(${Math.round(r + (255 - r) * 0.5)}, ${Math.round(g + (255 - g) * 0.5)}, ${Math.round(b + (255 - b) * 0.5)})`;
 }
 
 // ─── Table builder ──────────────────────────────────────────────────────────
@@ -7582,11 +7578,6 @@ const SOLID_LIGHT = (() => {
     const n = Math.hypot(l[0], l[1], l[2]);
     return [l[0] / n, l[1] / n, l[2] / n];
 })();
-
-function parseRgbPrefix(rgba) {
-    const m = /rgba?\(([^,]+),([^,]+),([^,]+)/.exec(rgba);
-    return m ? [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])] : [170, 170, 190];
-}
 
 // floorBoundaryEdges returns the floor's outer-boundary edges: edges that
 // belong to exactly one floor triangle across all regions + the backdrop —
