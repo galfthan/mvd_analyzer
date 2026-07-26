@@ -116,6 +116,7 @@ func TestSpecialCasesInvariants(t *testing.T) {
 			checkRosterMatchesStreams(t, res)
 			checkIntervalsHaveEvidence(t, res)
 			checkIntervalsInMatchWindow(t, res)
+			playerStatsChecks(t, res)
 		})
 	}
 }
