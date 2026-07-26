@@ -1448,17 +1448,18 @@ case-insensitive substrings:
 | Pattern | Provenance | Notes |
 |---------|-----------|-------|
 | `"has begun"` | **verified** in `ktx/` | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1173`, a `G_bprint`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). This is the entry that fires on a modern KTX demo. |
-| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` (`ktx/src/arena.c:602-618`, `clan_arena.c`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
-| `"go!"` | unverified | The loosest entry in the table — a bare `"go!"` substring. It is why chat is refused (below). |
-| `"match started"` | unverified | Not found in `ktx/`, `mvdsv/` or `ezquake-source/`. |
-| `"begins in 1"` | unverified | Not found in the vendored trees. If some mod does emit it, note it fires ~1 s *before* the start proper. |
-| `"game start"` | unverified | Not found in the vendored trees. |
+| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` / `G_cp2all` (`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
+| `"go!"` | **not a broadcast in current KTX** | `GO!` is a `G_cp2all` in the race countdown (`ktx/src/race.c:2614`) — again `svc_centerprint`, not `svc_print`. Also the loosest entry in the table, a bare `"go!"` substring, which is why chat is refused (below). |
+| `"match started"` | **not printed at all** | The only occurrence in the vendored trees is a C comment (`ktx/src/commands.c:5123`). |
+| `"begins in 1"` | unverified | No printed string in `ktx/`, `mvdsv/` or `ezquake-source/`. If some mod does emit it, note it fires ~1 s *before* the start proper. |
+| `"game start"` | **not a broadcast in current KTX** | The only KTX string containing it is the pre-match countdown `"N seconds left before game starts"`, a `G_centerprint` (`ktx/src/admin.c:624`) — so it cannot reach this matcher, and would be a *pre*-start phrase if it could. |
 
-The last four entries predate this table and are kept because removing a
+The last five entries predate this table and are kept because removing a
 pattern can only lose match-start detection on a mod nobody here has a
-demo for. They are marked unverified rather than quietly attributed to
-KTX: the only phrase this repo can prove a current KTX server broadcasts
-is `"has begun"`.
+demo for. None of them is quietly attributed to KTX: the only phrase this
+repo can prove a current KTX server *broadcasts* is `"has begun"`. Four
+of the five do exist in `ktx/`, but as `svc_centerprint` text or a C
+comment, so on a KTX demo they are dead weight rather than a live path.
 
 **Implementation note**: match on the substring `"has begun"`, not
 `"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast

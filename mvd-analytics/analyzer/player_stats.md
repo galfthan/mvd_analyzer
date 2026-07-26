@@ -120,7 +120,7 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   throughout. Neither is fixable with what we have: the identity
   analyser's `Sessions` look like a presence record but their outer
   bounds are widened to ±inf so lookups always resolve
-  (`identity.go:311`), and splitting on a position-track gap would need
+  (`identity.go:239-240`), and splitting on a position-track gap would need
   an invented threshold. On the one reconnect demo in the corpus
   (gameId 216835) there is no gap to split on anyway — the largest
   interval between position samples is 56 ms for every player.
@@ -139,7 +139,7 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
 - **`ping`, `handicap` and `bot` stay KTX-only.** `handicap` and `bot`
   are server-side state with no wire signal. `ping` IS on the wire
   (`svc_updateping`) but the parser skips it
-  (`mvd-reader/parser/parser.go:787`) — decoding it is a Layer-1 change
+  (`mvd-reader/parser/parser.go:809`, `skipCommand`) — decoding it is a Layer-1 change
   left for a follow-up.
 
 ## Reference

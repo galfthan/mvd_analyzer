@@ -1440,9 +1440,12 @@ function displayPlayerStats(rows) {
     // Every column comes from the playerStats row. `score` is always
     // derived (KTX's own stats over-count pentagram-deflect telefrags and
     // reset after a reconnect); `damage` is KTX's where the block carries
-    // it. `taken` is our ALL-SOURCES figure and `takenEnemy` is KTX's
-    // enemy-only one — they are different quantities and get separate
-    // columns rather than being conflated. See RESULT_SCHEMA.md.
+    // it. The `Taken` column is `damage.taken`, our ALL-SOURCES figure —
+    // NOT KTX's enemy-only `damage.takenEnemy`, which is a different
+    // quantity and has no column here (the `<th title>` in index.html
+    // says so; add a column rather than conflating the two if it is ever
+    // wanted). `ToDie` does derive from `takenEnemy`, per-player only.
+    // See RESULT_SCHEMA.md.
     const sorted = sortByFragsDesc(rows);
     const teamOrder = getTeamOrder(sorted);
 

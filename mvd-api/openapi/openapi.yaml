@@ -5421,7 +5421,11 @@ components:
               type: number
             byWeapon:
               description: >
-                Enemy kills split by the weapon that dealt them, keyed rl/lg/gl/sg/ssg/sng/ng/axe.
+                Enemy kills split by the weapon that dealt them, commonly rl/lg/gl/sg/ssg/sng/ng/axe.
+                The key set is the frag log's obituary vocabulary, which ALSO includes the
+                non-weapon killers `tele`, `stomp` and `squish`, the catch-all `unknown` for a
+                generic "was killed by" line, and `hook`/`rail` on mods that have them — `tele`
+                appears in the committed corpus. Iterate the map; do not assume a fixed key list.
                 From the corrected frag log, so it is on the same footing as `kills` — absent with
                 it — and is never overlaid with KTX's per-weapon counts. Weapons the player never
                 killed with are omitted, not zero-filled.
@@ -5464,8 +5468,9 @@ components:
                 byWeapon:
                   description: >
                     Enemy damage GIVEN split by the attacker's weapon, keyed rl/lg/gl/sg/ssg/sng/ng/axe
-                    plus the non-KTX residual keys unknown/stomp/tele/explobox, which are real measured
-                    damage the reconstruction contributes. Follows src with the family: KTX's per-weapon
+                    plus the non-KTX residual keys unknown/stomp/tele/squish/explobox, which are real
+                    measured damage the reconstruction contributes (the full vocabulary is
+                    `DeathTypeToWeapon`; iterate the map). Follows src with the family: KTX's per-weapon
                     enemy damage wherever the block carries a `damage` sub-block — including an
                     `enemy: 0` there, which is a MEASURED zero (a weapon used for team splash only) —
                     else the bounded reconstruction. Weapons the player dealt no damage with are
@@ -7221,9 +7226,11 @@ components:
           additionalProperties: false
           properties:
             playerStats:
-              description: Canonical per-player statistics section. Never null — a degraded result with no player streams 422s instead.
-              oneOf:
-                - $ref: "#/components/schemas/PlayerStats"
-                - type: "null"
+              description: >
+                Canonical per-player statistics section. Never null, unlike most sibling artifact
+                envelopes: a parse degraded enough to produce no player streams 422s with
+                `playerstats_unavailable` instead. A missing KTX demoinfo block is NOT that case —
+                the section is computed for every demo.
+              $ref: "#/components/schemas/PlayerStats"
             timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - $ref: "#/components/schemas/Los"

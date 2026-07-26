@@ -100,6 +100,7 @@ new `accuracy` block on team rows.
   row carries every family its members carry, and on a demo with a KTX
   block every roster row joins it with an agreeing `src`. They were red
   on 8 of the 12 local demos before these fixes.
+
 ## 2026-07-26 (playerstats) — pre-KTX demos get their frag log back
 
 No schema bump. Layer 1 only; every consumer of `PrintEvent` benefits.
@@ -207,8 +208,19 @@ corpus regenerated for the two new maps.
   `Players` count instead of an average ping, and no `ToDie`, because
   averaging per-player averages across different death counts is
   meaningless; powerup seconds come from our hold integral rather than
-  KTX's `item.time`, so they agree with the Possession panel (measured
-  identical on the test corpus).
+  KTX's `item.time`, so they agree with the Possession panel. The two
+  are **close but not identical**: across the 55 comparable powerup rows
+  in the golden corpus the largest disagreement is 1.011 s, and 17 of
+  those rows shift by one displayed second because we `Math.round` a
+  millisecond integral where KTX truncates its own second counter (7
+  rows still differ if we truncate too). Nothing here moves by more than
+  a second.
+- **One visible regression, since fixed.** The per-team Weapon Stats
+  accuracy column rendered `-` on every demo: the deleted JavaScript
+  summed `attacks`/`hits` over a team's members, and no `accuracy`
+  family was ever built for a team row. The v62 section above restores
+  it in Go, on both the analyzer aggregate and the read-time KTX
+  overlay.
 - **`isDuel()` reads `playerStats`**, so a pre-KTX-block 1v1 collapses
   the team panels correctly instead of falling through and rendering
   them. The canonical team→colour order (`timelineState.teams`,

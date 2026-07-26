@@ -155,7 +155,8 @@ type ResolvedSession struct {
 	Name    string
 	Team    string
 	// Auth is the `*auth` login from userinfo, set by mvdsv for
-	// authenticated players (mvd-reader parser/userinfo.go:102). It is the
+	// authenticated players (mvd-reader parser/userinfo.go:177 for the
+	// per-key svc_setinfo path, :229 for a full userinfo string). It is the
 	// wire-side source for the login the KTX demoinfo block also carries,
 	// so a demo without that block can still report who was playing.
 	// Empty for unauthenticated players and on servers that do not set it.

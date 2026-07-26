@@ -454,10 +454,15 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 		// hub-origin parse failure still 500s — the wrap is upload-only signal.
 		return nil, CacheMeta{}, fmt.Errorf("%w: %v", ErrParse, err)
 	}
-	if data, err := encodeResult(r); err == nil {
-		if writeErr := writeFileAtomic(rp, data, 0o644); writeErr == nil {
-			c.maybeGC()
-		}
+	// An encode failure is non-fatal (the Result is served from memory this
+	// time round) but it is not benign: json.Marshal rejects NaN/±Inf, so a
+	// single such float anywhere outside Streams disables tier-2 caching for
+	// that demo on every request, forever, and silently. Warn the way
+	// tier3Store does (:658,:665) rather than dropping the error on the floor.
+	if data, err := encodeResult(r); err != nil {
+		slog.Warn("tier-2 result encode failed", "sha", sha, "err", err)
+	} else if writeErr := writeFileAtomic(rp, data, 0o644); writeErr == nil {
+		c.maybeGC()
 	}
 	c.mem.put(sha, r)
 	return r, meta, nil

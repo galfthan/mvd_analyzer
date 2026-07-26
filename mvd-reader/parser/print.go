@@ -278,12 +278,24 @@ var MatchStartPatterns = []string{
 // updateMatchStartedFromPrint flips p.matchStarted on the first
 // observed match-start phrase (case-insensitive). Idempotent.
 //
-// Chat is refused. Every phrase in the table is a server broadcast
-// (G_bprint at PRINT_MEDIUM/PRINT_HIGH), and the gate never resets once
-// flipped, so a single prewar "go go go!" in team chat would open the
-// obituary-death path for the rest of the demo. Same guard the analytics
-// MatchTimingDetector applies (analyzer/matchtiming.go) and the KTX
-// pickup-print matcher above it.
+// Chat is refused: the gate never resets once flipped, so a single prewar
+// "go go go!" in team chat would open the obituary-death path for the rest
+// of the demo. Same guard the analytics MatchTimingDetector applies
+// (analyzer/matchtiming.go) and the KTX pickup-print matcher above it.
+//
+// Only ONE phrase in the table is a verified server broadcast: "has begun"
+// (G_bprint at PRINT_HIGH, ktx/src/match.c:1173). The other five are not
+// reachable from a current KTX server through svc_print — "fight!" is a
+// G_centerprint / G_cp2all (ktx/src/arena.c:602,617-618;
+// clan_arena.c:1402-1403,1537), "go!" is a G_cp2all (race.c:2614), "game start"
+// only occurs inside the centerprinted countdown "N seconds left before
+// game starts" (admin.c:624), "match started" is a C comment
+// (commands.c:5123), and "begins in 1" has no printed string anywhere in
+// ktx/, mvdsv/ or ezquake-source/. All five are kept anyway: dropping a
+// pattern can only lose match-start detection on some mod nobody here has
+// a demo for, and a centerprint-only phrase costs nothing here because it
+// arrives as svc_centerprint and never reaches this function. See
+// MVD_FORMAT.md's match-start table for the per-entry provenance.
 func (p *Parser) updateMatchStartedFromPrint(level int, msg string) {
 	if p.matchStarted || level == mvd.PrintChat {
 		return

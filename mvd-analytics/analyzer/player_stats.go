@@ -764,7 +764,7 @@ func armorRuns(at []result.ChangeStr, matchMs int32) []armorRun {
 // oversight: the pipeline has no disconnect record to key on. The
 // identity analyser's Sessions look like one but are not — their first
 // and last bounds are widened to ±inf so a lookup at any time resolves
-// (analyzer/identity.go:311) — and splitting on a position-track gap
+// (analyzer/identity.go:239-240) — and splitting on a position-track gap
 // would need an invented threshold, which is the kind of made-up filter
 // this repo avoids. Measured on the reconnect corpus demo (gameId
 // 216835) the position track has no gap at all to split on: 56 ms is the

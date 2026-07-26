@@ -285,12 +285,18 @@ type PlayerStatsDamage struct {
 	// every other field here and this one is genuinely unmeasured. A zero
 	// would read as "took no damage at all".
 	Taken *int `json:"taken,omitempty"`
-	// TakenEnemy is KTX's enemy-only damage taken. KTX-only: the
-	// reconstruction cannot split taken damage by source, so this is
-	// absent (not zero) on demos without a demoinfo block.
+	// TakenEnemy is enemy-only damage taken — KTX's dmg_t. NOT KTX-only:
+	// KTX's value when the block carries it, otherwise reconstructed from
+	// the per-hit log by summing the hits flagged neither team, self nor
+	// environment (analyzer.deriveTakenEnemy). A POINTER because that
+	// reconstruction needs a damage stream: absent, not zero, on a demo
+	// carrying no damage information at all.
 	TakenEnemy *int `json:"takenEnemy,omitempty"`
-	// TakenToDie is KTX's average damage absorbed per death. KTX-only,
-	// same reasoning.
+	// TakenToDie is the average damage absorbed per death,
+	// TakenEnemy / deaths, on the same footing as TakenEnemy — derived
+	// wherever that is. Additionally absent when the player never died;
+	// KTX's 99999 no-deaths sentinel (ktx/src/stats_json.c:357) is never
+	// served as a number.
 	TakenToDie *int `json:"takenToDie,omitempty"`
 }
 
