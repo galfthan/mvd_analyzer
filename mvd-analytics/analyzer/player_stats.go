@@ -7,7 +7,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// Player statistics (schema v60). playerStatsPost joins the artifacts that
+// Player statistics (schema v61). playerStatsPost joins the artifacts that
 // each hold a piece of "how did this player do" — the corrected scoreboard,
 // the frag log, the damage reconstruction, the item and weapon-pickup
 // timelines, the backpack drops — and adds the family none of them carry:

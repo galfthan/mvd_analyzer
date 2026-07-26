@@ -35573,11 +35573,19 @@
         "name": "wd.char",
         "suicides": 0,
         "team": "wd"
+      },
+      {
+        "deaths": 79,
+        "frags": 21,
+        "kills": 25,
+        "name": "wd.dilbert",
+        "suicides": 2,
+        "team": "pys"
       }
     ],
     "teams": [
       {
-        "frags": 50,
+        "frags": 71,
         "name": "pys"
       },
       {
@@ -38531,10 +38539,10 @@
           },
           "deaths": 79,
           "efficiency": 0.2404,
-          "frags": 0,
+          "frags": 21,
           "kills": 25,
           "src": "derived",
-          "suicides": 0,
+          "suicides": 2,
           "teamKills": 2
         },
         "team": "pys",
@@ -38872,10 +38880,10 @@
           },
           "deaths": 131,
           "efficiency": 0.3791,
-          "frags": 50,
+          "frags": 71,
           "kills": 80,
           "src": "derived",
-          "suicides": 2,
+          "suicides": 4,
           "teamKills": 5
         },
         "window": {
@@ -38887,7 +38895,7 @@
       }
     ]
   },
-  "schemaVersion": 60,
+  "schemaVersion": 61,
   "shots": {
     "byPlayer": [
       {

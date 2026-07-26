@@ -927,7 +927,7 @@ function sortByFragsDesc(players) {
 
 // ─── playerStats accessors ─────────────────────────────────────────────────
 //
-// result.playerStats is the canonical per-player section (schema v60). The
+// result.playerStats is the canonical per-player section (schema v61). The
 // WASM entry point applies the KTX overlay before marshalling
 // (mvd-web/cmd/wasm/main.go withPlayerStatsOverlay), so what reaches the
 // browser is already merged — every family carries `src` saying whether the

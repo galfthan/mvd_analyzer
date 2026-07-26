@@ -5,8 +5,8 @@ Status: **phases 1-3 done**; phase 4 deferred by request. Branch
 
 | phase | scope | state |
 |---|---|---|
-| 1 | the artifact, derived-only (schema v60) | done — `a76a8c4` |
-| 2 | KTX merge + REST/MCP serving | done — `aa632e7`, `5c78772`, `7ec14ef` |
+| 1 | the artifact, derived-only (schema v61) | done — `56bee97` |
+| 2 | KTX merge + REST/MCP serving | done — `5a8b501`, `46f038b`, `565c4f3` |
 | 3 | web summary tab onto `playerStats` | done |
 | 4 | `?diagnostics=1` per-family `ktxDelta` | **deferred**, not started |
 
@@ -310,7 +310,7 @@ Four details that make this exact rather than approximate:
    show, so a second renderer for it would be a code path with no
    readers. The fallback is deleted as planned.
 
-   Two Layer-1/2 fixes came out of testing this and are in `7ec14ef`:
+   Two Layer-1/2 fixes came out of testing this and are in `565c4f3`:
    the match-start pattern table missed kmod/qwe's "The duel has begun!",
    which left a 2003 duel with no streams AND no deaths, and the
    transfer gate trusted the `teamplay` cvar rather than the mode.
@@ -323,7 +323,7 @@ Four details that make this exact rather than approximate:
     `damage.byWeapon` (per-weapon enemy damage given, KTX-overlaid weapon
     by weapon). The weapon-stats table needs both, and reproducing
     today's KTX-sourced numbers in JS would have rebuilt exactly the join
-    this phase deletes. Additive; schema stays v60.
+    this phase deletes. Additive; schema stays v61.
 11. `isDuel()` (`app.js:1392`) stops reading `demoInfo.players` — read
     `playerStats` rows (roster already stamps `team === name` for duels).
 12. **Team-colour invariant**: `timelineState.teams` must stay the
@@ -349,7 +349,7 @@ deviate from KTX on armor time" note), `mvd-analytics/README.md`
 top-level `README.md` (section list), `mvd-api/API.md`
 (endpoint-choice guide: when to use `/player-stats` vs `/demoinfo` vs
 `/damage`), `openapi.yaml`, `mvd-web/README.md` (summary tab source),
-`RELEASE_NOTES.md` (schema v60 entry).
+`RELEASE_NOTES.md` (schema v61 entry).
 
 ## 6. Tests
 

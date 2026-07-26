@@ -7,7 +7,7 @@
             — `identity` supplies the `*auth` login, `shots` the fire
             stream the derived accuracy is reconstructed from
 **Writes to Result:** `result.PlayerStats` (`*PlayerStatsResult`),
-            schema v60
+            schema v61
 
 ## What it does
 

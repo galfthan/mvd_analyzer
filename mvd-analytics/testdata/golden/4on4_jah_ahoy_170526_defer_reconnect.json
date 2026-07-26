@@ -78021,27 +78021,6 @@
         }
       },
       {
-        "byPlayer": {
-          "rusti": 1
-        },
-        "byTeam": {
-          "jah": 1
-        },
-        "from": "Quad.low",
-        "kind": "teleport",
-        "to": "Pent.MH",
-        "total": 1,
-        "unarmed": {
-          "byPlayer": {
-            "rusti": 1
-          },
-          "byTeam": {
-            "jah": 1
-          },
-          "total": 1
-        }
-      },
-      {
         "armed": {
           "byPlayer": {
             "biggz": 2,
@@ -95910,7 +95889,7 @@
       }
     ]
   },
-  "schemaVersion": 60,
+  "schemaVersion": 61,
   "shots": {
     "byPlayer": [
       {
