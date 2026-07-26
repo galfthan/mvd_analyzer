@@ -204,7 +204,7 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		ktx[p.Name] = p
 	}
 
-	var anyDamage, anyPickups bool
+	var anyDamage, anyAccuracy, anyPickups bool
 	for i := range out.Players {
 		row := &out.Players[i]
 		di := ktx[row.Name]
@@ -238,6 +238,7 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		}
 		if a := overlayAccuracy(di); a != nil {
 			row.Accuracy = a
+			anyAccuracy = true
 		}
 		if p := overlayPickups(row.Pickups, di); p != nil {
 			row.Pickups = p
@@ -250,10 +251,15 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 	// after filtering — deriving it from "any row matched" badged the
 	// whole family KTX when one row did.
 	//
+	// Accuracy is in the gate because it is overlaid per player here: a
+	// KTX demo whose block carries `acc` but no `dmg`/`items` would
+	// otherwise keep a team accuracy summed from the derived member rows
+	// while every member row shows KTX's.
+	//
 	// Team rows are sums of the per-player rows, so re-derive them from
 	// the overlaid players rather than leaving stale derived totals beside
 	// KTX-sourced member rows.
-	if (anyDamage || anyPickups) && len(out.Teams) > 0 {
+	if (anyDamage || anyAccuracy || anyPickups) && len(out.Teams) > 0 {
 		out.Teams = reaggregateTeams(out.Players, out.Teams)
 	}
 	return out
@@ -476,13 +482,19 @@ func sumOptional(dst, src *int) *int {
 
 // reaggregateTeams re-sums the team rows from overlaid player rows,
 // preserving each team's window and hold figures (which the overlay never
-// touches) and replacing only the summed damage and pickups.
+// touches) and replacing the summed damage, accuracy and pickups.
+//
+// Accuracy has to be re-summed HERE as well as in the analyzer, because
+// it is overlaid per player at read time: an analyzer-only aggregate
+// would be stale on every KTX demo. The absent-hits and shared-src rules
+// live once, in result.AggregateAccuracy.
 func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerStatsRow {
 	out := append([]result.PlayerStatsRow(nil), teams...)
 	for i := range out {
 		team := &out[i]
 		var dmg *result.PlayerStatsDamage
 		var pickups map[string]result.PlayerStatsPickup
+		var acc []*result.PlayerStatsAccuracy
 		src := result.SrcDerived
 
 		for j := range players {
@@ -490,6 +502,7 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 			if p.Team != team.Name {
 				continue
 			}
+			acc = append(acc, p.Accuracy)
 			if p.Damage != nil {
 				if dmg == nil {
 					dmg = &result.PlayerStatsDamage{Src: p.Damage.Src}
@@ -549,6 +562,7 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 			}
 		}
 		team.Damage = dmg
+		team.Accuracy = result.AggregateAccuracy(acc)
 		if pickups != nil {
 			team.Pickups = &result.PlayerStatsPickups{Src: src, ByKind: pickups}
 		}

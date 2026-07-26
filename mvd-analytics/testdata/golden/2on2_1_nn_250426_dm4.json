@@ -54737,6 +54737,31 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 2,
+              "hits": 1
+            },
+            "lg": {
+              "attacks": 1033,
+              "hits": 329
+            },
+            "rl": {
+              "attacks": 296,
+              "hits": 132
+            },
+            "sg": {
+              "attacks": 153,
+              "hits": 33
+            },
+            "ssg": {
+              "attacks": 10,
+              "hits": 8
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "lg": 8548,
@@ -54911,6 +54936,35 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 8,
+              "hits": 4
+            },
+            "lg": {
+              "attacks": 823,
+              "hits": 250
+            },
+            "ng": {
+              "attacks": 1,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 375,
+              "hits": 145
+            },
+            "sg": {
+              "attacks": 102,
+              "hits": 49
+            },
+            "ssg": {
+              "attacks": 11,
+              "hits": 8
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 210,

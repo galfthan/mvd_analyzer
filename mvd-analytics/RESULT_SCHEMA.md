@@ -865,6 +865,16 @@ alive from match start, a death starts a dead period, the next spawn
 ends it — deliberately **not** requiring a recorded match-start spawn,
 since KTX emits a player's first spawn only on their first *respawn*.
 
+On a **team row** the `damage`, `accuracy` and `pickups` families are
+member sums. Two rules there: `accuracy.byWeapon[w].hits` stays
+**absent** unless *every* contributing member measured it (mixing a
+measured member with an unmeasured one would understate the team
+hit-rate under a number that looks measured), and `real` / `virtual` are
+**not** aggregated at all — KTX omits the pair unless it recorded one,
+so an all-or-nothing rule would drop them whenever a single member never
+fired rl/gl. `takenToDie` is likewise never aggregated (averaging
+averages across different death counts).
+
 On a **team row** `presentMs` / `aliveMs` / `deadMs` are member sums
 while `matchMs` stays the match window (it is the same value on every
 row, player or team). Hold shares use team time: `shareAlive` over the

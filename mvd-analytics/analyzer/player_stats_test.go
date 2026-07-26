@@ -871,3 +871,69 @@ func TestDeriveLoginsIsDeterministicOnNameCollision(t *testing.T) {
 		t.Error("a player with no *auth key must get no login entry at all")
 	}
 }
+
+// T1.5: team rows never carried an accuracy family at all, so the web's
+// per-team Weapon Stats column read `-` beside per-player rows showing
+// real percentages. Attacks and hits sum over members; hits stays ABSENT
+// unless every contributing member measured it, because mixing a
+// measured member with an unmeasured one understates the team hit-rate
+// under a number that looks measured.
+func TestTeamAggregationSumsAccuracy(t *testing.T) {
+	players := []result.PlayerStatsRow{
+		{
+			Name: "a", Team: "red",
+			Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 100, Hits: intp(30)},
+				"lg": {Attacks: 400, Hits: intp(120)},
+			}},
+		},
+		{
+			Name: "b", Team: "red",
+			Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 60, Hits: intp(12)},
+				// No hits on lg: this member's fires linked to nothing.
+				"lg": {Attacks: 200},
+			}},
+		},
+	}
+	red := aggregateTeamRows(players, 600000)[0]
+	if red.Accuracy == nil {
+		t.Fatal("team carries no accuracy family though both members do")
+	}
+	if red.Accuracy.Src != result.SrcDerived {
+		t.Errorf("team accuracy src = %q, want the members' derived", red.Accuracy.Src)
+	}
+	rl := red.Accuracy.ByWeapon["rl"]
+	if rl.Attacks != 160 || rl.Hits == nil || *rl.Hits != 42 {
+		t.Errorf("rl = %+v, want 160 attacks / 42 hits", rl)
+	}
+	lg := red.Accuracy.ByWeapon["lg"]
+	if lg.Attacks != 600 {
+		t.Errorf("lg attacks = %d, want 600", lg.Attacks)
+	}
+	if lg.Hits != nil {
+		t.Errorf("lg hits = %d, want ABSENT — one member never measured hits, "+
+			"and 120/600 would read as a measured 20%% team hit-rate", *lg.Hits)
+	}
+
+	// A team where nobody carries the family keeps none.
+	none := aggregateTeamRows([]result.PlayerStatsRow{{Name: "c", Team: "blue"}}, 600000)[0]
+	if none.Accuracy != nil {
+		t.Errorf("accuracy = %+v, want absent", none.Accuracy)
+	}
+}
+
+// A src disagreement between members is the phantom-roster defect, not a
+// data condition (result.SrcMixed), and must surface rather than be
+// resolved by whichever member came first.
+func TestTeamAggregationAccuracyMixedSrcIsRecorded(t *testing.T) {
+	players := []result.PlayerStatsRow{
+		{Name: "a", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcKTX,
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 10, Hits: intp(4)}}}},
+		{Name: "b", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1)}}}},
+	}
+	if got := aggregateTeamRows(players, 600000)[0].Accuracy.Src; got != result.SrcMixed {
+		t.Errorf("team accuracy src = %q, want mixed", got)
+	}
+}

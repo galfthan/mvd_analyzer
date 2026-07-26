@@ -545,3 +545,56 @@ func storedAccuracy(t *testing.T) *result.PlayerStatsAccuracy {
 	_, _ = PlayerStats(r, PlayerStatsOptions{})
 	return r.PlayerStats.Players[0].Accuracy
 }
+
+// T1.5, read-time half: accuracy is overlaid PER PLAYER, so the team row
+// must be re-summed after the overlay or it keeps the analyzer's derived
+// aggregate beside KTX-sourced members.
+func TestPlayerStatsTeamAccuracyReaggregatedAfterOverlay(t *testing.T) {
+	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{})
+	var red *result.PlayerStatsRow
+	for i := range got.Teams {
+		if got.Teams[i].Name == "red" {
+			red = &got.Teams[i]
+		}
+	}
+	if red == nil || red.Accuracy == nil {
+		t.Fatal("red team carries no accuracy family though its member does")
+	}
+	if red.Accuracy.Src != result.SrcKTX {
+		t.Errorf("team accuracy src = %q, want ktx", red.Accuracy.Src)
+	}
+	if got := red.Accuracy.ByWeapon["rl"].Attacks; got != 90 {
+		t.Errorf("team rl attacks = %d, want KTX's 90 re-summed from the overlaid member", got)
+	}
+	if h := red.Accuracy.ByWeapon["rl"].Hits; h == nil || *h != 40 {
+		t.Errorf("team rl hits = %v, want 40", h)
+	}
+	// The derived ssg entry was replaced on the member row, so it must not
+	// reappear on the team row either.
+	if _, ok := red.Accuracy.ByWeapon["ssg"]; ok {
+		t.Error("team row carries a derived ssg entry the overlay had already replaced")
+	}
+}
+
+// A KTX block carrying acc but no dmg/items must still trigger the team
+// re-aggregation, or the team keeps a stale derived accuracy beside
+// KTX-sourced member rows.
+func TestPlayerStatsAccuracyOnlyKTXBlockReaggregatesTeams(t *testing.T) {
+	r := storedResult(true)
+	r.DemoInfo.Players[0].Dmg = nil
+	r.DemoInfo.Players[0].Items = nil
+	r.DemoInfo.Players[0].Weapons["rl"].Pickups = nil
+
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	for i := range got.Teams {
+		if got.Teams[i].Name != "red" {
+			continue
+		}
+		acc := got.Teams[i].Accuracy
+		if acc == nil || acc.Src != result.SrcKTX || acc.ByWeapon["rl"].Attacks != 90 {
+			t.Errorf("team accuracy = %+v, want KTX's re-summed block", acc)
+		}
+		return
+	}
+	t.Fatal("no red team row")
+}

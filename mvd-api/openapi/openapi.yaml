@@ -5507,8 +5507,8 @@ components:
                     additionalProperties: false
                     properties:
                       attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
-                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no damage stream to link fires against — a zero would read as 'shot and never hit'.", type: integer }
-                      real: { description: "KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
+                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no damage stream to link fires against — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      real: { description: "Not aggregated on team rows (KTX omits the pair unless it recorded one). KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
                       virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
                     required: [attacks]
                     type: object

@@ -349,6 +349,78 @@ type PlayerStatsAcc struct {
 	Virtual *int `json:"virtual,omitempty"`
 }
 
+// AggregateAccuracy sums member accuracy blocks into a team row's.
+//
+// It lives here rather than in either caller because BOTH need it and
+// must agree: the analyzer aggregates the derived rows into the stored
+// artifact, and view.PlayerStats re-aggregates after the KTX overlay
+// (accuracy is overlaid per player at read time, so an analyzer-only
+// aggregate would be stale on every KTX demo).
+//
+// Two rules the old frontend implementation got wrong:
+//
+//   - Hits is *int where absent means "not measurable" — a derived block
+//     on a demo with no damage stream counts fires but can link none of
+//     them. Summing a member who has it with one who does not understates
+//     the team hit-rate under a number that looks measured, so the team
+//     value stays ABSENT unless EVERY contributing member carries it.
+//   - Src is stamped from the members and must agree. A disagreement is
+//     the phantom-roster defect (see SrcMixed), not a data condition;
+//     SrcMixed is recorded rather than silently picking one.
+//
+// Real / Virtual are deliberately NOT aggregated, for the same reason
+// TakenToDie is not: KTX omits the pair entirely unless it recorded one
+// (ktx/src/stats_json.c:146), so an all-or-nothing rule would drop them
+// whenever a single member never fired rl/gl, and a partial sum would
+// silently under-count. They stay a per-player reading.
+//
+// Returns nil when no member carries the family.
+func AggregateAccuracy(members []*PlayerStatsAccuracy) *PlayerStatsAccuracy {
+	byWeapon := map[string]PlayerStatsAcc{}
+	// hitsSeen counts members contributing to a weapon; hitsHave counts
+	// those whose Hits was measurable. Equal at the end == everybody had it.
+	hitsSeen, hitsHave := map[string]int{}, map[string]int{}
+	src := ""
+	any := false
+	for _, m := range members {
+		if m == nil {
+			continue
+		}
+		any = true
+		switch {
+		case src == "":
+			src = m.Src
+		case src != m.Src:
+			src = SrcMixed
+		}
+		for w, e := range m.ByWeapon {
+			agg := byWeapon[w]
+			agg.Attacks += e.Attacks
+			hitsSeen[w]++
+			if e.Hits != nil {
+				hitsHave[w]++
+				n := 0
+				if agg.Hits != nil {
+					n = *agg.Hits
+				}
+				n += *e.Hits
+				agg.Hits = &n
+			}
+			byWeapon[w] = agg
+		}
+	}
+	if !any {
+		return nil
+	}
+	for w, agg := range byWeapon {
+		if hitsHave[w] != hitsSeen[w] {
+			agg.Hits = nil
+			byWeapon[w] = agg
+		}
+	}
+	return &PlayerStatsAccuracy{Src: src, ByWeapon: byWeapon}
+}
+
 // PlayerStatsPickups is the per-kind pickup tally, keyed by this repo's
 // item-kind vocabulary ("ra", "ya", "ga", "mh", "h15", "h25", "quad",
 // "pent", "ring", "rl", "lg", "gl", "ssg", "sng", "ng", ammo kinds) —

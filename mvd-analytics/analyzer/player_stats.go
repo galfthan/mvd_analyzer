@@ -1098,8 +1098,10 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 		}
 		var dmg *result.PlayerStatsDamage
 		var pickups map[string]result.PlayerStatsPickup
+		acc := make([]*result.PlayerStatsAccuracy, 0, len(members))
 
 		for _, m := range members {
+			acc = append(acc, m.Accuracy)
 			row.Window.PresentMs += m.Window.PresentMs
 			row.Window.AliveMs += m.Window.AliveMs
 			row.Window.DeadMs += m.Window.DeadMs
@@ -1151,6 +1153,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 			row.Score.Efficiency = &eff
 		}
 		row.Damage = dmg
+		row.Accuracy = result.AggregateAccuracy(acc)
 		if pickups != nil {
 			row.Pickups = &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: pickups}
 		}
