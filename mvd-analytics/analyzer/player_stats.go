@@ -85,9 +85,12 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 		}
 	}
 
+	// The stored roll-up echoes the rows, so a bounded-skip demo says
+	// "derived:unbounded" here too. view.PlayerStats recomputes it from
+	// the rows it actually serves (rollUpSources).
 	for i := range ps.Players {
 		if ps.Players[i].Damage != nil {
-			ps.Sources.Damage = result.SrcDerived
+			ps.Sources.Damage = ps.Players[i].Damage.Src
 			break
 		}
 	}
@@ -252,9 +255,26 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 	if pd.Bounded != nil {
 		src = pd.Bounded
 	}
+	// When the bounded reconstruction was skipped, every pd.Bounded is nil
+	// and this family silently became raw wire damage INCLUDING overkill
+	// while still reading "derived" — 38-44% high on
+	// 4on4_oeks_vs_tsq[dm2], an order of magnitude on k_instagib's flat
+	// 5000/hit. Mark it so a caller can branch on one field instead of
+	// correlating src with damage.boundedMode.
+	//
+	// Keyed on BoundedMode, the demo-global CAUSE, rather than on
+	// pd.Bounded == nil at the row: the bounded nest is created lazily
+	// (result/damage.go BoundedNest), so a standard-mode player whose only
+	// hits fell outside the match window also has a nil nest, and marking
+	// that row would both overstate the degradation and split a team's
+	// members across two src values.
+	srcName := result.SrcDerived
+	if strings.HasPrefix(res.Damage.BoundedMode, "skipped:") {
+		srcName = result.SrcDerivedUnbounded
+	}
 	taken := src.Taken
 	out := &result.PlayerStatsDamage{
-		Src:          result.SrcDerived,
+		Src:          srcName,
 		Given:        src.Given,
 		GivenTeam:    src.GivenTeam,
 		GivenSelf:    src.GivenSelf,
@@ -1096,7 +1116,11 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 
 			if m.Damage != nil {
 				if dmg == nil {
-					dmg = &result.PlayerStatsDamage{Src: result.SrcDerived}
+					// Inherit the members' src rather than asserting
+					// "derived": on a bounded-skip demo every member
+					// carries "derived:unbounded", and the team total is
+					// exactly as raw as they are.
+					dmg = &result.PlayerStatsDamage{Src: m.Damage.Src}
 				}
 				dmg.Given += m.Damage.Given
 				dmg.GivenTeam += m.Damage.GivenTeam

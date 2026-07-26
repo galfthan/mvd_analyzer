@@ -690,6 +690,62 @@ func TestDeriveDamageZeroRowIsObserved(t *testing.T) {
 	}
 }
 
+// T1.4: on a k_midair / k_instagib / k_dmgfrags demo damage.go skips the
+// bounded reconstruction entirely (damage.go:308,542-546), so this family
+// falls back to RAW wire damage including overkill. It used to report
+// `src: "derived"` — the same value as the bounded case — leaving the
+// degradation invisible unless the caller also fetched
+// damage.boundedMode.
+func TestDeriveDamageMarksUnboundedFallback(t *testing.T) {
+	bounded := &result.PlayerDamage{Given: 13641, Taken: 9000, ByWeapon: map[string]int{"rl": 13000}}
+	standard := &Result{Damage: &result.DamageResult{
+		BoundedMode: "standard",
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 19640, Taken: 14000, ByWeapon: map[string]int{"rl": 19000}, Bounded: bounded},
+		},
+	}}
+	d := deriveDamage(standard, "a", nil)
+	if d.Src != result.SrcDerived {
+		t.Errorf("src = %q, want derived", d.Src)
+	}
+	if d.Given != 13641 {
+		t.Errorf("given = %d, want the bounded 13641", d.Given)
+	}
+
+	skipped := &Result{Damage: &result.DamageResult{
+		BoundedMode: "skipped:instagib",
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 19640, Taken: 14000, ByWeapon: map[string]int{"rl": 19000}},
+		},
+	}}
+	d = deriveDamage(skipped, "a", nil)
+	if d.Src != result.SrcDerivedUnbounded {
+		t.Errorf("src = %q, want %q — the numbers below are raw wire damage", d.Src, result.SrcDerivedUnbounded)
+	}
+	if d.Given != 19640 {
+		t.Errorf("given = %d, want the raw 19640", d.Given)
+	}
+
+	// The marker is demo-global: a team row must not end up split across
+	// two src values, and a lazily-absent bounded nest in a STANDARD-mode
+	// demo is not a mode degradation.
+	lazy := &Result{Damage: &result.DamageResult{
+		BoundedMode: "standard",
+		ByPlayer:    map[string]*result.PlayerDamage{"a": {Given: 40}},
+	}}
+	if got := deriveDamage(lazy, "a", nil).Src; got != result.SrcDerived {
+		t.Errorf("src = %q, want derived — standard mode, only the nest is absent", got)
+	}
+
+	teams := aggregateTeamRows([]result.PlayerStatsRow{
+		{Name: "a", Team: "red", Damage: &result.PlayerStatsDamage{Src: result.SrcDerivedUnbounded, Given: 19640}},
+		{Name: "b", Team: "red", Damage: &result.PlayerStatsDamage{Src: result.SrcDerivedUnbounded, Given: 100}},
+	}, 600000)
+	if teams[0].Damage.Src != result.SrcDerivedUnbounded {
+		t.Errorf("team src = %q, want the members' %q", teams[0].Damage.Src, result.SrcDerivedUnbounded)
+	}
+}
+
 // --- takenEnemy reconstruction ------------------------------------------
 
 func ptrInt(v int) *int { return &v }

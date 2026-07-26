@@ -684,7 +684,8 @@ against, and KTX's `taken-to-die` 99999 no-deaths sentinel is never
 served as a number.
 
 Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
-wire) or `"ktx"` (the demoinfo block). The stored artifact is always
+wire) or `"ktx"` (the demoinfo block). The **damage** family has a third
+value, `"derived:unbounded"` — see below. The stored artifact is always
 fully derived; `view.PlayerStats` applies the KTX overlay at read time,
 mirroring how `view.Damage` applies `boundedSource`.
 
@@ -781,6 +782,28 @@ teamplay damage-avoidance zeroed the damage (`virtual_take`,
 `ktx/src/combat.c:719`) — so `virtual >= real`, and the gap is damage
 that was *prevented*, not missed. Neither divided by `attacks` is an
 accuracy.
+
+#### `damage.src` is three-valued: the unbounded degradation
+
+The damage family means **bounded** numbers — KTX scoreboard semantics,
+armor absorbed and health capped to remaining — because that is what the
+KTX figures it merges with mean. On a `k_midair` / `k_instagib` /
+`k_dmgfrags` demo there is no bounded family to serve: those modes
+rewrite `T_Damage`'s take in ways the wire does not expose, so
+`analyzer/damage.go` skips the reconstruction entirely
+(`damage.boundedMode` reads `skipped:*`) and the numbers fall back to
+**raw wire damage including overkill**.
+
+`src` says so: `"derived:unbounded"`. Magnitude, measured on
+`4on4_oeks_vs_tsq[dm2]` (raw vs bounded): `muttan` given 19640 vs 13641
+(+44%), `tco` taken 25062 vs 18113 (+38%). On `k_instagib` the wire
+value is a flat 5000 per hit. **Never compare an unbounded row's damage
+with a bounded one's.** The value is demo-global (it keys on
+`boundedMode`, the cause), so team rows and the `sources` roll-up carry
+it too, and a team is never split across two values.
+
+No demo in the test corpus carries those cvars, which is why this path
+went unmarked.
 
 #### Why `accuracy` is swapped wholesale and `damage.byWeapon` is merged
 

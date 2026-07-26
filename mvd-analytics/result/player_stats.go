@@ -62,6 +62,25 @@ const (
 	// SrcKTX: taken from the KTX demoinfo block, which counts it
 	// server-side.
 	SrcKTX = "ktx"
+	// SrcDerivedUnbounded: computed by this pipeline, but from the RAW
+	// wire damage rather than the bounded reconstruction, because the
+	// server mode made a bounded reconstruction impossible.
+	//
+	// analyzer/damage.go builds the bounded family only when boundedSkip
+	// is empty (damage.go:308,542-546); on a k_midair / k_instagib /
+	// k_dmgfrags demo it is skipped entirely, because those modes rewrite
+	// T_Damage's take in ways the wire does not expose and a best-effort
+	// reconstruction would be confidently wrong. The damage family then
+	// silently became raw wire damage INCLUDING overkill while still
+	// reading "derived" — measured on 4on4_oeks_vs_tsq[dm2], raw exceeds
+	// bounded by 38-44%, and on k_instagib the wire value is a flat
+	// 5000/hit. This value is what makes that degradation legible: a
+	// caller branches on one field instead of correlating `src` with
+	// damage.boundedMode.
+	//
+	// Applies to the damage family only, and inherits into the Sources
+	// roll-up like any other per-row value.
+	SrcDerivedUnbounded = "derived:unbounded"
 	// SrcMixed appears in the Sources ROLL-UP only, never on a row, and
 	// means the rows disagreed about where the family came from.
 	//
@@ -223,7 +242,15 @@ type PlayerStatsScore struct {
 // PlayerStatsDamage is the damage line under KTX scoreboard semantics
 // (armor absorbed, health damage capped to remaining health) — the
 // bounded family, which is what the KTX numbers this merges with mean.
+//
+// EXCEPT where the server mode made the bounded reconstruction
+// impossible, in which case these are RAW wire numbers including overkill
+// and Src says so: see SrcDerivedUnbounded. This is the one family whose
+// Src is three-valued.
 type PlayerStatsDamage struct {
+	// Src is "ktx", "derived", or "derived:unbounded" — the last meaning
+	// the numbers are raw wire damage because no bounded reconstruction
+	// exists for this demo (DamageResult.BoundedMode is skipped:*).
 	Src string `json:"src"`
 	// Given is damage dealt to enemies.
 	Given     int `json:"given"`

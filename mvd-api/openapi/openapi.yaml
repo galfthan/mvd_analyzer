@@ -5344,7 +5344,7 @@ components:
           additionalProperties: false
           properties:
             score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx, mixed] }
-            damage: { description: "Provenance of the damage family.", type: string, enum: [derived, ktx, mixed] }
+            damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, mixed] }
             accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
             hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx, mixed] }
@@ -5434,7 +5434,19 @@ components:
           oneOf:
             - additionalProperties: false
               properties:
-                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                src:
+                  description: >
+                    Provenance of this family. "derived:unbounded" means the
+                    numbers are RAW wire damage including overkill, because the
+                    server mode (k_midair / k_instagib / k_dmgfrags) rewrites
+                    T_Damage in ways the wire does not expose and no bounded
+                    reconstruction was attempted — the same condition
+                    /damage reports as boundedMode "skipped:*". Raw runs
+                    38-44% above bounded on a normal 4on4 and an order of
+                    magnitude on instagib's flat 5000/hit, so do not compare
+                    these figures with a bounded demo's.
+                  type: string
+                  enum: [derived, "derived:unbounded", ktx]
                 given: { description: "Dealt to enemies.", type: integer }
                 givenTeam: { description: "Dealt to teammates.", type: integer }
                 givenSelf: { description: "Dealt to self.", type: integer }
