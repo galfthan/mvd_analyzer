@@ -562,10 +562,21 @@ func deriveHold(p *result.PlayerStream, alive []result.Interval, w result.Player
 	}
 	// "none" is the alive-time complement — the stat KTX structurally
 	// cannot produce, since its armor clocks never close on the armor
-	// being chewed to zero. Emitted whenever we know the alive window,
-	// including the all-alive-with-no-armor case (a full-match "none" is
-	// a real and interesting reading, not a missing value).
-	if w.AliveMs > 0 {
+	// being chewed to zero. Emitted whenever we know the alive window AND
+	// the armor stream was observed at all, including the
+	// all-alive-with-no-armor case (a full-match "none" is a real and
+	// interesting reading, not a missing value).
+	//
+	// The stream test is what separates the two. appendChangeStr
+	// (timeline_streams.go:36-41) appends the first sample
+	// unconditionally, so a player who genuinely never held armor still
+	// carries at = [{0,""}] — length >= 1. An EMPTY stream means the armor
+	// state was never observed, and the complement of nothing over a real
+	// alive window is a fabricated maximum: on the POV recording
+	// dag_caps_e1m2 only the recorder has stat streams, and the other
+	// seven rows claimed 100% no-armor while the same row listed their
+	// armor pickups.
+	if w.AliveMs > 0 && len(p.ArmorType) > 0 {
 		none := w.AliveMs - armorTotal
 		if none < 0 {
 			// Overlapping armor runs would be a stream-builder bug; clamp

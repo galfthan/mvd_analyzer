@@ -225,6 +225,32 @@ func TestArmorNoneAlwaysPresent(t *testing.T) {
 	}
 }
 
+// ...but a player whose armor stream was never observed gets NO armor map
+// at all. The complement of nothing over a real alive window is a
+// fabricated maximum — on the POV recording dag_caps_e1m2 seven of eight
+// rows asserted 100% no-armor while the same rows listed armor pickups.
+//
+// The two cases are cleanly distinguishable because appendChangeStr
+// always appends the first sample: a genuinely armorless player has one,
+// an unobserved one has none.
+func TestArmorNoneAbsentWithoutStream(t *testing.T) {
+	p := newHoldPlayer()
+	h := deriveHold(p, iv(0, 10000), result.PlayerStatsWindow{MatchMs: 10000, AliveMs: 10000})
+	if _, ok := h.Armor["none"]; ok {
+		t.Errorf("none = %+v, want ABSENT — the armor stream carries no sample at all", h.Armor["none"])
+	}
+	if h.Armor != nil {
+		t.Errorf("armor map = %+v, want nil", h.Armor)
+	}
+
+	// The genuinely-armorless case still reports a full-match "none".
+	p.ArmorType = []result.ChangeStr{{T: 0, V: ""}}
+	h = deriveHold(p, iv(0, 10000), result.PlayerStatsWindow{MatchMs: 10000, AliveMs: 10000})
+	if none := h.Armor["none"]; none.Ms != 10000 {
+		t.Errorf("none = %d ms, want the full 10000 — the stream says they had none", none.Ms)
+	}
+}
+
 func TestArmorRunsClipToMatchEnd(t *testing.T) {
 	// The last armor run has no closing transition; it ends at match end,
 	// not at whatever the stream's last timestamp happened to be.

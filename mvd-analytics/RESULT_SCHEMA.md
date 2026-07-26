@@ -824,10 +824,17 @@ cannot produce. `ga + ya + ra + none == aliveMs` exactly.
 `powerups` is keyed `quad`, `pent`, `ring`. A key the player never held
 is **omitted**, not zero-filled. `none` is the near-exception: it is
 emitted at zero as well, since "never without armor" is a real reading —
-but only when the alive window is known. A row with `aliveMs` 0 (a
-scoreboard-only player who connected but never streamed) carries
-`hold: {"src": "derived"}` and no `armor` map at all, so read
-`hold.armor?.none` rather than assuming the key.
+but only when the alive window is known **and the armor stream was
+observed at all**. Two rows therefore carry no `armor` map: one with
+`aliveMs` 0 (a scoreboard-only player who connected but never streamed),
+and one whose armor stream is empty — a player the recording never
+carried armor state for, typically on a POV demo where only the recorder
+has stat streams. The complement of an unobserved stream would otherwise
+read as a confident full-match `none` beside that player's own armor
+pickups. (A player who genuinely never picked armor up is *not* this
+case: the change stream always carries its first sample, so the empty
+run still produces `none == aliveMs`.) Read `hold.armor?.none` rather
+than assuming the key.
 
 | Field | Meaning |
 |---|---|
