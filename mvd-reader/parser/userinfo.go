@@ -11,6 +11,79 @@ import (
 type UserInfoEvent struct {
 	Player *mvd.PlayerInfo
 	TimeMs int32
+
+	// Vacated marks the svc_updateuserinfo that announces a client slot
+	// going *empty* rather than a live userinfo change. When the server
+	// drops a client it clears the client's name and both userinfo
+	// contexts and then broadcasts a full client update
+	// (mvdsv/src/sv_main.c:419-428, SV_DropClient), so the drop reaches
+	// the demo as
+	//
+	//	svc_updatefrags   <slot> 0        (client->old_frags, just zeroed)
+	//	svc_updateuserinfo <slot> <userid> ""
+	//
+	// back to back in the same server frame (SV_FullClientUpdate,
+	// sv_main.c:487-513). An empty userinfo string is therefore the wire's
+	// own end-of-occupancy marker, and the frag reset that precedes it in
+	// the same frame is slot bookkeeping, not a score.
+	//
+	// The parser deliberately keeps the last known name/team/colors on the
+	// PlayerInfo (parseUserInfoString returns early on an empty string), so
+	// a consumer can still tell *who* left.
+	//
+	// Vacated reports the wire fact (an empty userinfo string) and nothing
+	// more; two of them are not drops and a consumer must filter both:
+	//
+	//   - the MVD header's full-state block writes one for every
+	//     unoccupied slot (sv_demo.c:1438-1467 iterates all MAX_CLIENTS
+	//     regardless of client state). The entry is NOT zeroed: svs.clients
+	//     is only cleared when a new connection lands on the slot
+	//     (SVC_DirectConnect, mvdsv/src/sv_main.c:1351), so a slot whose
+	//     previous occupant left before the recording started still carries
+	//     that client's stale userid — observed as
+	//     `t=0 slot=15 uid=5081 info=""` on
+	//     demo-test-data/mvd/special-cases/4on4_l_vs_la[e1m2].mvd. The
+	//     userid is therefore no help here; only "the slot was never
+	//     occupied in this recording" identifies it.
+	//   - the server's per-client replay of the whole client table, which
+	//     writes `svc_updateuserinfo <slot> 0 ""` for every occupied slot
+	//     immediately followed by the real string. This is a dem_single
+	//     block addressed at ONE client (mvdsv's equivalent is SV_Spawn_f's
+	//     SV_FullClientUpdateToClient loop, sv_user.c:833-841), not a
+	//     broadcast: on 4on4_l_vs_la[e1m2] it appears 25 times, every one of
+	//     them a dem_single aimed at the same spectator in slot 12, each
+	//     emptying all eight in-game slots for one frame.
+	//
+	// A genuine drop always carries the departing client's own userid,
+	// because SV_DropClient clears the name and userinfo but not the
+	// userid. Userid 0 on an empty userinfo therefore means "resend", the
+	// same convention the rest of the pipeline applies to userid 0.
+	Vacated bool
+
+	// Partial marks an event synthesised from svc_setinfo (one key/value)
+	// rather than decoded from a full svc_updateuserinfo. It matters
+	// because the Player snapshot on a partial event is mostly CACHE, not
+	// wire: parseSetInfo overwrites exactly the one key the server sent and
+	// leaves every other field — crucially UserID — at whatever the last
+	// full userinfo put there.
+	//
+	// That makes a partial event useless as a slot-occupancy boundary, and
+	// actively misleading as one. mvdsv emits `svc_setinfo <slot> "*auth"
+	// ""` from SV_Logout (sv_login.c:644-646), which runs both when a
+	// client is dropped (SV_DropClient, sv_main.c:410) AND during the next
+	// client's connect handshake (SV_Login, sv_login.c:579, calls it at
+	// :588; the function's own comment at :576 is "called on connect after
+	// cmd new is issued"). The second one lands on a slot the
+	// parser still remembers as the departed client, so its synthesised
+	// event looks exactly like the departed client's userid coming back.
+	// Observed on hub gameId 216835 slot 7: rusti is dropped at t=613452
+	// and the only later wire message for the slot before Luk's real
+	// userinfo at t=766898 is `svc_setinfo 7 "*auth" ""` at t=685676.
+	//
+	// Consumers that track occupancy must therefore treat a partial event
+	// as an in-place update to whoever already holds the slot, never as a
+	// connect, drop or handover.
+	Partial bool
 }
 
 func (e *UserInfoEvent) EventType() EventType { return EventUserInfo }
@@ -54,8 +127,10 @@ func (p *Parser) parseUserInfo(r *mvd.BufferReader, timeMs int32) error {
 	player.UserID = int(userID)
 	parseUserInfoString(userinfo, player)
 
-	// Emit event
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
+	// Emit event. An empty userinfo string is the server's drop broadcast
+	// (see UserInfoEvent.Vacated); svc_setinfo can never carry it, so only
+	// this path sets the flag.
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Vacated: userinfo == ""})
 }
 
 // parseSetInfo parses svc_setinfo (single key/value update for a player).
@@ -108,7 +183,7 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 		return nil
 	}
 
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Partial: true})
 }
 
 // parseUserInfoString parses a backslash-delimited userinfo string
@@ -118,10 +193,10 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 // spectator flag is recomputed from scratch: absent key means not a
 // spectator. ezquake does the same on every update (CL_ProcessUserInfo,
 // cl_parse.c:2118-2123). Without the reset, a slot reused by a player after
-// a spectator disconnects — or a spectator who joins the game (mvdsv removes
-// the key rather than sending "*spectator\0", sv_user.c:2711) — inherits a
-// stale Spectator=true. Name/team/colors are left as carry-forward since
-// real userinfo strings always include them.
+// a spectator disconnects — or a spectator who joins the game (Cmd_Join_f
+// removes the key rather than sending "*spectator\0", sv_user.c:2671-2672)
+// — inherits a stale Spectator=true. Name/team/colors are left as
+// carry-forward since real userinfo strings always include them.
 func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 	if s == "" {
 		return
@@ -155,10 +230,10 @@ func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 			player.Auth = cleanString(value)
 		case "*spectator", "spectator":
 			// mvdsv strips the client-set "spectator" key and re-adds the
-			// server-set star key before broadcast (sv_main.c:1065-1066,
-			// Info_SetValueForStarKey(userinfo, "*spectator", "1")), so full
-			// userinfo strings in MVDs only ever carry "*spectator". The
-			// bare spelling is kept for non-mvdsv sources.
+			// server-set star key before broadcast (sv_main.c:1039-1040;
+			// SVC_DirectConnect sets it again at :1338 when the server is
+			// full), so full userinfo strings in MVDs only ever carry
+			// "*spectator". The bare spelling is kept for non-mvdsv sources.
 			player.Spectator = value == "1"
 		}
 	}

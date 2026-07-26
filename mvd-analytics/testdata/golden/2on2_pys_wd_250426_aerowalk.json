@@ -35569,11 +35569,19 @@
         "name": "wd.char",
         "suicides": 0,
         "team": "wd"
+      },
+      {
+        "deaths": 79,
+        "frags": 21,
+        "kills": 25,
+        "name": "wd.dilbert",
+        "suicides": 2,
+        "team": "pys"
       }
     ],
     "teams": [
       {
-        "frags": 50,
+        "frags": 71,
         "name": "pys"
       },
       {
@@ -37785,7 +37793,7 @@
       }
     ]
   },
-  "schemaVersion": 59,
+  "schemaVersion": 60,
   "shots": {
     "byPlayer": [
       {

@@ -88,8 +88,9 @@ belongs in the frontend.
 - **Always run tests.** `make test` (which runs
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...`)
   before every commit, no exceptions for "trivial" changes. If a test you
-  don't understand fails, surface it — don't skip it.
-- Tests come in three layers:
+  don't understand fails, surface it — don't skip it. `make test` also
+  gates on `gofmt -l` before running anything; `make fmt` fixes it.
+- Tests come in four layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),
      `mvd-analytics/analyzer/` (backpacks, duel normalisation, items,
@@ -103,7 +104,17 @@ belongs in the frontend.
      `mvd-analytics/testdata/cache/` (gitignored), and pins the full
      pipeline output to `mvd-analytics/testdata/golden/<label>.json`
      (committed). Steady-state runs are offline.
-  3. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
+  3. **Special-cases invariants** in `mvd-analytics/corpus/` — walks
+     `demo-test-data/mvd/special-cases/` (per-machine, no-op when
+     absent) and asserts roster/frag oracles: team totals vs the
+     serverinfo `score` key and the KTX demoinfo scoreboard, roster
+     and streams naming the same people, item intervals only where the
+     wire saw play. **Must run with `-count=1`** — `go test` caches the
+     skip and a directory listing is not a cache input, so once this
+     package has skipped on a machine it reports `ok (cached)` forever,
+     including after the demos are put in place. `make test` passes the
+     flag for this package.
+  4. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
      `TestDiagnosticParseDemos` runs every `.mvd` / `.mvd.gz` dropped
      into its `testdata/` through the parser in warning-collecting
      mode and applies data-quality invariants on the result. No-op

@@ -21,8 +21,8 @@ type LocNode struct {
 	X        float32          `json:"x"`
 	Y        float32          `json:"y"`
 	Z        float32          `json:"z"`
-	Total    int32            `json:"total"`    // time spent, int32 ms
-	ByPlayer map[string]int32 `json:"byPlayer"` // per-player time, int32 ms
+	Total    int32            `json:"total"`            // time spent, int32 ms
+	ByPlayer map[string]int32 `json:"byPlayer"`         // per-player time, int32 ms
 	ByTeam   map[string]int32 `json:"byTeam,omitempty"` // per-team time, int32 ms
 	Armed    *LocWeights      `json:"armed,omitempty"`
 	Unarmed  *LocWeights      `json:"unarmed,omitempty"`
@@ -34,8 +34,8 @@ type LocNode struct {
 // metric on a LocNode — same shape as the node's own Total / ByPlayer /
 // ByTeam, omitted entirely when no observed sample met the condition.
 type LocWeights struct {
-	Total    int32            `json:"total"`    // time spent, int32 ms
-	ByPlayer map[string]int32 `json:"byPlayer"` // per-player time, int32 ms
+	Total    int32            `json:"total"`            // time spent, int32 ms
+	ByPlayer map[string]int32 `json:"byPlayer"`         // per-player time, int32 ms
 	ByTeam   map[string]int32 `json:"byTeam,omitempty"` // per-team time, int32 ms
 }
 

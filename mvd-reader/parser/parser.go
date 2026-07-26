@@ -59,6 +59,8 @@ const (
 	EventBeam
 	EventNails
 	EventDemoMark
+	EventPlayerDeparture
+	EventPlayerRejoin
 )
 
 // IntermissionEvent is emitted when the server enters intermission

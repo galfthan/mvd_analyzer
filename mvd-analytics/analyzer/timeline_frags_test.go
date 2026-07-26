@@ -43,7 +43,9 @@ func TestFragUpdate_ReconnectRebasesScore(t *testing.T) {
 		feed(&events.FragUpdateEvent{PlayerNum: slot, Frags: frags, TimeMs: tMs})
 	}
 
-	// First half: rusti on slot 7, 16 kills.
+	// First half: rusti on slot 7, 16 kills. The userinfo arms the rebase —
+	// it is a mid-match connect as far as the tracker can tell — and the
+	// sixteen honest +1s that follow must all survive it.
 	userinfo(7, 8, "rusti", 0)
 	for f := 1; f <= 16; f++ {
 		frag(7, f, int32(f)*1000)

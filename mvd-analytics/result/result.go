@@ -742,7 +742,21 @@ package result
 //     unknown query keys/enum values; `los_unavailable` 422 (no-BSP /los, never
 //     persisted/latched); `server_hostname` in search rows; `/artifacts`
 //     echoing `timeUnit:"ms"`.
-const CurrentSchemaVersion = 59
+//
+// v60: match scoreboard built per slot occupancy (values only; no field
+// changed). `match.players` / `match.teams` are keyed on wire-slot
+// OCCUPANCIES rather than on the slot's final occupant, and participation
+// is evidence of play inside the match window rather than end-of-demo
+// spectator/team state. Four consequences on real demos: a player who goes
+// spectator after the match keeps their row and score; a player who leaves
+// mid-match keeps the score the server announced for them instead of the
+// zero the drop wrote; FFA rosters survive (an empty team is not a
+// spectator signal); and a connection the server refused no longer takes
+// the departed player's scoreboard row. Per-slot item possession is also
+// reset at a handover, so `streams.players[].rl|lg|gl|ssg|sng|quad|pent|
+// ring` no longer leak a departing player's inventory into the next
+// occupant. See RELEASE_NOTES.md.
+const CurrentSchemaVersion = 60
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

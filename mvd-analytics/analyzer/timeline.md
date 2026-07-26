@@ -119,6 +119,20 @@ authoritative table. Summary:
 - `PositionTrack.Li` is populated only when the loc finder loaded
   for the demo's map. Maps with no `.loc` file produce streams
   with empty `Li` and no derived loc graph / region control.
+- **The frag track is effectively empty on CTF demos.** `handleFragUpdate`
+  rejects any single-frame frag delta outside ±5 as a parsing artefact and
+  deliberately does *not* advance the cursor when it does, so the next
+  update reads as an even bigger jump and is rejected too. A CTF capture
+  bonus exceeds ±5 on its own, so the first capture freezes the player's
+  cursor for the rest of the match: on
+  `demo-test-data/mvd/special-cases/ctf_blue_vs_red[ctf5].mvd` five slots
+  are stuck (slots 2, 3, 5, 6 and 10; slot 2 alone logs 36 rejections, from
+  `2->17` to `2->164`)
+  and the capturing team's whole timeline is missing — `lwz-velocity`
+  scores 164 on the match scoreboard and 2 in `fragEvents`. The scoreboard
+  is unaffected: `match` scores from the raw `svc_updatefrags` cursor, not
+  from the timeline. This is long-standing, not a regression; fixing it
+  needs a mode-aware bound rather than a wider constant.
 
 ## Reference
 

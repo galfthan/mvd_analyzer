@@ -112,8 +112,24 @@ serve: build
 	@cd $(DIST_DIR) && python3 -m http.server 8080
 
 # Run tests across every workspace module.
+#
+# The gofmt gate comes first: nothing else in the build catches a
+# misformatted file, and `go test` is the one command everybody runs before
+# committing. `gofmt -l` prints offenders and exits 0, so the result has to
+# be turned into a failure explicitly. Fix with `make fmt`.
 test:
+	@out="$$(gofmt -l mvd-reader mvd-analytics mvd-api mvd-mcp mvd-web)"; \
+	if [ -n "$$out" ]; then \
+		echo "gofmt: not formatted (run 'make fmt'):"; echo "$$out"; exit 1; \
+	fi
 	go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
+# The special-cases harness walks a per-machine demo directory and skips
+# when it is absent. `go test` caches that skip and does NOT invalidate it
+# when the demos later appear (a directory listing is not a cache input), so
+# the invariants would silently never run again on a machine that was once
+# without demos. -count=1 is the only reliable fix; it costs nothing when
+# the directory really is absent.
+	go test -count=1 ./mvd-analytics/corpus/
 
 # Remove dist/.
 clean:

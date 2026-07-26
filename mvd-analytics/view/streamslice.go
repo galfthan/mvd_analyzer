@@ -16,7 +16,7 @@ type StreamSliceOptions struct {
 	Start   int32
 	End     int32
 	Players []string
-	Fields    []string
+	Fields  []string
 	// LocIndex selects the loc representation: false (default) resolves
 	// to loc names (PlayerSlice.Loc); true emits the raw LocTable index
 	// stream (PlayerSlice.Li). Decode the index via /loc-table.
