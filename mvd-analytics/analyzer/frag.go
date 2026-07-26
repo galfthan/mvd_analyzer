@@ -153,6 +153,23 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 	}
 }
 
+// adjustWeaponCount applies a +1/-1 to a per-weapon kill tally, dropping
+// the key when it returns to zero. These maps are built by incrementing,
+// so "absent" is what "never killed with it" looks like everywhere else
+// in this section — leaving a 0 behind would publish a weapon the player
+// is now recorded as never having killed with.
+func adjustWeaponCount(m map[string]int, weapon string, delta int) {
+	if m == nil {
+		return
+	}
+	n := m[weapon] + delta
+	if n <= 0 {
+		delete(m, weapon)
+		return
+	}
+	m[weapon] = n
+}
+
 func (a *FragAnalyzer) Finalize(result *Result) error {
 	// Re-evaluate teamkill status using DemoInfo. During OnEvent,
 	// isTeamKill() compared obituary display names against ctx.Players
@@ -169,14 +186,30 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 			wasTeamKill := f.IsTeamKill
 			f.IsTeamKill = killerTeam != "" && victimTeam != "" && killerTeam == victimTeam
 
-			// Fix kill counts if teamkill status changed
-			if f.IsTeamKill != wasTeamKill && !isGenericPlayer(f.Killer) {
+			// Fix kill counts if teamkill status changed.
+			//
+			// The per-weapon tallies move WITH the totals. OnEvent
+			// increments Kills and ByWeapon in the same breath (:143-153),
+			// so adjusting only the total leaves sum(byWeapon) > kills —
+			// and playerStats now publishes both and states they are on the
+			// same footing (result.PlayerStatsScore.ByWeapon). This path
+			// fires on auth-name servers, where OnEvent's isTeamKill()
+			// compared obituary display names against userinfo that carried
+			// auth names instead; no golden demo reaches it.
+			if f.IsTeamKill == wasTeamKill {
+				continue
+			}
+			delta := 1
+			if f.IsTeamKill {
+				delta = -1 // a kill reclassified as a teamkill is not a kill
+			}
+			// The global tally has no killerIsGeneric gate (:143-145), the
+			// per-player one does (:149-153); mirror both.
+			adjustWeaponCount(a.byWeapon, f.Weapon, delta)
+			if !isGenericPlayer(f.Killer) {
 				if killer, ok := a.byPlayer[f.Killer]; ok {
-					if f.IsTeamKill && !wasTeamKill {
-						killer.Kills--
-					} else if !f.IsTeamKill && wasTeamKill {
-						killer.Kills++
-					}
+					killer.Kills += delta
+					adjustWeaponCount(killer.ByWeapon, f.Weapon, delta)
 				}
 			}
 		}
