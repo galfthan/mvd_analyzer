@@ -239,12 +239,14 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	// Pre-match roster shuffles don't count — frags are 0 then anyway.
 	//
 	// Every mid-match connect arms it, including one onto a slot this
-	// recording has never seen occupied. A reconnect systematically lands on
-	// a *different* slot from the one just freed: SV_DropClient leaves the
-	// departing client in cs_zombie (mvdsv/src/sv_main.c:412) and
-	// CountPlayersSpecsVips hands SVC_DirectConnect the first cs_free slot
-	// (:1137-1145), so the returning player takes the lowest index nobody is
-	// on — which on a recording that started mid-game may carry no earlier
+	// recording has never seen occupied. Where a reconnect lands depends on
+	// HOW the player left: a drop parks them in cs_zombie
+	// (mvdsv/src/sv_main.c:412) so the slot is still taken, while a timeout
+	// frees it immediately (:3067-3069, "don't bother with zombie state") and
+	// can hand the same slot straight back. Either way
+	// CountPlayersSpecsVips gives SVC_DirectConnect the first cs_free slot
+	// (:1137-1145), so the returning player takes the lowest free index —
+	// which on a recording that started mid-game may carry no earlier
 	// occupancy at all. Gating on a prior occupancy therefore misses exactly
 	// the case the rebase exists for: replaying gameId 216835 without slot
 	// 2's pre-t=613452 userinfo (a demo whose recording began a few seconds
@@ -355,10 +357,14 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	// update after the arm is the player's first kill: rebasing it
 	// unconditionally silently ate that frag. Restricting the rebase to
 	// out-of-range values loses nothing — a restore small enough to pass the
-	// guard cannot be told from a kill and is accepted either way — and it
-	// bounds the damage a stale arm can do, since the flag has no expiry
-	// (216268 slot 5 stays armed for 25 s) and would otherwise let a genuine
-	// misaligned read install itself as the baseline.
+	// guard cannot be told from a kill and is accepted either way — and that
+	// is the whole of the benefit: an in-range first kill can no longer be
+	// swallowed. It does NOT otherwise bound what a stale arm can do. The
+	// flag has no expiry (216268 slot 5 stays armed for 25 s), but an
+	// out-of-range misaligned read installs itself as the baseline whether
+	// the arm is set or not — the corruption guard declines to advance
+	// state.frags on exactly the values the rebase adopts, so the two paths
+	// agree there.
 	if a.fragResetPending[e.PlayerNum] {
 		a.fragResetPending[e.PlayerNum] = false
 		if d := e.Frags - state.frags; d > fragDeltaLimit || d < -fragDeltaLimit {
