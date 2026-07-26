@@ -948,14 +948,41 @@ function playerStatsTeamRows(result) {
     return result?.playerStats?.teams || [];
 }
 
+// The map's FILE key — the basename the shipped geometry (maps/e1m2.json)
+// and a saved region config are named by. Mirrors result.EffectiveMap()
+// (mvd-analytics/result/result.go:824): demoInfo is the KTX block and is
+// null on every pre-2020 demo, so the serverinfo `map` key backs it, and
+// the absence of the KTX block never reads as "no map". `match.map` is
+// deliberately NOT in this chain — it is the pretty title ("Castle of the
+// Damned"), fine for display and useless as a filename.
+function mapFileKey(result) {
+    const raw = result?.demoInfo?.map || result?.metadata?.serverInfo?.map || '';
+    let base = String(raw).toLowerCase();
+    const slash = base.lastIndexOf('/');
+    if (slash >= 0) base = base.slice(slash + 1);
+    return base.endsWith('.bsp') ? base.slice(0, -4) : base;
+}
+
 // A hold figure as a whole-percent share of the player's ALIVE time —
 // KTX's own implicit denominator for its hold clocks, and the one that
 // answers "how much of the time they could have been holding it, were
 // they". Returns '-' when the item was never held, so a blank cell means
 // "never", never "not measured".
-function holdPct(stat) {
+//
+// The row's window goes into a tooltip because the share is only as
+// meaningful as its denominator: a player the streams barely saw can get
+// a presence window that is a FLOOR rather than a measurement
+// (possessionExtent in analyzer/player_stats.go says so itself), and
+// dividing their possession by it yields a confident "100%" over a few
+// seconds of an 18-minute match. The percentage cannot express that; the
+// raw ms behind it can, so they are one hover away.
+function holdPct(stat, win) {
     if (!stat || !stat.ms) return '-';
-    return `${(stat.shareAlive * 100).toFixed(0)}%`;
+    const pct = `${(stat.shareAlive * 100).toFixed(0)}%`;
+    if (!win) return pct;
+    const title = `held ${stat.ms} ms · alive ${win.aliveMs} ms · ` +
+        `present ${win.presentMs} ms · match ${win.matchMs} ms`;
+    return `<span title="${escapeHtml(title)}">${pct}</span>`;
 }
 
 // Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
@@ -967,6 +994,27 @@ function formatAccuracyCell(entry) {
     if (entry.hits == null) return `<span class="stat-muted" title="No damage stream to link fires against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
     return `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
+}
+
+// The kill side of a score row — kills, suicides, teamKills, efficiency and
+// the by-weapon split — is ABSENT (not zero) on a demo whose obituary log
+// yielded nothing while deaths were still counted from the death stream:
+// old kmod/qwe servers print obituaries in a shape the frag log never
+// matches. Deaths and frags are measured there and stay; printing 0 for the
+// rest made a 230-frag team read as one that never killed anybody. Zero is
+// still zero when the log WAS read, so these test for absence, not falsity.
+function effPct(score) {
+    // efficiency is a RATIO in [0,1] in the schema, shown as a percent.
+    return score.efficiency == null ? '-' : `${(score.efficiency * 100).toFixed(1)}%`;
+}
+
+// A by-weapon kill count. The map itself omits weapons the player never
+// killed with, so its absence cannot distinguish "no RL kills" from "no
+// frag log" — `kills` carries that signal for the whole family and is what
+// this branches on.
+function killsByWeapon(score, weapon) {
+    if (score.kills == null) return '-';
+    return score.byWeapon?.[weapon] || 0;
 }
 
 function updateTopbarDemoInfo(result) {
@@ -1422,25 +1470,23 @@ function displayPlayerStats(rows) {
             botBadge = ` <span class="bot-badge" title="${tooltip}">${label}</span>`;
         }
         const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
-        // efficiency is a RATIO in [0,1] in the schema, shown as a percent.
-        const efficiency = ((s.efficiency || 0) * 100).toFixed(1);
         return `
             <td>${escapeHtml(player.name)}${botBadge}</td>
             <td>${escapeHtml(player.team || '')}</td>
             ${handicapCell}
             <td>${s.frags || 0}</td>
-            <td>${efficiency}%</td>
-            <td>${s.kills || 0}</td>
-            <td>${s.byWeapon?.rl || 0}</td>
-            <td>${s.byWeapon?.lg || 0}</td>
+            <td>${effPct(s)}</td>
+            <td>${s.kills ?? '-'}</td>
+            <td>${killsByWeapon(s, 'rl')}</td>
+            <td>${killsByWeapon(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
-            <td>${s.teamKills || 0}</td>
-            <td>${s.suicides || 0}</td>
+            <td>${s.teamKills ?? '-'}</td>
+            <td>${s.suicides ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>${d?.takenToDie ?? '-'}</td>
-            <td>${player.ping || 0}</td>
+            <td>${player.ping ?? '-'}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
 }
@@ -1459,17 +1505,18 @@ function displayHoldTable(rows) {
         const w = h.weapons || {};
         const a = h.armor || {};
         const p = h.powerups || {};
+        const win = player.window;
         return `
             <td>${escapeHtml(player.name)}</td>
-            <td>${holdPct(w.rl)}</td>
-            <td>${holdPct(w.lg)}</td>
-            <td>${holdPct(a.ra)}</td>
-            <td>${holdPct(a.ya)}</td>
-            <td>${holdPct(a.ga)}</td>
-            <td>${holdPct(a.none)}</td>
-            <td>${holdPct(p.quad)}</td>
-            <td>${holdPct(p.pent)}</td>
-            <td>${holdPct(p.ring)}</td>
+            <td>${holdPct(w.rl, win)}</td>
+            <td>${holdPct(w.lg, win)}</td>
+            <td>${holdPct(a.ra, win)}</td>
+            <td>${holdPct(a.ya, win)}</td>
+            <td>${holdPct(a.ga, win)}</td>
+            <td>${holdPct(a.none, win)}</td>
+            <td>${holdPct(p.quad, win)}</td>
+            <td>${holdPct(p.pent, win)}</td>
+            <td>${holdPct(p.ring, win)}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
 }
@@ -1485,17 +1532,18 @@ function displayHoldTeamsTable(teamRows) {
         const w = h.weapons || {};
         const a = h.armor || {};
         const p = h.powerups || {};
+        const win = team.window;
         return `
             <td>${escapeHtml(team.name)}</td>
-            <td>${holdPct(w.rl)}</td>
-            <td>${holdPct(w.lg)}</td>
-            <td>${holdPct(a.ra)}</td>
-            <td>${holdPct(a.ya)}</td>
-            <td>${holdPct(a.ga)}</td>
-            <td>${holdPct(a.none)}</td>
-            <td>${holdPct(p.quad)}</td>
-            <td>${holdPct(p.pent)}</td>
-            <td>${holdPct(p.ring)}</td>
+            <td>${holdPct(w.rl, win)}</td>
+            <td>${holdPct(w.lg, win)}</td>
+            <td>${holdPct(a.ra, win)}</td>
+            <td>${holdPct(a.ya, win)}</td>
+            <td>${holdPct(a.ga, win)}</td>
+            <td>${holdPct(a.none, win)}</td>
+            <td>${holdPct(p.quad, win)}</td>
+            <td>${holdPct(p.pent, win)}</td>
+            <td>${holdPct(p.ring, win)}</td>
         `;
     }, (_team, idx) => idx);
 }
@@ -1527,6 +1575,12 @@ function applyDuelModeUI(result) {
     // cleanly on demo reload without leaking stale display:none values
     // onto unrelated elements.
     document.body.classList.toggle('duel-mode', isDuel(result));
+    // FFA has no teams at all, so playerStats omits the section and the
+    // four Summary "Per Team" tables rendered as headers over nothing —
+    // duel mode was the only thing hiding them, and it does not fire at
+    // five players. Drive it off the rows themselves, which covers every
+    // demo class with nothing to aggregate.
+    document.body.classList.toggle('no-team-rows', playerStatsTeamRows(result).length === 0);
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -1667,7 +1721,14 @@ function displayServerInfo(serverInfo) {
 const HOLD_WEAPON_NAMES = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
 function displayWeaponStatsTable(rows) {
-    const sorted = [...rows].sort((a, b) => (b.damage?.given || 0) - (a.damage?.given || 0));
+    // Damage-first ordering, because this table is about output. On a demo
+    // where no row has a damage family the comparator is a constant, which
+    // left the rows in stream order — a different, teamwise-jumbled order
+    // from every other Summary table. Fall back to the frag sort they use.
+    const hasDamage = rows.some(r => r.damage);
+    const sorted = hasDamage
+        ? [...rows].sort((a, b) => (b.damage?.given || 0) - (a.damage?.given || 0))
+        : sortByFragsDesc(rows);
     const teamOrder = getTeamOrder(sorted);
 
     renderTableRows('weapon-stats-body', sorted, player => {
@@ -1781,17 +1842,16 @@ function displayPlayerStatsTeams(teamRows) {
     renderTableRows('player-stats-team-body', teamRowsInColourOrder(teamRows), team => {
         const s = team.score || {};
         const d = team.damage;
-        const efficiency = ((s.efficiency || 0) * 100).toFixed(1);
         return `
             <td>${escapeHtml(team.name)}</td>
             <td>${s.frags || 0}</td>
-            <td>${efficiency}%</td>
-            <td>${s.kills || 0}</td>
-            <td>${s.byWeapon?.rl || 0}</td>
-            <td>${s.byWeapon?.lg || 0}</td>
+            <td>${effPct(s)}</td>
+            <td>${s.kills ?? '-'}</td>
+            <td>${killsByWeapon(s, 'rl')}</td>
+            <td>${killsByWeapon(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
-            <td>${s.teamKills || 0}</td>
-            <td>${s.suicides || 0}</td>
+            <td>${s.teamKills ?? '-'}</td>
+            <td>${s.suicides ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
@@ -2984,9 +3044,11 @@ function resetUIToCleanState() {
     hide('pickups-empty');
     // pickups-items-panel is shown by displayPickupsTab when item data exists
 
-    // Body class — duel-mode collapses some panels via CSS; clear it so
-    // a non-duel demo loaded after a duel doesn't inherit the layout.
+    // Body classes — duel-mode / no-team-rows collapse some panels via CSS;
+    // clear them so a teamplay demo loaded after a duel or an FFA doesn't
+    // inherit the layout.
     document.body.classList.remove('duel-mode');
+    document.body.classList.remove('no-team-rows');
 
     // JS-side state objects that hold per-demo data
     mapState.locations = [];
@@ -6322,8 +6384,7 @@ function initMapView(result) {
     // Fire-and-forget: try to load pre-generated BSP-derived map geometry.
     // If present, switch from convex-hull blobs to real floor polygons.
     // If absent (404 or fetch error), the existing hull path remains as fallback.
-    const rawMapName = result.demoInfo && result.demoInfo.map ? result.demoInfo.map : '';
-    const mapBasename = rawMapName.toLowerCase().replace(/^maps\//, '').replace(/\.bsp$/, '');
+    const mapBasename = mapFileKey(result);
     mapState.mapBasename = mapBasename;
     if (mapBasename) {
         const tGeom = performance.now();
@@ -6695,12 +6756,7 @@ function renderRegionControlFromGo(regions, stats, teamA, teamB) {
 // Map name → safe filename stem for the Save button. Falls back to
 // "regions" when no map info is available.
 function regionConfigFilename() {
-    const raw = currentResult?.demoInfo?.map || currentResult?.match?.map || '';
-    let base = String(raw).toLowerCase();
-    const slash = base.lastIndexOf('/');
-    if (slash >= 0) base = base.slice(slash + 1);
-    if (base.endsWith('.bsp')) base = base.slice(0, -4);
-    base = base.replace(/[^a-z0-9_-]/g, '');
+    const base = mapFileKey(currentResult).replace(/[^a-z0-9_-]/g, '');
     return (base || 'regions') + '.json';
 }
 
@@ -7078,8 +7134,16 @@ function canvasToWorld(cx, cy, zPlane) {
 }
 
 function assignPlayerSymbols(result) {
-    const demoInfo = result.demoInfo;
-    const players = demoInfo?.players || [];
+    // Roster source: the KTX demoinfo block where the demo has one, else
+    // playerStats — the canonical roster, built from the streams and present
+    // on every demo. Both shapes carry `name` and `team`, which is all this
+    // needs. Reading demoInfo alone left the symbol map EMPTY on a pre-KTX
+    // demo, and an empty symbol map is what the draw loop, the legend, the
+    // trail dropdown and the sidebar roster all key off — so a demo with
+    // full position streams rendered a map with nobody on it.
+    const players = result.demoInfo?.players?.length
+        ? result.demoInfo.players
+        : playerStatsRows(result);
 
     mapState.playerSymbols = {};
 

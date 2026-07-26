@@ -32,7 +32,11 @@ talks to it through a JS shim.
     [`vendor/README.md`](static/vendor/README.md).
   - `maps/` — pre-generated per-map floor polygon JSON (version 2:
     per-vertex x,y,z — drives the map tab's 3D view). Committed; the
-    frontend fetches `maps/<basename>.json` at demo load.
+    frontend fetches `maps/<basename>.json` at demo load. `<basename>`
+    comes from `mapFileKey()`, which mirrors Go's `Result.EffectiveMap()`
+    — `demoInfo.map`, then the serverinfo `map` key, so a demo with no
+    KTX block still finds its geometry. `match.map` is the pretty title
+    ("Castle of the Damned") and never a file key.
   - `probe.html` — tiny dev page used to probe runtime features.
 
 ## Build and deploy
@@ -185,6 +189,20 @@ Two consequences worth knowing:
   tab (a 2003 kmod duel is the regression case). The one class with no
   section at all is a parse that produced no player streams — a race demo
   has no match — and that renders as empty tables.
+- **Absent is rendered `-`, never `0`.** A field the pipeline could not
+  measure is omitted rather than zeroed, so the tables test for absence:
+  the kill side of `score` (kills / suicides / teamKills / efficiency /
+  the by-weapon split) goes missing together on a demo whose obituary log
+  yielded nothing while deaths were still counted, and `ping` is KTX-only.
+  Frags and deaths are measured on those demos and still print. A zero
+  that *was* measured still prints as `0`.
+- **The Possession cells carry their denominator in a tooltip** — held /
+  alive / present / match ms. A share is only as good as the window it
+  divides by, and a player the streams barely saw can get a presence
+  window that is a floor rather than a measurement.
+- **The four "Per Team" tables hide when `playerStats.teams` is empty**
+  (body class `no-team-rows`), which is FFA and duels — otherwise FFA
+  rendered four headers over an empty tbody.
 
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,
@@ -442,6 +460,13 @@ drawn live over the neutral floor with a brighter outline and bold label.
 This is the *only* place a region takes on colour, so a coloured patch
 always means "someone is here". Team membership comes from the canonical
 `playerSymbols[name].teamIdx`, so it matches team colours everywhere else.
+
+`playerSymbols` is built by `assignPlayerSymbols()` from the KTX demoinfo
+roster where the demo has one and from `playerStats.players` otherwise —
+it is what the draw loop, the legend, the trail dropdown and the sidebar
+roster all key off, so a demo with no KTX block would otherwise render a
+map with nobody on it. Team colours still come from `getTeamOrder()` /
+`timelineState.teams`, never from either roster's own order.
 
 **View / velocity arrows** — two optional per-player toggles, **View**
 and **Vel**, draw 3D arrows from each player's origin (`drawPlayerArrows`
