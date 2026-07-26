@@ -38,17 +38,19 @@ that downstream consumers render, summarise, or feed to an agent.
   hand-ordered phase list. Every node is a task with declared
   `Requires`/`Provides` edges; nodes differ only in whether they read the
   event stream (analyzers — 15 of them, five of which publish
-  `CoreOutputs`) or only refine the assembled `Result` (seven
+  `CoreOutputs`) or only refine the assembled `Result` (eight
   post-processors: victim-named teamkill recovery → `frags:final`, **aim
   analysis**, airgib detection, scoreboard kills/deaths/suicides
   correction → `match:final`, locgraph synthesis, region-control
-  classification, and the match-opening projection → `opening`), plus
+  classification, the match-opening projection → `opening`, and the
+  canonical per-player statistics join → `playerStats`), plus
   one lazy node (`los`). There is no tier that
   orders the run — the topological sort of the declared edges does (see
   "Pipeline architecture" and "The nodes" below). Timestamps and team
   labels are born correct in each producer's Finalize, so the old
   whole-Result time rebase and duel team rewrite are gone. See `aim.go`,
-  `airgibs.go`, `opening.go`, `postprocess.go`, and `teamkill_telefrag.go`.
+  `airgibs.go`, `opening.go`, `player_stats.go`, `postprocess.go`, and
+  `teamkill_telefrag.go`.
 - `view/` — **time-parameterised query API** over a finalised
   `*Result`. Six pure functions (`Buckets`, `Events`, `StreamSlice`,
   `StateAt`, `LocTrails`, `RegionControl`) read `result.Streams` and
@@ -212,9 +214,14 @@ whole-Result rebase or duel rewrite.
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `regionControlPost`. Two publish a
-**named final artifact** rather than anonymously patching an earlier
-node's output: `recoverTelefragTeamkills` is node `frags-final`, which
+`scoreboardStatsPost`, `locGraphPost`, `regionControlPost`,
+`openingPost`, [`playerStatsPost`](analyzer/player_stats.md). They come in
+three shapes. **One creates a section of its own**: `playerStatsPost` is
+node `player-stats`, publishing `playerStats` — it consumes twelve
+artifacts and writes a top-level section no other node touches, so it
+carries no `mutates` flag. **Two publish a named final artifact** rather
+than anonymously patching an earlier node's output:
+`recoverTelefragTeamkills` is node `frags-final`, which
 appends recovered telefrag team-kills to the raw `frag` log and publishes
 `frags:final`; `scoreboardStatsPost` is node `match-final`, which folds the
 corrected kills/deaths/suicides into `match` and publishes `match:final`.
@@ -320,17 +327,23 @@ flowchart TB
     aim["aim"]
     match_final["match-final"]
   end
+  subgraph d6["depth 6"]
+    player_stats["player-stats"]
+  end
+  backpacks -->|"backpacks"| player_stats
   clock -->|"clock"| backpacks
   clock -->|"clock"| damage
   clock -->|"clock"| frag
   clock -->|"clock"| frags_final
   clock -->|"clock"| items
   clock -->|"clock"| messages
+  clock -->|"clock"| player_stats
   clock -->|"clock"| shots
   clock -->|"clock"| timeline
   clock -->|"clock"| weapon_pickups
   damage -->|"damage"| aim
   damage -->|"damage"| airgibs
+  damage -->|"damage"| player_stats
   demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| damage
   demoinfo -->|"demoinfo"| frag
@@ -350,36 +363,45 @@ flowchart TB
   frag -->|"frag"| timeline
   frag -->|"frag"| weapon_pickups
   frags_final -->|"frags:final"| match_final
+  frags_final -->|"frags:final"| player_stats
   identity -->|"identity"| damage
   identity -->|"identity"| frag
   identity -->|"identity"| items
   identity -->|"identity"| match
+  identity -->|"identity"| player_stats
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
   items -->|"items"| opening
+  items -->|"items"| player_stats
   match -->|"match"| match_final
   match -->|"match"| region_control
+  match_final -->|"match:final"| player_stats
   metadata -->|"metadata"| los
+  metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items
   roster -->|"roster"| messages
+  roster -->|"roster"| player_stats
   roster -->|"roster"| shots
   roster -->|"roster"| timeline
   roster -->|"roster"| weapon_pickups
   shots -->|"shots"| aim
+  shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
   timeline -->|"timeline"| airgibs
   timeline -->|"timeline"| frags_final
   timeline -->|"timeline"| loc_graph
   timeline -->|"timeline"| los
   timeline -->|"timeline"| opening
+  timeline -->|"timeline"| player_stats
   timeline -->|"timeline"| region_control
   timeline -->|"timeline"| shots
+  weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,region_control,opening post;
+  class frags_final,aim,airgibs,match_final,loc_graph,region_control,opening,player_stats post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```

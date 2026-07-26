@@ -896,24 +896,77 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// Sum stats.frags per team over a demoInfo.players array, returning a
-// { teamName: totalFrags } map. Players with no team bucket under
-// `emptyTeamKey` (default '' — the topbar/team-order convention; the Teams
-// panel passes 'unknown' so a teamless bucket renders with a visible label).
+// Frags off a row from either shape: a playerStats row (score.frags — the
+// corrected svc_updatefrags net score) or a legacy demoInfo player
+// (stats.frags). Both are read during the same render on demos where one
+// panel has migrated and another has not, so the accessor takes both
+// rather than each call site branching.
+function fragsOfRow(p) {
+    return p?.score?.frags ?? p?.stats?.frags ?? 0;
+}
+
+// Sum frags per team, returning a { teamName: totalFrags } map. Players
+// with no team bucket under `emptyTeamKey` (default '' — the topbar /
+// team-order convention; the Teams panel passes 'unknown' so a teamless
+// bucket renders with a visible label).
 function teamFragTotals(players, emptyTeamKey = '') {
     const totals = {};
     for (const p of (players || [])) {
         const t = p.team || emptyTeamKey;
-        totals[t] = (totals[t] || 0) + (p.stats?.frags || 0);
+        totals[t] = (totals[t] || 0) + fragsOfRow(p);
     }
     return totals;
 }
 
-// Return a new array of players sorted by stats.frags descending. The sort is
+// Return a new array of players sorted by frags descending. The sort is
 // stable (equal-frag players keep input order); this frag-sorted order is the
 // canonical TEAM_COLORS source, so its semantics must not change.
 function sortByFragsDesc(players) {
-    return [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
+    return [...players].sort((a, b) => fragsOfRow(b) - fragsOfRow(a));
+}
+
+// ─── playerStats accessors ─────────────────────────────────────────────────
+//
+// result.playerStats is the canonical per-player section (schema v61). The
+// WASM entry point applies the KTX overlay before marshalling
+// (mvd-web/cmd/wasm/main.go withPlayerStatsOverlay), so what reaches the
+// browser is already merged — every family carries `src` saying whether the
+// numbers came from KTX's demoinfo block or from this pipeline's
+// reconstruction. The summary tab reads it and nothing else; the old
+// four-source join across match.players / frags.byPlayer / frags.frags /
+// demoInfo now lives in Go.
+
+// Rows for the per-player tables. Empty array when the section is absent
+// (a parse that produced no player streams — e.g. a race demo, which has
+// no match at all), which the callers render as an empty table.
+function playerStatsRows(result) {
+    return result?.playerStats?.players || [];
+}
+
+// Rows for the per-team tables. Absent on duels and FFA by construction.
+function playerStatsTeamRows(result) {
+    return result?.playerStats?.teams || [];
+}
+
+// A hold figure as a whole-percent share of the player's ALIVE time —
+// KTX's own implicit denominator for its hold clocks, and the one that
+// answers "how much of the time they could have been holding it, were
+// they". Returns '-' when the item was never held, so a blank cell means
+// "never", never "not measured".
+function holdPct(stat) {
+    if (!stat || !stat.ms) return '-';
+    return `${(stat.shareAlive * 100).toFixed(0)}%`;
+}
+
+// Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
+// zero) when the demo has no damage stream to link fires against, so an
+// entry with attacks but no hits renders the attack count alone rather
+// than a fabricated 0%.
+function formatAccuracyCell(entry) {
+    if (!entry || !entry.attacks) return '-';
+    if (entry.hits == null) return `<span class="stat-muted" title="No damage stream to link fires against — attacks only">${entry.attacks} atk</span>`;
+    const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
+    return `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
 }
 
 function updateTopbarDemoInfo(result) {
@@ -930,8 +983,14 @@ function updateTopbarDemoInfo(result) {
     if (teams.length < 2 && demoInfo?.teams) teams = [...demoInfo.teams];
     if (teams.length < 2 && result?.match?.teams) teams = result.match.teams.map(t => t.name);
 
+    // playerStats first so the topbar score agrees with the scoreboard on
+    // the Summary tab: its score.frags is the corrected net score, while
+    // KTX's stats.frags resets after a reconnect.
     let teamScores = {};
-    if (demoInfo?.players) {
+    const psRows = playerStatsRows(result);
+    if (psRows.length) {
+        teamScores = teamFragTotals(psRows);
+    } else if (demoInfo?.players) {
         teamScores = teamFragTotals(demoInfo.players);
     } else if (result?.match?.teams) {
         for (const t of result.match.teams) teamScores[t.name] = t.frags || 0;
@@ -1070,23 +1129,41 @@ function displayResults(result) {
     // their own name (a property only true after the Go-side rewrite).
     applyDuelModeUI(result);
 
-    // Teams from demoInfo
-    if (demoInfo && demoInfo.teams) {
-        displayTeamsFromDemoInfo(demoInfo);
-    } else if (result.match && result.match.teams) {
-        displayTeams(result.match.teams);
+    // Teams summary box. Rows come from playerStats where it exists so the
+    // scores match the scoreboard below; demoInfo is the fallback.
+    {
+        const rows = playerStatsRows(result);
+        if (rows.length) {
+            displayTeamsSummary(rows);
+        } else if (demoInfo && demoInfo.teams) {
+            displayTeamsSummary(demoInfo.players);
+        } else if (result.match && result.match.teams) {
+            displayTeams(result.match.teams);
+        }
     }
 
-    // Set team order early (sorted by total frags, highest first) for consistent colors everywhere
+    // Set team order early (sorted by total frags, highest first) for consistent
+    // colors everywhere. CLAUDE.md: this is the ONE canonical team→colour source
+    // — TEAM_COLORS indexed by position in timelineState.teams, winner at 0 —
+    // and it must never be derived from demoInfo.teams order or any per-feature
+    // ordering. playerStats is the frag source now (its score.frags is the
+    // corrected net score and it exists on demos with no KTX block at all), with
+    // demoInfo/match retained only to enumerate the team NAMES.
     {
+        const psTeams = playerStatsTeamRows(result);
         let teams = [];
-        if (demoInfo?.teams) {
+        if (psTeams.length) {
+            teams = psTeams.map(t => t.name);
+        } else if (demoInfo?.teams) {
             teams = [...demoInfo.teams];
         } else if (result.match?.teams) {
             teams = result.match.teams.map(t => t.name);
         }
-        if (teams.length >= 2 && demoInfo?.players) {
-            const teamFrags = teamFragTotals(demoInfo.players);
+        if (teams.length >= 2) {
+            const rows = playerStatsRows(result);
+            const teamFrags = psTeams.length
+                ? Object.fromEntries(psTeams.map(t => [t.name, fragsOfRow(t)]))
+                : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
         timelineState.teams = teams;
@@ -1094,16 +1171,23 @@ function displayResults(result) {
 
     updateTopbarDemoInfo(result);
 
-    // Player stats from demoInfo
-    if (demoInfo && demoInfo.players) {
-        displayPlayerStatsTeams(demoInfo.players);
-        displayPlayerStats(demoInfo.players);
-        displayWeaponStatsTeamsTable(demoInfo.players);
-        displayWeaponStatsTable(demoInfo.players);
-        displayItemsTeamsTable(demoInfo.players);
-        displayItemsTable(demoInfo.players);
-    } else if (result.frags && result.frags.byPlayer) {
-        displayScoreboardFallback(result.frags.byPlayer, result.match ? result.match.players : []);
+    // Summary tab, all eight tables, from the canonical playerStats section.
+    // It is computed for EVERY demo — a missing KTX block degrades families
+    // to src:"derived" rather than dropping them — so there is no
+    // scoreboard-only fallback path any more. The one demo class with no
+    // section at all is a parse that produced no player streams (a race
+    // demo has no match), and that renders as empty tables.
+    {
+        const rows = playerStatsRows(result);
+        const teamRows = playerStatsTeamRows(result);
+        displayPlayerStatsTeams(teamRows);
+        displayPlayerStats(rows);
+        displayWeaponStatsTeamsTable(teamRows);
+        displayWeaponStatsTable(rows);
+        displayItemsTeamsTable(teamRows);
+        displayItemsTable(rows);
+        displayHoldTeamsTable(teamRows);
+        displayHoldTable(rows);
     }
 
     // Weapons chart from frags
@@ -1243,13 +1327,17 @@ function makeSortable(table) {
     });
 }
 
-function displayTeamsFromDemoInfo(demoInfo) {
+// Renders the standalone Teams summary box. `rows` are playerStats player
+// rows where the section exists, else demoInfo players — teamFragTotals
+// reads frags off either shape, and playerStats is preferred so this box
+// agrees with the scoreboard rather than with KTX's uncorrected stats.
+function displayTeamsSummary(rows) {
     const container = document.getElementById('teams-list');
     container.innerHTML = '';
 
     // Calculate team scores from players (teamless players bucket as 'unknown'
     // so they render with a visible label in this panel).
-    const teamScores = teamFragTotals(demoInfo.players, 'unknown');
+    const teamScores = teamFragTotals(rows, 'unknown');
 
     // Use timelineState.teams order for consistent colors, fall back to score sort
     let ordered;
@@ -1299,35 +1387,16 @@ function displayTeams(teams) {
     });
 }
 
-// Per-player suicides counted from our frag log (every self / world-dealt
-// death prints a suicide obituary), keyed by victim. KTX demoinfo
-// stats.suicides books world-dealt deaths (falls, trigger_hurt) on the `world`
-// entity instead of the victim, so it undercounts; the frag log is the
-// complete record. See MVD_FORMAT.md "World-dealt deaths". Returns null when no
-// frag log is present so callers can fall back to demoinfo.
-function suicidesFromFragLog() {
-    const log = currentResult?.frags?.frags;
-    if (!log) return null;
-    const out = {};
-    for (const f of log) if (f.isSuicide) out[f.victim] = (out[f.victim] || 0) + 1;
-    return out;
-}
 
-function displayPlayerStats(players) {
-    // Corrected scoreboard from match.players (schema v19): frags is the
-    // svc_updatefrags net score, kills/deaths the frag-log counts — all
-    // independent of the KTX demoinfo stats, which over-count pentagram-deflect
-    // telefrags / dtTELE2 and reset after a reconnect. Per-weapon RL/LG kills
-    // still come from frags.byPlayer.byWeapon; suicides from the frag log. Fall
-    // back to demoinfo per name when a player isn't in match.players (0 frags /
-    // didn't join). See RESULT_SCHEMA.md and MVD_FORMAT.md.
-    const matchByName = {};
-    for (const mp of (currentResult?.match?.players || [])) matchByName[mp.name] = mp;
-    const fragsOf = p => (matchByName[p.name]?.frags ?? p.stats?.frags ?? 0);
-    const sorted = [...players].sort((a, b) => fragsOf(b) - fragsOf(a));
+function displayPlayerStats(rows) {
+    // Every column comes from the playerStats row. `score` is always
+    // derived (KTX's own stats over-count pentagram-deflect telefrags and
+    // reset after a reconnect); `damage` is KTX's where the block carries
+    // it. `taken` is our ALL-SOURCES figure and `takenEnemy` is KTX's
+    // enemy-only one — they are different quantities and get separate
+    // columns rather than being conflated. See RESULT_SCHEMA.md.
+    const sorted = sortByFragsDesc(rows);
     const teamOrder = getTeamOrder(sorted);
-    const byPlayer = currentResult?.frags?.byPlayer || {};
-    const suicidesMap = suicidesFromFragLog();
 
     // Show the handicap column only when at least one player on this demo
     // has a non-default handicap. KTX omits the JSON field entirely when the
@@ -1339,15 +1408,8 @@ function displayPlayerStats(players) {
     });
 
     renderTableRows('scoreboard-body', sorted, player => {
-        const bp = byPlayer[player.name];
-        const mp = matchByName[player.name];
-        const frags = mp ? mp.frags : (player.stats?.frags || 0);
-        const kills = mp ? mp.kills : (bp ? bp.kills : (player.stats?.kills || 0));
-        const deaths = mp ? mp.deaths : (bp ? bp.deaths : (player.stats?.deaths || 0));
-        const suicides = mp ? mp.suicides : (suicidesMap ? (suicidesMap[player.name] || 0) : (player.stats?.suicides || 0));
-        const rlKills = bp ? (bp.byWeapon?.rl || 0) : (player.weapons?.rl?.kills?.enemy || 0);
-        const lgKills = bp ? (bp.byWeapon?.lg || 0) : (player.weapons?.lg?.kills?.enemy || 0);
-        const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
+        const s = player.score || {};
+        const d = player.damage;
         // Bot badge: render the skill level inline when present, since bots
         // in a match are rare enough that seeing "BOT 10" at a glance is
         // more useful than hiding it behind a hover. Fall back to a plain
@@ -1360,25 +1422,82 @@ function displayPlayerStats(players) {
             botBadge = ` <span class="bot-badge" title="${tooltip}">${label}</span>`;
         }
         const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
+        // efficiency is a RATIO in [0,1] in the schema, shown as a percent.
+        const efficiency = ((s.efficiency || 0) * 100).toFixed(1);
         return `
             <td>${escapeHtml(player.name)}${botBadge}</td>
             <td>${escapeHtml(player.team || '')}</td>
             ${handicapCell}
-            <td>${frags}</td>
+            <td>${s.frags || 0}</td>
             <td>${efficiency}%</td>
-            <td>${kills}</td>
-            <td>${rlKills}</td>
-            <td>${lgKills}</td>
-            <td>${deaths}</td>
-            <td>${player.stats?.tk || 0}</td>
-            <td>${suicides}</td>
-            <td>${player.dmg?.given || 0}</td>
-            <td>${player.dmg?.taken || 0}</td>
-            <td>${player.dmg?.['enemy-weapons'] ?? 0}</td>
-            <td>${player.dmg?.['taken-to-die'] ?? 0}</td>
+            <td>${s.kills || 0}</td>
+            <td>${s.byWeapon?.rl || 0}</td>
+            <td>${s.byWeapon?.lg || 0}</td>
+            <td>${s.deaths || 0}</td>
+            <td>${s.teamKills || 0}</td>
+            <td>${s.suicides || 0}</td>
+            <td>${d?.given ?? '-'}</td>
+            <td>${d?.taken ?? '-'}</td>
+            <td>${d?.enemyWeapons ?? '-'}</td>
+            <td>${d?.takenToDie ?? '-'}</td>
             <td>${player.ping || 0}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
+}
+
+// Possession times — the family KTX cannot produce at all (it writes no
+// weapon hold time into the demoinfo block on a demo of any age, and its
+// armor clock keeps counting after the armor is chewed to zero). Shares
+// are over ALIVE time; the section also carries shareMatch, and window.*
+// carries every denominator, so nothing here has an implicit divisor.
+function displayHoldTable(rows) {
+    const sorted = sortByFragsDesc(rows);
+    const teamOrder = getTeamOrder(sorted);
+
+    renderTableRows('hold-body', sorted, player => {
+        const h = player.hold || {};
+        const w = h.weapons || {};
+        const a = h.armor || {};
+        const p = h.powerups || {};
+        return `
+            <td>${escapeHtml(player.name)}</td>
+            <td>${holdPct(w.rl)}</td>
+            <td>${holdPct(w.lg)}</td>
+            <td>${holdPct(a.ra)}</td>
+            <td>${holdPct(a.ya)}</td>
+            <td>${holdPct(a.ga)}</td>
+            <td>${holdPct(a.none)}</td>
+            <td>${holdPct(p.quad)}</td>
+            <td>${holdPct(p.pent)}</td>
+            <td>${holdPct(p.ring)}</td>
+        `;
+    }, player => teamOrder.indexOf(player.team || ''));
+}
+
+function displayHoldTeamsTable(teamRows) {
+    // teamRowsInColourOrder, like every other per-team table: playerStats
+    // emits teams in stream order while timelineState.teams is frag-sorted,
+    // so passing the rows through raw would stripe this panel differently
+    // from the three beside it whenever the winning team is not the first
+    // to appear in the demo. See CLAUDE.md "Team colors".
+    renderTableRows('hold-team-body', teamRowsInColourOrder(teamRows), team => {
+        const h = team.hold || {};
+        const w = h.weapons || {};
+        const a = h.armor || {};
+        const p = h.powerups || {};
+        return `
+            <td>${escapeHtml(team.name)}</td>
+            <td>${holdPct(w.rl)}</td>
+            <td>${holdPct(w.lg)}</td>
+            <td>${holdPct(a.ra)}</td>
+            <td>${holdPct(a.ya)}</td>
+            <td>${holdPct(a.ga)}</td>
+            <td>${holdPct(a.none)}</td>
+            <td>${holdPct(p.quad)}</td>
+            <td>${holdPct(p.pent)}</td>
+            <td>${holdPct(p.ring)}</td>
+        `;
+    }, (_team, idx) => idx);
 }
 
 // applyDuelModeUI toggles the "Per Team" aggregation panels and the
@@ -1389,12 +1508,16 @@ function displayPlayerStats(players) {
 // Detection: the Go `roster` core node stamps every participant team field
 // as their own name for duels (and only for exactly-2-player matches — see
 // newRoster in analyzer/roster.go), so we can detect duel mode reliably by
-// checking whether the two demoInfo players each have
-// `team === name`. This avoids depending on the metadata mode string, which
-// can be "duel" / "1on1" / "LGC" / "Hoony" / missing entirely depending on
-// the server flavour.
+// checking whether the two players each have `team === name`. This avoids
+// depending on the metadata mode string, which can be "duel" / "1on1" /
+// "LGC" / "Hoony" / missing entirely depending on the server flavour.
+//
+// Read off playerStats rather than demoInfo: the roster stamp is what is
+// being tested, playerStats carries it on every demo, and a pre-KTX-block
+// duel used to fall through here and render the team panels for a 1v1.
 function isDuel(result) {
-    const players = result?.demoInfo?.players || [];
+    const players = playerStatsRows(result);
+    if (!players.length) return false;
     return players.length === 2 && players.every(p => p.team === p.name);
 }
 
@@ -1541,127 +1664,79 @@ function displayServerInfo(serverInfo) {
     panel.style.display = '';
 }
 
-function displayWeaponStatsTable(players) {
-    const sorted = [...players].sort((a, b) => (b.dmg?.given || 0) - (a.dmg?.given || 0));
+const HOLD_WEAPON_NAMES = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
+
+function displayWeaponStatsTable(rows) {
+    const sorted = [...rows].sort((a, b) => (b.damage?.given || 0) - (a.damage?.given || 0));
     const teamOrder = getTeamOrder(sorted);
-    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     renderTableRows('weapon-stats-body', sorted, player => {
-        const w = player.weapons || {};
         let cells = `<td>${escapeHtml(player.name)}</td>`;
-        wNames.forEach(wn => { cells += formatWeaponCells(w[wn]); });
+        HOLD_WEAPON_NAMES.forEach(wn => { cells += formatWeaponCells(player, wn); });
         return cells;
     }, player => teamOrder.indexOf(player.team || ''));
 }
 
-function formatWeaponCells(weapon) {
-    if (!weapon) return '<td>-</td><td>-</td><td>-</td>';
-
-    let acc = '-';
-    if (weapon.acc && weapon.acc.attacks > 0) {
-        const pct = ((weapon.acc.hits / weapon.acc.attacks) * 100).toFixed(1);
-        acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
-    }
-
-    const kills = weapon.kills?.total || weapon.kills?.enemy || 0;
-    const dmg = weapon.damage?.enemy || 0;
-
+// One weapon's three cells for a playerStats row: accuracy from the
+// `accuracy` family, kills from `score.byWeapon` (the corrected frag log),
+// damage from `damage.byWeapon`. A weapon the player never touched shows
+// '-' in all three rather than zeros.
+function formatWeaponCells(player, wn) {
+    const acc = formatAccuracyCell(player.accuracy?.byWeapon?.[wn]);
+    const kills = player.score?.byWeapon?.[wn] || 0;
+    const dmg = player.damage?.byWeapon?.[wn] || 0;
     return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>`;
 }
 
-function displayItemsTable(players) {
-    const sorted = sortByFragsDesc(players);
+function displayItemsTable(rows) {
+    const sorted = sortByFragsDesc(rows);
     const teamOrder = getTeamOrder(sorted);
 
     renderTableRows('items-body', sorted, player => {
-        const items = player.items || {};
-        const weapons = player.weapons || {};
+        const k = player.pickups?.byKind || {};
+        const hp = player.hold?.powerups || {};
         return `
             <td>${escapeHtml(player.name)}</td>
-            <td>${items.ra?.took || 0}</td>
-            <td>${items.ya?.took || 0}</td>
-            <td>${items.ga?.took || 0}</td>
-            <td>${items.health_100?.took || 0}</td>
-            <td>${formatPowerup(items.q)}</td>
-            <td>${formatPowerup(items.p)}</td>
-            <td>${formatPowerup(items.r)}</td>
-            <td>${weapons.rl?.pickups?.taken || 0}</td>
-            <td>${weapons.rl?.pickups?.dropped || 0}</td>
-            <td>${player.xferRL || 0}</td>
-            <td>${weapons.lg?.pickups?.taken || 0}</td>
-            <td>${weapons.lg?.pickups?.dropped || 0}</td>
-            <td>${player.xferLG || 0}</td>
+            <td>${k.ra?.took || 0}</td>
+            <td>${k.ya?.took || 0}</td>
+            <td>${k.ga?.took || 0}</td>
+            <td>${k.mh?.took || 0}</td>
+            <td>${formatPowerup(k.quad, hp.quad)}</td>
+            <td>${formatPowerup(k.pent, hp.pent)}</td>
+            <td>${formatPowerup(k.ring, hp.ring)}</td>
+            <td>${k.rl?.took || 0}</td>
+            <td>${k.rl?.dropped || 0}</td>
+            <td>${formatXfer(k.rl)}</td>
+            <td>${k.lg?.took || 0}</td>
+            <td>${k.lg?.dropped || 0}</td>
+            <td>${formatXfer(k.lg)}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
 }
 
-function formatPowerup(item) {
-    if (!item || !item.took) return '0';
-    if (item.time) {
-        return `${item.took} (${item.time}s)`;
-    }
-    return `${item.took}`;
+// "took (Ns)" — the count from the pickup tally, the seconds from OUR hold
+// integral rather than KTX's item.time, so the powerup seconds agree with
+// the hold table on the same page.
+function formatPowerup(pickup, holdStat) {
+    const took = pickup?.took || 0;
+    if (!took) return '0';
+    const secs = holdStat?.ms ? Math.round(holdStat.ms / 1000) : 0;
+    return secs > 0 ? `${took} (${secs}s)` : `${took}`;
 }
 
-function displayScoreboardFallback(byPlayer, players) {
-    const tbody = document.getElementById('scoreboard-body');
-    tbody.innerHTML = '';
-
-    const playerData = [];
-    for (const [name, stats] of Object.entries(byPlayer)) {
-        if (name.includes("'s quad") || name === 'teammate' || name === 'his teammate') {
-            continue;
-        }
-
-        const playerInfo = players.find(p => p.name === name);
-        playerData.push({
-            name: name,
-            team: playerInfo ? playerInfo.team : '',
-            frags: playerInfo ? playerInfo.frags : (stats.kills - stats.deaths),
-            deaths: stats.deaths,
-            tk: 0,
-            dmgGiven: 0,
-            dmgTaken: 0,
-            ping: 0
-        });
-    }
-
-    playerData.sort((a, b) => b.frags - a.frags);
-
-    // This fallback path has no demoinfo, hence no handicap data — always hide
-    // the handicap column, mirroring displayPlayerStats (there is no default
-    // CSS hiding .handicap-col).
-    document.querySelectorAll('#scoreboard .handicap-col').forEach(el => {
-        el.style.display = 'none';
-    });
-
-    playerData.forEach(player => {
-        const tr = document.createElement('tr');
-        // One cell per #scoreboard header, in header order (index.html):
-        // Player, Team, HC, Frags, Eff, Kills, RL K, LG K, Deaths, TK, Bores,
-        // Dmg, Taken, Ewep, ToDie, Ping. '-' fillers for stats this fallback
-        // (frag-log only, no demoinfo) cannot supply.
-        tr.innerHTML = `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${escapeHtml(player.team)}</td>
-            <td class="handicap-col" style="display: none;">-</td>
-            <td>${player.frags}</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>${player.deaths}</td>
-            <td>${player.tk}</td>
-            <td>-</td>
-            <td>${player.dmgGiven}</td>
-            <td>${player.dmgTaken}</td>
-            <td>-</td>
-            <td>-</td>
-            <td>${player.ping}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+// Pack transfers. `xfer` (a teammate took your pack) and `xferSelf` (you
+// took it back yourself) sum to KTX's single xferRL/xferLG figure, which
+// conflates them; the tooltip shows the split. ABSENT — rendered '-' —
+// when the demo carries no //ktx bp hints, since a 0 there would claim
+// nobody ever recovered a pack.
+function formatXfer(entry) {
+    if (!entry || entry.xfer == null) return '-';
+    const self = entry.xferSelf || 0;
+    const total = entry.xfer + self;
+    if (!self) return `${total}`;
+    return `<span title="${entry.xfer} to a teammate, ${self} self-recovered">${total}</span>`;
 }
+
 
 // ─── Team helpers ──────────────────────────────────────────────────────────
 
@@ -1680,138 +1755,79 @@ function getTeamOrder(sortedPlayers) {
     return order;
 }
 
-function groupByTeam(players) {
-    const groups = {};
-    players.forEach(p => {
-        const t = p.team || '';
-        if (!groups[t]) groups[t] = [];
-        groups[t].push(p);
-    });
-    return groups;
-}
 
 // ─── Per-team aggregate tables ─────────────────────────────────────────────
 
-function displayPlayerStatsTeams(players) {
-    const sorted = sortByFragsDesc(players);
-    const teamOrder = getTeamOrder(sorted);
-    const groups = groupByTeam(sorted);
-    // Same accurate-count sourcing as displayPlayerStats so the team totals
-    // reconcile with the per-player rows. See MVD_FORMAT.md.
-    const byPlayer = currentResult?.frags?.byPlayer || {};
-    const suicidesMap = suicidesFromFragLog();
-    const killsOf = p => (byPlayer[p.name] ? byPlayer[p.name].kills : (p.stats?.kills || 0));
-    const deathsOf = p => (byPlayer[p.name] ? byPlayer[p.name].deaths : (p.stats?.deaths || 0));
-    const suicidesOf = p => (suicidesMap ? (suicidesMap[p.name] || 0) : (p.stats?.suicides || 0));
-    const wKillsOf = (p, w) => (byPlayer[p.name] ? (byPlayer[p.name].byWeapon?.[w] || 0) : (p.weapons?.[w]?.kills?.enemy || 0));
+// The four per-team tables render playerStats.teams verbatim. The sums
+// are done ONCE in Go (analyzer aggregateTeamRows / view reaggregateTeams)
+// rather than re-derived per panel here: hold shares in particular must be
+// recomputed over the team's summed alive time, and averaging per-player
+// shares — which is what a JS reduce naturally does — is simply wrong.
+// Rows arrive in the section's own order; getTeamOrder is still the colour
+// index authority, so a team's stripe matches it everywhere else.
+function teamRowsInColourOrder(teamRows) {
+    const order = getTeamOrder(teamRows);
+    const byName = {};
+    for (const t of teamRows) byName[t.name] = t;
+    const out = [];
+    for (const name of order) if (byName[name]) out.push(byName[name]);
+    // Any team the colour order doesn't know about still renders, after
+    // the ones it does — dropping a row would silently lose a whole team.
+    for (const t of teamRows) if (!order.includes(t.name)) out.push(t);
+    return out;
+}
 
-    renderTableRows('player-stats-team-body', teamOrder, team => {
-        const members = groups[team] || [];
-        const frags = members.reduce((s, p) => s + (p.stats?.frags || 0), 0);
-        const kills = members.reduce((s, p) => s + killsOf(p), 0);
-        const rlKills = members.reduce((s, p) => s + wKillsOf(p, 'rl'), 0);
-        const lgKills = members.reduce((s, p) => s + wKillsOf(p, 'lg'), 0);
-        const deaths = members.reduce((s, p) => s + deathsOf(p), 0);
-        const tk = members.reduce((s, p) => s + (p.stats?.tk || 0), 0);
-        const suicides = members.reduce((s, p) => s + suicidesOf(p), 0);
-        const dmgGiven = members.reduce((s, p) => s + (p.dmg?.given || 0), 0);
-        const dmgTaken = members.reduce((s, p) => s + (p.dmg?.taken || 0), 0);
-        const ewep = members.reduce((s, p) => s + (p.dmg?.['enemy-weapons'] ?? 0), 0);
-        const toDie = members.length > 0
-            ? (members.reduce((s, p) => s + (p.dmg?.['taken-to-die'] ?? 0), 0) / members.length).toFixed(0)
-            : 0;
-        const ping = members.length > 0
-            ? (members.reduce((s, p) => s + (p.ping || 0), 0) / members.length).toFixed(0)
-            : 0;
-        const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
+function displayPlayerStatsTeams(teamRows) {
+    renderTableRows('player-stats-team-body', teamRowsInColourOrder(teamRows), team => {
+        const s = team.score || {};
+        const d = team.damage;
+        const efficiency = ((s.efficiency || 0) * 100).toFixed(1);
         return `
-            <td>${escapeHtml(team)}</td>
-            <td>${frags}</td>
+            <td>${escapeHtml(team.name)}</td>
+            <td>${s.frags || 0}</td>
             <td>${efficiency}%</td>
-            <td>${kills}</td>
-            <td>${rlKills}</td>
-            <td>${lgKills}</td>
-            <td>${deaths}</td>
-            <td>${tk}</td>
-            <td>${suicides}</td>
-            <td>${dmgGiven}</td>
-            <td>${dmgTaken}</td>
-            <td>${ewep}</td>
-            <td>${toDie}</td>
-            <td>${ping}</td>
+            <td>${s.kills || 0}</td>
+            <td>${s.byWeapon?.rl || 0}</td>
+            <td>${s.byWeapon?.lg || 0}</td>
+            <td>${s.deaths || 0}</td>
+            <td>${s.teamKills || 0}</td>
+            <td>${s.suicides || 0}</td>
+            <td>${d?.given ?? '-'}</td>
+            <td>${d?.taken ?? '-'}</td>
+            <td>${d?.enemyWeapons ?? '-'}</td>
+            <td>-</td>
+            <td>${team.members || 0}</td>
         `;
     }, (_team, idx) => idx);
 }
 
-function displayWeaponStatsTeamsTable(players) {
-    const sorted = sortByFragsDesc(players);
-    const teamOrder = getTeamOrder(sorted);
-    const groups = groupByTeam(sorted);
-    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
-
-    renderTableRows('weapon-stats-team-body', teamOrder, team => {
-        const members = groups[team] || [];
-        let cells = `<td>${escapeHtml(team)}</td>`;
-        wNames.forEach(wn => {
-            let totalAtk = 0, totalHits = 0, totalKills = 0, totalDmg = 0;
-            members.forEach(p => {
-                const w = (p.weapons || {})[wn];
-                if (!w) return;
-                totalAtk += w.acc?.attacks || 0;
-                totalHits += w.acc?.hits || 0;
-                totalKills += w.kills?.total || w.kills?.enemy || 0;
-                totalDmg += w.damage?.enemy || 0;
-            });
-            let acc = '-';
-            if (totalAtk > 0) {
-                const pct = ((totalHits / totalAtk) * 100).toFixed(1);
-                acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
-            }
-            cells += `<td>${acc}</td><td>${totalKills || '-'}</td><td>${totalDmg || '-'}</td>`;
-        });
+function displayWeaponStatsTeamsTable(teamRows) {
+    renderTableRows('weapon-stats-team-body', teamRowsInColourOrder(teamRows), team => {
+        let cells = `<td>${escapeHtml(team.name)}</td>`;
+        HOLD_WEAPON_NAMES.forEach(wn => { cells += formatWeaponCells(team, wn); });
         return cells;
     }, (_team, idx) => idx);
 }
 
-function displayItemsTeamsTable(players) {
-    const sorted = sortByFragsDesc(players);
-    const teamOrder = getTeamOrder(sorted);
-    const groups = groupByTeam(sorted);
-    const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
-
-    renderTableRows('items-team-body', teamOrder, team => {
-        const members = groups[team] || [];
-        const ra = members.reduce((s, p) => s + (p.items?.ra?.took || 0), 0);
-        const ya = members.reduce((s, p) => s + (p.items?.ya?.took || 0), 0);
-        const ga = members.reduce((s, p) => s + (p.items?.ga?.took || 0), 0);
-        const mh = members.reduce((s, p) => s + (p.items?.health_100?.took || 0), 0);
-        const quad = members.reduce((s, p) => s + (p.items?.q?.took || 0), 0);
-        const quadTime = members.reduce((s, p) => s + (p.items?.q?.time || 0), 0);
-        const pent = members.reduce((s, p) => s + (p.items?.p?.took || 0), 0);
-        const pentTime = members.reduce((s, p) => s + (p.items?.p?.time || 0), 0);
-        const ring = members.reduce((s, p) => s + (p.items?.r?.took || 0), 0);
-        const ringTime = members.reduce((s, p) => s + (p.items?.r?.time || 0), 0);
-        const rlPickup = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.taken || 0), 0);
-        const rlDrop = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.dropped || 0), 0);
-        const rlXfer = members.reduce((s, p) => s + (p.xferRL || 0), 0);
-        const lgPickup = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.taken || 0), 0);
-        const lgDrop = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.dropped || 0), 0);
-        const lgXfer = members.reduce((s, p) => s + (p.xferLG || 0), 0);
+function displayItemsTeamsTable(teamRows) {
+    renderTableRows('items-team-body', teamRowsInColourOrder(teamRows), team => {
+        const k = team.pickups?.byKind || {};
+        const hp = team.hold?.powerups || {};
         return `
-            <td>${escapeHtml(team)}</td>
-            <td>${ra}</td>
-            <td>${ya}</td>
-            <td>${ga}</td>
-            <td>${mh}</td>
-            <td>${fmtPu(quad, quadTime)}</td>
-            <td>${fmtPu(pent, pentTime)}</td>
-            <td>${fmtPu(ring, ringTime)}</td>
-            <td>${rlPickup}</td>
-            <td>${rlDrop}</td>
-            <td>${rlXfer}</td>
-            <td>${lgPickup}</td>
-            <td>${lgDrop}</td>
-            <td>${lgXfer}</td>
+            <td>${escapeHtml(team.name)}</td>
+            <td>${k.ra?.took || 0}</td>
+            <td>${k.ya?.took || 0}</td>
+            <td>${k.ga?.took || 0}</td>
+            <td>${k.mh?.took || 0}</td>
+            <td>${formatPowerup(k.quad, hp.quad)}</td>
+            <td>${formatPowerup(k.pent, hp.pent)}</td>
+            <td>${formatPowerup(k.ring, hp.ring)}</td>
+            <td>${k.rl?.took || 0}</td>
+            <td>${k.rl?.dropped || 0}</td>
+            <td>${formatXfer(k.rl)}</td>
+            <td>${k.lg?.took || 0}</td>
+            <td>${k.lg?.dropped || 0}</td>
+            <td>${formatXfer(k.lg)}</td>
         `;
     }, (_team, idx) => idx);
 }
@@ -2886,6 +2902,7 @@ function resetUIToCleanState() {
         'player-stats-team-body', 'scoreboard-body',
         'weapon-stats-team-body', 'weapon-stats-body',
         'items-team-body', 'items-body',
+        'hold-team-body', 'hold-body',
     ]) setHTML(id, '');
 
     // Weapons chart

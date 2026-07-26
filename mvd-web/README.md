@@ -160,6 +160,32 @@ strip above the main pane.
    purely that the worker no longer blocks on the bucket build before
    delivering the result.
 
+### The Summary tab reads `playerStats`, and only `playerStats`
+
+Every table on the Summary tab — Basic Stats, Possession, Weapon Stats,
+Item Pickups, and the four per-team variants — renders
+`result.playerStats` (schema v61). It replaced a four-source join across
+`match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
+lived in `app.js` and that the REST and MCP consumers never got; the
+merge now happens once, in Go.
+
+Two consequences worth knowing:
+
+- **`analyze()` applies the KTX overlay before marshalling**
+  (`withPlayerStatsOverlay` in `cmd/wasm/main.go`). The analyzer *stores*
+  the fully derived section on purpose, so the golden corpus records what
+  the pipeline computed; folding in KTX's own numbers where KTX is the
+  better source is a read-time step (`view.PlayerStats`). mvd-api runs it
+  in its handler, and this WASM entry point is the web's equivalent read
+  boundary. Without it the browser would see accuracy, the KTX damage
+  splits and ping/handicap/bot as if every demo lacked a demoinfo block.
+- **There is no scoreboard-only fallback any more.** `playerStats` is
+  computed for every demo and degrades families to `src: "derived"`
+  rather than dropping them, so a demo with no KTX block renders the full
+  tab (a 2003 kmod duel is the regression case). The one class with no
+  section at all is a parse that produced no player streams — a race demo
+  has no match — and that renders as empty tables.
+
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,
 date) from the pinned `lastResult` as JSON. It is zero extra cost (the

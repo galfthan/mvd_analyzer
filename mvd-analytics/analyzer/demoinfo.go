@@ -233,7 +233,7 @@ type DemoInfoPlayerRaw struct {
 	XferRL      int                           `json:"xferRL,omitempty"`
 	XferLG      int                           `json:"xferLG,omitempty"`
 	Spree       *DemoInfoSpree                `json:"spree,omitempty"`
-	Control     float64                       `json:"control,omitempty"`
+	Control     *float64                      `json:"control,omitempty"`
 	Speed       *DemoInfoSpeed                `json:"speed,omitempty"`
 	Handicap    int                           `json:"handicap,omitempty"`
 	Bot         *DemoInfoBot                  `json:"bot,omitempty"`

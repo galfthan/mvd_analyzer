@@ -436,9 +436,16 @@ backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
-`backpacks[].entNum`), and opening (schema v51 — each player's
+`backpacks[].entNum`), opening (schema v51 — each player's
 match-start spawn loc plus the first take of every contested spawner,
-the one-fetch answer to opening-race questions). Schema v7 introduced `streams` as the canonical
+the one-fetch answer to opening-race questions), and playerStats
+(schema v61 — the canonical per-player and per-team statistics row:
+corrected scoreboard, damage, pickup tallies and **possession time**
+(time with each weapon, each armor type, and with **no armor**), each
+family tagged with whether it came from KTX or was derived here.
+Computed for every demo, including ones with no KTX demoinfo block at
+all; `demoInfo` stays the verbatim KTX pass-through it is diffable
+against). Schema v7 introduced `streams` as the canonical
 event-rate storage — every per-player field (vitals, weapons, ammo,
 position) recorded at the rate it actually changed. Schema v8 stores
 **every timestamped field** as `int32` milliseconds rather than float

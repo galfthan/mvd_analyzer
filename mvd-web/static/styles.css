@@ -693,6 +693,26 @@ body.duel-mode .per-player-heading {
     display: none !important;
 }
 
+/* Explanatory note under a panel heading — used where a number deviates
+ * from the server's own end-of-match table on purpose (the Possession
+ * panel) and the viewer deserves to know why without a hover. */
+.panel-note {
+    margin: 0 0 0.75rem;
+    max-width: 68ch;
+    color: #8a9bb8;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+/* A cell showing a measurement we could only partly make — e.g. an
+ * accuracy block reconstructed from the fire stream on a demo with no
+ * damage stream to link the fires against, which yields attacks but no
+ * hits. Rendered muted so it never reads as a real accuracy figure. */
+.stat-muted {
+    color: #6b7d99;
+    font-style: italic;
+}
+
 /* --- Match Settings: modifier pills (Dmgfrags / Midair / etc.) --- */
 .modifier-label {
     display: block;

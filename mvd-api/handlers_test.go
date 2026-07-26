@@ -16,6 +16,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/view"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
 
@@ -144,13 +145,78 @@ func stubResult() *result.Result {
 				{Time: 590000, Type: "chat", Player: "valla", Team: "red", Message: "gg"},
 			},
 		},
+		// The KTX half of the demoinfo block is populated on purpose. The
+		// playerStats OpenAPI schema is HALF read-time overlay, and the
+		// golden corpus cannot exercise it — the analyzer stores the fully
+		// derived section, so every golden file has sources=all-derived. A
+		// bare fixture here would validate nothing of damage.*, accuracy.*,
+		// pickups.*, controlMs, speed, bot, ping, handicap or login. Every
+		// optional field is given its zero value where zero is meaningful,
+		// so "measured zero" survives validation as well as presence.
 		DemoInfo: &result.DemoInfoResult{
 			Version: 3,
 			Mode:    "4on4",
 			Players: []result.DemoInfoPlayer{
-				{Name: "bps", Team: "blue"},
+				{
+					Name: "bps", Team: "blue", Ping: 13, Handicap: 90, Login: "bps@qw",
+					Bot:     &result.DemoInfoBot{Skill: 10, Customised: true},
+					Control: func() *float64 { v := 0.0; return &v }(), // measured zero
+					Speed:   &result.DemoInfoSpeed{Max: 999.5, Avg: 307.6},
+					Stats:   &result.DemoInfoStats{Frags: 30, Deaths: 20, Kills: 32},
+					Dmg: &result.DemoInfoDmg{
+						Taken: 5665, Given: 7509, Team: 466, Self: 466,
+						TeamWeapons: 0, EnemyWeapons: 1764, TakenToDie: 161,
+					},
+					XferRL: 1,
+					Weapons: map[string]*result.DemoInfoWeapon{
+						// rl carries the rl/gl-only real/virtual pair.
+						"rl": {
+							Acc:     &result.DemoInfoAcc{Attacks: 110, Hits: 13, Real: 55, Virtual: 55},
+							Kills:   &result.DemoInfoKills{Total: 27, Enemy: 5, Self: 1},
+							Pickups: &result.DemoInfoPickups{Taken: 6, TotalTaken: 7, Dropped: 4},
+							Damage:  &result.DemoInfoDamage{Enemy: 3167, Team: 422},
+						},
+						// lg has no real/virtual — they must stay absent.
+						"lg": {Acc: &result.DemoInfoAcc{Attacks: 169, Hits: 0}},
+						// axe is a KTX-only key the derived path never emits.
+						"axe": {Acc: &result.DemoInfoAcc{Attacks: 4, Hits: 1}},
+					},
+					Items: map[string]*result.DemoInfoItem{
+						"ra": {Took: 9}, "health_100": {Took: 8}, "q": {Took: 3, Time: 90},
+					},
+				},
+				// A KTX entry carrying nothing but a name, to exercise the
+				// partial-overlay path alongside the fully-populated one.
 				{Name: "valla", Team: "red"},
 			},
+		},
+		PlayerStats: &result.PlayerStatsResult{
+			Players: []result.PlayerStatsRow{
+				{
+					Name: "bps", Team: "blue",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
+					Hold: result.PlayerStatsHold{Src: result.SrcDerived,
+						Weapons: map[string]result.HoldStat{"rl": {Ms: 200000, Runs: 4, LongestMs: 90000, ShareAlive: 0.4, ShareMatch: 0.3333}},
+						Armor:   map[string]result.HoldStat{"ra": {Ms: 129000, Runs: 3, LongestMs: 60000, ShareAlive: 0.258, ShareMatch: 0.215}, "none": {Ms: 371000, Runs: 9, LongestMs: 80000, ShareAlive: 0.742, ShareMatch: 0.6183}},
+					},
+				},
+				{
+					Name: "valla", Team: "red",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30, Efficiency: 0.4118},
+					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+			},
+			Teams: []result.PlayerStatsRow{
+				{
+					Name:   "blue",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
+					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+			},
+			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Hold: result.SrcDerived},
 		},
 		Backpacks: []result.BackpackDrop{
 			{Time: 100000, Player: "bps", Team: "blue", Weapon: "rl", EntNum: 17},
@@ -311,6 +377,17 @@ func TestDamageParams_MatrixWhenFiltered(t *testing.T) {
 // the dmg= family selection.
 func boundedDamageStore() *fakeStore {
 	full := stubResult()
+	// stubResult's demoinfo carries a full KTX block so the playerStats
+	// OpenAPI validation reaches the ktx overlay branch (see
+	// TestStubResultExercisesKTXOverlay). view.Damage substitutes KTX's
+	// end-of-match figures for the bounded SUMMARY when that block has a
+	// dmg entry, which is correct — but it is not what this test is about.
+	// Drop the dmg entries here so the reconstructed path stays covered;
+	// the ktx substitution has its own tests.
+	for i := range full.DemoInfo.Players {
+		full.DemoInfo.Players[i].Dmg = nil
+		full.DemoInfo.Players[i].Weapons = nil
+	}
 	full.Damage = &result.DamageResult{
 		Dmg:         "both",
 		BoundedMode: "standard",
@@ -1273,6 +1350,80 @@ func TestDemoInfo(t *testing.T) {
 	}
 }
 
+func TestPlayerStats(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	if resp["timeUnit"] != "ms" {
+		t.Errorf("timeUnit = %v; want ms", resp["timeUnit"])
+	}
+	players, _ := resp["players"].([]any)
+	if len(players) != 2 {
+		t.Fatalf("len(players) = %d; want 2", len(players))
+	}
+	bps, _ := players[0].(map[string]any)
+	hold, _ := bps["hold"].(map[string]any)
+	armor, _ := hold["armor"].(map[string]any)
+	if _, ok := armor["none"]; !ok {
+		t.Error(`hold.armor has no "none" key — the time-with-no-armor complement is the point`)
+	}
+	sources, _ := resp["sources"].(map[string]any)
+	if sources["hold"] != "derived" {
+		t.Errorf("sources.hold = %v; want derived", sources["hold"])
+	}
+}
+
+// The endpoint must serve a demo with no KTX demoinfo block — that is the
+// regression this whole section exists to prevent. Only a parse degraded
+// to no streams at all is a 422.
+func TestPlayerStats_NoKTXBlockStillServed(t *testing.T) {
+	r := stubResult()
+	r.DemoInfo = nil
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	players, _ := resp["players"].([]any)
+	if len(players) != 2 {
+		t.Errorf("len(players) = %d; want 2 even without a demoinfo block", len(players))
+	}
+}
+
+func TestPlayerStats_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no PlayerStats
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 422)
+	errObj, _ := resp["error"].(map[string]any)
+	if errObj["code"] != "playerstats_unavailable" {
+		t.Errorf("code = %v; want playerstats_unavailable", errObj["code"])
+	}
+}
+
+func TestPlayerStats_Filters(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?players=bps", 200)
+	players, _ := resp["players"].([]any)
+	if len(players) != 1 {
+		t.Errorf("len(players) = %d; want 1", len(players))
+	}
+	if teams, ok := resp["teams"].([]any); ok && len(teams) != 0 {
+		t.Errorf("teams = %v; want none alongside a players filter (they are whole-team sums)", teams)
+	}
+
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?teams=blue", 200)
+	players, _ = resp["players"].([]any)
+	if len(players) != 1 {
+		t.Errorf("teams filter: len(players) = %d; want 1", len(players))
+	}
+
+	// Unknown params are rejected, like everywhere else.
+	getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats?nope=1", 400)
+}
+
 func TestDemoInfo_Unavailable(t *testing.T) {
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no DemoInfo
@@ -2177,5 +2328,57 @@ func TestWeaponsAlias(t *testing.T) {
 	bb, _ := both["byWeapon"].(map[string]any)
 	if len(bb) != 1 || bb["rl"] == nil {
 		t.Errorf("weapons=rl&weapon=tele byWeapon = %v, want only rl (weapons wins)", bb)
+	}
+}
+
+// The playerStats OpenAPI schema has two halves — the derived one the
+// analyzer stores, and the KTX-overlaid one view.PlayerStats produces at
+// read time. The golden corpus cannot reach the second by construction
+// (the stored artifact is derived, always), so stubResult's demoinfo
+// block is what makes it reachable for TestOpenAPIGoldenResponsesValidate.
+//
+// This asserts that it still does. Strip the Dmg/Weapons/Items from the
+// fixture and every ktx-branch field — the whole accuracy subtree, the
+// KTX damage figures, the pickup tallies, ping/handicap/bot/controlMs/
+// speed — silently stops being schema-validated at any layer, while the
+// suite stays green. That is a failure mode worth a test of its own.
+func TestStubResultExercisesKTXOverlay(t *testing.T) {
+	ps, err := view.PlayerStats(stubResult(), view.PlayerStatsOptions{})
+	if err != nil {
+		t.Fatalf("PlayerStats: %v", err)
+	}
+	if ps.Sources.Damage != result.SrcKTX || ps.Sources.Accuracy != result.SrcKTX || ps.Sources.Pickups != result.SrcKTX {
+		t.Fatalf("stubResult no longer reaches the KTX overlay (sources = %+v); "+
+			"the ktx half of the PlayerStats schema is then validated by nothing", ps.Sources)
+	}
+
+	var row *result.PlayerStatsRow
+	for i := range ps.Players {
+		if ps.Players[i].Name == "bps" {
+			row = &ps.Players[i]
+		}
+	}
+	if row == nil {
+		t.Fatal("overlaid row for bps missing")
+	}
+	// The specific ktx-only fields that exist nowhere in the derived form.
+	switch {
+	case row.Ping == 0 || row.Handicap == 0 || row.Bot == nil:
+		t.Error("ktx identity fields (ping/handicap/bot) not exercised")
+	case row.ControlMs == nil || row.Speed == nil:
+		t.Error("ktx controlMs/speed not exercised")
+	case row.Accuracy == nil || len(row.Accuracy.ByWeapon) == 0:
+		t.Error("ktx accuracy subtree not exercised")
+	case row.Damage == nil || row.Damage.TeamWeapons == nil || row.Damage.TakenEnemy == nil:
+		t.Error("ktx damage figures not exercised")
+	case row.Pickups == nil || len(row.Pickups.ByKind) == 0:
+		t.Error("ktx pickup tallies not exercised")
+	}
+	// real/virtual are rl/gl-only; lg in the fixture deliberately has none.
+	if acc, ok := row.Accuracy.ByWeapon["rl"]; !ok || acc.Real == nil {
+		t.Error("rl real/virtual pair not exercised")
+	}
+	if acc, ok := row.Accuracy.ByWeapon["lg"]; !ok || acc.Real != nil {
+		t.Error("lg must carry no real/virtual — the absent-not-zero branch")
 	}
 }

@@ -221,6 +221,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
 | GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs, analyzer `errors`) |
+| GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard, damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" or "ktx") |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
 | GET | `/v1/demos/{id}/frags` | `players`, `weapons`, `from`, `to`, `summary` | `result.FragResult` (totalFrags + byPlayer + byWeapon + full kill log) |
@@ -376,6 +377,24 @@ lean `results/v<N>/…` gobs (format 1) are simply never read and get re-parsed
 once on next touch. Served bodies are byte-identical (mvd-api enriched `/shots`
 and `/aim` on every request since phase 5.3), so this is a cache-locality bump,
 not a schema bump: the ETag stays `"<sha>-v<n>"`.
+
+`f3` changed the tier-2 **encoding**, and unlike `f2` it does move served
+bytes. The tier was a bare gob, and `encoding/gob` flattens pointers and
+omits zero values — so a `*int` holding a MEASURED ZERO decoded as `nil`.
+Every optional field in the schema means "absent = not measurable", so a
+cache hit silently answered a different question than a cold parse:
+`damage.taken: 0` ("took no damage") came back absent ("could not tell"),
+as did `accuracy.byWeapon[].hits: 0`, `pickups.xferSelf: 0`,
+`damage.events[].bounded: 0` and `demoInfo.players[].control: 0`. The
+same demo therefore served different bytes depending on cache warmth.
+
+Tier 2 is now `result.EncodeCache`: JSON for every section — which
+distinguishes `0` from absent and is the representation the golden corpus
+and OpenAPI spec already pin — plus gob for `Streams` alone, which is 97%
+of the payload (50.5 MB of 52.3 MB on a 4on4) and which JSON decodes 40x
+slower. Cost against the old bare gob: +2.6% on disk and ~48 ms per
+tier-2 read. Format-2 files cannot be repaired (the information is gone),
+so the bump re-parses them once on next touch.
 
 Tier 3 holds the lazily-materialised `los` artifact (per-player LOS/PVS) as a
 side-gob so its multi-second raycast survives a process restart or an LRU

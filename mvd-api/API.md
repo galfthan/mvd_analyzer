@@ -313,6 +313,7 @@ Non-2xx responses use a stable envelope:
 | 404 | `map_unavailable` | no entity corpus / geometry for this map (`/v1/maps/{map}/…`) |
 | 404 | `artifact_unknown` | no servable artifact of that name (`/v1/demos/{id}/artifacts/{name}`) |
 | 422 | `demoinfo_unavailable` | non-KTX server or aborted match |
+| 422 | `playerstats_unavailable` | parse degraded to no player streams. **Not** raised for a missing KTX block — `/player-stats` serves those normally |
 | 422 | `metadata_unavailable` | no fullserverinfo / countdown centerprint |
 | 422 | `frags_unavailable` | no frag log |
 | 422 | `damage_unavailable` | no KTX `mvdhidden_dmgdone` damage stream |
@@ -524,8 +525,22 @@ Common frontend features → the call that backs them.
 - **Draw the map (items, spawns, teleporters as overlays)** → `GET /v1/maps/{map}/entities`
   (map name from `/overview`); add `GET /v1/maps/{map}/geometry` for
   floor polygons to render underneath.
-- **Weapon effectiveness** → `GET /demoinfo` (KTX accuracy/damage) or
-  `/weapon-pickups` (kills-before-next-death).
+- **"How did each player do?" (one call)** → `GET /player-stats`.
+  Corrected scoreboard + damage + accuracy + pickup tallies + possession
+  time in one row per player and per team, on **every** demo including
+  ones with no KTX block. Prefer it over stitching `/demoinfo` +
+  `/frags` + `/damage` yourself; read each family's `src` to see whether
+  a number came from KTX or was derived here.
+- **"How long did X hold the RL / RA?" / "how long with no armor?"** →
+  `GET /player-stats`, read `hold.weapons.rl` / `hold.armor.ra` /
+  `hold.armor.none`. This exists nowhere else: KTX never writes weapon
+  hold time into the demoinfo block, and its armor time overcounts (its
+  clock keeps running after the armor is chewed to zero), so ours reads
+  lower on purpose. Use the emitted `shareAlive` / `shareMatch` rather
+  than dividing yourself — on a team row the denominators are team time.
+- **Weapon effectiveness** → `GET /player-stats` (accuracy + per-weapon
+  pickups + hold time), `GET /demoinfo` (KTX's own verbatim numbers, the
+  audit trail), or `/weapon-pickups` (kills-before-next-death).
 - **Analyze a local demo file (no hub gameId)** → upload it, then use the
   returned `demoId` with any per-demo GET:
 

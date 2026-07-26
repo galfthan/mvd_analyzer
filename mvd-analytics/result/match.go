@@ -19,7 +19,7 @@ type MatchResult struct {
 // deaths to the wrong entity: a pentagram-deflect telefrag (dtTELE2) inflates
 // the deflector's kills, and a world-dealt suicide (fall / lava / squish /
 // drown) bumps the world entity's counter instead of the victim's
-// (ktx/src/client.c:5132), so demoinfo undercounts suicides. Kills/Deaths
+// (ktx/src/client.c:4951), so demoinfo undercounts suicides. Kills/Deaths
 // come from FragResult.ByPlayer; Suicides is the per-victim count of
 // IsSuicide frag entries. All 0 when the demo carried no frag log;
 // per-weapon kills stay in FragResult.ByPlayer.ByWeapon.

@@ -31,7 +31,7 @@ func scoreboardStatsPost(res *Result, _ *CoreOutputs) {
 	// Suicides: count self-inflicted deaths (IsSuicide, killer == victim) per
 	// victim from the final frag log. KTX demoinfo undercounts these — a
 	// world-dealt self-death (fall / lava / squish / drown) bumps the world
-	// entity's suicide counter, not the victim's (ktx/src/client.c:5132), and
+	// entity's suicide counter, not the victim's (ktx/src/client.c:4951), and
 	// a pentagram-deflect self-telefrag isn't credited to the victim either.
 	suicides := make(map[string]int)
 	for _, f := range res.Frags.Frags {

@@ -603,6 +603,47 @@ func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, di)
 }
 
+// handlePlayerStats: GET /v1/demos/{id}/player-stats — the canonical
+// per-player and per-team statistics row: corrected scoreboard, damage,
+// pickup tallies, KTX identity fields, and possession time (time with
+// each weapon / armor type / no armor) with explicit denominators.
+//
+// A missing KTX demoinfo block is never a reason to fail here — the
+// section is computed for every demo and each stat family carries `src`
+// naming its source (/demoinfo remains the verbatim KTX pass-through to
+// diff against). 422 `playerstats_unavailable` means something else: a
+// parse degraded enough to produce no player streams at all.
+//
+// Query params:
+//
+//	players  csv — restrict to these players (drops the team rows, which
+//	             are whole-team sums and would misread as the subset's)
+//	teams    csv — restrict to these teams
+func (s *server) handlePlayerStats(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	opts := view.PlayerStatsOptions{
+		Players: p.CSV("players"),
+		Teams:   p.CSV("teams"),
+	}
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	ps, err := view.PlayerStats(res, opts)
+	if err != nil {
+		s.writeUnavailable(w, r, err, "playerstats_unavailable",
+			"this demo produced no player streams (degraded parse) — note a missing KTX demoinfo block is NOT a reason for this")
+		return
+	}
+	writeJSON(w, http.StatusOK, view.PlayerStatsEnvelope{TimeUnit: view.UnitMs, PlayerStatsResult: ps})
+}
+
 // handleBackpacks: GET /v1/demos/{id}/backpacks — RL/LG drops with
 // optional player/weapon filters.
 //

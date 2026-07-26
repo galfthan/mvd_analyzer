@@ -56,7 +56,7 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, timeMs int32, targetPlayerNum i
 	}); err != nil {
 		return err
 	}
-	p.updateMatchStartedFromPrint(cleanedMessage)
+	p.updateMatchStartedFromPrint(int(level), cleanedMessage)
 	if err := p.tryEmitObituaryDeath(cleanedMessage, timeMs); err != nil {
 		return err
 	}
@@ -109,7 +109,14 @@ func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 // that could silently drift. Match-END phrases are analytics-only (they
 // gate no parser behaviour) and stay in the analyzer.
 var MatchStartPatterns = []string{
-	"match has begun",
+	// "has begun" rather than "match has begun": KTX prints "The match has
+	// begun!" (ktx/src/match.c:1173), but kmod/qwe announces the MODE —
+	// "The duel has begun!" — and the narrower pattern missed it. A 2003
+	// kmod duel in the test corpus therefore detected no match start at
+	// all, which left every stream empty (streams only record between
+	// Started and Ended) and silently dropped the whole streams-derived
+	// half of the pipeline. This entry is still tighter than "go!" below.
+	"has begun",
 	"match started",
 	"fight!",
 	"go!",
@@ -119,8 +126,15 @@ var MatchStartPatterns = []string{
 
 // updateMatchStartedFromPrint flips p.matchStarted on the first
 // observed match-start phrase (case-insensitive). Idempotent.
-func (p *Parser) updateMatchStartedFromPrint(msg string) {
-	if p.matchStarted {
+//
+// Chat is refused. Every phrase in the table is a server broadcast
+// (G_bprint at PRINT_MEDIUM/PRINT_HIGH), and the gate never resets once
+// flipped, so a single prewar "go go go!" in team chat would open the
+// obituary-death path for the rest of the demo. Same guard the analytics
+// MatchTimingDetector applies (analyzer/matchtiming.go) and the KTX
+// pickup-print matcher above it.
+func (p *Parser) updateMatchStartedFromPrint(level int, msg string) {
+	if p.matchStarted || level == mvd.PrintChat {
 		return
 	}
 	lower := strings.ToLower(msg)

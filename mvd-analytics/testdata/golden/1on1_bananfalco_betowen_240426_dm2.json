@@ -10813,7 +10813,322 @@
       }
     ]
   },
-  "schemaVersion": 60,
+  "playerStats": {
+    "players": [
+      {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 27,
+              "hits": 3
+            },
+            "ng": {
+              "attacks": 2,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 159,
+              "hits": 54
+            },
+            "sg": {
+              "attacks": 28,
+              "hits": 9
+            }
+          },
+          "src": "derived"
+        },
+        "damage": {
+          "byWeapon": {
+            "gl": 268,
+            "rl": 4142,
+            "sg": 150
+          },
+          "enemyWeapons": 4167,
+          "given": 4560,
+          "givenSelf": 1715,
+          "givenTeam": 0,
+          "src": "derived",
+          "taken": 6988,
+          "takenEnemy": 4826,
+          "takenToDie": 219
+        },
+        "hold": {
+          "armor": {
+            "none": {
+              "longestMs": 36402,
+              "ms": 320584,
+              "runs": 36,
+              "shareAlive": 0.5483,
+              "shareMatch": 0.5343
+            },
+            "ra": {
+              "longestMs": 33586,
+              "ms": 129286,
+              "runs": 7,
+              "shareAlive": 0.2211,
+              "shareMatch": 0.2155
+            },
+            "ya": {
+              "longestMs": 38947,
+              "ms": 134853,
+              "runs": 9,
+              "shareAlive": 0.2306,
+              "shareMatch": 0.2248
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 133985,
+              "ms": 150206,
+              "runs": 3,
+              "shareAlive": 0.2569,
+              "shareMatch": 0.2504
+            },
+            "rl": {
+              "longestMs": 116777,
+              "ms": 446861,
+              "runs": 16,
+              "shareAlive": 0.7642,
+              "shareMatch": 0.7448
+            },
+            "ssg": {
+              "longestMs": 29025,
+              "ms": 54778,
+              "runs": 2,
+              "shareAlive": 0.0937,
+              "shareMatch": 0.0913
+            }
+          }
+        },
+        "name": "betowen",
+        "pickups": {
+          "byKind": {
+            "gl": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "h15": {
+              "took": 8
+            },
+            "h25": {
+              "took": 31
+            },
+            "mh": {
+              "took": 11
+            },
+            "nails": {
+              "took": 8
+            },
+            "ng": {
+              "took": 2,
+              "totalTook": 2
+            },
+            "ra": {
+              "took": 10
+            },
+            "rl": {
+              "dropped": 12,
+              "took": 16,
+              "totalTook": 27
+            },
+            "rockets": {
+              "took": 23
+            },
+            "ssg": {
+              "took": 2,
+              "totalTook": 2
+            },
+            "ya": {
+              "took": 9
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "byWeapon": {
+            "rl": 9,
+            "sg": 1
+          },
+          "deaths": 22,
+          "efficiency": 0.3125,
+          "frags": 7,
+          "kills": 10,
+          "src": "derived",
+          "suicides": 3,
+          "teamKills": 0
+        },
+        "team": "betowen",
+        "window": {
+          "aliveMs": 584723,
+          "deadMs": 15217,
+          "matchMs": 599980,
+          "presentMs": 599940
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 8,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 168,
+              "hits": 62
+            },
+            "sg": {
+              "attacks": 19,
+              "hits": 7
+            },
+            "ssg": {
+              "attacks": 6,
+              "hits": 1
+            }
+          },
+          "src": "derived"
+        },
+        "damage": {
+          "byWeapon": {
+            "rl": 4721,
+            "sg": 74,
+            "ssg": 27,
+            "unknown": 4
+          },
+          "enemyWeapons": 3408,
+          "given": 4826,
+          "givenSelf": 1537,
+          "givenTeam": 0,
+          "src": "derived",
+          "taken": 6330,
+          "takenEnemy": 4560,
+          "takenToDie": 350
+        },
+        "hold": {
+          "armor": {
+            "none": {
+              "longestMs": 33012,
+              "ms": 161359,
+              "runs": 25,
+              "shareAlive": 0.2741,
+              "shareMatch": 0.2689
+            },
+            "ra": {
+              "longestMs": 44914,
+              "ms": 266108,
+              "runs": 12,
+              "shareAlive": 0.4521,
+              "shareMatch": 0.4435
+            },
+            "ya": {
+              "longestMs": 33598,
+              "ms": 161173,
+              "runs": 8,
+              "shareAlive": 0.2738,
+              "shareMatch": 0.2686
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 33819,
+              "ms": 89910,
+              "runs": 5,
+              "shareAlive": 0.1527,
+              "shareMatch": 0.1499
+            },
+            "rl": {
+              "longestMs": 137831,
+              "ms": 511367,
+              "runs": 13,
+              "shareAlive": 0.8687,
+              "shareMatch": 0.8523
+            },
+            "ssg": {
+              "longestMs": 132298,
+              "ms": 337883,
+              "runs": 7,
+              "shareAlive": 0.574,
+              "shareMatch": 0.5632
+            }
+          }
+        },
+        "name": "banan falco",
+        "pickups": {
+          "byKind": {
+            "gl": {
+              "took": 5,
+              "totalTook": 5
+            },
+            "h15": {
+              "took": 3
+            },
+            "h25": {
+              "took": 29
+            },
+            "mh": {
+              "took": 9
+            },
+            "nails": {
+              "took": 4
+            },
+            "ng": {
+              "took": 3,
+              "totalTook": 3
+            },
+            "ra": {
+              "took": 16
+            },
+            "rl": {
+              "dropped": 10,
+              "took": 13,
+              "totalTook": 21
+            },
+            "rockets": {
+              "took": 24
+            },
+            "ssg": {
+              "took": 7,
+              "totalTook": 7
+            },
+            "ya": {
+              "took": 10
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "byWeapon": {
+            "rl": 17,
+            "sg": 1,
+            "ssg": 1
+          },
+          "deaths": 13,
+          "efficiency": 0.5938,
+          "frags": 16,
+          "kills": 19,
+          "src": "derived",
+          "suicides": 3,
+          "teamKills": 0
+        },
+        "team": "banan falco",
+        "window": {
+          "aliveMs": 588640,
+          "deadMs": 11300,
+          "matchMs": 599980,
+          "presentMs": 599940
+        }
+      }
+    ],
+    "sources": {
+      "accuracy": "derived",
+      "damage": "derived",
+      "hold": "derived",
+      "pickups": "derived",
+      "score": "derived"
+    }
+  },
+  "schemaVersion": 61,
   "shots": {
     "byPlayer": [
       {

@@ -12,6 +12,7 @@ type MCPBackend interface {
 	GetOverview(ctx context.Context, in GetOverviewInput) (any, error)
 	GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (any, error)
 	GetMetadata(ctx context.Context, in GetMetadataInput) (any, error)
+	GetPlayerStats(ctx context.Context, in GetPlayerStatsInput) (any, error)
 	GetFrags(ctx context.Context, in GetFragsInput) (any, error)
 	GetDamage(ctx context.Context, in GetDamageInput) (any, error)
 	GetAim(ctx context.Context, in GetAimInput) (any, error)
@@ -135,6 +136,13 @@ type GetDemoInfoInput struct {
 // match settings.
 type GetMetadataInput struct {
 	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+}
+
+// GetPlayerStatsInput filters /v1/demos/{id}/player-stats.
+type GetPlayerStatsInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players []string `json:"players,omitempty" jsonschema:"restrict to these players; also drops the team rows, which are whole-team sums"`
+	Teams   []string `json:"teams,omitempty" jsonschema:"restrict to these teams"`
 }
 
 // GetFragsInput filters /v1/demos/{id}/frags. When any scoping filter

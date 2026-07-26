@@ -5,6 +5,184 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-25 (playerstats) — the API cache stopped eating measured zeros
+
+No schema bump; the tier-2 cache-format counter goes to `f3`, so cached
+Results are re-parsed once on next touch.
+
+- **`GET /v1/demos/{id}/*` served different bytes depending on cache
+  warmth.** The tier-2 cache was a bare gob, and `encoding/gob` flattens
+  pointers and omits zero values — so a `*int` holding a **measured
+  zero** decoded as `nil`. Since every optional field in this schema
+  means "absent = not measurable", a cache hit answered a different
+  question than a cold parse: `damage.taken: 0` ("took no damage") came
+  back absent ("we could not tell"), and so did
+  `accuracy.byWeapon[].hits: 0` ("fired, never hit"),
+  `pickups.byKind[].xferSelf: 0`, `damage.events[].bounded: 0` and
+  `demoInfo.players[].control: 0`.
+- **Pre-existing, and widened by the playerStats work.**
+  `damage.events[].bounded` — whose own comment says "0 is a real value"
+  — has had this flaw for as long as the gob cache has existed; the
+  golden corpus (cold, JSON) carries 25 such events on one 4on4 that the
+  live API returned none of. The pointer-heavy playerStats section took
+  the exposure from 3 fields to 14, which is how it was noticed.
+- **Tier 2 is now JSON by default, gob only for `Streams`.** JSON
+  distinguishes `0` from absent and is the representation the golden
+  corpus and OpenAPI spec already pin; `Streams` is 97% of the payload
+  and decodes 40x slower as JSON, so it keeps gob. The failure mode is
+  now the safe one — an optional field added anywhere outside `Streams`
+  is correct by default, and `TestStreamsHasNoOptionalScalars` guards
+  the one section that carries the constraint. Cost: +2.6% on disk,
+  ~48 ms per tier-2 read.
+- **Two more served-byte changes come with it**, same root cause, for
+  anyone diffing responses across the deploy: a pointer to an all-zero
+  STRUCT was dropped whole and now survives (`playerStats.speed`
+  `{max: 0, avg: 0}`, `demoInfo.players[].bot` `{}`), and **negative zero**
+  is preserved rather than normalised to `0` (`mapEntities` coordinates —
+  obsidian's SNG spawner sits at `x: -0`).
+- `TestCacheRoundTripPreservesServedBytes` pins the real invariant on the
+  whole golden corpus: a cache hit must serve the same bytes as a cold
+  parse.
+
+## 2026-07-25 (playerstats) — the web summary tab moves onto `playerStats`
+
+Still schema **v61** (additive within the same unmerged branch); golden
+corpus regenerated for the two new maps.
+
+- **The four-source JavaScript join is gone.** Every Summary-tab table —
+  Basic Stats, Weapon Stats, Item Pickups and their per-team variants —
+  now renders `result.playerStats` instead of joining `match.players`,
+  `frags.byPlayer`, `frags.frags` and `demoInfo` in `app.js`. The merge
+  happens once in Go, so the REST and MCP consumers get the same numbers
+  the web shows.
+- **A demo with no KTX block renders the full tab.** `displayScoreboardFallback`
+  — frags only, no weapon or item tables — is deleted. A 2003 kmod duel
+  now shows a complete scoreboard, possession times, per-weapon accuracy
+  and item tallies where it previously showed a bare frag list.
+- **New Possession panel**: RL / LG hold, RA / YA / GA hold, **time with
+  no armor**, and quad / pent / ring, all as a share of time *alive*.
+  Weapon hold time is absent from KTX's demoinfo block on a demo of any
+  age, and "no armor" is a figure KTX structurally cannot produce.
+- **The WASM entry point applies the KTX overlay before marshalling**
+  (`withPlayerStatsOverlay`). The analyzer still stores the fully derived
+  section; the overlay is a read-time step, and this is the web's read
+  boundary, exactly as the REST handler is the API's.
+- **`score.byWeapon` and `damage.byWeapon`** are new: per-weapon enemy
+  kills (always from the corrected frag log) and per-weapon enemy damage
+  given (KTX's where the block carries it, merged weapon by weapon). The
+  Weapon Stats table's kills column previously showed KTX's count while
+  the scoreboard beside it showed the frag log's — the two now agree.
+- **Three visible number changes on the scoreboard**, all deliberate:
+  `Taken` is now our ALL-SOURCES figure rather than KTX's enemy-only one
+  (they are different quantities; the tooltip says so); team rows show a
+  `Players` count instead of an average ping, and no `ToDie`, because
+  averaging per-player averages across different death counts is
+  meaningless; powerup seconds come from our hold integral rather than
+  KTX's `item.time`, so they agree with the Possession panel (measured
+  identical on the test corpus).
+- **`isDuel()` reads `playerStats`**, so a pre-KTX-block 1v1 collapses
+  the team panels correctly instead of falling through and rendering
+  them. The canonical team→colour order (`timelineState.teams`,
+  frag-sorted, winner at index 0) is seeded from `playerStats` too — the
+  CLAUDE.md invariant is unchanged, only its input.
+- Verified in a headless browser across 13 demos spanning 2003 kmod,
+  2022 KTX, CTF, wipeout, hoonymode, FFA and race: no page errors, team
+  colours consistent between the Teams box and every table, and the race
+  demo (no match, hence no section) renders empty tables cleanly.
+
+## 2026-07-25 (playerstats) — canonical `playerStats` section, schema v61
+
+Adds a per-player and per-team statistics section computed for **every**
+demo, with per-family provenance. Additive — no existing field changed
+shape — but `CurrentSchemaVersion` bumps to **v61** and the golden
+corpus was regenerated.
+
+- **New `playerStats` section / `player-stats` artifact.** One row per
+  player (and per team) carrying the corrected scoreboard, damage,
+  pickup tallies, the KTX-only identity fields, and possession time.
+  Each stat family carries `src` (`"derived"` | `"ktx"`), with a
+  `sources` roll-up — the same provenance pattern `damage.boundedSource`
+  established. The stored artifact is always fully derived; the KTX
+  overlay is applied at read time.
+- **Possession time is new information, not a re-shaping.** "Time with
+  RL", "time with RA", and "time with **no armor**" are exact integrals
+  over the native-rate possession streams, with explicit denominators
+  (`window.matchMs` / `presentMs` / `aliveMs`) instead of KTX's unstated
+  alive-time divisor. KTX never writes weapon hold time into the
+  demoinfo block at all (`ktx/src/stats_json.c` emits acc/kills/deaths/
+  pickups/damage only), so this was unavailable on demos of any age.
+- **Our armor hold time is lower than KTX's, on purpose.** KTX's armor
+  clock closes only on death or a different-type pickup, never when the
+  armor is chewed to zero, so it keeps counting after the armor is gone.
+  Measured on gameId 212423: KTX `ra` 213 s vs 129 s, 317 s vs 266 s.
+  Expect a KTX end-of-match table to disagree.
+- **Pack transfers are decomposed.** `xfer` (a teammate took your pack)
+  and `xferSelf` (you took it back) sum to KTX's `xferRL`/`xferLG`,
+  which conflates them. Derived, so they work on demos that carry the
+  `//ktx bp` / `//ktx drop` hints but no demoinfo block; absent (not
+  zero) when the hints are missing, and teamplay-only like KTX's gate.
+- **`GET /v1/demos/{id}/player-stats` + MCP `getPlayerStats`** serve it,
+  with `players` / `teams` filters. A `players` filter drops the team
+  rows: they are whole-team sums and would misread as the filtered
+  subset's totals. 422 `playerstats_unavailable` fires only on a parse
+  degraded to no player streams — a missing KTX block is served
+  normally, which is the entire point.
+- **The KTX overlay is applied at read time**, in `view.PlayerStats`, so
+  the stored artifact and the golden corpus always record what the
+  pipeline computed. KTX wins on damage given/team/self/ewep, accuracy,
+  and pickup counts; `taken` stays derived (KTX's is enemy-only and
+  lands separately in `takenEnemy`); score and hold are never overlaid.
+- **The section keeps ONE SHAPE across demo ages.** Where a wire-side
+  reconstruction is possible at all it is emitted and marked
+  `src: "derived"` rather than the field vanishing on a demo recorded
+  before KTX embedded its block: `accuracy` from the decoded fire stream,
+  `takenEnemy` / `takenToDie` from the per-hit damage log, `login` from
+  the `*auth` userinfo key. A response whose shape changes with the
+  demo's age forces every consumer into two code paths, and the old-demo
+  path is the one nobody tests. The limit is honesty, not effort — a
+  value that cannot be measured stays ABSENT rather than becoming a
+  zero, so `accuracy.byWeapon[].hits` is omitted when there is no damage
+  stream to link fires against, and KTX's `taken-to-die` 99999
+  no-deaths sentinel is never served as a number.
+- **`/demoinfo` stays the verbatim KTX pass-through**, now explicitly
+  positioned as the audit trail `playerStats` is diffable against. One
+  fidelity fix: `control` was a `float64` behind `omitempty`, so a KTX
+  block recording `"control": 0.0` came out with the key *dropped* —
+  indistinguishable from an older build that never wrote it. It is a
+  pointer now, and a measured zero is served as `0`. Seven of the eleven
+  golden demos record an all-zero control time and gain the key; three
+  duels record nonzero values that were always emitted; one carries no
+  `control` key at all and still doesn't.
+- **Match start is detected on `"has begun"`, not `"match has begun"`.**
+  kmod 1.58 / qwe 0.170 (2003-era) broadcast `"The duel has begun!"` —
+  they announce the *mode*, not the word "match". The narrower pattern
+  missed it, and because both stream sampling and the parser's
+  obituary-death gate hang off that flag, such a demo silently produced
+  **no streams at all and zero deaths**. A 2003 dm4 duel now reports
+  48/13 and 10/52 with full possession times where it previously had no
+  `playerStats` section and a 0-death scoreboard. No golden output moved
+  — every corpus demo uses KTX's own phrasing.
+- **`accuracy.real` / `virtual` are documented correctly.** They are
+  KTX's `rhits` / `vhits`, present on rl/gl only, and count *victims
+  damaged by a blast* — not a direct/splash split of `hits`, which for
+  rl/gl is the direct-impact count. One rocket splashing three players
+  adds three, so `real` routinely exceeds `hits` (a 2022 dm3 demo reads
+  `rl: {attacks: 110, hits: 13, real: 55, virtual: 55}`). `virtual` is
+  latched before godmode / pentagram / teamplay damage-avoidance, so the
+  gap to `real` is damage *prevented*, not missed.
+- **Pack transfers are gated on the MODE, not the `teamplay` cvar.** KTX
+  gates on `isTeam()`; an FFA server can still run `teamplay 2`, and
+  trusting the cvar there made "the dropper's team" trivially true and
+  invented a transfer for every backpack anyone picked up. CTF keeps
+  counting — its teams are real, KTX simply declines to measure them —
+  so the `xfer + xferSelf == xferRL` identity holds on team games only.
+- Verified end-to-end on gameId 71035 (a 2019 4on4 with no demoinfo
+  block): full scoreboard, pickups, transfers and hold times. Also on a
+  13-demo local corpus spanning 2003 kmod, 2022 KTX, CTF, wipeout,
+  hoonymode, FFA and race: the `xfer + xferSelf == KTX xferRL/xferLG`
+  identity holds exactly for all 16 players across the two team demos
+  carrying both signals.
+
 ## 2026-07-25 (fix-roster-frags) — scoreboard by occupancy, schema v60
 
 Three pre-existing defects in the roster / frag path, found by auditing

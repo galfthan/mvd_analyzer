@@ -100,6 +100,15 @@ type RegionControlEnvelope struct {
 	*result.RegionControlResult
 }
 
+// PlayerStatsEnvelope wraps the /player-stats section (ms-native): the
+// window figures and every hold duration are int32 ms. The shares and
+// efficiency are unitless ratios, so the echo stays a constant "ms" for
+// the fields that have a unit at all.
+type PlayerStatsEnvelope struct {
+	TimeUnit TimeUnit `json:"timeUnit"`
+	*result.PlayerStatsResult
+}
+
 // --- bare-array bodies: {timeUnit, <list>} object so the echo has a home ---
 //
 // The wrapped slices are the stored result.* types verbatim (ms-native); the

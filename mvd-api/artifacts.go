@@ -87,6 +87,17 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
 	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
 	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
+	// player-stats is computed for every demo that produced player streams,
+	// so a missing KTX block never 422s (only a stream-less parse does). It routes
+	// through the view so the artifact carries the same KTX overlay the
+	// curated endpoint serves — the stored section is derived-only, and
+	// serving it raw here would hand two different answers to the same
+	// question. echoMs covers window.*Ms and hold.*.ms/longestMs; the
+	// shares and efficiency are unitless ratios.
+	"player-stats": {extract: func(r *result.Result) (any, error) {
+		return view.PlayerStats(r, view.PlayerStatsOptions{})
+	},
+		code: "playerstats_unavailable", msg: "this demo produced no player streams (degraded parse) — note a missing KTX demoinfo block is NOT a reason for this", echoMs: true},
 }
 
 // handleArtifactsManifest: GET /v1/artifacts — the manifest of every DAG node

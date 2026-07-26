@@ -20,23 +20,30 @@ type DemoInfoResult struct {
 
 // DemoInfoPlayer contains player stats from KTX JSON.
 type DemoInfoPlayer struct {
-	Name        string                     `json:"name"`
-	Team        string                     `json:"team"`
-	TopColor    int                        `json:"topColor,omitempty"`
-	BottomColor int                        `json:"bottomColor,omitempty"`
-	Ping        int                        `json:"ping,omitempty"`
-	Login       string                     `json:"login,omitempty"`
-	Handicap    int                        `json:"handicap,omitempty"`
-	Bot         *DemoInfoBot               `json:"bot,omitempty"`
-	Stats       *DemoInfoStats             `json:"stats,omitempty"`
-	Dmg         *DemoInfoDmg               `json:"dmg,omitempty"`
-	Spree       *DemoInfoSpree             `json:"spree,omitempty"`
-	Control     float64                    `json:"control,omitempty"`
-	Speed       *DemoInfoSpeed             `json:"speed,omitempty"`
-	XferRL      int                        `json:"xferRL,omitempty"`
-	XferLG      int                        `json:"xferLG,omitempty"`
-	Weapons     map[string]*DemoInfoWeapon `json:"weapons,omitempty"`
-	Items       map[string]*DemoInfoItem   `json:"items,omitempty"`
+	Name        string         `json:"name"`
+	Team        string         `json:"team"`
+	TopColor    int            `json:"topColor,omitempty"`
+	BottomColor int            `json:"bottomColor,omitempty"`
+	Ping        int            `json:"ping,omitempty"`
+	Login       string         `json:"login,omitempty"`
+	Handicap    int            `json:"handicap,omitempty"`
+	Bot         *DemoInfoBot   `json:"bot,omitempty"`
+	Stats       *DemoInfoStats `json:"stats,omitempty"`
+	Dmg         *DemoInfoDmg   `json:"dmg,omitempty"`
+	Spree       *DemoInfoSpree `json:"spree,omitempty"`
+	// Control is KTX's map-control time in seconds. A POINTER because KTX
+	// writes it unconditionally (ktx/src/stats_json.c:362 — unlike
+	// `handicap` just below it, which is conditional), so a player who
+	// never held control writes a real 0. Older KTX builds omit the key
+	// entirely; only a pointer tells "measured zero" from "this build did
+	// not record it", and collapsing the two would let a served value
+	// vanish for exactly the player the stat says the most about.
+	Control *float64                   `json:"control,omitempty"`
+	Speed   *DemoInfoSpeed             `json:"speed,omitempty"`
+	XferRL  int                        `json:"xferRL,omitempty"`
+	XferLG  int                        `json:"xferLG,omitempty"`
+	Weapons map[string]*DemoInfoWeapon `json:"weapons,omitempty"`
+	Items   map[string]*DemoInfoItem   `json:"items,omitempty"`
 }
 
 // DemoInfoBot is the per-player bot block KTX writes when the player slot
@@ -90,11 +97,20 @@ type DemoInfoWeapon struct {
 }
 
 // DemoInfoAcc contains accuracy stats from KTX JSON (authoritative).
+//
+// Real / Virtual are KTX's rhits / vhits (ktx/src/combat.c:1085,1100) and
+// exist on rl and gl only. They are NOT a direct/splash split of Hits:
+// they count VICTIMS DAMAGED BY A BLAST — one rocket splashing three
+// players adds three — while Hits for rl/gl is the direct-impact count
+// (ktx/src/weapons.c:994 for rl, :1329 for gl). Real therefore routinely
+// exceeds Hits. Virtual is latched before godmode / pentagram / teamplay
+// damage-avoidance
+// (combat.c:719), so Virtual >= Real and the gap is damage prevented.
 type DemoInfoAcc struct {
 	Attacks int `json:"attacks"` // Pellet count for SG/SSG
 	Hits    int `json:"hits"`
-	Real    int `json:"real,omitempty"`    // Real hits (not splash)
-	Virtual int `json:"virtual,omitempty"` // Virtual hits (splash)
+	Real    int `json:"real,omitempty"`
+	Virtual int `json:"virtual,omitempty"`
 }
 
 // DemoInfoKills contains kill breakdown from KTX JSON.

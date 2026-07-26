@@ -13667,7 +13667,357 @@
       }
     ]
   },
-  "schemaVersion": 60,
+  "playerStats": {
+    "players": [
+      {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 2,
+              "hits": 0
+            },
+            "lg": {
+              "attacks": 70,
+              "hits": 19
+            },
+            "rl": {
+              "attacks": 121,
+              "hits": 56
+            },
+            "sg": {
+              "attacks": 9,
+              "hits": 3
+            }
+          },
+          "src": "derived"
+        },
+        "damage": {
+          "byWeapon": {
+            "lg": 551,
+            "rl": 4092,
+            "sg": 52
+          },
+          "enemyWeapons": 4357,
+          "given": 4695,
+          "givenSelf": 396,
+          "givenTeam": 0,
+          "src": "derived",
+          "taken": 7171,
+          "takenEnemy": 6700,
+          "takenToDie": 304
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 4685,
+              "ms": 12919,
+              "runs": 3,
+              "shareAlive": 0.0223,
+              "shareMatch": 0.0215
+            },
+            "none": {
+              "longestMs": 13390,
+              "ms": 145745,
+              "runs": 33,
+              "shareAlive": 0.2511,
+              "shareMatch": 0.2429
+            },
+            "ra": {
+              "longestMs": 42087,
+              "ms": 307632,
+              "runs": 15,
+              "shareAlive": 0.53,
+              "shareMatch": 0.5127
+            },
+            "ya": {
+              "longestMs": 27625,
+              "ms": 114150,
+              "runs": 7,
+              "shareAlive": 0.1967,
+              "shareMatch": 0.1903
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 51039,
+              "ms": 238434,
+              "runs": 12,
+              "shareAlive": 0.4108,
+              "shareMatch": 0.3974
+            },
+            "lg": {
+              "longestMs": 49599,
+              "ms": 274461,
+              "runs": 11,
+              "shareAlive": 0.4728,
+              "shareMatch": 0.4574
+            },
+            "rl": {
+              "longestMs": 63640,
+              "ms": 479879,
+              "runs": 22,
+              "shareAlive": 0.8267,
+              "shareMatch": 0.7998
+            },
+            "ssg": {
+              "longestMs": 59440,
+              "ms": 342117,
+              "runs": 14,
+              "shareAlive": 0.5894,
+              "shareMatch": 0.5702
+            }
+          }
+        },
+        "name": "AHemlocksLie",
+        "pickups": {
+          "byKind": {
+            "cells": {
+              "took": 18
+            },
+            "ga": {
+              "took": 3
+            },
+            "gl": {
+              "took": 12,
+              "totalTook": 12
+            },
+            "h25": {
+              "took": 14
+            },
+            "lg": {
+              "dropped": 2,
+              "took": 11,
+              "totalTook": 12
+            },
+            "mh": {
+              "took": 8
+            },
+            "ra": {
+              "took": 20
+            },
+            "rl": {
+              "dropped": 13,
+              "took": 22,
+              "totalTook": 30
+            },
+            "rockets": {
+              "took": 36
+            },
+            "shells": {
+              "took": 9
+            },
+            "ssg": {
+              "took": 14,
+              "totalTook": 14
+            },
+            "ya": {
+              "took": 7
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "byWeapon": {
+            "lg": 1,
+            "rl": 9
+          },
+          "deaths": 22,
+          "efficiency": 0.3125,
+          "frags": 9,
+          "kills": 10,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 0
+        },
+        "team": "AHemlocksLie",
+        "window": {
+          "aliveMs": 580446,
+          "deadMs": 19534,
+          "matchMs": 599993,
+          "presentMs": 599980
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "lg": {
+              "attacks": 321,
+              "hits": 96
+            },
+            "rl": {
+              "attacks": 119,
+              "hits": 55
+            },
+            "sg": {
+              "attacks": 5,
+              "hits": 3
+            },
+            "ssg": {
+              "attacks": 1,
+              "hits": 1
+            }
+          },
+          "src": "derived"
+        },
+        "damage": {
+          "byWeapon": {
+            "lg": 2695,
+            "rl": 3953,
+            "sg": 40,
+            "ssg": 12
+          },
+          "enemyWeapons": 6588,
+          "given": 6700,
+          "givenSelf": 530,
+          "givenTeam": 0,
+          "src": "derived",
+          "taken": 5295,
+          "takenEnemy": 4695,
+          "takenToDie": 426
+        },
+        "hold": {
+          "armor": {
+            "ga": {
+              "longestMs": 11022,
+              "ms": 17389,
+              "runs": 2,
+              "shareAlive": 0.0295,
+              "shareMatch": 0.029
+            },
+            "none": {
+              "longestMs": 12429,
+              "ms": 136545,
+              "runs": 20,
+              "shareAlive": 0.2314,
+              "shareMatch": 0.2276
+            },
+            "ra": {
+              "longestMs": 49367,
+              "ms": 109318,
+              "runs": 5,
+              "shareAlive": 0.1853,
+              "shareMatch": 0.1822
+            },
+            "ya": {
+              "longestMs": 91831,
+              "ms": 326827,
+              "runs": 13,
+              "shareAlive": 0.5539,
+              "shareMatch": 0.5447
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "gl": {
+              "longestMs": 107726,
+              "ms": 229282,
+              "runs": 6,
+              "shareAlive": 0.3886,
+              "shareMatch": 0.3821
+            },
+            "lg": {
+              "longestMs": 137115,
+              "ms": 487307,
+              "runs": 11,
+              "shareAlive": 0.8258,
+              "shareMatch": 0.8122
+            },
+            "rl": {
+              "longestMs": 138839,
+              "ms": 532281,
+              "runs": 12,
+              "shareAlive": 0.9021,
+              "shareMatch": 0.8871
+            },
+            "ssg": {
+              "longestMs": 113008,
+              "ms": 318297,
+              "runs": 8,
+              "shareAlive": 0.5394,
+              "shareMatch": 0.5305
+            }
+          }
+        },
+        "name": "42",
+        "pickups": {
+          "byKind": {
+            "cells": {
+              "took": 20
+            },
+            "ga": {
+              "took": 2
+            },
+            "gl": {
+              "took": 6,
+              "totalTook": 6
+            },
+            "h25": {
+              "took": 39
+            },
+            "lg": {
+              "dropped": 2,
+              "took": 11,
+              "totalTook": 12
+            },
+            "mh": {
+              "took": 7
+            },
+            "ra": {
+              "took": 6
+            },
+            "rl": {
+              "dropped": 9,
+              "took": 12,
+              "totalTook": 25
+            },
+            "rockets": {
+              "took": 19
+            },
+            "shells": {
+              "took": 9
+            },
+            "ssg": {
+              "took": 8,
+              "totalTook": 8
+            },
+            "ya": {
+              "took": 15
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "byWeapon": {
+            "lg": 11,
+            "rl": 10
+          },
+          "deaths": 11,
+          "efficiency": 0.6563,
+          "frags": 20,
+          "kills": 21,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 0
+        },
+        "team": "42",
+        "window": {
+          "aliveMs": 590079,
+          "deadMs": 9901,
+          "matchMs": 599993,
+          "presentMs": 599980
+        }
+      }
+    ],
+    "sources": {
+      "accuracy": "derived",
+      "damage": "derived",
+      "hold": "derived",
+      "pickups": "derived",
+      "score": "derived"
+    }
+  },
+  "schemaVersion": 61,
   "shots": {
     "byPlayer": [
       {
