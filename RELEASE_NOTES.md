@@ -19,6 +19,13 @@ already existed in the Result; this is where the web app puts it.
   single count column: mega health is consumed on pickup, so there is no
   hold stat for it by design. The panel's methodology prose survives,
   condensed, in the Item Pickups explainer.
+- **The Pickups tab gained the same possession seconds**, one `<kind> s`
+  column after each kind's last count column. Possession is per KIND, not
+  per spawn entity — the integral over the inventory stream knows only that
+  the player held an RL, not which pad or pack granted it — so a map with
+  two RL spawns still gets one `RL s` column, and the column ignores the
+  all/first-pickup mode selector. MH has none, for the same reason as
+  above. Rows join `playerStats` by player name and team name.
 - **Timeline panels reordered** to Score → Powerups → Weapons →
   Health/Armor, with Region Control still last. The JS lists that mirror
   DOM order were resequenced with it.

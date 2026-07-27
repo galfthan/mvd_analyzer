@@ -385,6 +385,37 @@ dev; the build still works, you just get V1 everywhere.
 The Netlify deploy chains `make bsps && make build`, so production
 gets the visibility filter on every push.
 
+## Pickups tab
+
+Two panels — Weapon Pickups (RL / LG / GL / SNG) and Item Pickups
+(armors, MH, powerups) — each with a per-team and a per-player table.
+Every *spawn entity* gets its own column (`RL @ ra-room`, taken from
+`result.items[].phases`), RL/LG add a `pack` column, and each kind
+closes with a `Σ` verify cell that compares the analytics-derived count
+against KTX's own counter (silent on agreement, red ✗ on divergence).
+A mode selector switches both tables between "All pickups" (Σ vs KTX
+`total-taken`) and "First pickup per life" (Σ vs KTX `taken`).
+
+Each kind then ends in a possession column, `<kind> s` — total seconds
+that kind was held, joined by name from `playerStats.hold`
+(`weapons` for RL/LG/GL/SNG, `armor` for RA/YA/GA, `powerups` for
+Quad/Pent/Ring), with the same tooltip and raw-ms `data-sort-value` as
+the Summary tab's possession cells. Two properties are deliberate:
+
+- **One column per kind, never per entity.** Possession is an integral
+  over the player's inventory stream; it knows only *that* the player
+  held an RL, not which pad or pack it came from. A map with two RL
+  spawns still gets exactly one `RL s` column.
+- **It does not follow the mode selector.** "All" vs "first per life"
+  changes what is counted, not how long anything was held.
+- **MH has no possession column** — mega health is consumed on pickup,
+  so `playerStats` carries no hold stat for it (same as the Summary
+  table).
+
+These rows come from `demoInfo.players`, not `playerStats`, so the join
+is by player name and by team name (`playerStats.teams[].name`); a demo
+whose `playerStats` lacks the row or the hold family renders `-`.
+
 ## Pack Drops tab
 
 The Pack Drops tab shows every RL / LG backpack drop as one row,

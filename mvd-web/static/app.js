@@ -2244,25 +2244,37 @@ function populateFilterSelect(selectId, values) {
 // Per-entity columns always show every-touch from items.phases. The
 // verify cell renders silently on KTX agreement and red+✗ on diff.
 //
+// Each kind also ends in a possession (`s`) column — total seconds held,
+// joined from playerStats.hold. It is per KIND, not per entity: possession
+// is an integral over the inventory stream and knows nothing about which
+// pad or pack the item came from. It ignores the mode selector for the same
+// reason.
+//
 // Note: GL/SNG packs aren't tracked on the analyser side (KTX only emits
 // `//ktx bp` for RL/LG; ktx/src/items.c:2471), so those weapons compare
 // against KTX's entity-only fields (spawn-taken / spawn-total-taken).
 
+// `hold` names the playerStats.hold family a kind's possession seconds live
+// in (result/player_stats.go PlayerStatsHold), keyed by `kind`. Possession is
+// an integral over the player's inventory stream, so it belongs to the KIND,
+// never to the spawn point the item came from — one column per kind no matter
+// how many pads the map has. MH has no entry on purpose: mega health is
+// consumed on pickup, so the section carries no hold stat for it.
 const PICKUPS_WEAPON_KINDS = [
-    { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true  },
-    { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true  },
-    { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false },
-    { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false },
+    { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true,  hold: 'weapons' },
+    { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true,  hold: 'weapons' },
+    { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false, hold: 'weapons' },
+    { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false, hold: 'weapons' },
 ];
 
 const PICKUPS_ITEM_KINDS = [
-    { kind: 'ra',   label: 'RA',   ktxName: 'ra' },
-    { kind: 'ya',   label: 'YA',   ktxName: 'ya' },
-    { kind: 'ga',   label: 'GA',   ktxName: 'ga' },
-    { kind: 'mh',   label: 'MH',   ktxName: 'health_100' },
-    { kind: 'quad', label: 'Quad', ktxName: 'q' },
-    { kind: 'pent', label: 'Pent', ktxName: 'p' },
-    { kind: 'ring', label: 'Ring', ktxName: 'r' },
+    { kind: 'ra',   label: 'RA',   ktxName: 'ra',         hold: 'armor'    },
+    { kind: 'ya',   label: 'YA',   ktxName: 'ya',         hold: 'armor'    },
+    { kind: 'ga',   label: 'GA',   ktxName: 'ga',         hold: 'armor'    },
+    { kind: 'mh',   label: 'MH',   ktxName: 'health_100'                   },
+    { kind: 'quad', label: 'Quad', ktxName: 'q',          hold: 'powerups' },
+    { kind: 'pent', label: 'Pent', ktxName: 'p',          hold: 'powerups' },
+    { kind: 'ring', label: 'Ring', ktxName: 'r',          hold: 'powerups' },
 ];
 
 let pickupsMode = 'all'; // 'all' | 'first'
@@ -2318,6 +2330,17 @@ function renderPickupsTables(result) {
     renderPickupsSection(state, 'weap', PICKUPS_WEAPON_KINDS, buildWeaponCols, weaponCellFor);
     if (itemsPanel) itemsPanel.style.display = hasItem ? '' : 'none';
     renderPickupsSection(state, 'item', PICKUPS_ITEM_KINDS, buildItemCols, itemCellFor);
+
+    // Re-apply after every render: the sections replace their <thead>
+    // content, and click handlers die with the old <th> nodes — without
+    // this the tab stops sorting after the first mode-select change.
+    // makeSortable binds per element (th._sortBound), so re-application
+    // never double-binds (see its loc/region-heatmap contract).
+    for (const id of ['pickups-weap-team-table', 'pickups-weap-player-table',
+                      'pickups-item-team-table', 'pickups-item-player-table']) {
+        const t = document.getElementById(id);
+        if (t) makeSortable(t);
+    }
 }
 
 function computePickupsState(result) {
@@ -2370,13 +2393,47 @@ function computePickupsState(result) {
     const hasKtxItemCounters = players.some(p =>
         p.items && Object.keys(p.items).length > 0);
 
+    // Possession comes from playerStats, which these tables otherwise don't
+    // read (their rows are demoInfo.players). Both sides key by name — the
+    // team rows' identity field is `name`, the same string demoInfo puts on
+    // a player's `team` — so a plain lookup joins them. A demo without the
+    // section (or a team the section doesn't know) simply misses, and
+    // holdCell renders '-'.
+    const psByName = new Map(playerStatsRows(result).map(r => [r.name, r]));
+    const psTeamByName = new Map(playerStatsTeamRows(result).map(r => [r.name, r]));
+
     return {
         result, players, teamOrder, playerByName,
         weaponEntsByKind, itemEntsByKind,
         entityCountsByPlayer, entityCountsByTeam,
         weaponPickups: result.weaponPickups || [],
         hasKtxWeaponCounters, hasKtxItemCounters,
+        psByName, psTeamByName,
     };
+}
+
+// The possession column for one kind, appended after that kind's last count
+// column. `s` mirrors the Summary table's possession heading.
+function holdCol(spec, isWeapon) {
+    const verb = spec.hold === 'weapons' ? 'holding the' : spec.hold === 'armor' ? 'wearing' : 'under';
+    const title = `Total seconds ${verb} ${spec.label} — the whole match's possession for this item kind, ` +
+        `regardless of which spawn or pack it came from` +
+        (isWeapon ? '. Independent of the pickup-mode select: possession is the same integral either way.' : '.');
+    return {
+        type: 'hold',
+        kindSpec: spec,
+        header: `${spec.label} <span class="pickups-verify-header">s</span>`,
+        headerTitle: title,
+    };
+}
+
+// Possession cell for a pickups row. Team rows read the pre-summed team row
+// from playerStats (never a JS re-aggregation of member shares — see the
+// comment on teamRowsInColourOrder).
+function holdCellFor(col, isTeam, key, state) {
+    const row = isTeam ? state.psTeamByName.get(key) : state.psByName.get(key);
+    const stat = row?.hold?.[col.kindSpec.hold]?.[col.kindSpec.kind];
+    return tdFromHtml(holdCell(stat, row?.window));
 }
 
 function buildWeaponCols(state) {
@@ -2387,6 +2444,7 @@ function buildWeaponCols(state) {
         if (list.length === 1 && !spec.hasPack) {
             // Single combined cell: kind label, mode-aware verify against KTX.
             cols.push({ type: 'weap-verify', kindSpec: spec, header: spec.label });
+            if (spec.hold) cols.push(holdCol(spec, true));
             continue;
         }
         if (list.length === 1) {
@@ -2415,6 +2473,7 @@ function buildWeaponCols(state) {
             kindSpec: spec,
             header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
         });
+        if (spec.hold) cols.push(holdCol(spec, true));
     }
     return cols;
 }
@@ -2426,6 +2485,7 @@ function buildItemCols(state) {
         if (list.length === 0) continue;
         if (list.length === 1) {
             cols.push({ type: 'item-verify', kindSpec: spec, entNums: [list[0].entNum], header: spec.label });
+            if (spec.hold) cols.push(holdCol(spec, false));
             continue;
         }
         for (const it of list) {
@@ -2443,6 +2503,7 @@ function buildItemCols(state) {
             entNums: list.map(it => it.entNum),
             header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
         });
+        if (spec.hold) cols.push(holdCol(spec, false));
     }
     return cols;
 }
@@ -2470,7 +2531,7 @@ function renderPickupsSection(state, idPrefix, kinds, buildCols, cellFor) {
     const buildHeader = (label) => {
         const tr = document.createElement('tr');
         tr.appendChild(makeTh(label));
-        for (const c of cols) tr.appendChild(makeTh(c.header));
+        for (const c of cols) tr.appendChild(makeTh(c.header, c.headerTitle));
         return tr;
     };
     teamHead.appendChild(buildHeader('Team'));
@@ -2518,6 +2579,7 @@ function renderPickupsSection(state, idPrefix, kinds, buildCols, cellFor) {
 
 function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     const spec = col.kindSpec;
+    if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
     if (col.type === 'entity-count') {
         const n = entMap.get(col.entNum) || 0;
         return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
@@ -2573,6 +2635,7 @@ function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
 
 function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     const spec = col.kindSpec;
+    if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
     if (col.type === 'entity-count') {
         const n = entMap.get(col.entNum) || 0;
         return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
@@ -2586,9 +2649,10 @@ function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     return makeVerifyCell(ana, primary, null, state.hasKtxItemCounters);
 }
 
-function makeTh(html) {
+function makeTh(html, title) {
     const th = document.createElement('th');
     th.innerHTML = html;
+    if (title) th.title = title;
     return th;
 }
 
@@ -2596,6 +2660,15 @@ function makeTd(html) {
     const td = document.createElement('td');
     td.innerHTML = html;
     return td;
+}
+
+// A <td> element from a cell-HTML string, so the DOM-building tables can
+// reuse the string-building cell renderers (holdCell) verbatim rather than
+// growing a second implementation of the same cell.
+function tdFromHtml(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html.trim();
+    return tpl.content.firstElementChild;
 }
 
 // makeVerifyCell renders the KTX-authoritative counter as the cell
