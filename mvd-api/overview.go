@@ -17,14 +17,14 @@ type Overview struct {
 	SchemaVersion int    `json:"schemaVersion"`
 	FilePath      string `json:"filePath,omitempty"`
 	// Map is the canonical map SHORTNAME (dm2, dm3, …) — Result.EffectiveMap
-	// (demoinfo → serverinfo fallback), the same value searchGames rows and
-	// serverinfo carry, so a caller can join on it. Falls back to the BSP
-	// title (r.Match.Map) only on a degraded demo that resolves no shortname.
+	// (demoinfo → serverinfo fallback), the same value searchGames rows,
+	// serverinfo and Result.Match.Map carry, so a caller can join on it.
 	Map string `json:"map,omitempty"`
-	// MapTitle is the BSP's pretty level title (LevelName, e.g.
-	// "Claustrophobopolis" on dm2). Omitted when it equals Map — the common
-	// case where the map has no distinct title (repo precedent: MessageClean
-	// elides when identical to the raw message).
+	// MapTitle is the display-only level title (Result.Match.MapTitle, e.g.
+	// "Claustrophobopolis" on dm2). Never an identifier. Omitted when it
+	// equals Map — the common case where the map has no distinct title
+	// (repo precedent: MessageClean elides when identical to the raw
+	// message).
 	MapTitle         string            `json:"mapTitle,omitempty"`
 	GameDir          string            `json:"gameDir,omitempty"`
 	Mode             string            `json:"mode,omitempty"`
@@ -122,10 +122,10 @@ func BuildOverview(r *result.Result) Overview {
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
 
-	// map = the canonical shortname (joinable with searchGames / serverinfo);
-	// mapTitle = the BSP's pretty title, elided when identical. EffectiveMap
-	// resolves the shortname independent of Match (demoinfo → serverinfo), so a
-	// degraded demo with no shortname falls back to the title below.
+	// map = the canonical shortname, mapTitle = the display-only level title.
+	// Match publishes both (result/match.go), but EffectiveMap stays the
+	// accessor for the shortname: it resolves independent of Match, so an
+	// overview of a demo with no match section still names its map.
 	ov.Map = r.EffectiveMap()
 
 	if r.Match != nil {
@@ -136,8 +136,8 @@ func BuildOverview(r *result.Result) Overview {
 		// vs BSP LevelName "Aerowalk"): those are the same map, not a distinct
 		// pretty title. A near-echo like "Bravado -" is deliberately NOT
 		// elided — case-only is the one fixed class we collapse.
-		if r.Match.Map != "" && !strings.EqualFold(r.Match.Map, ov.Map) {
-			ov.MapTitle = r.Match.Map
+		if r.Match.MapTitle != "" && !strings.EqualFold(r.Match.MapTitle, ov.Map) {
+			ov.MapTitle = r.Match.MapTitle
 		}
 		ov.GameDir = r.Match.GameDir
 		ov.Duration = r.Match.Duration

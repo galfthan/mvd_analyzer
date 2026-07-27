@@ -7,7 +7,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// Player statistics (schema v61). playerStatsPost joins the artifacts that
+// Player statistics (schema v62). playerStatsPost joins the artifacts that
 // each hold a piece of "how did this player do" — the corrected scoreboard,
 // the frag log, the damage reconstruction, the item and weapon-pickup
 // timelines, the backpack drops — and adds the family none of them carry:
@@ -85,9 +85,12 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 		}
 	}
 
+	// The stored roll-up echoes the rows, so a bounded-skip demo says
+	// "derived:unbounded" here too. view.PlayerStats recomputes it from
+	// the rows it actually serves (rollUpSources).
 	for i := range ps.Players {
 		if ps.Players[i].Damage != nil {
-			ps.Sources.Damage = result.SrcDerived
+			ps.Sources.Damage = ps.Players[i].Damage.Src
 			break
 		}
 	}
@@ -133,14 +136,28 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 // deriveScore reads the corrected scoreboard. MatchResult carries the
 // frag-log-corrected kills/deaths/suicides (match-final post-processor) and
 // the svc_updatefrags net score; FragResult carries the team-kill count.
+//
+// The kill side is OPTIONAL, because the two sides of this family do not
+// rest on the same evidence. Frags is the svc_updatefrags net score and
+// Deaths is counted from the protocol death events; both are measured on
+// every demo. Kills, suicides, teamkills and the per-weapon split are all
+// attributed from the obituary-derived frag log, and some servers never
+// give us one in a matchable form — on 4on4_l_vs_la[e1m2] a full 4v4
+// scoreboard with 230 team frags and 121 deaths yielded not a single frag
+// entry. Reporting 0 kills and 0.0% efficiency there is
+// byte-indistinguishable from a genuinely killless team, so the fields
+// are omitted instead. See result.PlayerStatsScore.
 func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	s := result.PlayerStatsScore{Src: result.SrcDerived}
+	var kills, suicides, teamKills int
+	var byWeapon map[string]int
 	onScoreboard := false
 	if res.Match != nil {
 		for i := range res.Match.Players {
 			if res.Match.Players[i].Name == name {
 				mp := &res.Match.Players[i]
-				s.Frags, s.Kills, s.Deaths, s.Suicides = mp.Frags, mp.Kills, mp.Deaths, mp.Suicides
+				s.Frags, s.Deaths = mp.Frags, mp.Deaths
+				kills, suicides = mp.Kills, mp.Suicides
 				onScoreboard = true
 				break
 			}
@@ -148,29 +165,71 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	}
 	if res.Frags != nil {
 		if pf := res.Frags.ByPlayer[name]; pf != nil {
-			s.TeamKills = pf.TeamKills
+			teamKills = pf.TeamKills
 			// A player absent from the scoreboard — no Match section at
 			// all, or a streamed name the match analyzer did not resolve
 			// into a row — still has a frag-log line. Use it rather than
 			// reporting zeros for someone the demo plainly recorded
 			// killing and dying. Frags (the net score) has no frag-log
-			// equivalent and stays 0.
+			// equivalent and stays 0; suicides have one and are counted
+			// the same way scoreboardStatsPost does it (postprocess.go:36-41
+			// — per-victim IsSuicide over the final log), rather than being
+			// left at a fabricated 0 beside recovered kills and deaths.
 			if !onScoreboard {
-				s.Kills, s.Deaths = pf.Kills, pf.Deaths
+				kills, s.Deaths = pf.Kills, pf.Deaths
+				for i := range res.Frags.Frags {
+					if f := &res.Frags.Frags[i]; f.IsSuicide && f.Victim == name {
+						suicides++
+					}
+				}
 			}
 			for w, n := range pf.ByWeapon {
 				if n == 0 {
 					continue
 				}
-				if s.ByWeapon == nil {
-					s.ByWeapon = map[string]int{}
+				if byWeapon == nil {
+					byWeapon = map[string]int{}
 				}
-				s.ByWeapon[w] = n
+				byWeapon[w] = n
 			}
 		}
 	}
-	s.Efficiency = result.NewShare(int32(s.Kills), int32(s.Kills+s.Deaths))
+	if killsMeasurable(res) {
+		eff := result.NewShare(int32(kills), int32(kills+s.Deaths))
+		s.Kills, s.Suicides, s.TeamKills = &kills, &suicides, &teamKills
+		s.Efficiency = &eff
+		s.ByWeapon = byWeapon
+	}
 	return s
+}
+
+// killsMeasurable reports whether kill attribution was observable on this
+// demo at all.
+//
+// An empty frag log on a demo where players demonstrably died means every
+// obituary went unmatched — the server printed them in a form this
+// pipeline does not parse, or printed none. Deaths still count (they come
+// from the protocol death events, not the obituaries), which is exactly
+// what makes the zeros dangerous: a row reading 0 kills / 92 deaths looks
+// measured.
+//
+// Deliberately DEMO-GLOBAL rather than per row, so every row on a demo
+// agrees and a team aggregate can never mix a measured member with an
+// unmeasured one. A demo where nobody died has nothing to contradict and
+// keeps its honest zeros.
+func killsMeasurable(res *Result) bool {
+	if res.Frags == nil || len(res.Frags.Frags) > 0 {
+		return true
+	}
+	if res.Match == nil {
+		return true
+	}
+	for i := range res.Match.Players {
+		if res.Match.Players[i].Deaths > 0 {
+			return false
+		}
+	}
+	return true
 }
 
 // deriveDamage reads the damage reconstruction, preferring the bounded
@@ -183,15 +242,39 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 	}
 	pd := res.Damage.ByPlayer[name]
 	if pd == nil {
-		return nil
+		// damage.go only creates an entry on an actual hit, so a player who
+		// neither dealt nor took a point of damage has none. On a demo that
+		// carries the damage stream that is an OBSERVED all-zero row, not an
+		// unmeasurable one — the same distinction deriveTakenEnemy makes a
+		// few lines below when it zero-fills every player in the table.
+		// Collapsing it into an absent family says "we could not tell",
+		// which on this demo is false.
+		pd = &result.PlayerDamage{}
 	}
 	src := pd
 	if pd.Bounded != nil {
 		src = pd.Bounded
 	}
+	// When the bounded reconstruction was skipped, every pd.Bounded is nil
+	// and this family silently became raw wire damage INCLUDING overkill
+	// while still reading "derived" — 38-44% high on
+	// 4on4_oeks_vs_tsq[dm2], an order of magnitude on k_instagib's flat
+	// 5000/hit. Mark it so a caller can branch on one field instead of
+	// correlating src with damage.boundedMode.
+	//
+	// Keyed on BoundedMode, the demo-global CAUSE, rather than on
+	// pd.Bounded == nil at the row: the bounded nest is created lazily
+	// (result/damage.go BoundedNest), so a standard-mode player whose only
+	// hits fell outside the match window also has a nil nest, and marking
+	// that row would both overstate the degradation and split a team's
+	// members across two src values.
+	srcName := result.SrcDerived
+	if strings.HasPrefix(res.Damage.BoundedMode, "skipped:") {
+		srcName = result.SrcDerivedUnbounded
+	}
 	taken := src.Taken
 	out := &result.PlayerStatsDamage{
-		Src:          result.SrcDerived,
+		Src:          srcName,
 		Given:        src.Given,
 		GivenTeam:    src.GivenTeam,
 		GivenSelf:    src.GivenSelf,
@@ -562,10 +645,21 @@ func deriveHold(p *result.PlayerStream, alive []result.Interval, w result.Player
 	}
 	// "none" is the alive-time complement — the stat KTX structurally
 	// cannot produce, since its armor clocks never close on the armor
-	// being chewed to zero. Emitted whenever we know the alive window,
-	// including the all-alive-with-no-armor case (a full-match "none" is
-	// a real and interesting reading, not a missing value).
-	if w.AliveMs > 0 {
+	// being chewed to zero. Emitted whenever we know the alive window AND
+	// the armor stream was observed at all, including the
+	// all-alive-with-no-armor case (a full-match "none" is a real and
+	// interesting reading, not a missing value).
+	//
+	// The stream test is what separates the two. appendChangeStr
+	// (timeline_streams.go:36-41) appends the first sample
+	// unconditionally, so a player who genuinely never held armor still
+	// carries at = [{0,""}] — length >= 1. An EMPTY stream means the armor
+	// state was never observed, and the complement of nothing over a real
+	// alive window is a fabricated maximum: on the POV recording
+	// dag_caps_e1m2 only the recorder has stat streams, and the other
+	// seven rows claimed 100% no-armor while the same row listed their
+	// armor pickups.
+	if w.AliveMs > 0 && len(p.ArmorType) > 0 {
 		none := w.AliveMs - armorTotal
 		if none < 0 {
 			// Overlapping armor runs would be a stream-builder bug; clamp
@@ -670,7 +764,7 @@ func armorRuns(at []result.ChangeStr, matchMs int32) []armorRun {
 // oversight: the pipeline has no disconnect record to key on. The
 // identity analyser's Sessions look like one but are not — their first
 // and last bounds are widened to ±inf so a lookup at any time resolves
-// (analyzer/identity.go:311) — and splitting on a position-track gap
+// (analyzer/identity.go:239-240) — and splitting on a position-track gap
 // would need an invented threshold, which is the kind of made-up filter
 // this repo avoids. Measured on the reconnect corpus demo (gameId
 // 216835) the position track has no gap at all to split on: 56 ms is the
@@ -1004,21 +1098,31 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 		}
 		var dmg *result.PlayerStatsDamage
 		var pickups map[string]result.PlayerStatsPickup
+		acc := make([]*result.PlayerStatsAccuracy, 0, len(members))
 
 		for _, m := range members {
+			acc = append(acc, m.Accuracy)
 			row.Window.PresentMs += m.Window.PresentMs
 			row.Window.AliveMs += m.Window.AliveMs
 			row.Window.DeadMs += m.Window.DeadMs
 			row.Score.Frags += m.Score.Frags
-			row.Score.Kills += m.Score.Kills
 			row.Score.Deaths += m.Score.Deaths
-			row.Score.Suicides += m.Score.Suicides
-			row.Score.TeamKills += m.Score.TeamKills
+			// The kill side is optional and the condition that omits it is
+			// demo-global (killsMeasurable), so these are either present on
+			// every member or on none — addPtr can never end up mixing a
+			// measured member with an unmeasured one here.
+			row.Score.Kills = addPtr(row.Score.Kills, m.Score.Kills)
+			row.Score.Suicides = addPtr(row.Score.Suicides, m.Score.Suicides)
+			row.Score.TeamKills = addPtr(row.Score.TeamKills, m.Score.TeamKills)
 			row.Score.ByWeapon = addWeaponCounts(row.Score.ByWeapon, m.Score.ByWeapon)
 
 			if m.Damage != nil {
 				if dmg == nil {
-					dmg = &result.PlayerStatsDamage{Src: result.SrcDerived}
+					// Inherit the members' src rather than asserting
+					// "derived": on a bounded-skip demo every member
+					// carries "derived:unbounded", and the team total is
+					// exactly as raw as they are.
+					dmg = &result.PlayerStatsDamage{Src: m.Damage.Src}
 				}
 				dmg.Given += m.Damage.Given
 				dmg.GivenTeam += m.Damage.GivenTeam
@@ -1044,8 +1148,12 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				}
 			}
 		}
-		row.Score.Efficiency = result.NewShare(int32(row.Score.Kills), int32(row.Score.Kills+row.Score.Deaths))
+		if row.Score.Kills != nil {
+			eff := result.NewShare(int32(*row.Score.Kills), int32(*row.Score.Kills+row.Score.Deaths))
+			row.Score.Efficiency = &eff
+		}
 		row.Damage = dmg
+		row.Accuracy = result.AggregateAccuracy(acc)
 		if pickups != nil {
 			row.Pickups = &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: pickups}
 		}
@@ -1061,7 +1169,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				present++
 			}
 		}
-		row.Members = present
+		row.Members = &present
 		row.Hold = aggregateHold(members, row.Window.AliveMs, matchMs*int32(present))
 		out = append(out, row)
 	}

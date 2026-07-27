@@ -65,7 +65,7 @@ The concrete event list, in stable order:
 |---|---|
 | `ServerDataEvent` | Connection-time server data block |
 | `UserInfoEvent` | Player slot userinfo bind / rebind. `Vacated` flags the empty-string form the server broadcasts when it drops a client (see [MVD_FORMAT.md](MVD_FORMAT.md), "Departure"). |
-| `PrintEvent` | Text messages (chat, obituaries, system) |
+| `PrintEvent` | Text messages (chat, obituaries, system). One complete console **line**, reassembled from however many `svc_print` fragments the server split it into (see the note below the table) |
 | `StatUpdateEvent` | Per-player stat delta (health, armor, weapons, ...) |
 | `FragUpdateEvent` | Frag count changes (server-authoritative) |
 | `PlayerPositionEvent` | Per-player position / angle sample |
@@ -95,6 +95,22 @@ The concrete event list, in stable order:
 | `ProjectileDespawnEvent` | A tracked projectile left the wire (impact / timeout) — last origin. Co-locates with the explosion + `mvdhidden_dmgdone` damage, so the launching shot links to that impact |
 | `BeamEvent` | `svc_temp_entity` lightning beam (`TE_LIGHTNING1/2/3`) — firing entity + start/end coords. `TE_LIGHTNING2` is the player LG bolt (one per fire tick), the authoritative per-shot LG signal for the `shots` analyzer |
 | `NailsFrameEvent` | `svc_nails` / `svc_nails2` — the full live nail set for one frame (ids + origins). Emitted only when nail decoding is enabled (`Parser.SetDecodeNails`); high volume, off by default. Note most modern servers (`sv_nailhack`) send nails as packet entities (spike models) instead, so this fires only on non-nailhack servers |
+
+`PrintEvent` carries a whole console line, not one wire message. QuakeC
+builds a line out of several `sprint`/`bprint` calls and each becomes its
+own `svc_print`: old kmod/qwe emits an obituary as `"DARKLORD"` +
+`"'s rocket"` + `"\n"`, and current KTX still emits the backpack pickup
+line that way (`ktx/src/items.c:2404-2618`). `parser/print.go`
+(`assemblePrintLine`) buffers fragments per (print level, `dem_single`
+target) and releases up to and including the last newline — ezquake's
+`CL_ProcessPrint` rule (`ezquake-source/src/cl_parse.c:3072-3105`) plus a
+target dimension ezquake does not need, because it sees one client's
+stream while we demultiplex the whole recording. The assembled event
+carries the first fragment's wire time. A line that is already whole
+passes through byte-identically. Matching an obituary, pickup or
+match-start phrase against a single `svc_print` payload finds nothing on
+a pre-KTX demo — see
+[MVD_FORMAT.md](MVD_FORMAT.md#one-console-line-is-often-several-svc_print-messages).
 
 `DeathEvent` and `SpawnEvent` are derived events the parser synthesises
 from up to three sources sharing one per-player dead-state cursor, so a
@@ -179,8 +195,9 @@ per-client pickup prints (`"You got the Red Armor"`,
 `"You receive 25 health"`). It covers categories `//ktx took`
 misses — ammo boxes (`ammo_touch` has no hint call) and H15/H25.
 The `"You get "` backpack opener is deliberately *not* decoded into a
-typed event: its ammo breakdown arrives as separate per-piece prints
-that would need stateful reassembly, and no consumer uses it.
+typed event: it now reaches consumers as one assembled line, but the
+signal is absent on competitive demos (see the caveat below) and no
+consumer uses it.
 `PrintEvent.TargetPlayerNum` carries the `dem_single` slot the server
 addressed. **Caveat:** mvdsv's
 `SV_ClientPrintf` (`mvdsv/src/sv_send.c:225`) drops prints where

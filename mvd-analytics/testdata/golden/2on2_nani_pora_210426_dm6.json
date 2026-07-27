@@ -27358,7 +27358,8 @@
   "match": {
     "duration": 600000,
     "gameDir": "qw",
-    "map": "The Dark Zone",
+    "map": "dm6",
+    "mapTitle": "The Dark Zone",
     "players": [
       {
         "deaths": 13,
@@ -31247,6 +31248,31 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 92,
+              "hits": 6
+            },
+            "lg": {
+              "attacks": 500,
+              "hits": 144
+            },
+            "rl": {
+              "attacks": 312,
+              "hits": 111
+            },
+            "sg": {
+              "attacks": 71,
+              "hits": 21
+            },
+            "sng": {
+              "attacks": 81,
+              "hits": 0
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 307,
@@ -31415,6 +31441,31 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 69,
+              "hits": 3
+            },
+            "lg": {
+              "attacks": 394,
+              "hits": 86
+            },
+            "rl": {
+              "attacks": 260,
+              "hits": 88
+            },
+            "sg": {
+              "attacks": 115,
+              "hits": 16
+            },
+            "sng": {
+              "attacks": 8,
+              "hits": 0
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 277,
@@ -31580,7 +31631,7 @@
       }
     ]
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

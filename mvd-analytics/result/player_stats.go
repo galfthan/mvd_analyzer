@@ -37,7 +37,7 @@ import (
 // integral, so it will legitimately read LOWER than a KTX end-of-match
 // table — that is the correction, not a bug.
 //
-// Schema v61.
+// Schema v62.
 type PlayerStatsResult struct {
 	// Players is one row per participant, in Streams.Players order (the
 	// canonical player order used across the Result), with any scoreboard
@@ -62,11 +62,51 @@ const (
 	// SrcKTX: taken from the KTX demoinfo block, which counts it
 	// server-side.
 	SrcKTX = "ktx"
+	// SrcDerivedUnbounded: computed by this pipeline, but from the RAW
+	// wire damage rather than the bounded reconstruction, because the
+	// server mode made a bounded reconstruction impossible.
+	//
+	// analyzer/damage.go builds the bounded family only when boundedSkip
+	// is empty (damage.go:308,542-546); on a k_midair / k_instagib /
+	// k_dmgfrags demo it is skipped entirely, because those modes rewrite
+	// T_Damage's take in ways the wire does not expose and a best-effort
+	// reconstruction would be confidently wrong. The damage family then
+	// silently became raw wire damage INCLUDING overkill while still
+	// reading "derived" — measured on 4on4_oeks_vs_tsq[dm2], raw exceeds
+	// bounded by 38-44%, and on k_instagib the wire value is a flat
+	// 5000/hit. This value is what makes that degradation legible: a
+	// caller branches on one field instead of correlating `src` with
+	// damage.boundedMode.
+	//
+	// Applies to the damage family only, and inherits into the Sources
+	// roll-up like any other per-row value.
+	SrcDerivedUnbounded = "derived:unbounded"
+	// SrcMixed appears in the Sources roll-up and on TEAM rows whose
+	// members disagreed about where the family came from (the shared-or-
+	// mixed aggregation rule — see AggregateAccuracy and the view's team
+	// reaggregation). A PLAYER row never carries it: per-player families
+	// come from exactly one source.
+	//
+	// It is a CANARY, not a data condition. Measured across every local
+	// demo carrying a KTX block, the playerStats name set and the demoinfo
+	// name set are identical and every listed player carries both a dmg
+	// blob and an acc entry — so a demo either has the block for everyone
+	// or for nobody. The one way a mix ever arose was a roster row KTX had
+	// never heard of (a refused connection surfaced as a player), which is
+	// the phantom-roster defect. If this value is ever served, that defect
+	// is back.
+	SrcMixed = "mixed"
 )
 
 // PlayerStatsSources records, per family, which source the rows carry.
 // Families absent from every row (no KTX block and no derivable
 // equivalent) are omitted.
+//
+// COMPUTED FROM THE ROWS BEING SERVED, after any filtering: all rows KTX
+// -> "ktx", none -> "derived", disagreement -> "mixed". It used to be set
+// from an "any row matched KTX" flag on the unfiltered set, which both
+// over-reported (one KTX-matched row badged the whole family) and
+// described rows a filter had since removed.
 type PlayerStatsSources struct {
 	Score    string `json:"score"`
 	Damage   string `json:"damage,omitempty"`
@@ -82,7 +122,13 @@ type PlayerStatsRow struct {
 
 	// KTX-only identity fields, straight from the demoinfo block and
 	// absent on demos without one. Not derivable from the wire.
-	Ping     int          `json:"ping,omitempty"`
+	//
+	// Ping is a POINTER for the measured-zero rule: KTX writes the key
+	// unconditionally, so a 0 there would be a reading rather than a gap.
+	// (In practice unreachable — ping is measured over frame round-trips,
+	// so its floor is one frame, and KTX bots report synthetic nonzero
+	// pings. The pointer is for consistency, not for a live case.)
+	Ping     *int         `json:"ping,omitempty"`
 	Handicap int          `json:"handicap,omitempty"`
 	Login    string       `json:"login,omitempty"`
 	Bot      *DemoInfoBot `json:"bot,omitempty"`
@@ -104,14 +150,23 @@ type PlayerStatsRow struct {
 	// consumer can recompute or re-scale it. A scoreboard-only row
 	// (connected, never streamed) is summed into the team's totals but
 	// does NOT count here, because it contributed no time anyone could
-	// have played. Absent on player rows.
-	Members int `json:"members,omitempty"`
+	// have played.
+	//
+	// A POINTER, set on team rows and only there: an `omitempty` int
+	// dropped the key exactly when it mattered most — a team whose only
+	// member never streamed serializes with no `members` while every
+	// ShareMatch on it rests on matchMs x 0, so the one row whose
+	// denominator a consumer must check was the one that hid it.
+	Members *int `json:"members,omitempty"`
 
 	Window PlayerStatsWindow `json:"window"`
 	Score  PlayerStatsScore  `json:"score"`
 	// Damage is omitted when the demo carries no damage information at
 	// all — neither a KTX damage stream to reconstruct from nor a
-	// demoinfo block (common on pre-2020 demos).
+	// demoinfo block (common on pre-2020 demos). A player who neither
+	// dealt nor took a point of damage on a demo that DOES carry the
+	// stream gets a zeroed family, not an absent one: that is an observed
+	// zero, and it is a different fact from "unmeasurable".
 	Damage *PlayerStatsDamage `json:"damage,omitempty"`
 	// Accuracy is KTX's block where the demo carries one, else a
 	// reconstruction from the decoded fire stream — the two are different
@@ -151,18 +206,33 @@ type PlayerStatsWindow struct {
 // world-dealt suicides to the world entity rather than the victim
 // (ktx/src/client.c:4951), and reset after a reconnect. MatchResult's
 // frag-log-corrected counts are right — see PlayerStat.
+//
+// The two SIDES of this struct rest on different evidence, and only one
+// of them is always available. Frags is the svc_updatefrags net score,
+// straight off the wire; Deaths is counted from the protocol death
+// events. Both are measured on every demo. Everything else — kills,
+// suicides, teamKills, byWeapon and the efficiency computed from them —
+// is attributed from the OBITUARY-derived frag log, which some servers
+// never give us in a matchable form. Those fields are therefore
+// POINTERS: absent means kill attribution was not measurable on this
+// demo, which is a different fact from a player who killed nobody.
 type PlayerStatsScore struct {
 	Src string `json:"src"`
 	// Frags is the canonical QW net score from the svc_updatefrags
 	// scoreboard.
-	Frags     int `json:"frags"`
-	Kills     int `json:"kills"`
-	Deaths    int `json:"deaths"`
-	Suicides  int `json:"suicides"`
-	TeamKills int `json:"teamKills"`
+	Frags int `json:"frags"`
+	// Kills, Suicides and TeamKills come from the frag log. Absent
+	// together, whenever it carries no entries at all on a demo where
+	// players demonstrably died — serving 0 kills beside 121 deaths is
+	// byte-indistinguishable from a genuinely awful team.
+	Kills     *int `json:"kills,omitempty"`
+	Deaths    int  `json:"deaths"`
+	Suicides  *int `json:"suicides,omitempty"`
+	TeamKills *int `json:"teamKills,omitempty"`
 	// Efficiency is kills / (kills + deaths) as a RATIO in [0,1] — not a
-	// percentage. 0 when the player neither killed nor died.
-	Efficiency Share `json:"efficiency"`
+	// percentage. 0 when the player neither killed nor died; absent
+	// exactly when Kills is, since it is computed from it.
+	Efficiency *Share `json:"efficiency,omitempty"`
 	// ByWeapon is enemy kills split by the weapon that dealt them, keyed
 	// like the rest of this section ("rl", "lg", "sg", ...). From the
 	// corrected frag log, so it is on the same footing as Kills above and
@@ -175,7 +245,15 @@ type PlayerStatsScore struct {
 // PlayerStatsDamage is the damage line under KTX scoreboard semantics
 // (armor absorbed, health damage capped to remaining health) — the
 // bounded family, which is what the KTX numbers this merges with mean.
+//
+// EXCEPT where the server mode made the bounded reconstruction
+// impossible, in which case these are RAW wire numbers including overkill
+// and Src says so: see SrcDerivedUnbounded. This is the one family whose
+// Src is three-valued.
 type PlayerStatsDamage struct {
+	// Src is "ktx", "derived", or "derived:unbounded" — the last meaning
+	// the numbers are raw wire damage because no bounded reconstruction
+	// exists for this demo (DamageResult.BoundedMode is skipped:*).
 	Src string `json:"src"`
 	// Given is damage dealt to enemies.
 	Given     int `json:"given"`
@@ -210,12 +288,18 @@ type PlayerStatsDamage struct {
 	// every other field here and this one is genuinely unmeasured. A zero
 	// would read as "took no damage at all".
 	Taken *int `json:"taken,omitempty"`
-	// TakenEnemy is KTX's enemy-only damage taken. KTX-only: the
-	// reconstruction cannot split taken damage by source, so this is
-	// absent (not zero) on demos without a demoinfo block.
+	// TakenEnemy is enemy-only damage taken — KTX's dmg_t. NOT KTX-only:
+	// KTX's value when the block carries it, otherwise reconstructed from
+	// the per-hit log by summing the hits flagged neither team, self nor
+	// environment (analyzer.deriveTakenEnemy). A POINTER because that
+	// reconstruction needs a damage stream: absent, not zero, on a demo
+	// carrying no damage information at all.
 	TakenEnemy *int `json:"takenEnemy,omitempty"`
-	// TakenToDie is KTX's average damage absorbed per death. KTX-only,
-	// same reasoning.
+	// TakenToDie is the average damage absorbed per death,
+	// TakenEnemy / deaths, on the same footing as TakenEnemy — derived
+	// wherever that is. Additionally absent when the player never died;
+	// KTX's 99999 no-deaths sentinel (ktx/src/stats_json.c:357) is never
+	// served as a number.
 	TakenToDie *int `json:"takenToDie,omitempty"`
 }
 
@@ -272,6 +356,78 @@ type PlayerStatsAcc struct {
 	// the gap is damage that was prevented rather than missed.
 	Real    *int `json:"real,omitempty"`
 	Virtual *int `json:"virtual,omitempty"`
+}
+
+// AggregateAccuracy sums member accuracy blocks into a team row's.
+//
+// It lives here rather than in either caller because BOTH need it and
+// must agree: the analyzer aggregates the derived rows into the stored
+// artifact, and view.PlayerStats re-aggregates after the KTX overlay
+// (accuracy is overlaid per player at read time, so an analyzer-only
+// aggregate would be stale on every KTX demo).
+//
+// Two rules the old frontend implementation got wrong:
+//
+//   - Hits is *int where absent means "not measurable" — a derived block
+//     on a demo with no damage stream counts fires but can link none of
+//     them. Summing a member who has it with one who does not understates
+//     the team hit-rate under a number that looks measured, so the team
+//     value stays ABSENT unless EVERY contributing member carries it.
+//   - Src is stamped from the members and must agree. A disagreement is
+//     the phantom-roster defect (see SrcMixed), not a data condition;
+//     SrcMixed is recorded rather than silently picking one.
+//
+// Real / Virtual are deliberately NOT aggregated, for the same reason
+// TakenToDie is not: KTX omits the pair entirely unless it recorded one
+// (ktx/src/stats_json.c:146), so an all-or-nothing rule would drop them
+// whenever a single member never fired rl/gl, and a partial sum would
+// silently under-count. They stay a per-player reading.
+//
+// Returns nil when no member carries the family.
+func AggregateAccuracy(members []*PlayerStatsAccuracy) *PlayerStatsAccuracy {
+	byWeapon := map[string]PlayerStatsAcc{}
+	// hitsSeen counts members contributing to a weapon; hitsHave counts
+	// those whose Hits was measurable. Equal at the end == everybody had it.
+	hitsSeen, hitsHave := map[string]int{}, map[string]int{}
+	src := ""
+	any := false
+	for _, m := range members {
+		if m == nil {
+			continue
+		}
+		any = true
+		switch {
+		case src == "":
+			src = m.Src
+		case src != m.Src:
+			src = SrcMixed
+		}
+		for w, e := range m.ByWeapon {
+			agg := byWeapon[w]
+			agg.Attacks += e.Attacks
+			hitsSeen[w]++
+			if e.Hits != nil {
+				hitsHave[w]++
+				n := 0
+				if agg.Hits != nil {
+					n = *agg.Hits
+				}
+				n += *e.Hits
+				agg.Hits = &n
+			}
+			byWeapon[w] = agg
+		}
+	}
+	if !any {
+		return nil
+	}
+	for w, agg := range byWeapon {
+		if hitsHave[w] != hitsSeen[w] {
+			agg.Hits = nil
+			byWeapon[w] = agg
+		}
+	}
+	return &PlayerStatsAccuracy{Src: src, ByWeapon: byWeapon}
 }
 
 // PlayerStatsPickups is the per-kind pickup tally, keyed by this repo's

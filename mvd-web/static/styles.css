@@ -693,6 +693,19 @@ body.duel-mode .per-player-heading {
     display: none !important;
 }
 
+/* --- No team rows: same treatment for FFA ---
+ *
+ * playerStats emits no `teams` section when the demo has no teams to
+ * aggregate (FFA is not teamplay), so the Summary "Per Team" tables would
+ * render as four headers over an empty tbody. Scoped to #tab-summary
+ * because those tables are the ones fed from playerStats.teams; the
+ * Pickups tab derives its own team rows from the item phases. */
+body.no-team-rows #tab-summary .team-aggregate-heading,
+body.no-team-rows #tab-summary .team-aggregate-table,
+body.no-team-rows #tab-summary .per-player-heading {
+    display: none !important;
+}
+
 /* Explanatory note under a panel heading — used where a number deviates
  * from the server's own end-of-match table on purpose (the Possession
  * panel) and the viewer deserves to know why without a hover. */
@@ -702,6 +715,36 @@ body.duel-mode .per-player-heading {
     color: #8a9bb8;
     font-size: 0.8rem;
     line-height: 1.45;
+}
+
+/* The one disclosure idiom for methodology prose under a panel heading.
+ * Every panel that used to open with a paragraph of explanation now
+ * carries it here instead, collapsed, so the numbers start at the top of
+ * the panel. Visually derived from .per-player-detail (same subtle
+ * summary line); the body keeps whichever prose class it already had
+ * (.panel-note / .aim-desc / .locheatmap-desc), which is why the last
+ * child's own bottom margin is dropped in favour of this one. */
+.panel-info {
+    margin: 0 0 0.75rem;
+}
+
+.panel-info > summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #aaa;
+    user-select: none;
+}
+
+.panel-info > summary:hover {
+    color: #ddd;
+}
+
+.panel-info[open] > summary {
+    margin-bottom: 8px;
+}
+
+.panel-info > :last-child {
+    margin-bottom: 0;
 }
 
 /* A cell showing a measurement we could only partly make — e.g. an

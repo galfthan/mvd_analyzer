@@ -75668,7 +75668,8 @@
   "match": {
     "duration": 1200017,
     "gameDir": "qw",
-    "map": "Schloss Adler",
+    "map": "schloss",
+    "mapTitle": "Schloss Adler",
     "players": [
       {
         "deaths": 81,
@@ -92341,6 +92342,31 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 66,
+              "hits": 15
+            },
+            "rl": {
+              "attacks": 358,
+              "hits": 193
+            },
+            "sg": {
+              "attacks": 1661,
+              "hits": 744
+            },
+            "sng": {
+              "attacks": 412,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 92,
+              "hits": 54
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 1150,
@@ -92510,6 +92536,35 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 57,
+              "hits": 16
+            },
+            "ng": {
+              "attacks": 1,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 632,
+              "hits": 370
+            },
+            "sg": {
+              "attacks": 1268,
+              "hits": 673
+            },
+            "sng": {
+              "attacks": 343,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 162,
+              "hits": 126
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 1247,
@@ -92689,7 +92744,7 @@
       }
     ]
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

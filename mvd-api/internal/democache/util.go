@@ -181,14 +181,18 @@ func (id DemoID) String() string {
 // encodeResult / decodeResult round-trip a *Result for tier-2 disk
 // storage, via result.EncodeCache / result.DecodeCache.
 //
-// That codec is gob for the bulk plus a JSON patch of the few sections
-// carrying optional scalars. Plain gob is NOT lossless here, contrary to
-// what this comment used to claim: it flattens pointers and omits zero
-// values, so a *int holding a MEASURED ZERO decodes as nil — turning
-// "they took no damage" into "we could not measure it" on every cache
-// hit, while a cold parse answered correctly. See result/cache.go for
-// the full rationale; the encoding lives there because the section list
-// is a property of the schema, not of this cache.
+// That codec is JSON for every section plus gob for Streams alone — not
+// the other way round, and there is deliberately no list of "the sections
+// that need JSON" to keep in step with the schema. Plain gob is NOT
+// lossless here, contrary to what this comment used to claim: it flattens
+// pointers and omits zero values, so a *int holding a MEASURED ZERO
+// decodes as nil — turning "they took no damage" into "we could not
+// measure it" on every cache hit, while a cold parse answered correctly.
+// Streams is the one gob section because it is 97% of the bytes and 40x
+// slower to decode as JSON, and TestStreamsHasNoOptionalScalars pins the
+// constraint that makes it safe. See result/cache.go for the full
+// rationale; the encoding lives there because the split is a property of
+// the schema, not of this cache.
 func encodeResult(r *result.Result) ([]byte, error) {
 	b, err := result.EncodeCache(r)
 	if err != nil {

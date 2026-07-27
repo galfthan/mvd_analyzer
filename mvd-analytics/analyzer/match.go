@@ -474,10 +474,24 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		Duration: matchDuration,
 	}
 
-	// Get map name from server data
+	// Map is the canonical SHORT name (e1m2, dm2, aerowalk) — the one map
+	// identity the whole project keys on — so it resolves through the same
+	// accessor every BSP-derived producer uses (demoinfo map, else the
+	// serverinfo `map` key). That is why this node requires `metadata`:
+	// co.ServerInfoMap is published by MetadataAnalyzer.PopulateCore.
+	// MapTitle is the svc_serverdata level title, display-only.
+	mr.Map = a.core.EffectiveMap()
 	if a.ctx.ServerData != nil {
-		mr.Map = extractMapName(a.ctx.ServerData.LevelName)
+		mr.MapTitle = cleanLevelTitle(a.ctx.ServerData.LevelName)
 		mr.GameDir = a.ctx.ServerData.GameDir
+	}
+	if mr.Map == "" {
+		// Last resort only: neither shortname source named a map (no KTX
+		// demoinfo block AND no serverinfo `map` key). The level title is
+		// the sole remaining signal, so a degraded demo still reports
+		// *something* rather than an empty identity — accepting that on a
+		// map with a distinct title it is a title, not a shortname.
+		mr.Map = mr.MapTitle
 	}
 
 	// Collect team stats
@@ -659,10 +673,16 @@ func isSpectatorTeam(team string) bool {
 	return false
 }
 
-// extractMapName extracts the map name from the level name
-func extractMapName(levelName string) string {
-	// Level name might be like "Schloss Adler by Zaka" or just "dm4"
-	// We want to extract just the map identifier
+// cleanLevelTitle cleans the svc_serverdata level name into the display
+// title published as MatchResult.MapTitle. It is NOT a shortname
+// extractor — on most maps the level name is the pretty title ("Castle of
+// the Damned"), and no amount of cleaning turns that into "e1m2".
+func cleanLevelTitle(levelName string) string {
+	// Level name might be like "Schloss Adler by Zaka" or just "dm4".
+	// filepath.Base("") is ".", so bail before it invents a title.
+	if strings.TrimSpace(levelName) == "" {
+		return ""
+	}
 
 	// First, try to get base filename if it looks like a path
 	name := filepath.Base(levelName)
@@ -670,7 +690,7 @@ func extractMapName(levelName string) string {
 	// Remove common suffixes
 	name = strings.TrimSuffix(name, ".bsp")
 
-	// If there's " by " in it, it's a description - try to get first word
+	// If there's " by " in it, it's a description - drop the author hint
 	if idx := strings.Index(name, " by "); idx > 0 {
 		name = strings.TrimSpace(name[:idx])
 	}

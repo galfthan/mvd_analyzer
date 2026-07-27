@@ -6,6 +6,8 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
+func intp(v int) *int { return &v }
+
 func iv(pairs ...int32) []result.Interval {
 	var out []result.Interval
 	for i := 0; i+1 < len(pairs); i += 2 {
@@ -222,6 +224,32 @@ func TestArmorNoneAlwaysPresent(t *testing.T) {
 	}
 	if none.Ms != 0 {
 		t.Errorf("none = %d ms, want 0", none.Ms)
+	}
+}
+
+// ...but a player whose armor stream was never observed gets NO armor map
+// at all. The complement of nothing over a real alive window is a
+// fabricated maximum — on the POV recording dag_caps_e1m2 seven of eight
+// rows asserted 100% no-armor while the same rows listed armor pickups.
+//
+// The two cases are cleanly distinguishable because appendChangeStr
+// always appends the first sample: a genuinely armorless player has one,
+// an unobserved one has none.
+func TestArmorNoneAbsentWithoutStream(t *testing.T) {
+	p := newHoldPlayer()
+	h := deriveHold(p, iv(0, 10000), result.PlayerStatsWindow{MatchMs: 10000, AliveMs: 10000})
+	if _, ok := h.Armor["none"]; ok {
+		t.Errorf("none = %+v, want ABSENT — the armor stream carries no sample at all", h.Armor["none"])
+	}
+	if h.Armor != nil {
+		t.Errorf("armor map = %+v, want nil", h.Armor)
+	}
+
+	// The genuinely-armorless case still reports a full-match "none".
+	p.ArmorType = []result.ChangeStr{{T: 0, V: ""}}
+	h = deriveHold(p, iv(0, 10000), result.PlayerStatsWindow{MatchMs: 10000, AliveMs: 10000})
+	if none := h.Armor["none"]; none.Ms != 10000 {
+		t.Errorf("none = %d ms, want the full 10000 — the stream says they had none", none.Ms)
 	}
 }
 
@@ -444,6 +472,107 @@ func TestIsTeamplayGate_FFAModeBeatsTeamplayCvar(t *testing.T) {
 	}
 }
 
+// --- score --------------------------------------------------------------
+
+// deriveScore has two branches and, until this test, neither was covered.
+// The kill side is served only where the frag log measured something.
+func TestDeriveScoreKillSide(t *testing.T) {
+	base := func() *Result {
+		return &Result{
+			Match: &result.MatchResult{Players: []result.PlayerStat{
+				{Name: "a", Team: "red", Frags: 62, Kills: 40, Deaths: 18, Suicides: 2},
+			}},
+			Frags: &result.FragResult{
+				Frags: []result.FragEntry{{Killer: "a", Victim: "b", Weapon: "rl"}},
+				ByPlayer: map[string]*result.PlayerFrags{
+					"a": {Kills: 40, Deaths: 18, TeamKills: 3, ByWeapon: map[string]int{"rl": 30, "lg": 10, "gl": 0}},
+				},
+			},
+		}
+	}
+
+	t.Run("measured", func(t *testing.T) {
+		s := deriveScore(base(), "a")
+		if s.Frags != 62 || s.Deaths != 18 {
+			t.Errorf("frags/deaths = %d/%d, want 62/18", s.Frags, s.Deaths)
+		}
+		if s.Kills == nil || *s.Kills != 40 {
+			t.Fatalf("kills = %v, want 40", s.Kills)
+		}
+		if s.Suicides == nil || *s.Suicides != 2 {
+			t.Errorf("suicides = %v, want the scoreboard's 2", s.Suicides)
+		}
+		if s.TeamKills == nil || *s.TeamKills != 3 {
+			t.Errorf("teamKills = %v, want 3", s.TeamKills)
+		}
+		if s.Efficiency == nil || float64(*s.Efficiency) < 0.689 || float64(*s.Efficiency) > 0.690 {
+			t.Errorf("efficiency = %v, want 40/58", s.Efficiency)
+		}
+		// A weapon with a zero count is omitted, not zero-filled.
+		if got := s.ByWeapon; got["rl"] != 30 || got["lg"] != 10 || len(got) != 2 {
+			t.Errorf("byWeapon = %v, want rl/lg only", got)
+		}
+	})
+
+	t.Run("unmeasured: empty frag log beside real deaths", func(t *testing.T) {
+		r := base()
+		r.Frags.Frags = nil
+		s := deriveScore(r, "a")
+		// Both measured sides survive — this is the whole point of not
+		// dropping the family wholesale.
+		if s.Frags != 62 || s.Deaths != 18 {
+			t.Errorf("frags/deaths = %d/%d, want the measured 62/18", s.Frags, s.Deaths)
+		}
+		if s.Kills != nil || s.Suicides != nil || s.TeamKills != nil ||
+			s.Efficiency != nil || s.ByWeapon != nil {
+			t.Errorf("kill side served over an empty frag log: %+v", s)
+		}
+	})
+
+	t.Run("nobody died: honest zeros survive", func(t *testing.T) {
+		r := base()
+		r.Frags.Frags = nil
+		r.Match.Players[0].Kills, r.Match.Players[0].Deaths = 0, 0
+		r.Match.Players[0].Suicides = 0
+		s := deriveScore(r, "a")
+		if s.Kills == nil || *s.Kills != 0 {
+			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
+		}
+	})
+}
+
+// R3: a streamed player the match analyzer never resolved into a
+// scoreboard row recovers kills and deaths from the frag log — and must
+// recover suicides the same way instead of reporting a fabricated 0
+// beside them. Same count scoreboardStatsPost uses (postprocess.go:36-41).
+func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
+	r := &Result{
+		Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "someone else"}}},
+		Frags: &result.FragResult{
+			Frags: []result.FragEntry{
+				{Killer: "a", Victim: "a", Weapon: "rl", IsSuicide: true},
+				{Killer: "a", Victim: "a", Weapon: "gl", IsSuicide: true},
+				{Killer: "b", Victim: "b", Weapon: "rl", IsSuicide: true},
+				{Killer: "a", Victim: "b", Weapon: "lg"},
+			},
+			ByPlayer: map[string]*result.PlayerFrags{
+				"a": {Kills: 11, Deaths: 7, ByWeapon: map[string]int{"lg": 11}},
+			},
+		},
+	}
+	s := deriveScore(r, "a")
+	if s.Kills == nil || *s.Kills != 11 || s.Deaths != 7 {
+		t.Fatalf("kills/deaths = %v/%d, want the frag log's 11/7", s.Kills, s.Deaths)
+	}
+	if s.Suicides == nil || *s.Suicides != 2 {
+		t.Errorf("suicides = %v, want 2 counted off the log — b's must not leak in", s.Suicides)
+	}
+	// Frags (the net score) has no frag-log equivalent and stays 0.
+	if s.Frags != 0 {
+		t.Errorf("frags = %d, want 0 — there is no frag-log net score", s.Frags)
+	}
+}
+
 // --- team aggregation ---------------------------------------------------
 
 func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
@@ -452,7 +581,7 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 		{
 			Name: "a", Team: "red",
 			Window: result.PlayerStatsWindow{MatchMs: matchMs, PresentMs: matchMs, AliveMs: 400000, DeadMs: 200000},
-			Score:  result.PlayerStatsScore{Kills: 10, Deaths: 5},
+			Score:  result.PlayerStatsScore{Kills: intp(10), Deaths: 5},
 			Hold: result.PlayerStatsHold{Weapons: map[string]result.HoldStat{
 				"rl": {Ms: 200000, Runs: 3, LongestMs: 90000},
 			}},
@@ -460,7 +589,7 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 		{
 			Name: "b", Team: "red",
 			Window: result.PlayerStatsWindow{MatchMs: matchMs, PresentMs: matchMs, AliveMs: 200000, DeadMs: 400000},
-			Score:  result.PlayerStatsScore{Kills: 2, Deaths: 8},
+			Score:  result.PlayerStatsScore{Kills: intp(2), Deaths: 8},
 			Hold: result.PlayerStatsHold{Weapons: map[string]result.HoldStat{
 				"rl": {Ms: 100000, Runs: 1, LongestMs: 100000},
 			}},
@@ -492,8 +621,17 @@ func TestTeamAggregationUsesTeamTimeDenominators(t *testing.T) {
 	if got := float64(rl.ShareMatch); got != 0.25 {
 		t.Errorf("team shareMatch = %v, want 0.25 over 2x match window", got)
 	}
-	if got := float64(red.Score.Efficiency); got < 0.4799 || got > 0.4801 {
+	if red.Score.Efficiency == nil {
+		t.Fatal("team efficiency absent though both members carry kills")
+	}
+	if got := float64(*red.Score.Efficiency); got < 0.4799 || got > 0.4801 {
 		t.Errorf("team efficiency = %v, want 12/25", got)
+	}
+	if red.Score.Kills == nil || *red.Score.Kills != 12 {
+		t.Errorf("team kills = %v, want 12", red.Score.Kills)
+	}
+	if red.Members == nil || *red.Members != 2 {
+		t.Errorf("team members = %v, want an always-present 2", red.Members)
 	}
 }
 
@@ -514,6 +652,97 @@ func TestTeamAggregationPreservesXferObservability(t *testing.T) {
 	}
 	if *players[0].Pickups.ByKind["rl"].Xfer != 1 {
 		t.Error("aggregation mutated a member's counter through the shared pointer")
+	}
+}
+
+// --- damage family ------------------------------------------------------
+
+// damage.go creates a per-player entry only on an actual hit, so a player
+// who neither dealt nor took a point of damage has none. On a demo that
+// carries the damage stream that is an OBSERVED all-zero row: collapsing
+// it into an absent family says "we could not tell", which is false, and
+// inverts what deriveTakenEnemy deliberately does two functions away.
+func TestDeriveDamageZeroRowIsObserved(t *testing.T) {
+	r := &Result{Damage: &result.DamageResult{
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 4000, Taken: 3000},
+		},
+	}}
+	takenEnemy := deriveTakenEnemy(r)
+
+	d := deriveDamage(r, "ghost", takenEnemy)
+	if d == nil {
+		t.Fatal("damage absent for a player the demo measured at zero")
+	}
+	if d.Given != 0 || d.GivenTeam != 0 || d.GivenSelf != 0 || d.EnemyWeapons != 0 {
+		t.Errorf("zeroed family is not zero: %+v", d)
+	}
+	if d.Taken == nil || *d.Taken != 0 {
+		t.Errorf("taken = %v, want an observed 0", d.Taken)
+	}
+	if d.ByWeapon != nil {
+		t.Errorf("byWeapon = %v, want absent — weapons with no damage are omitted", d.ByWeapon)
+	}
+
+	// A demo with no damage information at all is still the absent case.
+	if got := deriveDamage(&Result{}, "ghost", nil); got != nil {
+		t.Errorf("damage = %+v, want absent with no damage stream at all", got)
+	}
+}
+
+// T1.4: on a k_midair / k_instagib / k_dmgfrags demo damage.go skips the
+// bounded reconstruction entirely (damage.go:308,542-546), so this family
+// falls back to RAW wire damage including overkill. It used to report
+// `src: "derived"` — the same value as the bounded case — leaving the
+// degradation invisible unless the caller also fetched
+// damage.boundedMode.
+func TestDeriveDamageMarksUnboundedFallback(t *testing.T) {
+	bounded := &result.PlayerDamage{Given: 13641, Taken: 9000, ByWeapon: map[string]int{"rl": 13000}}
+	standard := &Result{Damage: &result.DamageResult{
+		BoundedMode: "standard",
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 19640, Taken: 14000, ByWeapon: map[string]int{"rl": 19000}, Bounded: bounded},
+		},
+	}}
+	d := deriveDamage(standard, "a", nil)
+	if d.Src != result.SrcDerived {
+		t.Errorf("src = %q, want derived", d.Src)
+	}
+	if d.Given != 13641 {
+		t.Errorf("given = %d, want the bounded 13641", d.Given)
+	}
+
+	skipped := &Result{Damage: &result.DamageResult{
+		BoundedMode: "skipped:instagib",
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {Given: 19640, Taken: 14000, ByWeapon: map[string]int{"rl": 19000}},
+		},
+	}}
+	d = deriveDamage(skipped, "a", nil)
+	if d.Src != result.SrcDerivedUnbounded {
+		t.Errorf("src = %q, want %q — the numbers below are raw wire damage", d.Src, result.SrcDerivedUnbounded)
+	}
+	if d.Given != 19640 {
+		t.Errorf("given = %d, want the raw 19640", d.Given)
+	}
+
+	// The marker is demo-global: a team row must not end up split across
+	// two src values, and a lazily-absent bounded nest in a STANDARD-mode
+	// demo is not a mode degradation.
+	lazy := &Result{Damage: &result.DamageResult{
+		BoundedMode: "standard",
+		ByPlayer:    map[string]*result.PlayerDamage{"a": {Given: 40}},
+	}}
+	if got := deriveDamage(lazy, "a", nil).Src; got != result.SrcDerived {
+		t.Errorf("src = %q, want derived — standard mode, only the nest is absent", got)
+	}
+
+	teams := aggregateTeamRows([]result.PlayerStatsRow{
+		{Name: "a", Team: "red", Damage: &result.PlayerStatsDamage{Src: result.SrcDerivedUnbounded, Given: 19640}},
+		{Name: "b", Team: "red", Damage: &result.PlayerStatsDamage{Src: result.SrcDerivedUnbounded, Given: 100}},
+	}, 600000)
+	if teams[0].Damage.Src != result.SrcDerivedUnbounded {
+		t.Errorf("team src = %q, want the members' %q", teams[0].Damage.Src, result.SrcDerivedUnbounded)
 	}
 }
 
@@ -640,5 +869,71 @@ func TestDeriveLoginsIsDeterministicOnNameCollision(t *testing.T) {
 	}
 	if _, ok := deriveLogins(co)["other"]; ok {
 		t.Error("a player with no *auth key must get no login entry at all")
+	}
+}
+
+// T1.5: team rows never carried an accuracy family at all, so the web's
+// per-team Weapon Stats column read `-` beside per-player rows showing
+// real percentages. Attacks and hits sum over members; hits stays ABSENT
+// unless every contributing member measured it, because mixing a
+// measured member with an unmeasured one understates the team hit-rate
+// under a number that looks measured.
+func TestTeamAggregationSumsAccuracy(t *testing.T) {
+	players := []result.PlayerStatsRow{
+		{
+			Name: "a", Team: "red",
+			Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 100, Hits: intp(30)},
+				"lg": {Attacks: 400, Hits: intp(120)},
+			}},
+		},
+		{
+			Name: "b", Team: "red",
+			Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 60, Hits: intp(12)},
+				// No hits on lg: this member's fires linked to nothing.
+				"lg": {Attacks: 200},
+			}},
+		},
+	}
+	red := aggregateTeamRows(players, 600000)[0]
+	if red.Accuracy == nil {
+		t.Fatal("team carries no accuracy family though both members do")
+	}
+	if red.Accuracy.Src != result.SrcDerived {
+		t.Errorf("team accuracy src = %q, want the members' derived", red.Accuracy.Src)
+	}
+	rl := red.Accuracy.ByWeapon["rl"]
+	if rl.Attacks != 160 || rl.Hits == nil || *rl.Hits != 42 {
+		t.Errorf("rl = %+v, want 160 attacks / 42 hits", rl)
+	}
+	lg := red.Accuracy.ByWeapon["lg"]
+	if lg.Attacks != 600 {
+		t.Errorf("lg attacks = %d, want 600", lg.Attacks)
+	}
+	if lg.Hits != nil {
+		t.Errorf("lg hits = %d, want ABSENT — one member never measured hits, "+
+			"and 120/600 would read as a measured 20%% team hit-rate", *lg.Hits)
+	}
+
+	// A team where nobody carries the family keeps none.
+	none := aggregateTeamRows([]result.PlayerStatsRow{{Name: "c", Team: "blue"}}, 600000)[0]
+	if none.Accuracy != nil {
+		t.Errorf("accuracy = %+v, want absent", none.Accuracy)
+	}
+}
+
+// A src disagreement between members is the phantom-roster defect, not a
+// data condition (result.SrcMixed), and must surface rather than be
+// resolved by whichever member came first.
+func TestTeamAggregationAccuracyMixedSrcIsRecorded(t *testing.T) {
+	players := []result.PlayerStatsRow{
+		{Name: "a", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcKTX,
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 10, Hits: intp(4)}}}},
+		{Name: "b", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1)}}}},
+	}
+	if got := aggregateTeamRows(players, 600000)[0].Accuracy.Src; got != result.SrcMixed {
+		t.Errorf("team accuracy src = %q, want mixed", got)
 	}
 }

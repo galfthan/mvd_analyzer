@@ -156,7 +156,11 @@ type Parser struct {
 	// the still-to-arrive stat-based DeathEvent. Gating obit emission
 	// on this flag keeps warmup obits silent and lets the dedup state
 	// flow normally once the match is live.
-	matchStarted   bool
+	matchStarted bool
+	// printLines buffers svc_print fragments per (level, dem_single
+	// target) until the line they belong to is terminated. See
+	// assemblePrintLine in print.go.
+	printLines     map[printLineKey]*printLineBuf
 	handlers       []Handler
 	floatCoords    bool
 	fteExtensions  uint32 // FTE protocol extension flags
@@ -232,11 +236,27 @@ func (p *Parser) ParseOne() error {
 	msg, err := p.decoder.NextMessage()
 	if err != nil {
 		if err == mvd.ErrEndOfDemo {
-			return io.EOF
+			err = io.EOF
+		}
+		// The stream is over — cleanly or by truncation. Release any
+		// half-assembled print line so a demo that stops mid-line still
+		// reports what the server had said. Idempotent: the buffer map is
+		// empty afterwards, so a caller that keeps calling ParseOne past
+		// the end gets nothing more.
+		if ferr := p.flushPendingPrintLines(); ferr != nil {
+			return ferr
 		}
 		return err
 	}
-	return p.parseMessage(msg)
+	// svc_disconnect "EndOfDemo" surfaces io.EOF from inside the message
+	// (parser.go's SvcDisconnect case), so flush on that path too.
+	perr := p.parseMessage(msg)
+	if perr == io.EOF {
+		if ferr := p.flushPendingPrintLines(); ferr != nil {
+			return ferr
+		}
+	}
+	return perr
 }
 
 // parseMessage handles a single demo message

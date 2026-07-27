@@ -13068,7 +13068,8 @@
   "match": {
     "duration": 599993,
     "gameDir": "qw",
-    "map": "Skull Hunt",
+    "map": "skull",
+    "mapTitle": "Skull Hunt",
     "players": [
       {
         "deaths": 22,
@@ -14017,7 +14018,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

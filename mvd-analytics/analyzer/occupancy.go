@@ -98,11 +98,6 @@ func (r *occupancyRecord) open() bool { return r.endMs == math.MaxInt32 }
 // a distinct connection.
 func (r *occupancyRecord) identified() bool { return r.userID != 0 }
 
-// covers reports whether tMs falls inside the half-open occupancy window.
-func (r *occupancyRecord) covers(tMs int32) bool {
-	return tMs >= r.startMs && tMs < r.endMs
-}
-
 // occupancyTracker follows the tenancy of every client slot across a demo.
 type occupancyTracker struct {
 	cur     map[int]*occupancyRecord // slot -> currently open record

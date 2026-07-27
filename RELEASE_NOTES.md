@@ -5,6 +5,159 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-26 (playerstats) — `playerStats` learns to say "not measured", schema v62
+
+Amends the v61 section before it ships. Every `playerStats` change below
+replaces a confident zero with an absence, or names a degradation that had
+none; the section closes with a separate fix that makes `match.map` the
+canonical map shortname. Golden corpus regenerated: the movement is
+`schemaVersion`, the new `accuracy` block on team rows, and the
+`match.map` / `match.mapTitle` split.
+
+- **The kill side of `score` is optional.** `kills`, `suicides`,
+  `teamKills`, `byWeapon` and `efficiency` are all attributed from the
+  obituary-derived frag log; `frags` (the wire net score) and `deaths`
+  (protocol death events) are not. On a demo whose obituaries never
+  matched, the five are now **omitted together** instead of being served
+  as zeros. `4on4_l_vs_la[e1m2]` was the canonical case — a full 4v4
+  scoreboard with 230 team frags and 121 deaths reporting 0 kills and
+  0.0% efficiency on every row, byte-indistinguishable from a genuinely
+  awful team — until the frag-log recovery in the entry below made its
+  kill side measurable; the omission now guards any demo whose
+  obituaries genuinely cannot be matched.
+  **Consumers must render `-`, not `0`.** The condition is demo-global,
+  so a team row never mixes a measured member with an unmeasured one.
+- **`hold.armor` is omitted when the armor stream is empty.** `none` is
+  the alive-time complement, and it was emitted whenever the alive
+  window was known — including when no armor sample had ever been
+  observed. On the POV recording `dag_caps_e1m2`, 7 of 8 rows asserted
+  100% no-armor while the same rows listed their armor pickups. A player
+  who genuinely never picked armor up still reports `none == aliveMs`;
+  the change stream always carries its first sample, so the two cases
+  are cleanly distinguishable.
+- **`damage.src` is three-valued: `"derived:unbounded"`.** On a
+  `k_midair` / `k_instagib` / `k_dmgfrags` demo the bounded
+  reconstruction is skipped entirely, and the damage family silently
+  became raw wire damage including overkill while still reading
+  `"derived"`. Measured on `4on4_oeks_vs_tsq[dm2]`: raw runs 38-44% above
+  bounded, and on instagib the wire value is a flat 5000/hit. Never
+  compare an unbounded row's damage with a bounded one's. No demo in the
+  test corpus carries those cvars, which is why the path went unmarked.
+- **A zero-damage player now gets a zeroed `damage` family** on a demo
+  that carries the damage stream. The reconstruction only creates an
+  entry on an actual hit, so the row vanished — collapsing an observed
+  zero into "unmeasurable", the inverse of what the same file does when
+  it zero-fills `takenEnemy`.
+- **Team rows carry `accuracy`.** They never did, so the web's per-team
+  Weapon Stats column rendered `-` beside per-player rows showing real
+  percentages — a regression against the deleted JavaScript, which summed
+  it. `attacks` and `hits` sum per weapon over members; `hits` stays
+  **absent** unless every contributing member measured it (mixing a
+  measured member with an unmeasured one understates the team hit-rate
+  under a number that looks measured), and `real`/`virtual` are not
+  aggregated, since KTX omits the pair unless it recorded one.
+- **`sources` is computed from the rows being served, after filtering.**
+  It previously read `"ktx"` for a family if *any* row matched the KTX
+  block, badging unmatched rows with a provenance they did not have, and
+  `PlayerStats()` copied the roll-up verbatim into filtered responses,
+  where it described rows that had been removed. It gains a third value,
+  `"mixed"`, reserved as a **canary**: on a demo with a KTX block every
+  roster row joins it, so a disagreement means a phantom roster row is
+  back. It should never appear on healthy data.
+- **KTX measured zeros in `damage.byWeapon` are no longer dropped.** The
+  overlay skipped a KTX weapon whose `damage.enemy` was 0 and kept the
+  reconstruction's number in its place — then stamped the family
+  `src: "ktx"`. KTX emits the `damage` sub-block whenever either counter
+  moved (`ktx/src/stats_json.c:208`), so `enemy: 0` is a measurement: a
+  GL used purely for team splash was served as 700 *enemy* damage under
+  a KTX badge, and `byWeapon` stopped summing to `given`. The non-KTX
+  residual keys (`unknown`, `stomp`, `tele`, `explobox`) are deliberately
+  kept — real measured damage, and on `1on1_bananfalco_betowen_240426_dm2`
+  the `unknown: 4` residual is what reconciles `byWeapon` with KTX's
+  `given`.
+- **Unfiltered `/player-stats` can no longer return `"players": null`.**
+  The filtered branch had built an empty slice since it was written; the
+  unfiltered one appended to a nil. `players` is declared required and
+  array-typed, so this was a live spec violation on any demo whose stream
+  roster came out empty.
+- **`accuracy` overlay documented and pinned.** KTX's block replaces the
+  derived one wholesale rather than merging per weapon, because KTX's
+  `attacks` is a pellet count for sg/ssg where ours is trigger pulls.
+  Measured across all 42 cached corpus demos (228 rows): **zero** weapons
+  present in the reconstruction and missing from KTX's `acc` set, so the
+  swap is lossless in practice and no per-entry `src` is introduced.
+- **Type changes** on the same fields, for measured-zero consistency:
+  `ping` `int` -> `*int`; `members` `int` -> `*int`, so a team row always
+  publishes it — including the `0` that a team whose only member never
+  streamed needs most, since every `shareMatch` on it rests on
+  `matchMs x 0`; `efficiency` `Share` -> `*Share`.
+- **Outside the section:** `frags.byWeapon` and
+  `frags.byPlayer[].byWeapon` now move with the Finalize teamkill
+  re-classification, which previously adjusted only `kills` — so
+  `sum(byWeapon) == kills` holds, as `score.byWeapon` claims. Fires on
+  auth-name servers; no golden demo reaches it.
+- **`match.map` is the canonical map SHORTNAME; the title moves to
+  `match.mapTitle`.** `match.map` was the `svc_serverdata` level name run
+  through a cleanup heuristic, which on most id maps yields the pretty
+  title — `4on4_l_vs_la[e1m2]` reported `"Castle of the Damned"`, dm2
+  `"Claustrophobopolis"`. Two names for one map meant `match` could not
+  be joined against `demoInfo.map`, `metadata.serverInfo.map`,
+  `searchGames` rows or any BSP / loc / geometry file key, and every
+  consumer that wanted the identity had to route around it (`/overview`
+  carried an explicit workaround; the web's `mapFileKey()` excluded
+  `match.map` by name). **The rule: the short name is the map identity
+  everywhere; the title is display-only data.** `match.map` now resolves
+  through the same accessor every BSP-derived producer uses — the KTX
+  demoinfo map, else the serverinfo `map` key — falling back to the
+  cleaned title only when neither source names a map. The title is served
+  verbatim as the new, additive `match.mapTitle`, omitted when
+  `svc_serverdata` named no level. `/overview`'s `map`/`mapTitle` split is
+  unchanged in shape (it already published these two values); the web
+  topbar and Summary map cell now show `mapTitle` when present, and
+  `mapFileKey()` gains `match.map` as a final fallback now that it is
+  guaranteed short. Golden movement is confined to `match.map` and the new
+  `match.mapTitle` key.
+- **New regression net.** The `mvd-analytics/corpus/` special-cases
+  harness gains four playerStats invariants — a hold key implies a
+  non-empty stream, the kill side implies a non-empty frag log, a team
+  row carries every family its members carry, and on a demo with a KTX
+  block every roster row joins it with an agreeing `src`. They were red
+  on 8 of the 12 local demos before these fixes.
+
+## 2026-07-26 (playerstats) — pre-KTX demos get their frag log back
+
+No schema bump. Layer 1 only; every consumer of `PrintEvent` benefits.
+
+- **A `svc_print` payload is a console fragment, not a line.** QuakeC
+  builds a line out of however many `sprint`/`bprint` calls the code path
+  makes, and each one becomes its own `svc_print`. Old kmod/qwe emits an
+  obituary id1-progs-style — `"DARKLORD"`, `"'s rocket"`, `"\n"` arrive as
+  three messages — while modern KTX prints obituaries whole. Both obituary
+  consumers (the parser's death-mining and the analytics frag log) matched
+  per-message, so on a pre-KTX demo **nothing ever matched**.
+- **`4on4_l_vs_la[e1m2]` went from an empty frag log to 368 entries**, one
+  per death counted from the death stream, every one naming killer, victim
+  and weapon. The 2003 duel `1on1_]apollyon[_vs_jogi_[dm4]` gains its
+  fragmented obituaries too. This is what `playerStats.score.kills` and
+  `efficiency` were reading as a confident `0` on all eight rows of a 4on4
+  that scored 230 frags.
+- **The parser now assembles fragments into lines** before emitting
+  `PrintEvent` and before any obituary / pickup / match-start matching,
+  following ezquake's `CL_ProcessPrint` rule
+  (`ezquake-source/src/cl_parse.c:3072-3105`) with the buffer keyed by
+  (print level, `dem_single` target) — ezquake sees one client's stream,
+  we demultiplex the whole recording. A line that is already whole passes
+  through byte-identically.
+- **Modern KTX demos are unaffected in the data**, and the golden corpus
+  is unchanged. Two families there were fragmented and now arrive as one
+  event instead of 6-14 (the `PRINT_LOW` backpack pickup line, still
+  `ktx/src/items.c:2404-2618`, and the end-of-match "top scorers" table);
+  neither carries an obituary, chat line or pickup match.
+- New regression net: `mvd-analytics/corpus/obituary_test.go` asserts a
+  frag-log floor on the pre-KTX special-case demos (0 entries before this
+  change), plus parser unit tests for fragmented obituaries, interleaved
+  levels/targets, and end-of-demo flush.
+
 ## 2026-07-25 (playerstats) — the API cache stopped eating measured zeros
 
 No schema bump; the tier-2 cache-format counter goes to `f3`, so cached
@@ -78,8 +231,19 @@ corpus regenerated for the two new maps.
   `Players` count instead of an average ping, and no `ToDie`, because
   averaging per-player averages across different death counts is
   meaningless; powerup seconds come from our hold integral rather than
-  KTX's `item.time`, so they agree with the Possession panel (measured
-  identical on the test corpus).
+  KTX's `item.time`, so they agree with the Possession panel. The two
+  are **close but not identical**: across the 55 comparable powerup rows
+  in the golden corpus the largest disagreement is 1.011 s, and 17 of
+  those rows shift by one displayed second because we `Math.round` a
+  millisecond integral where KTX truncates its own second counter (7
+  rows still differ if we truncate too). Nothing here moves by more than
+  a second.
+- **One visible regression, since fixed.** The per-team Weapon Stats
+  accuracy column rendered `-` on every demo: the deleted JavaScript
+  summed `attacks`/`hits` over a team's members, and no `accuracy`
+  family was ever built for a team row. The v62 section above restores
+  it in Go, on both the analyzer aggregate and the read-time KTX
+  overlay.
 - **`isDuel()` reads `playerStats`**, so a pre-KTX-block 1v1 collapses
   the team panels correctly instead of falling through and rendering
   them. The canonical team→colour order (`timelineState.teams`,

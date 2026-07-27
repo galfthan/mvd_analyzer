@@ -8,21 +8,10 @@ import (
 // ModelBounds is the axis-aligned bounding box of one BSP submodel. A
 // brush entity references a submodel via its `model "*N"` key, where N
 // indexes into the slice returned by ReadModelBounds (model 0 is
-// worldspawn). The box centre is a reasonable anchor point for a brush
-// entity (button, teleport trigger, door); the box itself is the
-// trigger volume.
+// worldspawn). The box is the brush entity's trigger volume.
 type ModelBounds struct {
 	Mins Vec3
 	Maxs Vec3
-}
-
-// Center returns the midpoint of the bounding box.
-func (m ModelBounds) Center() Vec3 {
-	return Vec3{
-		X: (m.Mins.X + m.Maxs.X) / 2,
-		Y: (m.Mins.Y + m.Maxs.Y) / 2,
-		Z: (m.Mins.Z + m.Maxs.Z) / 2,
-	}
 }
 
 // ReadModelBounds reads only the models lump and returns each submodel's

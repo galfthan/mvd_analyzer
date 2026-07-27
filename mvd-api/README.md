@@ -392,9 +392,14 @@ Tier 2 is now `result.EncodeCache`: JSON for every section — which
 distinguishes `0` from absent and is the representation the golden corpus
 and OpenAPI spec already pin — plus gob for `Streams` alone, which is 97%
 of the payload (50.5 MB of 52.3 MB on a 4on4) and which JSON decodes 40x
-slower. Cost against the old bare gob: +2.6% on disk and ~48 ms per
-tier-2 read. Format-2 files cannot be repaired (the information is gone),
-so the bump re-parses them once on next touch.
+slower. Cost against the old bare gob is **additive** — the gob decode of
+`Streams` is unchanged and the JSON half is layered on top: +2.6% on disk
+and ~48 ms per tier-2 read on a 4on4. Both figures scale with how much of
+a demo is *not* streams, so a smaller game pays proportionally more (a
+2on2 dm6 goes 458 KB → 788 KB; the 4on4 `defer_reconnect` goes 1.19 MB →
+2.16 MB and 16.7 ms → 52.5 ms to decode). Format-2 files cannot be
+repaired (the information is gone), so the bump re-parses them once on
+next touch.
 
 Tier 3 holds the lazily-materialised `los` artifact (per-player LOS/PVS) as a
 side-gob so its multi-second raycast survives a process restart or an LRU

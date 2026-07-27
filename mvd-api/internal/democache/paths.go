@@ -57,9 +57,11 @@ func mvdPath(root, sha string) string {
 // are byte-identical (mvd-api has served the enriched /shots and /aim on every
 // request since phase 5.3), so this is a cache-locality bump, not a schema one.
 //
-// Format 3 replaced the bare gob with result.EncodeCache — gob plus a JSON
-// patch of the sections carrying optional scalars. A bare gob drops any
-// pointer to a zero value (it flattens pointers and omits zero values), so
+// Format 3 replaced the bare gob with result.EncodeCache — JSON for every
+// section (JSON distinguishes 0 from absent), plus gob for Streams alone,
+// which is 97% of the bytes and the one section contracted to carry no
+// optional scalars. A bare gob drops any pointer to a zero value (it
+// flattens pointers and omits zero values), so
 // every format-2 gob on disk has already lost the difference between "we
 // measured zero" and "we could not measure it" for fields like
 // damage.taken, accuracy.byWeapon[].hits and pickups.xferSelf. Those files

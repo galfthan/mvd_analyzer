@@ -82781,7 +82781,8 @@
   "match": {
     "duration": 1200101,
     "gameDir": "qw",
-    "map": "Coup de Fer",
+    "map": "defer",
+    "mapTitle": "Coup de Fer",
     "players": [
       {
         "deaths": 59,
@@ -95493,6 +95494,39 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 99,
+              "hits": 19
+            },
+            "lg": {
+              "attacks": 458,
+              "hits": 140
+            },
+            "ng": {
+              "attacks": 1,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 272,
+              "hits": 122
+            },
+            "sg": {
+              "attacks": 1632,
+              "hits": 837
+            },
+            "sng": {
+              "attacks": 117,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 106,
+              "hits": 84
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 1243,
@@ -95690,6 +95724,39 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 20,
+              "hits": 0
+            },
+            "lg": {
+              "attacks": 227,
+              "hits": 88
+            },
+            "ng": {
+              "attacks": 3,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 304,
+              "hits": 169
+            },
+            "sg": {
+              "attacks": 1355,
+              "hits": 724
+            },
+            "sng": {
+              "attacks": 390,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 168,
+              "hits": 128
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 100,
@@ -95889,7 +95956,7 @@
       }
     ]
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

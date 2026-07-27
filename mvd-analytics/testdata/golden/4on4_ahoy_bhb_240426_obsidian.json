@@ -77978,7 +77978,8 @@
   "match": {
     "duration": 1200128,
     "gameDir": "qw",
-    "map": "Obsidian",
+    "map": "obsidian",
+    "mapTitle": "Obsidian",
     "players": [
       {
         "deaths": 65,
@@ -94751,6 +94752,31 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 67,
+              "hits": 16
+            },
+            "rl": {
+              "attacks": 217,
+              "hits": 151
+            },
+            "sg": {
+              "attacks": 1574,
+              "hits": 873
+            },
+            "sng": {
+              "attacks": 668,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 158,
+              "hits": 125
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 1643,
@@ -94919,6 +94945,35 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 90,
+              "hits": 20
+            },
+            "ng": {
+              "attacks": 4,
+              "hits": 0
+            },
+            "rl": {
+              "attacks": 152,
+              "hits": 109
+            },
+            "sg": {
+              "attacks": 1658,
+              "hits": 766
+            },
+            "sng": {
+              "attacks": 506,
+              "hits": 0
+            },
+            "ssg": {
+              "attacks": 247,
+              "hits": 188
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 1588,
@@ -95089,7 +95144,7 @@
       }
     ]
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

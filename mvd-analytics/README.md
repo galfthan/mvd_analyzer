@@ -378,6 +378,7 @@ flowchart TB
   match -->|"match"| region_control
   match_final -->|"match:final"| player_stats
   metadata -->|"metadata"| los
+  metadata -->|"metadata"| match
   metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
   roster -->|"roster"| backpacks

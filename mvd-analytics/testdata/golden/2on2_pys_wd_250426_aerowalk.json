@@ -35548,7 +35548,8 @@
   "match": {
     "duration": 600040,
     "gameDir": "qw",
-    "map": "Aerowalk",
+    "map": "aerowalk",
+    "mapTitle": "Aerowalk",
     "players": [
       {
         "deaths": 56,
@@ -38563,6 +38564,31 @@
     },
     "teams": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 15,
+              "hits": 4
+            },
+            "lg": {
+              "attacks": 568,
+              "hits": 178
+            },
+            "rl": {
+              "attacks": 359,
+              "hits": 159
+            },
+            "sg": {
+              "attacks": 118,
+              "hits": 19
+            },
+            "sng": {
+              "attacks": 9,
+              "hits": 0
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 231,
@@ -38729,6 +38755,31 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 27,
+              "hits": 2
+            },
+            "lg": {
+              "attacks": 339,
+              "hits": 79
+            },
+            "rl": {
+              "attacks": 389,
+              "hits": 162
+            },
+            "sg": {
+              "attacks": 137,
+              "hits": 25
+            },
+            "sng": {
+              "attacks": 12,
+              "hits": 0
+            }
+          },
+          "src": "derived"
+        },
         "damage": {
           "byWeapon": {
             "gl": 65,
@@ -38895,7 +38946,7 @@
       }
     ]
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

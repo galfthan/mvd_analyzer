@@ -5,7 +5,21 @@ package result
 // streams.global (matchStart/matchEnd); read Duration for "how long was
 // the match".
 type MatchResult struct {
-	Map      string       `json:"map"`
+	// Map is the canonical SHORT map identifier — "e1m2", "dm2",
+	// "aerowalk". It is THE map identity across the whole project: the
+	// join key against searchGames rows and the serverinfo `map` key, and
+	// the basename every BSP / loc / geometry lookup is named by. Resolved
+	// exactly like EffectiveMap (demoinfo map, else serverinfo `map`); see
+	// analyzer/match.go Finalize for the degraded last resort.
+	Map string `json:"map"`
+	// MapTitle is the level TITLE the server announced in svc_serverdata
+	// ("Castle of the Damned" on e1m2, "Claustrophobopolis" on dm2),
+	// cleaned of the `.bsp` suffix and trailing ` by <author>` hints.
+	// DISPLAY ONLY — never a file key, a join key, or any other
+	// identifier: it is free-form text a mapper chose, it is not unique,
+	// and on many demos it is absent. Omitted when svc_serverdata named no
+	// level.
+	MapTitle string       `json:"mapTitle,omitempty"`
 	GameDir  string       `json:"gameDir"`
 	Duration int32        `json:"duration"` // ms
 	Players  []PlayerStat `json:"players"`

@@ -32,7 +32,14 @@ talks to it through a JS shim.
     [`vendor/README.md`](static/vendor/README.md).
   - `maps/` — pre-generated per-map floor polygon JSON (version 2:
     per-vertex x,y,z — drives the map tab's 3D view). Committed; the
-    frontend fetches `maps/<basename>.json` at demo load.
+    frontend fetches `maps/<basename>.json` at demo load. `<basename>`
+    comes from `mapFileKey()`, which mirrors Go's `Result.EffectiveMap()`
+    — `demoInfo.map`, then the serverinfo `map` key, then `match.map`
+    (also a shortname), so a demo with no KTX block still finds its
+    geometry. `match.mapTitle` is the display-only level title ("Castle
+    of the Damned") and never a file key; the topbar and the Summary
+    map cell show the shortname and carry the title only as the map
+    cell's tooltip — nothing else reads it.
   - `probe.html` — tiny dev page used to probe runtime features.
 
 ## Build and deploy
@@ -164,7 +171,7 @@ strip above the main pane.
 
 Every table on the Summary tab — Basic Stats, Possession, Weapon Stats,
 Item Pickups, and the four per-team variants — renders
-`result.playerStats` (schema v61). It replaced a four-source join across
+`result.playerStats` (schema v62). It replaced a four-source join across
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
 merge now happens once, in Go.
@@ -185,6 +192,23 @@ Two consequences worth knowing:
   tab (a 2003 kmod duel is the regression case). The one class with no
   section at all is a parse that produced no player streams — a race demo
   has no match — and that renders as empty tables.
+- **Absent is rendered `-`, never `0`.** A field the pipeline could not
+  measure is omitted rather than zeroed, so the tables test for absence:
+  the kill side of `score` (kills / suicides / teamKills / efficiency /
+  the by-weapon split) goes missing together on a demo whose obituary log
+  yielded nothing while deaths were still counted, and `ping` is KTX-only.
+  Frags and deaths are measured on those demos and still print. In the
+  Basic Stats tables a zero that *was* measured still prints as `0`;
+  the Weapon Stats and Possession tables are the exception by design —
+  a weapon the player never touched or an item never held renders `-`
+  across its cells rather than a row of zeros.
+- **The Possession cells carry their denominator in a tooltip** — held /
+  alive / present / match ms. A share is only as good as the window it
+  divides by, and a player the streams barely saw can get a presence
+  window that is a floor rather than a measurement.
+- **The four "Per Team" tables hide when `playerStats.teams` is empty**
+  (body class `no-team-rows`), which is FFA and duels — otherwise FFA
+  rendered four headers over an empty tbody.
 
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,
@@ -205,6 +229,32 @@ unpkg / Google Fonts are unreachable. To bump a vendored version: replace
 the file (keeping the version in its name), update the matching
 `<script>` / `<link>` in `index.html`, and update the row in
 `static/vendor/README.md` (see that file for the full procedure).
+
+### Panel explanations live behind one disclosure
+
+Several panels need a paragraph explaining what their numbers mean and
+where they come from — Possession (Summary), Region Control and Loc
+Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
+full, but collapsed, so a panel opens with its table rather than with a
+wall of text. The idiom is a single one in `index.html`:
+
+```html
+<details class="panel-info">
+    <summary>More info</summary>
+    <div class="aim-desc">…the full explanation…</div>
+</details>
+```
+
+`.panel-info` (styles.css) is the disclosure chrome, visually derived
+from `.per-player-detail` — the older per-player `<details>` blocks on
+the Timeline tab, which stay as they are. The body element keeps
+whichever prose class it already had (`.panel-note`, `.aim-desc`,
+`.locheatmap-desc`), so only the collapsing is shared, not the type
+scale. Use the same bare `More info` label for any new one — an ⓘ
+glyph was tried and dropped, since the vendored Rajdhani/Inter subsets
+carry no U+24D8 and it rendered as tofu. Short single-line captions
+(`.locmetric-hint`, `.map-entity-hint`) stay inline and do **not** get
+a disclosure.
 
 ## Performance timing (console)
 
@@ -442,6 +492,13 @@ drawn live over the neutral floor with a brighter outline and bold label.
 This is the *only* place a region takes on colour, so a coloured patch
 always means "someone is here". Team membership comes from the canonical
 `playerSymbols[name].teamIdx`, so it matches team colours everywhere else.
+
+`playerSymbols` is built by `assignPlayerSymbols()` from the KTX demoinfo
+roster where the demo has one and from `playerStats.players` otherwise —
+it is what the draw loop, the legend, the trail dropdown and the sidebar
+roster all key off, so a demo with no KTX block would otherwise render a
+map with nobody on it. Team colours still come from `getTeamOrder()` /
+`timelineState.teams`, never from either roster's own order.
 
 **View / velocity arrows** — two optional per-player toggles, **View**
 and **Vel**, draw 3D arrows from each player's origin (`drawPlayerArrows`

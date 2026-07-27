@@ -160,8 +160,10 @@ func degenerateResult(res *result.Result) bool {
 	if res == nil {
 		return true
 	}
-	// No ServerData: without a map the demo delivered no svc_serverdata, so
-	// there is no game to analyze.
+	// No map at all: Match.Map is the canonical shortname, resolved from the
+	// demoinfo block, then the serverinfo `map` key, then the svc_serverdata
+	// level title. Empty means not one of those three named a level, which
+	// no real recording manages — there is no game to analyze.
 	if res.Match == nil || res.Match.Map == "" {
 		return true
 	}

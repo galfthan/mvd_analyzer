@@ -47,7 +47,6 @@ func PlayerStats(r *result.Result, opts PlayerStatsOptions) (*result.PlayerStats
 		// required and array-typed, and a null there breaks a caller that
 		// ranges over it.
 		filtered := &result.PlayerStatsResult{
-			Sources: out.Sources,
 			Players: []result.PlayerStatsRow{},
 		}
 		for i := range out.Players {
@@ -73,7 +72,67 @@ func PlayerStats(r *result.Result, opts PlayerStatsOptions) (*result.PlayerStats
 		}
 		out = filtered
 	}
+	// AFTER filtering: the roll-up describes the rows this response
+	// carries, so it must be computed over exactly those. Copying the
+	// unfiltered roll-up made it describe rows that had been removed.
+	out.Sources = rollUpSources(out.Players)
 	return out, nil
+}
+
+// rollUpSources recomputes the per-family provenance from the rows.
+//
+// score and hold are never overlaid, so they are constants. The other
+// three are read off the rows themselves: all agree -> that value, none
+// carries the family -> omitted, they disagree -> result.SrcMixed, which
+// is a canary for the phantom-roster defect rather than a data condition
+// (see result.SrcMixed).
+//
+// Team rows are deliberately NOT consulted: they are sums of these very
+// rows and carry no independent provenance, and on a players filter they
+// are dropped entirely.
+func rollUpSources(rows []result.PlayerStatsRow) result.PlayerStatsSources {
+	return result.PlayerStatsSources{
+		Score: result.SrcDerived,
+		Hold:  result.SrcDerived,
+		Damage: foldSrc(rows, func(r *result.PlayerStatsRow) string {
+			if r.Damage == nil {
+				return ""
+			}
+			return r.Damage.Src
+		}),
+		Accuracy: foldSrc(rows, func(r *result.PlayerStatsRow) string {
+			if r.Accuracy == nil {
+				return ""
+			}
+			return r.Accuracy.Src
+		}),
+		Pickups: foldSrc(rows, func(r *result.PlayerStatsRow) string {
+			if r.Pickups == nil {
+				return ""
+			}
+			return r.Pickups.Src
+		}),
+	}
+}
+
+// foldSrc reduces one family's per-row Src to a single value. Rows without
+// the family contribute nothing — an absent family is not a third opinion.
+func foldSrc(rows []result.PlayerStatsRow, get func(*result.PlayerStatsRow) string) string {
+	seen := ""
+	for i := range rows {
+		src := get(&rows[i])
+		if src == "" {
+			continue
+		}
+		if seen == "" {
+			seen = src
+			continue
+		}
+		if seen != src {
+			return result.SrcMixed
+		}
+	}
+	return seen
 }
 
 // ktxItemKind maps a KTX demoinfo item key (ItName, ktx/src/stats.c:395)
@@ -123,11 +182,18 @@ var ktxItemKind = map[string]string{
 //     login when KTX carries none.
 func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 	stored := r.PlayerStats
+	// Empty slice, not nil, for the same reason the filtered branch above
+	// says so: `players` is declared required and array-typed, and a null
+	// breaks a caller that ranges over it. playerStatsPost sets the section
+	// unconditionally, so a demo whose stream roster came out empty reaches
+	// here with stored.Players nil — exactly the degraded-parse territory
+	// this endpoint advertises it handles.
 	out := &result.PlayerStatsResult{
-		Players: append([]result.PlayerStatsRow(nil), stored.Players...),
+		Players: make([]result.PlayerStatsRow, 0, len(stored.Players)),
 		Teams:   append([]result.PlayerStatsRow(nil), stored.Teams...),
 		Sources: stored.Sources,
 	}
+	out.Players = append(out.Players, stored.Players...)
 	if r.DemoInfo == nil || len(r.DemoInfo.Players) == 0 {
 		return out
 	}
@@ -145,7 +211,8 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		if di == nil {
 			continue
 		}
-		row.Ping, row.Handicap, row.Bot = di.Ping, di.Handicap, di.Bot
+		ping := di.Ping
+		row.Ping, row.Handicap, row.Bot = &ping, di.Handicap, di.Bot
 		if di.Login != "" {
 			// KTX's login wins, but a blank one must not erase the *auth
 			// login the analyzer already read off the wire.
@@ -179,19 +246,20 @@ func applyKTXOverlay(r *result.Result) *result.PlayerStatsResult {
 		}
 	}
 
-	if anyDamage {
-		out.Sources.Damage = result.SrcKTX
-	}
-	if anyAccuracy {
-		out.Sources.Accuracy = result.SrcKTX
-	}
-	if anyPickups {
-		out.Sources.Pickups = result.SrcKTX
-	}
+	// The `any…` flags gate the team re-aggregation ONLY. The Sources
+	// roll-up is computed from the rows in PlayerStats (rollUpSources)
+	// after filtering — deriving it from "any row matched" badged the
+	// whole family KTX when one row did.
+	//
+	// Accuracy is in the gate because it is overlaid per player here: a
+	// KTX demo whose block carries `acc` but no `dmg`/`items` would
+	// otherwise keep a team accuracy summed from the derived member rows
+	// while every member row shows KTX's.
+	//
 	// Team rows are sums of the per-player rows, so re-derive them from
 	// the overlaid players rather than leaving stale derived totals beside
 	// KTX-sourced member rows.
-	if (anyDamage || anyPickups) && len(out.Teams) > 0 {
+	if (anyDamage || anyAccuracy || anyPickups) && len(out.Teams) > 0 {
 		out.Teams = reaggregateTeams(out.Players, out.Teams)
 	}
 	return out
@@ -216,11 +284,29 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 		out.ByWeapon = cloneCounts(derived.ByWeapon)
 	}
 	// KTX's own per-weapon enemy damage wins where it carries one, weapon
-	// by weapon rather than family-wide: a block can record damage for the
-	// weapons a player killed with and omit the rest, and dropping the
-	// reconstruction for those would lose real data.
+	// by weapon rather than family-wide.
+	//
+	// PRESENCE, not non-zero-ness — the same rule as the dmg block below.
+	// KTX emits a weapon entry whenever the player used the weapon at all
+	// (`attacks || deaths || drops || sttooks || ttooks`,
+	// ktx/src/stats_json.c:382) and, inside it, a `damage` sub-block
+	// whenever either counter moved (`if (stats->edamage ||
+	// stats->tdamage)`, :208). So `enemy: 0` with the block present is a
+	// MEASURED zero — a weapon that dealt team damage only — and an absent
+	// sub-block on a present entry means both were zero. Treating that
+	// zero as "absent" kept the reconstruction's number in its place and
+	// then stamped the whole family `src: "ktx"`: a GL used purely for
+	// team splash reads `{enemy: 0, team: 700}` in KTX, and the response
+	// asserted 700 ENEMY damage under a KTX badge, with byWeapon no longer
+	// summing to `given`.
+	//
+	// Keys KTX has no vocabulary for at all (`unknown`, `stomp`, `tele`,
+	// `explobox` — mvd-reader/mvd/types.go:286) are deliberately KEPT from
+	// the reconstruction: they are real measured damage, and on
+	// 1on1_bananfalco_betowen_240426_dm2 the `unknown: 4` residual is
+	// exactly what reconciles byWeapon with KTX's `given` of 4826.
 	for w, wv := range di.Weapons {
-		if wv == nil || wv.Damage == nil || wv.Damage.Enemy == 0 {
+		if wv == nil || wv.Damage == nil {
 			continue
 		}
 		if out.ByWeapon == nil {
@@ -274,6 +360,22 @@ func derivedTakenToDie(derived *result.PlayerStatsDamage) *int {
 // overlayAccuracy lifts KTX's per-weapon acc blocks. Returns nil when the
 // player has no weapon with accuracy recorded — a spectator slot, or a
 // player who never fired.
+//
+// The KTX block replaces the derived one WHOLESALE — it never reads
+// row.Accuracy — and that is deliberate, unlike the per-weapon merge
+// overlayDamage does. Damage is the same unit in both sources; accuracy
+// is not. KTX counts PELLETS server-side for sg/ssg while the
+// reconstruction counts trigger pulls (result.PlayerStatsAccuracy), so a
+// per-weapon merge would put the two scales side by side in one map under
+// one `src`, which is exactly the coercion this section exists to avoid.
+//
+// Measured before deciding: across all 42 cached corpus demos, every one
+// of which carries a KTX block, 228 player rows with a derived accuracy
+// family — ZERO weapons with derived attacks that KTX's acc set omits.
+// The loss the swap could in principle cause is empty in practice, which
+// is what KTX's own emission rule predicts (a weapon entry exists
+// whenever the player used the weapon, ktx/src/stats_json.c:382). So no
+// per-entry `src` is introduced; the family-level one is sufficient.
 func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 	if len(di.Weapons) == 0 {
 		return nil
@@ -380,26 +482,40 @@ func sumOptional(dst, src *int) *int {
 
 // reaggregateTeams re-sums the team rows from overlaid player rows,
 // preserving each team's window and hold figures (which the overlay never
-// touches) and replacing only the summed damage and pickups.
+// touches) and replacing the summed damage, accuracy and pickups.
+//
+// Accuracy has to be re-summed HERE as well as in the analyzer, because
+// it is overlaid per player at read time: an analyzer-only aggregate
+// would be stale on every KTX demo. The absent-hits and shared-src rules
+// live once, in result.AggregateAccuracy.
 func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerStatsRow {
 	out := append([]result.PlayerStatsRow(nil), teams...)
 	for i := range out {
 		team := &out[i]
 		var dmg *result.PlayerStatsDamage
 		var pickups map[string]result.PlayerStatsPickup
-		src := result.SrcDerived
+		var acc []*result.PlayerStatsAccuracy
+		src := "" // pickups: members' shared src, else the mixed canary
 
 		for j := range players {
 			p := &players[j]
 			if p.Team != team.Name {
 				continue
 			}
+			acc = append(acc, p.Accuracy)
 			if p.Damage != nil {
 				if dmg == nil {
 					dmg = &result.PlayerStatsDamage{Src: p.Damage.Src}
-				}
-				if p.Damage.Src == result.SrcKTX {
-					dmg.Src = result.SrcKTX
+				} else if dmg.Src != p.Damage.Src {
+					// Members' shared src, else the mixed canary — the
+					// same rule AggregateAccuracy applies. The previous
+					// "any KTX member upgrades the team" stamp badged a
+					// part-derived sum as pure server counters, which is
+					// the T2.3 defect surviving one level down; a mixed
+					// team only occurs when the phantom-roster invariant
+					// is already broken, and that is exactly when the
+					// row must not claim a clean provenance.
+					dmg.Src = result.SrcMixed
 				}
 				dmg.Given += p.Damage.Given
 				dmg.GivenTeam += p.Damage.GivenTeam
@@ -422,8 +538,13 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 				if pickups == nil {
 					pickups = map[string]result.PlayerStatsPickup{}
 				}
-				if p.Pickups.Src == result.SrcKTX {
-					src = result.SrcKTX
+				// Same shared-or-mixed rule as damage above and
+				// AggregateAccuracy.
+				switch {
+				case src == "":
+					src = p.Pickups.Src
+				case src != p.Pickups.Src:
+					src = result.SrcMixed
 				}
 				for kind, e := range p.Pickups.ByKind {
 					agg := pickups[kind]
@@ -453,6 +574,7 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 			}
 		}
 		team.Damage = dmg
+		team.Accuracy = result.AggregateAccuracy(acc)
 		if pickups != nil {
 			team.Pickups = &result.PlayerStatsPickups{Src: src, ByKind: pickups}
 		}

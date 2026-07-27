@@ -896,7 +896,7 @@ Per-player "this player just died" / "this player just spawned" boundaries are n
 |---|---|---|---|---|---|
 | 1 | **`STAT_HEALTH` crossings** | `svc_updatestat` health crosses 0 | yes | **directed via `dem_stats`** | Kills whose stat update is bundled in a `dem_stats` block addressed to a different POV player. The recorder must currently be POV'd on (or near) the victim. |
 | 2 | **`DF_DEAD` bit in `svc_playerinfo`** | bit 8 of the flag word; set when `ent->v->health <= 0` (mvdsv/src/sv_demo.c) | yes | yes — every recorded frame | Tight respawn cycles compressed into a single inter-frame gap (no sampled frame ever shows `DF_DEAD=1` between two adjacent recorded frames). |
-| 3 | **Obituary `svc_print`** | KTX fragfile lines like `"X was rocketed by Y"`, `"X suicides"`, the pent-deflection `"Satan's power deflects X's telefrag"`, etc. | yes (victim is named) | yes | Deaths emitted by mods/death-types with no print path; pre-match obits arriving before the match-start phrase (parser-side `matchStarted` gate). |
+| 3 | **Obituary `svc_print`** | KTX fragfile lines like `"X was rocketed by Y"`, `"X suicides"`, the pent-deflection `"Satan's power deflects X's telefrag"`, etc. Old kmod/qwe splits these across several `svc_print` messages, so match the *assembled line*, never one message — see [One console line is often several `svc_print` messages](#one-console-line-is-often-several-svc_print-messages). | yes (victim is named) | yes | Deaths emitted by mods/death-types with no print path; pre-match obits arriving before the match-start phrase (parser-side `matchStarted` gate). |
 
 KTX's authoritative deaths counter (`logfrag(targ, targ)` and friends — see `ktx/src/client.c`) increments once per kill regardless of which of these wire-level signals fires. Validating reconstructed death counts against KTX's `demoInfo.players[].stats.deaths` is the cleanest end-to-end check.
 
@@ -1052,7 +1052,11 @@ re-scan print text. Three wire properties make that worth doing once:
 - **Prints fragment, at arbitrary points.** One logical broadcast can arrive
   as several `svc_print` messages. `4on4_l_vs_la[e1m2]` carries the departure
   as `"DARKLORD left the game with 21 frag"` + `"s\n"`, so a matcher that
-  requires the trailing `"frags"` decodes nothing at all on that demo.
+  requires the trailing `"frags"` decodes nothing at all on that demo. The
+  parser now reassembles fragments into lines before this decoder runs (see
+  [One console line is often several `svc_print` messages](#one-console-line-is-often-several-svc_print-messages)), so it sees the joined
+  text; the tolerance below is kept because it also covers the case where the
+  wire never carried the terminator at all.
 - **The split can land inside a number.** At t=1094110 the same server emits
   a team score as the six prints `"Team [.la.] = "`, `""`, `"2"`, `"2"`,
   `"7"`, `"\n"`. A departure cut the same way — `"…with 2"` then
@@ -1328,6 +1332,78 @@ Offset  Size  Field
 | 2 | `PRINT_HIGH` | High priority | Match events, server messages |
 | 3 | `PRINT_CHAT` | Chat message | Player chat |
 
+### One console line is often several `svc_print` messages
+
+**A `svc_print` payload is a console *fragment*, not a line.** QuakeC builds a
+line out of however many `sprint`/`bprint` calls the code path happens to make,
+and mvdsv writes each one as its own `svc_print`. The line terminator arrives as
+a fragment of its own when the QC ends with a bare `"\n"`.
+
+The pattern is id1-progs heritage and is still alive in current KTX — the
+backpack pickup line is emitted as `"You get "` (`ktx/src/items.c:2404`),
+`"the %s"` (`:2480`), `", "` / `"%.0f shells"` (`:2534-2578`), `"\n"` (`:2618`).
+Old kmod/qwe progs print **obituaries** the same way. On
+`4on4_l_vs_la[e1m2].mvd` a kill reaches the wire as four messages:
+
+```
+t=24983  level 1  dem_all  "space"
+t=24983  level 1  dem_all  " chewed on "
+t=24983  level 1  dem_all  "DARKLORD"
+t=24983  level 1  dem_all  "'s boomstick"     (+ a "\n" fragment)
+```
+
+Modern KTX prints obituaries whole, so a consumer that matches per-message looks
+correct on a 2026 demo and silently matches **nothing** on a 2003 one: that demo
+yielded 0 matched obituaries out of 368 deaths before line assembly existed.
+
+#### Line assembly (`parser/print.go`, `assemblePrintLine`)
+
+The parser reassembles fragments before emitting `PrintEvent` and before any
+obituary / pickup / match-start matching runs, so every consumer sees whole
+lines. The algorithm follows ezquake's client-side assembler, `CL_ProcessPrint`
+(`ezquake-source/src/cl_parse.c:3072-3105`):
+
+- append the fragment to a buffer, and once the buffer contains a newline
+  release everything up to and **including the last one**
+  (`qwcsrchr(cl.sprint_buf, '\n')`), keeping any remainder for the next
+  fragment;
+- ezquake flushes its single buffer when the print **level** changes
+  (`cl.sprint_level`); we express the same rule by keying a buffer per level.
+
+Two deliberate departures from ezquake, both forced by the fact that we
+demultiplex a whole recording where ezquake sees one client's stream:
+
+- **The buffer key is (level, `dem_single` target)**, not level alone. mvdsv has
+  already routed away every `dem_single` addressed at somebody else by the time
+  ezquake sees the stream; we see them all interleaved — and they interleave
+  *inside* a line, because `ktx/src/items.c:2485` emits an `mi_print` to other
+  clients between two pieces of the backpack line. Keying on level alone would
+  splice a broadcast into a personal line. The target dimension is also what
+  keeps a broadcast fragment from ever merging into the `PRINT_LOW`
+  `dem_single` pickup prints (`parser/ktx_pickup_print.go`).
+- **A pending buffer is released when a fragment for the same key arrives with a
+  different wire time.** Every fragment of a line is written inside the server
+  frame that produced it, so a same-key fragment in a later frame is
+  definitionally a new line; without the rule a line whose terminator never
+  arrived would swallow an unrelated print minutes later.
+
+Any still-unterminated buffer is released at end of stream (clean end or
+truncation), so a demo that stops mid-line still reports what the server had
+said. The assembled `PrintEvent` carries the wire time of the line's **first**
+fragment — the moment the server started saying it, which is what keeps an
+obituary's derived `DeathEvent` in the frame the kill happened in.
+
+Normalisation order does not matter: `Q_normalizetext` is a per-byte map (plus
+NUL elision) and byte 10 maps to `'\n'`, so cleaning each fragment and
+concatenating is identical to concatenating and cleaning once.
+
+**Compatibility.** On a demo whose prints are already whole lines assembly is a
+pass-through — the line, trailing `"\n"` included, is emitted byte-identically.
+Modern KTX demos still have two fragmented families (the backpack pickup line at
+`PRINT_LOW`, and the end-of-match "top scorers" table at `PRINT_HIGH`), which
+now arrive as one `PrintEvent` each instead of 6-14; neither carries an
+obituary, chat line or pickup match, so the analytics output is unchanged.
+
 ### Per-recipient chat duplication (KTX)
 
 Vanilla `SV_Say` (`mvdsv/src/sv_user.c`) writes a chat line to the MVD **once** — `dem_all` for public say, `dem_multiple` (with a recipient bitmask) for say_team. But it first calls `PR_ClientSay`, and if the mod handles say it returns early *before* that single write (`sv_user.c:1832`/`:1837`). **KTX always handles say in QC** (`ClientSay`, `ktx/src/g_cmd.c:287`), looping over every eligible recipient and calling `G_sprint` per client (`g_cmd.c:560`). Each `G_sprint` → `SV_ClientPrintf` emits its own `MVDWrite_Begin(dem_single, …)` (`mvdsv/src/sv_send.c:220`), so on KTX demos **one chat line is written to the MVD once per recipient** and the parser faithfully emits one `PrintEvent` per copy. Public say reaches every client (most copies); say_team only teammates (fewer) — which is why public say duplicates more.
@@ -1372,17 +1448,18 @@ case-insensitive substrings:
 | Pattern | Provenance | Notes |
 |---------|-----------|-------|
 | `"has begun"` | **verified** in `ktx/` | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1173`, a `G_bprint`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). This is the entry that fires on a modern KTX demo. |
-| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` (`ktx/src/arena.c:602-618`, `clan_arena.c`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
-| `"go!"` | unverified | The loosest entry in the table — a bare `"go!"` substring. It is why chat is refused (below). |
-| `"match started"` | unverified | Not found in `ktx/`, `mvdsv/` or `ezquake-source/`. |
-| `"begins in 1"` | unverified | Not found in the vendored trees. If some mod does emit it, note it fires ~1 s *before* the start proper. |
-| `"game start"` | unverified | Not found in the vendored trees. |
+| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` / `G_cp2all` (`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
+| `"go!"` | **not a broadcast in current KTX** | `GO!` is a `G_cp2all` in the race countdown (`ktx/src/race.c:2614`) — again `svc_centerprint`, not `svc_print`. Also the loosest entry in the table, a bare `"go!"` substring, which is why chat is refused (below). |
+| `"match started"` | **not printed at all** | The only occurrence in the vendored trees is a C comment (`ktx/src/commands.c:5123`). |
+| `"begins in 1"` | unverified | No printed string in `ktx/`, `mvdsv/` or `ezquake-source/`. If some mod does emit it, note it fires ~1 s *before* the start proper. |
+| `"game start"` | **not a broadcast in current KTX** | The only KTX string containing it is the pre-match countdown `"N seconds left before game starts"`, a `G_centerprint` (`ktx/src/admin.c:624`) — so it cannot reach this matcher, and would be a *pre*-start phrase if it could. |
 
-The last four entries predate this table and are kept because removing a
+The last five entries predate this table and are kept because removing a
 pattern can only lose match-start detection on a mod nobody here has a
-demo for. They are marked unverified rather than quietly attributed to
-KTX: the only phrase this repo can prove a current KTX server broadcasts
-is `"has begun"`.
+demo for. None of them is quietly attributed to KTX: the only phrase this
+repo can prove a current KTX server *broadcasts* is `"has begun"`. Four
+of the five do exist in `ktx/`, but as `svc_centerprint` text or a C
+comment, so on a KTX demo they are dead weight rather than a live path.
 
 **Implementation note**: match on the substring `"has begun"`, not
 `"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast
@@ -2981,7 +3058,7 @@ The server is pushing a console command into the client. There are four classes 
     **Practical gap — non-RL/LG backpack pickups on competitive demos.** Combining the two limits documented above leaves a hole in the wire signal:
 
     - `//ktx bp` only fires for RL/LG packs (line above), so SSG/NG/SNG/GL/ammo-only packs have no `//ktx`-driven attribution.
-    - The fallback signal — KTX's `"You get "` backpack-opener print — is `G_sprint(PRINT_LOW)`, which `SV_ClientPrintf` (`mvdsv/src/sv_send.c:225`) drops *before* the MVD-write step when the picking client has `messagelevel >= 1`. Competitive players overwhelmingly run `msg 2`, so on a typical 4on4 / duel **the pickup-print bytes are never written to the demo file** — see [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter). (Because that signal is absent in practice and its per-piece ammo breakdown would need stateful reassembly, the parser does not decode the opener into a typed event; only `"You got the X"` / `"You receive N health"` become `ItemPickupPrintEvent`.)
+    - The fallback signal — KTX's `"You get "` backpack-opener print — is `G_sprint(PRINT_LOW)`, which `SV_ClientPrintf` (`mvdsv/src/sv_send.c:225`) drops *before* the MVD-write step when the picking client has `messagelevel >= 1`. Competitive players overwhelmingly run `msg 2`, so on a typical 4on4 / duel **the pickup-print bytes are never written to the demo file** — see [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter). (The parser now assembles the opener's per-piece fragments into one line — see [One console line is often several `svc_print` messages](#one-console-line-is-often-several-svc_print-messages) — but still does not decode it into a typed event: the signal is absent in practice and no consumer uses it. Only `"You got the X"` / `"You receive N health"` become `ItemPickupPrintEvent`.)
 
     Net result on a competitive MVD: there is **no authoritative wire signal** for non-RL/LG backpack pickups. The demo still carries indirect evidence — the picker's STAT_ITEMS bit flips on for the gained weapon, and STAT_SHELLS / STAT_NAILS / STAT_ROCKETS / STAT_CELLS all jump to reflect the absorbed ammo, both arriving as ordinary `svc_updatestat` per-slot — so a heuristic analyzer could correlate stat deltas with nearby `BackpackDropHintEvent` edicts to attribute these pickups by proximity and timing. In **weapon-stay modes** (`deathmatch 2/3/5`, coop) mvd-analytics ships exactly that class of recovery: `weapon_pickups.go` synthesizes kind-level pickups from STAT_ITEMS bit flips (a flip with no weapon pad in touch range surfaces as `source: "unknown"` — almost always one of these packs). In non-weapon-stay modes no analyzer ships the correlation logic today; `result.Backpacks` and hint-driven `result.WeaponPickups` entries consequently cover only the RL/LG domain there.
 

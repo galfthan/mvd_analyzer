@@ -267,10 +267,15 @@
 
                 <div id="hold-panel" class="panel">
                     <h3>Possession</h3>
-                    <p class="panel-note">Share of time <em>alive</em> spent holding each item. Computed from the
-                        position/inventory streams, not from KTX — KTX writes no weapon hold time at all, and its
-                        armor clock keeps counting after the armor is chewed to zero. &ldquo;No armor&rdquo; is the
-                        alive-time complement, a figure KTX structurally cannot produce.</p>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <p class="panel-note">Share of time <em>alive</em> spent holding each item. Computed from the
+                            position/inventory streams, not from KTX — KTX writes no weapon hold time at all, and its
+                            armor clock keeps counting after the armor is chewed to zero. The alive-time complement —
+                            the share spent wearing no armor at all — is not a column here, but it is reported as
+                            <code>hold.armor.none</code> in the result JSON and the API: a figure KTX structurally
+                            cannot produce.</p>
+                    </details>
                     <h4 class="team-aggregate-heading">Per Team</h4>
                     <table id="hold-team-table" class="stats-table team-aggregate-table">
                         <thead>
@@ -281,7 +286,6 @@
                                 <th title="Share of alive time wearing red armor">RA</th>
                                 <th title="Share of alive time wearing yellow armor">YA</th>
                                 <th title="Share of alive time wearing green armor">GA</th>
-                                <th title="Share of alive time wearing NO armor — the alive-time complement">None</th>
                                 <th title="Share of alive time under quad damage">Quad</th>
                                 <th title="Share of alive time under pentagram">Pent</th>
                                 <th title="Share of alive time under ring of shadows">Ring</th>
@@ -299,7 +303,6 @@
                                 <th title="Share of alive time wearing red armor">RA</th>
                                 <th title="Share of alive time wearing yellow armor">YA</th>
                                 <th title="Share of alive time wearing green armor">GA</th>
-                                <th title="Share of alive time wearing NO armor — the alive-time complement">None</th>
                                 <th title="Share of alive time under quad damage">Quad</th>
                                 <th title="Share of alive time under pentagram">Pent</th>
                                 <th title="Share of alive time under ring of shadows">Ring</th>
@@ -668,14 +671,17 @@
                 <!-- Region Control (definition editor + per-region control matrix) -->
                 <div class="panel" id="region-control-panel" style="display: none;">
                     <h3>Region Control</h3>
-                    <div class="locheatmap-desc">
-                        Group locs into named regions. Rows = regions, columns = control
-                        states (the team color underlines which columns are which).
-                        Cell color is normalised <em>per region</em> (brightest = that
-                        region's dominant control state, Empty excluded), so compare colors
-                        across a row — not down a column. The printed % is the absolute
-                        match fraction. Click a column header to sort; hover for details.
-                    </div>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <div class="locheatmap-desc">
+                            Group locs into named regions. Rows = regions, columns = control
+                            states (the team color underlines which columns are which).
+                            Cell color is normalised <em>per region</em> (brightest = that
+                            region's dominant control state, Empty excluded), so compare colors
+                            across a row — not down a column. The printed % is the absolute
+                            match fraction. Click a column header to sort; hover for details.
+                        </div>
+                    </details>
                     <div id="region-config" class="region-config"></div>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
@@ -768,15 +774,18 @@
                 <!-- Loc Heatmap -->
                 <div class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
                     <h3>Loc Heatmap</h3>
-                    <div class="locheatmap-desc">
-                        Rows = locs, for the metric selected above. The first columns
-                        are the teams (all members combined), then one column per
-                        player grouped by team. Each cell shows the share of that
-                        column's time spent in the loc, normalised to its own busiest
-                        loc; cell intensity uses the viridis scale and the team color
-                        underlines each header. Click a column header to sort; hover a
-                        cell for exact time.
-                    </div>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <div class="locheatmap-desc">
+                            Rows = locs, for the metric selected above. The first columns
+                            are the teams (all members combined), then one column per
+                            player grouped by team. Each cell shows the share of that
+                            column's time spent in the loc, normalised to its own busiest
+                            loc; cell intensity uses the viridis scale and the team color
+                            underlines each header. Click a column header to sort; hover a
+                            cell for exact time.
+                        </div>
+                    </details>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
                     </div>
@@ -987,27 +996,30 @@
 
                 <div class="panel" id="aim-accuracy-panel">
                     <h3>Accuracy &amp; effectiveness</h3>
-                    <div class="aim-desc">
-                        One table per weapon; rows are players (team-coloured, click a
-                        column to sort). <strong>SG/SSG</strong> show pellets hit / fired
-                        and how many fires landed all pellets (full), some (partial) or
-                        none (miss); <strong>RL/GL</strong> show direct vs splash vs
-                        missed; <strong>LG</strong> splits its misses into miss (an aim
-                        error — no enemy on the beam's line), blocked (the beam would
-                        have hit an enemy in range but an object stopped it short) and
-                        far (the enemy was on the beam's line but beyond its ~600u
-                        reach). Every count also has
-                        a <strong>share-of-fires %</strong> column — the counts scale
-                        with how much a player fired, so the percentages are what
-                        compare across players. Pellet and direct figures match the
-                        server's authoritative stats. The <strong>Victims</strong>
-                        filter above slices every hit figure by who the shots hit:
-                        <strong>Enemy</strong> (opponents only), <strong>Team</strong>
-                        (teammates, excluding the shooter), <strong>Self</strong>
-                        (RL/GL self-splash — rocket jumps) or <strong>All</strong>
-                        (everything; the view that matches the server's stats). A
-                        fire that hit both an enemy and a teammate counts in both.
-                    </div>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <div class="aim-desc">
+                            One table per weapon; rows are players (team-coloured, click a
+                            column to sort). <strong>SG/SSG</strong> show pellets hit / fired
+                            and how many fires landed all pellets (full), some (partial) or
+                            none (miss); <strong>RL/GL</strong> show direct vs splash vs
+                            missed; <strong>LG</strong> splits its misses into miss (an aim
+                            error — no enemy on the beam's line), blocked (the beam would
+                            have hit an enemy in range but an object stopped it short) and
+                            far (the enemy was on the beam's line but beyond its ~600u
+                            reach). Every count also has
+                            a <strong>share-of-fires %</strong> column — the counts scale
+                            with how much a player fired, so the percentages are what
+                            compare across players. Pellet and direct figures match the
+                            server's authoritative stats. The <strong>Victims</strong>
+                            filter above slices every hit figure by who the shots hit:
+                            <strong>Enemy</strong> (opponents only), <strong>Team</strong>
+                            (teammates, excluding the shooter), <strong>Self</strong>
+                            (RL/GL self-splash — rocket jumps) or <strong>All</strong>
+                            (everything; the view that matches the server's stats). A
+                            fire that hit both an enemy and a teammate counts in both.
+                        </div>
+                    </details>
                     <div id="aim-weapon-tables"></div>
                 </div>
 
@@ -1019,26 +1031,29 @@
                              title="Click a player, or focus and use ← → to step between players"></div>
                         <span id="aim-mode" class="aim-mode"></span>
                     </div>
-                    <div class="aim-desc">
-                        Where the enemy sat relative to the crosshair at each fire,
-                        in <strong>Quake units at the target's range</strong> — both
-                        axes share the same scale, and <strong>the solid box is
-                        the player's collision box, true to shape (32 wide × 56
-                        tall)</strong>; the dashed box is its corner-on silhouette
-                        (viewed diagonally the axis-aligned box reads ~1.4× wider).
-                        The image is the <strong>smoothed
-                        density of shots</strong> (colorbar = shots per bin); a tight
-                        bright spot at the center is good placement. Hover for exact
-                        shot/hit counts. Below each image: yaw and pitch histograms
-                        of the same fires (shaded band = within the hull edge, rule
-                        = dead center; the outermost bins also collect shots beyond
-                        the plotted range). LG adds a ramp histogram: hit % by time
-                        since the shaft opened, hover for the counts. The Victims
-                        filter applies here too: Team shows only confirmed teammate
-                        hits (misses always attribute to enemies, so they only
-                        appear in Enemy/All), and Self shows nothing — hitscan
-                        cannot self-hit.
-                    </div>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <div class="aim-desc">
+                            Where the enemy sat relative to the crosshair at each fire,
+                            in <strong>Quake units at the target's range</strong> — both
+                            axes share the same scale, and <strong>the solid box is
+                            the player's collision box, true to shape (32 wide × 56
+                            tall)</strong>; the dashed box is its corner-on silhouette
+                            (viewed diagonally the axis-aligned box reads ~1.4× wider).
+                            The image is the <strong>smoothed
+                            density of shots</strong> (colorbar = shots per bin); a tight
+                            bright spot at the center is good placement. Hover for exact
+                            shot/hit counts. Below each image: yaw and pitch histograms
+                            of the same fires (shaded band = within the hull edge, rule
+                            = dead center; the outermost bins also collect shots beyond
+                            the plotted range). LG adds a ramp histogram: hit % by time
+                            since the shaft opened, hover for the counts. The Victims
+                            filter applies here too: Team shows only confirmed teammate
+                            hits (misses always attribute to enemies, so they only
+                            appear in Enemy/All), and Self shows nothing — hitscan
+                            cannot self-hit.
+                        </div>
+                    </details>
 
                     <div class="aim-heatmap-row">
                         <div class="aim-heatmap-block">

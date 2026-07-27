@@ -103,6 +103,9 @@ func (f *fakeStore) EnsureLOS(ctx context.Context, id democache.DemoID) (*result
 
 // stubResult builds a minimal but well-formed *Result so handlers
 // have something to query.
+// psShare is the pointer form the optional efficiency field takes.
+func psShare(v result.Share) *result.Share { return &v }
+
 func stubResult() *result.Result {
 	return &result.Result{
 		SchemaVersion: result.CurrentSchemaVersion,
@@ -195,7 +198,7 @@ func stubResult() *result.Result {
 				{
 					Name: "bps", Team: "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20, Efficiency: psShare(0.6154)},
 					Hold: result.PlayerStatsHold{Src: result.SrcDerived,
 						Weapons: map[string]result.HoldStat{"rl": {Ms: 200000, Runs: 4, LongestMs: 90000, ShareAlive: 0.4, ShareMatch: 0.3333}},
 						Armor:   map[string]result.HoldStat{"ra": {Ms: 129000, Runs: 3, LongestMs: 60000, ShareAlive: 0.258, ShareMatch: 0.215}, "none": {Ms: 371000, Runs: 9, LongestMs: 80000, ShareAlive: 0.742, ShareMatch: 0.6183}},
@@ -204,16 +207,17 @@ func stubResult() *result.Result {
 				{
 					Name: "valla", Team: "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: 21, Deaths: 30, Efficiency: 0.4118},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30, Efficiency: psShare(0.4118)},
 					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
 			Teams: []result.PlayerStatsRow{
 				{
-					Name:   "blue",
-					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: 32, Deaths: 20, Efficiency: 0.6154},
-					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+					Name:    "blue",
+					Members: intp(1),
+					Window:  result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+					Score:   result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20, Efficiency: psShare(0.6154)},
+					Hold:    result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
 			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Hold: result.SrcDerived},
@@ -991,15 +995,15 @@ func TestOverview(t *testing.T) {
 	}
 }
 
-// TestOverviewMapTitle pins the map/mapTitle split (v59): `map` is the
-// canonical shortname from EffectiveMap (demoinfo → serverinfo), `mapTitle`
-// the BSP's pretty title, elided when the two are identical.
+// TestOverviewMapTitle pins the map/mapTitle split: `map` is the canonical
+// shortname from EffectiveMap (demoinfo → serverinfo), `mapTitle` the
+// display-only level title Match publishes, elided when the two are
+// identical.
 func TestOverviewMapTitle(t *testing.T) {
-	// Distinct title: demoinfo resolves the shortname "dm2", Match.Map carries
-	// the pretty BSP title.
+	// Distinct title: both are shortname + title on Match itself.
 	distinct := &result.Result{
 		DemoInfo: &result.DemoInfoResult{Map: "dm2"},
-		Match:    &result.MatchResult{Map: "Claustrophobopolis"},
+		Match:    &result.MatchResult{Map: "dm2", MapTitle: "Claustrophobopolis"},
 	}
 	ov := BuildOverview(distinct)
 	if ov.Map != "dm2" {
@@ -1012,15 +1016,16 @@ func TestOverviewMapTitle(t *testing.T) {
 	// Identical (or no distinct title): mapTitle elided.
 	same := &result.Result{
 		DemoInfo: &result.DemoInfoResult{Map: "dm3"},
-		Match:    &result.MatchResult{Map: "dm3"},
+		Match:    &result.MatchResult{Map: "dm3", MapTitle: "dm3"},
 	}
 	ov = BuildOverview(same)
 	if ov.Map != "dm3" || ov.MapTitle != "" {
 		t.Errorf("map/mapTitle = %q/%q; want dm3/\"\" (title elided when identical)", ov.Map, ov.MapTitle)
 	}
 
-	// Degraded: no shortname source — fall back to Match.Map, no mapTitle.
-	degraded := &result.Result{Match: &result.MatchResult{Map: "dm6"}}
+	// Degraded: no shortname source — Match.Map is the analyzer's own last
+	// resort (the level title), and it still names the overview's map.
+	degraded := &result.Result{Match: &result.MatchResult{Map: "dm6", MapTitle: "dm6"}}
 	ov = BuildOverview(degraded)
 	if ov.Map != "dm6" || ov.MapTitle != "" {
 		t.Errorf("degraded map/mapTitle = %q/%q; want dm6/\"\" (fallback to Match.Map)", ov.Map, ov.MapTitle)
@@ -1030,7 +1035,7 @@ func TestOverviewMapTitle(t *testing.T) {
 	// same map, so mapTitle is elided (case-insensitive compare).
 	caseOnly := &result.Result{
 		DemoInfo: &result.DemoInfoResult{Map: "aerowalk"},
-		Match:    &result.MatchResult{Map: "Aerowalk"},
+		Match:    &result.MatchResult{Map: "aerowalk", MapTitle: "Aerowalk"},
 	}
 	ov = BuildOverview(caseOnly)
 	if ov.Map != "aerowalk" || ov.MapTitle != "" {
@@ -2363,7 +2368,7 @@ func TestStubResultExercisesKTXOverlay(t *testing.T) {
 	}
 	// The specific ktx-only fields that exist nowhere in the derived form.
 	switch {
-	case row.Ping == 0 || row.Handicap == 0 || row.Bot == nil:
+	case row.Ping == nil || *row.Ping == 0 || row.Handicap == 0 || row.Bot == nil:
 		t.Error("ktx identity fields (ping/handicap/bot) not exercised")
 	case row.ControlMs == nil || row.Speed == nil:
 		t.Error("ktx controlMs/speed not exercised")

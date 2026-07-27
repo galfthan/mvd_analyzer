@@ -173,9 +173,16 @@ func TestCorpusScoreMatchesScoreboard(t *testing.T) {
 			if !ok {
 				continue // streamed player with no scoreboard row
 			}
-			if row.Score.Frags != mp.Frags || row.Score.Kills != mp.Kills ||
-				row.Score.Deaths != mp.Deaths || row.Score.Suicides != mp.Suicides {
+			if row.Score.Frags != mp.Frags || row.Score.Deaths != mp.Deaths {
 				t.Errorf("%s %s: score %+v does not match match.players %+v", name, row.Name, row.Score, mp)
+			}
+			// The kill side is optional (absent where the frag log measured
+			// nothing); where it IS served it must be the scoreboard's.
+			if row.Score.Kills != nil && *row.Score.Kills != mp.Kills {
+				t.Errorf("%s %s: kills %d, match.players says %d", name, row.Name, *row.Score.Kills, mp.Kills)
+			}
+			if row.Score.Suicides != nil && *row.Score.Suicides != mp.Suicides {
+				t.Errorf("%s %s: suicides %d, match.players says %d", name, row.Name, *row.Score.Suicides, mp.Suicides)
 			}
 		}
 	}
@@ -227,4 +234,60 @@ func deref(p *int) int {
 		return 0
 	}
 	return *p
+}
+
+// TestCorpusTeamAccuracySumsMembers pins the team accuracy aggregate
+// against its own members across the committed corpus. Attacks sum
+// exactly; hits are present only where every contributing member
+// measured them, so the identity is asserted per weapon rather than
+// family-wide.
+func TestCorpusTeamAccuracySumsMembers(t *testing.T) {
+	checked := 0
+	for name, r := range loadGoldens(t) {
+		if r.PlayerStats == nil || len(r.PlayerStats.Teams) == 0 {
+			continue
+		}
+		for _, team := range r.PlayerStats.Teams {
+			wantAttacks := map[string]int{}
+			wantHits := map[string]int{}
+			seen, have := map[string]int{}, map[string]int{}
+			for _, m := range r.PlayerStats.Players {
+				if m.Team != team.Name || m.Accuracy == nil {
+					continue
+				}
+				for w, e := range m.Accuracy.ByWeapon {
+					wantAttacks[w] += e.Attacks
+					seen[w]++
+					if e.Hits != nil {
+						have[w]++
+						wantHits[w] += *e.Hits
+					}
+				}
+			}
+			if len(wantAttacks) == 0 {
+				continue
+			}
+			if team.Accuracy == nil {
+				t.Errorf("%s team %s: no accuracy family though its members have one", name, team.Name)
+				continue
+			}
+			for w, want := range wantAttacks {
+				got := team.Accuracy.ByWeapon[w]
+				if got.Attacks != want {
+					t.Errorf("%s team %s %s: attacks = %d, members sum to %d", name, team.Name, w, got.Attacks, want)
+				}
+				switch {
+				case have[w] == seen[w] && (got.Hits == nil || *got.Hits != wantHits[w]):
+					t.Errorf("%s team %s %s: hits = %v, members sum to %d", name, team.Name, w, got.Hits, wantHits[w])
+				case have[w] != seen[w] && got.Hits != nil:
+					t.Errorf("%s team %s %s: hits = %d, want ABSENT — %d of %d members measured it",
+						name, team.Name, w, *got.Hits, have[w], seen[w])
+				}
+				checked++
+			}
+		}
+	}
+	if checked == 0 {
+		t.Error("no team weapon exercised the accuracy aggregate")
+	}
 }

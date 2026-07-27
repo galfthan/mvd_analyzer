@@ -10268,7 +10268,8 @@
   "match": {
     "duration": 599980,
     "gameDir": "qw",
-    "map": "Claustrophobopolis",
+    "map": "dm2",
+    "mapTitle": "Claustrophobopolis",
     "players": [
       {
         "deaths": 22,
@@ -11128,7 +11129,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 61,
+  "schemaVersion": 62,
   "shots": {
     "byPlayer": [
       {

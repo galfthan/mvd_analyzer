@@ -49,9 +49,17 @@ import (
 // the representation this schema is already contracted on (the golden
 // corpus and the OpenAPI spec both pin it). gob is kept for exactly one
 // section, Streams, which is 97% of the bytes (50.5 MB of 52.3 MB on a
-// 4on4) and which JSON decodes 40x slower. Everything else is 1.75 MB of
-// JSON: 11 ms to write, 48 ms to read, against gob's 158 ms for the whole
-// Result.
+// 4on4) and which JSON decodes 40x slower.
+//
+// The cost is ADDITIVE, not a replacement: the gob decode of Streams is
+// unchanged, and the ~1.75 MB of JSON for everything else adds ~11 ms to
+// a write and ~48 ms to a read on top of it. (The old bare gob read the
+// whole Result in 158 ms; this codec does not make that number go away,
+// it appends to it.) Both the time and the size premium are
+// demo-dependent — measured 458 KB -> 788 KB on a 2on2 dm6 and 1.19 MB
+// -> 2.16 MB with a 16.7 ms -> 52.5 ms decode on the 4on4
+// defer_reconnect, so treat mvd-api/README.md's headline "+2.6% on disk"
+// as one 4on4's figure rather than a ceiling.
 //
 // The failure mode is what makes this the right split. Adding an optional
 // field anywhere outside Streams is automatically safe — the default is
@@ -126,7 +134,10 @@ func DecodeCache(data []byte) (*Result, error) {
 	rest := data[len(cacheMagic):]
 	jsonLen := int(binary.LittleEndian.Uint32(rest[:4]))
 	rest = rest[4:]
-	if jsonLen > len(rest) {
+	// jsonLen < 0 is only reachable on a 32-bit build, where a corrupt
+	// length >= 2^31 wraps negative and rest[:jsonLen] would panic instead
+	// of erroring. Unreachable on the amd64 target; one comparison closes it.
+	if jsonLen < 0 || jsonLen > len(rest) {
 		return nil, fmt.Errorf("decode cache: json length %d exceeds payload %d", jsonLen, len(rest))
 	}
 	jsonBytes, gobBytes := rest[:jsonLen], rest[jsonLen:]
