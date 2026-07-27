@@ -5,6 +5,43 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (dmg-splits) — per-weapon team/self damage splits, schema v63
+
+Additive: no existing field changed shape or meaning, and every number that
+was already served is unchanged.
+
+- **`damage.byPlayer[].byWeaponTeam` / `.byWeaponSelf`** (raw family and the
+  `bounded` nest alike) split `givenTeam` and `givenSelf` by the
+  **attacker's** weapon, exactly as `byWeapon` splits `given` — same keys,
+  same telefrag/stomp exclusion (positional kills fold into the totals
+  only). `matrix`, the top-level `damage.byWeapon` and the `enemyVs*`/`ewep`
+  buckets stay enemy-only. The view's filtered recompute produces them too,
+  so a windowed or player-scoped `/damage` response agrees with the stored
+  artifact.
+- **`playerStats.players[].damage`** gains the same two maps, summed into
+  team rows by both aggregators (the stored one and the post-overlay
+  re-aggregation).
+- **The KTX overlays now read `weapons[].damage.team`.** KTX has always
+  written the team counter beside `.enemy` in one sub-block
+  (`ktx/src/stats_json.c:208-212`) and nothing consumed it. A bounded
+  `/damage` summary badged `boundedSource: "ktx"`, or a `playerStats`
+  damage family badged `src: "ktx"`, therefore served a *reconstructed*
+  team split under a server-counter badge; both now carry KTX's own.
+  `byWeaponSelf` has no KTX counterpart and stays derived.
+- **Measuredness is documented, not inferred from `omitempty`.**
+  `byWeapon` and `byWeaponTeam` are measured whenever the damage family is
+  present; `byWeaponSelf` only where a damage stream was read, which is
+  exactly what a non-nil `damage.taken` says. Within a measured family an
+  absent key means "dealt none with that weapon" — the derived copy drops
+  zeros, KTX keeps a measured 0 where the sub-block exists.
+- **Web (Aim Stats):** the per-weapon **Dmg** column now follows the
+  Enemy/Team/Self victim filter instead of being pinned to enemy damage.
+  In **All** mode it sums the three splits when all are measured, and
+  renders a `≥`-prefixed lower bound with a tooltip naming the missing
+  split when one is not (a KTX-block-without-stream demo has no self
+  split); `-` when nothing is measured. Measured zeros render as `0`.
+- Golden corpus regenerated for the new fields.
+
 ## 2026-07-27 (ux-tweaks) — Summary/Timeline/Chat/Aim UI cleanup, schema v62 (unchanged)
 
 Frontend only — no Go, no schema bump, no golden churn. Every number below

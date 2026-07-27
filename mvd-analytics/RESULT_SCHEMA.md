@@ -33,7 +33,7 @@ analyzer are also covered there.
 | Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
-| PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v62). |
+| PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
 
 All sub-result fields are pointers and use `omitempty`, so a missing
@@ -165,16 +165,20 @@ families against the KTX scoreboard; raw diverges by the overkill
 
 **KTX-exact bounded on a summary (phase 16.3).** The per-hit bounded
 reconstruction is best-effort, but KTX's own end-of-match totals
-(`demoInfo.players[].dmg` + `weapons[].damage.enemy`) are exact. So on an
+(`demoInfo.players[].dmg` + `weapons[].damage.enemy`/`.team`) are exact.
+So on an
 **unfiltered summary** that serves the bounded family (`dmg=bounded` or
 `dmg=both`), the view substitutes each player's bounded `given`,
-`givenTeam`, `givenSelf`, `ewep` and per-weapon `byWeapon` with the KTX
+`givenTeam`, `givenSelf`, `ewep` and the per-weapon `byWeapon` /
+`byWeaponTeam` with the KTX
 figures when the demo carries `demoInfo`, echoing `boundedSource: "ktx"`
 (else `"reconstructed"`). The substitution is deliberately partial:
 `taken` stays reconstructed (KTX `dmg.taken` is enemy-only, our `taken`
-counts all sources) and the `enemyVs*` buckets stay reconstructed (KTX has
+counts all sources), the `enemyVs*` buckets stay reconstructed (KTX has
 no such split) — so on a KTX-sourced summary they may no longer sum
-exactly to the substituted `given`. A filtered/windowed summary has no KTX
+exactly to the substituted `given` — and `byWeaponSelf` stays
+reconstructed (KTX records no per-weapon self damage). A
+filtered/windowed summary has no KTX
 counterpart, so it stays fully reconstructed (no `boundedSource`).
 
 The per-player / matrix aggregates AND the `events` log are both **match-time
@@ -188,7 +192,8 @@ match-relative `time` so consumers can still window within the match.
 buckets (schema v54).** A telefrag
 (deathtype `tele`) is an instant kill reported on the wire as the 9999
 sentinel; a stomp (deathtype `stomp`, landing on a head) is a real ~10 HP
-`T_Damage`. Both stay out of the `events` log, `byWeapon`, `matrix`,
+`T_Damage`. Both stay out of the `events` log, every per-weapon map
+(`byWeapon`, `byWeaponTeam`, `byWeaponSelf`), `matrix`,
 `ewep` and `totalDamage` (KTX maps them to `wpNONE`, so its
 `weapons[].damage` excludes them too), are listed in `telefrags` /
 `stomps` (and the opt-in `telefrag` / `stomp` events) and counted
@@ -268,6 +273,18 @@ inventory, not the attacker's weapon. Mutually exclusive, priority
 RL+LG > RL > LG > mid > sg (NG counts as shotgun-tier). `ewep` is the
 sum of the LG/RL/both buckets = damage dealt to enemies holding RL or LG.
 
+`byWeaponTeam` and `byWeaponSelf` (schema v63) split `givenTeam` and
+`givenSelf` by the attacker's weapon exactly as `byWeapon` splits
+`given` — same keys, same tele/stomp exclusion (positional kills fold
+into the totals only). **Measuredness is family-level, not key-level:**
+all three maps are measured wherever the `damage` section itself exists
+(it only exists when a damage stream was read), and within them an
+absent KEY means "dealt none with that weapon" — zeros are dropped, not
+stored. The two splits are `omitempty` because a player who dealt no
+team/self damage has nothing to say, never because the split was
+unmeasurable. `matrix`, the top-level `byWeapon` and the `enemyVs*`
+buckets stay enemy-only.
+
 | Field | JSON key | Type |
 |---|---|---|
 | Given | `given` | int (to enemies) |
@@ -276,6 +293,8 @@ sum of the LG/RL/both buckets = damage dealt to enemies holding RL or LG.
 | GivenSelf | `givenSelf` | int |
 | TakenEnv | `takenEnv` | int |
 | ByWeapon | `byWeapon` | map[string]int (enemy given, by attacker weapon) |
+| ByWeaponTeam | `byWeaponTeam` | map[string]int (omitempty — team given, by attacker weapon) |
+| ByWeaponSelf | `byWeaponSelf` | map[string]int (omitempty — self given, by attacker weapon) |
 | EnemyVsSG | `enemyVsSg` | int (victim held shotgun-tier only) |
 | EnemyVsMid | `enemyVsMid` | int (victim held ssg/sng/gl) |
 | EnemyVsLG | `enemyVsLg` | int (victim held LG, not RL) |
@@ -655,7 +674,7 @@ field is documented inline.
 
 ## PlayerStatsResult (`playerStats`)
 
-Defined in `result/player_stats.go`. Schema v62. Present on **every**
+Defined in `result/player_stats.go`. Schema v63. Present on **every**
 demo — it never depends on the KTX demoinfo block being there.
 
 This is the canonical answer to "how did this player do". `demoInfo` is
@@ -712,6 +731,8 @@ never does.
 | `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
 | `damage.teamWeapons` | **ktx-only** | KTX's `dmg_tweapon` (`ktx/src/combat.c:1063`), the friendly-fire mirror of `enemyWeapons`. The reconstruction does not bucket team damage by the victim's inventory. |
 | `damage.byWeapon` | **ktx** per weapon when present, else the bounded reconstruction | enemy damage GIVEN split by attacker weapon. Merged weapon by weapon, on **presence** of KTX's `damage` sub-block, not on its being non-zero: KTX emits a weapon entry whenever the weapon was used (`ktx/src/stats_json.c:382`) and a `damage` sub-block whenever either counter moved (`:208`), so `enemy: 0` there is a measured zero — a weapon used for team splash only. The reconstruction survives for keys outside KTX's vocabulary (`unknown`, `stomp`, `tele`, `squish`, `explobox` — the full vocabulary is `DeathTypeToWeapon`, `mvd-reader/mvd/types.go:286`), which are real measured damage. |
+| `damage.byWeaponTeam` | **ktx** per weapon when present, else the bounded reconstruction | TEAM damage GIVEN split by attacker weapon (schema v63). KTX writes `enemy` and `team` in the SAME `damage` sub-block (`ktx/src/stats_json.c:208-212`), so it is merged on exactly the presence rule `byWeapon` uses, and `team: 0` beside a non-zero `enemy` is a measured zero. **Measured whenever the `damage` family is present** — see below. |
+| `damage.byWeaponSelf` | always **derived** | SELF damage GIVEN split by attacker weapon (schema v63). KTX records no per-weapon self counter, so this one has no overlay and is **measured only where a damage stream was read** — which is exactly what a non-nil `damage.taken` says. Absent on a KTX-block-without-stream demo whatever the player did. |
 | `score.byWeapon` | always **derived** | enemy kills split by weapon, from the corrected frag log — same footing as `score.kills`, which is why KTX's per-weapon counts (subject to the same reconnect / telefrag over-counting) never overlay it. Its key set is the *obituary* vocabulary, not `DeathTypeToWeapon`'s: beyond rl/lg/gl/sg/ssg/sng/ng/axe it can carry `tele`, `stomp`, `squish`, `unknown` and (on mods that have them) `hook`/`rail`. `tele` is in the committed corpus. Iterate the map. |
 | `login` | **ktx** when present, else the `*auth` userinfo login | genuinely on the wire (`mvd-reader/parser/userinfo.go:177` in `parseSetInfo`, `:229` in `parseUserInfoString`). |
 | `controlMs` / `speed` | **ktx-only** | KTX's own control clock and speed summary; no wire-side equivalent is computed today. |
@@ -810,6 +831,43 @@ it too, and a team is never split across two values.
 
 No demo in the test corpus carries those cvars, which is why this path
 went unmarked.
+
+#### The three per-weapon damage maps and what an absence means
+
+`damage.byWeapon`, `damage.byWeaponTeam` and `damage.byWeaponSelf`
+(schema v63) split `given`, `givenTeam` and `givenSelf` by the
+**attacker's** weapon, with the same keys and the same telefrag/stomp
+exclusion. Never infer measuredness from `omitempty` — there are exactly
+two rules, and a consumer implements only these:
+
+1. **`byWeapon` and `byWeaponTeam` are measured whenever the `damage`
+   family is present.** `src: "ktx"` means the KTX block existed, and
+   KTX counts per-weapon enemy AND team damage for every weapon entry
+   (one sub-block carries both, `ktx/src/stats_json.c:208-212`, omitted
+   only when both are zero). `src: "derived"` / `"derived:unbounded"`
+   means a damage stream was read.
+2. **`byWeaponSelf` is measured only when a damage stream exists**, which
+   is exactly what a non-nil `damage.taken` says. KTX has no per-weapon
+   self counter, so on a demo with a KTX block but no damage stream the
+   family is present and this map is genuinely unmeasured.
+
+Within a measured family, an absent KEY means "dealt none with that
+weapon". The derived copy drops zeros; KTX keeps an explicit measured 0
+where the weapon's `damage` sub-block exists and omits the sub-block
+when both counters are zero — so key-level absence is zero-or-never
+either way, and never distinguishable. A UI summing the three splits
+(an "all victims" figure) must therefore check rule 2 and label the sum
+a lower bound when `taken` is absent, rather than treating the missing
+self split as zero.
+
+The two rules are **per-player**. TEAM rows follow the team-row
+convention set in schema v62: optional figures are partial sums over the
+members that measured them (`sumOptional` — "a team figure reads as
+measured if any member's was"), and the new maps sum the same way. On a
+team mixing a KTX-only member with a stream-derived one, the team's
+`byWeaponSelf` therefore under-counts `givenSelf` by the KTX-only
+member's share; `src: "mixed"` on the family is the canary, and such
+teams only arise when the roster invariant is already broken.
 
 #### Why `accuracy` is swapped wholesale and `damage.byWeapon` is merged
 
@@ -2236,6 +2294,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v63 | **Per-weapon team and self damage splits** (additive; no existing field changed shape or meaning). `damage.byPlayer.<p>.byWeaponTeam` / `.byWeaponSelf` — in the raw family and the `bounded` nest alike — and `playerStats.players[].damage.byWeaponTeam` / `.byWeaponSelf` split `givenTeam` and `givenSelf` by the ATTACKER's weapon, exactly as `byWeapon` splits `given` (same keys; telefrags and stomps stay excluded from all three, folding into the totals only). The KTX overlays now stamp `byWeaponTeam` from `weapons[].damage.team`, which KTX has always written beside `.enemy` (`ktx/src/stats_json.c:208-212`) and nothing consumed: a bounded summary with `boundedSource: "ktx"`, or a `playerStats` damage family with `src: "ktx"`, previously served a reconstructed team split under a server-counter badge. `byWeaponSelf` has no KTX counterpart and stays derived. **Measuredness is family-level and documented, never inferred from `omitempty`**: `byWeapon` + `byWeaponTeam` are measured wherever the damage family is present; `byWeaponSelf` only where a damage stream was read, which a non-nil `damage.taken` says. Within a measured family an absent key means "dealt none with that weapon". `matrix`, the top-level `damage.byWeapon` and the `enemyVs*`/`ewep` buckets stay enemy-only. Web: the aim tab's per-weapon **Dmg** column now follows the Enemy/Team/Self victim filter, and its All mode renders a `≥`-prefixed lower bound when a split is unmeasured. See [PlayerDamage](#playerdamage) and [PlayerStatsResult](#playerstatsresult-playerstats). |
 | v62 | **`playerStats` learns to say "not measured"** (the v61 section is amended before it ships) **and `match.map` becomes the canonical shortname.** `match.map` previously carried whatever the `svc_serverdata` level name cleaned down to — the pretty title (`"Castle of the Damned"`) on most id maps. It is now always the SHORT name (`e1m2`), resolved like `EffectiveMap` (demoinfo map, else the serverinfo `map` key, and only then the title), so the one map identity holds across `match`, `demoInfo`, `metadata.serverInfo`, `searchGames` and every geometry file key. The title moves to the additive, **display-only** `match.mapTitle` (omitted when `svc_serverdata` named no level). `/overview` is unaffected in shape — its `map`/`mapTitle` split already reported these values, and `mapTitle` now reads the dedicated field. The `playerStats` half, six changes, all of them replacing a confident zero with an absence: (1) the **kill side of `score`** — `kills`, `suicides`, `teamKills`, `byWeapon`, `efficiency` — is now **optional** and omitted together on a demo whose obituary-derived frag log measured nothing while players demonstrably died (`4on4_l_vs_la[e1m2]`: 230 team frags, 121 deaths, 0 kills, 0.0% efficiency, indistinguishable from a genuinely awful team). `frags` and `deaths` are measured on every demo and stay. Render `-`, not `0`. (2) `hold.armor` is **omitted entirely** when the armor stream carries no sample at all, instead of reporting the alive-time complement of nothing as a full-match `none` (`dag_caps_e1m2`, a POV recording: 7 of 8 rows claimed 100% no-armor beside their own armor pickups). A player who genuinely never held armor still reports `none == aliveMs`. (3) `damage.src` becomes **three-valued** with `"derived:unbounded"`, marking the `k_midair` / `k_instagib` / `k_dmgfrags` demos where no bounded reconstruction exists and the figures are raw wire damage including overkill (+38-44% on a normal 4on4, an order of magnitude on instagib). (4) `damage` is now **emitted, zeroed**, for a player who dealt and took nothing on a demo that carries the damage stream — an observed zero, not an unmeasurable one. (5) **team rows carry `accuracy`**, summed per weapon over members, with `hits` absent unless every contributing member measured it and `real`/`virtual` not aggregated. (6) `sources` is **computed from the rows being served, after filtering** (it previously read `ktx` if any row matched, and was copied verbatim into filtered responses) and gains `"mixed"` as a phantom-roster canary. Type changes on the same fields: `ping` `int` -> `*int`, `members` `int` -> `*int` (so a team row always publishes it, including 0), `efficiency` `Share` -> `*Share`. Also outside the section: `frags.byWeapon` and `frags.byPlayer[].byWeapon` now move with the Finalize teamkill re-classification, so `sum(byWeapon) == kills` holds. See [PlayerStatsResult](#playerstatsresult-playerstats). |
 | v61 | **New `playerStats` section** (additive — no existing field added, removed or retyped). One row per player and per team, present on **every** demo, carrying the join consumers previously re-implemented: the frag-log-corrected scoreboard, the damage family, pickup tallies and the KTX-only identity fields, plus the family neither source carries — **possession time** (time holding each weapon, each armor type, and **no armor**, as exact integrals over the native-rate streams with explicit `matchMs` / `presentMs` / `aliveMs` denominators). Every stat family carries `src` (`"derived"` \| `"ktx"`) with a top-level `sources` roll-up; the stored artifact is always fully derived and `view.PlayerStats` applies the KTX overlay at read time, the same pattern as `damage.boundedSource`. Exposed as the `player-stats` artifact (REST `/v1/demos/{id}/player-stats`, MCP `getArtifact`). `demoInfo` is unchanged — still the verbatim KTX pass-through this section is diffable against. See [PlayerStatsResult](#playerstatsresult-playerstats). |
 | v60 | **Match scoreboard built per slot occupancy** (values only — no field added, removed or retyped). `match.players` and `match.teams` are now keyed on wire-slot *occupancies* instead of on each slot's final occupant, and participation is decided by evidence of play inside the match window (a spawn, a death, a position sample, or a frag value that changed) instead of end-of-demo `spectator` / empty-team state. What moves: (1) a participant who goes spectator *after* the match keeps their row and their score (hub 212535 `wd.dilbert` 0 -> 21, team `pys` 50 -> 71); (2) a player who leaves mid-match keeps the score the server announced in its `"<name> left the game with N frags"` broadcast instead of the zero `SV_DropClient` writes (`4on4_l_vs_la[e1m2]`: `shiva` 26, `DARKLORD` 21, team totals now reconcile exactly with the serverinfo `score` key); (3) FFA rosters survive — an empty team is no longer read as a spectator marker; (4) a connection the server refused (match locked) no longer inherits the departed player's scoreboard row, so phantom one-person teams disappear. Also value-only in `streams.players[]`: per-slot item state is reset at an occupancy handover, so the `rl`/`lg`/`gl`/`ssg`/`sng`/`quad`/`pent`/`ring` interval lists no longer carry a departing player's inventory into the next occupant, and a departing player's own open intervals close when they left rather than at match end. The same split reaches `locGraph.edges[]`: an occupancy boundary breaks the position track, so a player's exit from one slot is no longer bridged to his re-entry on another and the phantom `teleport` edge that bridging invented disappears (`4on4_jah_ahoy_170526_defer_reconnect`: `Quad.low -> Pent.MH`, `rusti`, total 1). |

@@ -36894,6 +36894,14 @@
             "sg": 3410,
             "ssg": 131
           },
+          "byWeaponSelf": {
+            "gl": 135,
+            "rl": 215
+          },
+          "byWeaponTeam": {
+            "rl": 63,
+            "sg": 135
+          },
           "enemyVsBoth": 220,
           "enemyVsLg": 697,
           "enemyVsMid": 942,
@@ -36913,6 +36921,14 @@
           "rl": 2530,
           "sg": 3532,
           "ssg": 224
+        },
+        "byWeaponSelf": {
+          "gl": 135,
+          "rl": 233
+        },
+        "byWeaponTeam": {
+          "rl": 65,
+          "sg": 144
         },
         "enemyVsBoth": 220,
         "enemyVsLg": 898,
@@ -36937,6 +36953,14 @@
             "sng": 120,
             "ssg": 84
           },
+          "byWeaponSelf": {
+            "rl": 443
+          },
+          "byWeaponTeam": {
+            "lg": 30,
+            "rl": 76,
+            "sg": 52
+          },
           "enemyVsBoth": 429,
           "enemyVsLg": 536,
           "enemyVsMid": 358,
@@ -36957,6 +36981,14 @@
           "sg": 2476,
           "sng": 144,
           "ssg": 84
+        },
+        "byWeaponSelf": {
+          "rl": 443
+        },
+        "byWeaponTeam": {
+          "lg": 30,
+          "rl": 241,
+          "sg": 52
         },
         "enemyVsBoth": 458,
         "enemyVsLg": 582,
@@ -36980,6 +37012,14 @@
             "sng": 1558,
             "ssg": 291
           },
+          "byWeaponSelf": {
+            "lg": 30,
+            "rl": 176
+          },
+          "byWeaponTeam": {
+            "sg": 52,
+            "sng": 30
+          },
           "enemyVsBoth": 358,
           "enemyVsLg": 1110,
           "enemyVsMid": 557,
@@ -36998,6 +37038,14 @@
           "sg": 2640,
           "sng": 1674,
           "ssg": 292
+        },
+        "byWeaponSelf": {
+          "lg": 839,
+          "rl": 176
+        },
+        "byWeaponTeam": {
+          "sg": 52,
+          "sng": 90
         },
         "enemyVsBoth": 370,
         "enemyVsLg": 1222,
@@ -37022,6 +37070,17 @@
             "sng": 110,
             "ssg": 395
           },
+          "byWeaponSelf": {
+            "gl": 42,
+            "rl": 235
+          },
+          "byWeaponTeam": {
+            "gl": 60,
+            "lg": 23,
+            "rl": 193,
+            "sg": 100,
+            "sng": 90
+          },
           "enemyVsBoth": 108,
           "enemyVsLg": 310,
           "enemyVsMid": 862,
@@ -37041,6 +37100,17 @@
           "sg": 3332,
           "sng": 126,
           "ssg": 424
+        },
+        "byWeaponSelf": {
+          "gl": 42,
+          "rl": 235
+        },
+        "byWeaponTeam": {
+          "gl": 109,
+          "lg": 30,
+          "rl": 193,
+          "sg": 100,
+          "sng": 90
         },
         "enemyVsBoth": 108,
         "enemyVsLg": 428,
@@ -37066,6 +37136,14 @@
             "sng": 545,
             "ssg": 876
           },
+          "byWeaponSelf": {
+            "gl": 71,
+            "rl": 147
+          },
+          "byWeaponTeam": {
+            "rl": 221,
+            "sng": 126
+          },
           "enemyVsBoth": 208,
           "enemyVsLg": 560,
           "enemyVsMid": 347,
@@ -37086,6 +37164,14 @@
           "sg": 2764,
           "sng": 576,
           "ssg": 1024
+        },
+        "byWeaponSelf": {
+          "gl": 71,
+          "rl": 230
+        },
+        "byWeaponTeam": {
+          "rl": 262,
+          "sng": 126
         },
         "enemyVsBoth": 216,
         "enemyVsLg": 678,
@@ -37110,6 +37196,14 @@
             "sng": 36,
             "ssg": 108
           },
+          "byWeaponSelf": {
+            "rl": 201
+          },
+          "byWeaponTeam": {
+            "gl": 0,
+            "rl": 28,
+            "sg": 148
+          },
           "enemyVsBoth": 212,
           "enemyVsLg": 786,
           "enemyVsMid": 408,
@@ -37129,6 +37223,14 @@
           "sg": 2736,
           "sng": 36,
           "ssg": 108
+        },
+        "byWeaponSelf": {
+          "rl": 231
+        },
+        "byWeaponTeam": {
+          "gl": 147,
+          "rl": 50,
+          "sg": 148
         },
         "enemyVsBoth": 228,
         "enemyVsLg": 820,
@@ -37153,6 +37255,17 @@
             "sng": 54,
             "ssg": 195
           },
+          "byWeaponSelf": {
+            "gl": 33,
+            "rl": 125
+          },
+          "byWeaponTeam": {
+            "lg": 30,
+            "ng": 36,
+            "rl": 117,
+            "sg": 51,
+            "ssg": 24
+          },
           "enemyVsBoth": 483,
           "enemyVsLg": 507,
           "enemyVsMid": 1408,
@@ -37172,6 +37285,17 @@
           "sg": 3004,
           "sng": 54,
           "ssg": 208
+        },
+        "byWeaponSelf": {
+          "gl": 33,
+          "rl": 523
+        },
+        "byWeaponTeam": {
+          "lg": 30,
+          "ng": 36,
+          "rl": 197,
+          "sg": 52,
+          "ssg": 24
         },
         "enemyVsBoth": 509,
         "enemyVsLg": 594,
@@ -37195,6 +37319,16 @@
             "sng": 18,
             "ssg": 292
           },
+          "byWeaponSelf": {
+            "gl": 50,
+            "lg": 24,
+            "rl": 853
+          },
+          "byWeaponTeam": {
+            "lg": 100,
+            "rl": 613,
+            "sg": 36
+          },
           "enemyVsBoth": 218,
           "enemyVsLg": 540,
           "enemyVsMid": 1522,
@@ -37214,6 +37348,16 @@
           "sg": 1644,
           "sng": 18,
           "ssg": 368
+        },
+        "byWeaponSelf": {
+          "gl": 50,
+          "lg": 367,
+          "rl": 902
+        },
+        "byWeaponTeam": {
+          "lg": 120,
+          "rl": 733,
+          "sg": 36
         },
         "enemyVsBoth": 218,
         "enemyVsLg": 664,
@@ -89860,6 +90004,17 @@
             "sng": 54,
             "ssg": 195
           },
+          "byWeaponSelf": {
+            "gl": 33,
+            "rl": 125
+          },
+          "byWeaponTeam": {
+            "lg": 30,
+            "ng": 36,
+            "rl": 117,
+            "sg": 51,
+            "ssg": 24
+          },
           "enemyWeapons": 2090,
           "given": 7711,
           "givenSelf": 158,
@@ -90080,6 +90235,14 @@
             "sg": 3410,
             "ssg": 131
           },
+          "byWeaponSelf": {
+            "gl": 135,
+            "rl": 215
+          },
+          "byWeaponTeam": {
+            "rl": 63,
+            "sg": 135
+          },
           "enemyWeapons": 1540,
           "given": 5952,
           "givenSelf": 350,
@@ -90274,6 +90437,16 @@
             "sg": 1599,
             "sng": 18,
             "ssg": 292
+          },
+          "byWeaponSelf": {
+            "gl": 50,
+            "lg": 24,
+            "rl": 853
+          },
+          "byWeaponTeam": {
+            "lg": 100,
+            "rl": 613,
+            "sg": 36
           },
           "enemyWeapons": 1913,
           "given": 8390,
@@ -90488,6 +90661,14 @@
             "sg": 2472,
             "sng": 1558,
             "ssg": 291
+          },
+          "byWeaponSelf": {
+            "lg": 30,
+            "rl": 176
+          },
+          "byWeaponTeam": {
+            "sg": 52,
+            "sng": 30
           },
           "enemyWeapons": 2835,
           "given": 6425,
@@ -90710,6 +90891,14 @@
             "sg": 2622,
             "sng": 545,
             "ssg": 876
+          },
+          "byWeaponSelf": {
+            "gl": 71,
+            "rl": 147
+          },
+          "byWeaponTeam": {
+            "rl": 221,
+            "sng": 126
           },
           "enemyWeapons": 2731,
           "given": 7323,
@@ -90940,6 +91129,17 @@
             "sng": 110,
             "ssg": 395
           },
+          "byWeaponSelf": {
+            "gl": 42,
+            "rl": 235
+          },
+          "byWeaponTeam": {
+            "gl": 60,
+            "lg": 23,
+            "rl": 193,
+            "sg": 100,
+            "sng": 90
+          },
           "enemyWeapons": 1374,
           "given": 6610,
           "givenSelf": 277,
@@ -91167,6 +91367,14 @@
             "sng": 120,
             "ssg": 84
           },
+          "byWeaponSelf": {
+            "rl": 443
+          },
+          "byWeaponTeam": {
+            "lg": 30,
+            "rl": 76,
+            "sg": 52
+          },
           "enemyWeapons": 1736,
           "given": 5705,
           "givenSelf": 443,
@@ -91366,6 +91574,13 @@
             "sg": 2580,
             "sng": 36,
             "ssg": 108
+          },
+          "byWeaponSelf": {
+            "rl": 201
+          },
+          "byWeaponTeam": {
+            "rl": 28,
+            "sg": 148
           },
           "enemyWeapons": 1942,
           "given": 6046,
@@ -91598,6 +91813,20 @@
             "sg": 10529,
             "sng": 182,
             "ssg": 1013
+          },
+          "byWeaponSelf": {
+            "gl": 260,
+            "lg": 24,
+            "rl": 1428
+          },
+          "byWeaponTeam": {
+            "gl": 60,
+            "lg": 153,
+            "ng": 36,
+            "rl": 986,
+            "sg": 322,
+            "sng": 90,
+            "ssg": 24
           },
           "enemyWeapons": 6917,
           "given": 28663,
@@ -91835,6 +92064,17 @@
             "sng": 2259,
             "ssg": 1359
           },
+          "byWeaponSelf": {
+            "gl": 71,
+            "lg": 30,
+            "rl": 967
+          },
+          "byWeaponTeam": {
+            "lg": 30,
+            "rl": 325,
+            "sg": 252,
+            "sng": 156
+          },
           "enemyWeapons": 9244,
           "given": 25499,
           "givenSelf": 1068,
@@ -92029,7 +92269,7 @@
       }
     ]
   },
-  "schemaVersion": 62,
+  "schemaVersion": 63,
   "shots": {
     "byPlayer": [
       {

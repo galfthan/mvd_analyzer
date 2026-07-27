@@ -11183,10 +11183,16 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
-    // Joined in from playerStats.damage.byWeapon (the Summary tab's source),
-    // which is ENEMY damage only — so this column does not follow the
-    // Enemy/Team/Self victim toggle above (result/player_stats.go).
-    dmg: { h: 'Dmg', t: 'Damage dealt to enemies with this weapon — enemy damage only, so it does NOT follow the Enemy/Team/Self victim filter', cell: w => w.dmg || '-' },
+    // Joined in from playerStats.damage's three per-weapon maps, which
+    // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
+    // the measuredness rules). The cell carries a {n, lower, note} object,
+    // not a number, so the sort key comes from `sort` rather than the text.
+    dmg: {
+        h: 'Dmg',
+        t: 'Damage dealt with this weapon, following the Enemy/Team/Self victim filter above. All sums the three splits; a "≥" prefix marks a lower bound where one split is not measured on this demo',
+        cell: w => aimDamageText(w.dmg),
+        sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
+    },
     hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
     fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
     pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
@@ -11266,6 +11272,53 @@ function aimWeaponView(w) {
     };
 }
 
+// aimDamageCell resolves the Dmg cell for one player + weapon under the
+// active victim filter. `dmg` is that player's playerStats damage family,
+// absent on a demo carrying no damage information at all.
+//
+// Measuredness follows the two rules result.PlayerStatsDamage documents and
+// nothing else: byWeapon and byWeaponTeam are measured whenever the family
+// is present, byWeaponSelf only where a damage stream was read — which is
+// exactly what a non-null `taken` says. Within a measured map an absent KEY
+// means "dealt none with that weapon", so it reads 0, never "not measured";
+// on a KTX-only demo a weapon used purely for team splash genuinely is
+// {enemy: 0, team: N}.
+//
+// Returns {n, lower, note}. n === null is "not measured" (renders "-").
+// `lower` marks an All-mode PARTIAL sum: the three splits are per-hit and
+// mutually exclusive, so summing them is only correct when every one is
+// measured — otherwise the figure is labelled a lower bound rather than
+// served as a total or padded with a fabricated zero.
+function aimDamageCell(dmg, wn) {
+    if (!dmg) return { n: null, lower: false, note: 'No damage information for this player on this demo.' };
+    const selfMeasured = dmg.taken !== null && dmg.taken !== undefined;
+    const enemy = (dmg.byWeapon || {})[wn] || 0;
+    const team = (dmg.byWeaponTeam || {})[wn] || 0;
+    const self = (dmg.byWeaponSelf || {})[wn] || 0;
+    const noSelf = 'The self-damage split is not measured on this demo — it needs the damage stream, which this demo does not carry.';
+    switch (aimVictimFilter) {
+        case 'enemy': return { n: enemy, lower: false, note: '' };
+        case 'team': return { n: team, lower: false, note: '' };
+        case 'self':
+            return selfMeasured
+                ? { n: self, lower: false, note: '' }
+                : { n: null, lower: false, note: noSelf };
+        default:
+            return selfMeasured
+                ? { n: enemy + team + self, lower: false, note: '' }
+                : { n: enemy + team, lower: true, note: 'Lower bound: enemy + team damage only. ' + noSelf };
+    }
+}
+
+function aimDamageText(d) {
+    if (!d || d.n === null) {
+        const t = d && d.note ? ` title="${escapeHtml(d.note)}"` : '';
+        return `<span class="aim-na"${t}>-</span>`;
+    }
+    if (d.lower) return `<span title="${escapeHtml(d.note)}">&ge;${d.n}</span>`;
+    return String(d.n);
+}
+
 // renderAimWeaponTables builds one table per weapon, rows = players (all who
 // fired anything; "-" where they didn't fire this weapon), team-coloured like
 // the Summary tab. Player-independent (re-rendered when the victim filter
@@ -11279,8 +11332,10 @@ function renderAimWeaponTables(result) {
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
-    // Summary weapon table reads through formatWeaponCells.
-    const dmgByPlayer = new Map(playerStatsRows(result).map(p => [p.name, p.damage?.byWeapon || {}]));
+    // Summary weapon table reads through formatWeaponCells. The whole damage
+    // family is carried, not just byWeapon: the column follows the victim
+    // filter and needs `taken` for the self split's measuredness.
+    const dmgByPlayer = new Map(playerStatsRows(result).map(p => [p.name, p.damage || null]));
 
     for (const wn of AIM_WEAPON_ORDER) {
         const colKeys = AIM_TABLE_COLS[wn] || [];
@@ -11289,7 +11344,7 @@ function renderAimWeaponTables(result) {
             const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, dmg: dmgByPlayer.get(pa.player)?.[wn] || 0 } : null,
+                w: w ? { ...w, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
@@ -11319,7 +11374,12 @@ function renderAimWeaponTables(result) {
             const color = (ti >= 0 && ti < TEAM_COLORS.length) ? TEAM_COLORS[ti] : '';
             const stripe = color ? ` style="border-left: 3px solid ${color}"` : '';
             const tds = `<td>${escapeHtml(r.player)}</td>` +
-                (r.w ? cols.map((c, i) => `<td${cellCls(i)}>${c.cell(r.w)}</td>`).join('') : naCells);
+                (r.w ? cols.map((c, i) => {
+                    // A column whose text is not its own sort key (Dmg's "≥N"
+                    // / "-") publishes one via data-sort-value.
+                    const sv = c.sort ? ` data-sort-value="${c.sort(r.w)}"` : '';
+                    return `<td${cellCls(i)}${sv}>${c.cell(r.w)}</td>`;
+                }).join('') : naCells);
             body += `<tr${stripe}>${tds}</tr>`;
         });
 

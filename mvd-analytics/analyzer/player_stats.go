@@ -7,7 +7,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// Player statistics (schema v62). playerStatsPost joins the artifacts that
+// Player statistics (schema v63). playerStatsPost joins the artifacts that
 // each hold a piece of "how did this player do" — the corrected scoreboard,
 // the frag log, the damage reconstruction, the item and weapon-pickup
 // timelines, the backpack drops — and adds the family none of them carry:
@@ -281,6 +281,9 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 		EnemyWeapons: src.EWep,
 		Taken:        &taken,
 	}
+	// The three given directions get the same zero-dropping copy: a weapon
+	// the player dealt nothing with in that direction is omitted, never
+	// zero-filled (result.PlayerStatsDamage documents the rule).
 	for w, n := range src.ByWeapon {
 		if n == 0 {
 			continue
@@ -289,6 +292,24 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 			out.ByWeapon = map[string]int{}
 		}
 		out.ByWeapon[w] = n
+	}
+	for w, n := range src.ByWeaponTeam {
+		if n == 0 {
+			continue
+		}
+		if out.ByWeaponTeam == nil {
+			out.ByWeaponTeam = map[string]int{}
+		}
+		out.ByWeaponTeam[w] = n
+	}
+	for w, n := range src.ByWeaponSelf {
+		if n == 0 {
+			continue
+		}
+		if out.ByWeaponSelf == nil {
+			out.ByWeaponSelf = map[string]int{}
+		}
+		out.ByWeaponSelf[w] = n
 	}
 	// TakenEnemy and TakenToDie were KTX-only until we reconstructed them
 	// from the per-hit log: a demo without a demoinfo block should degrade
@@ -1132,6 +1153,8 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				dmg.TakenEnemy = addPtr(dmg.TakenEnemy, m.Damage.TakenEnemy)
 				dmg.TeamWeapons = addPtr(dmg.TeamWeapons, m.Damage.TeamWeapons)
 				dmg.ByWeapon = addWeaponCounts(dmg.ByWeapon, m.Damage.ByWeapon)
+				dmg.ByWeaponTeam = addWeaponCounts(dmg.ByWeaponTeam, m.Damage.ByWeaponTeam)
+				dmg.ByWeaponSelf = addWeaponCounts(dmg.ByWeaponSelf, m.Damage.ByWeaponSelf)
 			}
 			if m.Pickups != nil {
 				if pickups == nil {
