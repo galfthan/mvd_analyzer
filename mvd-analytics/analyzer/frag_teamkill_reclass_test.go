@@ -91,22 +91,65 @@ func TestFragFinalizeTeamkillDemotionRestoresByWeapon(t *testing.T) {
 	}}
 	a.UseCoreOutputs(&CoreOutputs{DemoInfo: di, Names: NewNameTable(di)})
 
-	// One unambiguous enemy kill first, so the killer has a frag line for
-	// the promotion to land on (OnEvent creates one only for real kills).
-	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "enemy eats shooter's pineapple\n", TimeMs: 500})
+	// The killer's ONLY frag was misread as a teamkill at OnEvent, so no
+	// frag line exists when the promotion runs — Finalize must create it
+	// rather than silently dropping the adjustment (external-review
+	// finding: the old ok-guard left the global byWeapon incremented with
+	// no per-player counterpart).
 	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "mate eats shooter's pineapple\n", TimeMs: 1000})
 	var res Result
 	if err := a.Finalize(&res); err != nil {
 		t.Fatal(err)
 	}
 	pf := res.Frags.ByPlayer["shooter"]
-	if pf == nil || pf.Kills != 2 {
-		t.Fatalf("player line = %+v, want 2 kills after the promotion", pf)
+	if pf == nil || pf.Kills != 1 {
+		t.Fatalf("player line = %+v, want a line with 1 kill created by the promotion", pf)
 	}
-	if pf.ByWeapon["gl"] != 2 {
-		t.Errorf("byWeapon[gl] = %d, want 2 — the promotion must restore the weapon too", pf.ByWeapon["gl"])
+	if pf.ByWeapon["gl"] != 1 {
+		t.Errorf("byWeapon[gl] = %d, want 1 — the promotion must restore the weapon too", pf.ByWeapon["gl"])
 	}
-	if n := res.Frags.ByWeapon["gl"]; n != 2 {
-		t.Errorf("global byWeapon[gl] = %d, want 2", n)
+	if n := res.Frags.ByWeapon["gl"]; n != 1 {
+		t.Errorf("global byWeapon[gl] = %d, want 1", n)
+	}
+}
+
+// A kill demoted to a teamkill must move ALL THREE counters — kills,
+// byWeapon and teamKills — or the identity frags == kills − suicides −
+// teamKills breaks by one on the reclass path (external-review finding:
+// only the first two moved).
+func TestFragFinalizeTeamkillDemotionMovesTeamKills(t *testing.T) {
+	a := NewFragAnalyzer()
+	ctx := &Context{}
+	// Wire-side userinfo puts them on different teams → OnEvent scores a
+	// kill...
+	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "shooter", Team: "red"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "mate", Team: "blue"}
+	_ = a.Init(ctx)
+	a.timing.Started = true
+
+	// ...but the demoinfo block says they were teammates all along.
+	di := &result.DemoInfoResult{Players: []result.DemoInfoPlayer{
+		{Name: "shooter", Team: "red"},
+		{Name: "mate", Team: "red"},
+	}}
+	a.UseCoreOutputs(&CoreOutputs{DemoInfo: di, Names: NewNameTable(di)})
+
+	_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "mate eats shooter's pineapple\n", TimeMs: 1000})
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	pf := res.Frags.ByPlayer["shooter"]
+	if pf == nil {
+		t.Fatal("no frag line for shooter")
+	}
+	if pf.Kills != 0 || pf.TeamKills != 1 {
+		t.Errorf("kills=%d teamKills=%d, want 0/1 — the demotion must move both", pf.Kills, pf.TeamKills)
+	}
+	if len(pf.ByWeapon) != 0 {
+		t.Errorf("byWeapon = %v, want empty after the demotion", pf.ByWeapon)
+	}
+	if n := res.Frags.ByWeapon["gl"]; n != 0 {
+		t.Errorf("global byWeapon[gl] = %d, want 0", n)
 	}
 }

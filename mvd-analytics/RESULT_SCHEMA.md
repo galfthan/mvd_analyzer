@@ -693,10 +693,15 @@ mirroring how `view.Damage` applies `boundedSource`.
 `sources` at the top level is the roll-up, **computed from the rows the
 response actually carries, after any filtering**: all rows agree → that
 value, no row carries the family → the key is omitted, the rows disagree
-→ `"mixed"`. `"mixed"` is a **canary**, not a data condition — on a demo
+→ `"mixed"`. Exception: `score` and `hold` are constants (`"derived"`)
+whenever players are present — no overlay ever supplies either family.
+`"mixed"` is a **canary**, not a data condition — on a demo
 carrying a KTX block every roster row joins it, so a disagreement means
 a roster row KTX has never heard of, i.e. the phantom-row defect. It
-should never appear on healthy data.
+should never appear on healthy data. A **team row** whose members
+disagree carries `"mixed"` as its family `src` under the same rule
+(shared value or the canary — never a silent upgrade); a player row
+never does.
 
 | Family | Winner | Why |
 |---|---|---|

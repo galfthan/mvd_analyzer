@@ -495,7 +495,7 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 		var dmg *result.PlayerStatsDamage
 		var pickups map[string]result.PlayerStatsPickup
 		var acc []*result.PlayerStatsAccuracy
-		src := result.SrcDerived
+		src := "" // pickups: members' shared src, else the mixed canary
 
 		for j := range players {
 			p := &players[j]
@@ -506,9 +506,16 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 			if p.Damage != nil {
 				if dmg == nil {
 					dmg = &result.PlayerStatsDamage{Src: p.Damage.Src}
-				}
-				if p.Damage.Src == result.SrcKTX {
-					dmg.Src = result.SrcKTX
+				} else if dmg.Src != p.Damage.Src {
+					// Members' shared src, else the mixed canary — the
+					// same rule AggregateAccuracy applies. The previous
+					// "any KTX member upgrades the team" stamp badged a
+					// part-derived sum as pure server counters, which is
+					// the T2.3 defect surviving one level down; a mixed
+					// team only occurs when the phantom-roster invariant
+					// is already broken, and that is exactly when the
+					// row must not claim a clean provenance.
+					dmg.Src = result.SrcMixed
 				}
 				dmg.Given += p.Damage.Given
 				dmg.GivenTeam += p.Damage.GivenTeam
@@ -531,8 +538,13 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 				if pickups == nil {
 					pickups = map[string]result.PlayerStatsPickup{}
 				}
-				if p.Pickups.Src == result.SrcKTX {
-					src = result.SrcKTX
+				// Same shared-or-mixed rule as damage above and
+				// AggregateAccuracy.
+				switch {
+				case src == "":
+					src = p.Pickups.Src
+				case src != p.Pickups.Src:
+					src = result.SrcMixed
 				}
 				for kind, e := range p.Pickups.ByKind {
 					agg := pickups[kind]

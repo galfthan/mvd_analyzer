@@ -104,12 +104,18 @@ type printLineBuf struct {
 // consumes: those are dem_single PRINT_LOW and can never merge with a
 // broadcast fragment.
 //
-// FRAME BOUNDARY. A pending buffer is also released when a fragment for
-// the same key arrives with a different wire time. Every fragment of one
-// line is written inside the server frame that produced it, so a
-// same-key fragment in a later frame is definitionally a new line;
-// without this a line whose terminator never arrived would swallow an
-// unrelated print minutes later.
+// FRAME BOUNDARY. Any incoming fragment releases EVERY pending buffer
+// from an earlier frame, not just its own key's. Every fragment of one
+// line is written inside the server frame that produced it, so a buffer
+// from an earlier frame is definitionally a finished (or abandoned)
+// line; without this a line whose terminator never arrived would
+// swallow an unrelated print minutes later. The sweep is deliberately
+// global: releasing only the incoming key's buffer would let a stale
+// buffer on another key — say an unterminated match-start announcement
+// — sit pending while later prints are delivered, emitting events out
+// of chronological order and letting the matchStarted gate judge those
+// events before the line that would have started the match
+// (external-review finding, 2026-07-27).
 //
 // TIME. The assembled event carries the wire time of the line's FIRST
 // fragment — the moment the server started saying it, and the only
@@ -118,18 +124,19 @@ type printLineBuf struct {
 func (p *Parser) assemblePrintLine(level int, msg string, target int, timeMs int32) error {
 	key := printLineKey{level: level, target: target}
 
+	// Frame boundary — see the doc comment: every buffer from an earlier
+	// frame is released before this fragment is handled, keeping the
+	// delivered event stream in wire order across keys.
+	if err := p.flushPrintLinesOutsideFrame(timeMs); err != nil {
+		return err
+	}
+
 	text := msg
 	start := timeMs
 	if buf, ok := p.printLines[key]; ok {
-		if buf.timeMs != timeMs {
-			delete(p.printLines, key)
-			if err := p.deliverPrintLine(level, buf.text, target, buf.timeMs); err != nil {
-				return err
-			}
-		} else {
-			text = buf.text + msg
-			start = buf.timeMs
-		}
+		// Same frame is guaranteed by the sweep above.
+		text = buf.text + msg
+		start = buf.timeMs
 	}
 
 	nl := strings.LastIndexByte(text, '\n')
@@ -159,12 +166,30 @@ func (p *Parser) assemblePrintLine(level int, msg string, target int, timeMs int
 // rather than silently dropped. Order is deterministic (time, level,
 // target) because Go map iteration is not.
 func (p *Parser) flushPendingPrintLines() error {
+	return p.flushPrintLinesWhere(func(*printLineBuf) bool { return true })
+}
+
+// flushPrintLinesOutsideFrame releases every pending buffer whose first
+// fragment arrived in a different frame than timeMs — the global
+// frame-boundary sweep assemblePrintLine documents.
+func (p *Parser) flushPrintLinesOutsideFrame(timeMs int32) error {
+	return p.flushPrintLinesWhere(func(b *printLineBuf) bool { return b.timeMs != timeMs })
+}
+
+// flushPrintLinesWhere delivers, in deterministic (time, level, target)
+// order, every pending buffer the predicate selects.
+func (p *Parser) flushPrintLinesWhere(pred func(*printLineBuf) bool) error {
 	if len(p.printLines) == 0 {
 		return nil
 	}
 	keys := make([]printLineKey, 0, len(p.printLines))
 	for k := range p.printLines {
-		keys = append(keys, k)
+		if pred(p.printLines[k]) {
+			keys = append(keys, k)
+		}
+	}
+	if len(keys) == 0 {
+		return nil
 	}
 	sort.Slice(keys, func(i, j int) bool {
 		a, b := keys[i], keys[j]
@@ -176,10 +201,9 @@ func (p *Parser) flushPendingPrintLines() error {
 		}
 		return a.target < b.target
 	})
-	pending := p.printLines
-	p.printLines = nil
 	for _, k := range keys {
-		buf := pending[k]
+		buf := p.printLines[k]
+		delete(p.printLines, k)
 		if err := p.deliverPrintLine(k.level, buf.text, k.target, buf.timeMs); err != nil {
 			return err
 		}

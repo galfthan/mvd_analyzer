@@ -491,7 +491,7 @@ paths:
 
         Available on EVERY demo, including ones with no KTX demoinfo block
         (a missing KTX block is never a reason to 422 — see the 422 response
-        below for the one case that is). Each stat family carries `src` ("derived" | "ktx")
+        below for the one case that is). Each stat family carries `src` ("derived" | "ktx" | "derived:unbounded" on damage; "mixed" on a team row is the phantom-roster canary)
         naming its source, with a `sources` roll-up; `/demoinfo` stays the
         verbatim KTX pass-through to diff against.
 
@@ -5321,7 +5321,7 @@ components:
     PlayerStats:
       description: >
         Canonical per-player and per-team statistics, computed for EVERY
-        demo. Each stat family carries `src` ("derived" | "ktx") naming
+        demo. Each stat family carries `src` ("derived" | "ktx", plus "derived:unbounded" on damage and the "mixed" team-row canary) naming
         where its numbers came from; `sources` is the roll-up. /demoinfo
         remains the verbatim KTX pass-through this is diffable against.
       additionalProperties: false
@@ -5340,17 +5340,19 @@ components:
             Per-family provenance roll-up, computed FROM THE ROWS this
             response carries, after any filtering: all rows agree -> that
             value, no row carries the family -> the key is omitted, rows
-            disagree -> "mixed". "mixed" is a canary and should never appear
+            disagree -> "mixed". Exception: score and hold are constants
+            ("derived") whenever players are present — no overlay ever
+            supplies either family. "mixed" is a canary and should never appear
             on healthy data — on a demo with a KTX block every roster row
             joins it, so a disagreement means a row the block has never
             heard of.
           additionalProperties: false
           properties:
-            score: { description: "Provenance of the scoreboard family (always derived).", type: string, enum: [derived, ktx, mixed] }
+            score: { description: "Provenance of the scoreboard family — a constant: the kill side is always the frag-log reconstruction.", type: string, enum: [derived] }
             damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, mixed] }
             accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
-            hold: { description: "Provenance of the possession-time family (always derived).", type: string, enum: [derived, ktx, mixed] }
+            hold: { description: "Provenance of the possession-time family — a constant: no other source carries it.", type: string, enum: [derived] }
           required: [score, hold]
           type: object
       required:
@@ -5413,7 +5415,7 @@ components:
             measured on every demo and always present.
           additionalProperties: false
           properties:
-            src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+            src: { description: "Provenance of this family — a constant \"derived\": the kill side is always the frag-log reconstruction.", type: string, enum: [derived] }
             frags: { description: "svc_updatefrags net score.", type: integer }
             kills: { description: "Frag-log-corrected kills. ABSENT when the frag log measured nothing on a demo where players died — kill attribution was not observable.", type: integer }
             deaths: { description: "Frag-log-corrected deaths.", type: integer }
@@ -5453,7 +5455,7 @@ components:
                     magnitude on instagib's flat 5000/hit, so do not compare
                     these figures with a bounded demo's.
                   type: string
-                  enum: [derived, "derived:unbounded", ktx]
+                  enum: [derived, "derived:unbounded", ktx, mixed]
                 given: { description: "Dealt to enemies.", type: integer }
                 givenTeam: { description: "Dealt to teammates.", type: integer }
                 givenSelf: { description: "Dealt to self.", type: integer }
@@ -5508,7 +5510,7 @@ components:
           oneOf:
             - additionalProperties: false
               properties:
-                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                src: { description: "Provenance of this family: the members' shared source on a team row, or \"mixed\" — the phantom-roster canary — when they disagree. Player rows never carry \"mixed\".", type: string, enum: [derived, ktx, mixed] }
                 byWeapon:
                   description: "Per weapon key (axe, sg, ssg, ng, sng, gl, rl, lg — KTX counts axe swings too). What the numbers mean depends on src — see the family description."
                   additionalProperties:
@@ -5529,7 +5531,7 @@ components:
           oneOf:
             - additionalProperties: false
               properties:
-                src: { description: "Provenance of this family.", type: string, enum: [derived, ktx] }
+                src: { description: "Provenance of this family: the members' shared source on a team row, or \"mixed\" — the phantom-roster canary — when they disagree. Player rows never carry \"mixed\".", type: string, enum: [derived, ktx, mixed] }
                 byKind:
                   description: >
                     Tally per item kind. With src=ktx the key set can additionally include
@@ -5545,7 +5547,7 @@ components:
           description: "Possession time by item — the family no other source carries."
           additionalProperties: false
           properties:
-            src: { description: "Provenance of this family (always derived).", type: string, enum: [derived, ktx] }
+            src: { description: "Provenance of this family — a constant: no other source carries it.", type: string, enum: [derived] }
             weapons:
               description: "Keyed rl/lg/gl/ssg/sng. Shotgun and axe are deliberately absent (held all match by everyone); the nailgun is absent because the streams track no NG possession interval."
               additionalProperties: { $ref: "#/components/schemas/HoldStat" }

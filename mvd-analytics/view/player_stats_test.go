@@ -598,3 +598,76 @@ func TestPlayerStatsAccuracyOnlyKTXBlockReaggregatesTeams(t *testing.T) {
 	}
 	t.Fatal("no red team row")
 }
+
+// A team whose members disagree on a family's source carries the "mixed"
+// canary as that family's src — never a silent upgrade to "ktx". Only
+// reachable when the phantom-roster invariant is already broken (a roster
+// row the KTX block has never heard of), which is exactly when the row
+// must not claim clean provenance. External-review finding: damage and
+// pickups used to do "any KTX member upgrades the team" while accuracy
+// already had the shared-or-mixed rule.
+func TestPlayerStatsTeamRowMixedSrcOnPartialJoin(t *testing.T) {
+	r := &result.Result{
+		PlayerStats: &result.PlayerStatsResult{
+			Players: []result.PlayerStatsRow{
+				{
+					Name: "alpha", Team: "red",
+					Window:  result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000},
+					Score:   result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Deaths: 10},
+					Damage:  &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 4000},
+					Pickups: &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: map[string]result.PlayerStatsPickup{"ra": {Took: 3}}},
+					Hold:    result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+				{
+					Name: "phantom", Team: "red",
+					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000},
+					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 5, Deaths: 20},
+					Damage: &result.PlayerStatsDamage{Src: result.SrcDerived, Given: 1000},
+					// Derived accuracy so the team aggregation sees two
+					// members with OPINIONS that disagree after alpha's is
+					// overlaid to ktx — a member without the family would
+					// (correctly) contribute no opinion at all.
+					Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 12}}},
+					Pickups:  &result.PlayerStatsPickups{Src: result.SrcDerived, ByKind: map[string]result.PlayerStatsPickup{"ya": {Took: 1}}},
+					Hold:     result.PlayerStatsHold{Src: result.SrcDerived},
+				},
+			},
+			Teams: []result.PlayerStatsRow{{
+				Name:   "red",
+				Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 1200000, AliveMs: 1000000},
+				Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 35, Deaths: 30},
+				Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+			}},
+			Sources: result.PlayerStatsSources{Score: result.SrcDerived, Damage: result.SrcDerived, Pickups: result.SrcDerived, Hold: result.SrcDerived},
+		},
+		// The KTX block knows alpha and not phantom — the phantom-roster
+		// condition the canary exists for.
+		DemoInfo: &result.DemoInfoResult{Players: []result.DemoInfoPlayer{{
+			Name: "alpha", Team: "red",
+			Dmg: &result.DemoInfoDmg{Given: 4321, Taken: 5000},
+			Weapons: map[string]*result.DemoInfoWeapon{"rl": {
+				Acc:     &result.DemoInfoAcc{Attacks: 90, Hits: 40},
+				Pickups: &result.DemoInfoPickups{Taken: 7, TotalTaken: 9},
+			}},
+			Items: map[string]*result.DemoInfoItem{"ra": {Took: 8}},
+		}}},
+	}
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	if len(got.Teams) != 1 {
+		t.Fatalf("teams = %d, want 1", len(got.Teams))
+	}
+	team := got.Teams[0]
+	if team.Damage == nil || team.Damage.Src != result.SrcMixed {
+		t.Errorf("team damage src = %v, want mixed", team.Damage)
+	}
+	if team.Pickups == nil || team.Pickups.Src != result.SrcMixed {
+		t.Errorf("team pickups src = %v, want mixed", team.Pickups)
+	}
+	if team.Accuracy == nil || team.Accuracy.Src != result.SrcMixed {
+		t.Errorf("team accuracy src = %v, want mixed", team.Accuracy)
+	}
+	// The roll-up says mixed too — row and roll-up tell the same story.
+	if got.Sources.Damage != result.SrcMixed {
+		t.Errorf("sources.damage = %q, want mixed", got.Sources.Damage)
+	}
+}

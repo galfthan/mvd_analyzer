@@ -197,8 +197,11 @@ Two consequences worth knowing:
   the kill side of `score` (kills / suicides / teamKills / efficiency /
   the by-weapon split) goes missing together on a demo whose obituary log
   yielded nothing while deaths were still counted, and `ping` is KTX-only.
-  Frags and deaths are measured on those demos and still print. A zero
-  that *was* measured still prints as `0`.
+  Frags and deaths are measured on those demos and still print. In the
+  Basic Stats tables a zero that *was* measured still prints as `0`;
+  the Weapon Stats and Possession tables are the exception by design —
+  a weapon the player never touched or an item never held renders `-`
+  across its cells rather than a row of zeros.
 - **The Possession cells carry their denominator in a tooltip** — held /
   alive / present / match ms. A share is only as good as the window it
   divides by, and a player the streams barely saw can get a presence

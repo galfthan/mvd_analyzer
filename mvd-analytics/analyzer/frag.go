@@ -207,9 +207,25 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 			// per-player one does (:149-153); mirror both.
 			adjustWeaponCount(a.byWeapon, f.Weapon, delta)
 			if !isGenericPlayer(f.Killer) {
-				if killer, ok := a.byPlayer[f.Killer]; ok {
-					killer.Kills += delta
-					adjustWeaponCount(killer.ByWeapon, f.Weapon, delta)
+				// getOrCreatePlayer, not a lookup: a killer whose ONLY
+				// frag was misread as a teamkill at OnEvent has no line
+				// yet, and an ok-guard would silently drop the promotion
+				// — leaving the global byWeapon (adjusted above,
+				// unguarded) out of step with the per-player sums.
+				killer := a.getOrCreatePlayer(f.Killer)
+				killer.Kills += delta
+				adjustWeaponCount(killer.ByWeapon, f.Weapon, delta)
+				// TeamKills moves with the demotion so the identity
+				// frags == kills − suicides − teamKills survives the
+				// reclassification: the frag log now carries the entry
+				// as IsTeamKill and playerStats reads this counter.
+				// The promotion direction deliberately does NOT
+				// decrement — a both-named OnEvent teamkill was never
+				// counted into TeamKills (only the generic-victim
+				// recovery at recoverTeamkills and the telefrag
+				// post-processor count), so there is nothing to undo.
+				if f.IsTeamKill {
+					killer.TeamKills++
 				}
 			}
 		}

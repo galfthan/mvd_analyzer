@@ -195,6 +195,30 @@ func TestAssemblePrintLine_FrameBoundaryFlush(t *testing.T) {
 	}
 }
 
+// The frame-boundary sweep is GLOBAL: a fragment on one key releases a
+// stale buffer on a DIFFERENT key, in wire order, before the incoming
+// fragment's own line is delivered. External-review scenario: an
+// unterminated PRINT_HIGH line buffered at t=1000 must not sit pending
+// while a complete PRINT_MEDIUM obituary at t=9000 is delivered — the
+// stale line comes out first, keeping the event stream chronological
+// (a matchStarted-gating consumer would otherwise judge the obituary
+// against pre-announcement state).
+func TestAssemblePrintLine_CrossKeyFrameFlush(t *testing.T) {
+	p := NewParser(nil)
+	c := newPrintCollector(p)
+
+	feedPrints(t, p, mvd.PrintHigh, -1, 1000, "The match begins")
+	feedPrints(t, p, mvd.PrintMedium, -1, 9000, "dag rides white's rocket\n")
+
+	wantMessages(t, c.messages(), []string{
+		"The match begins",
+		"dag rides white's rocket\n",
+	})
+	if c.prints[0].TimeMs != 1000 || c.prints[1].TimeMs != 9000 {
+		t.Errorf("times = %d,%d want 1000,9000", c.prints[0].TimeMs, c.prints[1].TimeMs)
+	}
+}
+
 // Two lines inside one fragment: everything up to the LAST newline is
 // released as one event (ezquake's qwcsrchr rule), and the tail is kept.
 func TestAssemblePrintLine_TrailingRemainderKept(t *testing.T) {
@@ -212,12 +236,16 @@ func TestAssemblePrintLine_TrailingRemainderKept(t *testing.T) {
 }
 
 // A demo that stops mid-line must still report what the server said.
+// Both buffers share the final frame's time: the global frame-boundary
+// sweep releases any earlier-frame buffer as soon as a later fragment
+// arrives, so same-frame stragglers are the only shape that can still
+// be pending at end of stream.
 func TestFlushPendingPrintLines(t *testing.T) {
 	p := NewParser(nil)
 	c := newPrintCollector(p)
 
+	feedPrints(t, p, mvd.PrintMedium, -1, 5000, "space was gibbed by dag")
 	feedPrints(t, p, mvd.PrintLow, 1, 5000, "You get ", "20 shells")
-	feedPrints(t, p, mvd.PrintMedium, -1, 4000, "space was gibbed by dag")
 	if len(c.prints) != 0 {
 		t.Fatalf("nothing should have been released yet, got %q", c.messages())
 	}
@@ -225,10 +253,10 @@ func TestFlushPendingPrintLines(t *testing.T) {
 	if err := p.flushPendingPrintLines(); err != nil {
 		t.Fatalf("flushPendingPrintLines: %v", err)
 	}
-	// Deterministic order: earliest first fragment wins.
+	// Deterministic order at equal time: level breaks the tie.
 	wantMessages(t, c.messages(), []string{
-		"space was gibbed by dag",
 		"You get 20 shells",
+		"space was gibbed by dag",
 	})
 
 	// Idempotent — a caller that keeps polling past the end gets nothing.

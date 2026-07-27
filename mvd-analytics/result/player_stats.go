@@ -81,8 +81,11 @@ const (
 	// Applies to the damage family only, and inherits into the Sources
 	// roll-up like any other per-row value.
 	SrcDerivedUnbounded = "derived:unbounded"
-	// SrcMixed appears in the Sources ROLL-UP only, never on a row, and
-	// means the rows disagreed about where the family came from.
+	// SrcMixed appears in the Sources roll-up and on TEAM rows whose
+	// members disagreed about where the family came from (the shared-or-
+	// mixed aggregation rule — see AggregateAccuracy and the view's team
+	// reaggregation). A PLAYER row never carries it: per-player families
+	// come from exactly one source.
 	//
 	// It is a CANARY, not a data condition. Measured across every local
 	// demo carrying a KTX block, the playerStats name set and the demoinfo
