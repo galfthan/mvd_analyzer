@@ -110,11 +110,18 @@ the shots hit — the tables read the Go-computed per-bucket counter slices
 per-sample `team` flag, and the LG ramp rescores its bars; **All** (the
 default) matches the server's authoritative numbers (KTX counts team and
 self hits too). Duels hide the Team option; Self (rl/gl self-splash —
-rocket jumps) has no crosshair samples, tables only. The one column that
-does **not** follow that filter is **Dmg**: `result.aim` carries no
-damage, so it is joined by player name from
-`playerStats.damage.byWeapon` (the Summary tab's source), which is
-enemy-only by construction. Its tooltip says so.
+rocket jumps) has no crosshair samples, tables only. The **Dmg** column
+follows the filter too (since schema v63): `result.aim` carries no
+damage, so it is joined by player name from `playerStats.damage` and
+reads `byWeapon` / `byWeaponTeam` / `byWeaponSelf` per the active
+victim. Measuredness comes from exactly the two rules
+`result.PlayerStatsDamage` documents — the family's presence for the
+enemy and team maps, `damage.taken != null` for the self one — so a
+measured zero renders `0` and only an unmeasured split renders `-`.
+**All** sums the three splits, which is correct only when all three are
+measured; where the self split is not (a KTX-block-without-stream demo)
+the cell shows a `≥`-prefixed lower bound whose tooltip names what is
+missing, never a silently partial total.
 The **Key Moments** tab has four tables: powerup runs, longest frag
 streaks, a **Demo Markers** table, and a full-width **Airborne Rocket
 Gibs** table — enemy rocket hits on airborne victims
@@ -199,7 +206,7 @@ strip above the main pane.
 
 Every table on the Summary tab — Basic Stats, Weapon Stats, Item Pickups
 & Drops, and the three per-team variants — renders
-`result.playerStats` (schema v62). It replaced a four-source join across
+`result.playerStats` (schema v63). It replaced a four-source join across
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
 merge now happens once, in Go.

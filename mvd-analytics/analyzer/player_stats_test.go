@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -935,5 +936,56 @@ func TestTeamAggregationAccuracyMixedSrcIsRecorded(t *testing.T) {
 	}
 	if got := aggregateTeamRows(players, 600000)[0].Accuracy.Src; got != result.SrcMixed {
 		t.Errorf("team accuracy src = %q, want mixed", got)
+	}
+}
+
+// v63: the derived damage family copies all THREE per-weapon maps out of
+// the reconstruction with the same zero-dropping rule — a weapon the
+// player dealt nothing with in that direction is omitted, never
+// zero-filled — and team rows sum each of them.
+func TestDeriveDamageCopiesVictimSplits(t *testing.T) {
+	r := &Result{Damage: &result.DamageResult{
+		BoundedMode: "standard",
+		ByPlayer: map[string]*result.PlayerDamage{
+			"a": {
+				Given: 900, GivenTeam: 80, GivenSelf: 20,
+				ByWeapon:     map[string]int{"rl": 900, "lg": 0},
+				ByWeaponTeam: map[string]int{"sg": 80, "gl": 0},
+				ByWeaponSelf: map[string]int{"rl": 20},
+				Bounded: &result.PlayerDamage{
+					Given: 700, GivenTeam: 30, GivenSelf: 12,
+					ByWeapon:     map[string]int{"rl": 700},
+					ByWeaponTeam: map[string]int{"sg": 30, "gl": 0},
+					ByWeaponSelf: map[string]int{"rl": 12},
+				},
+			},
+		},
+	}}
+	d := deriveDamage(r, "a", nil)
+	// The bounded family is the source, and its zeros are dropped.
+	if got, want := d.ByWeaponTeam, map[string]int{"sg": 30}; !reflect.DeepEqual(got, want) {
+		t.Errorf("byWeaponTeam = %v, want %v (the gl 0 is dropped, not zero-filled)", got, want)
+	}
+	if got, want := d.ByWeaponSelf, map[string]int{"rl": 12}; !reflect.DeepEqual(got, want) {
+		t.Errorf("byWeaponSelf = %v, want %v", got, want)
+	}
+
+	// A player who dealt no team/self damage carries neither map.
+	r.Damage.ByPlayer["b"] = &result.PlayerDamage{Given: 10, ByWeapon: map[string]int{"sg": 10}}
+	if d := deriveDamage(r, "b", nil); d.ByWeaponTeam != nil || d.ByWeaponSelf != nil {
+		t.Errorf("splits = team %v / self %v, want both absent", d.ByWeaponTeam, d.ByWeaponSelf)
+	}
+
+	teams := aggregateTeamRows([]result.PlayerStatsRow{
+		{Name: "a", Team: "red", Damage: &result.PlayerStatsDamage{
+			Src: result.SrcDerived, ByWeaponTeam: map[string]int{"sg": 30}, ByWeaponSelf: map[string]int{"rl": 12}}},
+		{Name: "b", Team: "red", Damage: &result.PlayerStatsDamage{
+			Src: result.SrcDerived, ByWeaponTeam: map[string]int{"sg": 5, "gl": 40}}},
+	}, 600000)
+	if got, want := teams[0].Damage.ByWeaponTeam, map[string]int{"sg": 35, "gl": 40}; !reflect.DeepEqual(got, want) {
+		t.Errorf("team byWeaponTeam = %v, want %v", got, want)
+	}
+	if got, want := teams[0].Damage.ByWeaponSelf, map[string]int{"rl": 12}; !reflect.DeepEqual(got, want) {
+		t.Errorf("team byWeaponSelf = %v, want %v", got, want)
 	}
 }

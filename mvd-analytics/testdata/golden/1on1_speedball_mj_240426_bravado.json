@@ -7004,6 +7004,9 @@
             "rl": 4545,
             "sg": 208
           },
+          "byWeaponSelf": {
+            "rl": 536
+          },
           "enemyVsBoth": 4559,
           "enemyVsLg": 0,
           "enemyVsMid": 82,
@@ -7021,6 +7024,9 @@
           "lg": 450,
           "rl": 4713,
           "sg": 208
+        },
+        "byWeaponSelf": {
+          "rl": 536
         },
         "enemyVsBoth": 4744,
         "enemyVsLg": 0,
@@ -7042,6 +7048,9 @@
             "sg": 44,
             "ssg": 60
           },
+          "byWeaponSelf": {
+            "rl": 1776
+          },
           "enemyVsBoth": 1576,
           "enemyVsLg": 815,
           "enemyVsMid": 640,
@@ -7059,6 +7068,9 @@
           "rl": 5026,
           "sg": 44,
           "ssg": 60
+        },
+        "byWeaponSelf": {
+          "rl": 1804
         },
         "enemyVsBoth": 1799,
         "enemyVsLg": 893,
@@ -17777,6 +17789,9 @@
             "sg": 44,
             "ssg": 60
           },
+          "byWeaponSelf": {
+            "rl": 1776
+          },
           "enemyWeapons": 6723,
           "given": 8746,
           "givenSelf": 1776,
@@ -17968,6 +17983,9 @@
             "rl": 4545,
             "sg": 208
           },
+          "byWeaponSelf": {
+            "rl": 536
+          },
           "enemyWeapons": 5071,
           "given": 5268,
           "givenSelf": 536,
@@ -18139,7 +18157,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 62,
+  "schemaVersion": 63,
   "shots": {
     "byPlayer": [
       {

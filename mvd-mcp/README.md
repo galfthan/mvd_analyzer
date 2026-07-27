@@ -388,10 +388,16 @@ match-gated at the source, an all-players recompute reproduces the stored
 totals exactly. With none set the authoritative stored totals are returned.
 
 Output: `result.DamageResult` — `{ totalDamage, byWeapon, byPlayer: {name:
-{given, taken, givenTeam, givenSelf, takenEnv, byWeapon, enemyVsSg,
+{given, taken, givenTeam, givenSelf, takenEnv, byWeapon, byWeaponTeam,
+byWeaponSelf, enemyVsSg,
 enemyVsMid, enemyVsLg, enemyVsRl, enemyVsBoth, ewep}}, matrix: [{attacker,
 victim, damage, byWeapon}], events: [{time, attacker, victim, weapon,
-damage, victimWep, ...}], scoreboard }`. **EWep** (= `enemyVsLg +
+damage, victimWep, ...}], scoreboard }`. The three per-weapon maps split
+`given` / `givenTeam` / `givenSelf` by the **attacker's** weapon on the
+same keys (telefrags and stomps are excluded from all three; `matrix` and
+the `enemyVs*` buckets stay enemy-only). `byWeaponTeam` / `byWeaponSelf`
+are `omitempty` but **measured whenever the damage family is present** —
+an absent key means "dealt none with that weapon", never "not measured". **EWep** (= `enemyVsLg +
 enemyVsRl + enemyVsBoth`) is damage dealt to enemies *holding* RL/LG,
 keyed on the **victim's** inventory. Amounts are **unbound** (include
 overkill; a telefrag reports 9999), so totals run higher than the KTX

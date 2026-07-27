@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "62"
+  version: "63"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -567,7 +567,8 @@ paths:
       description: >
         Per-hit damage log plus aggregates (matrix, per-weapon, given/taken)
         and the KTX-scoreboard cross-check. Positional kills — telefrags and
-        stomps — are excluded from the byWeapon/matrix/totalDamage figures
+        stomps — are excluded from every per-weapon map
+        (byWeapon/byWeaponTeam/byWeaponSelf) and from matrix/totalDamage,
         and listed separately, but their kill value DOES fold into
         given/taken and, on enemy kills, the EWep victim-weapon buckets
         (no fold at all on skipped:* demos — pure exclusion there).
@@ -2843,13 +2844,14 @@ components:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —
             `ktx` when substituted with KTX's exact end-of-match scoreboard
-            totals (demoInfo dmg + weapons[].damage.enemy), else
+            totals (demoInfo dmg + weapons[].damage.enemy/.team), else
             `reconstructed`. Present only on an unfiltered summary that serves
             the bounded family (`dmg=bounded` or `dmg=both`); absent on the
-            full-log, filtered, and raw responses. NOTE `taken` and the
-            enemyVs* buckets stay reconstructed even when `ktx` (KTX has no
-            matching split), so they may not sum exactly to the substituted
-            `given`.
+            full-log, filtered, and raw responses. NOTE `taken`, the
+            enemyVs* buckets and `byWeaponSelf` stay reconstructed even when
+            `ktx` (KTX has no matching counter), so the buckets may not sum
+            exactly to the substituted `given`; `byWeapon` and `byWeaponTeam`
+            both come from KTX's own weapons[].damage sub-block.
           type: string
           enum: [ktx, reconstructed]
         byPlayer:
@@ -2873,6 +2875,27 @@ components:
                     type:
                       - object
                       - "null"
+                  byWeaponTeam:
+                    description: >
+                      Team damage by attacker weapon, keyed like byWeapon.
+                      Measured whenever this damage family is present; an
+                      absent key means the player dealt no team damage with
+                      that weapon, and the whole map is omitted when empty.
+                      Telefrags and stomps are excluded, as from byWeapon.
+                    additionalProperties:
+                      type: integer
+                    type: object
+                  byWeaponSelf:
+                    description: >
+                      Self damage by attacker weapon, keyed like byWeapon.
+                      Measured whenever this damage family is present; an
+                      absent key means the player dealt no self damage with
+                      that weapon, and the whole map is omitted when empty.
+                      Telefrags and stomps are excluded — their damage folds
+                      into givenSelf only.
+                    additionalProperties:
+                      type: integer
+                    type: object
                   enemyVsBoth:
                     description: "Enemy-given damage where the victim held both RL and LG."
                     type: integer
@@ -2927,6 +2950,27 @@ components:
                 type:
                   - object
                   - "null"
+              byWeaponTeam:
+                description: >
+                  Team damage by attacker weapon, keyed like byWeapon.
+                  Measured whenever this damage family is present; an absent
+                  key means the player dealt no team damage with that weapon,
+                  and the whole map is omitted when empty. Telefrags and
+                  stomps are excluded, as they are from byWeapon.
+                additionalProperties:
+                  type: integer
+                type: object
+              byWeaponSelf:
+                description: >
+                  Self damage by attacker weapon, keyed like byWeapon.
+                  Measured whenever this damage family is present; an absent
+                  key means the player dealt no self damage with that weapon,
+                  and the whole map is omitted when empty. Telefrags and
+                  stomps are excluded — their damage folds into givenSelf
+                  only.
+                additionalProperties:
+                  type: integer
+                type: object
               enemyVsBoth:
                 description: "Enemy-given damage where the victim held both RL and LG."
                 type: integer
@@ -5480,6 +5524,25 @@ components:
                     `enemy: 0` there, which is a MEASURED zero (a weapon used for team splash only) —
                     else the bounded reconstruction. Weapons the player dealt no damage with are
                     omitted. There is no by-weapon split of damage TAKEN on either side.
+                  additionalProperties: { type: integer }
+                  type: object
+                byWeaponTeam:
+                  description: >
+                    TEAM damage GIVEN split by the attacker's weapon, keyed exactly like byWeapon.
+                    Follows src with the family: KTX writes `enemy` and `team` in the same
+                    `damage` sub-block, so it is merged on the same presence rule and a `team: 0`
+                    there is a MEASURED zero. MEASURED whenever this damage family is present.
+                    Weapons the player dealt no team damage with are omitted.
+                  additionalProperties: { type: integer }
+                  type: object
+                byWeaponSelf:
+                  description: >
+                    SELF damage GIVEN split by the attacker's weapon, keyed exactly like byWeapon.
+                    Derived-only — KTX records no per-weapon self counter — so it is MEASURED only
+                    where a damage stream was read, which is exactly what a present `taken` says:
+                    absent on a demo with a KTX block but no damage stream, whatever the player did.
+                    Weapons the player dealt no self damage with are omitted. Telefrags and stomps
+                    are excluded — their damage folds into givenSelf only.
                   additionalProperties: { type: integer }
                   type: object
                 takenEnemy:

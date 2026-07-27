@@ -24,7 +24,8 @@ package result
 // kills (teleporting onto a player; landing on their head). The wire reports
 // a telefrag as the 9999 cap, which would otherwise dominate the attacker's
 // ByWeapon / EWep and the totals; a stomp is a movement kill, not a
-// weapon. Both are excluded from the Events log, ByWeapon, Matrix, EWep and
+// weapon. Both are excluded from the Events log, every per-weapon map
+// (ByWeapon, ByWeaponTeam, ByWeaponSelf), Matrix, EWep and
 // TotalDamage, and surfaced separately in Telefrags / Stomps (and as the
 // opt-in "telefrag" / "stomp" events in view.Events). The kill still appears
 // in FragResult / the "frag" event.
@@ -37,7 +38,7 @@ package result
 // reconstruction (bounded). An ENEMY positional kill also folds into the
 // victim-weapon EnemyVs*/EWep buckets — KTX's dmg_eweapon accumulation has
 // no deathtype gate either (combat.c:1073), so a kill on an RL/LG holder
-// lands in EWep. ByWeapon, Matrix and TotalDamage stay excluded (the wpNONE
+// lands in EWep. The per-weapon maps, Matrix and TotalDamage stay excluded (the wpNONE
 // parity). On a skipped:* demo the reversal is total: no fold at all, so
 // given/taken and the buckets revert to pure v53 exclusion.
 type DamageResult struct {
@@ -65,7 +66,7 @@ type DamageResult struct {
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
 	// end-of-match scoreboard totals (demoInfo.players[].dmg +
-	// weapons[].damage.enemy — authoritative where our per-hit reconstruction
+	// weapons[].damage.enemy/.team — authoritative where our per-hit reconstruction
 	// is best-effort), or "reconstructed" when no KTX counterpart was
 	// available. Set by view.Damage ONLY on an unfiltered summary response
 	// that serves the bounded family (dmg=bounded or dmg=both); absent on the
@@ -74,6 +75,9 @@ type DamageResult struct {
 	// reconstructed (KTX dmg.taken is enemy-only while our taken counts all
 	// sources), and the enemyVs* buckets keep the reconstruction (KTX has no
 	// split), so they may no longer sum exactly to the substituted `given`.
+	// ByWeaponSelf stays reconstructed too — KTX records no per-weapon self
+	// damage — while ByWeapon and ByWeaponTeam both come from KTX's own
+	// weapons[].damage sub-block.
 	BoundedSource string `json:"boundedSource,omitempty"`
 }
 
@@ -145,6 +149,20 @@ type PlayerDamage struct {
 	TakenEnv  int            `json:"takenEnv"`  // from world / environment
 	ByWeapon  map[string]int `json:"byWeapon"`  // enemy damage given, by attacker weapon
 
+	// ByWeaponTeam and ByWeaponSelf split GivenTeam and GivenSelf the same
+	// way ByWeapon splits Given — same weapon keys, same attacker-weapon
+	// perspective, same tele/stomp exclusion (their damage folds into the
+	// Given* totals only, see the type comment above).
+	//
+	// MEASUREDNESS is family-level, never key-level: within a present
+	// damage family an absent KEY means "dealt none with that weapon"
+	// (a zero is dropped rather than stored), and the whole family only
+	// exists when a damage stream was read. The two maps are omitempty
+	// because a player who dealt no team/self damage at all has nothing
+	// to say, not because the split was unmeasurable.
+	ByWeaponTeam map[string]int `json:"byWeaponTeam,omitempty"` // team damage given, by attacker weapon
+	ByWeaponSelf map[string]int `json:"byWeaponSelf,omitempty"` // self damage given, by attacker weapon
+
 	// EnemyVs* partition enemy-given damage by the VICTIM's held weapons at
 	// the moment of the hit — KTX "ewep" semantics, keyed on the target's
 	// inventory (ktx/src/combat.c:1084-1089), NOT the attacker's weapon.
@@ -179,6 +197,21 @@ func (p *PlayerDamage) BoundedNest() *PlayerDamage {
 		p.Bounded = &PlayerDamage{ByWeapon: make(map[string]int)}
 	}
 	return p.Bounded
+}
+
+// AddWeaponDamage folds n into m under the attacker-weapon key w and
+// returns the map, allocating it on first use. The map-returning form is
+// mandatory: ByWeaponTeam / ByWeaponSelf are omitempty and start nil, and a
+// plain func(map, w, n) cannot replace a nil map at the caller. Every
+// producer of the three per-weapon damage maps (analyzer aggregation,
+// view.Damage's filtered recompute) folds through this one helper so a new
+// PlayerDamage constructor can never reintroduce a nil-map panic.
+func AddWeaponDamage(m map[string]int, w string, n int) map[string]int {
+	if m == nil {
+		m = map[string]int{}
+	}
+	m[w] += n
+	return m
 }
 
 // DamagePair is one attacker→victim total in the damage matrix.
