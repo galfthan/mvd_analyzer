@@ -24,6 +24,7 @@ The docs that matter, in priority order:
 | [`mvd-analytics/WRITING_AN_ANALYZER.md`](mvd-analytics/WRITING_AN_ANALYZER.md) | Contributor tutorial: add an analyzer end-to-end (inputs, interfaces, dag.go node declaration, eager vs lazy, checklist). |
 | [`mvd-api/README.md`](mvd-api/README.md) | REST host: flags, cache layout, endpoint quick-index, build |
 | [`mvd-api/API.md`](mvd-api/API.md) | High-level HTTP integration guide: getting started, conventions (units/caching/errors/auth), endpoint-choice guide, recipes. The per-endpoint reference is `mvd-api/openapi/openapi.yaml` (served at `/openapi.yaml` + `/docs`, drift-tested + golden-validated) — keep it self-contained; don't re-grow endpoint docs in API.md. |
+| [`mvd-mcp/README.md`](mvd-mcp/README.md) | MCP shim: tool list, stdio + streamable-HTTP transports, auth to mvd-api. Client setup lives in [`mvd-mcp/CLAUDE_DESKTOP.md`](mvd-mcp/CLAUDE_DESKTOP.md). |
 | [`mvd-web/README.md`](mvd-web/README.md) | Layer 3: build targets, dist/ layout, map-tab overlay behaviour, loc corpus fetch |
 | [`mvd-reader/MVD_FORMAT.md`](mvd-reader/MVD_FORMAT.md) | MVD binary format reference — every svc_* we decode, entity-state item tracking, derived events, ezquake/mvdsv line refs |
 
@@ -47,7 +48,7 @@ future reader can find it.
 
 ## Architecture you must respect
 
-Three modules in a Go workspace (`go.work`):
+Five modules in a Go workspace (`go.work`):
 
 - **`mvd-reader/` (Layer 1)** owns the MVD wire format. `events/` is the
   public contract; `parser/` does the decoding; `source/mvd/` wraps it
@@ -60,6 +61,15 @@ Three modules in a Go workspace (`go.work`):
 - **`mvd-web/` (Layer 3)** is one consumer of Result. The WASM entry
   is in `cmd/wasm/`; the static frontend is in `static/`. Nothing
   mvd-reader or mvd-analytics imports from here.
+- **`mvd-api/`** is another Layer-3 consumer: it serves
+  `mvd-analytics/view` as a hosted REST API with an on-disk demo cache.
+  It imports mvd-analytics (and transitively mvd-reader); nothing
+  imports it. Response shapes it exposes are owned here (OpenAPI spec).
+- **`mvd-mcp/`** is a distributable MCP shim that forwards every tool
+  call over HTTP to a running mvd-api. It deliberately imports **no
+  other workspace module** — it depends only on the REST wire
+  contract. Keep it that way; analytics logic never goes in the shim.
+  mvd-mcp and mvd-api always deploy together (lockstep versioning).
 
 Put logic in the lowest layer that can express it. Protocol-level signals
 (entity state, health transitions) belong in the parser. Cross-event
@@ -166,9 +176,11 @@ at the top of this repo. Memory pointer: see
   rediscover.
 - **Run `make test`** after every change (see "Always run tests"
   above). For deeper sanity-checking on non-trivial work, also run a
-  sample analysis: the demos under `demos/` are the regression corpus,
-  and a quick
-  `go run ./mvd-analytics/cmd/qw-analyze -format json demos/broken.mvd.gz`
+  sample analysis: the regression demos are the golden-corpus cache
+  under `mvd-analytics/testdata/cache/` (fetched on the first golden
+  test run, gitignored) and the per-machine sets under
+  `demo-test-data/mvd/`. A quick
+  `go run ./mvd-analytics/cmd/qw-analyze -format json mvd-analytics/testdata/cache/<gameId>.mvd.gz`
   catches most categories of break that unit tests miss.
 - **Don't commit generated artefacts** (`mapgen` binary, `dist/`).
   Those are in `.gitignore` — don't route around.
@@ -182,4 +194,4 @@ Serve the web UI: `make serve`
 Run all tests: `make test`
 Regenerate map geometry: `go run ./mvd-analytics/cmd/mapgen -bsp-dir /path/to/bsps -verbose`
 Regenerate map-entity corpus (committed, embedded): `go run ./mvd-analytics/cmd/mapgen -bsp-dir /path/to/bsps -out-dir "" -entities-out mvd-analytics/mapents/data -verbose`
-Analyze one demo: `go run ./mvd-analytics/cmd/qw-analyze -format json demos/X.mvd.gz | jq`
+Analyze one demo: `go run ./mvd-analytics/cmd/qw-analyze -format json mvd-analytics/testdata/cache/<gameId>.mvd.gz | jq` (any demo in the golden cache or `demo-test-data/mvd/`)
