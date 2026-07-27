@@ -5,6 +5,46 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-27 (ux-tweaks) — Summary/Timeline/Chat/Aim UI cleanup, schema v62 (unchanged)
+
+Frontend only — no Go, no schema bump, no golden churn. Every number below
+already existed in the Result; this is where the web app puts it.
+
+- **Possession moved into "Item Pickups & Drops"** and the standalone
+  Possession panel is gone. Each item is now a `took | s` group under a
+  two-row header (RL/LG add `drop | xfer`), with the seconds coming from
+  `hold.*` as before — the possession cell sorts on raw ms and its tooltip
+  carries held ms, the share of alive time, the run count and the row's
+  alive/present/match window (the denominators the share rests on). MH keeps a
+  single count column: mega health is consumed on pickup, so there is no
+  hold stat for it by design. The panel's methodology prose survives,
+  condensed, in the Item Pickups explainer.
+- **Timeline panels reordered** to Score → Powerups → Weapons →
+  Health/Armor, with Region Control still last. The JS lists that mirror
+  DOM order were resequenced with it.
+- **Chat: "Hide team chat"** — a checkbox that drops `say_team` lines from
+  the two chat columns. Off by default, reset per demo; frags and public
+  `say` are unaffected.
+- **Aim Stats tables gained a Dmg column** and two-row headers grouping
+  each weapon's columns (Pellets / Shots / %). Damage is joined by player
+  name from `playerStats.damage.byWeapon`, which is **enemy-only** — that
+  column deliberately does not follow the Enemy/Team/Self victim filter,
+  and its tooltip says so.
+- **Key Moments: a powerup-run filter** — min length 5 s **and** min 1
+  frag by default, both editable down to 0 and reset per demo. A UI-level
+  display filter with visible controls; `timelineAnalysis.powerupEvents`
+  is served complete, and a table emptied by the filter says that rather
+  than reporting no powerups.
+- **Team rosters sort by player name by default** on both the Timeline
+  and the Map. The timeline roster's Player / Frags / Health / Armor
+  headers are clickable (one delegated handler, since the tables are
+  rebuilt on every playhead tick); the old frags-descending default made
+  rows swap places while the reader was scrubbing.
+- **First click on a numeric column now sorts descending** in every
+  sortable table (`makeSortable`), matching what its comment always
+  claimed and what the new roster sort does; text columns still start
+  ascending, and repeat clicks flip as before.
+
 ## 2026-07-26 (playerstats) — `playerStats` learns to say "not measured", schema v62
 
 Amends the v61 section before it ships. Every `playerStats` change below

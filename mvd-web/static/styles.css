@@ -697,7 +697,7 @@ body.duel-mode .per-player-heading {
  *
  * playerStats emits no `teams` section when the demo has no teams to
  * aggregate (FFA is not teamplay), so the Summary "Per Team" tables would
- * render as four headers over an empty tbody. Scoped to #tab-summary
+ * render as three headers over an empty tbody. Scoped to #tab-summary
  * because those tables are the ones fed from playerStats.teams; the
  * Pickups tab derives its own team rows from the item phases. */
 body.no-team-rows #tab-summary .team-aggregate-heading,
@@ -707,8 +707,9 @@ body.no-team-rows #tab-summary .per-player-heading {
 }
 
 /* Explanatory note under a panel heading — used where a number deviates
- * from the server's own end-of-match table on purpose (the Possession
- * panel) and the viewer deserves to know why without a hover. */
+ * from the server's own end-of-match table on purpose (the possession
+ * columns of Item Pickups) and the viewer deserves to know why without a
+ * hover. */
 .panel-note {
     margin: 0 0 0.75rem;
     max-width: 68ch;
@@ -918,6 +919,13 @@ table tbody tr:hover {
     text-align: right;
 }
 
+/* In a two-row header the Player <th> spans both rows via rowspan, so the
+   second row's :first-child is a data column and must right-align like the
+   cells under it. */
+.stats-table thead tr + tr th:first-child {
+    text-align: right;
+}
+
 .chart {
     display: flex;
     flex-direction: column;
@@ -1025,6 +1033,10 @@ table tbody tr:hover {
 /* One stats table per weapon, players on the rows (team-coloured stripe). */
 .aim-weapon-block {
     margin-bottom: 18px;
+    /* The widest of these (SG/SSG, 14 columns) overruns the pane at 1280 px
+       and its right-hand columns were simply unreachable; scroll the table
+       inside its own block instead, as Item Pickups does. */
+    overflow-x: auto;
 }
 
 .aim-weapon-block h4 {
@@ -1613,6 +1625,22 @@ body.graph-scrubbing * {
 .chat-panel-outer {
     padding: 12px 16px;
     margin-bottom: 20px;
+}
+
+.chat-toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.chat-toolbar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
 }
 
 .chat-header-row {
@@ -2205,6 +2233,31 @@ body.graph-scrubbing * {
     border-left: 1px solid #333;
 }
 
+/* Item Pickups & Drops is 22 columns wide once possession is merged in —
+   ~1500 px, more than the panel gets at a 1280 px viewport — so each of its
+   two tables scrolls inside its own box rather than spilling out of the
+   panel. Same idiom as .heatmap-table-wrap / .pickups-table-wrap. */
+.items-table-wrap {
+    overflow-x: auto;
+}
+
+/* Grouped columns in two-row headers (Item Pickups, Aim Stats). The older
+   .weapon-stats-split rules above encode uniform 3-wide groups in
+   nth-child strides; these groups are 1, 2 and 4 columns wide, so the
+   separator is carried by an explicit .group-start on the first cell of
+   each group instead of column arithmetic. .col-group marks the spanning
+   header itself; it is qualified with .stats-table to beat the
+   `th:not(:first-child)` right-align rule above on specificity. */
+.stats-table th.col-group {
+    text-align: center;
+    border-bottom: none;
+}
+
+.stats-table th.group-start,
+.stats-table td.group-start {
+    border-left: 1px solid #333;
+}
+
 /* Stats tables */
 .stats-table {
     font-size: 0.9rem;
@@ -2489,6 +2542,32 @@ th.sortable.sort-desc::after {
     text-transform: uppercase;
     font-size: 0.78rem;
     letter-spacing: 0.04em;
+}
+
+/* Powerup-run filter on the Key Moments tab. Same shape as
+   .packdrops-filters, but its controls are number inputs. */
+.keymoments-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+}
+.keymoments-filters label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.keymoments-filters input[type="number"] {
+    background: var(--bg-deep);
+    color: #ccc;
+    border: 1px solid #666;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    width: 64px;
 }
 
 .packdrops-filters {

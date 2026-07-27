@@ -88,7 +88,8 @@ viewport (no width cap). Sidebar order is `Search`, `Summary`,
 The **Aim Stats** tab (experimental) is a thin renderer over the Go-computed
 `result.aim` block: all-players accuracy tables (counts plus
 share-of-fires % columns, so players with different shot volumes compare
-directly) and — driven by a per-player picker inside the Crosshair placement
+directly, under a two-row header that names each column group) and —
+driven by a per-player picker inside the Crosshair placement
 panel, the only place it applies — a smoothed crosshair-density image
 (hitscan; a Gaussian-smoothed
 2-D histogram on canvas with a colorbar, hull box marked; radius 1 ≈ the
@@ -109,7 +110,11 @@ the shots hit — the tables read the Go-computed per-bucket counter slices
 per-sample `team` flag, and the LG ramp rescores its bars; **All** (the
 default) matches the server's authoritative numbers (KTX counts team and
 self hits too). Duels hide the Team option; Self (rl/gl self-splash —
-rocket jumps) has no crosshair samples, tables only.
+rocket jumps) has no crosshair samples, tables only. The one column that
+does **not** follow that filter is **Dmg**: `result.aim` carries no
+damage, so it is joined by player name from
+`playerStats.damage.byWeapon` (the Summary tab's source), which is
+enemy-only by construction. Its tooltip says so.
 The **Key Moments** tab has four tables: powerup runs, longest frag
 streaks, a **Demo Markers** table, and a full-width **Airborne Rocket
 Gibs** table — enemy rocket hits on airborne victims
@@ -121,6 +126,29 @@ user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
 Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty
 since demos rarely carry markers, and warmup marks show a negative time.
+The **Powerup Runs** table carries a two-input display filter (**min s**
+= 5, **min frags** = 1 by default, both editable down to 0, reset per
+demo load): a run is listed only if it clears *both*, so short runs and
+fragless ones drop out while `timelineAnalysis.powerupEvents` stays
+complete. When the filter empties an otherwise non-empty table the panel
+says so instead of claiming the demo had no powerups.
+
+The **Timeline** tab stacks its panels in reading order — team rosters,
+Score, Powerups, Weapons, Team Health/Armor, Region Control. That order
+is pure DOM order in `index.html`; the JS lists that mirror it
+(`updateDetailView`, `TIMELINE_CANVAS_IDS`, the pan/zoom and
+current-time-indicator installs) are kept in the same sequence on
+purpose. The roster tables above them are **sortable by Player, Frags,
+Health or Armor**, defaulting to player name ascending so rows don't
+swap places under the reader as the playhead moves; both sides share one
+sort state, and a delegated click handler on `.team-status-panel`
+survives the innerHTML rebuild that happens on every tick. First click
+sorts names A→Z and numbers biggest-first; clicking the active column
+flips it.
+
+The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
+lines (`event.type === 'teamsay'`) from the two chat columns; frags and
+public `say` are untouched, and the flag resets per demo load.
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -169,8 +197,8 @@ strip above the main pane.
 
 ### The Summary tab reads `playerStats`, and only `playerStats`
 
-Every table on the Summary tab — Basic Stats, Possession, Weapon Stats,
-Item Pickups, and the four per-team variants — renders
+Every table on the Summary tab — Basic Stats, Weapon Stats, Item Pickups
+& Drops, and the three per-team variants — renders
 `result.playerStats` (schema v62). It replaced a four-source join across
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
@@ -199,16 +227,23 @@ Two consequences worth knowing:
   yielded nothing while deaths were still counted, and `ping` is KTX-only.
   Frags and deaths are measured on those demos and still print. In the
   Basic Stats tables a zero that *was* measured still prints as `0`;
-  the Weapon Stats and Possession tables are the exception by design —
-  a weapon the player never touched or an item never held renders `-`
-  across its cells rather than a row of zeros.
-- **The Possession cells carry their denominator in a tooltip** — held /
-  alive / present / match ms. A share is only as good as the window it
-  divides by, and a player the streams barely saw can get a presence
-  window that is a floor rather than a measurement.
-- **The four "Per Team" tables hide when `playerStats.teams` is empty**
+  the Weapon Stats table and the possession (`s`) columns of Item Pickups
+  are the exception by design — a weapon the player never touched or an
+  item never held renders `-` rather than a zero.
+- **Item Pickups carries possession, not a separate panel.** Each item's
+  group is `took | s`: the pickup count, then the seconds it was held
+  from our own hold integral (KTX writes no weapon hold time at all, and
+  its armor clock keeps counting after the armor is chewed to zero). MH
+  has no `s` column — mega health is consumed on pickup — and RL/LG add
+  `drop | xfer`. A possession cell's tooltip carries held ms, the share
+  of *alive* time, the run count and the row's alive/present/match
+  window: a share is only as good as the window it divides by, and a
+  player the streams barely saw can get a presence window that is a
+  floor rather than a measurement — the denominators name that. The
+  cell sorts on raw ms (`data-sort-value`), not on the rendered seconds.
+- **The three "Per Team" tables hide when `playerStats.teams` is empty**
   (body class `no-team-rows`), which is FFA and duels — otherwise FFA
-  rendered four headers over an empty tbody.
+  rendered three headers over an empty tbody.
 
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,
@@ -233,8 +268,8 @@ the file (keeping the version in its name), update the matching
 ### Panel explanations live behind one disclosure
 
 Several panels need a paragraph explaining what their numbers mean and
-where they come from — Possession (Summary), Region Control and Loc
-Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
+where they come from — Item Pickups & Drops (Summary), Region Control and
+Loc Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
 full, but collapsed, so a panel opens with its table rather than with a
 wall of text. The idiom is a single one in `index.html`:
 
@@ -498,7 +533,9 @@ roster where the demo has one and from `playerStats.players` otherwise —
 it is what the draw loop, the legend, the trail dropdown and the sidebar
 roster all key off, so a demo with no KTX block would otherwise render a
 map with nobody on it. Team colours still come from `getTeamOrder()` /
-`timelineState.teams`, never from either roster's own order.
+`timelineState.teams`, never from either roster's own order. The legend
+lists each team's players **by name**, not in roster order; its column
+headers stay `makeSortable`-clickable for any other order.
 
 **View / velocity arrows** — two optional per-player toggles, **View**
 and **Vel**, draw 3D arrows from each player's origin (`drawPlayerArrows`
