@@ -24,3 +24,6 @@ mvd-web/wasm
 
 # Local production runbook — real deployment topology, deliberately not published.
 DEPLOY-HETZNER.md
+
+# Local planning docs (plan/spec files for in-flight work) — per-machine, never committed.
+plans/
