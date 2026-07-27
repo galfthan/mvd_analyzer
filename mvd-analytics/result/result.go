@@ -794,8 +794,27 @@ package result
 //   - sources is computed from the rows being served, after filtering,
 //     and can read "mixed" as a phantom-roster canary.
 //
+// v63 splits per-weapon damage by victim class. Additive — no existing
+// field changed shape or meaning.
+//   - PlayerDamage (damage.byPlayer, raw family and bounded nest alike)
+//     and PlayerStatsDamage gain byWeaponTeam and byWeaponSelf beside
+//     byWeapon: the same attacker-weapon keys, splitting givenTeam and
+//     givenSelf the way byWeapon splits given. Telefrags and stomps stay
+//     out of all three (positional kills fold into the totals only).
+//   - The KTX overlays stamp byWeaponTeam from weapons[].damage.team,
+//     which KTX has always written beside .enemy and nothing consumed —
+//     so a bounded summary or a playerStats row badged src/boundedSource
+//     "ktx" now serves KTX's own team split rather than a reconstruction
+//     under a KTX badge. byWeaponSelf has no KTX counterpart and stays
+//     derived.
+//   - MEASUREDNESS is family-level and documented rather than inferred
+//     from omitempty: byWeapon and byWeaponTeam are measured whenever the
+//     damage family is present; byWeaponSelf only where a damage stream
+//     was read, which is what a non-nil damage.taken says. Within a
+//     measured family an absent key means "dealt none with that weapon".
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 62
+const CurrentSchemaVersion = 63
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

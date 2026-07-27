@@ -37,7 +37,7 @@ import (
 // integral, so it will legitimately read LOWER than a KTX end-of-match
 // table — that is the correction, not a bug.
 //
-// Schema v62.
+// Schema v63.
 type PlayerStatsResult struct {
 	// Players is one row per participant, in Streams.Players order (the
 	// canonical player order used across the Result), with any scoreboard
@@ -268,11 +268,36 @@ type PlayerStatsDamage struct {
 	// reconstruction's PlayerDamage.ByWeapon. Weapons the player dealt no
 	// damage with are omitted, not zero-filled.
 	//
-	// NOTE this splits GIVEN only. There is no by-weapon split of taken
-	// damage on either side — KTX does not record one and the victim's
-	// per-hit log would answer a different question (who shot me with
-	// what), so the absence is a real gap, not an oversight.
+	// NOTE this splits ENEMY given only. ByWeaponTeam / ByWeaponSelf
+	// below split the other two given directions; there is still no
+	// by-weapon split of TAKEN damage on either side — KTX does not
+	// record one and the victim's per-hit log would answer a different
+	// question (who shot me with what), so that absence is a real gap,
+	// not an oversight.
 	ByWeapon map[string]int `json:"byWeapon,omitempty"`
+	// ByWeaponTeam and ByWeaponSelf split GivenTeam and GivenSelf by the
+	// attacker's weapon, keyed exactly like ByWeapon. Telefrags and stomps
+	// are excluded from all three (positional kills, not weapon damage).
+	//
+	// MEASUREDNESS is family-level and has two rules, which a consumer
+	// must apply instead of reading anything into omitempty:
+	//   - ByWeapon and ByWeaponTeam are measured whenever this damage
+	//     family is present. Src "ktx" means the KTX block existed, and
+	//     KTX counts per-weapon enemy AND team damage for every weapon
+	//     entry (ktx/src/stats_json.c:208-212 writes the pair in one
+	//     sub-block, omitted only when both are zero). Src "derived*"
+	//     means a damage stream was read.
+	//   - ByWeaponSelf is measured ONLY when a damage stream exists — KTX
+	//     has no per-weapon self counter — which is exactly what a
+	//     non-nil Taken says. On a KTX-block-without-stream demo Taken is
+	//     absent and so is this map, whatever the player did.
+	// Within a measured family an absent KEY means the player dealt none
+	// with that weapon. The derived copy drops zeros; KTX keeps an
+	// explicit measured 0 where the weapon's damage sub-block exists, and
+	// omits the sub-block when both its counters are zero — so key-level
+	// absence is zero-or-never either way, and never distinguishable.
+	ByWeaponTeam map[string]int `json:"byWeaponTeam,omitempty"`
+	ByWeaponSelf map[string]int `json:"byWeaponSelf,omitempty"`
 	// TeamWeapons is the same measure for TEAMMATES holding RL/LG (KTX
 	// dmg_tweapon, ktx/src/combat.c:1063) — the friendly-fire mirror of
 	// EnemyWeapons. KTX-only: our reconstruction does not bucket team

@@ -441,7 +441,7 @@ effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`), opening (schema v51 — each player's
 match-start spawn loc plus the first take of every contested spawner,
 the one-fetch answer to opening-race questions), and playerStats
-(schema v62 — the canonical per-player and per-team statistics row:
+(schema v63 — the canonical per-player and per-team statistics row:
 corrected scoreboard, damage, pickup tallies and **possession time**
 (time with each weapon, each armor type, and with **no armor**), each
 family tagged with whether it came from KTX or was derived here.
@@ -528,10 +528,13 @@ including overkill, capped only at 9999) and a **bounded** reconstruction of
 KTX's scoreboard `dmg_dealt` (armor absorbed + health capped to the victim's
 remaining health) carried in additive `bounded` fields. Positional kills
 (telefrags, stomps) are surfaced separately and kept out of `events` /
-`byWeapon` / `matrix` / `ewep`, but their damage now folds into
+every per-weapon map / `matrix` / `ewep`, but their damage now folds into
 `given`/`givenTeam`/`taken` in both families (matching KTX's own
 accumulation). The REST `/damage` `dmg=raw|bounded|both` param picks the
-family.
+family. Schema v63 adds `byWeaponTeam` / `byWeaponSelf` beside `byWeapon`
+in both families (and in `playerStats.damage`): the same attacker-weapon
+split for team and self damage, with the KTX overlays sourcing the team
+map from `weapons[].damage.team`.
 
 `streams.global` carries a wall-clock anchor so a consumer can project any
 match-relative game time onto real-world time (for syncing voice tracks /
@@ -854,7 +857,7 @@ diff -r /tmp/before /tmp/after
    mode rewrites `T_Damage` unobservably; `dmg=bounded` there is a `422
    bounded_unavailable`. **Positional kills** — telefrags (the 9999
    instakill sentinel) and stomps (landing on a head) — are kept out of
-   `events` / `byWeapon` / `matrix` / `ewep` / `totalDamage` and tracked
+   `events` / every per-weapon map / `matrix` / `ewep` / `totalDamage` and tracked
    separately (`damage.telefrags`/`damage.stomps`, the opt-in
    `telefrag`/`stomp` events), but their damage **folds into**
    `given`/`givenTeam`/`taken` in both families (mirroring KTX, which

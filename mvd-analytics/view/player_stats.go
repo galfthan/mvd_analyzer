@@ -279,9 +279,16 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 		// block but no damage stream genuinely has no all-sources figure,
 		// and a zero would read as "took no damage at all".
 		out.Taken = derived.Taken
-		// A COPY: the loop below writes into this map, and the derived one
-		// belongs to the stored artifact that every later read starts from.
+		// COPIES: the loop below writes into the enemy and team maps, and
+		// the derived ones belong to the stored artifact that every later
+		// read starts from.
 		out.ByWeapon = cloneCounts(derived.ByWeapon)
+		out.ByWeaponTeam = cloneCounts(derived.ByWeaponTeam)
+		// Self is derived-only — KTX records no per-weapon self damage —
+		// so it rides through untouched, and stays ABSENT on a demo with a
+		// KTX block but no damage stream (the same condition Taken above
+		// tracks).
+		out.ByWeaponSelf = cloneCounts(derived.ByWeaponSelf)
 	}
 	// KTX's own per-weapon enemy damage wins where it carries one, weapon
 	// by weapon rather than family-wide.
@@ -305,6 +312,12 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 	// the reconstruction: they are real measured damage, and on
 	// 1on1_bananfalco_betowen_240426_dm2 the `unknown: 4` residual is
 	// exactly what reconciles byWeapon with KTX's `given` of 4826.
+	//
+	// The TEAM counter lives in the same sub-block and is stamped on the
+	// same presence rule (stats_json.c:208-212 writes `enemy` and `team`
+	// together), so `team: 0` beside a non-zero `enemy` is a measured zero
+	// — a weapon that only ever hit enemies — exactly as the mirror case
+	// is for `enemy`.
 	for w, wv := range di.Weapons {
 		if wv == nil || wv.Damage == nil {
 			continue
@@ -313,6 +326,10 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 			out.ByWeapon = map[string]int{}
 		}
 		out.ByWeapon[w] = wv.Damage.Enemy
+		if out.ByWeaponTeam == nil {
+			out.ByWeaponTeam = map[string]int{}
+		}
+		out.ByWeaponTeam[w] = wv.Damage.Team
 	}
 	out.Given = di.Dmg.Given
 	out.GivenTeam = di.Dmg.Team
@@ -529,6 +546,23 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 						dmg.ByWeapon = map[string]int{}
 					}
 					dmg.ByWeapon[w] += n
+				}
+				for w, n := range p.Damage.ByWeaponTeam {
+					if dmg.ByWeaponTeam == nil {
+						dmg.ByWeaponTeam = map[string]int{}
+					}
+					dmg.ByWeaponTeam[w] += n
+				}
+				// Partial sum over the members that measured one — the
+				// sumOptional doctrine, same as Taken above. On a mixed
+				// team this under-counts givenSelf by the KTX-only
+				// members' share; src:"mixed" is the canary
+				// (RESULT_SCHEMA "measuredness" section).
+				for w, n := range p.Damage.ByWeaponSelf {
+					if dmg.ByWeaponSelf == nil {
+						dmg.ByWeaponSelf = map[string]int{}
+					}
+					dmg.ByWeaponSelf[w] += n
 				}
 				// TakenToDie is an average; averaging averages across
 				// players with different death counts is meaningless, so a

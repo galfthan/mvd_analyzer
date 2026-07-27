@@ -265,53 +265,6 @@
                     </table>
                 </div>
 
-                <div id="hold-panel" class="panel">
-                    <h3>Possession</h3>
-                    <details class="panel-info">
-                        <summary>More info</summary>
-                        <p class="panel-note">Share of time <em>alive</em> spent holding each item. Computed from the
-                            position/inventory streams, not from KTX — KTX writes no weapon hold time at all, and its
-                            armor clock keeps counting after the armor is chewed to zero. The alive-time complement —
-                            the share spent wearing no armor at all — is not a column here, but it is reported as
-                            <code>hold.armor.none</code> in the result JSON and the API: a figure KTX structurally
-                            cannot produce.</p>
-                    </details>
-                    <h4 class="team-aggregate-heading">Per Team</h4>
-                    <table id="hold-team-table" class="stats-table team-aggregate-table">
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th title="Share of alive time holding a rocket launcher">RL</th>
-                                <th title="Share of alive time holding a lightning gun">LG</th>
-                                <th title="Share of alive time wearing red armor">RA</th>
-                                <th title="Share of alive time wearing yellow armor">YA</th>
-                                <th title="Share of alive time wearing green armor">GA</th>
-                                <th title="Share of alive time under quad damage">Quad</th>
-                                <th title="Share of alive time under pentagram">Pent</th>
-                                <th title="Share of alive time under ring of shadows">Ring</th>
-                            </tr>
-                        </thead>
-                        <tbody id="hold-team-body"></tbody>
-                    </table>
-                    <h4 class="per-player-heading">Per Player</h4>
-                    <table id="hold-table" class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th title="Share of alive time holding a rocket launcher">RL</th>
-                                <th title="Share of alive time holding a lightning gun">LG</th>
-                                <th title="Share of alive time wearing red armor">RA</th>
-                                <th title="Share of alive time wearing yellow armor">YA</th>
-                                <th title="Share of alive time wearing green armor">GA</th>
-                                <th title="Share of alive time under quad damage">Quad</th>
-                                <th title="Share of alive time under pentagram">Pent</th>
-                                <th title="Share of alive time under ring of shadows">Ring</th>
-                            </tr>
-                        </thead>
-                        <tbody id="hold-body"></tbody>
-                    </table>
-                </div>
-
                 <div id="weapons-summary-panel" class="panel">
                     <h3>Weapon Stats</h3>
                     <h4 class="team-aggregate-heading">Per Team</h4>
@@ -364,50 +317,100 @@
 
                 <div id="items-panel" class="panel">
                     <h3>Item Pickups & Drops</h3>
+                    <details class="panel-info">
+                        <summary>More info</summary>
+                        <p class="panel-note">Each item shows how many times it was taken and, under <em>s</em>, the
+                            seconds it was held — integrated from the position/inventory streams, not from KTX, which
+                            writes no weapon hold time at all and whose armor clock keeps counting after the armor is
+                            chewed to zero. A possession cell's tooltip carries its share of time <em>alive</em> and
+                            the run count; the alive-time complement — time spent wearing no armor at all — is not a
+                            column here but is reported as <code>hold.armor.none</code> in the result JSON and the API.
+                            Mega health has no possession column: it is consumed on pickup.</p>
+                    </details>
                     <h4 class="team-aggregate-heading">Per Team</h4>
-                    <table id="items-team-table" class="stats-table team-aggregate-table">
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th title="Red Armor pickups">RA</th>
-                                <th title="Yellow Armor pickups">YA</th>
-                                <th title="Green Armor pickups">GA</th>
-                                <th title="Mega Health pickups">MH</th>
-                                <th title="Quad Damage pickups (total hold time)">Quad</th>
-                                <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
-                                <th title="Ring of Shadows pickups (total hold time)">Ring</th>
-                                <th title="Rocket Launcher first pickups per life (item or pack)">RL</th>
-                                <th title="Rocket Launcher drops">RL drop</th>
-                                <th title="Rocket Launcher transfers to teammates">RL xfer</th>
-                                <th title="Lightning Gun first pickups per life (item or pack)">LG</th>
-                                <th title="Lightning Gun drops">LG drop</th>
-                                <th title="Lightning Gun transfers to teammates">LG xfer</th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-team-body"></tbody>
-                    </table>
+                    <div class="items-table-wrap team-aggregate-table">
+                        <table id="items-team-table" class="stats-table team-aggregate-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Team</th>
+                                    <th class="col-group group-start" colspan="2" title="Red Armor">RA</th>
+                                    <th class="col-group group-start" colspan="2" title="Yellow Armor">YA</th>
+                                    <th class="col-group group-start" colspan="2" title="Green Armor">GA</th>
+                                    <th class="group-start" rowspan="2" title="Mega Health pickups">MH</th>
+                                    <th class="col-group group-start" colspan="2" title="Quad Damage">Quad</th>
+                                    <th class="col-group group-start" colspan="2" title="Pentagram of Protection">Pent</th>
+                                    <th class="col-group group-start" colspan="2" title="Ring of Shadows">Ring</th>
+                                    <th class="col-group group-start" colspan="4" title="Rocket Launcher">RL</th>
+                                    <th class="col-group group-start" colspan="4" title="Lightning Gun">LG</th>
+                                </tr>
+                                <tr>
+                                    <th class="group-start" title="Red Armor pickups">took</th>
+                                    <th title="Seconds wearing red armor">s</th>
+                                    <th class="group-start" title="Yellow Armor pickups">took</th>
+                                    <th title="Seconds wearing yellow armor">s</th>
+                                    <th class="group-start" title="Green Armor pickups">took</th>
+                                    <th title="Seconds wearing green armor">s</th>
+                                    <th class="group-start" title="Quad Damage pickups">took</th>
+                                    <th title="Seconds under quad damage">s</th>
+                                    <th class="group-start" title="Pentagram pickups">took</th>
+                                    <th title="Seconds under pentagram">s</th>
+                                    <th class="group-start" title="Ring of Shadows pickups">took</th>
+                                    <th title="Seconds under ring of shadows">s</th>
+                                    <th class="group-start" title="Rocket Launcher first pickups per life (item or pack)">took</th>
+                                    <th title="Seconds holding a rocket launcher">s</th>
+                                    <th title="Rocket Launcher drops">drop</th>
+                                    <th title="Rocket Launcher transfers to teammates">xfer</th>
+                                    <th class="group-start" title="Lightning Gun first pickups per life (item or pack)">took</th>
+                                    <th title="Seconds holding a lightning gun">s</th>
+                                    <th title="Lightning Gun drops">drop</th>
+                                    <th title="Lightning Gun transfers to teammates">xfer</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-team-body"></tbody>
+                        </table>
+                    </div>
                     <h4 class="per-player-heading">Per Player</h4>
-                    <table id="items-table" class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th title="Red Armor pickups">RA</th>
-                                <th title="Yellow Armor pickups">YA</th>
-                                <th title="Green Armor pickups">GA</th>
-                                <th title="Mega Health pickups">MH</th>
-                                <th title="Quad Damage pickups (total hold time)">Quad</th>
-                                <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
-                                <th title="Ring of Shadows pickups (total hold time)">Ring</th>
-                                <th title="Rocket Launcher first pickups per life (item or pack)">RL</th>
-                                <th title="Rocket Launcher drops">RL drop</th>
-                                <th title="Rocket Launcher transfers to teammates">RL xfer</th>
-                                <th title="Lightning Gun first pickups per life (item or pack)">LG</th>
-                                <th title="Lightning Gun drops">LG drop</th>
-                                <th title="Lightning Gun transfers to teammates">LG xfer</th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-body"></tbody>
-                    </table>
+                    <div class="items-table-wrap">
+                        <table id="items-table" class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Player</th>
+                                    <th class="col-group group-start" colspan="2" title="Red Armor">RA</th>
+                                    <th class="col-group group-start" colspan="2" title="Yellow Armor">YA</th>
+                                    <th class="col-group group-start" colspan="2" title="Green Armor">GA</th>
+                                    <th class="group-start" rowspan="2" title="Mega Health pickups">MH</th>
+                                    <th class="col-group group-start" colspan="2" title="Quad Damage">Quad</th>
+                                    <th class="col-group group-start" colspan="2" title="Pentagram of Protection">Pent</th>
+                                    <th class="col-group group-start" colspan="2" title="Ring of Shadows">Ring</th>
+                                    <th class="col-group group-start" colspan="4" title="Rocket Launcher">RL</th>
+                                    <th class="col-group group-start" colspan="4" title="Lightning Gun">LG</th>
+                                </tr>
+                                <tr>
+                                    <th class="group-start" title="Red Armor pickups">took</th>
+                                    <th title="Seconds wearing red armor">s</th>
+                                    <th class="group-start" title="Yellow Armor pickups">took</th>
+                                    <th title="Seconds wearing yellow armor">s</th>
+                                    <th class="group-start" title="Green Armor pickups">took</th>
+                                    <th title="Seconds wearing green armor">s</th>
+                                    <th class="group-start" title="Quad Damage pickups">took</th>
+                                    <th title="Seconds under quad damage">s</th>
+                                    <th class="group-start" title="Pentagram pickups">took</th>
+                                    <th title="Seconds under pentagram">s</th>
+                                    <th class="group-start" title="Ring of Shadows pickups">took</th>
+                                    <th title="Seconds under ring of shadows">s</th>
+                                    <th class="group-start" title="Rocket Launcher first pickups per life (item or pack)">took</th>
+                                    <th title="Seconds holding a rocket launcher">s</th>
+                                    <th title="Rocket Launcher drops">drop</th>
+                                    <th title="Rocket Launcher transfers to teammates">xfer</th>
+                                    <th class="group-start" title="Lightning Gun first pickups per life (item or pack)">took</th>
+                                    <th title="Seconds holding a lightning gun">s</th>
+                                    <th title="Lightning Gun drops">drop</th>
+                                    <th title="Lightning Gun transfers to teammates">xfer</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-body"></tbody>
+                        </table>
+                    </div>
                 </div>
 
 
@@ -452,32 +455,20 @@
                     </details>
                 </div>
 
-                <!-- Health/Armor (diverging style) -->
-                <div class="panel timeline-health-panel-full">
-                    <h3>Team Health/Armor</h3>
-                    <div class="health-graph-wrapper">
-                        <div class="timeline-y-axis" id="health-y-axis">
-                            <span class="y-label y-top" id="health-y-top">800</span>
-                            <span class="y-label y-mid">0</span>
-                            <span class="y-label y-bottom" id="health-y-bottom">800</span>
-                        </div>
-                        <div class="health-graph-outer">
-                            <canvas class="timeline-canvas" id="health-armor-canvas"></canvas>
-                            <div class="current-time-indicator" id="health-time-indicator"></div>
+                <!-- Powerups -->
+                <div class="panel timeline-region-panel" id="powerup-timeline-panel" style="display: none;">
+                    <h3>Powerups</h3>
+                    <div class="region-timeline-wrapper">
+                        <div class="region-timeline-labels" id="powerup-timeline-labels"></div>
+                        <div class="region-timeline-outer">
+                            <canvas class="timeline-canvas" id="powerup-canvas"></canvas>
+                            <div class="current-time-indicator" id="powerup-time-indicator"></div>
                         </div>
                     </div>
                     <div class="timeline-legend">
-                        <span class="legend-item"><span id="legend-health-team-a">Team A ↑</span></span>
-                        <span class="legend-item"><span id="legend-health-team-b">Team B ↓</span></span>
-                        <span class="legend-item"><span class="legend-color health"></span> Health</span>
-                        <span class="legend-item"><span class="legend-color ra"></span> RA</span>
-                        <span class="legend-item"><span class="legend-color ya"></span> YA</span>
-                        <span class="legend-item"><span class="legend-color ga"></span> GA</span>
+                        <span class="legend-item"><span class="legend-color" id="pu-legend-a"></span> <span id="pu-tl-teamA">Team A</span></span>
+                        <span class="legend-item"><span class="legend-color" id="pu-legend-b"></span> <span id="pu-tl-teamB">Team B</span></span>
                     </div>
-                    <details class="per-player-detail" id="ha-per-player-details">
-                        <summary>Per-player health/armor</summary>
-                        <div class="per-player-grid" id="ha-per-player"></div>
-                    </details>
                 </div>
 
                 <!-- Weapons (full width) -->
@@ -515,20 +506,32 @@
                     </details>
                 </div>
 
-                <!-- Powerups -->
-                <div class="panel timeline-region-panel" id="powerup-timeline-panel" style="display: none;">
-                    <h3>Powerups</h3>
-                    <div class="region-timeline-wrapper">
-                        <div class="region-timeline-labels" id="powerup-timeline-labels"></div>
-                        <div class="region-timeline-outer">
-                            <canvas class="timeline-canvas" id="powerup-canvas"></canvas>
-                            <div class="current-time-indicator" id="powerup-time-indicator"></div>
+                <!-- Health/Armor (diverging style) -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Team Health/Armor</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="health-y-axis">
+                            <span class="y-label y-top" id="health-y-top">800</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="health-y-bottom">800</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <canvas class="timeline-canvas" id="health-armor-canvas"></canvas>
+                            <div class="current-time-indicator" id="health-time-indicator"></div>
                         </div>
                     </div>
                     <div class="timeline-legend">
-                        <span class="legend-item"><span class="legend-color" id="pu-legend-a"></span> <span id="pu-tl-teamA">Team A</span></span>
-                        <span class="legend-item"><span class="legend-color" id="pu-legend-b"></span> <span id="pu-tl-teamB">Team B</span></span>
+                        <span class="legend-item"><span id="legend-health-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-health-team-b">Team B ↓</span></span>
+                        <span class="legend-item"><span class="legend-color health"></span> Health</span>
+                        <span class="legend-item"><span class="legend-color ra"></span> RA</span>
+                        <span class="legend-item"><span class="legend-color ya"></span> YA</span>
+                        <span class="legend-item"><span class="legend-color ga"></span> GA</span>
                     </div>
+                    <details class="per-player-detail" id="ha-per-player-details">
+                        <summary>Per-player health/armor</summary>
+                        <div class="per-player-grid" id="ha-per-player"></div>
+                    </details>
                 </div>
 
                 <!-- Region Control -->
@@ -554,6 +557,9 @@
             <div id="tab-chat" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel chat-panel-outer">
+                    <div class="chat-toolbar">
+                        <label><input type="checkbox" id="chat-hide-teamsay"> Hide team chat</label>
+                    </div>
                     <!-- Column headers (outside scroll) -->
                     <div class="chat-header-row">
                         <div class="chat-time-axis-col"><h3>&nbsp;</h3></div>
@@ -806,6 +812,10 @@
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel">
                     <h3>Powerup Runs</h3>
+                    <div class="keymoments-filters">
+                        <label>Min length: <input type="number" id="keymoments-min-dur" min="0" step="1" value="5"> s</label>
+                        <label>Min frags: <input type="number" id="keymoments-min-frags" min="0" step="1" value="1"></label>
+                    </div>
                     <table class="stats-table" id="keymoments-table">
                         <thead>
                             <tr>
@@ -822,6 +832,9 @@
                     </table>
                     <div id="keymoments-empty" class="empty-message" style="display: none;">
                         No powerup pickups detected in this demo.
+                    </div>
+                    <div id="keymoments-filtered-empty" class="empty-message" style="display: none;">
+                        No powerup runs match the filter.
                     </div>
                 </div>
                 <div class="panel">

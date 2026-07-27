@@ -2,6 +2,7 @@ package view
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -669,5 +670,127 @@ func TestPlayerStatsTeamRowMixedSrcOnPartialJoin(t *testing.T) {
 	// The roll-up says mixed too — row and roll-up tell the same story.
 	if got.Sources.Damage != result.SrcMixed {
 		t.Errorf("sources.damage = %q, want mixed", got.Sources.Damage)
+	}
+}
+
+// v63: the KTX overlay stamps byWeaponTeam from weapons[].damage.team on
+// exactly the presence rule byWeapon uses — the two counters share one
+// sub-block (ktx/src/stats_json.c:208-212) — while byWeaponSelf, which KTX
+// has no counter for, rides through from the reconstruction untouched.
+func TestPlayerStatsOverlayKTXTeamDamageByWeapon(t *testing.T) {
+	r := storedResult(true)
+	d := r.PlayerStats.Players[0].Damage
+	d.ByWeapon = map[string]int{"rl": 2000, "gl": 700, "unknown": 4}
+	d.ByWeaponTeam = map[string]int{"gl": 650, "unknown": 2}
+	d.ByWeaponSelf = map[string]int{"rl": 50}
+	w := r.DemoInfo.Players[0].Weapons
+	// {enemy: N, team: 0} — a weapon that only ever hit enemies.
+	w["rl"].Damage = &result.DemoInfoDamage{Enemy: 1800, Team: 0}
+	// {enemy: 0, team: N} — a weapon used purely for team splash.
+	w["gl"] = &result.DemoInfoWeapon{Damage: &result.DemoInfoDamage{Enemy: 0, Team: 700}}
+	// A weapon entry with no damage sub-block: both counters were zero, so
+	// it stamps nothing at all (not a zero).
+	w["lg"] = &result.DemoInfoWeapon{Acc: &result.DemoInfoAcc{Attacks: 169, Hits: 53}}
+
+	got := mustPlayerStats(t, r, PlayerStatsOptions{}).Players[0].Damage
+	if got.Src != result.SrcKTX {
+		t.Fatalf("src = %q, want ktx", got.Src)
+	}
+	wantEnemy := map[string]int{"rl": 1800, "gl": 0, "unknown": 4}
+	if !reflect.DeepEqual(got.ByWeapon, wantEnemy) {
+		t.Errorf("byWeapon = %v, want %v", got.ByWeapon, wantEnemy)
+	}
+	// The derived-only `unknown` key survives; rl's measured team 0 lands.
+	wantTeam := map[string]int{"rl": 0, "gl": 700, "unknown": 2}
+	if !reflect.DeepEqual(got.ByWeaponTeam, wantTeam) {
+		t.Errorf("byWeaponTeam = %v, want %v", got.ByWeaponTeam, wantTeam)
+	}
+	if _, ok := got.ByWeaponTeam["lg"]; ok {
+		t.Errorf("byWeaponTeam stamped a weapon entry with no damage sub-block: %v", got.ByWeaponTeam)
+	}
+	if !reflect.DeepEqual(got.ByWeaponSelf, map[string]int{"rl": 50}) {
+		t.Errorf("byWeaponSelf = %v, want the derived {rl:50} — KTX has no self counter", got.ByWeaponSelf)
+	}
+	// The stored artifact every later read starts from is untouched.
+	if !reflect.DeepEqual(d.ByWeaponTeam, map[string]int{"gl": 650, "unknown": 2}) {
+		t.Errorf("overlay wrote through to the stored derived map: %v", d.ByWeaponTeam)
+	}
+}
+
+// A demo carrying a KTX block but no damage stream has no derived row at
+// all: byWeapon/byWeaponTeam come from KTX, and byWeaponSelf is ABSENT —
+// the same condition `taken` tracks, and the signal the frontend reads.
+func TestPlayerStatsOverlayKTXNoStreamHasNoSelfSplit(t *testing.T) {
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Damage = nil
+	r.DemoInfo.Players[0].Weapons["rl"].Damage = &result.DemoInfoDamage{Enemy: 1800, Team: 90}
+
+	got := mustPlayerStats(t, r, PlayerStatsOptions{}).Players[0].Damage
+	if got == nil || got.Src != result.SrcKTX {
+		t.Fatalf("damage = %+v, want a KTX family", got)
+	}
+	if got.Taken != nil {
+		t.Errorf("taken = %v, want absent — no damage stream to measure it", got.Taken)
+	}
+	if got.ByWeaponSelf != nil {
+		t.Errorf("byWeaponSelf = %v, want absent — KTX has no per-weapon self counter", got.ByWeaponSelf)
+	}
+	if !reflect.DeepEqual(got.ByWeaponTeam, map[string]int{"rl": 90}) {
+		t.Errorf("byWeaponTeam = %v, want KTX's {rl:90}", got.ByWeaponTeam)
+	}
+}
+
+// The post-overlay team re-aggregation sums the new maps too — an
+// analyzer-only aggregate would be stale on every KTX demo. Derived,
+// KTX-overlaid and mixed-source team rows all fold identically.
+func TestPlayerStatsTeamRowsSumVictimSplits(t *testing.T) {
+	// Derived: no KTX block, so the stored team rows stand as the analyzer
+	// summed them.
+	derived := storedResult(false)
+	derived.PlayerStats.Teams[0].Damage.ByWeaponTeam = map[string]int{"sg": 30}
+	red := mustPlayerStats(t, derived, PlayerStatsOptions{}).Teams[0]
+	if !reflect.DeepEqual(red.Damage.ByWeaponTeam, map[string]int{"sg": 30}) {
+		t.Errorf("derived team byWeaponTeam = %v, want the stored {sg:30}", red.Damage.ByWeaponTeam)
+	}
+
+	// KTX-overlaid: red's only member is alpha, so the team row must equal
+	// the overlaid member row rather than the stale stored sum.
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Damage.ByWeaponTeam = map[string]int{"gl": 650}
+	r.PlayerStats.Players[0].Damage.ByWeaponSelf = map[string]int{"rl": 50}
+	r.DemoInfo.Players[0].Weapons["gl"] = &result.DemoInfoWeapon{
+		Damage: &result.DemoInfoDamage{Enemy: 0, Team: 700},
+	}
+	ps := mustPlayerStats(t, r, PlayerStatsOptions{})
+	red = ps.Teams[0]
+	if red.Damage.Src != result.SrcKTX {
+		t.Fatalf("team src = %q, want ktx", red.Damage.Src)
+	}
+	if !reflect.DeepEqual(red.Damage.ByWeaponTeam, map[string]int{"gl": 700}) {
+		t.Errorf("KTX team byWeaponTeam = %v, want {gl:700}", red.Damage.ByWeaponTeam)
+	}
+	if !reflect.DeepEqual(red.Damage.ByWeaponSelf, map[string]int{"rl": 50}) {
+		t.Errorf("KTX team byWeaponSelf = %v, want the derived {rl:50}", red.Damage.ByWeaponSelf)
+	}
+	// beta is on blue and has no KTX entry, so the blue row stays derived —
+	// the mixed canary only fires when members of ONE team disagree.
+	if blue := ps.Teams[1]; blue.Damage.Src != result.SrcDerived {
+		t.Errorf("blue team src = %q, want derived", blue.Damage.Src)
+	}
+
+	// Mixed: two members of one team, only one of which KTX knows.
+	mixed := storedResult(true)
+	mixed.PlayerStats.Players[1].Team = "red"
+	mixed.PlayerStats.Players[1].Damage.ByWeaponTeam = map[string]int{"sg": 15}
+	mixed.PlayerStats.Players[0].Damage.ByWeaponTeam = map[string]int{"gl": 650}
+	mixed.DemoInfo.Players[0].Weapons["gl"] = &result.DemoInfoWeapon{
+		Damage: &result.DemoInfoDamage{Enemy: 0, Team: 700},
+	}
+	red = mustPlayerStats(t, mixed, PlayerStatsOptions{}).Teams[0]
+	if red.Damage.Src != result.SrcMixed {
+		t.Errorf("mixed team src = %q, want %q", red.Damage.Src, result.SrcMixed)
+	}
+	if !reflect.DeepEqual(red.Damage.ByWeaponTeam, map[string]int{"gl": 700, "sg": 15}) {
+		t.Errorf("mixed team byWeaponTeam = %v, want {gl:700, sg:15}", red.Damage.ByWeaponTeam)
 	}
 }

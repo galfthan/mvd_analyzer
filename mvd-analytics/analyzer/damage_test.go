@@ -891,3 +891,120 @@ func TestDamageAnalyzer_BoundedClampCeiling(t *testing.T) {
 		t.Errorf("clamped-kill armored bounded = %d, want 300 (save 100 + shadow health 200; ceiling 401 not binding)", got)
 	}
 }
+
+// mapsEqual compares a per-weapon damage map against an expectation,
+// treating nil and empty as the same absence.
+func mapsEqual(got, want map[string]int) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for k, v := range want {
+		if got[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+// v63: byWeaponTeam / byWeaponSelf split GivenTeam / GivenSelf by the
+// attacker's weapon in BOTH families, on the same keys and with the same
+// positional-kill exclusion byWeapon has.
+func TestDamageAnalyzer_ByWeaponVictimSplits(t *testing.T) {
+	a := buildDamageAnalyzer()
+	seedVitals(a, 0, 100, 0, 0) // alpha, for the self hit
+	seedVitals(a, 4, 30, 0, 0)  // erl, enemy — dies to the RL
+	seedVitals(a, 6, 100, 0, 0) // gmate, teammate
+
+	// Enemy RL overkill: raw 100, bounded 30 (raw + death value).
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 4, Damage: 100, DeathType: dtRLTest, TimeMs: 10000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatHealth, Value: -70, TimeMs: 10000})
+	// Team SG: one survived hit (25/25) and one overkill (raw 150, bounded 75).
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 25, DeathType: dtSGTest, TimeMs: 11000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 150, DeathType: dtSGTest, TimeMs: 12000})
+	a.OnEvent(&events.StatUpdateEvent{PlayerNum: 6, StatIndex: events.StatHealth, Value: -75, TimeMs: 12000})
+	// Self RL splash (a rocket jump): survives, so both families read 40.
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 40, DeathType: dtRLTest, TimeMs: 13000})
+	// Positional kills stay out of every per-weapon map: a TEAM telefrag
+	// (folds into GivenTeam) and an ENEMY stomp (folds into Given).
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 9999, DeathType: dtTeleTest, TimeMs: 14000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 10, DeathType: dtStompTest, TimeMs: 15000})
+
+	d := finalizeDamage(t, a)
+	alpha := d.ByPlayer["alpha"]
+	if alpha.Bounded == nil {
+		t.Fatal("no bounded nest")
+	}
+
+	if !mapsEqual(alpha.ByWeapon, map[string]int{"rl": 100}) {
+		t.Errorf("raw byWeapon = %v, want {rl:100}", alpha.ByWeapon)
+	}
+	if !mapsEqual(alpha.Bounded.ByWeapon, map[string]int{"rl": 30}) {
+		t.Errorf("bounded byWeapon = %v, want {rl:30}", alpha.Bounded.ByWeapon)
+	}
+	if !mapsEqual(alpha.ByWeaponTeam, map[string]int{"sg": 175}) {
+		t.Errorf("raw byWeaponTeam = %v, want {sg:175}", alpha.ByWeaponTeam)
+	}
+	if !mapsEqual(alpha.Bounded.ByWeaponTeam, map[string]int{"sg": 100}) {
+		t.Errorf("bounded byWeaponTeam = %v, want {sg:100} (25 + overkill-capped 75)", alpha.Bounded.ByWeaponTeam)
+	}
+	if !mapsEqual(alpha.ByWeaponSelf, map[string]int{"rl": 40}) {
+		t.Errorf("raw byWeaponSelf = %v, want {rl:40}", alpha.ByWeaponSelf)
+	}
+	if !mapsEqual(alpha.Bounded.ByWeaponSelf, map[string]int{"rl": 40}) {
+		t.Errorf("bounded byWeaponSelf = %v, want {rl:40}", alpha.Bounded.ByWeaponSelf)
+	}
+
+	// The positional kills folded into the totals but must appear in no
+	// per-weapon map, under their own key or any other.
+	if alpha.GivenTeam != 275 {
+		t.Errorf("GivenTeam = %d, want 275 (175 sg + a 100 telefrag fold)", alpha.GivenTeam)
+	}
+	for name, m := range map[string]map[string]int{
+		"byWeapon": alpha.ByWeapon, "byWeaponTeam": alpha.ByWeaponTeam, "byWeaponSelf": alpha.ByWeaponSelf,
+		"bounded.byWeapon": alpha.Bounded.ByWeapon, "bounded.byWeaponTeam": alpha.Bounded.ByWeaponTeam,
+		"bounded.byWeaponSelf": alpha.Bounded.ByWeaponSelf,
+	} {
+		if m["tele"] != 0 || m["stomp"] != 0 {
+			t.Errorf("%s carries a positional-kill key: %v", name, m)
+		}
+	}
+}
+
+// A demo whose bounded reconstruction was skipped gets the raw splits and
+// no bounded nest at all — the same rule byWeapon follows.
+func TestDamageAnalyzer_ByWeaponVictimSplitsBoundedSkip(t *testing.T) {
+	a := buildDamageAnalyzer()
+	a.OnEvent(&events.ServerInfoEvent{Key: "k_midair", Value: "1"})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 60, DeathType: dtSGTest, TimeMs: 10000})
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 0, Damage: 20, DeathType: dtRLTest, TimeMs: 11000})
+
+	d := finalizeDamage(t, a)
+	alpha := d.ByPlayer["alpha"]
+	if !mapsEqual(alpha.ByWeaponTeam, map[string]int{"sg": 60}) ||
+		!mapsEqual(alpha.ByWeaponSelf, map[string]int{"rl": 20}) {
+		t.Errorf("raw splits = team %v / self %v, want {sg:60} / {rl:20}", alpha.ByWeaponTeam, alpha.ByWeaponSelf)
+	}
+	if alpha.Bounded != nil {
+		t.Errorf("bounded nest present on a skipped:* demo: %+v", alpha.Bounded)
+	}
+}
+
+// Teamplay nullification zeroes the BOUNDED team figure while the wire
+// still carries the pre-nullification amount: the raw split keeps the wire
+// value and the bounded split keeps the reconstructed real zero
+// (result/damage.go documents 0 as a real value, never an absence).
+func TestDamageAnalyzer_ByWeaponTeamTeamplayNullified(t *testing.T) {
+	a := buildDamageAnalyzer()
+	a.OnEvent(&events.ServerInfoEvent{Key: "teamplay", Value: "1"})
+	seedVitals(a, 6, 100, 0, 0) // no armor, so tp1 nullifies the whole hit
+	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 6, Damage: 30, DeathType: dtRLTest, TimeMs: 10000})
+
+	d := finalizeDamage(t, a)
+	alpha := d.ByPlayer["alpha"]
+	if !mapsEqual(alpha.ByWeaponTeam, map[string]int{"rl": 30}) {
+		t.Errorf("raw byWeaponTeam = %v, want {rl:30} (the wire value)", alpha.ByWeaponTeam)
+	}
+	if alpha.Bounded == nil || !mapsEqual(alpha.Bounded.ByWeaponTeam, map[string]int{"rl": 0}) {
+		t.Errorf("bounded byWeaponTeam = %v, want {rl:0} — a measured zero, not an absent key", alpha.Bounded)
+	}
+}

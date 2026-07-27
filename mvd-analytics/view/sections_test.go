@@ -1170,3 +1170,175 @@ func TestItems_WindowBoundaries(t *testing.T) {
 		t.Errorf("take just past to: takenCount = %d, want 0", s.Items[0].TakenCount)
 	}
 }
+
+// splitsFixture is a three-player teamplay fixture exercising all three
+// per-weapon damage maps (v63). Every player both deals and takes, so the
+// stored ByPlayer entries are exactly what a full-window all-players
+// recompute builds — down to the empty-but-present ByWeapon maps.
+//
+//	ev1 t1000 alpha->bravo rl  100        enemy,  victim rl
+//	ev2 t2000 alpha->mate  sg   30        team
+//	ev3 t3000 alpha->alpha rl   20 (b=12) self,   overkill-capped
+//	ev4 t4000 alpha->mate  gl   50 (b=0)  team,   teamplay-nullified bounded
+func splitsFixture() *result.Result {
+	return &result.Result{Damage: &result.DamageResult{
+		Dmg:         "both",
+		BoundedMode: "standard",
+		TotalDamage: 200,
+		ByWeapon:    map[string]int{"rl": 100},
+		Events: []result.DamageEntry{
+			{Time: 1000, Attacker: "alpha", Victim: "bravo", Weapon: "rl", Damage: 100, VictimWep: "rl"},
+			{Time: 2000, Attacker: "alpha", Victim: "mate", Weapon: "sg", Damage: 30, IsTeam: true},
+			{Time: 3000, Attacker: "alpha", Victim: "alpha", Weapon: "rl", Damage: 20, IsSelf: true, Bounded: intPtr(12)},
+			{Time: 4000, Attacker: "alpha", Victim: "mate", Weapon: "gl", Damage: 50, IsTeam: true, Bounded: intPtr(0)},
+		},
+		Matrix: []result.DamagePair{
+			{Attacker: "alpha", Victim: "bravo", Damage: 100, ByWeapon: map[string]int{"rl": 100}},
+		},
+		ByPlayer: map[string]*result.PlayerDamage{
+			"alpha": {
+				Given: 100, Taken: 20, GivenTeam: 80, GivenSelf: 20,
+				ByWeapon:     map[string]int{"rl": 100},
+				ByWeaponTeam: map[string]int{"sg": 30, "gl": 50},
+				ByWeaponSelf: map[string]int{"rl": 20},
+				EnemyVsRL:    100, EWep: 100,
+				Bounded: &result.PlayerDamage{
+					Given: 100, Taken: 12, GivenTeam: 30, GivenSelf: 12,
+					ByWeapon:     map[string]int{"rl": 100},
+					ByWeaponTeam: map[string]int{"sg": 30, "gl": 0},
+					ByWeaponSelf: map[string]int{"rl": 12},
+					EnemyVsRL:    100, EWep: 100,
+				},
+			},
+			"bravo": {
+				Taken: 100, ByWeapon: map[string]int{},
+				Bounded: &result.PlayerDamage{Taken: 100, ByWeapon: map[string]int{}},
+			},
+			"mate": {
+				Taken: 80, ByWeapon: map[string]int{},
+				Bounded: &result.PlayerDamage{Taken: 30, ByWeapon: map[string]int{}},
+			},
+		},
+	}}
+}
+
+// V63a: a full-window all-players recompute reproduces the stored per-weapon
+// splits in both families — the view builds them the same way the analyzer
+// does, including the nullified `gl: 0` measured zero.
+func TestDamage_ByWeaponSplitsFilteredRecompute(t *testing.T) {
+	r := splitsFixture()
+	out, err := Damage(r, DamageOptions{Dmg: "both", Players: []string{"alpha", "bravo", "mate"}})
+	if err != nil {
+		t.Fatalf("Damage: %v", err)
+	}
+	if !reflect.DeepEqual(out.ByPlayer, r.Damage.ByPlayer) {
+		t.Errorf("ByPlayer recompute mismatch:\n got %s\nwant %s",
+			mustJSON(out.ByPlayer), mustJSON(r.Damage.ByPlayer))
+	}
+}
+
+// V63b: a windowed request narrows the splits to the hits it shows.
+func TestDamage_ByWeaponSplitsWindowed(t *testing.T) {
+	r := splitsFixture()
+	// [2500, ...] keeps the self rl (3000) and the team gl (4000) only.
+	out, err := Damage(r, DamageOptions{Dmg: "both", From: 2500})
+	if err != nil {
+		t.Fatalf("Damage: %v", err)
+	}
+	a := out.ByPlayer["alpha"]
+	if !reflect.DeepEqual(a.ByWeaponTeam, map[string]int{"gl": 50}) {
+		t.Errorf("windowed byWeaponTeam = %v, want {gl:50}", a.ByWeaponTeam)
+	}
+	if !reflect.DeepEqual(a.ByWeaponSelf, map[string]int{"rl": 20}) {
+		t.Errorf("windowed byWeaponSelf = %v, want {rl:20}", a.ByWeaponSelf)
+	}
+	if len(a.ByWeapon) != 0 {
+		t.Errorf("windowed byWeapon = %v, want empty (the enemy hit is outside the window)", a.ByWeapon)
+	}
+	if !reflect.DeepEqual(a.Bounded.ByWeaponTeam, map[string]int{"gl": 0}) {
+		t.Errorf("windowed bounded byWeaponTeam = %v, want {gl:0}", a.Bounded.ByWeaponTeam)
+	}
+	if !reflect.DeepEqual(a.Bounded.ByWeaponSelf, map[string]int{"rl": 12}) {
+		t.Errorf("windowed bounded byWeaponSelf = %v, want {rl:12}", a.Bounded.ByWeaponSelf)
+	}
+}
+
+// V63c: the raw view keeps the raw splits and drops the nest; the bounded
+// view promotes the nest's splits into the top-level names.
+func TestDamage_ByWeaponSplitsRawAndBounded(t *testing.T) {
+	r := splitsFixture()
+
+	raw, err := Damage(r, DamageOptions{Dmg: "raw", Players: []string{"alpha"}})
+	if err != nil {
+		t.Fatalf("dmg=raw: %v", err)
+	}
+	a := raw.ByPlayer["alpha"]
+	if !reflect.DeepEqual(a.ByWeaponTeam, map[string]int{"sg": 30, "gl": 50}) ||
+		!reflect.DeepEqual(a.ByWeaponSelf, map[string]int{"rl": 20}) {
+		t.Errorf("raw splits = team %v / self %v, want the wire values", a.ByWeaponTeam, a.ByWeaponSelf)
+	}
+	if a.Bounded != nil {
+		t.Errorf("raw view kept a bounded nest")
+	}
+
+	bnd, err := Damage(r, DamageOptions{Dmg: "bounded"})
+	if err != nil {
+		t.Fatalf("dmg=bounded: %v", err)
+	}
+	b := bnd.ByPlayer["alpha"]
+	if !reflect.DeepEqual(b.ByWeaponTeam, map[string]int{"sg": 30, "gl": 0}) ||
+		!reflect.DeepEqual(b.ByWeaponSelf, map[string]int{"rl": 12}) {
+		t.Errorf("materialized splits = team %v / self %v, want the bounded values", b.ByWeaponTeam, b.ByWeaponSelf)
+	}
+	// A player who dealt no team/self damage keeps the maps ABSENT — the
+	// materialization must not turn a nil nest map into {}.
+	if m := bnd.ByPlayer["mate"]; m.ByWeaponTeam != nil || m.ByWeaponSelf != nil {
+		t.Errorf("materialized empty splits = team %v / self %v, want absent", m.ByWeaponTeam, m.ByWeaponSelf)
+	}
+}
+
+// V63d: an unfiltered bounded SUMMARY stamps byWeaponTeam from KTX's own
+// weapons[].damage.team alongside byWeapon — otherwise the response claims
+// boundedSource "ktx" while serving a reconstructed team split. Covers all
+// three KTX weapon-entry shapes plus the derived-only key.
+func TestDamage_SummaryKTXBoundedTeamMap(t *testing.T) {
+	r := splitsFixture()
+	r.DemoInfo = &result.DemoInfoResult{Players: []result.DemoInfoPlayer{{
+		Name: "alpha", Team: "red",
+		Dmg: &result.DemoInfoDmg{Given: 95, Team: 70, Self: 18, EnemyWeapons: 95},
+		Weapons: map[string]*result.DemoInfoWeapon{
+			"rl": {Damage: &result.DemoInfoDamage{Enemy: 95, Team: 0}},
+			"gl": {Damage: &result.DemoInfoDamage{Enemy: 0, Team: 70}},
+			// A weapon entry with no damage sub-block: both counters were
+			// zero, so nothing is stamped from it at all.
+			"lg": {Acc: &result.DemoInfoAcc{Attacks: 10, Hits: 3}},
+		},
+	}}}
+	before := mustJSON(r.Damage)
+
+	out, err := Damage(r, DamageOptions{Dmg: "both", Summary: true})
+	if err != nil {
+		t.Fatalf("Damage: %v", err)
+	}
+	if out.BoundedSource != "ktx" {
+		t.Fatalf("BoundedSource = %q, want ktx", out.BoundedSource)
+	}
+	a := out.ByPlayer["alpha"].Bounded
+	if !reflect.DeepEqual(a.ByWeapon, map[string]int{"rl": 95, "gl": 0}) {
+		t.Errorf("bounded byWeapon = %v, want {rl:95, gl:0} (gl's measured enemy zero)", a.ByWeapon)
+	}
+	if !reflect.DeepEqual(a.ByWeaponTeam, map[string]int{"sg": 30, "gl": 70, "rl": 0}) {
+		t.Errorf("bounded byWeaponTeam = %v, want {sg:30 (derived-only key kept), gl:70, rl:0}", a.ByWeaponTeam)
+	}
+	// KTX has no per-weapon self counter, so this one stays reconstructed.
+	if !reflect.DeepEqual(a.ByWeaponSelf, map[string]int{"rl": 12}) {
+		t.Errorf("bounded byWeaponSelf = %v, want the derived {rl:12}", a.ByWeaponSelf)
+	}
+	// The raw family and the stored Result are untouched.
+	if !reflect.DeepEqual(out.ByPlayer["alpha"].ByWeaponTeam, map[string]int{"sg": 30, "gl": 50}) {
+		t.Errorf("raw byWeaponTeam mutated: %v", out.ByPlayer["alpha"].ByWeaponTeam)
+	}
+	if after := mustJSON(r.Damage); after != before {
+		t.Fatalf("stored Result mutated:\nbefore %s\nafter  %s", before, after)
+	}
+}

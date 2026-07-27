@@ -447,6 +447,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
     setupSearch();
+    setupChatToolbar();
+    setupKeyMomentsFilters();
+    setupTeamStatusSort();
 
     const params = new URLSearchParams(location.search);
     const hubId = params.get('gameId') || params.get('hub');
@@ -961,26 +964,37 @@ function mapFileKey(result) {
     return base.endsWith('.bsp') ? base.slice(0, -4) : base;
 }
 
-// A hold figure as a whole-percent share of the player's ALIVE time —
-// KTX's own implicit denominator for its hold clocks, and the one that
-// answers "how much of the time they could have been holding it, were
-// they". Returns '-' when the item was never held, so a blank cell means
-// "never", never "not measured".
+// One possession cell of the Item Pickups table: seconds spent holding the
+// item, from OUR hold integral (KTX writes no weapon hold time at all, and
+// its armor clock keeps counting after the armor is chewed to zero).
+// Returns '-' when the item was never held, so a blank cell means "never",
+// never "not measured".
 //
-// The row's window goes into a tooltip because the share is only as
-// meaningful as its denominator: a player the streams barely saw can get
-// a presence window that is a FLOOR rather than a measurement
-// (possessionExtent in analyzer/player_stats.go says so itself), and
-// dividing their possession by it yields a confident "100%" over a few
-// seconds of an 18-minute match. The percentage cannot express that; the
-// raw ms behind it can, so they are one hover away.
-function holdPct(stat, win) {
-    if (!stat || !stat.ms) return '-';
-    const pct = `${(stat.shareAlive * 100).toFixed(0)}%`;
-    if (!win) return pct;
-    const title = `held ${stat.ms} ms · alive ${win.aliveMs} ms · ` +
-        `present ${win.presentMs} ms · match ${win.matchMs} ms`;
-    return `<span title="${escapeHtml(title)}">${pct}</span>`;
+// The share of ALIVE time and the run count go into the tooltip together
+// with the raw ms and the row's window: a share is only as meaningful as
+// its denominator, and a player the streams barely saw can get a presence
+// window that is a FLOOR rather than a measurement (possessionExtent in
+// analyzer/player_stats.go says so itself) — a confident "100%" over a few
+// seconds of an 18-minute match. The seconds cannot express that; the
+// numbers behind them can, so they are one hover away.
+//
+// data-sort-value keeps the raw ms so the column sorts numerically rather
+// than on the rendered "12s".
+function holdCell(stat, win) {
+    if (!stat || !stat.ms) return `<td data-sort-value="0">-</td>`;
+    const bits = [`held ${stat.ms} ms`];
+    if (stat.shareAlive != null) bits.push(`${(stat.shareAlive * 100).toFixed(0)}% of alive time`);
+    bits.push(`${stat.runs || 0} run${stat.runs === 1 ? '' : 's'}`);
+    if (stat.longestMs) bits.push(`longest ${Math.round(stat.longestMs / 1000)}s`);
+    // Team rows sum alive/present over members while matchMs stays the
+    // single match length (aggregateTeamRows), so present > match is
+    // expected there — label it so the triple doesn't read as broken.
+    if (win) {
+        const summed = (win.presentMs || 0) > (win.matchMs || 0) ? ', member-summed' : '';
+        bits.push(`window alive ${win.aliveMs || 0} / present ${win.presentMs || 0} / match ${win.matchMs || 0} ms${summed}`);
+    }
+    const title = escapeHtml(bits.join(' · '));
+    return `<td data-sort-value="${stat.ms}" title="${title}">${Math.round(stat.ms / 1000)}s</td>`;
 }
 
 // Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
@@ -1228,7 +1242,7 @@ function displayResults(result) {
 
     updateTopbarDemoInfo(result);
 
-    // Summary tab, all eight tables, from the canonical playerStats section.
+    // Summary tab, all six tables, from the canonical playerStats section.
     // It is computed for EVERY demo — a missing KTX block degrades families
     // to src:"derived" rather than dropping them — so there is no
     // scoreboard-only fallback path any more. The one demo class with no
@@ -1243,8 +1257,6 @@ function displayResults(result) {
         displayWeaponStatsTable(rows);
         displayItemsTeamsTable(teamRows);
         displayItemsTable(rows);
-        displayHoldTeamsTable(teamRows);
-        displayHoldTable(rows);
     }
 
     // Weapons chart from frags
@@ -1355,9 +1367,22 @@ function makeSortable(table) {
             if (!tbody) return;
             const rows = Array.from(tbody.querySelectorAll('tr'));
 
-            // Toggle direction (default first click = descending for numbers)
+            // Toggle direction. First click on a column sorts numeric
+            // columns descending (biggest first, what a stats reader wants)
+            // and text columns ascending; further clicks flip. The numeric
+            // sniff uses the same value a sort would (data-sort-value or
+            // text), from the first row that has one.
             const wasAsc = th.classList.contains('sort-asc');
-            const dir = wasAsc ? 'desc' : 'asc';
+            const wasDesc = th.classList.contains('sort-desc');
+            let dir;
+            if (wasAsc || wasDesc) {
+                dir = wasAsc ? 'desc' : 'asc';
+            } else {
+                const probe = rows
+                    .map(r => { const c = r.cells[colIdx]; return c?.dataset.sortValue ?? c?.textContent.trim() ?? ''; })
+                    .find(t => t !== '' && t !== '-');
+                dir = probe !== undefined && !isNaN(parseFloat(probe)) ? 'desc' : 'asc';
+            }
 
             // Reset all headers in this table
             allHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
@@ -1503,61 +1528,6 @@ function displayPlayerStats(rows) {
     }, player => teamOrder.indexOf(player.team || ''));
 }
 
-// Possession times — the family KTX cannot produce at all (it writes no
-// weapon hold time into the demoinfo block on a demo of any age, and its
-// armor clock keeps counting after the armor is chewed to zero). Shares
-// are over ALIVE time; the section also carries shareMatch, and window.*
-// carries every denominator, so nothing here has an implicit divisor.
-function displayHoldTable(rows) {
-    const sorted = sortByFragsDesc(rows);
-    const teamOrder = getTeamOrder(sorted);
-
-    renderTableRows('hold-body', sorted, player => {
-        const h = player.hold || {};
-        const w = h.weapons || {};
-        const a = h.armor || {};
-        const p = h.powerups || {};
-        const win = player.window;
-        return `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${holdPct(w.rl, win)}</td>
-            <td>${holdPct(w.lg, win)}</td>
-            <td>${holdPct(a.ra, win)}</td>
-            <td>${holdPct(a.ya, win)}</td>
-            <td>${holdPct(a.ga, win)}</td>
-            <td>${holdPct(p.quad, win)}</td>
-            <td>${holdPct(p.pent, win)}</td>
-            <td>${holdPct(p.ring, win)}</td>
-        `;
-    }, player => teamOrder.indexOf(player.team || ''));
-}
-
-function displayHoldTeamsTable(teamRows) {
-    // teamRowsInColourOrder, like every other per-team table: playerStats
-    // emits teams in stream order while timelineState.teams is frag-sorted,
-    // so passing the rows through raw would stripe this panel differently
-    // from the three beside it whenever the winning team is not the first
-    // to appear in the demo. See CLAUDE.md "Team colors".
-    renderTableRows('hold-team-body', teamRowsInColourOrder(teamRows), team => {
-        const h = team.hold || {};
-        const w = h.weapons || {};
-        const a = h.armor || {};
-        const p = h.powerups || {};
-        const win = team.window;
-        return `
-            <td>${escapeHtml(team.name)}</td>
-            <td>${holdPct(w.rl, win)}</td>
-            <td>${holdPct(w.lg, win)}</td>
-            <td>${holdPct(a.ra, win)}</td>
-            <td>${holdPct(a.ya, win)}</td>
-            <td>${holdPct(a.ga, win)}</td>
-            <td>${holdPct(p.quad, win)}</td>
-            <td>${holdPct(p.pent, win)}</td>
-            <td>${holdPct(p.ring, win)}</td>
-        `;
-    }, (_team, idx) => idx);
-}
-
 // applyDuelModeUI toggles the "Per Team" aggregation panels and the
 // standalone "Teams" summary off when we're rendering a 1v1 demo.
 // Everything else (the per-player scoreboard, weapon stats, item
@@ -1586,7 +1556,7 @@ function applyDuelModeUI(result) {
     // onto unrelated elements.
     document.body.classList.toggle('duel-mode', isDuel(result));
     // FFA has no teams at all, so playerStats omits the section and the
-    // four Summary "Per Team" tables rendered as headers over nothing —
+    // three Summary "Per Team" tables rendered as headers over nothing —
     // duel mode was the only thing hiding them, and it does not fire at
     // five players. Drive it off the rows themselves, which covers every
     // demo class with nothing to aggregate.
@@ -1763,36 +1733,46 @@ function displayItemsTable(rows) {
     const sorted = sortByFragsDesc(rows);
     const teamOrder = getTeamOrder(sorted);
 
-    renderTableRows('items-body', sorted, player => {
-        const k = player.pickups?.byKind || {};
-        const hp = player.hold?.powerups || {};
-        return `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${k.ra?.took || 0}</td>
-            <td>${k.ya?.took || 0}</td>
-            <td>${k.ga?.took || 0}</td>
-            <td>${k.mh?.took || 0}</td>
-            <td>${formatPowerup(k.quad, hp.quad)}</td>
-            <td>${formatPowerup(k.pent, hp.pent)}</td>
-            <td>${formatPowerup(k.ring, hp.ring)}</td>
-            <td>${k.rl?.took || 0}</td>
-            <td>${k.rl?.dropped || 0}</td>
-            <td>${formatXfer(k.rl)}</td>
-            <td>${k.lg?.took || 0}</td>
-            <td>${k.lg?.dropped || 0}</td>
-            <td>${formatXfer(k.lg)}</td>
-        `;
-    }, player => teamOrder.indexOf(player.team || ''));
+    renderTableRows('items-body', sorted, player =>
+        `<td>${escapeHtml(player.name)}</td>${itemCells(player)}`,
+    player => teamOrder.indexOf(player.team || ''));
 }
 
-// "took (Ns)" — the count from the pickup tally, the seconds from OUR hold
-// integral rather than KTX's item.time, so the powerup seconds agree with
-// the hold table on the same page.
-function formatPowerup(pickup, holdStat) {
-    const took = pickup?.took || 0;
-    if (!took) return '0';
-    const secs = holdStat?.ms ? Math.round(holdStat.ms / 1000) : 0;
-    return secs > 0 ? `${took} (${secs}s)` : `${took}`;
+// The pickup/possession cells of one Item Pickups row — identical for the
+// per-player and per-team tables, which differ only in their first column.
+// Counts come from the pickup tally, seconds from OUR hold integral rather
+// than KTX's item.time. MH has no possession column by design: mega health
+// is consumed on pickup, so playerStats carries no hold stat for it.
+function itemCells(row) {
+    const k = row.pickups?.byKind || {};
+    const h = row.hold || {};
+    const hw = h.weapons || {};
+    const ha = h.armor || {};
+    const hp = h.powerups || {};
+    const w = row.window;
+    return `
+        <td class="group-start">${k.ra?.took || 0}</td>
+        ${holdCell(ha.ra, w)}
+        <td class="group-start">${k.ya?.took || 0}</td>
+        ${holdCell(ha.ya, w)}
+        <td class="group-start">${k.ga?.took || 0}</td>
+        ${holdCell(ha.ga, w)}
+        <td class="group-start">${k.mh?.took || 0}</td>
+        <td class="group-start">${k.quad?.took || 0}</td>
+        ${holdCell(hp.quad, w)}
+        <td class="group-start">${k.pent?.took || 0}</td>
+        ${holdCell(hp.pent, w)}
+        <td class="group-start">${k.ring?.took || 0}</td>
+        ${holdCell(hp.ring, w)}
+        <td class="group-start">${k.rl?.took || 0}</td>
+        ${holdCell(hw.rl, w)}
+        <td>${k.rl?.dropped || 0}</td>
+        <td>${formatXfer(k.rl)}</td>
+        <td class="group-start">${k.lg?.took || 0}</td>
+        ${holdCell(hw.lg, w)}
+        <td>${k.lg?.dropped || 0}</td>
+        <td>${formatXfer(k.lg)}</td>
+    `;
 }
 
 // Pack transfers. `xfer` (a teammate took your pack) and `xferSelf` (you
@@ -1829,11 +1809,11 @@ function getTeamOrder(sortedPlayers) {
 
 // ─── Per-team aggregate tables ─────────────────────────────────────────────
 
-// The four per-team tables render playerStats.teams verbatim. The sums
+// The three per-team tables render playerStats.teams verbatim. The sums
 // are done ONCE in Go (analyzer aggregateTeamRows / view reaggregateTeams)
-// rather than re-derived per panel here: hold shares in particular must be
-// recomputed over the team's summed alive time, and averaging per-player
-// shares — which is what a JS reduce naturally does — is simply wrong.
+// rather than re-derived per panel here: hold figures in particular must be
+// summed over the team's own alive time, and averaging per-player shares —
+// which is what a JS reduce naturally does — is simply wrong.
 // Rows arrive in the section's own order; getTeamOrder is still the colour
 // index authority, so a team's stripe matches it everywhere else.
 function teamRowsInColourOrder(teamRows) {
@@ -1880,26 +1860,9 @@ function displayWeaponStatsTeamsTable(teamRows) {
 }
 
 function displayItemsTeamsTable(teamRows) {
-    renderTableRows('items-team-body', teamRowsInColourOrder(teamRows), team => {
-        const k = team.pickups?.byKind || {};
-        const hp = team.hold?.powerups || {};
-        return `
-            <td>${escapeHtml(team.name)}</td>
-            <td>${k.ra?.took || 0}</td>
-            <td>${k.ya?.took || 0}</td>
-            <td>${k.ga?.took || 0}</td>
-            <td>${k.mh?.took || 0}</td>
-            <td>${formatPowerup(k.quad, hp.quad)}</td>
-            <td>${formatPowerup(k.pent, hp.pent)}</td>
-            <td>${formatPowerup(k.ring, hp.ring)}</td>
-            <td>${k.rl?.took || 0}</td>
-            <td>${k.rl?.dropped || 0}</td>
-            <td>${formatXfer(k.rl)}</td>
-            <td>${k.lg?.took || 0}</td>
-            <td>${k.lg?.dropped || 0}</td>
-            <td>${formatXfer(k.lg)}</td>
-        `;
-    }, (_team, idx) => idx);
+    renderTableRows('items-team-body', teamRowsInColourOrder(teamRows), team =>
+        `<td>${escapeHtml(team.name)}</td>${itemCells(team)}`,
+    (_team, idx) => idx);
 }
 
 function displayWeaponsChart(byWeapon) {
@@ -1930,9 +1893,50 @@ function getAccuracyClass(acc) {
     return 'accuracy-low';
 }
 
-function displayKeyMoments(result) {
+// Powerup-run display filter (Key Moments). A run is listed only when it
+// lasted at least `minDur` seconds AND scored at least `minFrags` frags —
+// the reading of "min length 5s and min frags 1" as a conjunction, which
+// hides long fragless runs by default. Both thresholds are editable down to
+// 0 in the panel and the Result keeps every run either way, so this is a UI
+// control rather than a pipeline filter (CLAUDE.md "surface, don't filter").
+const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 1 };
+let keymomentsFilter = { ...KEYMOMENTS_FILTER_DEFAULTS };
+
+// Wired once at load; the inputs live outside the rebuilt table.
+function setupKeyMomentsFilters() {
+    const wire = (id, key) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', () => {
+            // Number.isFinite, not isNaN: "1e309" parses to Infinity, which
+            // would silently filter every run while the input displays blank.
+            const v = parseFloat(el.value);
+            let clean = Number.isFinite(v) ? Math.max(0, v) : 0;
+            if (key === 'minFrags') clean = Math.ceil(clean);
+            keymomentsFilter[key] = clean;
+            el.value = clean;
+            if (currentResult) renderPowerupRuns(currentResult);
+        });
+    };
+    wire('keymoments-min-dur', 'minDur');
+    wire('keymoments-min-frags', 'minFrags');
+}
+
+// Back to 5s / 1 frag on every demo load, inputs included.
+function resetKeyMomentsFilter() {
+    keymomentsFilter = { ...KEYMOMENTS_FILTER_DEFAULTS };
+    const dur = document.getElementById('keymoments-min-dur');
+    if (dur) dur.value = KEYMOMENTS_FILTER_DEFAULTS.minDur;
+    const frags = document.getElementById('keymoments-min-frags');
+    if (frags) frags.value = KEYMOMENTS_FILTER_DEFAULTS.minFrags;
+}
+
+// The powerup-runs table on its own, so the filter inputs can re-render it
+// without touching the three independent tables below.
+function renderPowerupRuns(result) {
     const tbody = document.getElementById('keymoments-body');
     const emptyMsg = document.getElementById('keymoments-empty');
+    const filteredMsg = document.getElementById('keymoments-filtered-empty');
     tbody.innerHTML = '';
 
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
@@ -1948,49 +1952,59 @@ function displayKeyMoments(result) {
         endTime: (ev.endTime || 0) * 0.001,
         duration: (ev.duration || 0) * 0.001,
     }));
+    // duration is in seconds by here, matching the "min s" input. Compare
+    // the ROUNDED seconds — the column displays Math.round(duration), and a
+    // 4.6s run rendered as "5s" must not be hidden by a 5s threshold.
+    const shown = powerupEvents.filter(ev =>
+        Math.round(ev.duration) >= keymomentsFilter.minDur && (ev.frags || 0) >= keymomentsFilter.minFrags);
 
     // Powerups don't exist on duel / 2v2 maps, so powerupEvents is routinely
     // empty. Show the empty-state for the powerup table but DO NOT return —
-    // the frag-streaks section below is independent and must still render.
-    if (powerupEvents.length === 0) {
-        emptyMsg.style.display = 'block';
-    } else {
-        emptyMsg.style.display = 'none';
+    // the callers' other sections are independent and must still render. The
+    // two empty states are distinct: nothing happened vs the filter hid it.
+    emptyMsg.style.display = powerupEvents.length === 0 ? 'block' : 'none';
+    filteredMsg.style.display = (powerupEvents.length > 0 && shown.length === 0) ? 'block' : 'none';
 
-        powerupEvents.forEach(event => {
-            const tr = document.createElement('tr');
+    shown.forEach(event => {
+        const tr = document.createElement('tr');
 
-            // Build viewer URL if hub info available
-            let watchCell = '-';
-            if (hubInfo && hubInfo.gameId) {
-                const demoOff = timelineState.demoOffset || 0;
-                const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
-                const toTime = Math.floor(event.endTime + demoOff) + 5;
-                const trackId = event.playerUserID || event.playerSlot;
-                const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
-                watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
-            }
+        // Build viewer URL if hub info available
+        let watchCell = '-';
+        if (hubInfo && hubInfo.gameId) {
+            const demoOff = timelineState.demoOffset || 0;
+            const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
+            const toTime = Math.floor(event.endTime + demoOff) + 5;
+            const trackId = event.playerUserID || event.playerSlot;
+            const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
+            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+        }
 
-            const powerupDisplay = getPowerupDisplay(event.powerupType);
+        const powerupDisplay = getPowerupDisplay(event.powerupType);
 
-            tr.innerHTML = `
-                <td class="time-cell time-link">${formatDuration(event.time)}</td>
-                <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
-                <td>${escapeHtml(event.playerName || 'Unknown')}</td>
-                <td>${escapeHtml(event.team || '-')}</td>
-                <td>${event.frags || 0}</td>
-                <td>${Math.round(event.duration)}s</td>
-                <td>${watchCell}</td>
-            `;
+        tr.innerHTML = `
+            <td class="time-cell time-link">${formatDuration(event.time)}</td>
+            <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
+            <td>${escapeHtml(event.playerName || 'Unknown')}</td>
+            <td>${escapeHtml(event.team || '-')}</td>
+            <td>${event.frags || 0}</td>
+            <td>${Math.round(event.duration)}s</td>
+            <td>${watchCell}</td>
+        `;
 
-            // Click on time to jump there
-            tr.querySelector('.time-link').addEventListener('click', () => {
-                setCurrentTime(event.time);
-            });
-
-            tbody.appendChild(tr);
+        // Click on time to jump there
+        tr.querySelector('.time-link').addEventListener('click', () => {
+            setCurrentTime(event.time);
         });
-    }
+
+        tbody.appendChild(tr);
+    });
+}
+
+function displayKeyMoments(result) {
+    renderPowerupRuns(result);
+
+    // Get hub info for viewer links (from currentResult which may have hubInfo set)
+    const hubInfo = currentResult?.hubInfo;
 
     // Display frag streaks
     const streakBody = document.getElementById('fragstreaks-body');
@@ -2230,25 +2244,37 @@ function populateFilterSelect(selectId, values) {
 // Per-entity columns always show every-touch from items.phases. The
 // verify cell renders silently on KTX agreement and red+✗ on diff.
 //
+// Each kind also ends in a possession (`s`) column — total seconds held,
+// joined from playerStats.hold. It is per KIND, not per entity: possession
+// is an integral over the inventory stream and knows nothing about which
+// pad or pack the item came from. It ignores the mode selector for the same
+// reason.
+//
 // Note: GL/SNG packs aren't tracked on the analyser side (KTX only emits
 // `//ktx bp` for RL/LG; ktx/src/items.c:2471), so those weapons compare
 // against KTX's entity-only fields (spawn-taken / spawn-total-taken).
 
+// `hold` names the playerStats.hold family a kind's possession seconds live
+// in (result/player_stats.go PlayerStatsHold), keyed by `kind`. Possession is
+// an integral over the player's inventory stream, so it belongs to the KIND,
+// never to the spawn point the item came from — one column per kind no matter
+// how many pads the map has. MH has no entry on purpose: mega health is
+// consumed on pickup, so the section carries no hold stat for it.
 const PICKUPS_WEAPON_KINDS = [
-    { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true  },
-    { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true  },
-    { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false },
-    { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false },
+    { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true,  hold: 'weapons' },
+    { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true,  hold: 'weapons' },
+    { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false, hold: 'weapons' },
+    { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false, hold: 'weapons' },
 ];
 
 const PICKUPS_ITEM_KINDS = [
-    { kind: 'ra',   label: 'RA',   ktxName: 'ra' },
-    { kind: 'ya',   label: 'YA',   ktxName: 'ya' },
-    { kind: 'ga',   label: 'GA',   ktxName: 'ga' },
-    { kind: 'mh',   label: 'MH',   ktxName: 'health_100' },
-    { kind: 'quad', label: 'Quad', ktxName: 'q' },
-    { kind: 'pent', label: 'Pent', ktxName: 'p' },
-    { kind: 'ring', label: 'Ring', ktxName: 'r' },
+    { kind: 'ra',   label: 'RA',   ktxName: 'ra',         hold: 'armor'    },
+    { kind: 'ya',   label: 'YA',   ktxName: 'ya',         hold: 'armor'    },
+    { kind: 'ga',   label: 'GA',   ktxName: 'ga',         hold: 'armor'    },
+    { kind: 'mh',   label: 'MH',   ktxName: 'health_100'                   },
+    { kind: 'quad', label: 'Quad', ktxName: 'q',          hold: 'powerups' },
+    { kind: 'pent', label: 'Pent', ktxName: 'p',          hold: 'powerups' },
+    { kind: 'ring', label: 'Ring', ktxName: 'r',          hold: 'powerups' },
 ];
 
 let pickupsMode = 'all'; // 'all' | 'first'
@@ -2304,6 +2330,17 @@ function renderPickupsTables(result) {
     renderPickupsSection(state, 'weap', PICKUPS_WEAPON_KINDS, buildWeaponCols, weaponCellFor);
     if (itemsPanel) itemsPanel.style.display = hasItem ? '' : 'none';
     renderPickupsSection(state, 'item', PICKUPS_ITEM_KINDS, buildItemCols, itemCellFor);
+
+    // Re-apply after every render: the sections replace their <thead>
+    // content, and click handlers die with the old <th> nodes — without
+    // this the tab stops sorting after the first mode-select change.
+    // makeSortable binds per element (th._sortBound), so re-application
+    // never double-binds (see its loc/region-heatmap contract).
+    for (const id of ['pickups-weap-team-table', 'pickups-weap-player-table',
+                      'pickups-item-team-table', 'pickups-item-player-table']) {
+        const t = document.getElementById(id);
+        if (t) makeSortable(t);
+    }
 }
 
 function computePickupsState(result) {
@@ -2356,13 +2393,47 @@ function computePickupsState(result) {
     const hasKtxItemCounters = players.some(p =>
         p.items && Object.keys(p.items).length > 0);
 
+    // Possession comes from playerStats, which these tables otherwise don't
+    // read (their rows are demoInfo.players). Both sides key by name — the
+    // team rows' identity field is `name`, the same string demoInfo puts on
+    // a player's `team` — so a plain lookup joins them. A demo without the
+    // section (or a team the section doesn't know) simply misses, and
+    // holdCell renders '-'.
+    const psByName = new Map(playerStatsRows(result).map(r => [r.name, r]));
+    const psTeamByName = new Map(playerStatsTeamRows(result).map(r => [r.name, r]));
+
     return {
         result, players, teamOrder, playerByName,
         weaponEntsByKind, itemEntsByKind,
         entityCountsByPlayer, entityCountsByTeam,
         weaponPickups: result.weaponPickups || [],
         hasKtxWeaponCounters, hasKtxItemCounters,
+        psByName, psTeamByName,
     };
+}
+
+// The possession column for one kind, appended after that kind's last count
+// column. `s` mirrors the Summary table's possession heading.
+function holdCol(spec, isWeapon) {
+    const verb = spec.hold === 'weapons' ? 'holding the' : spec.hold === 'armor' ? 'wearing' : 'under';
+    const title = `Total seconds ${verb} ${spec.label} — the whole match's possession for this item kind, ` +
+        `regardless of which spawn or pack it came from` +
+        (isWeapon ? '. Independent of the pickup-mode select: possession is the same integral either way.' : '.');
+    return {
+        type: 'hold',
+        kindSpec: spec,
+        header: `${spec.label} <span class="pickups-verify-header">s</span>`,
+        headerTitle: title,
+    };
+}
+
+// Possession cell for a pickups row. Team rows read the pre-summed team row
+// from playerStats (never a JS re-aggregation of member shares — see the
+// comment on teamRowsInColourOrder).
+function holdCellFor(col, isTeam, key, state) {
+    const row = isTeam ? state.psTeamByName.get(key) : state.psByName.get(key);
+    const stat = row?.hold?.[col.kindSpec.hold]?.[col.kindSpec.kind];
+    return tdFromHtml(holdCell(stat, row?.window));
 }
 
 function buildWeaponCols(state) {
@@ -2373,6 +2444,7 @@ function buildWeaponCols(state) {
         if (list.length === 1 && !spec.hasPack) {
             // Single combined cell: kind label, mode-aware verify against KTX.
             cols.push({ type: 'weap-verify', kindSpec: spec, header: spec.label });
+            if (spec.hold) cols.push(holdCol(spec, true));
             continue;
         }
         if (list.length === 1) {
@@ -2401,6 +2473,7 @@ function buildWeaponCols(state) {
             kindSpec: spec,
             header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
         });
+        if (spec.hold) cols.push(holdCol(spec, true));
     }
     return cols;
 }
@@ -2412,6 +2485,7 @@ function buildItemCols(state) {
         if (list.length === 0) continue;
         if (list.length === 1) {
             cols.push({ type: 'item-verify', kindSpec: spec, entNums: [list[0].entNum], header: spec.label });
+            if (spec.hold) cols.push(holdCol(spec, false));
             continue;
         }
         for (const it of list) {
@@ -2429,6 +2503,7 @@ function buildItemCols(state) {
             entNums: list.map(it => it.entNum),
             header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
         });
+        if (spec.hold) cols.push(holdCol(spec, false));
     }
     return cols;
 }
@@ -2456,7 +2531,7 @@ function renderPickupsSection(state, idPrefix, kinds, buildCols, cellFor) {
     const buildHeader = (label) => {
         const tr = document.createElement('tr');
         tr.appendChild(makeTh(label));
-        for (const c of cols) tr.appendChild(makeTh(c.header));
+        for (const c of cols) tr.appendChild(makeTh(c.header, c.headerTitle));
         return tr;
     };
     teamHead.appendChild(buildHeader('Team'));
@@ -2504,6 +2579,7 @@ function renderPickupsSection(state, idPrefix, kinds, buildCols, cellFor) {
 
 function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     const spec = col.kindSpec;
+    if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
     if (col.type === 'entity-count') {
         const n = entMap.get(col.entNum) || 0;
         return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
@@ -2559,6 +2635,7 @@ function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
 
 function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     const spec = col.kindSpec;
+    if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
     if (col.type === 'entity-count') {
         const n = entMap.get(col.entNum) || 0;
         return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
@@ -2572,9 +2649,10 @@ function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     return makeVerifyCell(ana, primary, null, state.hasKtxItemCounters);
 }
 
-function makeTh(html) {
+function makeTh(html, title) {
     const th = document.createElement('th');
     th.innerHTML = html;
+    if (title) th.title = title;
     return th;
 }
 
@@ -2582,6 +2660,15 @@ function makeTd(html) {
     const td = document.createElement('td');
     td.innerHTML = html;
     return td;
+}
+
+// A <td> element from a cell-HTML string, so the DOM-building tables can
+// reuse the string-building cell renderers (holdCell) verbatim rather than
+// growing a second implementation of the same cell.
+function tdFromHtml(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html.trim();
+    return tpl.content.firstElementChild;
 }
 
 // makeVerifyCell renders the KTX-authoritative counter as the cell
@@ -2972,17 +3059,16 @@ function resetUIToCleanState() {
         'player-stats-team-body', 'scoreboard-body',
         'weapon-stats-team-body', 'weapon-stats-body',
         'items-team-body', 'items-body',
-        'hold-team-body', 'hold-body',
     ]) setHTML(id, '');
 
     // Weapons chart
     setHTML('weapons-chart', '');
 
-    // Timeline canvases
+    // Timeline canvases (DOM order)
     for (const cid of [
+        'score-canvas', 'powerup-canvas',
         'detail-graph-canvas', 'health-armor-canvas',
-        'score-canvas', 'weapons-per-player-canvas',
-        'powerup-canvas', 'region-control-canvas',
+        'region-control-canvas', 'weapons-per-player-canvas',
     ]) {
         const c = document.getElementById(cid);
         if (c && c.getContext) c.getContext('2d').clearRect(0, 0, c.width, c.height);
@@ -2991,6 +3077,9 @@ function resetUIToCleanState() {
     hide('region-control-timeline-panel');
     hide('unified-timeline');
     setText('time-range-label', '');
+    setHTML('team-status-a', '');
+    setHTML('team-status-b', '');
+    teamStatusSort = { ...TEAM_STATUS_SORT_DEFAULT };
 
     // Chat
     for (const id of ['chat-time-axis', 'kill-messages', 'team-a-messages', 'team-b-messages']) {
@@ -2998,6 +3087,9 @@ function resetUIToCleanState() {
     }
     setText('team-a-chat-title', 'Team A Chat');
     setText('team-b-chat-title', 'Team B Chat');
+    chatHideTeam = false;
+    const hideTeamCb = document.getElementById('chat-hide-teamsay');
+    if (hideTeamCb) hideTeamCb.checked = false;
 
     // Map view
     const mapCanvas = document.getElementById('map-canvas');
@@ -3029,6 +3121,8 @@ function resetUIToCleanState() {
     // Key moments
     setHTML('keymoments-body', '');
     hide('keymoments-empty');
+    hide('keymoments-filtered-empty');
+    resetKeyMomentsFilter();
     setHTML('fragstreaks-body', '');
     hide('fragstreaks-empty');
     setHTML('demomarkers-body', '');
@@ -4520,15 +4614,15 @@ function setupUnifiedTimeline() {
     document.getElementById('tl-play-pause').addEventListener('click', () => startPlaybackAtSpeed(1));
     document.getElementById('tl-5x').addEventListener('click', () => startPlaybackAtSpeed(5));
 
-    // --- Pan/zoom on every diverging graph + spans timelines ---
-    ['detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
-     'health-armor-canvas', 'score-canvas',
+    // --- Pan/zoom on every diverging graph + spans timelines (DOM order) ---
+    ['score-canvas', 'powerup-canvas', 'detail-graph-canvas',
+     'health-armor-canvas', 'region-control-canvas',
      // Per-player weapons spans canvas — same Ctrl/Cmd+scroll zoom + drag-pan.
      'weapons-per-player-canvas'].forEach(installGraphPanZoom);
 
     // --- Drag the current-time line on any graph to scrub the clock ---
-    ['detail-time-indicator', 'powerup-time-indicator', 'region-time-indicator',
-     'health-time-indicator', 'score-time-indicator',
+    ['score-time-indicator', 'powerup-time-indicator', 'detail-time-indicator',
+     'health-time-indicator', 'region-time-indicator',
      'weapons-pp-time-indicator'].forEach(id =>
         installIndicatorScrub(document.getElementById(id)));
 
@@ -4578,8 +4672,8 @@ function setupUnifiedTimeline() {
 }
 
 const TIMELINE_CANVAS_IDS = [
-    'detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
-    'health-armor-canvas', 'score-canvas', 'weapons-per-player-canvas',
+    'score-canvas', 'powerup-canvas', 'detail-graph-canvas',
+    'health-armor-canvas', 'region-control-canvas', 'weapons-per-player-canvas',
 ];
 
 let _timelineResizeRafId = null;
@@ -4694,11 +4788,11 @@ function updateTimeIndicators() {
     const range = rangeEnd - rangeStart;
 
     const detailIndicators = [
-        'detail-time-indicator',
+        'score-time-indicator',
         'powerup-time-indicator',
-        'region-time-indicator',
+        'detail-time-indicator',
         'health-time-indicator',
-        'score-time-indicator'
+        'region-time-indicator'
     ];
 
     if (range <= 0) return;
@@ -4746,12 +4840,12 @@ function updateDetailView() {
     }
 
     // Update all detail panels (axes are drawn on canvas by the unified
-    // renderer). Order mirrors the DOM: score, health/armor, weapons, then
-    // the optional span timelines.
+    // renderer). Order mirrors the DOM: score, powerups, weapons,
+    // health/armor, then region control.
     updateScoreTimeline(start, end);
-    updateHealthArmorGraph(start, end);
-    updateDetailGraph(start, end);
     updatePowerupTimeline(start, end);
+    updateDetailGraph(start, end);
+    updateHealthArmorGraph(start, end);
     updateRegionControlTimeline(start, end);
 
     // Re-glue the current-time lines to the new window. Without this the
@@ -4767,10 +4861,26 @@ function updateDetailView() {
 // theme constants at the top of this file.)
 
 let chatRendered = false;
+// "Hide team chat" — drops say_team lines from the two chat columns so the
+// public banter (and the taunts a spectator would have heard) reads on its
+// own. Off by default; the Result keeps every message either way.
+let chatHideTeam = false;
 let chatUserScrolling = false;
 let _chatScrollTimer = null;
 let chatContentHeight = 0;
 let _chatProgrammaticScroll = false; // flag to distinguish our scrollTop writes from user scrolls
+
+// Wired once at load: the checkbox lives outside the rebuilt chat DOM, so a
+// change only has to invalidate the built columns and re-run the build.
+function setupChatToolbar() {
+    const cb = document.getElementById('chat-hide-teamsay');
+    if (!cb) return;
+    cb.addEventListener('change', () => {
+        chatHideTeam = cb.checked;
+        chatRendered = false;
+        renderChatMessages();
+    });
+}
 
 function renderChatMessages() {
     if (chatRendered) {
@@ -4824,6 +4934,9 @@ function buildFullChat() {
         if (event.type === 'frag') {
             killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
+            // "Hide team chat" is a display filter over the two say columns
+            // only; frags and public say keep their rows.
+            if (chatHideTeam && event.type === 'teamsay') continue;
             if (event.team === teams[0]) teamAEvents.push(event);
             else if (event.team === teams[1]) teamBEvents.push(event);
         }
@@ -5378,6 +5491,42 @@ function updateRegionControlTimeline(startTime, endTime) {
 
 // ─── Team Status Panel ──────────────────────────────────────────────────────
 
+// Sort state shared by both timeline roster tables. The default is player
+// name ascending: the rosters are rebuilt on every playhead tick, so the old
+// frags-descending order made rows swap places as the match progressed —
+// churn under the reader's eyes while scrubbing. Reset per demo load.
+const TEAM_STATUS_SORT_DEFAULT = { key: 'name', dir: 1 };
+let teamStatusSort = { ...TEAM_STATUS_SORT_DEFAULT };
+
+// dir: 1 ascending, -1 descending. Numeric keys tie-break on name (always
+// ascending) so equal-frag rows keep a stable, readable order.
+function compareTeamStatusRows(a, b) {
+    const k = teamStatusSort.key;
+    if (k === 'name') return a.name.localeCompare(b.name) * teamStatusSort.dir;
+    const cmp = (a[k] || 0) - (b[k] || 0);
+    return cmp ? cmp * teamStatusSort.dir : a.name.localeCompare(b.name);
+}
+
+// One delegated listener per roster container, wired at load. updateTeamStatus
+// rewrites the tables' innerHTML on every tick, so per-<th> listeners (what
+// makeSortable installs) would be thrown away between clicks.
+function setupTeamStatusSort() {
+    document.querySelectorAll('.team-status-panel').forEach(panel => {
+        panel.addEventListener('click', e => {
+            const th = e.target.closest('th[data-key]');
+            if (!th || !panel.contains(th)) return;
+            const key = th.dataset.key;
+            if (teamStatusSort.key === key) {
+                teamStatusSort.dir = -teamStatusSort.dir;
+            } else {
+                // First click: names read A→Z, numbers biggest-first.
+                teamStatusSort = { key, dir: key === 'name' ? 1 : -1 };
+            }
+            updateTeamStatus();
+        });
+    });
+}
+
 function updateTeamStatus() {
     const containerA = document.getElementById('team-status-a');
     const containerB = document.getElementById('team-status-b');
@@ -5438,8 +5587,7 @@ function updateTeamStatus() {
             });
         }
 
-        // Sort by frags desc
-        players.sort((a, b) => b.frags - a.frags);
+        players.sort(compareTeamStatusRows);
 
         const teamFrags = players.reduce((s, p) => s + p.frags, 0);
         const teamHealth = players.reduce((s, p) => s + (p.health || 0), 0);
@@ -5454,7 +5602,17 @@ function updateTeamStatus() {
         const teamColor = TEAM_COLORS[ti] || '#ccc';
         let html = `<h4 style="color: ${teamColor}">${escapeHtml(team)} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
-        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th>View</th></tr>`;
+        // Sortable headers carry their key; setupTeamStatusSort reads it off
+        // the delegated click. The arrow classes are the same ones
+        // makeSortable sets, so the indicator styling is shared.
+        const sortTh = (key, label) => {
+            const active = teamStatusSort.key === key;
+            const cls = `sortable${active ? (teamStatusSort.dir === 1 ? ' sort-asc' : ' sort-desc') : ''}`;
+            return `<th class="${cls}" data-key="${key}">${label}</th>`;
+        };
+        html += `<tr>${sortTh('name', 'Player')}${sortTh('frags', 'Frags')}` +
+            `${sortTh('health', 'Health')}${sortTh('armor', 'Armor')}` +
+            `<th>Weapons</th><th>View</th></tr>`;
 
         for (const p of players) {
             const hubLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
@@ -7256,7 +7414,13 @@ function buildMapLegend() {
         const tbody = document.createElement('tbody');
         tbody.className = 'map-legend-tbody';
 
-        for (const [name, info] of Object.entries(mapState.playerSymbols)) {
+        // Name order inside the team — playerSymbols is in roster order,
+        // which is frag-ish and demo-dependent. The column headers stay
+        // click-sortable for anything else.
+        const teamPlayers = Object.entries(mapState.playerSymbols)
+            .sort((a, b) => a[0].localeCompare(b[0]));
+
+        for (const [name, info] of teamPlayers) {
             if (info.team === team) {
                 const tr = document.createElement('tr');
                 tr.dataset.player = name;
@@ -11019,6 +11183,16 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
+    // Joined in from playerStats.damage's three per-weapon maps, which
+    // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
+    // the measuredness rules). The cell carries a {n, lower, note} object,
+    // not a number, so the sort key comes from `sort` rather than the text.
+    dmg: {
+        h: 'Dmg',
+        t: 'Damage dealt with this weapon, following the Enemy/Team/Self victim filter above. All sums the three splits; a "≥" prefix marks a lower bound where one split is not measured on this demo',
+        cell: w => aimDamageText(w.dmg),
+        sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
+    },
     hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
     fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
     pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
@@ -11046,17 +11220,29 @@ const AIM_COL = {
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
-    lg: ['shots', 'hits', 'lgMiss', 'blocked', 'far', 'unres', 'hitPct', 'lgMissPct', 'blockedPct', 'farPct'],
-    sg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
-    ssg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
-    rl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
-    gl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
+    lg: ['shots', 'hits', 'dmg', 'lgMiss', 'blocked', 'far', 'unres', 'hitPct', 'lgMissPct', 'blockedPct', 'farPct'],
+    sg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'dmg', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
+    ssg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'dmg', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
+    rl: ['shots', 'hits', 'dmg', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
+    gl: ['shots', 'hits', 'dmg', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
     // Nails (web parse only — the WASM build turns on BuildNails). Nail
     // accuracy is approximate (svc_nails fires in bursts, one damage credited
     // per pull), so ng/sng show only the generic shots/hits/hitPct counters —
     // no direct/splash/pellet split, which nails don't carry.
-    ng: ['shots', 'hits', 'hitPct'],
-    sng: ['shots', 'hits', 'hitPct'],
+    ng: ['shots', 'hits', 'dmg', 'hitPct'],
+    sng: ['shots', 'hits', 'dmg', 'hitPct'],
+};
+// Two-row header: [label, span] pairs in column order, spans summing to the
+// weapon's AIM_TABLE_COLS length. Not a counts-vs-% split — sg/ssg interleave
+// pAcc (a percentage) between the pellet counts and the shot counts, so the
+// groups are named after what they count. A weapon absent here (ng/sng, four
+// columns) keeps the flat single-row header.
+const AIM_TABLE_GROUPS = {
+    lg: [['Shots', 7], ['%', 4]],
+    sg: [['Pellets', 3], ['Shots', 6], ['%', 4]],
+    ssg: [['Pellets', 3], ['Shots', 6], ['%', 4]],
+    rl: [['Shots', 6], ['%', 4]],
+    gl: [['Shots', 6], ['%', 4]],
 };
 const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng'];
 
@@ -11086,6 +11272,53 @@ function aimWeaponView(w) {
     };
 }
 
+// aimDamageCell resolves the Dmg cell for one player + weapon under the
+// active victim filter. `dmg` is that player's playerStats damage family,
+// absent on a demo carrying no damage information at all.
+//
+// Measuredness follows the two rules result.PlayerStatsDamage documents and
+// nothing else: byWeapon and byWeaponTeam are measured whenever the family
+// is present, byWeaponSelf only where a damage stream was read — which is
+// exactly what a non-null `taken` says. Within a measured map an absent KEY
+// means "dealt none with that weapon", so it reads 0, never "not measured";
+// on a KTX-only demo a weapon used purely for team splash genuinely is
+// {enemy: 0, team: N}.
+//
+// Returns {n, lower, note}. n === null is "not measured" (renders "-").
+// `lower` marks an All-mode PARTIAL sum: the three splits are per-hit and
+// mutually exclusive, so summing them is only correct when every one is
+// measured — otherwise the figure is labelled a lower bound rather than
+// served as a total or padded with a fabricated zero.
+function aimDamageCell(dmg, wn) {
+    if (!dmg) return { n: null, lower: false, note: 'No damage information for this player on this demo.' };
+    const selfMeasured = dmg.taken !== null && dmg.taken !== undefined;
+    const enemy = (dmg.byWeapon || {})[wn] || 0;
+    const team = (dmg.byWeaponTeam || {})[wn] || 0;
+    const self = (dmg.byWeaponSelf || {})[wn] || 0;
+    const noSelf = 'The self-damage split is not measured on this demo — it needs the damage stream, which this demo does not carry.';
+    switch (aimVictimFilter) {
+        case 'enemy': return { n: enemy, lower: false, note: '' };
+        case 'team': return { n: team, lower: false, note: '' };
+        case 'self':
+            return selfMeasured
+                ? { n: self, lower: false, note: '' }
+                : { n: null, lower: false, note: noSelf };
+        default:
+            return selfMeasured
+                ? { n: enemy + team + self, lower: false, note: '' }
+                : { n: enemy + team, lower: true, note: 'Lower bound: enemy + team damage only. ' + noSelf };
+    }
+}
+
+function aimDamageText(d) {
+    if (!d || d.n === null) {
+        const t = d && d.note ? ` title="${escapeHtml(d.note)}"` : '';
+        return `<span class="aim-na"${t}>-</span>`;
+    }
+    if (d.lower) return `<span title="${escapeHtml(d.note)}">&ge;${d.n}</span>`;
+    return String(d.n);
+}
+
 // renderAimWeaponTables builds one table per weapon, rows = players (all who
 // fired anything; "-" where they didn't fire this weapon), team-coloured like
 // the Summary tab. Player-independent (re-rendered when the victim filter
@@ -11097,33 +11330,63 @@ function renderAimWeaponTables(result) {
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return;
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
+    // result.aim carries no damage, so the Dmg column is joined by player
+    // name from playerStats — the same source (and the same weapon keys) the
+    // Summary weapon table reads through formatWeaponCells. The whole damage
+    // family is carried, not just byWeapon: the column follows the victim
+    // filter and needs `taken` for the self split's measuredness.
+    const dmgByPlayer = new Map(playerStatsRows(result).map(p => [p.name, p.damage || null]));
 
     for (const wn of AIM_WEAPON_ORDER) {
-        const cols = (AIM_TABLE_COLS[wn] || []).map(k => AIM_COL[k]);
-        const rows = players.map(pa => ({
-            player: pa.player, team: pa.team,
-            w: aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null),
-        }));
+        const colKeys = AIM_TABLE_COLS[wn] || [];
+        const cols = colKeys.map(k => AIM_COL[k]);
+        const rows = players.map(pa => {
+            const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
+            return {
+                player: pa.player, team: pa.team,
+                w: w ? { ...w, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
+            };
+        });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
         rows.sort((a, b) => (b.w ? b.w.shots : -1) - (a.w ? a.w.shots : -1));
 
-        const head = '<th>Player</th>' +
-            cols.map(c => `<th title="${escapeHtml(c.t)}">${escapeHtml(c.h)}</th>`).join('');
-        const naCells = '<td class="aim-na">-</td>'.repeat(cols.length);
+        // Column indices that open a header group carry the .group-start
+        // separator, in the header rows and in the body alike.
+        const groups = AIM_TABLE_GROUPS[wn];
+        const starts = new Set();
+        if (groups) {
+            let at = 0;
+            for (const [, span] of groups) { starts.add(at); at += span; }
+        }
+        const cellCls = i => starts.has(i) ? ' class="group-start"' : '';
+        const subHead = cols.map((c, i) =>
+            `<th${cellCls(i)} title="${escapeHtml(c.t)}">${escapeHtml(c.h)}</th>`).join('');
+        const head = groups
+            ? `<tr><th rowspan="2">Player</th>` +
+              groups.map(([label, span]) =>
+                  `<th class="col-group group-start" colspan="${span}">${escapeHtml(label)}</th>`).join('') +
+              `</tr><tr>${subHead}</tr>`
+            : `<tr><th>Player</th>${subHead}</tr>`;
+        const naCells = cols.map((_c, i) => `<td class="aim-na${starts.has(i) ? ' group-start' : ''}">-</td>`).join('');
         let body = '';
         rows.forEach(r => {
             const ti = teamOrder.indexOf(r.team || '');
             const color = (ti >= 0 && ti < TEAM_COLORS.length) ? TEAM_COLORS[ti] : '';
             const stripe = color ? ` style="border-left: 3px solid ${color}"` : '';
             const tds = `<td>${escapeHtml(r.player)}</td>` +
-                (r.w ? cols.map(c => `<td>${c.cell(r.w)}</td>`).join('') : naCells);
+                (r.w ? cols.map((c, i) => {
+                    // A column whose text is not its own sort key (Dmg's "≥N"
+                    // / "-") publishes one via data-sort-value.
+                    const sv = c.sort ? ` data-sort-value="${c.sort(r.w)}"` : '';
+                    return `<td${cellCls(i)}${sv}>${c.cell(r.w)}</td>`;
+                }).join('') : naCells);
             body += `<tr${stripe}>${tds}</tr>`;
         });
 
         const block = document.createElement('div');
         block.className = 'aim-weapon-block';
         block.innerHTML = `<h4>${escapeHtml(getWeaponName(wn))}</h4>` +
-            `<table class="stats-table aim-weapon-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+            `<table class="stats-table aim-weapon-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
         container.appendChild(block);
         makeSortable(block.querySelector('table'));
     }

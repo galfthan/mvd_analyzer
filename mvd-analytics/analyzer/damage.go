@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -512,25 +513,31 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 		switch {
 		case isSelf:
 			ap.GivenSelf += d.damage
+			ap.ByWeaponSelf = addWeaponDamage(ap.ByWeaponSelf, weapon, d.damage)
 			if boundedSkip == "" {
-				ap.BoundedNest().GivenSelf += b
+				ab := ap.BoundedNest()
+				ab.GivenSelf += b
+				ab.ByWeaponSelf = addWeaponDamage(ab.ByWeaponSelf, weapon, b)
 			}
 		case isTeam:
 			ap.GivenTeam += d.damage
+			ap.ByWeaponTeam = addWeaponDamage(ap.ByWeaponTeam, weapon, d.damage)
 			if boundedSkip == "" {
-				ap.BoundedNest().GivenTeam += b
+				ab := ap.BoundedNest()
+				ab.GivenTeam += b
+				ab.ByWeaponTeam = addWeaponDamage(ab.ByWeaponTeam, weapon, b)
 			}
 		default:
 			// Enemy damage — the "useful" number.
 			ap.Given += d.damage
-			ap.ByWeapon[weapon] += d.damage
+			ap.ByWeapon = addWeaponDamage(ap.ByWeapon, weapon, d.damage)
 			out.ByWeapon[weapon] += d.damage
 			addToMatrix(matrix, attacker, victim, weapon, d.damage)
 			addVictimWeaponBucket(ap, vw, d.damage)
 			if boundedSkip == "" {
 				ab := ap.BoundedNest()
 				ab.Given += b
-				ab.ByWeapon[weapon] += b
+				ab.ByWeapon = addWeaponDamage(ab.ByWeapon, weapon, b)
 				addVictimWeaponBucket(ab, vw, b)
 				enemyTakenBounded[victim] += b
 			}
@@ -614,6 +621,13 @@ func addVictimWeaponBucket(p *PlayerDamage, class string, dmg int) {
 	default:
 		p.EnemyVsSG += dmg
 	}
+}
+
+// addWeaponDamage is result.AddWeaponDamage under a package-local name:
+// Finalize binds `result` to its *Result parameter, so the package
+// qualifier is not reachable inside it.
+func addWeaponDamage(m map[string]int, w string, n int) map[string]int {
+	return result.AddWeaponDamage(m, w, n)
 }
 
 func getOrCreateDamage(m map[string]*PlayerDamage, name string) *PlayerDamage {

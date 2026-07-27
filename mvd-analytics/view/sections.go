@@ -479,22 +479,28 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 			switch {
 			case de.IsSelf:
 				ap.GivenSelf += de.Damage
+				ap.ByWeaponSelf = result.AddWeaponDamage(ap.ByWeaponSelf, de.Weapon, de.Damage)
 				if wantBounded {
-					ap.BoundedNest().GivenSelf += bdmg
+					ab := ap.BoundedNest()
+					ab.GivenSelf += bdmg
+					ab.ByWeaponSelf = result.AddWeaponDamage(ab.ByWeaponSelf, de.Weapon, bdmg)
 				}
 			case de.IsTeam:
 				ap.GivenTeam += de.Damage
+				ap.ByWeaponTeam = result.AddWeaponDamage(ap.ByWeaponTeam, de.Weapon, de.Damage)
 				if wantBounded {
-					ap.BoundedNest().GivenTeam += bdmg
+					ab := ap.BoundedNest()
+					ab.GivenTeam += bdmg
+					ab.ByWeaponTeam = result.AddWeaponDamage(ab.ByWeaponTeam, de.Weapon, bdmg)
 				}
 			default:
 				ap.Given += de.Damage
-				ap.ByWeapon[de.Weapon] += de.Damage
+				ap.ByWeapon = result.AddWeaponDamage(ap.ByWeapon, de.Weapon, de.Damage)
 				addVictimBucket(ap, de.VictimWep, de.Damage)
 				if wantBounded {
 					ab := ap.BoundedNest()
 					ab.Given += bdmg
-					ab.ByWeapon[de.Weapon] += bdmg
+					ab.ByWeapon = result.AddWeaponDamage(ab.ByWeapon, de.Weapon, bdmg)
 					addVictimBucket(ab, de.VictimWep, bdmg)
 				}
 			}
@@ -768,6 +774,10 @@ func materializePlayer(p *result.PlayerDamage) *result.PlayerDamage {
 		for k, v := range b.ByWeapon {
 			out.ByWeapon[k] = v
 		}
+		// The team/self splits stay omitempty — a nil nest map materializes
+		// as an absent map, not as {}.
+		out.ByWeaponTeam = cloneCounts(b.ByWeaponTeam)
+		out.ByWeaponSelf = cloneCounts(b.ByWeaponSelf)
 	}
 	return out
 }
@@ -786,17 +796,25 @@ func materializePlayer(p *result.PlayerDamage) *result.PlayerDamage {
 //
 // Deliberately partial substitution (documented on DamageResult.BoundedSource):
 //   - given  <- dmg.given, givenTeam <- dmg.team, givenSelf <- dmg.self,
-//     ewep <- dmg.enemy-weapons, byWeapon[w] <- weapons[w].damage.enemy for
-//     every weapon KTX carries a damage block for (reconstruction keys KTX lacks
-//     survive).
+//     ewep <- dmg.enemy-weapons, byWeapon[w] <- weapons[w].damage.enemy and
+//     byWeaponTeam[w] <- weapons[w].damage.team for every weapon KTX carries a
+//     damage block for (reconstruction keys KTX lacks survive).
+//   - byWeaponSelf is NOT substituted: KTX records no per-weapon self damage,
+//     so it stays the reconstruction's.
 //   - taken is NOT substituted: KTX dmg.taken is ENEMY-ONLY, our taken counts
 //     all sources — different semantics.
 //   - the enemyVs* buckets are NOT substituted (KTX has no such split), so they
 //     may no longer sum exactly to the substituted given.
 //
-// Works on owned copies — the touched ByPlayer entries (and their .Bounded nest)
-// are deep-copied before mutation, so a stored Result aliased via dmg=both is
-// never written through.
+// Works on owned copies of everything it MUTATES: the touched ByPlayer entries
+// (and their .Bounded nest) are value-copied and the substituted maps rebuilt
+// fresh, so a stored Result aliased via dmg=both is never written through.
+// Maps this function does not substitute (byWeaponSelf; in dmg=both the raw
+// family) stay aliased to the stored Result on purpose — the serve path only
+// marshals them, and cloning what is never written would cost an allocation
+// per request for nothing. Anyone adding a mutation downstream must clone
+// first; the byte-identity regression test on the stored artifact will catch
+// a violation.
 func applyKTXBoundedSummary(out *result.DamageResult, r *result.Result, materialized bool) string {
 	if r.DemoInfo == nil {
 		return "reconstructed"
@@ -845,12 +863,25 @@ func applyKTXBoundedSummary(out *result.DamageResult, r *result.Result, material
 		for k, v := range target.ByWeapon {
 			nbw[k] = v
 		}
+		// KTX writes enemy and team per-weapon damage in the SAME sub-block
+		// (ktx/src/stats_json.c:208-212), so a summary that substituted only
+		// the enemy map would badge boundedSource:"ktx" while still serving a
+		// reconstructed team split. Stamp both, weapon by weapon, from a clone
+		// that keeps the reconstruction's keys KTX has no vocabulary for.
+		// byWeaponSelf stays derived: KTX has no per-weapon self counter.
+		ntw := cloneCounts(target.ByWeaponTeam)
 		for w, wv := range di.Weapons {
-			if wv.Damage != nil {
-				nbw[w] = wv.Damage.Enemy
+			if wv.Damage == nil {
+				continue
 			}
+			nbw[w] = wv.Damage.Enemy
+			if ntw == nil {
+				ntw = map[string]int{}
+			}
+			ntw[w] = wv.Damage.Team
 		}
 		target.ByWeapon = nbw
+		target.ByWeaponTeam = ntw
 		bp[name] = &cp
 		substituted = true
 	}

@@ -589,7 +589,10 @@ of KTX's scoreboard `dmg_dealt` (armor absorbed + health capped to the
 victim's remaining health), the latter in additive `bounded` fields.
 Telefrag and stomp damage now folds into `given`/`givenTeam`/`taken` in
 both families — matching KTX's accumulation, which applies no positional-
-kill exclusion — while staying out of `events`/`byWeapon`/`matrix`/`ewep`.
+kill exclusion — while staying out of `events`, every per-weapon map,
+`matrix` and `ewep`. Since v63 `PlayerDamage` splits team and self damage
+by attacker weapon too (`byWeaponTeam` / `byWeaponSelf`, both families),
+measured wherever the damage family itself is.
 See [RESULT_SCHEMA.md](RESULT_SCHEMA.md#damageresult-damage) for the
 field-level reference.
 
