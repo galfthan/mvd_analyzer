@@ -23,9 +23,13 @@ consumers (web UI, CLI) read first.
    case-insensitive and shared across every analyser that needs it.
 2. Match duration is computed as `EndTime - StartTime` when both
    exist; otherwise falls back to `lastEvent - StartTime`.
-3. Map name comes from `ctx.ServerData.LevelName` (passed through
-   `extractMapName` to strip the `.bsp` extension and trailing
-   author hints like ` by …`).
+3. `map` is the canonical SHORT map name, resolved through
+   `CoreOutputs.EffectiveMap()` (demoinfo map, else the serverinfo
+   `map` key) — hence the node's `metadata` edge. `mapTitle` is the
+   display-only level title from `ctx.ServerData.LevelName`, passed
+   through `cleanLevelTitle` to strip the `.bsp` extension and
+   trailing author hints like ` by …`. The title backs `map` only
+   when neither shortname source named a map.
 4. **The scoreboard is built per slot *occupancy*, not per slot.** A wire
    slot is recycled — a client leaves, the next connection lands on the
    same index — so the analyser splits each slot with the shared

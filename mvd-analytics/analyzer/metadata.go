@@ -100,8 +100,8 @@ func (a *MetadataAnalyzer) parseFullserverinfo(cmd string) {
 // surrounding quotes, then walks the backslash-delimited pairs, skipping
 // empty keys. Shared by MetadataAnalyzer (all keys), ItemAnalyzer and
 // BackpackAnalyzer (the "map" key). Distinct from the package-level
-// extractMapName(levelName) in match.go, which parses a serverdata level
-// name, not an info string.
+// cleanLevelTitle(levelName) in match.go, which cleans a serverdata level
+// title, not an info string.
 func parseInfoString(cmd string) map[string]string {
 	rest := strings.TrimPrefix(cmd, "fullserverinfo ")
 	rest = strings.TrimSpace(rest)

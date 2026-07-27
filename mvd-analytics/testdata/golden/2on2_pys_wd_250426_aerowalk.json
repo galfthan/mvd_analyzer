@@ -35548,7 +35548,8 @@
   "match": {
     "duration": 600040,
     "gameDir": "qw",
-    "map": "Aerowalk",
+    "map": "aerowalk",
+    "mapTitle": "Aerowalk",
     "players": [
       {
         "deaths": 56,

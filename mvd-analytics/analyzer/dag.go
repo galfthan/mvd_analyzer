@@ -105,7 +105,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 	// Derived consumers / independent peers.
 	"metadata": {name: "metadata", resultKey: "metadata",
 		desc: "Server cvars and parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...)."},
-	"match": {name: "match", requires: []string{"demoinfo", "identity"}, resultKey: "match",
+	"match": {name: "match", requires: []string{"demoinfo", "identity", "metadata"}, resultKey: "match",
 		desc: "Match summary: map, mode, duration, and the per-player scoreboard. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
 	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},

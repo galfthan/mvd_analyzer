@@ -519,6 +519,9 @@ func dumpMarkdown(path string, w io.Writer, regionsOverride []config.MapRegionOv
 	if res.Match != nil {
 		fmt.Fprintf(&b, "- duration: %.1fs\n", float64(res.Match.Duration)*0.001)
 		fmt.Fprintf(&b, "- map: %s\n", res.Match.Map)
+		if res.Match.MapTitle != "" && !strings.EqualFold(res.Match.MapTitle, res.Match.Map) {
+			fmt.Fprintf(&b, "- map title: %s\n", res.Match.MapTitle)
+		}
 		fmt.Fprintf(&b, "- game dir: %s\n", res.Match.GameDir)
 	}
 	if res.Metadata != nil && res.Metadata.MatchSettings != nil {

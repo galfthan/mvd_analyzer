@@ -48978,7 +48978,8 @@
   "match": {
     "duration": 600050,
     "gameDir": "qw",
-    "map": "The Bad Place",
+    "map": "dm4",
+    "mapTitle": "The Bad Place",
     "players": [
       {
         "deaths": 50,

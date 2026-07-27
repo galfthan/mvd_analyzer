@@ -82781,7 +82781,8 @@
   "match": {
     "duration": 1200101,
     "gameDir": "qw",
-    "map": "Coup de Fer",
+    "map": "defer",
+    "mapTitle": "Coup de Fer",
     "players": [
       {
         "deaths": 59,

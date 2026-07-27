@@ -7,10 +7,12 @@ detail.
 
 ## 2026-07-26 (playerstats) — `playerStats` learns to say "not measured", schema v62
 
-Amends the v61 section before it ships. Every change below replaces a
-confident zero with an absence, or names a degradation that had none.
-Golden corpus regenerated: the only movement is `schemaVersion` and the
-new `accuracy` block on team rows.
+Amends the v61 section before it ships. Every `playerStats` change below
+replaces a confident zero with an absence, or names a degradation that had
+none; the section closes with a separate fix that makes `match.map` the
+canonical map shortname. Golden corpus regenerated: the movement is
+`schemaVersion`, the new `accuracy` block on team rows, and the
+`match.map` / `match.mapTitle` split.
 
 - **The kill side of `score` is optional.** `kills`, `suicides`,
   `teamKills`, `byWeapon` and `efficiency` are all attributed from the
@@ -94,6 +96,27 @@ new `accuracy` block on team rows.
   re-classification, which previously adjusted only `kills` — so
   `sum(byWeapon) == kills` holds, as `score.byWeapon` claims. Fires on
   auth-name servers; no golden demo reaches it.
+- **`match.map` is the canonical map SHORTNAME; the title moves to
+  `match.mapTitle`.** `match.map` was the `svc_serverdata` level name run
+  through a cleanup heuristic, which on most id maps yields the pretty
+  title — `4on4_l_vs_la[e1m2]` reported `"Castle of the Damned"`, dm2
+  `"Claustrophobopolis"`. Two names for one map meant `match` could not
+  be joined against `demoInfo.map`, `metadata.serverInfo.map`,
+  `searchGames` rows or any BSP / loc / geometry file key, and every
+  consumer that wanted the identity had to route around it (`/overview`
+  carried an explicit workaround; the web's `mapFileKey()` excluded
+  `match.map` by name). **The rule: the short name is the map identity
+  everywhere; the title is display-only data.** `match.map` now resolves
+  through the same accessor every BSP-derived producer uses — the KTX
+  demoinfo map, else the serverinfo `map` key — falling back to the
+  cleaned title only when neither source names a map. The title is served
+  verbatim as the new, additive `match.mapTitle`, omitted when
+  `svc_serverdata` named no level. `/overview`'s `map`/`mapTitle` split is
+  unchanged in shape (it already published these two values); the web
+  topbar and Summary map cell now show `mapTitle` when present, and
+  `mapFileKey()` gains `match.map` as a final fallback now that it is
+  guaranteed short. Golden movement is confined to `match.map` and the new
+  `match.mapTitle` key.
 - **New regression net.** The `mvd-analytics/corpus/` special-cases
   harness gains four playerStats invariants — a hold key implies a
   non-empty stream, the kill side implies a non-empty frag log, a team

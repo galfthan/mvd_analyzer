@@ -77978,7 +77978,8 @@
   "match": {
     "duration": 1200128,
     "gameDir": "qw",
-    "map": "Obsidian",
+    "map": "obsidian",
+    "mapTitle": "Obsidian",
     "players": [
       {
         "deaths": 65,

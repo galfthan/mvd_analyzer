@@ -75668,7 +75668,8 @@
   "match": {
     "duration": 1200017,
     "gameDir": "qw",
-    "map": "Schloss Adler",
+    "map": "schloss",
+    "mapTitle": "Schloss Adler",
     "players": [
       {
         "deaths": 81,

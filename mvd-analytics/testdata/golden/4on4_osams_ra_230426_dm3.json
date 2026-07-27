@@ -77522,7 +77522,8 @@
   "match": {
     "duration": 1200059,
     "gameDir": "qw",
-    "map": "The Abandoned Base",
+    "map": "dm3",
+    "mapTitle": "The Abandoned Base",
     "players": [
       {
         "deaths": 52,

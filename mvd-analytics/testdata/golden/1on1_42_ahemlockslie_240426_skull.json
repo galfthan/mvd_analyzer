@@ -13068,7 +13068,8 @@
   "match": {
     "duration": 599993,
     "gameDir": "qw",
-    "map": "Skull Hunt",
+    "map": "skull",
+    "mapTitle": "Skull Hunt",
     "players": [
       {
         "deaths": 22,

@@ -946,13 +946,15 @@ function playerStatsTeamRows(result) {
 
 // The map's FILE key — the basename the shipped geometry (maps/e1m2.json)
 // and a saved region config are named by. Mirrors result.EffectiveMap()
-// (mvd-analytics/result/result.go:824): demoInfo is the KTX block and is
-// null on every pre-2020 demo, so the serverinfo `map` key backs it, and
-// the absence of the KTX block never reads as "no map". `match.map` is
-// deliberately NOT in this chain — it is the pretty title ("Castle of the
-// Damned"), fine for display and useless as a filename.
+// (mvd-analytics/result/result.go): demoInfo is the KTX block and is null
+// on every pre-2020 demo, so the serverinfo `map` key backs it, and the
+// absence of the KTX block never reads as "no map". `match.map` closes the
+// chain — it is the canonical SHORT name (the same two sources, then the
+// level title as a last resort). `match.mapTitle` is display-only text
+// ("Castle of the Damned") and must never appear here.
 function mapFileKey(result) {
-    const raw = result?.demoInfo?.map || result?.metadata?.serverInfo?.map || '';
+    const raw = result?.demoInfo?.map || result?.metadata?.serverInfo?.map
+        || result?.match?.map || '';
     let base = String(raw).toLowerCase();
     const slash = base.lastIndexOf('/');
     if (slash >= 0) base = base.slice(slash + 1);
@@ -1018,6 +1020,9 @@ function updateTopbarDemoInfo(result) {
     if (!el) return;
 
     const demoInfo = result?.demoInfo;
+    // Display: the canonical shortname (dm2, e1m2) — how QW players name
+    // maps. `match.mapTitle` is available for surfaces that want the long
+    // level title; the topbar is not one of them. Never a key.
     const map = demoInfo?.map || result?.match?.map || '';
     const date = demoInfo?.date || '';
 
@@ -1150,14 +1155,22 @@ function displayResults(result) {
     // KTX JSON (integer seconds, untransformed by design); result.match
     // .duration flipped to int32 ms in schema v8 — convert to seconds for
     // formatDuration.
+    // The map cell shows the canonical shortname (dm2, e1m2) — the name
+    // QW players use. `match.mapTitle` ("Castle of the Damned") goes in
+    // the cell's tooltip for anyone curious about the level title.
+    // Geometry lookups go through mapFileKey() and never touch mapTitle.
     if (demoInfo) {
-        document.getElementById('map-name').textContent = demoInfo.map || result.match?.map || '-';
+        const mapCell = document.getElementById('map-name');
+        mapCell.textContent = demoInfo.map || result.match?.map || '-';
+        mapCell.title = result.match?.mapTitle || '';
         document.getElementById('duration').textContent = formatDuration(demoInfo.duration || ((result.match?.duration || 0) * 0.001));
         document.getElementById('mode').textContent = demoInfo.mode || '-';
         document.getElementById('hostname').textContent = demoInfo.hostname || '-';
         document.getElementById('match-date').textContent = demoInfo.date || '-';
     } else if (result.match) {
-        document.getElementById('map-name').textContent = result.match.map || '-';
+        const mapCell = document.getElementById('map-name');
+        mapCell.textContent = result.match.map || '-';
+        mapCell.title = result.match.mapTitle || '';
         document.getElementById('duration').textContent = formatDuration((result.match.duration || 0) * 0.001);
     }
 

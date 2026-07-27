@@ -34,9 +34,12 @@ talks to it through a JS shim.
     per-vertex x,y,z — drives the map tab's 3D view). Committed; the
     frontend fetches `maps/<basename>.json` at demo load. `<basename>`
     comes from `mapFileKey()`, which mirrors Go's `Result.EffectiveMap()`
-    — `demoInfo.map`, then the serverinfo `map` key, so a demo with no
-    KTX block still finds its geometry. `match.map` is the pretty title
-    ("Castle of the Damned") and never a file key.
+    — `demoInfo.map`, then the serverinfo `map` key, then `match.map`
+    (also a shortname), so a demo with no KTX block still finds its
+    geometry. `match.mapTitle` is the display-only level title ("Castle
+    of the Damned") and never a file key; the topbar and the Summary
+    map cell show the shortname and carry the title only as the map
+    cell's tooltip — nothing else reads it.
   - `probe.html` — tiny dev page used to probe runtime features.
 
 ## Build and deploy

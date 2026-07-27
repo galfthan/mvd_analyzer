@@ -16973,7 +16973,8 @@
   "match": {
     "duration": 600001,
     "gameDir": "qw",
-    "map": "Bravado -",
+    "map": "bravado",
+    "mapTitle": "Bravado -",
     "players": [
       {
         "deaths": 7,

@@ -27358,7 +27358,8 @@
   "match": {
     "duration": 600000,
     "gameDir": "qw",
-    "map": "The Dark Zone",
+    "map": "dm6",
+    "mapTitle": "The Dark Zone",
     "players": [
       {
         "deaths": 13,

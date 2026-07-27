@@ -5138,7 +5138,10 @@ components:
           description: "Game directory (mod)."
           type: string
         map:
-          description: "Map name."
+          description: "Canonical map identifier — always the SHORT name (e1m2, dm2, aerowalk). Resolved from the KTX demoinfo map, else the serverinfo `map` key, else the cleaned level title. Join on this against searchGames rows, metadata serverinfo and map geometry keys."
+          type: string
+        mapTitle:
+          description: "Level title announced in svc_serverdata (\"Castle of the Damned\" on e1m2), cleaned of a .bsp suffix and a trailing ` by <author>` hint. DISPLAY ONLY — never an identifier or file key. Omitted when svc_serverdata named no level."
           type: string
         players:
           description: "Final scoreboard lines."
