@@ -227,6 +227,32 @@ the file (keeping the version in its name), update the matching
 `<script>` / `<link>` in `index.html`, and update the row in
 `static/vendor/README.md` (see that file for the full procedure).
 
+### Panel explanations live behind one disclosure
+
+Several panels need a paragraph explaining what their numbers mean and
+where they come from — Possession (Summary), Region Control and Loc
+Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
+full, but collapsed, so a panel opens with its table rather than with a
+wall of text. The idiom is a single one in `index.html`:
+
+```html
+<details class="panel-info">
+    <summary>More info</summary>
+    <div class="aim-desc">…the full explanation…</div>
+</details>
+```
+
+`.panel-info` (styles.css) is the disclosure chrome, visually derived
+from `.per-player-detail` — the older per-player `<details>` blocks on
+the Timeline tab, which stay as they are. The body element keeps
+whichever prose class it already had (`.panel-note`, `.aim-desc`,
+`.locheatmap-desc`), so only the collapsing is shared, not the type
+scale. Use the same bare `More info` label for any new one — an ⓘ
+glyph was tried and dropped, since the vendored Rajdhani/Inter subsets
+carry no U+24D8 and it rendered as tofu. Short single-line captions
+(`.locmetric-hint`, `.map-entity-hint`) stay inline and do **not** get
+a disclosure.
+
 ## Performance timing (console)
 
 Every demo load prints a structured per-stage breakdown to the browser
