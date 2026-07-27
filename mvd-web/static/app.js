@@ -1525,7 +1525,6 @@ function displayHoldTable(rows) {
             <td>${holdPct(a.ra, win)}</td>
             <td>${holdPct(a.ya, win)}</td>
             <td>${holdPct(a.ga, win)}</td>
-            <td>${holdPct(a.none, win)}</td>
             <td>${holdPct(p.quad, win)}</td>
             <td>${holdPct(p.pent, win)}</td>
             <td>${holdPct(p.ring, win)}</td>
@@ -1552,7 +1551,6 @@ function displayHoldTeamsTable(teamRows) {
             <td>${holdPct(a.ra, win)}</td>
             <td>${holdPct(a.ya, win)}</td>
             <td>${holdPct(a.ga, win)}</td>
-            <td>${holdPct(a.none, win)}</td>
             <td>${holdPct(p.quad, win)}</td>
             <td>${holdPct(p.pent, win)}</td>
             <td>${holdPct(p.ring, win)}</td>
