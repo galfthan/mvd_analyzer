@@ -1,18 +1,20 @@
+# redirect branch — the Netlify site no longer hosts the app.
+# Production moved to mvdanalyzer.com (Caddy serves the web bundle from
+# the API host; see deploy/README.md). Point the Netlify site's
+# production branch at `redirect` and it publishes only redirect/:
+# a static notice page that counts down 5 s and forwards to
+# mvdanalyzer.com, preserving the query string so old shared
+# ?gameId=… links keep working. No build step, no BSP fetch.
 [build]
-  # `make bsps` downloads the curated set of Quake 1 BSPs into bsps/
-  # (gitignored, see scripts/fetch-bsps.sh). `make build` then copies
-  # them into dist/bsps/ so the WASM worker can lazy-fetch per map for
-  # the locvis visibility filter. Hard-fails the deploy if any mirror
-  # is down — a deploy that silently regresses to V1 attribution would
-  # be worse than a red build.
-  command = "make bsps && make build"
-  publish = "dist"
+  command = ""
+  publish = "redirect"
 
-# Ensure correct MIME type for WASM and enable compression
-[[headers]]
-  for = "/*.wasm"
-  [headers.values]
-    Content-Type = "application/wasm"
+# Any old deep URL (stale asset paths, probe.html, …) shows the notice
+# too instead of a bare Netlify 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 [[headers]]
   for = "/*"

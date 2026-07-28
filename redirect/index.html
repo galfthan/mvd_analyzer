@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MVD Analyzer has moved</title>
+  <!-- JS below preserves ?gameId=… etc.; this fallback covers no-JS browsers. -->
+  <noscript><meta http-equiv="refresh" content="5;url=https://mvdanalyzer.com/"></noscript>
+  <style>
+    /* Palette mirrors mvd-web/static/styles.css (--bg-deep, top-bar #16213e). */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: system-ui, -apple-system, sans-serif;
+      text-align: center;
+    }
+    .card {
+      background: #16213e;
+      border: 1px solid #2a3f5f;
+      border-radius: 8px;
+      padding: 2.5rem 3rem;
+      max-width: 34rem;
+      margin: 1rem;
+    }
+    h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+    a { color: #6bb3ff; }
+    .count { font-variant-numeric: tabular-nums; font-weight: bold; }
+    p { line-height: 1.5; }
+    .small { color: #9aa4b2; font-size: 0.85rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>MVD Analyzer has moved</h1>
+    <p>The interface now lives at
+      <a id="target" href="https://mvdanalyzer.com/">mvdanalyzer.com</a>.</p>
+    <p>Redirecting in <span class="count" id="count">5</span>&nbsp;s…</p>
+    <p class="small">Update your bookmarks — this address will go away.
+      Shared demo links keep working; your query string travels along.</p>
+  </div>
+  <script>
+    // Preserve ?gameId=…&t=… and any #hash so old shared links land on
+    // the same demo at the new host.
+    var dest = 'https://mvdanalyzer.com/' + location.search + location.hash;
+    document.getElementById('target').href = dest;
+    var n = 5;
+    var el = document.getElementById('count');
+    var tick = setInterval(function () {
+      n -= 1;
+      el.textContent = n;
+      if (n <= 0) {
+        clearInterval(tick);
+        location.replace(dest);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
