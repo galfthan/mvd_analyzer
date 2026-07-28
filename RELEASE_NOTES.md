@@ -5,6 +5,17 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (info-links) — API & MCP discoverability, admin contact
+
+No schema change; no served number changed.
+
+- **Web top bar gains an "API & MCP" link** to the portal
+  (mvdanalyzer.com/portal), which already documents REST access, key
+  sign-up, `/docs`, and the MCP endpoint — the app links rather than
+  duplicating that text.
+- **Portal shows the admin contact** (`nexusga` on Discord): a line on
+  the landing page and in the shared footer on every portal page.
+
 ## unreleased (dmg-splits) — per-weapon team/self damage splits, schema v63
 
 Additive: no existing field changed shape or meaning, and every number that

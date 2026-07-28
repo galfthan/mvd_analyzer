@@ -137,6 +137,19 @@ body.no-demo .topbar-demo-info { display: none; }
     border-bottom: 1px dotted currentColor;
 }
 
+/* Text link to the portal (API docs, keys, MCP setup, contact). */
+.topbar-link {
+    color: #7a8ba8;
+    font-size: 0.8rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+}
+
+.topbar-link:hover {
+    color: var(--accent-cyan);
+}
+
 .topbar-github {
     color: #7a8ba8;
     display: inline-flex;

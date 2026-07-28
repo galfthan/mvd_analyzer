@@ -90,7 +90,9 @@ which is preferred to a silent V1-everywhere regression.
 
 ## Layout
 
-A slim top bar (wordmark + commit-hash version + GitHub link) sits
+A slim top bar (wordmark + commit-hash version + an "API & MCP" link
+to the portal at mvdanalyzer.com/portal — API docs, keys, MCP setup,
+admin contact — + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
