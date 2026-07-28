@@ -66,15 +66,27 @@ dist/
                               visibility filter (skipped if bsps/ is empty)
 ```
 
-### Netlify deploy
+### Deploying
+
+Production is served from the API host (mvdanalyzer.com): Caddy routes
+the reserved API prefixes (`/v1/*`, `/docs*`, `/openapi.yaml`,
+`/healthz`, `/portal*`, `/mcp*`) to the backends and everything else to
+the published `dist/` as static files — same-origin with the API, so
+the app needs no CORS. See [`deploy/README.md`](../deploy/README.md)
+("Publish the web bundle") for the rsync step and the two rules that
+keep the path split sound (never ship an asset under a reserved
+prefix; new API paths must extend the Caddy matcher).
+
+### Netlify deploy (branch previews)
 
 `netlify.toml` at the repo root chains `make bsps && make build` and
 publishes `dist/`. Every push to a branch with Netlify connected
-rebuilds and deploys. `make bsps` runs on Netlify's build container
-(it has `curl` and `bash`), fetches the ~14 competitive-map BSPs from
-the public mirrors documented in `scripts/fetch-bsps.sh`, and verifies
-each sha256 — a missing or corrupt BSP hard-fails the deploy, which
-is preferred to a silent V1-everywhere regression.
+rebuilds and deploys — kept as the branch-preview mechanism now that
+production lives on the API host. `make bsps` runs on Netlify's build
+container (it has `curl` and `bash`), fetches the ~14 competitive-map
+BSPs from the public mirrors documented in `scripts/fetch-bsps.sh`, and
+verifies each sha256 — a missing or corrupt BSP hard-fails the deploy,
+which is preferred to a silent V1-everywhere regression.
 
 ## Layout
 

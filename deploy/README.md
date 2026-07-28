@@ -1,8 +1,9 @@
-# Deploy runbook — hosting mvd-api + mvd-mcp
+# Deploy runbook — hosting mvd-api + mvd-mcp + the web app
 
 Templates for putting the QuakeWorld MVD analytics service on the public
-internet: `mvd-api` (REST + Discord key portal) and `mvd-mcp` (MCP over
-streamable HTTP), behind Caddy for TLS. This is the concrete shape of
+internet: `mvd-api` (REST + Discord key portal), `mvd-mcp` (MCP over
+streamable HTTP), and the static `mvd-web` bundle, all behind one Caddy
+on one domain. This is the concrete shape of
 [PLAN-hosting.md](../PLAN-hosting.md) decision **D9**.
 
 These files are **templates**, not run by CI. Read every `EDIT:` comment
@@ -13,12 +14,27 @@ consistent with each other (and with the binaries).
 
 | Service | Bind | Behind Caddy at |
 |---|---|---|
-| mvd-api | `localhost:8080` | everything except `/mcp*` |
+| mvd-api | `localhost:8080` | `/v1/*`, `/docs*`, `/openapi.yaml`, `/healthz`, `/portal*` |
 | mvd-mcp | `localhost:8081` | `/mcp*` (streamable HTTP) |
+| mvd-web | static files, `/opt/mvd/web` | everything else (`/`, `/app.js`, `/analyzer.wasm`, …) |
 
 mvd-mcp serves the MCP handler at exactly `/mcp` (and `/mcp/`); Caddy
 passes the path through unchanged, so there is no prefix strip to get
 wrong. Both services expose an unauthenticated `GET /healthz`.
+
+**Path-based, not subdomain-based, on purpose.** The API's URLs are
+published — users' MCP client configs point at `/mcp`, the Discord OAuth
+app registers `/portal/callback`, issued keys reference `/v1/…` — so the
+API keeps its paths and the web app takes the leftover namespace.
+Same-origin hosting also means the web app calls `/v1/*` with no CORS.
+Two rules keep the split sound (also in the Caddyfile header):
+
+- The `@api` matcher in the Caddyfile is the **complete** mvd-api route
+  surface. A new top-level API path must be added there or it 404s from
+  the file server — prefer new endpoints under `/v1/` so the matcher
+  never changes.
+- The web bundle must never ship assets under a reserved prefix
+  (`/v1`, `/docs`, `/openapi.yaml`, `/healthz`, `/portal`, `/mcp`).
 
 **Auth split:** the REST API requires an API key on every `/v1/*` call;
 MCP requires none — mvd-mcp holds its own operator-issued **service key**
@@ -44,13 +60,20 @@ See PLAN-hosting.md → **"Operator prerequisites"**. In short:
 On a build host with the Go toolchain:
 
 ```sh
-make build-bin      # produces dist/mvd-api and dist/mvd-mcp
+make bsps           # fetch BSPs into bsps/ (sha-pinned; web locvis filter)
+make build          # web bundle -> dist/ (index.html, analyzer.wasm, …)
+# publish the web bundle NOW (step 2a) — then:
+make build-bin      # adds dist/mvd-api and dist/mvd-mcp
 ```
 
-(`make build` builds only the WASM web frontend, not the server binaries.)
-To cross-compile Linux binaries on another OS, use
-`make build-api-linux build-mcp-linux` (or `make build-all-platforms`),
-which emit `dist/mvd-api-linux-amd64` and `dist/mvd-mcp-linux-amd64`.
+Order matters twice: `make build` starts by wiping `dist/`, and
+`make build-bin` drops the server binaries into the same `dist/` — so
+publish the web bundle between the two, or the binaries end up in the
+web root. `make bsps` is optional but recommended — without it the web
+app's visibility filter falls back to V1. To cross-compile Linux
+binaries on another OS, use `make build-api-linux build-mcp-linux` (or
+`make build-all-platforms`), which emit `dist/mvd-api-linux-amd64` and
+`dist/mvd-mcp-linux-amd64`.
 
 ## 2. Place binaries and create the account
 
@@ -61,6 +84,23 @@ sudo cp dist/mvd-api dist/mvd-mcp /opt/mvd/bin/
 sudo chown -R mvd:mvd /opt/mvd
 sudo chmod 700 /opt/mvd/auth        # key store — keys.json lives here
 ```
+
+### 2a. Publish the web bundle
+
+Run this after `make build` and **before** `make build-bin` (see the
+build-order note above). `--delete` keeps removed assets from lingering;
+if you publish after `build-bin` anyway, the `--exclude`s keep the
+server binaries out of the web root.
+
+```sh
+sudo mkdir -p /opt/mvd/web
+sudo rsync -a --delete --exclude 'mvd-api*' --exclude 'mvd-mcp*' \
+    dist/ /opt/mvd/web/
+```
+
+Caddy serves these as root-owned static files; the `mvd` service user
+never touches them. No service restart is needed — the next request
+picks up the new files (`file_server` re-stats per request).
 
 ## 3. Write the secrets file
 
@@ -135,6 +175,11 @@ curl -sS https://qw.example.com/healthz            # {"ok":true,...} (mvd-api)
 #    mvd-mcp's healthz is on its own port; probe it ON THE BOX (Caddy only
 #    forwards /mcp* to the streamable handler, not /healthz):
 curl -sS http://localhost:8081/healthz             # {"ok":true} (mvd-mcp)
+
+# a2. Web app is served at the root (and API routes are NOT shadowed):
+curl -sS https://qw.example.com/ | grep -o '<title>[^<]*'   # the mvd-web title
+curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/analyzer.wasm  # 200
+curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/nonexistent    # 404 (file server, not API)
 
 # b. Portal flow (browser): visit https://qw.example.com/portal,
 #    "Sign in with Discord", authorize, land on /portal/key, generate a
