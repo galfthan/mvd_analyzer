@@ -205,6 +205,16 @@ type PlayerStream struct {
 	// first spawn only on their first RESPAWN. A death with no following
 	// spawn (the dtTELE2 deflection) correctly leaves them dead to the end.
 	//
+	// A death SPLITS a life even when the respawn lands on the same
+	// millisecond: the two intervals TOUCH ([..,T) and [T,..)) so no dead time
+	// is invented, but the boundary survives, because anything counting lives
+	// or attributing per-life stats has to see it. Conversely a hole in the
+	// position track does NOT split — an unobserved stretch is not a death,
+	// and on a POV recording (where only players inside the recorder's PVS are
+	// written) tracks are full of holes. Refusing to credit unobserved TIME is
+	// a separate question, answered by result.SampleStaleCapMs in the
+	// occupancy walkers rather than here.
+	//
 	// NOT omitempty, deliberately — the three states are distinct:
 	//   null  the match window is unknown, so liveness was not measurable;
 	//   []    measured, and the player was never alive in the window;

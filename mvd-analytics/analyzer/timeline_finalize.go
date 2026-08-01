@@ -672,8 +672,12 @@ func deriveAliveIntervals(streams *Streams) {
 		// A player with no track keeps the marker-derived intervals — there is
 		// no presence evidence to clip against, and inventing one would be
 		// worse than the wider claim.
+		//
+		// The clip trims the ENDS only. It deliberately does NOT split on gaps
+		// inside the track, and it must not merge touching intervals — see
+		// clipToPresence.
 		if pt := p.Position; pt != nil && len(pt.T) > 0 {
-			iv = clipIntervals(iv, observedSpans(pt.T))
+			iv = clipToPresence(iv, pt.T[0], result.TrackHoldEnd(pt.T))
 		}
 
 		if iv == nil {
@@ -685,29 +689,41 @@ func deriveAliveIntervals(streams *Streams) {
 	}
 }
 
-// observedSpans is the set of windows in which the position track actually
-// carries evidence: contiguous runs of samples, split wherever a gap exceeds
-// result.SampleStaleCapMs, each held to the end of its run.
+// clipToPresence trims each life to [lo, hi) — the span in which the player's
+// position track carries any evidence at all — WITHOUT merging the result.
 //
-// Clipping Alive to these is what stops the published field claiming liveness
-// across a hole. It matters on POV recordings, where only players inside the
-// recorder's PVS are written and everyone else has multi-second gaps — without
-// the split, `alive` would assert a continuous life across a 73-second window
-// containing no sample at all, and every consumer gating on it would inherit
-// that claim.
-func observedSpans(t []int32) []Interval {
-	if len(t) == 0 {
-		return nil
-	}
-	var out []Interval
-	start := t[0]
-	for i := 1; i < len(t); i++ {
-		if t[i]-t[i-1] > result.SampleStaleCapMs {
-			out = append(out, Interval{Start: start, End: t[i-1] + result.SampleStaleCapMs})
-			start = t[i]
+// Both properties are load-bearing, and the obvious `clipIntervals` does
+// neither:
+//
+//   - It must not MERGE. A death and the respawn it triggers can land on the
+//     same millisecond; aliveIntervals correctly emits two touching lives,
+//     [..,T) and [T,..). clipIntervals ends in mergeIntervals, which unions on
+//     `Start <= End` — i.e. touching counts as overlapping — and welds them
+//     back into one, erasing the death. For a liveness predicate that is
+//     harmless (a zero-width dead gap changes no duration), but Alive is
+//     documented and consumed as the player's LIVES, so anything counting
+//     lives or attributing per-life stats would silently lose one.
+//   - It must not SPLIT on interior gaps. A hole in the track means the player
+//     was not observed, not that they died — on a POV recording only players
+//     inside the recorder's PVS are written, so tracks are full of holes and
+//     splitting there would invent lives nobody lived. The occupancy walkers
+//     handle unobserved time themselves, via result.SampleStaleCapMs; that is
+//     the right layer for it, because "don't credit presence you didn't see"
+//     and "how many lives were there" are different questions.
+func clipToPresence(iv []Interval, lo, hi int32) []Interval {
+	out := make([]Interval, 0, len(iv))
+	for _, v := range iv {
+		if v.Start < lo {
+			v.Start = lo
+		}
+		if v.End > hi {
+			v.End = hi
+		}
+		if v.End > v.Start {
+			out = append(out, v)
 		}
 	}
-	return append(out, Interval{Start: start, End: result.TrackHoldEnd(t)})
+	return out
 }
 
 // lastObservedMs is the latest timestamp the player is known to exist at,

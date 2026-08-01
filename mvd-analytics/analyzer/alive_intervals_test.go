@@ -125,32 +125,59 @@ func TestAliveIntervalsDemoTimebaseFallback(t *testing.T) {
 	}
 }
 
-// A hole in the position track is not evidence of life. On a POV (client)
-// recording only players inside the recorder's PVS get svc_playerinfo, so
-// every other player's track has multi-second gaps — measured up to 73 s on
-// demo-test-data/mvd/special-cases/dag_caps_e1m2.mvd. Claiming a continuous
-// life across such a hole would hand every consumer that gates on this field
-// the same invented presence.
-func TestAliveIntervalsSplitAtTrackHoles(t *testing.T) {
-	// Samples at 0,13,26 then a 40-second hole, then 40000,40013,40026.
+// A hole in the position track means the player was not OBSERVED — not that
+// they died — so it must NOT split a life. On a POV (client) recording only
+// players inside the recorder's PVS get svc_playerinfo, so tracks are full of
+// multi-second holes (measured up to 73 s on
+// demo-test-data/mvd/special-cases/dag_caps_e1m2.mvd); splitting there would
+// invent lives nobody lived, and anything enumerating lives or attributing
+// per-life stats would over-count.
+//
+// Not crediting unobserved TIME is a different question, answered a layer
+// down by result.SampleStaleCapMs in the occupancy walkers
+// (TestLocGraphOccupancyDoesNotCreditTrackHoles). Keeping the two separate is
+// what lets Alive be a truthful life list and the walkers still refuse to
+// credit presence they never saw.
+func TestAliveIntervalsSpanTrackHolesWithoutSplitting(t *testing.T) {
+	// Samples at 0,13,26 then a 40-second hole, then 40000,40013,40026 —
+	// with no death anywhere.
 	track := []int32{0, 13, 26, 40000, 40013, 40026}
 	got := aliveOf(t, nil, nil, 60000, track)
 
+	if len(got) != 1 {
+		t.Fatalf("got %v, want ONE life: no death occurred, only an observation gap", got)
+	}
+	if got[0].Start != 0 {
+		t.Errorf("life starts at %d, want 0", got[0].Start)
+	}
+	// Clipped to the track's end, not to match end.
+	if got[0].End > 40026+result.SampleStaleCapMs || got[0].End <= 40026 {
+		t.Errorf("life ends at %d, want just past the final sample (40026)", got[0].End)
+	}
+}
+
+// A death SPLITS a life, even when the respawn lands on the same millisecond
+// and no dead time elapses. Alive is documented and consumed as the player's
+// lives, so a zero-width dead gap still has to leave two intervals — the
+// interval algebra's usual "touching means overlapping" merge would erase the
+// death, and any life analyzer built on this field would silently lose one.
+func TestAliveIntervalsKeepLifeBoundaryOnSameMsRespawn(t *testing.T) {
+	var track []int32
+	for ms := int32(0); ms <= 30000; ms += 13 {
+		track = append(track, ms)
+	}
+	got := aliveOf(t, []int32{10000}, []int32{10000}, 30000, track)
+
 	if len(got) != 2 {
-		t.Fatalf("got %v, want two spans split at the hole", got)
+		t.Fatalf("got %v, want two lives — the death at 10000 must survive its same-ms respawn", got)
 	}
-	if got[0].End > 26+result.SampleStaleCapMs {
-		t.Errorf("first span ends at %d — it holds past the last sample before the hole (26 ms)", got[0].End)
+	if got[0].End != 10000 || got[1].Start != 10000 {
+		t.Errorf("got %v, want the boundary at exactly 10000", got)
 	}
-	if got[1].Start != 40000 {
-		t.Errorf("second span starts at %d, want 40000 (the first sample after the hole)", got[1].Start)
-	}
-	var total int32
-	for _, iv := range got {
-		total += iv.End - iv.Start
-	}
-	if total > 1000 {
-		t.Errorf("alive totals %d ms across a track carrying ~52 ms of samples — the hole was credited", total)
+	// Touching, so no dead time is invented: the player really was alive
+	// throughout, they just started a new life.
+	if got[0].End != got[1].Start {
+		t.Errorf("got %v: an instant respawn must not manufacture a dead gap", got)
 	}
 }
 

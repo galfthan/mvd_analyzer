@@ -61,13 +61,20 @@ pinned these numbers, expect them to fall.
   them everything up to the next event — on a recording that ends before the
   match window, the entire remaining match (measured: 60 s of phantom presence
   for a player who left after 2 s).
-- **`streams.players[].alive` is clipped to observed presence.** The
-  underlying derivation starts everyone alive at `t=0` (deliberately — KTX
-  emits a first spawn only on the first respawn), which is right for a player
-  present from the start and wrong for everyone else; a late joiner would
-  otherwise claim to have been alive before connecting. `playerStats` never saw
-  this because it intersects with its own presence window. Note a reconnect gap
-  in the middle of a merged stream is still not represented.
+- **`streams.players[].alive` is a truthful LIFE list.** The underlying
+  derivation starts everyone alive at `t=0` (deliberately — KTX emits a first
+  spawn only on the first respawn), which is right for a player present from
+  the start and wrong for everyone else, so it is clipped at the ends to
+  observed presence; a late joiner would otherwise claim to have been alive
+  before connecting. `playerStats` never saw this because it intersects with
+  its own presence window.
+  Two boundary rules matter for anyone reading it as lives: a **death splits a
+  life even when the respawn lands on the same millisecond** (the intervals
+  touch, so no dead time is invented, but the boundary survives — the ordinary
+  interval algebra would have merged them and erased the death), and a **hole
+  in the track does not split** one, because an unobserved stretch is not a
+  death. Refusing to credit unobserved time is the walkers' job, not this
+  field's. A reconnect gap inside a merged stream is still not represented.
 - **The loc-graph teleport threshold is scaled by the real inter-sample
   delta** instead of an assumed 50 ms. The MVD sample rate is *not* fixed:
   mvdsv gates demo frames on `sv_demofps` (default 30,

@@ -382,8 +382,11 @@ func (c *playerCursor) sampleAt(t int32) (regionIdx int, armed, ok bool) {
 		return 0, false, false
 	}
 	// The last sample's evidence has expired: the player's location between
-	// here and their next sample is unknown, so credit it to nobody.
-	if t-pt.T[c.sIdx] > result.SampleStaleCapMs {
+	// here and their next sample is unknown, so credit it to nobody. >= not >,
+	// so the expiry boundary at sample+cap is itself rejected rather than
+	// being credited the whole remaining hole; the credited window is
+	// [sample, sample+cap).
+	if t-pt.T[c.sIdx] >= result.SampleStaleCapMs {
 		return 0, false, false
 	}
 	if c.alive != nil && !advanceContains(c.alive, &c.aliveIdx, t) {

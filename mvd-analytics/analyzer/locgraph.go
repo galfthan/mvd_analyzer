@@ -156,7 +156,11 @@ func (c *locCursor) sampleAt(t int32) (li int16, armed, quad, pent, ok bool) {
 		return 0, false, false, false, false
 	}
 	// The last sample's evidence has expired — see result.SampleStaleCapMs.
-	if t-c.pt.T[c.sIdx] > result.SampleStaleCapMs {
+	// >= not >: the expiry boundary SampleStaleBoundaries emits sits at
+	// sample+cap, so a strict > would let that exact boundary through and
+	// credit the whole remaining hole to it. The credited window is
+	// [sample, sample+cap).
+	if t-c.pt.T[c.sIdx] >= result.SampleStaleCapMs {
 		return 0, false, false, false, false
 	}
 	if !c.inAlive(t) {
