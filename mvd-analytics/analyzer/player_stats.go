@@ -194,7 +194,7 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 			}
 		}
 	}
-	if killsMeasurable(res) {
+	if killsMeasured(res) {
 		eff := result.NewShare(int32(kills), int32(kills+s.Deaths))
 		s.Kills, s.Suicides, s.TeamKills = &kills, &suicides, &teamKills
 		s.Efficiency = &eff
@@ -203,8 +203,24 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	return s
 }
 
+// killsMeasured is the demo-global kill-attribution verdict AS PUBLISHED on
+// the frag artifact (result.FragResult.KillsMeasured). The rule itself is
+// killsMeasurable below, evaluated once by the match-final node
+// (scoreboardStatsPost) and read from the stored field everywhere else —
+// including out in view.MeasuredSources.Frags, which cannot import this
+// package. Two implementations of this rule is how /hot-windows and /lives
+// came to claim measured kill attribution on a demo /player-stats had already
+// judged unmeasurable.
+//
+// A demo with no frag section carries no verdict and needs none: there is no
+// empty log to be suspicious of and the scoreboard's own counts stand, which
+// is the answer killsMeasurable gives for it too. (view answers differently
+// for that case, and correctly: with no frag section there are no frag-sourced
+// stats to report at all.)
+func killsMeasured(res *Result) bool { return res.Frags == nil || res.Frags.KillsMeasured }
+
 // killsMeasurable reports whether kill attribution was observable on this
-// demo at all.
+// demo at all. It is THE rule; call killsMeasured to read the answer.
 //
 // An empty frag log on a demo where players demonstrably died means every
 // obituary went unmatched — the server printed them in a form this

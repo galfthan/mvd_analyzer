@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -27,6 +28,10 @@ func TestInputSchemasHaveNoNullUnions(t *testing.T) {
 		"getDamage":        inputSchema[GetDamageInput](),  // players, weapons, dmg
 		"getItems":         inputSchema[GetItemsInput](),   // items, players, kinds
 		"getWeaponPickups": inputSchema[GetWeaponPickupsInput](),
+		// hot-windows also carries *int params (windowMs/limit/min), which
+		// reflect to a ["null","integer"] union before stripping.
+		"getHotWindows": inputSchema[GetHotWindowsInput](),
+		"getLives":      inputSchema[GetLivesInput](),
 	} {
 		assertNoNullTypes(t, name, s)
 	}
@@ -113,6 +118,12 @@ func (f *fakeBackend) GetLocTable(_ context.Context, _ GetLocTableInput) (any, e
 }
 func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInput) (any, error) {
 	return map[string]any{"regions": []any{}, "stats": map[string]any{}}, nil
+}
+func (f *fakeBackend) GetHotWindows(_ context.Context, _ GetHotWindowsInput) (any, error) {
+	return map[string]any{"metric": "frags", "windowMs": 30000, "windows": []any{}}, nil
+}
+func (f *fakeBackend) GetLives(_ context.Context, _ GetLivesInput) (any, error) {
+	return map[string]any{"lives": []any{}}, nil
 }
 func (f *fakeBackend) GetDemoInfo(_ context.Context, _ GetDemoInfoInput) (any, error) {
 	return map[string]any{"version": 3, "mode": "4on4", "players": []any{}}, nil
@@ -234,6 +245,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getBackpacks", "getItems", "getMapEntitiesByMap", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
+		"getHotWindows", "getLives",
 		"listArtifacts", "getArtifact",
 	}
 	got := map[string]bool{}
@@ -363,6 +375,134 @@ func TestMCP_LoadDemo_BackendError(t *testing.T) {
 	}
 	if !res.IsError {
 		t.Errorf("expected isError=true on backend error")
+	}
+}
+
+// TestMCP_HotWindows_OmittedIntsNotSent pins the omitted-integer contract
+// end to end (client JSON -> tool input struct -> proxy query): an argument
+// the caller never mentioned must NOT reach mvd-api as 0, because 0 is a
+// rejected value on windowMs/limit and a meaningful filter on min. An
+// EXPLICIT 0 must reach it, so the caller earns the documented 400 rather
+// than silently getting the default.
+func TestMCP_HotWindows_OmittedIntsNotSent(t *testing.T) {
+	var seen url.Values
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.URL.Query()
+		w.Write([]byte(`{"windows":[]}`))
+	}))
+	defer api.Close()
+	sess := testMCPSession(t, newProxyBackend(api.URL, "", 5*time.Second))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	call := func(args map[string]any) {
+		t.Helper()
+		res, err := sess.CallTool(ctx, &mcp.CallToolParams{Name: "getHotWindows", Arguments: args})
+		if err != nil {
+			t.Fatalf("CallTool: %v", err)
+		}
+		if res.IsError {
+			t.Fatalf("isError=true; content=%+v", res.Content)
+		}
+	}
+
+	// Nothing but demoId: no integer param may appear at all.
+	call(map[string]any{"demoId": "gameId:42"})
+	for _, k := range []string{"windowMs", "limit", "perPlayer", "minScore", "from", "to"} {
+		if seen.Has(k) {
+			t.Errorf("omitted %s reached the API as %q; it must stay out of the query", k, seen.Get(k))
+		}
+	}
+
+	// Explicit zeros are forwarded verbatim (windowMs/limit earn their 400,
+	// minScore:0 is a real "keep zero-scoring windows" filter). perPlayer is
+	// the deliberate exception: REST rejects an explicit 0 there too, but
+	// `intv` drops it before it can be sent, so from this shim perPlayer:0 is
+	// indistinguishable from omitting it and lands on the uncapped default.
+	call(map[string]any{"demoId": "gameId:42", "windowMs": 0, "limit": 0, "minScore": 0, "perPlayer": 0})
+	if seen.Has("perPlayer") {
+		t.Errorf("perPlayer:0 reached the API as %q; intv must drop it", seen.Get("perPlayer"))
+	}
+	for _, k := range []string{"windowMs", "limit", "minScore"} {
+		if seen.Get(k) != "0" {
+			t.Errorf("explicit %s:0 forwarded as %q; want \"0\"", k, seen.Get(k))
+		}
+	}
+
+	// A populated call encodes every param under its REST name.
+	call(map[string]any{
+		"demoId": "gameId:42", "metric": "netFrags", "windowMs": 5000, "limit": 25,
+		"perPlayer": 3, "players": []any{"bps"}, "weapons": []any{"rl"},
+		"startTime": 60000, "endTime": 120000, "dmg": "raw", "minScore": 2,
+	})
+	for k, want := range map[string]string{
+		"metric": "netFrags", "windowMs": "5000", "limit": "25", "perPlayer": "3",
+		"players": "bps", "weapons": "rl", "from": "60000", "to": "120000",
+		"dmg": "raw", "minScore": "2",
+	} {
+		if got := seen.Get(k); got != want {
+			t.Errorf("hot-windows %s = %q; want %q", k, got, want)
+		}
+	}
+}
+
+// TestMCP_Lives_ParamsForwarded: lives has no ambiguous integer (every 0 IS
+// the REST default), so plain ints suffice — pin the encoding. summary is the
+// one pointer: its MCP default is TRUE (a whole match is ~400 rows), so a bare
+// call must send summary=1 and carry the hint that says how to get the detail.
+func TestMCP_Lives_ParamsForwarded(t *testing.T) {
+	var seen url.Values
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.URL.Query()
+		w.Write([]byte(`{"lives":[]}`))
+	}))
+	defer api.Close()
+	b := newProxyBackend(api.URL, "", 5*time.Second)
+	ctx := context.Background()
+
+	out, err := b.GetLives(ctx, GetLivesInput{DemoID: "gameId:42"})
+	if err != nil {
+		t.Fatalf("GetLives: %v", err)
+	}
+	// A bare call is lean by default, like getDamage / getAim / getItems.
+	if seen.Get("summary") != "1" {
+		t.Errorf("bare lives call sent summary=%q; want \"1\" (the MCP default)", seen.Get("summary"))
+	}
+	seen.Del("summary")
+	if len(seen) != 0 {
+		t.Errorf("bare lives call sent %v; want nothing but summary", seen)
+	}
+	if hint, _ := out.(map[string]any)["hint"].(string); !strings.Contains(hint, "summary:false") {
+		t.Errorf("defaulted summary carries hint %q; want the summary:false escape", hint)
+	}
+
+	// An explicit summary:false reaches REST as an absent param (REST's own
+	// default is false) and gets NO hint — the caller already knows.
+	no := false
+	out, err = b.GetLives(ctx, GetLivesInput{DemoID: "gameId:42", Summary: &no})
+	if err != nil {
+		t.Fatalf("GetLives: %v", err)
+	}
+	if seen.Has("summary") {
+		t.Errorf("summary:false sent summary=%q; want it omitted (REST defaults to false)", seen.Get("summary"))
+	}
+	if _, ok := out.(map[string]any)["hint"]; ok {
+		t.Error("an explicit summary:false must not get the default-summary hint")
+	}
+
+	if _, err := b.GetLives(ctx, GetLivesInput{
+		DemoID: "gameId:42", Players: []string{"bps", "milton"},
+		StartTime: 1000, EndTime: 2000, MinMs: 1500, Dmg: "raw", Summary: &no,
+	}); err != nil {
+		t.Fatalf("GetLives: %v", err)
+	}
+	for k, want := range map[string]string{
+		"players": "bps,milton", "from": "1000", "to": "2000", "minMs": "1500", "dmg": "raw",
+	} {
+		if got := seen.Get(k); got != want {
+			t.Errorf("lives %s = %q; want %q", k, got, want)
+		}
 	}
 }
 

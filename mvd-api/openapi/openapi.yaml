@@ -3,8 +3,10 @@
 # FORMATTING IS LOAD-BEARING. mvd-api/openapi_test.go scans this file
 # line-wise:
 #   - path items are "  /path:" (2-space indent), methods "    get:" (4-space);
-#   - the marker comments (artifact-enum, error-code-enum, field-code-enum)
-#     delimit enum blocks pinned to the code;
+#   - the marker comments (artifact-enum, error-code-enum, field-code-enum,
+#     event-type-enum, hot-window-metric-enum) delimit enum blocks pinned to
+#     the code — each names the test that pins it, and a block whose lines
+#     are not all "- value" fails the parser;
 #   - info.version must equal result.CurrentSchemaVersion.
 # Keep those conventions when editing, or the drift tests will fail loudly.
 #
@@ -18,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "64"
+  version: "65"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -579,7 +581,18 @@ paths:
         Top-level frag aggregates plus the full kill log. When any scoping
         filter (players / weapon / from / to) is active, ALL aggregates are
         recomputed from the filtered log so they stay consistent with the
-        entries shown. 422 `frags_unavailable` when the demo has no frag log.
+        entries shown.
+
+        `killsMeasured` (always present) is the demo-global verdict on whether
+        kill ATTRIBUTION was observable at all. When it is `false` the log is
+        empty on a demo where players demonstrably died — every obituary went
+        unmatched — so `kills`, `teamkills` and `byWeapon` are zeros that are
+        NOT measurements, while `deaths` still is. It is not recomputed per
+        filter: a filter that matches nothing does not make a demo
+        unmeasurable. `/hot-windows` and `/lives` publish the same verdict as
+        `measured.frags`.
+
+        422 `frags_unavailable` when the demo has no frag log.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -1264,6 +1277,186 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/hot-windows:
+    get:
+      operationId: getHotWindows
+      tags: [timeline]
+      summary: Each player's best stretches of the match
+      description: >
+        Top-scoring fixed-length windows. The contract is one sentence: "in
+        these `windowMs` milliseconds this player scored higher on `metric`
+        than in any other stretch of the same length." `windowMs` is the main
+        knob — 5000 gives damage bursts, 30000 gives hot streaks — and there is
+        deliberately no adaptive mode; for the naturally variable-length unit
+        use `/lives`, and for a fixed grid use `/buckets`.
+
+        `from`/`to` BOUND WHERE A WINDOW MAY START, not what it covers — the
+        one place this endpoint departs from the shared parameter description.
+        A window anchored at or before `to` still runs the full `windowMs` past
+        it, so `to=1000&windowMs=30000` returns the best window ANCHORED in the
+        first second, which covers up to 31 s, not "the best window inside the
+        first second". This is deliberate: scoring is clipped to the same span
+        the row reports, so a row's `score` and its stats block always describe
+        one identical interval. To constrain what a window COVERS, shrink
+        `windowMs`.
+
+        Windows are anchored at REAL event times, not a grid, so "the best 30 s"
+        is exact rather than snapped. They are non-overlapping per player and
+        returned as ONE FLAT LIST sorted by score, each row carrying `player`,
+        `team` and a 1-based `rank`. Two independent caps shape it: `perPlayer`
+        (max windows from any one player) is applied BEFORE `limit` (the total),
+        so `perPlayer=3&limit=10` means "the top 10, at most 3 from anyone"
+        rather than "the top 3 of the first three players". The defaults —
+        `limit=10`, `perPlayer=0` — make a bare call the match-wide top 10.
+
+        `weapons` scopes the SCORING events only: the stats block still
+        describes everything that happened in the window, so with
+        `metric=damageGiven&weapons=lg` the `score` is a subset of
+        `damageGiven`. The envelope's `scoredBy` (once, not per row — it is the
+        same rule for every window) says which is which. Valid weapon tokens
+        depend on the metric's own source (the frag log knows `hook` and
+        `water`, the damage log `explobox` and `drown`, the shot stream only
+        what can be fired); `water` and `drown` are accepted interchangeably.
+        Suicides and teamkills never score but do appear in the stats block, and
+        so do telefrags/stomps — their value folds into `damageGiven` as
+        `/damage` reports it, while the SCORE ignores them (no per-hit evidence
+        backs a positional kill, and its lump value would swamp any window).
+
+        Every numeric stat is emitted even at zero; read the envelope's
+        `measured` block, never a field's absence, to tell an unmeasured source
+        from a measured zero.
+
+        `dmg` selects the family of the whole STATS BLOCK and so applies under
+        EVERY metric, not only the damage ones — a window picked by
+        `metric=frags` still reports `damageGiven`. The resolved family and the
+        demo's reconstruction state come back on the envelope as `dmg` and
+        `boundedMode`, exactly as `/damage` echoes them; read `dmg` rather than
+        assuming the `bounded` default took, since it silently becomes `raw` on
+        a demo whose reconstruction was skipped.
+
+        422 `hot_windows_unavailable` when the demo carries no source stream for
+        the chosen metric, and 422 `bounded_unavailable` — under any metric —
+        for an EXPLICIT `dmg=bounded` on a demo whose bounded reconstruction was
+        skipped. Missing loc data omits `locs`/`eventLocs` only and never fails
+        the request.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Metric"
+        - $ref: "#/components/parameters/HotWindowMs"
+        - $ref: "#/components/parameters/HotWindowLimit"
+        - $ref: "#/components/parameters/PerPlayer"
+        - $ref: "#/components/parameters/Players"
+        - $ref: "#/components/parameters/Weapons"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/DmgFamily"
+        - $ref: "#/components/parameters/MinScore"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The ranked windows.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HotWindows" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/lives:
+    get:
+      operationId: getLives
+      tags: [timeline]
+      summary: Every player's lives, spawn to death
+      description: >
+        One row per spawn-to-death run — the natural unit of QuakeWorld
+        analysis — carrying the same per-interval stats block `/hot-windows`
+        uses, plus `endReason`, `spawnLoc`, `deathLoc`, `killedBy`,
+        `deathWeapon`, `itemsTaken` and `weaponsHeld`.
+
+        Segmentation comes from `streams.players[].alive` (schema v64). Two
+        attribution rules matter if you sum per-life stats: a kill made
+        POSTHUMOUSLY — a rocket landing after its shooter died, measured 76-197
+        ms later on real demos — is credited to the life that fired it, and an
+        event on the boundary between two TOUCHING lives (a same-millisecond
+        death and respawn) goes to the life that was ending.
+        `durationMs` is ALIVE time and is not extended by the posthumous window.
+
+        WHAT THE SUMS RECONCILE AGAINST. Every stat here is built from the
+        per-event LOGS, so an unfiltered response sums to those logs: the
+        `/frags` `frags[]` rows and the `/damage` `events[]` rows for that
+        player. It does NOT necessarily sum to a scoreboard aggregate such as
+        `/frags`' `byPlayer`, which has other sources — a death detected from
+        `DF_DEAD` / `STAT_HEALTH` with no obituary counts there and leaves no
+        log row for any life to carry. On
+        `wipeout_3on2_red_vs_blue[q3dm6qw]` three players' per-life deaths sum
+        to 3/4/7 against a `byPlayer` 4/5/9, and the frag log itself holds
+        3/4/7 — the lives are faithful to their source.
+
+        `deaths` is the count of death rows attributed to the life. It is
+        usually 1; it is 0 whenever no frag-log row names the player at that
+        instant, INCLUDING on lives whose `endReason` is `death` (four such
+        rows on the demo above), so do not infer one field from the other; and
+        it can EXCEED 1, because a life carries both the death that ended it
+        and any death recorded during the dead gap that followed, which is the
+        KTX `dtTELE2` deflection (measured across 11558 corpus lives: 12 with 2
+        deaths, one with 3). Never treat it as a 0/1 flag — read `endReason`
+        for how the life ended.
+
+        Each row carries its attribution window explicitly as
+        `attrStart`/`attrEnd`, which is WIDER than `durationMs` (alive time
+        only) — divide a count by `attrEnd − attrStart` for an exact rate.
+
+        `from`/`to` keep lives OVERLAPPING the window,
+        not only those contained; note that a filtered response does NOT
+        reconcile — each selected life still carries its whole attribution
+        window, and `minMs` drops a life together with the events in its
+        window. They are therefore not a response-size control either; that is
+        `summary`. An INVERTED window (`from` > `to`) selects nothing and
+        returns `lives: []`, matching `/frags`, `/damage` and `/hot-windows`.
+
+        Every numeric stat is emitted even at zero; read the envelope's
+        `measured` block, never a field's absence, to tell an unmeasured source
+        from a measured zero. A demo with no damage stream still yields lives —
+        there, and only there, the envelope's `dmg`/`boundedMode` echoes are
+        absent.
+
+        422 `lives_unavailable` when the demo carries no per-player streams to
+        segment, and equally when it has streams but liveness was never
+        MEASURABLE on any of them. The second case would otherwise serve
+        `lives: []`, which reads as "nobody ever lived" — a different and false
+        claim from "we could not tell". `measured.liveness` carries the same
+        fact on the responses that do get served. 422 `bounded_unavailable` for
+        an EXPLICIT `dmg=bounded` on a demo whose bounded reconstruction was
+        skipped; a defaulted one falls back to `raw` and says so in `dmg`.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Players"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/MinMs"
+        - $ref: "#/components/parameters/DmgFamily"
+        - $ref: "#/components/parameters/LivesSummary"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The lives.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Lives" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/airgibs:
     get:
       operationId: getAirgibs
@@ -1570,7 +1763,10 @@ components:
         environmental / cause codes (hook, rail, squish, fall, lava, slime,
         water, world, tele, stomp, unknown, suicide, teamkill); /damage the
         death-type + environmental codes (explobox, squish, lava, slime, drown,
-        fall, trigger, suicide, unknown); /backpacks accepts rl/lg only;
+        fall, trigger, suicide, unknown). `water` and `drown` are the SAME
+        cause under the two logs' different spellings and are accepted
+        interchangeably wherever either is valid, so you need not know which
+        log backs the endpoint you are calling. /backpacks accepts rl/lg only;
         /weapon-pickups ssg,ng,sng,gl,rl,lg. The pre-16.2 singular spelling
         `weapon` is an accepted legacy alias; `weapons` wins when both are
         present.
@@ -1757,6 +1953,97 @@ components:
       schema:
         type: string
         enum: [column, row]
+    Metric:
+      name: metric
+      in: query
+      description: >
+        What a hot window is ranked by — any SUMMABLE per-event quantity.
+        Ratios (accuracy, efficiency) are deliberately absent: they do not sum,
+        so "the best window" is undefined for them; they ride the per-window
+        stats block instead. `netFrags` (kills − deaths) is usually what people
+        mean by hot — five kills bought with four deaths is a trade, not a run.
+        `deaths` finds a player's WORST stretch. Case-insensitive.
+      schema:
+        type: string
+        default: frags
+        enum:
+          # hot-window-metric-enum:begin — TestOpenAPIHotWindowMetricsCurrent pins this to view.KnownHotWindowMetrics
+          - frags
+          - deaths
+          - netFrags
+          - damageGiven
+          - damageTaken
+          - netDamage
+          - shots
+          - hits
+          # hot-window-metric-enum:end
+      example: netFrags
+    HotWindowMs:
+      name: windowMs
+      in: query
+      description: >
+        Window length in integer MILLISECONDS (default 30000). The main knob:
+        5000 gives damage bursts, 30000 hot streaks, 120000 map-phase
+        dominance. Sweep it — there is no single right value and the API does
+        not pick one for you.
+
+        Bounded on both sides, and an out-of-range value is REJECTED with a
+        400 naming the bound rather than clamped. The floor is 1 (`windowMs=0`
+        and any negative value alike; omit the parameter for the default). The
+        CEILING IS THE MATCH DURATION — see `/overview`'s `matchEnd` — because
+        a window at least that long is simply the whole match, and a longer one
+        would break the `end = start + windowMs` identity every row is
+        documented by (the response would have to clamp `end`, leaving a
+        `durationMs` covering time that does not exist).
+      schema: { type: integer, format: int32, minimum: 1, default: 30000 }
+      example: 30000
+    HotWindowLimit:
+      name: limit
+      in: query
+      description: >
+        Total windows returned across all players (default 10, max 200).
+        Applied AFTER `perPlayer`. A NEGATIVE value means uncapped.
+
+        Out-of-range values are REJECTED with a 400, never silently clamped: an
+        explicit `limit=0` (0 cannot mean "uncapped" — an omitted MCP integer
+        arrives as 0, which would make a forgotten argument look deliberate)
+        and any `limit` above the 200 maximum.
+      schema: { type: integer, default: 10, maximum: 200 }
+      example: 10
+    PerPlayer:
+      name: perPlayer
+      in: query
+      description: >
+        Maximum windows contributed by any ONE player. Applied BEFORE `limit`,
+        so `perPlayer=3&limit=10` is "the top 10 with at most 3 from anyone".
+        Set it to spread a leaderboard across the roster; omit it for a pure
+        match-wide ranking in which one dominant player may own every row.
+
+        Same rule as `limit`, deliberately: omitted is the default (uncapped),
+        a NEGATIVE value means uncapped, and an explicit `perPlayer=0` is
+        REJECTED with a 400 — an omitted MCP integer arrives as 0, and 0 must
+        not make a forgotten argument look like a deliberate one.
+      schema: { type: integer, default: 0 }
+      example: 3
+    MinScore:
+      name: minScore
+      in: query
+      description: >
+        Drop windows scoring below this many points OF THE CHOSEN METRIC
+        (default 1) — a score threshold, not a duration; the ms-valued filter
+        on the sibling `/lives` is `minMs`. Matters most for the net metrics,
+        which can go negative — a window nobody would call hot. An explicit
+        `minScore=0` is a MEANINGFUL request (keep the windows that broke even)
+        and is honoured, not treated as "unset".
+      schema: { type: integer, default: 1 }
+    MinMs:
+      name: minMs
+      in: query
+      description: >
+        Drop lives shorter than this many integer milliseconds (default 0, keep
+        all). Useful for filtering out spawn-frag lives.
+      schema: { type: integer, format: int32, minimum: 0, default: 0 }
+      example: 1000
     RegionsMode:
       name: regions
       in: query
@@ -1790,6 +2077,56 @@ components:
       schema:
         type: string
         enum: [raw, bounded, both]
+    DmgFamily:
+      name: dmg
+      in: query
+      description: >
+        Damage family for the interval endpoints (`/hot-windows`, `/lives`):
+        `raw` — the unbound wire values; `bounded` — KTX-scoreboard semantics
+        (armor absorbed + health capped to remaining). Default (unset):
+        `bounded`, falling back to `raw` on a demo whose bounded reconstruction
+        was skipped; an EXPLICIT `dmg=bounded` there is a 422
+        `bounded_unavailable` naming the demo's `boundedMode`.
+
+        It selects the family of the whole STATS BLOCK, so it applies under
+        EVERY `/hot-windows` metric and not only the damage ones — a window
+        picked by `metric=frags` still reports `damageGiven`, and that number
+        has a family. Both rules above hold under every metric too: the
+        skipped-demo 422 fires for an explicit `dmg=bounded` whatever the
+        metric, and a defaulted one falls back to `raw` whatever the metric.
+        The resolved family comes back as the response's own `dmg` — read it
+        rather than assuming the default took.
+
+        TWO VALUES, not three: `both` is a response SHAPE — raw fields plus a
+        parallel `bounded` nest, as `/damage` returns it — and these endpoints
+        have no such shape. One interval stats block carries one set of damage
+        numbers and a scoring metric has to rank on a single family, so `both`
+        is rejected with a 400 here for EVERY metric, not only the damage ones.
+      schema:
+        type: string
+        enum: [raw, bounded]
+    LivesSummary:
+      name: summary
+      in: query
+      description: >
+        Size control. `/lives` returns one row per spawn-to-death run and a
+        whole 4on4 match is ~400 of them (~240 KB), of which ~40% is per-row
+        collections. Note that `from`/`to` only SELECT rows here — each kept
+        row still carries its whole attribution window — so they are not a size
+        control on their own.
+
+        `summary=true` keeps EVERY ROW and every scalar (the counts, the
+        durations, `endReason`, `spawnLoc`/`deathLoc`, `killedBy`/
+        `deathWeapon`, `mainWeapon`, `weaponsHeld`) and drops the per-row
+        breakdown collections: `itemsTaken`, `locs`, `eventLocs`, `victims`,
+        `byWeapon`, `damageByWeapon`.
+
+        One consequence to know: `itemsTaken` is `null` on every summary row.
+        In a summary response that null means "not requested" and says NOTHING
+        about the demo — the envelope's `measured.items` remains the authority
+        on whether an item timeline exists. Re-ask with `summary=false` (plus
+        `players` / `from` / `to`) for the detail of the lives you care about.
+      schema: { type: boolean, default: false }
     Reducers:
       name: reducers
       in: query
@@ -2058,11 +2395,13 @@ components:
         - demo_too_large
         - demoinfo_unavailable
         - frags_unavailable
+        - hot_windows_unavailable
         - hub_upstream
         - internal
         - invalid_demo_id
         - invalid_gzip
         - invalid_param
+        - lives_unavailable
         - locgraph_unavailable
         - los_unavailable
         - map_unavailable
@@ -2889,6 +3228,22 @@ components:
           type:
             - "null"
             - array
+        killsMeasured:
+          description: >
+            Whether kill ATTRIBUTION was observable on this demo at all — the
+            demo-global verdict, decided once by the analyzer and stored on the
+            Result (schema v65). `false` means the frag log is EMPTY on a demo
+            where players demonstrably died: every obituary went unmatched
+            because the server printed them in a form this pipeline does not
+            parse. Deaths still count (they come from the protocol death events,
+            not the obituaries), which is exactly what makes the zeros
+            dangerous — a row reading `kills: 0, deaths: 92` looks measured.
+            Present `kills`, `teamkills` and `byWeapon` as UNMEASURED rather
+            than zero when this is false. It is DEMO-GLOBAL and survives every
+            filter: narrowing the log by `players`/`weapons`/`from`/`to` cannot
+            make a demo's obituaries matchable or unmatchable. This is the same
+            verdict `/hot-windows` and `/lives` publish as `measured.frags`.
+          type: boolean
         totalFrags:
           description: "Total frags in the log."
           type: integer
@@ -2901,6 +3256,7 @@ components:
         - frags
         - byWeapon
         - byPlayer
+        - killsMeasured
       type: object
     Damage:
       additionalProperties: false
@@ -4433,6 +4789,383 @@ components:
         - height
         - damage
       type: object
+    HotWindows:
+      type: object
+      additionalProperties: false
+      required: [scoredBy, windowMs, limit, perPlayer, measured, windows]
+      properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        scoredBy: { $ref: "#/components/schemas/ScoringRule" }
+        measured: { $ref: "#/components/schemas/MeasuredSources" }
+        dmg: { $ref: "#/components/schemas/IntervalDmgFamily" }
+        boundedMode: { $ref: "#/components/schemas/IntervalBoundedMode" }
+        windowMs:
+          type: integer
+          format: int32
+          description: Window length in ms (echoed).
+        limit:
+          type: integer
+          description: >
+            The total cap as it was applied, echoed after defaulting. An
+            out-of-range request is REJECTED with a 400, not clamped, so this
+            only ever differs from what you sent when you sent nothing (you get
+            the default 10). A NEGATIVE value is echoed verbatim and is not a
+            cap — it is the "uncapped" spelling.
+        perPlayer:
+          type: integer
+          description: >
+            The per-player cap as it was applied, echoed. `0` (the default,
+            from omitting the parameter) and any negative value both mean
+            uncapped; neither is a cap.
+        windows:
+          type: array
+          description: Ranked windows, best first. Never null.
+          items: { $ref: "#/components/schemas/HotWindow" }
+    HotWindow:
+      type: object
+      required: [rank, player, start, end, score]
+      properties:
+        rank: { type: integer, description: "1-based position in this response." }
+        player: { type: string, description: "The player who scored in this window." }
+        team: { type: string, description: "Their team at match end; absent in a demo with no team labels." }
+        start: { type: integer, format: int32, description: "Match-relative ms." }
+        end: { type: integer, format: int32, description: "start + windowMs." }
+        score:
+          type: integer
+          description: >
+            The metric total over the window — the value that selected and
+            ranked it. With a `weapons` filter this is a SUBSET of the
+            same-named stat below; the envelope's `scoredBy` says exactly what
+            produced it.
+      allOf:
+        - $ref: "#/components/schemas/IntervalStats"
+    ScoringRule:
+      type: object
+      additionalProperties: false
+      required: [metric]
+      description: >
+        The scoring rule that produced every row's `score`. It sits on the
+        ENVELOPE, not on each window: one query means one rule, so a per-row
+        copy would repeat the same object up to `limit` times. It is also the
+        only place the metric is echoed.
+      properties:
+        metric: { type: string, description: "The canonicalised metric that produced `score`." }
+        weapons:
+          type: array
+          items: { type: string }
+          description: Weapon tokens the scoring events were restricted to, if any (lowercased, sorted).
+        dmg:
+          type: string
+          description: Damage family used, for the damage metrics.
+    IntervalDmgFamily:
+      type: string
+      enum: [raw, bounded]
+      description: >
+        The damage family every `damageGiven` / `damageTaken` /
+        `damageGivenTeam` / `damageGivenSelf` / `damageByWeapon` in this
+        response was computed in, echoed exactly as `/damage` echoes its own
+        `dmg`. It applies under EVERY metric, not only the damage ones — the
+        stats block reports damage whichever metric selected the interval — so
+        on `/hot-windows` with `metric=frags` this is the only place the family
+        is named (`scoredBy.dmg` carries the same value when the metric is a
+        damage one, from the same single resolution).
+
+        The REST default is `bounded`, matching `/damage`; the in-process view
+        default is `raw`. A DEFAULTED bounded on a demo with no bounded family
+        falls back to `raw` and says so here, while an EXPLICIT `dmg=bounded`
+        on such a demo is a 422 `bounded_unavailable`.
+
+        Absent only on a demo with no damage stream at all, where
+        `measured.damage` is `false` anyway.
+    IntervalBoundedMode:
+      type: string
+      description: >
+        Whether this demo's bounded damage family was reconstructed —
+        `standard`, or a `skipped:*` reason when the server mode rewrites the
+        take in ways the wire does not expose. Same field, same values, as
+        `/damage`'s `boundedMode` (see the `Damage` schema for the enumerated
+        reasons); it is the field that NAMES the state, so read it rather than
+        inferring from `dmg`.
+
+        Absent only on a demo with no damage stream at all.
+    MeasuredSources:
+      type: object
+      additionalProperties: false
+      required: [frags, damage, shots, locs, items, liveness]
+      description: >
+        Which underlying streams THIS DEMO carries. **Measuredness is read from
+        here and never from a field's absence** — every numeric field of the
+        stats block is emitted even at zero, so `damageGiven: 0` alone cannot
+        tell a player who dealt none from a demo with no damage stream at all.
+
+        `false` means the source is absent for the whole demo. `true` does not
+        promise a non-zero row: within a measured source a zero is a
+        measurement, and an absent MAP KEY (`byWeapon`, `victims`,
+        `damageByWeapon`) means "none of that kind".
+      properties:
+        frags:
+          type: boolean
+          description: >
+            Whether KILL ATTRIBUTION was observable — the stored demo-global
+            verdict `/frags` publishes as `killsMeasured`, NOT merely "a frag
+            log exists". It is `false` on a demo whose log is empty while the
+            scoreboard shows deaths (every obituary went unmatched), which is
+            precisely the case where the zeros below look like measurements.
+            One verdict, decided once by the analyzer, so this flag and
+            `/frags`' `killsMeasured` cannot drift.
+
+            Gates `kills`, `deaths`, `teamKills`, `suicides`, `byWeapon`,
+            `mainWeapon`, `victims`, `eventLocs`, and on `/lives` `killedBy` /
+            `deathWeapon`.
+        damage:
+          type: boolean
+          description: >
+            Gates `damageGiven`, `damageTaken`, `damageGivenTeam`,
+            `damageGivenSelf`, `damageByWeapon`.
+        shots: { type: boolean, description: "Gates `shots` and `hits`." }
+        locs:
+          type: boolean
+          description: >
+            Gates `locs`, `eventLocs` and `/lives`' `spawnLoc` / `deathLoc`.
+            True only when the demo has both a loc table and player loc streams.
+
+            DEMO-WIDE, and computed as "at least one player has a loc stream".
+            On a POV recording, where only players inside the recorder's PVS
+            are written to the wire, an UNOBSERVED player's row can therefore
+            carry empty `locs` under `measured.locs: true`. Read that as
+            "unobserved", not as "spent no time anywhere" — a live player
+            always occupied somewhere. Not reachable on server-side recordings,
+            which write every player.
+        items:
+          type: boolean
+          description: >
+            Gates `/lives`' `itemsTaken` (where it is the same signal as
+            `itemsTaken: null`). Always present on `/hot-windows` too, which
+            emits no item field, so one block covers both responses.
+        liveness:
+          type: boolean
+          description: >
+            Whether the spawn-to-death segmentation itself was measurable — at
+            least one player carries liveness intervals. It distinguishes
+            "liveness was not measurable on this demo" from "measured, and this
+            player was never alive", which an empty `lives` array conflated.
+
+            `/lives` 422s `lives_unavailable` when it is `false`, so a caller
+            only ever observes `false` here on `/hot-windows`, which does not
+            need it. The flag is present on both responses because the block
+            keeps ONE shape across them.
+    Lives:
+      type: object
+      additionalProperties: false
+      required: [measured, lives]
+      properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        measured: { $ref: "#/components/schemas/MeasuredSources" }
+        dmg: { $ref: "#/components/schemas/IntervalDmgFamily" }
+        boundedMode: { $ref: "#/components/schemas/IntervalBoundedMode" }
+        lives:
+          type: array
+          description: Every life, time-ordered per player, players in name order. Never null.
+          items: { $ref: "#/components/schemas/Life" }
+    Life:
+      type: object
+      required: [player, index, start, end, attrStart, attrEnd, endReason, itemsTaken]
+      properties:
+        player: { type: string, description: "The player whose life this is." }
+        team: { type: string, description: "Their team at match end; absent in a demo with no team labels." }
+        index: { type: integer, description: "0-based, per player, in time order." }
+        start: { type: integer, format: int32, description: "Spawn, match-relative ms." }
+        end: { type: integer, format: int32, description: "Death, or match end." }
+        attrStart:
+          type: integer
+          format: int32
+          description: >
+            Start of the ATTRIBUTION WINDOW — the span every event field in the
+            stats block was counted over. Always present: `0` is the legitimate
+            value on every player's first life, so an omit-on-zero rule would
+            delete the commonest one.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+        attrEnd:
+          type: integer
+          format: int32
+          description: >
+            End of the attribution window. The window is the life PLUS the dead
+            gap that follows it (and, for the first and last lives, out to the
+            match edges), so that a posthumous rocket counts for the life that
+            fired it.
+
+            IT IS WIDER THAN `durationMs`, which measures `end − start` — ALIVE
+            time — and this is the one asymmetry in the row: a per-second rate
+            computed from a count over `durationMs` reads slightly high, and
+            `attrEnd − attrStart` is the span the counts actually cover.
+
+            One player's windows tile the match end to end (half-open at
+            exactly one side apiece), so no instant belongs to two of them and
+            none to none. On a demo with no match window the last life's
+            `attrEnd` is the int32 ceiling: there is no match end to bound it,
+            and everything after the last life belongs to it.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+        endReason:
+          type: string
+          enum: [death, matchEnd, leftGame]
+          description: >
+            How the life ended. `death` — a recorded death. `matchEnd` — the
+            player was still alive. `leftGame` — the player's position track
+            ended (they quit, or the recording lost them); liveness is clipped
+            to observed presence. Always present: an absent `killedBy` used to
+            conflate all three.
+        spawnLoc: { type: string, description: "Loc the life began in; absent without loc data." }
+        deathLoc: { type: string, description: "Loc the life ended in." }
+        killedBy:
+          type: string
+          description: >
+            Who ended it. Absent when `endReason` is not `death`, and also on a
+            death seen only by the health/DF_DEAD detectors with no obituary
+            naming it — read `endReason`, not this field, to tell those apart.
+            That second state is REACHABLE (the two detectors exist precisely
+            because each sees deaths the other misses) but is not currently
+            observed: across the 42 cached corpus demos, 0 of the 11364
+            death-ended lives — of 11558 lives in total — lack an obituary.
+        deathWeapon: { type: string, description: "Weapon or cause that ended the life." }
+        itemsTaken:
+          type: [array, "null"]
+          description: >
+            Every item picked up in the life's attribution window, in time
+            order. **`null` means the demo carries no item timeline** (the same
+            signal as `measured.items: false`); `[]` means it has one and this
+            life took nothing. With `summary=true` it is `null` on every row
+            regardless of the demo — there, only `measured.items` speaks.
+          items: { $ref: "#/components/schemas/LifeItem" }
+        weaponsHeld:
+          type: array
+          items: { type: string }
+          description: >
+            Which of rl/lg/gl/ssg/sng the player held at any point while ALIVE
+            in this life, in that order. Clipped to the alive interval, not to
+            the attribution window: KTX does not clear the weapon bits on death,
+            so a corpse still reads as armed. Absent means "held none of them",
+            not "unknown".
+      allOf:
+        - $ref: "#/components/schemas/IntervalStats"
+    LifeItem:
+      type: object
+      additionalProperties: false
+      required: [item, kind, time]
+      properties:
+        item: { type: string, description: "Instance name, e.g. `ra_1` — the `name` used by /items." }
+        kind: { type: string, description: "Item kind: `ra`, `mh`, `quad`, `rl`, ..." }
+        time: { type: integer, format: int32, description: "Pickup, match-relative ms." }
+    IntervalStats:
+      type: object
+      description: >
+        The per-interval stats block, shared by `/hot-windows` and `/lives` so
+        one shape covers every segmentation. All times int32 ms.
+
+        Every NUMERIC field below is always present, including a measured zero.
+        Read the envelope's `measured` block to tell "this demo has no shot
+        stream" from "this player fired nothing" — never a field's absence. The
+        maps and lists are omitted when empty, where absence means "nothing to
+        list".
+      required:
+        - durationMs
+        - kills
+        - deaths
+        - teamKills
+        - suicides
+        - damageGiven
+        - damageTaken
+        - damageGivenTeam
+        - damageGivenSelf
+        - shots
+        - hits
+      properties:
+        durationMs:
+          type: integer
+          format: int32
+          description: >
+            end − start. For a life this is ALIVE TIME ONLY, while every event
+            field below covers the wider attribution window (the life plus the
+            dead gap that follows it, so a posthumous rocket counts for the life
+            that fired it) — the row's `attrStart` / `attrEnd` carry that
+            window, so divide by `attrEnd − attrStart` for an exact rate. A rate
+            derived from a count and this duration is therefore very slightly
+            high. For a hot window the two coincide and there is no separate
+            window to publish.
+        kills: { type: integer, description: "Enemy kills. Suicides and teamkills excluded." }
+        deaths:
+          type: integer
+          description: >
+            Death rows from the FRAG LOG naming this player as victim inside
+            the attribution window. Sums, over an unfiltered `/lives` response,
+            to that player's rows in `/frags`' `frags[]` — not necessarily to
+            `/frags`' `byPlayer` scoreboard, which counts deaths the log never
+            recorded.
+
+            Not capped at 1 on `/lives`, and NOT a flag for `endReason`. It can
+            be 0 on a life whose `endReason` is `death` (the death was seen
+            only by the `DF_DEAD` / `STAT_HEALTH` detectors and no obituary
+            named it — four such rows on
+            `wipeout_3on2_red_vs_blue[q3dm6qw]`), and it can EXCEED 1, because
+            a life carries both the death that ended it and any death recorded
+            during the dead gap that followed (the KTX `dtTELE2` deflection —
+            measured across 11558 corpus lives: 12 rows with 2 deaths, one with
+            3).
+        teamKills: { type: integer, description: "Teammates killed. Never scores, but shown for context." }
+        suicides: { type: integer, description: "Self-inflicted deaths, a subset of `deaths`." }
+        byWeapon:
+          type: object
+          additionalProperties: { type: integer }
+          description: Kills by weapon.
+        damageGiven:
+          type: integer
+          description: >
+            To enemies. INCLUDES telefrag / stomp value, exactly as `/damage`
+            does, so per-interval damage reconciles against that endpoint.
+        damageTaken:
+          type: integer
+          description: >
+            From ALL sources — enemy, team, self, world — and including telefrag
+            / stomp value.
+        damageGivenTeam: { type: integer, description: "Damage dealt to teammates." }
+        damageGivenSelf: { type: integer, description: "Self damage, e.g. own rocket splash." }
+        damageByWeapon:
+          type: object
+          additionalProperties: { type: integer }
+          description: >
+            Enemy damage given, by weapon. EXCLUDES telefrags and stomps (they
+            carry no weapon), exactly as `/damage`'s `byWeapon` does, so this
+            sums to at most `damageGiven` rather than to it.
+        shots: { type: integer, description: "Weapon fires in the interval." }
+        hits: { type: integer, description: "Fires that connected." }
+        mainWeapon:
+          type: string
+          description: Weapon with the most kills; ties broken by name so the value is stable.
+        victims:
+          type: object
+          additionalProperties: { type: integer }
+          description: Kills per victim. Sums to `kills`.
+        locs:
+          type: array
+          items: { $ref: "#/components/schemas/IntervalLoc" }
+          description: >
+            Where the TIME went — top loc residences by dwell. Absent when the
+            demo carries no loc data; that never fails the request.
+        eventLocs:
+          type: array
+          items: { $ref: "#/components/schemas/IntervalLoc" }
+          description: >
+            Where the KILLS happened. Routinely disagrees with `locs`, and the
+            disagreement is the interesting part.
+    IntervalLoc:
+      type: object
+      additionalProperties: false
+      required: [loc]
+      properties:
+        loc: { type: string, description: "Loc name." }
+        ms: { type: integer, format: int32, description: "Dwell, on `locs`." }
+        count: { type: integer, description: "Event count, on `eventLocs`." }
     RegionControl:
       additionalProperties: false
       properties:

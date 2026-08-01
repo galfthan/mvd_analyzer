@@ -68727,6 +68727,7 @@
         "weapon": "gl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 414
   },
   "items": {
@@ -96107,7 +96108,7 @@
       }
     ]
   },
-  "schemaVersion": 64,
+  "schemaVersion": 65,
   "shots": {
     "byPlayer": [
       {

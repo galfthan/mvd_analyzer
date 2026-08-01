@@ -46,6 +46,52 @@ func TestScoreboardStatsPost_CopiesCorrectedKillsDeaths(t *testing.T) {
 	}
 }
 
+// The node also PUBLISHES the demo-global kill-attribution verdict on the frag
+// artifact, which is the whole point of storing it: view (which cannot import
+// this package) and player_stats read one answer instead of each re-deriving
+// the rule — and the second reader is how a demo judged unmeasurable by
+// /player-stats came to report `measured.frags: true` on /hot-windows.
+func TestScoreboardStatsPost_PublishesKillAttributionVerdict(t *testing.T) {
+	// An empty frag log beside a scoreboard that records deaths: every
+	// obituary went unmatched.
+	unmeasured := &Result{
+		Match: &MatchResult{Players: []PlayerStat{{Name: "a", Deaths: 92}}},
+		Frags: &FragResult{ByPlayer: map[string]*PlayerFrags{}},
+	}
+	scoreboardStatsPost(unmeasured, nil)
+	if unmeasured.Frags.KillsMeasured {
+		t.Error("killsMeasured is true on a demo whose frag log matched no obituary")
+	}
+
+	// The same shape with a log is measured...
+	measured := &Result{
+		Match: &MatchResult{Players: []PlayerStat{{Name: "a", Deaths: 92}}},
+		Frags: &FragResult{Frags: []FragEntry{{Killer: "a", Victim: "b", Weapon: "rl"}}},
+	}
+	scoreboardStatsPost(measured, nil)
+	if !measured.Frags.KillsMeasured {
+		t.Error("killsMeasured is false on a demo with a matched frag log")
+	}
+
+	// ...and so is a demo where nobody died: an empty log contradicts nothing.
+	quiet := &Result{
+		Match: &MatchResult{Players: []PlayerStat{{Name: "a"}}},
+		Frags: &FragResult{},
+	}
+	scoreboardStatsPost(quiet, nil)
+	if !quiet.Frags.KillsMeasured {
+		t.Error("killsMeasured is false on a demo where nobody died — the zeros there are honest")
+	}
+
+	// The verdict is published even without a scoreboard, where the node's
+	// other work is skipped entirely.
+	noBoard := &Result{Frags: &FragResult{}}
+	scoreboardStatsPost(noBoard, nil)
+	if !noBoard.Frags.KillsMeasured {
+		t.Error("killsMeasured left unset on a demo with no scoreboard; the early return skipped it")
+	}
+}
+
 func TestScoreboardStatsPost_NilSafe(t *testing.T) {
 	// None of these should panic.
 	scoreboardStatsPost(&Result{}, nil)

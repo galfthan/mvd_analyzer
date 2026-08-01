@@ -344,6 +344,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "hot-windows", url: "/v1/demos/gameId:42/hot-windows", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "hot-windows-net", url: "/v1/demos/gameId:42/hot-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "hot-windows-damage", url: "/v1/demos/gameId:42/hot-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
+		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},

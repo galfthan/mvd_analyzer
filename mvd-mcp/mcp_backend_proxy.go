@@ -666,3 +666,54 @@ func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControl
 	}
 	return out, err
 }
+
+func (p *proxyBackend) GetHotWindows(ctx context.Context, in GetHotWindowsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/hot-windows")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.str("metric", in.Metric)
+	// windowMs / limit / minScore go through intp, not intv: an omitted MCP
+	// integer argument arrives as 0, and mvd-api rejects 0 on windowMs and
+	// limit (and reads minScore=0 as a real filter distinct from its default
+	// 1). intp keeps an UNSET field out of the query so the REST default
+	// applies, and forwards an EXPLICIT 0 so it earns its documented 400
+	// instead of being silently dropped — the same contract searchGames' limit
+	// has. perPlayer stays on intv: REST rejects an explicit perPlayer=0 too,
+	// but intv drops a 0 before it can be sent, so from here the field is
+	// simply "uncapped unless set".
+	q.intp("windowMs", in.WindowMs)
+	q.intp("limit", in.Limit)
+	q.intv("perPlayer", in.PerPlayer)
+	q.csv("players", in.Players)
+	q.csv("weapons", in.Weapons)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
+	// Empty dmg stays out of the query so the REST default resolution applies
+	// (bounded, falling back to raw on a skipped:* demo rather than 422-ing a
+	// caller who never asked for the bounded family).
+	q.str("dmg", in.Dmg)
+	q.intp("minScore", in.MinScore)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
+func (p *proxyBackend) GetLives(ctx context.Context, in GetLivesInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/lives")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("players", in.Players)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
+	q.ms("minMs", in.MinMs)
+	q.str("dmg", in.Dmg)
+	// Lean by default, like getDamage / getAim / getItems: a whole match is
+	// ~400 lives and the per-row collections are ~40% of the bytes.
+	summary, defaulted := summaryDefaultTrue(in.Summary)
+	q.boolean("summary", summary)
+	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
+	return withSummaryHint(out, defaulted && summary,
+		"the per-row itemsTaken / locs / eventLocs / victims / byWeapon / damageByWeapon collections"), err
+}

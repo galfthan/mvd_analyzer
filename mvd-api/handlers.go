@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 
@@ -183,14 +184,15 @@ func writeUnknownParam(w http.ResponseWriter, err error) bool {
 // invalid_param (v57 reject-loudly posture, mirroring the games-search limit=0
 // rejection): a caller who typed 0 wants zero-width buckets, which is never
 // useful, so point them at omitting the param. An OMITTED windowMs keeps the
-// default 50 (p.Int already resolved it). The view-level <=0 → default
-// coercion stays — it is the programmatic-caller default for WASM / qw-analyze;
-// this rejection is only the HTTP surface. Reports whether it wrote, so callers
-// do `if windowMsZero(w, p, opts.WindowMs) { return }`.
-func windowMsZero(w http.ResponseWriter, p *qp, windowMs int) bool {
+// endpoint's default (p.Int already resolved it), which is why def is passed
+// in — the endpoints do not share one. The view-level <=0 → default coercion
+// stays: it is the programmatic-caller default for WASM / qw-analyze, and this
+// rejection is only the HTTP surface. Reports whether it wrote, so callers do
+// `if windowMsZero(w, p, opts.WindowMs, 50) { return }`.
+func windowMsZero(w http.ResponseWriter, p *qp, windowMs, def int) bool {
 	if p.Present("windowMs") && windowMs == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			"windowMs must be >= 1; omit it for the default 50")
+			fmt.Sprintf("windowMs must be >= 1; omit it for the default %d", def))
 		return true
 	}
 	return false
@@ -806,7 +808,7 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
-	if windowMsZero(w, p, opts.WindowMs) {
+	if windowMsZero(w, p, opts.WindowMs, 50) {
 		return
 	}
 	if opts.Layout == "column" {
@@ -1108,7 +1110,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
-	if windowMsZero(w, p, opts.WindowMs) {
+	if windowMsZero(w, p, opts.WindowMs, 50) {
 		return
 	}
 	if err := view.RegionControlAvailable(res); err != nil {
@@ -1162,4 +1164,314 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
+}
+
+// handleHotWindows: GET /v1/demos/{id}/hot-windows — each player's best
+// stretches of the match, computed on demand from the stored event logs.
+//
+// The contract is one sentence: "in these windowMs milliseconds this player
+// scored higher on metric than in any other stretch of the same length."
+// Windows are anchored at real event times (not a grid), non-overlapping per
+// player, and returned as one flat list under two independent caps —
+// perPlayer, then limit.
+//
+// Query params:
+//
+//	metric     enum — frags (default) | deaths | netFrags | damageGiven |
+//	                  damageTaken | netDamage | shots | hits
+//	windowMs   int  — window length in ms (default 30000; an explicit value
+//	                  below 1 or above the match duration is a 400)
+//	limit      int  — total windows (default 10; negative means uncapped; an
+//	                  explicit 0 and anything above 200 are both a 400, never
+//	                  a silent clamp)
+//	perPlayer  int  — max windows from any one player (default uncapped;
+//	                  negative means uncapped, explicit 0 is a 400 — limit's
+//	                  rule exactly)
+//	players    csv  — restrict to these SUBJECT players
+//	weapons    csv  — restrict the SCORING events (legacy alias: weapon)
+//	from / to  int  — match-relative bounds, integer ms (0 = no bound). NOTE
+//	                  they bound where a window may START, not what it covers:
+//	                  a window anchored at `to` still runs windowMs past it.
+//	dmg        enum — raw | bounded (default bounded); both is rejected
+//	minScore   int  — drop windows scoring below this (default 1)
+func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	// windowMs is read as a plain int, not through Ms: Ms rejects a negative
+	// with "must be >= 0" while the endpoint's real floor is 1, so a caller
+	// told to retry with 0 failed again. One check below covers both.
+	windowMs := p.IntHint("windowMs", 0, "integer milliseconds")
+	opts := view.HotWindowsOptions{
+		Metric:    p.Metric(),
+		Limit:     p.Int("limit", 0),
+		PerPlayer: p.Int("perPlayer", 0),
+		Players:   p.CSV("players"),
+		Weapons:   p.CSVAny("weapons", "weapon"),
+		From:      p.Ms("from", 0),
+		To:        p.Ms("to", 0),
+		Dmg:       p.DmgFamily(),
+		Min:       p.IntPtr("minScore", "integer score, may be negative"),
+	}
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// Explicit sentinels are REJECTED, not silently reinterpreted — the v59
+	// ruling that an out-of-range limit "is rejected, no longer silently
+	// clamped". An omitted MCP int arrives as 0, which is why 0 cannot mean
+	// "uncapped" for either cap: it would make a forgotten argument look like
+	// a deliberate one.
+	if p.Present("windowMs") && windowMs < 1 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("windowMs must be >= 1; omit it for the default %d", hotWindowsDefaultMs))
+		return
+	}
+	// An UNBOUNDED windowMs makes the documented `end = start + windowMs`
+	// unsatisfiable: the view has to clamp end to MaxInt32, and windowMs=
+	// 2147483647 then reported a 24.8-day "window" carrying the whole match's
+	// stats, on which every derived rate is nonsense. The match duration is
+	// the natural cap — a window at least that long is the whole match, and
+	// asking for more describes time that does not exist. The view's clamp
+	// stays as defence in depth for its in-process callers; this makes it
+	// unreachable over HTTP.
+	if maxWin := matchDurationMs(res); windowMs > maxWin {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("windowMs must be <= %d (the match duration), got %d; a window longer than the match is the whole match", maxWin, windowMs))
+		return
+	}
+	opts.WindowMs = int32(windowMs)
+	if p.Present("limit") && opts.Limit == 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			"limit must be >= 1, or negative for uncapped; omit it for the default 10")
+		return
+	}
+	if opts.Limit > hotWindowsMaxLimit {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("limit must be <= %d, got %d", hotWindowsMaxLimit, opts.Limit))
+		return
+	}
+	// perPlayer follows limit's rule exactly rather than inventing a second
+	// one: an explicit 0 is rejected (the omitted-MCP-integer reason applies
+	// verbatim), a negative means uncapped, and omitting it is the uncapped
+	// default. The old shape rejected -1 and accepted 0, i.e. the opposite of
+	// limit on the same endpoint, so an agent that learned one guessed the
+	// other wrong in both directions.
+	if p.Present("perPlayer") && opts.PerPlayer == 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			"perPlayer must be >= 1, or negative for uncapped; omit it for the default (uncapped)")
+		return
+	}
+	if err := view.HotWindowsAvailable(res, opts.Metric); err != nil {
+		s.writeUnavailable(w, r, err, "hot_windows_unavailable",
+			hotWindowsUnavailableMsg(opts.Metric))
+		return
+	}
+
+	// Single resolution point for the damage-family default, matching
+	// handleDamage: an unset dmg is bounded, and a DEFAULTED bounded on a
+	// skipped:* demo falls back to raw rather than 422-ing a caller who never
+	// asked for the bounded family.
+	explicitDmg := opts.Dmg != ""
+	if !explicitDmg {
+		opts.Dmg = "bounded"
+	}
+	out, err := view.HotWindows(res, opts)
+	if errors.Is(err, view.ErrBoundedUnavailable) && !explicitDmg {
+		opts.Dmg = "raw"
+		out, err = view.HotWindows(res, opts)
+	}
+	if err != nil {
+		// A bogus weapons token is a 400 — it does not wrap ErrUnavailable, so
+		// it is checked first. The gate is on ErrInvalidFilter and NOT on
+		// "err != nil": ErrBoundedUnavailable wraps ErrUnavailable, so an
+		// unconditional writeInvalidParam here swallowed every 422 below and
+		// answered 400 invalid_param instead. Same order as handleDamage.
+		if errors.Is(err, view.ErrInvalidFilter) {
+			writeInvalidParam(w, err)
+			return
+		}
+		if errors.Is(err, view.ErrBoundedUnavailable) {
+			mode := ""
+			if res.Damage != nil {
+				mode = res.Damage.BoundedMode
+			}
+			writeError(w, http.StatusUnprocessableEntity, "bounded_unavailable",
+				fmt.Sprintf("this demo has no bounded damage family (boundedMode %q); use dmg=raw", mode))
+			return
+		}
+		s.writeUnavailable(w, r, err, "hot_windows_unavailable",
+			hotWindowsUnavailableMsg(opts.Metric))
+		return
+	}
+	out.TimeUnit = view.UnitMs
+	writeJSON(w, http.StatusOK, out)
+}
+
+// hotWindowsMaxLimit mirrors view's own cap. Duplicated deliberately: the
+// handler REJECTS an over-limit request rather than letting the view clamp it,
+// so the number has to be known here to say what the bound is. (The view still
+// clamps behind us, as defence in depth for its in-process callers.)
+//
+// hotWindowsDefaultMs is likewise view's default window, needed here only so
+// the windowMs=0 rejection can name the value the caller gets by omitting it.
+const (
+	hotWindowsMaxLimit  = 200
+	hotWindowsDefaultMs = 30000
+)
+
+// hotWindowsUnavailableMsg names the stream the chosen metric needs, so a 422
+// says which capability the demo lacks rather than just "unavailable".
+func hotWindowsUnavailableMsg(metric string) string {
+	switch metric {
+	case view.MetricShots, view.MetricHits:
+		return "this demo has no weapon-fire stream"
+	case view.MetricDamageGiven, view.MetricDamageTaken, view.MetricNetDamage:
+		return "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"
+	default:
+		return "this demo has no frag log"
+	}
+}
+
+// livesUnavailableMsg names BOTH halves of view.LivesAvailable's gate. The
+// second half is not a footnote: a demo can carry per-player streams and still
+// have no measurable liveness (PlayerStream.Alive nil on every one of them),
+// and a message naming only the streams sent that caller looking for a stream
+// they have.
+const livesUnavailableMsg = "this demo has no per-player streams to segment into lives, or none on which liveness was measurable"
+
+// handleLives: GET /v1/demos/{id}/lives — one row per spawn-to-death run, with
+// the same per-interval stats block hot windows uses.
+//
+// Query params:
+//
+//	players   csv  — restrict to these players
+//	from / to int  — keep lives OVERLAPPING this window, integer ms
+//	minMs     int  — drop lives shorter than this
+//	dmg       enum — raw | bounded (default bounded)
+//	summary   bool — keep every row and every scalar, drop the per-row
+//	                 breakdown collections (see livesSummary)
+func (s *server) handleLives(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	opts := view.LivesOptions{
+		Players: p.CSV("players"),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
+		MinMs:   p.Ms("minMs", 0),
+		Dmg:     p.DmgFamily(),
+	}
+	summary := p.Bool("summary")
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if opts.MinMs < 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param", "minMs must be >= 0")
+		return
+	}
+	if err := view.LivesAvailable(res); err != nil {
+		s.writeUnavailable(w, r, err, "lives_unavailable",
+			livesUnavailableMsg)
+		return
+	}
+
+	explicitDmg := opts.Dmg != ""
+	if !explicitDmg {
+		opts.Dmg = "bounded"
+	}
+	out, err := view.Lives(res, opts)
+	if errors.Is(err, view.ErrBoundedUnavailable) && !explicitDmg {
+		opts.Dmg = "raw"
+		out, err = view.Lives(res, opts)
+	}
+	if err != nil {
+		// ErrInvalidFilter first, for the same reason handleDamage does it:
+		// ErrBoundedUnavailable wraps ErrUnavailable, so gating on a bare
+		// non-nil err turned the 422 below into dead code.
+		if errors.Is(err, view.ErrInvalidFilter) {
+			writeInvalidParam(w, err)
+			return
+		}
+		if errors.Is(err, view.ErrBoundedUnavailable) {
+			mode := ""
+			if res.Damage != nil {
+				mode = res.Damage.BoundedMode
+			}
+			writeError(w, http.StatusUnprocessableEntity, "bounded_unavailable",
+				fmt.Sprintf("this demo has no bounded damage family (boundedMode %q); use dmg=raw", mode))
+			return
+		}
+		s.writeUnavailable(w, r, err, "lives_unavailable",
+			livesUnavailableMsg)
+		return
+	}
+	if summary {
+		livesSummary(out)
+	}
+	out.TimeUnit = view.UnitMs
+	writeJSON(w, http.StatusOK, out)
+}
+
+// livesSummary is /lives' size control, the sibling of /damage's and /items'
+// summary=true.
+//
+// Lives is the one heavy endpoint whose from/to only SELECT rows: each kept
+// row still carries its whole attribution window, so a narrowed window does
+// not narrow the row. Measured on gameId:212260 (387 lives, 241 KB) the weight
+// is in the per-row breakdown collections — itemsTaken 45 KB, locs 29 KB,
+// eventLocs 7 KB, victims/byWeapon/damageByWeapon 11 KB — not in the scalars.
+//
+// So the rule is: keep every ROW and every SCALAR (the counts, the durations,
+// endReason, the locs a life began and ended in, killedBy/deathWeapon,
+// mainWeapon, weaponsHeld) and drop the collections. A caller who needs one
+// life's detail re-asks with players= and from/to.
+//
+// itemsTaken is set to null rather than []: [] would claim this life took
+// nothing. In a summary response null means "not requested" and carries NO
+// information about the demo — the envelope's measured.items is still the
+// authority on whether an item timeline exists, which is where the schema
+// already points readers. Documented on the parameter.
+//
+// This trims mvd-api's own response, not the view: view.Lives has no Summary
+// option, and adding one there is mvd-analytics' call.
+func livesSummary(out *view.LivesView) {
+	for i := range out.Lives {
+		l := &out.Lives[i]
+		l.ItemsTaken = nil
+		l.Locs = nil
+		l.EventLocs = nil
+		l.Victims = nil
+		l.ByWeapon = nil
+		l.DamageByWeapon = nil
+	}
+}
+
+// matchDurationMs is how long the match ran, in ms — the bound hot windows
+// caps windowMs against. Streams.Global.MatchEnd is the authority (MatchStart
+// is always 0, the match-relative origin); Match.Duration is the fallback for
+// a Result assembled without streams. Both absent leaves a half-int32 ceiling,
+// which keeps `start + windowMs` inside int32 without pretending to know a
+// duration the Result never carried.
+func matchDurationMs(r *result.Result) int {
+	var d int32
+	if r.Streams != nil && r.Streams.Global.MatchEnd > 0 {
+		d = r.Streams.Global.MatchEnd - r.Streams.Global.MatchStart
+	}
+	if d <= 0 && r.Match != nil {
+		d = r.Match.Duration
+	}
+	if d <= 0 {
+		return math.MaxInt32 / 2
+	}
+	return int(d)
 }

@@ -45,7 +45,7 @@ mvd-mcp version
 
 ## Tool surface
 
-Twenty-three tools. Inputs are typed Go structs with JSON-Schema inference
+Twenty-six tools. Inputs are typed Go structs with JSON-Schema inference
 (this file); outputs are passed through as opaque JSON — see
 [`../mvd-api/README.md`](../mvd-api/README.md) for the response shape
 of each per-demo endpoint, and
@@ -86,6 +86,8 @@ description says so.
 | `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
 | `getLocTable` | `mvd-api` `GET /v1/demos/{id}/loc-table` |
 | `getRegionControl` | `mvd-api` `GET /v1/demos/{id}/region-control` |
+| `getHotWindows` | `mvd-api` `GET /v1/demos/{id}/hot-windows` |
+| `getLives` | `mvd-api` `GET /v1/demos/{id}/lives` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
 
@@ -94,8 +96,8 @@ description says so.
 
 ### Curated tools vs. the generic artifact pair
 
-The first twenty-one tools are **curated**: each wraps one analytics
-section with a hand-written description and (where useful)
+Every tool above except the last two is **curated**: each wraps one
+analytics section with a hand-written description and (where useful)
 `players`/`weapons`/window filters — that ergonomics is the product
 surface, and it stays. The last two are the **generic** DAG accessor:
 `listArtifacts` returns the fetchable-artifact catalog — servable
@@ -210,7 +212,8 @@ infers their JSON Schemas from struct tags and exposes them via
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails, getLocGraph) and carries match-position time echoes a
+getLocTrails, getLocGraph, getHotWindows, getLives) and carries
+match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
 int32 ms (pure-ms model). getLocGraph is on that list because
 its node weights are int32-ms durations, and getArtifact responses carry
@@ -617,6 +620,121 @@ Output: `result.RegionControlResult`. Errors with
 region layout. See RESULT_SCHEMA.md for the encoding of
 `bucketStates` (per-region one-char-per-bucket string) and `stats`
 (match-aggregate percentages).
+
+#### `getHotWindows({demoId, metric?, windowMs?, limit?, perPlayer?, ...})`
+
+Each player's best fixed-length stretches: *"in these `windowMs` ms this
+player scored higher on `metric` than in any other stretch of the same
+length."*
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`    | `string` (required) | — | — |
+| `metric`    | `string` | `frags` | What the windows are ranked by, case-insensitive: `frags`, `deaths` (a player's WORST stretch), `netFrags`, `damageGiven`, `damageTaken`, `netDamage`, `shots`, `hits`. Any **summable** per-event quantity; ratios (accuracy) are deliberately absent — they don't sum, so "the best window" is undefined for them. Read them off the stats block instead. |
+| `windowMs`  | `int` | **30000** | Window length in **milliseconds** — the main knob (5000 = damage bursts, 30000 = hot streaks, 120000 = map-phase dominance). Sweep it; there is deliberately no adaptive mode. Bounded to `[1, match duration]`: omit for the default, and an out-of-range value (a `0`, a negative, or anything longer than the match) is rejected `400 invalid_param` naming the bound rather than clamped. |
+| `limit`     | `int` | **10** | Total windows across all players, max 200; **negative = uncapped**. Applied AFTER `perPlayer`. Omit for the default; an explicit `0` is rejected `400 invalid_param` (an omitted MCP integer arrives as 0, so 0 cannot mean "uncapped"). |
+| `perPlayer` | `int` | uncapped | Max windows from any ONE player. Applied BEFORE `limit`, so `perPlayer:3, limit:10` is "the top 10, at most 3 from anyone" — set it to spread a leaderboard across the roster. Same rule as `limit`: omit for the default, negative for uncapped. (REST rejects an explicit `perPlayer=0`; from this shim a `0` never leaves the query, so it simply reads as unset.) |
+| `players`   | `string[]` | all | Restrict to these **subject** players (whose windows are ranked) |
+| `weapons`   | `string[]` | all | Restrict the **scoring** events only. Valid tokens depend on the metric's own source — the frag log knows `hook`/`water`, the damage log `explobox`/`drown`, the shot stream only what can be fired; `water` and `drown` are accepted interchangeably. A bad token 400s naming the full valid set. |
+| `startTime` | `integer` | match start | Window-search lower bound, match-relative **milliseconds**. Bounds where a window may **start**, not what it covers |
+| `endTime`   | `integer` | match end | Window-search upper bound. It too bounds the **start**: a window anchored at `endTime` still runs the full `windowMs` past it, so `endTime:1000, windowMs:30000` gives the best window *anchored* in the first second, covering up to 31 s. Shrink `windowMs` to constrain what a window covers |
+| `dmg`       | `string` | **`bounded`** | Damage family for the damage metrics and the stats block: `raw` \| `bounded`. `both` is rejected for **every** metric — a score and a stats block use one family, not two. |
+| `minScore`  | `int` | `1` | Drop windows scoring below this many points **of the chosen metric** — a score threshold, not a duration (the ms-valued filter on `getLives` is `minMs`). Matters for the net metrics, which go negative. An explicit `0` IS honoured (keep the windows that broke even). |
+
+Output: `{ timeUnit, scoredBy, dmg, boundedMode, windowMs, limit,
+perPlayer, measured, windows: [{ rank, player, team, start, end, score,
+…stats }, …] }`.
+Windows are anchored at **real event times** (not a grid),
+non-overlapping per player, and returned as ONE FLAT list sorted by
+score — group by player client-side with one reduce.
+
+`scoredBy` (`{metric, weapons, dmg}`) sits on the **envelope, not on each
+row**: one query means one rule. It is also the only place the metric is
+echoed. It matters because `weapons` scopes the *scoring* events while
+the stats block still describes everything that happened, so
+`metric:"damageGiven", weapons:["lg"]` can report `score` 445 beside a
+`damageGiven` of 650.
+
+`dmg`/`boundedMode` echo the damage family the **stats block** was
+computed in and this demo's bounded-reconstruction state, exactly as
+`getDamage` echoes them. They ride the envelope under **every** metric,
+not just the damage ones — a window picked by `metric:"frags"` still
+reports `damageGiven`, and that number has a family. Read `dmg` rather
+than assuming the `bounded` default took: a defaulted request silently
+falls back to `raw` on a demo whose reconstruction was skipped. Both are
+absent only on a demo with no damage stream (`measured.damage: false`).
+
+Errors with `hot_windows_unavailable` (422) when the demo carries no
+source stream for the chosen metric, and `bounded_unavailable` (422) —
+under any metric — for an **explicit** `dmg:"bounded"` on a demo whose
+bounded reconstruction was skipped. Missing loc data only omits
+`locs`/`eventLocs` and never fails the request.
+
+#### `getLives({demoId, players?, startTime?, endTime?, minMs?, dmg?, summary?})`
+
+One row per spawn-to-death run — the natural unit of QuakeWorld
+analysis, and the variable-length counterpart to `getHotWindows`.
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`    | `string` (required) | — | — |
+| `players`   | `string[]` | all | Restrict to these players' lives |
+| `startTime` | `integer` | match start | Match-relative **milliseconds**; lives **overlapping** the window are kept, not only those contained |
+| `endTime`   | `integer` | match end | See `startTime` |
+| `minMs`     | `integer` | `0` (keep all) | Drop lives shorter than this many milliseconds — useful for filtering out spawn-frag lives |
+| `dmg`       | `string` | **`bounded`** | Damage family for the per-life stats block: `raw` \| `bounded`; `both` is rejected |
+| `summary`   | `boolean` | **`true`** (MCP default) | Token economy. A whole 4on4 match is ~400 lives (~240 KB), and `startTime`/`endTime` only *select* rows — each kept row still carries its whole attribution window — so they are not a size control. `summary` keeps **every row and every scalar** and drops the per-row collections `itemsTaken`, `locs`, `eventLocs`, `victims`, `byWeapon`, `damageByWeapon` (~40% of the bytes). Same MCP-vs-REST divergent default as `getDamage`/`getAim`/`getItems`: REST defaults to `false`, the proxy injects `true`, and a defaulted response carries a `hint`. Pass `summary:false` (with `players`/`startTime`/`endTime`) for one life's detail. |
+
+Output: `{ timeUnit, dmg, boundedMode, measured, lives: [{ player,
+team, index, start, end, attrStart, attrEnd, endReason, spawnLoc,
+deathLoc, killedBy, deathWeapon, itemsTaken, weaponsHeld, …stats }, …] }`
+— time-ordered per player, players in name order. `dmg`/`boundedMode`
+are the same envelope echoes `getHotWindows` carries.
+
+Three things to know before summing:
+
+- **Lives partition the match.** Each life is attributed every event
+  from its own start to the start of the next (match start / match end
+  at the edges), so a **posthumous** kill — a rocket landing after its
+  shooter died — counts for the life that fired it, so per-life stats sum
+  to what the per-event **logs** hold for that player: `getFrags`'
+  `frags[]` rows and `getDamage`' `events[]` rows. They do **not**
+  necessarily sum to the `byPlayer` scoreboards, which count deaths the
+  log never recorded (a `DF_DEAD`/`STAT_HEALTH` death with no obituary).
+  `durationMs` stays **alive time**, so a rate derived from a count over
+  it is very slightly high — every row carries the wider window it
+  counted over as `attrStart`/`attrEnd`, so divide by
+  `attrEnd - attrStart` when you want the exact one.
+- **`deaths` is not a 0/1 flag and does not imply `endReason`.** It counts
+  the frag-log death rows attributed to the life, so it is 0 whenever no
+  row names the player at that instant — including on lives whose
+  `endReason` *is* `death` — and it can **exceed 1**: a life also carries
+  any death recorded in the dead gap that followed it (the KTX `dtTELE2`
+  deflection — measured across 11 558 corpus lives, 12 rows with 2 and
+  one with 3). Read `endReason` for how the life ended.
+- **A filtered response does not reconcile.** `startTime`/`endTime`
+  select lives but each still carries its whole attribution window, and
+  `minMs` drops a life together with the events inside its window. An
+  inverted window (`startTime` > `endTime`) selects nothing and returns
+  `lives: []`, matching `getFrags`, `getDamage` and `getHotWindows`.
+
+`endReason` is `death` | `matchEnd` | `leftGame`, always present —
+`killedBy` alone used to conflate all three, and is additionally absent
+on a death that no obituary named (reachable, but not observed in the
+42-demo cached corpus: 0 of its 11364 death-ended lives).
+`itemsTaken` is **not** omitempty: `null` means the demo has no item
+timeline, `[]` means it has one and this life took nothing. Under the
+default `summary:true` it is `null` on every row and carries no signal —
+read `measured.items` on the envelope.
+
+Errors with `lives_unavailable` (422) when the demo carries no
+per-player streams to segment, and equally when it has streams but
+liveness was never **measurable** on any of them — serving `lives: []`
+there would read as "nobody ever lived", which is a different and false
+claim from "we could not tell". The envelope's `measured.liveness`
+carries the same fact on the responses that do get served, so it is only
+ever `false` on `getHotWindows`. A demo with no damage stream still
+yields lives.
 
 #### `listArtifacts({})`
 

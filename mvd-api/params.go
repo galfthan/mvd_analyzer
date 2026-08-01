@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/mvd-analyzer/mvd-analytics/view"
 )
 
 // ciGet returns a query value by case-insensitive key. The documented
@@ -43,14 +45,21 @@ func parseCSV(v string) []string {
 	return out
 }
 
-// parseInt parses a query-string integer. Empty → default.
-func parseInt(q url.Values, key string, defaultVal int) (int, error) {
+// parseInt parses a query-string integer. Empty → default. A non-empty hint
+// is appended in parentheses, the same shape Ms uses for its "(integer
+// milliseconds)" tail — a bare `invalid min="abc"` said nothing about the
+// unit or the accepted range, which is exactly what a caller who typed it
+// wrong needs.
+func parseInt(q url.Values, key string, defaultVal int, hint string) (int, error) {
 	v := ciGet(q, key)
 	if v == "" {
 		return defaultVal, nil
 	}
 	n, err := strconv.Atoi(v)
 	if err != nil {
+		if hint != "" {
+			return 0, fmt.Errorf("invalid %s=%q (%s)", key, v, hint)
+		}
 		return 0, fmt.Errorf("invalid %s=%q", key, v)
 	}
 	return n, nil
@@ -94,10 +103,31 @@ var (
 	// dmg: raw | bounded | both (empty → "", the handler resolves the default
 	// to "bounded" for both summary and full-log requests).
 	dmgCanon = map[string]string{"raw": "raw", "bounded": "bounded", "both": "both"}
+	// dmg on the interval endpoints (/hot-windows, /lives): raw | bounded only.
+	// `both` is a SHAPE — raw fields plus a parallel bounded nest — and there
+	// is no such shape here: one interval stats block carries one set of
+	// damage numbers, and the scoring metrics need a single family to rank on.
+	// Rejecting it at the boundary is what makes the two-value enum in
+	// openapi.yaml true for EVERY metric; leaving it to the view rejected it
+	// only when a damage family was actually resolved, so `dmg=both` 400d with
+	// metric=damageGiven and silently 200d (ignored) with metric=frags.
+	dmgFamilyCanon = map[string]string{"raw": "raw", "bounded": "bounded"}
 	// regions: full (default; the full ControlRegion list with polygon Points)
 	// | summary (name/locs/centroids kept, Points stripped) | none (list omitted).
 	regionsCanon = map[string]string{"full": "full", "summary": "summary", "none": "none"}
+	// metric: what a hot window is ranked by. Built from view's own vocabulary
+	// so the two cannot drift, and accepted case-insensitively — the canonical
+	// spellings are camelCase, which a naive ToLower would never match.
+	metricCanon = buildMetricCanon()
 )
+
+func buildMetricCanon() map[string]string {
+	m := make(map[string]string, len(view.KnownHotWindowMetrics))
+	for _, k := range view.KnownHotWindowMetrics {
+		m[strings.ToLower(k)] = k
+	}
+	return m
+}
 
 // parseReducers parses a comma-separated list of "field=name" pairs.
 // Empty → nil. Malformed → error.
@@ -239,12 +269,18 @@ func (p *qp) Ms(key string, def int32) int32 {
 }
 
 // Int reads an integer param (empty → def). No-op after a prior error.
-func (p *qp) Int(key string, def int) int {
+func (p *qp) Int(key string, def int) int { return p.IntHint(key, def, "") }
+
+// IntHint is Int with a unit / accepted-range hint appended to the parse
+// error, matching Ms's "(integer milliseconds)" tail. Use it wherever the
+// param's unit is not obvious from its name (windowMs is ms, minScore is a
+// score) so a malformed value tells the caller what a good one looks like.
+func (p *qp) IntHint(key string, def int, hint string) int {
 	p.mark(key)
 	if p.err != nil {
 		return def
 	}
-	v, err := parseInt(p.q, key, def)
+	v, err := parseInt(p.q, key, def, hint)
 	if err != nil {
 		p.err = err
 	}
@@ -308,6 +344,32 @@ func (p *qp) Layout() string {
 // default to "bounded"). No-op after a prior error.
 func (p *qp) Dmg() string {
 	return p.enum("dmg", "", dmgCanon, "want 'raw', 'bounded' or 'both'")
+}
+
+// DmgFamily reads ?dmg=raw|bounded for the interval endpoints (empty → "",
+// the handler resolves the default to "bounded"). `both` is rejected here for
+// every metric — see dmgFamilyCanon. No-op after a prior error.
+func (p *qp) DmgFamily() string {
+	return p.enum("dmg", "", dmgFamilyCanon, "want 'raw' or 'bounded'; 'both' is not a shape this endpoint has")
+}
+
+// IntPtr reads an optional integer param, returning nil when it is absent so
+// a caller can tell "asked for 0" from "asked for nothing". hint is the
+// IntHint tail for a malformed value. No-op after a prior error.
+func (p *qp) IntPtr(key, hint string) *int {
+	if !p.Present(key) {
+		p.mark(key)
+		return nil
+	}
+	v := p.IntHint(key, 0, hint)
+	return &v
+}
+
+// Metric reads ?metric=frags|deaths|netFrags|... (empty → "frags"), the
+// hot-windows ranking quantity. No-op after a prior error.
+func (p *qp) Metric() string {
+	return p.enum("metric", view.MetricFrags, metricCanon,
+		"want one of: "+strings.Join(view.KnownHotWindowMetrics, ", "))
 }
 
 // Regions reads ?regions=full|summary|none (empty → "full"). No-op after a

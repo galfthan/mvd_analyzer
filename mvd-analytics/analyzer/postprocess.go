@@ -25,6 +25,18 @@ import "github.com/mvd-analyzer/mvd-analytics/view"
 // whose name has no ByPlayer entry keep 0/0 (no frag log, or a name that
 // never appeared in an obituary). KTX demoinfo stats are left untouched.
 func scoreboardStatsPost(res *Result, _ *CoreOutputs) {
+	// Publish the demo-global kill-attribution verdict on the frag artifact
+	// (schema v65). This node is where it belongs: killsMeasurable is exactly a
+	// statement about the JOIN this node performs — an empty frag log against a
+	// scoreboard that records deaths — and both inputs are final here. It is
+	// evaluated ONCE and read from the stored field afterwards by
+	// player_stats.go (killsMeasured) and by view.MeasuredSources.Frags, so the
+	// rule cannot be applied on one surface and forgotten on another. Set
+	// before the early return below: a demo with no scoreboard still has a
+	// verdict, and killsMeasurable's answer for it is "measured".
+	if res.Frags != nil {
+		res.Frags.KillsMeasured = killsMeasurable(res)
+	}
 	if res.Match == nil || res.Frags == nil {
 		return
 	}

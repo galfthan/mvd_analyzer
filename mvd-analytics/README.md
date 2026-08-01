@@ -52,10 +52,12 @@ that downstream consumers render, summarise, or feed to an agent.
   `airgibs.go`, `opening.go`, `player_stats.go`, `postprocess.go`, and
   `teamkill_telefrag.go`.
 - `view/` — **time-parameterised query API** over a finalised
-  `*Result`. Six pure functions (`Buckets`, `Events`, `StreamSlice`,
-  `StateAt`, `LocTrails`, `RegionControl`) read `result.Streams` and
-  produce derived shapes (bucketed timelines, raw stream slices,
-  point-in-time state, loc trails, region-control bucket states) at
+  `*Result`. Eight pure functions (`Buckets`, `Events`, `StreamSlice`,
+  `StateAt`, `LocTrails`, `RegionControl`, and since v65 the two
+  interval segmentations `HotWindows` and `Lives`) read `result.Streams`
+  and produce derived shapes (bucketed timelines, raw stream slices,
+  point-in-time state, loc trails, region-control bucket states,
+  best-scoring stretches, per-life rollups) at
   the caller's chosen window / fields / reducers. Every entry takes
   at least one time-related option that the caller controls; static
   derivations (`FragResult`, `LocGraphResult`, `MetadataResult`, …)
@@ -63,6 +65,12 @@ that downstream consumers render, summarise, or feed to an agent.
   by the CLI's `-view` family of flags and the WASM bridge's
   `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt` /
   `getLocTrails` / `recomputeRegionControl` exports.
+  `HotWindows` (`hotwindows.go` — **not** `hot_windows.go`, which Go
+  would read as a `GOOS` build constraint) ranks fixed-length windows by
+  a caller-chosen summable metric; `Lives` (`lives.go`) cuts the match at
+  the v64 `streams.players[].alive` boundaries. Both fill the same
+  per-interval stats block from one builder (`interval_stats.go`), so a
+  third segmentation means writing the segmentation, not the statistics.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -599,6 +607,35 @@ by attacker weapon too (`byWeaponTeam` / `byWeaponSelf`, both families),
 measured wherever the damage family itself is.
 See [RESULT_SCHEMA.md](RESULT_SCHEMA.md#damageresult-damage) for the
 field-level reference.
+
+Schema v65 adds exactly **one** field to `Result` — `FragResult.KillsMeasured`,
+the demo-global verdict on whether kill *attribution* was observable. The rule
+itself is not new (`analyzer.killsMeasurable` has decided it since v62) but
+nothing stored the answer, so it was applied on `playerStats` and nowhere
+else; storing it gives every consumer one answer to read instead of a rule to
+re-derive. `false` means the frag log is empty on a demo where players
+demonstrably died — every obituary went unmatched — so `kills: 0` beside a
+measured deaths count is not a measurement. It is demo-global and survives
+every filter.
+
+Otherwise v65 is additive at the view layer: the two interval segmentations
+(`HotWindows`, `Lives`) are **views** over data that was already stored, and
+the bump is the cache-key tick every observable change earns. Their response
+shapes are owned by `view/` and documented
+in [RESULT_SCHEMA.md](RESULT_SCHEMA.md#interval-segmentations-hotwindows-lives--schema-v65).
+Three contracts there are worth knowing before consuming either: their
+shared `measured` block is the **only** way to read measuredness (every
+numeric stat is emitted including a measured zero, so a field's absence
+never means "unmeasured" — and `measured.frags` is exactly the stored
+`KillsMeasured` verdict, while `measured.liveness` says whether the
+segmentation was possible at all); a player's lives **partition** the match,
+so unfiltered per-life sums reconcile exactly with what the per-event
+LOGS hold for that player — `frags.frags[]` and `damage.events[]`, not
+necessarily the `byPlayer` scoreboards, which count deaths no log row
+recorded — while `durationMs` stays alive time and each row's `attrStart`/`attrEnd` carry the
+wider window the counts were taken over; and both envelopes echo the damage
+family they were computed in as `dmg`/`boundedMode`, exactly as `/damage`
+does, because the stats block reports damage under every metric.
 
 ### Items result
 

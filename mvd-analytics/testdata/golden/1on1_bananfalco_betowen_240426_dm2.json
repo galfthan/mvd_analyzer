@@ -4113,6 +4113,7 @@
         "weapon": "rl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 35
   },
   "items": {
@@ -11132,7 +11133,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 64,
+  "schemaVersion": 65,
   "shots": {
     "byPlayer": [
       {

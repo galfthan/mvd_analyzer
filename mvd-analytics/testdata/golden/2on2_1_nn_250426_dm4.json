@@ -39734,6 +39734,7 @@
         "weapon": "rl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 242
   },
   "items": {
@@ -55069,7 +55070,7 @@
       }
     ]
   },
-  "schemaVersion": 64,
+  "schemaVersion": 65,
   "shots": {
     "byPlayer": [
       {
