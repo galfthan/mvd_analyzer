@@ -27,6 +27,17 @@ func livesResult(alive []result.Interval, frags []result.FragEntry) *result.Resu
 	}
 }
 
+// mustLives runs a query that must succeed. The error contract has its own test
+// (TestLivesUnavailable); everywhere else an error is a fixture bug.
+func mustLives(t *testing.T, r *result.Result, opts LivesOptions) *LivesView {
+	t.Helper()
+	got, err := Lives(r, opts)
+	if err != nil {
+		t.Fatalf("Lives(%+v): %v", opts, err)
+	}
+	return got
+}
+
 func TestLivesOnePerAliveInterval(t *testing.T) {
 	alive := []result.Interval{{Start: 0, End: 10000}, {Start: 12000, End: 30000}}
 	frags := []result.FragEntry{
@@ -35,10 +46,7 @@ func TestLivesOnePerAliveInterval(t *testing.T) {
 		{Time: 10000, Killer: "B", Victim: "A", Weapon: "rl"}, // ends life 0
 		kill(20000, "A", "B", "lg"),
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatalf("Lives: %v", err)
-	}
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
 	if len(got.Lives) != 2 {
 		t.Fatalf("got %d lives, want 2", len(got.Lives))
 	}
@@ -88,10 +96,7 @@ func TestLivesReconcileWithFragsAndAliveTime(t *testing.T) {
 		{Time: 25000, Killer: "B", Victim: "A", Weapon: "lg"},
 		kill(30000, "A", "B", "rl"),
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
 
 	var kills int
 	var dur int32
@@ -118,47 +123,47 @@ func TestLivesReconcileWithFragsAndAliveTime(t *testing.T) {
 	}
 }
 
-// A kill landing exactly on a life boundary must be counted once, not twice.
-// Intervals are closed at both ends for the stats block, so the only thing
-// stopping a double count is that lives touch rather than overlap.
+// A kill landing exactly on a life boundary must be counted once, not twice —
+// and the two boundary shapes resolve it in OPPOSITE directions. Intervals are
+// closed at both ends for the stats block, so the only thing stopping a double
+// count is that exactly one of the two lives claims the shared instant:
+//
+//   - TOUCHING LIVES (a same-millisecond death and respawn, schema v64) give
+//     the instant to the life that was ENDING — the player was living it when
+//     the event happened.
+//   - A REAL DEAD GAP gives an event on the NEXT life's spawn instant to the
+//     life just BEGUN, and the outgoing window of the life that ended (which
+//     runs to that instant) must not claim it as well.
 func TestLivesBoundaryKillCountedOnce(t *testing.T) {
-	// Same-millisecond death and respawn: two touching lives (schema v64).
-	alive := []result.Interval{{Start: 0, End: 10000}, {Start: 10000, End: 20000}}
-	frags := []result.FragEntry{kill(10000, "A", "B", "rl")}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got.Lives) != 2 {
-		t.Fatalf("got %d lives, want 2 (the death survives its same-ms respawn)", len(got.Lives))
-	}
-	total := got.Lives[0].Kills + got.Lives[1].Kills
-	if total != 1 {
-		t.Errorf("boundary kill counted %d times across two touching lives, want 1 — "+
-			"summing per-life kills would exceed the player's match total", total)
-	}
-	// It belongs to the life that was ENDING, not the one just begun.
-	if got.Lives[0].Kills != 1 {
-		t.Errorf("the boundary kill went to life %d; it belongs to the life that was ending", 1)
-	}
-}
-
-// The mirror of the touching-lives case: with a real dead gap, an event
-// landing exactly on the NEXT life's spawn instant must not be counted by both
-// the life that just ended (whose outgoing window runs to that instant) and
-// the life just begun (whose start is inclusive).
-func TestLivesKillAtNextSpawnInstantCountedOnce(t *testing.T) {
-	alive := []result.Interval{{Start: 0, End: 10000}, {Start: 12000, End: 30000}}
-	frags := []result.FragEntry{kill(12000, "A", "B", "rl")}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if total := got.Lives[0].Kills + got.Lives[1].Kills; total != 1 {
-		t.Errorf("kill at the next spawn instant counted %d times, want 1", total)
-	}
-	if got.Lives[1].Kills != 1 {
-		t.Errorf("the kill belongs to the life that had begun, not the one that ended")
+	for _, tc := range []struct {
+		name  string
+		alive []result.Interval
+		at    int32
+		owner int    // index of the life the kill belongs to
+		why   string // why that one
+	}{
+		{
+			"touching lives", []result.Interval{{Start: 0, End: 10000}, {Start: 10000, End: 20000}},
+			10000, 0, "it belongs to the life that was ending",
+		},
+		{
+			"across a dead gap", []result.Interval{{Start: 0, End: 10000}, {Start: 12000, End: 30000}},
+			12000, 1, "it belongs to the life that had begun, not the one that ended",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got := mustLives(t, livesResult(tc.alive, []result.FragEntry{kill(tc.at, "A", "B", "rl")}), LivesOptions{})
+			if len(got.Lives) != 2 {
+				t.Fatalf("got %d lives, want 2 (the death survives its same-ms respawn)", len(got.Lives))
+			}
+			if total := got.Lives[0].Kills + got.Lives[1].Kills; total != 1 {
+				t.Errorf("boundary kill counted %d times across two lives, want 1 — "+
+					"summing per-life kills would exceed the player's match total", total)
+			}
+			if got.Lives[tc.owner].Kills != 1 {
+				t.Errorf("the boundary kill did not go to life %d; %s", tc.owner, tc.why)
+			}
+		})
 	}
 }
 
@@ -172,10 +177,7 @@ func TestLivesPosthumousKillBelongsToTheFiringLife(t *testing.T) {
 		{Time: 10000, Killer: "B", Victim: "A", Weapon: "rl"}, // A dies
 		kill(10150, "A", "B", "rl"),                           // A's rocket lands 150 ms later
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
 	if got.Lives[0].Kills != 1 {
 		t.Errorf("life 0 kills = %d, want 1 — the rocket was fired during that life", got.Lives[0].Kills)
 	}
@@ -195,37 +197,18 @@ func TestLivesFilters(t *testing.T) {
 	}
 	res := livesResult(alive, nil)
 
-	all, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(all.Lives) != 3 {
+	if all := mustLives(t, res, LivesOptions{}); len(all.Lives) != 3 {
 		t.Fatalf("got %d lives, want 3", len(all.Lives))
 	}
-
 	// MinMs drops the 500 ms life.
-	long, err := Lives(res, LivesOptions{MinMs: 1000})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(long.Lives) != 2 {
+	if long := mustLives(t, res, LivesOptions{MinMs: 1000}); len(long.Lives) != 2 {
 		t.Errorf("minMs=1000 gave %d lives, want 2", len(long.Lives))
 	}
-
 	// From/To keep lives that OVERLAP the window, not only those contained.
-	win, err := Lives(res, LivesOptions{From: 4000, To: 7000})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(win.Lives) != 2 {
+	if win := mustLives(t, res, LivesOptions{From: 4000, To: 7000}); len(win.Lives) != 2 {
 		t.Errorf("from/to gave %d lives, want 2 (both straddle the window)", len(win.Lives))
 	}
-
-	none, err := Lives(res, LivesOptions{Players: []string{"nobody"}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(none.Lives) != 0 {
+	if none := mustLives(t, res, LivesOptions{Players: []string{"nobody"}}); len(none.Lives) != 0 {
 		t.Errorf("unknown player gave %d lives, want 0", len(none.Lives))
 	}
 }
@@ -249,11 +232,7 @@ func TestLivesUnmeasuredLivenessIsNotAnEmptyMatch(t *testing.T) {
 	}
 	// hot windows do not need liveness, so they still answer — and report the
 	// same fact on the same envelope field.
-	hw, err := HotWindows(unmeasured, HotWindowsOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if hw.Measured.Liveness {
+	if hw := mustHW(t, unmeasured, HotWindowsOptions{}); hw.Measured.Liveness {
 		t.Error("measured.liveness is true on a demo where no player has an Alive stream")
 	}
 
@@ -301,10 +280,7 @@ func TestLivesDeathInADeadGapBelongsToTheEndingLife(t *testing.T) {
 		{Time: 10000, Killer: "B", Victim: "A", Weapon: "rl"},                    // ends life 0
 		{Time: 11000, Killer: "A", Victim: "A", Weapon: "tele", IsSuicide: true}, // while already dead
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
 	if got.Lives[0].Deaths != 2 || got.Lives[0].Suicides != 1 {
 		t.Errorf("life 0 deaths/suicides = %d/%d, want 2/1 — the in-gap death belongs to the life that ended",
 			got.Lives[0].Deaths, got.Lives[0].Suicides)
@@ -314,28 +290,48 @@ func TestLivesDeathInADeadGapBelongsToTheEndingLife(t *testing.T) {
 	}
 }
 
-// The two match edges. Alive[0].Start is clipped to when the player was first
-// OBSERVED, and the last life can end before MatchEnd, so without closing both
-// edges onto the outer lives an event there belongs to no life at all.
+// The two match edges, counted and reported. Alive[0].Start is clipped to when
+// the player was first OBSERVED, and the last life can end before MatchEnd, so
+// without closing both edges onto the outer lives an event there belongs to no
+// life at all.
+//
+// The windows are also on the row, because without them a consumer cannot see
+// that the counts cover the life PLUS the dead gap after it while durationMs is
+// alive time only — so any rate divided by durationMs reads high, silently.
 func TestLivesCoverTheWholeMatchWindow(t *testing.T) {
 	alive := []result.Interval{{Start: 500, End: 10000}, {Start: 12000, End: 50000}}
 	frags := []result.FragEntry{
 		kill(0, "A", "B", "rl"),     // before the first life's clipped start
 		kill(60000, "A", "B", "lg"), // exactly on MatchEnd, past the last life's end
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
+	if len(got.Lives) != 2 {
+		t.Fatalf("got %d lives, want 2", len(got.Lives))
 	}
-	if got.Lives[0].Kills != 1 {
-		t.Errorf("life 0 kills = %d, want 1 — the t=0 kill predates the clipped start", got.Lives[0].Kills)
+	l0, l1 := got.Lives[0], got.Lives[1]
+	if l0.Kills != 1 {
+		t.Errorf("life 0 kills = %d, want 1 — the t=0 kill predates the clipped start", l0.Kills)
 	}
-	if got.Lives[1].Kills != 1 {
-		t.Errorf("life 1 kills = %d, want 1 — the MatchEnd kill postdates the last life", got.Lives[1].Kills)
+	if l1.Kills != 1 {
+		t.Errorf("life 1 kills = %d, want 1 — the MatchEnd kill postdates the last life", l1.Kills)
 	}
-	if got.Lives[0].DurationMs != 9500 {
-		t.Errorf("duration = %d, want 9500 — the widened window must not lengthen the life",
-			got.Lives[0].DurationMs)
+	// Life 0: back to MatchStart (its own start is clipped to first
+	// observation) and forward to the next life's spawn.
+	if l0.AttrStart != 0 || l0.AttrEnd != 12000 {
+		t.Errorf("life 0 attribution = [%d,%d], want [0,12000]", l0.AttrStart, l0.AttrEnd)
+	}
+	// Life 1: its own start, out to MatchEnd.
+	if l1.AttrStart != 12000 || l1.AttrEnd != 60000 {
+		t.Errorf("life 1 attribution = [%d,%d], want [12000,60000]", l1.AttrStart, l1.AttrEnd)
+	}
+	// The spans tile the match end to end, and durationMs is NOT their width.
+	if l0.AttrEnd != l1.AttrStart {
+		t.Errorf("a gap between life 0's window end (%d) and life 1's start (%d) belongs to no life",
+			l0.AttrEnd, l1.AttrStart)
+	}
+	if l0.DurationMs != 9500 || l0.DurationMs == l0.AttrEnd-l0.AttrStart {
+		t.Errorf("durationMs = %d; it is ALIVE time (9500), not the attribution width (%d) — "+
+			"the widened window must not lengthen the life", l0.DurationMs, l0.AttrEnd-l0.AttrStart)
 	}
 }
 
@@ -363,11 +359,7 @@ func TestLivesEndReason(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := Lives(c.res, LivesOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
-			l := got.Lives[0]
+			l := mustLives(t, c.res, LivesOptions{}).Lives[0]
 			if l.EndReason != c.want {
 				t.Errorf("endReason = %q, want %q", l.EndReason, c.want)
 			}
@@ -393,10 +385,7 @@ func TestLivesItemsTakenAndWeaponsHeld(t *testing.T) {
 	p.RL = []result.Interval{{Start: 4000, End: 10000}}
 	p.LG = []result.Interval{{Start: 10000, End: 20000}} // acquired at the death instant
 
-	got, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, res, LivesOptions{})
 	l0, l1 := got.Lives[0], got.Lives[1]
 	if len(l0.ItemsTaken) != 2 || l0.ItemsTaken[0].Item != "ra_1" || l0.ItemsTaken[1].Kind != "quad" {
 		t.Errorf("life 0 itemsTaken = %+v, want ra_1 then quad_1 (the gap belongs to the life before it)", l0.ItemsTaken)
@@ -418,11 +407,7 @@ func TestLivesItemsTakenAndWeaponsHeld(t *testing.T) {
 	}
 
 	res.Items = nil
-	none, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if none.Lives[0].ItemsTaken != nil {
+	if none := mustLives(t, res, LivesOptions{}); none.Lives[0].ItemsTaken != nil {
 		t.Errorf("itemsTaken = %+v on a demo with no item timeline, want null", none.Lives[0].ItemsTaken)
 	}
 }
@@ -438,10 +423,7 @@ func TestLivesOverlappingAliveIntervalsDoNotDoubleCount(t *testing.T) {
 		kill(12000, "A", "B", "lg"), // inside the overlap
 		kill(20000, "A", "B", "sg"),
 	}
-	got, err := Lives(livesResult(alive, frags), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, livesResult(alive, frags), LivesOptions{})
 	total := 0
 	for _, l := range got.Lives {
 		total += l.Kills
@@ -459,24 +441,16 @@ func TestLivesFilteredResponsesDoNotReconcile(t *testing.T) {
 	frags := []result.FragEntry{kill(12500, "A", "B", "rl")}
 	res := livesResult(alive, frags)
 
-	all, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
 	total := 0
-	for _, l := range all.Lives {
+	for _, l := range mustLives(t, res, LivesOptions{}).Lives {
 		total += l.Kills
 	}
 	if total != 1 {
 		t.Fatalf("unfiltered kills = %d, want 1", total)
 	}
 
-	filtered, err := Lives(res, LivesOptions{MinMs: 1000})
-	if err != nil {
-		t.Fatal(err)
-	}
 	total = 0
-	for _, l := range filtered.Lives {
+	for _, l := range mustLives(t, res, LivesOptions{MinMs: 1000}).Lives {
 		total += l.Kills
 	}
 	if total != 0 {
@@ -508,10 +482,7 @@ func TestLivesPartitionWithoutAMatchWindow(t *testing.T) {
 			result.DamageEntry{Time: f.Time, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 10})
 	}
 
-	got, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, res, LivesOptions{})
 	if len(got.Lives) != 1 {
 		t.Fatalf("got %d lives, want 1", len(got.Lives))
 	}
@@ -533,46 +504,9 @@ func TestLivesPartitionWithoutAMatchWindow(t *testing.T) {
 	res.Streams.Players = append(res.Streams.Players, result.PlayerStream{
 		Name: "Q", Alive: []result.Interval{{Start: 0, End: 9000}},
 	})
-	got, err = Lives(res, LivesOptions{Players: []string{"Q"}})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got = mustLives(t, res, LivesOptions{Players: []string{"Q"}})
 	if len(got.Lives) != 1 || got.Lives[0].EndReason != LifeEndLeftGame {
 		t.Errorf("early-quitter endReason = %+v, want %q", got.Lives, LifeEndLeftGame)
-	}
-}
-
-// Each row states the span its event fields were counted over. Without it a
-// consumer cannot see that the counts cover the life PLUS the dead gap after
-// it while durationMs is alive time only — so any rate divided by durationMs
-// reads high, silently.
-func TestLivesReportTheirAttributionSpan(t *testing.T) {
-	alive := []result.Interval{{Start: 500, End: 10000}, {Start: 12000, End: 30000}}
-	got, err := Lives(livesResult(alive, nil), LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got.Lives) != 2 {
-		t.Fatalf("got %d lives, want 2", len(got.Lives))
-	}
-	l0, l1 := got.Lives[0], got.Lives[1]
-	// Life 0: back to MatchStart (its own start is clipped to first
-	// observation) and forward to the next life's spawn.
-	if l0.AttrStart != 0 || l0.AttrEnd != 12000 {
-		t.Errorf("life 0 attribution = [%d,%d], want [0,12000]", l0.AttrStart, l0.AttrEnd)
-	}
-	// Life 1: its own start, out to MatchEnd.
-	if l1.AttrStart != 12000 || l1.AttrEnd != 60000 {
-		t.Errorf("life 1 attribution = [%d,%d], want [12000,60000]", l1.AttrStart, l1.AttrEnd)
-	}
-	// The spans tile the match end to end, and durationMs is NOT their width.
-	if l0.AttrEnd != l1.AttrStart {
-		t.Errorf("a gap between life 0's window end (%d) and life 1's start (%d) belongs to no life",
-			l0.AttrEnd, l1.AttrStart)
-	}
-	if l0.DurationMs != 9500 || l0.DurationMs == l0.AttrEnd-l0.AttrStart {
-		t.Errorf("durationMs = %d; it is ALIVE time (9500), not the attribution width (%d)",
-			l0.DurationMs, l0.AttrEnd-l0.AttrStart)
 	}
 }
 
@@ -582,18 +516,10 @@ func TestLivesReportTheirAttributionSpan(t *testing.T) {
 // life that straddled both bounds while hot windows returned nothing.
 func TestLivesInvertedRangeMatchesTheSiblings(t *testing.T) {
 	res := livesResult([]result.Interval{{Start: 0, End: 30000}}, []result.FragEntry{kill(500, "A", "B", "rl")})
-	lv, err := Lives(res, LivesOptions{From: 20000, To: 1000})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(lv.Lives) != 0 {
+	if lv := mustLives(t, res, LivesOptions{From: 20000, To: 1000}); len(lv.Lives) != 0 {
 		t.Errorf("from=20000&to=1000 gave %d lives; the range is empty", len(lv.Lives))
 	}
-	hw, err := HotWindows(res, HotWindowsOptions{From: 20000, To: 1000})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(hw.Windows) != 0 {
+	if hw := mustHW(t, res, HotWindowsOptions{From: 20000, To: 1000}); len(hw.Windows) != 0 {
 		t.Fatalf("fixture: hot windows should be empty too, got %+v", hw.Windows)
 	}
 	fv, err := Frags(res, FragOptions{From: 20000, To: 1000})
@@ -625,10 +551,7 @@ func TestLivesEchoesTheDamageFamily(t *testing.T) {
 		{"raw", "raw", 100},
 		{"bounded", "bounded", 40},
 	} {
-		got, err := Lives(res, LivesOptions{Dmg: tc.dmg})
-		if err != nil {
-			t.Fatalf("dmg=%q: %v", tc.dmg, err)
-		}
+		got := mustLives(t, res, LivesOptions{Dmg: tc.dmg})
 		if got.Dmg != tc.wantFam || got.BoundedMode != "standard" {
 			t.Errorf("dmg=%q: envelope dmg/boundedMode = %q/%q, want %q/standard",
 				tc.dmg, got.Dmg, got.BoundedMode, tc.wantFam)
@@ -638,13 +561,10 @@ func TestLivesEchoesTheDamageFamily(t *testing.T) {
 		}
 	}
 	// A demo with no damage stream names no family; measured.damage says why.
-	none := livesResult([]result.Interval{{Start: 0, End: 30000}}, nil)
-	got, err := Lives(none, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got.Dmg != "" || got.BoundedMode != "" || got.Measured.Damage {
-		t.Errorf("no damage stream: dmg=%q boundedMode=%q measured.damage=%v", got.Dmg, got.BoundedMode, got.Measured.Damage)
+	none := mustLives(t, livesResult([]result.Interval{{Start: 0, End: 30000}}, nil), LivesOptions{})
+	if none.Dmg != "" || none.BoundedMode != "" || none.Measured.Damage {
+		t.Errorf("no damage stream: dmg=%q boundedMode=%q measured.damage=%v",
+			none.Dmg, none.BoundedMode, none.Measured.Damage)
 	}
 }
 

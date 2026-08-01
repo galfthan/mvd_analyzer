@@ -110,6 +110,37 @@ func analyzeCached(t *testing.T, name string) *result.Result {
 	return res
 }
 
+// livesOf analyzes a cached demo and returns it together with its lives. Both
+// are nil when the demo is not cached or produced no lives — the skip path that
+// keeps an offline `make test` green. A demo that IS cached and does produce
+// lives must not error, so that half is fatal rather than skipped.
+func livesOf(t *testing.T, name string) (*result.Result, *view.LivesView) {
+	t.Helper()
+	res := analyzeCached(t, name)
+	if res == nil {
+		return nil, nil
+	}
+	lv, err := view.Lives(res, view.LivesOptions{})
+	if err != nil {
+		t.Fatalf("%s: Lives: %v", name, err)
+	}
+	if len(lv.Lives) == 0 {
+		return nil, nil
+	}
+	return res, lv
+}
+
+// livesOfOrSkip is livesOf for the incident subtests below, each of which names
+// one demo and has nothing to check without it.
+func livesOfOrSkip(t *testing.T, name string) (*result.Result, *view.LivesView) {
+	t.Helper()
+	res, lv := livesOf(t, name)
+	if lv == nil {
+		t.Skipf("%s not cached", name)
+	}
+	return res, lv
+}
+
 // The property that makes lives trustworthy: a player's lives PARTITION the
 // match, so summing any per-life count over an unfiltered response gives back
 // their match total. Every event is attributed exactly once — not dropped in a
@@ -137,15 +168,8 @@ func analyzeCached(t *testing.T, name string) *result.Result {
 func TestLivesPartitionTheMatchOnRealDemos(t *testing.T) {
 	checked := 0
 	for _, name := range realDemos {
-		res := analyzeCached(t, name)
-		if res == nil {
-			continue
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil {
-			t.Fatalf("%s: Lives: %v", name, err)
-		}
-		if len(lv.Lives) == 0 {
+		res, lv := livesOf(t, name)
+		if lv == nil {
 			continue
 		}
 		checked++
@@ -221,12 +245,8 @@ func TestLivesPartitionTheMatchOnRealDemos(t *testing.T) {
 func TestLivesRowInvariantsOnRealDemos(t *testing.T) {
 	checked, rows := 0, 0
 	for _, name := range realDemos {
-		res := analyzeCached(t, name)
-		if res == nil {
-			continue
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil || len(lv.Lives) == 0 {
+		res, lv := livesOf(t, name)
+		if lv == nil {
 			continue
 		}
 		checked++
@@ -318,12 +338,8 @@ func TestLivesRowInvariantsOnRealDemos(t *testing.T) {
 func TestLivesItemsPartitionTheItemTimeline(t *testing.T) {
 	checked := 0
 	for _, name := range realDemos {
-		res := analyzeCached(t, name)
-		if res == nil || res.Items == nil {
-			continue
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil || len(lv.Lives) == 0 {
+		res, lv := livesOf(t, name)
+		if lv == nil || res.Items == nil {
 			continue
 		}
 		checked++
@@ -339,7 +355,7 @@ func TestLivesItemsPartitionTheItemTimeline(t *testing.T) {
 				}
 			}
 		}
-		for _, player := range sortedIntKeys(got) {
+		for _, player := range sortedKeys(got) {
 			if got[player] != want[player] {
 				t.Errorf("%s: %s took %d items across lives, %d in the item timeline",
 					name, player, got[player], want[player])
@@ -361,16 +377,9 @@ func TestLivesAttributionIncidents(t *testing.T) {
 		// and he lands 18 damage on KreatoR with an sng on the final
 		// millisecond, plus the shot that carried it. A half-open final edge
 		// dropped all three.
-		res := analyzeCached(t, "212483.mvd.gz")
-		if res == nil {
-			t.Skip("212483 not cached")
-		}
+		res, lv := livesOfOrSkip(t, "212483.mvd.gz")
 		if got := res.Streams.Global.MatchEnd; got != 1200128 {
 			t.Fatalf("matchEnd = %d, want 1200128 — the fixture moved", got)
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil {
-			t.Fatal(err)
 		}
 		last := lastLife(lv, "sailorman")
 		if last == nil || last.End != 1200064 {
@@ -398,14 +407,7 @@ func TestLivesAttributionIncidents(t *testing.T) {
 	t.Run("deaths inside a dead gap belong to the life that ended", func(t *testing.T) {
 		// 212260: nlk dies at 619017 and respawns at 623629, and KTX records
 		// two `tele` suicides at 621093 and 623222 while he is already dead.
-		res := analyzeCached(t, "212260.mvd.gz")
-		if res == nil {
-			t.Skip("212260 not cached")
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil {
-			t.Fatal(err)
-		}
+		_, lv := livesOfOrSkip(t, "212260.mvd.gz")
 		var deaths, suicides int
 		var gapLife *view.Life
 		for i, l := range lv.Lives {
@@ -435,14 +437,7 @@ func TestLivesAttributionIncidents(t *testing.T) {
 		// 212260: a telefrag at t=0 — doberman kills his teammate nlk, and
 		// clox telefrags doberman — while doberman's first life, clipped to
 		// first observation, does not start until 553.
-		res := analyzeCached(t, "212260.mvd.gz")
-		if res == nil {
-			t.Skip("212260 not cached")
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil {
-			t.Fatal(err)
-		}
+		_, lv := livesOfOrSkip(t, "212260.mvd.gz")
 		var first *view.Life
 		var teamKills int
 		for i, l := range lv.Lives {
@@ -471,14 +466,7 @@ func TestLivesAttributionIncidents(t *testing.T) {
 		// 212260: lakso's life 21 runs [342875,348052] and the next begins at
 		// 348808 with a kill exactly there. It belongs to the life that had
 		// begun; eventLocs used to claim it for the one that ended as well.
-		res := analyzeCached(t, "212260.mvd.gz")
-		if res == nil {
-			t.Skip("212260 not cached")
-		}
-		lv, err := view.Lives(res, view.LivesOptions{})
-		if err != nil {
-			t.Fatal(err)
-		}
+		_, lv := livesOfOrSkip(t, "212260.mvd.gz")
 		for _, l := range lv.Lives {
 			if l.Player != "lakso" || l.Start != 342875 {
 				continue
@@ -507,16 +495,9 @@ func lastLife(lv *view.LivesView, player string) *view.Life {
 	return out
 }
 
-func sortedKeys(m map[string]*lifeTotals) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
-}
-
-func sortedIntKeys(m map[string]int) []string {
+// sortedKeys iterates a player-keyed map in a stable order — a failure message
+// naming players in map order is unreproducible.
+func sortedKeys[V any](m map[string]V) []string {
 	out := make([]string, 0, len(m))
 	for k := range m {
 		out = append(out, k)

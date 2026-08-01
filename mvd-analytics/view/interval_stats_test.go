@@ -43,14 +43,39 @@ func track(lo, hi int32) *result.PositionTrack {
 // The attribution window
 // ---------------------------------------------------------------------------
 
-// The zero value of the attribution fields is the non-partitioning case that
-// HotWindows passes: the window IS the interval, closed at both ends. Changing
-// that silently would move every hot window's stats off its own score.
-func TestStatsSpanDefaultWindowIsClosed(t *testing.T) {
-	sp := statsSpan{start: 1000, end: 2000, startInclusive: true}
-	lo, hi, loIncl, hiIncl := sp.window()
-	if lo != 1000 || hi != 2000 || !loIncl || !hiIncl {
-		t.Errorf("window() = %d,%d,%v,%v; want 1000,2000,true,true", lo, hi, loIncl, hiIncl)
+// window() resolves the two shapes a span comes in.
+func TestStatsSpanWindow(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		sp       statsSpan
+		lo, hi   int32
+		loI, hiI bool
+	}{
+		{
+			// The zero value of the attribution fields is the non-partitioning
+			// case that HotWindows passes: the window IS the interval, closed at
+			// both ends. Changing that silently would move every hot window's
+			// stats off its own score.
+			"unattributed: the window is the interval, closed",
+			statsSpan{start: 1000, end: 2000, startInclusive: true},
+			1000, 2000, true, true,
+		},
+		{
+			// A stored Alive list this package does not produce could in
+			// principle be out of order; the window clamps rather than
+			// inverting, which would make the counts depend on comparison order.
+			"attributed and inverted: clamped, not inverted",
+			statsSpan{start: 5000, end: 6000, attributed: true, attrStart: 5000, attrEnd: 3000},
+			5000, 5000, false, false,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			lo, hi, loI, hiI := tc.sp.window()
+			if lo != tc.lo || hi != tc.hi || loI != tc.loI || hiI != tc.hiI {
+				t.Errorf("window() = %d,%d,%v,%v; want %d,%d,%v,%v",
+					lo, hi, loI, hiI, tc.lo, tc.hi, tc.loI, tc.hiI)
+			}
+		})
 	}
 }
 
@@ -66,15 +91,14 @@ func TestStatsSpanEdgeRules(t *testing.T) {
 	sb := newStatsBuilder(statsResult(frags, loc, track(0, 5000)), "")
 
 	cases := []struct {
-		name           string
-		start, end     bool
-		wantKills      int
-		wantAttributed bool
+		name       string
+		start, end bool
+		wantKills  int
 	}{
-		{"closed both ends", true, true, 3, true},
-		{"half-open at the end", true, false, 2, true},
-		{"half-open at the start", false, true, 2, true},
-		{"open both ends", false, false, 1, true},
+		{"closed both ends", true, true, 3},
+		{"half-open at the end", true, false, 2},
+		{"half-open at the start", false, true, 2},
+		{"open both ends", false, false, 1},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -119,17 +143,6 @@ func TestStatsSpanDurationIsTheIntervalNotTheWindow(t *testing.T) {
 	}
 }
 
-// A stored Alive list this package does not produce could in principle be
-// out of order; the window clamps rather than inverting, which would make the
-// counts depend on comparison order.
-func TestStatsSpanClampsAnInvertedWindow(t *testing.T) {
-	sp := statsSpan{start: 5000, end: 6000, attributed: true, attrStart: 5000, attrEnd: 3000}
-	lo, hi, _, _ := sp.window()
-	if lo != 5000 || hi != 5000 {
-		t.Errorf("window() = %d,%d; want 5000,5000 (clamped, not inverted)", lo, hi)
-	}
-}
-
 // ---------------------------------------------------------------------------
 // Measuredness
 // ---------------------------------------------------------------------------
@@ -169,10 +182,7 @@ func TestMeasuredSourcesTracksTheDemo(t *testing.T) {
 	full.Shots = &result.ShotsResult{}
 	full.Items = &result.ItemsResult{}
 
-	got, err := Lives(full, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, full, LivesOptions{})
 	want := MeasuredSources{Frags: true, Damage: true, Shots: true, Locs: true, Items: true, Liveness: true}
 	if got.Measured != want {
 		t.Errorf("measured = %+v, want %+v", got.Measured, want)
@@ -202,10 +212,7 @@ func TestMeasuredSourcesTracksTheDemo(t *testing.T) {
 			res.Shots = &result.ShotsResult{}
 			res.Items = &result.ItemsResult{}
 			c.strip(res)
-			got, err := Lives(res, LivesOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
+			got := mustLives(t, res, LivesOptions{})
 			if c.check(got.Measured) {
 				t.Errorf("measured = %+v still claims a source the demo lost", got.Measured)
 			}
@@ -229,10 +236,7 @@ func TestMeasuredFragsReadsTheStoredKillAttributionVerdict(t *testing.T) {
 	res.Frags.KillsMeasured = false
 	res.Streams.Players[0].Deaths = []int32{5000}
 
-	got, err := Lives(res, LivesOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := mustLives(t, res, LivesOptions{})
 	if got.Measured.Frags {
 		t.Error("measured.frags is true on a demo whose frag log matched no obituary — " +
 			"the row's 0 kills / 0 teamkills would read as measured")
@@ -243,17 +247,11 @@ func TestMeasuredFragsReadsTheStoredKillAttributionVerdict(t *testing.T) {
 	// The same demo with a matched log is measured, so the flag tracks the
 	// verdict and not merely the emptiness of the response.
 	res.Frags.KillsMeasured = true
-	if got, err = Lives(res, LivesOptions{}); err != nil {
-		t.Fatal(err)
-	} else if !got.Measured.Frags {
+	if got := mustLives(t, res, LivesOptions{}); !got.Measured.Frags {
 		t.Error("measured.frags is false on a demo the analyzer judged measurable")
 	}
 	// And hot windows read the same flag from the same builder.
-	hw, err := HotWindows(res, HotWindowsOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !hw.Measured.Frags {
+	if hw := mustHW(t, res, HotWindowsOptions{}); !hw.Measured.Frags {
 		t.Error("/hot-windows measured.frags disagrees with /lives on one demo")
 	}
 }
@@ -397,11 +395,8 @@ func TestTopLocsRanksAndCaps(t *testing.T) {
 	if got[0].Loc != "b" || got[1].Loc != "c" || got[2].Loc != "e" {
 		t.Errorf("order = %q,%q,%q; want b,c,e", got[0].Loc, got[1].Loc, got[2].Loc)
 	}
-}
-
-func TestTopLocsEmptyIsNil(t *testing.T) {
 	if got := topLocs(nil, nil); got != nil {
-		t.Errorf("got %+v, want nil", got)
+		t.Errorf("empty input: got %+v, want nil", got)
 	}
 }
 
@@ -422,6 +417,15 @@ func TestTopCountKeyBreaksTiesByName(t *testing.T) {
 // Parity with the sibling endpoints
 // ---------------------------------------------------------------------------
 
+// parityDemos are the fixtures both acceptance tests below run on: COMMITTED
+// golden results, not the gitignored demo cache, so they run on every
+// `make test`, offline. (The view package cannot import analyzer — that is an
+// import cycle — so a real demo reaches it as its serialised Result.)
+var parityDemos = []string{
+	"2on2_nani_pora_210426_dm6.json",
+	"4on4_osams_ra_230426_dm3.json",
+}
+
 // The plan's acceptance test for the shared primitive: over non-degenerate
 // windows of a real demo, the stats block must equal what /frags and /damage
 // report for the same window. If they can drift, a caller adding up per-life or
@@ -440,11 +444,6 @@ func TestTopCountKeyBreaksTiesByName(t *testing.T) {
 // interval starting at t=0 would receive whole-match aggregates). Every window
 // here therefore starts past 0.
 //
-// The fixtures are the COMMITTED golden results, not the gitignored demo
-// cache: this test is the acceptance criterion for the shared primitive and
-// must run on every `make test`, offline, rather than only on a machine that
-// has fetched the corpus. (The view package cannot import analyzer — that is
-// an import cycle — so a real demo reaches it as its serialised Result.)
 // BOTH FAMILIES are exercised. The earlier version built the stats with fam=""
 // and compared against view.Damage with an unset Dmg — both raw — so it could
 // not see a family mismatch at all, which is how the builder came to be handed
@@ -453,12 +452,8 @@ func TestTopCountKeyBreaksTiesByName(t *testing.T) {
 // hundreds of points per window on a real demo, so a swapped family now fails
 // here.
 func TestIntervalStatsParityWithFragsAndDamage(t *testing.T) {
-	demos := []string{
-		"2on2_nani_pora_210426_dm6.json",
-		"4on4_osams_ra_230426_dm3.json",
-	}
 	checked, windows, folds, differing := 0, 0, 0, 0
-	for _, name := range demos {
+	for _, name := range parityDemos {
 		res := loadGolden(t, name)
 		if res == nil || res.Frags == nil || res.Damage == nil || res.Streams == nil {
 			continue
@@ -553,12 +548,8 @@ func TestIntervalStatsParityWithFragsAndDamage(t *testing.T) {
 // diverged, every one of them a positional kill. Committed goldens, so this
 // runs offline on every `make test`.
 func TestHotWindowScoreEqualsItsOwnStat(t *testing.T) {
-	demos := []string{
-		"2on2_nani_pora_210426_dm6.json",
-		"4on4_osams_ra_230426_dm3.json",
-	}
 	checked, windows := 0, 0
-	for _, name := range demos {
+	for _, name := range parityDemos {
 		res := loadGolden(t, name)
 		if res == nil || res.Frags == nil || res.Damage == nil {
 			continue
