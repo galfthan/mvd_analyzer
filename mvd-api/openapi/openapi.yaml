@@ -78,6 +78,42 @@ info:
     likewise 400 (`invalid_param`) on an unknown value instead of matching
     nothing.
 
+    ### API stability
+    The API grows **additively**, and the rare genuine break arrives as a
+    new route rather than a mutation of an old one.
+
+    What you can rely on: **`/v1` grows, it doesn't shift** — new endpoints
+    and new response fields appear at any time without announcement, and
+    documented fields don't change meaning, change type, or disappear
+    outside the process here. A **breaking change ships as `/v2/<endpoint>`
+    served alongside `/v1`**, not as a replacement. **Old routes retire on
+    a minimum of 8 weeks' notice**, and in practice only once measured
+    usage has drained. A **correctness fix is not a break**: when a value
+    changes because it was computed wrongly, the field keeps its name, type
+    and documented meaning, so the fix ships inside `/v1` and only raises
+    `schemaVersion`.
+
+    `schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and this
+    document's `info.version`) is a **regeneration counter, not a break
+    signal**. It ticks on every observable change including purely additive
+    ones. Treat it as a cache key.
+
+    Covered by the contract: documented request parameters, documented
+    response fields and their types, documented enum members and status
+    codes. **Not** covered, and free to change without a version bump:
+    ordering where no order is documented, rounding of derived floats,
+    whether an empty value is omitted or emitted, rate-limit thresholds,
+    and which demos return `422 <section>_unavailable` (a demo's
+    capabilities are a property of the recording). Adding a member to a
+    *default* set is additive even though it changes the rows you receive —
+    schema v58 added the `demomark` event type to `/events` and to its
+    default set, so callers omitting `types` began seeing new rows. Filter
+    explicitly if you need a fixed set.
+
+    In return, clients **must ignore unknown fields and unknown enum
+    values**, and treat this document as the contract — undocumented
+    behaviour you happen to observe may change without notice.
+
     This document is the complete per-endpoint reference. Deep
     field-level semantics of the underlying analysis (the Result
     contract shared with the Go library and WASM builds) are served by

@@ -5,6 +5,36 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (api-stability-policy) — the compatibility promise, written down
+
+Documentation only: no schema change, no code change, no served number or
+response shape changed.
+
+- **The API's compatibility policy is now stated where consumers can read
+  it.** [`mvd-api/API.md` §2.7](mvd-api/API.md) is the canonical text, with a
+  self-contained copy in the OpenAPI `info.description` (so it is served at
+  `/docs` to integrators who cannot follow repo paths) and a short version on
+  the Discord key portal's landing page.
+- **The policy**: `/v1` grows additively — new endpoints, fields and enum
+  members appear without announcement. A genuine break ships as
+  `/v2/<endpoint>` served **alongside** `/v1` rather than replacing it, and
+  old routes retire on a minimum of **8 weeks' notice**, in practice only
+  once measured usage has drained. Clients must ignore unknown fields and
+  enum values, and treat `openapi.yaml` as the contract.
+- **A correctness fix is explicitly not a break.** When a field's value
+  changes because it was being computed wrongly, the name, type and
+  documented meaning are unchanged, so it stays in `/v1` and rides
+  `schemaVersion`. Such changes are called out here with the direction and
+  rough magnitude.
+- **What the contract does *not* cover** is now written down: undocumented
+  ordering, rounding of derived floats, `omitempty` behaviour, rate-limit
+  thresholds, and which demos return `422 <section>_unavailable`. Adding a
+  member to a *default* set (e.g. the v58 `demomark` event type) counts as
+  additive even though it changes the rows a caller receives.
+- Fixes the previous §2.7, which described `/v1` as a prefix that would be
+  *bumped* on a break (implying replacement), and the stale
+  "currently `38`" schema-version claim in the top-level README.
+
 ## unreleased (info-links) — API & MCP discoverability, admin contact
 
 No schema change; no served number changed.

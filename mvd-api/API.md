@@ -420,27 +420,76 @@ key. `Access-Control-Allow-Origin: *` and a credentialed `Authorization`
 header coexist because the key travels as a plain header, not a cookie (the
 CORS credentials mode that `*` forbids applies to cookies, not bearer tokens).
 
-### 2.7 API versioning
+### 2.7 API versioning and stability
+
+The API is still growing. The deal is: it grows **additively**, and the rare
+genuine break arrives as a new route you can migrate to on your own
+schedule.
 
 Two version numbers move independently, and they mean different things:
 
 - **The `/v1` path prefix is the compatibility contract.** It is bumped
-  only for a *breaking* change — a field removed or renamed, an enum value
-  withdrawn, a type changed incompatibly, a default behaviour altered. As
-  long as you stay on `/v1`, existing integrations keep working.
+  only for a *breaking* change — a documented field removed or renamed, an
+  enum value withdrawn, a type changed incompatibly, a documented default
+  behaviour altered. As long as you stay on `/v1`, existing integrations
+  keep working.
 - **`schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and the
   OpenAPI `info.version`) is a regeneration counter.** It ticks on *every*
   observable change to the analysis output, including purely **additive**
-  ones — a new field, a new event type, a new enum value. It keys caches
-  and ETags, so bumping it invalidates stale client caches automatically; a
-  schema-version increase is **not** a signal that anything broke.
+  ones — a new field, a new endpoint, a new event type, a new enum value.
+  It keys caches and ETags, so bumping it invalidates stale client caches
+  automatically; a schema-version increase is **not** a signal that
+  anything broke.
 
-Within `/v1`, clients must **ignore unknown fields and unknown enum
-values** so that additive changes (which only raise `schemaVersion`) never
-require a client update. Pin behaviour to `/v1`, treat `schemaVersion` as a
-cache key, and let new fields/enum members flow through unread until you
-choose to consume them. (For example, schema v58 added the `demomark`
-event type to `/events` — a no-`types` caller simply began seeing new rows.)
+#### What you can rely on
+
+- **`/v1` grows, it doesn't shift.** New endpoints and new response fields
+  appear at any time without announcement. Documented fields and endpoints
+  don't change meaning, change type, or disappear outside the process
+  below.
+- **A breaking change ships as a new route** (`/v2/<endpoint>`) served
+  **alongside** the old one, not as a replacement. Both work during the
+  transition, so nothing forces a same-day migration.
+- **Old routes retire on notice**: a minimum of 8 weeks after the
+  deprecation is announced, and in practice only once measured usage of the
+  old route has drained — every request carries a key, so "is anyone still
+  on this?" is measured rather than guessed. The notice period is the
+  floor; drained usage can only delay a removal, never bring it forward.
+- **A correctness fix is not a break.** When a field's *value* changes
+  because it was being computed wrongly, the field keeps its name, type and
+  documented meaning — so the fix ships inside `/v1` and rides
+  `schemaVersion` like any other regeneration. Corrections are called out
+  in [RELEASE_NOTES.md](../RELEASE_NOTES.md) with the direction and rough
+  magnitude of the change. If you have pinned a golden file, expect it to
+  move; if you have pinned a *shape*, it won't.
+
+#### What is, and isn't, covered
+
+**Covered by the contract** — the documented request parameters, the
+documented response fields and their types, documented enum members, and
+documented status codes.
+
+**Not covered, and free to change without a version bump** — the ordering
+of array elements where no order is documented, rounding of derived
+floating-point values, whether an empty/zero field is omitted
+(`omitempty`) or emitted, rate-limit thresholds, and which demos return
+`422 <section>_unavailable` (a demo's capabilities are a property of the
+recording, not of the API).
+
+**Adding a member to a default set is additive**, even though it changes
+the rows you receive. Schema v58 added the `demomark` event type to
+`/events` *and* to its default type set, so a caller that omits `types`
+simply began seeing new rows. Filter explicitly if you need a fixed set.
+
+#### What your client must do in return
+
+1. **Ignore unknown fields and unknown enum values.** Never treat an
+   unrecognised field as an error — additive evolution depends on it.
+2. **Treat [`/openapi.yaml`](/openapi.yaml) as the contract.** Undocumented
+   behaviour you happen to observe may change without notice.
+3. **Pin behaviour to `/v1`, treat `schemaVersion` as a cache key** — not
+   as a compatibility signal — and let new fields flow through unread until
+   you choose to consume them.
 
 ---
 

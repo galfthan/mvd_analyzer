@@ -124,6 +124,17 @@ identically. See [`mvd-api/README.md`](mvd-api/README.md) for the
 endpoint table; the running server also describes itself — an OpenAPI
 3.1 spec at `/openapi.yaml`, browsable at `/docs`.
 
+**API stability.** The API grows additively: new endpoints and response
+fields appear without announcement, documented fields don't change meaning
+or disappear, and a genuine break ships as `/v2/<endpoint>` served
+*alongside* `/v1` (old routes retire on a minimum of 8 weeks' notice). A
+correctness fix — a value that changes because it was computed wrongly —
+keeps the field's name, type and meaning, so it stays in `/v1` and only
+raises `schemaVersion`, which is a cache key rather than a break signal. In
+return clients must ignore unknown fields and enum values. The full policy
+is [`mvd-api/API.md` §2.7](mvd-api/API.md#27-api-versioning-and-stability),
+also served in the spec's own description at `/docs`.
+
 ### Run MCP locally (`mvd-mcp`)
 
 `mvd-mcp` is a thin (~7 MB) stdio MCP server that lets AI clients
@@ -596,10 +607,14 @@ construction; the PVS-minus-LOS gap is an occlusion-tolerant
 proximity/awareness signal. Both are surfaced through the REST/MCP
 `/los` endpoint, the CLI, and the web map overlay.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `38`).
-Consumers can pin or feature-detect by reading `result.schemaVersion`.
-The full per-field reference and the complete v4–v35 migration table live
-in [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
+`CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
+observable change to the analysis output — additive ones included — so it is
+a regeneration counter and cache key, not a break signal. Consumers can pin
+or feature-detect by reading `result.schemaVersion`. The full per-field
+reference and the complete version-history table live in
+[mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md); the
+HTTP-level compatibility policy is [`mvd-api/API.md`
+§2.7](mvd-api/API.md#27-api-versioning-and-stability).
 
 ### Running the pipeline
 
