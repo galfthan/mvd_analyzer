@@ -5,6 +5,81 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (alive-gated-occupancy) — loc/region occupancy stops counting corpses, schema v64
+
+**A correctness fix.** Values move in `locGraph` and
+`timelineAnalysis.regionControl`; no existing field changed shape, name or
+meaning, so this stays in `/v1` per the compatibility policy. If you have
+pinned these numbers, expect them to fall.
+
+- **Dead players were being counted as present — and usually as *armed*.**
+  They keep streaming position at full rate (`mvdsv/src/sv_demo.c:1481-1519`
+  writes `svc_playerinfo` for every `cs_spawned` client), and on a gib the
+  player entity *itself* becomes the bouncing head
+  (`ktx/src/player.c:1070` `ThrowHead`), so a corpse's travels were tallied
+  as loc time, as region control, and as movement edges. RL/LG
+  possession spans death (`StatItems` bits clear only at respawn), so the
+  corpse counted as armed. `regionControl`'s own comment claimed `Li==0`
+  marked dead players; it never did. Expect region percentages and `byPlayer`
+  ms to drop by roughly (deaths × death-to-respawn time) per player.
+- **New `streams.players[].alive`** — each player's lives as half-open
+  intervals, the one canonical "was this player alive at t", derived from the
+  fused spawn/death markers. Deaths come from three detectors, and the
+  obituary path (`mvd-reader/parser/stats.go` `forceEmitDeath`) exists
+  precisely because the other two miss deaths, so liveness is derived from the
+  markers rather than from any single wire flag. Not `omitempty`: `null` /
+  `[]` / `[…]` are three distinct measuredness states.
+- **`locGraph` node time is now an exact time-weighted integral**, replacing a
+  forward difference clamped to 50 ms. Posture splits at interval boundaries
+  instead of snapping to sample instants, so an RL pickup landing between two
+  samples divides the interval exactly. The clamp itself was near-inert
+  (measured 0–96 ms lost per 60 s), so the corpse exclusion is what actually
+  moves the numbers.
+- **`/loc-trails` is gated too.** A residence is dwell, i.e. presence, so it
+  now truncates at a death and resumes at the respawn. Without this the same
+  corpse travels loc-graph excludes would still have shown up as dwell and the
+  two endpoints would have answered the same question differently.
+- **`region-control`'s `bucketStates` strings change as well**, not just the
+  stats block: both walkers share one classification point, so a bucket in
+  which every present player is dead now reads `_` (empty) instead of
+  controlled or contested. The web Region Control timeline shifts accordingly.
+- **Sample-and-hold is now bounded, which the deleted 50 ms clamp had really
+  been doing.** A position sample's evidence expires after 250 ms
+  (`result.SampleStaleCapMs`); beyond that the player's location is unknown and
+  credited to nobody. This is inert on server-recorded demos (the worst gap
+  anywhere in the golden corpus is 74 ms) and decisive on **POV recordings**,
+  where only players inside the recorder's PVS get `svc_playerinfo`: on one such
+  demo the recorder had a 152 ms worst gap while the other seven players had
+  gaps up to **73 seconds**, and holding across them credited ~92% of a player's
+  loc time to wherever they were standing when they left view. `regionControl`
+  had this defect too, since v59.
+- **Both walks now end at a player's end-of-track** (`view.TrackHoldEnd`: the
+  last position sample held for one measured cadence, capped at 250 ms), so an
+  early quitter no longer holds their final loc and region through to match
+  end. This was the sharper half of the bug: region control evaluates each
+  interval at its LEFT endpoint, so a departed player's final sample credited
+  them everything up to the next event — on a recording that ends before the
+  match window, the entire remaining match (measured: 60 s of phantom presence
+  for a player who left after 2 s).
+- **`streams.players[].alive` is clipped to observed presence.** The
+  underlying derivation starts everyone alive at `t=0` (deliberately — KTX
+  emits a first spawn only on the first respawn), which is right for a player
+  present from the start and wrong for everyone else; a late joiner would
+  otherwise claim to have been alive before connecting. `playerStats` never saw
+  this because it intersects with its own presence window. Note a reconnect gap
+  in the middle of a merged stream is still not represented.
+- **The loc-graph teleport threshold is scaled by the real inter-sample
+  delta** instead of an assumed 50 ms. The MVD sample rate is *not* fixed:
+  mvdsv gates demo frames on `sv_demofps` (default 30,
+  `mvdsv/src/sv_send.c:1339-1346`), and measured across the golden corpus the
+  cadence is bimodal — ~13–16 ms on servers at full tick, ~34–39 ms on servers
+  at the default. The docs' "~13 ms, virtually all gaps under 25 ms" was wrong
+  for a third of the corpus and is corrected.
+- Sibling to the **v59** region-stats fix, which removed the same
+  grid-versus-integral defect from region control and concluded it existed
+  nowhere else. Loc-graph was missed. A new reconciliation test now pins loc
+  totals to region totals so the two cannot drift apart again.
+
 ## unreleased (api-stability-policy) — the compatibility promise, written down
 
 Documentation only: no schema change, no code change, no served number or

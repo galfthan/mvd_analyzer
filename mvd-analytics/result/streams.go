@@ -169,6 +169,50 @@ type PlayerStream struct {
 	Spawns []int32 `json:"sp,omitempty"`
 	Deaths []int32 `json:"d,omitempty"`
 
+	// Alive is the player's LIVES: one half-open [Start, End) interval per
+	// spawn-to-death run, derived from Spawns/Deaths against the match
+	// window. It is the canonical STORED liveness — a consumer should read
+	// it rather than re-derive liveness from the marker lists.
+	//
+	// It is not yet the only implementation, and the name is overloaded on the
+	// wire: the columnar /buckets response already carries a per-column
+	// `alive` computed by view.playerActiveInWindow, which is a
+	// window-OVERLAP test with its own fallbacks — a different question from
+	// this field's instantaneous one. They can disagree, and neither is wrong.
+	//
+	// Three older in-package liveness predicates remain —
+	// analyzer.losAliveAt, aimcore's per-shot aliveAt, and
+	// view.playerActiveInWindow — and they agree with this field except
+	// at one documented ms-tie case (a death and the respawn it triggers on
+	// the same millisecond: this field reports ALIVE, the other three report
+	// dead; see analyzer/player_stats.go aliveIntervals). They were left
+	// alone deliberately: pointing them here moves every line-of-sight, aim
+	// and bucket figure in the golden corpus, which would confound the
+	// loc/region correctness fix this field was added for. Migrating them is
+	// a follow-up; when it happens, fix them together.
+	//
+	// Deaths are the FUSION of three detectors (DF_DEAD|DF_GIB on
+	// svc_playerinfo, STAT_HEALTH transitions, and the obituary path —
+	// mvd-reader/parser/stats.go forceEmitDeath), which is why this is
+	// derived from the marker lists rather than from any single wire flag:
+	// the obituary path exists precisely because the other two miss deaths
+	// (a death+respawn entirely between two MVD frames, and the KTX
+	// dtTELE2 pent deflection).
+	//
+	// Liveness rule: alive from match start until a death, each death
+	// beginning a dead period the next spawn ends. It deliberately does
+	// NOT require a recorded match-start spawn — KTX emits a player's
+	// first spawn only on their first RESPAWN. A death with no following
+	// spawn (the dtTELE2 deflection) correctly leaves them dead to the end.
+	//
+	// NOT omitempty, deliberately — the three states are distinct:
+	//   null  the match window is unknown, so liveness was not measurable;
+	//   []    measured, and the player was never alive in the window;
+	//   [...] the player's lives.
+	// A player who never died is a single interval spanning the match, so
+	// absence can never be read as "alive throughout".
+	Alive []Interval `json:"alive"`
+
 	// LOS records when this player (the looker) had a clear line of sight
 	// to each other player, one LosTrack per opponent ever seen (schema
 	// v37). Line of sight is asymmetric — the looker's single eye point vs.
@@ -341,8 +385,10 @@ type GlobalStream struct {
 // respawn teleport or an abnormal time gap (death / pause / reconnect),
 // so a velocity reads ~0 over those rather than spiking; an isolated
 // sample reads 0. The source x/y/z are float32 Quake units (the wire's
-// sub-unit origin, no longer rounded to whole units), sampled ~every
-// 13 ms, so the derivative is sub-unit precise — smooth client-side
+// sub-unit origin, no longer rounded to whole units), sampled at the demo's
+// native cadence (~13-40 ms depending on the recording server's sv_demofps;
+// see MVD_FORMAT.md), so the derivative is sub-unit precise at the fast end
+// and correspondingly coarser at the slow end — smooth client-side
 // only if a softer speed curve is wanted. Like x/y/z and h these are
 // native float32; only the JSON text is rounded to 3 decimals (see
 // PositionTrack.MarshalJSON / coord.go). Speed is hypot(vx,vy,vz); horizontal speed

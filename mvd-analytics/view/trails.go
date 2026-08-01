@@ -72,7 +72,22 @@ func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) 
 		if !pf.accepts(p.Name) {
 			continue
 		}
-		raw := buildTrailRaw(p.Loc, opts.StartTime, end, locTable)
+		// Bound by the player's own end-of-track, the same instant the
+		// occupancy walkers stop at, so a departed player's last residence
+		// does not run to match end.
+		pEnd := end
+		if pt := p.Position; pt != nil && len(pt.T) > 0 {
+			if h := result.TrackHoldEnd(pt.T); pEnd == 0 || h < pEnd {
+				pEnd = h
+			}
+		}
+		raw := buildTrailRaw(p.Loc, opts.StartTime, pEnd, locTable)
+		// A residence is DWELL — presence — so it is alive-gated exactly like
+		// loc-graph node time and region-control presence. Without this the
+		// same corpse/gib-head travels loc-graph now excludes would still show
+		// up here as dwell, and the two endpoints would answer the same
+		// question differently on the same demo.
+		raw = clipTrailToAlive(raw, p.Alive)
 		seq := raw
 		if minDwell > 0 {
 			seq = mergeShortDwells(seq, minDwell)
@@ -139,6 +154,39 @@ func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd int32, locT
 			Loc:   locName,
 			li:    c.V,
 		})
+	}
+	return out
+}
+
+// clipTrailToAlive intersects each residence with the player's lives, so a
+// residence straddling a death is truncated at the death and resumes at the
+// respawn. A NIL Alive means liveness was not measurable and the trail is
+// returned unchanged — the same degrade the occupancy walkers apply, for the
+// same reason (see analyzer makeAliveGate / view aliveAt).
+func clipTrailToAlive(seq []TrailEntry, alive []result.Interval) []TrailEntry {
+	if alive == nil || len(seq) == 0 {
+		return seq
+	}
+	out := make([]TrailEntry, 0, len(seq))
+	ai := 0
+	for _, e := range seq {
+		for ai < len(alive) && alive[ai].End <= e.Start {
+			ai++
+		}
+		for j := ai; j < len(alive) && alive[j].Start < e.End; j++ {
+			s, t := e.Start, e.End
+			if alive[j].Start > s {
+				s = alive[j].Start
+			}
+			if alive[j].End < t {
+				t = alive[j].End
+			}
+			if t > s {
+				c := e
+				c.Start, c.End = s, t
+				out = append(out, c)
+			}
+		}
 	}
 	return out
 }

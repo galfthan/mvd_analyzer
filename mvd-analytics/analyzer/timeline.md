@@ -15,7 +15,8 @@
 Reconstructs per-player state at native event rate into
 `result.Streams` — sparse change streams (health, armor, armor type,
 loc, ammo) + interval lists (weapons, powerups) + a columnar position
-track at the demo's native sampling cadence (~77 Hz). All higher-order
+track at the demo's native sampling cadence (server-configured via
+sv_demofps; see MVD_FORMAT.md). All higher-order
 analyses (frag streaks, region control, powerup events) are computed
 during finalize from this storage. Bucketed views are no longer baked
 at parse time; `mvd-analytics/view.Buckets` produces them on demand at
@@ -136,9 +137,11 @@ authoritative table. Summary:
 
 ## Reference
 
-- Native position sampling cadence is the QW server tick rate
-  (typically ~77 Hz, ~13 ms between samples; varies with
-  `sv_demoPings` and per-player update rate).
+- Native position sampling cadence is set by the SERVER's `sv_demofps`
+  (default 30), quantised up to the server tick — not the tick rate
+  itself. Measured across the golden corpus it is bimodal: ~13-16 ms on
+  servers at full tick, ~34-39 ms on servers at the default. Never assume
+  a fixed interval; read it off the track.
 - Region / loc heuristics: see `mvd-analytics/loc/data/*.loc`.
   Auto-detect keywords live in `timeline_regions.go`; per-map
   region overrides ship as JSON in

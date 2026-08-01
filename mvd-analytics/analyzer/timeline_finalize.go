@@ -9,6 +9,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-analytics/mapbsp"
 	"github.com/mvd-analyzer/mvd-analytics/mapclip"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -397,6 +398,11 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		flagDemoTimeBase(result)
 	}
 
+	// Canonical liveness, derived once from the final spawn/death markers.
+	// Runs AFTER the rebase and after synthesizeMatchStartSpawns, so it sees
+	// match-relative markers including the synthesised match-start spawn.
+	deriveAliveIntervals(result.Streams)
+
 	// Duel: synthesise the frag-score timeline for a participant who never
 	// emitted svc_updatefrags (a frogbot) and so is absent from the frag-update
 	// stream above, sourcing their entries from the obituary-based frag log
@@ -614,6 +620,112 @@ func synthesizeMatchStartSpawns(streams *Streams) {
 		}
 		p.Spawns = append([]int32{0}, p.Spawns...)
 	}
+}
+
+// deriveAliveIntervals publishes each player's lives on PlayerStream.Alive so
+// consumers can read one definition of "alive at t" instead of re-deriving it
+// from the Spawns/Deaths markers.
+//
+// It is the same computation player_stats already ran (aliveIntervals), now
+// stored so the two positional producers that had NO liveness notion at all —
+// loc-graph and region-control, which were therefore counting corpses as
+// present — can share it. The three other predicates (losAliveAt, aimcore's
+// aliveAt, view.playerActiveInWindow) still compute their own; see
+// PlayerStream.Alive for why they were not migrated here.
+//
+// The window is [0, matchEnd] on the match clock. When no match window is
+// known (the demo-timebase path: no match start detected, so nothing was
+// rebased) the window falls back to the player's own last observed
+// timestamp, which keeps liveness measurable on such a demo; if even that is
+// absent, Alive stays nil to say "not measurable" rather than "never alive".
+func deriveAliveIntervals(streams *Streams) {
+	if streams == nil {
+		return
+	}
+	matchEnd := streams.Global.MatchEnd
+	for pi := range streams.Players {
+		p := &streams.Players[pi]
+		end := matchEnd
+		if end <= 0 {
+			end = lastObservedMs(p)
+		}
+		if end <= 0 {
+			p.Alive = nil // unmeasurable — no window, no samples
+			continue
+		}
+		iv := aliveIntervals(p.Spawns, p.Deaths, end)
+
+		// Clip to when the player was actually PRESENT. aliveIntervals starts
+		// alive at t=0 unconditionally — deliberately, because KTX emits a
+		// player's first spawn only on their first RESPAWN, so keying off
+		// "most recent spawn" would mark everyone dead until minutes in. That
+		// assumption is right for someone present from the start and wrong for
+		// everyone else: without this clip a player who joins at 5:00 claims to
+		// have been alive for the five minutes before they connected, and one
+		// who quits at 5:00 without dying claims to be alive to match end.
+		// player_stats never saw the error because it intersects with its own
+		// presence window; a stored, published field has no such caller.
+		//
+		// The position track is the presence evidence: it exists in memory here
+		// even when it is not serialised. Its end uses the shared
+		// view.TrackHoldEnd so the field agrees with the walkers that read it.
+		// A player with no track keeps the marker-derived intervals — there is
+		// no presence evidence to clip against, and inventing one would be
+		// worse than the wider claim.
+		if pt := p.Position; pt != nil && len(pt.T) > 0 {
+			iv = clipIntervals(iv, observedSpans(pt.T))
+		}
+
+		if iv == nil {
+			// Measured, but the player was never alive in the window.
+			// Distinct from nil (unmeasurable) — see PlayerStream.Alive.
+			iv = []Interval{}
+		}
+		p.Alive = iv
+	}
+}
+
+// observedSpans is the set of windows in which the position track actually
+// carries evidence: contiguous runs of samples, split wherever a gap exceeds
+// result.SampleStaleCapMs, each held to the end of its run.
+//
+// Clipping Alive to these is what stops the published field claiming liveness
+// across a hole. It matters on POV recordings, where only players inside the
+// recorder's PVS are written and everyone else has multi-second gaps — without
+// the split, `alive` would assert a continuous life across a 73-second window
+// containing no sample at all, and every consumer gating on it would inherit
+// that claim.
+func observedSpans(t []int32) []Interval {
+	if len(t) == 0 {
+		return nil
+	}
+	var out []Interval
+	start := t[0]
+	for i := 1; i < len(t); i++ {
+		if t[i]-t[i-1] > result.SampleStaleCapMs {
+			out = append(out, Interval{Start: start, End: t[i-1] + result.SampleStaleCapMs})
+			start = t[i]
+		}
+	}
+	return append(out, Interval{Start: start, End: result.TrackHoldEnd(t)})
+}
+
+// lastObservedMs is the latest timestamp the player is known to exist at,
+// used only as the alive-window fallback on a demo with no detected match
+// window. Position samples are the densest source; spawn / death markers
+// cover a player whose position track was not built.
+func lastObservedMs(p *PlayerStream) int32 {
+	var last int32
+	if p.Position != nil && len(p.Position.T) > 0 {
+		last = p.Position.T[len(p.Position.T)-1]
+	}
+	if n := len(p.Spawns); n > 0 && p.Spawns[n-1] > last {
+		last = p.Spawns[n-1]
+	}
+	if n := len(p.Deaths); n > 0 && p.Deaths[n-1] > last {
+		last = p.Deaths[n-1]
+	}
+	return last
 }
 
 // pauseCoalesceGapMs separates one pause from the next. mvdsv emits a

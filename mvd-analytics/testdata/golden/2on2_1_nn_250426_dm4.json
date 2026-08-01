@@ -45573,31 +45573,31 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 10,
+            "Milton": 9,
             "shazam": 12,
             "squeeze": 2,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 12,
+            "1": 11,
             "n n": 13
           },
-          "total": 25
+          "total": 24
         },
         "byPlayer": {
-          "Milton": 11,
+          "Milton": 10,
           "shazam": 13,
           "squeeze": 7,
           "stepcop": 3
         },
         "byTeam": {
-          "1": 18,
+          "1": 17,
           "n n": 16
         },
         "from": "GL",
         "kind": "normal",
         "to": "LG",
-        "total": 34,
+        "total": 33,
         "unarmed": {
           "byPlayer": {
             "Milton": 1,
@@ -45655,27 +45655,18 @@
           "total": 9
         },
         "byPlayer": {
-          "shazam": 3,
+          "shazam": 2,
           "squeeze": 5,
           "stepcop": 2
         },
         "byTeam": {
           "1": 5,
-          "n n": 5
+          "n n": 4
         },
         "from": "GL",
         "kind": "normal",
         "to": "SSG",
-        "total": 10,
-        "unarmed": {
-          "byPlayer": {
-            "shazam": 1
-          },
-          "byTeam": {
-            "n n": 1
-          },
-          "total": 1
-        }
+        "total": 9
       },
       {
         "armed": {
@@ -45790,29 +45781,23 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 1,
-            "squeeze": 1,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 2,
             "n n": 1
           },
-          "total": 3
+          "total": 1
         },
         "byPlayer": {
-          "Milton": 1,
-          "squeeze": 1,
           "stepcop": 1
         },
         "byTeam": {
-          "1": 2,
           "n n": 1
         },
         "from": "LG",
         "kind": "normal",
         "to": "Quad.stairs",
-        "total": 3
+        "total": 1
       },
       {
         "armed": {
@@ -45843,28 +45828,26 @@
         "armed": {
           "byPlayer": {
             "Milton": 1,
-            "shazam": 1,
-            "stepcop": 1
+            "shazam": 1
           },
           "byTeam": {
             "1": 1,
-            "n n": 2
+            "n n": 1
           },
-          "total": 3
+          "total": 2
         },
         "byPlayer": {
           "Milton": 1,
-          "shazam": 1,
-          "stepcop": 1
+          "shazam": 1
         },
         "byTeam": {
           "1": 1,
-          "n n": 2
+          "n n": 1
         },
         "from": "LG",
         "kind": "normal",
         "to": "high",
-        "total": 3
+        "total": 2
       },
       {
         "armed": {
@@ -45882,25 +45865,16 @@
         "byPlayer": {
           "Milton": 4,
           "squeeze": 1,
-          "stepcop": 4
+          "stepcop": 3
         },
         "byTeam": {
           "1": 5,
-          "n n": 4
+          "n n": 3
         },
         "from": "LG",
         "kind": "normal",
         "to": "low",
-        "total": 9,
-        "unarmed": {
-          "byPlayer": {
-            "stepcop": 1
-          },
-          "byTeam": {
-            "n n": 1
-          },
-          "total": 1
-        }
+        "total": 8
       },
       {
         "armed": {
@@ -45999,29 +45973,29 @@
           "byPlayer": {
             "Milton": 1,
             "shazam": 2,
-            "squeeze": 2,
+            "squeeze": 1,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 3,
+            "1": 2,
             "n n": 3
           },
-          "total": 6
+          "total": 5
         },
         "byPlayer": {
           "Milton": 1,
           "shazam": 2,
-          "squeeze": 2,
+          "squeeze": 1,
           "stepcop": 1
         },
         "byTeam": {
-          "1": 3,
+          "1": 2,
           "n n": 3
         },
         "from": "LG.GA",
         "kind": "normal",
         "to": "low",
-        "total": 6
+        "total": 5
       },
       {
         "armed": {
@@ -46215,29 +46189,27 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 1,
-            "shazam": 1
+            "Milton": 1
           },
           "byTeam": {
-            "1": 1,
-            "n n": 1
+            "1": 1
           },
-          "total": 2
+          "total": 1
         },
         "byPlayer": {
           "Milton": 3,
-          "shazam": 3,
+          "shazam": 2,
           "squeeze": 2,
           "stepcop": 3
         },
         "byTeam": {
           "1": 5,
-          "n n": 6
+          "n n": 5
         },
         "from": "Quad.stairs",
         "kind": "normal",
         "to": "LG",
-        "total": 11,
+        "total": 10,
         "unarmed": {
           "byPlayer": {
             "Milton": 2,
@@ -46276,27 +46248,6 @@
       {
         "armed": {
           "byPlayer": {
-            "shazam": 1
-          },
-          "byTeam": {
-            "n n": 1
-          },
-          "total": 1
-        },
-        "byPlayer": {
-          "shazam": 1
-        },
-        "byTeam": {
-          "n n": 1
-        },
-        "from": "Quad.stairs",
-        "kind": "normal",
-        "to": "Quad",
-        "total": 1
-      },
-      {
-        "armed": {
-          "byPlayer": {
             "Milton": 4,
             "shazam": 3,
             "squeeze": 10,
@@ -46312,25 +46263,25 @@
           "Milton": 4,
           "shazam": 5,
           "squeeze": 10,
-          "stepcop": 7
+          "stepcop": 6
         },
         "byTeam": {
           "1": 14,
-          "n n": 12
+          "n n": 11
         },
         "from": "Quad.stairs",
         "kind": "normal",
         "to": "Quad.tele",
-        "total": 26,
+        "total": 25,
         "unarmed": {
           "byPlayer": {
             "shazam": 2,
-            "stepcop": 2
+            "stepcop": 1
           },
           "byTeam": {
-            "n n": 4
+            "n n": 3
           },
-          "total": 4
+          "total": 3
         }
       },
       {
@@ -46428,27 +46379,6 @@
         "kind": "normal",
         "to": "low",
         "total": 13
-      },
-      {
-        "armed": {
-          "byPlayer": {
-            "shazam": 1
-          },
-          "byTeam": {
-            "n n": 1
-          },
-          "total": 1
-        },
-        "byPlayer": {
-          "shazam": 1
-        },
-        "byTeam": {
-          "n n": 1
-        },
-        "from": "Quad.stairs",
-        "kind": "normal",
-        "to": "low.stand",
-        "total": 1
       },
       {
         "armed": {
@@ -46623,28 +46553,28 @@
             "Milton": 1,
             "shazam": 6,
             "squeeze": 3,
-            "stepcop": 2
+            "stepcop": 1
           },
           "byTeam": {
             "1": 4,
-            "n n": 8
+            "n n": 7
           },
-          "total": 12
+          "total": 11
         },
         "byPlayer": {
           "Milton": 3,
           "shazam": 9,
           "squeeze": 8,
-          "stepcop": 3
+          "stepcop": 2
         },
         "byTeam": {
           "1": 11,
-          "n n": 12
+          "n n": 11
         },
         "from": "SSG",
         "kind": "normal",
         "to": "GL",
-        "total": 23,
+        "total": 22,
         "unarmed": {
           "byPlayer": {
             "Milton": 2,
@@ -46909,61 +46839,61 @@
           "total": 34
         },
         "byPlayer": {
-          "Milton": 13,
+          "Milton": 12,
           "shazam": 3,
           "squeeze": 21,
           "stepcop": 10
         },
         "byTeam": {
-          "1": 34,
+          "1": 33,
           "n n": 13
         },
         "from": "YA.entry",
         "kind": "normal",
         "to": "YA",
-        "total": 47,
+        "total": 46,
         "unarmed": {
           "byPlayer": {
-            "Milton": 6,
+            "Milton": 5,
             "shazam": 1,
             "squeeze": 5,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 11,
+            "1": 10,
             "n n": 2
           },
-          "total": 13
+          "total": 12
         }
       },
       {
         "armed": {
           "byPlayer": {
-            "Milton": 6,
+            "Milton": 5,
             "shazam": 5,
             "squeeze": 17,
             "stepcop": 13
           },
           "byTeam": {
-            "1": 23,
+            "1": 22,
             "n n": 18
           },
-          "total": 41
+          "total": 40
         },
         "byPlayer": {
-          "Milton": 13,
+          "Milton": 12,
           "shazam": 15,
           "squeeze": 22,
           "stepcop": 21
         },
         "byTeam": {
-          "1": 35,
+          "1": 34,
           "n n": 36
         },
         "from": "YA.entry",
         "kind": "normal",
         "to": "high",
-        "total": 71,
+        "total": 70,
         "unarmed": {
           "byPlayer": {
             "Milton": 7,
@@ -47020,61 +46950,60 @@
           "total": 36
         },
         "byPlayer": {
-          "Milton": 19,
+          "Milton": 18,
           "shazam": 20,
           "squeeze": 17,
           "stepcop": 14
         },
         "byTeam": {
-          "1": 36,
+          "1": 35,
           "n n": 34
         },
         "from": "high",
         "kind": "normal",
         "to": "LG",
-        "total": 70,
+        "total": 69,
         "unarmed": {
           "byPlayer": {
-            "Milton": 8,
+            "Milton": 7,
             "shazam": 10,
             "squeeze": 9,
             "stepcop": 7
           },
           "byTeam": {
-            "1": 17,
+            "1": 16,
             "n n": 17
           },
-          "total": 34
+          "total": 33
         }
       },
       {
         "armed": {
           "byPlayer": {
-            "Milton": 2,
             "shazam": 3,
             "squeeze": 2,
             "stepcop": 2
           },
           "byTeam": {
-            "1": 4,
+            "1": 2,
             "n n": 5
           },
-          "total": 9
+          "total": 7
         },
         "byPlayer": {
-          "Milton": 4,
+          "Milton": 2,
           "shazam": 3,
           "squeeze": 2,
           "stepcop": 2
         },
         "byTeam": {
-          "1": 6,
+          "1": 4,
           "n n": 5
         },
         "from": "high",
         "kind": "normal",
         "to": "LG.GA",
-        "total": 11,
+        "total": 9,
         "unarmed": {
           "byPlayer": {
             "Milton": 2
@@ -47089,30 +47018,28 @@
         "armed": {
           "byPlayer": {
             "Milton": 8,
-            "shazam": 1,
-            "squeeze": 3,
+            "squeeze": 2,
             "stepcop": 10
           },
           "byTeam": {
-            "1": 11,
-            "n n": 11
+            "1": 10,
+            "n n": 10
           },
-          "total": 22
+          "total": 20
         },
         "byPlayer": {
           "Milton": 8,
-          "shazam": 1,
-          "squeeze": 3,
+          "squeeze": 2,
           "stepcop": 12
         },
         "byTeam": {
-          "1": 11,
-          "n n": 13
+          "1": 10,
+          "n n": 12
         },
         "from": "high",
         "kind": "normal",
         "to": "Quad.stairs",
-        "total": 24,
+        "total": 22,
         "unarmed": {
           "byPlayer": {
             "stepcop": 2
@@ -47138,53 +47065,53 @@
           "total": 31
         },
         "byPlayer": {
-          "Milton": 9,
+          "Milton": 8,
           "shazam": 4,
           "squeeze": 10,
           "stepcop": 11
         },
         "byTeam": {
-          "1": 19,
+          "1": 18,
           "n n": 15
         },
         "from": "high",
         "kind": "normal",
         "to": "YA.entry",
-        "total": 34,
+        "total": 33,
         "unarmed": {
           "byPlayer": {
-            "Milton": 2,
+            "Milton": 1,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 2,
+            "1": 1,
             "n n": 1
           },
-          "total": 3
+          "total": 2
         }
       },
       {
         "armed": {
           "byPlayer": {
-            "stepcop": 4
+            "stepcop": 3
           },
           "byTeam": {
-            "n n": 4
+            "n n": 3
           },
-          "total": 4
+          "total": 3
         },
         "byPlayer": {
           "Milton": 1,
-          "stepcop": 4
+          "stepcop": 3
         },
         "byTeam": {
           "1": 1,
-          "n n": 4
+          "n n": 3
         },
         "from": "high",
         "kind": "normal",
         "to": "high.tele",
-        "total": 5,
+        "total": 4,
         "unarmed": {
           "byPlayer": {
             "Milton": 1
@@ -47262,29 +47189,29 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 6,
+            "Milton": 5,
             "shazam": 6,
             "squeeze": 1
           },
           "byTeam": {
-            "1": 7,
+            "1": 6,
             "n n": 6
           },
-          "total": 13
+          "total": 12
         },
         "byPlayer": {
-          "Milton": 6,
+          "Milton": 5,
           "shazam": 6,
           "squeeze": 2
         },
         "byTeam": {
-          "1": 8,
+          "1": 7,
           "n n": 6
         },
         "from": "high.tele",
         "kind": "normal",
         "to": "SSG.stairs",
-        "total": 14,
+        "total": 13,
         "unarmed": {
           "byPlayer": {
             "squeeze": 1
@@ -47301,28 +47228,28 @@
             "Milton": 14,
             "shazam": 12,
             "squeeze": 8,
-            "stepcop": 14
+            "stepcop": 13
           },
           "byTeam": {
             "1": 22,
-            "n n": 26
+            "n n": 25
           },
-          "total": 48
+          "total": 47
         },
         "byPlayer": {
           "Milton": 20,
           "shazam": 15,
           "squeeze": 13,
-          "stepcop": 19
+          "stepcop": 18
         },
         "byTeam": {
           "1": 33,
-          "n n": 34
+          "n n": 33
         },
         "from": "high.tele",
         "kind": "normal",
         "to": "high",
-        "total": 67,
+        "total": 66,
         "unarmed": {
           "byPlayer": {
             "Milton": 6,
@@ -47378,25 +47305,23 @@
       {
         "armed": {
           "byPlayer": {
-            "shazam": 1,
-            "stepcop": 1
+            "shazam": 1
           },
           "byTeam": {
-            "n n": 2
+            "n n": 1
           },
-          "total": 2
+          "total": 1
         },
         "byPlayer": {
-          "shazam": 1,
-          "stepcop": 1
+          "shazam": 1
         },
         "byTeam": {
-          "n n": 2
+          "n n": 1
         },
         "from": "low",
         "kind": "normal",
         "to": "GL",
-        "total": 2
+        "total": 1
       },
       {
         "armed": {
@@ -47417,27 +47342,6 @@
         "from": "low",
         "kind": "normal",
         "to": "LG",
-        "total": 1
-      },
-      {
-        "armed": {
-          "byPlayer": {
-            "shazam": 1
-          },
-          "byTeam": {
-            "n n": 1
-          },
-          "total": 1
-        },
-        "byPlayer": {
-          "shazam": 1
-        },
-        "byTeam": {
-          "n n": 1
-        },
-        "from": "low",
-        "kind": "normal",
-        "to": "LG.GA",
         "total": 1
       },
       {
@@ -47472,77 +47376,31 @@
       {
         "armed": {
           "byPlayer": {
-            "squeeze": 1
-          },
-          "byTeam": {
-            "1": 1
-          },
-          "total": 1
-        },
-        "byPlayer": {
-          "squeeze": 1
-        },
-        "byTeam": {
-          "1": 1
-        },
-        "from": "low",
-        "kind": "normal",
-        "to": "Quad",
-        "total": 1
-      },
-      {
-        "armed": {
-          "byPlayer": {
-            "Milton": 2,
+            "Milton": 1,
             "shazam": 1,
             "squeeze": 1,
             "stepcop": 1
           },
           "byTeam": {
-            "1": 3,
+            "1": 2,
             "n n": 2
           },
-          "total": 5
+          "total": 4
         },
         "byPlayer": {
-          "Milton": 2,
+          "Milton": 1,
           "shazam": 1,
           "squeeze": 1,
           "stepcop": 1
         },
         "byTeam": {
-          "1": 3,
+          "1": 2,
           "n n": 2
         },
         "from": "low",
         "kind": "normal",
         "to": "RA.exit",
-        "total": 5
-      },
-      {
-        "armed": {
-          "byPlayer": {
-            "shazam": 1,
-            "squeeze": 1
-          },
-          "byTeam": {
-            "1": 1,
-            "n n": 1
-          },
-          "total": 2
-        },
-        "byPlayer": {
-          "shazam": 1,
-          "squeeze": 1
-        },
-        "byTeam": {
-          "1": 1,
-          "n n": 1
-        },
-        "from": "low",
-        "kind": "normal",
-        "to": "low.stand",
-        "total": 2
+        "total": 4
       },
       {
         "armed": {
@@ -47645,41 +47503,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 15558,
-            "shazam": 23065,
-            "squeeze": 15798,
-            "stepcop": 13599
+            "Milton": 12437,
+            "shazam": 21364,
+            "squeeze": 13901,
+            "stepcop": 11673
           },
           "byTeam": {
-            "1": 31356,
-            "n n": 36664
+            "1": 26338,
+            "n n": 33037
           },
-          "total": 68020
+          "total": 59375
         },
         "byPlayer": {
-          "Milton": 17769,
-          "shazam": 25129,
-          "squeeze": 19082,
-          "stepcop": 14694
+          "Milton": 13011,
+          "shazam": 22305,
+          "squeeze": 16235,
+          "stepcop": 12768
         },
         "byTeam": {
-          "1": 36851,
-          "n n": 39823
+          "1": 29246,
+          "n n": 35073
         },
         "name": "GL",
-        "total": 76674,
+        "total": 64319,
         "unarmed": {
           "byPlayer": {
-            "Milton": 2211,
-            "shazam": 2064,
-            "squeeze": 3284,
+            "Milton": 574,
+            "shazam": 941,
+            "squeeze": 2334,
             "stepcop": 1095
           },
           "byTeam": {
-            "1": 5495,
-            "n n": 3159
+            "1": 2908,
+            "n n": 2036
           },
-          "total": 8654
+          "total": 4944
         },
         "x": 290.25,
         "y": -461.25,
@@ -47688,41 +47546,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 54559,
-            "shazam": 59728,
-            "squeeze": 35560,
-            "stepcop": 30377
+            "Milton": 52701,
+            "shazam": 57521,
+            "squeeze": 34245,
+            "stepcop": 30167
           },
           "byTeam": {
-            "1": 90119,
-            "n n": 90105
+            "1": 86946,
+            "n n": 87688
           },
-          "total": 180224
+          "total": 174634
         },
         "byPlayer": {
-          "Milton": 58982,
-          "shazam": 65916,
-          "squeeze": 39820,
-          "stepcop": 36309
+          "Milton": 56787,
+          "shazam": 62839,
+          "squeeze": 38505,
+          "stepcop": 35832
         },
         "byTeam": {
-          "1": 98802,
-          "n n": 102225
+          "1": 95292,
+          "n n": 98671
         },
         "name": "LG",
-        "total": 201027,
+        "total": 193963,
         "unarmed": {
           "byPlayer": {
-            "Milton": 4423,
-            "shazam": 6188,
+            "Milton": 4086,
+            "shazam": 5318,
             "squeeze": 4260,
-            "stepcop": 5932
+            "stepcop": 5665
           },
           "byTeam": {
-            "1": 8683,
-            "n n": 12120
+            "1": 8346,
+            "n n": 10983
           },
-          "total": 20803
+          "total": 19329
         },
         "x": 494.5,
         "y": -217.75,
@@ -47731,40 +47589,39 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 28617,
-            "shazam": 39751,
-            "squeeze": 29939,
-            "stepcop": 11799
+            "Milton": 25807,
+            "shazam": 36102,
+            "squeeze": 29603,
+            "stepcop": 10543
           },
           "byTeam": {
-            "1": 58556,
-            "n n": 51550
+            "1": 55410,
+            "n n": 46645
           },
-          "total": 110106
+          "total": 102055
         },
         "byPlayer": {
-          "Milton": 29389,
-          "shazam": 40641,
-          "squeeze": 29939,
-          "stepcop": 12766
+          "Milton": 26579,
+          "shazam": 36102,
+          "squeeze": 29603,
+          "stepcop": 11510
         },
         "byTeam": {
-          "1": 59328,
-          "n n": 53407
+          "1": 56182,
+          "n n": 47612
         },
         "name": "LG.GA",
-        "total": 112735,
+        "total": 103794,
         "unarmed": {
           "byPlayer": {
             "Milton": 772,
-            "shazam": 890,
             "stepcop": 967
           },
           "byTeam": {
             "1": 772,
-            "n n": 1857
+            "n n": 967
           },
-          "total": 2629
+          "total": 1739
         },
         "x": 500.75,
         "y": -134.5,
@@ -47774,40 +47631,28 @@
         "armed": {
           "byPlayer": {
             "Milton": 4880,
-            "shazam": 9836,
-            "squeeze": 6400,
-            "stepcop": 8434
+            "shazam": 8835,
+            "squeeze": 5242,
+            "stepcop": 4914
           },
           "byTeam": {
-            "1": 11280,
-            "n n": 18270
+            "1": 10122,
+            "n n": 13749
           },
-          "total": 29550
+          "total": 23871
         },
         "byPlayer": {
-          "Milton": 6783,
-          "shazam": 9836,
-          "squeeze": 7320,
-          "stepcop": 9380
+          "Milton": 4880,
+          "shazam": 8835,
+          "squeeze": 5242,
+          "stepcop": 4914
         },
         "byTeam": {
-          "1": 14103,
-          "n n": 19216
+          "1": 10122,
+          "n n": 13749
         },
         "name": "LG.tele",
-        "total": 33319,
-        "unarmed": {
-          "byPlayer": {
-            "Milton": 1903,
-            "squeeze": 920,
-            "stepcop": 946
-          },
-          "byTeam": {
-            "1": 2823,
-            "n n": 946
-          },
-          "total": 3769
-        },
+        "total": 23871,
         "x": 686.625,
         "y": -272.125,
         "z": -103.875
@@ -47818,38 +47663,38 @@
             "Milton": 7912,
             "shazam": 19517,
             "squeeze": 6871,
-            "stepcop": 8270
+            "stepcop": 7366
           },
           "byTeam": {
             "1": 14783,
-            "n n": 27787
+            "n n": 26883
           },
-          "total": 42570
+          "total": 41666
         },
         "byPlayer": {
-          "Milton": 24431,
+          "Milton": 23503,
           "shazam": 42489,
           "squeeze": 20919,
-          "stepcop": 27717
+          "stepcop": 25749
         },
         "byTeam": {
-          "1": 45350,
-          "n n": 70206
+          "1": 44422,
+          "n n": 68238
         },
         "name": "MH",
-        "total": 115556,
+        "total": 112660,
         "unarmed": {
           "byPlayer": {
-            "Milton": 16519,
+            "Milton": 15591,
             "shazam": 22972,
             "squeeze": 14048,
-            "stepcop": 19447
+            "stepcop": 18383
           },
           "byTeam": {
-            "1": 30567,
-            "n n": 42419
+            "1": 29639,
+            "n n": 41355
           },
-          "total": 72986
+          "total": 70994
         },
         "x": -73.375,
         "y": 327.75,
@@ -47858,29 +47703,29 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 10535,
-            "shazam": 26185,
-            "squeeze": 8913,
-            "stepcop": 14205
+            "Milton": 5881,
+            "shazam": 23688,
+            "squeeze": 5808,
+            "stepcop": 9193
           },
           "byTeam": {
-            "1": 19448,
-            "n n": 40390
+            "1": 11689,
+            "n n": 32881
           },
-          "total": 59838
+          "total": 44570
         },
         "byPlayer": {
-          "Milton": 10535,
-          "shazam": 26185,
-          "squeeze": 8913,
-          "stepcop": 14205
+          "Milton": 5881,
+          "shazam": 23688,
+          "squeeze": 5808,
+          "stepcop": 9193
         },
         "byTeam": {
-          "1": 19448,
-          "n n": 40390
+          "1": 11689,
+          "n n": 32881
         },
         "name": "MH.entry",
-        "total": 59838,
+        "total": 44570,
         "x": -79.875,
         "y": -116.25,
         "z": -295.875
@@ -47889,28 +47734,26 @@
         "armed": {
           "byPlayer": {
             "Milton": 2070,
-            "shazam": 1363,
-            "squeeze": 978,
-            "stepcop": 910
+            "shazam": 805,
+            "squeeze": 436
           },
           "byTeam": {
-            "1": 3048,
-            "n n": 2273
+            "1": 2506,
+            "n n": 805
           },
-          "total": 5321
+          "total": 3311
         },
         "byPlayer": {
           "Milton": 2070,
-          "shazam": 1363,
-          "squeeze": 978,
-          "stepcop": 910
+          "shazam": 805,
+          "squeeze": 436
         },
         "byTeam": {
-          "1": 3048,
-          "n n": 2273
+          "1": 2506,
+          "n n": 805
         },
         "name": "Quad",
-        "total": 5321,
+        "total": 3311,
         "x": 190.625,
         "y": 63.5,
         "z": -103.875
@@ -47918,41 +47761,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 41111,
-            "shazam": 44503,
-            "squeeze": 28791,
-            "stepcop": 66792
+            "Milton": 38016,
+            "shazam": 38255,
+            "squeeze": 23921,
+            "stepcop": 60654
           },
           "byTeam": {
-            "1": 69902,
-            "n n": 111295
+            "1": 61937,
+            "n n": 98909
           },
-          "total": 181197
+          "total": 160846
         },
         "byPlayer": {
-          "Milton": 43969,
-          "shazam": 52793,
-          "squeeze": 38543,
-          "stepcop": 81503
+          "Milton": 39949,
+          "shazam": 46545,
+          "squeeze": 31975,
+          "stepcop": 72225
         },
         "byTeam": {
-          "1": 82512,
-          "n n": 134296
+          "1": 71924,
+          "n n": 118770
         },
         "name": "Quad.stairs",
-        "total": 216808,
+        "total": 190694,
         "unarmed": {
           "byPlayer": {
-            "Milton": 2858,
+            "Milton": 1933,
             "shazam": 8290,
-            "squeeze": 9752,
-            "stepcop": 14711
+            "squeeze": 8054,
+            "stepcop": 11571
           },
           "byTeam": {
-            "1": 12610,
-            "n n": 23001
+            "1": 9987,
+            "n n": 19861
           },
-          "total": 35611
+          "total": 29848
         },
         "x": 154,
         "y": -412.5,
@@ -47961,41 +47804,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 6672,
-            "shazam": 5058,
-            "squeeze": 13011,
+            "Milton": 5827,
+            "shazam": 4176,
+            "squeeze": 12636,
             "stepcop": 6836
           },
           "byTeam": {
-            "1": 19683,
-            "n n": 11894
+            "1": 18463,
+            "n n": 11012
           },
-          "total": 31577
+          "total": 29475
         },
         "byPlayer": {
-          "Milton": 15718,
-          "shazam": 17557,
-          "squeeze": 23593,
-          "stepcop": 13838
+          "Milton": 14873,
+          "shazam": 13995,
+          "squeeze": 23218,
+          "stepcop": 12608
         },
         "byTeam": {
-          "1": 39311,
-          "n n": 31395
+          "1": 38091,
+          "n n": 26603
         },
         "name": "Quad.tele",
-        "total": 70706,
+        "total": 64694,
         "unarmed": {
           "byPlayer": {
             "Milton": 9046,
-            "shazam": 12499,
+            "shazam": 9819,
             "squeeze": 10582,
-            "stepcop": 7002
+            "stepcop": 5772
           },
           "byTeam": {
             "1": 19628,
-            "n n": 19501
+            "n n": 15591
           },
-          "total": 39129
+          "total": 35219
         },
         "x": -143.875,
         "y": -208.125,
@@ -48004,29 +47847,29 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 40810,
-            "shazam": 17582,
-            "squeeze": 58540,
-            "stepcop": 43694
+            "Milton": 39962,
+            "shazam": 16228,
+            "squeeze": 56764,
+            "stepcop": 42835
           },
           "byTeam": {
-            "1": 99350,
-            "n n": 61276
+            "1": 96726,
+            "n n": 59063
           },
-          "total": 160626
+          "total": 155789
         },
         "byPlayer": {
-          "Milton": 49759,
-          "shazam": 28995,
-          "squeeze": 64718,
-          "stepcop": 59244
+          "Milton": 48911,
+          "shazam": 27641,
+          "squeeze": 62942,
+          "stepcop": 58385
         },
         "byTeam": {
-          "1": 114477,
-          "n n": 88239
+          "1": 111853,
+          "n n": 86026
         },
         "name": "RA",
-        "total": 202716,
+        "total": 197879,
         "unarmed": {
           "byPlayer": {
             "Milton": 8949,
@@ -48047,29 +47890,29 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 6180,
-            "shazam": 6197,
+            "Milton": 5713,
+            "shazam": 5264,
             "squeeze": 4285,
             "stepcop": 5315
           },
           "byTeam": {
-            "1": 10465,
-            "n n": 11512
+            "1": 9998,
+            "n n": 10579
           },
-          "total": 21977
+          "total": 20577
         },
         "byPlayer": {
-          "Milton": 6180,
-          "shazam": 6197,
+          "Milton": 5713,
+          "shazam": 5264,
           "squeeze": 4285,
           "stepcop": 5315
         },
         "byTeam": {
-          "1": 10465,
-          "n n": 11512
+          "1": 9998,
+          "n n": 10579
         },
         "name": "RA.exit",
-        "total": 21977,
+        "total": 20577,
         "x": 341.375,
         "y": 7,
         "z": -295.875
@@ -48080,38 +47923,38 @@
             "Milton": 16810,
             "shazam": 20135,
             "squeeze": 18967,
-            "stepcop": 3423
+            "stepcop": 2270
           },
           "byTeam": {
             "1": 35777,
-            "n n": 23558
+            "n n": 22405
           },
-          "total": 59335
+          "total": 58182
         },
         "byPlayer": {
           "Milton": 34371,
-          "shazam": 63131,
-          "squeeze": 50382,
-          "stepcop": 26698
+          "shazam": 58811,
+          "squeeze": 48530,
+          "stepcop": 22143
         },
         "byTeam": {
-          "1": 84753,
-          "n n": 89829
+          "1": 82901,
+          "n n": 80954
         },
         "name": "SSG",
-        "total": 174582,
+        "total": 163855,
         "unarmed": {
           "byPlayer": {
             "Milton": 17561,
-            "shazam": 42996,
-            "squeeze": 31415,
-            "stepcop": 23275
+            "shazam": 38676,
+            "squeeze": 29563,
+            "stepcop": 19873
           },
           "byTeam": {
-            "1": 48976,
-            "n n": 66271
+            "1": 47124,
+            "n n": 58549
           },
-          "total": 115247
+          "total": 105673
         },
         "x": 338.875,
         "y": -892.375,
@@ -48120,28 +47963,28 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 5732,
+            "Milton": 5238,
             "shazam": 4650,
-            "squeeze": 3150
+            "squeeze": 2786
           },
           "byTeam": {
-            "1": 8882,
+            "1": 8024,
             "n n": 4650
           },
-          "total": 13532
+          "total": 12674
         },
         "byPlayer": {
-          "Milton": 7173,
+          "Milton": 6679,
           "shazam": 4650,
-          "squeeze": 4177,
+          "squeeze": 3813,
           "stepcop": 2182
         },
         "byTeam": {
-          "1": 11350,
+          "1": 10492,
           "n n": 6832
         },
         "name": "SSG.stairs",
-        "total": 18182,
+        "total": 17324,
         "unarmed": {
           "byPlayer": {
             "Milton": 1441,
@@ -48161,41 +48004,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 33009,
+            "Milton": 32616,
             "shazam": 4850,
-            "squeeze": 57439,
+            "squeeze": 55611,
             "stepcop": 22768
           },
           "byTeam": {
-            "1": 90448,
+            "1": 88227,
             "n n": 27618
           },
-          "total": 118066
+          "total": 115845
         },
         "byPlayer": {
-          "Milton": 39294,
+          "Milton": 38584,
           "shazam": 5434,
-          "squeeze": 67992,
-          "stepcop": 24175
+          "squeeze": 65281,
+          "stepcop": 23306
         },
         "byTeam": {
-          "1": 107286,
-          "n n": 29609
+          "1": 103865,
+          "n n": 28740
         },
         "name": "YA",
-        "total": 136895,
+        "total": 132605,
         "unarmed": {
           "byPlayer": {
-            "Milton": 6285,
+            "Milton": 5968,
             "shazam": 584,
-            "squeeze": 10553,
-            "stepcop": 1407
+            "squeeze": 9670,
+            "stepcop": 538
           },
           "byTeam": {
-            "1": 16838,
-            "n n": 1991
+            "1": 15638,
+            "n n": 1122
           },
-          "total": 18829
+          "total": 16760
         },
         "x": 909.375,
         "y": -474.125,
@@ -48204,41 +48047,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 16109,
-            "shazam": 8685,
-            "squeeze": 37725,
-            "stepcop": 29112
+            "Milton": 13351,
+            "shazam": 7804,
+            "squeeze": 36866,
+            "stepcop": 26121
           },
           "byTeam": {
-            "1": 53834,
-            "n n": 37797
+            "1": 50217,
+            "n n": 33925
           },
-          "total": 91631
+          "total": 84142
         },
         "byPlayer": {
-          "Milton": 28522,
-          "shazam": 18003,
-          "squeeze": 50612,
-          "stepcop": 43947
+          "Milton": 24805,
+          "shazam": 16041,
+          "squeeze": 47922,
+          "stepcop": 38320
         },
         "byTeam": {
-          "1": 79134,
-          "n n": 61950
+          "1": 72727,
+          "n n": 54361
         },
         "name": "YA.entry",
-        "total": 141084,
+        "total": 127088,
         "unarmed": {
           "byPlayer": {
-            "Milton": 12413,
-            "shazam": 9318,
-            "squeeze": 12887,
-            "stepcop": 14835
+            "Milton": 11454,
+            "shazam": 8237,
+            "squeeze": 11056,
+            "stepcop": 12199
           },
           "byTeam": {
-            "1": 25300,
-            "n n": 24153
+            "1": 22510,
+            "n n": 20436
           },
-          "total": 49453
+          "total": 42946
         },
         "x": 750,
         "y": -178,
@@ -48247,41 +48090,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 65800,
-            "shazam": 34047,
-            "squeeze": 47710,
-            "stepcop": 76410
+            "Milton": 63361,
+            "shazam": 29433,
+            "squeeze": 43225,
+            "stepcop": 72826
           },
           "byTeam": {
-            "1": 113510,
-            "n n": 110457
+            "1": 106586,
+            "n n": 102259
           },
-          "total": 223967
+          "total": 208845
         },
         "byPlayer": {
-          "Milton": 74597,
-          "shazam": 42751,
-          "squeeze": 55057,
-          "stepcop": 85937
+          "Milton": 70312,
+          "shazam": 36403,
+          "squeeze": 47916,
+          "stepcop": 80486
         },
         "byTeam": {
-          "1": 129654,
-          "n n": 128688
+          "1": 118228,
+          "n n": 116889
         },
         "name": "high",
-        "total": 258342,
+        "total": 235117,
         "unarmed": {
           "byPlayer": {
-            "Milton": 8797,
-            "shazam": 8704,
-            "squeeze": 7347,
-            "stepcop": 9527
+            "Milton": 6951,
+            "shazam": 6970,
+            "squeeze": 4691,
+            "stepcop": 7660
           },
           "byTeam": {
-            "1": 16144,
-            "n n": 18231
+            "1": 11642,
+            "n n": 14630
           },
-          "total": 34375
+          "total": 26272
         },
         "x": 588.625,
         "y": -179,
@@ -48290,41 +48133,41 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 37583,
-            "shazam": 25636,
-            "squeeze": 38597,
-            "stepcop": 31674
+            "Milton": 37130,
+            "shazam": 24674,
+            "squeeze": 36010,
+            "stepcop": 25939
           },
           "byTeam": {
-            "1": 76180,
-            "n n": 57310
+            "1": 73140,
+            "n n": 50613
           },
-          "total": 133490
+          "total": 123753
         },
         "byPlayer": {
-          "Milton": 53692,
-          "shazam": 32854,
-          "squeeze": 51539,
-          "stepcop": 53763
+          "Milton": 52349,
+          "shazam": 31892,
+          "squeeze": 48022,
+          "stepcop": 46764
         },
         "byTeam": {
-          "1": 105231,
-          "n n": 86617
+          "1": 100371,
+          "n n": 78656
         },
         "name": "high.tele",
-        "total": 191848,
+        "total": 179027,
         "unarmed": {
           "byPlayer": {
-            "Milton": 16109,
+            "Milton": 15219,
             "shazam": 7218,
-            "squeeze": 12942,
-            "stepcop": 22089
+            "squeeze": 12012,
+            "stepcop": 20825
           },
           "byTeam": {
-            "1": 29051,
-            "n n": 29307
+            "1": 27231,
+            "n n": 28043
           },
-          "total": 58358
+          "total": 55274
         },
         "x": 346.625,
         "y": -993.875,
@@ -48333,38 +48176,37 @@
       {
         "armed": {
           "byPlayer": {
-            "Milton": 73565,
-            "shazam": 86260,
-            "squeeze": 33037,
-            "stepcop": 61647
+            "Milton": 65221,
+            "shazam": 74294,
+            "squeeze": 29774,
+            "stepcop": 55079
           },
           "byTeam": {
-            "1": 106602,
-            "n n": 147907
+            "1": 94995,
+            "n n": 129373
           },
-          "total": 254509
+          "total": 224368
         },
         "byPlayer": {
-          "Milton": 73565,
-          "shazam": 87072,
-          "squeeze": 33037,
-          "stepcop": 62252
+          "Milton": 65221,
+          "shazam": 75106,
+          "squeeze": 29774,
+          "stepcop": 55079
         },
         "byTeam": {
-          "1": 106602,
-          "n n": 149324
+          "1": 94995,
+          "n n": 130185
         },
         "name": "low",
-        "total": 255926,
+        "total": 225180,
         "unarmed": {
           "byPlayer": {
-            "shazam": 812,
-            "stepcop": 605
+            "shazam": 812
           },
           "byTeam": {
-            "n n": 1417
+            "n n": 812
           },
-          "total": 1417
+          "total": 812
         },
         "x": 375.625,
         "y": -224.75,
@@ -48373,55 +48215,29 @@
       {
         "armed": {
           "byPlayer": {
-            "shazam": 920,
-            "squeeze": 656
+            "Milton": 22940,
+            "shazam": 25372,
+            "squeeze": 28110,
+            "stepcop": 23976
           },
           "byTeam": {
-            "1": 656,
-            "n n": 920
+            "1": 51050,
+            "n n": 49348
           },
-          "total": 1576
+          "total": 100398
         },
         "byPlayer": {
-          "shazam": 920,
-          "squeeze": 656
+          "Milton": 22940,
+          "shazam": 26350,
+          "squeeze": 28110,
+          "stepcop": 23976
         },
         "byTeam": {
-          "1": 656,
-          "n n": 920
-        },
-        "name": "low.stand",
-        "total": 1576,
-        "x": 164.5,
-        "y": -40,
-        "z": -295.875
-      },
-      {
-        "armed": {
-          "byPlayer": {
-            "Milton": 23266,
-            "shazam": 27171,
-            "squeeze": 28503,
-            "stepcop": 25230
-          },
-          "byTeam": {
-            "1": 51769,
-            "n n": 52401
-          },
-          "total": 104170
-        },
-        "byPlayer": {
-          "Milton": 23266,
-          "shazam": 28149,
-          "squeeze": 28503,
-          "stepcop": 25230
-        },
-        "byTeam": {
-          "1": 51769,
-          "n n": 53379
+          "1": 51050,
+          "n n": 50326
         },
         "name": "low.tele",
-        "total": 105148,
+        "total": 101376,
         "unarmed": {
           "byPlayer": {
             "shazam": 978
@@ -55253,7 +55069,7 @@
       }
     ]
   },
-  "schemaVersion": 63,
+  "schemaVersion": 64,
   "shots": {
     "byPlayer": [
       {
@@ -79477,6 +79293,24 @@
             "v": 100
           }
         ],
+        "alive": [
+          {
+            "e": 5234,
+            "s": 0
+          },
+          {
+            "e": 15167,
+            "s": 6236
+          },
+          {
+            "e": 79678,
+            "s": 20761
+          },
+          {
+            "e": 600029,
+            "s": 578223
+          }
+        ],
         "at": [
           {
             "t": 0,
@@ -84037,6 +83871,48 @@
       },
       {
         "a": [],
+        "alive": [
+          {
+            "e": 9398,
+            "s": 0
+          },
+          {
+            "e": 12416,
+            "s": 10298
+          },
+          {
+            "e": 42927,
+            "s": 13497
+          },
+          {
+            "e": 60730,
+            "s": 57458
+          },
+          {
+            "e": 62598,
+            "s": 60802
+          },
+          {
+            "e": 84182,
+            "s": 63520
+          },
+          {
+            "e": 589780,
+            "s": 584616
+          },
+          {
+            "e": 594220,
+            "s": 590056
+          },
+          {
+            "e": 596227,
+            "s": 595054
+          },
+          {
+            "e": 598973,
+            "s": 597141
+          }
+        ],
         "at": [
           {
             "t": 0,
@@ -88645,6 +88521,48 @@
           {
             "t": 597903,
             "v": 0
+          }
+        ],
+        "alive": [
+          {
+            "e": 10603,
+            "s": 0
+          },
+          {
+            "e": 13935,
+            "s": 11456
+          },
+          {
+            "e": 19984,
+            "s": 14804
+          },
+          {
+            "e": 69108,
+            "s": 50039
+          },
+          {
+            "e": 71618,
+            "s": 69455
+          },
+          {
+            "e": 75055,
+            "s": 71989
+          },
+          {
+            "e": 590259,
+            "s": 583743
+          },
+          {
+            "e": 593249,
+            "s": 591096
+          },
+          {
+            "e": 598103,
+            "s": 594188
+          },
+          {
+            "e": 600029,
+            "s": 599056
           }
         ],
         "at": [
@@ -93613,6 +93531,20 @@
           {
             "t": 596150,
             "v": 62
+          }
+        ],
+        "alive": [
+          {
+            "e": 64250,
+            "s": 0
+          },
+          {
+            "e": 90189,
+            "s": 65123
+          },
+          {
+            "e": 600029,
+            "s": 580522
           }
         ],
         "at": [
@@ -102621,9 +102553,9 @@
     },
     "regionControl": {
       "bucketStates": {
-        "LG": "___________________________aaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________BBBBBBBBBBCCCCCCCCCCCCCBBBB__________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBB____________________________________________bbbbbbbbbbbbbbbbbb____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________bbbbAAACCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________BBBBBB____________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________BB_____________AAAAAAAAAAAAAA______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________AAAAAAAAaaAAAAAAAAAAAAAAAA__bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________BBBB__________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________BBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBB________________________bbbbbbbbbbbbbbbbBBBBBBBBBBaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_BBBBBBB_________________________________________________________________________________aaaaaAAAAAA__________________________________BBBBBBBBBBBBBBBB________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___AAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________AACCCCCCCCCCCCCCCBBBBBBBBBBBBBBB______________________________aaAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________aAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________BBBBBBBBBBBBBBBBBBBB____________________________________________________________aAAAAAAAAAAAAAAAAAAAAA_________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCBBBBCCCCCCCCCCCCCA________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCA________________________AAAAAAAAAAAAAAAA________________________________aaaaaaaaaaaAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________bbbbb__________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________aaAAAAAAAAAA___________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBB__________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBB________________________________________________________________________bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________AAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________AAAACCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAA___________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAA__________BBBBBBBBBBBBBBBBBBBBBBBB_______________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCBBBBBBBBBBBBBBBBB__________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________aaAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBB______________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbBBBBCCCCCCCCCCCCCCACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________AAAAAAAAAAAAAAAAAAAAA______________________aaaaaaaAAAAAAAAAAAAAA____________________________________________bbbbbbBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________aaAAAAAAAAAAAAA________________________________bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________AAAAAAAAAAAAAAAAAAAAAAA______________________AAAAAAAA___________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________aaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "QUAD": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBB___________________AAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAA_________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________AAAAAAAAAAAA_____________________________________________________________________________bbbbbbbbbbb_______________________AAAAAAAAAAAAAAAAAAAAAAAAAA____________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbb______________aaaaaaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________BBBBBBBBBBBBB____________________________________________________________________BBBBBBBBBBBBBBBBBB_________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___AAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBbbbbbbbbbbbbbbbbbbbb__________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________AAAAAAAAAAAAAAAAAA____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________AAAAAAAAAAA_________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCAAAAAAAAAAAA________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________bbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________AAAAAAAAAA______________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbb___________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________BBBBBBBBBBBBBBBBBBBBBB________________________________________________________AAAAAAAA_______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBB_AAAAAAAAAAAAAAAAAAAAA_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________BBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa______________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________AAAAAAAAAAAaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaa_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________BBBBBBCCCCCCCCCCCAAAA_____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________BBCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________bbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_______________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb__________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_______AAAAACCCCCCCCCCCCCCCCCCAAAAA__________________________________________________________bbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________________________________AAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________AAAAAAAAAA_____________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAA____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________AAAAAAAAAAAA_____________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________bbbbbbbbbbbBBBBBBBBBBBBBBBBBBbbbbbbbbbbbb______________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbb_______________________________BBBBBBBB_________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________bbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_BBBBBBB_____________________________________________________bbbbbbbbbbbbbbbbbbbbbbb_________________________________________________________________________BBBBBBBBBB____________________________________bbbbbbbbbbbBBCCCCCCCCCCCBBBBBBB____________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________AAAAAAAAAAAA_______________________bbbbbbbbbbBBBBBBBBBBBBBBBBBBB_____________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBB_AAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbAAAAAAAAAbbbbbbbbbbbAAAAAAA__________________________________________________________",
-        "RA": "_______________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAACCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________bbbbbbbbbbbbbbbBBBBBBBBBBBbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAA_________________________________aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBB_________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBaaaaaaaaaaAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________aaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________AAAAAAA___________________________________________________________________________________________________aaCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBB________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________aaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBB__________________BBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________bbbbbbbbbbBBBBBBBBBBB________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB___________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCBBBBBBBB________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________aaAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBB_aaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________BBBBBB__________________________________________________________bbbbbbbbbbBBBBBBBBBBBB____________________________________________________________bbbbbbbbbbbBBBBBBBBBBBB____________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________________"
+        "LG": "___________________________aaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________BBBBBBBBBBCCCCCCCCCCCCCBBBB__________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________bbbbAAACCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________BBBBBB____________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________AAAAAAAAAAAAAA______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________aaAAAAAAAAAAAAAAAA__bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________BBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________bbbbbbbbbbbbbbbbBB________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________aaaaaAAAAAA__________________________________BBBBBBBBBBBBBBBB________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAACCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________aaAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________aAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________BBBBBBBBBBBBBBBBBBBB____________________________________________________________aAAAAAAAAAAAAAAAAAAAAA_________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCAA____AAAAAAAAAAAAAA________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCAAAAAAAAAAAAAAAAAAA________________________AAAAAAAAAAAAAAAA________________________________aaaaaaaaaaaAAAAAAAAAAAAAAACCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________aaAAAAAAAAAA___________________AAAAAAAAAAAAAAAAAAAAAAAA____________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBB__________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBB________________________________________________________________________bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________AAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAA___________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBB_______________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCBBBBBBBBBBBBBBBBB__________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________aaAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________BBBBBBBBBB_______________________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbB___AAAAAAAAAAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAA_______________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________AAAAAAAAAAAAAAAAAAAAA______________________aaaaaaaAAAAAAAAAAAAAA____________________________________________bbbbbbBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________aaAAAAAAAAAAAAA________________________________bbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________AAAAAAAAAAAAAAAAAAAAAAA______________________AAAAAAAA___________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________aaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "QUAD": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________BBBBBBBBBB_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAA_________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________AAAAAAAAAAAA_____________________________________________________________________________bbbbbbbbbbb_______________________AAAAAAAA______________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbb______________aaaaaaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________BBBBBBBBBBBBBBBBBB_________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________bbbbbbbbbbbbbbbbb______________________AAAAAAAAAAA_______________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBbbbbbbbbbbbbbbbbbbbb__________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________AAAAAAAAAAA_________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCBBBB____________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________________________________________________________bbbbbbbbbbBBBBBBB______________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbb___________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________BBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBB_AAAAAAAAAAAAAAAAAAAAA_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________BBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa______________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________aaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaa_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________AAAAAAAAAAAAAAA_____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________BBCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________bbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_______________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_______AAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________bbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________________________________AAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________AAAAAAAAAA_____________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAA____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________AAAAAAAAAAAA_____________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAACCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________bbbbbbbbbbbbbbbbbbbb_____________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaa_____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBB_________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________bbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________AAAAAAAAAAAAAAAAAAAAAA__________________BBBBBBB_____________________________________________________bbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________________________________________________bbbbbbbbbbbBBCAAAAAAAAAA___________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBBB_________________________________________________________________bbbbbbbbbbBBBBBBBBBBBBBBBBBBB_____________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________bbbbbbbbbbbbbbbbbbbbbbbbbbbbb____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbAAAAAAAAA___________AAAAAAA__________________________________________________________",
+        "RA": "_______________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAACCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________bbbbbbbbbbbbbbbBBBBBBBBBBBbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAA_________________________________aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBB_________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________aaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________AAAAAAA___________________________________________________________________________________________________aaCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBB________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________aaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCACCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________________________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBB__________________BBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________bbbbbbbbbbBBBBBBBBBBB________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB___________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAAAAAAAACCCCCCAAAAAAAAA________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________aaAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBB_aaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________aaaAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________aaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________BBBBBB__________________________________________________________bbbbbbbbbbBBBBBBBBBBBB____________________________________________________________bbbbbbbbbbbBBBBBBBBBBBB____________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBB_______________________________"
       },
       "regions": [
         {
@@ -102810,93 +102742,93 @@
         "LG": {
           "byPlayer": {
             "Milton": {
-              "armed": 88041,
+              "armed": 83388,
               "team": "1",
-              "unarmed": 7098
+              "unarmed": 4858
             },
             "shazam": {
-              "armed": 109315,
+              "armed": 102458,
               "team": "n n",
-              "unarmed": 7078
+              "unarmed": 5318
             },
             "squeeze": {
-              "armed": 71884,
+              "armed": 69090,
               "team": "1",
-              "unarmed": 5180
+              "unarmed": 4260
             },
             "stepcop": {
-              "armed": 50610,
+              "armed": 45624,
               "team": "n n",
-              "unarmed": 7845
+              "unarmed": 6632
             }
           },
-          "contested": 2.7,
-          "empty": 50.1,
-          "teamAControl": 22.1,
+          "contested": 1.1,
+          "empty": 51.8,
+          "teamAControl": 22.4,
           "teamAWeakControl": 0.9,
-          "teamBControl": 22.9,
-          "teamBWeakControl": 1.4,
+          "teamBControl": 22.5,
+          "teamBWeakControl": 1.3,
           "weakContested": 0
         },
         "QUAD": {
           "byPlayer": {
             "Milton": {
-              "armed": 49853,
+              "armed": 45913,
               "team": "1",
-              "unarmed": 11904
+              "unarmed": 10979
             },
             "shazam": {
-              "armed": 50924,
+              "armed": 43236,
               "team": "n n",
-              "unarmed": 20789
+              "unarmed": 18109
             },
             "squeeze": {
-              "armed": 42780,
+              "armed": 36993,
               "team": "1",
-              "unarmed": 20334
+              "unarmed": 18636
             },
             "stepcop": {
-              "armed": 74538,
+              "armed": 67490,
               "team": "n n",
-              "unarmed": 21713
+              "unarmed": 17343
             }
           },
-          "contested": 2,
-          "empty": 56.6,
-          "teamAControl": 12.8,
-          "teamAWeakControl": 4.1,
-          "teamBControl": 18.8,
-          "teamBWeakControl": 5.6,
+          "contested": 0.8,
+          "empty": 60.3,
+          "teamAControl": 12.5,
+          "teamAWeakControl": 4,
+          "teamBControl": 17.7,
+          "teamBWeakControl": 4.7,
           "weakContested": 0
         },
         "RA": {
           "byPlayer": {
             "Milton": {
-              "armed": 46990,
+              "armed": 45675,
               "team": "1",
               "unarmed": 8949
             },
             "shazam": {
-              "armed": 23779,
+              "armed": 21492,
               "team": "n n",
               "unarmed": 11413
             },
             "squeeze": {
-              "armed": 62825,
+              "armed": 61049,
               "team": "1",
               "unarmed": 6178
             },
             "stepcop": {
-              "armed": 49009,
+              "armed": 48150,
               "team": "n n",
               "unarmed": 15550
             }
           },
-          "contested": 1.7,
-          "empty": 66.1,
-          "teamAControl": 15.9,
+          "contested": 1.1,
+          "empty": 66.3,
+          "teamAControl": 16,
           "teamAWeakControl": 2.2,
-          "teamBControl": 10.2,
+          "teamBControl": 10.4,
           "teamBWeakControl": 3.9,
           "weakContested": 0
         }

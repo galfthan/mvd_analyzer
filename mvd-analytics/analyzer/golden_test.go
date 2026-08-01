@@ -375,7 +375,7 @@ func sampleStreams(m map[string]interface{}) {
 			}
 		}
 		// Intervals: []{s, e}. Clamp to overlapping window slice.
-		for _, key := range []string{"rl", "lg", "gl", "ssg", "sng", "q", "pe", "r"} {
+		for _, key := range []string{"rl", "lg", "gl", "ssg", "sng", "q", "pe", "r", "alive"} {
 			if arr, ok := p[key].([]interface{}); ok {
 				p[key] = filterIntervalStream(arr, windows)
 			}

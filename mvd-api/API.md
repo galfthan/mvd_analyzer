@@ -507,7 +507,7 @@ streams but in different shapes. Pick by what you're drawing:
 
 Concrete consequences:
 
-- **Native-rate positions (~77 fps)** come **only** from
+- **Native-rate positions (server-configured cadence, typically 13-40 ms per sample — see below)** come **only** from
   `/stream-slice?fields=pos`. `/buckets` and `/state-at` down-sample
   position to one sample per window / instant.
 - **Spawns & deaths**: `/events?types=spawn,death` is the authoritative
@@ -553,10 +553,10 @@ Common frontend features → the call that backs them.
   `delta` client-side; or `/buckets?fields=sp,d` for activity density.
 - **Health/armor chart for a player** → `GET /buckets?fields=h,a&windowMs=1000&players=X`
   (smooth grid) or `/stream-slice?fields=h,a&from=…&to=…` (every change).
-- **Map replay / movement trails (~77 fps)** → `GET /stream-slice?fields=pos&players=X&from=…&to=…`
+- **Map replay / movement trails (native cadence)** → `GET /stream-slice?fields=pos&players=X&from=…&to=…`
   — the only native-rate position source. Stitch windows for the full
   match. Remember positions are **int32 ms**.
-- **Aim arrows / sightlines / "who's looking at whom" (~77 fps)** →
+- **Aim arrows / sightlines / "who's looking at whom" (native cadence)** →
   add `view` to the fields: `GET /stream-slice?fields=pos,view&players=X&from=…&to=…`.
   Decode `vp`/`vya` with `deg = uint16(v)*360/65536`; forward vector
   `= (cos p·cos y, cos p·sin y, −sin p)`.

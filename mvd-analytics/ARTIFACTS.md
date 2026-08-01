@@ -33,4 +33,4 @@ Every node in the analytics DAG, as declared in [`analyzer/dag.go`](analyzer/dag
 | `player-stats` | light | no | `playerStats` | `clock`, `identity`, `roster`, `timeline`, `match:final`, `frags:final`, `damage`, `shots`, `items`, `weapon-pickups`, `backpacks`, `metadata` | `player-stats` | Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. |
 | `los` | heavy | yes | — | `timeline`, `demoinfo`, `metadata` | `los` | Per-player line-of-sight and potential-visibility interval sets — the heaviest position-derived pass, materialised on demand. |
 
-Generated at schema version 63.
+Generated at schema version 64.

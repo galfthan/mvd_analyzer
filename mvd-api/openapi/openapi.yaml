@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "63"
+  version: "64"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -730,7 +730,7 @@ paths:
       summary: Per-map loc adjacency graph
       description: >
         Which locs are reachable from which, weighted by observed traversal.
-        Node weights (time spent) are int32 ms; edge weights are transition
+        Node weights (ALIVE time spent; dead players excluded since schema v64) are int32 ms; edge weights are transition
         counts. Echoes `timeUnit:"ms"`. 422 `locgraph_unavailable` when no
         position track was emitted.
       parameters:
@@ -1202,7 +1202,7 @@ paths:
         (percentages + `byPlayer`) are the exact time-weighted integral
         over the native position samples (no grid), independent of
         `windowMs`, so they don't change with the display window.
-        `byPlayer.armed`/`unarmed` are integer milliseconds of presence.
+        `byPlayer.armed`/`unarmed` are integer milliseconds of ALIVE presence (dead players excluded since schema v64).
         The `regions` param trims the polygon payload: `full` (default)
         ships the region `points`; `summary` strips them; `none` omits the
         `regions` list entirely — `bucketStates` and `stats` are unaffected.

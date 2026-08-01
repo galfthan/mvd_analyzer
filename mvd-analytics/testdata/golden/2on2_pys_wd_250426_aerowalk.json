@@ -31548,29 +31548,28 @@
           "byPlayer": {
             "psy*overon": 17,
             "wd.cao": 3,
-            "wd.char": 7,
-            "wd.dilbert": 1
+            "wd.char": 7
           },
           "byTeam": {
-            "pys": 18,
+            "pys": 17,
             "wd": 10
           },
-          "total": 28
+          "total": 27
         },
         "byPlayer": {
           "psy*overon": 18,
           "wd.cao": 3,
           "wd.char": 8,
-          "wd.dilbert": 3
+          "wd.dilbert": 2
         },
         "byTeam": {
-          "pys": 21,
+          "pys": 20,
           "wd": 11
         },
         "from": "MH",
         "kind": "normal",
         "to": "YA",
-        "total": 32,
+        "total": 31,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 1,
@@ -31588,66 +31587,53 @@
         "armed": {
           "byPlayer": {
             "psy*overon": 3,
-            "wd.cao": 1,
             "wd.dilbert": 2
           },
           "byTeam": {
-            "pys": 5,
-            "wd": 1
+            "pys": 5
           },
-          "total": 6
+          "total": 5
         },
         "byPlayer": {
           "psy*overon": 3,
-          "wd.cao": 2,
           "wd.dilbert": 2
         },
         "byTeam": {
-          "pys": 5,
-          "wd": 2
+          "pys": 5
         },
         "from": "MH",
         "kind": "normal",
         "to": "air.ledge",
-        "total": 7,
-        "unarmed": {
-          "byPlayer": {
-            "wd.cao": 1
-          },
-          "byTeam": {
-            "wd": 1
-          },
-          "total": 1
-        }
+        "total": 5
       },
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 10,
+            "psy*overon": 9,
             "wd.cao": 4,
-            "wd.char": 16,
+            "wd.char": 15,
             "wd.dilbert": 6
           },
           "byTeam": {
-            "pys": 16,
-            "wd": 20
+            "pys": 15,
+            "wd": 19
           },
-          "total": 36
+          "total": 34
         },
         "byPlayer": {
-          "psy*overon": 13,
+          "psy*overon": 12,
           "wd.cao": 4,
-          "wd.char": 18,
+          "wd.char": 17,
           "wd.dilbert": 8
         },
         "byTeam": {
-          "pys": 21,
-          "wd": 22
+          "pys": 20,
+          "wd": 21
         },
         "from": "MH",
         "kind": "normal",
         "to": "low.RL",
-        "total": 43,
+        "total": 41,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 3,
@@ -31718,22 +31704,22 @@
             "psy*overon": 13,
             "wd.cao": 6,
             "wd.char": 3,
-            "wd.dilbert": 11
+            "wd.dilbert": 10
           },
           "byTeam": {
-            "pys": 24,
+            "pys": 23,
             "wd": 9
           },
-          "total": 33
+          "total": 32
         },
         "byPlayer": {
           "psy*overon": 13,
           "wd.cao": 10,
           "wd.char": 4,
-          "wd.dilbert": 13
+          "wd.dilbert": 12
         },
         "byTeam": {
-          "pys": 26,
+          "pys": 25,
           "wd": 14
         },
         "from": "Quad",
@@ -31749,7 +31735,7 @@
           "total": 5
         },
         "to": "Quad.GA",
-        "total": 40,
+        "total": 39,
         "unarmed": {
           "byPlayer": {
             "wd.cao": 4,
@@ -32150,25 +32136,25 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 4,
+            "psy*overon": 3,
             "wd.cao": 2,
             "wd.char": 2,
             "wd.dilbert": 1
           },
           "byTeam": {
-            "pys": 5,
+            "pys": 4,
             "wd": 4
           },
-          "total": 9
+          "total": 8
         },
         "byPlayer": {
-          "psy*overon": 4,
+          "psy*overon": 3,
           "wd.cao": 5,
           "wd.char": 4,
           "wd.dilbert": 1
         },
         "byTeam": {
-          "pys": 5,
+          "pys": 4,
           "wd": 9
         },
         "from": "Quad.ledge",
@@ -32183,7 +32169,7 @@
           "total": 1
         },
         "to": "air.ledge",
-        "total": 14,
+        "total": 13,
         "unarmed": {
           "byPlayer": {
             "wd.cao": 3,
@@ -32198,23 +32184,23 @@
       {
         "armed": {
           "byPlayer": {
-            "wd.char": 3
+            "wd.char": 2
           },
           "byTeam": {
-            "wd": 3
+            "wd": 2
           },
-          "total": 3
+          "total": 2
         },
         "byPlayer": {
-          "wd.char": 3
+          "wd.char": 2
         },
         "byTeam": {
-          "wd": 3
+          "wd": 2
         },
         "from": "Quad.ledge",
         "kind": "normal",
         "to": "high.RL",
-        "total": 3
+        "total": 2
       },
       {
         "armed": {
@@ -32357,28 +32343,28 @@
             "psy*overon": 2,
             "wd.cao": 2,
             "wd.char": 3,
-            "wd.dilbert": 3
+            "wd.dilbert": 2
           },
           "byTeam": {
-            "pys": 5,
+            "pys": 4,
             "wd": 5
           },
-          "total": 10
+          "total": 9
         },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 2,
           "wd.char": 3,
-          "wd.dilbert": 3
+          "wd.dilbert": 2
         },
         "byTeam": {
-          "pys": 5,
+          "pys": 4,
           "wd": 5
         },
         "from": "Quad.tele",
         "kind": "normal",
         "to": "MH",
-        "total": 10
+        "total": 9
       },
       {
         "armed": {
@@ -32495,29 +32481,29 @@
           "byPlayer": {
             "psy*overon": 3,
             "wd.cao": 1,
-            "wd.char": 3,
+            "wd.char": 2,
             "wd.dilbert": 1
           },
           "byTeam": {
             "pys": 4,
-            "wd": 4
+            "wd": 3
           },
-          "total": 8
+          "total": 7
         },
         "byPlayer": {
           "psy*overon": 3,
           "wd.cao": 1,
-          "wd.char": 3,
+          "wd.char": 2,
           "wd.dilbert": 1
         },
         "byTeam": {
           "pys": 4,
-          "wd": 4
+          "wd": 3
         },
         "from": "Quad.tele",
         "kind": "normal",
         "to": "high.RL",
-        "total": 8
+        "total": 7
       },
       {
         "armed": {
@@ -32597,28 +32583,28 @@
             "psy*overon": 12,
             "wd.cao": 8,
             "wd.char": 7,
-            "wd.dilbert": 19
+            "wd.dilbert": 17
           },
           "byTeam": {
-            "pys": 31,
+            "pys": 29,
             "wd": 15
           },
-          "total": 46
+          "total": 44
         },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 8,
           "wd.char": 8,
-          "wd.dilbert": 23
+          "wd.dilbert": 21
         },
         "byTeam": {
-          "pys": 35,
+          "pys": 33,
           "wd": 16
         },
         "from": "Quad.up",
         "kind": "normal",
         "to": "Quad",
-        "total": 51,
+        "total": 49,
         "unarmed": {
           "byPlayer": {
             "wd.char": 1,
@@ -32888,58 +32874,49 @@
             "psy*overon": 5,
             "wd.cao": 9,
             "wd.char": 15,
-            "wd.dilbert": 11
+            "wd.dilbert": 10
           },
           "byTeam": {
-            "pys": 16,
+            "pys": 15,
             "wd": 24
           },
-          "total": 40
+          "total": 39
         },
         "byPlayer": {
-          "psy*overon": 6,
+          "psy*overon": 5,
           "wd.cao": 9,
           "wd.char": 15,
-          "wd.dilbert": 11
+          "wd.dilbert": 10
         },
         "byTeam": {
-          "pys": 17,
+          "pys": 15,
           "wd": 24
         },
         "from": "RA.LG",
         "kind": "normal",
         "to": "RA.stairs",
-        "total": 41,
-        "unarmed": {
-          "byPlayer": {
-            "psy*overon": 1
-          },
-          "byTeam": {
-            "pys": 1
-          },
-          "total": 1
-        }
+        "total": 39
       },
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 6,
+            "psy*overon": 5,
             "wd.char": 6,
-            "wd.dilbert": 3
+            "wd.dilbert": 2
           },
           "byTeam": {
-            "pys": 9,
+            "pys": 7,
             "wd": 6
           },
-          "total": 15
+          "total": 13
         },
         "byPlayer": {
-          "psy*overon": 6,
+          "psy*overon": 5,
           "wd.char": 6,
-          "wd.dilbert": 3
+          "wd.dilbert": 2
         },
         "byTeam": {
-          "pys": 9,
+          "pys": 7,
           "wd": 6
         },
         "from": "RA.LG",
@@ -32954,7 +32931,7 @@
           "total": 1
         },
         "to": "air",
-        "total": 15
+        "total": 13
       },
       {
         "armed": {
@@ -32962,22 +32939,22 @@
             "psy*overon": 5,
             "wd.cao": 10,
             "wd.char": 5,
-            "wd.dilbert": 4
+            "wd.dilbert": 3
           },
           "byTeam": {
-            "pys": 9,
+            "pys": 8,
             "wd": 15
           },
-          "total": 24
+          "total": 23
         },
         "byPlayer": {
           "psy*overon": 8,
           "wd.cao": 11,
           "wd.char": 7,
-          "wd.dilbert": 9
+          "wd.dilbert": 8
         },
         "byTeam": {
-          "pys": 17,
+          "pys": 16,
           "wd": 18
         },
         "from": "RA.LG",
@@ -32992,7 +32969,7 @@
           "total": 1
         },
         "to": "high.RL",
-        "total": 35,
+        "total": 34,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 3,
@@ -33040,22 +33017,22 @@
             "psy*overon": 8,
             "wd.cao": 10,
             "wd.char": 15,
-            "wd.dilbert": 9
+            "wd.dilbert": 8
           },
           "byTeam": {
-            "pys": 17,
+            "pys": 16,
             "wd": 25
           },
-          "total": 42
+          "total": 41
         },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 14,
           "wd.char": 18,
-          "wd.dilbert": 15
+          "wd.dilbert": 14
         },
         "byTeam": {
-          "pys": 27,
+          "pys": 26,
           "wd": 32
         },
         "from": "RA.stairs",
@@ -33070,7 +33047,7 @@
           "total": 1
         },
         "to": "RA.LG",
-        "total": 59,
+        "total": 58,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 4,
@@ -33620,26 +33597,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 10,
-            "wd.cao": 6,
+            "psy*overon": 8,
+            "wd.cao": 5,
             "wd.char": 5,
             "wd.dilbert": 9
           },
           "byTeam": {
-            "pys": 19,
-            "wd": 11
+            "pys": 17,
+            "wd": 10
           },
-          "total": 30
+          "total": 27
         },
         "byPlayer": {
-          "psy*overon": 10,
-          "wd.cao": 9,
+          "psy*overon": 8,
+          "wd.cao": 8,
           "wd.char": 6,
           "wd.dilbert": 10
         },
         "byTeam": {
-          "pys": 20,
-          "wd": 15
+          "pys": 18,
+          "wd": 14
         },
         "from": "air.ledge",
         "kind": "normal",
@@ -33653,7 +33630,7 @@
           "total": 1
         },
         "to": "yard",
-        "total": 35,
+        "total": 32,
         "unarmed": {
           "byPlayer": {
             "wd.cao": 3,
@@ -33944,25 +33921,25 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 8,
+            "psy*overon": 7,
             "wd.cao": 8,
             "wd.char": 14,
             "wd.dilbert": 8
           },
           "byTeam": {
-            "pys": 16,
+            "pys": 15,
             "wd": 22
           },
-          "total": 38
+          "total": 37
         },
         "byPlayer": {
-          "psy*overon": 9,
+          "psy*overon": 8,
           "wd.cao": 8,
           "wd.char": 14,
           "wd.dilbert": 8
         },
         "byTeam": {
-          "pys": 17,
+          "pys": 16,
           "wd": 22
         },
         "from": "low.RL",
@@ -33977,7 +33954,7 @@
           "total": 1
         },
         "to": "RA.stairs",
-        "total": 39,
+        "total": 38,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 1
@@ -34030,25 +34007,25 @@
         "armed": {
           "byPlayer": {
             "psy*overon": 8,
-            "wd.cao": 5,
+            "wd.cao": 4,
             "wd.char": 5,
             "wd.dilbert": 2
           },
           "byTeam": {
             "pys": 10,
-            "wd": 10
+            "wd": 9
           },
-          "total": 20
+          "total": 19
         },
         "byPlayer": {
           "psy*overon": 11,
-          "wd.cao": 5,
+          "wd.cao": 4,
           "wd.char": 9,
           "wd.dilbert": 7
         },
         "byTeam": {
           "pys": 18,
-          "wd": 14
+          "wd": 13
         },
         "from": "yard",
         "kind": "normal",
@@ -34062,7 +34039,7 @@
           "total": 1
         },
         "to": "MH",
-        "total": 32,
+        "total": 31,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 3,
@@ -34166,23 +34143,23 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 2,
-            "wd.cao": 2
+            "psy*overon": 1,
+            "wd.cao": 1
           },
           "byTeam": {
-            "pys": 2,
-            "wd": 2
+            "pys": 1,
+            "wd": 1
           },
-          "total": 4
+          "total": 2
         },
         "byPlayer": {
-          "psy*overon": 2,
-          "wd.cao": 2,
+          "psy*overon": 1,
+          "wd.cao": 1,
           "wd.dilbert": 1
         },
         "byTeam": {
-          "pys": 3,
-          "wd": 2
+          "pys": 2,
+          "wd": 1
         },
         "from": "yard",
         "kind": "normal",
@@ -34196,7 +34173,7 @@
           "total": 1
         },
         "to": "air.ledge",
-        "total": 5,
+        "total": 3,
         "unarmed": {
           "byPlayer": {
             "wd.dilbert": 1
@@ -34212,51 +34189,51 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 61998,
-            "wd.cao": 22134,
-            "wd.char": 45407,
-            "wd.dilbert": 15137
+            "psy*overon": 58171,
+            "wd.cao": 17589,
+            "wd.char": 44124,
+            "wd.dilbert": 11431
           },
           "byTeam": {
-            "pys": 77135,
-            "wd": 67541
+            "pys": 69602,
+            "wd": 61713
           },
-          "total": 144676
+          "total": 131315
         },
         "byPlayer": {
-          "psy*overon": 66506,
-          "wd.cao": 25227,
-          "wd.char": 50212,
-          "wd.dilbert": 24512
+          "psy*overon": 61774,
+          "wd.cao": 20351,
+          "wd.char": 48046,
+          "wd.dilbert": 18808
         },
         "byTeam": {
-          "pys": 91018,
-          "wd": 75439
+          "pys": 80582,
+          "wd": 68397
         },
         "name": "MH",
         "quad": {
           "byPlayer": {
             "wd.cao": 1366,
-            "wd.char": 1716
+            "wd.char": 890
           },
           "byTeam": {
-            "wd": 3082
+            "wd": 2256
           },
-          "total": 3082
+          "total": 2256
         },
-        "total": 166457,
+        "total": 148979,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 4508,
-            "wd.cao": 3093,
-            "wd.char": 4805,
-            "wd.dilbert": 9375
+            "psy*overon": 3603,
+            "wd.cao": 2762,
+            "wd.char": 3922,
+            "wd.dilbert": 7377
           },
           "byTeam": {
-            "pys": 13883,
-            "wd": 7898
+            "pys": 10980,
+            "wd": 6684
           },
-          "total": 21781
+          "total": 17664
         },
         "x": -660.875,
         "y": -89.75,
@@ -34265,54 +34242,54 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 38674,
-            "wd.cao": 17103,
-            "wd.char": 22362,
-            "wd.dilbert": 37299
+            "psy*overon": 36478,
+            "wd.cao": 16153,
+            "wd.char": 20643,
+            "wd.dilbert": 32647
           },
           "byTeam": {
-            "pys": 75973,
-            "wd": 39465
+            "pys": 69125,
+            "wd": 36796
           },
-          "total": 115438
+          "total": 105921
         },
         "byPlayer": {
-          "psy*overon": 42065,
-          "wd.cao": 33565,
-          "wd.char": 23230,
-          "wd.dilbert": 55056
+          "psy*overon": 38972,
+          "wd.cao": 30810,
+          "wd.char": 21511,
+          "wd.dilbert": 48731
         },
         "byTeam": {
-          "pys": 97121,
-          "wd": 56795
+          "pys": 87703,
+          "wd": 52321
         },
         "name": "Quad",
         "quad": {
           "byPlayer": {
             "psy*overon": 561,
             "wd.cao": 5340,
-            "wd.char": 6432,
+            "wd.char": 5539,
             "wd.dilbert": 637
           },
           "byTeam": {
             "pys": 1198,
-            "wd": 11772
+            "wd": 10879
           },
-          "total": 12970
+          "total": 12077
         },
-        "total": 153916,
+        "total": 140024,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 3391,
-            "wd.cao": 16462,
+            "psy*overon": 2494,
+            "wd.cao": 14657,
             "wd.char": 868,
-            "wd.dilbert": 17757
+            "wd.dilbert": 16084
           },
           "byTeam": {
-            "pys": 21148,
-            "wd": 17330
+            "pys": 18578,
+            "wd": 15525
           },
-          "total": 38478
+          "total": 34103
         },
         "x": -702.25,
         "y": -831.625,
@@ -34321,51 +34298,51 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 30697,
-            "wd.cao": 20177,
+            "psy*overon": 29881,
+            "wd.cao": 16541,
             "wd.char": 13399,
-            "wd.dilbert": 22967
+            "wd.dilbert": 18878
           },
           "byTeam": {
-            "pys": 53664,
-            "wd": 33576
+            "pys": 48759,
+            "wd": 29940
           },
-          "total": 87240
+          "total": 78699
         },
         "byPlayer": {
-          "psy*overon": 39927,
-          "wd.cao": 55839,
-          "wd.char": 19589,
-          "wd.dilbert": 41565
+          "psy*overon": 37283,
+          "wd.cao": 50861,
+          "wd.char": 18771,
+          "wd.dilbert": 37163
         },
         "byTeam": {
-          "pys": 81492,
-          "wd": 75428
+          "pys": 74446,
+          "wd": 69632
         },
         "name": "Quad.GA",
         "quad": {
           "byPlayer": {
-            "wd.cao": 4511,
+            "wd.cao": 3776,
             "wd.char": 1607
           },
           "byTeam": {
-            "wd": 6118
+            "wd": 5383
           },
-          "total": 6118
+          "total": 5383
         },
-        "total": 156920,
+        "total": 144078,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 9230,
-            "wd.cao": 35662,
-            "wd.char": 6190,
-            "wd.dilbert": 18598
+            "psy*overon": 7402,
+            "wd.cao": 34320,
+            "wd.char": 5372,
+            "wd.dilbert": 18285
           },
           "byTeam": {
-            "pys": 27828,
-            "wd": 41852
+            "pys": 25687,
+            "wd": 39692
           },
-          "total": 69680
+          "total": 65379
         },
         "x": -410.625,
         "y": -765,
@@ -34374,26 +34351,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 12879,
+            "psy*overon": 12557,
             "wd.cao": 11257,
-            "wd.char": 12399,
-            "wd.dilbert": 15835
+            "wd.char": 12178,
+            "wd.dilbert": 9096
           },
           "byTeam": {
-            "pys": 28714,
-            "wd": 23656
+            "pys": 21653,
+            "wd": 23435
           },
-          "total": 52370
+          "total": 45088
         },
         "byPlayer": {
-          "psy*overon": 16181,
-          "wd.cao": 18754,
-          "wd.char": 15100,
-          "wd.dilbert": 28259
+          "psy*overon": 15859,
+          "wd.cao": 18221,
+          "wd.char": 14046,
+          "wd.dilbert": 19757
         },
         "byTeam": {
-          "pys": 44440,
-          "wd": 33854
+          "pys": 35616,
+          "wd": 32267
         },
         "name": "Quad.ledge",
         "quad": {
@@ -34405,19 +34382,19 @@
           },
           "total": 1313
         },
-        "total": 78294,
+        "total": 67883,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 3302,
-            "wd.cao": 7497,
-            "wd.char": 2701,
-            "wd.dilbert": 12424
+            "wd.cao": 6964,
+            "wd.char": 1868,
+            "wd.dilbert": 10661
           },
           "byTeam": {
-            "pys": 15726,
-            "wd": 10198
+            "pys": 13963,
+            "wd": 8832
           },
-          "total": 25924
+          "total": 22795
         },
         "x": -224.125,
         "y": -339.625,
@@ -34426,52 +34403,51 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 6441,
-            "wd.cao": 4927,
-            "wd.char": 12758,
-            "wd.dilbert": 4676
+            "psy*overon": 4220,
+            "wd.cao": 4074,
+            "wd.char": 11945,
+            "wd.dilbert": 3365
           },
           "byTeam": {
-            "pys": 11117,
-            "wd": 17685
+            "pys": 7585,
+            "wd": 16019
           },
-          "total": 28802
+          "total": 23604
         },
         "byPlayer": {
-          "psy*overon": 8729,
-          "wd.cao": 6246,
-          "wd.char": 12758,
-          "wd.dilbert": 8147
+          "psy*overon": 6508,
+          "wd.cao": 4461,
+          "wd.char": 11945,
+          "wd.dilbert": 6526
         },
         "byTeam": {
-          "pys": 16876,
-          "wd": 19004
+          "pys": 13034,
+          "wd": 16406
         },
         "name": "Quad.stairs",
         "quad": {
           "byPlayer": {
-            "psy*overon": 2221,
             "wd.char": 1045,
-            "wd.dilbert": 988
+            "wd.dilbert": 678
           },
           "byTeam": {
-            "pys": 3209,
+            "pys": 678,
             "wd": 1045
           },
-          "total": 4254
+          "total": 1723
         },
-        "total": 35880,
+        "total": 29440,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 2288,
-            "wd.cao": 1319,
-            "wd.dilbert": 3471
+            "wd.cao": 387,
+            "wd.dilbert": 3161
           },
           "byTeam": {
-            "pys": 5759,
-            "wd": 1319
+            "pys": 5449,
+            "wd": 387
           },
-          "total": 7078
+          "total": 5836
         },
         "x": -927.875,
         "y": -541.5,
@@ -34480,26 +34456,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 27602,
-            "wd.cao": 12371,
-            "wd.char": 38275,
-            "wd.dilbert": 18977
+            "psy*overon": 26754,
+            "wd.cao": 12030,
+            "wd.char": 37032,
+            "wd.dilbert": 17754
           },
           "byTeam": {
-            "pys": 46579,
-            "wd": 50646
+            "pys": 44508,
+            "wd": 49062
           },
-          "total": 97225
+          "total": 93570
         },
         "byPlayer": {
-          "psy*overon": 31641,
-          "wd.cao": 12371,
-          "wd.char": 39290,
-          "wd.dilbert": 18977
+          "psy*overon": 30793,
+          "wd.cao": 12030,
+          "wd.char": 38047,
+          "wd.dilbert": 17754
         },
         "byTeam": {
-          "pys": 50618,
-          "wd": 51661
+          "pys": 48547,
+          "wd": 50077
         },
         "name": "Quad.tele",
         "quad": {
@@ -34511,7 +34487,7 @@
           },
           "total": 3800
         },
-        "total": 102279,
+        "total": 98624,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 4039,
@@ -34530,51 +34506,51 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 35349,
-            "wd.cao": 48425,
-            "wd.char": 57327,
-            "wd.dilbert": 39928
+            "psy*overon": 34124,
+            "wd.cao": 45698,
+            "wd.char": 53459,
+            "wd.dilbert": 37275
           },
           "byTeam": {
-            "pys": 75277,
-            "wd": 105752
+            "pys": 71399,
+            "wd": 99157
           },
-          "total": 181029
+          "total": 170556
         },
         "byPlayer": {
-          "psy*overon": 44514,
-          "wd.cao": 70220,
-          "wd.char": 67734,
-          "wd.dilbert": 64477
+          "psy*overon": 43289,
+          "wd.cao": 64377,
+          "wd.char": 63866,
+          "wd.dilbert": 60972
         },
         "byTeam": {
-          "pys": 108991,
-          "wd": 137954
+          "pys": 104261,
+          "wd": 128243
         },
         "name": "Quad.up",
         "quad": {
           "byPlayer": {
             "wd.cao": 1205,
-            "wd.char": 4554
+            "wd.char": 3619
           },
           "byTeam": {
-            "wd": 5759
+            "wd": 4824
           },
-          "total": 5759
+          "total": 4824
         },
-        "total": 246945,
+        "total": 232504,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 9165,
-            "wd.cao": 21795,
+            "wd.cao": 18679,
             "wd.char": 10407,
-            "wd.dilbert": 24549
+            "wd.dilbert": 23697
           },
           "byTeam": {
-            "pys": 33714,
-            "wd": 32202
+            "pys": 32862,
+            "wd": 29086
           },
-          "total": 65916
+          "total": 61948
         },
         "x": -733.375,
         "y": -458.875,
@@ -34597,27 +34573,27 @@
         "byPlayer": {
           "psy*overon": 7808,
           "wd.cao": 10895,
-          "wd.char": 14213,
+          "wd.char": 13375,
           "wd.dilbert": 6438
         },
         "byTeam": {
           "pys": 14246,
-          "wd": 25108
+          "wd": 24270
         },
         "name": "RA",
-        "total": 39354,
+        "total": 38516,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 6540,
             "wd.cao": 3936,
-            "wd.char": 2867,
+            "wd.char": 2029,
             "wd.dilbert": 5256
           },
           "byTeam": {
             "pys": 11796,
-            "wd": 6803
+            "wd": 5965
           },
-          "total": 18599
+          "total": 17761
         },
         "x": -326.375,
         "y": 466,
@@ -34626,26 +34602,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 55341,
-            "wd.cao": 138567,
-            "wd.char": 104469,
-            "wd.dilbert": 92009
+            "psy*overon": 52914,
+            "wd.cao": 130686,
+            "wd.char": 101027,
+            "wd.dilbert": 77372
           },
           "byTeam": {
-            "pys": 147350,
-            "wd": 243036
+            "pys": 130286,
+            "wd": 231713
           },
-          "total": 390386
+          "total": 361999
         },
         "byPlayer": {
-          "psy*overon": 66051,
-          "wd.cao": 142192,
-          "wd.char": 107601,
-          "wd.dilbert": 105927
+          "psy*overon": 62323,
+          "wd.cao": 133476,
+          "wd.char": 104159,
+          "wd.dilbert": 91290
         },
         "byTeam": {
-          "pys": 171978,
-          "wd": 249793
+          "pys": 153613,
+          "wd": 237635
         },
         "name": "RA.LG",
         "quad": {
@@ -34658,19 +34634,19 @@
           },
           "total": 5616
         },
-        "total": 421771,
+        "total": 391248,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 10710,
-            "wd.cao": 3625,
+            "psy*overon": 9409,
+            "wd.cao": 2790,
             "wd.char": 3132,
             "wd.dilbert": 13918
           },
           "byTeam": {
-            "pys": 24628,
-            "wd": 6757
+            "pys": 23327,
+            "wd": 5922
           },
-          "total": 31385
+          "total": 29249
         },
         "x": 99,
         "y": -221.625,
@@ -34679,26 +34655,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 13580,
-            "wd.cao": 17363,
-            "wd.char": 30596,
-            "wd.dilbert": 18049
+            "psy*overon": 12125,
+            "wd.cao": 16028,
+            "wd.char": 29712,
+            "wd.dilbert": 16601
           },
           "byTeam": {
-            "pys": 31629,
-            "wd": 47959
+            "pys": 28726,
+            "wd": 45740
           },
-          "total": 79588
+          "total": 74466
         },
         "byPlayer": {
-          "psy*overon": 21576,
-          "wd.cao": 21285,
-          "wd.char": 32725,
-          "wd.dilbert": 24100
+          "psy*overon": 19532,
+          "wd.cao": 19950,
+          "wd.char": 31841,
+          "wd.dilbert": 21756
         },
         "byTeam": {
-          "pys": 45676,
-          "wd": 54010
+          "pys": 41288,
+          "wd": 51791
         },
         "name": "RA.stairs",
         "quad": {
@@ -34710,19 +34686,19 @@
           },
           "total": 1090
         },
-        "total": 99686,
+        "total": 93079,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 7996,
+            "psy*overon": 7407,
             "wd.cao": 3922,
             "wd.char": 2129,
-            "wd.dilbert": 6051
+            "wd.dilbert": 5155
           },
           "byTeam": {
-            "pys": 14047,
+            "pys": 12562,
             "wd": 6051
           },
-          "total": 20098
+          "total": 18613
         },
         "x": 38.875,
         "y": 543.875,
@@ -34732,25 +34708,25 @@
         "armed": {
           "byPlayer": {
             "psy*overon": 24603,
-            "wd.cao": 6570,
+            "wd.cao": 5632,
             "wd.char": 14261,
-            "wd.dilbert": 5371
+            "wd.dilbert": 5021
           },
           "byTeam": {
-            "pys": 29974,
-            "wd": 20831
+            "pys": 29624,
+            "wd": 19893
           },
-          "total": 50805
+          "total": 49517
         },
         "byPlayer": {
           "psy*overon": 26409,
-          "wd.cao": 10312,
+          "wd.cao": 9374,
           "wd.char": 15095,
-          "wd.dilbert": 9682
+          "wd.dilbert": 9332
         },
         "byTeam": {
-          "pys": 36091,
-          "wd": 25407
+          "pys": 35741,
+          "wd": 24469
         },
         "name": "YA",
         "quad": {
@@ -34762,7 +34738,7 @@
           },
           "total": 686
         },
-        "total": 61498,
+        "total": 60210,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 1806,
@@ -34785,37 +34761,36 @@
           "byPlayer": {
             "psy*overon": 11143,
             "wd.cao": 2154,
-            "wd.char": 5650,
+            "wd.char": 4719,
             "wd.dilbert": 2935
           },
           "byTeam": {
             "pys": 14078,
-            "wd": 7804
+            "wd": 6873
           },
-          "total": 21882
+          "total": 20951
         },
         "byPlayer": {
           "psy*overon": 12117,
           "wd.cao": 3900,
-          "wd.char": 5650,
+          "wd.char": 4719,
           "wd.dilbert": 5099
         },
         "byTeam": {
           "pys": 17216,
-          "wd": 9550
+          "wd": 8619
         },
         "name": "YA.stairs",
         "quad": {
           "byPlayer": {
-            "wd.cao": 366,
-            "wd.char": 931
+            "wd.cao": 366
           },
           "byTeam": {
-            "wd": 1297
+            "wd": 366
           },
-          "total": 1297
+          "total": 366
         },
-        "total": 26766,
+        "total": 25835,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 974,
@@ -34835,24 +34810,24 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 4366,
+            "psy*overon": 4010,
             "wd.char": 4949,
-            "wd.dilbert": 2615
+            "wd.dilbert": 2279
           },
           "byTeam": {
-            "pys": 6981,
+            "pys": 6289,
             "wd": 4949
           },
-          "total": 11930
+          "total": 11238
         },
         "byPlayer": {
-          "psy*overon": 13879,
+          "psy*overon": 13523,
           "wd.cao": 4875,
           "wd.char": 9843,
-          "wd.dilbert": 11527
+          "wd.dilbert": 11191
         },
         "byTeam": {
-          "pys": 25406,
+          "pys": 24714,
           "wd": 14718
         },
         "name": "air",
@@ -34865,7 +34840,7 @@
           },
           "total": 594
         },
-        "total": 40124,
+        "total": 39432,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 9513,
@@ -34886,51 +34861,51 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 26609,
-            "wd.cao": 14759,
-            "wd.char": 32756,
-            "wd.dilbert": 18077
+            "psy*overon": 23044,
+            "wd.cao": 13066,
+            "wd.char": 31924,
+            "wd.dilbert": 17233
           },
           "byTeam": {
-            "pys": 44686,
-            "wd": 47515
+            "pys": 40277,
+            "wd": 44990
           },
-          "total": 92201
+          "total": 85267
         },
         "byPlayer": {
-          "psy*overon": 32062,
-          "wd.cao": 24665,
-          "wd.char": 37990,
-          "wd.dilbert": 22609
+          "psy*overon": 28497,
+          "wd.cao": 21589,
+          "wd.char": 37158,
+          "wd.dilbert": 20815
         },
         "byTeam": {
-          "pys": 54671,
-          "wd": 62655
+          "pys": 49312,
+          "wd": 58747
         },
         "name": "air.ledge",
         "quad": {
           "byPlayer": {
-            "wd.cao": 2014,
-            "wd.char": 2177
+            "wd.cao": 1014,
+            "wd.char": 1345
           },
           "byTeam": {
-            "wd": 4191
+            "wd": 2359
           },
-          "total": 4191
+          "total": 2359
         },
-        "total": 117326,
+        "total": 108059,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 5453,
-            "wd.cao": 9906,
+            "wd.cao": 8523,
             "wd.char": 5234,
-            "wd.dilbert": 4532
+            "wd.dilbert": 3582
           },
           "byTeam": {
-            "pys": 9985,
-            "wd": 15140
+            "pys": 9035,
+            "wd": 13757
           },
-          "total": 25125
+          "total": 22792
         },
         "x": -322.125,
         "y": 217.125,
@@ -34939,26 +34914,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 29823,
-            "wd.cao": 49483,
-            "wd.char": 38918,
-            "wd.dilbert": 42791
+            "psy*overon": 27846,
+            "wd.cao": 46027,
+            "wd.char": 36465,
+            "wd.dilbert": 39174
           },
           "byTeam": {
-            "pys": 72614,
-            "wd": 88401
+            "pys": 67020,
+            "wd": 82492
           },
-          "total": 161015
+          "total": 149512
         },
         "byPlayer": {
-          "psy*overon": 35536,
-          "wd.cao": 58971,
-          "wd.char": 45457,
-          "wd.dilbert": 60246
+          "psy*overon": 33559,
+          "wd.cao": 55515,
+          "wd.char": 43004,
+          "wd.dilbert": 54864
         },
         "byTeam": {
-          "pys": 95782,
-          "wd": 104428
+          "pys": 88423,
+          "wd": 98519
         },
         "name": "high.RL",
         "quad": {
@@ -34970,19 +34945,19 @@
           },
           "total": 1636
         },
-        "total": 200210,
+        "total": 186942,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 5713,
             "wd.cao": 9488,
             "wd.char": 6539,
-            "wd.dilbert": 17455
+            "wd.dilbert": 15690
           },
           "byTeam": {
-            "pys": 23168,
+            "pys": 21403,
             "wd": 16027
           },
-          "total": 39195
+          "total": 37430
         },
         "x": -45.25,
         "y": -348.375,
@@ -34991,26 +34966,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 60925,
-            "wd.cao": 52116,
-            "wd.char": 74915,
-            "wd.dilbert": 57703
+            "psy*overon": 55804,
+            "wd.cao": 47229,
+            "wd.char": 71915,
+            "wd.dilbert": 51872
           },
           "byTeam": {
-            "pys": 118628,
-            "wd": 127031
+            "pys": 107676,
+            "wd": 119144
           },
-          "total": 245659
+          "total": 226820
         },
         "byPlayer": {
-          "psy*overon": 85319,
-          "wd.cao": 64088,
-          "wd.char": 83247,
-          "wd.dilbert": 72268
+          "psy*overon": 76406,
+          "wd.cao": 59201,
+          "wd.char": 80247,
+          "wd.dilbert": 64658
         },
         "byTeam": {
-          "pys": 157587,
-          "wd": 147335
+          "pys": 141064,
+          "wd": 139448
         },
         "name": "low.RL",
         "quad": {
@@ -35022,19 +34997,19 @@
           },
           "total": 1776
         },
-        "total": 304922,
+        "total": 280512,
         "unarmed": {
           "byPlayer": {
-            "psy*overon": 24394,
+            "psy*overon": 20602,
             "wd.cao": 11972,
             "wd.char": 8332,
-            "wd.dilbert": 14565
+            "wd.dilbert": 12786
           },
           "byTeam": {
-            "pys": 38959,
+            "pys": 33388,
             "wd": 20304
           },
-          "total": 59263
+          "total": 53692
         },
         "x": -608,
         "y": 165.75,
@@ -35043,26 +35018,26 @@
       {
         "armed": {
           "byPlayer": {
-            "psy*overon": 40360,
-            "wd.cao": 21844,
+            "psy*overon": 32758,
+            "wd.cao": 20890,
             "wd.char": 13556,
-            "wd.dilbert": 15538
+            "wd.dilbert": 13811
           },
           "byTeam": {
-            "pys": 55898,
-            "wd": 35400
+            "pys": 46569,
+            "wd": 34446
           },
-          "total": 91298
+          "total": 81015
         },
         "byPlayer": {
-          "psy*overon": 49711,
-          "wd.cao": 36626,
+          "psy*overon": 42109,
+          "wd.cao": 35672,
           "wd.char": 20297,
-          "wd.dilbert": 41142
+          "wd.dilbert": 38532
         },
         "byTeam": {
-          "pys": 90853,
-          "wd": 56923
+          "pys": 80641,
+          "wd": 55969
         },
         "name": "yard",
         "quad": {
@@ -35075,19 +35050,19 @@
           },
           "total": 5338
         },
-        "total": 147776,
+        "total": 136610,
         "unarmed": {
           "byPlayer": {
             "psy*overon": 9351,
             "wd.cao": 14782,
             "wd.char": 6741,
-            "wd.dilbert": 25604
+            "wd.dilbert": 24721
           },
           "byTeam": {
-            "pys": 34955,
+            "pys": 34072,
             "wd": 21523
           },
-          "total": 56478
+          "total": 55595
         },
         "x": -205.875,
         "y": -94.625,
@@ -39050,7 +39025,7 @@
       }
     ]
   },
-  "schemaVersion": 63,
+  "schemaVersion": 64,
   "shots": {
     "byPlayer": [
       {
@@ -56145,6 +56120,36 @@
             "v": 0
           }
         ],
+        "alive": [
+          {
+            "e": 13248,
+            "s": 0
+          },
+          {
+            "e": 19492,
+            "s": 13999
+          },
+          {
+            "e": 65154,
+            "s": 58723
+          },
+          {
+            "e": 81547,
+            "s": 66086
+          },
+          {
+            "e": 587147,
+            "s": 586075
+          },
+          {
+            "e": 591295,
+            "s": 588011
+          },
+          {
+            "e": 600023,
+            "s": 593945
+          }
+        ],
         "at": [
           {
             "t": 0,
@@ -62133,6 +62138,40 @@
             "v": 1
           }
         ],
+        "alive": [
+          {
+            "e": 7508,
+            "s": 0
+          },
+          {
+            "e": 11945,
+            "s": 8442
+          },
+          {
+            "e": 15320,
+            "s": 12850
+          },
+          {
+            "e": 61830,
+            "s": 56973
+          },
+          {
+            "e": 65039,
+            "s": 62764
+          },
+          {
+            "e": 66317,
+            "s": 65968
+          },
+          {
+            "e": 125842,
+            "s": 67362
+          },
+          {
+            "e": 600023,
+            "s": 556011
+          }
+        ],
         "at": [
           {
             "t": 0,
@@ -68037,6 +68076,28 @@
           {
             "t": 599958,
             "v": 0
+          }
+        ],
+        "alive": [
+          {
+            "e": 19870,
+            "s": 0
+          },
+          {
+            "e": 61845,
+            "s": 57466
+          },
+          {
+            "e": 74092,
+            "s": 62089
+          },
+          {
+            "e": 84155,
+            "s": 74958
+          },
+          {
+            "e": 600023,
+            "s": 553102
           }
         ],
         "at": [
@@ -74010,6 +74071,44 @@
           {
             "t": 598802,
             "v": 0
+          }
+        ],
+        "alive": [
+          {
+            "e": 5596,
+            "s": 0
+          },
+          {
+            "e": 9672,
+            "s": 5909
+          },
+          {
+            "e": 16216,
+            "s": 10547
+          },
+          {
+            "e": 68131,
+            "s": 57831
+          },
+          {
+            "e": 71669,
+            "s": 68441
+          },
+          {
+            "e": 73790,
+            "s": 72507
+          },
+          {
+            "e": 79530,
+            "s": 74642
+          },
+          {
+            "e": 593793,
+            "s": 581633
+          },
+          {
+            "e": 600023,
+            "s": 598802
           }
         ],
         "at": [
@@ -83920,9 +84019,9 @@
     ],
     "regionControl": {
       "bucketStates": {
-        "QUAD": "______________________________________________________________bbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbbbbbb________________________________________________________BBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaa___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCBBBBBBBBBBBBBBBB_AAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCBBBBBBBBBBBBBBBBBBBBBB__________AAAACCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________aaaaaaaaaaaaaaaaaaaaa_______________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAccccccccccccccccccccccccccccccccccccccBBBBBcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________aaaaaaaaaaaaaaacccccccaaaaaaaaaaaaaaaaaa_____aaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________AAAAACCCCCCCCCCCCCCCCCCCCCAAaaaa________________________________________________aaaaaaaaaaaaaaaaaa___________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccccccb_________aaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAA__________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________bbbbbbbbbbbbbbbbbb________________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAA_____________________________________________AAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBccccccccaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________AAAAAAAAAAAAAAAAAAAAAA___________________________________bbbbbbbbbbbbbbbbbbbbbbbb__________________________BBBBB_______________________________________________BBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________BBBBBB_______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbccAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________bbbbbbbb______________________________________BBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________bbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________AAAAAAAAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________BBBBBB_________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________aaaaaaaaaaaaaaaaaaa___aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAA_________________________________________bbbbbbbb______bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbb________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________BBBBBBBBBBBBBBBBBBBBB_________aaaBBBBBBBBBBBBBBBBBBBBCCCCCCCAAAAAAAAAAAAAAaaaaaaaaa___________________________________________________________________________________BBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa________________________________BCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCBBBBBBBBBBBBBBCCCCCAAAAAAAAACCCCCCCBBBBBBBBBBBBB_____________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb____________bbbbbbbbbbbbbbbbbbbb_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbbbb___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbb_________________________________________________BBBBBBBBBBBBBBBBBBBBBB________bbbbbbb___________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBB____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBBBB____________________________________________________________aaaaaaaaaaaacccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbb______________________________AAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbb_____________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________BCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaa___________________________BBBBBBBBBBBBBBBBB_____________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAA___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAA__________aaaaaaaaa____________________________________________________________________________bbbbbbbb_______________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBbb________________aaaaaaaaaaaaa_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________BBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________bbbbbbb____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBB___________________________________________________________________bbbbbbb______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBaaaA____AAAAAAAAAAAAACCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAACCCCCCCCAAAAAAAAAAAAA______________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_________________________________________________________bbbbbbbbbbbbbBBBBBBBbbbbbbbbBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAAAAAAAAAAAAAAAAAA________________aBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBaaaaa________BBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________BBBBBBBBBBBBBBBBB_____________________bbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbb_________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-        "RA": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________BBBBBBB_________________________________bbbbbbbbbbbbbbbbbbb____________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAA__________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBa___________________________________________________________________BBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________BBBBBBBBBBBB______________bbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbb_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________ACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbccccccccccccccccccccbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB_____________________________bbbbbbbbbbbbbbbbbbbbb_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAA_______________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBB_______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAACCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBBBBBBBBBBBBBBBB__________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______cccccccccccccccccccccaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAA______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAA_____________________________________________________________bbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbb___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaa_______________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAA_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________",
-        "RL": "aaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAA_________________bbbbbbbbbbbbbbbbbbbBBBBCCCCCCCCCCCCCCCCCCCCAAA____BBBBBBBBBBBBBBBBB___________________________________bbbbbbbbbbbbbBBBBBBBBBBBB____________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCAAAAAAACCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAA____________________AAAAAAAAAAAAAAAAAAAAAAAA__________AAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBBCCCCCAAAAAAAAAAAA__________________________AAAAAAAACCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAACCCCCCCBBBBB________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBB_______________________________________________________AAAAAAAAAAAAAAAAAaaaaaAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAA________aaaaaaaaAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCAAAAAAAA_____________________aaaaaaaAAAAAAAAAAAAAAAAbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBB____________________________A___BBBBBBBBBBB________________________bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbccccccccAAAAAAAAAAAAAAAAA____________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________bbbbbbbbbbbbbbbbbb________________BBBBBBBBBBBBBBBBBBBBaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____aaaaaaaAAAAAAAAAAAACCCBCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBB________________________________BBBBBBBBBBBBBBBCCCCCCCAAAAAAAAAA_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________bbbbbbbbBBBBBBBBBBBBBBB______aaaaaaaaAAAAAAAAAA__________________AAAAAAAAAAAAAAAA__AAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBB___________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCB__________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________aaaaaaaAAAAAAAAAAAAAAAAAAAAAA__CCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAACCCCCBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCC_________________________________bbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBB______________________________________aaaaaaaAAAAAAAAAAAAAA____________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBB________aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAA__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________BBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAAAAaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________AAAAAAAAAAAAAAAAAAAAAAA__________aaaaaaAAAAAAAAAACCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCAAAAAAAAAA____________________________________________acccccccBCCCCCCCCCCCCCCCAAAAA________________________________________________________________aaaaaaaaaaaaccccccAACCCCCCCCCCCCCCCCAAAAAAAAAA________________bbbbbbbbBBBBBBBBBBBBBBBBbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_aaaaaaaacccccccCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____AAAAAAAAA_______________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________bbbbbbbbCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAA___________________BBBBBBBBBBBBBB__________________________bBBBBBBBBBBBBBBBBBBBB___bbbbbbbbBBBBBBBBBBBBBBB_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCBBBBBBBBBBBB________________________________BBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbcccccccccccccAACCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBB________________________________________________________bbbbbbbBBBBBBBBBBBBBBBB_______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAACCCCCCCCCCCCCCCCBBBBBBBBBBBBBBB____________________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAA_____________________A________aaaaaaaAAAAAAAAAAAAAAAA_____________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbBBBBBBBBBBBBBB_________________________BBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________aaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________bbbbbbbbBBBBBBBBBBBBBBBB_____AAAAAAAAAAAAACCCCCCBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________AAAAAACCCCCCCCBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBB__________________________________________________________________bbbbbbbBBBBBBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________ACCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBbbbbbbbcBBBBBBBBBBBBBBBBBBBBBBBCCCAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAACCCCCCCCCCCCCBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAA_________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB______________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBB_________________________________________________________aaaaaaAAAAAAAAAAAAAAAAA____________________________________AAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCbbbbbbbbbbbbbbbbbbbBBBBBBBBCCCCCCCCAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBB________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________bbbbbbbBBBBBBBBBBBBBB__________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAA___________________________________aaaaaaaaaccccAAAAAAAAAAAAACCCCCCCCCCCCCCBBBBBBBBBBBBBCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAAAAAAAAAAAAAAbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________AAAAAAAAAAAAAAAAAAAA____________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________BBBBBBBBBBBBBBBBBBBBB______bbbbbbbbbbbbbbBBBBBBBBBBBBB__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAbbbBBBBBBBBBBBBBBBBBBBBBB____________aaaaaaaAAAAAAAAAAAAA__bbAAAAAAAAAAAAAACCCBBBBBBBBBBBBBBBBCCAAAAAAAA_________aaaaaaaAAAAAAAAAAAAAAAA_____________________________________________________________bbbbbbbBBBBBBBBBBBBBBBB____________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCBBBBBBBBBB______________________BBBBBBBBBaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaAAAAAAAAAAAAAAAAACCCCCCBBBBBBBBBBB_________________________bbbbbbbbbbbbbBBBBBBBBBB________________________________________________________bbbbbbbBBBBBBBBBBBBB_____________________________________bbbbbbbbbBBBBBBBBBBBBBB_____________________________bbbbbbbbbbbbbbbBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBB_____________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBB_________________AAAAAAAAAAAAAAAAAAAA_________________________________________________________AAAAAAAAAAAAAAAAAAAAAAA_____BBBBBBBBBBBBBBB_______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbCCCCCCCCCCCCCCCCCCCCCCCAAAAAAbbbbbbbbbbbbbbbbBBBBBBBBB___________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________bbbBBBBBBBBBBBBBBBBBBB_____________AAAAAAACCCCCCCCCCCCCCAAAAAAAAAAAAAAAA_______BBBBBBBBBBBBBBBBBBBB_________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__bbbbbbbbbbbbbbbbbbbbbaaaaaaaAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAA__________________________________bbbbbbbbbbbbbAAACCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAbbbbBBBBBBBBBBBB_____________________________________________________________________bbbbbbBBBBBBBBBBBBBB____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________AAAAAAAAAAAAAAAAA_____________BBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCBBBBBBBB___________aaaaaaaaAAAAAAAAAAAA___________________________________________bbbbbbbbBBBBBBBBBBBB____________________________________________________________________________aaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____BBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBbbbbbbbAAAAAAAAAAAACCCCCCCCCCCBBBBCCCCCCCAAAAAAAAAbbbbbbbBBBBBBBBBBBBBBBBBBBB__BBBB______________________AAAAAAAAAAAAAAAAAAAAAAAAbbbbAAAAAAAAAAAACCCCBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAAAAAA_________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________bbbbbbbBBBBBBCCCCCCCCCAAAA__________________________________________________________________BBBBBBBBBCAAAAAAAAAAAAAAAAAA__________________________________________________BBBBBBBBBBBBBBBB________________AAAAAAAAAAAAA__________________________________________AAAAAAAAAAAAA_____________AAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "QUAD": "______________________________________________________________bbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbbbbbb________________________________________________________BBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaa___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCAAAAA___BBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBCCCCAA_________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCBBBBBBBBBBBBBBBBBBBBBB__________AAAACCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________aaaaaaaaaaaaaaaaaaaaa_______________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCAabbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccBBBBBccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccbbbbbbbbbbbbbbbbbbcccccccccAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCBBBBB________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________aaaaaaaaaaaaaaacccccccaaaaaaaaaaaaaaaaaa_____aaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________AAAAACCCCCCCCCCCCCCCCCCCCCAAaaaa________________________________________________aaaaaaaaaaaaaaaaaa___________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccccccb_________aaaaaaaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAA__________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________bbbbbbbbbbbbbbbbbb________________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAA_____________________________________________AAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAA_______aaaaaaccccccccaaaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________________________________________AAAAAAAAAAAAAAAAAAAAAA___________________________________bbbbbbbbbbbbbbbbbbbbbbbb__________________________BBBBB_______________________________________________BBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________BBBBBB_______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbccAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAACCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________bbbbbbbb______________________________________BBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________bbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________AAAAAAAAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________BBBBBB_________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________aaaaaaaaaaaaaaaaaaa___aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAA_________________________________________bbbbbbbb______bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbb________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________BBBBBBBBBBBBBBBBBBBBB_________aaaBBBBBBBBBBBBBBBBBBBBCCCCCCCAAAAAAAAAA_____aaaaaaaa___________________________________________________________________________________BBBBBBCCCCCCCCCCCCCCCCCBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCBBBBBBBBBBBBBBCCCCCAAAAAAAAACCCCCCCBBBBBBBBBBBBB_____________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb____________bbbbbbbbbbbbbbbbbbbb_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________bbbbbbbbbbbbbbbbbbbbbbb___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa__________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbb_________________________________________________BBBBBBBBBBBBBBBBBBBBBB________bbbbbbb___________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___AAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBB____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBBBB____________________________________________________________aaaaaaaaaaaacccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbb______________________________AAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbb_____________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________BCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________aaaaaaaaa___________________________BBBBBBBBBBBBBBBBB_____________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAA___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCAA__________________aaaaaaaaa____________________________________________________________________________bbbbbbbb_______________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbb___AAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBbb________________aaaaaaaaaaaaa_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________BBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________bbbbbbb____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBB___________________________________________________________________bbbbbbb______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCAAAAAAAAAAAAAAAACCCCCCCCCCCBBBBBBBBBBaaaA____AAAAAAAAAAAAACCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAACCCCCCCCAAAAAAAAAAAAA______________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_________________________________________________________bbbbbbbbbbbbbBBBBBBBbbbbbbbbBBBBBBBBBBBBBBBBBBBBCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAAAAAAAAAAAAAAAAAA________________aBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBaaaaa________BBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________BBBBBBBBBBBBBBBBB_____________________bbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbbbb_________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________BBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "RA": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________BBBBBBB_________________________________bbbbbbbbbbbbbbbbbbb____________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAA__________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBa___________________________________________________________________BBBBBCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbb_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________ACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbccccccccccccccccccccbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB_____________________________bbbbbbbbbbbbbbbbbbbbb_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAA_______________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBB_______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAACCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______cccccccccccccccccccccaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAA______________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAA_____________________________________________________________bbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbb___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAACCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaa_______________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________",
+        "RL": "aaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAA_________________bbbbbbbbbbbbbbbbbbbBBBBCCCCCCCCCCCCCCCCCCCCAAA____BBBBBBBBBBBBBBBBB___________________________________bbbbbbbbbbbbbBBBBBBBBBBBB____________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAA______aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAACCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAA____________________AAAAAAAAAAAAAAAAAAAAAAAA__________AAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBBCCCCCAAAAAAAAAAAA__________________________AAAAAAAACCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAACCCCCCCBBBBB________BBBBBBBBBBBBBBBBBBBBBBBBBBBBaaaaaaaaaaaaAAAAAAAAAACCCCCCCCCCCCCCCCCCCCBBBBBBBBBCCCCCCCCCAAAAAbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBB_______________________________________________________AAAAAAAAAAAAAAAAAaaaaaAAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBB_____________________aaaaaaaaAAAAAAAAAAAAAAACCCCCCCCCCCAAAAAAAAAAAAAAAA_____________________aaaaaaaAAAAAAAAAAAAAAAAbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__aaaaaaaaAAAAAAAAAAAAAAAAA____________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________bbbbbbbbbbbbbbbbbb________________BBBBBBBBBBBBBBBBBBBBaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____aaaaaaaAAAAAAAAAAAACCCBCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBB________________________________BBBBBBBBBBBBBBBCBBBBBB___________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________bbbbbbbbBBBBBBBBBBBBBBB______aaaaaaaaAAAAAAAAAA__________________AAAAAAAAAAAAAAAA__AAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBB___________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCB__________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________aaaaaaaAAAAAAAAAAAAAAAAAAAAAA__CCCCCCCCCCCCCCCCCAAAAAAAAA________BBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCC_________________________________bbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBB______________________________________aaaaaaaAAAAAAAAAAAAAA____________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBB________aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAA__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________BBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAAAAaaaaaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________AAAAAAAAAAAAAAAAAAAAAAA__________aaaaaaAAAAAAAAAACCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCAAAAAAAAAA____________________________________________acccccccBCCCBBBBBBBBBBBB_____________________________________________________________________aaaaaaaaaaaaccccccAACCCCCCCCCCCCCCCCAAAAAAAAAA________________bbbbbbbbBBBBBBBBBBBBBBBBbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_aaaaaaaacccccccCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____AAAAAAAAA_______________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________bbbbbbbbCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________BBBBBBBBBBBBBB___________________________BBBBBBBBBBBBBBBBBBBB___bbbbbbbbBBBBBBBBBBBBBBB_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________aaaaaaaAAAA________________AAAAAAAAAAAAAAAAAAAA__________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCBBBBBBBBBBBB________________________________BBBBBBBBBBBBB______________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbcccccccccccccAACCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCAA_________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBB________________________________________________________bbbbbbbBBBBBBBBBBBBBBBB_______AAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCBBBBBBCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAA______________________________aaaaaaaAAAAAAAAAAAAAAAA_____________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbBBBBBBBBBBBBBB_________________________BBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________aaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________aaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________bbbbbbbbBBBBBBBBBBBBBBBB_____AAAAAAAAAAAAACCCCCCBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________AAAAAACCCCCCCCBBB___________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBB__________________________________________________________________bbbbbbbBBBBBBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________ACCCCCCCCCCCCCAAAAAbBBBBBBBBBBBBBBBBBBBbbbbbbbcBBBBBBBBBBBBBBBBBBBBBBBCCCAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCBBBBBBBBBBBBB____AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAA___________________________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB______________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBB_________________________________________________________aaaaaaAAAAAAAAAAAAAAAAA____________________________________AAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCBBBBBBBBBBBCAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCC___bbbbbbbbbbbbbbbbBBBBBBBBCCCCCCCCAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBB________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________bbbbbbbBBBBBBBBBBBBBB__________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAA____________________________________________________aaaaaaaaaccccAAAAAAAAAAAAACCCCCCCCCCCCCCBBBBBBBBBBBBBCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAAAAAAAAAAAAAAbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________AAAAAAAAAAAAAAAAAAAA____________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________BBBBBBBBBBBBBBBBBBBBB______bbbbbbbbbbbbbbBBBBBBBBBBBBB__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCB____________bbbbbbbBBBBBBBBBBBBBBBBBBBBBB____________aaaaaaaAAAAAAAAAAAAA__bbAAAAAAAAAAAAAACCCBBBBBBBBBBBBBBBBBB_________________aaaaaaaAAAAAAAAAAAAAAAA_____________________________________________________________bbbbbbbBBBBBBBBBBBBBBBB____________aaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCBBBBBBBBBBB______________________BBBBBBBBBaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaAAAAAAAAAAAAAAAAACCCCCCBBBBBBBBBBB_________________________bbbbbbbbbbbbbBBBBBBBBBB________________________________________________________bbbbbbbBBBBBBBBBBBBB_____________________________________bbbbbbbbbBBBBBBBBBBBBBB_____________________________bbbbbbbbbbbbbbbBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBB_____________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBB_________________AAAAAAAAAAAAAAAAAAAA_________________________________________________________AAAAAAAAAAAAAAAAAAAAAAA_____BBBBBBBBBBBBBBB_______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbbCCCCCCCCCCCCCCCCCCCCAAAAAAAAAbbbbbbbbbbbbbbbbBBBBBBBBB___________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________bbbBBBBBBBBBBBBBBBBBBB_____________AAAAAAACCCCCCCCCCCCCCAAAAAAAAAAAAAAAA_______BBBBBBBBBBBBBBBBBBBB_________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__bbbbbbbbbbbbbbbbbbbbbaaaaaaaAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAA__________________________________bbbbbbbbbbbbbAAACCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAbbbbBBBBBBBBBBBB_____________________________________________________________________bbbbbbBBBBBBBBBBBBBB____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________AAAAAAAAAAAAAAAAA_____________BBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCBBBBBBBB___________aaaaaaaaAAAAAAAAAAAA___________________________________________bbbbbbbbBBBBBBBBBBBB____________________________________________________________________________aaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____BBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBB___________________bbbbbbbAAAAAAAAAAAACAAAAAAAAAAaaaaAAAAAAAAAAAAAAAAbbbbbbbBBBBBBBBBBBBBBBBBBBB____________________________AAAAAAAAAAAAAAAAAAAAAAAAbbbbAAAAAAAAAAAACCCCBBBBBBBBBBBBBBBBBBB__________________________________________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________bbbbbbbBBBBBBCCCCCCCCCAAAA__________________________________________________________________BBBBBBBBBC____________________________________________________________________BBBBBBBBBBBBBBBB________________AAAAAAAAAAAAA__________________________________________AAAAAAAAAAAAA_____________AAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       },
       "regions": [
         {
@@ -84256,95 +84355,95 @@
         "QUAD": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 151649,
+              "armed": 144014,
               "team": "pys",
-              "unarmed": 31415
+              "unarmed": 28690
             },
             "wd.cao": {
-              "armed": 114260,
+              "armed": 105753,
               "team": "wd",
-              "unarmed": 82737
+              "unarmed": 75007
             },
             "wd.char": {
-              "armed": 156525,
+              "armed": 148656,
               "team": "wd",
-              "unarmed": 21181
+              "unarmed": 19530
             },
             "wd.dilbert": {
-              "armed": 139708,
+              "armed": 119015,
               "team": "pys",
-              "unarmed": 76799
+              "unarmed": 71888
             }
           },
-          "contested": 19.1,
-          "empty": 27.1,
-          "teamAControl": 17.8,
+          "contested": 15.6,
+          "empty": 27.9,
+          "teamAControl": 20,
           "teamAWeakControl": 5.1,
-          "teamBControl": 21.6,
-          "teamBWeakControl": 7.8,
-          "weakContested": 1.5
+          "teamBControl": 22,
+          "teamBWeakControl": 8,
+          "weakContested": 1.3
         },
         "RA": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 70191,
+              "armed": 66307,
               "team": "pys",
-              "unarmed": 25246
+              "unarmed": 23356
             },
             "wd.cao": {
-              "armed": 162889,
+              "armed": 153673,
               "team": "wd",
-              "unarmed": 11483
+              "unarmed": 10648
             },
             "wd.char": {
-              "armed": 146413,
+              "armed": 142085,
               "team": "wd",
-              "unarmed": 8128
+              "unarmed": 7290
             },
             "wd.dilbert": {
-              "armed": 111240,
+              "armed": 95155,
               "team": "pys",
-              "unarmed": 25225
+              "unarmed": 24329
             }
           },
-          "contested": 12.5,
-          "empty": 33.8,
-          "teamAControl": 33.7,
-          "teamAWeakControl": 1.7,
-          "teamBControl": 14.3,
+          "contested": 8.9,
+          "empty": 34.5,
+          "teamAControl": 35.9,
+          "teamAWeakControl": 1.8,
+          "teamBControl": 15,
           "teamBWeakControl": 3.6,
           "weakContested": 0.3
         },
         "RL": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 90748,
+              "armed": 83650,
               "team": "pys",
-              "unarmed": 30107
+              "unarmed": 26315
             },
             "wd.cao": {
-              "armed": 101606,
+              "armed": 93256,
               "team": "wd",
               "unarmed": 21460
             },
             "wd.char": {
-              "armed": 113835,
+              "armed": 108380,
               "team": "wd",
               "unarmed": 14871
             },
             "wd.dilbert": {
-              "armed": 100496,
+              "armed": 91046,
               "team": "pys",
-              "unarmed": 32020
+              "unarmed": 28476
             }
           },
-          "contested": 9.5,
-          "empty": 38.9,
-          "teamAControl": 23.5,
-          "teamAWeakControl": 3,
+          "contested": 7.4,
+          "empty": 40.9,
+          "teamAControl": 23.7,
+          "teamAWeakControl": 3.2,
           "teamBControl": 19.5,
-          "teamBWeakControl": 5.2,
-          "weakContested": 0.4
+          "teamBWeakControl": 5,
+          "weakContested": 0.3
         }
       },
       "teamA": "wd",

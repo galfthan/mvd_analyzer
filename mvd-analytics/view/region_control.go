@@ -73,8 +73,10 @@ type RegionControlView = result.RegionControlResult
 // The walk (both): find each player's last position sample with T ≤ the
 // evaluation time (via PositionTrack.Li), look up loc → region, check
 // armed via RL/LG interval membership, tally per region per team,
-// classify. "Armed" means RL or LG. Pre-spawn / dead samples (Li=0)
-// skipped, as are unmapped locs.
+// classify. "Armed" means RL or LG. DEAD players are skipped — gated on
+// PlayerStream.Alive since v64, NOT on Li==0, which marks an unresolved loc
+// and never marked death (a corpse streams position at full rate). Samples
+// with no resolved loc, and locs mapping to no region, are skipped too.
 //
 // All time arithmetic is integer milliseconds (schema v8); the window
 // is anchored at r.Streams.Global.MatchStart.
@@ -310,27 +312,86 @@ func (c *regionCounts) tally(team, teamA, teamB string, armed bool) {
 // playerCursor walks one player's position track monotonically, sampling the
 // (region, armed) state at a non-decreasing sequence of query times. Both
 // walkers advance the evaluation time forward (bucket-start / boundary), so
-// sampleAt must be called with non-decreasing t; the sample cursor only ever
-// moves forward, giving an O(events) scan per player with no re-seek.
+// sampleAt must be called with non-decreasing t. EVERY cursor it holds — the
+// position sample index and the rl / lg / alive interval indices — only moves
+// forward, giving an O(events) scan per player with no re-seek.
 type playerCursor struct {
 	pt         *result.PositionTrack
 	rl, lg     []result.Interval
+	alive      []result.Interval
 	liToRegion map[int16]int
 	sIdx       int
+	holdEnd    int32 // presence stops here (result.TrackHoldEnd of the track)
+
+	// Monotone cursors into rl / lg / alive, one per list. sampleAt is only
+	// ever queried at non-decreasing t (bucket starts, or the sorted boundary
+	// list), so each index only moves forward and the whole walk stays
+	// O(events) per player. A linear intervalContains scan per query instead
+	// made it O(events x intervals), which on a 4on4 is ~10^8 comparisons.
+	rlIdx, lgIdx, aliveIdx int
+}
+
+// newPlayerCursor binds one player's track, posture intervals and canonical
+// lives into a cursor. holdEnd is captured here so presence stops at the
+// player's own end-of-track instead of running on indefinitely — walkRegionExact
+// evaluates each interval at its LEFT endpoint, so without this bound the
+// interval starting at a departed player's final sample would credit them
+// everything up to the next event, which at the end of a recording is the
+// whole remaining match.
+func newPlayerCursor(pt *result.PositionTrack, p *result.PlayerStream, liToRegion map[int16]int) playerCursor {
+	return playerCursor{
+		pt:         pt,
+		rl:         p.RL,
+		lg:         p.LG,
+		alive:      p.Alive,
+		liToRegion: liToRegion,
+		holdEnd:    result.TrackHoldEnd(pt.T),
+	}
 }
 
 // sampleAt reports the region index and armed state of the player at time t —
-// their last position sample with T ≤ t. ok is false (the player contributes
-// nothing at t) when they have no sample at/before t (pre-spawn), are dead /
-// pre-spawn (Li==0), or stand in an unmapped loc. "Armed" means RL or LG held
-// at t. This is the one place the cursor-advance / Li-skip / region-lookup /
-// armed-check sequence lives; both walkers call it so they classify identically.
+// their last position sample with T ≤ t. "Armed" means RL or LG held at t.
+// This is the one place the cursor-advance / liveness / Li-skip /
+// region-lookup / armed-check sequence lives; both walkers call it so they
+// classify identically.
+//
+// ok is false — the player contributes nothing at t — when:
+//
+//   - they have no sample at/before t (they had not appeared yet);
+//   - they are DEAD at t. Liveness comes from PlayerStream.Alive, the
+//     canonical lives list. It is NOT inferable from the samples: a dead
+//     player keeps broadcasting position at full rate (mvdsv writes
+//     svc_playerinfo for every cs_spawned client, sv_demo.c:1481-1519) and on
+//     a gib the player entity IS the bouncing head (ktx/src/player.c:1070
+//     ThrowHead), so before this gate a corpse's travels were tallied as
+//     regional presence — and as ARMED presence, since StatItems weapon bits
+//     do not clear until respawn. An earlier revision of this comment claimed
+//     Li==0 marked dead players; it does not, and never did;
+//   - t is at or past their end-of-track (view.TrackHoldEnd). Sample-and-hold
+//     has no staleness bound of its own, and walkRegionExact evaluates each
+//     interval at its LEFT endpoint, so without this an early quitter would be
+//     credited everything from their final sample to the next event — the whole
+//     remaining match when the recording ends before the match window does;
+//   - the sample resolved no loc (Li==0), or the loc maps to no region.
 func (c *playerCursor) sampleAt(t int32) (regionIdx int, armed, ok bool) {
 	pt := c.pt
 	for c.sIdx+1 < len(pt.T) && pt.T[c.sIdx+1] <= t {
 		c.sIdx++
 	}
-	if pt.T[c.sIdx] > t {
+	if pt.T[c.sIdx] > t || t >= c.holdEnd {
+		return 0, false, false
+	}
+	// The last sample's evidence has expired: the player's location between
+	// here and their next sample is unknown, so credit it to nobody.
+	if t-pt.T[c.sIdx] > result.SampleStaleCapMs {
+		return 0, false, false
+	}
+	if c.alive != nil && !advanceContains(c.alive, &c.aliveIdx, t) {
+		// Liveness was measured and says dead. A NIL list means it was not
+		// measurable, and the honest response to "unknown" is to degrade
+		// rather than to drop — gating everything off would blank a demo's
+		// whole region-control panel. On any demo through the normal pipeline
+		// Alive is always derived, so the nil path is hand-assembled Results.
 		return 0, false, false
 	}
 	li := pt.Li[c.sIdx]
@@ -341,7 +402,21 @@ func (c *playerCursor) sampleAt(t int32) (regionIdx int, armed, ok bool) {
 	if !found {
 		return 0, false, false
 	}
-	return ri, intervalContains(c.rl, t) || intervalContains(c.lg, t), true
+	armedRL := advanceContains(c.rl, &c.rlIdx, t)
+	armedLG := advanceContains(c.lg, &c.lgIdx, t)
+	return ri, armedRL || armedLG, true
+}
+
+// advanceContains reports whether t falls inside one of a player's sorted,
+// non-overlapping intervals, advancing *idx forward as it goes. Valid only for
+// non-decreasing t — the contract playerCursor already documents. Mirrors
+// analyzer.makeInside; the two exist separately only because the packages
+// cannot import each other.
+func advanceContains(ivs []result.Interval, idx *int, t int32) bool {
+	for *idx < len(ivs) && ivs[*idx].End <= t {
+		*idx++
+	}
+	return *idx < len(ivs) && ivs[*idx].Start <= t && t < ivs[*idx].End
 }
 
 // classifyRegions is the region-control walker — formerly
@@ -518,7 +593,7 @@ func walkRegionExact(
 		players = append(players, exactPlayer{
 			name:   p.Name,
 			team:   team,
-			cursor: playerCursor{pt: pt, rl: p.RL, lg: p.LG, liToRegion: liToRegion},
+			cursor: newPlayerCursor(pt, p, liToRegion),
 		})
 		for _, t := range pt.T {
 			addEvt(t)
@@ -530,6 +605,25 @@ func walkRegionExact(
 		for _, iv := range p.LG {
 			addEvt(iv.Start)
 			addEvt(iv.End)
+		}
+		// Life boundaries split an interval too: a player who dies partway
+		// between two position samples stops contributing at the death, not at
+		// the next sample. Without these the walk would credit the remainder
+		// of the straddling interval to a corpse.
+		for _, iv := range p.Alive {
+			addEvt(iv.Start)
+			addEvt(iv.End)
+		}
+		// The player's own end-of-track is a boundary too, so the interval
+		// that starts at their final sample is truncated there instead of
+		// running to whatever the next global event happens to be.
+		addEvt(result.TrackHoldEnd(pt.T))
+		// A sample's evidence expires SampleStaleCapMs after it. On a POV
+		// recording only players in the recorder's PVS are written, so the
+		// others have multi-second holes; without these boundaries the walk
+		// would credit each hole in full to wherever the player was last seen.
+		for _, t := range result.SampleStaleBoundaries(pt.T) {
+			addEvt(t)
 		}
 	}
 	// No early return on len(players)==0: with no roster-mapped player the
@@ -684,7 +778,7 @@ func walkRegionGrid(
 		if pt == nil || len(pt.T) == 0 || len(pt.Li) != len(pt.T) {
 			continue
 		}
-		cur := playerCursor{pt: pt, rl: p.RL, lg: p.LG, liToRegion: liToRegion}
+		cur := newPlayerCursor(pt, p, liToRegion)
 		for bi := 0; bi < nBuckets; bi++ {
 			bucketStart := gridStart + int32(bi)*bucketDurMs
 			ri, armed, ok := cur.sampleAt(bucketStart)

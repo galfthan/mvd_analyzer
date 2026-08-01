@@ -686,7 +686,9 @@
                             Cell color is normalised <em>per region</em> (brightest = that
                             region's dominant control state, Empty excluded), so compare colors
                             across a row — not down a column. The printed % is the absolute
-                            match fraction. Click a column header to sort; hover for details.
+                            match fraction; players count only while <em>alive</em>, so a region
+                            whose occupants keep dying reads more Empty. Click a column header to
+                            sort; hover for details.
                         </div>
                     </details>
                     <div id="region-config" class="region-config"></div>
@@ -787,7 +789,8 @@
                             Rows = locs, for the metric selected above. The first columns
                             are the teams (all members combined), then one column per
                             player grouped by team. Each cell shows the share of that
-                            column's time spent in the loc, normalised to its own busiest
+                            column's <em>alive</em> time spent in the loc (time while dead is
+                            excluded), normalised to its own busiest
                             loc; cell intensity uses the viridis scale and the team color
                             underlines each header. Click a column header to sort; hover a
                             cell for exact time.
