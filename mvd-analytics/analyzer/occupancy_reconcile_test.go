@@ -158,7 +158,7 @@ func TestOccupancyExcludesCorpseTime(t *testing.T) {
 // LEFT endpoint, so a departed player's final sample credited them everything
 // up to the next global event — the whole remaining match when the recording
 // ends before the match window does (measured: 60 s credited for a player who
-// left after 2 s). Both walkers now stop at view.TrackHoldEnd.
+// left after 2 s). Both walkers now stop at result.TrackHoldEnd.
 func TestOccupancyBoundsAnEarlyQuitter(t *testing.T) {
 	res := buildReconcileResult()
 
@@ -239,7 +239,13 @@ func buildReconcileResult() *Result {
 	// p1: alive in "spawn" then "mid", dies at 10*step, corpse sits in
 	// "morgue" until it respawns at 20*step into "mid".
 	li1 := []int16{1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2}
-	p1 := mk("p1", "red", li1, []int32{10 * step}, []int32{20 * step},
+	// The death lands BETWEEN two samples (5 ms before the body's first
+	// "morgue" sample), not on one. That is what makes the Alive interval
+	// endpoints load-bearing as walk boundaries: with a death on a sample
+	// instant the boundary already exists from the sample time, so dropping
+	// Alive from the boundary set would change nothing. Here the final live
+	// interval must be truncated mid-span at the death itself.
+	p1 := mk("p1", "red", li1, []int32{10*step - 5}, []int32{20 * step},
 		// Armed from mid-interval to mid-interval, so the boundary split matters.
 		[]result.Interval{{Start: 3*step + 5, End: 22*step - 4}})
 
@@ -259,10 +265,16 @@ func buildReconcileResult() *Result {
 	// by winEnd. This is the fixture property the invariant depends on.
 	matchEnd := int32(len(li1)+40) * step
 
+	// p4 is on a THIRD team. region-control only walks teamA/teamB, while
+	// locGraph walks everyone with a track — so the identity only holds if the
+	// test applies the same eligibility filter. Without this player that
+	// filter is dead code.
+	p4 := mk("p4", "green", li2, nil, nil, nil)
+
 	res := &Result{
 		Streams: &result.Streams{
 			Global:  result.GlobalStream{MatchStart: 0, MatchEnd: matchEnd},
-			Players: []result.PlayerStream{p1, p2, p3},
+			Players: []result.PlayerStream{p1, p2, p3, p4},
 		},
 		TimelineAnalysis: &TimelineAnalysisResult{
 			LocTable: locTable,
@@ -272,7 +284,7 @@ func buildReconcileResult() *Result {
 			RegionControl: &result.RegionControlResult{
 				Regions: []result.ControlRegion{
 					{Name: "home", Locs: []string{"spawn"}},
-					{Name: "centre", Locs: []string{"mid"}},
+					{Name: "centre", Locs: []string{"MiD"}}, // mixed case: region-control lower-cases, locGraph keeps the original
 					{Name: "morgue-region", Locs: []string{"morgue"}},
 					// "backyard" is deliberately in no region.
 				},
@@ -280,10 +292,12 @@ func buildReconcileResult() *Result {
 			},
 		},
 		Match: &MatchResult{Players: []PlayerStat{
-			{Name: "p1", Team: "red"}, {Name: "p2", Team: "blue"}, {Name: "p3", Team: "red"},
+			{Name: "p1", Team: "red"}, {Name: "p2", Team: "blue"},
+			{Name: "p3", Team: "red"}, {Name: "p4", Team: "green"},
 		}},
 		DemoInfo: &DemoInfoResult{Players: []DemoInfoPlayer{
-			{Name: "p1", Team: "red"}, {Name: "p2", Team: "blue"}, {Name: "p3", Team: "red"},
+			{Name: "p1", Team: "red"}, {Name: "p2", Team: "blue"},
+			{Name: "p3", Team: "red"}, {Name: "p4", Team: "green"},
 		}},
 	}
 	deriveAliveIntervals(res.Streams)
@@ -304,15 +318,28 @@ func TestLocAndRegionOccupancyReconcileOnRealDemos(t *testing.T) {
 		t.Skip("no cached corpus demos — run TestGoldenCorpus once to populate testdata/cache")
 	}
 
-	checkedDemos := 0
+	// Demos are chosen EXPLICITLY, not by taking the first few directory
+	// entries: lexical order silently excluded 216835, the defer/reconnect
+	// demo, which is precisely the one whose numbers move when the
+	// end-of-track bound is wrong. Any missing id is skipped, so this still
+	// works on a partially-populated cache.
+	want := []string{
+		"216835.mvd.gz", // reconnect / deferred join
+		"212483.mvd.gz", // 4on4, sv_demofps-default cadence (~36 ms)
+		"212423.mvd.gz", // duel, ~39 ms cadence
+		"211805.mvd.gz", // 2on2 dm6, full-tick cadence (~15 ms)
+	}
+	have := map[string]bool{}
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".mvd.gz") {
+		have[e.Name()] = true
+	}
+
+	checkedDemos := 0
+	for _, name := range want {
+		if !have[name] {
 			continue
 		}
-		if checkedDemos >= 4 { // a representative sample; the whole cache is slow
-			break
-		}
-		path := filepath.Join(cacheDir, e.Name())
+		path := filepath.Join(cacheDir, name)
 		res, err := NewDefaultRegistry().Analyze(path)
 		if err != nil || res == nil || res.LocGraph == nil ||
 			res.TimelineAnalysis == nil || res.TimelineAnalysis.RegionControl == nil {
@@ -354,16 +381,16 @@ func TestLocAndRegionOccupancyReconcileOnRealDemos(t *testing.T) {
 		pairs := 0
 		for regionName, st := range rc.Stats {
 			for player, ps := range st.ByPlayer {
-				want := int32(ps.Armed + ps.Unarmed)
-				if got := locMs[key{regionName, player}]; got != want {
+				wantMs := int32(ps.Armed + ps.Unarmed)
+				if got := locMs[key{regionName, player}]; got != wantMs {
 					t.Errorf("%s: %s / %s — locGraph %d ms != regionControl %d ms (delta %d)",
-						e.Name(), regionName, player, got, want, got-want)
+						name, regionName, player, got, wantMs, got-wantMs)
 				}
 				pairs++
 			}
 		}
 		if pairs == 0 {
-			t.Errorf("%s: no (region, player) pairs to compare", e.Name())
+			t.Errorf("%s: no (region, player) pairs to compare", name)
 		}
 	}
 	if checkedDemos == 0 {

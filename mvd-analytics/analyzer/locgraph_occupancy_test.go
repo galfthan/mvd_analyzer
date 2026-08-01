@@ -183,3 +183,87 @@ func TestLocGraphOccupancyDoesNotCreditTrackHoles(t *testing.T) {
 		t.Errorf("total %d ms across a track carrying ~260 ms of samples", total)
 	}
 }
+
+// The EDGE gate, exercised by a corpse that TRAVELS.
+//
+// The other corpse fixtures park the body in one loc, where the pre-existing
+// spawn/death cursor reset already suppresses the two edges crossing the death
+// and respawn instants — so they cannot see whether the edge gate does
+// anything. A gib is different: ktx/src/player.c:1070 ThrowHead makes the
+// player entity itself a MOVETYPE_BOUNCE head, so the body crosses locs while
+// dead and every crossing is a candidate edge. The release notes claim those
+// edges disappear; this is what pins the claim.
+func TestLocGraphEdgesExcludeATravellingCorpse(t *testing.T) {
+	step := int32(13)
+	// Alive in A, then dead while the head bounces B,C,B,C, then alive in A.
+	li := []int16{1, 1, 1, 1, 2, 3, 2, 3, 2, 3, 1, 1, 1}
+	p := walkTrack("p", step, li, []int32{4 * step}, []int32{10 * step})
+	res := occupancyResult(p, step*int32(len(li)-1))
+	// The fixture's loc table only has A and B; add C.
+	res.TimelineAnalysis.LocTable = []string{"", "A", "B", "C"}
+	res.TimelineAnalysis.LocationData = []MapLocation{{Name: "A"}, {Name: "B"}, {Name: "C"}}
+	deriveAliveIntervals(res.Streams)
+
+	g := BuildLocGraph(res)
+	if g == nil {
+		t.Fatal("BuildLocGraph returned nil")
+	}
+	for _, e := range g.Edges {
+		if e.From == "B" || e.To == "B" || e.From == "C" || e.To == "C" {
+			t.Errorf("edge %s -> %s (%s, total %d) was walked by a corpse, not a player",
+				e.From, e.To, e.Kind, e.Total)
+		}
+	}
+	for _, n := range g.Locs {
+		if n.Name == "B" || n.Name == "C" {
+			t.Errorf("loc %s credited %d ms to a bouncing gib head", n.Name, n.Total)
+		}
+	}
+}
+
+// The teleport threshold is scaled by the REAL inter-sample delta, because the
+// recording cadence is server-configured. A fixed bound misclassifies in both
+// directions once the cadence is not the assumed one — and the pre-existing
+// teleport test samples at exactly 50 ms, the single cadence at which the old
+// fixed bound and the new scaled one are identical, so it cannot see this.
+func TestLocGraphTeleportThresholdScalesWithCadence(t *testing.T) {
+	// A jump of 300 units between two adjacent samples.
+	//   at 13 ms: bound = 0.013*2500 =  32.5 -> teleport
+	//   at 39 ms: bound = 0.039*2500 =  97.5 -> teleport
+	//   at 200 ms: bound = 0.200*2500 = 500  -> normal movement (2000 ups is
+	//              plausible over 200 ms), which a fixed 125-unit bound would
+	//              have called a teleport.
+	build := func(step int32, jump float32) *Result {
+		pt := &result.PositionTrack{
+			T:  []int32{0, step, 2 * step},
+			Li: []int16{1, 2, 2},
+			X:  []float32{0, jump, jump},
+			Y:  []float32{0, 0, 0},
+			Z:  []float32{0, 0, 0},
+		}
+		p := result.PlayerStream{Name: "p", Team: "red", Position: pt}
+		return occupancyResult(p, 60000)
+	}
+	kindOf := func(res *Result) string {
+		g := BuildLocGraph(res)
+		for _, e := range g.Edges {
+			if e.From == "A" && e.To == "B" {
+				return e.Kind
+			}
+		}
+		return "<no edge>"
+	}
+
+	if got := kindOf(build(13, 300)); got != "teleport" {
+		t.Errorf("300 units in 13 ms: kind = %q, want teleport (bound 32.5)", got)
+	}
+	if got := kindOf(build(200, 300)); got != "normal" {
+		t.Errorf("300 units in 200 ms: kind = %q, want normal — a fixed 125-unit bound would misread plausible movement as a teleport", got)
+	}
+	// Across an abnormally long gap no displacement claim is meaningful, so the
+	// transition must not be invented as a teleport.
+	if got := kindOf(build(locgraphTeleportMaxGapMs+100, 100000)); got != "normal" {
+		t.Errorf("huge jump across a >%dms stall: kind = %q, want normal (unclassifiable)",
+			locgraphTeleportMaxGapMs, got)
+	}
+}

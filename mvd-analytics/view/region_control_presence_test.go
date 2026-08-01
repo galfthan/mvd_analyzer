@@ -17,6 +17,24 @@ import (
 // sampleAt and as an event boundary so the straddling interval is truncated
 // rather than merely dropped.
 func TestRegionControlBoundsDepartedPlayer(t *testing.T) {
+	// Two shapes, because they fail differently. When the OTHER player keeps
+	// producing boundaries the over-credit is bounded by their sample spacing;
+	// when the whole recording stops (a demo cut before the match window ends,
+	// the ordinary case) the next boundary is gridEnd and the departed player
+	// is credited the entire remaining match.
+	for _, tc := range []struct {
+		name   string
+		nOther int
+	}{
+		{"another player keeps playing", 601},
+		{"the recording ends early", 21},
+	} {
+		t.Run(tc.name, func(t *testing.T) { checkDepartedPlayerBound(t, tc.nOther) })
+	}
+}
+
+func checkDepartedPlayerBound(t *testing.T, nOther int) {
+	t.Helper()
 	// p1 quits at 2000ms. p2 plays to 60000ms and keeps generating boundaries.
 	mk := func(name, team string, n int, step int32) result.PlayerStream {
 		pt := &result.PositionTrack{}
@@ -33,7 +51,7 @@ func TestRegionControlBoundsDepartedPlayer(t *testing.T) {
 	res := &result.Result{
 		Streams: &result.Streams{
 			Global:  result.GlobalStream{MatchStart: 0, MatchEnd: 60000},
-			Players: []result.PlayerStream{mk("p1", "red", 21, 100), mk("p2", "blue", 21, 100)},
+			Players: []result.PlayerStream{mk("p1", "red", 21, 100), mk("p2", "blue", nOther, 100)},
 		},
 		TimelineAnalysis: &result.TimelineAnalysisResult{
 			LocTable: []string{"", "mid"},

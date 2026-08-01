@@ -53,7 +53,7 @@ pinned these numbers, expect them to fall.
   gaps up to **73 seconds**, and holding across them credited ~92% of a player's
   loc time to wherever they were standing when they left view. `regionControl`
   had this defect too, since v59.
-- **Both walks now end at a player's end-of-track** (`view.TrackHoldEnd`: the
+- **Both walks now end at a player's end-of-track** (`result.TrackHoldEnd`: the
   last position sample held for one measured cadence, capped at 250 ms), so an
   early quitter no longer holds their final loc and region through to match
   end. This was the sharper half of the bug: region control evaluates each

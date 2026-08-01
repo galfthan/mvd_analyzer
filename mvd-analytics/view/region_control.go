@@ -367,7 +367,7 @@ func newPlayerCursor(pt *result.PositionTrack, p *result.PlayerStream, liToRegio
 //     regional presence — and as ARMED presence, since StatItems weapon bits
 //     do not clear until respawn. An earlier revision of this comment claimed
 //     Li==0 marked dead players; it does not, and never did;
-//   - t is at or past their end-of-track (view.TrackHoldEnd). Sample-and-hold
+//   - t is at or past their end-of-track (result.TrackHoldEnd). Sample-and-hold
 //     has no staleness bound of its own, and walkRegionExact evaluates each
 //     interval at its LEFT endpoint, so without this an early quitter would be
 //     credited everything from their final sample to the next event — the whole

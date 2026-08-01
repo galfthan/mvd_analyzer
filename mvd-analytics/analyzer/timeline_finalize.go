@@ -668,7 +668,7 @@ func deriveAliveIntervals(streams *Streams) {
 		//
 		// The position track is the presence evidence: it exists in memory here
 		// even when it is not serialised. Its end uses the shared
-		// view.TrackHoldEnd so the field agrees with the walkers that read it.
+		// result.TrackHoldEnd so the field agrees with the walkers that read it.
 		// A player with no track keeps the marker-derived intervals — there is
 		// no presence evidence to clip against, and inventing one would be
 		// worse than the wider claim.
