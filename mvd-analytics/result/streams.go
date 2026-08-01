@@ -180,16 +180,15 @@ type PlayerStream struct {
 	// window-OVERLAP test with its own fallbacks — a different question from
 	// this field's instantaneous one. They can disagree, and neither is wrong.
 	//
-	// Three older in-package liveness predicates remain —
-	// analyzer.losAliveAt, aimcore's per-shot aliveAt, and
-	// view.playerActiveInWindow — and they agree with this field except
-	// at one documented ms-tie case (a death and the respawn it triggers on
-	// the same millisecond: this field reports ALIVE, the other three report
-	// dead; see analyzer/player_stats.go aliveIntervals). They were left
-	// alone deliberately: pointing them here moves every line-of-sight, aim
-	// and bucket figure in the golden corpus, which would confound the
-	// loc/region correctness fix this field was added for. Migrating them is
-	// a follow-up; when it happens, fix them together.
+	// LOS, aim, loc-graph and region-control all read this field. The two
+	// predicates that used to re-derive liveness themselves —
+	// analyzer.losAliveAt and aimcore's aimAliveAt — are gone: their strict
+	// `lastSpawn > lastDeath` LATCHED on a same-millisecond death+respawn and
+	// reported the player dead for the whole remaining life (measured: 100.7 s
+	// of one player's match). view.playerActiveInWindow is deliberately NOT
+	// migrated — it asks whether a player appears anywhere in a bucket window,
+	// which is a different question, and it already resolves that tie
+	// correctly.
 	//
 	// Deaths are the FUSION of three detectors (DF_DEAD|DF_GIB on
 	// svc_playerinfo, STAT_HEALTH transitions, and the obituary path —

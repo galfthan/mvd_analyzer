@@ -35,6 +35,25 @@ pinned these numbers, expect them to fall.
   samples divides the interval exactly. The clamp itself was near-inert
   (measured 0–96 ms lost per 60 s), so the corpse exclusion is what actually
   moves the numbers.
+- **LOS and aim now read `alive` instead of re-deriving liveness — fixing a
+  latching bug.** `analyzer.losAliveAt` and `aimcore.aimAliveAt` were
+  byte-identical copies of the rule *"alive iff the most recent spawn is
+  STRICTLY later than the most recent death"*. That rule latches: when a death
+  and the respawn it triggers share a millisecond the two are equal, so it
+  reports dead — and keeps reporting dead until some later spawn arrives, i.e.
+  for the whole remaining life, not for an instant. Measured across the cached
+  corpus: 100.7 s of one player's 1143.7 s match (8.8%), 46.9 s of another's,
+  4.3 s and 3.4 s elsewhere; 16 of 20 demos were unaffected. Both functions are
+  deleted.
+  Visible effect: on `4on4_jah_ahoy_170526_defer_reconnect`, `biggz`'s
+  crosshair error improves on every affected sample — 117.6° → 3.7°,
+  64.6° → 13.3°, 63.9° → 35.1° — with the sample count unchanged. He was
+  aiming at `[nW].Veggie`, who had been wrongly dead since 349400 ms, so those
+  shots were being attributed to whatever distant player remained. A
+  117-degree "aim error" was never real.
+  `view.playerActiveInWindow` is deliberately NOT migrated: it asks whether a
+  player appears anywhere in a bucket window, which is a different question,
+  and it already resolves the tie correctly.
 - **`/loc-trails` is gated too.** A residence is dwell, i.e. presence, so it
   now truncates at a death and resumes at the respawn. Without this the same
   corpse travels loc-graph excludes would still have shown up as dwell and the

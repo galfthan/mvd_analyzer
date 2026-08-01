@@ -880,17 +880,20 @@ func possessionExtent(p *result.PlayerStream) []result.Interval {
 // deliberately does NOT require a recorded match-start spawn — KTX emits a
 // player's first spawn only on their first RESPAWN, so keying off "most
 // recent spawn" would mark everyone dead until minutes into the match.
-// Keep this in sync with losAliveAt and view.playerActiveInWindow. The
-// unit tests assert this function and losAliveAt agree pointwise on every
-// case where the two can agree — with ONE deliberate divergence, also
-// pinned by a test: when a death and the spawn it triggers land on the
-// same millisecond, this function reports the player ALIVE from that
-// instant while losAliveAt (and aimcore's copy) report them dead, because
-// both use a strict `lastSpawn > lastDeath`. A player who respawns
-// instantly is alive, so the tie-break here is the correct one; the other
-// two are left alone rather than quietly changed, since altering them
-// moves every line-of-sight and aim figure in the golden corpus. If they
-// are ever fixed, fix them together.
+// This is the derivation behind PlayerStream.Alive, which LOS, aim,
+// loc-graph and region-control all now read. The two rival copies it used
+// to warn about — analyzer.losAliveAt and aimcore's aimAliveAt — are gone
+// (v64): both used a strict `lastSpawn > lastDeath`, which LATCHES when a
+// death and the respawn it triggers share a millisecond, reporting the
+// player dead for the whole remaining life rather than for an instant.
+// Measured before removal: 100.7 s of one player's 1143.7 s match. The
+// tie-break here — deaths sorted before spawns, so an instant respawn reads
+// alive — is the correct one and is now the only one.
+//
+// view.playerActiveInWindow remains separate on purpose: it answers a
+// different question (does this player appear ANYWHERE in this bucket
+// window), resolves the same tie correctly already, and carries fallbacks
+// for streams with no markers at all.
 func aliveIntervals(spawns, deaths []int32, matchMs int32) []result.Interval {
 	type ev struct {
 		t     int32

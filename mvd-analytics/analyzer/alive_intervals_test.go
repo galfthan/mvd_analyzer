@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"os"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -40,7 +41,7 @@ func eqIntervals(a, b []result.Interval) bool {
 // redundant storage, and redundant storage drifts unless something pins it.
 // These cases carry no position track, so the observed-presence clip is a
 // no-op and the comparison is against the raw marker derivation;
-// TestAliveIntervalsSplitAtTrackHoles covers the clip.
+// TestAliveIntervalsSpanTrackHolesWithoutSplitting covers the clip.
 func TestAliveIntervalsMatchMarkers(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -194,5 +195,47 @@ func TestAliveIntervalsExcludeTheCorpsePeriod(t *testing.T) {
 		if 10500 >= iv.Start && 10500 < iv.End {
 			t.Fatalf("t=10500 is inside the dead period but Alive reports it live: %v", got)
 		}
+	}
+}
+
+// The pipeline must ALWAYS populate Alive for a player with a position track.
+//
+// Every consumer — loc-graph, region-control, loc-trails, LOS, aim — degrades
+// to "always alive" when the list is nil, which is the right answer for
+// "liveness was not measurable" but the wrong one for "somebody moved
+// deriveAliveIntervals and nothing noticed". That failure is silent by
+// construction: numbers get quietly larger and no test that builds its own
+// fixtures would see it. Two aim tests were caught by exactly this while the
+// LOS/aim migration landed — their hand-built Results had no Alive, so the
+// dead-enemy exclusion stopped applying.
+//
+// Cache-gated like the real-demo reconcile: skips when testdata/cache is
+// empty, so an offline `make test` stays green.
+func TestPipelineAlwaysPopulatesAlive(t *testing.T) {
+	const demo = "../testdata/cache/211805.mvd.gz"
+	if _, err := os.Stat(demo); err != nil {
+		t.Skip("no cached demo — run TestGoldenCorpus once to populate testdata/cache")
+	}
+	res, err := NewDefaultRegistry().Analyze(demo)
+	if err != nil {
+		t.Fatalf("analyze: %v", err)
+	}
+	if res.Streams == nil || len(res.Streams.Players) == 0 {
+		t.Fatal("no player streams")
+	}
+	checked := 0
+	for i := range res.Streams.Players {
+		p := &res.Streams.Players[i]
+		if p.Position == nil || len(p.Position.T) == 0 {
+			continue
+		}
+		checked++
+		if p.Alive == nil {
+			t.Errorf("%s has a position track but Alive is nil — every consumer "+
+				"silently degrades to always-alive", p.Name)
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no player had a position track — the assertion proves nothing")
 	}
 }

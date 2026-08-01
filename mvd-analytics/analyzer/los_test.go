@@ -37,16 +37,20 @@ func TestLosTargets(t *testing.T) {
 	}
 }
 
-func TestLosAliveAt(t *testing.T) {
+// LOS liveness now comes from PlayerStream.Alive via makeAliveGate, not from
+// a local re-derivation. These are the cases the removed losAliveAt covered,
+// re-pointed at the path LOS actually takes — plus the case that motivated
+// removing it.
+func TestLosLivenessFromAlive(t *testing.T) {
 	// Realistic KTX ordering: the match-start spawn is NOT recorded, so the
 	// first event is a death; each recorded spawn is a respawn that follows it.
-	deaths := []int32{300, 700}
-	spawns := []int32{450, 900}
+	alive := aliveOfMarkers(t, []int32{450, 900}, []int32{300, 700}, 2000)
+	gate := makeAliveGate(alive)
 	cases := []struct {
 		t    int32
 		want bool
 	}{
-		{50, true},   // before first death → alive since match start (no spawn recorded yet)
+		{50, true},   // before first death → alive since match start
 		{200, true},  // still pre-first-death → alive
 		{300, false}, // at first death → dead
 		{400, false}, // dead between death and respawn
@@ -57,21 +61,53 @@ func TestLosAliveAt(t *testing.T) {
 		{900, true},  // second respawn
 	}
 	for _, c := range cases {
-		if got := losAliveAt(spawns, deaths, c.t); got != c.want {
-			t.Errorf("losAliveAt(t=%d) = %v, want %v", c.t, got, c.want)
+		if got := gate(c.t); got != c.want {
+			t.Errorf("alive at t=%d = %v, want %v (alive=%v)", c.t, got, c.want, alive)
 		}
 	}
+
 	// No spawn/death records → alive throughout.
-	if !losAliveAt(nil, nil, 1234) {
+	if !makeAliveGate(aliveOfMarkers(t, nil, nil, 2000))(1234) {
 		t.Errorf("empty spawns/deaths must read alive")
 	}
 	// Deaths only (no respawn recorded) → alive until the death, dead after.
-	if !losAliveAt(nil, []int32{500}, 400) {
+	deathsOnly := makeAliveGate(aliveOfMarkers(t, nil, []int32{500}, 2000))
+	if !deathsOnly(400) {
 		t.Errorf("deaths-only: should be alive before the death")
 	}
-	if losAliveAt(nil, []int32{500}, 600) {
+	if deathsOnly(600) {
 		t.Errorf("deaths-only: should be dead after the death")
 	}
+}
+
+// The reason losAliveAt was removed rather than kept. Its rule was "alive iff
+// the most recent spawn is STRICTLY later than the most recent death", which
+// LATCHES on a same-millisecond death+respawn: the two are equal, so it reads
+// dead, and keeps reading dead until some later spawn arrives — the whole
+// remaining life, not an instant. Measured on cached demos before removal:
+// 100.7 s of one player's 1143.7 s match (8.8%), 46.9 s of another's.
+func TestLosLivenessSurvivesSameMsRespawn(t *testing.T) {
+	const tie = 10000
+	gate := makeAliveGate(aliveOfMarkers(t, []int32{tie}, []int32{tie}, 60000))
+
+	for _, at := range []int32{tie, tie + 1, tie + 5000, 59000} {
+		if !gate(at) {
+			t.Errorf("t=%d reads DEAD after a same-ms death+respawn at %d; "+
+				"the player respawned instantly and is alive", at, tie)
+		}
+	}
+}
+
+// aliveOfMarkers runs the real derivation so these tests exercise the same
+// path the pipeline does, rather than a hand-built interval list.
+func aliveOfMarkers(t *testing.T, spawns, deaths []int32, matchEnd int32) []result.Interval {
+	t.Helper()
+	s := &result.Streams{
+		Global:  result.GlobalStream{MatchEnd: matchEnd},
+		Players: []result.PlayerStream{{Name: "p", Spawns: spawns, Deaths: deaths}},
+	}
+	deriveAliveIntervals(s)
+	return s.Players[0].Alive
 }
 
 // TestComputeLOS_NoBSP: a 2-player demo whose map has no provisioned BSP returns

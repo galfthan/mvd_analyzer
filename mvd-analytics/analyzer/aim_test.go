@@ -56,6 +56,7 @@ func TestAimPostDuel(t *testing.T) {
 		},
 	}
 
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
@@ -132,6 +133,7 @@ func TestAimPostRocketBlockWithoutProjectileStream(t *testing.T) {
 		},
 	}
 
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
@@ -175,6 +177,7 @@ func TestAimPostDamageFromMatchGatedEvents(t *testing.T) {
 		},
 	}
 
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
@@ -223,6 +226,7 @@ func TestAimPostDeadEnemyExcluded(t *testing.T) {
 			},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
@@ -254,6 +258,7 @@ func TestAimPostDuelDeadEnemyDropped(t *testing.T) {
 			Players: []result.PlayerStream{aimTrack("A", 0, 0, 0, 3000), b},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
@@ -296,6 +301,7 @@ func TestAimPostKillingBlowAttributesVictim(t *testing.T) {
 			},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
@@ -327,6 +333,7 @@ func TestAimPostDuelKillingBlowKept(t *testing.T) {
 			Players: []result.PlayerStream{aimTrack("A", 0, 0, 0, 3000), b},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
@@ -373,6 +380,7 @@ func TestAimPostTeamHitSplits(t *testing.T) {
 			},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 2 {
 		t.Fatalf("expected 2 aim players, got %+v", res.Aim)
@@ -437,6 +445,7 @@ func TestAimPostRampTeamFlag(t *testing.T) {
 			},
 		},
 	}
+	deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 	aimPost(res, nil)
 	if res.Aim == nil || len(res.Aim.Players) != 1 {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
@@ -508,6 +517,7 @@ func TestAimPostLGMissClasses(t *testing.T) {
 					},
 				},
 			}
+			deriveAliveIntervals(res.Streams) // the timeline node does this before aimPost in the real pipeline
 			aimPost(res, nil)
 			if res.Aim == nil || len(res.Aim.Players) != 1 {
 				t.Fatalf("expected 1 aim player, got %+v", res.Aim)

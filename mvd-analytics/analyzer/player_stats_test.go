@@ -55,35 +55,78 @@ func TestComplementIntervals(t *testing.T) {
 
 // --- alive intervals ----------------------------------------------------
 
-// TestAliveIntervalsMatchesLosAliveAt is the cross-check that keeps this
-// file's interval form and analyzer.losAliveAt's point form from drifting:
-// the repo has one liveness rule and two encodings of it.
-func TestAliveIntervalsMatchesLosAliveAt(t *testing.T) {
+// This used to cross-check aliveIntervals against analyzer.losAliveAt, on the
+// grounds that the repo had "one liveness rule and two encodings of it". That
+// premise is gone: losAliveAt (and aimcore's copy) were removed in v64 because
+// their strict `lastSpawn > lastDeath` latched on a same-millisecond
+// death+respawn and reported the player dead for the rest of the life. There
+// is now one encoding, so the point-form semantics are asserted directly
+// rather than against a second implementation that could be wrong in the same
+// way.
+func TestAliveIntervalsPointSemantics(t *testing.T) {
+	const matchMs = 20000
 	cases := []struct {
 		name           string
 		spawns, deaths []int32
+		alive, dead    []int32 // sample instants that must read alive / dead
 	}{
-		{"no events", nil, nil},
-		{"alive from start, dies once", nil, []int32{5000}},
-		{"death then respawn", []int32{6000}, []int32{5000}},
-		{"several lives", []int32{6000, 12000}, []int32{5000, 11000, 18000}},
-		{"spawn before any death (KTX first-respawn quirk)", []int32{7000}, []int32{5000}},
+		{
+			name:  "no events — alive from match start",
+			alive: []int32{0, 10000, 19999},
+		},
+		{
+			name:   "alive from start, dies once, never respawns",
+			deaths: []int32{5000},
+			alive:  []int32{0, 4999},
+			dead:   []int32{5000, 12000, 19999},
+		},
+		{
+			name:   "death then respawn",
+			spawns: []int32{6000}, deaths: []int32{5000},
+			alive: []int32{0, 4999, 6000, 19999},
+			dead:  []int32{5000, 5999},
+		},
+		{
+			name:   "several lives",
+			spawns: []int32{6000, 12000}, deaths: []int32{5000, 11000, 18000},
+			alive: []int32{0, 6000, 10999, 12000, 17999},
+			dead:  []int32{5000, 11000, 18000, 19999},
+		},
+		{
+			// KTX emits a player's first spawn only on their first RESPAWN, so
+			// liveness must NOT key off "most recent spawn" — that would mark
+			// everyone dead until minutes into the match.
+			name:   "no match-start spawn recorded",
+			spawns: []int32{7000}, deaths: []int32{5000},
+			alive: []int32{0, 100, 4999, 7000},
+			dead:  []int32{5000, 6999},
+		},
+		{
+			// The case that killed losAliveAt.
+			name:   "death and respawn on the same millisecond",
+			spawns: []int32{5000}, deaths: []int32{5000},
+			alive: []int32{0, 4999, 5000, 5001, 19999},
+		},
 	}
-	const matchMs = 20000
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			ivs := aliveIntervals(tc.spawns, tc.deaths, matchMs)
-			for tms := int32(0); tms < matchMs; tms += 100 {
-				want := losAliveAt(tc.spawns, tc.deaths, tms)
-				got := false
+			in := func(tms int32) bool {
 				for _, v := range ivs {
 					if tms >= v.Start && tms < v.End {
-						got = true
-						break
+						return true
 					}
 				}
-				if got != want {
-					t.Fatalf("t=%d: intervals say alive=%v, losAliveAt says %v (intervals %v)", tms, got, want, ivs)
+				return false
+			}
+			for _, tms := range tc.alive {
+				if !in(tms) {
+					t.Errorf("t=%d reads dead, want alive (intervals %v)", tms, ivs)
+				}
+			}
+			for _, tms := range tc.dead {
+				if in(tms) {
+					t.Errorf("t=%d reads alive, want dead (intervals %v)", tms, ivs)
 				}
 			}
 		})
