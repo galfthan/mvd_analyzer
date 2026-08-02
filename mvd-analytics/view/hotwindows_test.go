@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"reflect"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -1107,5 +1108,58 @@ func TestHotWindowsClampsTheWindowEnd(t *testing.T) {
 			t.Errorf("window starting at %d: durationMs = %d, want %d",
 				w.Start, w.DurationMs, math.MaxInt32-w.Start)
 		}
+	}
+}
+
+// Everything landing on one millisecond leaves collectScoreEvents as ONE tick
+// carrying the sum — a kill and a death at the same instant are a net 0 there,
+// not two ticks that a window could start between. Asserted on the event
+// stream rather than on a window because the fold is currently invisible in
+// the output: candidate starts are deduped and the two-pointer sum is
+// order-independent within a millisecond, so topWindowsFor returns identical
+// candidates for a folded and an unfolded stream (checked over 200k random
+// duplicate-heavy cases). The fold is the precondition that keeps it so.
+func TestCollectScoreEventsFoldsOneTickPerMillisecond(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "B", "rl"), kill(1000, "C", "A", "rl"),
+		kill(1200, "A", "B", "rl"),
+	}
+	ev, err := collectScoreEvents(hwResult(frags, 60000), MetricNetFrags, nil, "raw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []scoreEvent{{t: 1000, v: 0}, {t: 1200, v: 1}}
+	if !reflect.DeepEqual(ev["A"], want) {
+		t.Errorf("A = %v, want %v", ev["A"], want)
+	}
+	// The fold allocates: compacting into the head of the input would rewrite
+	// a slice the caller still owns, leaving stale duplicates in its tail.
+	in := []scoreEvent{{t: 1, v: 1}, {t: 1, v: 2}, {t: 2, v: 5}}
+	keep := append([]scoreEvent(nil), in...)
+	if coalesce(in); !reflect.DeepEqual(in, keep) {
+		t.Errorf("input = %v, want %v — coalesce compacted in place", in, keep)
+	}
+}
+
+// The ranking is total and the ORDER of its keys is part of the contract:
+// score, then the earlier window, then the player name. Five windows all
+// scoring 1 — four of them at the same instant — pin both halves, since a
+// name-before-start ranking would hoist AAA's later window to rank 1.
+func TestHotWindowsTieBreakStartThenPlayer(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "D", "X", "rl"), kill(1000, "B", "X", "rl"),
+		kill(1000, "C", "X", "rl"), kill(1000, "A", "X", "rl"),
+		kill(5000, "AAA", "X", "rl"),
+	}
+	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{WindowMs: 2000, Limit: -1})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 1 {
+			t.Fatalf("%s scored %d, want 1 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"A", "B", "C", "D", "AAA"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v", order, want)
 	}
 }
