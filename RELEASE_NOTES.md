@@ -51,6 +51,16 @@ byte-identical.
   (44 cached demos + the per-machine special-cases set), and both demos above
   join the golden corpus. See
   [RESULT_SCHEMA.md → Player userids](mvd-analytics/RESULT_SCHEMA.md#player-userids-schema-v66).
+- **Web UI: no more slot-as-track fallback.** The Key Moments powerup-run
+  "Hub" link fell back to a player's wire *slot* when the userid was 0 — a
+  slot is not a userid, so the link tracked an unrelated player. Runs with no
+  userid now show no link, matching the other link builders.
+- **OpenAPI: `TimelineAnalysis` now documents `demoMarkers[]`** (the schema
+  v58 `/demomark` bookmarks), which `/v1/demos/{id}/artifacts/timeline` had
+  been serving undeclared — no corpus demo carries a marker, so the
+  `additionalProperties: false` validator never saw the field. No response
+  changed; the spec caught up with the payload, and the golden-response
+  validator gained a synthetic-marker fixture so the gap cannot reopen.
 
 ## unreleased (hot-windows) — hot windows and lives, schema v65
 

@@ -5704,6 +5704,44 @@ components:
           type:
             - "null"
             - array
+        demoMarkers:
+          description: "Player-inserted `/demomark` bookmarks (KTX stufftext), in demo order. Not deduplicated."
+          items:
+            additionalProperties: false
+            properties:
+              label:
+                description: "Optional argument tail of the mark (e.g. the HoonyMode \"0 round-07\" form); omitted for a plain mark."
+                type: string
+              playerName:
+                description: "Marking player's name; empty when the mark was not slot-addressed."
+                type: string
+              playerSlot:
+                description: "Marking player's wire slot — the only attribution channel; -1 when the mark was not slot-addressed."
+                type: integer
+              playerUserID:
+                description: "Marking player's UserID (Hub viewer link); 0 when unattributed, and not a useful track target for a spectator's mark."
+                type: integer
+              spectator:
+                description: "The mark was inserted by a spectator, not a player (KTX accepts /demomark from both); omitted when false."
+                type: boolean
+              team:
+                description: "Marking player's team; usually empty for a spectator's mark."
+                type: string
+              time:
+                description: "Event/sample time, int32 ms since match start; negative for a mark inserted during warmup (surfaced un-gated)."
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
+            required:
+              - time
+              - playerName
+              - playerSlot
+              - playerUserID
+              - team
+            type: object
+          type:
+            - "null"
+            - array
         fragEvents:
           description: "Frag events for the score timeline."
           items:

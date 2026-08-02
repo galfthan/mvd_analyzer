@@ -241,6 +241,22 @@ func addBoundedFamily(d *result.DamageResult) {
 	}
 }
 
+// addDemoMarkers gives a Result's TimelineAnalysis a synthetic pair of
+// `/demomark` bookmarks. Markers are rare (0 per demo across the whole golden
+// corpus, including 4on4_osams_ra_230426_dm3), so the served timeline body
+// never carried the field and TimelineAnalysis's additionalProperties: false
+// went unexercised against it — which is how the schema shipped with no
+// demoMarkers property at all while the /artifacts/timeline route was
+// validated. The two records cover both shapes: an attributed player mark
+// (no spectator/label) and a labelled spectator mark. Assignment, not append,
+// so the two tests that share the cached golden can both call it.
+func addDemoMarkers(ta *result.TimelineAnalysisResult) {
+	ta.DemoMarkers = []result.DemoMarkerEvent{
+		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
+		{Time: -4200, PlayerName: "spec", PlayerSlot: 9, PlayerUserID: 42, Team: "", Spectator: true, Label: "0 round-07"},
+	}
+}
+
 // allFieldCodes is every fields= selector, to exercise the widest
 // stream-slice / state-at / buckets shapes.
 const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,sp,d"
@@ -364,6 +380,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
+		// The timeline artifact is already swept below with every other
+		// servable artifact, but that generic case validates whatever the
+		// body happens to carry. No corpus demo carries a /demomark bookmark,
+		// so demoMarkers never reached the validator and its absence from the
+		// TimelineAnalysis schema was invisible. This case names the field it
+		// exists for, against the synthetic markers addDemoMarkers installs.
+		{name: "artifact-timeline-demomarkers", url: "/v1/demos/gameId:42/artifacts/timeline",
+			path: "/v1/demos/{id}/artifacts/{name}", status: 200,
+			mustContain: []string{`"demoMarkers"`, `"playerUserID":17`, `"spectator":true`, `"label":"0 round-07"`}},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
@@ -420,6 +445,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// still v53 on this branch) so the dmg=both / dmg=bounded cases exercise
 	// the extended schema instead of validating empty additions.
 	addBoundedFamily(res.Damage)
+	// Same reason for demo markers: no corpus demo has one, so the timeline
+	// artifact never exercised the demoMarkers half of its schema.
+	addDemoMarkers(res.TimelineAnalysis)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the
