@@ -1,0 +1,463 @@
+{
+  "match": {
+    "players": [
+      {
+        "deaths": 64,
+        "frags": 40,
+        "kills": 47,
+        "name": "Anza  (FU)",
+        "suicides": 2,
+        "team": "-fu-"
+      },
+      {
+        "deaths": 49,
+        "frags": 43,
+        "kills": 45,
+        "name": "peter",
+        "suicides": 0,
+        "team": "mix"
+      },
+      {
+        "deaths": 56,
+        "frags": 57,
+        "kills": 63,
+        "name": "Silenoz",
+        "suicides": 2,
+        "team": "mix"
+      },
+      {
+        "deaths": 86,
+        "frags": 47,
+        "kills": 53,
+        "name": "Hto   (FU)",
+        "suicides": 1,
+        "team": "-fu-"
+      },
+      {
+        "deaths": 75,
+        "frags": 26,
+        "kills": 30,
+        "name": "rgh   (FU)",
+        "suicides": 4,
+        "team": "-fu-"
+      },
+      {
+        "deaths": 65,
+        "frags": 46,
+        "kills": 47,
+        "name": "j0rmund",
+        "suicides": 0,
+        "team": "mix"
+      },
+      {
+        "deaths": 35,
+        "frags": 96,
+        "kills": 107,
+        "name": "sailorman",
+        "suicides": 3,
+        "team": "mix"
+      },
+      {
+        "deaths": 19,
+        "frags": 36,
+        "kills": 39,
+        "name": "(1)rusti (FU)",
+        "suicides": 1,
+        "team": "-fu-"
+      },
+      {
+        "deaths": 40,
+        "frags": 14,
+        "kills": 16,
+        "name": "rusti (FU)",
+        "suicides": 1,
+        "team": "-fu-"
+      }
+    ]
+  },
+  "streams": {
+    "global": {
+      "demoOffset": 10105,
+      "demoStartAccuracyMs": 1,
+      "demoStartUnixMs": 1780776295225,
+      "matchEnd": 1200011,
+      "matchStart": 0,
+      "pauses": [
+        {
+          "atMs": 609644,
+          "durationMs": 32250
+        },
+        {
+          "atMs": 620599,
+          "durationMs": 18339
+        }
+      ]
+    }
+  },
+  "timelineAnalysis": {
+    "airgibs": [
+      {
+        "attacker": "sailorman",
+        "attackerTeam": "mix",
+        "attackerUserID": 39,
+        "damage": 110,
+        "height": 322.96875,
+        "heightAboveAttacker": 151.625,
+        "lethal": true,
+        "loc": "Quad.high",
+        "time": 249314,
+        "victim": "Hto   (FU)",
+        "victimTeam": "-fu-",
+        "victimUserID": 34
+      },
+      {
+        "attacker": "rgh   (FU)",
+        "attackerTeam": "-fu-",
+        "attackerUserID": 36,
+        "damage": 110,
+        "height": 155.09375,
+        "heightAboveAttacker": -26.875,
+        "loc": "Quad.high",
+        "time": 249402,
+        "victim": "sailorman",
+        "victimTeam": "mix",
+        "victimUserID": 39
+      }
+    ],
+    "fragStreaks": [
+      {
+        "duration": 237548,
+        "endTime": 252467,
+        "ewep": "rl",
+        "frags": 28,
+        "playerName": "sailorman",
+        "playerUserID": 39,
+        "team": "mix",
+        "time": 14919
+      },
+      {
+        "duration": 225141,
+        "endTime": 895000,
+        "ewep": "rl",
+        "frags": 20,
+        "playerName": "(1)rusti (FU)",
+        "playerUserID": 43,
+        "team": "-fu-",
+        "time": 669859
+      },
+      {
+        "duration": 214353,
+        "endTime": 467996,
+        "ewep": "rl",
+        "frags": 19,
+        "playerName": "sailorman",
+        "playerUserID": 39,
+        "team": "mix",
+        "time": 253643
+      },
+      {
+        "duration": 146276,
+        "endTime": 629453,
+        "ewep": "rl",
+        "frags": 16,
+        "playerName": "sailorman",
+        "playerUserID": 39,
+        "team": "mix",
+        "time": 483177
+      },
+      {
+        "duration": 179396,
+        "endTime": 1141010,
+        "ewep": "rl",
+        "frags": 15,
+        "playerName": "Anza  (FU)",
+        "playerUserID": 31,
+        "team": "-fu-",
+        "time": 961614
+      },
+      {
+        "duration": 91829,
+        "endTime": 178377,
+        "ewep": "rl",
+        "frags": 11,
+        "playerName": "Silenoz",
+        "playerUserID": 33,
+        "team": "mix",
+        "time": 86548
+      },
+      {
+        "duration": 62390,
+        "endTime": 932856,
+        "ewep": "rl",
+        "frags": 10,
+        "playerName": "sailorman",
+        "playerUserID": 39,
+        "team": "mix",
+        "time": 870466
+      },
+      {
+        "duration": 85401,
+        "endTime": 85401,
+        "ewep": "rl",
+        "frags": 10,
+        "playerName": "Silenoz",
+        "playerUserID": 33,
+        "team": "mix",
+        "time": 0
+      },
+      {
+        "duration": 123203,
+        "endTime": 551877,
+        "ewep": "rl",
+        "frags": 10,
+        "playerName": "peter",
+        "playerUserID": 32,
+        "team": "mix",
+        "time": 428674
+      },
+      {
+        "duration": 149447,
+        "endTime": 372564,
+        "ewep": "rl",
+        "frags": 10,
+        "playerName": "j0rmund",
+        "playerUserID": 38,
+        "team": "mix",
+        "time": 223117
+      }
+    ],
+    "playerUserIDs": {
+      "(1)rusti (FU)": 43,
+      "Anza  (FU)": 31,
+      "Hto   (FU)": 34,
+      "Silenoz": 33,
+      "j0rmund": 38,
+      "peter": 32,
+      "rgh   (FU)": 36,
+      "rusti (FU)": 37,
+      "sailorman": 39
+    },
+    "powerupEvents": [
+      {
+        "duration": 30001,
+        "endTime": 37103,
+        "frags": 5,
+        "playerName": "Silenoz",
+        "playerSlot": 2,
+        "playerUserID": 33,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 7102
+      },
+      {
+        "duration": 19355,
+        "endTime": 86548,
+        "frags": 4,
+        "playerName": "Silenoz",
+        "playerSlot": 2,
+        "playerUserID": 33,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 67193
+      },
+      {
+        "duration": 29999,
+        "endTime": 157567,
+        "frags": 6,
+        "playerName": "Silenoz",
+        "playerSlot": 2,
+        "playerUserID": 33,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 127568
+      },
+      {
+        "duration": 30014,
+        "endTime": 220144,
+        "frags": 4,
+        "playerName": "peter",
+        "playerSlot": 1,
+        "playerUserID": 32,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 190130
+      },
+      {
+        "duration": 2772,
+        "endTime": 253643,
+        "frags": 1,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 250871
+      },
+      {
+        "duration": 3828,
+        "endTime": 315884,
+        "frags": 1,
+        "playerName": "Silenoz",
+        "playerSlot": 2,
+        "playerUserID": 33,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 312056
+      },
+      {
+        "duration": 30008,
+        "endTime": 403546,
+        "frags": 7,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 373538
+      },
+      {
+        "duration": 30009,
+        "endTime": 464456,
+        "frags": 3,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 434447
+      },
+      {
+        "duration": 30015,
+        "endTime": 525144,
+        "frags": 7,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 495129
+      },
+      {
+        "duration": 30000,
+        "endTime": 585937,
+        "frags": 4,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 555937
+      },
+      {
+        "duration": 4698,
+        "endTime": 621771,
+        "frags": 1,
+        "playerName": "Silenoz",
+        "playerSlot": 2,
+        "playerUserID": 33,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 617073
+      },
+      {
+        "duration": 11094,
+        "endTime": 688566,
+        "frags": 1,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 677472
+      },
+      {
+        "duration": 29990,
+        "endTime": 768295,
+        "frags": 5,
+        "playerName": "(1)rusti (FU)",
+        "playerSlot": 9,
+        "playerUserID": 43,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 738305
+      },
+      {
+        "duration": 29991,
+        "endTime": 828428,
+        "frags": 5,
+        "playerName": "Anza  (FU)",
+        "playerSlot": 0,
+        "playerUserID": 31,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 798437
+      },
+      {
+        "duration": 30006,
+        "endTime": 891417,
+        "frags": 3,
+        "playerName": "(1)rusti (FU)",
+        "playerSlot": 9,
+        "playerUserID": 43,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 861411
+      },
+      {
+        "duration": 12769,
+        "endTime": 935025,
+        "frags": 3,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 922256
+      },
+      {
+        "duration": 29996,
+        "endTime": 1012265,
+        "frags": 3,
+        "playerName": "Anza  (FU)",
+        "playerSlot": 0,
+        "playerUserID": 31,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 982269
+      },
+      {
+        "duration": 8806,
+        "endTime": 1051072,
+        "frags": 1,
+        "playerName": "(1)rusti (FU)",
+        "playerSlot": 9,
+        "playerUserID": 43,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 1042266
+      },
+      {
+        "duration": 18068,
+        "endTime": 1121594,
+        "frags": 6,
+        "playerName": "rgh   (FU)",
+        "playerSlot": 4,
+        "playerUserID": 36,
+        "powerupType": "quad",
+        "team": "-fu-",
+        "time": 1103526
+      },
+      {
+        "duration": 2609,
+        "endTime": 1167047,
+        "frags": 0,
+        "playerName": "sailorman",
+        "playerSlot": 7,
+        "playerUserID": 39,
+        "powerupType": "quad",
+        "team": "mix",
+        "time": 1164438
+      }
+    ]
+  }
+}

@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "65"
+  version: "66"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -2624,7 +2624,7 @@ components:
           description: "Match mode (e.g. Duel/Team/FFA)."
           type: string
         playerUserIDs:
-          description: "Player name → UserID map (Hub viewer links)."
+          description: "Player name → UserID map (Hub viewer links). Per connection session: for a player who reconnected this is the last session of theirs that had play — the id live at the end of the demo (schema v66)."
           additionalProperties:
             type: integer
           type: object

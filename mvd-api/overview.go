@@ -46,6 +46,15 @@ type Overview struct {
 	// PlayerUserIDs maps player name → hub.quakeworld.nu user id. Use it
 	// to build deep links of the form
 	// https://hub.quakeworld.nu/games/<gameId>?track=<userId>.
+	//
+	// A userid identifies one CONNECTION, so a player who reconnected has
+	// held more than one. The id here is the last session of theirs that
+	// had play — the one live at the end of the demo, and what a `track=`
+	// resolves for a still-connected player (schema v66; before that it was
+	// the first id seen on their wire slot, which after any handover or
+	// rejoin belonged to somebody else). Timestamped surfaces resolve their
+	// own: the timeline artifact's fragStreaks / powerupEvents /
+	// demoMarkers each carry the id valid at that moment.
 	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
 	// Errors carries the analyzer's non-fatal errors verbatim (a
 	// sub-analyzer's Finalize failed but the pipeline continued). A

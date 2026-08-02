@@ -464,28 +464,36 @@ func fragStart(b *streamBuilder, startMs, endMs int32) int32 {
 	return best
 }
 
-// sessionHasPlay reports whether the builder recorded any actual play
-// (a spawn, death, or position sample) inside [startMs, endMs). Used to
-// tell a real occupancy from a phantom one (e.g. a vacated slot taken
-// by someone who never spawned).
-func sessionHasPlay(b *streamBuilder, startMs, endMs int32) bool {
-	in := func(t int32) bool { return t >= startMs && t < endMs }
-	for _, t := range b.spawns {
-		if in(t) {
-			return true
+// sessionLastPlay reports the time of the last actual play (a spawn,
+// death, or position sample) the builder recorded inside [startMs, endMs),
+// and whether there was any at all. The boolean tells a real occupancy
+// from a phantom one (e.g. a vacated slot taken by someone who never
+// spawned); the timestamp orders one player's sessions by recency, which
+// their window bounds cannot do — the first session on a slot is extended
+// back to -inf and the last forward to +inf for event lookup
+// (identity.go's PopulateCore), so two sessions of the same human on two
+// slots can both start at -inf. Play evidence is per slot, so the value is
+// always a real wire time.
+func sessionLastPlay(b *streamBuilder, startMs, endMs int32) (int32, bool) {
+	last, got := int32(0), false
+	in := func(t int32) {
+		if t < startMs || t >= endMs {
+			return
 		}
+		if !got || t > last {
+			last, got = t, true
+		}
+	}
+	for _, t := range b.spawns {
+		in(t)
 	}
 	for _, t := range b.deaths {
-		if in(t) {
-			return true
-		}
+		in(t)
 	}
 	for _, t := range b.posT {
-		if in(t) {
-			return true
-		}
+		in(t)
 	}
-	return false
+	return last, got
 }
 
 // streamFragment is one slot-occupancy window contributing to a player

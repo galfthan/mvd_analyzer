@@ -160,7 +160,18 @@ type ResolvedSession struct {
 	// wire-side source for the login the KTX demoinfo block also carries,
 	// so a demo without that block can still report who was playing.
 	// Empty for unauthenticated players and on servers that do not set it.
-	Auth        string
+	Auth string
+	// UserID is the wire userid of the connection that held the slot for
+	// this session — the value a hub `track=` link resolves against. It is
+	// per-session on purpose: a userid identifies a *connection*, not a
+	// human (SV_GenerateUserID, mvdsv/src/sv_main.c:538-556, reissues ids
+	// from a rotating pool), so the same person reconnecting draws a new
+	// one and the slot they vacated hands its old one to whoever takes it
+	// next. Anything keyed slot-wide therefore names the wrong connection
+	// after a handover or a rejoin. 0 when the occupancy carried no userid
+	// of its own (see occupancyRecord.identified — an inferred occupancy,
+	// a userid-0 resend, or KTX's ghost scoreboard row).
+	UserID      int
 	IdentityKey string
 }
 

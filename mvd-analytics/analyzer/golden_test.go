@@ -275,6 +275,32 @@ var densePosDemos = map[string]bool{
 // over the pinned events.
 var partialGoldenDemos = map[string][]string{
 	"4on4_tbg_pex_080326_dm2_demomark": {"timelineAnalysis.demoMarkers", "streams.global"},
+	// The two identity demos (schema v66). Both are ordinary 4on4s
+	// otherwise — a full golden would add ~11 MB of output the nine other
+	// goldens already pin — so they pin the userid carriers, the roster,
+	// and streams.global (for TestTimelineInvariants' window check).
+	//
+	// 220637: rusti reconnects while his first connection is still
+	// spawned, so mvdsv renames him `(1)rusti (FU)` and KTX scores the two
+	// separately. Pins the two-row split AND that each row keeps its own
+	// userid (37 / 43) rather than the id of the spectator who held the
+	// slot first.
+	//
+	// 222649: bogojoker times out and rejoins on the SAME slot with a new
+	// userid under one name, which is the only case where "last session
+	// with play" is the difference between a live id (25) and a dead one
+	// (12) — the shape no wire-side invariant can catch, because the dead
+	// id really was his.
+	"4on4_fu_mix_060626_dm2_rename_handover": {
+		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
+		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"match.players", "streams.global",
+	},
+	"4on4_blue_red_200626_e1m2_sameslot_rejoin": {
+		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
+		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"match.players", "streams.global",
+	},
 }
 
 // projectPaths reduces m to only the given dotted paths, preserving the

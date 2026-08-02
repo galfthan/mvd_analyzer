@@ -5,6 +5,53 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (player-identity) — userids follow the player, not the slot, schema v66
+
+**A correctness fix: the userids we publish were somebody else's.** No field
+is added, removed or retyped — the numbers were wrong and are now right,
+which is the correction carve-out of [API.md §2.7](mvd-api/API.md), not a
+breaking change. Values move only on demos with a mid-match handover or
+reconnect (3 of the 44 cached corpus demos); every other demo is
+byte-identical.
+
+- **What was wrong.** `timelineAnalysis.playerUserIDs` — and the
+  `playerUserID` on `fragStreaks[]`, `powerupEvents[]`, `demoMarkers[]`, plus
+  `airgibs[].attackerUserID`/`.victimUserID` — latched the **first** userid
+  ever seen on a player's wire slot and reported it for the whole demo. A
+  userid names a *connection*, not a person: mvdsv hands them out from a
+  rotating pool (`SV_GenerateUserID`, `mvdsv/src/sv_main.c:538-556`), so a
+  slot that changes hands and a player who times out and rejoins both draw
+  fresh ones. Every consumer that turned the value into the documented
+  `hub.quakeworld.nu/games/<id>?track=<userId>` deep link — including
+  `/overview` and the `getOverview` MCP tool, and the third-party app that
+  reported this — was pointed at the wrong player.
+- **Two measured cases, both reported from the field.** On hub game **220637**
+  rusti reconnects while his first connection is still spawned, so mvdsv
+  renames him `(1)rusti (FU)`; we served his id as **42** — a spectator who
+  had left after 26 s — where it is **43**. On **222649** bogojoker times out
+  during a pause and rejoins on the same slot with a new id; we served **12**
+  on his 19-minute-mark rampage streak, sixteen minutes after that connection
+  ceased to exist, where it is **25**.
+- **What it is now.** Every id is resolved from the *session* (one contiguous
+  occupancy of a wire slot by one userid) that held the slot at the value's
+  own timestamp. Where the reconnect unifier folds several sessions into one
+  name, `playerUserIDs` reports the **last session that had play** — a
+  judgement call, documented at the selection site: it is the id that is live
+  at the end of the demo and the one a `track=` resolves for a player still
+  connected. The event carriers stay finer-grained and report the id valid at
+  their own instant.
+- **What deliberately did NOT change.** A player who reconnects while their
+  old connection is still spawned is renamed `(N)<name>` by mvdsv, and KTX —
+  matching ghosts by exact netname — scores the two as separate players in
+  its own demoinfo block. Our scoreboard, streams and `playerUserIDs`
+  reproduce that split, now with the correct id on each row. Folding the two
+  rows would contradict the server's own record.
+- **Regression cover.** A new corpus invariant asserts that every reported
+  userid was observed on the wire together with the name it is reported under
+  (44 cached demos + the per-machine special-cases set), and both demos above
+  join the golden corpus. See
+  [RESULT_SCHEMA.md → Player userids](mvd-analytics/RESULT_SCHEMA.md#player-userids-schema-v66).
+
 ## unreleased (hot-windows) — hot windows and lives, schema v65
 
 **Two new read endpoints, purely additive.** Both are **views** over data that

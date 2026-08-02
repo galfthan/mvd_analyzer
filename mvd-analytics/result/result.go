@@ -926,8 +926,26 @@ package result
 //     deaths — every obituary went unmatched — where a row of measured zeros
 //     beside a real death count would look like a measurement.
 //
+// v66:
+//   - Every reported userid is now the SESSION's, not the wire slot's.
+//     TimelineAnalysis.PlayerUserIDs and the userid on fragStreaks,
+//     powerupEvents, demoMarkers and airgibs used to carry the first
+//     userid ever seen on the slot, latched for the whole demo, so any
+//     slot handover or reconnect published an id belonging to a different
+//     connection — a hub `track=<id>` link then followed the wrong player
+//     (gameId 220637: `(1)rusti (FU)` served as 42, a spectator who left
+//     after 26 s) or a connection that no longer existed (222649:
+//     `bogojoker` served as 12, sixteen minutes after he timed out and
+//     came back as 25). Same field names, same types, same documented
+//     meaning; the numbers were wrong and are now right.
+//   - Where one player holds several sessions (a reconnect the identity
+//     unifier folded into one name), PlayerUserIDs reports the LAST
+//     session that had play — the id that is live at the end of the demo
+//     and the one a `track=` resolves. The event carriers each report the
+//     session that held the slot at their own timestamp.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 65
+const CurrentSchemaVersion = 66
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

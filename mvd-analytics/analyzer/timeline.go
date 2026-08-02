@@ -28,7 +28,7 @@ type TimelineAnalyzer struct {
 	core          *CoreOutputs
 	playerState   map[int]*timelinePlayerState
 	playerNames   map[int]string // Slot -> player name (from UserInfoEvent)
-	playerUserIDs map[int]int    // Slot -> UserID (for Hub viewer track param)
+	playerUserIDs map[int]int    // Slot -> latest wire UserID; fallback only (see userIDAt)
 	// occ is the shared wire-slot occupancy tracker (occupancy.go). It
 	// spots a mid-match handoff so handleFragUpdate can rebase a
 	// reconnecting player's restored frag total (see fragResetPending) and
@@ -223,10 +223,19 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	slot := e.Player.Slot
 	if e.Player.Name != "" {
 		a.playerNames[slot] = e.Player.Name
-		// Keep the FIRST valid UserID per slot for the Hub viewer track
-		// param; some servers resend userinfo with UserID 0 or corrupted
-		// values.
-		if a.playerUserIDs[slot] == 0 && e.Player.UserID > 0 {
+		// Track the slot's current userid. This used to keep the FIRST
+		// valid one per slot, guarding against "servers that resend
+		// userinfo with UserID 0 or corrupted values" — but those resends
+		// are exactly the svc_setinfo syntheses the parser already marks
+		// Partial, whose UserID is documented stale cache rather than a
+		// wire value (mvd-reader/parser/userinfo.go:63-86). Ignoring
+		// Partial is therefore the discriminator that guard wanted;
+		// first-wins additionally latched the first connection ever seen on
+		// the slot for the whole demo, so every handover and rejoin
+		// afterwards reported a dead userid. Per-session userids are
+		// carried on CoreOutputs.Sessions (see identity.go); this map is
+		// the fallback for runs with no identity analyser wired.
+		if !e.Partial && e.Player.UserID > 0 {
 			a.playerUserIDs[slot] = e.Player.UserID
 		}
 	}
@@ -490,6 +499,22 @@ func (a *TimelineAnalyzer) resolveAt(slot int, tMs int32) (name, team string) {
 		team = a.core.Names.TeamForName(name)
 	}
 	return name, team
+}
+
+// userIDAt resolves a wire slot to the userid of the connection that held
+// it at time tMs — the session's userid, which is what a hub `track=` link
+// needs. It is the time-keyed sibling of resolveAt, and exists because the
+// slot-keyed alternatives are both stale by construction: ctx.Players[slot]
+// holds the slot's FINAL occupant (so a powerup run before a handover was
+// credited to the player who took the slot afterwards) and playerUserIDs is
+// a per-slot latch. That latch remains the fallback for runs with no
+// identity analyser wired (hand-built registries, unit tests), where there
+// is no session table to key on.
+func (a *TimelineAnalyzer) userIDAt(slot int, tMs int32) int {
+	if s, ok := a.core.SlotSessionAt(slot, tMs); ok && s.UserID > 0 {
+		return s.UserID
+	}
+	return a.playerUserIDs[slot]
 }
 
 func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayerState {

@@ -225,11 +225,16 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 		root := uf.find(i)
 		g := groups[root]
 		sessions[s.slot] = append(sessions[s.slot], ResolvedSession{
-			StartMs:     s.startMs,
-			EndMs:       s.endMs,
-			Name:        g.name,
-			Team:        g.team,
-			Auth:        s.auth,
+			StartMs: s.startMs,
+			EndMs:   s.endMs,
+			Name:    g.name,
+			Team:    g.team,
+			Auth:    s.auth,
+			// The occupancy's own userid, not the slot's: the tracker
+			// already splits a session where the userid changes
+			// (occupancy.go:196-198), so this is the connection that was
+			// live for exactly this window.
+			UserID:      s.userID,
 			IdentityKey: identityKey(root),
 		})
 	}

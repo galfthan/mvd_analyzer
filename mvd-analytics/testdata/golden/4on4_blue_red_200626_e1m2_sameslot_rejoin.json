@@ -1,0 +1,429 @@
+{
+  "match": {
+    "players": [
+      {
+        "deaths": 61,
+        "frags": 35,
+        "kills": 38,
+        "name": "cronus",
+        "suicides": 1,
+        "team": "blue"
+      },
+      {
+        "deaths": 60,
+        "frags": 49,
+        "kills": 51,
+        "name": "powerzord",
+        "suicides": 1,
+        "team": "red"
+      },
+      {
+        "deaths": 52,
+        "frags": 66,
+        "kills": 72,
+        "name": "george",
+        "suicides": 0,
+        "team": "blue"
+      },
+      {
+        "deaths": 77,
+        "frags": 61,
+        "kills": 63,
+        "name": "Venator",
+        "suicides": 1,
+        "team": "blue"
+      },
+      {
+        "deaths": 67,
+        "frags": 71,
+        "kills": 78,
+        "name": "BLooD_DoG(D_P)",
+        "suicides": 3,
+        "team": "red"
+      },
+      {
+        "deaths": 61,
+        "frags": 65,
+        "kills": 68,
+        "name": "bogojoker",
+        "suicides": 0,
+        "team": "blue"
+      },
+      {
+        "deaths": 77,
+        "frags": 31,
+        "kills": 37,
+        "name": "omicron",
+        "suicides": 3,
+        "team": "red"
+      },
+      {
+        "deaths": 59,
+        "frags": 64,
+        "kills": 71,
+        "name": "blaze",
+        "suicides": 1,
+        "team": "red"
+      },
+      {
+        "deaths": 0,
+        "frags": 0,
+        "kills": 0,
+        "name": "herbie",
+        "suicides": 0,
+        "team": "tpa"
+      }
+    ]
+  },
+  "streams": {
+    "global": {
+      "demoOffset": 10092,
+      "demoStartAccuracyMs": 1,
+      "demoStartUnixMs": 1781932325740,
+      "matchEnd": 1199953,
+      "matchStart": 0,
+      "pauses": [
+        {
+          "atMs": 140177,
+          "durationMs": 32636
+        }
+      ]
+    }
+  },
+  "timelineAnalysis": {
+    "fragStreaks": [
+      {
+        "duration": 264319,
+        "endTime": 992385,
+        "ewep": "rl",
+        "frags": 31,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerUserID": 15,
+        "team": "red",
+        "time": 728066
+      },
+      {
+        "duration": 157798,
+        "endTime": 445027,
+        "ewep": "rl",
+        "frags": 22,
+        "playerName": "george",
+        "playerUserID": 10,
+        "team": "blue",
+        "time": 287229
+      },
+      {
+        "duration": 135167,
+        "endTime": 507994,
+        "ewep": "rl",
+        "frags": 15,
+        "playerName": "bogojoker",
+        "playerUserID": 25,
+        "team": "blue",
+        "time": 372827
+      },
+      {
+        "duration": 119982,
+        "endTime": 119982,
+        "ewep": "rl",
+        "frags": 12,
+        "playerName": "george",
+        "playerUserID": 10,
+        "team": "blue",
+        "time": 0
+      },
+      {
+        "duration": 136322,
+        "endTime": 1149657,
+        "ewep": "rl",
+        "frags": 12,
+        "playerName": "blaze",
+        "playerUserID": 21,
+        "team": "red",
+        "time": 1013335
+      },
+      {
+        "duration": 91417,
+        "endTime": 592166,
+        "ewep": "rl",
+        "frags": 11,
+        "playerName": "blaze",
+        "playerUserID": 21,
+        "team": "red",
+        "time": 500749
+      },
+      {
+        "duration": 55344,
+        "endTime": 250555,
+        "ewep": "rl",
+        "frags": 9,
+        "playerName": "omicron",
+        "playerUserID": 13,
+        "team": "red",
+        "time": 195211
+      },
+      {
+        "duration": 78498,
+        "endTime": 443362,
+        "ewep": "rl",
+        "frags": 9,
+        "playerName": "Venator",
+        "playerUserID": 16,
+        "team": "blue",
+        "time": 364864
+      },
+      {
+        "duration": 89508,
+        "endTime": 1169800,
+        "ewep": "rl",
+        "frags": 9,
+        "playerName": "bogojoker",
+        "playerUserID": 25,
+        "team": "blue",
+        "time": 1080292
+      },
+      {
+        "duration": 58691,
+        "endTime": 612983,
+        "ewep": "rl",
+        "frags": 8,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerUserID": 15,
+        "team": "red",
+        "time": 554292
+      }
+    ],
+    "playerUserIDs": {
+      "BLooD_DoG(D_P)": 15,
+      "Venator": 16,
+      "blaze": 21,
+      "bogojoker": 25,
+      "cronus": 3,
+      "george": 10,
+      "omicron": 13,
+      "powerzord": 24
+    },
+    "powerupEvents": [
+      {
+        "duration": 22586,
+        "endTime": 31009,
+        "frags": 2,
+        "playerName": "omicron",
+        "playerSlot": 10,
+        "playerUserID": 13,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 8423
+      },
+      {
+        "duration": 3224,
+        "endTime": 71609,
+        "frags": 1,
+        "playerName": "Venator",
+        "playerSlot": 7,
+        "playerUserID": 16,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 68385
+      },
+      {
+        "duration": 1772,
+        "endTime": 130330,
+        "frags": 0,
+        "playerName": "george",
+        "playerSlot": 5,
+        "playerUserID": 10,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 128558
+      },
+      {
+        "duration": 8999,
+        "endTime": 197552,
+        "frags": 4,
+        "playerName": "Venator",
+        "playerSlot": 7,
+        "playerUserID": 16,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 188553
+      },
+      {
+        "duration": 1215,
+        "endTime": 251476,
+        "frags": 1,
+        "playerName": "omicron",
+        "playerSlot": 10,
+        "playerUserID": 13,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 250261
+      },
+      {
+        "duration": 30013,
+        "endTime": 341032,
+        "frags": 5,
+        "playerName": "george",
+        "playerSlot": 5,
+        "playerUserID": 10,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 311019
+      },
+      {
+        "duration": 30013,
+        "endTime": 401038,
+        "frags": 8,
+        "playerName": "george",
+        "playerSlot": 5,
+        "playerUserID": 10,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 371025
+      },
+      {
+        "duration": 12597,
+        "endTime": 444375,
+        "frags": 4,
+        "playerName": "Venator",
+        "playerSlot": 7,
+        "playerUserID": 16,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 431778
+      },
+      {
+        "duration": 5636,
+        "endTime": 497411,
+        "frags": 0,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerSlot": 8,
+        "playerUserID": 15,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 491775
+      },
+      {
+        "duration": 30014,
+        "endTime": 581788,
+        "frags": 7,
+        "playerName": "blaze",
+        "playerSlot": 11,
+        "playerUserID": 21,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 551774
+      },
+      {
+        "duration": 113,
+        "endTime": 612916,
+        "frags": 0,
+        "playerName": "Venator",
+        "playerSlot": 7,
+        "playerUserID": 16,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 612803
+      },
+      {
+        "duration": 1049,
+        "endTime": 673853,
+        "frags": 0,
+        "playerName": "blaze",
+        "playerSlot": 11,
+        "playerUserID": 21,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 672804
+      },
+      {
+        "duration": 30007,
+        "endTime": 762815,
+        "frags": 3,
+        "playerName": "powerzord",
+        "playerSlot": 3,
+        "playerUserID": 24,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 732808
+      },
+      {
+        "duration": 30000,
+        "endTime": 824371,
+        "frags": 3,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerSlot": 8,
+        "playerUserID": 15,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 794371
+      },
+      {
+        "duration": 29990,
+        "endTime": 887558,
+        "frags": 4,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerSlot": 8,
+        "playerUserID": 15,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 857568
+      },
+      {
+        "duration": 29998,
+        "endTime": 947566,
+        "frags": 3,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerSlot": 8,
+        "playerUserID": 15,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 917568
+      },
+      {
+        "duration": 29346,
+        "endTime": 1006916,
+        "frags": 1,
+        "playerName": "blaze",
+        "playerSlot": 11,
+        "playerUserID": 21,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 977570
+      },
+      {
+        "duration": 20554,
+        "endTime": 1059555,
+        "frags": 4,
+        "playerName": "BLooD_DoG(D_P)",
+        "playerSlot": 8,
+        "playerUserID": 15,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 1039001
+      },
+      {
+        "duration": 9861,
+        "endTime": 1109724,
+        "frags": 1,
+        "playerName": "omicron",
+        "playerSlot": 10,
+        "playerUserID": 13,
+        "powerupType": "quad",
+        "team": "red",
+        "time": 1099863
+      },
+      {
+        "duration": 15545,
+        "endTime": 1175400,
+        "frags": 1,
+        "playerName": "Venator",
+        "playerSlot": 7,
+        "playerUserID": 16,
+        "powerupType": "quad",
+        "team": "blue",
+        "time": 1159855
+      }
+    ]
+  }
+}
