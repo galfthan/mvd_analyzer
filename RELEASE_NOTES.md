@@ -51,6 +51,47 @@ byte-identical.
   (44 cached demos + the per-machine special-cases set), and both demos above
   join the golden corpus. See
   [RESULT_SCHEMA.md → Player userids](mvd-analytics/RESULT_SCHEMA.md#player-userids-schema-v66).
+
+**And the identity behind it is now exported — purely additive.** Getting the
+id right still left a consumer with no supported way to say *"these two rows
+are one person"* or *"this row was slot S / userid U during [t1,t2)"*; the
+reporting client had rebuilt both with a fuzzy name matcher against the live
+engine roster. `streams.players[]` and `playerStats.players[]` (hence
+`GET /v1/demos/{id}/player-stats` and the `getPlayerStats` MCP tool) now carry:
+
+- **`identity`** — the reconnect-unification key the pipeline already used
+  internally to merge a reconnected player's streams. Equal values are one
+  human; different values are different humans *as the server scored them*.
+  On 220637 the two `rusti` rows carry different identities (KTX declined to
+  merge them, and we do not second-guess it); on 216835 the one `rusti` row
+  carries a single identity over two connections. It is **demo-local** —
+  derived from the first session's slot+userid, reproducible from the same
+  bytes, meaningless across demos — so **do not persist it**. The cross-demo
+  identity remains the authenticated `login`.
+- **`sessions[]`** — every wire occupancy behind the row, in time order:
+  `{startMs, endMs, slot, userId, name}`. This is the lossless form of the
+  answer `playerUserIDs` gives once per player, and the shape the reporter
+  asked for ("a list of ids per player with their validity window"). The
+  windows are the **observed** ones, not the ±inf-widened lookup windows the
+  internal resolver uses: on 222649 bogojoker's two sessions read
+  `[…,131740)` and `[140177,…)`, the drop and the rejoin. A connection made
+  during the countdown reports a negative `startMs` rather than being clamped
+  or dropped, and the only synthetic bound is a client still connected when
+  the recording ended (closed at match end).
+- **What is deliberately NOT listed:** an occupancy the wire never gave a
+  userid — KTX's ghost scoreboard row (a departed player's edict, userid
+  hardcoded 0) and inferred occupancies. The ghost carries the departed
+  player's name, so the unifier folds it into that player; listing it would
+  have given 216835's `rusti` a userid-less window *overlapping* the slot he
+  had actually reconnected onto, and would have made the next real connection
+  on that slot (222649's `herbie`, adopted into the ghost's record) claim a
+  window starting 3.7 minutes before he connected.
+- **Only those two views carry it.** `lives`, `hot-windows`, `frags`,
+  `damage` and `buckets` join to them by the row's **player name**, which is
+  the same canonical string everywhere. One consequence now visible to a
+  consumer: `/hot-windows`' `perPlayer` cap is name-keyed, so a human split
+  across two rows can occupy twice the quota — detectable via `identity`,
+  and left as is.
 - **Web UI: no more slot-as-track fallback.** The Key Moments powerup-run
   "Hub" link fell back to a player's wire *slot* when the userid was 0 — a
   slot is not a userid, so the link tracked an unrelated player. Runs with no

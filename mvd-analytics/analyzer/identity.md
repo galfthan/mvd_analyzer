@@ -49,9 +49,20 @@ restores it at `:1464-1490`); this analyser reproduces that unification.
    and no reconnect print (so modern demos never over-merge two distinct
    same-name players).
 4. **Output.** `co.Sessions[slot]` is the time-sorted, identity-resolved
-   occupancy list (first session extends to -inf, last to +inf so edge
-   events still resolve). `co.SlotIdentityAt(slot, tMs)` returns the
-   identity that held the slot at `tMs`.
+   occupancy list. Each entry carries TWO windows: `StartMs`/`EndMs` are
+   the *lookup* bounds (first session extends to -inf, last to +inf so
+   edge events still resolve) and `OccStartMs`/`OccEndMs` the *observed*
+   ones, which is what gets published (schema v66) — a widened bound
+   would tell a consumer a connection existed before it did.
+   `co.SlotIdentityAt(slot, tMs)` returns the identity that held the slot
+   at `tMs`.
+5. **Identity keys.** `IdentityKey` is `s<slot>u<userId>` of the group's
+   first session (`identityKeys`), not a union-find array index: the key
+   is exported on `streams.players[].identity`, so it is a wire fact a
+   consumer can reproduce rather than a slice position. It is demo-local
+   (a userid names a connection to one server) and disambiguated with an
+   `@<startMs>` suffix in the one theoretical clash — a userid reissued
+   to the same slot — because the streams builder GROUPS on this key.
 
 ## Who consumes it
 
@@ -61,7 +72,14 @@ restores it at `:1464-1490`); this analyser reproduces that unification.
 - **timeline streams** group per-slot builders by
   `ResolvedSession.IdentityKey`, stitching a player's two slots into one
   `PlayerStream` (and carving a slot shared by two players at the
-  handover). Phantom sessions with no recorded play are dropped.
+  handover). Phantom sessions with no recorded play are dropped. Since
+  v66 the same pass PUBLISHES the identity: `streams.players[].identity`
+  plus a `sessions[]` list of the observed occupancy windows
+  (`{startMs, endMs, slot, userId, name}`), mirrored onto
+  `playerStats.players[]`. Occupancies with no userid of their own are
+  withheld — a KTX ghost row is not a connection, and it would otherwise
+  publish a window overlapping the slot the player really reconnected
+  onto. See RESULT_SCHEMA.md § "Player identity and sessions".
 
 ## Limitations / known issues
 

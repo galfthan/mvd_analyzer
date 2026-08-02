@@ -61,6 +61,24 @@ type occupancyRecord struct {
 	startMs int32
 	endMs   int32 // math.MaxInt32 while open
 
+	// uidStartMs is when the wire first attested THIS record's userid. It
+	// equals startMs for a record opened by a userinfo that carried one,
+	// and is later for a record opened unidentified (userid 0) that adopted
+	// one afterwards — see the adoption branch in onUserInfo. Meaningless
+	// (and unread) while userID is still 0.
+	//
+	// The gap between startMs and uidStartMs is not cosmetic: KTX's ghost
+	// scoreboard row opens an occupancy with userid 0 (ghost2scores,
+	// ktx/src/g_utils.c:2272-2356), and the next real connection on that
+	// slot is adopted into it rather than splitting it. The record then
+	// spans a window that begins before the connection it names — verified
+	// on gameId 222649 slot 12, where the ghost of a dropped bogojoker
+	// opens at 141832 and herbie's uid-26 connection is folded in later.
+	// Anything PUBLISHING a session window must report from uidStartMs
+	// (see attestedStartMs), not startMs, or it claims a userid was live
+	// before the wire ever mentioned it.
+	uidStartMs int32
+
 	name string // latest non-empty netname seen this occupancy
 	team string // latest non-empty team
 	auth string // latest non-empty *auth login
@@ -97,6 +115,19 @@ func (r *occupancyRecord) open() bool { return r.endMs == math.MaxInt32 }
 // entry (see the note in match.go's rowForKey). None of them is evidence of
 // a distinct connection.
 func (r *occupancyRecord) identified() bool { return r.userID != 0 }
+
+// attestedStartMs is the earliest time the wire attested this occupancy's
+// *connection* — startMs normally, but the adoption time when the record
+// was opened by something that carried no userid of its own and picked one
+// up later (see uidStartMs). It is what a published session window starts
+// at; startMs is what internal resolution keys on, because an event on the
+// slot before the adoption still belongs to this record.
+func (r *occupancyRecord) attestedStartMs() int32 {
+	if r.identified() && r.uidStartMs > r.startMs {
+		return r.uidStartMs
+	}
+	return r.startMs
+}
 
 // occupancyTracker follows the tenancy of every client slot across a demo.
 type occupancyTracker struct {
@@ -199,6 +230,7 @@ func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened *
 	}
 	if cur.userID == 0 && uid != 0 {
 		cur.userID = uid
+		cur.uidStartMs = e.TimeMs
 	}
 	t.note(cur, e.Player)
 	return nil, nil
@@ -230,7 +262,7 @@ func (t *occupancyTracker) closeOpen(endMs int32) {
 }
 
 func (t *occupancyTracker) open(slot, uid int, p *events.PlayerInfo, tMs int32) *occupancyRecord {
-	r := &occupancyRecord{slot: slot, userID: uid, startMs: tMs, endMs: math.MaxInt32}
+	r := &occupancyRecord{slot: slot, userID: uid, startMs: tMs, uidStartMs: tMs, endMs: math.MaxInt32}
 	t.note(r, p)
 	t.cur[slot] = r
 	t.records = append(t.records, r)

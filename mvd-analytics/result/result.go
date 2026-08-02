@@ -943,6 +943,19 @@ package result
 //     session that had play — the id that is live at the end of the demo
 //     and the one a `track=` resolves. The event carriers each report the
 //     session that held the slot at their own timestamp.
+//   - ADDITIVE: Streams.Players and PlayerStats.Players gain Identity and
+//     Sessions. Identity is the reconnect-unification key the pipeline
+//     already used internally to merge a reconnected player's streams —
+//     equal on every row that is the same human, so a consumer can relate
+//     the two rows a `(N)<name>` rename produces without a name heuristic
+//     (which is what one had resorted to). It is DEMO-LOCAL (derived from
+//     the first session's slot+userid) and must not be persisted; the
+//     cross-demo identity is the authenticated login. Sessions is the
+//     per-connection {StartMs, EndMs, Slot, UserID, Name} window list —
+//     the lossless form of PlayerUserIDs, carrying the OBSERVED occupancy
+//     bounds rather than the ±inf-widened ones the internal resolver uses,
+//     and omitting occupancies the wire never gave a userid (KTX's ghost
+//     scoreboard row is not a connection). See PlayerSession.
 //
 // See RELEASE_NOTES.md.
 const CurrentSchemaVersion = 66

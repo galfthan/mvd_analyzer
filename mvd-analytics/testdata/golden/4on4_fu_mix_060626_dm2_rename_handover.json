@@ -92,7 +92,126 @@
           "durationMs": 18339
         }
       ]
-    }
+    },
+    "players": [
+      {
+        "identity": "s0u31",
+        "name": "Anza  (FU)",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "Anza  (FU)",
+            "slot": 0,
+            "startMs": -10105,
+            "userId": 31
+          }
+        ]
+      },
+      {
+        "identity": "s1u32",
+        "name": "peter",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "peter",
+            "slot": 1,
+            "startMs": -10105,
+            "userId": 32
+          }
+        ]
+      },
+      {
+        "identity": "s2u33",
+        "name": "Silenoz",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "Silenoz",
+            "slot": 2,
+            "startMs": -10105,
+            "userId": 33
+          }
+        ]
+      },
+      {
+        "identity": "s3u34",
+        "name": "Hto   (FU)",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "Hto   (FU)",
+            "slot": 3,
+            "startMs": -10105,
+            "userId": 34
+          }
+        ]
+      },
+      {
+        "identity": "s4u36",
+        "name": "rgh   (FU)",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "rgh   (FU)",
+            "slot": 4,
+            "startMs": -10105,
+            "userId": 36
+          }
+        ]
+      },
+      {
+        "identity": "s5u37",
+        "name": "rusti (FU)",
+        "sessions": [
+          {
+            "endMs": 620599,
+            "name": "rusti (FU)",
+            "slot": 5,
+            "startMs": -10105,
+            "userId": 37
+          }
+        ]
+      },
+      {
+        "identity": "s6u38",
+        "name": "j0rmund",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "j0rmund",
+            "slot": 6,
+            "startMs": -10105,
+            "userId": 38
+          }
+        ]
+      },
+      {
+        "identity": "s7u39",
+        "name": "sailorman",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "sailorman",
+            "slot": 7,
+            "startMs": -10105,
+            "userId": 39
+          }
+        ]
+      },
+      {
+        "identity": "s9u43",
+        "name": "(1)rusti (FU)",
+        "sessions": [
+          {
+            "endMs": 1200011,
+            "name": "(1)rusti (FU)",
+            "slot": 9,
+            "startMs": 609644,
+            "userId": 43
+          }
+        ]
+      }
+    ]
   },
   "timelineAnalysis": {
     "airgibs": [

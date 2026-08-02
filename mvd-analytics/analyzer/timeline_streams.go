@@ -511,6 +511,12 @@ type streamGroup struct {
 	team    string
 	repSlot int // smallest contributing slot — stable ordering + collision suffix
 	frags   []streamFragment
+	// sessions is the published occupancy list (result.PlayerSession) — the
+	// OBSERVED boundaries, not the ±inf-widened lookup windows the fragments
+	// above are sliced by. Empty when this group came from the no-identity-
+	// table fallback, which is also what leaves Identity unset.
+	sessions []result.PlayerSession
+	identity string
 }
 
 // buildStreamsResult assembles result.Streams, one PlayerStream per
@@ -550,7 +556,7 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 
 	groups := make(map[string]*streamGroup)
 	var order []string // identity keys in first-seen slot order, for determinism
-	add := func(key, name, team string, slot int, startMs, endMs int32) {
+	add := func(key, name, team string, slot int, startMs, endMs int32, sess *ResolvedSession) {
 		if name == "" {
 			return
 		}
@@ -559,6 +565,38 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 			g = &streamGroup{name: name, team: team, repSlot: slot}
 			groups[key] = g
 			order = append(order, key)
+		}
+		if sess != nil {
+			g.identity = key
+			// Published sessions are CONNECTIONS, so an occupancy the wire
+			// never gave a userid of its own is left out (see
+			// occupancyRecord.identified): KTX's ghost scoreboard row — a
+			// departed player's edict, userid hardcoded 0, ghost2scores in
+			// ktx/src/g_utils.c:2272-2356 — and inferred occupancies. The
+			// ghost carries the departed player's NAME, so the identity
+			// unifier folds it into that player, and rusti on gameId 216835
+			// would otherwise publish a userid-less slot-10 window
+			// OVERLAPPING the slot he had actually reconnected onto. An
+			// entry with no userid cannot answer the question this list
+			// exists for ("which userid do I track at t"); it can only
+			// mislead.
+			if sess.UserID != 0 {
+				// Published window: the observed occupancy, with the only
+				// synthetic bound being a client still connected when the
+				// recording stopped (no wire event to report — close it
+				// where every other open interval closes, at match end).
+				end := sess.OccEndMs
+				if end > matchEndMs {
+					end = matchEndMs
+				}
+				g.sessions = append(g.sessions, result.PlayerSession{
+					StartMs: sess.OccStartMs,
+					EndMs:   end,
+					Slot:    slot,
+					UserID:  sess.UserID,
+					Name:    sess.WireName,
+				})
+			}
 		}
 		if name != "" {
 			g.name = name
@@ -581,11 +619,12 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 			// No identity table (e.g. unit test without the registry, or
 			// an untracked slot): fall back to one stream per slot named
 			// by the demoinfo/userinfo resolution.
-			add("slot:"+strconv.Itoa(slot), slotToName[slot], slotToTeam[slot], slot, minInt32, maxInt32)
+			add("slot:"+strconv.Itoa(slot), slotToName[slot], slotToTeam[slot], slot, minInt32, maxInt32, nil)
 			continue
 		}
-		for _, s := range sessions {
-			add(s.IdentityKey, s.Name, s.Team, slot, s.StartMs, s.EndMs)
+		for i := range sessions {
+			s := &sessions[i]
+			add(s.IdentityKey, s.Name, s.Team, slot, s.StartMs, s.EndMs, s)
 		}
 	}
 
@@ -629,7 +668,20 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 		// team to their own name (keyed on the resolved display name), replacing
 		// the old normalizeDuelTeams stream rewrite.
 		team := a.core.TeamFor(g.name, g.team)
-		streams.Players = append(streams.Players, merged.toPlayerStream(uniqName, team))
+		ps := merged.toPlayerStream(uniqName, team)
+		ps.Identity = g.identity
+		ps.Sessions = g.sessions
+		// Chronological, and stable across slots: fragments were ordered by
+		// their first in-window sample (a session with no play sorts
+		// arbitrarily there), but a published window list must read in time
+		// order regardless of whether anything happened in it.
+		sort.SliceStable(ps.Sessions, func(i, j int) bool {
+			if ps.Sessions[i].StartMs != ps.Sessions[j].StartMs {
+				return ps.Sessions[i].StartMs < ps.Sessions[j].StartMs
+			}
+			return ps.Sessions[i].Slot < ps.Sessions[j].Slot
+		})
+		streams.Players = append(streams.Players, ps)
 	}
 	if len(streams.Players) == 0 {
 		return nil

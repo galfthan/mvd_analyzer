@@ -54,7 +54,9 @@ type Overview struct {
 	// the first id seen on their wire slot, which after any handover or
 	// rejoin belonged to somebody else). Timestamped surfaces resolve their
 	// own: the timeline artifact's fragStreaks / powerupEvents /
-	// demoMarkers each carry the id valid at that moment.
+	// demoMarkers each carry the id valid at that moment, and
+	// /player-stats' per-row sessions[] carries every one of a player's
+	// ids with the window it was live in — the lossless form of this map.
 	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
 	// Errors carries the analyzer's non-fatal errors verbatim (a
 	// sub-analyzer's Finalize failed but the pipeline continued). A

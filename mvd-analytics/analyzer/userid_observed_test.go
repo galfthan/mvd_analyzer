@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -61,6 +62,7 @@ func TestReportedUserIDsWereObservedWithThatName(t *testing.T) {
 				t.Fatalf("analyze: %v", err)
 			}
 			checkReportedUserIDs(t, res, tap.byName)
+			checkPublishedSessions(t, res, tap.byName)
 		})
 	}
 }
@@ -158,6 +160,89 @@ func checkReportedUserIDs(t *testing.T, res *Result, observed map[string]map[int
 	}
 	if checked == 0 {
 		t.Skip("no userid reported on this demo — nothing to falsify")
+	}
+}
+
+// checkPublishedSessions asserts the schema-v66 identity export on the same
+// parse: every published session is a connection the wire actually named,
+// the rows agree with the id `playerUserIDs` picked, and the identity key
+// partitions rows rather than colliding two of them.
+//
+// It rides this walk rather than opening its own because parsing dominates
+// the cost and the tap already records what the wire said.
+func checkPublishedSessions(t *testing.T, res *Result, observed map[string]map[int]bool) {
+	t.Helper()
+	if res.Streams == nil || len(res.Streams.Players) == 0 {
+		t.Skip("no streams on this demo")
+	}
+	byIdentity := map[string]string{}
+	for _, p := range res.Streams.Players {
+		if p.Identity == "" {
+			// Legitimate only when the identity table is absent entirely;
+			// on any demo with one, every row carries a key.
+			t.Errorf("stream %q carries no identity", p.Name)
+			continue
+		}
+		if other, ok := byIdentity[p.Identity]; ok {
+			t.Errorf("rows %q and %q share identity %q — the key must partition rows, not merge two humans",
+				other, p.Name, p.Identity)
+		}
+		byIdentity[p.Identity] = p.Name
+
+		last := int32(math.MinInt32)
+		for i, s := range p.Sessions {
+			if s.UserID <= 0 {
+				t.Errorf("%s.sessions[%d] has userid %d — an occupancy the wire never named is not a connection",
+					p.Name, i, s.UserID)
+			}
+			if s.EndMs < s.StartMs {
+				t.Errorf("%s.sessions[%d] window [%d,%d) runs backwards", p.Name, i, s.StartMs, s.EndMs)
+			}
+			if s.StartMs < last {
+				t.Errorf("%s.sessions[%d] starts at %d, before the previous session (%d) — the list must be chronological",
+					p.Name, i, s.StartMs, last)
+			}
+			last = s.StartMs
+			if s.Name != "" && s.UserID > 0 {
+				if norm := normalizePlayerName(s.Name); !observed[norm][s.UserID] {
+					t.Errorf("%s.sessions[%d] claims userid %d for %q, which the wire never carried together (ids seen: %v)",
+						p.Name, i, s.UserID, s.Name, sortedIDs(observed[norm]))
+				}
+			}
+		}
+		// The id published under the row's name must be one of the row's
+		// own sessions — that is the join a consumer makes between
+		// playerUserIDs and this list.
+		if ta := res.TimelineAnalysis; ta != nil && len(p.Sessions) > 0 {
+			if uid, ok := ta.PlayerUserIDs[p.Name]; ok && uid > 0 {
+				found := false
+				for _, s := range p.Sessions {
+					if s.UserID == uid {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("playerUserIDs[%q] = %d is not among that row's published sessions %v",
+						p.Name, uid, p.Sessions)
+				}
+			}
+		}
+	}
+
+	// playerStats mirrors the streams rows verbatim.
+	if res.PlayerStats != nil {
+		for _, row := range res.PlayerStats.Players {
+			for _, p := range res.Streams.Players {
+				if p.Name != row.Name {
+					continue
+				}
+				if row.Identity != p.Identity || len(row.Sessions) != len(p.Sessions) {
+					t.Errorf("playerStats row %q carries identity %q / %d sessions, streams says %q / %d",
+						row.Name, row.Identity, len(row.Sessions), p.Identity, len(p.Sessions))
+				}
+			}
+		}
 	}
 }
 

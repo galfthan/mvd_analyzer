@@ -291,45 +291,89 @@ var partialGoldenDemos = map[string][]string{
 	// with play" is the difference between a live id (25) and a dead one
 	// (12) — the shape no wire-side invariant can catch, because the dead
 	// id really was his.
+	//
+	// Both also pin the v66 identity EXPORT (streams.players[].identity /
+	// .sessions, via the `[]` array projection): 220637 is the only demo
+	// where two rows must carry DIFFERENT identities, and 222649 the only
+	// one where a single identity spans two sessions with two userids on
+	// one slot — the exact contrast the export exists to publish, and one
+	// no other golden can pin.
 	"4on4_fu_mix_060626_dm2_rename_handover": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
 		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
 		"match.players", "streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
 	"4on4_blue_red_200626_e1m2_sameslot_rejoin": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
 		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
 		"match.players", "streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
 }
 
 // projectPaths reduces m to only the given dotted paths, preserving the
 // nesting so the golden keeps the Result's shape.
+//
+// A `[]` suffix maps the rest of the path over an array:
+// "streams.players[].identity" keeps one small object per player instead of
+// the megabytes of stream a bare "streams.players" would drag in.
 func projectPaths(m map[string]interface{}, paths []string) map[string]interface{} {
 	out := map[string]interface{}{}
 	for _, path := range paths {
-		src, dst := m, out
-		parts := strings.Split(path, ".")
-		for i, key := range parts {
-			if i == len(parts)-1 {
-				if v, ok := src[key]; ok {
-					dst[key] = v
-				}
-				break
-			}
-			next, ok := src[key].(map[string]interface{})
-			if !ok {
-				break
-			}
-			sub, ok := dst[key].(map[string]interface{})
-			if !ok {
-				sub = map[string]interface{}{}
-				dst[key] = sub
-			}
-			src, dst = next, sub
-		}
+		projectInto(m, out, strings.Split(path, "."))
 	}
 	return out
+}
+
+func projectInto(src, dst map[string]interface{}, parts []string) {
+	key := parts[0]
+	if strings.HasSuffix(key, "[]") {
+		key = strings.TrimSuffix(key, "[]")
+		items, ok := src[key].([]interface{})
+		if !ok {
+			return
+		}
+		if len(parts) == 1 {
+			dst[key] = items
+			return
+		}
+		rows, _ := dst[key].([]interface{})
+		if rows == nil {
+			rows = make([]interface{}, len(items))
+			for i := range rows {
+				rows[i] = map[string]interface{}{}
+			}
+			dst[key] = rows
+		}
+		if len(rows) != len(items) {
+			return
+		}
+		for i, item := range items {
+			in, okIn := item.(map[string]interface{})
+			row, okRow := rows[i].(map[string]interface{})
+			if okIn && okRow {
+				projectInto(in, row, parts[1:])
+			}
+		}
+		return
+	}
+	if len(parts) == 1 {
+		if v, ok := src[key]; ok {
+			dst[key] = v
+		}
+		return
+	}
+	next, ok := src[key].(map[string]interface{})
+	if !ok {
+		return
+	}
+	sub, ok := dst[key].(map[string]interface{})
+	if !ok {
+		sub = map[string]interface{}{}
+		dst[key] = sub
+	}
+	projectInto(next, sub, parts[1:])
 }
 
 // dropPositionTracks removes streams.players[].pos — the dense

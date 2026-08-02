@@ -88,7 +88,120 @@
           "durationMs": 32636
         }
       ]
-    }
+    },
+    "players": [
+      {
+        "identity": "s2u3",
+        "name": "cronus",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "cronus",
+            "slot": 2,
+            "startMs": -10092,
+            "userId": 3
+          }
+        ]
+      },
+      {
+        "identity": "s3u24",
+        "name": "powerzord",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "powerzord",
+            "slot": 3,
+            "startMs": -10092,
+            "userId": 24
+          }
+        ]
+      },
+      {
+        "identity": "s5u10",
+        "name": "george",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "george",
+            "slot": 5,
+            "startMs": -10092,
+            "userId": 10
+          }
+        ]
+      },
+      {
+        "identity": "s7u16",
+        "name": "Venator",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "Venator",
+            "slot": 7,
+            "startMs": -10092,
+            "userId": 16
+          }
+        ]
+      },
+      {
+        "identity": "s8u15",
+        "name": "BLooD_DoG(D_P)",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "BLooD_DoG(D_P)",
+            "slot": 8,
+            "startMs": -10092,
+            "userId": 15
+          }
+        ]
+      },
+      {
+        "identity": "s9u12",
+        "name": "bogojoker",
+        "sessions": [
+          {
+            "endMs": 131740,
+            "name": "bogojoker",
+            "slot": 9,
+            "startMs": -10092,
+            "userId": 12
+          },
+          {
+            "endMs": 1199953,
+            "name": "bogojoker",
+            "slot": 9,
+            "startMs": 140177,
+            "userId": 25
+          }
+        ]
+      },
+      {
+        "identity": "s10u13",
+        "name": "omicron",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "omicron",
+            "slot": 10,
+            "startMs": -10092,
+            "userId": 13
+          }
+        ]
+      },
+      {
+        "identity": "s11u21",
+        "name": "blaze",
+        "sessions": [
+          {
+            "endMs": 1199953,
+            "name": "blaze",
+            "slot": 11,
+            "startMs": -10092,
+            "userId": 21
+          }
+        ]
+      }
+    ]
   },
   "timelineAnalysis": {
     "fragStreaks": [

@@ -121,8 +121,13 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 	w.DeadMs = w.PresentMs - w.AliveMs
 
 	row := result.PlayerStatsRow{
-		Name:     p.Name,
-		Team:     p.Team,
+		Name: p.Name,
+		Team: p.Team,
+		// Carried through from the stream this row is built on, so a
+		// consumer reading /player-stats alone can tell two rows that are
+		// one human apart from two humans, without re-deriving anything.
+		Identity: p.Identity,
+		Sessions: p.Sessions,
 		Window:   w,
 		Score:    deriveScore(res, p.Name),
 		Damage:   deriveDamage(res, p.Name, takenEnemy),

@@ -147,13 +147,35 @@ func (co *CoreOutputs) IsDuel() bool {
 
 // ResolvedSession is one contiguous occupancy of a wire slot, resolved
 // to the canonical (reconnect-unified) player identity. IdentityKey is
-// stable within a single analysis run and equal for every session the
-// same human played, so stream merging can group on it.
+// equal for every session the same human played, so stream merging can
+// group on it; see identityKeys (identity.go) for how it is derived and
+// what it is and is not stable against.
 type ResolvedSession struct {
+	// StartMs / EndMs are the RESOLUTION window: the half-open interval a
+	// lookup on this slot resolves to this identity. The first session on a
+	// slot is widened back to MinInt32 and the last forward to MaxInt32 so
+	// an event on either edge (before the first userinfo, after the last)
+	// still resolves — they are lookup bounds, not observations.
 	StartMs int32
 	EndMs   int32
-	Name    string
-	Team    string
+	// OccStartMs / OccEndMs are the OBSERVED occupancy boundaries, unwidened
+	// — what the wire actually said. OccStartMs is the first userinfo that
+	// attested this connection's userid (occupancyRecord.attestedStartMs);
+	// OccEndMs is the drop broadcast, the next connection's userinfo, or
+	// MaxInt32 when the client was still on the slot at the end of the
+	// recording. Anything PUBLISHED to a consumer must use this pair: the
+	// widened one above claims a connection existed before it did.
+	OccStartMs int32
+	OccEndMs   int32
+	Name       string
+	Team       string
+	// WireName is this occupancy's own netname, where Name is the identity's
+	// canonical (last-session, demoinfo-preferred) one. The two differ after
+	// a rename or an mvdsv `(N)` duplicate-name prefix, and a consumer
+	// joining our rows against a live engine roster at some instant needs
+	// the name that was on the wire THEN. Folded through qNormalizeTable
+	// like every other name in the pipeline.
+	WireName string
 	// Auth is the `*auth` login from userinfo, set by mvdsv for
 	// authenticated players (mvd-reader parser/userinfo.go:177 for the
 	// per-key svc_setinfo path, :229 for a full userinfo string). It is the

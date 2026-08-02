@@ -37952,6 +37952,7 @@
             }
           }
         },
+        "identity": "s0u30",
         "name": "wd.cao",
         "pickups": {
           "byKind": {
@@ -38021,6 +38022,15 @@
           "suicides": 5,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.cao",
+            "slot": 0,
+            "startMs": -10104,
+            "userId": 30
+          }
+        ],
         "team": "wd",
         "window": {
           "aliveMs": 555544,
@@ -38150,6 +38160,7 @@
             }
           }
         },
+        "identity": "s1u36",
         "name": "psy*overon",
         "pickups": {
           "byKind": {
@@ -38219,6 +38230,15 @@
           "suicides": 2,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "psy*overon",
+            "slot": 1,
+            "startMs": -10104,
+            "userId": 36
+          }
+        ],
         "team": "pys",
         "window": {
           "aliveMs": 556747,
@@ -38343,6 +38363,7 @@
             }
           }
         },
+        "identity": "s2u32",
         "name": "wd.char",
         "pickups": {
           "byKind": {
@@ -38411,6 +38432,15 @@
           "suicides": 0,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.char",
+            "slot": 2,
+            "startMs": -10104,
+            "userId": 32
+          }
+        ],
         "team": "wd",
         "window": {
           "aliveMs": 575956,
@@ -38540,6 +38570,7 @@
             }
           }
         },
+        "identity": "s4u35",
         "name": "wd.dilbert",
         "pickups": {
           "byKind": {
@@ -38609,6 +38640,15 @@
           "suicides": 2,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.dilbert",
+            "slot": 4,
+            "startMs": -10104,
+            "userId": 35
+          }
+        ],
         "team": "pys",
         "window": {
           "aliveMs": 533672,
@@ -56409,6 +56449,7 @@
             "v": 100
           }
         ],
+        "identity": "s0u30",
         "lg": [
           {
             "e": 13999,
@@ -62035,6 +62076,15 @@
             "s": 598907
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.cao",
+            "slot": 0,
+            "startMs": -10104,
+            "userId": 30
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -62336,6 +62386,7 @@
             "v": 98
           }
         ],
+        "identity": "s1u36",
         "lg": [
           {
             "e": 600040,
@@ -67950,6 +68001,15 @@
             "s": 564543
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "psy*overon",
+            "slot": 1,
+            "startMs": -10104,
+            "userId": 36
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -68325,6 +68385,7 @@
             "v": 74
           }
         ],
+        "identity": "s2u32",
         "lg": [
           {
             "e": 600040,
@@ -73964,6 +74025,15 @@
             "s": 555531
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.char",
+            "slot": 2,
+            "startMs": -10104,
+            "userId": 32
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -74296,6 +74366,7 @@
             "v": 100
           }
         ],
+        "identity": "s4u35",
         "lg": [
           {
             "e": 598802,
@@ -80013,6 +80084,15 @@
           {
             "e": 598802,
             "s": 582396
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 600040,
+            "name": "wd.dilbert",
+            "slot": 4,
+            "startMs": -10104,
+            "userId": 35
           }
         ],
         "sh": [

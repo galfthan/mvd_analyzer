@@ -2052,6 +2052,11 @@ components:
         Set it to spread a leaderboard across the roster; omit it for a pure
         match-wide ranking in which one dominant player may own every row.
 
+        The cap is keyed on the player NAME, so a human the server scored as
+        two players (a reconnect renamed `(N)<name>`) can occupy twice the
+        quota. `/player-stats`' `identity` is what lets you detect that — two
+        names, one identity; the cap itself is deliberately left name-keyed.
+
         Same rule as `limit`, deliberately: omitted is the default (uncapped),
         a NEGATIVE value means uncapped, and an explicit `perPlayer=0` is
         REJECTED with a 400 — an omitted MCP integer arrives as 0, and 0 must
@@ -6307,6 +6312,38 @@ components:
       properties:
         name: { description: "Player name, or team name on a team row.", type: string }
         team: { description: "Team name.", type: string }
+        identity:
+          description: >
+            Reconnect-unification key: two rows carrying the SAME value are
+            one human under two names — a player who reconnected while their
+            old connection was still spawned is renamed `(N)<name>` by mvdsv
+            and scored as two players by KTX, which this pipeline reproduces
+            faithfully rather than merging. Different values are different
+            humans as the server scored them.
+
+            DEMO-LOCAL: it is derived from the identity's first session
+            (`s<slot>u<userId>`), both of which describe a connection to one
+            server. Reproducible from the same demo, but NOT an id to persist
+            and NOT comparable across demos — the cross-demo identity is
+            `login`. Absent on TEAM rows and on a scoreboard-only player row
+            (in the KTX block, produced no stream, so no occupancy to
+            attribute).
+          type: string
+        sessions:
+          description: >
+            Every wire-slot occupancy behind this row, in time order — one
+            entry per CONNECTION, so a player who timed out and rejoined has
+            two, with two userids. This is the lossless form of the answer
+            `/overview`'s `playerUserIDs` gives once per player: use
+            `userId` for a `?track=` link at an instant inside the window.
+            Absent with `identity` (team and scoreboard-only rows).
+
+            Occupancies the wire never gave a userid are NOT listed — KTX's
+            ghost scoreboard row (a departed player's edict, userid hardcoded
+            0) and inferred occupancies are not connections, and the ghost
+            carries the departed player's name.
+          items: { $ref: "#/components/schemas/PlayerSession" }
+          type: array
         ping:
           description: "KTX-only: end-of-match ping. Absent without a demoinfo block (svc_updateping carries it on the wire but the parser skips it today)."
           type: [integer, "null"]
@@ -6526,6 +6563,50 @@ components:
         - window
         - score
         - hold
+      type: object
+    PlayerSession:
+      description: >
+        One contiguous occupancy of a wire client slot by ONE connection of
+        this player — the validity window of a userid. A userid names a
+        connection, not a person (mvdsv reissues them from a rotating pool),
+        so the same human reconnecting draws a new one and the slot they left
+        hands its old one to whoever takes it next.
+      additionalProperties: false
+      properties:
+        startMs:
+          description: >
+            First userinfo that attested this connection, int32 ms on the
+            match clock. NOT clamped to the match window: a player connected
+            during the countdown reports a NEGATIVE value, the same policy as
+            the timeline's demo markers and the pause anchors.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        endMs:
+          description: >
+            The drop broadcast, or the next connection's userinfo — half-open
+            [startMs, endMs). The one synthetic bound: a client still
+            connected when the recording ended has no wire event to report,
+            so it is closed at match end.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        slot:
+          description: "Wire client slot (0-based), the index svc_* messages address this connection by."
+          type: integer
+        userId:
+          description: "The connection's userid — the value a hub `?track=` link must carry to follow this player inside this window, and only then."
+          type: integer
+        name:
+          description: >
+            The netname this connection carried, where the row's `name` is
+            the identity's canonical one. They differ after a rename or an
+            mvdsv `(N)` duplicate-name prefix; this is the one to match
+            against a live engine roster at an instant inside the window.
+            Normalized through the same Quake character fold as every other
+            name in this API, so it is not the raw wire bytes.
+          type: string
+      required: [startMs, endMs, slot, userId]
       type: object
     PlayerStatsWindow:
       description: >
@@ -6802,7 +6883,12 @@ components:
           type: integer
           description: Window end, int32 ms (the exact bound used for slicing).
         players:
-          description: "Per-player stream slices over the window (mini result.PlayerStream shapes)."
+          description: >
+            Per-player stream slices over the window (mini result.PlayerStream
+            shapes). Deliberately WITHOUT the match-global `identity` /
+            `sessions` fields that `streams.players[]` carries: they do not
+            vary by window. Fetch them once from `/player-stats` and join on
+            the player `name`.
           items:
             additionalProperties: false
             properties:

@@ -90080,6 +90080,7 @@
             }
           }
         },
+        "identity": "s0u1",
         "name": "nlk",
         "pickups": {
           "byKind": {
@@ -90165,6 +90166,15 @@
           "suicides": 3,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "nlk",
+            "slot": 0,
+            "startMs": -10326,
+            "userId": 1
+          }
+        ],
         "team": ".ra.",
         "window": {
           "aliveMs": 1158396,
@@ -90294,6 +90304,7 @@
             }
           }
         },
+        "identity": "s1u2",
         "name": "[cmd] witka",
         "pickups": {
           "byKind": {
@@ -90368,6 +90379,15 @@
           "suicides": 1,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "[cmd] witka",
+            "slot": 1,
+            "startMs": -10326,
+            "userId": 2
+          }
+        ],
         "team": ".ra.",
         "window": {
           "aliveMs": 1149277,
@@ -90513,6 +90533,7 @@
             }
           }
         },
+        "identity": "s2u3",
         "name": "sCorp",
         "pickups": {
           "byKind": {
@@ -90597,6 +90618,15 @@
           "suicides": 1,
           "teamKills": 5
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "sCorp",
+            "slot": 2,
+            "startMs": -10326,
+            "userId": 3
+          }
+        ],
         "team": ".ra.",
         "window": {
           "aliveMs": 1172592,
@@ -90735,6 +90765,7 @@
             }
           }
         },
+        "identity": "s3u9",
         "name": "clox",
         "pickups": {
           "byKind": {
@@ -90817,6 +90848,15 @@
           "suicides": 1,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "clox",
+            "slot": 3,
+            "startMs": -10326,
+            "userId": 9
+          }
+        ],
         "team": "oSaMs",
         "window": {
           "aliveMs": 1154832,
@@ -90972,6 +91012,7 @@
             }
           }
         },
+        "identity": "s4u11",
         "name": "lakso",
         "pickups": {
           "byKind": {
@@ -91059,6 +91100,15 @@
           "suicides": 1,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "lakso",
+            "slot": 4,
+            "startMs": -10326,
+            "userId": 11
+          }
+        ],
         "team": "oSaMs",
         "window": {
           "aliveMs": 1148608,
@@ -91205,6 +91255,7 @@
             }
           }
         },
+        "identity": "s5u10",
         "name": "doberman",
         "pickups": {
           "byKind": {
@@ -91292,6 +91343,15 @@
           "suicides": 0,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "doberman",
+            "slot": 5,
+            "startMs": -10326,
+            "userId": 10
+          }
+        ],
         "team": ".ra.",
         "window": {
           "aliveMs": 1165531,
@@ -91433,6 +91493,7 @@
             }
           }
         },
+        "identity": "s6u7",
         "name": "apa",
         "pickups": {
           "byKind": {
@@ -91505,6 +91566,15 @@
           "suicides": 0,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "apa",
+            "slot": 6,
+            "startMs": -10326,
+            "userId": 7
+          }
+        ],
         "team": "oSaMs",
         "window": {
           "aliveMs": 1165402,
@@ -91647,6 +91717,7 @@
             }
           }
         },
+        "identity": "s7u8",
         "name": "marksuzu",
         "pickups": {
           "byKind": {
@@ -91730,6 +91801,15 @@
           "suicides": 0,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "marksuzu",
+            "slot": 7,
+            "startMs": -10326,
+            "userId": 8
+          }
+        ],
         "team": "oSaMs",
         "window": {
           "aliveMs": 1155673,
@@ -185656,6 +185736,7 @@
             "v": 8
           }
         ],
+        "identity": "s0u1",
         "lg": [],
         "li": [
           {
@@ -193493,6 +193574,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "nlk",
+            "slot": 0,
+            "startMs": -10326,
+            "userId": 1
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -193837,6 +193927,7 @@
             "v": 100
           }
         ],
+        "identity": "s1u2",
         "lg": [],
         "li": [
           {
@@ -201461,6 +201552,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "[cmd] witka",
+            "slot": 1,
+            "startMs": -10326,
+            "userId": 2
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -201738,6 +201838,7 @@
             "v": 38
           }
         ],
+        "identity": "s2u3",
         "lg": [],
         "li": [
           {
@@ -208956,6 +209057,15 @@
             "s": 1190075
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "sCorp",
+            "slot": 2,
+            "startMs": -10326,
+            "userId": 3
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -209272,6 +209382,7 @@
             "v": 100
           }
         ],
+        "identity": "s3u9",
         "lg": [
           {
             "e": 69398,
@@ -216667,6 +216778,15 @@
             "s": 158
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "clox",
+            "slot": 3,
+            "startMs": -10326,
+            "userId": 9
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -217017,6 +217137,7 @@
             "v": 79
           }
         ],
+        "identity": "s4u11",
         "lg": [
           {
             "e": 1200059,
@@ -224509,6 +224630,15 @@
             "s": 1052272
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "lakso",
+            "slot": 4,
+            "startMs": -10326,
+            "userId": 11
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -224712,6 +224842,7 @@
             "v": 100
           }
         ],
+        "identity": "s5u10",
         "lg": [],
         "li": [
           {
@@ -232531,6 +232662,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "doberman",
+            "slot": 5,
+            "startMs": -10326,
+            "userId": 10
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -232896,6 +233036,7 @@
             "v": 60
           }
         ],
+        "identity": "s6u7",
         "lg": [],
         "li": [
           {
@@ -241049,6 +241190,15 @@
             "s": 973350
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "apa",
+            "slot": 6,
+            "startMs": -10326,
+            "userId": 7
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -241387,6 +241537,7 @@
             "v": 84
           }
         ],
+        "identity": "s7u8",
         "lg": [
           {
             "e": 136688,
@@ -248554,6 +248705,15 @@
           {
             "e": 1200059,
             "s": 1086007
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 1200059,
+            "name": "marksuzu",
+            "slot": 7,
+            "startMs": -10326,
+            "userId": 8
           }
         ],
         "sh": [

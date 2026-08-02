@@ -590,6 +590,16 @@ func (a *TimelineAnalyzer) rebaseToMatch(result *Result, matchStartMs int32) {
 		p.Spawns = shiftAndFilterInts(p.Spawns, matchStartMs)
 		p.Deaths = shiftAndFilterInts(p.Deaths, matchStartMs)
 
+		// Session windows shift but are NOT filtered or clamped: a
+		// connection made during the countdown is a real connection, and
+		// dropping (or flattening to 0) the window it was live in would
+		// hide exactly the handover a consumer is trying to resolve. Same
+		// policy as Global.Pauses and timelineAnalysis.demoMarkers.
+		for si := range p.Sessions {
+			p.Sessions[si].StartMs -= matchStartMs
+			p.Sessions[si].EndMs -= matchStartMs
+		}
+
 		if p.Position != nil {
 			shiftAndFilterPosition(p.Position, matchStartMs)
 		}

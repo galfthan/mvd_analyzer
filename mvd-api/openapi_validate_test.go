@@ -305,7 +305,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
-		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200},
+		// mustContain names the v66 identity export: both fields are
+		// omitempty, so a regression that stopped emitting them would still
+		// validate against the schema (the demoMarkers lesson).
+		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
+			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`}},
 		{name: "player-stats-filtered", url: "/v1/demos/gameId:42/player-stats?players=nlk", path: "/v1/demos/{id}/player-stats", status: 200},
 
 		{name: "frags", url: "/v1/demos/gameId:42/frags", path: "/v1/demos/{id}/frags", status: 200},
