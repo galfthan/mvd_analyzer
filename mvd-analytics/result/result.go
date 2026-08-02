@@ -940,8 +940,10 @@ package result
 //     meaning; the numbers were wrong and are now right.
 //   - Where one player holds several sessions (a reconnect the identity
 //     unifier folded into one name), PlayerUserIDs reports the LAST
-//     session that had play — the id that is live at the end of the demo
-//     and the one a `track=` resolves. The event carriers each report the
+//     session that had play — normally the id that is live at the end of
+//     the demo and the one a `track=` resolves; the ranking is by last play
+//     evidence, so an exact tie in it resolves to the lower slot rather
+//     than to the surviving connection. The event carriers each report the
 //     session that held the slot at their own timestamp.
 //   - ADDITIVE: Streams.Players and PlayerStats.Players gain Identity and
 //     Sessions. Identity is the reconnect-unification key the pipeline

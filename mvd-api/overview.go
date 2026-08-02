@@ -49,8 +49,10 @@ type Overview struct {
 	//
 	// A userid identifies one CONNECTION, so a player who reconnected has
 	// held more than one. The id here is the last session of theirs that
-	// had play — the one live at the end of the demo, and what a `track=`
-	// resolves for a still-connected player (schema v66; before that it was
+	// had play — normally the one live at the end of the demo, and what a
+	// `track=` resolves for a still-connected player; the ranking is by last
+	// play evidence, so an exact tie in it resolves to the lower slot rather
+	// than to the surviving connection (schema v66; before that it was
 	// the first id seen on their wire slot, which after any handover or
 	// rejoin belonged to somebody else). Timestamped surfaces resolve their
 	// own: the timeline artifact's fragStreaks / powerupEvents /

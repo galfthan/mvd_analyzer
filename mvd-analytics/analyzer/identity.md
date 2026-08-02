@@ -62,13 +62,21 @@ restores it at `:1464-1490`); this analyser reproduces that unification.
    consumer can reproduce rather than a slice position. It is demo-local
    (a userid names a connection to one server) and disambiguated with an
    `@<startMs>` suffix in the one theoretical clash — a userid reissued
-   to the same slot — because the streams builder GROUPS on this key.
+   to the same slot — because the streams builder GROUPS on this key. A
+   third occupancy sharing that start takes a `.2` / `.3` counter on top,
+   so the suffix cannot itself re-collide.
 
 ## Who consumes it
 
 - **items**, **weapon_pickups**, **timeline** (frag events, powerups,
   streaks) resolve each event by its own timestamp via
   `co.SlotIdentityAt`, so pre-reconnect events stay with the right player.
+  The two userid carriers that no longer have a slot on them — frag
+  streaks (spawns/deaths already merged under one identity name) and
+  airgibs (post-hoc from the name-keyed damage log) — resolve through
+  `nameUserIDIndex`, the name-keyed sibling of `co.SlotSessionAt`, so they
+  stamp the connection live at the event's own instant rather than the
+  demo-wide `playerUserIDs` pick.
 - **timeline streams** group per-slot builders by
   `ResolvedSession.IdentityKey`, stitching a player's two slots into one
   `PlayerStream` (and carving a slot shared by two players at the
@@ -79,7 +87,10 @@ restores it at `:1464-1490`); this analyser reproduces that unification.
   `playerStats.players[]`. Occupancies with no userid of their own are
   withheld — a KTX ghost row is not a connection, and it would otherwise
   publish a window overlapping the slot the player really reconnected
-  onto. See RESULT_SCHEMA.md § "Player identity and sessions".
+  onto — as is a connection first attested at or after match end (a
+  postgame spectator unified with a player who left mid-match), whose
+  window would close before it opened. See RESULT_SCHEMA.md § "Player
+  identity and sessions".
 
 ## Limitations / known issues
 

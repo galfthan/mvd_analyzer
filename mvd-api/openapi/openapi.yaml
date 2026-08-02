@@ -2629,7 +2629,7 @@ components:
           description: "Match mode (e.g. Duel/Team/FFA)."
           type: string
         playerUserIDs:
-          description: "Player name → UserID map (Hub viewer links). Per connection session: for a player who reconnected this is the last session of theirs that had play — the id live at the end of the demo (schema v66)."
+          description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
           additionalProperties:
             type: integer
           type: object
@@ -4789,7 +4789,7 @@ components:
           description: "Attacker team name."
           type: string
         attackerUserID:
-          description: "Attacker UserID (Hub viewer link)."
+          description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
           type: integer
         damage:
           description: "Raw rocket damage (unbound, incl. overkill)."
@@ -4818,7 +4818,7 @@ components:
           description: "Victim team name."
           type: string
         victimUserID:
-          description: "Victim UserID (Hub viewer link)."
+          description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
           type: integer
       required:
         - time
@@ -5644,7 +5644,7 @@ components:
                 description: "Attacker team name."
                 type: string
               attackerUserID:
-                description: "Attacker UserID (Hub viewer link)."
+                description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
                 type: integer
               damage:
                 description: "Raw rocket damage (unbound, incl. overkill)."
@@ -5673,7 +5673,7 @@ components:
                 description: "Victim team name."
                 type: string
               victimUserID:
-                description: "Victim UserID (Hub viewer link)."
+                description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
                 type: integer
             required:
               - time
@@ -5800,7 +5800,7 @@ components:
                 description: "Player name."
                 type: string
               playerUserID:
-                description: "Player UserID (Hub viewer link)."
+                description: "Player UserID (Hub viewer link), resolved at the run's own start — the connection that played it, not the player's demo-wide id."
                 type: integer
               team:
                 description: "Team name."
@@ -5881,7 +5881,7 @@ components:
             - "null"
             - array
         playerUserIDs:
-          description: "Player name → UserID map (Hub viewer links)."
+          description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
           additionalProperties:
             type: integer
           type: object
@@ -6341,7 +6341,11 @@ components:
             Occupancies the wire never gave a userid are NOT listed — KTX's
             ghost scoreboard row (a departed player's edict, userid hardcoded
             0) and inferred occupancies are not connections, and the ghost
-            carries the departed player's name.
+            carries the departed player's name. Nor is a connection first
+            attested at or after match end (a spectator connecting postgame,
+            unified with a player who left mid-match): the published window
+            closes at match end, so it would emit startMs > endMs, and it
+            describes nothing trackable inside the match.
           items: { $ref: "#/components/schemas/PlayerSession" }
           type: array
         ping:
@@ -6585,9 +6589,12 @@ components:
         endMs:
           description: >
             The drop broadcast, or the next connection's userinfo — half-open
-            [startMs, endMs). The one synthetic bound: a client still
-            connected when the recording ended has no wire event to report,
-            so it is closed at match end.
+            [startMs, endMs). Synthetic in TWO cases, both reading exactly
+            match end: a client still connected when the recording ended (no
+            wire event exists to report), and a drop broadcast that lands
+            AFTER match end (the event exists, but the window is closed on
+            the match clock every other time here lives on). So an endMs at
+            match end does not by itself mean "still connected at the end".
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
@@ -6595,7 +6602,7 @@ components:
           description: "Wire client slot (0-based), the index svc_* messages address this connection by."
           type: integer
         userId:
-          description: "The connection's userid — the value a hub `?track=` link must carry to follow this player inside this window, and only then."
+          description: "The connection's userid — the value a hub `?track=` link must carry to follow this player inside this window, and only then. Always non-zero: an occupancy the wire gave no userid is not published as a session at all, so there is no 0 to interpret."
           type: integer
         name:
           description: >

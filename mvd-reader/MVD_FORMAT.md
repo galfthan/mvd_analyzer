@@ -950,7 +950,9 @@ These two identifiers serve different purposes:
 - Different demos from the same server may assign different slots to the same player
 - The same player on different servers will have different UserIDs
 
-**Implementation note:** The `svc_updateuserinfo` message is sent multiple times during a demo (e.g., when player info changes). Some server mods (like KTPro) resend userinfo with `user_id=0` or corrupted values in subsequent updates. When parsing, keep the **first valid UserID** (non-zero) for each slot and ignore later updates that have invalid values.
+**Implementation note:** The `svc_updateuserinfo` message is sent multiple times during a demo (e.g., when player info changes). Some server mods (like KTPro) resend userinfo with `user_id=0` or corrupted values in subsequent updates — legacy lore, kept because the guard is cheap: the vendored modern trees show no such path (mvdsv writes the id it generated for the connection, `SV_GenerateUserID` in `sv_main.c:538-556`, and KTX never rewrites it), and the userid-0 resends we actually see are the parser's own `svc_setinfo` syntheses, flagged `Partial` and carrying a stale cached id (`parser/userinfo.go:63-86`).
+
+So keep the **first valid UserID** (non-zero, non-`Partial`) per **occupancy** — not per slot. The two halves matter for different reasons: first-valid-wins *within* an occupancy is the only guard against a corrupted non-zero resend, while a *new* occupancy must re-latch, because a slot is reused and latching its first connection for the whole demo reports a userid that stopped existing (the v66 bug). The boundary between the two is the server's drop broadcast (`SV_DropClient` broadcasts the empty userinfo, `sv_main.c:419-428`), which always precedes a genuine reconnection; a userid change *without* a drop is exactly the corrupt-resend shape and is ignored. A slot dropped and never retaken keeps its last named connection.
 
 ### Userinfo String Format
 

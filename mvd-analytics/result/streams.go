@@ -158,7 +158,20 @@ type PlayerStream struct {
 	// entry per connection — a player who times out and rejoins has two,
 	// with two userids.
 	//
-	// Absent on a row with no identity table (see Identity).
+	// Two kinds of occupancy are deliberately withheld, because neither can
+	// answer that question: one the wire never gave a userid of its own (see
+	// PlayerSession.UserID), and one first attested at or after match end —
+	// a postgame connection, whose published window would close before it
+	// opened (see the EndMs rule) and which is not an in-match window to
+	// track anyway.
+	//
+	// Absent in two DIFFERENT states, which Identity tells apart:
+	//   Identity == ""  the demo produced no identity table at all (see
+	//                   Identity) — nothing was measured;
+	//   Identity != ""  the row HAS an identity and every occupancy behind
+	//                   it was withheld. A real, pinned state — the row is a
+	//                   person whose connections are simply not linkable —
+	//                   not a missing table.
 	Sessions []PlayerSession `json:"sessions,omitempty"`
 
 	// Position track at native rate. Always populated in-memory; whether
@@ -288,12 +301,18 @@ type PlayerStream struct {
 // reconnecting draws a new one, and the slot they left hands its old one to
 // whoever takes it next.
 //
-// Times are match-relative ms like everything else in Streams, and are NOT
-// clamped to the match window: a connection that predates the countdown
-// reports a negative StartMs (the same policy as timelineAnalysis.demoMarkers
-// and streams.global.pauses — the wire said it, so we say it). The one
-// synthetic bound is EndMs on a client still connected when the recording
-// ended: there is no wire event to report, so it is closed at match end.
+// Times are match-relative ms like everything else in Streams, and StartMs is
+// NOT clamped: a connection that predates the countdown reports a negative
+// value (the same policy as timelineAnalysis.demoMarkers and
+// streams.global.pauses — the wire said it, so we say it).
+//
+// EndMs is the one bound that can be synthetic, in TWO cases, both reading
+// exactly matchEnd: a client still connected when the recording ended (no
+// wire event exists to report), and a drop broadcast that lands AFTER match
+// end (the event exists and is simply outside the window every other time
+// here lives on). So EndMs == matchEnd does not by itself mean "still
+// connected at the end" — read the drop from the events log if the
+// distinction matters.
 type PlayerSession struct {
 	// StartMs is the first userinfo that attested this connection. For the
 	// KTX ghost row — a scoreboard-only edict with userid 0 that the next
@@ -308,9 +327,14 @@ type PlayerSession struct {
 	// Slot is the wire client slot (0-based), the index svc_* messages
 	// address this connection by.
 	Slot int `json:"slot"`
-	// UserID is the connection's userid — 0 when the wire never gave this
-	// occupancy one of its own (an inferred occupancy or a userid-0 resend),
-	// which is a gap, not a userid to link with.
+	// UserID is the connection's userid, and is ALWAYS non-zero. An
+	// occupancy the wire never gave a userid of its own — an inferred
+	// occupancy, a userid-0 resend, KTX's ghost scoreboard row — is not a
+	// connection anyone can follow, so it is not published as a session at
+	// all rather than published with a 0 nobody can link with (the gate is
+	// in analyzer/timeline_streams.go, buildStreamsResult). The 0-as-gap
+	// value exists one layer down, on the internal analyzer.ResolvedSession
+	// this is projected from.
 	UserID int `json:"userId"`
 	// Name is the netname this connection carried, where the row's `name` is
 	// the identity's canonical one. They differ after a rename or an mvdsv

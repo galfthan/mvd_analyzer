@@ -36,10 +36,40 @@ byte-identical.
   occupancy of a wire slot by one userid) that held the slot at the value's
   own timestamp. Where the reconnect unifier folds several sessions into one
   name, `playerUserIDs` reports the **last session that had play** — a
-  judgement call, documented at the selection site: it is the id that is live
-  at the end of the demo and the one a `track=` resolves for a player still
-  connected. The event carriers stay finer-grained and report the id valid at
-  their own instant.
+  judgement call, documented at the selection site: it is normally the id
+  that is live at the end of the demo and the one a `track=` resolves for a
+  player still connected. "Normally", because the rule ranks by last play
+  evidence, not by who is still connected: two sessions whose last play
+  lands on the same millisecond are broken toward the **lower slot**, which
+  need not be the surviving one. The event carriers stay finer-grained and
+  report the id valid at their own instant.
+- **All four event carriers are per-instant, including the two with no slot
+  left on them.** `demoMarkers[]` and `powerupEvents[]` still carry the wire
+  slot their event happened on, so they resolve through the per-slot session
+  table directly. `fragStreaks[]` (built *after* the per-slot spawns and
+  deaths are merged under one identity name) and `airgibs[]` (built post-hoc
+  from the name-keyed damage log) had no slot to resolve with and stamped
+  the demo-wide id instead — so a run inside a rejoiner's **earlier** stint
+  carried an id issued after it ended (222649: userid 25 on a streak that
+  finished nine seconds before that connection existed, a `track=` that
+  silently follows nobody). Both now look the name up in per-identity
+  session windows at the event's own timestamp, falling back to the
+  demo-wide map for a name the session table does not carry. One committed
+  golden moves: 216835's airgib `victimUserID` 14 → 8, the connection that
+  actually took the rocket (the hit is 7.6 minutes before userid 14 existed).
+- **The no-session fallback latch is per connection too.** The timeline
+  keeps its own slot → userid map for runs with no identity analyser wired
+  (hand-built registries, unit tests), where there is no session table to
+  key on. It now keeps the **first valid userid of each occupancy** and
+  re-latches when the server ends one: first-valid-wins *within* an
+  occupancy is the only guard against the corrupted non-zero userinfo resend
+  [MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) records, while a *new* occupancy
+  must re-latch or the slot reports a connection that no longer exists. The
+  boundary between the two is the server's drop broadcast (`SV_DropClient`,
+  `mvdsv/src/sv_main.c:419-428`), which always precedes a genuine
+  reconnection; a userid change with no drop is the corrupt-resend shape and
+  is ignored. A slot dropped and never retaken keeps its last named
+  connection.
 - **What deliberately did NOT change.** A player who reconnects while their
   old connection is still spawned is renamed `(N)<name>` by mvdsv, and KTX —
   matching ghosts by exact netname — scores the two as separate players in
@@ -67,7 +97,10 @@ engine roster. `streams.players[]` and `playerStats.players[]` (hence
   carries a single identity over two connections. It is **demo-local** —
   derived from the first session's slot+userid, reproducible from the same
   bytes, meaningless across demos — so **do not persist it**. The cross-demo
-  identity remains the authenticated `login`.
+  identity remains the authenticated `login`. In the theoretical clash where
+  one slot+userid pair is reissued, the key takes an `@<startMs>` suffix, and
+  a further `.2` / `.3` counter if that repeats too: the streams builder
+  groups on this key, so a collision would splice two players into one row.
 - **`sessions[]`** — every wire occupancy behind the row, in time order:
   `{startMs, endMs, slot, userId, name}`. This is the lossless form of the
   answer `playerUserIDs` gives once per player, and the shape the reporter
@@ -76,8 +109,12 @@ engine roster. `streams.players[]` and `playerStats.players[]` (hence
   internal resolver uses: on 222649 bogojoker's two sessions read
   `[…,131740)` and `[140177,…)`, the drop and the rejoin. A connection made
   during the countdown reports a negative `startMs` rather than being clamped
-  or dropped, and the only synthetic bound is a client still connected when
-  the recording ended (closed at match end).
+  or dropped. `endMs` is the one bound that can be synthetic, in two cases
+  that both read exactly match end: a client still connected when the
+  recording ended (no wire event exists to report), and a drop broadcast
+  landing *after* match end (the event exists, but the window is closed on
+  the match clock every other time in the payload lives on) — so an `endMs`
+  at match end is not by itself evidence of a live connection.
 - **What is deliberately NOT listed:** an occupancy the wire never gave a
   userid — KTX's ghost scoreboard row (a departed player's edict, userid
   hardcoded 0) and inferred occupancies. The ghost carries the departed
@@ -85,17 +122,31 @@ engine roster. `streams.players[]` and `playerStats.players[]` (hence
   have given 216835's `rusti` a userid-less window *overlapping* the slot he
   had actually reconnected onto, and would have made the next real connection
   on that slot (222649's `herbie`, adopted into the ghost's record) claim a
-  window starting 3.7 minutes before he connected.
+  window starting 3.7 minutes before he connected. Withheld for the same
+  reason: a connection **first attested at or after match end**. The
+  published window closes at match end, so a postgame connection would emit
+  `startMs > endMs` — an inverted window against the documented half-open
+  contract — and describes nothing trackable inside the match anyway. It is
+  a real shape, not a hypothetical: a spectator who connects after the game
+  to say gg, and whose name or login unifies them with a player who left
+  mid-match, arrives as a second session of a played identity. Only applied
+  where a match end was detected; a demo with none withholds nothing.
 - **Only those two views carry it.** `lives`, `hot-windows`, `frags`,
-  `damage` and `buckets` join to them by the row's **player name**, which is
-  the same canonical string everywhere. One consequence now visible to a
-  consumer: `/hot-windows`' `perPlayer` cap is name-keyed, so a human split
-  across two rows can occupy twice the quota — detectable via `identity`,
-  and left as is.
+  `damage` and `buckets` join to them by the row's **player name**, the same
+  canonical string everywhere except on a demo where two identities share a
+  display name: there these two views suffix both rows `name#slot` while the
+  frag and damage logs keep the bare name, so strip the suffix to join. One
+  consequence now visible to a consumer: `/hot-windows`' `perPlayer` cap is
+  name-keyed, so a human split across two rows can occupy twice the quota —
+  detectable via `identity`, and left as is.
 - **Web UI: no more slot-as-track fallback.** The Key Moments powerup-run
   "Hub" link fell back to a player's wire *slot* when the userid was 0 — a
   slot is not a userid, so the link tracked an unrelated player. Runs with no
-  userid now show no link, matching the other link builders.
+  userid now show no link, the same rule `buildHubWatchLink` and the
+  pack-drop anchors already followed. The frag-streak, demo-mark and airgib
+  tables deliberately keep theirs: they fall back to `track=0`, which points
+  at no player rather than the wrong one, so the clip still opens at the
+  right moment untracked.
 - **OpenAPI: `TimelineAnalysis` now documents `demoMarkers[]`** (the schema
   v58 `/demomark` bookmarks), which `/v1/demos/{id}/artifacts/timeline` had
   been serving undeclared — no corpus demo carries a marker, so the

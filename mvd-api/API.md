@@ -770,7 +770,11 @@ Common frontend features → the call that backs them.
   is **demo-local**: never persist it or compare it across demos; the
   cross-demo identity is `login`. Every other name-keyed view (`/lives`,
   `/hot-windows`, `/frags`, `/damage`, `/buckets`) joins to these rows by
-  the player **name**.
+  the player **name** — with one exception: when two identities share a
+  display name, `/player-stats` and the stream views suffix both rows `name#slot`
+  to keep them apart while the frag and damage logs keep the bare name, so
+  strip the `#…` suffix to join (and expect the answer to cover both
+  same-named players).
 - **"How long did X hold the RL / RA?" / "how long with no armor?"** →
   `GET /player-stats`, read `hold.weapons.rl` / `hold.armor.ra` /
   `hold.armor.none`. This exists nowhere else: KTX never writes weapon

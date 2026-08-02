@@ -17,7 +17,9 @@ package analyzer_test
 // same-frame multi-hit cascade's approximate save split; and, for ewep, the
 // victim-item one-frame window (a same-frame RL/LG pickup reclassifying a
 // hit's victim-weapon bucket) — a classification effect independent of the
-// health arithmetic, so its band is unchanged from v54.
+// health arithmetic, so its band is unchanged from v54. One further class is
+// not the reconstruction's at all: damage KTX scores after intermission,
+// which our match window excludes (see knownBoundedTeamResiduals).
 //
 // Run with -v to see every per-player and per-weapon delta.
 
@@ -47,19 +49,40 @@ const (
 
 // knownBoundedTeamResiduals lists "<demo label>/<player>" pairs whose
 // bounded TEAM total misses KTX's by more than tolBoundedTeam for a reason
-// that is not the reconstruction's: damage the event log structurally does
-// not carry. Listed one by one, and never folded into the tolerance, so a
-// real drift in the team split still fails everywhere else.
+// that is not the reconstruction's. Each is pinned to its MEASURED delta
+// with a tight slack rather than waved through: a drift in the team split
+// still fails everywhere else, and a regression that widens a known
+// residual fails right here.
 //
-// The one entry is exactly 20 points, all of it AXE (measured per-weapon:
-// axe -20, every other weapon 0). No axe damage event exists anywhere in
-// the pinned corpus — 0 across ~13 700 damage events in the ten full
-// goldens — while KTX counts axe in its own weapon table, so an axe hit's
-// evidence is not reaching the damage stream at all. Pre-existing and
-// independent of the identity work this demo was added for (v66): its
-// given / taken / ewep / per-weapon families all reconcile.
-var knownBoundedTeamResiduals = map[string]string{
-	"4on4_blue_red_200626_e1m2_sameslot_rejoin/Venator": "20 points of axe team damage KTX counted and no damage event carries",
+// The one entry is the POST-INTERMISSION class: damage KTX scores that the
+// match window excludes. KTX's T_Damage accumulates dmg_team and
+// wpn[].tdamage with no match_in_progress gate on that path
+// (ktx/src/combat.c:1057-1058), so a hit landing after the match has ended
+// still lands on the end-of-match scoreboard, while every total we publish
+// is windowed to the match. On this demo Venator lands four dtAXE team hits
+// of 20 each (mvdhidden_dmgdone at demo-ms 1206856 and 1207889 on cronus,
+// 1209595 and 1210101 on george); matchEnd is 1210045 demo-ms, so the
+// fourth is 56 ms past intermission. Three are served (the served
+// byWeaponTeam axe total reads 60) and KTX counted all four (80): exactly
+// the -20, all of it axe, with every other weapon 0.
+//
+// It is a WINDOW question, never a missing event: KTX cannot silently omit
+// an in-window hidden damage message (combat.c:795-807 writes
+// mvdhidden_dmgdone whenever unbound_dmg_dealt > 0), so damage this side of
+// intermission always reaches the stream. The same shape — ours short of
+// KTX's by a sliver — shows up on this player's given (-4) and taken (-5)
+// and stays inside those tolerances; only the axe hit is big enough to name.
+type knownTeamResidual struct {
+	delta int    // measured stream-minus-KTX delta
+	slack int    // permitted drift around it
+	why   string // the invariant, not the symptom
+}
+
+var knownBoundedTeamResiduals = map[string]knownTeamResidual{
+	"4on4_blue_red_200626_e1m2_sameslot_rejoin/Venator": {
+		delta: -20, slack: 5,
+		why: "one 20-point axe team hit KTX scored 56 ms after intermission, outside our match window",
+	},
 }
 
 func TestBoundedReconciliationCorpus(t *testing.T) {
@@ -113,9 +136,17 @@ func TestBoundedReconciliationCorpus(t *testing.T) {
 				within(t, name+" bounded given", b.StreamGiven, delta.ScoreGiven, tolBoundedGiven)
 				within(t, name+" bounded taken", b.StreamTaken, delta.ScoreTaken, tolBoundedTaken)
 				within(t, name+" bounded ewep", b.StreamEWep, delta.ScoreEWep, tolBoundedEWep)
-				if why, known := knownBoundedTeamResiduals[entry.Label+"/"+name]; known {
-					t.Logf("%s bounded team: stream %d vs KTX %d — expected residual, not checked: %s",
-						name, b.StreamTeam, b.ScoreTeam, why)
+				if known, isKnown := knownBoundedTeamResiduals[entry.Label+"/"+name]; isKnown {
+					// Pinned to its measured magnitude: "known" means this
+					// exact residual, not an open-ended exemption.
+					d := b.StreamTeam - b.ScoreTeam
+					if drift := d - known.delta; drift > known.slack || drift < -known.slack {
+						t.Errorf("%s bounded team: stream %d vs KTX %d (delta %+d) — known residual is %+d ±%d (%s)",
+							name, b.StreamTeam, b.ScoreTeam, d, known.delta, known.slack, known.why)
+					} else {
+						t.Logf("%s bounded team: stream %d vs KTX %d (delta %+d, known %+d): %s",
+							name, b.StreamTeam, b.ScoreTeam, d, known.delta, known.why)
+					}
 				} else {
 					within(t, name+" bounded team", b.StreamTeam, b.ScoreTeam, tolBoundedTeam)
 				}
