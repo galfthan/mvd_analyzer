@@ -565,7 +565,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 	t.Run("unmeasured: empty frag log beside real deaths", func(t *testing.T) {
 		r := base()
 		r.Frags.Frags = nil
-		r.Frags.KillsMeasured = killsMeasurable(r) // false: deaths on the scoreboard
+		r.Frags.KillsMeasured = killsMeasurable(r) // false: protocol deaths in ByPlayer
 		s := deriveScore(r, "a")
 		// Both measured sides survive — this is the whole point of not
 		// dropping the family wholesale.
@@ -583,6 +583,9 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		r.Frags.Frags = nil
 		r.Match.Players[0].Kills, r.Match.Players[0].Deaths = 0, 0
 		r.Match.Players[0].Suicides = 0
+		// The scoreboard's deaths are a copy of these (the match-final fold),
+		// so a demo where nobody died has both at zero.
+		r.Frags.ByPlayer["a"].Kills, r.Frags.ByPlayer["a"].Deaths = 0, 0
 		r.Frags.KillsMeasured = killsMeasurable(r) // true: nothing to contradict
 		s := deriveScore(r, "a")
 		if s.Kills == nil || *s.Kills != 0 {

@@ -233,15 +233,24 @@ func killsMeasured(res *Result) bool { return res.Frags == nil || res.Frags.Kill
 // agrees and a team aggregate can never mix a measured member with an
 // unmeasured one. A demo where nobody died has nothing to contradict and
 // keeps its honest zeros.
+//
+// The death evidence is FragResult.ByPlayer[].Deaths — the protocol
+// DeathEvent tally the frag analyser builds in its own Finalize
+// (frag.go:236-243), independent of the obituary parse. It is deliberately
+// NOT MatchResult.Players[].Deaths: that field's only writer is the
+// match-final fold below (postprocess.go), which copies these very counts
+// onto the scoreboard, so on a pipeline-produced Result the scoreboard still
+// reads 0 deaths for everyone until that fold runs — reading it made the
+// verdict vacuously "measured" on every demo the pipeline ever produced.
+// ByPlayer is final at the "frags:final" artifact, which match-final
+// requires, so it is the one death source provably settled before the
+// verdict is taken.
 func killsMeasurable(res *Result) bool {
 	if res.Frags == nil || len(res.Frags.Frags) > 0 {
 		return true
 	}
-	if res.Match == nil {
-		return true
-	}
-	for i := range res.Match.Players {
-		if res.Match.Players[i].Deaths > 0 {
+	for _, pf := range res.Frags.ByPlayer {
+		if pf != nil && pf.Deaths > 0 {
 			return false
 		}
 	}
