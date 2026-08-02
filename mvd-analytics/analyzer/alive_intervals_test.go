@@ -281,9 +281,36 @@ func TestAliveIntervalsCoverEveryDeath(t *testing.T) {
 		got := aliveOf(t, []int32{63100}, deaths, 120000, track)
 
 		assertDeathsCovered(t, got, deaths)
-		if len(got) == 0 || got[0].End != 63000 {
-			t.Fatalf("got %v, want the first life to run to its death at 63000, "+
-				"not to stop at the end of the position track", got)
+		// Covering the death is not enough: the life the respawn STARTS has to
+		// survive too. Clipping the presence bound at that trailing spawn made
+		// it [63100, 63100) — zero width — and clipToPresence dropped it, so
+		// everything the player did after respawning was attributed to a life
+		// the same response says ended at 63000.
+		want := []result.Interval{{Start: 0, End: 63000}, {Start: 63100, End: 120000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v — the first life runs to its death at 63000 "+
+				"(not to the end of the position track) and the life the respawn "+
+				"at 63100 starts must exist, running to the window end", got, want)
+		}
+	})
+
+	// The control for the asymmetry: when the trailing marker is a DEATH, the
+	// high clip still lands exactly on it. A death both proves existence and
+	// ends the life, so nothing after it is claimed — unlike a trailing spawn,
+	// it must NOT widen the bound to the window end.
+	t.Run("a trailing death clips exactly there", func(t *testing.T) {
+		var track []int32
+		for ms := int32(0); ms <= 10000; ms += 13 {
+			track = append(track, ms)
+		}
+		deaths := []int32{20000, 63000}
+		got := aliveOf(t, []int32{30000}, deaths, 120000, track)
+
+		assertDeathsCovered(t, got, deaths)
+		want := []result.Interval{{Start: 0, End: 20000}, {Start: 30000, End: 63000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v — the last life ends at the trailing death, "+
+				"never at the window end", got, want)
 		}
 	})
 
@@ -313,6 +340,94 @@ func TestAliveIntervalsCoverEveryDeath(t *testing.T) {
 		if len(got) != 1 || got[0].Start != 60000 {
 			t.Fatalf("got %v, want one life starting at 60000 — a joiner must not "+
 				"claim the time before they connected", got)
+		}
+	})
+}
+
+// A SPAWN trailing the position track must not delete the life it starts.
+//
+// The high clip used to land exactly on the last marker, on the argument that
+// "a marker after the track proves existence at that instant and nothing past
+// it". For a death that is right — a death ends its life, so the exact
+// extension both covers the death and claims nothing after it. For a spawn it
+// is self-defeating: the life is [spawn, …), clipping it to [spawn, spawn)
+// makes it zero-width, and clipToPresence drops zero-width intervals. The
+// player's whole post-respawn life vanished from the list while their frags
+// and deaths kept flowing, landing on the previous life — which the same
+// response says had already ended.
+//
+// The rule: when the last marker at or beyond the track's hold end is a
+// spawn, the presence bound extends to the alive window's end and the life
+// keeps its marker-derived end. That is the same degradation a player with NO
+// track gets (nothing to clip against, so the marker-derived lives stand), and
+// the wider claim is visible and interpretable where the deletion is silent
+// data loss.
+func TestAliveIntervalsTrailingSpawnKeepsItsLife(t *testing.T) {
+	// The recorder loses the player 10 s in; hold end is a cadence past the
+	// final sample.
+	var track []int32
+	for ms := int32(0); ms <= 10000; ms += 13 {
+		track = append(track, ms)
+	}
+	holdEnd := result.TrackHoldEnd(track)
+
+	t.Run("a spawn exactly at the hold end", func(t *testing.T) {
+		got := aliveOf(t, []int32{holdEnd}, []int32{9000}, 120000, track)
+		want := []result.Interval{{Start: 0, End: 9000}, {Start: holdEnd, End: 120000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v — a spawn ON the hold-end boundary starts a "+
+				"life like any other", got, want)
+		}
+	})
+
+	t.Run("a death and its same-ms respawn past the track", func(t *testing.T) {
+		got := aliveOf(t, []int32{63000}, []int32{63000}, 120000, track)
+		want := []result.Interval{{Start: 0, End: 63000}, {Start: 63000, End: 120000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v — an instant respawn is still a new life, and "+
+				"the spawn wins the tie for what the last marker IS", got, want)
+		}
+	})
+
+	t.Run("several spawns past the track", func(t *testing.T) {
+		// The second spawn is a redundant marker (no death between them), so it
+		// starts no life; the bound must still come from the trailing spawn.
+		got := aliveOf(t, []int32{63100, 70000}, []int32{63000}, 120000, track)
+		want := []result.Interval{{Start: 0, End: 63000}, {Start: 63100, End: 120000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("a spawn past the track followed by a death", func(t *testing.T) {
+		// Death last: back to the exact extension, so the final life closes on
+		// the death rather than running to the window end.
+		got := aliveOf(t, []int32{63100}, []int32{63000, 65000}, 120000, track)
+		want := []result.Interval{{Start: 0, End: 63000}, {Start: 63100, End: 65000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	})
+
+	// The degenerate case: a spawn is the ONLY marker past the track and no
+	// death precedes it, so it starts no life — it is a redundant re-entry
+	// marker inside the one life the player has had since match start. The
+	// same rule applies, and it has to: a bound that stopped at the spawn here
+	// while extending past it when a death came first would be an asymmetry
+	// with no evidential basis. The result is exactly what the player would
+	// get with no position track at all.
+	t.Run("a lone spawn past the track", func(t *testing.T) {
+		got := aliveOf(t, []int32{63100}, nil, 120000, track)
+		want := []result.Interval{{Start: 0, End: 120000}}
+		if !eqIntervals(got, want) {
+			t.Fatalf("got %v, want %v — a trailing spawn is not a life boundary "+
+				"here, and nothing after it contradicts the player's presence", got, want)
+		}
+		if noTrack := aliveOf(t, []int32{63100}, nil, 120000, nil); !eqIntervals(got, noTrack) {
+			t.Fatalf("with a truncated track %v, with no track at all %v — a track "+
+				"that stops before a trailing spawn is the same evidential state "+
+				"past that spawn as having no track, and must degrade the same way",
+				got, noTrack)
 		}
 	})
 }

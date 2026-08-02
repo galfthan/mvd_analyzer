@@ -123,11 +123,17 @@ If you have pinned these numbers, expect them to fall.
   10 s, death at 63 s → `alive: [{0,10010}]`), which a consumer reading
   lives interprets as the player having left the game — dropping every
   later life. `presenceBounds` now widens the clip with marker evidence,
-  sharing `lastMarkerMs` with `lastObservedMs` so the two rules cannot
-  drift; the ends stay deliberately asymmetric (a marker after the track
-  extends the high clip exactly to it; a *death* before the track drops the
-  low clip, a *spawn* before it does not, since a join proves nothing
-  earlier). Server recordings have no track truncation, so goldens are
+  and the ends stay deliberately asymmetric (a *death* before the track
+  drops the low clip, a *spawn* before it does not, since a join proves
+  nothing earlier). The high end distinguishes the two marker kinds: a
+  trailing **death** extends the clip exactly to it (a death ends its life,
+  so nothing after it is claimed), while a trailing **spawn** extends it to
+  the end of the alive window — clipping at the spawn made the life it
+  starts `[spawn, spawn)`, zero-width, and deleted it outright, so a
+  respawned player's frags landed on a life the same response said had
+  already ended. A truncated track past a trailing spawn is the same
+  evidential state as having no track at all, and now degrades the same
+  way. Server recordings have no track truncation, so goldens are
   unchanged.
 - **`locGraph` edges are no longer recorded across unobserved holes.** The
   edge walk had no stale-gap reset: past `locgraphTeleportMaxGapMs` it

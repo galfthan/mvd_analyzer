@@ -680,7 +680,7 @@ func deriveAliveIntervals(streams *Streams) {
 		// inside the track, and it must not merge touching intervals — see
 		// clipToPresence.
 		if pt := p.Position; pt != nil && len(pt.T) > 0 {
-			lo, hi := presenceBounds(p, pt)
+			lo, hi := presenceBounds(p, pt, end)
 			iv = clipToPresence(iv, lo, hi)
 		}
 
@@ -744,23 +744,79 @@ func clipToPresence(iv []Interval, lo, hi int32) []Interval {
 // player with no track kept their marker-derived lives while a player with a
 // truncated one lost them.
 //
-// The two ends are deliberately not symmetric, because the evidence is not. A
-// marker AFTER the track proves existence at that instant and nothing past it,
-// so hi extends exactly to it. A DEATH before the track proves the player was
-// in the game — and, by the canonical liveness rule, alive — for the run-up to
-// it, so the low clip has nothing left to stand on and is dropped. A SPAWN
-// before the track start is the join itself and proves no such thing;
-// extending on it would re-introduce the "alive before they connected" claim
-// the low clip exists to remove.
-func presenceBounds(p *PlayerStream, pt *PositionTrack) (lo, hi int32) {
+// The two ends are deliberately not symmetric, because the evidence is not,
+// and the HIGH end depends on which kind of marker trails the track.
+//
+//   - A DEATH at or past the track's end both proves existence and ENDS the
+//     life it closes, so hi extends exactly to it: nothing after a death is
+//     claimed, and the death still lands inside a life.
+//   - A SPAWN as the last marker at or past the track's end proves the player
+//     re-entered, and nothing afterwards contradicts it, so hi extends to the
+//     end of the alive window — the life that spawn starts keeps its
+//     marker-derived end. Clipping hi AT the spawn instead (the original rule:
+//     "a marker after the track proves existence at that instant and nothing
+//     past it") deleted that life outright, because the life is [spawn, …) and
+//     clipping it to [spawn, spawn) makes it zero-width; clipToPresence then
+//     drops it. Downstream, its frags and deaths get attributed to the
+//     PREVIOUS life, which the same response says ended at the death before
+//     the spawn — kills made while provably alive attached to a life the
+//     response denies existed.
+//
+// Extending to the window end is the consistent degradation, not a special
+// case: a player with NO track at all keeps their full marker-derived lives,
+// the last of them running to the window end, because there is no presence
+// evidence to clip against. A track that stops before a trailing spawn is the
+// same evidential situation past that spawn, so it degrades the same way. It
+// is also what the repo's surface-authoritative-data doctrine (CLAUDE.md)
+// asks for: the wider claim is visible and interpretable, whereas deleting a
+// marker-proven life silently destroys data no consumer can recover.
+//
+// At the LOW end a DEATH before the track proves the player was in the game —
+// and, by the canonical liveness rule, alive — for the run-up to it, so the
+// low clip has nothing left to stand on and is dropped. A SPAWN before the
+// track start is the join itself and proves no such thing; extending on it
+// would re-introduce the "alive before they connected" claim the low clip
+// exists to remove.
+func presenceBounds(p *PlayerStream, pt *PositionTrack, windowEnd int32) (lo, hi int32) {
 	lo, hi = pt.T[0], result.TrackHoldEnd(pt.T)
-	if m := lastMarkerMs(p); m > hi {
-		hi = m
+
+	spawn, hasSpawn := lastSpawnMs(p)
+	death, hasDeath := lastDeathMs(p)
+	// A spawn TIED with a death is the respawn that death triggered — the
+	// same tie-break aliveIntervals uses (deaths sort before spawns, so the
+	// player reads alive afterwards). It trails, and the life it starts is
+	// exactly the one a clip at that instant would erase.
+	switch {
+	case hasSpawn && spawn >= hi && (!hasDeath || spawn >= death):
+		if windowEnd > hi {
+			hi = windowEnd
+		}
+	case hasDeath && death > hi:
+		hi = death
 	}
+
 	if len(p.Deaths) > 0 && p.Deaths[0] >= 0 && p.Deaths[0] < lo {
 		lo = 0
 	}
 	return lo, hi
+}
+
+// lastSpawnMs / lastDeathMs report the final marker of each kind and whether
+// there was one at all. Both marker lists are in ascending time order, and
+// both can hold negative (pre-match) timestamps, so "absent" needs its own
+// flag rather than a zero sentinel.
+func lastSpawnMs(p *PlayerStream) (int32, bool) {
+	if n := len(p.Spawns); n > 0 {
+		return p.Spawns[n-1], true
+	}
+	return 0, false
+}
+
+func lastDeathMs(p *PlayerStream) (int32, bool) {
+	if n := len(p.Deaths); n > 0 {
+		return p.Deaths[n-1], true
+	}
+	return 0, false
 }
 
 // lastMarkerMs is the latest spawn / death timestamp — the last instant the
@@ -768,11 +824,11 @@ func presenceBounds(p *PlayerStream, pt *PositionTrack) (lo, hi int32) {
 // position track was built. Both marker lists are in ascending time order.
 func lastMarkerMs(p *PlayerStream) int32 {
 	var last int32
-	if n := len(p.Spawns); n > 0 && p.Spawns[n-1] > last {
-		last = p.Spawns[n-1]
+	if s, ok := lastSpawnMs(p); ok && s > last {
+		last = s
 	}
-	if n := len(p.Deaths); n > 0 && p.Deaths[n-1] > last {
-		last = p.Deaths[n-1]
+	if d, ok := lastDeathMs(p); ok && d > last {
+		last = d
 	}
 	return last
 }
