@@ -306,7 +306,16 @@ func identityKeys(sess []*occupancyRecord, uf *unionFind) map[int]string {
 		s := first[root]
 		key := "s" + strconv.Itoa(s.slot) + "u" + strconv.Itoa(s.userID)
 		if taken[key] {
-			key += "@" + strconv.Itoa(int(s.attestedStartMs()))
+			// Break the clash with the start time, and keep breaking it: a
+			// third occupancy of the same slot+userid at the same attested
+			// start would otherwise re-collide with the second and splice
+			// two identities' streams — the failure this whole branch
+			// exists to prevent.
+			base := key + "@" + strconv.Itoa(int(s.attestedStartMs()))
+			key = base
+			for n := 2; taken[key]; n++ {
+				key = base + "." + strconv.Itoa(n)
+			}
 		}
 		taken[key] = true
 		out[root] = key

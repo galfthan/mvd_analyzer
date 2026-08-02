@@ -224,6 +224,16 @@ func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened *
 	if cur == nil {
 		return nil, t.open(slot, uid, e.Player, e.TimeMs)
 	}
+	// A different non-zero userid on an occupied slot is a handover. One
+	// documented shape would be misread here: mvd-reader/MVD_FORMAT.md
+	// ("Player Slot vs User ID") reports that some server mods (KTPro)
+	// resend a full userinfo with a corrupted userid, which this splits
+	// into a phantom second occupancy. It is kept deliberately — no such
+	// resend exists in the vendored mvdsv / ktx sources or anywhere in the
+	// corpus, every confirmed handover and rejoin we have is preceded by
+	// the server's drop broadcast (the Vacated branch above), and inventing
+	// a heuristic to tell a corrupt id from a real one would cost real
+	// handovers. Revisit if a KTPro demo ever surfaces.
 	if uid != 0 && cur.userID != 0 && uid != cur.userID {
 		cur.endMs = e.TimeMs
 		return cur, t.open(slot, uid, e.Player, e.TimeMs)

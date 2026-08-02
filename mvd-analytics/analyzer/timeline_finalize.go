@@ -262,10 +262,17 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		// only choice that is right for a same-slot rejoin (gameId 222649:
 		// bogojoker times out on userid 12 and returns on 25 under one
 		// name — keeping the first would report an id that stopped existing
-		// sixteen minutes before the streak it is attached to). Ordering is
-		// by last play evidence rather than by session start because the
-		// first session on a slot is extended back to -inf, which makes two
-		// slots' opening sessions incomparable (see sessionLastPlay).
+		// sixteen minutes before the streak it is attached to).
+		//
+		// Ordering is by last play evidence rather than by session start on
+		// the merits, not out of necessity — the attested start sits on the
+		// same record (ResolvedSession.OccStartMs). A rejoin that only ever
+		// spectated starts later but has no play and no POV for a `track=`
+		// to follow, so it must not displace the connection that played;
+		// and where two connections of one auth-unified identity overlap,
+		// the later start is not the later player — the last play is. The
+		// evidence is per slot, so the value is always a real wire time
+		// (see sessionLastPlay).
 		type uidPick struct {
 			uid      int
 			lastPlay int32
@@ -316,8 +323,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Detect top 5 longest frag streaks for Key Moments
-	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
+	// Detect top 5 longest frag streaks for Key Moments. Streaks carry a
+	// userid of their own, resolved per run from the session table
+	// (nameUserIDIndex) with the demo-wide map above as the fallback.
+	fragStreaks := a.detectFragStreaks(10, names, newNameUserIDIndex(a.core, playerUserIDsByName))
 
 	// Resolve player-inserted `/demomark` bookmarks for Key Moments
 	demoMarkers := a.buildDemoMarkers()

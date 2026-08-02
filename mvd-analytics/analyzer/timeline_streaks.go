@@ -9,7 +9,7 @@ import (
 // detectFragStreaks computes the top N longest frag streaks (spawn-to-death runs)
 // ranked by number of frags. Each run starts at spawn and ends at death.
 // Effective weapon (ewep) is the weapon with the most kills during the run.
-func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerUserIDsByName map[string]int) []FragStreakEvent {
+func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, userIDs *nameUserIDIndex) []FragStreakEvent {
 	// Build per-player sorted spawn and death time lists, resolving each
 	// spawn/death to the identity on the slot *at that time* so a streak
 	// that straddles a reconnect stays one run under one player name.
@@ -205,9 +205,14 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 		return allStreaks[i].Duration < allStreaks[j].Duration // Tie-break: shorter run = more impressive
 	})
 
-	// Set UserIDs
+	// Stamp the userid of the connection the player held at the run's OWN
+	// instant (its spawn), not the demo-wide one: a run inside a rejoiner's
+	// earlier stint belongs to the connection that played it, and the id
+	// issued for the later one did not exist yet. Times here are still on
+	// the demo clock (rebaseToMatch runs at the end of Finalize), which is
+	// the clock the session table is on.
 	for i := range allStreaks {
-		if uid, ok := playerUserIDsByName[allStreaks[i].PlayerName]; ok {
+		if uid := userIDs.at(allStreaks[i].PlayerName, allStreaks[i].Time); uid > 0 {
 			allStreaks[i].PlayerUserID = uid
 		}
 	}

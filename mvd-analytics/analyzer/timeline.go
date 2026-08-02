@@ -28,7 +28,12 @@ type TimelineAnalyzer struct {
 	core          *CoreOutputs
 	playerState   map[int]*timelinePlayerState
 	playerNames   map[int]string // Slot -> player name (from UserInfoEvent)
-	playerUserIDs map[int]int    // Slot -> latest wire UserID; fallback only (see userIDAt)
+	playerUserIDs map[int]int    // Slot -> latched wire UserID; fallback only (see userIDAt)
+	// userIDLatchStale[slot] marks a latched userid whose occupancy the
+	// server ended: the value stays readable (it is still the last
+	// connection the wire named on that slot) but the next full userinfo
+	// re-latches instead of being ignored. See handleUserInfo.
+	userIDLatchStale map[int]bool
 	// occ is the shared wire-slot occupancy tracker (occupancy.go). It
 	// spots a mid-match handoff so handleFragUpdate can rebase a
 	// reconnecting player's restored frag total (see fragResetPending) and
@@ -162,6 +167,7 @@ func NewTimelineAnalyzer() *TimelineAnalyzer {
 		playerState:      make(map[int]*timelinePlayerState),
 		playerNames:      make(map[int]string),
 		playerUserIDs:    make(map[int]int),
+		userIDLatchStale: make(map[int]bool),
 		occ:              newOccupancyTracker(),
 		fragResetPending: make(map[int]bool),
 	}
@@ -223,24 +229,51 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	slot := e.Player.Slot
 	if e.Player.Name != "" {
 		a.playerNames[slot] = e.Player.Name
-		// Track the slot's current userid. This used to keep the FIRST
-		// valid one per slot, guarding against "servers that resend
-		// userinfo with UserID 0 or corrupted values" — but those resends
-		// are exactly the svc_setinfo syntheses the parser already marks
-		// Partial, whose UserID is documented stale cache rather than a
-		// wire value (mvd-reader/parser/userinfo.go:63-86). Ignoring
-		// Partial is therefore the discriminator that guard wanted;
-		// first-wins additionally latched the first connection ever seen on
-		// the slot for the whole demo, so every handover and rejoin
-		// afterwards reported a dead userid. Per-session userids are
-		// carried on CoreOutputs.Sessions (see identity.go); this map is
-		// the fallback for runs with no identity analyser wired.
-		if !e.Partial && e.Player.UserID > 0 {
-			a.playerUserIDs[slot] = e.Player.UserID
-		}
 	}
 
 	closed, opened := a.occ.onUserInfo(e)
+
+	// The slot's fallback userid latch: keep the FIRST valid (non-zero,
+	// non-Partial) userid of each OCCUPANCY, and let the next connection
+	// re-latch once the server has ended this one. Per-session userids are
+	// carried on CoreOutputs.Sessions (see identity.go); this map only
+	// answers for runs with no identity analyser wired (hand-built
+	// registries, unit tests), where there is no session table to key on.
+	//
+	// The two rules it has to satisfy pull in opposite directions:
+	//
+	//   - First-valid-wins WITHIN an occupancy. mvd-reader/MVD_FORMAT.md
+	//     ("Player Slot vs User ID") records that some server mods (KTPro)
+	//     resend userinfo with userid 0 or corrupted values, and prescribes
+	//     keeping the first valid one per slot. Zero is filtered anyway;
+	//     for a corrupted non-zero resend, first-valid is the only guard —
+	//     latest-wins would adopt it. Ignoring Partial does NOT cover this
+	//     class: Partial marks the svc_setinfo syntheses whose UserID is
+	//     the parser's stale cache (mvd-reader/parser/userinfo.go:63-86), a
+	//     different (and also filtered) thing than a full userinfo carrying
+	//     a bad id.
+	//   - Latest-wins ACROSS occupancies. Latching the first connection
+	//     ever seen on the slot for the whole demo made every later
+	//     handover and rejoin report a dead userid (gameId 222649).
+	//
+	// The occupancy boundary that separates them is the server's drop
+	// broadcast, not the tracker's userid-change split: a genuine
+	// reconnection is always preceded by a drop (SV_DropClient broadcasts
+	// the empty userinfo, mvdsv/src/sv_main.c:419-428 — verified on
+	// 222649), while a mid-occupancy userid change with no drop is exactly
+	// the corrupt-resend shape above. So a drop marks the latch stale and
+	// the next full userinfo replaces it; anything else leaves it alone.
+	// Stale rather than deleted: a slot dropped and never retaken keeps its
+	// last named connection, which is what the map is for.
+	if closed != nil && closed.vacated {
+		a.userIDLatchStale[slot] = true
+	}
+	if !e.Partial && !e.Vacated && e.Player.Name != "" && e.Player.UserID > 0 {
+		if _, latched := a.playerUserIDs[slot]; !latched || a.userIDLatchStale[slot] {
+			a.playerUserIDs[slot] = e.Player.UserID
+			delete(a.userIDLatchStale, slot)
+		}
+	}
 
 	// A fresh connection took the slot mid-match: its next frag update may be
 	// a KTX stats restore rather than a kill. Flag it so handleFragUpdate can
@@ -509,7 +542,15 @@ func (a *TimelineAnalyzer) resolveAt(slot int, tMs int32) (name, team string) {
 // credited to the player who took the slot afterwards) and playerUserIDs is
 // a per-slot latch. That latch remains the fallback for runs with no
 // identity analyser wired (hand-built registries, unit tests), where there
-// is no session table to key on.
+// is no session table to key on — and for a timestamp in the gap between
+// two sessions (a slot standing empty between a drop and the rejoin), which
+// no session covers.
+//
+// Session windows are half-open [StartMs, EndMs) and a handover's two
+// sessions share that instant (the tracker closes one and opens the next at
+// the same wire time), so an event stamped exactly at the handover resolves
+// to the SUCCESSOR — the connection that owns every later instant, and the
+// one an svc_updateuserinfo at that time is announcing.
 func (a *TimelineAnalyzer) userIDAt(slot int, tMs int32) int {
 	if s, ok := a.core.SlotSessionAt(slot, tMs); ok && s.UserID > 0 {
 		return s.UserID

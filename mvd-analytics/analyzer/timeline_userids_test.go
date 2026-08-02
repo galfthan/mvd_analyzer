@@ -156,25 +156,148 @@ func TestPowerupUserIDIsTheSessionAtPickup(t *testing.T) {
 }
 
 // With no identity analyser wired (a hand-built registry) there is no
-// session table, so the per-slot userinfo latch remains the fallback. It
-// now keeps the LAST valid userid rather than the first, and ignores
-// svc_setinfo syntheses, whose UserID is the parser's stale cache
-// (mvd-reader/parser/userinfo.go:63-86).
-func TestSlotUserIDLatchIgnoresPartialAndKeepsLatest(t *testing.T) {
+// session table, so the per-slot userinfo latch remains the fallback. Its
+// rule is FIRST valid userid per OCCUPANCY: a corrupted full-userinfo
+// resend inside one occupancy (the KTPro class MVD_FORMAT.md documents)
+// cannot move it, the server's drop broadcast lets the next connection
+// re-latch, and svc_setinfo syntheses — whose UserID is the parser's stale
+// cache (mvd-reader/parser/userinfo.go:63-86) — never latch at all.
+func TestSlotUserIDLatchKeepsFirstValidPerOccupancy(t *testing.T) {
 	a := NewTimelineAnalyzer()
 	a.ctx = &Context{}
 	info := func(uid int, name string) *events.PlayerInfo {
 		return &events.PlayerInfo{Slot: 3, Name: name, UserID: uid}
 	}
 	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 0, Player: info(12, "bogojoker")})
-	// svc_setinfo replay carrying the departed client's cached userid.
+	// A full userinfo resend on the SAME occupancy carrying a different
+	// userid: the corrupted-resend shape. First-valid-wins is the only
+	// guard against it — Partial does not mark it.
+	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 60000, Player: info(77, "bogojoker")})
+	if got := a.playerUserIDs[3]; got != 12 {
+		t.Fatalf("playerUserIDs[3] = %d after a corrupt mid-occupancy resend, want the occupancy's first valid 12", got)
+	}
+	// The server drops the client (SV_DropClient's empty userinfo, which
+	// still carries the departing client's userid). The latch goes stale.
+	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 141832, Player: &events.PlayerInfo{Slot: 3, UserID: 77}, Vacated: true})
+	// svc_setinfo replay carrying the departed client's cached userid: not
+	// a connection, so it must not claim the freed latch.
 	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 150269, Player: info(12, "bogojoker"), Partial: true})
+	// The rejoin: a new occupancy, so this one latches.
 	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 150269, Player: info(25, "bogojoker")})
-	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 150300, Player: info(25, "bogojoker"), Partial: true})
+	// A trailing svc_setinfo with the STALE userid must not move it back.
+	a.handleUserInfo(&events.UserInfoEvent{TimeMs: 150300, Player: info(12, "bogojoker"), Partial: true})
+
 	if got := a.playerUserIDs[3]; got != 25 {
-		t.Errorf("playerUserIDs[3] = %d, want 25 (latest non-partial userinfo)", got)
+		t.Errorf("playerUserIDs[3] = %d, want 25 (the occupancy that followed the drop)", got)
 	}
 	if got := a.userIDAt(3, 900000); got != 25 {
 		t.Errorf("userIDAt with no session table = %d, want the latch value 25", got)
+	}
+}
+
+// The half-open convention at a handover instant: the two sessions share
+// that millisecond (the occupancy tracker closes one and opens the next at
+// the same wire time), and t == the boundary belongs to the SUCCESSOR.
+func TestUserIDAt_HandoverInstantResolvesToSuccessor(t *testing.T) {
+	a := sessionFixture(
+		map[int][]ResolvedSession{
+			5: {
+				{StartMs: math.MinInt32, EndMs: 630704, Name: "rusti (FU)", UserID: 37, IdentityKey: "id:0"},
+				{StartMs: 630704, EndMs: math.MaxInt32, Name: "niomic(FU)", UserID: 44, IdentityKey: "id:2"},
+			},
+		},
+		nil,
+	)
+	if got := a.userIDAt(5, 630704); got != 44 {
+		t.Errorf("userIDAt at the handover = %d, want 44 (the session that owns [t, …))", got)
+	}
+	if got := a.userIDAt(5, 630703); got != 37 {
+		t.Errorf("userIDAt one ms earlier = %d, want 37", got)
+	}
+}
+
+// Between a drop and the rejoin the slot belongs to nobody, so no session
+// covers the instant and the per-slot latch answers. The sentinel value
+// here appears in no session precisely so the assertion can only pass via
+// that fallback.
+func TestUserIDAt_GapBetweenSessionsFallsBackToTheLatch(t *testing.T) {
+	a := sessionFixture(
+		map[int][]ResolvedSession{
+			9: {
+				{StartMs: math.MinInt32, EndMs: 141832, Name: "bogojoker", UserID: 12, IdentityKey: "id:0"},
+				{StartMs: 150269, EndMs: math.MaxInt32, Name: "bogojoker", UserID: 25, IdentityKey: "id:0"},
+			},
+		},
+		nil,
+	)
+	a.playerUserIDs[9] = 99
+	if got := a.userIDAt(9, 145000); got != 99 {
+		t.Errorf("userIDAt inside the empty-slot gap = %d, want the latch fallback 99", got)
+	}
+	if got := a.userIDAt(9, 140000); got != 12 {
+		t.Errorf("userIDAt inside the first session = %d, want 12, not the latch", got)
+	}
+}
+
+// Two connections of one player on two slots, neither of which the other
+// ever occupied: both are the FIRST session on their slot, so both
+// resolution windows start at -inf and a start-ordered pick is a tie
+// broken by slot index — which here would hand the answer to the DEAD
+// first connection (the lower slot). The rule is last session with PLAY.
+func TestPlayerUserIDs_OrderedByLastPlayNotSessionStart(t *testing.T) {
+	a := sessionFixture(
+		map[int][]ResolvedSession{
+			3: {{StartMs: math.MinInt32, EndMs: math.MaxInt32, Name: "rusti", UserID: 12, IdentityKey: "id:0"}},
+			9: {{StartMs: math.MinInt32, EndMs: math.MaxInt32, Name: "rusti", UserID: 25, IdentityKey: "id:0"}},
+		},
+		map[int][]int32{3: {1000, 600000}, 9: {700000, 900000}},
+	)
+	if got := finalizeUserIDs(t, a)["rusti"]; got != 25 {
+		t.Errorf("playerUserIDs[rusti] = %d, want 25 — the connection that played last, not the lower slot", got)
+	}
+}
+
+// Frag streaks stamp the userid of the connection that played the run, not
+// the demo-wide one. gameId 222649's shape: a streak inside bogojoker's
+// pre-timeout stint belongs to userid 12; the id he came back on (25) was
+// not issued until nine seconds after that stint ended, so a `track=` link
+// built from it resolves to nothing for the whole run.
+func TestFragStreaks_UserIDIsTheSessionAtTheRun(t *testing.T) {
+	a := sessionFixture(
+		map[int][]ResolvedSession{
+			9: {
+				{StartMs: math.MinInt32, EndMs: 141832, OccStartMs: 0, Name: "bogojoker", UserID: 12, IdentityKey: "id:0"},
+				{StartMs: 150269, EndMs: math.MaxInt32, OccStartMs: 150269, Name: "bogojoker", UserID: 25, IdentityKey: "id:0"},
+			},
+		},
+		nil,
+	)
+	a.timing.EndTime = 900000
+	a.core.FragEntries = []FragEntry{
+		{Time: 30000, Killer: "bogojoker", Victim: "prey", Weapon: "rl"},
+		{Time: 200000, Killer: "bogojoker", Victim: "prey", Weapon: "lg"},
+	}
+	a.rawSpawns = append(a.rawSpawns,
+		deathEvent{Time: 20000, PlayerNum: 9},
+		deathEvent{Time: 160000, PlayerNum: 9})
+	a.rawDeaths = append(a.rawDeaths,
+		deathEvent{Time: 100000, PlayerNum: 9},
+		deathEvent{Time: 300000, PlayerNum: 9})
+
+	// The demo-wide map (PlayerUserIDs) reports the live id for both runs;
+	// only the per-instant resolution can tell them apart.
+	streaks := a.detectFragStreaks(10, nil, newNameUserIDIndex(a.core, map[string]int{"bogojoker": 25}))
+	if len(streaks) != 2 {
+		t.Fatalf("streaks = %+v, want 2", streaks)
+	}
+	byStart := map[int32]int{}
+	for _, s := range streaks {
+		byStart[s.Time] = s.PlayerUserID
+	}
+	if got := byStart[20000]; got != 12 {
+		t.Errorf("pre-timeout run carries userid %d, want 12 (the connection that played it)", got)
+	}
+	if got := byStart[160000]; got != 25 {
+		t.Errorf("post-rejoin run carries userid %d, want 25", got)
 	}
 }

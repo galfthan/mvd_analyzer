@@ -86,7 +86,10 @@ func TestSessionExport_ReconnectIsOneIdentityTwoSessions(t *testing.T) {
 			2: {{
 				StartMs: 603_204, EndMs: maxInt32,
 				OccStartMs: 603_204, OccEndMs: maxInt32,
-				Name: "rusti", WireName: "rusti", UserID: 14, IdentityKey: "s7u8",
+				// mvdsv renames a connection that collides with a name
+				// already on the server, so the wire name of the second
+				// connection differs from the identity's canonical one.
+				Name: "rusti", WireName: "(1)rusti", UserID: 14, IdentityKey: "s7u8",
 			}},
 		},
 		map[int][2]int32{7: {0, 600_000}, 2: {610_000, 1_200_000}}, 1_200_000)
@@ -97,6 +100,14 @@ func TestSessionExport_ReconnectIsOneIdentityTwoSessions(t *testing.T) {
 	p := streamNamed(t, streams, "rusti")
 	if len(p.Sessions) != 2 {
 		t.Fatalf("sessions = %+v, want 2", p.Sessions)
+	}
+	// Each session reports the name that was ON THE WIRE during it — the
+	// point of publishing WireName beside the canonical Name. A consumer
+	// joining these windows against a live roster at some instant needs
+	// the name the engine had then.
+	if p.Sessions[0].Name != "rusti" || p.Sessions[1].Name != "(1)rusti" {
+		t.Errorf("session names = %q,%q, want rusti then (1)rusti (the wire names, not the canonical one)",
+			p.Sessions[0].Name, p.Sessions[1].Name)
 	}
 	if p.Sessions[0].UserID != 8 || p.Sessions[1].UserID != 14 {
 		t.Errorf("userids = %d,%d, want 8 then 14 (time order)", p.Sessions[0].UserID, p.Sessions[1].UserID)
@@ -166,6 +177,41 @@ func TestSessionExport_UnidentifiedOccupancyIsNotPublished(t *testing.T) {
 	}
 	if p.Identity == "" {
 		t.Error("identity must survive even when a session is withheld")
+	}
+}
+
+// A connection first attested AFTER the match ended is not a trackable
+// in-match window, and publishing it would emit StartMs > EndMs (windows
+// close at match end), contradicting the half-open contract. The shape is
+// real: a spectator connecting postgame to say gg, whom the identity
+// unifier folds onto a player who left mid-match.
+func TestSessionExport_PostgameConnectionIsWithheld(t *testing.T) {
+	streams := exportSessions(t,
+		map[int][]ResolvedSession{
+			7: {{
+				StartMs: minInt32, EndMs: 610_000,
+				OccStartMs: 0, OccEndMs: 590_000,
+				Name: "rusti", WireName: "rusti", UserID: 8, IdentityKey: "s7u8",
+			}},
+			3: {{ // same human, reconnects after the match is over
+				StartMs: 610_000, EndMs: maxInt32,
+				OccStartMs: 610_000, OccEndMs: maxInt32,
+				Name: "rusti", WireName: "rusti", UserID: 21, IdentityKey: "s7u8",
+			}},
+		},
+		map[int][2]int32{7: {0, 590_000}, 3: {610_000, 620_000}}, 600_000)
+
+	p := streamNamed(t, streams, "rusti")
+	if len(p.Sessions) != 1 {
+		t.Fatalf("sessions = %+v, want only the in-match connection", p.Sessions)
+	}
+	for _, s := range p.Sessions {
+		if s.StartMs > s.EndMs {
+			t.Errorf("session %+v has StartMs > EndMs — the window contract is half-open [start,end)", s)
+		}
+	}
+	if p.Sessions[0].UserID != 8 {
+		t.Errorf("published session userid = %d, want 8", p.Sessions[0].UserID)
 	}
 }
 
@@ -336,6 +382,44 @@ func TestIdentityKeys_CollisionIsBroken(t *testing.T) {
 	}
 	if got := keys[uf.find(1)]; got != "s7u8@900000" {
 		t.Errorf("disambiguated key = %q, want s7u8@900000", got)
+	}
+}
+
+// Appending the start time once is not enough: a third occupancy of the
+// same slot+userid attested at the same millisecond would re-collide with
+// the second, and the streams builder groups on this key.
+func TestIdentityKeys_RepeatedCollisionKeepsBreaking(t *testing.T) {
+	sess := []*occupancyRecord{
+		{slot: 7, userID: 8, startMs: 0, uidStartMs: 0},
+		{slot: 7, userID: 8, startMs: 900_000, uidStartMs: 900_000},
+		{slot: 7, userID: 8, startMs: 900_000, uidStartMs: 900_000},
+	}
+	uf := newUnionFind(len(sess)) // three distinct identities
+
+	keys := identityKeys(sess, uf)
+	seen := make(map[string]bool, len(sess))
+	for i := range sess {
+		k := keys[uf.find(i)]
+		if seen[k] {
+			t.Fatalf("key %q issued twice — two identities would be spliced into one row", k)
+		}
+		seen[k] = true
+	}
+}
+
+// Ties in attested start are broken by the lower slot, so the key of an
+// identity whose two first-observed occupancies begin on the same
+// millisecond is reproducible rather than dependent on record order.
+func TestIdentityKeys_EqualStartsBreakOnSlot(t *testing.T) {
+	sess := []*occupancyRecord{
+		{slot: 7, userID: 8, startMs: 100, uidStartMs: 100},
+		{slot: 2, userID: 14, startMs: 100, uidStartMs: 100},
+	}
+	uf := newUnionFind(len(sess))
+	uf.union(0, 1) // one human on two slots from the same instant
+
+	if got := identityKeys(sess, uf)[uf.find(0)]; got != "s2u14" {
+		t.Errorf("identity key = %q, want s2u14 (equal starts break on the lower slot)", got)
 	}
 }
 

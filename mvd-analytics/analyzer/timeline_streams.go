@@ -580,7 +580,21 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 			// entry with no userid cannot answer the question this list
 			// exists for ("which userid do I track at t"); it can only
 			// mislead.
-			if sess.UserID != 0 {
+			//
+			// A connection first attested at or after match end is withheld
+			// for the same reason a userid-less occupancy is: it cannot
+			// answer the question this list exists for. The published window
+			// closes at match end (below), so a postgame connection would
+			// publish StartMs > EndMs — an inverted window contradicting the
+			// documented half-open contract — and the thing it describes is
+			// not a trackable in-match window anyway. This is a real shape,
+			// not a hypothetical: a spectator who connects after the game to
+			// say gg, whose name or login unifies them with a player who
+			// left mid-match, arrives as a second session of a played
+			// identity. Guarded on a known match end (0 on a demo with no
+			// detected match, where nothing may be withheld).
+			postgame := matchEndMs > 0 && sess.OccStartMs >= matchEndMs
+			if sess.UserID != 0 && !postgame {
 				// Published window: the observed occupancy, with the only
 				// synthetic bound being a client still connected when the
 				// recording stopped (no wire event to report — close it

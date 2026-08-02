@@ -1,6 +1,11 @@
 package analyzer
 
-import "github.com/mvd-analyzer/mvd-reader/events"
+import (
+	"math"
+	"sort"
+
+	"github.com/mvd-analyzer/mvd-reader/events"
+)
 
 // CoreOutputs is the typed bundle of state-reconstruction results
 // that derived analysers consume during their Finalize. It replaces
@@ -230,6 +235,106 @@ func (co *CoreOutputs) SlotSessionAt(slot int, tMs int32) (ResolvedSession, bool
 		}
 	}
 	return ResolvedSession{}, false
+}
+
+// nameUserIDIndex resolves (canonical identity name, demo-clock ms) to the
+// userid of the connection that identity held at that instant. It is the
+// name-keyed sibling of SlotSessionAt, for the two userid carriers whose
+// event has no wire slot left on it: frag streaks (built after the per-slot
+// spawns and deaths have been merged under one identity name) and airgibs
+// (built post-hoc from the name-keyed damage log). Both used to stamp the
+// demo-wide "last session with play" id from
+// TimelineAnalysis.PlayerUserIDs, which for an event inside an EARLIER
+// session of a rejoiner is an id that did not exist yet — a hub `track=`
+// link that silently resolves to nothing for the whole run. The shape is
+// gameId 222649's (bogojoker times out on userid 12 and returns on 25
+// under one name); no cached demo happens to place a streak or an airgib
+// in the earlier stint, which is why nothing caught it. result.go's v66
+// note promises each event carrier reports the session that held the slot
+// at its own timestamp; this is what delivers that off the slot-less
+// surfaces.
+//
+// Windows are half-open [start_i, start_{i+1}) over the identity's sessions
+// ordered by attested start (ResolvedSession.OccStartMs — the first
+// userinfo that named the connection), the same convention SlotSessionAt
+// resolves on, so an event landing exactly at a handover belongs to the
+// successor. The earliest window is widened back to MinInt32, mirroring the
+// ±inf widening the per-slot table carries: an event before the first
+// userinfo (a match-start synthesised spawn on a recording that began
+// mid-game) still belongs to the connection that was there.
+//
+// Keys are the canonical identity names — the same keys
+// TimelineAnalysis.PlayerUserIDs uses, NOT the `name#slot` form the streams
+// builder emits when two identities share a display name. A lookup under a
+// suffixed name finds no windows and falls back to the name-keyed map,
+// exactly as the map-only stamping it replaces did.
+type nameUserIDIndex struct {
+	windows  map[string][]nameUserIDWindow
+	fallback map[string]int
+}
+
+type nameUserIDWindow struct {
+	startMs int32
+	slot    int
+	userID  int
+}
+
+// newNameUserIDIndex builds the index from the published session table,
+// with fallback (the demo-wide name→userid map) answering for names the
+// table does not carry. Nil-safe on co: with no session table every lookup
+// is the fallback, which is the pre-v66 behaviour.
+func newNameUserIDIndex(co *CoreOutputs, fallback map[string]int) *nameUserIDIndex {
+	x := &nameUserIDIndex{windows: make(map[string][]nameUserIDWindow), fallback: fallback}
+	if co == nil {
+		return x
+	}
+	slots := make([]int, 0, len(co.Sessions))
+	for slot := range co.Sessions {
+		slots = append(slots, slot)
+	}
+	sort.Ints(slots)
+	for _, slot := range slots {
+		for _, s := range co.Sessions[slot] {
+			// An occupancy the wire never gave a userid of its own (an
+			// inferred occupancy, a userid-0 resend, KTX's ghost scoreboard
+			// row) names no connection, and its window would otherwise
+			// shadow the real one it overlaps — the ghost carries the
+			// departed player's name, so it lands under the same key.
+			if s.Name == "" || s.UserID <= 0 {
+				continue
+			}
+			x.windows[s.Name] = append(x.windows[s.Name],
+				nameUserIDWindow{startMs: s.OccStartMs, slot: slot, userID: s.UserID})
+		}
+	}
+	for name, ws := range x.windows {
+		sort.Slice(ws, func(i, j int) bool {
+			if ws[i].startMs != ws[j].startMs {
+				return ws[i].startMs < ws[j].startMs
+			}
+			return ws[i].slot < ws[j].slot
+		})
+		ws[0].startMs = math.MinInt32
+		x.windows[name] = ws
+	}
+	return x
+}
+
+// at returns the userid to stamp on an event attributed to name at
+// demo-clock time tMs: the connection live at that instant, or the
+// fallback map's demo-wide pick when the name has no sessions. 0 when
+// neither source knows the name.
+func (x *nameUserIDIndex) at(name string, tMs int32) int {
+	if x == nil {
+		return 0
+	}
+	ws := x.windows[name]
+	for i := len(ws) - 1; i >= 0; i-- {
+		if tMs >= ws[i].startMs {
+			return ws[i].userID
+		}
+	}
+	return x.fallback[name]
 }
 
 // SlotIdentityAt returns the canonical identity that owned slot at the
