@@ -420,7 +420,10 @@ deeper in a body may still be `null`; check before iterating. One nested
 is `null` when the demo carries no item timeline at all and `[]` when it
 has one and that life took nothing — the same signal as the envelope's
 `measured.items`. (Under `/lives?summary=1` it is `null` on every row and
-carries no signal at all; read `measured.items`.)
+carries no signal at all; read `measured.items`.) `/stream-slice`'s
+per-player `alive` is the same kind of signal: `null` = liveness was not
+measurable, `[]` = measured and never alive in **this window**, `[…]` =
+the lives. `/state-at`'s `alive` carries the same `null` as a scalar.
 
 ### 2.5 Authentication
 
@@ -608,6 +611,19 @@ Concrete consequences:
   log. `/stream-slice?fields=sp,d` gives the raw ms timestamp arrays.
   `/buckets?fields=sp,d` only yields a per-window bool (lossy — collapses
   a same-window death+respawn).
+- **Liveness is served, not re-derived.** Never compute "was X alive at
+  t" from the `sp`/`d` markers: `/stream-slice` carries `alive` (the
+  stored lives, clamped to the window) and `/state-at` carries `alive`
+  (`true`/`false`/`null`) on every row, whatever `fields` asks for. The
+  obvious re-derivation — "last spawn after last death" — latches on a
+  death and respawn sharing a millisecond and reports the player dead for
+  the rest of that life (100.7 s of one player's match, measured).
+- **A `/state-at` position can be arbitrarily old.** The row reports the
+  nearest position sample with no staleness bound (deliberate, and
+  unchanged), so it also reports **`posAgeMs`** — `time` minus that
+  sample's timestamp. `/region-control`, `/loc-graph` and `/loc-trails`
+  drop a sample once its age reaches 250 ms; apply the same rule to
+  `posAgeMs` and the four endpoints answer "where was X" consistently.
 
 ### Aggregates: whole match, chosen stretches, or per life?
 

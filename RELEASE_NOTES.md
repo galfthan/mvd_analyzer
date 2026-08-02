@@ -189,10 +189,42 @@ than a migration.
   `getDamage`/`getAim`/`getItems`. One consequence: under `summary` the
   per-row `itemsTaken` is `null` regardless of the demo and says nothing —
   `measured.items` on the envelope stays the authority.
+- **Liveness is finally reachable over the API, and a `/state-at` position
+  says how old it is.** v64 made `streams.players[].alive` the canonical
+  liveness and the schema told consumers to read it rather than re-derive it
+  from the `sp`/`d` markers — advice no API consumer could follow, because no
+  endpoint served the field (there is no `streams` artifact either). Meanwhile
+  `/stream-slice` served the very markers whose obvious re-derivation
+  ("alive iff the last spawn is strictly later than the last death") is the
+  latching bug v64 deleted from this codebase, worth 100.7 s of one player's
+  match. Two additive view fields close that:
+  - **`/stream-slice` players carry `alive`** — the stored lives clamped to
+    the window exactly as `rl`/`lg`/`q` are. All three states survive the
+    clip: `null` = liveness was not measurable, `[]` = measured and never
+    alive **in this window** (including when a life list clips to nothing),
+    `[…]` = the lives, with the life boundaries a same-millisecond
+    death+respawn still produces.
+  - **`/state-at` rows carry `alive`** as the same three states at an instant:
+    `true` / `false` / `null`.
+  Neither is `omitempty` and neither is field-gated — `null` is a state, so a
+  key that could be omitted would also mean "you didn't ask", which is exactly
+  the inference the measuredness discipline forbids.
+- **`/state-at` also carries `posAgeMs`.** The row reports a player's nearest
+  position sample with no staleness bound, so on a POV recording it will
+  happily answer "X was at the RA" from a sample tens of seconds old — while
+  `/region-control`, `/loc-graph` and `/loc-trails` have discarded a sample
+  older than 250 ms since v64, so the four endpoints answered "where was X at
+  t" differently. *Which* position is reported does not change (the raw
+  carry-forward is deliberate — this endpoint hands over the evidence and lets
+  the caller judge); what is new is the evidence age: `time` minus the snapped
+  sample's timestamp, signed, so a negative value says the nearest sample is a
+  *later* one. Apply `>= 250 ms` to it and `/state-at` agrees with the
+  occupancy endpoints.
 - MCP gains `getHotWindows` and `getLives`. The golden corpus moves by exactly
   two lines per file — the `schemaVersion` tick and the new
   `frags.killsMeasured` — and by nothing else, which is what "both are views"
-  buys: no analytic value in the stored `Result` changes.
+  buys: no analytic value in the stored `Result` changes; the two view-layer
+  additions above are likewise invisible to it.
 
 ## unreleased (alive-gated-occupancy) — loc/region occupancy stops counting corpses, schema v64
 

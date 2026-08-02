@@ -1,6 +1,8 @@
 package view
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -188,6 +190,101 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 	if sl2.Height != nil || sl2.Liquid != nil || sl2.View != nil || sl2.Velocity != nil {
 		t.Errorf("hgt/lq/view/vel materialized on bare track: hgt=%v lq=%v view=%v vel=%v",
 			sl2.Height, sl2.Liquid, sl2.View, sl2.Velocity)
+	}
+}
+
+// The sliced `alive` is the stored lives clipped to the window, and it
+// carries result.PlayerStream.Alive's three states through the clip: null
+// stays null, [] stays [], and a measured list clipped to nothing comes
+// back [] — never null, which would read as "liveness not measurable".
+func TestStreamSliceAliveWindowAndThreeStates(t *testing.T) {
+	// Lives: one entirely before the window, one straddling the start, one
+	// inside, one straddling the end, one entirely after.
+	r := makeStream(t, result.PlayerStream{
+		Name: "p1",
+		Alive: []result.Interval{
+			{Start: 0, End: 500},
+			{Start: 900, End: 2500},
+			{Start: 2600, End: 2800},
+			{Start: 3500, End: 5000},
+			{Start: 6000, End: 7000},
+		},
+	})
+	v, err := StreamSlice(r, StreamSliceOptions{Start: 1000, End: 4000, Fields: []string{FieldHealth}})
+	if err != nil {
+		t.Fatalf("StreamSlice: %v", err)
+	}
+	want := []result.Interval{
+		{Start: 1000, End: 2500},
+		{Start: 2600, End: 2800},
+		{Start: 3500, End: 4000},
+	}
+	got := v.Players[0].Alive
+	if len(got) != len(want) {
+		t.Fatalf("alive = %+v, want %+v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("alive[%d] = %+v, want %+v", i, got[i], want[i])
+		}
+	}
+
+	// A window that no life overlaps: measured, never alive HERE → [].
+	v, err = StreamSlice(r, StreamSliceOptions{Start: 5000, End: 6000, Fields: []string{FieldHealth}})
+	if err != nil {
+		t.Fatalf("StreamSlice: %v", err)
+	}
+	if got := v.Players[0].Alive; got == nil || len(got) != 0 {
+		t.Errorf("alive over a lifeless window = %+v, want an empty non-nil slice", got)
+	}
+
+	// Stored [] (measured, never alive at all) stays [].
+	rEmpty := makeStream(t, result.PlayerStream{Name: "p1", Alive: []result.Interval{}})
+	v, _ = StreamSlice(rEmpty, StreamSliceOptions{Start: 0, End: 10000, Fields: []string{FieldHealth}})
+	if got := v.Players[0].Alive; got == nil || len(got) != 0 {
+		t.Errorf("stored [] came back %+v, want an empty non-nil slice", got)
+	}
+
+	// Stored null (not measurable) stays null.
+	rNil := makeStream(t, result.PlayerStream{Name: "p1"})
+	vNil, _ := StreamSlice(rNil, StreamSliceOptions{Start: 0, End: 10000, Fields: []string{FieldHealth}})
+	if got := vNil.Players[0].Alive; got != nil {
+		t.Errorf("stored null came back %+v, want nil", got)
+	}
+
+	// The distinction has to survive to the wire — the key is never omitted.
+	for _, tc := range []struct {
+		name string
+		v    *StreamSliceView
+		want string
+	}{
+		{"null", vNil, `"alive":null`},
+		{"empty", v, `"alive":[]`},
+	} {
+		b, err := json.Marshal(tc.v.Players[0])
+		if err != nil {
+			t.Fatalf("marshal %s: %v", tc.name, err)
+		}
+		if !strings.Contains(string(b), tc.want) {
+			t.Errorf("%s slice marshalled to %s, want it to contain %s", tc.name, b, tc.want)
+		}
+	}
+}
+
+// `alive` is not field-gated — a slice that asked for one unrelated field
+// still carries liveness, because the key cannot be omitted without null
+// meaning both "not requested" and "not measurable".
+func TestStreamSliceAliveIsNotFieldGated(t *testing.T) {
+	r := makeStream(t, result.PlayerStream{
+		Name:  "p1",
+		Alive: []result.Interval{{Start: 0, End: 5000}},
+	})
+	v, err := StreamSlice(r, StreamSliceOptions{Start: 0, End: 10000, Fields: []string{FieldRL}})
+	if err != nil {
+		t.Fatalf("StreamSlice: %v", err)
+	}
+	if got := v.Players[0].Alive; len(got) != 1 || got[0] != (result.Interval{Start: 0, End: 5000}) {
+		t.Errorf("alive = %+v, want the single stored life", got)
 	}
 }
 

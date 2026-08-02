@@ -31,8 +31,28 @@ type StateAtView struct {
 
 // PlayerStateAt holds each requested field at Time. Pointers (and
 // omitempty) make it possible for JSON to omit fields that weren't
-// requested AND fields that have no data yet at Time.
+// requested AND fields that have no data yet at Time. Alive is the one
+// exception on both counts — see its comment.
 type PlayerStateAt struct {
+	// Alive is the player's liveness at Time, read from the stored
+	// result.PlayerStream.Alive (the canonical lives list) rather than
+	// re-derived from the sp/d markers. Not omitempty and not field-gated,
+	// like the sliced stream's `alive`: null is a state of its own —
+	// true / false = measured, null = liveness was not measurable — so a key
+	// that could be omitted would collide with it.
+	Alive *bool `json:"alive"`
+	// PosAgeMs is Time minus the timestamp of the position sample every
+	// positional field on this row (pos / view / hgt / lq / vel) was snapped
+	// to: positive = carried forward from an earlier sample, negative = the
+	// nearest sample is a LATER one. Which sample is reported is unchanged
+	// and deliberately unbounded — this publishes the evidence age instead,
+	// so a consumer can apply the same discipline the occupancy walkers do
+	// (region control, loc graph and /loc-trails drop a sample once
+	// |age| >= result.SampleStaleCapMs, 250 ms) rather than trusting a
+	// position held across an arbitrarily long unobserved hole. Absent
+	// exactly when no positional field resolved a sample.
+	PosAgeMs *int32 `json:"posAgeMs,omitempty"`
+
 	Health    *int16  `json:"h,omitempty"`
 	Armor     *int16  `json:"a,omitempty"`
 	ArmorType *string `json:"at,omitempty"`
@@ -133,6 +153,9 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			continue
 		}
 		ps := PlayerStateAt{}
+		if p.Alive != nil {
+			ps.Alive = boolPtr(intervalContains(p.Alive, tMs))
+		}
 		if requested[FieldHealth] {
 			if idx := indexI16AtOrBefore(p.Health, tMs); idx >= 0 {
 				v := p.Health[idx].V
@@ -218,6 +241,8 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			pt := p.Position
 			idx := nearestPositionIndex(pt, tMs)
 			if idx >= 0 {
+				age := tMs - pt.T[idx]
+				ps.PosAgeMs = &age
 				if requested[FieldPosition] {
 					ps.Pos = &Position3D{X: pt.X[idx], Y: pt.Y[idx], Z: pt.Z[idx]}
 				}

@@ -1001,6 +1001,11 @@ paths:
         Verbatim slices of the stored per-player streams (change-stream /
         interval / position tracks) for a time window. Entries and the
         envelope `start`/`end` bounds are all int32 MILLISECONDS.
+        Each player also carries `alive` — the stored lives clamped to the
+        window — so liveness never has to be re-derived from the `sp`/`d`
+        markers. It is not field-gated and keeps its three states through
+        the clip: `null` not measurable, `[]` measured but never alive in
+        this window, `[…]` the lives.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"
@@ -1036,6 +1041,12 @@ paths:
         /buckets and /stream-slice, except `sp`/`d` are rejected (spawns
         and deaths have no point-in-time meaning — use /events); note the
         `li` code renders as output key `loc`.
+        Two fields ride every row regardless of the selector: `alive`
+        (`true`/`false`/`null`, the stored liveness at the instant, `null`
+        = not measurable) and `posAgeMs` (how old the snapped position
+        sample is — the carry-forward is unbounded by design, so this is
+        what lets a caller apply the 250 ms staleness rule the occupancy
+        endpoints use).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/TimeRequired"
@@ -6739,6 +6750,37 @@ components:
                 type:
                   - "null"
                   - array
+              alive:
+                description: >
+                  The player's LIVES, clamped to the window — the canonical
+                  stored liveness (`streams.players[].alive`), not a
+                  re-derivation of the `sp`/`d` markers beside it. Always
+                  present and never field-gated, because `null` is a state:
+                  `null` = liveness was not measurable, `[]` = measured and
+                  never alive IN THIS WINDOW, `[…]` = the lives. A death
+                  splits a life even when the respawn lands on the same
+                  millisecond (the intervals touch), so this is also the
+                  life-boundary list.
+                items:
+                  additionalProperties: false
+                  properties:
+                    e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
+                    s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
+                  required:
+                    - s
+                    - e
+                  type: object
+                type:
+                  - "null"
+                  - array
               at:
                 description: "Armor-type change stream (t/v pairs)."
                 items:
@@ -7402,6 +7444,7 @@ components:
                   - object
             required:
               - name
+              - alive
             type: object
           type: array
         start:
@@ -7429,6 +7472,17 @@ components:
                 type:
                   - "null"
                   - integer
+              alive:
+                description: >
+                  Whether the player was alive at the instant, read from the
+                  canonical stored liveness (`streams.players[].alive`) and
+                  not re-derived from the `sp`/`d` markers. Always present
+                  and never field-gated, because `null` is a state of its
+                  own: `true`/`false` = measured, `null` = liveness was not
+                  measurable for this player.
+                type:
+                  - "null"
+                  - boolean
               at:
                 description: "Armor type at the instant."
                 type:
@@ -7514,6 +7568,22 @@ components:
                 type:
                   - "null"
                   - object
+              posAgeMs:
+                description: >
+                  Age of the position sample every positional field on this
+                  row (`pos`, `view`, `hgt`, `lq`, `vel`) was snapped to:
+                  `time` minus that sample's timestamp, int32 ms. Positive
+                  means the state is carried forward from an earlier sample;
+                  negative means the nearest sample is a LATER one. The
+                  carry-forward itself is unbounded by design — this is the
+                  evidence age, so a consumer can apply the same 250 ms
+                  discipline the occupancy endpoints do (`/region-control`,
+                  `/loc-graph` and `/loc-trails` drop a sample once its age
+                  reaches 250 ms). Absent exactly when no positional field
+                  resolved a sample.
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               q:
                 description: "Quad active at the instant."
                 type:
@@ -7593,6 +7663,8 @@ components:
                 type:
                   - "null"
                   - object
+            required:
+              - alive
             type: object
           type:
             - object

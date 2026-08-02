@@ -1,6 +1,8 @@
 package view
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -175,6 +177,108 @@ func TestStateAtLocResolvesName(t *testing.T) {
 	}
 	if st.Loc != nil {
 		t.Fatalf("Loc should be nil in index mode, got %v", *st.Loc)
+	}
+}
+
+// `alive` is the stored liveness evaluated at the instant, with three
+// states: true / false when it was measured, null when it was not. It is
+// not field-gated, so the key is always there to carry that null.
+func TestStateAtAlive(t *testing.T) {
+	r := makeStream(t, result.PlayerStream{
+		Name:  "p1",
+		Alive: []result.Interval{{Start: 1000, End: 2000}, {Start: 2000, End: 4000}},
+	})
+	for _, tc := range []struct {
+		at   int32
+		want bool
+	}{
+		{500, false},  // before the first life
+		{1000, true},  // start boundary is closed
+		{2000, true},  // the touching boundary of a same-ms death+respawn
+		{4000, false}, // end boundary is open
+		{5000, false}, // after the last life
+	} {
+		v, err := StateAt(r, StateAtOptions{Time: tc.at, Fields: []string{FieldHealth}})
+		if err != nil {
+			t.Fatalf("StateAt(%d): %v", tc.at, err)
+		}
+		got := v.Players["p1"].Alive
+		if got == nil || *got != tc.want {
+			t.Errorf("alive at %d = %v, want %v", tc.at, got, tc.want)
+		}
+	}
+
+	// Measured, never alive → false, not null.
+	rEmpty := makeStream(t, result.PlayerStream{Name: "p1", Alive: []result.Interval{}})
+	v, _ := StateAt(rEmpty, StateAtOptions{Time: 1000, Fields: []string{FieldHealth}})
+	if got := v.Players["p1"].Alive; got == nil || *got != false {
+		t.Errorf("alive on a measured-never-alive player = %v, want false", got)
+	}
+
+	// Not measurable → null, and the key survives to the wire.
+	rNil := makeStream(t, result.PlayerStream{Name: "p1"})
+	v, _ = StateAt(rNil, StateAtOptions{Time: 1000, Fields: []string{FieldHealth}})
+	if got := v.Players["p1"].Alive; got != nil {
+		t.Errorf("alive on an unmeasurable liveness = %v, want nil", *got)
+	}
+	b, err := json.Marshal(v.Players["p1"])
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if !strings.Contains(string(b), `"alive":null`) {
+		t.Errorf("row marshalled to %s, want it to contain \"alive\":null", b)
+	}
+}
+
+// posAgeMs publishes how old the snapped position sample is, so a consumer
+// can apply the occupancy walkers' staleness rule (drop at
+// |age| >= result.SampleStaleCapMs) to a carry-forward this endpoint
+// deliberately leaves unbounded.
+func TestStateAtPosAgeMs(t *testing.T) {
+	r := makeStream(t, result.PlayerStream{
+		Name: "p1",
+		Position: &result.PositionTrack{
+			T: []int32{0, 1000},
+			X: []float32{0, 100},
+			Y: []float32{0, 0},
+			Z: []float32{0, 0},
+		},
+	})
+	for _, tc := range []struct {
+		name string
+		at   int32
+		want int32
+	}{
+		{"on the sample", 1000, 0},
+		{"one ms short of the cap", 1000 + result.SampleStaleCapMs - 1, result.SampleStaleCapMs - 1},
+		{"at the cap (the walkers already reject here)", 1000 + result.SampleStaleCapMs, result.SampleStaleCapMs},
+		{"past the cap", 60000, 59000},
+		// Before the first sample the nearest one is a LATER sample, which
+		// the sign records rather than hides.
+		{"snapped back to a later sample", 0 - 120, -120},
+	} {
+		v, err := StateAt(r, StateAtOptions{Time: tc.at, Fields: []string{FieldPosition}})
+		if err != nil {
+			t.Fatalf("StateAt(%s): %v", tc.name, err)
+		}
+		st := v.Players["p1"]
+		if st.Pos == nil {
+			t.Fatalf("%s: pos absent — the carry-forward itself must not change", tc.name)
+		}
+		if st.PosAgeMs == nil || *st.PosAgeMs != tc.want {
+			t.Errorf("%s: posAgeMs = %v, want %d", tc.name, st.PosAgeMs, tc.want)
+		}
+	}
+
+	// No positional field requested (and no track at all) → no age to report.
+	v, _ := StateAt(r, StateAtOptions{Time: 1000, Fields: []string{FieldHealth}})
+	if got := v.Players["p1"].PosAgeMs; got != nil {
+		t.Errorf("posAgeMs = %d without a positional field, want absent", *got)
+	}
+	rNoTrack := makeStream(t, result.PlayerStream{Name: "p1"})
+	v, _ = StateAt(rNoTrack, StateAtOptions{Time: 1000, Fields: []string{FieldPosition}})
+	if got := v.Players["p1"].PosAgeMs; got != nil {
+		t.Errorf("posAgeMs = %d without a position track, want absent", *got)
 	}
 }
 

@@ -578,7 +578,11 @@ keys are in RESULT_SCHEMA.md.
 
 Output: `view.StreamSliceView`. Per-player change-stream entries
 inside the window (carry-forward entry prepended at `startTime`;
-intervals clamped to the window).
+intervals clamped to the window). Every player also carries **`alive`**,
+the canonical stored lives clamped to the window — read it instead of
+re-deriving liveness from the `sp`/`d` markers. It is not field-gated and
+has three states: `null` liveness not measurable, `[]` measured but never
+alive in this window, `[…]` the lives.
 
 #### `getStateAt({demoId, time, ...})`
 
@@ -592,6 +596,19 @@ intervals clamped to the window).
 Output: `view.StateAtView` — `{ time, players: { name: {...fields} } }`.
 Change streams resolve to "latest entry ≤ time" (carry-forward);
 intervals to membership; position to nearest sample.
+
+Two fields ride every row whatever `fields` asks for:
+
+- **`alive`** — the canonical stored liveness at the instant, never
+  re-derived from the `sp`/`d` markers. `true`/`false` = measured,
+  `null` = liveness was not measurable for that player.
+- **`posAgeMs`** — `time` minus the timestamp of the snapped position
+  sample (positive = carried forward from an earlier sample, negative =
+  the nearest sample is a later one). The reported position is an
+  unbounded carry-forward by design, so check this before trusting
+  "where was X at `time`": the occupancy surfaces (`getRegionControl`,
+  `getLocGraph`, `getLocTrails`) discard a sample once its age reaches
+  250 ms. Absent when no positional field resolved a sample.
 
 #### `getLocTrails({demoId, ...})`
 

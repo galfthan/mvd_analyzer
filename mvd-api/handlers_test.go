@@ -1286,6 +1286,68 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	}
 }
 
+// Liveness reaches REST on both stream surfaces (schema v65), never
+// field-gated, and /state-at publishes the age of the sample its position
+// was snapped to. `alive` is null — not absent — when the stored liveness
+// was not measurable, which is why neither key is omitempty.
+func TestStreamSliceStateAtAliveAndPosAge(t *testing.T) {
+	res := stubResult()
+	p := &res.Streams.Players[0]
+	p.Alive = []result.Interval{{Start: 0, End: 10000}, {Start: 12000, End: 60000}}
+	p.Position = &result.PositionTrack{
+		T: []int32{0, 100, 200, 300},
+		X: []float32{0, 10, 20, 30},
+		Y: []float32{0, 0, 0, 0},
+		Z: []float32{0, 0, 0, 0},
+	}
+	store := &fakeStore{byID: map[string]*result.Result{"gameId:42": res}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	// stream-slice: the lives clamped to the window, on a request that asked
+	// for one unrelated field.
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=5000&to=20000&fields=h&players=bps", 200)
+	p0 := resp["players"].([]any)[0].(map[string]any)
+	alive, ok := p0["alive"].([]any)
+	if !ok || len(alive) != 2 {
+		t.Fatalf("stream-slice alive = %v, want two clamped lives", p0["alive"])
+	}
+	first := alive[0].(map[string]any)
+	if first["s"].(float64) != 5000 || first["e"].(float64) != 10000 {
+		t.Errorf("first life = %v, want [5000,10000)", first)
+	}
+
+	// state-at: alive at the instant, plus the snapped sample's age (the
+	// track stops at 300 ms, so a query at 11 s is 10.7 s stale — the
+	// position is still reported, unchanged, but the age now says so).
+	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=11000&fields=pos&players=bps", 200)
+	sp := st["players"].(map[string]any)["bps"].(map[string]any)
+	if sp["alive"] != false {
+		t.Errorf("alive at 11000 (between two lives) = %v, want false", sp["alive"])
+	}
+	if _, ok := sp["pos"]; !ok {
+		t.Errorf("pos must still be reported however stale: %v", sp)
+	}
+	if age, ok := sp["posAgeMs"].(float64); !ok || age != 10700 {
+		t.Errorf("posAgeMs = %v, want 10700", sp["posAgeMs"])
+	}
+
+	// A demo whose liveness was not measurable serves null on both, and the
+	// keys stay present so null can carry that.
+	plain := newTestServer(t, storeWithStub())
+	defer plain.Close()
+	sl := getJSON(t, plain.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30000&fields=h&players=bps", 200)
+	slp := sl["players"].([]any)[0].(map[string]any)
+	if v, present := slp["alive"]; !present || v != nil {
+		t.Errorf("stream-slice alive = %v (present=%v), want a present null", v, present)
+	}
+	sa := getJSON(t, plain.URL+"/v1/demos/gameId:42/state-at?time=1000&fields=h&players=bps", 200)
+	sap := sa["players"].(map[string]any)["bps"].(map[string]any)
+	if v, present := sap["alive"]; !present || v != nil {
+		t.Errorf("state-at alive = %v (present=%v), want a present null", v, present)
+	}
+}
+
 func TestStateAt_MissingTime(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
