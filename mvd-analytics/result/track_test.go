@@ -54,6 +54,14 @@ func TestTrackHoldEndCapsTheHold(t *testing.T) {
 }
 
 func TestTrackHoldEndDegenerateTracks(t *testing.T) {
+	// An empty track has no evidence at all. The policy has to be total: the
+	// answer is zero, not a panic on t[len(t)-1].
+	if got := TrackHoldEnd(nil); got != 0 {
+		t.Errorf("empty track: TrackHoldEnd = %d, want 0", got)
+	}
+	if got := TrackHoldEnd([]int32{}); got != 0 {
+		t.Errorf("empty non-nil track: TrackHoldEnd = %d, want 0", got)
+	}
 	// A single sample carries no cadence, so it holds for nothing. Crediting a
 	// guessed duration would be worse than crediting none.
 	if got := TrackHoldEnd([]int32{500}); got != 500 {

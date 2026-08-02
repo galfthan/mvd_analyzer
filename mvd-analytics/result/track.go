@@ -50,6 +50,12 @@ const SampleStaleCapMs int32 = 250
 // that evaluates intervals at their left endpoint would otherwise stretch a
 // departed player's final sample to whatever the next event happens to be.
 func TrackHoldEnd(t []int32) int32 {
+	if len(t) == 0 {
+		// No sample, no evidence, nothing to hold: presence ends where it
+		// began. Callers guard on len(T) > 0 today, but the policy has to be
+		// total — a track with no samples must not panic its way out of a walk.
+		return 0
+	}
 	last := t[len(t)-1]
 	if len(t) < 2 {
 		// A single sample carries no cadence to hold for. Crediting nothing is
