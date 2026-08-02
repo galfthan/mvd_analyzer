@@ -195,6 +195,15 @@ func clipTrailToAlive(seq []TrailEntry, alive []result.Interval) []TrailEntry {
 // preceding entry. Keeps the earlier loc name (its dwell extends to
 // cover the dropped span), which matches the analyzer's blip-filter
 // behaviour.
+//
+// INVARIANT: neither the fold nor the coalesce may cross a gap between
+// two entries. Both work by extending the preceding entry's End over the
+// span that follows, and a gap is time the earlier stages deliberately
+// removed — the dead span cut out by clipTrailToAlive, or a stretch whose
+// loc did not resolve. Extending across it would hand that time back as
+// dwell: without this check a player who stood in one loc from 0-30 s and
+// was dead 10-20 s came back as a single 30 s residence at the DEFAULT
+// minDwellMs, silently undoing the alive gate two lines earlier.
 func mergeShortDwells(seq []TrailEntry, minDwell int32) []TrailEntry {
 	if len(seq) <= 1 {
 		return seq
@@ -202,14 +211,18 @@ func mergeShortDwells(seq []TrailEntry, minDwell int32) []TrailEntry {
 	out := make([]TrailEntry, 0, len(seq))
 	out = append(out, seq[0])
 	for i := 1; i < len(seq); i++ {
+		last := &out[len(out)-1]
+		if seq[i].Start > last.End {
+			out = append(out, seq[i])
+			continue
+		}
 		dwell := seq[i].End - seq[i].Start
 		if dwell < minDwell {
-			out[len(out)-1].End = seq[i].End
+			last.End = seq[i].End
 			continue
 		}
 		// Coalesce identical-loc adjacent entries (rare, but the
 		// merge above can produce them).
-		last := &out[len(out)-1]
 		if last.Loc == seq[i].Loc {
 			last.End = seq[i].End
 			continue
