@@ -74,7 +74,9 @@ than a migration.
   start / match end at the edges), so per-life `kills`, `deaths`,
   `damageGiven`, `shots`, `itemsTaken` and the rest sum **exactly** to what the
   per-event **logs** hold for that player on an unfiltered call — `/frags`'
-  `frags[]` rows and `/damage`'s `events[]` rows. That is not always the same
+  `frags[]` rows on the frag side, `/damage`'s **non-summary** aggregate on the
+  damage side (not its `events[]` rows: a telefrag or stomp folds its value
+  into the totals without a per-hit row of its own). That is not always the same
   as the `byPlayer` scoreboards: a death detected from `DF_DEAD`/`STAT_HEALTH`
   with no obituary counts there and leaves no log row for any life to carry,
   so on `wipeout_3on2_red_vs_blue[q3dm6qw]` three players' per-life deaths sum
@@ -104,8 +106,10 @@ than a migration.
   and a player whose observed presence simply stopped. `durationMs` stays
   **alive time** while the counts cover the wider attribution window — a life's
   duration is how long the player lived, not how long their rockets were in
-  the air — so a rate derived by dividing one by the other is very slightly
-  high, and every row therefore also publishes that window as
+  the air — so a rate derived by dividing one by the other reads **high**:
+  slightly when summed across a whole match, by tens of percent on a single
+  row where a short life is followed by a long dead gap. Every row therefore
+  also publishes that window as
   **`attrStart`/`attrEnd`**. Divide by `attrEnd − attrStart` for an exact
   rate; the pair also makes the partition property measurable, since one
   player's windows tile the match end to end.
@@ -131,7 +135,11 @@ than a migration.
   `kills: 0` beside `deaths: 92` is not a measurement. It is demo-global and
   **survives every filter** — narrowing the log cannot make a demo's
   obituaries matchable — and it is the value both endpoints publish as
-  `measured.frags`, so the two cannot drift.
+  `measured.frags`, so the two cannot drift. The verdict is decided from the
+  protocol death tally (`FragResult.ByPlayer`), not the match scoreboard: the
+  scoreboard's deaths column is written by the same post-processing fold that
+  stores the verdict, so a scoreboard read would see zeros and come out `true`
+  on exactly the unmatched-obituary demos the field exists to flag.
 - **`measured.liveness`, and `/lives` now 422s rather than lying.**
   `streams.players[].alive` distinguishes `null` "liveness was not measurable"
   from `[]` "measured, and never alive", and `/lives` emits no rows for
@@ -159,14 +167,15 @@ than a migration.
   instead kept every life straddling both bounds, so the two interval
   endpoints disagreed on the same query. Rejecting the range is the HTTP
   layer's call to make, not the view's.
-- **Positional kills fold into the totals but never into the score.** Telefrag
+- **Positional kills score under every metric they contribute to.** Telefrag
   and stomp value is added to the stats block's `damageGiven`/`damageTaken`
-  exactly as `/damage` reports it, so per-interval damage reconciles against
-  that endpoint — but it stays out of `damageByWeapon` (a positional kill
-  carries no weapon, as in `/damage`'s own `byWeapon`) and it does **not**
-  score for the damage metrics, because no per-hit evidence backs it and a
-  9999-sentinel lump would swamp every window it touched. Telefrags *do* score
-  under `frags`: they are kills in the frag log.
+  exactly as `/damage` reports it, and it scores on the same terms — so absent
+  a `weapons` filter a window's `score` equals the same-named field of its own
+  stats block exactly, under the damage metrics as under `frags`. `weapons=`
+  is the only thing that makes the two diverge, and it selects positional kills
+  too: `weapons=tele` scores telefrags alone. The one exclusion is
+  `damageByWeapon`, which matches `/damage`'s own `byWeapon` — a positional
+  kill carries no wire weapon to file it under.
 - **`water` and `drown` are now accepted interchangeably** in both the frag
   and damage weapon vocabularies. It is one event the two logs spell
   differently — a pre-existing wart that hot windows made visible, since one

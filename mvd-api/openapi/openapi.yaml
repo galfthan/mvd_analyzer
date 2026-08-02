@@ -1041,12 +1041,14 @@ paths:
         /buckets and /stream-slice, except `sp`/`d` are rejected (spawns
         and deaths have no point-in-time meaning — use /events); note the
         `li` code renders as output key `loc`.
-        Two fields ride every row regardless of the selector: `alive`
+        One field rides every row regardless of the selector: `alive`
         (`true`/`false`/`null`, the stored liveness at the instant, `null`
-        = not measurable) and `posAgeMs` (how old the snapped position
-        sample is — the carry-forward is unbounded by design, so this is
-        what lets a caller apply the 250 ms staleness rule the occupancy
-        endpoints use).
+        = not measurable). A second, `posAgeMs`, rides a row whenever the
+        request asked for at least one positional field (`pos`, `view`,
+        `hgt`, `lq`, `vel`) AND a sample resolved: it is how old the
+        snapped position sample is — the carry-forward is unbounded by
+        design, so this is what lets a caller apply the 250 ms staleness
+        rule the occupancy endpoints use.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/TimeRequired"
@@ -1328,10 +1330,15 @@ paths:
         depend on the metric's own source (the frag log knows `hook` and
         `water`, the damage log `explobox` and `drown`, the shot stream only
         what can be fired); `water` and `drown` are accepted interchangeably.
-        Suicides and teamkills never score but do appear in the stats block, and
-        so do telefrags/stomps — their value folds into `damageGiven` as
-        `/damage` reports it, while the SCORE ignores them (no per-hit evidence
-        backs a positional kill, and its lump value would swamp any window).
+        Suicides and teamkills never score, though they do appear in the stats
+        block. Telefrags and stomps DO score, under every metric they
+        contribute to: their value folds into `damageGiven`/`damageTaken` as
+        `/damage` reports it and is scored on the same terms, which is why an
+        UNFILTERED row's `score` equals the same-named field of its own stats
+        block exactly. `weapons` is the only thing that makes the two diverge,
+        and it selects positional kills too — `weapons=tele` scores telefrags
+        alone. The one exclusion is `damageByWeapon`, matching `/damage`'s own
+        `byWeapon`: a positional kill carries no wire weapon.
 
         Every numeric stat is emitted even at zero; read the envelope's
         `measured` block, never a field's absence, to tell an unmeasured source
@@ -1398,15 +1405,30 @@ paths:
         `durationMs` is ALIVE time and is not extended by the posthumous window.
 
         WHAT THE SUMS RECONCILE AGAINST. Every stat here is built from the
-        per-event LOGS, so an unfiltered response sums to those logs: the
-        `/frags` `frags[]` rows and the `/damage` `events[]` rows for that
-        player. It does NOT necessarily sum to a scoreboard aggregate such as
+        per-event LOGS, so an unfiltered response sums, on the frag side, to
+        that player's `/frags` `frags[]` rows, and on the damage side to
+        `/damage`'s NON-SUMMARY aggregate for them. Not to `/damage`'s
+        `events[]` rows: a telefrag or stomp folds its value into the totals
+        without a per-hit row of its own, so on a demo with any positional kill
+        the `events[]` sum comes in low by exactly that fold. Not to an
+        unfiltered BOUNDED SUMMARY either — that response substitutes KTX's
+        end-of-match scoreboard for the per-hit reconstruction these rows are
+        built from. And not necessarily to a scoreboard aggregate such as
         `/frags`' `byPlayer`, which has other sources — a death detected from
         `DF_DEAD` / `STAT_HEALTH` with no obituary counts there and leaves no
         log row for any life to carry. On
         `wipeout_3on2_red_vs_blue[q3dm6qw]` three players' per-life deaths sum
         to 3/4/7 against a `byPlayer` 4/5/9, and the frag log itself holds
         3/4/7 — the lives are faithful to their source.
+
+        ONE DEMO CLASS BREAKS THE IDENTITY OUTRIGHT, and says so by reading
+        zero. Where two wire slots resolve to the same player NAME, that
+        player's per-player stream is keyed with a `#slot` suffix while the
+        event logs keep the bare name, so nothing in their lives rows can
+        match: every stat there — kills, deaths, damage, shots — is 0, and
+        their pickups attach to no life at all rather than to the wrong slot's.
+        `/hot-windows` is unaffected (its subjects come from the log names
+        directly).
 
         `deaths` is the count of death rows attributed to the life. It is
         usually 1; it is 0 whenever no frag-log row names the player at that
@@ -4840,14 +4862,21 @@ components:
         player: { type: string, description: "The player who scored in this window." }
         team: { type: string, description: "Their team at match end; absent in a demo with no team labels." }
         start: { type: integer, format: int32, description: "Match-relative ms." }
-        end: { type: integer, format: int32, description: "start + windowMs." }
+        end:
+          type: integer
+          format: int32
+          description: >
+            `start + windowMs` (the identity holds over REST because `windowMs`
+            is capped at the match duration; the view clamps `end` at the int32
+            ceiling for in-process callers, who face no such cap).
         score:
           type: integer
           description: >
             The metric total over the window — the value that selected and
-            ranked it. With a `weapons` filter this is a SUBSET of the
-            same-named stat below; the envelope's `scoredBy` says exactly what
-            produced it.
+            ranked it. WITHOUT a `weapons` filter it equals the same-named stat
+            below exactly (telefrags and stomps score just as they fold); with
+            one it is a SUBSET of that stat. The envelope's `scoredBy` says
+            exactly what produced it.
       allOf:
         - $ref: "#/components/schemas/IntervalStats"
     ScoringRule:
@@ -5008,8 +5037,16 @@ components:
 
             IT IS WIDER THAN `durationMs`, which measures `end − start` — ALIVE
             time — and this is the one asymmetry in the row: a per-second rate
-            computed from a count over `durationMs` reads slightly high, and
+            computed from a count over `durationMs` reads HIGH — slightly when
+            summed across a whole match, by tens of percent on a single row
+            where a short life is followed by a long dead gap — while
             `attrEnd − attrStart` is the span the counts actually cover.
+
+            On a POV or otherwise truncated recording the final life's window
+            can contain events its player earned while provably still present:
+            liveness is clipped using the player's OWN samples, spawns and
+            deaths, and a killer-side obituary is deliberately not counted as
+            presence evidence.
 
             One player's windows tile the match end to end (half-open at
             exactly one side apiece), so no instant belongs to two of them and
@@ -5025,8 +5062,9 @@ components:
             How the life ended. `death` — a recorded death. `matchEnd` — the
             player was still alive. `leftGame` — the player's position track
             ended (they quit, or the recording lost them); liveness is clipped
-            to observed presence. Always present: an absent `killedBy` used to
-            conflate all three.
+            to observed presence, so on a truncated recording this means "the
+            recording stopped seeing them", not "they stopped playing".
+            Always present: an absent `killedBy` used to conflate all three.
         spawnLoc: { type: string, description: "Loc the life began in; absent without loc data." }
         deathLoc: { type: string, description: "Loc the life ended in." }
         killedBy:
@@ -5101,9 +5139,11 @@ components:
             dead gap that follows it, so a posthumous rocket counts for the life
             that fired it) — the row's `attrStart` / `attrEnd` carry that
             window, so divide by `attrEnd − attrStart` for an exact rate. A rate
-            derived from a count and this duration is therefore very slightly
-            high. For a hot window the two coincide and there is no separate
-            window to publish.
+            derived from a count and this duration therefore reads HIGH:
+            slightly when summed across a whole match, by tens of percent on a
+            single row where a short life is followed by a long dead gap. For a
+            hot window the two coincide and there is no separate window to
+            publish.
         kills: { type: integer, description: "Enemy kills. Suicides and teamkills excluded." }
         deaths:
           type: integer
@@ -7579,8 +7619,11 @@ components:
                   evidence age, so a consumer can apply the same 250 ms
                   discipline the occupancy endpoints do (`/region-control`,
                   `/loc-graph` and `/loc-trails` drop a sample once its age
-                  reaches 250 ms). Absent exactly when no positional field
-                  resolved a sample.
+                  reaches 250 ms). Present only when the request asked for at
+                  least one positional field AND a sample resolved — a field
+                  set with no positional field in it never carries this key,
+                  which therefore says nothing about whether the demo has a
+                  position track.
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer

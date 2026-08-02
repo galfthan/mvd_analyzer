@@ -208,8 +208,10 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   size control; both are deliberate — clipping a hot window's scoring at
   `to` while its stats block ran unclipped made `score` and the stats
   disagree. An **inverted** window (`from` > `to`) selects nothing
-  everywhere: `/frags`, `/damage`, `/hot-windows` and `/lives` all return an
-  empty top-level array rather than rejecting it or ignoring a bound.
+  everywhere: `/frags`, `/damage`, `/hot-windows` and `/lives` all serve a
+  200 whose row array is empty — nested inside the usual envelope object
+  (`frags`, `events`, `windows`, `lives` respectively) — rather than
+  rejecting the range or ignoring a bound.
 - **`summary`** (`/frags`, `/damage`, `/aim`, `/items`, `/lives`) —
   `1`/`true` drops the big per-event log / sample arrays / phase timeline
   and returns only the aggregates. On `/lives`, where the rows *are* the
@@ -647,9 +649,13 @@ Concrete consequences:
   deliberately no adaptive mode; the naturally variable-length unit is a
   life, and that is `/lives`.
 - **Only `/lives` reconciles per interval.** Lives partition the match, so
-  summing a player's per-life `kills` / `deaths` / `damageGiven` / `shots`
-  gives what the per-event **logs** hold for them — the `/frags` `frags[]`
-  rows and the `/damage` `events[]` rows. That is *not* always the same as
+  summing a player's per-life `kills` / `deaths` / `shots` gives what the
+  `/frags` `frags[]` rows hold for them, and summing `damageGiven` /
+  `damageTaken` gives `/damage`'s **non-summary** aggregate for them
+  (not its `events[]` rows — a telefrag or stomp folds its value into the
+  totals without a per-hit row — and not an unfiltered bounded *summary*,
+  which serves KTX's scoreboard instead of the reconstruction). That is
+  *not* always the same as
   the `byPlayer` scoreboards, which have other sources: a death detected
   from `DF_DEAD` / `STAT_HEALTH` with no obituary counts on the scoreboard
   and leaves no log row for any life to carry, so per-life deaths can come

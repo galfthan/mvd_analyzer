@@ -61,10 +61,12 @@ that downstream consumers render, summarise, or feed to an agent.
   the caller's chosen window / fields / reducers. Every entry takes
   at least one time-related option that the caller controls; static
   derivations (`FragResult`, `LocGraphResult`, `MetadataResult`, …)
-  don't belong here and are served directly from result fields. Used
-  by the CLI's `-view` family of flags and the WASM bridge's
-  `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt` /
-  `getLocTrails` / `recomputeRegionControl` exports.
+  don't belong here and are served directly from result fields. The
+  first six are what the CLI's `-view` family of flags and the WASM
+  bridge export (`getBuckets` / `getEvents` / `getStreamSlice` /
+  `getStateAt` / `getLocTrails` / `recomputeRegionControl`); the two
+  v65 segmentations are reachable over REST and MCP only, and neither
+  the CLI nor the WASM bridge exports them.
   `HotWindows` (`hotwindows.go` — **not** `hot_windows.go`, which Go
   would read as a `GOOS` build constraint) ranks fixed-length windows by
   a caller-chosen summable metric; `Lives` (`lives.go`) cuts the match at
@@ -629,10 +631,13 @@ numeric stat is emitted including a measured zero, so a field's absence
 never means "unmeasured" — and `measured.frags` is exactly the stored
 `KillsMeasured` verdict, while `measured.liveness` says whether the
 segmentation was possible at all); a player's lives **partition** the match,
-so unfiltered per-life sums reconcile exactly with what the per-event
-LOGS hold for that player — `frags.frags[]` and `damage.events[]`, not
-necessarily the `byPlayer` scoreboards, which count deaths no log row
-recorded — while `durationMs` stays alive time and each row's `attrStart`/`attrEnd` carry the
+so unfiltered per-life sums reconcile exactly — the frag side against
+`frags.frags[]`, the damage side against `/damage`'s **non-summary**
+aggregate (`damage.events[]` is one row short per telefrag / stomp,
+whose value folds into the totals without a per-hit row of its own), and
+neither necessarily against the `byPlayer` scoreboards, which count
+deaths no log row recorded — while `durationMs` stays alive time and
+each row's `attrStart`/`attrEnd` carry the
 wider window the counts were taken over; and both envelopes echo the damage
 family they were computed in as `dmg`/`boundedMode`, exactly as `/damage`
 does, because the stats block reports damage under every metric.

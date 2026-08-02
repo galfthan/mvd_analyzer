@@ -74,8 +74,11 @@ type HotWindowsOptions struct {
 	PerPlayer int      // max windows from any ONE player; <=0 → uncapped
 	Players   []string // restrict to these SUBJECT players (case-sensitive)
 	Weapons   []string // restrict the SCORING events (case-insensitive)
-	From      int32    // window start bound, int32 ms (0 = no bound)
-	To        int32    // window end bound, int32 ms (0 = no bound)
+	// From/To bound where a window may START, never what it covers: a
+	// window anchored at To still runs the full WindowMs past it. See
+	// topWindowsFor, whose lo/hi are exactly these.
+	From int32 // earliest window start, int32 ms (0 = no bound)
+	To   int32 // latest window start, int32 ms (0 = no bound)
 	// Dmg is the damage family: "raw" | "bounded". It applies under EVERY
 	// metric, not only the damage ones — the per-window stats block reports
 	// damage whatever selected the window — and the resolved family is echoed

@@ -489,9 +489,9 @@ per-interval stats block and one envelope `measured` marker — every
 numeric stat is emitted including a measured zero, so measuredness is
 read from that marker and never from a field's absence — and a player's
 lives partition the match, so unfiltered per-life sums reconcile exactly
-with what the per-event logs hold for that player (`frags.frags[]`,
-`damage.events[]`) — not necessarily with the `byPlayer` scoreboards,
-which count deaths no log row recorded. `Result` itself gains exactly one field in v65,
+with `frags.frags[]` on the frag side and with `/damage`'s non-summary
+aggregate on the damage side — not necessarily with the `byPlayer`
+scoreboards, which count deaths no log row recorded. `Result` itself gains exactly one field in v65,
 `frags.killsMeasured`: the demo-global verdict on whether kill
 attribution was observable at all, which the `measured` marker's `frags`
 flag republishes rather than re-deriving. Schema v9 adds visibility-aware loc

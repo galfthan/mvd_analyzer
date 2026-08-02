@@ -597,18 +597,23 @@ Output: `view.StateAtView` — `{ time, players: { name: {...fields} } }`.
 Change streams resolve to "latest entry ≤ time" (carry-forward);
 intervals to membership; position to nearest sample.
 
-Two fields ride every row whatever `fields` asks for:
+Two fields come from outside the `fields` selector; only the first is
+ungated:
 
-- **`alive`** — the canonical stored liveness at the instant, never
-  re-derived from the `sp`/`d` markers. `true`/`false` = measured,
-  `null` = liveness was not measurable for that player.
+- **`alive`** — rides every row whatever `fields` asks for: the
+  canonical stored liveness at the instant, never re-derived from the
+  `sp`/`d` markers. `true`/`false` = measured, `null` = liveness was not
+  measurable for that player.
 - **`posAgeMs`** — `time` minus the timestamp of the snapped position
   sample (positive = carried forward from an earlier sample, negative =
   the nearest sample is a later one). The reported position is an
   unbounded carry-forward by design, so check this before trusting
   "where was X at `time`": the occupancy surfaces (`getRegionControl`,
   `getLocGraph`, `getLocTrails`) discard a sample once its age reaches
-  250 ms. Absent when no positional field resolved a sample.
+  250 ms. Present only when `fields` asked for at least one positional
+  field (`pos`, `view`, `hgt`, `lq`, `vel`) **and** a sample resolved, so
+  its absence under a non-positional field set says nothing about the
+  demo's position track.
 
 #### `getLocTrails({demoId, ...})`
 
@@ -670,7 +675,9 @@ row**: one query means one rule. It is also the only place the metric is
 echoed. It matters because `weapons` scopes the *scoring* events while
 the stats block still describes everything that happened, so
 `metric:"damageGiven", weapons:["lg"]` can report `score` 445 beside a
-`damageGiven` of 650.
+`damageGiven` of 650. Without a `weapons` filter the two are equal
+exactly — telefrags and stomps score just as they fold — and `weapons`
+selects those too, so `weapons:["tele"]` scores telefrags alone.
 
 `dmg`/`boundedMode` echo the damage family the **stats block** was
 computed in and this demo's bounded-reconstruction state, exactly as
@@ -714,13 +721,17 @@ Three things to know before summing:
   from its own start to the start of the next (match start / match end
   at the edges), so a **posthumous** kill — a rocket landing after its
   shooter died — counts for the life that fired it, so per-life stats sum
-  to what the per-event **logs** hold for that player: `getFrags`'
-  `frags[]` rows and `getDamage`' `events[]` rows. They do **not**
+  to `getFrags`' `frags[]` rows on the frag side and to `getDamage`'s
+  **non-summary** aggregate on the damage side (not to its `events[]`
+  rows: a telefrag or stomp folds its value into the totals without a
+  per-hit row of its own). They do **not**
   necessarily sum to the `byPlayer` scoreboards, which count deaths the
   log never recorded (a `DF_DEAD`/`STAT_HEALTH` death with no obituary).
-  `durationMs` stays **alive time**, so a rate derived from a count over
-  it is very slightly high — every row carries the wider window it
-  counted over as `attrStart`/`attrEnd`, so divide by
+  `durationMs` stays **alive time** while the counts cover the wider
+  attribution window, so a rate derived from a count over it runs high —
+  slightly, summed over a whole match; by tens of percent on a single row
+  where a short life is followed by a long dead gap. Every row carries
+  that window as `attrStart`/`attrEnd`, so divide by
   `attrEnd - attrStart` when you want the exact one.
 - **`deaths` is not a 0/1 flag and does not imply `endReason`.** It counts
   the frag-log death rows attributed to the life, so it is 0 whenever no
