@@ -260,10 +260,95 @@ func TestLocGraphTeleportThresholdScalesWithCadence(t *testing.T) {
 	if got := kindOf(build(200, 300)); got != "normal" {
 		t.Errorf("300 units in 200 ms: kind = %q, want normal — a fixed 125-unit bound would misread plausible movement as a teleport", got)
 	}
-	// Across an abnormally long gap no displacement claim is meaningful, so the
-	// transition must not be invented as a teleport.
-	if got := kindOf(build(locgraphTeleportMaxGapMs+100, 100000)); got != "normal" {
-		t.Errorf("huge jump across a >%dms stall: kind = %q, want normal (unclassifiable)",
+	// Across an abnormally long gap no displacement claim is meaningful — and
+	// there is no transition left to classify either, because the walk resets
+	// on an unobserved hole rather than inventing one
+	// (TestLocGraphEdgesDoNotCrossUnobservedHoles).
+	if got := kindOf(build(locgraphTeleportMaxGapMs+100, 100000)); got != "<no edge>" {
+		t.Errorf("huge jump across a >%dms stall: kind = %q, want no edge at all",
 			locgraphTeleportMaxGapMs, got)
+	}
+}
+
+// An unobserved hole is not a transition. The node walk already refuses to
+// credit time across one (TestLocGraphOccupancyDoesNotCreditTrackHoles); the
+// edge walk used to mint an edge anyway, because its only gap rule skipped
+// teleport CLASSIFICATION and then recorded the transition regardless. So a
+// player last seen at A and next seen at B forty seconds later produced
+// "A -> B, kind=normal, total=1" — a movement nobody observed, labelled
+// exactly like a real one, and labelled "normal" precisely because the jump
+// was too big to classify.
+func TestLocGraphEdgesDoNotCrossUnobservedHoles(t *testing.T) {
+	// Ten samples in A, a gap, ten samples in B.
+	build := func(gap int32) *Result {
+		var ts []int32
+		var li []int16
+		for i := int32(0); i < 10; i++ {
+			ts = append(ts, i*13)
+			li = append(li, 1)
+		}
+		resume := ts[len(ts)-1] + gap
+		for i := int32(0); i < 10; i++ {
+			ts = append(ts, resume+i*13)
+			li = append(li, 2)
+		}
+		pt := &result.PositionTrack{T: ts, Li: li}
+		for range ts {
+			pt.X = append(pt.X, 0)
+			pt.Y = append(pt.Y, 0)
+			pt.Z = append(pt.Z, 0)
+		}
+		return occupancyResult(result.PlayerStream{Name: "p", Team: "red", Position: pt}, 120000)
+	}
+	edgeTotal := func(res *Result) int {
+		g := BuildLocGraph(res)
+		if g == nil {
+			t.Fatal("BuildLocGraph returned nil")
+		}
+		for _, e := range g.Edges {
+			if e.From == "A" && e.To == "B" {
+				return e.Total
+			}
+		}
+		return 0
+	}
+
+	if got := edgeTotal(build(40000)); got != 0 {
+		t.Errorf("A -> B total = %d across a 40-second hole, want 0 — the walk saw no transition", got)
+	}
+	if got := edgeTotal(build(result.SampleStaleCapMs + 1)); got != 0 {
+		t.Errorf("A -> B total = %d across a %d ms hole, want 0 — the previous sample's evidence had expired",
+			got, result.SampleStaleCapMs+1)
+	}
+	// A gap the hold still covers is ordinary play and must keep its edge.
+	if got := edgeTotal(build(result.SampleStaleCapMs - 50)); got != 1 {
+		t.Errorf("A -> B total = %d across a %d ms gap, want 1 — the bound must not eat real movement",
+			got, result.SampleStaleCapMs-50)
+	}
+}
+
+// PlayerStream.Alive is three-state, and the loc-graph gate has to honour all
+// three: nil is "liveness was not measurable" and degrades to ungated, while an
+// EMPTY non-nil list is the measurement "never alive in the window" and gates
+// everything. Collapsing the two — the natural `len(alive) == 0` shorthand —
+// silently credits a player their whole track as presence on the strength of a
+// measurement that said the opposite.
+func TestLocGraphAliveMeasurednessStates(t *testing.T) {
+	li := make([]int16, 20)
+	for i := range li {
+		li[i] = 1
+	}
+	totalFor := func(alive []result.Interval) int32 {
+		p := walkTrack("p", 13, li, nil, nil)
+		p.Alive = alive
+		return totalsOf(t, occupancyResult(p, 60000))["A"]
+	}
+
+	if got := totalFor([]result.Interval{}); got != 0 {
+		t.Errorf("A = %d ms for a player measured as never alive, want 0", got)
+	}
+	if got := totalFor(nil); got == 0 {
+		t.Error("A = 0 ms for a player whose liveness was not measurable — unknown must " +
+			"degrade to ungated, not to a zeroed player")
 	}
 }

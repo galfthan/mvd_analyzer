@@ -379,7 +379,8 @@ func BuildLocGraph(res *Result) *LocGraphResult {
 		insideAlive := makeAliveGate(p.Alive)
 		// Per-player cursor: tracks the loc + position of the last
 		// sample we counted. Reset at boundary crossings (death/spawn),
-		// at gaps in the loc track (Li=0), and while dead.
+		// at gaps in the loc track (Li=0), across an unobserved hole
+		// (result.SampleStaleCapMs), and while dead.
 		var (
 			curLoc   string
 			curX     float32
@@ -397,6 +398,19 @@ func BuildLocGraph(res *Result) *LocGraphResult {
 			for bIdx < len(boundaries) && boundaries[bIdx] <= t {
 				havePrev = false
 				bIdx++
+			}
+			// An unobserved hole is not a transition. Past
+			// result.SampleStaleCapMs the previous sample's evidence has
+			// expired (the same bound the node walk credits time under), so
+			// the two samples bracket a stall — a PVS hole on a POV recording,
+			// packet loss — and the player may have crossed any number of locs
+			// in between. Recording one edge across it invents movement that
+			// was never seen, and the displacement check could not even label
+			// it: beyond locgraphTeleportMaxGapMs a jump is left "normal", so
+			// a consumer filtering teleports out kept exactly the invented
+			// ones.
+			if havePrev && t-curT > result.SampleStaleCapMs {
+				havePrev = false
 			}
 
 			li := pt.Li[i]
