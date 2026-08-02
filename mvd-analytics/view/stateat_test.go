@@ -230,6 +230,30 @@ func TestStateAtAlive(t *testing.T) {
 	}
 }
 
+// `alive` is not field-gated — the sibling of
+// TestStreamSliceAliveIsNotFieldGated. Every case above happens to request
+// FieldHealth, so a gate on any requested field would have survived them all;
+// this one asks for a single unrelated, non-positional field and still expects
+// liveness, because the key cannot be omitted without null meaning both "not
+// requested" and "not measurable".
+func TestStateAtAliveIsNotFieldGated(t *testing.T) {
+	r := makeStream(t, result.PlayerStream{
+		Name:  "p1",
+		Alive: []result.Interval{{Start: 0, End: 5000}},
+	})
+	v, err := StateAt(r, StateAtOptions{Time: 2000, Fields: []string{FieldRL}})
+	if err != nil {
+		t.Fatalf("StateAt: %v", err)
+	}
+	st := v.Players["p1"]
+	if st.Alive == nil || *st.Alive != true {
+		t.Errorf("alive = %v on a fields=[rl] request, want true", st.Alive)
+	}
+	if st.Health != nil {
+		t.Errorf("health = %v on a fields=[rl] request, want nil — the gate under test must stay a real one", *st.Health)
+	}
+}
+
 // posAgeMs publishes how old the snapped position sample is, so a consumer
 // can apply the occupancy walkers' staleness rule (drop at
 // |age| >= result.SampleStaleCapMs) to a carry-forward this endpoint

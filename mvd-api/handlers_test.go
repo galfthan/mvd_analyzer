@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -2728,6 +2730,30 @@ func TestHotWindows_CapsAreConsistent(t *testing.T) {
 			t.Errorf("%s=-1: status = %d, want 200 uncapped (body=%s)", cap, status, string(body))
 		}
 	}
+
+	// The upper end of limit is the third arm of the same ruling: an
+	// out-of-range limit is REJECTED, not silently clamped. Without the
+	// handler's check the view still caps at 200 behind it, so limit=1000
+	// would answer 200 with a body that quietly disagrees with the request —
+	// exactly the "silently clamped" shape v59 removed, and the opposite of
+	// what /hot-windows' parameter docs promise.
+	body, status := getRaw(t, base+"?limit=1000")
+	if status != 400 {
+		t.Fatalf("limit=1000: status = %d, want 400 (a clamped 200 is the bug this pins) (body=%s)", status, string(body))
+	}
+	code, msg := errEnvelope(t, body)
+	if code != "invalid_param" {
+		t.Errorf("limit=1000: code = %q, want invalid_param", code)
+	}
+	// The message names both the bound and the value, so a caller can fix the
+	// request without consulting the spec.
+	if want := fmt.Sprintf("limit must be <= %d, got 1000", hotWindowsMaxLimit); msg != want {
+		t.Errorf("limit=1000: message = %q, want %q", msg, want)
+	}
+	// The bound itself is inclusive — the rejection starts one past it.
+	if body, status := getRaw(t, base+"?limit="+strconv.Itoa(hotWindowsMaxLimit)); status != 200 {
+		t.Errorf("limit=%d: status = %d, want 200 (the cap is inclusive) (body=%s)", hotWindowsMaxLimit, status, string(body))
+	}
 }
 
 // TestHotWindows_MinScoreParam: the filter is `minScore`, not the bare,
@@ -2850,5 +2876,208 @@ func TestHotWindows_ToBoundsWindowStart(t *testing.T) {
 	// It really did score events beyond `to`: the two kills at 10000/12000.
 	if score := w0["score"].(float64); score != 2 {
 		t.Errorf("score = %v, want 2 (the kills at 10000 and 12000, both past to=1000)", score)
+	}
+}
+
+// TestHotWindows_Unavailable exercises the 422 over HTTP: the view's gate is
+// per-METRIC, so the same demo answers 200 for one metric and 422 for another,
+// and the message has to name the stream the chosen metric needs rather than
+// say a bare "unavailable". Each arm of hotWindowsUnavailableMsg gets its own
+// demo, so a message wired to the wrong metric class fails here.
+func TestHotWindows_Unavailable(t *testing.T) {
+	// Each fixture drops exactly one source; everything else stays, so a 422
+	// can only come from the metric under test.
+	noShots := intervalFixture("standard")
+	noShots.Shots = nil
+	noDamage := intervalFixture("standard")
+	noDamage.Damage = nil
+	noFrags := intervalFixture("standard")
+	noFrags.Frags = nil
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:10": noShots,
+		"gameId:11": noDamage,
+		"gameId:12": noFrags,
+	}})
+	defer srv.Close()
+
+	for _, tc := range []struct {
+		id, metric, wantMsg string
+	}{
+		{"gameId:10", "shots", "this demo has no weapon-fire stream"},
+		{"gameId:10", "hits", "this demo has no weapon-fire stream"},
+		{"gameId:11", "damageGiven", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:11", "netDamage", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:12", "frags", "this demo has no frag log"},
+		{"gameId:12", "netFrags", "this demo has no frag log"},
+	} {
+		u := fmt.Sprintf("/v1/demos/%s/hot-windows?metric=%s", tc.id, tc.metric)
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s: status = %d, want 422 (body=%s)", u, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "hot_windows_unavailable" {
+			t.Errorf("GET %s: code = %q, want hot_windows_unavailable", u, code)
+		}
+		if msg != tc.wantMsg {
+			t.Errorf("GET %s: message = %q, want %q (it must name the missing stream)", u, msg, tc.wantMsg)
+		}
+	}
+
+	// The gate really is per-metric: the demo without a damage stream still
+	// serves the frag metrics, and vice versa.
+	for _, u := range []string{
+		"/v1/demos/gameId:11/hot-windows?metric=frags",
+		"/v1/demos/gameId:12/hot-windows?metric=damageGiven",
+		"/v1/demos/gameId:12/hot-windows?metric=shots",
+	} {
+		if body, status := getRaw(t, srv.URL+u); status != 200 {
+			t.Errorf("GET %s: status = %d, want 200 — the gate is per-metric (body=%s)", u, status, string(body))
+		}
+	}
+}
+
+// TestLives_Unavailable exercises /lives' 422 over HTTP for BOTH halves of
+// LivesAvailable's gate, which the single livesUnavailableMsg has to cover at
+// once. The halves are distinguishable states of the demo:
+//
+//	no per-player streams at all      → nothing to segment
+//	streams present, every Alive nil  → nothing on which liveness was measured
+//
+// The second is why the message does not stop at "no per-player streams": a
+// demo in that state HAS the streams, and a message naming only them sends the
+// caller looking for something they already have. Both states are asserted
+// against the half of the message that describes them.
+func TestLives_Unavailable(t *testing.T) {
+	noStreams := intervalFixture("standard")
+	noStreams.Streams = nil
+
+	emptyStreams := intervalFixture("standard")
+	emptyStreams.Streams.Players = nil
+
+	// Streams, names, teams, loc tracks — everything except a measurable
+	// liveness. Lives would emit zero rows here, and `{"lives":[]}` would
+	// claim nobody ever lived.
+	nilLiveness := intervalFixture("standard")
+	for i := range nilLiveness.Streams.Players {
+		nilLiveness.Streams.Players[i].Alive = nil
+	}
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:20": noStreams,
+		"gameId:21": emptyStreams,
+		"gameId:22": nilLiveness,
+	}})
+	defer srv.Close()
+
+	for _, tc := range []struct {
+		id, why, wantHalf string
+	}{
+		{"gameId:20", "no streams section", "no per-player streams to segment into lives"},
+		{"gameId:21", "streams section with no players", "no per-player streams to segment into lives"},
+		{"gameId:22", "streams whose liveness was never measurable", "none on which liveness was measurable"},
+	} {
+		u := "/v1/demos/" + tc.id + "/lives"
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s (%s): status = %d, want 422 (body=%s)", u, tc.why, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "lives_unavailable" {
+			t.Errorf("GET %s (%s): code = %q, want lives_unavailable", u, tc.why, code)
+		}
+		if !strings.Contains(msg, tc.wantHalf) {
+			t.Errorf("GET %s (%s): message = %q, must contain the half that describes this demo: %q",
+				u, tc.why, msg, tc.wantHalf)
+		}
+		// One constant covers both states, so neither half may be dropped:
+		// whichever demo asked, the message stays true.
+		if msg != livesUnavailableMsg {
+			t.Errorf("GET %s (%s): message = %q, want the shared constant %q", u, tc.why, msg, livesUnavailableMsg)
+		}
+	}
+}
+
+// TestLives_MinMsFloor: minMs is a DURATION filter, so a negative is
+// meaningless rather than a second spelling of "no filter" — it is rejected,
+// not clamped to 0.
+//
+// The rejection comes from qp.Ms, which already refuses a negative, so the
+// handler's own `opts.MinMs < 0` guard is defence in depth behind it and its
+// message never reaches the wire. This test pins what a caller observes — 400
+// invalid_param naming the floor — which is the contract either layer owes,
+// rather than one layer's wording. (Contrast windowMs on /hot-windows, which
+// deliberately bypasses Ms because its real floor is 1, not 0.)
+func TestLives_MinMsFloor(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/lives"
+
+	body, status := getRaw(t, base+"?minMs=-1")
+	if status != 400 {
+		t.Fatalf("minMs=-1: status = %d, want 400 (body=%s)", status, string(body))
+	}
+	code, msg := errEnvelope(t, body)
+	if code != "invalid_param" {
+		t.Errorf("minMs=-1: code = %q, want invalid_param", code)
+	}
+	if !strings.Contains(msg, "minMs") || !strings.Contains(msg, ">= 0") {
+		t.Errorf("minMs=-1: message = %q, must name the param and its floor", msg)
+	}
+	// 0 is the no-op filter and stays accepted.
+	if body, status := getRaw(t, base+"?minMs=0"); status != 200 {
+		t.Errorf("minMs=0: status = %d, want 200 (body=%s)", status, string(body))
+	}
+}
+
+// TestHotWindows_WindowMsCeilingFallbacks covers the two matchDurationMs arms
+// the intervalFixture (which carries Streams.Global.MatchEnd) never reaches.
+// The ceiling is what keeps the documented `end = start + windowMs` inside
+// int32, so a Result assembled without streams must still get one.
+func TestHotWindows_WindowMsCeilingFallbacks(t *testing.T) {
+	// No Streams at all: Match.Duration is the fallback authority.
+	fromMatch := intervalFixture("standard")
+	fromMatch.Streams = nil // Match.Duration is 120000
+
+	// Neither a stream match-end nor a match duration: the half-int32 ceiling.
+	// Frags is kept so the request dies on the bound, not on availability.
+	noDuration := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Frags:         intervalFixture("standard").Frags,
+	}
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:30": fromMatch,
+		"gameId:31": noDuration,
+	}})
+	defer srv.Close()
+
+	const halfInt32 = math.MaxInt32 / 2 // 1073741823
+	for _, tc := range []struct {
+		id, arm  string
+		bound    int
+		overshot int
+	}{
+		{"gameId:30", "Match.Duration", 120000, 120001},
+		{"gameId:31", "no duration at all", halfInt32, halfInt32 + 1},
+	} {
+		base := srv.URL + "/v1/demos/" + tc.id + "/hot-windows"
+		body, status := getRaw(t, base+"?windowMs="+strconv.Itoa(tc.overshot))
+		if status != 400 {
+			t.Fatalf("%s arm, windowMs=%d: status = %d, want 400 (body=%s)", tc.arm, tc.overshot, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "invalid_param" {
+			t.Errorf("%s arm: code = %q, want invalid_param", tc.arm, code)
+		}
+		if !strings.Contains(msg, strconv.Itoa(tc.bound)) {
+			t.Errorf("%s arm: message = %q, must name the bound %d it applied", tc.arm, msg, tc.bound)
+		}
+		// The bound is inclusive on both arms.
+		if body, status := getRaw(t, base+"?windowMs="+strconv.Itoa(tc.bound)); status != 200 {
+			t.Errorf("%s arm, windowMs=%d (exactly the bound): status = %d, want 200 (body=%s)",
+				tc.arm, tc.bound, status, string(body))
+		}
 	}
 }

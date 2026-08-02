@@ -252,6 +252,11 @@ type validationCase struct {
 	path   string // spec path pattern
 	body   []byte // request body (POST /v1/demos upload); nil for GETs
 	status int
+	// mustContain are substrings the response body has to carry. A case
+	// exists to make the SCHEMA do work, and a body that omits the field the
+	// case was added for validates just as happily as one that carries it —
+	// this is how such a case says which field it is here for.
+	mustContain []string
 }
 
 // gzipDemoBody is a tiny valid gzip stream used as the upload request body.
@@ -331,6 +336,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at", url: "/v1/demos/gameId:42/state-at?time=30&fields=" + strings.TrimSuffix(allFieldCodes, ",sp,d"), path: "/v1/demos/{id}/state-at", status: 200},
 		{name: "err-state-at-sp", url: "/v1/demos/gameId:42/state-at?time=30&fields=sp", path: "/v1/demos/{id}/state-at", status: 400},
 		{name: "state-at-locindex", url: "/v1/demos/gameId:42/state-at?time=30&loc=index", path: "/v1/demos/{id}/state-at", status: 200},
+		// The golden corpus (dm3) carries no position track, so every
+		// state-at case above resolves no positional field and the schema's
+		// posAgeMs / pos / view / vel branches went unexercised. gameId:45 is
+		// a minimal streams-only Result WITH a track, requested off-sample so
+		// posAgeMs is non-zero. mustContain keeps it from silently reverting
+		// to a body that validates by carrying nothing.
+		{name: "state-at-position-track", url: "/v1/demos/gameId:45/state-at?time=1500&fields=pos,view,hgt,lq,vel",
+			path: "/v1/demos/{id}/state-at", status: 200,
+			mustContain: []string{`"posAgeMs":500`, `"pos"`, `"view"`, `"vel"`, `"hgt"`, `"lq"`}},
 		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
 		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
 		// that still validates the Los schema (timeUnit + empty players array).
@@ -418,6 +432,34 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			ByPlayer:    map[string]*result.PlayerDamage{},
 			BoundedMode: "skipped:midair",
 		}},
+		// gameId:45 carries the one thing the golden corpus does not: a
+		// position track, with the optional h/lq/velocity columns, so the
+		// positional half of the state-at schema (pos, view, hgt, lq, vel and
+		// the posAgeMs that dates them all) gets validated against a real
+		// response instead of an absent one.
+		"gameId:45": {
+			SchemaVersion: result.CurrentSchemaVersion,
+			Streams: &result.Streams{
+				Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+				Players: []result.PlayerStream{{
+					Name:  "p1",
+					Alive: []result.Interval{{Start: 0, End: 10000}},
+					Position: &result.PositionTrack{
+						T:   []int32{0, 1000, 2000},
+						X:   []float32{0, 100, 200},
+						Y:   []float32{0, 10, 20},
+						Z:   []float32{0, -5, -10},
+						H:   []float32{5, 40, 12},
+						Lq:  []int8{0, 5, 7},
+						VP:  []int16{10, 20, 30},
+						VYa: []int16{-10, -20, -30},
+						VX:  []float32{100, 200, 300},
+						VY:  []float32{-100, -200, -300},
+						VZ:  []float32{1, 2, 3},
+					},
+				}},
+			},
+		},
 	}}
 	srv := newTestServer(t, store)
 	defer srv.Close()
@@ -448,6 +490,11 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			}
 			if tc.status == 200 {
 				covered[method+" "+tc.path] = true
+			}
+			for _, want := range tc.mustContain {
+				if !bytes.Contains(body, []byte(want)) {
+					t.Errorf("response does not contain %s — the case would validate vacuously; body: %.300s", want, body)
+				}
 			}
 			schema, hasJSON := sd.responseSchema(t, tc.path, method, fmt.Sprintf("%d", tc.status))
 			if !hasJSON {
