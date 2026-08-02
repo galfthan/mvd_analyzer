@@ -3,6 +3,7 @@ package analyzer
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -89,23 +90,54 @@ func TestLocAndRegionOccupancyReconcile(t *testing.T) {
 		}
 	}
 
-	checked := 0
+	// Same tallies from the region-control side.
+	regionMs := map[key]int32{}
+	regionArmedMs := map[key]int32{}
 	for regionName, st := range rc.Stats {
 		for player, ps := range st.ByPlayer {
 			k := key{regionName, player}
-			wantTotal := int32(ps.Armed + ps.Unarmed)
-			if got := locMs[k]; got != wantTotal {
-				t.Errorf("%s / %s: locGraph total %d ms != regionControl armed+unarmed %d ms",
-					regionName, player, got, wantTotal)
-			}
-			if got := locArmedMs[k]; got != int32(ps.Armed) {
-				t.Errorf("%s / %s: locGraph armed %d ms != regionControl armed %d ms",
-					regionName, player, got, ps.Armed)
-			}
-			checked++
+			regionMs[k] = int32(ps.Armed + ps.Unarmed)
+			regionArmedMs[k] = int32(ps.Armed)
 		}
 	}
-	if checked == 0 {
+
+	// Compare the UNION of both key sets, not region-control's alone.
+	// region-control creates a ByPlayer entry only for a player who accrued
+	// time, so iterating its keys can only catch a pair where it credits MORE
+	// than locGraph. A walker that credits a player nothing at all — the shape
+	// every liveness / end-of-track / staleness bug takes — produces no key and
+	// was compared against nothing.
+	pairs := map[key]bool{}
+	for k := range locMs {
+		pairs[k] = true
+	}
+	for k := range locArmedMs {
+		pairs[k] = true
+	}
+	for k := range regionMs {
+		pairs[k] = true
+	}
+	ordered := make([]key, 0, len(pairs))
+	for k := range pairs {
+		ordered = append(ordered, k)
+	}
+	sort.Slice(ordered, func(i, j int) bool {
+		if ordered[i].region != ordered[j].region {
+			return ordered[i].region < ordered[j].region
+		}
+		return ordered[i].player < ordered[j].player
+	})
+	for _, k := range ordered {
+		if locMs[k] != regionMs[k] {
+			t.Errorf("%s / %s: locGraph total %d ms != regionControl armed+unarmed %d ms",
+				k.region, k.player, locMs[k], regionMs[k])
+		}
+		if locArmedMs[k] != regionArmedMs[k] {
+			t.Errorf("%s / %s: locGraph armed %d ms != regionControl armed %d ms",
+				k.region, k.player, locArmedMs[k], regionArmedMs[k])
+		}
+	}
+	if len(ordered) == 0 {
 		t.Fatal("no (region, player) pairs compared — the fixture proves nothing")
 	}
 
@@ -378,15 +410,27 @@ func TestLocAndRegionOccupancyReconcileOnRealDemos(t *testing.T) {
 				}
 			}
 		}
-		pairs := 0
+		regionMs := map[key]int32{}
 		for regionName, st := range rc.Stats {
 			for player, ps := range st.ByPlayer {
-				wantMs := int32(ps.Armed + ps.Unarmed)
-				if got := locMs[key{regionName, player}]; got != wantMs {
-					t.Errorf("%s: %s / %s — locGraph %d ms != regionControl %d ms (delta %d)",
-						name, regionName, player, got, wantMs, got-wantMs)
+				regionMs[key{regionName, player}] = int32(ps.Armed + ps.Unarmed)
+			}
+		}
+		// The union, for the reason the synthetic test spells out: a pair only
+		// locGraph credits has no region-control key to iterate.
+		seen := map[key]bool{}
+		pairs := 0
+		for _, k := range []map[key]int32{locMs, regionMs} {
+			for kk := range k {
+				if seen[kk] {
+					continue
 				}
+				seen[kk] = true
 				pairs++
+				if locMs[kk] != regionMs[kk] {
+					t.Errorf("%s: %s / %s — locGraph %d ms != regionControl %d ms (delta %d)",
+						name, kk.region, kk.player, locMs[kk], regionMs[kk], locMs[kk]-regionMs[kk])
+				}
 			}
 		}
 		if pairs == 0 {

@@ -78,3 +78,72 @@ func checkDepartedPlayerBound(t *testing.T, nOther int) {
 		t.Error("p1 credited nothing at all — the bound is over-broad")
 	}
 }
+
+// A position sample's evidence expires result.SampleStaleCapMs after it: past
+// that the player's location is unknown and the time belongs to nobody. On a
+// POV recording, where only players inside the recorder's PVS are written, the
+// holes run to tens of seconds and crediting them in full hands a player most
+// of their loc time for standing still off-camera.
+//
+// The fixture puts the hole INSIDE a mapped region, which is what makes it
+// bite: a hole in an unmapped loc is discarded by the region lookup anyway, so
+// it cannot tell a working expiry from a missing one.
+func TestRegionControlDoesNotCreditStaleSamples(t *testing.T) {
+	const (
+		preHole  = int32(0)    // last sample before the hole
+		postHole = int32(1000) // first sample after it
+		lastSmpl = int32(1013)
+	)
+	res := &result.Result{
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 60000},
+			Players: []result.PlayerStream{{
+				Name: "p1", Team: "red",
+				Position: &result.PositionTrack{
+					T:  []int32{preHole, postHole, lastSmpl},
+					Li: []int16{1, 1, 1},
+				},
+				Alive: []result.Interval{{Start: 0, End: 60000}},
+			}},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			LocTable: []string{"", "mid"},
+			RegionControl: &result.RegionControlResult{
+				Regions: []result.ControlRegion{{Name: "centre", Locs: []string{"mid"}}},
+				TeamA:   "red", TeamB: "blue",
+			},
+		},
+		Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "p1", Team: "red"}}},
+	}
+	staleCap := result.SampleStaleCapMs
+
+	// The credited window of ONE sample is exactly [sample, sample+cap): the
+	// expiry instant itself is already stale. Asserting the boundary to the
+	// millisecond is what separates a working cap from an off-by-one that
+	// credits the whole remaining hole from the boundary onward.
+	sub, err := RegionControl(res, RegionControlOptions{StartTime: preHole, EndTime: postHole})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := presenceMs(sub.Stats["centre"].ByPlayer["p1"]); got != staleCap {
+		t.Errorf("over [%d,%d) with one sample at %d: credited %d ms, want exactly %d — the sample is evidence for [%d,%d) only",
+			preHole, postHole, preHole, got, staleCap, preHole, preHole+staleCap)
+	}
+
+	// Over the whole match: cap for the pre-hole sample, the 13 ms between the
+	// two post-hole samples, and one capped hold past the final sample. The
+	// 750 ms remainder of the hole is credited to nobody.
+	full, err := RegionControl(res, RegionControlOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := staleCap + (lastSmpl - postHole) + staleCap
+	if got := presenceMs(full.Stats["centre"].ByPlayer["p1"]); got != want {
+		t.Errorf("credited %d ms, want %d; the %d ms hole between samples %d and %d must not be credited",
+			got, want, postHole-preHole-staleCap, preHole, postHole)
+	}
+}
+
+func presenceMs(ps result.RegionPlayerStats) int32 {
+	return int32(ps.Armed + ps.Unarmed)
+}

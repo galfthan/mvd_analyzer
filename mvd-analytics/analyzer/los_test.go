@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -197,5 +198,75 @@ func TestComputeLOS_AlreadyLatched(t *testing.T) {
 	}
 	if err := ComputeLOS(res); err != nil {
 		t.Errorf("already-latched ComputeLOS = %v; want nil (fast path)", err)
+	}
+}
+
+// openWorldBSP is a degenerate map: one interior node whose two children are
+// the same empty leaf, that leaf carrying no vis row (so it sees everything),
+// and no solid anywhere but the leaf-0 sink. Every pair is therefore mutually
+// visible at every sample, which leaves the two liveness gates in losForLooker
+// as the only thing the emitted intervals can depend on.
+func openWorldBSP() *bspvis.BSP {
+	return &bspvis.BSP{
+		Version: "v29",
+		// Axial plane 1e6 units below the world, so every point and every box
+		// is on its front side and resolves to the single empty leaf.
+		Planes: []bspvis.Plane{{Normal: bspvis.Vec3{Z: 1}, Dist: -1e6, Type: 2}},
+		Nodes:  []bspvis.Node{{PlaneID: 0, Children: [2]int32{-2, -2}}},
+		Leaves: []bspvis.Leaf{
+			{Contents: bspvis.ContentsSolid},
+			{Contents: bspvis.ContentsEmpty, VisOfs: -1},
+		},
+		Models: []bspvis.Model{{HeadNodes: [4]int32{0}}},
+	}
+}
+
+// LOS is computed through the two alive gates in losForLooker: the looker's
+// own (no eye, no rays while dead) and each opponent's (a corpse, or the
+// bouncing gib head the player entity becomes, is not a sightline). Deleting
+// either only moved the BSP-gated golden corpus, so on a machine without
+// provisioned BSPs both could be removed silently. This runs the real walk
+// against a hand-built open world where visibility is decided by nothing else.
+func TestLosForLookerGatesOnAlive(t *testing.T) {
+	vb := openWorldBSP()
+	var ts []int32
+	for ms := int32(0); ms <= 2000; ms += 100 {
+		ts = append(ts, ms)
+	}
+	const matchEnd = 2000
+	full := []result.Interval{{Start: 0, End: matchEnd}}
+	// One death at 800, respawn at 1200.
+	split := []result.Interval{{Start: 0, End: 800}, {Start: 1200, End: matchEnd}}
+
+	seesAt := func(lookerAlive, otherAlive []result.Interval, at int32) bool {
+		players := []result.PlayerStream{
+			{Name: "A", Position: staticTrack(ts, 0, 0, 0), Alive: lookerAlive},
+			{Name: "B", Position: staticTrack(ts, 200, 0, 0), Alive: otherAlive},
+		}
+		los, _ := losForLooker(vb, players, 0, nil, matchEnd, map[int][]byte{}, buildEntityLeaves(vb, players))
+		for _, tr := range los {
+			if tr.Other != 1 {
+				continue
+			}
+			for _, iv := range tr.Iv {
+				if iv.Start <= at && at < iv.End {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	if !seesAt(full, full, 1000) {
+		t.Fatal("two live players in an open world do not see each other — the fixture pins nothing")
+	}
+	if seesAt(full, split, 1000) {
+		t.Error("the looker sees an opponent who is DEAD at t=1000: the opponent liveness gate is gone")
+	}
+	if seesAt(split, full, 1000) {
+		t.Error("a DEAD looker still has line of sight at t=1000: the looker liveness gate is gone")
+	}
+	if !seesAt(full, split, 400) {
+		t.Error("the opponent's live period at t=400 lost its sightline too — the gate is over-broad")
 	}
 }
