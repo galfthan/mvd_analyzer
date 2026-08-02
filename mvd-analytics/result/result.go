@@ -470,7 +470,8 @@ package result
 //
 // v43:
 //   - Aim target attribution gates candidates on being alive at fire time
-//     (losAliveAt over the spawn/death streams). Dead players keep streaming
+//     (then losAliveAt over the spawn/death streams; since v64 the stored
+//     PlayerStream.Alive). Dead players keep streaming
 //     position samples (the death-anim body), so a corpse could previously
 //     win nearest-crosshair attribution in team games. No field changes;
 //     crosshair sample counts/targets shift on team demos, and a duel fire
@@ -848,6 +849,13 @@ package result
 //     74 ms). It also stops an early quitter holding their loc/region to match
 //     end — region control evaluated intervals at their left endpoint, so a
 //     departed player's final sample was credited to the next event.
+//     locGraph EDGES take the same bound: no transition is recorded across a
+//     gap longer than SampleStaleCapMs, which previously minted a kind
+//     "normal" adjacency between the locs bracketing a PVS hole (past
+//     locgraphTeleportMaxGapMs the displacement check cannot label it, so a
+//     consumer filtering teleports out kept exactly the invented edges).
+//     /loc-trails carries the same two bounds, and its minDwellMs fold never
+//     merges across the gaps they cut.
 //   - The loc-graph teleport threshold is scaled by the REAL inter-sample
 //     delta instead of an assumed 50 ms. The MVD sample rate is NOT fixed:
 //     mvdsv gates demo frames on sv_demofps (default 30), so measured cadence

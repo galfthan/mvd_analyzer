@@ -86,12 +86,21 @@ info:
     and new response fields appear at any time without announcement, and
     documented fields don't change meaning, change type, or disappear
     outside the process here. A **breaking change ships as `/v2/<endpoint>`
-    served alongside `/v1`**, not as a replacement. **Old routes retire on
+    served alongside `/v1`**, not as a replacement — that includes
+    withdrawing a documented field or enum member, changing a type,
+    altering a documented default behaviour, and changing the **default
+    value of a parameter** (a caller who omits it would otherwise get
+    different numbers without opting in). **Old routes retire on
     a minimum of 8 weeks' notice**, and in practice only once measured
     usage has drained. A **correctness fix is not a break**: when a value
-    changes because it was computed wrongly, the field keeps its name, type
-    and documented meaning, so the fix ships inside `/v1` and only raises
-    `schemaVersion`.
+    changes because it was computed wrongly, the field keeps its name and
+    type and its documented meaning is not replaced — at most narrowed to
+    the semantics it was always meant to have, with the docs updated to say
+    so (schema v64: loc/region "time spent" is now documented as "alive,
+    observed time spent"). Such fixes ship inside `/v1` and only raise
+    `schemaVersion`. The **MCP tool surface** is covered by the same rules:
+    the shim and this API deploy in lockstep, so tool names, parameters and
+    result semantics change only under the process above.
 
     `schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and this
     document's `info.version`) is a **regeneration counter, not a break
@@ -730,9 +739,17 @@ paths:
       summary: Per-map loc adjacency graph
       description: >
         Which locs are reachable from which, weighted by observed traversal.
-        Node weights (ALIVE time spent; dead players excluded since schema v64) are int32 ms; edge weights are transition
-        counts. Echoes `timeUnit:"ms"`. 422 `locgraph_unavailable` when no
-        position track was emitted.
+        Node weights (ALIVE, OBSERVED time spent; dead players excluded since
+        schema v64) are int32 ms; edge weights are transition counts.
+        Two bounds shape both: a position sample's evidence expires after
+        250 ms, so time inside an unobserved hole (a PVS gap on a POV
+        recording, packet loss) is credited to nobody and no edge is
+        recorded across such a hole; and a player stops contributing at
+        their end-of-track (final sample held for one measured cadence,
+        capped at 250 ms) rather than holding their last loc to match end.
+        Both are inert on server-recorded demos, where gaps are
+        cadence-sized. Echoes `timeUnit:"ms"`. 422 `locgraph_unavailable`
+        when no position track was emitted.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Label"
@@ -1140,8 +1157,18 @@ paths:
       summary: Per-player loc dwell trails
       description: >
         Consecutive loc residences per player as `[start, end)` spans
-        (int32 ms). `minDwellMs` filters out blips shorter than the
-        threshold.
+        (int32 ms). A residence is dwell, i.e. presence, so it is
+        ALIVE dwell (schema v64): truncated at a death and resumed at
+        the respawn, and the player's last residence ends at their
+        end-of-track (final position sample held for one measured
+        cadence, capped at 250 ms) rather than at match end — the same
+        bounds `/loc-graph` node time and `/region-control` presence
+        use. `minDwellMs` filters out blips shorter than the threshold
+        by folding them into the preceding residence, but the fold
+        never crosses a gap: dead spans (and stretches whose loc did
+        not resolve) are never re-merged at any `minDwellMs`, and a
+        residence that follows a gap is returned even when it is
+        shorter than `minDwellMs`.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"
@@ -1202,7 +1229,14 @@ paths:
         (percentages + `byPlayer`) are the exact time-weighted integral
         over the native position samples (no grid), independent of
         `windowMs`, so they don't change with the display window.
-        `byPlayer.armed`/`unarmed` are integer milliseconds of ALIVE presence (dead players excluded since schema v64).
+        `byPlayer.armed`/`unarmed` are integer milliseconds of ALIVE,
+        OBSERVED presence (schema v64): dead players are excluded, a
+        sample's evidence expires after 250 ms so unobserved holes are
+        credited to nobody, and a player stops contributing at their
+        end-of-track (final position sample held for one measured
+        cadence, capped at 250 ms) rather than holding their last region
+        to match end. `bucketStates` shares the same classification
+        point, so a bucket in which no player qualifies reads `_`.
         The `regions` param trims the polygon payload: `full` (default)
         ships the region `points`; `summary` strips them; `none` omits the
         `regions` list entirely — `bucketStates` and `stats` are unaffected.
@@ -1787,7 +1821,11 @@ components:
     MinDwellMs:
       name: minDwellMs
       in: query
-      description: Drop loc residences shorter than this many milliseconds.
+      description: >
+        Fold loc residences shorter than this many milliseconds into the
+        preceding residence. The fold never crosses a gap, so a residence
+        that follows a dead span (or an unresolved stretch) survives even
+        when shorter than the threshold. Default 0 = no filter.
       schema:
         type: integer
         minimum: 0
@@ -3940,19 +3978,19 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (int32 ms), keyed by player name."
+                    description: "Per-player ALIVE, OBSERVED time spent (int32 ms), keyed by player name. Dead time is excluded and sample-and-hold expires after 250 ms, so unobserved holes are credited to nobody (schema v64)."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (int32 ms), keyed by team name."
+                    description: "Per-team ALIVE, OBSERVED time spent (int32 ms), keyed by team name — the sum of its members' values."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, int32 ms."
+                    description: "Aggregate ALIVE, OBSERVED time spent, int32 ms."
                     type: integer
                 required:
                   - total
@@ -3961,14 +3999,14 @@ components:
                   - "null"
                   - object
               byPlayer:
-                description: "Per-player time spent (int32 ms), keyed by player name."
+                description: "Per-player ALIVE, OBSERVED time spent (int32 ms), keyed by player name. Dead time is excluded and sample-and-hold expires after 250 ms, so unobserved holes are credited to nobody (schema v64)."
                 additionalProperties:
                   type: integer
                 type:
                   - object
                   - "null"
               byTeam:
-                description: "Per-team time spent (int32 ms), keyed by team name."
+                description: "Per-team ALIVE, OBSERVED time spent (int32 ms), keyed by team name — the sum of its members' values."
                 additionalProperties:
                   type: integer
                 type: object
@@ -3980,19 +4018,19 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (int32 ms), keyed by player name."
+                    description: "Per-player ALIVE, OBSERVED time spent (int32 ms), keyed by player name. Dead time is excluded and sample-and-hold expires after 250 ms, so unobserved holes are credited to nobody (schema v64)."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (int32 ms), keyed by team name."
+                    description: "Per-team ALIVE, OBSERVED time spent (int32 ms), keyed by team name — the sum of its members' values."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, int32 ms."
+                    description: "Aggregate ALIVE, OBSERVED time spent, int32 ms."
                     type: integer
                 required:
                   - total
@@ -4005,19 +4043,19 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (int32 ms), keyed by player name."
+                    description: "Per-player ALIVE, OBSERVED time spent (int32 ms), keyed by player name. Dead time is excluded and sample-and-hold expires after 250 ms, so unobserved holes are credited to nobody (schema v64)."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (int32 ms), keyed by team name."
+                    description: "Per-team ALIVE, OBSERVED time spent (int32 ms), keyed by team name — the sum of its members' values."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, int32 ms."
+                    description: "Aggregate ALIVE, OBSERVED time spent, int32 ms."
                     type: integer
                 required:
                   - total
@@ -4026,26 +4064,26 @@ components:
                   - "null"
                   - object
               total:
-                description: "Aggregate time spent, int32 ms."
+                description: "Aggregate ALIVE, OBSERVED time spent, int32 ms."
                 type: integer
               unarmed:
                 description: "Same time-spent breakdown restricted to samples holding neither RL nor LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (int32 ms), keyed by player name."
+                    description: "Per-player ALIVE, OBSERVED time spent (int32 ms), keyed by player name. Dead time is excluded and sample-and-hold expires after 250 ms, so unobserved holes are credited to nobody (schema v64)."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (int32 ms), keyed by team name."
+                    description: "Per-team ALIVE, OBSERVED time spent (int32 ms), keyed by team name — the sum of its members' values."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, int32 ms."
+                    description: "Aggregate ALIVE, OBSERVED time spent, int32 ms."
                     type: integer
                 required:
                   - total
@@ -4400,7 +4438,7 @@ components:
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         bucketStates:
-          description: "Per-bucket per-region control codes (one ASCII char each) at the requested windowMs. Each bucket is a point-sample classification: the state of every player's last position at bucket-start."
+          description: "Per-bucket per-region control codes (one ASCII char each) at the requested windowMs. Each bucket is a point-sample classification: the state of every player's last position at bucket-start. It shares the exact walk's classification point and therefore its liveness and staleness bounds (schema v64) — a dead player, a player whose last sample is more than 250 ms old, and a player past their end-of-track all contribute nothing, so a bucket with no qualifying player reads '_' (empty)."
           additionalProperties:
             type: string
           type: object
@@ -4467,18 +4505,18 @@ components:
             additionalProperties: false
             properties:
               byPlayer:
-                description: "Per-player presence in this region, keyed by player name. Values are integer milliseconds of presence (exact time-weighted, independent of the display windowMs)."
+                description: "Per-player presence in this region, keyed by player name. Values are integer milliseconds of ALIVE, OBSERVED presence (exact time-weighted, independent of the display windowMs): dead time is excluded, sample-and-hold expires after 250 ms so unobserved holes are credited to nobody, and a player stops contributing at their end-of-track rather than holding their last region to match end (schema v64)."
                 additionalProperties:
                   additionalProperties: false
                   properties:
                     armed:
-                      description: "Milliseconds present while carrying RL or LG."
+                      description: "Milliseconds of alive, observed presence while carrying RL or LG."
                       type: integer
                     team:
                       description: "Team name."
                       type: string
                     unarmed:
-                      description: "Milliseconds present without RL/LG."
+                      description: "Milliseconds of alive, observed presence without RL/LG."
                       type: integer
                   required:
                     - team
@@ -5144,18 +5182,18 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player breakdown, keyed by player name. Values are integer milliseconds of presence (exact time-weighted)."
+                    description: "Per-player breakdown, keyed by player name. Values are integer milliseconds of ALIVE, OBSERVED presence (exact time-weighted; dead time, unobserved holes past 250 ms and time past a player's end-of-track are all excluded since schema v64)."
                     additionalProperties:
                       additionalProperties: false
                       properties:
                         armed:
-                          description: "Milliseconds present while carrying RL or LG."
+                          description: "Milliseconds of alive, observed presence while carrying RL or LG."
                           type: integer
                         team:
                           description: "Team name."
                           type: string
                         unarmed:
-                          description: "Milliseconds present without RL/LG."
+                          description: "Milliseconds of alive, observed presence without RL/LG."
                           type: integer
                       required:
                         - team
@@ -6847,7 +6885,7 @@ components:
                 description: "Name / display label."
                 type: string
               sequence:
-                description: "Ordered loc residences for this player."
+                description: "Ordered loc residences for this player. Alive-gated (truncated at a death, resumed at the respawn) and bounded at the player's end-of-track since schema v64; a minDwellMs fold never merges across those gaps, so a residence following one is returned even when shorter than minDwellMs."
                 items:
                   additionalProperties: false
                   properties:

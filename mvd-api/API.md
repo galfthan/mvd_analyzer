@@ -428,11 +428,13 @@ schedule.
 
 Two version numbers move independently, and they mean different things:
 
-- **The `/v1` path prefix is the compatibility contract.** It is bumped
-  only for a *breaking* change — a documented field removed or renamed, an
-  enum value withdrawn, a type changed incompatibly, a documented default
-  behaviour altered. As long as you stay on `/v1`, existing integrations
-  keep working.
+- **The `/v1` path prefix is the compatibility contract.** It never
+  changes meaning under you: a *breaking* change — a documented field
+  removed or renamed, an enum value withdrawn, a type changed
+  incompatibly, a documented default behaviour or default parameter value
+  altered — arrives as a new prefix (`/v2/<endpoint>`) served **alongside**
+  `/v1`, not as a replacement of it. As long as you stay on `/v1`, existing
+  integrations keep working.
 - **`schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and the
   OpenAPI `info.version`) is a regeneration counter.** It ticks on *every*
   observable change to the analysis output, including purely **additive**
@@ -456,12 +458,19 @@ Two version numbers move independently, and they mean different things:
   on this?" is measured rather than guessed. The notice period is the
   floor; drained usage can only delay a removal, never bring it forward.
 - **A correctness fix is not a break.** When a field's *value* changes
-  because it was being computed wrongly, the field keeps its name, type and
-  documented meaning — so the fix ships inside `/v1` and rides
-  `schemaVersion` like any other regeneration. Corrections are called out
-  in [RELEASE_NOTES.md](../RELEASE_NOTES.md) with the direction and rough
-  magnitude of the change. If you have pinned a golden file, expect it to
-  move; if you have pinned a *shape*, it won't.
+  because it was being computed wrongly, the field keeps its name and its
+  type, and its documented meaning is not *replaced* — at most it is
+  **narrowed to the semantics the field was always meant to have**, with
+  the documentation updated to say so plainly. Schema v64 is the pattern:
+  loc and region occupancy stopped counting dead players and unobserved
+  time, so "time spent in a loc" is now documented as "**alive, observed**
+  time spent in a loc" — the same quantity the field was always intended
+  to report, finally measured. Such fixes ship inside `/v1` and ride
+  `schemaVersion` like any other regeneration, and are called out in
+  [RELEASE_NOTES.md](../RELEASE_NOTES.md) with the direction and rough
+  magnitude of the change. Giving a field a *different* meaning is a
+  break and goes through `/v2`. If you have pinned a golden file, expect
+  it to move; if you have pinned a *shape*, it won't.
 
 #### What is, and isn't, covered
 
@@ -480,6 +489,25 @@ recording, not of the API).
 the rows you receive. Schema v58 added the `demomark` event type to
 `/events` *and* to its default type set, so a caller that omits `types`
 simply began seeing new rows. Filter explicitly if you need a fixed set.
+
+**Changing the default *value* of a parameter is a break**, and goes
+through `/v2`. Widening a default set leaves everything you already
+received in place and adds to it; changing a default `windowMs`,
+`limit` or `minDwellMs` instead makes the default-path response
+*different* — a caller who never passed the parameter gets other numbers
+without having opted into anything, which is the same reason an altered
+default *behaviour* is a break.
+
+**The MCP tool surface follows this policy too.** `mvd-mcp` forwards
+every call to `mvd-api` and the two deploy in lockstep, so tool names,
+tool parameters and the meaning of their results move only under the
+rules above: new tools, new parameters and new result fields appear
+additively; a genuine break rides the same `/v2` + notice process as the
+REST route behind it. MCP tool *defaults* may differ from the REST
+defaults where an agent-facing default is more useful (e.g.
+`getLocTrails` defaults `minDwellMs` to 250 while REST defaults it to
+0); each such difference is documented in the tool description and is
+itself covered by the rule above.
 
 #### What your client must do in return
 

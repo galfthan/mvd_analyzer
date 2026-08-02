@@ -70,13 +70,27 @@ The analyser is split across several files:
    `Registry.SetRegionsOverride` can replace them at runtime.
 7. **Region control** (`view.RegionControl` in
    [`../view/region_control.go`](../view/region_control.go)):
-   walks each player's `PositionTrack` natively. For each bucket
-   window, sample the player's Li at `bucketStart` (carry-forward
-   from the latest position sample) and the armed state via the
-   RL/LG interval streams. Classify each bucket into one of seven
-   states (empty, teamA[Weak]Control, teamB[Weak]Control,
-   contested, weakContested). Output is per-region `bucketStates`
-   (one ASCII char per bucket) + match-aggregate `stats`. Region
+   walks each player's `PositionTrack` natively, through **two**
+   walks that share one classification point (`playerCursor.sampleAt`)
+   so they cannot disagree:
+   - `bucketStates` is the display walk: sample each player's Li at
+     `bucketStart` (carry-forward from the latest position sample)
+     and the armed state via the RL/LG interval streams, then classify
+     the bucket into one of seven states (empty,
+     teamA[Weak]Control, teamB[Weak]Control, contested,
+     weakContested). One ASCII char per bucket per region.
+   - `stats` is the exact walk (since v59): the match aggregate is a
+     time-weighted **integral** over the union of every player's
+     position sample times, their RL/LG armed boundaries and their
+     `alive` life boundaries — no grid, so it does not move with the
+     caller's `windowMs`.
+
+   Both walks apply the same three v64 bounds: a player is skipped
+   while **dead** (`PlayerStream.Alive`, the canonical lives — liveness
+   is not inferable from the samples, a corpse keeps streaming
+   position), while their last sample is more than
+   `result.SampleStaleCapMs` (250 ms) **stale**, and once past their
+   `result.TrackHoldEnd` **end-of-track**. Region
    definitions and team labels come from `TimelineAnalysisResult.
    RegionControl` (populated by analyzer Finalize); `BucketStates`
    and `Stats` are filled by the `regionControlPost` post-processor

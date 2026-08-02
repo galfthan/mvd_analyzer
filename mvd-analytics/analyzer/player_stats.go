@@ -874,8 +874,8 @@ func possessionExtent(p *result.PlayerStream) []result.Interval {
 // aliveIntervals converts the spawn / death markers into alive intervals
 // over [0, matchMs].
 //
-// The liveness rule is the repo's canonical one, stated at
-// analyzer.losAliveAt: a player is alive from match start and stays alive
+// The liveness rule is the repo's canonical one — this function IS its
+// statement: a player is alive from match start and stays alive
 // until a death; each death begins a dead period the next spawn ends. It
 // deliberately does NOT require a recorded match-start spawn — KTX emits a
 // player's first spawn only on their first RESPAWN, so keying off "most

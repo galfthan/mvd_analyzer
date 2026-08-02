@@ -126,13 +126,16 @@ endpoint table; the running server also describes itself — an OpenAPI
 
 **API stability.** The API grows additively: new endpoints and response
 fields appear without announcement, documented fields don't change meaning
-or disappear, and a genuine break ships as `/v2/<endpoint>` served
-*alongside* `/v1` (old routes retire on a minimum of 8 weeks' notice). A
-correctness fix — a value that changes because it was computed wrongly —
-keeps the field's name, type and meaning, so it stays in `/v1` and only
-raises `schemaVersion`, which is a cache key rather than a break signal. In
-return clients must ignore unknown fields and enum values. The full policy
-is [`mvd-api/API.md` §2.7](mvd-api/API.md#27-api-versioning-and-stability),
+or disappear, parameter defaults don't change value, and a genuine break
+ships as `/v2/<endpoint>` served *alongside* `/v1` (old routes retire on a
+minimum of 8 weeks' notice). A correctness fix — a value that changes
+because it was computed wrongly — keeps the field's name and type and at
+most narrows its documented meaning to what it was always meant to measure,
+so it stays in `/v1` and only raises `schemaVersion`, which is a cache key
+rather than a break signal. The MCP tool surface follows the same policy;
+the shim and the API deploy in lockstep. In return clients must ignore
+unknown fields and enum values. The full policy is
+[`mvd-api/API.md` §2.7](mvd-api/API.md#27-api-versioning-and-stability),
 also served in the spec's own description at `/docs`.
 
 ### Run MCP locally (`mvd-mcp`)

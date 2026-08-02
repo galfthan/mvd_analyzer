@@ -38,16 +38,19 @@
 <p class="muted">
   The API grows <strong>additively</strong>. New endpoints and new response
   fields appear at any time without announcement; documented fields do not
-  change meaning, change type, or disappear. A genuine breaking change ships
+  change meaning, change type, or disappear, and parameter defaults do not
+  change value. A genuine breaking change ships
   as a new route (<code>/v2/…</code>) served <em>alongside</em> <code>/v1</code>,
   so you migrate on your own schedule — old routes retire on a minimum of
-  8 weeks' notice.
+  8 weeks' notice. The MCP tools follow the same policy; they deploy in
+  lockstep with the API.
 </p>
 <p class="muted">
   <code>schemaVersion</code> is a regeneration counter, not a break signal: it
   ticks on every change including additive ones, so treat it as a cache key.
   A correctness fix — a value that changes because it was computed wrongly —
-  keeps the field's name, type and meaning, and so ships inside
+  keeps the field's name and type, and at most narrows its documented meaning
+  to what the field was always meant to measure, so it ships inside
   <code>/v1</code>.
 </p>
 <p class="muted">

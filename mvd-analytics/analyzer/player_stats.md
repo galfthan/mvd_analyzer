@@ -31,19 +31,29 @@ golden corpus always say what this pipeline actually computed.
 1. **Windows.** `presenceWindow` reads the player's first/last activity
    (position track, else spawn/death markers, else the whole match).
    `aliveIntervals` converts the spawn/death markers into alive
-   intervals using the repo's canonical liveness rule — the interval
-   form of `losAliveAt` (`los.go`), which a unit test pins pointwise,
-   with one deliberate divergence also pinned by a test: a death and the
-   spawn it triggers on the same millisecond leave the player ALIVE here
-   and dead in `losAliveAt` / `aimcore`, which both use a strict
-   `lastSpawn > lastDeath`. Instant respawn means alive, so this is the
-   correct tie-break; the other two are left alone rather than quietly
-   changed, since altering them moves every LOS and aim figure in the
-   golden corpus.
+   intervals; it **is** the repo's canonical liveness rule, and since
+   v64 the same function also produces the stored
+   `PlayerStream.Alive` that LOS, aim, loc-graph, region control and
+   `/loc-trails` read (`timeline_finalize.go` `deriveAliveIntervals`).
+   The two rival copies — `analyzer.losAliveAt` and `aimcore`'s
+   `aimAliveAt` — used a strict `lastSpawn > lastDeath`, which reports
+   a death and the spawn it triggers on the same millisecond as DEAD
+   and then latches there for the rest of the life. That tie-break is
+   wrong (instant respawn means alive), so v64 deleted `losAliveAt`,
+   rewrote `aimAliveAt` into a reader over `Alive`, and moved the LOS
+   and aim figures accordingly. `view.playerActiveInWindow` (the
+   `/buckets` `alive` mask) stays separate on purpose: it is a
+   window-overlap test, a different question, and it already resolves
+   the tie correctly.
    Alive is then intersected with presence, which is what stops a late
    joiner being credited alive time from match start (the liveness rule
    says "no death yet ⇒ alive since match start", right for a player
-   who was there, wrong for one who had not connected).
+   who was there, wrong for one who had not connected). That clip is
+   `presenceWindow` (raw first/last activity), while the stored
+   `Alive` clips to `result.TrackHoldEnd` widened by marker evidence,
+   so `window.aliveMs` and the summed durations of
+   `streams.players[].alive` can differ by up to ~250 ms per player.
+   Known and transitional; documented in RESULT_SCHEMA.md.
 2. **Hold.** Each possession stream is merged, clipped to
    `[0, matchEnd]`, and intersected with the alive intervals; `ms`,
    `runs` and `longestMs` fall out of the resulting interval list.

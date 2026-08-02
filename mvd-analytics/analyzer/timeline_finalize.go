@@ -629,9 +629,11 @@ func synthesizeMatchStartSpawns(streams *Streams) {
 // It is the same computation player_stats already ran (aliveIntervals), now
 // stored so the two positional producers that had NO liveness notion at all —
 // loc-graph and region-control, which were therefore counting corpses as
-// present — can share it. The three other predicates (losAliveAt, aimcore's
-// aliveAt, view.playerActiveInWindow) still compute their own; see
-// PlayerStream.Alive for why they were not migrated here.
+// present — can share it. LOS, aim and view.LocTrails read it too; the two
+// predicates that used to re-derive liveness (analyzer.losAliveAt, aimcore's
+// aimAliveAt) are gone — the first deleted, the second rewritten as a reader
+// over this field. view.playerActiveInWindow still computes its own on
+// purpose; see PlayerStream.Alive for why.
 //
 // The window is [0, matchEnd] on the match clock. When no match window is
 // known (the demo-timebase path: no match start detected, so nothing was

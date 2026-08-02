@@ -106,7 +106,7 @@ type GetStateAtInput struct {
 type GetLocTrailsInput struct {
 	DemoID     string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Players    []string `json:"players,omitempty"`
-	MinDwellMs *int     `json:"minDwellMs,omitempty" jsonschema:"drop residences shorter than this (ms). MCP default 250 (REST differs: 0 = raw) — nearest-loc flicker at loc boundaries otherwise dominates the list. Pass 0 explicitly for the raw unfiltered residences."`
+	MinDwellMs *int     `json:"minDwellMs,omitempty" jsonschema:"fold residences shorter than this (ms) into the preceding one, never across a gap. MCP default 250 (REST differs: 0 = raw) — nearest-loc flicker at loc boundaries otherwise dominates the list. Pass 0 explicitly for the raw unfiltered residences."`
 	StartTime  int32    `json:"startTime,omitempty"`
 	EndTime    int32    `json:"endTime,omitempty"`
 	Loc        string   `json:"loc,omitempty" jsonschema:"residence representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`

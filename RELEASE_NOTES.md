@@ -7,10 +7,13 @@ detail.
 
 ## unreleased (alive-gated-occupancy) — loc/region occupancy stops counting corpses, schema v64
 
-**A correctness fix.** Values move in `locGraph` and
-`timelineAnalysis.regionControl`; no existing field changed shape, name or
-meaning, so this stays in `/v1` per the compatibility policy. If you have
-pinned these numbers, expect them to fall.
+**A correctness fix.** Values move in `locGraph`,
+`timelineAnalysis.regionControl` and `/loc-trails`; no existing field
+changed shape or name, and no meaning is *replaced* — occupancy fields are
+narrowed to the semantics they were always meant to carry ("time spent in a
+loc" is now documented as "**alive, observed** time spent"), which is
+exactly the correctness-fix case the compatibility policy keeps in `/v1`.
+If you have pinned these numbers, expect them to fall.
 
 - **Dead players were being counted as present — and usually as *armed*.**
   They keep streaming position at full rate (`mvdsv/src/sv_demo.c:1481-1519`
@@ -43,8 +46,9 @@ pinned these numbers, expect them to fall.
   reports dead — and keeps reporting dead until some later spawn arrives, i.e.
   for the whole remaining life, not for an instant. Measured across the cached
   corpus: 100.7 s of one player's 1143.7 s match (8.8%), 46.9 s of another's,
-  4.3 s and 3.4 s elsewhere; 16 of 20 demos were unaffected. Both functions are
-  deleted.
+  4.3 s and 3.4 s elsewhere; 16 of 20 demos were unaffected. `losAliveAt` is
+  deleted outright; `aimAliveAt` survives by name only — it is now a
+  three-line binary search over `PlayerStream.Alive`.
   Visible effect: on `4on4_jah_ahoy_170526_defer_reconnect`, `biggz`'s
   crosshair error improves on every affected sample — 117.6° → 3.7°,
   64.6° → 13.3°, 63.9° → 35.1° — with the sample count unchanged. He was
@@ -101,10 +105,63 @@ pinned these numbers, expect them to fall.
   cadence is bimodal — ~13–16 ms on servers at full tick, ~34–39 ms on servers
   at the default. The docs' "~13 ms, virtually all gaps under 25 ms" was wrong
   for a third of the corpus and is corrected.
+- **`/loc-trails` no longer re-merges dead gaps at `minDwellMs > 0`.** The
+  short-dwell fold ran after the alive gate and welded residences back
+  together across the gaps the gate had just cut, so at the MCP default
+  `minDwellMs=250` a player alive in one loc 0–30 s but dead 10–20 s came
+  back as a single 30 s residence — every default MCP caller was getting
+  dead time re-credited as dwell, and only `minDwellMs=0` callers saw the
+  documented behaviour. The merge is now gap-aware, and a residence that
+  *follows* a gap is kept even when it is shorter than `minDwellMs`
+  (folding it anywhere would hand the removed time back). Dwell totals on
+  default `/loc-trails` and `getLocTrails` calls fall accordingly.
+- **Spawn and death markers now count as presence evidence for `alive`.**
+  The life list was clipped to the position track alone, but obituaries are
+  broadcast to every recorder while `svc_playerinfo` is not: on a POV
+  recording a player who left the recorder's PVS had their track stop and
+  their later, marker-proven deaths fall *outside* every life (track to
+  10 s, death at 63 s → `alive: [{0,10010}]`), which a consumer reading
+  lives interprets as the player having left the game — dropping every
+  later life. `presenceBounds` now widens the clip with marker evidence,
+  sharing `lastMarkerMs` with `lastObservedMs` so the two rules cannot
+  drift; the ends stay deliberately asymmetric (a marker after the track
+  extends the high clip exactly to it; a *death* before the track drops the
+  low clip, a *spawn* before it does not, since a join proves nothing
+  earlier). Server recordings have no track truncation, so goldens are
+  unchanged.
+- **`locGraph` edges are no longer recorded across unobserved holes.** The
+  edge walk had no stale-gap reset: past `locgraphTeleportMaxGapMs` it
+  skipped only the teleport *classification* and recorded the edge anyway,
+  minting a `kind:"normal"` adjacency between the locs bracketing a PVS
+  hole — worse than the old fixed-bound code, which at least branded such
+  jumps `teleport`, so a consumer filtering teleports out kept exactly the
+  invented ones. The cursor now resets past `result.SampleStaleCapMs`, the
+  same bound the node walk credits time under. Edge counts drop on POV
+  demos; inert on server recordings (worst corpus gap 74 ms, goldens
+  unchanged).
+- **`alive`'s three states now survive the API's demo cache.** `gob` omits
+  zero-valued fields and a length-0 slice is zero, so
+  `alive: []` (measured, never alive) decoded as `null` (not measurable) —
+  and every consumer degrades `null` to ungated, so mvd-api's tier-2 cache
+  answered liveness queries for such a player as if they were alive
+  throughout, disagreeing with a cold parse of the same demo. `PlayerStream`
+  now carries its own gob codec with an explicit measuredness flag. The JSON
+  contract is byte-identical and goldens are unchanged; the wire change
+  rides the v64-keyed cache tree, so no deployed cache holds old-format
+  bytes (a stale local dev cache fails decode and falls back to
+  re-analysis).
+- **`result.TrackHoldEnd` is total.** It read the final sample before its
+  length guard, so the exported policy function panicked on an empty track.
+  It now returns 0 — no sample, no evidence, nothing to hold. Defensive:
+  all five in-repo callers pre-check, so no served value changes.
 - Sibling to the **v59** region-stats fix, which removed the same
   grid-versus-integral defect from region control and concluded it existed
   nowhere else. Loc-graph was missed. A new reconciliation test now pins loc
-  totals to region totals so the two cannot drift apart again.
+  totals to region totals so the two cannot drift apart again, and a
+  25-mutation pass over this work added pins for four behaviours the whole
+  suite (goldens included) had left unguarded: region control's stale cap,
+  the LOS alive gates, the reconcile identity's unpaired-player direction,
+  and `aimcore`'s liveness measuredness states.
 
 ## unreleased (api-stability-policy) — the compatibility promise, written down
 
@@ -123,10 +180,20 @@ response shape changed.
   once measured usage has drained. Clients must ignore unknown fields and
   enum values, and treat `openapi.yaml` as the contract.
 - **A correctness fix is explicitly not a break.** When a field's value
-  changes because it was being computed wrongly, the name, type and
-  documented meaning are unchanged, so it stays in `/v1` and rides
-  `schemaVersion`. Such changes are called out here with the direction and
-  rough magnitude.
+  changes because it was being computed wrongly, the name and type are
+  unchanged and the documented meaning is not replaced — at most narrowed
+  to the semantics the field was always meant to have, with the docs
+  updated to say so (v64: loc/region "time spent" → "**alive, observed**
+  time spent"). Such changes stay in `/v1`, ride `schemaVersion`, and are
+  called out here with the direction and rough magnitude.
+- **Changing a parameter's default *value* is a break** and goes through
+  `/v2` — a caller who omits the parameter would otherwise get different
+  numbers without opting in. Widening a default *set* stays additive (see
+  below): the caller keeps everything they had and receives more.
+- **The MCP tool surface is covered by the same policy.** `mvd-mcp` and
+  `mvd-api` deploy in lockstep, so tool names, parameters and result
+  semantics move only under this process; new tools, parameters and result
+  fields appear additively.
 - **What the contract does *not* cover** is now written down: undocumented
   ordering, rounding of derived floats, `omitempty` behaviour, rate-limit
   thresholds, and which demos return `422 <section>_unavailable`. Adding a
