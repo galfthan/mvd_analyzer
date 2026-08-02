@@ -1,5 +1,10 @@
 package result
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 // Streams is the canonical native-rate storage for per-player and
 // global state changes. Read by the qwanalytics/view query API.
 //
@@ -219,7 +224,8 @@ type PlayerStream struct {
 	//   []    measured, and the player was never alive in the window;
 	//   [...] the player's lives.
 	// A player who never died is a single interval spanning the match, so
-	// absence can never be read as "alive throughout".
+	// absence can never be read as "alive throughout". gob cannot carry the
+	// null/[] distinction on the slice itself — see PlayerStream.GobEncode.
 	Alive []Interval `json:"alive"`
 
 	// LOS records when this player (the looker) had a clear line of sight
@@ -246,6 +252,52 @@ type PlayerStream struct {
 	// is an occlusion-tolerant proximity/awareness signal. Raw transitions, no
 	// smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
+}
+
+// PlayerStream carries its own gob codec for exactly one field: Alive.
+//
+// encoding/gob omits zero-valued struct fields, and a length-0 slice is zero
+// — so an empty non-nil slice decodes as nil, collapsing two of Alive's three
+// documented states. "Measured, and never alive" would come back as "liveness
+// was not measurable", which every consumer degrades to UNGATED: region
+// control, trails and the lazy LOS pass would then treat that player as alive
+// for the whole match. mvd-api's tier-2 demo cache stores Streams as a gob
+// (result/cache.go) and evaluates liveness on the decoded Result at read time,
+// so without this the same demo answers differently on a cold parse and a
+// cache hit.
+//
+// playerStreamWire is a defined type with PlayerStream's fields and none of
+// its methods: gob encodes it structurally (no recursion back into GobEncode)
+// and a field added to PlayerStream is carried along automatically. Only the
+// nil-vs-empty distinction needs the explicit flag.
+type playerStreamWire PlayerStream
+
+type playerStreamGob struct {
+	Fields        playerStreamWire
+	AliveMeasured bool
+}
+
+func (p PlayerStream) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(playerStreamGob{
+		Fields:        playerStreamWire(p),
+		AliveMeasured: p.Alive != nil,
+	}); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (p *PlayerStream) GobDecode(data []byte) error {
+	var w playerStreamGob
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&w); err != nil {
+		return err
+	}
+	*p = PlayerStream(w.Fields)
+	if w.AliveMeasured && p.Alive == nil {
+		p.Alive = []Interval{}
+	}
+	return nil
 }
 
 // LosTrack is one looker's line-of-sight onto a single opponent, as the
