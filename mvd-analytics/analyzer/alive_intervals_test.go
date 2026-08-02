@@ -239,3 +239,80 @@ func TestPipelineAlwaysPopulatesAlive(t *testing.T) {
 		t.Fatal("no player had a position track — the assertion proves nothing")
 	}
 }
+
+// Every death must land inside (or at the closing boundary of) some life. That
+// is the defining property of a life list: a death is what ENDS a life, so a
+// death outside every interval says the player died while not alive.
+//
+// The presence clip broke it whenever the position track ran out before the
+// markers did. On a POV recording a player leaves the recorder's PVS and their
+// svc_playerinfo stops, but their deaths keep arriving (an obituary is global),
+// so the track ends minutes before the last death — and the clip, reading only
+// the track, cut the life short and dropped every life after it. Downstream,
+// the lives view labelled the truncated life "leftGame".
+func TestAliveIntervalsCoverEveryDeath(t *testing.T) {
+	// Deaths are half-open interval ENDS: a death at exactly life.End closes
+	// that life, so the containment test is Start < death <= End.
+	assertDeathsCovered := func(t *testing.T, alive []result.Interval, deaths []int32) {
+		t.Helper()
+		for _, d := range deaths {
+			covered := false
+			for _, iv := range alive {
+				if iv.Start < d && d <= iv.End {
+					covered = true
+					break
+				}
+			}
+			if !covered {
+				t.Errorf("death at %d falls inside no life: %v", d, alive)
+			}
+		}
+	}
+
+	// The probe: the recorder loses the player 10 s in (samples every 13 ms to
+	// t=10000), but the obituary-fused death at 63000 and the respawn at 63100
+	// are still recorded.
+	t.Run("track ends before the markers do", func(t *testing.T) {
+		var track []int32
+		for ms := int32(0); ms <= 10000; ms += 13 {
+			track = append(track, ms)
+		}
+		deaths := []int32{63000}
+		got := aliveOf(t, []int32{63100}, deaths, 120000, track)
+
+		assertDeathsCovered(t, got, deaths)
+		if len(got) == 0 || got[0].End != 63000 {
+			t.Fatalf("got %v, want the first life to run to its death at 63000, "+
+				"not to stop at the end of the position track", got)
+		}
+	})
+
+	// The mirror image: the player is only observed from 60 s on, but died at
+	// 30 s. A DEATH before the track proves they were in the game (and, by the
+	// canonical rule, alive) before it began, so the low clip has nothing to
+	// stand on.
+	t.Run("a death precedes the track", func(t *testing.T) {
+		var track []int32
+		for ms := int32(60000); ms <= 70000; ms += 13 {
+			track = append(track, ms)
+		}
+		deaths := []int32{30000}
+		got := aliveOf(t, []int32{30100}, deaths, 120000, track)
+
+		assertDeathsCovered(t, got, deaths)
+	})
+
+	// The clip still does its job: a player who joins at 60 s, with no marker
+	// before their track, does not claim the first minute.
+	t.Run("a late joiner is still clipped", func(t *testing.T) {
+		var track []int32
+		for ms := int32(60000); ms <= 70000; ms += 13 {
+			track = append(track, ms)
+		}
+		got := aliveOf(t, nil, nil, 120000, track)
+		if len(got) != 1 || got[0].Start != 60000 {
+			t.Fatalf("got %v, want one life starting at 60000 — a joiner must not "+
+				"claim the time before they connected", got)
+		}
+	})
+}

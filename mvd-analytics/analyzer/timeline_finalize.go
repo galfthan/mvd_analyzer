@@ -666,18 +666,20 @@ func deriveAliveIntervals(streams *Streams) {
 		// player_stats never saw the error because it intersects with its own
 		// presence window; a stored, published field has no such caller.
 		//
-		// The position track is the presence evidence: it exists in memory here
-		// even when it is not serialised. Its end uses the shared
+		// The position track is the densest presence evidence: it exists in
+		// memory here even when it is not serialised. Its end uses the shared
 		// result.TrackHoldEnd so the field agrees with the walkers that read it.
-		// A player with no track keeps the marker-derived intervals — there is
-		// no presence evidence to clip against, and inventing one would be
-		// worse than the wider claim.
+		// Spawn / death markers are evidence too — see presenceBounds. A player
+		// with no track and no markers keeps the marker-derived intervals —
+		// there is no presence evidence to clip against, and inventing one
+		// would be worse than the wider claim.
 		//
 		// The clip trims the ENDS only. It deliberately does NOT split on gaps
 		// inside the track, and it must not merge touching intervals — see
 		// clipToPresence.
 		if pt := p.Position; pt != nil && len(pt.T) > 0 {
-			iv = clipToPresence(iv, pt.T[0], result.TrackHoldEnd(pt.T))
+			lo, hi := presenceBounds(p, pt)
+			iv = clipToPresence(iv, lo, hi)
 		}
 
 		if iv == nil {
@@ -689,8 +691,8 @@ func deriveAliveIntervals(streams *Streams) {
 	}
 }
 
-// clipToPresence trims each life to [lo, hi) — the span in which the player's
-// position track carries any evidence at all — WITHOUT merging the result.
+// clipToPresence trims each life to [lo, hi) — the span in which the player is
+// known to exist at all (presenceBounds) — WITHOUT merging the result.
 //
 // Both properties are load-bearing, and the obvious `clipIntervals` does
 // neither:
@@ -726,20 +728,63 @@ func clipToPresence(iv []Interval, lo, hi int32) []Interval {
 	return out
 }
 
-// lastObservedMs is the latest timestamp the player is known to exist at,
-// used only as the alive-window fallback on a demo with no detected match
-// window. Position samples are the densest source; spawn / death markers
-// cover a player whose position track was not built.
-func lastObservedMs(p *PlayerStream) int32 {
-	var last int32
-	if p.Position != nil && len(p.Position.T) > 0 {
-		last = p.Position.T[len(p.Position.T)-1]
+// presenceBounds is the span [lo, hi) the player is known to exist in, which
+// is what their marker-derived lives are clipped to.
+//
+// The position track is the dense evidence, but it is not the ONLY evidence:
+// spawns and deaths are broadcast to every recorder (an obituary is global),
+// so a player whose track stops — on a POV recording everyone outside the
+// recorder's PVS drops out of svc_playerinfo — is still known to exist at
+// every later marker. Reading the track alone put a death outside every life,
+// which is the one thing a life list must never do (the lives view then labels
+// the truncated life "leftGame" and drops the rest), and it contradicted
+// lastObservedMs, which counts the same markers as existence evidence: a
+// player with no track kept their marker-derived lives while a player with a
+// truncated one lost them.
+//
+// The two ends are deliberately not symmetric, because the evidence is not. A
+// marker AFTER the track proves existence at that instant and nothing past it,
+// so hi extends exactly to it. A DEATH before the track proves the player was
+// in the game — and, by the canonical liveness rule, alive — for the run-up to
+// it, so the low clip has nothing left to stand on and is dropped. A SPAWN
+// before the track start is the join itself and proves no such thing;
+// extending on it would re-introduce the "alive before they connected" claim
+// the low clip exists to remove.
+func presenceBounds(p *PlayerStream, pt *PositionTrack) (lo, hi int32) {
+	lo, hi = pt.T[0], result.TrackHoldEnd(pt.T)
+	if m := lastMarkerMs(p); m > hi {
+		hi = m
 	}
+	if len(p.Deaths) > 0 && p.Deaths[0] >= 0 && p.Deaths[0] < lo {
+		lo = 0
+	}
+	return lo, hi
+}
+
+// lastMarkerMs is the latest spawn / death timestamp — the last instant the
+// player is known to exist at from the markers alone, independent of whether a
+// position track was built. Both marker lists are in ascending time order.
+func lastMarkerMs(p *PlayerStream) int32 {
+	var last int32
 	if n := len(p.Spawns); n > 0 && p.Spawns[n-1] > last {
 		last = p.Spawns[n-1]
 	}
 	if n := len(p.Deaths); n > 0 && p.Deaths[n-1] > last {
 		last = p.Deaths[n-1]
+	}
+	return last
+}
+
+// lastObservedMs is the latest timestamp the player is known to exist at,
+// used only as the alive-window fallback on a demo with no detected match
+// window. Position samples are the densest source; spawn / death markers
+// cover a player whose position track was not built.
+func lastObservedMs(p *PlayerStream) int32 {
+	last := lastMarkerMs(p)
+	if p.Position != nil && len(p.Position.T) > 0 {
+		if t := p.Position.T[len(p.Position.T)-1]; t > last {
+			last = t
+		}
 	}
 	return last
 }
