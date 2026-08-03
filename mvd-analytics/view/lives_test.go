@@ -230,9 +230,9 @@ func TestLivesUnmeasuredLivenessIsNotAnEmptyMatch(t *testing.T) {
 		t.Errorf("Lives on unmeasurable liveness: err = %v, want ErrUnavailable — "+
 			"an empty list would claim the player never lived", err)
 	}
-	// hot windows do not need liveness, so they still answer — and report the
+	// top windows do not need liveness, so they still answer — and report the
 	// same fact on the same envelope field.
-	if hw := mustHW(t, unmeasured, HotWindowsOptions{}); hw.Measured.Liveness {
+	if hw := mustHW(t, unmeasured, TopWindowsOptions{}); hw.Measured.Liveness {
 		t.Error("measured.liveness is true on a demo where no player has an Alive stream")
 	}
 
@@ -511,16 +511,16 @@ func TestLivesPartitionWithoutAMatchWindow(t *testing.T) {
 }
 
 // An inverted window selects nothing, matching /frags, /damage and
-// /hot-windows — all of which are empty for from > to. The two interval
+// /top-windows — all of which are empty for from > to. The two interval
 // endpoints must at least agree with each other: lives used to return every
-// life that straddled both bounds while hot windows returned nothing.
+// life that straddled both bounds while top windows returned nothing.
 func TestLivesInvertedRangeMatchesTheSiblings(t *testing.T) {
 	res := livesResult([]result.Interval{{Start: 0, End: 30000}}, []result.FragEntry{kill(500, "A", "B", "rl")})
 	if lv := mustLives(t, res, LivesOptions{From: 20000, To: 1000}); len(lv.Lives) != 0 {
 		t.Errorf("from=20000&to=1000 gave %d lives; the range is empty", len(lv.Lives))
 	}
-	if hw := mustHW(t, res, HotWindowsOptions{From: 20000, To: 1000}); len(hw.Windows) != 0 {
-		t.Fatalf("fixture: hot windows should be empty too, got %+v", hw.Windows)
+	if hw := mustHW(t, res, TopWindowsOptions{From: 20000, To: 1000}); len(hw.Windows) != 0 {
+		t.Fatalf("fixture: top windows should be empty too, got %+v", hw.Windows)
 	}
 	fv, err := Frags(res, FragOptions{From: 20000, To: 1000})
 	if err != nil {

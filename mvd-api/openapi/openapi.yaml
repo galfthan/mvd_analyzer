@@ -4,7 +4,7 @@
 # line-wise:
 #   - path items are "  /path:" (2-space indent), methods "    get:" (4-space);
 #   - the marker comments (artifact-enum, error-code-enum, field-code-enum,
-#     event-type-enum, hot-window-metric-enum) delimit enum blocks pinned to
+#     event-type-enum, top-window-metric-enum) delimit enum blocks pinned to
 #     the code — each names the test that pins it, and a block whose lines
 #     are not all "- value" fails the parser;
 #   - info.version must equal result.CurrentSchemaVersion.
@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "66"
+  version: "67"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -591,7 +591,7 @@ paths:
         every obituary went unmatched — so `kills`, `teamkills` and `byWeapon`
         are zeros that are NOT measurements, while `deaths` still is. It is
         not recomputed per filter: a filter that matches nothing does not make
-        a demo unmeasurable. `/hot-windows` and `/lives` publish the same
+        a demo unmeasurable. `/top-windows` and `/lives` publish the same
         verdict as `measured.frags`.
 
         **Errors.** 422 `frags_unavailable` when the demo has no frag log.
@@ -1337,9 +1337,9 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
-  /v1/demos/{id}/hot-windows:
+  /v1/demos/{id}/top-windows:
     get:
-      operationId: getHotWindows
+      operationId: getTopWindows
       tags: [timeline]
       summary: Each player's best stretches of the match
       description: |
@@ -1411,7 +1411,7 @@ paths:
         since it silently becomes `raw` on a demo whose reconstruction was
         skipped.
 
-        **Errors.** 422 `hot_windows_unavailable` when the demo carries no
+        **Errors.** 422 `top_windows_unavailable` when the demo carries no
         source stream for the chosen metric, and 422 `bounded_unavailable` —
         under any metric — for an EXPLICIT `dmg=bounded` on a demo whose
         bounded reconstruction was skipped. Missing loc data omits
@@ -1419,8 +1419,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Metric"
-        - $ref: "#/components/parameters/HotWindowMs"
-        - $ref: "#/components/parameters/HotWindowLimit"
+        - $ref: "#/components/parameters/TopWindowMs"
+        - $ref: "#/components/parameters/TopWindowLimit"
         - $ref: "#/components/parameters/PerPlayer"
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Weapons"
@@ -1435,7 +1435,113 @@ paths:
           headers: *perDemoHeaders
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HotWindows" }
+              schema: { $ref: "#/components/schemas/TopWindows" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/top-kills:
+    get:
+      operationId: getTopKills
+      tags: [timeline]
+      summary: The match's hardest kill bursts
+      description: |
+        The highlight-reel view: every enemy kill ranked by how hard the burst
+        that produced it hit. Neighbours — `/frags` is the exhaustive kill LOG
+        with no damage figure, `/damage` the whole-match aggregates plus the
+        per-hit log, `/top-windows` the best fixed-length stretches; this one
+        ranks individual KILLS.
+
+        **What a burst is.** For each enemy kill, the contiguous run of
+        **killing-weapon** hits the killer landed on that victim leading up to
+        it, summed in the requested damage family. The run is clipped below by
+        the start of the victim's current life.
+
+        **The burst is the KILLING WEAPON's run, and that is the question this
+        endpoint answers** — "how hard was this burst with this weapon".
+        Measured over 1,866 enemy kills, on ~8% of them that UNDERSTATES what
+        produced the kill: a rocket softens, a shotgun finishes, and the row
+        reads `weapon: sg, damage: 16` for a kill that took 250 across
+        weapons. Deliberate, not a defect. "What did the kill take across
+        weapons" stays a `/damage` question. A different-weapon hit landing
+        inside the run neither joins it nor breaks it.
+
+        **`gapMs` is a CAPTURE gap — narrow with `maxGapMs`, not with
+        `gapMs`.** The default 3000 is generous on purpose: truncation is
+        unrecoverable downstream while over-merge is filterable. To get the
+        tighter per-weapon burst your product wants, keep the rows whose
+        `maxGapMs` is within that weapon's cadence (LG ≈ 1200 ms, RL ≈
+        2300 ms) — every KEPT row then carries its gap-`g` value EXACTLY,
+        because dropping hits from a run only widens gaps. An over-merged row
+        (`maxGapMs > g`) is dropped by that filter, not truncated, and a row
+        outside this response's `limit` cannot re-enter — `?gapMs=g` on this
+        endpoint is the exact tighter walk when either matters. Lowering
+        `gapMs` as a display knob instead loses damage: a baked 1200 ms gap truncated 11% of rl and 23% of sg bursts,
+        worst measured a 291-damage triple-rocket kill reported as **2**.
+        `spanMs` is the DISPLAY figure ("291 dmg in 1.7 s") and is not a valid
+        narrowing rule — 21 of the 24 over-merged rl bursts in the corpus pass
+        a `span <= 2×gap` test.
+
+        **Positional kills produce no row.** A telefrag, stomp or squish
+        carries no damage event, so there is no run to sum and no honest
+        figure to rank by; they are absent from this ranking only (13 of 1,879
+        measured kills) and still present in `/frags` and in `/damage`'s
+        `telefrags` / `stomps`.
+
+        **Kills by an already-dead killer stay in**, deliberately: the walk
+        consults the VICTIM's liveness and never the killer's, so a rocket in
+        flight when its shooter died still ranks. Measured 38 of 1,866 —
+        posthumous rockets and mutual frags, exactly the highlights this
+        endpoint exists to surface.
+
+        **`returnDamage` is a value, not a flag.** It is what the victim dealt
+        back to this killer over the `contestedMs` window before the kill —
+        any weapon, same damage family. The server owns the window; the
+        threshold that calls a kill "contested" is yours.
+
+        **Ranking & filters.** Rows are ranked by `damage`, ties broken by the
+        earlier kill then by killer / victim name, so the response is stable.
+        `minDamage` filters on that same figure; `weapons` filters the KILLING
+        weapon (burst-capable tokens only: rl, lg, gl, ssg, sng, ng, sg, axe,
+        unknown — a positional or environmental cause cannot anchor a burst
+        and is rejected, not silently empty); `players`
+        restricts the KILLER — there is deliberately no victim-side filter,
+        which would be a different question. `from`/`to` bound the KILL
+        instant, not the burst: a kept row's run may reach back before `from`.
+
+        **Errors.** 422 `top_kills_unavailable` when the demo lacks any of the
+        three sources — the frag log, the damage log, or measurable liveness.
+        The last is not pedantry: at the 3000 ms capture gap the walk crosses
+        the victim's previous death on 4% of measured kills, and without the
+        life clip those bursts absorb the victim's PREVIOUS life. Since the
+        list is ranked BY damage, the contaminated rows are exactly the ones
+        that reach the top, and a consumer holding only this response could
+        not tell them apart. 422 `bounded_unavailable` for an EXPLICIT
+        `dmg=bounded` on a demo whose bounded reconstruction was skipped; a
+        defaulted one falls back to `raw` and says so in `dmg`.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/TopKillGapMs"
+        - $ref: "#/components/parameters/TopKillContestedMs"
+        - $ref: "#/components/parameters/TopKillLimit"
+        - $ref: "#/components/parameters/Players"
+        - $ref: "#/components/parameters/Weapons"
+        - $ref: "#/components/parameters/MinDamage"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/DmgFamily"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The ranked kill bursts.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TopKills" }
         "304": { $ref: "#/components/responses/NotModified" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -1451,7 +1557,7 @@ paths:
       summary: Every player's lives, spawn to death
       description: |
         One row per spawn-to-death run — the natural unit of QuakeWorld
-        analysis — carrying the same per-interval stats block `/hot-windows`
+        analysis — carrying the same per-interval stats block `/top-windows`
         uses, plus `endReason`, `spawnLoc`, `deathLoc`, `killedBy`,
         `deathWeapon`, `itemsTaken` and `weaponsHeld`.
 
@@ -1496,7 +1602,7 @@ paths:
         the event logs keep the bare name, so nothing in their lives rows can
         match: every stat there — kills, deaths, damage, shots — is 0, and
         their pickups attach to no life at all rather than to the wrong
-        slot's. `/hot-windows` is unaffected (its subjects come from the log
+        slot's. `/top-windows` is unaffected (its subjects come from the log
         names directly).
 
         **`deaths` is not a 0/1 flag.** It is the count of death rows
@@ -1520,7 +1626,7 @@ paths:
         `minMs` drops a life together with the events in its window. They are
         therefore not a response-size control either; that is `summary`. An
         INVERTED window (`from` > `to`) selects nothing and returns
-        `lives: []`, matching `/frags`, `/damage` and `/hot-windows`.
+        `lives: []`, matching `/frags`, `/damage` and `/top-windows`.
 
         **Measuredness.** Every numeric stat is emitted even at zero; read the
         envelope's `measured` block, never a field's absence, to tell an
@@ -1878,7 +1984,13 @@ components:
         - **/damage** the death-type + environmental codes (explobox, squish,
           lava, slime, drown, fall, trigger, suicide, unknown);
         - **/backpacks** accepts rl/lg only;
-        - **/weapon-pickups** ssg,ng,sng,gl,rl,lg.
+        - **/weapon-pickups** ssg,ng,sng,gl,rl,lg;
+        - **/top-kills** filters the KILLING weapon (which is also the
+          burst's own weapon) and accepts only the burst-capable subset —
+          the core codes plus `unknown`. Positional (tele/stomp/squish),
+          environmental and bookkeeping causes are REJECTED here: no damage
+          event can anchor them, so the token would be a valid filter that
+          structurally selects nothing.
 
         `water` and `drown` are the SAME cause under the two logs' different
         spellings and are accepted interchangeably wherever either is valid,
@@ -2073,7 +2185,7 @@ components:
       name: metric
       in: query
       description: >
-        What a hot window is ranked by — any SUMMABLE per-event quantity.
+        What a top window is ranked by — any SUMMABLE per-event quantity.
         Ratios (accuracy, efficiency) are deliberately absent: they do not sum,
         so "the best window" is undefined for them; they ride the per-window
         stats block instead. `netFrags` (kills − deaths) is usually what people
@@ -2083,7 +2195,7 @@ components:
         type: string
         default: frags
         enum:
-          # hot-window-metric-enum:begin — TestOpenAPIHotWindowMetricsCurrent pins this to view.KnownHotWindowMetrics
+          # top-window-metric-enum:begin — TestOpenAPITopWindowMetricsCurrent pins this to view.KnownTopWindowMetrics
           - frags
           - deaths
           - netFrags
@@ -2092,9 +2204,9 @@ components:
           - netDamage
           - shots
           - hits
-          # hot-window-metric-enum:end
+          # top-window-metric-enum:end
       example: netFrags
-    HotWindowMs:
+    TopWindowMs:
       name: windowMs
       in: query
       description: |
@@ -2115,7 +2227,7 @@ components:
           leaving a `durationMs` covering time that does not exist).
       schema: { type: integer, format: int32, minimum: 1, default: 30000 }
       example: 30000
-    HotWindowLimit:
+    TopWindowLimit:
       name: limit
       in: query
       description: |
@@ -2161,6 +2273,69 @@ components:
         `minScore=0` is a MEANINGFUL request (keep the windows that broke even)
         and is honoured, not treated as "unset".
       schema: { type: integer, default: 1 }
+    TopKillGapMs:
+      name: gapMs
+      in: query
+      description: |
+        The burst walk's CAPTURE gap, in integer MILLISECONDS (default 3000,
+        max 5000): a hit joins the run while it lands within `gapMs` of the
+        run's earliest hit so far.
+
+        **Do not lower this to get tighter bursts** — filter the response by
+        `maxGapMs` instead. The default is generous because truncation is
+        unrecoverable downstream while over-merge is filterable, and keeping
+        the rows with `maxGapMs <= g` gives every KEPT row its gap-`g` value
+        EXACTLY. A run with `maxGapMs > g` is dropped by that filter, not
+        truncated — the true gap-`g` walk would report its shorter suffix
+        instead — so the narrowed list is the gap-`g` ranking restricted to
+        intact runs. A baked 1200 ms gap truncated 11% of rl and 23% of sg
+        bursts. The parameter exists for the exact server-side recompute
+        (`gapMs=g` when the truncated remainders matter), not as the display
+        knob.
+
+        Out-of-range values are REJECTED with a 400 naming the range, never
+        clamped: below 1 (including an explicit `gapMs=0` — an omitted MCP
+        integer arrives as 0, which must not look deliberate) and above 5000,
+        beyond which a "burst" is two fights. The resolved value is echoed on
+        the response.
+      schema: { type: integer, format: int32, minimum: 1, maximum: 5000, default: 3000 }
+      example: 3000
+    TopKillContestedMs:
+      name: contestedMs
+      in: query
+      description: >
+        The window each row's `returnDamage` sums the victim's damage back
+        over, in integer MILLISECONDS before the kill (default 4000, max
+        30000). It sets the WINDOW only — `returnDamage` is a value, not a
+        flag, so the threshold that calls a kill "contested" stays yours.
+        Out-of-range values (below 1, including an explicit 0, or above 30000)
+        are REJECTED with a 400 naming the range. The resolved value is echoed
+        on the response.
+      schema: { type: integer, format: int32, minimum: 1, maximum: 30000, default: 4000 }
+      example: 4000
+    TopKillLimit:
+      name: limit
+      in: query
+      description: >
+        Rows returned (default 20, max 200). A NEGATIVE value means uncapped.
+        Out-of-range values are REJECTED with a 400, never silently clamped:
+        an explicit `limit=0` (0 cannot mean "uncapped" — an omitted MCP
+        integer arrives as 0, which would make a forgotten argument look
+        deliberate) and any `limit` above the 200 maximum. The default is 20
+        rather than `/top-windows`' 10 because the per-weapon `maxGapMs`
+        narrowing this endpoint expects thins the list.
+      schema: { type: integer, default: 20, maximum: 200 }
+      example: 20
+    MinDamage:
+      name: minDamage
+      in: query
+      description: >
+        Drop kill bursts below this much burst damage (default 0, keep all) —
+        the same figure the rows are ranked by, in the resolved `dmg` family.
+        A negative value is rejected with a 400: 0 already means "no filter",
+        since a burst's damage is non-negative.
+      schema: { type: integer, minimum: 0, default: 0 }
+      example: 150
     MinMs:
       name: minMs
       in: query
@@ -2214,7 +2389,8 @@ components:
       name: dmg
       in: query
       description: |
-        Damage family for the interval endpoints (`/hot-windows`, `/lives`):
+        Damage family for the on-demand damage endpoints (`/top-windows`,
+        `/lives`, `/top-kills`):
 
         - `raw` — the unbound wire values;
         - `bounded` — KTX-scoreboard semantics (armor absorbed + health capped
@@ -2224,21 +2400,24 @@ components:
         bounded reconstruction was skipped; an EXPLICIT `dmg=bounded` there is
         a 422 `bounded_unavailable` naming the demo's `boundedMode`.
 
-        **It selects the family of the whole STATS BLOCK**, so it applies
-        under EVERY `/hot-windows` metric and not only the damage ones — a
-        window picked by `metric=frags` still reports `damageGiven`, and that
-        number has a family. Both rules above hold under every metric too: the
-        skipped-demo 422 fires for an explicit `dmg=bounded` whatever the
-        metric, and a defaulted one falls back to `raw` whatever the metric.
-        The resolved family comes back as the response's own `dmg` — read it
-        rather than assuming the default took.
+        **On the interval endpoints it selects the family of the whole STATS
+        BLOCK**, so it applies under EVERY `/top-windows` metric and not only
+        the damage ones — a window picked by `metric=frags` still reports
+        `damageGiven`, and that number has a family. Both rules above hold
+        under every metric too: the skipped-demo 422 fires for an explicit
+        `dmg=bounded` whatever the metric, and a defaulted one falls back to
+        `raw` whatever the metric. On `/top-kills` it selects the family of
+        both `damage` and `returnDamage`, so one response is one family there
+        too — and since `damage` is the RANKING key, the two families can
+        order the list differently. The resolved family comes back as the
+        response's own `dmg` — read it rather than assuming the default took.
 
         **Two values, not three:** `both` is a response SHAPE — raw fields
         plus a parallel `bounded` nest, as `/damage` returns it — and these
-        endpoints have no such shape. One interval stats block carries one set
-        of damage numbers and a scoring metric has to rank on a single family,
-        so `both` is rejected with a 400 here for EVERY metric, not only the
-        damage ones.
+        endpoints have no such shape. One interval stats block — one kill
+        burst — carries one set of damage numbers, and a quantity that RANKS
+        has to rank on a single family, so `both` is rejected with a 400 here
+        for every metric and on every one of the three endpoints.
       schema:
         type: string
         enum: [raw, bounded]
@@ -2534,7 +2713,6 @@ components:
         - demo_too_large
         - demoinfo_unavailable
         - frags_unavailable
-        - hot_windows_unavailable
         - hub_upstream
         - internal
         - invalid_demo_id
@@ -2551,6 +2729,8 @@ components:
         - rate_limited
         - region_control_unavailable
         - shots_unavailable
+        - top_kills_unavailable
+        - top_windows_unavailable
         - unauthorized
         - unknown_param
         - unparseable_demo
@@ -2830,6 +3010,12 @@ components:
           type:
             - "null"
             - object
+        topKills:
+          description: "The match's hardest kill BURSTS at /top-kills' documented defaults (gapMs 3000, contestedMs 4000, dmg bounded) — twenty rows, not the five its neighbours carry, because the per-weapon `maxGapMs` narrowing a highlight consumer runs off this list thins it. Row shape is /top-kills' verbatim; read that endpoint's description for the burst semantics before consuming them. Omitted when the demo cannot answer the query (no frag log, no damage log, or no measurable liveness) — and, since this response has no `dmg` echo to name a family, omitted rather than silently served raw on a demo with no bounded family. Absence is not a verdict: a demo with zero enemy kills also omits the field; read /top-kills itself when the distinction matters."
+          items: { $ref: "#/components/schemas/TopKill" }
+          type:
+            - "null"
+            - array
         topPowerups:
           description: "Top powerup runs (Key Moments)."
           items:
@@ -3384,7 +3570,7 @@ components:
 
             It is DEMO-GLOBAL and survives every filter: narrowing the log by
             `players`/`weapons`/`from`/`to` cannot make a demo's obituaries
-            matchable or unmatchable. This is the same verdict `/hot-windows`
+            matchable or unmatchable. This is the same verdict `/top-windows`
             and `/lives` publish as `measured.frags`.
           type: boolean
         totalFrags:
@@ -4932,7 +5118,7 @@ components:
         - height
         - damage
       type: object
-    HotWindows:
+    TopWindows:
       type: object
       additionalProperties: false
       required: [scoredBy, windowMs, limit, perPlayer, measured, windows]
@@ -4963,8 +5149,8 @@ components:
         windows:
           type: array
           description: Ranked windows, best first. Never null.
-          items: { $ref: "#/components/schemas/HotWindow" }
-    HotWindow:
+          items: { $ref: "#/components/schemas/TopWindow" }
+    TopWindow:
       type: object
       required: [rank, player, start, end, score]
       properties:
@@ -4989,6 +5175,90 @@ components:
             exactly what produced it.
       allOf:
         - $ref: "#/components/schemas/IntervalStats"
+    TopKills:
+      type: object
+      additionalProperties: false
+      required: [gapMs, contestedMs, limit, measured, kills]
+      properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        measured: { $ref: "#/components/schemas/MeasuredSources" }
+        dmg: { $ref: "#/components/schemas/IntervalDmgFamily" }
+        boundedMode: { $ref: "#/components/schemas/IntervalBoundedMode" }
+        gapMs:
+          type: integer
+          format: int32
+          description: >
+            The capture gap as it was applied, echoed after defaulting — it is
+            what every `damage` / `hits` / `spanMs` / `maxGapMs` below means.
+        contestedMs:
+          type: integer
+          format: int32
+          description: The returnDamage window as it was applied, echoed after defaulting.
+        limit:
+          type: integer
+          description: >
+            The cap as it was applied, echoed after defaulting. An
+            out-of-range request is REJECTED with a 400, not clamped, so this
+            only ever differs from what you sent when you sent nothing (you
+            get the default 20). A NEGATIVE value is echoed verbatim and is
+            not a cap — it is the "uncapped" spelling.
+        kills:
+          type: array
+          description: Ranked bursts, hardest first. Never null.
+          items: { $ref: "#/components/schemas/TopKill" }
+    TopKill:
+      type: object
+      additionalProperties: false
+      required: [rank, killer, victim, time, weapon, damage, hits, spanMs, maxGapMs, returnDamage]
+      description: >
+        One kill burst. Also the row shape of `/overview`'s `topKills`, which
+        carries this same list at the documented defaults.
+      properties:
+        rank: { type: integer, description: "1-based position in this response." }
+        killer: { type: string, description: "Who made the kill; the frag log's name." }
+        victim: { type: string, description: "Who died." }
+        team: { type: string, description: "The KILLER's team at match end; absent in a demo with no team labels." }
+        time:
+          type: integer
+          format: int32
+          description: "The kill instant, match-relative ms — also the run's last hit."
+        weapon:
+          type: string
+          description: "The killing weapon, which IS the burst's weapon (see the endpoint description)."
+        damage:
+          type: integer
+          description: >
+            The run's summed damage in the envelope's `dmg` family — the value
+            that ranked this row.
+        hits: { type: integer, description: "How many damage events the run holds." }
+        spanMs:
+          type: integer
+          format: int32
+          description: >
+            `time` minus the run's first hit — the DISPLAY figure ("291 dmg in
+            1.7 s"). Not a valid rule for narrowing to a tighter gap; use
+            `maxGapMs`.
+        maxGapMs:
+          type: integer
+          format: int32
+          description: >
+            The largest gap between consecutive hits in the run, `0` when
+            `hits` is 1. This is the EXACT client-side narrowing filter:
+            a kept row (`maxGapMs <= g`) carries its gap-`g` value verbatim;
+            an over-merged row is dropped by the filter rather than
+            truncated (request `gapMs=g` for the exact tighter walk).
+        victimWep:
+          type: string
+          description: >
+            The victim's weapon class (`sg`|`mid`|`lg`|`rl`|`both`) at the
+            killing hit, straight from that damage event — the same field
+            `/damage` reports. Absent when the wire carried none.
+        returnDamage:
+          type: integer
+          description: >
+            What the victim dealt back to this killer over the `contestedMs`
+            window before the kill: any weapon, same damage family. A value,
+            not a flag — you own the threshold that calls a kill contested.
     ScoringRule:
       type: object
       additionalProperties: false
@@ -5018,7 +5288,7 @@ components:
 
         It applies under EVERY metric, not only the damage ones — the stats
         block reports damage whichever metric selected the interval — so on
-        `/hot-windows` with `metric=frags` this is the only place the family
+        `/top-windows` with `metric=frags` this is the only place the family
         is named (`scoredBy.dmg` carries the same value when the metric is a
         damage one, from the same single resolution).
 
@@ -5092,7 +5362,7 @@ components:
           type: boolean
           description: >
             Gates `/lives`' `itemsTaken` (where it is the same signal as
-            `itemsTaken: null`). Always present on `/hot-windows` too, which
+            `itemsTaken: null`). Always present on `/top-windows` too, which
             emits no item field, so one block covers both responses.
         liveness:
           type: boolean
@@ -5103,7 +5373,7 @@ components:
             player was never alive", which an empty `lives` array conflated.
 
             `/lives` 422s `lives_unavailable` when it is `false`, so a caller
-            only ever observes `false` here on `/hot-windows`, which does not
+            only ever observes `false` here on `/top-windows`, which does not
             need it. The flag is present on both responses because the block
             keeps ONE shape across them.
     Lives:
@@ -5222,7 +5492,7 @@ components:
     IntervalStats:
       type: object
       description: |
-        The per-interval stats block, shared by `/hot-windows` and `/lives` so
+        The per-interval stats block, shared by `/top-windows` and `/lives` so
         one shape covers every segmentation. All times int32 ms.
 
         Every NUMERIC field below is always present, including a measured zero.
@@ -5258,7 +5528,7 @@ components:
             slightly when summed across a whole match, by tens of percent on a
             single row where a short life is followed by a long dead gap.
 
-            For a hot window the two coincide and there is no separate window
+            For a top window the two coincide and there is no separate window
             to publish.
         kills: { type: integer, description: "Enemy kills. Suicides and teamkills excluded." }
         deaths:

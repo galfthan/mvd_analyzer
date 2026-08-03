@@ -53,8 +53,8 @@ func TestStatsSpanWindow(t *testing.T) {
 	}{
 		{
 			// The zero value of the attribution fields is the non-partitioning
-			// case that HotWindows passes: the window IS the interval, closed at
-			// both ends. Changing that silently would move every hot window's
+			// case that TopWindows passes: the window IS the interval, closed at
+			// both ends. Changing that silently would move every top window's
 			// stats off its own score.
 			"unattributed: the window is the interval, closed",
 			statsSpan{start: 1000, end: 2000, startInclusive: true},
@@ -250,9 +250,9 @@ func TestMeasuredFragsReadsTheStoredKillAttributionVerdict(t *testing.T) {
 	if got := mustLives(t, res, LivesOptions{}); !got.Measured.Frags {
 		t.Error("measured.frags is false on a demo the analyzer judged measurable")
 	}
-	// And hot windows read the same flag from the same builder.
-	if hw := mustHW(t, res, HotWindowsOptions{}); !hw.Measured.Frags {
-		t.Error("/hot-windows measured.frags disagrees with /lives on one demo")
+	// And top windows read the same flag from the same builder.
+	if hw := mustHW(t, res, TopWindowsOptions{}); !hw.Measured.Frags {
+		t.Error("/top-windows measured.frags disagrees with /lives on one demo")
 	}
 }
 
@@ -547,7 +547,7 @@ func TestIntervalStatsParityWithFragsAndDamage(t *testing.T) {
 // Measured before the fix: 202 of 70964 windows across the 42 cached demos
 // diverged, every one of them a positional kill. Committed goldens, so this
 // runs offline on every `make test`.
-func TestHotWindowScoreEqualsItsOwnStat(t *testing.T) {
+func TestTopWindowScoreEqualsItsOwnStat(t *testing.T) {
 	checked, windows := 0, 0
 	for _, name := range parityDemos {
 		res := loadGolden(t, name)
@@ -555,12 +555,12 @@ func TestHotWindowScoreEqualsItsOwnStat(t *testing.T) {
 			continue
 		}
 		checked++
-		for _, m := range KnownHotWindowMetrics {
+		for _, m := range KnownTopWindowMetrics {
 			for _, fam := range []string{"raw", "bounded"} {
 				if fam == "bounded" && !hasBoundedFamily(res.Damage) {
 					continue
 				}
-				hw, err := HotWindows(res, HotWindowsOptions{Metric: m, Dmg: fam, Limit: -1})
+				hw, err := TopWindows(res, TopWindowsOptions{Metric: m, Dmg: fam, Limit: -1})
 				if err != nil {
 					continue // a stream this demo lacks
 				}

@@ -10,9 +10,9 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// Hot windows: each player's best stretches of the match.
+// Top windows: each player's best stretches of the match.
 //
-// NOTE the filename: this must NOT be called hot_windows.go. Go treats a
+// NOTE the filename: this must NOT be called top_windows.go. Go treats a
 // `_windows.go` suffix as a GOOS build constraint, so that name silently
 // compiles on Windows only — the package builds everywhere else with the file
 // absent, and every symbol in it reads as undefined. Same trap for _linux,
@@ -35,7 +35,7 @@ import (
 // exists. So a 30 s window is 30 s of play whether or not the match was paused
 // inside it, and subtracting pause time here would double-correct.
 
-// HotWindowMetric names a summable per-event quantity. Ratios (accuracy,
+// TopWindowMetric names a summable per-event quantity. Ratios (accuracy,
 // efficiency) are deliberately absent: they do not sum, so "the best window"
 // is undefined for them. They ride the per-window stats block instead.
 const (
@@ -49,26 +49,26 @@ const (
 	MetricHits        = "hits"        // connects
 )
 
-// KnownHotWindowMetrics is the closed vocabulary, in the order the docs list
+// KnownTopWindowMetrics is the closed vocabulary, in the order the docs list
 // it. An unknown value is rejected rather than silently matching nothing; the
 // openapi enum is drift-pinned to this slice.
-var KnownHotWindowMetrics = []string{
+var KnownTopWindowMetrics = []string{
 	MetricFrags, MetricDeaths, MetricNetFrags,
 	MetricDamageGiven, MetricDamageTaken, MetricNetDamage,
 	MetricShots, MetricHits,
 }
 
 const (
-	defaultHotWindowMs    = 30000
-	defaultHotWindowLimit = 10
-	hotWindowMaxLimit     = 200
+	defaultTopWindowMs    = 30000
+	defaultTopWindowLimit = 10
+	topWindowMaxLimit     = 200
 )
 
-// HotWindowsOptions narrows and shapes a HotWindows query. Empty fields mean
+// TopWindowsOptions narrows and shapes a TopWindows query. Empty fields mean
 // "default"; From/To are match-relative int32 ms (0 disables that bound),
 // matching FragOptions / DamageOptions.
-type HotWindowsOptions struct {
-	Metric    string   // one of KnownHotWindowMetrics; "" → frags
+type TopWindowsOptions struct {
+	Metric    string   // one of KnownTopWindowMetrics; "" → frags
 	WindowMs  int32    // window length; <=0 → 30000
 	Limit     int      // total windows returned; 0 → 10, <0 → uncapped
 	PerPlayer int      // max windows from any ONE player; <=0 → uncapped
@@ -82,10 +82,10 @@ type HotWindowsOptions struct {
 	// Dmg is the damage family: "raw" | "bounded". It applies under EVERY
 	// metric, not only the damage ones — the per-window stats block reports
 	// damage whatever selected the window — and the resolved family is echoed
-	// on the response envelope (HotWindowsView.Dmg).
+	// on the response envelope (TopWindowsView.Dmg).
 	//
 	// The VIEW default is raw and the REST default is bounded — mvd-api's
-	// handleHotWindows substitutes "bounded" for an unset dmg, exactly as
+	// handleTopWindows substitutes "bounded" for an unset dmg, exactly as
 	// handleDamage does, and falls back to raw when the demo has no bounded
 	// family. So an in-process caller (WASM, qw-analyze) that leaves this
 	// empty gets a DIFFERENT family than the same query over HTTP. Set it
@@ -98,12 +98,12 @@ type HotWindowsOptions struct {
 	Min *int
 }
 
-// HotWindowsView is the response: a FLAT list, sorted by score descending.
+// TopWindowsView is the response: a FLAT list, sorted by score descending.
 //
 // Flat rather than grouped-by-player because the two views callers actually
 // want — "the match's big moments" and "this player's best runs" — are the same
 // list under two different caps, and grouping client-side is one reduce.
-type HotWindowsView struct {
+type TopWindowsView struct {
 	TimeUnit TimeUnit `json:"timeUnit,omitempty"`
 
 	// ScoredBy is the scoring rule, echoed ONCE for the whole response: it is
@@ -123,7 +123,7 @@ type HotWindowsView struct {
 	// computed in, echoed on every response exactly as /damage echoes them —
 	// because the stats block reports damage under every metric, not only the
 	// damage ones. For a damage metric ScoredBy.Dmg carries the same value by
-	// construction (one resolution, hotWindowFamily, feeds both); for
+	// construction (one resolution, topWindowFamily, feeds both); for
 	// metric=frags this is the only place the family is named, and without it
 	// `damageGiven` on a row was a number with no stated family. Absent only on
 	// a demo with no damage stream, where measured.damage is false anyway.
@@ -138,12 +138,12 @@ type HotWindowsView struct {
 	// omitempty — an absent marker would be the very ambiguity it removes.
 	Measured MeasuredSources `json:"measured"`
 
-	Windows []HotWindow `json:"windows"`
+	Windows []TopWindow `json:"windows"`
 }
 
-// HotWindow is one stretch, with a stats block recomputed over exactly its
+// TopWindow is one stretch, with a stats block recomputed over exactly its
 // span. Times are match-relative int32 ms.
-type HotWindow struct {
+type TopWindow struct {
 	Rank   int    `json:"rank"` // 1-based over the returned list
 	Player string `json:"player"`
 	Team   string `json:"team,omitempty"`
@@ -181,17 +181,17 @@ type scoreEvent struct {
 	v int
 }
 
-// HotWindows returns the top-scoring fixed-length windows across the match.
+// TopWindows returns the top-scoring fixed-length windows across the match.
 //
 // Returns ErrUnavailable when the demo carries no source stream for the
 // requested metric, ErrBoundedUnavailable for an explicit dmg=bounded on a
 // demo with no bounded family, and ErrInvalidFilter for a bad metric or
 // weapon token.
-func HotWindows(r *result.Result, opts HotWindowsOptions) (*HotWindowsView, error) {
+func TopWindows(r *result.Result, opts TopWindowsOptions) (*TopWindowsView, error) {
 	metric, ok := canonicalMetric(opts.Metric)
 	if !ok {
 		return nil, fmt.Errorf("%w: unknown metric %q; valid: %s",
-			ErrInvalidFilter, opts.Metric, strings.Join(KnownHotWindowMetrics, ", "))
+			ErrInvalidFilter, opts.Metric, strings.Join(KnownTopWindowMetrics, ", "))
 	}
 	if r == nil {
 		return nil, ErrUnavailable
@@ -199,31 +199,31 @@ func HotWindows(r *result.Result, opts HotWindowsOptions) (*HotWindowsView, erro
 
 	windowMs := opts.WindowMs
 	if windowMs <= 0 {
-		windowMs = defaultHotWindowMs
+		windowMs = defaultTopWindowMs
 	}
 	limit := opts.Limit
 	if limit == 0 {
-		limit = defaultHotWindowLimit
+		limit = defaultTopWindowLimit
 	}
-	// Defence in depth, not the contract: mvd-api REJECTS limit > hotWindowMaxLimit
-	// with a 400 (handlers.go hotWindowsMaxLimit, the v59 "no longer silently
+	// Defence in depth, not the contract: mvd-api REJECTS limit > topWindowMaxLimit
+	// with a 400 (handlers.go topWindowsMaxLimit, the v59 "no longer silently
 	// clamped" ruling), and that handler is the real gate. Clamping here bounds
 	// the response for in-process callers — WASM, qw-analyze — that have no
 	// HTTP layer in front of them, rather than letting one query materialise an
 	// unbounded stats block per candidate window.
-	if limit > hotWindowMaxLimit {
-		limit = hotWindowMaxLimit
+	if limit > topWindowMaxLimit {
+		limit = topWindowMaxLimit
 	}
 	min := 1
 	if opts.Min != nil {
 		min = *opts.Min
 	}
 
-	fam, err := hotWindowFamily(r, metric, opts.Dmg)
+	fam, err := topWindowFamily(r, metric, opts.Dmg)
 	if err != nil {
 		return nil, err
 	}
-	if err := validateHotWindowWeapons(metric, opts.Weapons); err != nil {
+	if err := validateTopWindowWeapons(metric, opts.Weapons); err != nil {
 		return nil, err
 	}
 
@@ -232,7 +232,7 @@ func HotWindows(r *result.Result, opts HotWindowsOptions) (*HotWindowsView, erro
 		return nil, err
 	}
 
-	lo, hi := hotWindowBounds(r, opts.From, opts.To)
+	lo, hi := topWindowBounds(r, opts.From, opts.To)
 	pf := newPlayerFilter(opts.Players)
 
 	// Candidates per player, then one global ranking. Generating per player is
@@ -246,14 +246,14 @@ func HotWindows(r *result.Result, opts HotWindowsOptions) (*HotWindowsView, erro
 	}
 	sort.Strings(names) // never range a map into output
 
-	var all []HotWindow
+	var all []TopWindow
 	for _, name := range names {
 		for _, c := range topWindowsFor(events[name], windowMs, lo, hi, min) {
-			all = append(all, HotWindow{Player: name, Start: c.start, End: c.end, Score: c.score})
+			all = append(all, TopWindow{Player: name, Start: c.start, End: c.end, Score: c.score})
 		}
 	}
 
-	sortHotWindows(all)
+	sortTopWindows(all)
 	all = applyCaps(all, opts.PerPlayer, limit)
 
 	teamOf := defaultNameToTeam(r)
@@ -269,10 +269,10 @@ func HotWindows(r *result.Result, opts HotWindowsOptions) (*HotWindowsView, erro
 		w.IntervalStats = sb.build(w.Player, statsSpan{start: w.Start, end: w.End, startInclusive: true})
 	}
 	if all == nil {
-		all = []HotWindow{}
+		all = []TopWindow{}
 	}
 
-	return &HotWindowsView{
+	return &TopWindowsView{
 		ScoredBy:    scoredBy,
 		Dmg:         fam,
 		BoundedMode: boundedModeOf(r),
@@ -293,7 +293,7 @@ func canonicalMetric(in string) (string, bool) {
 	if m == "" {
 		return MetricFrags, true
 	}
-	for _, k := range KnownHotWindowMetrics {
+	for _, k := range KnownTopWindowMetrics {
 		if strings.EqualFold(k, m) {
 			return k, true
 		}
@@ -309,7 +309,7 @@ func isDamageMetric(m string) bool {
 	return false
 }
 
-// hotWindowFamily resolves the damage family for a hot-windows query.
+// topWindowFamily resolves the damage family for a top-windows query.
 //
 // It is resolved for EVERY metric, not only the damage ones, because the
 // per-window stats block always reports damageGiven / damageTaken /
@@ -326,7 +326,7 @@ func isDamageMetric(m string) bool {
 // damage to report — but only after the token itself has been validated, so a
 // bogus dmg is still a client error. A damage METRIC on such a demo keeps the
 // ErrUnavailable it always returned.
-func hotWindowFamily(r *result.Result, metric, dmg string) (string, error) {
+func topWindowFamily(r *result.Result, metric, dmg string) (string, error) {
 	fam, err := damageFamily(r, dmg)
 	switch {
 	case err == nil:
@@ -377,13 +377,13 @@ func boundedModeOf(r *result.Result) string {
 	return r.Damage.BoundedMode
 }
 
-// validateHotWindowWeapons checks the filter against the metric's OWN source
+// validateTopWindowWeapons checks the filter against the metric's OWN source
 // vocabulary. The three sources genuinely differ — the frag log knows `hook`,
 // `world` and `water`, the damage log knows `explobox`, `trigger` and `drown`,
 // and the shot stream knows only what can be fired — so `weapons=lava` is
 // meaningful on metric=deaths and nonsense on metric=shots. The error names
 // the valid set, which is the discovery mechanism.
-func validateHotWindowWeapons(metric string, weapons []string) error {
+func validateTopWindowWeapons(metric string, weapons []string) error {
 	if len(weapons) == 0 {
 		return nil
 	}
@@ -422,9 +422,9 @@ func normaliseWeapons(tokens []string) []string {
 	return out
 }
 
-// hotWindowBounds clamps the query to the match window, then to the caller's
+// topWindowBounds clamps the query to the match window, then to the caller's
 // From/To. 0 means "no bound" on both, matching every sibling endpoint.
-func hotWindowBounds(r *result.Result, from, to int32) (int32, int32) {
+func topWindowBounds(r *result.Result, from, to int32) (int32, int32) {
 	var lo, hi int32
 	if r.Streams != nil {
 		lo, hi = r.Streams.Global.MatchStart, r.Streams.Global.MatchEnd
@@ -784,9 +784,9 @@ func topWindowsFor(ev []scoreEvent, windowMs, lo, hi int32, min int) []windowCan
 	return out
 }
 
-// sortHotWindows is the total, integer ranking: score desc, then the shorter
+// sortTopWindows is the total, integer ranking: score desc, then the shorter
 // and earlier window, then player name. Total so the output is stable.
-func sortHotWindows(w []HotWindow) {
+func sortTopWindows(w []TopWindow) {
 	sort.Slice(w, func(a, b int) bool {
 		if w[a].Score != w[b].Score {
 			return w[a].Score > w[b].Score
@@ -804,7 +804,7 @@ func sortHotWindows(w []HotWindow) {
 // applyCaps enforces perPlayer BEFORE limit. The order is what makes
 // perPlayer=3&limit=10 mean "the top 10, with at most 3 from anyone" rather
 // than "the top 3 of the first three players".
-func applyCaps(w []HotWindow, perPlayer, limit int) []HotWindow {
+func applyCaps(w []TopWindow, perPlayer, limit int) []TopWindow {
 	if perPlayer > 0 {
 		seen := map[string]int{}
 		kept := w[:0]

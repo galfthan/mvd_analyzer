@@ -169,7 +169,7 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   once. Omit `players` to get all; omit `fields`/`types` to get the
   endpoint's default set.
 - **`weapons`** — comma-separated weapon tokens (`rl,lg,…`) on `/frags`,
-  `/damage`, `/backpacks`, `/weapon-pickups`, `/hot-windows`. A CSV set on
+  `/damage`, `/backpacks`, `/weapon-pickups`, `/top-windows`, `/top-kills`. A CSV set on
   every one of them since schema v36 (`/backpacks` previously took a single
   value).
   Each endpoint validates the tokens against its **own closed vocabulary**
@@ -180,11 +180,15 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   drown,fall,trigger,suicide,unknown`); `/frags` also takes the obituary
   cause codes (`hook,rail,squish,fall,lava,slime,water,world,tele,stomp,
   unknown,suicide,teamkill`); `/backpacks` accepts only `rl,lg`;
-  `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/hot-windows` the
+  `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/top-windows` the
   vocabulary follows the chosen `metric`'s **own source** — the frag one for
   `frags`/`deaths`/`netFrags`, the damage one for the damage metrics, and
   fire-derived `rl,lg,gl,ssg,sng,ng,sg` for `shots`/`hits` — so `weapons=lava`
-  is meaningful on `metric=deaths` and a 400 on `metric=shots`. Since schema
+  is meaningful on `metric=deaths` and a 400 on `metric=shots`. On
+  `/top-kills` it filters the **killing** weapon (which is also the burst's
+  own weapon) against the burst-capable subset only — `rl,lg,gl,ssg,sng,ng,
+  sg,axe,unknown`; a positional or environmental cause can never anchor a
+  burst, so those tokens are a 400 here, not a silent empty list. Since schema
   v65 **`water` and `drown` are accepted interchangeably** in both the frag
   and damage vocabularies: it is one event the two logs spell differently, and
   a caller should not have to know which log backs which metric (additive —
@@ -197,21 +201,22 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
 - **`from` / `to`** — match-relative **integer milliseconds**. Omit for
   the whole match. Honoured by `events`, `stream-slice`, `loc-trails`,
   `chat`, `region-control`, `aim`, `frags` / `damage`, and
-  `hot-windows` / `lives`. A non-integer
+  `top-windows` / `lives` / `top-kills` (on `top-kills` they bound the
+  **kill**, not the burst behind it, which may reach back before `from`). A non-integer
   value 400s `invalid_param` with an `(integer milliseconds)` hint.
   Two endpoints do **not** clip to the window and you have to know which:
   on `/lives` it **selects** rows — lives *overlapping* it are kept, each
-  still carrying its whole attribution window — and on `/hot-windows` it
+  still carrying its whole attribution window — and on `/top-windows` it
   bounds where a window may **start**, so a window anchored at `to` still
   runs the full `windowMs` past it (`to=1000&windowMs=30000` is "the best
   window anchored in the first second", covering up to 31 s). Neither is a
-  size control; both are deliberate — clipping a hot window's scoring at
+  size control; both are deliberate — clipping a top window's scoring at
   `to` while its stats block ran unclipped made `score` and the stats
   disagree. An **inverted** window (`from` > `to`) selects nothing
-  everywhere: `/frags`, `/damage`, `/hot-windows` and `/lives` all serve a
-  200 whose row array is empty — nested inside the usual envelope object
-  (`frags`, `events`, `windows`, `lives` respectively) — rather than
-  rejecting the range or ignoring a bound.
+  everywhere: `/frags`, `/damage`, `/top-windows`, `/lives` and `/top-kills`
+  all serve a 200 whose row array is empty — nested inside the usual
+  envelope object (`frags`, `events`, `windows`, `lives`, `kills`
+  respectively) — rather than rejecting the range or ignoring a bound.
 - **`summary`** (`/frags`, `/damage`, `/aim`, `/items`, `/lives`) —
   `1`/`true` drops the big per-event log / sample arrays / phase timeline
   and returns only the aggregates. On `/lives`, where the rows *are* the
@@ -220,7 +225,7 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   `byWeapon`, `damageByWeapon`) — ~40% of a 400-row 4on4 response. Note
   `itemsTaken` is then `null` on every row and says nothing about the demo;
   `measured.items` on the envelope remains the authority.
-- **`dmg`** (`/damage`, `/hot-windows`, `/lives`) — which damage **family** to return:
+- **`dmg`** (`/damage`, `/top-windows`, `/lives`, `/top-kills`) — which damage **family** to return:
   `raw` (the unbound wire value, byte-stable pre-v54 shape), `bounded`
   (KTX's scoreboard reconstruction — armor absorbed + health capped to the
   victim's remaining health, in the raw field names), or `both` (raw plus
@@ -231,14 +236,16 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   falls back to `raw`; an *explicit* `dmg=bounded` there is a
   `422 bounded_unavailable`. Unfiltered bounded summaries source the
   per-player figures from KTX's exact scoreboard (`boundedSource: "ktx"`).
-  `/hot-windows` and `/lives` follow the same default and the same fallback,
-  but reject **`dmg=both`** with a `400`: a score and a per-interval stats
-  block use one family, not two. On `/hot-windows` it selects the family of
+  `/top-windows`, `/lives` and `/top-kills` follow the same default and the
+  same fallback, but reject **`dmg=both`** with a `400`: a score, a
+  per-interval stats block and a burst each use one family, not two. On `/top-windows` it selects the family of
   the whole **stats block**, so it applies under **every** metric and not
   only the damage ones — a window picked by `metric=frags` still reports
   `damageGiven`, and that number has a family. The default, the fallback and
-  the explicit-`bounded` 422 all hold under every metric alike. Both
-  endpoints echo the resolved family and the demo's reconstruction state as
+  the explicit-`bounded` 422 all hold under every metric alike. On
+  `/top-kills` it selects the family of both `damage` and `returnDamage`, and
+  since `damage` is the **ranking** key the two families can order the list
+  differently. All three echo the resolved family and the demo's reconstruction state as
   envelope `dmg` / `boundedMode`, exactly as `/damage` does; read `dmg`
   rather than assuming the default took. Both echoes are absent only on a
   demo with no damage stream at all (`measured.damage: false`).
@@ -246,18 +253,18 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   `/state-at`. A non-integer value 400s `invalid_param` with an `(integer
   milliseconds)` hint.
 - **`windowMs`** — integer milliseconds (`/buckets`, `/region-control`,
-  `/hot-windows`).
+  `/top-windows`).
   ⚠️ On `/buckets` and `/region-control` it **defaults to 50 ms when
   omitted** — on a 20-minute match that is
   ~24,000 windows per field per player. Always pass an explicit
   `windowMs` sized to your question (the hosted MCP layer injects 5000).
-  On `/hot-windows` it means something different — the *length of each
+  On `/top-windows` it means something different — the *length of each
   candidate window*, defaulting to 30000 — and it is the endpoint's main
   knob rather than a resolution setting: sweep it (5000 for damage bursts,
   30000 for hot streaks, 120000 for map-phase dominance).
   All time params are ms: `windowMs`, `from`, and `to` alike. An explicit
   `windowMs=0` is rejected with `400 invalid_param` (omit it for the default)
-  on every endpoint that takes it. On `/hot-windows` it is bounded on **both**
+  on every endpoint that takes it. On `/top-windows` it is bounded on **both**
   sides — a negative value gets the same "must be >= 1" message a `0` does,
   and anything longer than the match duration is a `400` naming the bound
   rather than a window whose `end` had to be clamped.
@@ -269,17 +276,20 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   There `limit` defaults to 20 (omit the param) and is capped at 100 — an
   explicit `limit=0`, a `limit` above 100, or a negative `limit`/`offset`
   is rejected with `400 invalid_param` (no longer silently clamped).
-  `/hot-windows` also takes a `limit`, but as a **ranking cut-off, not a
-  page**: there is no `offset` and no next page, because the response is
-  already the top *n* of a total order. It defaults to 10, caps at 200, and
+  `/top-windows` and `/top-kills` also take a `limit`, but as a **ranking
+  cut-off, not a page**: there is no `offset` and no next page, because the
+  response is already the top *n* of a total order. It defaults to 10 (20 on
+  `/top-kills`, whose per-weapon narrowing thins the list), caps at 200, and
   a **negative** value means uncapped. An explicit `limit=0` is rejected
   `400 invalid_param` — an omitted MCP integer argument arrives as `0`, so
   reading it as "uncapped" would make a forgotten argument look deliberate —
   and so is anything above 200, never a silent clamp. Its sibling cap
   `perPlayer` follows the **same** rule (omit for the default, negative for
-  uncapped, explicit `0` rejected) so learning one teaches the other. The
-  score threshold on the same endpoint is `minScore`, not `min` — the bare
-  name read as a duration next to `/lives`' `minMs`.
+  uncapped, explicit `0` rejected) so learning one teaches the other, and so
+  do `/top-kills`' `gapMs` and `contestedMs` (out of range → a `400` naming
+  the range, never a clamp). The score threshold on `/top-windows` is
+  `minScore`, not `min` — the bare name read as a duration next to `/lives`'
+  `minMs`; the damage threshold on `/top-kills` is `minDamage`.
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,
@@ -385,8 +395,9 @@ Non-2xx responses use a stable envelope:
 | 422 | `opening_unavailable` | no detected match start (`/v1/demos/{id}/artifacts/opening`) |
 | 422 | `region_control_unavailable` | no region-control layout for this map |
 | 422 | `airgibs_unavailable` | no timeline analysis (BSP-less maps return `[]`, not this) |
-| 422 | `hot_windows_unavailable` | no source stream for the chosen `metric` (frag log / damage stream / shot stream). Missing loc data only omits `locs`/`eventLocs` — it does not raise this |
+| 422 | `top_windows_unavailable` | no source stream for the chosen `metric` (frag log / damage stream / shot stream). Missing loc data only omits `locs`/`eventLocs` — it does not raise this |
 | 422 | `lives_unavailable` | no per-player streams to segment into lives, **or** streams on none of which liveness was measurable (serving `lives: []` there would read as "nobody ever lived"). A missing damage stream does **not** raise it — `/lives` serves those demos with the damage fields at measured zero |
+| 422 | `top_kills_unavailable` | no frag log, no damage log, **or** no measurable liveness — the burst walk is clipped by the victim's current life start, and without that clip the top-ranked rows are exactly the contaminated ones |
 | 502 | `hub_upstream` | network / 5xx from the hub |
 | 500 | `internal` | unexpected server error (see below) |
 
@@ -415,7 +426,8 @@ when there's nothing, never `422`.
 
 **Null vs `[]`.** A governed response's **top-level array is never
 `null`** — an empty result is `[]` (`/events`, `/stream-slice` `players`,
-`/loc-trails` `players`, `/hot-windows` `windows`, `/lives` `lives`, and
+`/loc-trails` `players`, `/top-windows` `windows`, `/lives` `lives`,
+`/top-kills` `kills`, and
 the list endpoints above). Nested arrays
 deeper in a body may still be `null`; check before iterating. One nested
 `null` is **deliberate and load-bearing**: `/lives`' per-row `itemsTaken`
@@ -636,13 +648,14 @@ the match is cut up before the counting starts:
 |---|---|---|
 | **Whole-match** totals + the raw per-event logs | **`/frags`**, **`/damage`**, **`/player-stats`** | Authoritative stored aggregates; `/player-stats` is the one-call scoreboard. `/frags` carries `killsMeasured` — `false` means its zero `kills` are not measurements. |
 | A **fixed grid** of equal windows (charts) | **`/buckets`** | Every window, in order, whether or not anything happened in it. |
-| The **best stretches** — "when was X hot?" | **`/hot-windows`** | Ranked fixed-length windows, chosen for you by a metric you pick. |
+| The **best stretches** — "when was X hot?" | **`/top-windows`** | Ranked fixed-length windows, chosen for you by a metric you pick. |
 | The **natural unit** — one row per spawn-to-death life | **`/lives`** | Variable-length, and a partition, so per-life sums reconcile with the per-event **logs** (not necessarily the `byPlayer` scoreboards — see below). |
+| The **hardest single kills** — "find me the clips" | **`/top-kills`** | Ranked kill BURSTS: for each kill, the run of killing-weapon hits that produced it. |
 
 Concrete consequences:
 
-- **`/hot-windows` finds the windows; `/buckets` enumerates them.** Reach
-  for hot windows when the question is "which 30 seconds" rather than
+- **`/top-windows` finds the windows; `/buckets` enumerates them.** Reach
+  for top windows when the question is "which 30 seconds" rather than
   "what did each 30 seconds look like". Its `windowMs` is the whole knob
   — 5000 for damage bursts, 30000 for hot streaks, 120000 for map-phase
   dominance — so sweep it rather than expecting one right value. There is
@@ -664,7 +677,7 @@ Concrete consequences:
   and `durationMs` is alive time while the counts cover a slightly wider
   attribution window — each life publishes that window as
   `attrStart`/`attrEnd`, so divide by `attrEnd - attrStart` when you want an
-  exact rate. Hot windows overlap nothing per player but cover
+  exact rate. Top windows overlap nothing per player but cover
   only part of the match, so they never sum to anything.
 - **Both share one stats block** (`IntervalStats`) and both carry a
   `measured` block on the envelope —
@@ -675,10 +688,19 @@ Concrete consequences:
   **kill-attribution** verdict (`/frags`' own `killsMeasured`), not merely
   "a frag log exists", and `measured.liveness` says whether the
   spawn-to-death segmentation was measurable at all — `/lives` 422s when it
-  is false, so you only ever see it false on `/hot-windows`.
-- `/hot-windows` and `/lives` are computed on demand from the stored
-  event logs — no extra parse, and cached under the same per-demo ETag as
-  everything else.
+  is false, so you only ever see it false on `/top-windows`.
+- **`/top-kills` ranks kills, not stretches.** It is the third cut of the
+  same primitive — time windows, lives, and now the kill itself — but it is
+  not an interval reduction and carries no stats block; each row is the burst
+  that produced one kill. Two things to know before you consume it: the burst
+  is the **killing weapon's** run (on ~8% of kills that understates a
+  mixed-weapon kill — that is the endpoint's question, and `/damage` answers
+  the other one), and `gapMs` is a **capture** gap you narrow client-side with
+  each row's `maxGapMs`, never by lowering `gapMs` itself. Positional kills
+  (telefrag/stomp) produce no row; kills by an already-dead killer stay in.
+- `/top-windows`, `/lives` and `/top-kills` are computed on demand from the
+  stored event logs — no extra parse, and cached under the same per-demo ETag
+  as everything else.
 
 ---
 
@@ -733,15 +755,26 @@ Common frontend features → the call that backs them.
   (add `view`/`hgt`/`lq` for look direction / height / liquid).
 - **Life events / deaths timeline** → `GET /events?types=spawn,death`.
 - **"When was X hot?" / match highlights** →
-  `GET /hot-windows?metric=netFrags&windowMs=30000` (add `perPlayer=1` to
+  `GET /top-windows?metric=netFrags&windowMs=30000` (add `perPlayer=1` to
   spread the list across the roster, `players=X` for one player's
   ranking, `limit=-1` for all of them). `weapons=` scopes the *scoring*
   events, so `metric=damageGiven&weapons=lg` finds the best LG stretch
   and still reports everything that happened in it.
+- **Highlight reel ("find me the clips")** → one call: `GET /overview`,
+  read `topKills` (20 rows at the documented defaults), then filter
+  client-side — keep the rows whose `maxGapMs` is within your weapon's
+  cadence (LG ≈ 1200 ms, RL ≈ 2300 ms), whose `victimWep` says the victim was
+  armed, and whose `returnDamage` clears whatever *you* call contested. That
+  narrowing is exact per kept row: a row with `maxGapMs <= g` carries its
+  gap-`g` value verbatim, an over-merged row drops rather than truncates —
+  `?gapMs=g` is the exact walk when the remainders matter.
+  Use `GET /top-kills` when you want more than 20 rows or a server-side
+  filter — `weapons=rl&minDamage=150&limit=50`, or `gapMs=` for an exact
+  recompute at another capture gap.
 - **Per-life breakdown ("how did that life go?")** → `GET /lives`
   (`minMs=1000` drops spawn-frag lives). One row per spawn-to-death run
   with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`,
-  `weaponsHeld` and the same stats block `/hot-windows` uses. A whole 4on4
+  `weaponsHeld` and the same stats block `/top-windows` uses. A whole 4on4
   match is ~400 rows — narrow with `players` / `from` / `to` / `minMs`, or
   ask for `summary=1` first and re-request the lives you care about in
   full.
@@ -769,7 +802,7 @@ Common frontend features → the call that backs them.
   per-player id (which is the last connection that had play). `identity`
   is **demo-local**: never persist it or compare it across demos; the
   cross-demo identity is `login`. Every other name-keyed view (`/lives`,
-  `/hot-windows`, `/frags`, `/damage`, `/buckets`) joins to these rows by
+  `/top-windows`, `/frags`, `/damage`, `/buckets`) joins to these rows by
   the player **name** — with one exception: when two identities share a
   display name, `/player-stats` and the stream views suffix both rows `name#slot`
   to keep them apart while the frag and damage logs keep the bare name, so

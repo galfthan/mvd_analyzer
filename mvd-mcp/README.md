@@ -86,7 +86,8 @@ description says so.
 | `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
 | `getLocTable` | `mvd-api` `GET /v1/demos/{id}/loc-table` |
 | `getRegionControl` | `mvd-api` `GET /v1/demos/{id}/region-control` |
-| `getHotWindows` | `mvd-api` `GET /v1/demos/{id}/hot-windows` |
+| `getTopWindows` | `mvd-api` `GET /v1/demos/{id}/top-windows` |
+| `getTopKills` | `mvd-api` `GET /v1/demos/{id}/top-kills` |
 | `getLives` | `mvd-api` `GET /v1/demos/{id}/lives` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
@@ -212,7 +213,7 @@ infers their JSON Schemas from struct tags and exposes them via
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails, getLocGraph, getHotWindows, getLives) and carries
+getLocTrails, getLocGraph, getTopWindows, getTopKills, getLives) and carries
 match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
 int32 ms (pure-ms model). getLocGraph is on that list because
@@ -643,7 +644,7 @@ region layout. See RESULT_SCHEMA.md for the encoding of
 `bucketStates` (per-region one-char-per-bucket string) and `stats`
 (match-aggregate percentages).
 
-#### `getHotWindows({demoId, metric?, windowMs?, limit?, perPlayer?, ...})`
+#### `getTopWindows({demoId, metric?, windowMs?, limit?, perPlayer?, ...})`
 
 Each player's best fixed-length stretches: *"in these `windowMs` ms this
 player scored higher on `metric` than in any other stretch of the same
@@ -688,16 +689,85 @@ than assuming the `bounded` default took: a defaulted request silently
 falls back to `raw` on a demo whose reconstruction was skipped. Both are
 absent only on a demo with no damage stream (`measured.damage: false`).
 
-Errors with `hot_windows_unavailable` (422) when the demo carries no
+Errors with `top_windows_unavailable` (422) when the demo carries no
 source stream for the chosen metric, and `bounded_unavailable` (422) —
 under any metric — for an **explicit** `dmg:"bounded"` on a demo whose
 bounded reconstruction was skipped. Missing loc data only omits
 `locs`/`eventLocs` and never fails the request.
 
+#### `getTopKills({demoId, gapMs?, contestedMs?, limit?, players?, weapons?, minDamage?, ...})`
+
+The match's hardest kill **bursts**, ranked by burst damage — the
+highlight-reel view. For each enemy kill the burst is the contiguous run
+of **killing-weapon** hits the killer landed on that victim leading up to
+it, clipped below by the start of the victim's current life.
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`      | `string` (required) | — | — |
+| `gapMs`       | `int` | **3000** | The **capture** gap in milliseconds: a hit joins the run while it lands within `gapMs` of the run's earliest hit so far. Max 5000; omit for the default, and an out-of-range value (a `0`, a negative, or above 5000) is rejected `400 invalid_param` naming the range. **Do not lower it to get tighter bursts** — filter on `maxGapMs` instead (see below). |
+| `contestedMs` | `int` | **4000** | Window each row's `returnDamage` sums the victim's damage back over, in ms before the kill. Max 30000, same rejection rule. It sets the window only; the threshold that calls a kill "contested" is yours. |
+| `limit`       | `int` | **20** | Rows returned, max 200; **negative = uncapped**. Omit for the default; an explicit `0` is rejected `400 invalid_param` (an omitted MCP integer arrives as 0). 20 rather than `getTopWindows`' 10 because the per-weapon narrowing below thins the list. |
+| `players`     | `string[]` | all | Restrict to these **killers**. There is deliberately no victim-side filter — it would be a different question. |
+| `weapons`     | `string[]` | all | Restrict the **killing** weapon, which is also the burst's own weapon. Burst-capable tokens only (`rl,lg,gl,ssg,sng,ng,sg,axe,unknown`) — positional/environmental causes are rejected since no damage event can anchor them; a bad token 400s naming the valid set. |
+| `minDamage`   | `int` | `0` | Drop bursts below this much burst damage — the same figure the rows are ranked by. A negative value is rejected. |
+| `startTime`   | `integer` | match start | Earliest **kill** time, match-relative ms. It bounds the kill, not the burst: a kept row's run may reach back before it. |
+| `endTime`     | `integer` | match end | Latest kill time. |
+| `dmg`         | `string` | **`bounded`** | Damage family for `damage` **and** `returnDamage`: `raw` \| `bounded`. `both` is rejected — one response is one family, and `damage` is the ranking key, so the two families can order the list differently. |
+
+Output: `{ timeUnit, dmg, boundedMode, gapMs, contestedMs, limit,
+measured, kills: [{ rank, killer, victim, team, time, weapon, damage,
+hits, spanMs, maxGapMs, victimWep, returnDamage }, …] }`. The `gapMs` /
+`contestedMs` echoes are the **resolved** values — they are what the row
+numbers mean.
+
+**The burst is the killing weapon's run**, and that is the question this
+tool answers: *"how hard was this burst with this weapon"*. On ~8% of
+measured kills it therefore **understates** what produced the kill — a
+rocket softens, a shotgun finishes, and the row reads `weapon: "sg",
+damage: 16` for a kill that took 250 across weapons. Deliberate, not a
+defect; the cross-weapon question is a `getDamage` one. A
+different-weapon hit inside the run neither joins it nor breaks it.
+
+**Narrow with `maxGapMs`, never with `gapMs`.** The capture default is
+generous because truncation is unrecoverable downstream while over-merge
+is filterable: a baked 1200 ms gap truncated 11% of rl and 23% of sg
+bursts (worst measured, a 291-damage triple-rocket kill reported as
+**2**). To get your product's tighter burst, keep the rows whose
+`maxGapMs` is within that weapon's cadence — LG ≈ 1200 ms, RL ≈ 2300 ms
+— every **kept** row then carries its gap-`g` value exactly (an
+over-merged row is dropped, not truncated; ask with `gapMs=g` when the
+remainder matters), because dropping hits
+from a run only widens gaps. `spanMs` is the **display** figure ("291 dmg
+in 1.7 s") and is not a valid narrowing rule.
+
+**Two semantics worth knowing before you filter.** Telefrags, stomps and
+squishes carry no damage event, so they produce **no row** — absent from
+this ranking only, still in `getFrags` and `getDamage`. And kills by an
+**already-dead killer stay in**: the walk consults the *victim's*
+liveness and never the killer's, so a rocket in flight when its shooter
+died still ranks. That is the spawnluck / went-down-swinging highlight
+this tool exists for.
+
+`killer`/`victim` are the frag log's names, so joining to
+`getPlayerStats` rows works by **name** — except where two identities
+share a display name, which that tool suffixes `name#slot` while the logs
+keep the bare name; strip the suffix to join. `getOverview` carries this
+same list at the defaults as `topKills` (20 rows) when you only need the
+highlights.
+
+Errors with `top_kills_unavailable` (422) when the demo lacks the frag
+log, the damage log, or measurable liveness — the last because the burst
+walk is clipped by the victim's current life start, and without that clip
+a burst absorbs the victim's *previous* life on precisely the rows that
+rank highest. `bounded_unavailable` (422) for an **explicit**
+`dmg:"bounded"` on a demo whose bounded reconstruction was skipped; a
+defaulted one falls back to `raw` and says so in the `dmg` echo.
+
 #### `getLives({demoId, players?, startTime?, endTime?, minMs?, dmg?, summary?})`
 
 One row per spawn-to-death run — the natural unit of QuakeWorld
-analysis, and the variable-length counterpart to `getHotWindows`.
+analysis, and the variable-length counterpart to `getTopWindows`.
 
 | Param | Type | Default | Description |
 |---|---|---|---|
@@ -713,7 +783,7 @@ Output: `{ timeUnit, dmg, boundedMode, measured, lives: [{ player,
 team, index, start, end, attrStart, attrEnd, endReason, spawnLoc,
 deathLoc, killedBy, deathWeapon, itemsTaken, weaponsHeld, …stats }, …] }`
 — time-ordered per player, players in name order. `dmg`/`boundedMode`
-are the same envelope echoes `getHotWindows` carries.
+are the same envelope echoes `getTopWindows` carries.
 
 Three things to know before summing:
 
@@ -744,7 +814,7 @@ Three things to know before summing:
   select lives but each still carries its whole attribution window, and
   `minMs` drops a life together with the events inside its window. An
   inverted window (`startTime` > `endTime`) selects nothing and returns
-  `lives: []`, matching `getFrags`, `getDamage` and `getHotWindows`.
+  `lives: []`, matching `getFrags`, `getDamage` and `getTopWindows`.
 
 `endReason` is `death` | `matchEnd` | `leftGame`, always present —
 `killedBy` alone used to conflate all three, and is additionally absent
@@ -761,7 +831,7 @@ liveness was never **measurable** on any of them — serving `lives: []`
 there would read as "nobody ever lived", which is a different and false
 claim from "we could not tell". The envelope's `measured.liveness`
 carries the same fact on the responses that do get served, so it is only
-ever `false` on `getHotWindows`. A demo with no damage stream still
+ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
 
 #### `listArtifacts({})`

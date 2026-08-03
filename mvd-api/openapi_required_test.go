@@ -141,8 +141,8 @@ func TestOpenAPIRequired_IntervalStatsNumerics(t *testing.T) {
 
 	// And the promise has to reach the wire shapes: both segmentations
 	// compose the block, which is what makes one `required` list cover both
-	// /hot-windows rows and /lives rows.
-	for _, row := range []string{"HotWindow", "Life"} {
+	// /top-windows rows and /lives rows.
+	for _, row := range []string{"TopWindow", "Life"} {
 		schema := schemaAt(t, row)
 		branches, _ := schema["allOf"].([]any)
 		found := false

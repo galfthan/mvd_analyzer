@@ -58,7 +58,8 @@ var demoViewCoverage = map[string]mcpCoverage{
 	"/v1/demos/{id}/loc-trails":     {tool: "getLocTrails"},
 	"/v1/demos/{id}/loc-table":      {tool: "getLocTable"},
 	"/v1/demos/{id}/region-control": {tool: "getRegionControl"},
-	"/v1/demos/{id}/hot-windows":    {tool: "getHotWindows"},
+	"/v1/demos/{id}/top-windows":    {tool: "getTopWindows"},
+	"/v1/demos/{id}/top-kills":      {tool: "getTopKills"},
 	"/v1/demos/{id}/lives":          {tool: "getLives"},
 
 	// The three projectile/beam/nail dense streams share the getStreamSlice

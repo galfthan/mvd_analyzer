@@ -103,7 +103,7 @@ var (
 	// dmg: raw | bounded | both (empty → "", the handler resolves the default
 	// to "bounded" for both summary and full-log requests).
 	dmgCanon = map[string]string{"raw": "raw", "bounded": "bounded", "both": "both"}
-	// dmg on the interval endpoints (/hot-windows, /lives): raw | bounded only.
+	// dmg on the interval endpoints (/top-windows, /lives): raw | bounded only.
 	// `both` is a SHAPE — raw fields plus a parallel bounded nest — and there
 	// is no such shape here: one interval stats block carries one set of
 	// damage numbers, and the scoring metrics need a single family to rank on.
@@ -115,15 +115,15 @@ var (
 	// regions: full (default; the full ControlRegion list with polygon Points)
 	// | summary (name/locs/centroids kept, Points stripped) | none (list omitted).
 	regionsCanon = map[string]string{"full": "full", "summary": "summary", "none": "none"}
-	// metric: what a hot window is ranked by. Built from view's own vocabulary
+	// metric: what a top window is ranked by. Built from view's own vocabulary
 	// so the two cannot drift, and accepted case-insensitively — the canonical
 	// spellings are camelCase, which a naive ToLower would never match.
 	metricCanon = buildMetricCanon()
 )
 
 func buildMetricCanon() map[string]string {
-	m := make(map[string]string, len(view.KnownHotWindowMetrics))
-	for _, k := range view.KnownHotWindowMetrics {
+	m := make(map[string]string, len(view.KnownTopWindowMetrics))
+	for _, k := range view.KnownTopWindowMetrics {
 		m[strings.ToLower(k)] = k
 	}
 	return m
@@ -366,10 +366,10 @@ func (p *qp) IntPtr(key, hint string) *int {
 }
 
 // Metric reads ?metric=frags|deaths|netFrags|... (empty → "frags"), the
-// hot-windows ranking quantity. No-op after a prior error.
+// top-windows ranking quantity. No-op after a prior error.
 func (p *qp) Metric() string {
 	return p.enum("metric", view.MetricFrags, metricCanon,
-		"want one of: "+strings.Join(view.KnownHotWindowMetrics, ", "))
+		"want one of: "+strings.Join(view.KnownTopWindowMetrics, ", "))
 }
 
 // Regions reads ?regions=full|summary|none (empty → "full"). No-op after a

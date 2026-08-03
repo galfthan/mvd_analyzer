@@ -8,9 +8,11 @@ import (
 )
 
 // The per-interval stats builder, shared by every interval segmentation:
-// fixed-length hot windows (HotWindows) and spawn-to-death lives (Lives).
-// Adding a third segmentation should mean writing the segmentation, not the
-// statistics.
+// fixed-length top windows (TopWindows) and spawn-to-death lives (Lives).
+// Adding a further segmentation should mean writing the segmentation, not the
+// statistics — though the third one (TopKills) turned out not to be an
+// interval reduction at all and fills no IntervalStats; it borrows only
+// measured() below.
 //
 // It deliberately does NOT call view.Frags / view.Damage with From/To. Those
 // treat From==0 or To==0 as "no bound", so an interval legitimately beginning
@@ -23,12 +25,12 @@ import (
 // interval, statsSpan's [attrStart, attrEnd]. The window is not always the
 // interval itself:
 //
-//   - For a segmentation that merely SELECTS stretches of the match (hot
+//   - For a segmentation that merely SELECTS stretches of the match (top
 //     windows) the window IS the interval, closed at both ends. That matches
 //     the sibling event endpoints (/frags, /damage and /backpacks all include
 //     time == to) and matters more than it looks — a kill lands on the same
 //     millisecond as its damage, so a half-open end would split a kill from the
-//     hit that caused it. Hot windows are not a partition of the match and are
+//     hit that caused it. Top windows are not a partition of the match and are
 //     free to overlap the same event, so nothing more is needed.
 //   - For a segmentation that PARTITIONS the match (lives) the windows must
 //     tile [MatchStart, MatchEnd] exactly, so that per-interval stats sum to
@@ -38,7 +40,7 @@ import (
 //
 // startInclusive/endInclusive carry that edge rule. With no attribution window
 // the end is closed and startInclusive alone decides the start, which is the
-// shape HotWindows passes. The tie-break for a zero-length gap between two
+// shape TopWindows passes. The tie-break for a zero-length gap between two
 // touching intervals is to give the shared instant to the EARLIER one — the
 // life that was ending is the life the player was living when it happened.
 
@@ -47,8 +49,8 @@ import (
 const intervalTopLocs = 3
 
 // MeasuredSources says which of the underlying streams THIS DEMO carries. It
-// rides the envelope of every interval response (HotWindowsView, LivesView) and
-// is never omitempty.
+// rides the envelope of every segmentation response (TopWindowsView,
+// LivesView, TopKillsView) and is never omitempty.
 //
 // MEASUREDNESS IS READ FROM HERE AND NEVER FROM A FIELD'S ABSENCE. The numeric
 // fields of IntervalStats are always emitted, including a measured zero, so
@@ -68,12 +70,12 @@ const intervalTopLocs = 3
 //	locs     locs, eventLocs, and /lives' spawnLoc / deathLoc. True only when
 //	         the demo carries BOTH a loc table and at least one player loc
 //	         stream, since either alone yields nothing.
-//	items    /lives' itemsTaken. Meaningless to /hot-windows, which emits no
+//	items    /lives' itemsTaken. Meaningless to /top-windows, which emits no
 //	         item field; the block keeps one shape across both responses rather
 //	         than making a consumer learn two.
 //	liveness the spawn-to-death segmentation itself — /lives' whole existence.
 //	         /lives 422s when it is false, so a caller only ever sees false on
-//	         /hot-windows, which does not need it.
+//	         /top-windows, which does not need it.
 //
 // False means the source is absent for the whole demo. True does NOT promise
 // every row is non-zero: within a measured source, a zero is a measurement and
@@ -97,7 +99,7 @@ type MeasuredSources struct {
 }
 
 // IntervalStats is the per-interval stats block. It is deliberately
-// segmentation-agnostic: hot windows, lives (Lives) and any future interval
+// segmentation-agnostic: top windows, lives (Lives) and any future interval
 // segmentation all fill the same shape from the same builder, so a consumer
 // learns it once.
 //
@@ -113,7 +115,7 @@ type IntervalStats struct {
 	// it, so that a posthumous rocket counts for the life that fired it (see
 	// Lives). It is the one asymmetry left, and it matters when dividing: a
 	// per-second rate computed from these counts and this duration is very
-	// slightly high. For a hot window the two coincide exactly.
+	// slightly high. For a top window the two coincide exactly.
 	DurationMs int32 `json:"durationMs"`
 
 	Kills     int            `json:"kills"`
@@ -248,7 +250,7 @@ func itemsMeasured(r *result.Result) bool { return r.Items != nil }
 // attributed from.
 //
 // The zero value of the attribution fields means "the window is [start, end],
-// closed at the end" — the non-partitioning case, which is what HotWindows
+// closed at the end" — the non-partitioning case, which is what TopWindows
 // passes. A partitioning segmentation sets attributed and supplies the window
 // and both edge rules itself.
 type statsSpan struct {
@@ -393,7 +395,7 @@ func (sb *statsBuilder) build(player string, sp statsSpan) IntervalStats {
 		// The fold rule lives in sections.go and is applied here through it.
 		//
 		// collectScoreEvents folds the same values into the SCORE on the same
-		// terms (hotwindows.go), which is what makes an unfiltered window's
+		// terms (topwindows.go), which is what makes an unfiltered window's
 		// score equal the same-named field below.
 		if hasBoundedFamily(d) {
 			foldPositional := func(kills []result.PositionalKill) {
