@@ -93449,6 +93449,7 @@
             }
           }
         },
+        "identity": "s0u24",
         "name": "ocoini",
         "pickups": {
           "byKind": {
@@ -93520,6 +93521,15 @@
           "suicides": 5,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "ocoini",
+            "slot": 0,
+            "startMs": -10452,
+            "userId": 24
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1125444,
@@ -93651,6 +93661,7 @@
             }
           }
         },
+        "identity": "s1u25",
         "name": "ThundeR",
         "pickups": {
           "byKind": {
@@ -93719,6 +93730,15 @@
           "suicides": 1,
           "teamKills": 5
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "ThundeR",
+            "slot": 1,
+            "startMs": -10452,
+            "userId": 25
+          }
+        ],
         "team": "BhB",
         "window": {
           "aliveMs": 1146793,
@@ -93841,6 +93861,7 @@
             }
           }
         },
+        "identity": "s2u26",
         "name": "KreatoR",
         "pickups": {
           "byKind": {
@@ -93908,6 +93929,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "KreatoR",
+            "slot": 2,
+            "startMs": -10452,
+            "userId": 26
+          }
+        ],
         "team": "BhB",
         "window": {
           "aliveMs": 1144439,
@@ -94033,6 +94063,7 @@
             }
           }
         },
+        "identity": "s3u27",
         "name": "sailorman",
         "pickups": {
           "byKind": {
@@ -94101,6 +94132,15 @@
           "suicides": 2,
           "teamKills": 5
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "sailorman",
+            "slot": 3,
+            "startMs": -10452,
+            "userId": 27
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1147549,
@@ -94238,6 +94278,7 @@
             }
           }
         },
+        "identity": "s4u28",
         "name": "rghst",
         "pickups": {
           "byKind": {
@@ -94309,6 +94350,15 @@
           "suicides": 2,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "rghst",
+            "slot": 4,
+            "startMs": -10452,
+            "userId": 28
+          }
+        ],
         "team": "BhB",
         "window": {
           "aliveMs": 1112131,
@@ -94433,6 +94483,7 @@
             }
           }
         },
+        "identity": "s5u29",
         "name": "nexus",
         "pickups": {
           "byKind": {
@@ -94501,6 +94552,15 @@
           "suicides": 1,
           "teamKills": 6
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10452,
+            "userId": 29
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1147914,
@@ -94625,6 +94685,7 @@
             }
           }
         },
+        "identity": "s6u30",
         "name": "[nW].Veggie",
         "pickups": {
           "byKind": {
@@ -94690,6 +94751,15 @@
           "suicides": 1,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "[nW].Veggie",
+            "slot": 6,
+            "startMs": -10452,
+            "userId": 30
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1143449,
@@ -94816,6 +94886,7 @@
             }
           }
         },
+        "identity": "s7u32",
         "name": "Doomie",
         "pickups": {
           "byKind": {
@@ -94884,6 +94955,15 @@
           "suicides": 4,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "Doomie",
+            "slot": 7,
+            "startMs": -10452,
+            "userId": 32
+          }
+        ],
         "team": "BhB",
         "window": {
           "aliveMs": 1135997,
@@ -95317,7 +95397,7 @@
       }
     ]
   },
-  "schemaVersion": 65,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -222990,6 +223070,7 @@
             "v": 98
           }
         ],
+        "identity": "s0u24",
         "li": [
           {
             "t": 0,
@@ -248173,6 +248254,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "ocoini",
+            "slot": 0,
+            "startMs": -10452,
+            "userId": 24
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -248541,6 +248631,7 @@
             "v": -10
           }
         ],
+        "identity": "s1u25",
         "li": [
           {
             "t": 0,
@@ -273743,6 +273834,15 @@
             "s": 1184095
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "ThundeR",
+            "slot": 1,
+            "startMs": -10452,
+            "userId": 25
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -274019,6 +274119,7 @@
             "v": 70
           }
         ],
+        "identity": "s2u26",
         "li": [
           {
             "t": 0,
@@ -298925,6 +299026,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "KreatoR",
+            "slot": 2,
+            "startMs": -10452,
+            "userId": 26
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -299190,6 +299300,7 @@
             "v": 176
           }
         ],
+        "identity": "s3u27",
         "li": [
           {
             "t": 0,
@@ -324312,6 +324423,15 @@
             "s": 33475
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "sailorman",
+            "slot": 3,
+            "startMs": -10452,
+            "userId": 27
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -324556,6 +324676,7 @@
             "v": 100
           }
         ],
+        "identity": "s4u28",
         "li": [
           {
             "t": 0,
@@ -350242,6 +350363,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "rghst",
+            "slot": 4,
+            "startMs": -10452,
+            "userId": 28
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -350509,6 +350639,7 @@
             "v": 61
           }
         ],
+        "identity": "s5u29",
         "li": [
           {
             "t": 0,
@@ -375508,6 +375639,15 @@
             "s": 1152931
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10452,
+            "userId": 29
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -375780,6 +375920,7 @@
             "v": 99
           }
         ],
+        "identity": "s6u30",
         "li": [
           {
             "t": 0,
@@ -399765,6 +399906,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "[nW].Veggie",
+            "slot": 6,
+            "startMs": -10452,
+            "userId": 30
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -400045,6 +400195,7 @@
             "v": 100
           }
         ],
+        "identity": "s7u32",
         "li": [
           {
             "t": 0,
@@ -425725,6 +425876,15 @@
           {
             "e": 1189312,
             "s": 1163686
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 1200128,
+            "name": "Doomie",
+            "slot": 7,
+            "startMs": -10452,
+            "userId": 32
           }
         ],
         "sh": [

@@ -758,6 +758,23 @@ Common frontend features → the call that backs them.
   ones with no KTX block. Prefer it over stitching `/demoinfo` +
   `/frags` + `/damage` yourself; read each family's `src` to see whether
   a number came from KTX or was derived here.
+- **"Are these two rows the same person?" / "which userid do I `track=`
+  at time t?"** → `GET /player-stats`, read `identity` and `sessions[]`.
+  A player who reconnects while their old connection is still spawned is
+  renamed `(N)<name>` by mvdsv and scored as two players by KTX; this API
+  reproduces that split faithfully, and equal `identity` values are what
+  tell you the two rows are one human. `sessions[]` is the per-connection
+  `{startMs, endMs, slot, userId, name}` window list — use the `userId`
+  whose window contains your instant, rather than `/overview`'s single
+  per-player id (which is the last connection that had play). `identity`
+  is **demo-local**: never persist it or compare it across demos; the
+  cross-demo identity is `login`. Every other name-keyed view (`/lives`,
+  `/hot-windows`, `/frags`, `/damage`, `/buckets`) joins to these rows by
+  the player **name** — with one exception: when two identities share a
+  display name, `/player-stats` and the stream views suffix both rows `name#slot`
+  to keep them apart while the frag and damage logs keep the bare name, so
+  strip the `#…` suffix to join (and expect the answer to cover both
+  same-named players).
 - **"How long did X hold the RL / RA?" / "how long with no armor?"** →
   `GET /player-stats`, read `hold.weapons.rl` / `hold.armor.ra` /
   `hold.armor.none`. This exists nowhere else: KTX never writes weapon

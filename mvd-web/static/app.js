@@ -1968,14 +1968,17 @@ function renderPowerupRuns(result) {
     shown.forEach(event => {
         const tr = document.createElement('tr');
 
-        // Build viewer URL if hub info available
+        // Build viewer URL if hub info available. A slot number is NOT a
+        // userid — falling back to one tracks whichever player happens to
+        // hold that userid, and a rare wrong link is the kind nobody
+        // reports. No userid, no link (same rule as buildHubWatchLink and
+        // the pack-drop anchors).
         let watchCell = '-';
-        if (hubInfo && hubInfo.gameId) {
+        if (hubInfo && hubInfo.gameId && event.playerUserID) {
             const demoOff = timelineState.demoOffset || 0;
             const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
             const toTime = Math.floor(event.endTime + demoOff) + 5;
-            const trackId = event.playerUserID || event.playerSlot;
-            const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
+            const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: event.playerUserID });
             watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
         }
 

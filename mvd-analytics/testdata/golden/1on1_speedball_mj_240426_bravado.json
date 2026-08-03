@@ -17872,6 +17872,7 @@
             }
           }
         },
+        "identity": "s0u72",
         "name": "speedball",
         "pickups": {
           "byKind": {
@@ -17947,6 +17948,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 600001,
+            "name": "speedball",
+            "slot": 0,
+            "startMs": -10091,
+            "userId": 72
+          }
+        ],
         "team": "speedball",
         "window": {
           "aliveMs": 594848,
@@ -18066,6 +18076,7 @@
             }
           }
         },
+        "identity": "s2u70",
         "name": "mj",
         "pickups": {
           "byKind": {
@@ -18141,6 +18152,15 @@
           "suicides": 0,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 600001,
+            "name": "mj",
+            "slot": 2,
+            "startMs": -10091,
+            "userId": 70
+          }
+        ],
         "team": "mj",
         "window": {
           "aliveMs": 547868,
@@ -18158,7 +18178,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 65,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -30907,6 +30927,7 @@
             "v": 141
           }
         ],
+        "identity": "s0u72",
         "lg": [
           {
             "e": 261590,
@@ -33024,6 +33045,15 @@
             "s": 579313
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600001,
+            "name": "speedball",
+            "slot": 0,
+            "startMs": -10091,
+            "userId": 72
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -33315,6 +33345,7 @@
             "v": 95
           }
         ],
+        "identity": "s2u70",
         "lg": [
           {
             "e": 42611,
@@ -35406,6 +35437,15 @@
           {
             "e": 600001,
             "s": 596794
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 600001,
+            "name": "mj",
+            "slot": 2,
+            "startMs": -10091,
+            "userId": 70
           }
         ],
         "sh": [

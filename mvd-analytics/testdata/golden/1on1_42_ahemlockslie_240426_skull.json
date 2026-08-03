@@ -13778,6 +13778,7 @@
             }
           }
         },
+        "identity": "s0u20",
         "name": "AHemlocksLie",
         "pickups": {
           "byKind": {
@@ -13839,6 +13840,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 599993,
+            "name": "AHemlocksLie",
+            "slot": 0,
+            "startMs": -10104,
+            "userId": 20
+          }
+        ],
         "team": "AHemlocksLie",
         "window": {
           "aliveMs": 580446,
@@ -13951,6 +13961,7 @@
             }
           }
         },
+        "identity": "s1u21",
         "name": "42",
         "pickups": {
           "byKind": {
@@ -14012,6 +14023,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 599993,
+            "name": "42",
+            "slot": 1,
+            "startMs": -10104,
+            "userId": 21
+          }
+        ],
         "team": "42",
         "window": {
           "aliveMs": 590079,
@@ -14029,7 +14049,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 65,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -31135,6 +31155,7 @@
             "v": 100
           }
         ],
+        "identity": "s0u20",
         "lg": [
           {
             "e": 69090,
@@ -33132,6 +33153,15 @@
             "s": 595019
           }
         ],
+        "sessions": [
+          {
+            "endMs": 599993,
+            "name": "AHemlocksLie",
+            "slot": 0,
+            "startMs": -10104,
+            "userId": 20
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -33564,6 +33594,7 @@
             "v": 148
           }
         ],
+        "identity": "s1u21",
         "lg": [
           {
             "e": 69493,
@@ -35475,6 +35506,15 @@
           {
             "e": 599993,
             "s": 551163
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 599993,
+            "name": "42",
+            "slot": 1,
+            "startMs": -10104,
+            "userId": 21
           }
         ],
         "sh": [

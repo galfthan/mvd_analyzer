@@ -17,8 +17,13 @@ func newDemoMarkTestAnalyzer() *TimelineAnalyzer {
 	a.ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "watcher", UserID: 333, Spectator: true}
 	a.playerNames[0] = "alpha"
 	a.playerNames[1] = "bravo"
+	// The per-slot userinfo latch. It is the fallback userIDAt reads when
+	// no identity analyser is wired (as here); the spectator slot carries
+	// one too, because KTX takes /demomark from spectators and a
+	// spectator's slot has ordinary userinfo like any other.
 	a.playerUserIDs[0] = 111
 	a.playerUserIDs[1] = 222
+	a.playerUserIDs[2] = 333
 	a.UseCoreOutputs(&CoreOutputs{})
 	return a
 }

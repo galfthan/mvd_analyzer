@@ -53,5 +53,15 @@
     "gameId": 203199,
     "label": "4on4_tbg_pex_080326_dm2_demomark",
     "mode": "4on4"
+  },
+  {
+    "gameId": 220637,
+    "label": "4on4_fu_mix_060626_dm2_rename_handover",
+    "mode": "4on4"
+  },
+  {
+    "gameId": 222649,
+    "label": "4on4_blue_red_200626_e1m2_sameslot_rejoin",
+    "mode": "4on4"
   }
 ]

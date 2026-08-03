@@ -509,7 +509,12 @@ name fallback). Any Finalize site that has an event timestamp should
 resolve via `co.SlotIdentityAt(slot, tMs)` rather than `SlotName`, so a
 player's pre-reconnect events stay attributed to them. The streams
 output groups per-slot builders by `ResolvedSession.IdentityKey` to emit
-one merged `PlayerStream` per player.
+one merged `PlayerStream` per player, and since schema v66 it also
+**publishes** that identity: `streams.players[].identity` (equal on every
+row that is the same human) plus `sessions[]`, the observed
+`{startMs, endMs, slot, userId, name}` window of each connection —
+mirrored onto `playerStats.players[]`. See
+[RESULT_SCHEMA.md § Player identity and sessions](RESULT_SCHEMA.md#player-identity-and-sessions-schema-v66).
 
 ## Using mvd-analytics
 

@@ -120,6 +120,19 @@ type PlayerStatsRow struct {
 	Name string `json:"name"`
 	Team string `json:"team,omitempty"`
 
+	// Identity and Sessions are the reconnect-unification key and the wire
+	// occupancies behind this row, copied verbatim from the player's stream
+	// (see result.PlayerStream for the full contract — the key is DEMO-LOCAL
+	// and must not be persisted or compared across demos). Two rows sharing
+	// an identity are one human under two names; the sessions say which slot
+	// and userid they were at any instant.
+	//
+	// Absent on TEAM rows (an aggregate is not a connection) and on a
+	// scoreboard-only player row — one the KTX block lists but that produced
+	// no stream, so there is no occupancy to attribute.
+	Identity string          `json:"identity,omitempty"`
+	Sessions []PlayerSession `json:"sessions,omitempty"`
+
 	// KTX-only identity fields, straight from the demoinfo block and
 	// absent on demos without one. Not derivable from the wire.
 	//

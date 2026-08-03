@@ -94005,6 +94005,7 @@
             }
           }
         },
+        "identity": "s0u93",
         "name": "biggz",
         "pickups": {
           "byKind": {
@@ -94081,6 +94082,15 @@
           "suicides": 3,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "biggz",
+            "slot": 0,
+            "startMs": -10248,
+            "userId": 93
+          }
+        ],
         "team": "jah",
         "window": {
           "aliveMs": 1150227,
@@ -94217,6 +94227,7 @@
             }
           }
         },
+        "identity": "s1u99",
         "name": "gandi",
         "pickups": {
           "byKind": {
@@ -94295,6 +94306,15 @@
           "suicides": 2,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "gandi",
+            "slot": 1,
+            "startMs": -10248,
+            "userId": 99
+          }
+        ],
         "team": "jah",
         "window": {
           "aliveMs": 1156819,
@@ -94438,6 +94458,7 @@
             }
           }
         },
+        "identity": "s7u8",
         "name": "rusti",
         "pickups": {
           "byKind": {
@@ -94515,6 +94536,22 @@
           "suicides": 1,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 603204,
+            "name": "rusti",
+            "slot": 7,
+            "startMs": -10248,
+            "userId": 8
+          },
+          {
+            "endMs": 1200101,
+            "name": "rusti",
+            "slot": 2,
+            "startMs": 603204,
+            "userId": 14
+          }
+        ],
         "team": "jah",
         "window": {
           "aliveMs": 1145602,
@@ -94648,6 +94685,7 @@
             }
           }
         },
+        "identity": "s3u3",
         "name": "[nW].Veggie",
         "pickups": {
           "byKind": {
@@ -94716,6 +94754,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "[nW].Veggie",
+            "slot": 3,
+            "startMs": -10248,
+            "userId": 3
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1143667,
@@ -94855,6 +94902,7 @@
             }
           }
         },
+        "identity": "s4u4",
         "name": "sailorman",
         "pickups": {
           "byKind": {
@@ -94935,6 +94983,15 @@
           "suicides": 2,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "sailorman",
+            "slot": 4,
+            "startMs": -10248,
+            "userId": 4
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1152599,
@@ -95083,6 +95140,7 @@
             }
           }
         },
+        "identity": "s5u5",
         "name": "nexus",
         "pickups": {
           "byKind": {
@@ -95161,6 +95219,15 @@
           "suicides": 0,
           "teamKills": 3
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10248,
+            "userId": 5
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1158009,
@@ -95304,6 +95371,7 @@
             }
           }
         },
+        "identity": "s6u6",
         "name": "ocoini",
         "pickups": {
           "byKind": {
@@ -95382,6 +95450,15 @@
           "suicides": 1,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "ocoini",
+            "slot": 6,
+            "startMs": -10248,
+            "userId": 6
+          }
+        ],
         "team": "ahoy",
         "window": {
           "aliveMs": 1157375,
@@ -95525,6 +95602,7 @@
             }
           }
         },
+        "identity": "s8u11",
         "name": "paniagua",
         "pickups": {
           "byKind": {
@@ -95606,6 +95684,15 @@
           "suicides": 0,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "paniagua",
+            "slot": 8,
+            "startMs": -10248,
+            "userId": 11
+          }
+        ],
         "team": "jah",
         "window": {
           "aliveMs": 1150289,
@@ -96108,7 +96195,7 @@
       }
     ]
   },
-  "schemaVersion": 65,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -172404,6 +172491,7 @@
             "v": 74
           }
         ],
+        "identity": "s0u93",
         "lg": [
           {
             "e": 88350,
@@ -184258,6 +184346,15 @@
             "s": 1151573
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "biggz",
+            "slot": 0,
+            "startMs": -10248,
+            "userId": 93
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -184509,6 +184606,7 @@
             "v": 100
           }
         ],
+        "identity": "s1u99",
         "lg": [
           {
             "e": 1185833,
@@ -195175,6 +195273,15 @@
             "s": 1126406
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "gandi",
+            "slot": 1,
+            "startMs": -10248,
+            "userId": 99
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -195327,6 +195434,7 @@
             "v": -2
           }
         ],
+        "identity": "s7u8",
         "lg": [
           {
             "e": 1200101,
@@ -206058,6 +206166,22 @@
             "s": 1097694
           }
         ],
+        "sessions": [
+          {
+            "endMs": 603204,
+            "name": "rusti",
+            "slot": 7,
+            "startMs": -10248,
+            "userId": 8
+          },
+          {
+            "endMs": 1200101,
+            "name": "rusti",
+            "slot": 2,
+            "startMs": 603204,
+            "userId": 14
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -206244,6 +206368,7 @@
             "v": 100
           }
         ],
+        "identity": "s3u3",
         "lg": [],
         "li": [
           {
@@ -215613,6 +215738,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "[nW].Veggie",
+            "slot": 3,
+            "startMs": -10248,
+            "userId": 3
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -215853,6 +215987,7 @@
             "v": 100
           }
         ],
+        "identity": "s4u4",
         "lg": [
           {
             "e": 136203,
@@ -227237,6 +227372,15 @@
             "s": 31282
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "sailorman",
+            "slot": 4,
+            "startMs": -10248,
+            "userId": 4
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -227406,6 +227550,7 @@
             "v": -17
           }
         ],
+        "identity": "s5u5",
         "lg": [],
         "li": [
           {
@@ -238620,6 +238765,15 @@
             "s": 37919
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10248,
+            "userId": 5
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -238828,6 +238982,7 @@
             "v": 100
           }
         ],
+        "identity": "s6u6",
         "lg": [
           {
             "e": 1188032,
@@ -249332,6 +249487,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "ocoini",
+            "slot": 6,
+            "startMs": -10248,
+            "userId": 6
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -249585,6 +249749,7 @@
             "v": 56
           }
         ],
+        "identity": "s8u11",
         "lg": [],
         "li": [
           {
@@ -260870,6 +261035,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200101,
+            "name": "paniagua",
+            "slot": 8,
+            "startMs": -10248,
+            "userId": 11
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -260964,7 +261138,7 @@
         "time": 146760,
         "victim": "rusti",
         "victimTeam": "jah",
-        "victimUserID": 13
+        "victimUserID": 8
       }
     ],
     "deathEvents": [
@@ -265506,7 +265680,7 @@
         "ewep": "rl",
         "frags": 14,
         "playerName": "rusti",
-        "playerUserID": 13,
+        "playerUserID": 14,
         "team": "jah",
         "time": 1045798
       },
@@ -265516,7 +265690,7 @@
         "ewep": "rl",
         "frags": 14,
         "playerName": "rusti",
-        "playerUserID": 13,
+        "playerUserID": 14,
         "team": "jah",
         "time": 1036499
       },
@@ -267742,7 +267916,7 @@
       "nexus": 5,
       "ocoini": 6,
       "paniagua": 11,
-      "rusti": 13,
+      "rusti": 14,
       "sailorman": 4
     },
     "powerupEvents": [
@@ -267917,7 +268091,7 @@
         "frags": 2,
         "playerName": "rusti",
         "playerSlot": 2,
-        "playerUserID": 13,
+        "playerUserID": 14,
         "powerupType": "quad",
         "team": "jah",
         "time": 609411
@@ -268016,7 +268190,7 @@
         "frags": 4,
         "playerName": "rusti",
         "playerSlot": 2,
-        "playerUserID": 13,
+        "playerUserID": 14,
         "powerupType": "ring",
         "team": "jah",
         "time": 976725
@@ -268049,7 +268223,7 @@
         "frags": 4,
         "playerName": "rusti",
         "playerSlot": 2,
-        "playerUserID": 13,
+        "playerUserID": 14,
         "powerupType": "quad",
         "team": "jah",
         "time": 1154555

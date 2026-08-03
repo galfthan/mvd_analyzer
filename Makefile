@@ -122,14 +122,18 @@ test:
 	if [ -n "$$out" ]; then \
 		echo "gofmt: not formatted (run 'make fmt'):"; echo "$$out"; exit 1; \
 	fi
-	go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
+# -timeout: the analyzer package re-analyzes the whole cached demo corpus and
+# has been measured at ~9 minutes — close enough to go test's 600s default
+# that one more corpus demo, or a loaded machine, turns a passing run into a
+# confusing timeout panic rather than a failure. Raised well clear.
+	go test -timeout 1800s ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
 # The special-cases harness walks a per-machine demo directory and skips
 # when it is absent. `go test` caches that skip and does NOT invalidate it
 # when the demos later appear (a directory listing is not a cache input), so
 # the invariants would silently never run again on a machine that was once
 # without demos. -count=1 is the only reliable fix; it costs nothing when
 # the directory really is absent.
-	go test -count=1 ./mvd-analytics/corpus/
+	go test -count=1 -timeout 1800s ./mvd-analytics/corpus/
 
 # Remove dist/.
 clean:

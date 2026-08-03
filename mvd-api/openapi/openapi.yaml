@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "65"
+  version: "66"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -2052,6 +2052,11 @@ components:
         Set it to spread a leaderboard across the roster; omit it for a pure
         match-wide ranking in which one dominant player may own every row.
 
+        The cap is keyed on the player NAME, so a human the server scored as
+        two players (a reconnect renamed `(N)<name>`) can occupy twice the
+        quota. `/player-stats`' `identity` is what lets you detect that — two
+        names, one identity; the cap itself is deliberately left name-keyed.
+
         Same rule as `limit`, deliberately: omitted is the default (uncapped),
         a NEGATIVE value means uncapped, and an explicit `perPlayer=0` is
         REJECTED with a 400 — an omitted MCP integer arrives as 0, and 0 must
@@ -2624,7 +2629,7 @@ components:
           description: "Match mode (e.g. Duel/Team/FFA)."
           type: string
         playerUserIDs:
-          description: "Player name → UserID map (Hub viewer links)."
+          description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
           additionalProperties:
             type: integer
           type: object
@@ -4784,7 +4789,7 @@ components:
           description: "Attacker team name."
           type: string
         attackerUserID:
-          description: "Attacker UserID (Hub viewer link)."
+          description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
           type: integer
         damage:
           description: "Raw rocket damage (unbound, incl. overkill)."
@@ -4813,7 +4818,7 @@ components:
           description: "Victim team name."
           type: string
         victimUserID:
-          description: "Victim UserID (Hub viewer link)."
+          description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
           type: integer
       required:
         - time
@@ -5639,7 +5644,7 @@ components:
                 description: "Attacker team name."
                 type: string
               attackerUserID:
-                description: "Attacker UserID (Hub viewer link)."
+                description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
                 type: integer
               damage:
                 description: "Raw rocket damage (unbound, incl. overkill)."
@@ -5668,7 +5673,7 @@ components:
                 description: "Victim team name."
                 type: string
               victimUserID:
-                description: "Victim UserID (Hub viewer link)."
+                description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
                 type: integer
             required:
               - time
@@ -5699,6 +5704,44 @@ components:
             required:
               - time
               - player
+              - team
+            type: object
+          type:
+            - "null"
+            - array
+        demoMarkers:
+          description: "Player-inserted `/demomark` bookmarks (KTX stufftext), in demo order. Not deduplicated."
+          items:
+            additionalProperties: false
+            properties:
+              label:
+                description: "Optional argument tail of the mark (e.g. the HoonyMode \"0 round-07\" form); omitted for a plain mark."
+                type: string
+              playerName:
+                description: "Marking player's name; empty when the mark was not slot-addressed."
+                type: string
+              playerSlot:
+                description: "Marking player's wire slot — the only attribution channel; -1 when the mark was not slot-addressed."
+                type: integer
+              playerUserID:
+                description: "Marking player's UserID (Hub viewer link); 0 when unattributed, and not a useful track target for a spectator's mark."
+                type: integer
+              spectator:
+                description: "The mark was inserted by a spectator, not a player (KTX accepts /demomark from both); omitted when false."
+                type: boolean
+              team:
+                description: "Marking player's team; usually empty for a spectator's mark."
+                type: string
+              time:
+                description: "Event/sample time, int32 ms since match start; negative for a mark inserted during warmup (surfaced un-gated)."
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
+            required:
+              - time
+              - playerName
+              - playerSlot
+              - playerUserID
               - team
             type: object
           type:
@@ -5757,7 +5800,7 @@ components:
                 description: "Player name."
                 type: string
               playerUserID:
-                description: "Player UserID (Hub viewer link)."
+                description: "Player UserID (Hub viewer link), resolved at the run's own start — the connection that played it, not the player's demo-wide id."
                 type: integer
               team:
                 description: "Team name."
@@ -5838,7 +5881,7 @@ components:
             - "null"
             - array
         playerUserIDs:
-          description: "Player name → UserID map (Hub viewer links)."
+          description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
           additionalProperties:
             type: integer
           type: object
@@ -6269,6 +6312,42 @@ components:
       properties:
         name: { description: "Player name, or team name on a team row.", type: string }
         team: { description: "Team name.", type: string }
+        identity:
+          description: >
+            Reconnect-unification key: two rows carrying the SAME value are
+            one human under two names — a player who reconnected while their
+            old connection was still spawned is renamed `(N)<name>` by mvdsv
+            and scored as two players by KTX, which this pipeline reproduces
+            faithfully rather than merging. Different values are different
+            humans as the server scored them.
+
+            DEMO-LOCAL: it is derived from the identity's first session
+            (`s<slot>u<userId>`), both of which describe a connection to one
+            server. Reproducible from the same demo, but NOT an id to persist
+            and NOT comparable across demos — the cross-demo identity is
+            `login`. Absent on TEAM rows and on a scoreboard-only player row
+            (in the KTX block, produced no stream, so no occupancy to
+            attribute).
+          type: string
+        sessions:
+          description: >
+            Every wire-slot occupancy behind this row, in time order — one
+            entry per CONNECTION, so a player who timed out and rejoined has
+            two, with two userids. This is the lossless form of the answer
+            `/overview`'s `playerUserIDs` gives once per player: use
+            `userId` for a `?track=` link at an instant inside the window.
+            Absent with `identity` (team and scoreboard-only rows).
+
+            Occupancies the wire never gave a userid are NOT listed — KTX's
+            ghost scoreboard row (a departed player's edict, userid hardcoded
+            0) and inferred occupancies are not connections, and the ghost
+            carries the departed player's name. Nor is a connection first
+            attested at or after match end (a spectator connecting postgame,
+            unified with a player who left mid-match): the published window
+            closes at match end, so it would emit startMs > endMs, and it
+            describes nothing trackable inside the match.
+          items: { $ref: "#/components/schemas/PlayerSession" }
+          type: array
         ping:
           description: "KTX-only: end-of-match ping. Absent without a demoinfo block (svc_updateping carries it on the wire but the parser skips it today)."
           type: [integer, "null"]
@@ -6488,6 +6567,53 @@ components:
         - window
         - score
         - hold
+      type: object
+    PlayerSession:
+      description: >
+        One contiguous occupancy of a wire client slot by ONE connection of
+        this player — the validity window of a userid. A userid names a
+        connection, not a person (mvdsv reissues them from a rotating pool),
+        so the same human reconnecting draws a new one and the slot they left
+        hands its old one to whoever takes it next.
+      additionalProperties: false
+      properties:
+        startMs:
+          description: >
+            First userinfo that attested this connection, int32 ms on the
+            match clock. NOT clamped to the match window: a player connected
+            during the countdown reports a NEGATIVE value, the same policy as
+            the timeline's demo markers and the pause anchors.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        endMs:
+          description: >
+            The drop broadcast, or the next connection's userinfo — half-open
+            [startMs, endMs). Synthetic in TWO cases, both reading exactly
+            match end: a client still connected when the recording ended (no
+            wire event exists to report), and a drop broadcast that lands
+            AFTER match end (the event exists, but the window is closed on
+            the match clock every other time here lives on). So an endMs at
+            match end does not by itself mean "still connected at the end".
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        slot:
+          description: "Wire client slot (0-based), the index svc_* messages address this connection by."
+          type: integer
+        userId:
+          description: "The connection's userid — the value a hub `?track=` link must carry to follow this player inside this window, and only then. Always non-zero: an occupancy the wire gave no userid is not published as a session at all, so there is no 0 to interpret."
+          type: integer
+        name:
+          description: >
+            The netname this connection carried, where the row's `name` is
+            the identity's canonical one. They differ after a rename or an
+            mvdsv `(N)` duplicate-name prefix; this is the one to match
+            against a live engine roster at an instant inside the window.
+            Normalized through the same Quake character fold as every other
+            name in this API, so it is not the raw wire bytes.
+          type: string
+      required: [startMs, endMs, slot, userId]
       type: object
     PlayerStatsWindow:
       description: >
@@ -6764,7 +6890,12 @@ components:
           type: integer
           description: Window end, int32 ms (the exact bound used for slicing).
         players:
-          description: "Per-player stream slices over the window (mini result.PlayerStream shapes)."
+          description: >
+            Per-player stream slices over the window (mini result.PlayerStream
+            shapes). Deliberately WITHOUT the match-global `identity` /
+            `sessions` fields that `streams.players[]` carries: they do not
+            vary by window. Fetch them once from `/player-stats` and join on
+            the player `name`.
           items:
             additionalProperties: false
             properties:

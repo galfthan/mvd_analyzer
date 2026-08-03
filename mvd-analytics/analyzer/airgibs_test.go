@@ -113,6 +113,73 @@ func TestAirgibsPost_SortedByHeightUncapped(t *testing.T) {
 	}
 }
 
+// Airgibs stamp the userid of the connection each player held AT THE HIT,
+// not the demo-wide last-session-with-play id: a hit inside a rejoiner's
+// earlier stint belongs to the connection that threw it. The lookup also
+// has to cross time bases — damage times are match-relative, the session
+// table is on the demo clock — so the late hit here sits BEFORE the
+// session boundary in match time and after it in demo time.
+func TestAirgibsPost_UserIDIsTheSessionAtTheHit(t *testing.T) {
+	const matchStartMs = 10_000
+	pos := func(ts ...int32) *result.PositionTrack {
+		p := &result.PositionTrack{}
+		for _, t := range ts {
+			p.T = append(p.T, t)
+			p.X = append(p.X, 0)
+			p.Y = append(p.Y, 0)
+			p.Z = append(p.Z, 200)
+			p.H = append(p.H, 150) // airborne at every sample
+		}
+		return p
+	}
+	res := &result.Result{
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "vic", Position: pos(20_000, 145_000)},
+			{Name: "att", Position: pos(20_000, 145_000)},
+		}},
+		Damage: &result.DamageResult{Events: []result.DamageEntry{
+			{Time: 20_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
+			{Time: 145_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
+		}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			// The demo-wide map answers 25 for both hits; only per-instant
+			// resolution can tell the two connections apart.
+			PlayerUserIDs: map[string]int{"att": 25, "vic": 7},
+		},
+	}
+	co := &CoreOutputs{
+		Clock: &Clock{MatchStartMs: matchStartMs},
+		Sessions: map[int][]ResolvedSession{
+			3: {
+				{StartMs: minInt32, EndMs: 150_000, OccStartMs: 0, Name: "att", UserID: 12, IdentityKey: "s3u12"},
+				{StartMs: 150_000, EndMs: maxInt32, OccStartMs: 150_000, Name: "att", UserID: 25, IdentityKey: "s3u12"},
+			},
+			4: {
+				{StartMs: minInt32, EndMs: maxInt32, OccStartMs: 0, Name: "vic", UserID: 7, IdentityKey: "s4u7"},
+			},
+		},
+	}
+	airgibsPost(res, co)
+
+	got := map[int32]int{}
+	for _, ag := range res.TimelineAnalysis.Airgibs {
+		got[ag.Time] = ag.AttackerUserID
+		if ag.VictimUserID != 7 {
+			t.Errorf("victim userid at t=%d = %d, want 7", ag.Time, ag.VictimUserID)
+		}
+	}
+	if len(got) != 2 {
+		t.Fatalf("airgibs = %+v, want 2", res.TimelineAnalysis.Airgibs)
+	}
+	if got[20_000] != 12 {
+		t.Errorf("early hit attacker userid = %d, want 12 (the connection live then)", got[20_000])
+	}
+	// Match time 145000 is demo time 155000 — past the 150000 handover.
+	if got[145_000] != 25 {
+		t.Errorf("late hit attacker userid = %d, want 25 (match time converted to the session table's demo clock)", got[145_000])
+	}
+}
+
 func TestAirgibsPost_NoHeightColumnNoAirgibs(t *testing.T) {
 	// A victim with positions but no H column (BSP-less run): no airgibs.
 	res := &result.Result{

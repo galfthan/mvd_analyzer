@@ -59,7 +59,7 @@ func TestFragStreaks_InitialSpawnRun(t *testing.T) {
 	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 250000, PlayerNum: 1})
 	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 252000, PlayerNum: 1})
 
-	streaks := a.detectFragStreaks(10, nil, map[string]int{})
+	streaks := a.detectFragStreaks(10, nil, nil)
 
 	opening := findStreak(streaks, "dom", 5)
 	if opening == nil {
@@ -95,7 +95,7 @@ func TestFragStreaks_NeverDiedPlayer(t *testing.T) {
 		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2000, PlayerNum: 1})
 	}
 
-	streaks := a.detectFragStreaks(10, nil, map[string]int{})
+	streaks := a.detectFragStreaks(10, nil, nil)
 
 	full := findStreak(streaks, "dom", 3)
 	if full == nil {
@@ -132,7 +132,7 @@ func TestFragStreaks_MatchStartResetKill(t *testing.T) {
 		a.rawSpawns = append(a.rawSpawns, deathEvent{Time: dt + 2000, PlayerNum: 1})
 	}
 
-	streaks := a.detectFragStreaks(10, nil, map[string]int{})
+	streaks := a.detectFragStreaks(10, nil, nil)
 
 	first := findStreak(streaks, "nlk", 2)
 	if first == nil {
@@ -171,7 +171,7 @@ func TestFragStreaks_MidMatchJoinerUnaffected(t *testing.T) {
 	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: 120000, PlayerNum: 1})
 	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: 122000, PlayerNum: 1})
 
-	streaks := a.detectFragStreaks(10, nil, map[string]int{})
+	streaks := a.detectFragStreaks(10, nil, nil)
 
 	run := findStreak(streaks, "late", 1)
 	if run == nil {
