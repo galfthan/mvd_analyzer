@@ -1926,11 +1926,13 @@ function getAccuracyClass(acc) {
 
 // Powerup-run display filter (Key Moments). A run is listed only when it
 // lasted at least `minDur` seconds AND scored at least `minFrags` frags —
-// the reading of "min length 5s and min frags 1" as a conjunction, which
-// hides long fragless runs by default. Both thresholds are editable down to
+// the reading of "min length 5s and min frags 3" as a conjunction, which
+// hides low-value quad cycles by default (a quad spawns every 60 s, so
+// 0-2-frag runs are routine noise; pent/ring runs clearing 3 frags are the
+// ones worth a highlight list too). Both thresholds are editable down to
 // 0 in the panel and the Result keeps every run either way, so this is a UI
 // control rather than a pipeline filter (CLAUDE.md "surface, don't filter").
-const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 1 };
+const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 3 };
 let keymomentsFilter = { ...KEYMOMENTS_FILTER_DEFAULTS };
 
 // Wired once at load; the inputs live outside the rebuilt table.
@@ -2168,8 +2170,10 @@ function displayKeyMoments(result) {
 // already hold a capture-3000 response and want a tighter gap without a second
 // request. In-process a second request is free. See mvd-analytics/view/topkills.go.
 const TOP_KILL_QUERIES = [
-    { key: 'toprl', weapon: 'rl', gapMs: 2300 },
-    { key: 'toplg', weapon: 'lg', gapMs: 1200 },
+    // RL gets the wide list beside the frag runs; LG the short one beside the
+    // demo markers — the RL burst is the headline highlight in team games.
+    { key: 'toprl', weapon: 'rl', gapMs: 2300, limit: 10 },
+    { key: 'toplg', weapon: 'lg', gapMs: 1200, limit: 5 },
 ];
 
 // The window length for the frag-run ranking. 10 s is the "he just went off"
@@ -2214,12 +2218,12 @@ function renderTopMoments() {
     };
 
     run('getTopWindows',
-        { metric: 'frags', windowMs: TOP_RUN_WINDOW_MS, limit: 5, dmg: 'bounded' },
+        { metric: 'frags', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' },
         v => renderTopFragRuns(v, hubInfo, playerUserIDs));
 
     for (const q of TOP_KILL_QUERIES) {
         run('getTopKills',
-            { weapons: [q.weapon], gapMs: q.gapMs, limit: 5, dmg: 'bounded' },
+            { weapons: [q.weapon], gapMs: q.gapMs, limit: q.limit, dmg: 'bounded' },
             v => renderTopKills(q.key, v, hubInfo, playerUserIDs));
     }
 }

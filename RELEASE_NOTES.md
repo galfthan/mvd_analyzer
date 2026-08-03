@@ -69,9 +69,11 @@ observable change).
   silently served raw — when the demo cannot answer the query, since
   `/overview` has no `dmg` echo to name a family with.
 - **MCP gains `getTopKills`**, lockstep as always.
-- **Web app: Key Moments gains three ranked lists** — top 5 frag runs (the
-  best 10 s windows by enemy kills) and top 5 RL / LG kill bursts, at the
-  per-weapon gaps 2300 / 1200 ms. They are view queries over the analysed
+- **Web app: Key Moments gains three ranked lists** — the top 10 frag runs
+  (the best 10 s windows by enemy kills), the top 10 RL and top 5 LG kill
+  bursts at the per-weapon gaps 2300 / 1200 ms; the powerup-run filter now
+  defaults to min 3 frags (a quad cycles every 60 s, so 0-2-frag runs are
+  routine noise — the input still goes down to 0). They are view queries over the analysed
   demo (new WASM exports `getTopWindows` / `getTopKills`), so each table
   fills in independently and shows its own empty state when the demo cannot
   answer it.
