@@ -69,6 +69,12 @@ observable change).
   silently served raw — when the demo cannot answer the query, since
   `/overview` has no `dmg` echo to name a family with.
 - **MCP gains `getTopKills`**, lockstep as always.
+- **Web app: Key Moments gains three ranked lists** — top 5 frag runs (the
+  best 10 s windows by enemy kills) and top 5 RL / LG kill bursts, at the
+  per-weapon gaps 2300 / 1200 ms. They are view queries over the analysed
+  demo (new WASM exports `getTopWindows` / `getTopKills`), so each table
+  fills in independently and shows its own empty state when the demo cannot
+  answer it.
 
 **And `/hot-windows` is now `/top-windows` — a rename, not an alias.** The
 API's ranked-highlight scans get an explicit `top-` prefix, while plain nouns

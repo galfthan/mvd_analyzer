@@ -136,9 +136,10 @@ measured zero renders `0` and only an unmeasured split renders `-`.
 measured; where the self split is not (a KTX-block-without-stream demo)
 the cell shows a `≥`-prefixed lower bound whose tooltip names what is
 missing, never a silently partial total.
-The **Key Moments** tab has four tables: powerup runs, longest frag
-streaks, a **Demo Markers** table, and a full-width **Airborne Rocket
-Gibs** table — enemy rocket hits on airborne victims
+The **Key Moments** tab has seven tables: powerup runs, longest frag
+streaks, a **Demo Markers** table, three ranked view-query lists (**Top
+Frag Runs (10 s)**, **Top RL Kills**, **Top LG Kills**), and a
+full-width **Airborne Rocket Gibs** table — enemy rocket hits on airborne victims
 (`timelineAnalysis.airgibs`), sortable by any column and defaulting to
 height-above-shooter descending (the vertical gap the rocket climbed).
 Its rows are empty unless the map's BSP is provisioned (height needs the
@@ -147,6 +148,30 @@ user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
 Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty
 since demos rarely carry markers, and warmup marks show a negative time.
+
+The three ranked lists are the tab's only **view queries**: they are not
+stored `Result` fields but `view.TopWindows` / `view.TopKills` rankings
+computed on demand from the demo the WASM module still holds, so they
+fill in a moment after the rest of the tab has painted. The Go exports
+(`getTopWindows`, `getTopKills`) live on the worker's global like every
+other one, so the main page reaches them through a `viewQuery` worker
+message (`viewQueryInWorker`) — the same round-trip as region recompute
+and line of sight. **Top Frag Runs (10 s)** is the top 5 windows by
+enemy kills (`metric=frags`, `windowMs=10000`), showing the window's own
+`damageGiven` beside the frag count; **Top RL / LG Kills** are the top 5
+kill bursts per weapon — the run of killing-weapon hits leading up to
+the kill — at the per-weapon gaps `gapMs=2300` (RL) and `1200` (LG),
+with the burst's damage, hits, span, the victim's weapon class and the
+damage the victim dealt back. Every query names `dmg=bounded`
+explicitly (the *view* default is raw, unlike mvd-api's), so a demo
+whose bounded family was never reconstructed (`BoundedMode` `skipped:*`)
+shows that table's empty state rather than ranking a different family
+under the same heading. Each table settles independently: a query the
+demo cannot answer (no damage log, no measurable liveness) leaves only
+its own empty state up. Hub links follow the tab's usual rule — a slot
+number is not a userid, so a name `timelineAnalysis.playerUserIDs` does
+not resolve gets no link at all.
+
 The **Powerup Runs** table carries a two-input display filter (**min s**
 = 5, **min frags** = 1 by default, both editable down to 0, reset per
 demo load): a run is listed only if it clears *both*, so short runs and

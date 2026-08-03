@@ -879,6 +879,67 @@
                         No demo markers in this demo.
                     </div>
                 </div>
+                <div class="panel">
+                    <h3 title="The five 10-second stretches with the most enemy kills in them">Top Frag Runs (10 s)</h3>
+                    <table class="stats-table" id="topruns-table">
+                        <thead>
+                            <tr>
+                                <th>Start</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Frags</th>
+                                <th title="Enemy damage the player dealt inside the same window">Dmg</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topruns-body"></tbody>
+                    </table>
+                    <div id="topruns-empty" class="empty-message" style="display: none;">
+                        No frag runs in this demo.
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3 title="Hardest rocket kill bursts: the run of RL hits on that victim leading up to the kill (gap 2.3 s)">Top RL Kills</h3>
+                    <table class="stats-table" id="toprl-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Kill</th>
+                                <th title="Burst damage, bounded family">Dmg</th>
+                                <th title="Hits in the burst">Hits</th>
+                                <th title="First hit of the burst to the kill">Span</th>
+                                <th title="Victim's weapon class at the killing hit">Victim wep</th>
+                                <th title="Damage the victim dealt back to the killer in the 4 s before the kill">Return</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="toprl-body"></tbody>
+                    </table>
+                    <div id="toprl-empty" class="empty-message" style="display: none;">
+                        No RL kill bursts (needs a damage log and measurable liveness).
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3 title="Hardest lightning kill bursts: the run of LG hits on that victim leading up to the kill (gap 1.2 s)">Top LG Kills</h3>
+                    <table class="stats-table" id="toplg-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Kill</th>
+                                <th title="Burst damage, bounded family">Dmg</th>
+                                <th title="Hits in the burst">Hits</th>
+                                <th title="First hit of the burst to the kill">Span</th>
+                                <th title="Victim's weapon class at the killing hit">Victim wep</th>
+                                <th title="Damage the victim dealt back to the killer in the 4 s before the kill">Return</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="toplg-body"></tbody>
+                    </table>
+                    <div id="toplg-empty" class="empty-message" style="display: none;">
+                        No LG kill bursts (needs a damage log and measurable liveness).
+                    </div>
+                </div>
                 <div class="panel airgibs-panel">
                     <h3>Airborne Rocket Gibs</h3>
                     <table class="stats-table sortable-table" id="airgibs-table">
