@@ -2392,6 +2392,24 @@ on a grid, so "the best 30 s" is exact. Per player they are taken
 greedily and **non-overlapping** — touching counts as overlapping, since
 spans are closed at both ends — then merged into one global ranking.
 
+**Ordering (schema v67): `score`, then a fixed complementary metric,
+then `start`, `end`, `player`.** Ties on the metric are the common case
+— on `metric=frags` most of a page holds the same small integer — so
+equal-scoring rows are ranked by the other half of the same moment:
+`damageGiven` under `frags`/`netFrags`/`shots`/`hits`, `frags` under
+`damageGiven`/`netDamage`, `damageTaken` under `deaths`, `deaths` under
+`damageTaken`. It is fixed per metric, not a parameter. The secondary is
+summed **unscoped and in the response's own damage family** (the `dmg`
+echo), so it is exactly the same-named field of the row's own stats
+block — `weapons=` scopes the score and never the tie-break, and a
+`skipped:*` demo's raw fallback applies to both. The same key ranks a
+player's overlapping equal-scoring **candidates** before the greedy pass,
+above the "start on a scoring event" preference, so a reported window may
+be the stretch that ENDS on the scoring event rather than the one that
+starts on it. A demo with no stream for the secondary (no damage log
+under `metric=frags`) leaves every row tied at 0 and the positional keys
+decide, exactly as before v67.
+
 | Field | JSON key | Type | Intent |
 |---|---|---|---|
 | TimeUnit | `timeUnit` | string (omitempty) | `"ms"`, set by the REST layer. |

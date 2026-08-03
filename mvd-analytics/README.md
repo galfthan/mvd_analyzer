@@ -65,9 +65,10 @@ that downstream consumers render, summarise, or feed to an agent.
   don't belong here and are served directly from result fields. The
   first six are what the CLI's `-view` family of flags and the WASM
   bridge export (`getBuckets` / `getEvents` / `getStreamSlice` /
-  `getStateAt` / `getLocTrails` / `recomputeRegionControl`); the two
-  v65 segmentations and v67's `TopKills` are reachable over REST and
-  MCP only, and neither the CLI nor the WASM bridge exports them.
+  `getStateAt` / `getLocTrails` / `recomputeRegionControl`); since v67
+  the WASM bridge also exports `getTopWindows` and `getTopKills` (the
+  web Key Moments lists ride them), while `Lives` stays REST/MCP-only
+  and the CLI exports none of the three.
   `TopWindows` (`topwindows.go` — **not** `top_windows.go`, which Go
   would read as a `GOOS` build constraint) ranks fixed-length windows by
   a caller-chosen summable metric; `Lives` (`lives.go`) cuts the match at

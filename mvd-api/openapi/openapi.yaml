@@ -1364,8 +1364,26 @@ paths:
 
         **Anchoring & shape.** Windows are anchored at REAL event times, not
         a grid, so "the best 30 s" is exact rather than snapped. They are
-        non-overlapping per player and returned as ONE FLAT LIST sorted by
-        score, each row carrying `player`, `team` and a 1-based `rank`.
+        non-overlapping per player and returned as ONE FLAT LIST, each row
+        carrying `player`, `team` and a 1-based `rank`.
+
+        **Ordering: `score` first, then a fixed complementary metric.** Ties
+        on `score` are the common case — on `metric=frags` most of a page
+        holds the same small integer — so rows tied on the metric are ranked
+        by the other half of the same moment: `damageGiven` under
+        `frags`/`netFrags`/`shots`/`hits`, `frags` under
+        `damageGiven`/`netDamage`, `damageTaken` under `deaths`, `deaths`
+        under `damageTaken`; then earlier start, then player name. There is
+        no parameter for it. The secondary is read UNSCOPED and in the
+        response's own damage family (the `dmg` echo), so it is exactly the
+        same-named field of the row's stats block — `weapons=` narrows the
+        score but never the tie-break. It also decides WHICH of a player's
+        overlapping equal-scoring candidates survives, so a window may now be
+        the stretch that ENDS on the scoring event rather than the one that
+        starts on it, when that stretch carries more of the complementary
+        metric. Demos with no stream for the secondary (no damage log under
+        `metric=frags`) simply tie at 0 and fall through to the positional
+        keys.
 
         **Caps & defaults.** Two independent caps shape it:
 
@@ -2191,6 +2209,19 @@ components:
         stats block instead. `netFrags` (kills − deaths) is usually what people
         mean by hot — five kills bought with four deaths is a trade, not a run.
         `deaths` finds a player's WORST stretch. Case-insensitive.
+
+        **`shots`/`hits` want a `weapons=` filter.** A "shot" is one discrete
+        fire (an LG beam tick and a rocket each count 1), so the unfiltered
+        sum is dominated by fast-cycling weapons; and hits are counted only
+        for weapons whose fires LINK to damage (sg/ssg/lg always, rl/gl via
+        projectile tracking, ng/sng only when nail decoding ran), so the
+        unfiltered figure mixes measured and unmeasured weapons. A rocket's
+        SPLASH is a hit — including a rocket jump's self-splash (KTX-accuracy
+        parity; the stats split it out as selfHits) — so for RL windows
+        `metric=damageGiven&weapons=rl` is the quality signal (enemy-only by
+        definition), while `metric=hits&weapons=lg` is the LG tracking signal
+        (each cell counts the same; raw damage ≈ 30×hits, bounded discounts
+        the killing cell's overkill).
       schema:
         type: string
         default: frags

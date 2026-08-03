@@ -996,6 +996,16 @@ package result
 //     the per-weapon narrowing a consumer runs off that one call leaves 16-20
 //     of a top-20 and only 6-10 of a top-10. Omitted when the demo cannot
 //     answer the query. And an mvd-mcp getTopKills tool, lockstep as always.
+//   - ORDERING CHANGE on /top-windows: rows tied on `score` — the common case,
+//     since most of a metric=frags page holds the same small integer — now
+//     rank by a FIXED complementary metric (damageGiven under
+//     frags/netFrags/shots/hits, frags under damageGiven/netDamage,
+//     damageTaken under deaths, deaths under damageTaken) before the
+//     positional keys, and the same key picks among a player's overlapping
+//     equal-scoring candidates, so a window may end rather than start on the
+//     scoring event. No new parameter and no new field: the secondary is
+//     summed unscoped in the response's own damage family, which makes it
+//     exactly the same-named field of the row's stats block.
 //   - RENAME, a deliberate compatibility break: /hot-windows becomes
 //     /top-windows, its 422 code hot_windows_unavailable becomes
 //     top_windows_unavailable, and the MCP tool getHotWindows becomes

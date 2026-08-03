@@ -68,6 +68,23 @@ observable change).
   narrowing is 16-20 of a top-20 but only 6-10 of a top-10. Omitted — never
   silently served raw — when the demo cannot answer the query, since
   `/overview` has no `dmg` echo to name a family with.
+- **`/top-windows` ties now break on a fixed complementary metric.** Ties are
+  the common case — on `metric=frags` most of a page holds the same small
+  integer — and they used to break purely positionally (earlier start, then
+  player name), which made quality among equals invisible. Equal-scoring rows
+  are now ranked by the other half of the same moment: `damageGiven` under
+  `frags`/`netFrags`/`shots`/`hits`, `frags` under `damageGiven`/`netDamage`,
+  `damageTaken` under `deaths`, `deaths` under `damageTaken` — fixed per
+  metric, no new parameter, positional keys unchanged below it. The secondary
+  is summed **unscoped and in the response's own damage family**, so it is
+  exactly the same-named field of the row's stats block (`weapons=` scopes the
+  score, never the tie-break) and a demo with no stream for it simply ties at
+  0. The same key also picks among a player's overlapping equal-scoring
+  candidates, above the "start on a scoring event" preference, so a window may
+  now be the stretch that ENDS on the scoring event rather than the one that
+  starts on it: on 211805 at `windowMs=10000` the three-frag rows reorder by
+  damage (393 / 295 / 287 / 249 where they were 150 / 205 / 287 / 169) and
+  gLAd's best three-frag window shifts 3.7 s earlier for 99 more damage.
 - **MCP gains `getTopKills`**, lockstep as always.
 - **Web app: Key Moments gains three ranked lists** — the top 10 frag runs
   (the best 10 s windows by enemy kills), the top 10 RL and top 5 LG kill

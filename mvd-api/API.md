@@ -661,6 +661,14 @@ Concrete consequences:
   dominance — so sweep it rather than expecting one right value. There is
   deliberately no adaptive mode; the naturally variable-length unit is a
   life, and that is `/lives`.
+- **Rows tied on `score` are ranked by a fixed complementary metric**
+  (`damageGiven` under `frags`/`netFrags`/`shots`/`hits`, `frags` under
+  `damageGiven`/`netDamage`, `damageTaken` under `deaths`, `deaths` under
+  `damageTaken`), then by start time. Ties are the common case — on
+  `metric=frags` most of a page holds the same small integer — and there is
+  no parameter for it. The secondary is read unscoped and in the response's
+  own damage family, so it is exactly the same-named field of the row's
+  stats block: `weapons=` scopes the score, never the tie-break.
 - **Only `/lives` reconciles per interval.** Lives partition the match, so
   summing a player's per-life `kills` / `deaths` / `shots` gives what the
   `/frags` `frags[]` rows hold for them, and summing `damageGiven` /

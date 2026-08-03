@@ -1163,3 +1163,165 @@ func TestTopWindowsTieBreakStartThenPlayer(t *testing.T) {
 		t.Errorf("order = %v, want %v", order, want)
 	}
 }
+
+// The complementary metric each primary is tied against. Fixed rather than a
+// parameter, and paired as "the other half of the same moment".
+func TestSecondaryMetricPairs(t *testing.T) {
+	for _, tc := range []struct{ primary, want string }{
+		{MetricFrags, MetricDamageGiven},
+		{MetricNetFrags, MetricDamageGiven},
+		{MetricDeaths, MetricDamageTaken},
+		{MetricDamageGiven, MetricFrags},
+		{MetricNetDamage, MetricFrags},
+		{MetricDamageTaken, MetricDeaths},
+		{MetricShots, MetricDamageGiven},
+		{MetricHits, MetricDamageGiven},
+	} {
+		if got := secondaryMetric(tc.primary); got != tc.want {
+			t.Errorf("secondaryMetric(%s) = %s, want %s", tc.primary, got, tc.want)
+		}
+	}
+}
+
+// Ties are the COMMON case — on metric=frags a whole page of windows holds the
+// same small integer — and breaking them positionally makes quality among
+// equals invisible. The complementary metric (damageGiven under frags) ranks
+// them, and here it INVERTS the positional order: B's window is later but was
+// four times the damage.
+func TestTopWindowsTieBreakOnSecondaryMetric(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"),
+		kill(5000, "B", "X", "rl"), kill(5500, "B", "X", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 50), dmg(1500, "A", "X", "rl", 50),
+		dmg(5000, "B", "X", "rl", 200), dmg(5500, "B", "X", "rl", 200),
+	}}
+
+	got := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 2 {
+			t.Fatalf("%s scored %d, want 2 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v — the later window carried more damageGiven", order, want)
+	}
+	// The key is the number the row SHOWS: the secondary is summed unscoped, in
+	// the response's family, over the row's own closed span, so it equals the
+	// stats block exactly.
+	if w := got.Windows[0]; w.DamageGiven != 400 {
+		t.Errorf("winner damageGiven = %d, want 400 — the tie broke on a number the row does not display", w.DamageGiven)
+	}
+
+	// Control: the same fixture with no damage stream falls back to the
+	// positional keys, which is what the secondary displaced.
+	res.Damage = nil
+	got = mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	if got.Windows[0].Player != "A" {
+		t.Errorf("without a damage stream the earlier window must rank first, got %s", got.Windows[0].Player)
+	}
+}
+
+// The same key at the OTHER tie point: per-player candidate selection. Three
+// kills give two equal-scoring overlapping candidates, [1000,3000] and
+// [1500,3500], of which the greedy pass keeps exactly one. Both start on a
+// scoring event, so the old keys took the earlier; the later one carries a
+// 100-point hit the earlier misses, so it is the better stretch and now
+// survives.
+func TestTopWindowsCandidateTieBreakOnSecondaryMetric(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"), kill(3200, "A", "X", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 10),
+		dmg(1600, "A", "X", "rl", 20),
+		dmg(3400, "A", "X", "rl", 100),
+	}}
+
+	w := topWindow(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	if w.Score != 2 {
+		t.Fatalf("score = %d, want 2", w.Score)
+	}
+	if w.Start != 1500 {
+		t.Errorf("start = %d, want 1500 — the equal-scoring candidate with more damage must survive the greedy pass", w.Start)
+	}
+	if w.DamageGiven != 120 {
+		t.Errorf("damageGiven = %d, want 120", w.DamageGiven)
+	}
+
+	res.Damage = nil
+	if w := topWindow(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1}); w.Start != 1000 {
+		t.Errorf("without a damage stream the earlier candidate must win, got start %d", w.Start)
+	}
+}
+
+// The secondary is summed in the SAME damage family the stats block used, so
+// raw and bounded can rank the same two windows differently — and must, since
+// the row displays the family's number. Summing one family beside a block
+// showing the other would order the list on an invisible quantity.
+func TestTopWindowsTieBreakRespectsTheDamageFamily(t *testing.T) {
+	bounded := 40
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(5000, "B", "X", "rl"),
+	}, 60000)
+	res.Damage = &result.DamageResult{
+		BoundedMode: "standard",
+		Events: []result.DamageEntry{
+			{Time: 1000, Attacker: "A", Victim: "X", Weapon: "rl", Damage: 100}, // nil Bounded = 100
+			{Time: 5000, Attacker: "B", Victim: "X", Weapon: "rl", Damage: 300, Bounded: &bounded},
+		},
+	}
+	for _, tc := range []struct {
+		dmg  string
+		want []string
+	}{
+		{"raw", []string{"B", "A"}},     // 300 > 100
+		{"bounded", []string{"A", "B"}}, // 100 > 40
+	} {
+		got := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1, Dmg: tc.dmg})
+		var order []string
+		for _, w := range got.Windows {
+			if w.Score != 1 {
+				t.Fatalf("dmg=%s: %s scored %d, want 1", tc.dmg, w.Player, w.Score)
+			}
+			order = append(order, w.Player)
+		}
+		if !reflect.DeepEqual(order, tc.want) {
+			t.Errorf("dmg=%s: order = %v, want %v", tc.dmg, order, tc.want)
+		}
+	}
+}
+
+// A signed primary ties too, and its secondary is the same plain non-negative
+// sum: netFrags is ranked among equals by damageGiven, not by a second signed
+// optimisation. Both players net +1; B's stretch cost four times the damage.
+func TestTopWindowsNetFragsTieBreakOnDamageGiven(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(10000, "A", "X", "rl"), kill(11000, "X", "A", "rl"),
+		kill(30000, "B", "X", "rl"), kill(31000, "X", "B", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(9000, "A", "X", "rl", 50),
+		dmg(29000, "B", "X", "rl", 200),
+	}}
+	got := mustHW(t, res, TopWindowsOptions{
+		Metric: MetricNetFrags, WindowMs: 2000, Limit: -1,
+		Players: []string{"A", "B"}, // X is only here to be killed by, and to kill
+	})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 1 {
+			t.Fatalf("%s scored %d, want 1 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v", order, want)
+	}
+}
