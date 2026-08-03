@@ -527,7 +527,11 @@ func TestDeriveScoreKillSide(t *testing.T) {
 				{Name: "a", Team: "red", Frags: 62, Kills: 40, Deaths: 18, Suicides: 2},
 			}},
 			Frags: &result.FragResult{
-				Frags: []result.FragEntry{{Killer: "a", Victim: "b", Weapon: "rl"}},
+				// The demo-global verdict as the match-final node publishes it;
+				// deriveScore reads the stored field rather than re-deriving the
+				// rule (killsMeasurable, tested at its own wiring below).
+				KillsMeasured: true,
+				Frags:         []result.FragEntry{{Killer: "a", Victim: "b", Weapon: "rl"}},
 				ByPlayer: map[string]*result.PlayerFrags{
 					"a": {Kills: 40, Deaths: 18, TeamKills: 3, ByWeapon: map[string]int{"rl": 30, "lg": 10, "gl": 0}},
 				},
@@ -561,6 +565,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 	t.Run("unmeasured: empty frag log beside real deaths", func(t *testing.T) {
 		r := base()
 		r.Frags.Frags = nil
+		r.Frags.KillsMeasured = killsMeasurable(r) // false: protocol deaths in ByPlayer
 		s := deriveScore(r, "a")
 		// Both measured sides survive — this is the whole point of not
 		// dropping the family wholesale.
@@ -578,6 +583,10 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		r.Frags.Frags = nil
 		r.Match.Players[0].Kills, r.Match.Players[0].Deaths = 0, 0
 		r.Match.Players[0].Suicides = 0
+		// The scoreboard's deaths are a copy of these (the match-final fold),
+		// so a demo where nobody died has both at zero.
+		r.Frags.ByPlayer["a"].Kills, r.Frags.ByPlayer["a"].Deaths = 0, 0
+		r.Frags.KillsMeasured = killsMeasurable(r) // true: nothing to contradict
 		s := deriveScore(r, "a")
 		if s.Kills == nil || *s.Kills != 0 {
 			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
@@ -593,6 +602,7 @@ func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
 	r := &Result{
 		Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "someone else"}}},
 		Frags: &result.FragResult{
+			KillsMeasured: true,
 			Frags: []result.FragEntry{
 				{Killer: "a", Victim: "a", Weapon: "rl", IsSuicide: true},
 				{Killer: "a", Victim: "a", Weapon: "gl", IsSuicide: true},

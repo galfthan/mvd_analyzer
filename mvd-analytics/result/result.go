@@ -862,8 +862,105 @@ package result
 //     across the golden corpus is bimodal — ~13-16 ms on servers at full tick
 //     and ~34-39 ms on servers at the default.
 //
+// v65 — interval segmentations: hot windows and lives. ADDITIVE. Both are
+// VIEWS over data that was already there (view/hotwindows.go, view/lives.go,
+// sharing the stats builder in view/interval_stats.go); the stored Result
+// gains exactly one field, FragResult.KillsMeasured, so that the demo-global
+// kill-attribution verdict is decided once by the analyzer instead of being
+// re-derived by every consumer that needs it.
+//
+//   - /hot-windows serves each player's best fixed-length stretches, ranked
+//     by a caller-chosen SUMMABLE metric (frags, deaths, netFrags,
+//     damageGiven, damageTaken, netDamage, shots, hits). Ratios are absent
+//     because "the best window" is undefined for a quantity that does not
+//     sum. Windows are anchored at real event times rather than a grid,
+//     non-overlapping per player, and returned as one flat ranked list.
+//     weapons= scopes the SCORING events only, so a window's score can be a
+//     subset of the same-named field in its stats block; the envelope's
+//     scoredBy {metric, weapons, dmg} is what tells the two apart, and is the
+//     ONLY place the metric is echoed.
+//   - /lives serves one row per spawn-to-death run, segmented by the v64
+//     streams.players[].alive intervals. A player's lives PARTITION
+//     [MatchStart, MatchEnd]: each life is attributed every event from its
+//     own start to the start of the next, so a posthumous rocket counts for
+//     the life that fired it and per-life sums reconcile exactly with match
+//     totals. durationMs stays ALIVE time, which is the one asymmetry.
+//     deaths is therefore NOT capped at 1 (the KTX dtTELE2 deflection lands a
+//     death inside the dead gap; measured 12 rows with 2 and one with 3
+//     across 11558 cached-corpus lives), and endReason
+//     (death | matchEnd | leftGame) exists because an absent killedBy used to
+//     conflate all three.
+//   - Both responses carry a measured {frags, damage, shots, locs, items,
+//     liveness} block on the envelope, and echo the damage family they were
+//     computed in (dmg + boundedMode, exactly as /damage does — the stats
+//     block reports damage under every metric, so the family is a property of
+//     the response, not of the metric). MEASUREDNESS IS READ FROM THE BLOCK
+//     AND NEVER FROM A FIELD'S ABSENCE: every numeric stat is emitted
+//     including a measured zero, so `damageGiven: 0` alone says nothing about
+//     the demo. measured.frags is the stored FragResult.KillsMeasured verdict,
+//     not merely "a frag section exists"; measured.liveness distinguishes
+//     "liveness was not measurable" from "never alive", and /lives 422s
+//     (lives_unavailable) rather than serving an empty list for the first.
+//   - Positional-kill (telefrag / stomp) value FOLDS into the stats block's
+//     damageGiven / damageTaken exactly as /damage reports it, so lives
+//     reconcile against that endpoint, AND it scores for the damage metrics,
+//     so that absent a weapons= filter a hot window's score equals the
+//     same-named field of its own stats block. (The values are the analyzer's
+//     reconstruction — 0..298, median 100 across the cached corpus — not the
+//     9999 wire sentinel an earlier round mistook them for.) It stays out of
+//     damageByWeapon, which carries no key for a weaponless kill, matching
+//     /damage's byWeapon.
+//   - Each /lives row carries its ATTRIBUTION SPAN (attrStart/attrEnd): the
+//     event fields cover the life plus the dead gap after it, while durationMs
+//     is alive time, so a rate divided by durationMs reads high.
+//   - The frag and damage weapon vocabularies now accept `water` and `drown`
+//     interchangeably: it is one event the two logs spell differently, and a
+//     caller should not have to know which log backs which metric. Purely
+//     additive; no emitted token changed. The alias is expanded by the one
+//     filter-set builder every weapons= filter uses (view.weaponFilterSet), so
+//     /frags?weapons=drown and /damage?weapons=water MATCH rather than
+//     returning an empty result.
+//   - FragResult.KillsMeasured (the only stored-shape change): the demo-global
+//     "kill attribution was observable" verdict, published by the match-final
+//     node. False means an empty frag log on a demo whose scoreboard records
+//     deaths — every obituary went unmatched — where a row of measured zeros
+//     beside a real death count would look like a measurement.
+//
+// v66:
+//   - Every reported userid is now the SESSION's, not the wire slot's.
+//     TimelineAnalysis.PlayerUserIDs and the userid on fragStreaks,
+//     powerupEvents, demoMarkers and airgibs used to carry the first
+//     userid ever seen on the slot, latched for the whole demo, so any
+//     slot handover or reconnect published an id belonging to a different
+//     connection — a hub `track=<id>` link then followed the wrong player
+//     (gameId 220637: `(1)rusti (FU)` served as 42, a spectator who left
+//     after 26 s) or a connection that no longer existed (222649:
+//     `bogojoker` served as 12, sixteen minutes after he timed out and
+//     came back as 25). Same field names, same types, same documented
+//     meaning; the numbers were wrong and are now right.
+//   - Where one player holds several sessions (a reconnect the identity
+//     unifier folded into one name), PlayerUserIDs reports the LAST
+//     session that had play — normally the id that is live at the end of
+//     the demo and the one a `track=` resolves; the ranking is by last play
+//     evidence, so an exact tie in it resolves to the lower slot rather
+//     than to the surviving connection. The event carriers each report the
+//     session that held the slot at their own timestamp.
+//   - ADDITIVE: Streams.Players and PlayerStats.Players gain Identity and
+//     Sessions. Identity is the reconnect-unification key the pipeline
+//     already used internally to merge a reconnected player's streams —
+//     equal on every row that is the same human, so a consumer can relate
+//     the two rows a `(N)<name>` rename produces without a name heuristic
+//     (which is what one had resorted to). It is DEMO-LOCAL (derived from
+//     the first session's slot+userid) and must not be persisted; the
+//     cross-demo identity is the authenticated login. Sessions is the
+//     per-connection {StartMs, EndMs, Slot, UserID, Name} window list —
+//     the lossless form of PlayerUserIDs, carrying the OBSERVED occupancy
+//     bounds rather than the ±inf-widened ones the internal resolver uses,
+//     and omitting occupancies the wire never gave a userid (KTX's ghost
+//     scoreboard row is not a connection). See PlayerSession.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 64
+const CurrentSchemaVersion = 66
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -29,6 +29,8 @@ type MCPBackend interface {
 	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
 	GetLocTable(ctx context.Context, in GetLocTableInput) (any, error)
 	GetRegionControl(ctx context.Context, in GetRegionControlInput) (any, error)
+	GetHotWindows(ctx context.Context, in GetHotWindowsInput) (any, error)
+	GetLives(ctx context.Context, in GetLivesInput) (any, error)
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
 }
@@ -125,6 +127,49 @@ type GetRegionControlInput struct {
 	StartTime int32  `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer)"`
 	EndTime   int32  `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
 	Regions   string `json:"regions,omitempty" jsonschema:"polygon detail: 'full' (each region's ~6KB polygon points included — needed only for drawing the map overlay), 'summary' (points stripped; name/locs/centroids kept), 'none' (regions list omitted). MCP default 'summary' for token economy (REST differs: full); pass 'full' when you need the points."`
+}
+
+// GetHotWindowsInput mirrors /v1/demos/{id}/hot-windows query params.
+//
+// WindowMs, Limit and MinScore are POINTERS while PerPlayer is a plain int,
+// and the split is deliberate: an omitted MCP integer argument arrives as 0,
+// so a field whose 0 is rejected (windowMs must be >= 1; limit must be >= 1 or
+// negative for uncapped) or whose 0 differs from its default (minScore
+// defaults to 1, and minScore:0 is a real "keep zero-scoring windows" filter)
+// has to distinguish "unset" from "asked for 0".
+//
+// PerPlayer stays a plain int even though REST now rejects an explicit
+// perPlayer=0 (limit's rule, applied to both caps): `intv` never forwards a 0,
+// so from this shim a perPlayer:0 argument — deliberate or forgotten — leaves
+// the query and lands on the REST default, which IS uncapped. There is nothing
+// for a pointer to disambiguate and no 400 to earn.
+type GetHotWindowsInput struct {
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Metric    string   `json:"metric,omitempty" jsonschema:"what the windows are ranked by (case-insensitive): frags (default), deaths (finds a player's WORST stretch), netFrags (kills minus deaths — usually what 'hot' means), damageGiven, damageTaken, netDamage, shots, hits. Ratios (accuracy, efficiency) are deliberately absent: they do not sum, so 'the best window' is undefined for them — read them off the per-window stats block instead"`
+	WindowMs  *int     `json:"windowMs,omitempty" jsonschema:"window length in integer MILLISECONDS; omit for the default 30000. The main knob — 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase dominance; sweep it rather than expecting one right value. Must be >= 1 and no longer than the match (an out-of-range value is rejected 400 invalid_param naming the bound; omit it for the default)"`
+	Limit     *int     `json:"limit,omitempty" jsonschema:"total windows returned across all players; omit for the default 10, max 200, negative = uncapped. Applied AFTER perPlayer. An explicit 0 is rejected 400 invalid_param — omit it for the default"`
+	PerPlayer int      `json:"perPlayer,omitempty" jsonschema:"max windows contributed by any ONE player; omit (or pass a negative) for uncapped. Applied BEFORE limit, so perPlayer:3 with limit:10 is 'the top 10, at most 3 from anyone' — set it to spread a leaderboard across the roster"`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict to these SUBJECT players (whose windows are ranked)"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict the SCORING events to these weapon codes — the per-window stats block still describes everything that happened in the window, so score is a subset of it (scoredBy echoes which). Valid tokens depend on the metric's source: the frag log knows hook/water, the damage log explobox/drown, the shot stream only what can be fired"`
+	StartTime int32    `json:"startTime,omitempty" jsonschema:"window-search lower bound in match-relative milliseconds (integer). NOTE it bounds where a window may START, not what it covers"`
+	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window-search upper bound in match-relative milliseconds (integer). It bounds where a window may START, not what it covers: the best window anchored at or before endTime still runs windowMs past it, so endTime:1000 returns the best window of the first 1000+windowMs ms, not of the first second"`
+	Dmg       string   `json:"dmg,omitempty" jsonschema:"damage family for the damage metrics and the stats block: raw | bounded (default bounded, the KTX-scoreboard value); 'both' is rejected here for every metric"`
+	MinScore  *int     `json:"minScore,omitempty" jsonschema:"drop windows scoring below this many points of the chosen metric; omit for the default 1. Matters most for the net metrics, which can go negative. An explicit 0 IS forwarded (it keeps zero-scoring windows)"`
+}
+
+// GetLivesInput mirrors /v1/demos/{id}/lives query params. Every INTEGER here
+// has 0 as its own REST default (no bound / keep every life), so an omitted
+// MCP argument arriving as 0 asks for exactly the default — no pointers
+// needed. Summary is the exception and is a pointer for the usual reason: its
+// MCP default is TRUE, so "unset" and "false" have to be distinguishable.
+type GetLivesInput struct {
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict to these players' lives"`
+	StartTime int32    `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer); lives OVERLAPPING the window are kept, not only those contained in it"`
+	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
+	MinMs     int32    `json:"minMs,omitempty" jsonschema:"drop lives shorter than this many milliseconds (default 0 = keep all); useful for filtering out spawn-frag lives"`
+	Dmg       string   `json:"dmg,omitempty" jsonschema:"damage family for the per-life stats block: raw | bounded (default bounded, the KTX-scoreboard value); 'both' is rejected here"`
+	Summary   *bool    `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): every life row and every scalar, with the per-row breakdown collections dropped — itemsTaken, locs, eventLocs, victims, byWeapon, damageByWeapon. A whole 4on4 match is ~400 lives, so the full shape is large; narrow with players/startTime/endTime/minMs and pass false when you need one life's detail. Under summary itemsTaken is null for every row and says nothing about the demo — read the envelope's measured.items."`
 }
 
 // GetDemoInfoInput identifies a demo for the KTX demoinfo blob.

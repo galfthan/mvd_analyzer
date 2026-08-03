@@ -5,6 +5,385 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (player-identity) — userids follow the player, not the slot, schema v66
+
+**A correctness fix: the userids we publish were somebody else's.** No field
+is added, removed or retyped — the numbers were wrong and are now right,
+which is the correction carve-out of [API.md §2.7](mvd-api/API.md), not a
+breaking change. Values move only on demos with a mid-match handover or
+reconnect (3 of the 44 cached corpus demos); every other demo is
+byte-identical.
+
+- **What was wrong.** `timelineAnalysis.playerUserIDs` — and the
+  `playerUserID` on `fragStreaks[]`, `powerupEvents[]`, `demoMarkers[]`, plus
+  `airgibs[].attackerUserID`/`.victimUserID` — latched the **first** userid
+  ever seen on a player's wire slot and reported it for the whole demo. A
+  userid names a *connection*, not a person: mvdsv hands them out from a
+  rotating pool (`SV_GenerateUserID`, `mvdsv/src/sv_main.c:538-556`), so a
+  slot that changes hands and a player who times out and rejoins both draw
+  fresh ones. Every consumer that turned the value into the documented
+  `hub.quakeworld.nu/games/<id>?track=<userId>` deep link — including
+  `/overview` and the `getOverview` MCP tool, and the third-party app that
+  reported this — was pointed at the wrong player.
+- **Two measured cases, both reported from the field.** On hub game **220637**
+  rusti reconnects while his first connection is still spawned, so mvdsv
+  renames him `(1)rusti (FU)`; we served his id as **42** — a spectator who
+  had left after 26 s — where it is **43**. On **222649** bogojoker times out
+  during a pause and rejoins on the same slot with a new id; we served **12**
+  on his 19-minute-mark rampage streak, sixteen minutes after that connection
+  ceased to exist, where it is **25**.
+- **What it is now.** Every id is resolved from the *session* (one contiguous
+  occupancy of a wire slot by one userid) that held the slot at the value's
+  own timestamp. Where the reconnect unifier folds several sessions into one
+  name, `playerUserIDs` reports the **last session that had play** — a
+  judgement call, documented at the selection site: it is normally the id
+  that is live at the end of the demo and the one a `track=` resolves for a
+  player still connected. "Normally", because the rule ranks by last play
+  evidence, not by who is still connected: two sessions whose last play
+  lands on the same millisecond are broken toward the **lower slot**, which
+  need not be the surviving one. The event carriers stay finer-grained and
+  report the id valid at their own instant.
+- **All four event carriers are per-instant, including the two with no slot
+  left on them.** `demoMarkers[]` and `powerupEvents[]` still carry the wire
+  slot their event happened on, so they resolve through the per-slot session
+  table directly. `fragStreaks[]` (built *after* the per-slot spawns and
+  deaths are merged under one identity name) and `airgibs[]` (built post-hoc
+  from the name-keyed damage log) had no slot to resolve with and stamped
+  the demo-wide id instead — so a run inside a rejoiner's **earlier** stint
+  carried an id issued after it ended (222649: userid 25 on a streak that
+  finished nine seconds before that connection existed, a `track=` that
+  silently follows nobody). Both now look the name up in per-identity
+  session windows at the event's own timestamp, falling back to the
+  demo-wide map for a name the session table does not carry. One committed
+  golden moves: 216835's airgib `victimUserID` 14 → 8, the connection that
+  actually took the rocket (the hit is 7.6 minutes before userid 14 existed).
+- **The no-session fallback latch is per connection too.** The timeline
+  keeps its own slot → userid map for runs with no identity analyser wired
+  (hand-built registries, unit tests), where there is no session table to
+  key on. It now keeps the **first valid userid of each occupancy** and
+  re-latches when the server ends one: first-valid-wins *within* an
+  occupancy is the only guard against the corrupted non-zero userinfo resend
+  [MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) records, while a *new* occupancy
+  must re-latch or the slot reports a connection that no longer exists. The
+  boundary between the two is the server's drop broadcast (`SV_DropClient`,
+  `mvdsv/src/sv_main.c:419-428`), which always precedes a genuine
+  reconnection; a userid change with no drop is the corrupt-resend shape and
+  is ignored. A slot dropped and never retaken keeps its last named
+  connection.
+- **What deliberately did NOT change.** A player who reconnects while their
+  old connection is still spawned is renamed `(N)<name>` by mvdsv, and KTX —
+  matching ghosts by exact netname — scores the two as separate players in
+  its own demoinfo block. Our scoreboard, streams and `playerUserIDs`
+  reproduce that split, now with the correct id on each row. Folding the two
+  rows would contradict the server's own record.
+- **Regression cover.** A new corpus invariant asserts that every reported
+  userid was observed on the wire together with the name it is reported under
+  (44 cached demos + the per-machine special-cases set), and both demos above
+  join the golden corpus. See
+  [RESULT_SCHEMA.md → Player userids](mvd-analytics/RESULT_SCHEMA.md#player-userids-schema-v66).
+
+**And the identity behind it is now exported — purely additive.** Getting the
+id right still left a consumer with no supported way to say *"these two rows
+are one person"* or *"this row was slot S / userid U during [t1,t2)"*; the
+reporting client had rebuilt both with a fuzzy name matcher against the live
+engine roster. `streams.players[]` and `playerStats.players[]` (hence
+`GET /v1/demos/{id}/player-stats` and the `getPlayerStats` MCP tool) now carry:
+
+- **`identity`** — the reconnect-unification key the pipeline already used
+  internally to merge a reconnected player's streams. Equal values are one
+  human; different values are different humans *as the server scored them*.
+  On 220637 the two `rusti` rows carry different identities (KTX declined to
+  merge them, and we do not second-guess it); on 216835 the one `rusti` row
+  carries a single identity over two connections. It is **demo-local** —
+  derived from the first session's slot+userid, reproducible from the same
+  bytes, meaningless across demos — so **do not persist it**. The cross-demo
+  identity remains the authenticated `login`. In the theoretical clash where
+  one slot+userid pair is reissued, the key takes an `@<startMs>` suffix, and
+  a further `.2` / `.3` counter if that repeats too: the streams builder
+  groups on this key, so a collision would splice two players into one row.
+- **`sessions[]`** — every wire occupancy behind the row, in time order:
+  `{startMs, endMs, slot, userId, name}`. This is the lossless form of the
+  answer `playerUserIDs` gives once per player, and the shape the reporter
+  asked for ("a list of ids per player with their validity window"). The
+  windows are the **observed** ones, not the ±inf-widened lookup windows the
+  internal resolver uses: on 222649 bogojoker's two sessions read
+  `[…,131740)` and `[140177,…)`, the drop and the rejoin. A connection made
+  during the countdown reports a negative `startMs` rather than being clamped
+  or dropped. `endMs` is the one bound that can be synthetic, in two cases
+  that both read exactly match end: a client still connected when the
+  recording ended (no wire event exists to report), and a drop broadcast
+  landing *after* match end (the event exists, but the window is closed on
+  the match clock every other time in the payload lives on) — so an `endMs`
+  at match end is not by itself evidence of a live connection.
+- **What is deliberately NOT listed:** an occupancy the wire never gave a
+  userid — KTX's ghost scoreboard row (a departed player's edict, userid
+  hardcoded 0) and inferred occupancies. The ghost carries the departed
+  player's name, so the unifier folds it into that player; listing it would
+  have given 216835's `rusti` a userid-less window *overlapping* the slot he
+  had actually reconnected onto, and would have made the next real connection
+  on that slot (222649's `herbie`, adopted into the ghost's record) claim a
+  window starting 3.7 minutes before he connected. Withheld for the same
+  reason: a connection **first attested at or after match end**. The
+  published window closes at match end, so a postgame connection would emit
+  `startMs > endMs` — an inverted window against the documented half-open
+  contract — and describes nothing trackable inside the match anyway. It is
+  a real shape, not a hypothetical: a spectator who connects after the game
+  to say gg, and whose name or login unifies them with a player who left
+  mid-match, arrives as a second session of a played identity. Only applied
+  where a match end was detected; a demo with none withholds nothing.
+- **Only those two views carry it.** `lives`, `hot-windows`, `frags`,
+  `damage` and `buckets` join to them by the row's **player name**, the same
+  canonical string everywhere except on a demo where two identities share a
+  display name: there these two views suffix both rows `name#slot` while the
+  frag and damage logs keep the bare name, so strip the suffix to join. One
+  consequence now visible to a consumer: `/hot-windows`' `perPlayer` cap is
+  name-keyed, so a human split across two rows can occupy twice the quota —
+  detectable via `identity`, and left as is.
+- **Web UI: no more slot-as-track fallback.** The Key Moments powerup-run
+  "Hub" link fell back to a player's wire *slot* when the userid was 0 — a
+  slot is not a userid, so the link tracked an unrelated player. Runs with no
+  userid now show no link, the same rule `buildHubWatchLink` and the
+  pack-drop anchors already followed. The frag-streak, demo-mark and airgib
+  tables deliberately keep theirs: they fall back to `track=0`, which points
+  at no player rather than the wrong one, so the clip still opens at the
+  right moment untracked.
+- **OpenAPI: `TimelineAnalysis` now documents `demoMarkers[]`** (the schema
+  v58 `/demomark` bookmarks), which `/v1/demos/{id}/artifacts/timeline` had
+  been serving undeclared — no corpus demo carries a marker, so the
+  `additionalProperties: false` validator never saw the field. No response
+  changed; the spec caught up with the payload, and the golden-response
+  validator gained a synthetic-marker fixture so the gap cannot reopen.
+
+## unreleased (hot-windows) — hot windows and lives, schema v65
+
+**Two new read endpoints, purely additive.** Both are **views** over data that
+was already there. The stored `Result` gains exactly **one** field —
+`frags.killsMeasured`, below — and nothing existing changes shape, name or
+meaning, so v65 is the cache-key tick every observable change earns rather
+than a migration.
+
+- **`GET /v1/demos/{id}/hot-windows` — each player's best stretches of the
+  match.** The contract is one sentence: *"in these `windowMs` milliseconds
+  this player scored higher on `metric` than in any other stretch of the same
+  length."* `metric` is any **summable** per-event quantity — `frags`,
+  `deaths` (which finds a player's *worst* stretch), `netFrags`,
+  `damageGiven`, `damageTaken`, `netDamage`, `shots`, `hits`. Ratios such as
+  accuracy are deliberately absent: they do not sum, so "the best window" is
+  undefined for them, and they ride the per-window stats block instead.
+  Windows are anchored at **real event times**, not a grid, so "the best 30 s"
+  is exact; they are non-overlapping per player and come back as one flat list
+  sorted by score. `windowMs` is the whole knob (5000 for damage bursts, 30000
+  for hot streaks, 120000 for map-phase dominance) — there is deliberately no
+  adaptive mode, because "why did I get *this* segment?" had no short answer,
+  which is fatal for a surface an agent has to justify to a human.
+- **Two independent caps, applied in one order.** `perPlayer` (max rows from
+  any one player) runs **before** `limit` (the total), so
+  `perPlayer=3&limit=10` means "the top 10, at most 3 from anyone" rather than
+  "the top 3 of the first three players". Omitting them gives `limit=10` and
+  an uncapped `perPlayer`, making a bare call a pure match-wide top 10 in
+  which one dominant player may legitimately own every row.
+- **Both caps follow ONE rule: `0` is a 400, not "uncapped".** An omitted MCP
+  integer argument arrives as `0`, and reading that as "give me everything"
+  would make a forgotten argument look deliberate. On `limit` *and* on
+  `perPlayer`: omit for the default, negative for uncapped, explicit `0`
+  rejected — plus, for `limit`, anything above 200 is likewise **rejected
+  rather than silently clamped** (the v59 ruling).
+- **`windowMs` is bounded on both sides.** `0` and any negative value earn the
+  same `windowMs must be >= 1` 400 (one message, so an agent told to retry
+  does not fail twice), and anything longer than the match duration is a 400
+  naming the bound. Unbounded, it made the documented `end = start + windowMs`
+  unsatisfiable: `windowMs=2147483647` returned a 24.8-day "window" carrying
+  the whole match's stats, on which any derived rate is nonsense.
+- **The score threshold is `minScore`, not `min`.** A bare, undimensioned
+  `min` read as a duration next to the sibling `/lives`' `minMs`; every other
+  filter in the API carries its unit (`minMs`, `minDwellMs`).
+- **`dmg=both` is rejected on both endpoints, for every metric.** `both` is a
+  `/damage` response *shape* — raw fields plus a parallel `bounded` nest — and
+  one interval stats block carries one set of damage numbers. It is a 400 at
+  the HTTP boundary whatever the metric, so the OpenAPI enum for these two
+  endpoints is genuinely two-valued rather than 400-ing or silently ignoring
+  the same value depending on `metric`.
+- **`weapons=` scopes the SCORING events only.** The stats block still
+  describes everything that happened in the window, so
+  `metric=damageGiven&weapons=lg` can report `score` 445 beside a
+  `damageGiven` of 650 — the interesting part of a best-LG window is often
+  what *isn't* LG. The envelope's **`scoredBy` `{metric, weapons, dmg}`** is
+  what tells the two numbers apart. It sits on the envelope, **not on each
+  row**: one query means one rule, and a per-row copy would repeat the same
+  object up to `limit` times. It is also the only place the metric is echoed —
+  there is no top-level `metric` field, because naming one concept twice
+  invites the two copies to disagree.
+- **`GET /v1/demos/{id}/lives` — one row per spawn-to-death run**, the natural
+  unit of QuakeWorld analysis, segmented by v64's `streams.players[].alive`
+  and carrying the same per-interval stats block plus `endReason`,
+  `spawnLoc`/`deathLoc`, `killedBy`, `deathWeapon`, `itemsTaken` and
+  `weaponsHeld`.
+- **Lives PARTITION the match, and that is load-bearing.** Life *n* is
+  attributed every event from its own start to the start of life *n+1* (match
+  start / match end at the edges), so per-life `kills`, `deaths`,
+  `damageGiven`, `shots`, `itemsTaken` and the rest sum **exactly** to what the
+  per-event **logs** hold for that player on an unfiltered call — `/frags`'
+  `frags[]` rows on the frag side, `/damage`'s **non-summary** aggregate on the
+  damage side (not its `events[]` rows: a telefrag or stomp folds its value
+  into the totals without a per-hit row of its own). That is not always the same
+  as the `byPlayer` scoreboards: a death detected from `DF_DEAD`/`STAT_HEALTH`
+  with no obituary counts there and leaves no log row for any life to carry,
+  so on `wipeout_3on2_red_vs_blue[q3dm6qw]` three players' per-life deaths sum
+  to 3/4/7 against a `byPlayer` 4/5/9 — and the frag log itself holds 3/4/7.
+  Three measured facts forced the partition:
+  a rocket in flight when its shooter dies still kills (five landed 76–197 ms
+  after the killer's own death on `211805`); KTX records deaths on an
+  already-dead player, so dropping dead-gap deaths made per-life deaths sum to
+  49 against a match total of 52 (`212260`); and `alive[0].start` is clipped
+  to first *observation*, not to match start, so a telefrag at `t=0` belonged
+  to no life at all. A **filtered** response does not reconcile — `minMs` drops
+  a life together with the events in its window, and `from`/`to` select lives
+  that overlap the window while each still carries its whole attribution
+  window.
+- **`deaths` on a life is not a 0/1 flag, and does not imply `endReason`.** It
+  counts the frag-log death rows attributed to the life, so it is 0 whenever
+  no row names the player at that instant — including on lives whose
+  `endReason` *is* `death` (four such rows on
+  `wipeout_3on2_red_vs_blue[q3dm6qw]`) — and it can **exceed 1**: a life
+  carries both the death that ended it and any death recorded during the dead
+  gap that followed, the KTX `dtTELE2` pent deflection. Measured across the
+  11 558 cached-corpus lives, 12 rows report 2 and one reports 3.
+- **`endReason` (`death` | `matchEnd` | `leftGame`) is new** because an absent
+  `killedBy` used to conflate three different situations: a death nobody's
+  obituary named (reachable, though not observed in the 42-demo cached corpus:
+  0 of its 11 364 death-ended lives), a player still alive at match end,
+  and a player whose observed presence simply stopped. `durationMs` stays
+  **alive time** while the counts cover the wider attribution window — a life's
+  duration is how long the player lived, not how long their rockets were in
+  the air — so a rate derived by dividing one by the other reads **high**:
+  slightly when summed across a whole match, by tens of percent on a single
+  row where a short life is followed by a long dead gap. Every row therefore
+  also publishes that window as
+  **`attrStart`/`attrEnd`**. Divide by `attrEnd − attrStart` for an exact
+  rate; the pair also makes the partition property measurable, since one
+  player's windows tile the match end to end.
+- **A `measured` block rides the envelope of both responses**:
+  `{frags, damage, shots, locs, items, liveness}`, never `omitempty`. Every numeric stat
+  is emitted **including a measured zero**, so `damageGiven: 0` on its own
+  cannot tell a player who dealt none from a demo with no damage stream —
+  measuredness is read from that block and **never** from a field's absence.
+  This is the v55/v63 discipline (`RESULT_SCHEMA.md`'s own "never infer
+  measuredness from `omitempty`") made structural rather than inferred.
+  Availability is per-field: a demo with no position track omits
+  `locs`/`eventLocs` and serves the rest, `/hot-windows` 422s only when the
+  chosen metric's own source is missing, and `/lives` still yields lives on a
+  demo with no damage stream.
+- **`frags.killsMeasured` — the one stored-shape change, and the reason
+  `measured.frags` means what it says.** Whether kill *attribution* was
+  observable at all is a demo-global verdict, and it was already being decided
+  (`analyzer.killsMeasurable`) and applied on `/player-stats` since v62 — but
+  only there, because nothing stored the answer. It is now a field on
+  `FragResult`, emitted on `/frags` and on the `frag` artifact, and read
+  verbatim by the interval views. `false` means the frag log is **empty on a
+  demo where players demonstrably died**: every obituary went unmatched, so
+  `kills: 0` beside `deaths: 92` is not a measurement. It is demo-global and
+  **survives every filter** — narrowing the log cannot make a demo's
+  obituaries matchable — and it is the value both endpoints publish as
+  `measured.frags`, so the two cannot drift. The verdict is decided from the
+  protocol death tally (`FragResult.ByPlayer`), not the match scoreboard: the
+  scoreboard's deaths column is written by the same post-processing fold that
+  stores the verdict, so a scoreboard read would see zeros and come out `true`
+  on exactly the unmatched-obituary demos the field exists to flag.
+- **`measured.liveness`, and `/lives` now 422s rather than lying.**
+  `streams.players[].alive` distinguishes `null` "liveness was not measurable"
+  from `[]` "measured, and never alive", and `/lives` emits no rows for
+  either — so on a demo where liveness was never measurable the old response
+  was `{"lives": []}`, which reads as "nobody ever lived". That is a different
+  and false claim. `/lives` now answers **422 `lives_unavailable`** there, the
+  same shape every other unavailable capability uses, and the flag carries the
+  same fact on the responses that do get served. A caller therefore only ever
+  sees `liveness: false` on `/hot-windows`, which does not need it.
+- **`dmg` on `/hot-windows` now genuinely applies under every metric.** It
+  selects the family of the whole **stats block**, and the stats block reports
+  damage whichever metric selected the window — so `metric=frags&dmg=bounded`
+  had been silently serving **raw** damage figures. Fixed: the requested
+  family is applied under every metric, the REST `bounded` default takes under
+  every metric, and an explicit `dmg=bounded` on a `skipped:*` demo is a
+  `422 bounded_unavailable` under every metric (a *defaulted* one still falls
+  back to raw, as on `/damage`). Both endpoints now also echo **`dmg` and
+  `boundedMode` on the envelope**, exactly as `/damage` does: without them
+  `damageGiven` on a `metric=frags` row was a number with no stated family,
+  and a defaulted request could not tell whether the bounded default took.
+  Both echoes are absent only on a demo with no damage stream.
+- **`/lives?from=20000&to=1000` now returns `lives: []`.** An inverted window
+  selects nothing on `/frags`, `/damage` and `/hot-windows`, whose per-event
+  `time >= from && time <= to` is trivially empty; `/lives`' overlap test
+  instead kept every life straddling both bounds, so the two interval
+  endpoints disagreed on the same query. Rejecting the range is the HTTP
+  layer's call to make, not the view's.
+- **Positional kills score under every metric they contribute to.** Telefrag
+  and stomp value is added to the stats block's `damageGiven`/`damageTaken`
+  exactly as `/damage` reports it, and it scores on the same terms — so absent
+  a `weapons` filter a window's `score` equals the same-named field of its own
+  stats block exactly, under the damage metrics as under `frags`. `weapons=`
+  is the only thing that makes the two diverge, and it selects positional kills
+  too: `weapons=tele` scores telefrags alone. The one exclusion is
+  `damageByWeapon`, which matches `/damage`'s own `byWeapon` — a positional
+  kill carries no wire weapon to file it under.
+- **`water` and `drown` are now accepted interchangeably** in both the frag
+  and damage weapon vocabularies. It is one event the two logs spell
+  differently — a pre-existing wart that hot windows made visible, since one
+  `weapons=` now sits beside a `metric=` that picks the vocabulary. Purely
+  additive: no emitted token changed and no existing request breaks.
+- **Pauses need no correction and none is applied.** Every time here is
+  match-relative, i.e. on the game clock, which freezes during a pause; a 30 s
+  window is 30 s of play, and subtracting pause time would double-correct.
+- `timelineAnalysis.fragStreaks` is the top-10 projection of `/lives`, ranked
+  by frags and carrying only a count and an `ewep`. It stays — removing it
+  would be a genuine break — but anyone wanting every life, or any stat beyond
+  frags, should read `/lives`.
+- **`/lives` has a `summary` size control, and MCP defaults it on.** A whole
+  4on4 match is ~400 lives (241 KB on `212260`), and `from`/`to` only *select*
+  rows there — each kept row still carries its whole attribution window — so
+  they are not a size control. `summary=1` keeps every row and every scalar
+  and drops the per-row breakdown collections (`itemsTaken` 45 KB, `locs`
+  29 KB, `eventLocs` 7 KB, `victims`/`byWeapon`/`damageByWeapon` 11 KB).
+  `getLives` defaults it to true with the usual `hint`, like
+  `getDamage`/`getAim`/`getItems`. One consequence: under `summary` the
+  per-row `itemsTaken` is `null` regardless of the demo and says nothing —
+  `measured.items` on the envelope stays the authority.
+- **Liveness is finally reachable over the API, and a `/state-at` position
+  says how old it is.** v64 made `streams.players[].alive` the canonical
+  liveness and the schema told consumers to read it rather than re-derive it
+  from the `sp`/`d` markers — advice no API consumer could follow, because no
+  endpoint served the field (there is no `streams` artifact either). Meanwhile
+  `/stream-slice` served the very markers whose obvious re-derivation
+  ("alive iff the last spawn is strictly later than the last death") is the
+  latching bug v64 deleted from this codebase, worth 100.7 s of one player's
+  match. Two additive view fields close that:
+  - **`/stream-slice` players carry `alive`** — the stored lives clamped to
+    the window exactly as `rl`/`lg`/`q` are. All three states survive the
+    clip: `null` = liveness was not measurable, `[]` = measured and never
+    alive **in this window** (including when a life list clips to nothing),
+    `[…]` = the lives, with the life boundaries a same-millisecond
+    death+respawn still produces.
+  - **`/state-at` rows carry `alive`** as the same three states at an instant:
+    `true` / `false` / `null`.
+  Neither is `omitempty` and neither is field-gated — `null` is a state, so a
+  key that could be omitted would also mean "you didn't ask", which is exactly
+  the inference the measuredness discipline forbids.
+- **`/state-at` also carries `posAgeMs`.** The row reports a player's nearest
+  position sample with no staleness bound, so on a POV recording it will
+  happily answer "X was at the RA" from a sample tens of seconds old — while
+  `/region-control`, `/loc-graph` and `/loc-trails` have discarded a sample
+  older than 250 ms since v64, so the four endpoints answered "where was X at
+  t" differently. *Which* position is reported does not change (the raw
+  carry-forward is deliberate — this endpoint hands over the evidence and lets
+  the caller judge); what is new is the evidence age: `time` minus the snapped
+  sample's timestamp, signed, so a negative value says the nearest sample is a
+  *later* one. Apply `>= 250 ms` to it and `/state-at` agrees with the
+  occupancy endpoints.
+- MCP gains `getHotWindows` and `getLives`. The golden corpus moves by exactly
+  two lines per file — the `schemaVersion` tick and the new
+  `frags.killsMeasured` — and by nothing else, which is what "both are views"
+  buys: no analytic value in the stored `Result` changes; the two view-layer
+  additions above are likewise invisible to it.
+
 ## unreleased (alive-gated-occupancy) — loc/region occupancy stops counting corpses, schema v64
 
 **A correctness fix.** Values move in `locGraph`,

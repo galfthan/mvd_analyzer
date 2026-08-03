@@ -121,8 +121,13 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 	w.DeadMs = w.PresentMs - w.AliveMs
 
 	row := result.PlayerStatsRow{
-		Name:     p.Name,
-		Team:     p.Team,
+		Name: p.Name,
+		Team: p.Team,
+		// Carried through from the stream this row is built on, so a
+		// consumer reading /player-stats alone can tell two rows that are
+		// one human apart from two humans, without re-deriving anything.
+		Identity: p.Identity,
+		Sessions: p.Sessions,
 		Window:   w,
 		Score:    deriveScore(res, p.Name),
 		Damage:   deriveDamage(res, p.Name, takenEnemy),
@@ -194,7 +199,7 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 			}
 		}
 	}
-	if killsMeasurable(res) {
+	if killsMeasured(res) {
 		eff := result.NewShare(int32(kills), int32(kills+s.Deaths))
 		s.Kills, s.Suicides, s.TeamKills = &kills, &suicides, &teamKills
 		s.Efficiency = &eff
@@ -203,8 +208,24 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 	return s
 }
 
+// killsMeasured is the demo-global kill-attribution verdict AS PUBLISHED on
+// the frag artifact (result.FragResult.KillsMeasured). The rule itself is
+// killsMeasurable below, evaluated once by the match-final node
+// (scoreboardStatsPost) and read from the stored field everywhere else —
+// including out in view.MeasuredSources.Frags, which cannot import this
+// package. Two implementations of this rule is how /hot-windows and /lives
+// came to claim measured kill attribution on a demo /player-stats had already
+// judged unmeasurable.
+//
+// A demo with no frag section carries no verdict and needs none: there is no
+// empty log to be suspicious of and the scoreboard's own counts stand, which
+// is the answer killsMeasurable gives for it too. (view answers differently
+// for that case, and correctly: with no frag section there are no frag-sourced
+// stats to report at all.)
+func killsMeasured(res *Result) bool { return res.Frags == nil || res.Frags.KillsMeasured }
+
 // killsMeasurable reports whether kill attribution was observable on this
-// demo at all.
+// demo at all. It is THE rule; call killsMeasured to read the answer.
 //
 // An empty frag log on a demo where players demonstrably died means every
 // obituary went unmatched — the server printed them in a form this
@@ -217,15 +238,24 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 // agrees and a team aggregate can never mix a measured member with an
 // unmeasured one. A demo where nobody died has nothing to contradict and
 // keeps its honest zeros.
+//
+// The death evidence is FragResult.ByPlayer[].Deaths — the protocol
+// DeathEvent tally the frag analyser builds in its own Finalize
+// (frag.go:236-243), independent of the obituary parse. It is deliberately
+// NOT MatchResult.Players[].Deaths: that field's only writer is the
+// match-final fold below (postprocess.go), which copies these very counts
+// onto the scoreboard, so on a pipeline-produced Result the scoreboard still
+// reads 0 deaths for everyone until that fold runs — reading it made the
+// verdict vacuously "measured" on every demo the pipeline ever produced.
+// ByPlayer is final at the "frags:final" artifact, which match-final
+// requires, so it is the one death source provably settled before the
+// verdict is taken.
 func killsMeasurable(res *Result) bool {
 	if res.Frags == nil || len(res.Frags.Frags) > 0 {
 		return true
 	}
-	if res.Match == nil {
-		return true
-	}
-	for i := range res.Match.Players {
-		if res.Match.Players[i].Deaths > 0 {
+	for _, pf := range res.Frags.ByPlayer {
+		if pf != nil && pf.Deaths > 0 {
 			return false
 		}
 	}

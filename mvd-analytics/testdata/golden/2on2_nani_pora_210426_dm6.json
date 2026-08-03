@@ -20522,6 +20522,7 @@
         "weapon": "lg"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 118
   },
   "items": {
@@ -30642,6 +30643,7 @@
             }
           }
         },
+        "identity": "s0u71",
         "name": "gLAd",
         "pickups": {
           "byKind": {
@@ -30720,6 +30722,15 @@
           "suicides": 1,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "gLAd",
+            "slot": 0,
+            "startMs": -10090,
+            "userId": 71
+          }
+        ],
         "team": "nAnI",
         "window": {
           "aliveMs": 590716,
@@ -30838,6 +30849,7 @@
             }
           }
         },
+        "identity": "s1u76",
         "name": "kippo",
         "pickups": {
           "byKind": {
@@ -30913,6 +30925,15 @@
           "suicides": 2,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "kippo",
+            "slot": 1,
+            "startMs": -10090,
+            "userId": 76
+          }
+        ],
         "team": "pora",
         "window": {
           "aliveMs": 562928,
@@ -31025,6 +31046,7 @@
             }
           }
         },
+        "identity": "s2u73",
         "name": "SS",
         "pickups": {
           "byKind": {
@@ -31099,6 +31121,15 @@
           "suicides": 2,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "SS",
+            "slot": 2,
+            "startMs": -10090,
+            "userId": 73
+          }
+        ],
         "team": "nAnI",
         "window": {
           "aliveMs": 574529,
@@ -31208,6 +31239,7 @@
             }
           }
         },
+        "identity": "s3u74",
         "name": "rusti",
         "pickups": {
           "byKind": {
@@ -31276,6 +31308,15 @@
           "suicides": 0,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "rusti",
+            "slot": 3,
+            "startMs": -10090,
+            "userId": 74
+          }
+        ],
         "team": "pora",
         "window": {
           "aliveMs": 571248,
@@ -31694,7 +31735,7 @@
       }
     ]
   },
-  "schemaVersion": 64,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -115613,6 +115654,7 @@
             "v": 52
           }
         ],
+        "identity": "s0u71",
         "lg": [
           {
             "e": 45372,
@@ -118575,6 +118617,15 @@
             "s": 513072
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "gLAd",
+            "slot": 0,
+            "startMs": -10090,
+            "userId": 71
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -118900,6 +118951,7 @@
             "v": 100
           }
         ],
+        "identity": "s1u76",
         "lg": [
           {
             "e": 15869,
@@ -122199,6 +122251,15 @@
             "s": 592063
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "kippo",
+            "slot": 1,
+            "startMs": -10090,
+            "userId": 76
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -122460,6 +122521,7 @@
             "v": 99
           }
         ],
+        "identity": "s2u73",
         "lg": [
           {
             "e": 600000,
@@ -125697,6 +125759,15 @@
             "s": 581259
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "SS",
+            "slot": 2,
+            "startMs": -10090,
+            "userId": 73
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -125967,6 +126038,7 @@
             "v": 90
           }
         ],
+        "identity": "s3u74",
         "lg": [],
         "li": [
           {
@@ -128757,6 +128829,15 @@
           {
             "e": 600000,
             "s": 586053
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 600000,
+            "name": "rusti",
+            "slot": 3,
+            "startMs": -10090,
+            "userId": 74
           }
         ],
         "sh": [

@@ -248,9 +248,39 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// stray userid entry under a name that appears nowhere else.
 	playerUserIDsByName := make(map[string]int)
 	if a.core != nil && len(a.core.Sessions) > 0 {
-		// Iterate slots in order: a player who reconnected appears under
-		// the same name on >1 slot (each with its own userid); keep-first
-		// over a map would pick a nondeterministic userid run to run.
+		// The userid is the SESSION's, not the slot's: a userid names one
+		// connection (mvdsv reissues them from a rotating pool), so a slot
+		// that changed hands, and a player who timed out and reconnected,
+		// each own a different id than the one the slot started with.
+		//
+		// One name can still span several sessions — the identity unifier
+		// folds a reconnect back onto one name — and they carry different
+		// userids. Which one to publish is a judgement call, not a
+		// derivation: we take the LAST session that had play. That is the
+		// id a viewer scrubbing to the end of the demo needs, the one the
+		// hub's `track=` resolves for a still-connected player, and the
+		// only choice that is right for a same-slot rejoin (gameId 222649:
+		// bogojoker times out on userid 12 and returns on 25 under one
+		// name — keeping the first would report an id that stopped existing
+		// sixteen minutes before the streak it is attached to).
+		//
+		// Ordering is by last play evidence rather than by session start on
+		// the merits, not out of necessity — the attested start sits on the
+		// same record (ResolvedSession.OccStartMs). A rejoin that only ever
+		// spectated starts later but has no play and no POV for a `track=`
+		// to follow, so it must not displace the connection that played;
+		// and where two connections of one auth-unified identity overlap,
+		// the later start is not the later player — the last play is. The
+		// evidence is per slot, so the value is always a real wire time
+		// (see sessionLastPlay).
+		type uidPick struct {
+			uid      int
+			lastPlay int32
+		}
+		best := make(map[string]uidPick)
+		// Iterate slots in order so an exact tie in last-play time (two
+		// slots' final samples on the same frame) resolves to the lower
+		// slot every run rather than to map order.
 		sessSlots := make([]int, 0, len(a.core.Sessions))
 		for slot := range a.core.Sessions {
 			sessSlots = append(sessSlots, slot)
@@ -261,18 +291,27 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 			if st == nil {
 				continue
 			}
-			uid := a.playerUserIDs[slot]
-			if uid <= 0 {
-				continue
-			}
 			for _, s := range a.core.Sessions[slot] {
-				if s.Name == "" || !sessionHasPlay(&st.streams, s.StartMs, s.EndMs) {
+				// A session with no userid of its own (an inferred
+				// occupancy, a userid-0 resend, KTX's ghost row) has no id
+				// to publish; one with no play is a phantom occupancy and
+				// would leak a stray entry under a name that appears
+				// nowhere else.
+				if s.Name == "" || s.UserID <= 0 {
 					continue
 				}
-				if _, ok := playerUserIDsByName[s.Name]; !ok {
-					playerUserIDsByName[s.Name] = uid
+				lastPlay, played := sessionLastPlay(&st.streams, s.StartMs, s.EndMs)
+				if !played {
+					continue
 				}
+				if cur, ok := best[s.Name]; ok && lastPlay <= cur.lastPlay {
+					continue
+				}
+				best[s.Name] = uidPick{uid: s.UserID, lastPlay: lastPlay}
 			}
+		}
+		for name, pick := range best {
+			playerUserIDsByName[name] = pick.uid
 		}
 	} else {
 		for slot, userID := range a.playerUserIDs {
@@ -284,8 +323,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Detect top 5 longest frag streaks for Key Moments
-	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
+	// Detect top 5 longest frag streaks for Key Moments. Streaks carry a
+	// userid of their own, resolved per run from the session table
+	// (nameUserIDIndex) with the demo-wide map above as the fallback.
+	fragStreaks := a.detectFragStreaks(10, names, newNameUserIDIndex(a.core, playerUserIDsByName))
 
 	// Resolve player-inserted `/demomark` bookmarks for Key Moments
 	demoMarkers := a.buildDemoMarkers()
@@ -557,6 +598,16 @@ func (a *TimelineAnalyzer) rebaseToMatch(result *Result, matchStartMs int32) {
 
 		p.Spawns = shiftAndFilterInts(p.Spawns, matchStartMs)
 		p.Deaths = shiftAndFilterInts(p.Deaths, matchStartMs)
+
+		// Session windows shift but are NOT filtered or clamped: a
+		// connection made during the countdown is a real connection, and
+		// dropping (or flattening to 0) the window it was live in would
+		// hide exactly the handover a consumer is trying to resolve. Same
+		// policy as Global.Pauses and timelineAnalysis.demoMarkers.
+		for si := range p.Sessions {
+			p.Sessions[si].StartMs -= matchStartMs
+			p.Sessions[si].EndMs -= matchStartMs
+		}
 
 		if p.Position != nil {
 			shiftAndFilterPosition(p.Position, matchStartMs)

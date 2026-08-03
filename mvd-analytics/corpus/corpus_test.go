@@ -121,8 +121,20 @@ func TestSpecialCasesInvariants(t *testing.T) {
 	}
 }
 
-// checkRosterUnique — one scoreboard row per player. A duplicate means a
-// slot's occupancies were not folded back into one identity.
+// checkRosterUnique — one scoreboard row per display name. A duplicate
+// means two rows collide on the key every name-keyed map downstream uses
+// (streams, playerStats, playerUserIDs), so one of them silently wins.
+//
+// It is deliberately NOT an identity check, despite what its comment used
+// to claim: two rows for the same human under different names can be
+// correct, and folding them would contradict the server. On hub gameId
+// 220637 rusti reconnects while his first connection is still spawned, so
+// mvdsv renames him `(1)rusti (FU)` (SV_ExtractFromUserinfo,
+// mvdsv/src/sv_main.c:3686-3717), KTX's ghost lookup finds no match on the
+// new netname, declines to restore his stats, and writes two rows into its
+// own demoinfo block. Reproducing that split is right. What must not
+// happen is a userid from one of those rows being reported under the
+// other — that is the analyzer package's TestReportedUserIDsWereObservedWithThatName.
 func checkRosterUnique(t *testing.T, res *result.Result) {
 	t.Helper()
 	seen := map[string]bool{}

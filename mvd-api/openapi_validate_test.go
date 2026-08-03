@@ -241,6 +241,22 @@ func addBoundedFamily(d *result.DamageResult) {
 	}
 }
 
+// addDemoMarkers gives a Result's TimelineAnalysis a synthetic pair of
+// `/demomark` bookmarks. Markers are rare (0 per demo across the whole golden
+// corpus, including 4on4_osams_ra_230426_dm3), so the served timeline body
+// never carried the field and TimelineAnalysis's additionalProperties: false
+// went unexercised against it — which is how the schema shipped with no
+// demoMarkers property at all while the /artifacts/timeline route was
+// validated. The two records cover both shapes: an attributed player mark
+// (no spectator/label) and a labelled spectator mark. Assignment, not append,
+// so the two tests that share the cached golden can both call it.
+func addDemoMarkers(ta *result.TimelineAnalysisResult) {
+	ta.DemoMarkers = []result.DemoMarkerEvent{
+		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
+		{Time: -4200, PlayerName: "spec", PlayerSlot: 9, PlayerUserID: 42, Team: "", Spectator: true, Label: "0 round-07"},
+	}
+}
+
 // allFieldCodes is every fields= selector, to exercise the widest
 // stream-slice / state-at / buckets shapes.
 const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,sp,d"
@@ -252,6 +268,11 @@ type validationCase struct {
 	path   string // spec path pattern
 	body   []byte // request body (POST /v1/demos upload); nil for GETs
 	status int
+	// mustContain are substrings the response body has to carry. A case
+	// exists to make the SCHEMA do work, and a body that omits the field the
+	// case was added for validates just as happily as one that carries it —
+	// this is how such a case says which field it is here for.
+	mustContain []string
 }
 
 // gzipDemoBody is a tiny valid gzip stream used as the upload request body.
@@ -284,7 +305,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
-		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200},
+		// mustContain names the v66 identity export: both fields are
+		// omitempty, so a regression that stopped emitting them would still
+		// validate against the schema (the demoMarkers lesson).
+		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
+			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`}},
 		{name: "player-stats-filtered", url: "/v1/demos/gameId:42/player-stats?players=nlk", path: "/v1/demos/{id}/player-stats", status: 200},
 
 		{name: "frags", url: "/v1/demos/gameId:42/frags", path: "/v1/demos/{id}/frags", status: 200},
@@ -331,6 +356,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at", url: "/v1/demos/gameId:42/state-at?time=30&fields=" + strings.TrimSuffix(allFieldCodes, ",sp,d"), path: "/v1/demos/{id}/state-at", status: 200},
 		{name: "err-state-at-sp", url: "/v1/demos/gameId:42/state-at?time=30&fields=sp", path: "/v1/demos/{id}/state-at", status: 400},
 		{name: "state-at-locindex", url: "/v1/demos/gameId:42/state-at?time=30&loc=index", path: "/v1/demos/{id}/state-at", status: 200},
+		// The golden corpus (dm3) carries no position track, so every
+		// state-at case above resolves no positional field and the schema's
+		// posAgeMs / pos / view / vel branches went unexercised. gameId:45 is
+		// a minimal streams-only Result WITH a track, requested off-sample so
+		// posAgeMs is non-zero. mustContain keeps it from silently reverting
+		// to a body that validates by carrying nothing.
+		{name: "state-at-position-track", url: "/v1/demos/gameId:45/state-at?time=1500&fields=pos,view,hgt,lq,vel",
+			path: "/v1/demos/{id}/state-at", status: 200,
+			mustContain: []string{`"posAgeMs":500`, `"pos"`, `"view"`, `"vel"`, `"hgt"`, `"lq"`}},
 		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
 		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
 		// that still validates the Los schema (timeUnit + empty players array).
@@ -344,7 +378,21 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "hot-windows", url: "/v1/demos/gameId:42/hot-windows", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "hot-windows-net", url: "/v1/demos/gameId:42/hot-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "hot-windows-damage", url: "/v1/demos/gameId:42/hot-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
+		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
+		// The timeline artifact is already swept below with every other
+		// servable artifact, but that generic case validates whatever the
+		// body happens to carry. No corpus demo carries a /demomark bookmark,
+		// so demoMarkers never reached the validator and its absence from the
+		// TimelineAnalysis schema was invisible. This case names the field it
+		// exists for, against the synthetic markers addDemoMarkers installs.
+		{name: "artifact-timeline-demomarkers", url: "/v1/demos/gameId:42/artifacts/timeline",
+			path: "/v1/demos/{id}/artifacts/{name}", status: 200,
+			mustContain: []string{`"demoMarkers"`, `"playerUserID":17`, `"spectator":true`, `"label":"0 round-07"`}},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
@@ -401,6 +449,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// still v53 on this branch) so the dmg=both / dmg=bounded cases exercise
 	// the extended schema instead of validating empty additions.
 	addBoundedFamily(res.Damage)
+	// Same reason for demo markers: no corpus demo has one, so the timeline
+	// artifact never exercised the demoMarkers half of its schema.
+	addDemoMarkers(res.TimelineAnalysis)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the
@@ -413,6 +464,34 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			ByPlayer:    map[string]*result.PlayerDamage{},
 			BoundedMode: "skipped:midair",
 		}},
+		// gameId:45 carries the one thing the golden corpus does not: a
+		// position track, with the optional h/lq/velocity columns, so the
+		// positional half of the state-at schema (pos, view, hgt, lq, vel and
+		// the posAgeMs that dates them all) gets validated against a real
+		// response instead of an absent one.
+		"gameId:45": {
+			SchemaVersion: result.CurrentSchemaVersion,
+			Streams: &result.Streams{
+				Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+				Players: []result.PlayerStream{{
+					Name:  "p1",
+					Alive: []result.Interval{{Start: 0, End: 10000}},
+					Position: &result.PositionTrack{
+						T:   []int32{0, 1000, 2000},
+						X:   []float32{0, 100, 200},
+						Y:   []float32{0, 10, 20},
+						Z:   []float32{0, -5, -10},
+						H:   []float32{5, 40, 12},
+						Lq:  []int8{0, 5, 7},
+						VP:  []int16{10, 20, 30},
+						VYa: []int16{-10, -20, -30},
+						VX:  []float32{100, 200, 300},
+						VY:  []float32{-100, -200, -300},
+						VZ:  []float32{1, 2, 3},
+					},
+				}},
+			},
+		},
 	}}
 	srv := newTestServer(t, store)
 	defer srv.Close()
@@ -443,6 +522,11 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			}
 			if tc.status == 200 {
 				covered[method+" "+tc.path] = true
+			}
+			for _, want := range tc.mustContain {
+				if !bytes.Contains(body, []byte(want)) {
+					t.Errorf("response does not contain %s — the case would validate vacuously; body: %.300s", want, body)
+				}
 			}
 			schema, hasJSON := sd.responseSchema(t, tc.path, method, fmt.Sprintf("%d", tc.status))
 			if !hasJSON {

@@ -218,19 +218,28 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 	// Build the per-slot, time-sorted resolved session list. The first
 	// session on a slot extends back to -inf and the last forward to
 	// +inf so events on the edges (before the first userinfo, after the
-	// last) still resolve.
+	// last) still resolve; the observed boundaries ride along untouched in
+	// OccStartMs / OccEndMs for the published session list.
 	sessions := make(map[int][]ResolvedSession)
-	identityKey := func(root int) string { return "id:" + strconv.Itoa(root) }
+	keyOf := identityKeys(sess, uf)
 	for i, s := range sess {
 		root := uf.find(i)
 		g := groups[root]
 		sessions[s.slot] = append(sessions[s.slot], ResolvedSession{
-			StartMs:     s.startMs,
-			EndMs:       s.endMs,
-			Name:        g.name,
-			Team:        g.team,
-			Auth:        s.auth,
-			IdentityKey: identityKey(root),
+			StartMs:    s.startMs,
+			EndMs:      s.endMs,
+			OccStartMs: s.attestedStartMs(),
+			OccEndMs:   s.endMs,
+			Name:       g.name,
+			Team:       g.team,
+			WireName:   s.name,
+			Auth:       s.auth,
+			// The occupancy's own userid, not the slot's: the tracker
+			// already splits a session where the userid changes
+			// (occupancy.go:196-198), so this is the connection that was
+			// live for exactly this window.
+			UserID:      s.userID,
+			IdentityKey: keyOf[root],
 		})
 	}
 	for slot := range sessions {
@@ -241,6 +250,77 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 		sessions[slot] = ss
 	}
 	co.Sessions = sessions
+}
+
+// identityKeys names each identity group after its FIRST session's wire
+// slot and userid ("s9u12") instead of the union-find root index it used to
+// carry ("id:3").
+//
+// The key is now EXPORTED (result.PlayerStream.Identity), so what it is
+// stable against is a contract question:
+//
+//   - Stable across re-analysis of the same demo. A root index is equally
+//     deterministic, but it is a position in a slice — it says nothing a
+//     consumer could check or reproduce, and it invites persistence by
+//     looking like an id. Both components here are wire facts a consumer
+//     with their own parse can recompute.
+//   - NOT comparable between demos, and not a person. A userid identifies a
+//     connection to one server and is reissued from a rotating pool
+//     (SV_GenerateUserID, mvdsv/src/sv_main.c:538-556). The cross-demo
+//     identity is the authenticated login (playerStats[].login), which we
+//     already publish.
+//   - NOT guaranteed across code changes: adding a unification source merges
+//     two groups, and the merged group keeps only one of the two first
+//     sessions. That is inherent to any identity key, index or derived.
+//
+// Uniqueness holds by construction on any real demo — an identity's first
+// occupancy belongs to it alone. The one theoretical clash is a userid
+// reissued to the SAME slot for a later, unrelated occupancy (needs more
+// than the pool's ~99 connections). Since the streams builder groups on this
+// key, a clash would not merely mislabel two rows as one person but splice
+// two players' streams, so it is broken with the start time rather than left
+// to luck.
+func identityKeys(sess []*occupancyRecord, uf *unionFind) map[int]string {
+	earlier := func(a, b *occupancyRecord) bool {
+		if as, bs := a.attestedStartMs(), b.attestedStartMs(); as != bs {
+			return as < bs
+		}
+		return a.slot < b.slot
+	}
+	roots := make([]int, 0, len(sess))
+	first := make(map[int]*occupancyRecord, len(sess))
+	for i, s := range sess {
+		root := uf.find(i)
+		cur, ok := first[root]
+		if !ok {
+			roots = append(roots, root)
+		}
+		if !ok || earlier(s, cur) {
+			first[root] = s
+		}
+	}
+
+	out := make(map[int]string, len(roots))
+	taken := make(map[string]bool, len(roots))
+	for _, root := range roots { // first-observation order: deterministic
+		s := first[root]
+		key := "s" + strconv.Itoa(s.slot) + "u" + strconv.Itoa(s.userID)
+		if taken[key] {
+			// Break the clash with the start time, and keep breaking it: a
+			// third occupancy of the same slot+userid at the same attested
+			// start would otherwise re-collide with the second and splice
+			// two identities' streams — the failure this whole branch
+			// exists to prevent.
+			base := key + "@" + strconv.Itoa(int(s.attestedStartMs()))
+			key = base
+			for n := 2; taken[key]; n++ {
+				key = base + "." + strconv.Itoa(n)
+			}
+		}
+		taken[key] = true
+		out[root] = key
+	}
+	return out
 }
 
 // reconnectedNames resolves each stored rejoin/reenter prefix to the set

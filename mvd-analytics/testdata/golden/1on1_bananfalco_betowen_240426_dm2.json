@@ -4113,6 +4113,7 @@
         "weapon": "rl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 35
   },
   "items": {
@@ -10902,6 +10903,7 @@
             }
           }
         },
+        "identity": "s0u37",
         "name": "betowen",
         "pickups": {
           "byKind": {
@@ -10959,6 +10961,15 @@
           "suicides": 3,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 599980,
+            "name": "betowen",
+            "slot": 0,
+            "startMs": -10286,
+            "userId": 37
+          }
+        ],
         "team": "betowen",
         "window": {
           "aliveMs": 584723,
@@ -11057,6 +11068,7 @@
             }
           }
         },
+        "identity": "s2u39",
         "name": "banan falco",
         "pickups": {
           "byKind": {
@@ -11115,6 +11127,15 @@
           "suicides": 3,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 599980,
+            "name": "banan falco",
+            "slot": 2,
+            "startMs": -10286,
+            "userId": 39
+          }
+        ],
         "team": "banan falco",
         "window": {
           "aliveMs": 588640,
@@ -11132,7 +11153,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 64,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -253804,6 +253825,7 @@
             "v": 54
           }
         ],
+        "identity": "s0u37",
         "li": [
           {
             "t": 0,
@@ -268849,6 +268871,15 @@
             "s": 598513
           }
         ],
+        "sessions": [
+          {
+            "endMs": 599980,
+            "name": "betowen",
+            "slot": 0,
+            "startMs": -10286,
+            "userId": 37
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -268981,6 +269012,7 @@
             "v": 100
           }
         ],
+        "identity": "s2u39",
         "li": [
           {
             "t": 0,
@@ -283980,6 +284012,15 @@
           {
             "e": 599980,
             "s": 547766
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 599980,
+            "name": "banan falco",
+            "slot": 2,
+            "startMs": -10286,
+            "userId": 39
           }
         ],
         "sh": [

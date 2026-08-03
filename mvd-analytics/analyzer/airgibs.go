@@ -59,7 +59,19 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 	}
 
 	locTable := res.TimelineAnalysis.LocTable
-	userIDs := res.TimelineAnalysis.PlayerUserIDs
+	// Per-hit userids: the connection each player held at the hit's own
+	// instant, not the demo-wide last-session-with-play id — an airgib
+	// inside a rejoiner's earlier stint belongs to the connection that
+	// threw / took it. TimelineAnalysis.PlayerUserIDs stays the fallback
+	// for names the session table does not carry.
+	//
+	// Times need converting: this post-processor reads match-relative
+	// timestamps (the damage producer is born correct at its Finalize)
+	// while the session table on CoreOutputs is on the demo clock, so shift
+	// back by the match start the clock published — the inverse of
+	// Clock.ToMatch, and the identity on a demo with no match start.
+	userIDs := newNameUserIDIndex(co, res.TimelineAnalysis.PlayerUserIDs)
+	demoMs := func(matchMs int32) int32 { return matchMs + co.MatchStartMs() }
 	// Prefer the player-stream team: the timeline stamps stream teams with the
 	// roster's synthetic name-per-player duel labels at birth (co.Names keeps
 	// the raw team). Outside duel mode the two sources agree; co.Names remains
@@ -128,10 +140,10 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 			Time:                d.Time,
 			Attacker:            d.Attacker,
 			AttackerTeam:        teamFor(d.Attacker),
-			AttackerUserID:      userIDs[d.Attacker],
+			AttackerUserID:      userIDs.at(d.Attacker, demoMs(d.Time)),
 			Victim:              d.Victim,
 			VictimTeam:          teamFor(d.Victim),
-			VictimUserID:        userIDs[d.Victim],
+			VictimUserID:        userIDs.at(d.Victim, demoMs(d.Time)),
 			Height:              h,
 			HeightAboveAttacker: dz,
 			Loc:                 loc,

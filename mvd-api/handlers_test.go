@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -1286,6 +1288,68 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	}
 }
 
+// Liveness reaches REST on both stream surfaces (schema v65), never
+// field-gated, and /state-at publishes the age of the sample its position
+// was snapped to. `alive` is null — not absent — when the stored liveness
+// was not measurable, which is why neither key is omitempty.
+func TestStreamSliceStateAtAliveAndPosAge(t *testing.T) {
+	res := stubResult()
+	p := &res.Streams.Players[0]
+	p.Alive = []result.Interval{{Start: 0, End: 10000}, {Start: 12000, End: 60000}}
+	p.Position = &result.PositionTrack{
+		T: []int32{0, 100, 200, 300},
+		X: []float32{0, 10, 20, 30},
+		Y: []float32{0, 0, 0, 0},
+		Z: []float32{0, 0, 0, 0},
+	}
+	store := &fakeStore{byID: map[string]*result.Result{"gameId:42": res}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	// stream-slice: the lives clamped to the window, on a request that asked
+	// for one unrelated field.
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=5000&to=20000&fields=h&players=bps", 200)
+	p0 := resp["players"].([]any)[0].(map[string]any)
+	alive, ok := p0["alive"].([]any)
+	if !ok || len(alive) != 2 {
+		t.Fatalf("stream-slice alive = %v, want two clamped lives", p0["alive"])
+	}
+	first := alive[0].(map[string]any)
+	if first["s"].(float64) != 5000 || first["e"].(float64) != 10000 {
+		t.Errorf("first life = %v, want [5000,10000)", first)
+	}
+
+	// state-at: alive at the instant, plus the snapped sample's age (the
+	// track stops at 300 ms, so a query at 11 s is 10.7 s stale — the
+	// position is still reported, unchanged, but the age now says so).
+	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=11000&fields=pos&players=bps", 200)
+	sp := st["players"].(map[string]any)["bps"].(map[string]any)
+	if sp["alive"] != false {
+		t.Errorf("alive at 11000 (between two lives) = %v, want false", sp["alive"])
+	}
+	if _, ok := sp["pos"]; !ok {
+		t.Errorf("pos must still be reported however stale: %v", sp)
+	}
+	if age, ok := sp["posAgeMs"].(float64); !ok || age != 10700 {
+		t.Errorf("posAgeMs = %v, want 10700", sp["posAgeMs"])
+	}
+
+	// A demo whose liveness was not measurable serves null on both, and the
+	// keys stay present so null can carry that.
+	plain := newTestServer(t, storeWithStub())
+	defer plain.Close()
+	sl := getJSON(t, plain.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30000&fields=h&players=bps", 200)
+	slp := sl["players"].([]any)[0].(map[string]any)
+	if v, present := slp["alive"]; !present || v != nil {
+		t.Errorf("stream-slice alive = %v (present=%v), want a present null", v, present)
+	}
+	sa := getJSON(t, plain.URL+"/v1/demos/gameId:42/state-at?time=1000&fields=h&players=bps", 200)
+	sap := sa["players"].(map[string]any)["bps"].(map[string]any)
+	if v, present := sap["alive"]; !present || v != nil {
+		t.Errorf("state-at alive = %v (present=%v), want a present null", v, present)
+	}
+}
+
 func TestStateAt_MissingTime(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
@@ -2385,5 +2449,635 @@ func TestStubResultExercisesKTXOverlay(t *testing.T) {
 	}
 	if acc, ok := row.Accuracy.ByWeapon["lg"]; !ok || acc.Real != nil {
 		t.Error("lg must carry no real/virtual — the absent-not-zero branch")
+	}
+}
+
+// --- /hot-windows + /lives: the interval endpoints -----------------------
+//
+// These two shipped with NO handler test, which is how a dead 422 branch got
+// past review: both handlers gated their error tail on a bare `err != nil`
+// via writeInvalidParam, and ErrBoundedUnavailable wraps ErrUnavailable, so
+// every explicit dmg=bounded on a demo without the bounded family answered
+// 400 invalid_param and the 422 the spec documents was unreachable.
+
+// intervalFixture is a Result carrying all five sources the interval
+// endpoints read — frag log, per-hit damage log, shot stream, alive
+// intervals + loc streams, item timeline — over a 120 s match.
+// boundedMode selects whether the demo has a bounded damage family
+// ("standard") or not ("skipped:no_ktx").
+func intervalFixture(boundedMode string) *result.Result {
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		FilePath:      "interval.mvd.gz",
+		Match: &result.MatchResult{
+			Map: "dm3", GameDir: "qw", Duration: 120000,
+			Players: []result.PlayerStat{
+				{Name: "bps", Team: "blue", Frags: 3},
+				{Name: "valla", Team: "red", Frags: 1},
+			},
+		},
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 120000},
+			Players: []result.PlayerStream{
+				{
+					Name: "bps", Team: "blue",
+					Alive: []result.Interval{{Start: 0, End: 40000}, {Start: 42000, End: 120000}},
+					Loc:   []result.ChangeI16{{T: 0, V: 1}, {T: 50000, V: 2}},
+					RL:    []result.Interval{{Start: 5000, End: 60000}},
+				},
+				{
+					Name: "valla", Team: "red",
+					Alive: []result.Interval{{Start: 0, End: 120000}},
+					Loc:   []result.ChangeI16{{T: 0, V: 3}},
+				},
+			},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "ra", "ya", "rl"}},
+		Frags: &result.FragResult{
+			TotalFrags: 4,
+			Frags: []result.FragEntry{
+				{Time: 10000, Killer: "bps", Victim: "valla", Weapon: "rl"},
+				{Time: 12000, Killer: "bps", Victim: "valla", Weapon: "lg"},
+				{Time: 40000, Killer: "valla", Victim: "bps", Weapon: "rl"},
+				{Time: 90000, Killer: "bps", Victim: "valla", Weapon: "rl"},
+			},
+			ByWeapon: map[string]int{"rl": 3, "lg": 1},
+			ByPlayer: map[string]*result.PlayerFrags{
+				"bps":   {Kills: 3, Deaths: 1, ByWeapon: map[string]int{"rl": 2, "lg": 1}},
+				"valla": {Kills: 1, Deaths: 3, ByWeapon: map[string]int{"rl": 1}},
+			},
+		},
+		Shots: &result.ShotsResult{
+			Shots: []result.Shot{
+				{Time: 9000, Player: "bps", Weapon: "rl", Hit: true},
+				{Time: 11000, Player: "bps", Weapon: "lg"},
+			},
+		},
+		Items: &result.ItemsResult{
+			Items: []result.ItemTimeline{{
+				Name: "ra_1", Kind: "ra", EntNum: 12,
+				Phases: []result.ItemPhase{{AvailableFrom: 0, TakenAt: 8000, TakenBy: "bps", Team: "blue"}},
+			}},
+		},
+		Damage: &result.DamageResult{
+			BoundedMode: boundedMode,
+			TotalDamage: 300,
+			ByWeapon:    map[string]int{"rl": 200, "lg": 100},
+			ByPlayer: map[string]*result.PlayerDamage{
+				"bps": {Given: 200, Taken: 100, ByWeapon: map[string]int{"rl": 200}},
+			},
+			Events: []result.DamageEntry{
+				{Time: 9500, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 100, Bounded: intp(80)},
+				{Time: 11500, Attacker: "bps", Victim: "valla", Weapon: "lg", Damage: 100, Bounded: intp(70)},
+				{Time: 39000, Attacker: "valla", Victim: "bps", Weapon: "rl", Damage: 100, Bounded: intp(90)},
+			},
+		},
+	}
+}
+
+// intervalStore serves the fixture twice: gameId:42 with a bounded damage
+// family, gameId:99 without one.
+func intervalStore() *fakeStore {
+	return &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": intervalFixture("standard"),
+		"gameId:99": intervalFixture("skipped:no_ktx"),
+	}}
+}
+
+// errEnvelope decodes the shared {"error":{code,message}} body.
+func errEnvelope(t *testing.T, body []byte) (code, message string) {
+	t.Helper()
+	var env struct {
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("error body decode: %v (body=%s)", err, string(body))
+	}
+	return env.Error.Code, env.Error.Message
+}
+
+// TestIntervalEndpoints_BoundedUnavailable is the regression test for the
+// dead 422 branch. An EXPLICIT dmg=bounded on a demo whose bounded
+// reconstruction was skipped must be 422 bounded_unavailable NAMING the
+// boundedMode — not the 400 invalid_param an unconditional writeInvalidParam
+// produced. A DEFAULTED bounded on the same demo still falls back to raw.
+func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+
+	for _, u := range []string{
+		"/v1/demos/gameId:99/hot-windows?metric=damageGiven&dmg=bounded",
+		"/v1/demos/gameId:99/lives?dmg=bounded",
+	} {
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s: status = %d, want 422 (body=%s)", u, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "bounded_unavailable" {
+			t.Errorf("GET %s: code = %q, want bounded_unavailable", u, code)
+		}
+		if !strings.Contains(msg, "skipped:no_ktx") {
+			t.Errorf("GET %s: message must name the boundedMode, got %q", u, msg)
+		}
+		if !strings.Contains(msg, "dmg=raw") {
+			t.Errorf("GET %s: message must point at dmg=raw, got %q", u, msg)
+		}
+	}
+
+	// A DEFAULTED bounded (no dmg param) on the same demo serves the raw
+	// family instead of 422-ing a caller who never asked for bounded.
+	for _, u := range []string{
+		"/v1/demos/gameId:99/hot-windows?metric=damageGiven",
+		"/v1/demos/gameId:99/lives",
+	} {
+		if body, status := getRaw(t, srv.URL+u); status != 200 {
+			t.Errorf("GET %s (defaulted): status = %d, want 200 (body=%s)", u, status, string(body))
+		}
+	}
+
+	// And on a demo that HAS the family, explicit bounded serves.
+	for _, u := range []string{
+		"/v1/demos/gameId:42/hot-windows?metric=damageGiven&dmg=bounded",
+		"/v1/demos/gameId:42/lives?dmg=bounded",
+	} {
+		if body, status := getRaw(t, srv.URL+u); status != 200 {
+			t.Errorf("GET %s: status = %d, want 200 (body=%s)", u, status, string(body))
+		}
+	}
+}
+
+// TestIntervalEndpoints_DmgBothRejected: `both` is a /damage response SHAPE
+// and neither interval endpoint has it, so it is a 400 for EVERY metric — not
+// a 400 on the damage metrics and a silently ignored 200 on the rest, which
+// made the same parameter's validity depend on an unrelated one.
+func TestIntervalEndpoints_DmgBothRejected(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+
+	for _, u := range []string{
+		"/v1/demos/gameId:42/hot-windows?dmg=both",                    // default metric=frags
+		"/v1/demos/gameId:42/hot-windows?dmg=both&metric=damageGiven", // a damage metric
+		"/v1/demos/gameId:42/hot-windows?dmg=both&metric=shots",       // the shot stream
+		"/v1/demos/gameId:42/lives?dmg=both",
+	} {
+		body, status := getRaw(t, srv.URL+u)
+		if status != 400 {
+			t.Fatalf("GET %s: status = %d, want 400 (body=%s)", u, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "invalid_param" {
+			t.Errorf("GET %s: code = %q, want invalid_param", u, code)
+		}
+		if !strings.Contains(msg, "raw") || !strings.Contains(msg, "bounded") {
+			t.Errorf("GET %s: message must name the accepted values, got %q", u, msg)
+		}
+	}
+	// raw and bounded stay accepted on both.
+	for _, u := range []string{
+		"/v1/demos/gameId:42/hot-windows?dmg=raw",
+		"/v1/demos/gameId:42/hot-windows?dmg=bounded&metric=damageGiven",
+		"/v1/demos/gameId:42/lives?dmg=raw",
+	} {
+		if body, status := getRaw(t, srv.URL+u); status != 200 {
+			t.Errorf("GET %s: status = %d, want 200 (body=%s)", u, status, string(body))
+		}
+	}
+}
+
+// TestHotWindows_WindowMsBounds pins both ends of windowMs. The floor gives
+// ONE message for 0 and for a negative — an agent told "must be >= 0" by the
+// negative retried with 0 and failed again. The ceiling is the match
+// duration: windowMs=MaxInt32 used to 200 with a 24.8-day window whose
+// durationMs covered time that does not exist.
+func TestHotWindows_WindowMsBounds(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+
+	for _, v := range []string{"0", "-5"} {
+		body, status := getRaw(t, base+"?windowMs="+v)
+		if status != 400 {
+			t.Fatalf("windowMs=%s: status = %d, want 400 (body=%s)", v, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "invalid_param" {
+			t.Errorf("windowMs=%s: code = %q, want invalid_param", v, code)
+		}
+		if want := "windowMs must be >= 1; omit it for the default 30000"; msg != want {
+			t.Errorf("windowMs=%s: message = %q, want %q (the two must agree)", v, msg, want)
+		}
+	}
+
+	// Above the match duration (120000 in the fixture) is a 400 naming the
+	// bound, not a 200 with a clamped end.
+	body, status := getRaw(t, base+"?windowMs=2147483647")
+	if status != 400 {
+		t.Fatalf("windowMs=MaxInt32: status = %d, want 400 (body=%s)", status, string(body))
+	}
+	if _, msg := errEnvelope(t, body); !strings.Contains(msg, "120000") {
+		t.Errorf("windowMs=MaxInt32: message must name the bound, got %q", msg)
+	}
+
+	// Exactly the match duration is accepted, and `end = start + windowMs`
+	// still holds — the identity the ceiling exists to protect.
+	resp := getJSON(t, base+"?windowMs=120000&limit=1", 200)
+	if int(resp["windowMs"].(float64)) != 120000 {
+		t.Fatalf("windowMs echo = %v, want 120000", resp["windowMs"])
+	}
+	wins := resp["windows"].([]any)
+	if len(wins) == 0 {
+		t.Fatal("windowMs=120000 returned no windows")
+	}
+	w0 := wins[0].(map[string]any)
+	if got := w0["end"].(float64) - w0["start"].(float64); got != 120000 {
+		t.Errorf("end - start = %v, want 120000 (windowMs)", got)
+	}
+	// A malformed value names the unit, like from/to do.
+	body, _ = getRaw(t, base+"?windowMs=10.5")
+	if _, msg := errEnvelope(t, body); !strings.Contains(msg, "integer milliseconds") {
+		t.Errorf("windowMs=10.5: message should hint the unit, got %q", msg)
+	}
+}
+
+// TestHotWindows_CapsAreConsistent: limit and perPlayer are two caps on one
+// endpoint and now follow ONE rule — omitted is the default, negative is
+// uncapped, an explicit 0 is rejected. The old shape rejected limit=0 but
+// accepted perPlayer=0, and rejected perPlayer=-1 but accepted limit=-1, so
+// an agent that learned either guessed the other wrong.
+func TestHotWindows_CapsAreConsistent(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+
+	for _, cap := range []string{"limit", "perPlayer"} {
+		body, status := getRaw(t, base+"?"+cap+"=0")
+		if status != 400 {
+			t.Fatalf("%s=0: status = %d, want 400 (body=%s)", cap, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "invalid_param" {
+			t.Errorf("%s=0: code = %q, want invalid_param", cap, code)
+		}
+		if !strings.Contains(msg, "negative for uncapped") || !strings.Contains(msg, "omit it") {
+			t.Errorf("%s=0: message must give both escapes, got %q", cap, msg)
+		}
+		// Negative is the uncapped spelling on BOTH.
+		if body, status := getRaw(t, base+"?"+cap+"=-1"); status != 200 {
+			t.Errorf("%s=-1: status = %d, want 200 uncapped (body=%s)", cap, status, string(body))
+		}
+	}
+
+	// The upper end of limit is the third arm of the same ruling: an
+	// out-of-range limit is REJECTED, not silently clamped. Without the
+	// handler's check the view still caps at 200 behind it, so limit=1000
+	// would answer 200 with a body that quietly disagrees with the request —
+	// exactly the "silently clamped" shape v59 removed, and the opposite of
+	// what /hot-windows' parameter docs promise.
+	body, status := getRaw(t, base+"?limit=1000")
+	if status != 400 {
+		t.Fatalf("limit=1000: status = %d, want 400 (a clamped 200 is the bug this pins) (body=%s)", status, string(body))
+	}
+	code, msg := errEnvelope(t, body)
+	if code != "invalid_param" {
+		t.Errorf("limit=1000: code = %q, want invalid_param", code)
+	}
+	// The message names both the bound and the value, so a caller can fix the
+	// request without consulting the spec.
+	if want := fmt.Sprintf("limit must be <= %d, got 1000", hotWindowsMaxLimit); msg != want {
+		t.Errorf("limit=1000: message = %q, want %q", msg, want)
+	}
+	// The bound itself is inclusive — the rejection starts one past it.
+	if body, status := getRaw(t, base+"?limit="+strconv.Itoa(hotWindowsMaxLimit)); status != 200 {
+		t.Errorf("limit=%d: status = %d, want 200 (the cap is inclusive) (body=%s)", hotWindowsMaxLimit, status, string(body))
+	}
+}
+
+// TestHotWindows_MinScoreParam: the filter is `minScore`, not the bare,
+// undimensioned `min` — on the sibling /lives the analogous `minMs` is a
+// DURATION, so `min` read as one. A malformed value names what a good one is.
+func TestHotWindows_MinScoreParam(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+
+	// The old spelling is not silently accepted — it is an unknown param.
+	body, status := getRaw(t, base+"?min=1")
+	if status != 400 {
+		t.Fatalf("min=1: status = %d, want 400 unknown_param (body=%s)", status, string(body))
+	}
+	// The accepted-vocabulary tail is lowercased (keys resolve
+	// case-insensitively), so the replacement is named there as "minscore".
+	if code, msg := errEnvelope(t, body); code != "unknown_param" || !strings.Contains(msg, "minscore") {
+		t.Errorf("min=1: code=%q msg=%q, want unknown_param naming minScore", code, msg)
+	}
+
+	// minScore=0 is honoured as a real filter (keep zero-scoring windows),
+	// distinct from its default of 1: with netFrags, valla is 1-3 down over
+	// the match and only shows up once zero/negative windows are kept.
+	high := getJSON(t, base+"?metric=netFrags&limit=200", 200)["windows"].([]any)
+	low := getJSON(t, base+"?metric=netFrags&limit=200&minScore=-10", 200)["windows"].([]any)
+	if len(low) <= len(high) {
+		t.Errorf("minScore=-10 returned %d windows, want more than the default's %d", len(low), len(high))
+	}
+
+	body, _ = getRaw(t, base+"?minScore=abc")
+	if _, msg := errEnvelope(t, body); !strings.Contains(msg, "integer score") {
+		t.Errorf("minScore=abc: message should hint the unit/range, got %q", msg)
+	}
+}
+
+// TestLives_Summary pins /lives' size control: every ROW and every SCALAR
+// survives, the per-row collections do not, and itemsTaken becomes null (not
+// [], which would claim the life took nothing).
+func TestLives_Summary(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/lives"
+
+	full := getJSON(t, base, 200)
+	lean := getJSON(t, base+"?summary=1", 200)
+
+	fullRows := full["lives"].([]any)
+	leanRows := lean["lives"].([]any)
+	if len(fullRows) == 0 || len(fullRows) != len(leanRows) {
+		t.Fatalf("summary changed the row count: %d -> %d", len(fullRows), len(leanRows))
+	}
+	// The envelope's measured block is untouched — it stays the authority on
+	// what the demo carries when the per-row itemsTaken has gone null.
+	if fmt.Sprint(full["measured"]) != fmt.Sprint(lean["measured"]) {
+		t.Errorf("summary changed measured: %v -> %v", full["measured"], lean["measured"])
+	}
+
+	// Find bps's first life in each shape: it has items, locs, kills (so
+	// eventLocs/byWeapon/victims) and damage — every collection at once.
+	pick := func(rows []any) map[string]any {
+		for _, r := range rows {
+			m := r.(map[string]any)
+			if m["player"] == "bps" && int(m["index"].(float64)) == 0 {
+				return m
+			}
+		}
+		t.Fatal("bps life 0 missing")
+		return nil
+	}
+	f, l := pick(fullRows), pick(leanRows)
+
+	for _, k := range []string{"itemsTaken", "locs", "eventLocs", "victims", "byWeapon", "damageByWeapon"} {
+		if v, ok := f[k]; !ok || v == nil {
+			t.Fatalf("fixture does not exercise %q in the full shape (got %v) — the test would pass vacuously", k, v)
+		}
+	}
+	// itemsTaken is REQUIRED by the schema, so it is present-and-null rather
+	// than dropped; the rest are omitted outright.
+	if v, ok := l["itemsTaken"]; !ok || v != nil {
+		t.Errorf("summary itemsTaken = %v (present=%v), want present and null", v, ok)
+	}
+	for _, k := range []string{"locs", "eventLocs", "victims", "byWeapon", "damageByWeapon"} {
+		if v, ok := l[k]; ok {
+			t.Errorf("summary kept %q = %v, want it dropped", k, v)
+		}
+	}
+	// Scalars and the cheap per-row descriptors survive untouched.
+	for _, k := range []string{"player", "team", "index", "start", "end", "endReason", "durationMs",
+		"kills", "deaths", "teamKills", "suicides", "damageGiven", "damageTaken",
+		"damageGivenTeam", "damageGivenSelf", "shots", "hits", "mainWeapon", "spawnLoc", "weaponsHeld"} {
+		if fmt.Sprint(f[k]) != fmt.Sprint(l[k]) {
+			t.Errorf("summary changed scalar %q: %v -> %v", k, f[k], l[k])
+		}
+	}
+}
+
+// TestHotWindows_ToBoundsWindowStart pins the documented /hot-windows `to`
+// semantics: it bounds where a window may START, not what it covers. A window
+// anchored at or before `to` still runs the full windowMs past it. This is
+// deliberate — clamping the scoring at `to` while the stats block ran
+// unclamped made a row's score disagree with its own stats — so the test
+// exists to keep the behaviour and the spec's caveat in step.
+func TestHotWindows_ToBoundsWindowStart(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/hot-windows?to=1000&windowMs=30000&limit=1", 200)
+	wins := resp["windows"].([]any)
+	if len(wins) == 0 {
+		t.Fatal("to=1000 returned no windows")
+	}
+	w0 := wins[0].(map[string]any)
+	if start := w0["start"].(float64); start > 1000 {
+		t.Errorf("window start = %v, want <= to (1000)", start)
+	}
+	if end := w0["end"].(float64); end <= 1000 {
+		t.Fatalf("window end = %v — `to` is documented to bound the START, so the window must run past it", end)
+	}
+	// It really did score events beyond `to`: the two kills at 10000/12000.
+	if score := w0["score"].(float64); score != 2 {
+		t.Errorf("score = %v, want 2 (the kills at 10000 and 12000, both past to=1000)", score)
+	}
+}
+
+// TestHotWindows_Unavailable exercises the 422 over HTTP: the view's gate is
+// per-METRIC, so the same demo answers 200 for one metric and 422 for another,
+// and the message has to name the stream the chosen metric needs rather than
+// say a bare "unavailable". Each arm of hotWindowsUnavailableMsg gets its own
+// demo, so a message wired to the wrong metric class fails here.
+func TestHotWindows_Unavailable(t *testing.T) {
+	// Each fixture drops exactly one source; everything else stays, so a 422
+	// can only come from the metric under test.
+	noShots := intervalFixture("standard")
+	noShots.Shots = nil
+	noDamage := intervalFixture("standard")
+	noDamage.Damage = nil
+	noFrags := intervalFixture("standard")
+	noFrags.Frags = nil
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:10": noShots,
+		"gameId:11": noDamage,
+		"gameId:12": noFrags,
+	}})
+	defer srv.Close()
+
+	for _, tc := range []struct {
+		id, metric, wantMsg string
+	}{
+		{"gameId:10", "shots", "this demo has no weapon-fire stream"},
+		{"gameId:10", "hits", "this demo has no weapon-fire stream"},
+		{"gameId:11", "damageGiven", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:11", "netDamage", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:12", "frags", "this demo has no frag log"},
+		{"gameId:12", "netFrags", "this demo has no frag log"},
+	} {
+		u := fmt.Sprintf("/v1/demos/%s/hot-windows?metric=%s", tc.id, tc.metric)
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s: status = %d, want 422 (body=%s)", u, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "hot_windows_unavailable" {
+			t.Errorf("GET %s: code = %q, want hot_windows_unavailable", u, code)
+		}
+		if msg != tc.wantMsg {
+			t.Errorf("GET %s: message = %q, want %q (it must name the missing stream)", u, msg, tc.wantMsg)
+		}
+	}
+
+	// The gate really is per-metric: the demo without a damage stream still
+	// serves the frag metrics, and vice versa.
+	for _, u := range []string{
+		"/v1/demos/gameId:11/hot-windows?metric=frags",
+		"/v1/demos/gameId:12/hot-windows?metric=damageGiven",
+		"/v1/demos/gameId:12/hot-windows?metric=shots",
+	} {
+		if body, status := getRaw(t, srv.URL+u); status != 200 {
+			t.Errorf("GET %s: status = %d, want 200 — the gate is per-metric (body=%s)", u, status, string(body))
+		}
+	}
+}
+
+// TestLives_Unavailable exercises /lives' 422 over HTTP for BOTH halves of
+// LivesAvailable's gate, which the single livesUnavailableMsg has to cover at
+// once. The halves are distinguishable states of the demo:
+//
+//	no per-player streams at all      → nothing to segment
+//	streams present, every Alive nil  → nothing on which liveness was measured
+//
+// The second is why the message does not stop at "no per-player streams": a
+// demo in that state HAS the streams, and a message naming only them sends the
+// caller looking for something they already have. Both states are asserted
+// against the half of the message that describes them.
+func TestLives_Unavailable(t *testing.T) {
+	noStreams := intervalFixture("standard")
+	noStreams.Streams = nil
+
+	emptyStreams := intervalFixture("standard")
+	emptyStreams.Streams.Players = nil
+
+	// Streams, names, teams, loc tracks — everything except a measurable
+	// liveness. Lives would emit zero rows here, and `{"lives":[]}` would
+	// claim nobody ever lived.
+	nilLiveness := intervalFixture("standard")
+	for i := range nilLiveness.Streams.Players {
+		nilLiveness.Streams.Players[i].Alive = nil
+	}
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:20": noStreams,
+		"gameId:21": emptyStreams,
+		"gameId:22": nilLiveness,
+	}})
+	defer srv.Close()
+
+	for _, tc := range []struct {
+		id, why, wantHalf string
+	}{
+		{"gameId:20", "no streams section", "no per-player streams to segment into lives"},
+		{"gameId:21", "streams section with no players", "no per-player streams to segment into lives"},
+		{"gameId:22", "streams whose liveness was never measurable", "none on which liveness was measurable"},
+	} {
+		u := "/v1/demos/" + tc.id + "/lives"
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s (%s): status = %d, want 422 (body=%s)", u, tc.why, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "lives_unavailable" {
+			t.Errorf("GET %s (%s): code = %q, want lives_unavailable", u, tc.why, code)
+		}
+		if !strings.Contains(msg, tc.wantHalf) {
+			t.Errorf("GET %s (%s): message = %q, must contain the half that describes this demo: %q",
+				u, tc.why, msg, tc.wantHalf)
+		}
+		// One constant covers both states, so neither half may be dropped:
+		// whichever demo asked, the message stays true.
+		if msg != livesUnavailableMsg {
+			t.Errorf("GET %s (%s): message = %q, want the shared constant %q", u, tc.why, msg, livesUnavailableMsg)
+		}
+	}
+}
+
+// TestLives_MinMsFloor: minMs is a DURATION filter, so a negative is
+// meaningless rather than a second spelling of "no filter" — it is rejected,
+// not clamped to 0.
+//
+// The rejection comes from qp.Ms, which already refuses a negative, so the
+// handler's own `opts.MinMs < 0` guard is defence in depth behind it and its
+// message never reaches the wire. This test pins what a caller observes — 400
+// invalid_param naming the floor — which is the contract either layer owes,
+// rather than one layer's wording. (Contrast windowMs on /hot-windows, which
+// deliberately bypasses Ms because its real floor is 1, not 0.)
+func TestLives_MinMsFloor(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/lives"
+
+	body, status := getRaw(t, base+"?minMs=-1")
+	if status != 400 {
+		t.Fatalf("minMs=-1: status = %d, want 400 (body=%s)", status, string(body))
+	}
+	code, msg := errEnvelope(t, body)
+	if code != "invalid_param" {
+		t.Errorf("minMs=-1: code = %q, want invalid_param", code)
+	}
+	if !strings.Contains(msg, "minMs") || !strings.Contains(msg, ">= 0") {
+		t.Errorf("minMs=-1: message = %q, must name the param and its floor", msg)
+	}
+	// 0 is the no-op filter and stays accepted.
+	if body, status := getRaw(t, base+"?minMs=0"); status != 200 {
+		t.Errorf("minMs=0: status = %d, want 200 (body=%s)", status, string(body))
+	}
+}
+
+// TestHotWindows_WindowMsCeilingFallbacks covers the two matchDurationMs arms
+// the intervalFixture (which carries Streams.Global.MatchEnd) never reaches.
+// The ceiling is what keeps the documented `end = start + windowMs` inside
+// int32, so a Result assembled without streams must still get one.
+func TestHotWindows_WindowMsCeilingFallbacks(t *testing.T) {
+	// No Streams at all: Match.Duration is the fallback authority.
+	fromMatch := intervalFixture("standard")
+	fromMatch.Streams = nil // Match.Duration is 120000
+
+	// Neither a stream match-end nor a match duration: the half-int32 ceiling.
+	// Frags is kept so the request dies on the bound, not on availability.
+	noDuration := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Frags:         intervalFixture("standard").Frags,
+	}
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:30": fromMatch,
+		"gameId:31": noDuration,
+	}})
+	defer srv.Close()
+
+	const halfInt32 = math.MaxInt32 / 2 // 1073741823
+	for _, tc := range []struct {
+		id, arm  string
+		bound    int
+		overshot int
+	}{
+		{"gameId:30", "Match.Duration", 120000, 120001},
+		{"gameId:31", "no duration at all", halfInt32, halfInt32 + 1},
+	} {
+		base := srv.URL + "/v1/demos/" + tc.id + "/hot-windows"
+		body, status := getRaw(t, base+"?windowMs="+strconv.Itoa(tc.overshot))
+		if status != 400 {
+			t.Fatalf("%s arm, windowMs=%d: status = %d, want 400 (body=%s)", tc.arm, tc.overshot, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "invalid_param" {
+			t.Errorf("%s arm: code = %q, want invalid_param", tc.arm, code)
+		}
+		if !strings.Contains(msg, strconv.Itoa(tc.bound)) {
+			t.Errorf("%s arm: message = %q, must name the bound %d it applied", tc.arm, msg, tc.bound)
+		}
+		// The bound is inclusive on both arms.
+		if body, status := getRaw(t, base+"?windowMs="+strconv.Itoa(tc.bound)); status != 200 {
+			t.Errorf("%s arm, windowMs=%d (exactly the bound): status = %d, want 200 (body=%s)",
+				tc.arm, tc.bound, status, string(body))
+		}
 	}
 }

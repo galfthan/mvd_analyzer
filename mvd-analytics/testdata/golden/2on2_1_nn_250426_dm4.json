@@ -39734,6 +39734,7 @@
         "weapon": "rl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 242
   },
   "items": {
@@ -53932,6 +53933,7 @@
             }
           }
         },
+        "identity": "s0u14",
         "name": "squeeze",
         "pickups": {
           "byKind": {
@@ -54012,6 +54014,15 @@
           "suicides": 1,
           "teamKills": 1
         },
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "squeeze",
+            "slot": 0,
+            "startMs": -10160,
+            "userId": 14
+          }
+        ],
         "team": "1",
         "window": {
           "aliveMs": 558522,
@@ -54141,6 +54152,7 @@
             }
           }
         },
+        "identity": "s1u8",
         "name": "shazam",
         "pickups": {
           "byKind": {
@@ -54221,6 +54233,15 @@
           "suicides": 2,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "shazam",
+            "slot": 1,
+            "startMs": -10160,
+            "userId": 8
+          }
+        ],
         "team": "n n",
         "window": {
           "aliveMs": 545195,
@@ -54345,6 +54366,7 @@
             }
           }
         },
+        "identity": "s2u9",
         "name": "stepcop",
         "pickups": {
           "byKind": {
@@ -54421,6 +54443,15 @@
           "suicides": 3,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "stepcop",
+            "slot": 2,
+            "startMs": -10160,
+            "userId": 9
+          }
+        ],
         "team": "n n",
         "window": {
           "aliveMs": 540741,
@@ -54550,6 +54581,7 @@
             }
           }
         },
+        "identity": "s4u11",
         "name": "Milton",
         "pickups": {
           "byKind": {
@@ -54629,6 +54661,15 @@
           "suicides": 4,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "Milton",
+            "slot": 4,
+            "startMs": -10160,
+            "userId": 11
+          }
+        ],
         "team": "1",
         "window": {
           "aliveMs": 557404,
@@ -55069,7 +55110,7 @@
       }
     ]
   },
-  "schemaVersion": 64,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -79705,6 +79746,7 @@
             "v": 60
           }
         ],
+        "identity": "s0u14",
         "lg": [
           {
             "e": 6236,
@@ -83818,6 +83860,15 @@
             "s": 581334
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "squeeze",
+            "slot": 0,
+            "startMs": -10160,
+            "userId": 14
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -84142,6 +84193,7 @@
             "v": -10
           }
         ],
+        "identity": "s1u8",
         "lg": [
           {
             "e": 10298,
@@ -88335,6 +88387,15 @@
             "s": 597921
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "shazam",
+            "slot": 1,
+            "startMs": -10160,
+            "userId": 8
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -88909,6 +88970,7 @@
             "v": 100
           }
         ],
+        "identity": "s2u9",
         "lg": [
           {
             "e": 69455,
@@ -93346,6 +93408,15 @@
             "s": 594730
           }
         ],
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "stepcop",
+            "slot": 2,
+            "startMs": -10160,
+            "userId": 9
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -93841,6 +93912,7 @@
             "v": 24
           }
         ],
+        "identity": "s4u11",
         "lg": [
           {
             "e": 65123,
@@ -98420,6 +98492,15 @@
           {
             "e": 600050,
             "s": 581857
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 600050,
+            "name": "Milton",
+            "slot": 4,
+            "startMs": -10160,
+            "userId": 11
           }
         ],
         "sh": [

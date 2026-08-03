@@ -62,10 +62,18 @@ func (e *invalidFilterError) Is(target error) bool { return target == ErrInvalid
 // (mvd-analytics/analyzer/obituary.go obituaryWeapons + obituary_parse.go
 // suicide/kill/generic pattern tables), including the phrasing-only
 // "teamkill"/"unknown"/"suicide" causes.
+//
+// "drown" is an ACCEPTED ALIAS, not an emitted value: a drowning death is
+// "water" here and "drown" in damageWeaponVocab, the same event under two
+// spellings, and neither vocabulary used to admit the other's. Accepting both
+// on both sides is purely additive — no emitted token changes — and stops a
+// caller having to know which log backs the endpoint they are querying. The
+// matcher expands one to the other (view.weaponMatcher).
 var fragWeaponVocab = []string{
 	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "hook", "rail",
 	"tele", "stomp", "squish", "fall", "lava", "slime", "water", "world",
 	"unknown", "suicide", "teamkill",
+	"drown", // alias of "water"; never emitted
 }
 
 // damageWeaponVocab is every DamageEntry.Weapon the damage analyzer emits
@@ -73,10 +81,12 @@ var fragWeaponVocab = []string{
 // mvd-analytics/analyzer/damage.go), plus the pseudo-tokens "tele"/"stomp" that
 // select positional kills (telefrags/stomps carry no wire weapon; see
 // DamageOptions.Weapons).
+// "water" is an accepted alias of "drown" here — see fragWeaponVocab.
 var damageWeaponVocab = []string{
 	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "stomp", "tele",
 	"squish", "explobox", "unknown", "lava", "slime", "drown", "fall",
 	"trigger", "suicide",
+	"water", // alias of "drown"; never emitted
 }
 
 // backpackWeaponVocab is the RL/LG drop set
@@ -166,7 +176,7 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 		return nil, ErrUnavailable
 	}
 	players := toSet(opts.Players)
-	weapons := toLowerSet(opts.Weapons)
+	weapons := weaponFilterSet(opts.Weapons)
 	if len(players) == 0 && len(weapons) == 0 && opts.From == 0 && opts.To == 0 {
 		if opts.Summary {
 			// Shallow copy so we can drop the log without mutating the shared
@@ -211,6 +221,12 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 		TotalFrags: len(filtered),
 		ByWeapon:   map[string]int{},
 		ByPlayer:   map[string]*result.PlayerFrags{},
+		// The kill-attribution verdict is DEMO-GLOBAL (analyzer.killsMeasurable)
+		// and survives every filter: narrowing the log cannot make a demo's
+		// obituaries matchable or unmatchable. Recomputing it from the filtered
+		// log would say "unmeasured" for any filter that happens to match
+		// nothing, which is the opposite of what the flag means.
+		KillsMeasured: r.Frags.KillsMeasured,
 	}
 	get := func(name string) *result.PlayerFrags {
 		if len(players) > 0 && !players[name] {
@@ -333,7 +349,7 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	// with it. The view does NOT validate opts.Dmg (the REST layer does) —
 	// anything but "bounded"/"both" is the raw (v53) shape.
 	fam := strings.ToLower(strings.TrimSpace(opts.Dmg))
-	hasBounded := d.BoundedMode == "standard"
+	hasBounded := hasBoundedFamily(d)
 	if fam == "bounded" && !hasBounded {
 		return nil, ErrBoundedUnavailable
 	}
@@ -344,7 +360,7 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	wantBounded := hasBounded && (fam == "both" || fam == "bounded")
 
 	players := toSet(opts.Players)
-	weapons := toLowerSet(opts.Weapons)
+	weapons := weaponFilterSet(opts.Weapons)
 
 	// An explicit whole-match window is not a restrictive filter: from<=0 with
 	// to either unset or at/after a KNOWN match end selects every in-match hit,
@@ -516,40 +532,29 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	// numbers. Fold only when the bounded family exists: a skipped:* demo folds
 	// nothing (v53 exclusion semantics), matching the analyzer.
 	foldKill := func(k result.PositionalKill) {
-		// Mirror the analyzer's fold exactly: the raw family folds the kill's
-		// Damage (present only when it differs from Bounded — a stomp whose
-		// bounded arithmetic capped below the wire value), the bounded family
-		// folds Bounded. Telefrags fold the same number into both. A nil
-		// Bounded never reaches here (the fold is gated on hasBounded, and
-		// the analyzer sets it on every kill it folds).
-		b := 0
-		if k.Bounded != nil {
-			b = *k.Bounded
-		}
-		raw := k.Damage
-		if raw == 0 {
-			raw = b
-		}
+		raw, b := positionalKillValues(k)
 		if vp := getP(k.Victim); vp != nil {
 			vp.Taken += raw
 			if wantBounded {
 				vp.BoundedNest().Taken += b
 			}
 		}
-		if k.Attacker == "world" {
+		given := positionalKillGiven(k)
+		if given == foldGivenNobody {
 			return
 		}
+		// Only now, so a "world" attacker never materialises a ByPlayer entry.
 		ap := getP(k.Attacker)
 		if ap == nil {
 			return
 		}
-		switch {
-		case k.Attacker == k.Victim:
+		switch given {
+		case foldGivenSelf:
 			ap.GivenSelf += raw
 			if wantBounded {
 				ap.BoundedNest().GivenSelf += b
 			}
-		case k.IsTeam:
+		case foldGivenTeam:
 			ap.GivenTeam += raw
 			if wantBounded {
 				ap.BoundedNest().GivenTeam += b
@@ -1114,7 +1119,7 @@ func Backpacks(r *result.Result, opts BackpackOptions) ([]result.BackpackDrop, e
 		return out, nil
 	}
 	players := toSet(opts.Players)
-	weapons := toLowerSet(opts.Weapons)
+	weapons := weaponFilterSet(opts.Weapons)
 	startMs := opts.From
 	endMs := opts.To
 	for _, b := range r.Backpacks {
@@ -1155,7 +1160,7 @@ func WeaponPickups(r *result.Result, opts WeaponPickupOptions) ([]result.WeaponP
 		return out, nil
 	}
 	players := toSet(opts.Players)
-	weapons := toLowerSet(opts.Weapons)
+	weapons := weaponFilterSet(opts.Weapons)
 	source := strings.ToLower(strings.TrimSpace(opts.Source))
 	startMs := opts.From
 	endMs := opts.To
@@ -1219,6 +1224,67 @@ func Chat(r *result.Result, opts ChatOptions) []result.MatchEvent {
 	return out
 }
 
+// The telefrag/stomp fold, in one place.
+//
+// Positional kills carry no per-hit entry in DamageResult.Events — the wire
+// value is a 9999 sentinel, not a measurement — so every consumer that
+// re-aggregates damage from the hit log has to add them back or its totals will
+// not equal the stored ones. Damage's filtered recompute does; so does the
+// per-interval stats builder (interval_stats.go). Two implementations of the
+// same rule is how the two came to disagree, so the rule lives here.
+
+// hasBoundedFamily reports whether the analyzer reconstructed the bounded
+// damage family. It is read from BoundedMode — the field that NAMES the state
+// ("standard" vs "skipped:*") — rather than the Dmg echo.
+//
+// It is ALSO exactly the telefrag/stomp fold gate, and deliberately the same
+// predicate: the analyzer folds a positional kill's value into the raw and
+// bounded aggregates together (v53 exclusion semantics), so a skipped:* demo's
+// stored totals contain no fold and a re-aggregation must add none.
+func hasBoundedFamily(d *result.DamageResult) bool { return d.BoundedMode == "standard" }
+
+// positionalKillValues is the value one telefrag/stomp folds into each family.
+// The raw family folds the kill's Damage — present only when it differs from
+// Bounded, i.e. a stomp whose bounded arithmetic capped below the wire value —
+// and the bounded family folds Bounded; a telefrag folds the same number into
+// both. A nil Bounded only reaches here on a demo with no fold at all (the
+// callers gate on hasBoundedFamily, and the analyzer sets Bounded on every kill
+// it folds), where the zero is the correct no-op.
+func positionalKillValues(k result.PositionalKill) (raw, bounded int) {
+	if k.Bounded != nil {
+		bounded = *k.Bounded
+	}
+	raw = k.Damage
+	if raw == 0 {
+		raw = bounded
+	}
+	return raw, bounded
+}
+
+// Which GIVEN bucket a positional kill's value credits to its attacker. The
+// victim is always credited `taken`, whoever the attacker was.
+const (
+	foldGivenNobody = iota // "world" killed them; no player dealt it
+	foldGivenSelf
+	foldGivenTeam
+	foldGivenEnemy
+)
+
+// positionalKillGiven classifies the attacker side of a positional kill, the
+// same three-way split view.Damage applies to a hit.
+func positionalKillGiven(k result.PositionalKill) int {
+	switch {
+	case k.Attacker == "world":
+		return foldGivenNobody
+	case k.Attacker == k.Victim:
+		return foldGivenSelf
+	case k.IsTeam:
+		return foldGivenTeam
+	default:
+		return foldGivenEnemy
+	}
+}
+
 // toSet builds a case-sensitive lookup set, trimming and dropping empties.
 func toSet(vals []string) map[string]bool {
 	if len(vals) == 0 {
@@ -1233,17 +1299,86 @@ func toSet(vals []string) map[string]bool {
 	return s
 }
 
-// toLowerSet builds a case-insensitive lookup set (lowercased), trimming
-// and dropping empties.
-func toLowerSet(vals []string) map[string]bool {
+// normaliseTokens is the ONE canonical form for a case-insensitive filter
+// token: trimmed, lowercased, empties dropped. Every case-insensitive filter in
+// this package (weapon sets, the weapon matcher, the scoredBy echo) starts here
+// so they cannot disagree about what "  LG " means.
+func normaliseTokens(vals []string) []string {
 	if len(vals) == 0 {
 		return nil
 	}
-	s := make(map[string]bool, len(vals))
+	out := make([]string, 0, len(vals))
 	for _, v := range vals {
 		if v = strings.TrimSpace(strings.ToLower(v)); v != "" {
-			s[v] = true
+			out = append(out, v)
 		}
 	}
+	return out
+}
+
+// weaponAliases folds the one place the two logs disagree about the same
+// event: a drowning death is `water` in the frag log and `drown` in the damage
+// log. Both spellings are in both vocabularies (fragWeaponVocab /
+// damageWeaponVocab), so validation accepts either; this is what makes the
+// accepted token actually MATCH the emitted one.
+var weaponAliases = map[string]string{"water": "drown", "drown": "water"}
+
+// weaponFilterSet is toLowerSet plus that alias expansion, and it is the ONE
+// builder every weapons= filter in this package goes through — view.Frags,
+// view.Damage, view.Backpacks, view.WeaponPickups and the hot-window scoring
+// matcher (weaponMatcher).
+//
+// Incident (adversarial review, 2026-08-01): the alias tokens were added to the
+// vocabularies, which validate, while the expansion lived only in
+// weaponMatcher, which only collectScoreEvents uses. /frags?weapons=drown and
+// /damage?weapons=water therefore stopped 400-ing and started returning a
+// silent EMPTY 200 — precisely the failure the closed vocabulary exists to
+// prevent, for the two tokens a caller is most likely to guess wrong. Any
+// future alias must be added to weaponAliases and nowhere else.
+func weaponFilterSet(vals []string) map[string]bool {
+	toks := normaliseTokens(vals)
+	if len(toks) == 0 {
+		return nil
+	}
+	set := make(map[string]bool, len(toks)*2)
+	for _, t := range toks {
+		set[t] = true
+		if alias, ok := weaponAliases[t]; ok {
+			set[alias] = true
+		}
+	}
+	return set
+}
+
+// toLowerSet builds a case-insensitive lookup set (lowercased), trimming
+// and dropping empties.
+func toLowerSet(vals []string) map[string]bool {
+	toks := normaliseTokens(vals)
+	if len(toks) == 0 {
+		return nil
+	}
+	s := make(map[string]bool, len(toks))
+	for _, v := range toks {
+		s[v] = true
+	}
 	return s
+}
+
+// isGenericName matches the placeholder killers the obituary parser emits when
+// the wire names no one, mirroring the frag analyzer's own exclusion.
+func isGenericName(n string) bool {
+	switch strings.ToLower(n) {
+	case "", "world", "unknown", "someone":
+		return true
+	}
+	return false
+}
+
+// baseName strips the "#slot" suffix the analyzer adds for name collisions, so
+// a lookup keyed on the display name (team, KTX scoreboard) still resolves.
+func baseName(n string) string {
+	if i := strings.LastIndex(n, "#"); i >= 0 {
+		return n[:i]
+	}
+	return n
 }

@@ -173,3 +173,57 @@ func RegionControlAvailable(r *result.Result) error {
 	}
 	return nil
 }
+
+// HotWindowsAvailable reports whether the demo can answer a hot-windows query
+// for the given metric. Availability is PER-METRIC because the three source
+// streams are independently present: a non-KTX demo has a frag log but no
+// damage stream, so metric=frags works and metric=damageGiven does not.
+//
+// Note this is a source check only. Absent loc data does NOT make the endpoint
+// unavailable — the segmentation needs the event log alone, so a demo with no
+// position track simply omits the per-window locs.
+func HotWindowsAvailable(r *result.Result, metric string) error {
+	if r == nil {
+		return ErrUnavailable
+	}
+	m, ok := canonicalMetric(metric)
+	if !ok {
+		return ErrUnavailable
+	}
+	switch m {
+	case MetricShots, MetricHits:
+		if r.Shots == nil {
+			return ErrUnavailable
+		}
+	case MetricDamageGiven, MetricDamageTaken, MetricNetDamage:
+		if r.Damage == nil {
+			return ErrUnavailable
+		}
+	default:
+		if r.Frags == nil {
+			return ErrUnavailable
+		}
+	}
+	return nil
+}
+
+// LivesAvailable reports whether the demo carries the per-player streams lives
+// are segmented from, AND whether liveness was measurable on any of them.
+//
+// The second half is not pedantry. PlayerStream.Alive has three states — nil
+// "the match window was unknown, so liveness was not measurable", [] "measured,
+// and never alive", [...] "the lives" — and Lives emits no rows for either of
+// the first two. Serving `{"lives": []}` on a demo where liveness was never
+// measurable says "nobody ever lived", which is a different and false claim; a
+// 422 is the honest answer, and it is the same shape every other unavailable
+// capability uses. (measured.liveness carries the same fact on the responses
+// that do get served.)
+func LivesAvailable(r *result.Result) error {
+	if r == nil || r.Streams == nil || len(r.Streams.Players) == 0 {
+		return ErrUnavailable
+	}
+	if !livenessMeasured(r) {
+		return ErrUnavailable
+	}
+	return nil
+}

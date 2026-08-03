@@ -294,6 +294,32 @@ func TestFrags_UnfilteredReturnsStored(t *testing.T) {
 	}
 }
 
+// The kill-attribution verdict is DEMO-GLOBAL and survives every filter:
+// narrowing the log cannot make a demo's obituaries matchable or unmatchable.
+// Recomputing it from the filtered log would report "unmeasured" for any filter
+// that matched nothing, which is the opposite of what the flag means.
+func TestFrags_KillsMeasuredSurvivesFiltering(t *testing.T) {
+	for _, measured := range []bool{true, false} {
+		r := filterFixture()
+		r.Frags.KillsMeasured = measured
+		for _, opts := range []FragOptions{
+			{Players: []string{"alpha"}},
+			{Weapons: []string{"rl"}},
+			{From: 1, To: 2},
+			{Players: []string{"nobody at all"}},
+		} {
+			out, err := Frags(r, opts)
+			if err != nil {
+				t.Fatalf("%+v: %v", opts, err)
+			}
+			if out.KillsMeasured != measured {
+				t.Errorf("%+v: killsMeasured = %v, want the demo-global %v",
+					opts, out.KillsMeasured, measured)
+			}
+		}
+	}
+}
+
 func TestFrags_SummaryNoFilterKeepsStoredAggregates(t *testing.T) {
 	r := filterFixture()
 	out, err := Frags(r, FragOptions{Summary: true})

@@ -61018,6 +61018,7 @@
         "weapon": "rl"
       }
     ],
+    "killsMeasured": true,
     "totalFrags": 461
   },
   "items": {
@@ -91011,6 +91012,7 @@
             }
           }
         },
+        "identity": "s0u5",
         "name": "gore",
         "pickups": {
           "byKind": {
@@ -91077,6 +91079,15 @@
           "suicides": 0,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "gore",
+            "slot": 0,
+            "startMs": -10092,
+            "userId": 5
+          }
+        ],
         "team": "'\u003e\u003c\u003e",
         "window": {
           "aliveMs": 1132541,
@@ -91220,6 +91231,7 @@
             }
           }
         },
+        "identity": "s2u14",
         "name": "paniagua",
         "pickups": {
           "byKind": {
@@ -91294,6 +91306,15 @@
           "suicides": 0,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "paniagua",
+            "slot": 2,
+            "startMs": -10092,
+            "userId": 14
+          }
+        ],
         "team": "'tbg",
         "window": {
           "aliveMs": 1169334,
@@ -91425,6 +91446,7 @@
             }
           }
         },
+        "identity": "s3u8",
         "name": "ocoini",
         "pickups": {
           "byKind": {
@@ -91496,6 +91518,15 @@
           "suicides": 2,
           "teamKills": 0
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "ocoini",
+            "slot": 3,
+            "startMs": -10092,
+            "userId": 8
+          }
+        ],
         "team": "'\u003e\u003c\u003e",
         "window": {
           "aliveMs": 1127027,
@@ -91619,6 +91650,7 @@
             }
           }
         },
+        "identity": "s4u15",
         "name": "DobeZz",
         "pickups": {
           "byKind": {
@@ -91682,6 +91714,15 @@
           "suicides": 1,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "DobeZz",
+            "slot": 4,
+            "startMs": -10092,
+            "userId": 15
+          }
+        ],
         "team": "'\u003e\u003c\u003e",
         "window": {
           "aliveMs": 1136768,
@@ -91809,6 +91850,7 @@
             }
           }
         },
+        "identity": "s5u10",
         "name": "nexus",
         "pickups": {
           "byKind": {
@@ -91874,6 +91916,15 @@
           "suicides": 1,
           "teamKills": 8
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10092,
+            "userId": 10
+          }
+        ],
         "team": "'tbg",
         "window": {
           "aliveMs": 1170868,
@@ -92000,6 +92051,7 @@
             }
           }
         },
+        "identity": "s6u12",
         "name": "anni",
         "pickups": {
           "byKind": {
@@ -92067,6 +92119,15 @@
           "suicides": 1,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "anni",
+            "slot": 6,
+            "startMs": -10092,
+            "userId": 12
+          }
+        ],
         "team": "'\u003e\u003c\u003e",
         "window": {
           "aliveMs": 1144351,
@@ -92198,6 +92259,7 @@
             }
           }
         },
+        "identity": "s7u13",
         "name": ".N3ophyt3.",
         "pickups": {
           "byKind": {
@@ -92269,6 +92331,15 @@
           "suicides": 1,
           "teamKills": 4
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": ".N3ophyt3.",
+            "slot": 7,
+            "startMs": -10092,
+            "userId": 13
+          }
+        ],
         "team": "'tbg",
         "window": {
           "aliveMs": 1167500,
@@ -92399,6 +92470,7 @@
             }
           }
         },
+        "identity": "s8u16",
         "name": "biggz",
         "pickups": {
           "byKind": {
@@ -92470,6 +92542,15 @@
           "suicides": 1,
           "teamKills": 2
         },
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "biggz",
+            "slot": 8,
+            "startMs": -10092,
+            "userId": 16
+          }
+        ],
         "team": "'tbg",
         "window": {
           "aliveMs": 1151923,
@@ -92911,7 +92992,7 @@
       }
     ]
   },
-  "schemaVersion": 64,
+  "schemaVersion": 66,
   "shots": {
     "byPlayer": [
       {
@@ -138722,6 +138803,7 @@
             "v": 32
           }
         ],
+        "identity": "s0u5",
         "li": [
           {
             "t": 0,
@@ -149202,6 +149284,15 @@
             "s": 1187734
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "gore",
+            "slot": 0,
+            "startMs": -10092,
+            "userId": 5
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -149513,6 +149604,7 @@
             "v": 100
           }
         ],
+        "identity": "s2u14",
         "li": [
           {
             "t": 0,
@@ -160100,6 +160192,15 @@
             "s": 1146048
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "paniagua",
+            "slot": 2,
+            "startMs": -10092,
+            "userId": 14
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -160327,6 +160428,7 @@
             "v": 76
           }
         ],
+        "identity": "s3u8",
         "li": [
           {
             "t": 0,
@@ -171197,6 +171299,15 @@
             "s": 70247
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "ocoini",
+            "slot": 3,
+            "startMs": -10092,
+            "userId": 8
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -171434,6 +171545,7 @@
             "v": 100
           }
         ],
+        "identity": "s4u15",
         "li": [
           {
             "t": 0,
@@ -181265,6 +181377,15 @@
           }
         ],
         "rl": [],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "DobeZz",
+            "slot": 4,
+            "startMs": -10092,
+            "userId": 15
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -181585,6 +181706,7 @@
             "v": 100
           }
         ],
+        "identity": "s5u10",
         "li": [
           {
             "t": 0,
@@ -191674,6 +191796,15 @@
             "s": 61447
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "nexus",
+            "slot": 5,
+            "startMs": -10092,
+            "userId": 10
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -192013,6 +192144,7 @@
             "v": 100
           }
         ],
+        "identity": "s6u12",
         "li": [
           {
             "t": 0,
@@ -201941,6 +202073,15 @@
             "s": 1459
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "anni",
+            "slot": 6,
+            "startMs": -10092,
+            "userId": 12
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -202260,6 +202401,7 @@
             "v": 57
           }
         ],
+        "identity": "s7u13",
         "li": [
           {
             "t": 0,
@@ -211786,6 +211928,15 @@
             "s": 1877
           }
         ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": ".N3ophyt3.",
+            "slot": 7,
+            "startMs": -10092,
+            "userId": 13
+          }
+        ],
         "sh": [
           {
             "t": 0,
@@ -212102,6 +212253,7 @@
             "v": -41
           }
         ],
+        "identity": "s8u16",
         "li": [
           {
             "t": 0,
@@ -221906,6 +222058,15 @@
           {
             "e": 1200017,
             "s": 1026486
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 1200017,
+            "name": "biggz",
+            "slot": 8,
+            "startMs": -10092,
+            "userId": 16
           }
         ],
         "sh": [

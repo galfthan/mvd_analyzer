@@ -68,20 +68,12 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 		Duration:    endTime - startTime,
 	}
 
-	if userID, ok := a.playerUserIDs[slot]; ok {
-		event.PlayerUserID = userID
-	}
-
 	// Resolve the identity that held the slot when the powerup run began
 	// (startTime), so a quad/pent/ring run picked up before a reconnect
 	// is credited to the right player.
 	event.PlayerName, event.Team = a.resolveAt(slot, startTime)
 	event.Team = a.core.TeamFor(event.PlayerName, event.Team)
-	if event.PlayerUserID == 0 {
-		if player := a.ctx.Players[slot]; player != nil && player.UserID != 0 {
-			event.PlayerUserID = player.UserID
-		}
-	}
+	event.PlayerUserID = a.userIDAt(slot, startTime)
 
 	return event
 }
@@ -89,9 +81,8 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 // buildDemoMarkers resolves every collected `//demomark` bookmark to a
 // DemoMarkerEvent. Attribution mirrors createPowerupEvent: the marking
 // slot is resolved to name/team at the mark's demo time, the team stamped
-// through the born-correct duel rewrite (co.TeamFor), and the userid taken
-// from the timeline's first-valid table (falling back to the context
-// roster). A mark that was not slot-addressed (PlayerNum -1) carries no
+// through the born-correct duel rewrite (co.TeamFor), and the userid read
+// off the session that held the slot at that instant (userIDAt). A mark that was not slot-addressed (PlayerNum -1) carries no
 // attribution and is emitted with just its time and label. `/demomark` is
 // CF_BOTH in KTX (ktx/src/commands.c:1027) — spectators can mark too, and
 // their slot resolves like any client slot — so Spectator carries the
@@ -114,14 +105,7 @@ func (a *TimelineAnalyzer) buildDemoMarkers() []DemoMarkerEvent {
 		if m.PlayerNum >= 0 {
 			ev.PlayerName, ev.Team = a.resolveAt(m.PlayerNum, m.Time)
 			ev.Team = a.core.TeamFor(ev.PlayerName, ev.Team)
-			if userID, ok := a.playerUserIDs[m.PlayerNum]; ok {
-				ev.PlayerUserID = userID
-			}
-			if ev.PlayerUserID == 0 {
-				if player := a.ctx.Players[m.PlayerNum]; player != nil && player.UserID != 0 {
-					ev.PlayerUserID = player.UserID
-				}
-			}
+			ev.PlayerUserID = a.userIDAt(m.PlayerNum, m.Time)
 			if player := a.ctx.Players[m.PlayerNum]; player != nil {
 				ev.Spectator = player.Spectator
 			}

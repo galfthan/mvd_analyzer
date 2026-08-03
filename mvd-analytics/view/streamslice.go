@@ -88,6 +88,21 @@ type PlayerSlice struct {
 	// from result.PlayerStream — same JSON keys, same unit.
 	Spawns []int32 `json:"sp,omitempty"`
 	Deaths []int32 `json:"d,omitempty"`
+
+	// Alive is the stored liveness (result.PlayerStream.Alive) clipped to
+	// the window — the canonical lives list, NOT a re-derivation of the
+	// sp/d markers beside it (the strict `lastSpawn > lastDeath` form of
+	// that re-derivation latches on a same-millisecond death+respawn; see
+	// the field comment on result.PlayerStream.Alive).
+	//
+	// Not omitempty and not field-gated, both for the same reason: the
+	// three states are distinguished by null, so anything that could omit
+	// the key would make null mean "not requested" as well as "liveness
+	// was not measurable".
+	//   null   liveness was not measurable;
+	//   []     measured, and the player was never alive IN THIS WINDOW;
+	//   [...]  the lives, clamped to [Start, End).
+	Alive []result.Interval `json:"alive"`
 }
 
 // StreamSlice walks each player's streams and returns the entries
@@ -202,6 +217,7 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 		if requested[FieldVelocity] && p.Position != nil {
 			ps.Velocity = sliceVelocity(p.Position, start, end)
 		}
+		ps.Alive = sliceAlive(p.Alive, start, end)
 
 		out.Players = append(out.Players, ps)
 	}
@@ -313,6 +329,20 @@ func sliceInterval(stream []result.Interval, start, end int32) []result.Interval
 		return nil
 	}
 	return out
+}
+
+// sliceAlive clamps the stored lives to the window with sliceInterval, but
+// keeps the null/[] distinction result.PlayerStream.Alive documents: a
+// measured liveness whose clip leaves nothing is "never alive in this
+// window" ([]), which is not "liveness was not measurable" (null).
+func sliceAlive(alive []result.Interval, start, end int32) []result.Interval {
+	if alive == nil {
+		return nil
+	}
+	if out := sliceInterval(alive, start, end); out != nil {
+		return out
+	}
+	return []result.Interval{}
 }
 
 // sliceInts windows the int32-ms Spawns / Deaths streams; bounds are

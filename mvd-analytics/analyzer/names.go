@@ -13,6 +13,22 @@ import (
 // This is used wherever an MVD-stream name (which still has Q_normalizetext
 // folding, color codes, dots, brackets, etc.) needs to be matched against
 // another source of truth — most importantly the demoinfo JSON.
+//
+// Digits are kept deliberately. The cost is that mvdsv's duplicate-name
+// prefix survives the fold — "(1)rusti (FU)" normalizes to "1rustifu",
+// not "rustifu" — so a player who reconnects into a taken name and gets
+// renamed does NOT fold onto his base name, and the identity unifier's
+// name fallback sees two people. That is correct, and stripping the
+// prefix here is not the fix: mvdsv puts it on the wire before the
+// userinfo broadcast (sv_main.c:3686-3717 in SV_ExtractFromUserinfo),
+// KTX's ghost lookup is exact string equality and therefore declined to
+// merge the two connections at all (no stats restored, two demoinfo
+// scoreboard rows), so folding here would make our roster disagree with
+// the authoritative server record. It would also over-merge genuinely
+// distinct humans colliding on a common name ("player", "unnamed"),
+// which is the risk the demoinfo gate exists to avoid. The real defect
+// behind that report was a stale userid, fixed in the timeline
+// analyzer, not a naming question.
 func normalizePlayerName(name string) string {
 	var b strings.Builder
 	b.Grow(len(name))

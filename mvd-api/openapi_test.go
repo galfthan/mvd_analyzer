@@ -289,6 +289,21 @@ func TestOpenAPIEventTypesCurrent(t *testing.T) {
 	}
 }
 
+// TestOpenAPIHotWindowMetricsCurrent pins the /hot-windows metric= enum to
+// view.KnownHotWindowMetrics. The spec's marker comment CLAIMED this pin from
+// the day the endpoint landed and no test implemented it, so a new metric
+// would have been accepted by the handler (params.go builds its canon table
+// from the same slice) and invisible to every schema-driven client.
+func TestOpenAPIHotWindowMetricsCurrent(t *testing.T) {
+	want := append([]string{}, view.KnownHotWindowMetrics...)
+	got := markerBlock(t, "hot-window-metric-enum")
+	diffSets(t, "hot-window metric enum", got, want)
+	if t.Failed() {
+		t.Logf("expected hot-window-metric-enum block (view.KnownHotWindowMetrics order):\n          - %s",
+			strings.Join(want, "\n          - "))
+	}
+}
+
 // TestOpenAPIErrorCodesCurrent pins the ErrorCode enum to the writeError /
 // writeUnavailable call sites across the package (plus the eagerArtifacts
 // code table). Scanning source beats a canonical slice refactor: the codes

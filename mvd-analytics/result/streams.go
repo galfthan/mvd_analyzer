@@ -134,6 +134,46 @@ type PlayerStream struct {
 	Name string `json:"name"`
 	Team string `json:"team,omitempty"`
 
+	// Identity is the reconnect-unification key: two rows carrying the same
+	// value are the same human, however their names differ. It is what makes
+	// the split roster usable — mvdsv renames a player who reconnects while
+	// their old connection is still spawned (`(1)name`, sv_main.c:3686-3717)
+	// and KTX may decline to merge the two, which is faithful but leaves a
+	// consumer with two rows and no supported way to relate them.
+	//
+	// DEMO-LOCAL, and NOT a person: it is derived from the first session's
+	// slot and userid ("s9u12"), both of which describe a connection to one
+	// server. Do not persist it and do not compare it across demos — the
+	// cross-demo identity is the authenticated login (playerStats[].login).
+	// It is reproducible from these bytes but not promised across pipeline
+	// versions. See analyzer.identityKeys.
+	//
+	// Absent when the demo produced no identity table at all (a degraded
+	// parse, or a hand-built registry without the identity analyser).
+	Identity string `json:"identity,omitempty"`
+
+	// Sessions is every wire-slot occupancy this identity played, in time
+	// order: the answer to "which slot and userid was this row at time t",
+	// which is what a hub `track=` link or a live-roster join needs. One
+	// entry per connection — a player who times out and rejoins has two,
+	// with two userids.
+	//
+	// Two kinds of occupancy are deliberately withheld, because neither can
+	// answer that question: one the wire never gave a userid of its own (see
+	// PlayerSession.UserID), and one first attested at or after match end —
+	// a postgame connection, whose published window would close before it
+	// opened (see the EndMs rule) and which is not an in-match window to
+	// track anyway.
+	//
+	// Absent in two DIFFERENT states, which Identity tells apart:
+	//   Identity == ""  the demo produced no identity table at all (see
+	//                   Identity) — nothing was measured;
+	//   Identity != ""  the row HAS an identity and every occupancy behind
+	//                   it was withheld. A real, pinned state — the row is a
+	//                   person whose connections are simply not linkable —
+	//                   not a missing table.
+	Sessions []PlayerSession `json:"sessions,omitempty"`
+
 	// Position track at native rate. Always populated in-memory; whether
 	// it is serialised to JSON is controlled at marshal time (the CLI's
 	// -include positions flag and equivalent transports). Nil when the
@@ -252,6 +292,57 @@ type PlayerStream struct {
 	// is an occlusion-tolerant proximity/awareness signal. Raw transitions, no
 	// smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
+}
+
+// PlayerSession is one contiguous occupancy of a wire client slot by one
+// connection of a player (schema v66). It is the validity window of a
+// userid: `userId` is the value a hub `track=` link must carry to follow
+// this player between StartMs and EndMs, and only then — the same human
+// reconnecting draws a new one, and the slot they left hands its old one to
+// whoever takes it next.
+//
+// Times are match-relative ms like everything else in Streams, and StartMs is
+// NOT clamped: a connection that predates the countdown reports a negative
+// value (the same policy as timelineAnalysis.demoMarkers and
+// streams.global.pauses — the wire said it, so we say it).
+//
+// EndMs is the one bound that can be synthetic, in TWO cases, both reading
+// exactly matchEnd: a client still connected when the recording ended (no
+// wire event exists to report), and a drop broadcast that lands AFTER match
+// end (the event exists and is simply outside the window every other time
+// here lives on). So EndMs == matchEnd does not by itself mean "still
+// connected at the end" — read the drop from the events log if the
+// distinction matters.
+type PlayerSession struct {
+	// StartMs is the first userinfo that attested this connection. For the
+	// KTX ghost row — a scoreboard-only edict with userid 0 that the next
+	// real connection on the slot is folded into (ktx/src/g_utils.c:2272-2356)
+	// — that is the real connection's own userinfo, not the ghost's: a
+	// session never claims a window that starts before the connection it
+	// describes.
+	StartMs int32 `json:"startMs"`
+	// EndMs is the drop broadcast or the next connection's userinfo, else
+	// match end (see above). Half-open: [StartMs, EndMs).
+	EndMs int32 `json:"endMs"`
+	// Slot is the wire client slot (0-based), the index svc_* messages
+	// address this connection by.
+	Slot int `json:"slot"`
+	// UserID is the connection's userid, and is ALWAYS non-zero. An
+	// occupancy the wire never gave a userid of its own — an inferred
+	// occupancy, a userid-0 resend, KTX's ghost scoreboard row — is not a
+	// connection anyone can follow, so it is not published as a session at
+	// all rather than published with a 0 nobody can link with (the gate is
+	// in analyzer/timeline_streams.go, buildStreamsResult). The 0-as-gap
+	// value exists one layer down, on the internal analyzer.ResolvedSession
+	// this is projected from.
+	UserID int `json:"userId"`
+	// Name is the netname this connection carried, where the row's `name` is
+	// the identity's canonical one. They differ after a rename or an mvdsv
+	// `(N)` duplicate-name prefix; this is the one to match against a live
+	// engine roster at an instant inside the window. Normalized through the
+	// same Quake fold as every other name here (mvd-reader
+	// parser/userinfo.go qNormalizeTable), so it is not the raw wire bytes.
+	Name string `json:"name,omitempty"`
 }
 
 // PlayerStream carries its own gob codec for exactly one field: Alive.

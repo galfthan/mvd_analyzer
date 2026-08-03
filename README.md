@@ -47,7 +47,8 @@ grow on its own timeline. Today's concrete shape:
 - **Layer 2 (`mvd-analytics`)** is the only place that knows how to compute
   match summaries, frag streaks, timeline buckets, or loc-graphs. New
   analytics land here. The `view/` sub-package turns the canonical `Streams`
-  into bucketed timelines, event lists, point-in-time state, and loc trails.
+  into bucketed timelines, event lists, point-in-time state, loc trails, and
+  interval segmentations (best-scoring hot windows, per-life rollups).
   Analytics never peeks at MVD bytes; it consumes events.
 - **Layer 3 consumers** read `Result` or call `view/` and produce something
   user-facing. When hosted, the service presents **four surfaces** — REST,
@@ -159,10 +160,12 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Twenty-three tools — one for discovery, two for cache control + curated
+Twenty-six tools — one for discovery, two for cache control + curated
 summary, the high-level Result-section pass-throughs (KTX demoinfo,
-metadata, frags, damage, loc-graph, chat, backpacks, items, map entities,
-weapon-pickups), six for the view query layer, and two generic
+metadata, player-stats, frags, damage, aim, loc-graph, chat, backpacks,
+items, map entities, weapon-pickups, loc-table), eight for the view
+query layer,
+and two generic
 DAG-artifact tools (`listArtifacts` + `getArtifact`) that reach any
 servable artifact by name:
 
@@ -176,22 +179,26 @@ servable artifact by name:
 | **Result section pass-throughs** | |
 | `getDemoInfo(demoId)` | `mvd-api` `/demoinfo` (KTX scoreboard) |
 | `getMetadata(demoId)` | `mvd-api` `/metadata` (server cvars + match settings) |
+| `getPlayerStats(demoId, players, teams)` | `mvd-api` `/player-stats` (canonical per-player + per-team row) |
 | `getFrags(demoId, players, weapon)` | `mvd-api` `/frags` (aggregates + full kill log) |
 | `getDamage(demoId, players, weapon)` | `mvd-api` `/damage` (per-hit log + matrix + EWep buckets + scoreboard cross-check) |
+| `getAim(demoId, players, …)` | `mvd-api` `/aim` (crosshair error, LG ramp, rocket direct/splash) |
 | `getLocGraph(demoId)` | `mvd-api` `/loc-graph` (per-map loc adjacency) |
 | `getChat(demoId, players, from, to, types)` | `mvd-api` `/chat` |
 | `getBackpacks(demoId, players, weapon)` | `mvd-api` `/backpacks` |
 | `getItems(demoId, items, players, kinds)` | `mvd-api` `/items` |
-| `getMapEntities(demoId, types, kinds)` | `mvd-api` `/map-entities` (static map layout) |
-| `getMapEntitiesByMap(map, types, kinds)` | `mvd-api` `/v1/maps/{map}/entities` |
+| `getMapEntitiesByMap(map, types, kinds)` | `mvd-api` `/v1/maps/{map}/entities` (static map layout) |
 | `getWeaponPickups(demoId, players, weapon, source)` | `mvd-api` `/weapon-pickups` |
+| `getLocTable(demoId)` | `mvd-api` `/loc-table` (decoder for `loc=index`) |
 | **View queries** | |
 | `getBuckets(demoId, windowMs, fields, reducers, layout, …)` | `mvd-api` `/buckets` (default column-major; `layout=row` for the per-bucket shape) |
 | `getEvents(demoId, types, …)` | `mvd-api` `/events` |
 | `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
 | `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
-| `getRegionControl(demoId, windowMs)` | `mvd-api` `/region-control` |
+| `getRegionControl(demoId, windowMs, regions, …)` | `mvd-api` `/region-control` |
+| `getHotWindows(demoId, metric, windowMs, limit, perPlayer, …)` | `mvd-api` `/hot-windows` (each player's best fixed-length stretches, ranked) |
+| `getLives(demoId, players, minMs, …)` | `mvd-api` `/lives` (one row per spawn-to-death life) |
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
 | `getArtifact(demoId, name)` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` (any servable artifact by name) |
@@ -207,7 +214,7 @@ servable artifact by name:
 - **[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md)**
   — view types (`BucketsView` / `ColumnarBuckets`, `EventsView`,
   `StreamSliceView`, `StateAtView`, `LocTrailsView`,
-  `RegionControlResult`), the
+  `RegionControlResult`, `HotWindowsView`, `LivesView`), the
   field-code vocabulary, the reducer registry, and the underlying
   `Result` / `Streams` types. View outputs are the same whether
   reached via WASM, the CLI, or MCP. The view layer is the
@@ -473,7 +480,21 @@ keeps the schema consistent and sensible to extend. As of schema v57
 `view.Events`, `view.StreamSlice`, `view.StateAt`) also takes and emits
 **int32 milliseconds** at its public surface — no seconds anywhere,
 inputs or outputs, so REST/MCP `from`/`to`/`time` params and every
-response time field are int32 ms alike. Schema v9 adds visibility-aware loc
+response time field are int32 ms alike. Schema v65 adds two **interval
+segmentations** to that same view layer:
+`hot-windows` (each player's best fixed-length stretches, ranked by a
+caller-chosen summable metric) and `lives` (one row per spawn-to-death
+run, cut at the v64 `streams.players[].alive` boundaries). They share one
+per-interval stats block and one envelope `measured` marker — every
+numeric stat is emitted including a measured zero, so measuredness is
+read from that marker and never from a field's absence — and a player's
+lives partition the match, so unfiltered per-life sums reconcile exactly
+with `frags.frags[]` on the frag side and with `/damage`'s non-summary
+aggregate on the damage side — not necessarily with the `byPlayer`
+scoreboards, which count deaths no log row recorded. `Result` itself gains exactly one field in v65,
+`frags.killsMeasured`: the demo-global verdict on whether kill
+attribution was observable at all, which the `measured` marker's `frags`
+flag republishes rather than re-deriving. Schema v9 adds visibility-aware loc
 attribution: when a per-map BSP is available, the analyzer rejects
 candidate loc-points that fall outside the player's potentially-
 visible-set (PVS), eliminating brief "wall-bleed" phantom loc visits
@@ -611,7 +632,9 @@ proximity/awareness signal. Both are surfaced through the REST/MCP
 `/los` endpoint, the CLI, and the web map overlay.
 
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
-observable change to the analysis output — additive ones included — so it is
+observable change to the analysis output — additive ones included, and
+largely view-only ones such as v65, whose two interval segmentations add
+no `Result` field at all — so it is
 a regeneration counter and cache key, not a break signal. Consumers can pin
 or feature-detect by reading `result.schemaVersion`. The full per-field
 reference and the complete version-history table live in

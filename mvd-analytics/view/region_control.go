@@ -137,13 +137,7 @@ func RegionControl(r *result.Result, opts RegionControlOptions) (*result.RegionC
 	teamOf := opts.TeamOf
 	if teamOf == nil {
 		nameToTeam := defaultNameToTeam(r)
-		teamOf = func(name string) string {
-			base := name
-			if idx := strings.LastIndex(name, "#"); idx >= 0 {
-				base = name[:idx]
-			}
-			return nameToTeam[base]
-		}
+		teamOf = func(name string) string { return nameToTeam[baseName(name)] }
 	}
 
 	// 4. Window resolution + optional sub-window.

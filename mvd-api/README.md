@@ -235,8 +235,8 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapons`, `source`, `from`, `to` | `{timeUnit, pickups: []result.WeaponPickup}` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |
 | GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types`, `loc` | `view.EventsView` |
-| GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields`, `loc` | `view.StreamSliceView` |
-| GET | `/v1/demos/{id}/state-at` | `time` (required), `players`, `fields`, `loc` | `view.StateAtView` |
+| GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields`, `loc` | `view.StreamSliceView` — plus a never-omitted, never-field-gated `alive` per player: the stored lives clamped to the window (`null` / `[]` / `[…]`) |
+| GET | `/v1/demos/{id}/state-at` | `time` (required), `players`, `fields`, `loc` | `view.StateAtView` — plus `alive` (`true`/`false`/`null`) and `posAgeMs` (age of the snapped position sample) on every row |
 | GET | `/v1/demos/{id}/los` | — | `{ "players": [{ "name", "los":[{ "other", "intervals":[{ "s","e" }] }] }] }` — line of sight, **computed lazily on first request** (BSP-backed maps only) |
 | GET | `/v1/demos/{id}/streams/projectiles` | — | `{ "projectiles": ProjectileStreams\|null }` — rocket/grenade flights, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/beams` | — | `{ "beams": BeamStreams\|null }` — LG bolts, from the always-full base parse |
@@ -245,6 +245,8 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions` | `result.RegionControlResult` |
 | GET | `/v1/demos/{id}/airgibs` | — | `{timeUnit, airgibs: []result.AirgibEvent}` (Key Moments: direct rocket hits on airborne victims, height-sorted; empty without the map BSP) |
+| GET | `/v1/demos/{id}/hot-windows` | `metric`, `windowMs`, `limit`, `perPlayer`, `players`, `weapons`, `from`, `to`, `dmg`, `minScore` | `view.HotWindowsView` — each player's best fixed-length stretches, ranked by a summable metric (`frags`/`deaths`/`netFrags`/`damageGiven`/`damageTaken`/`netDamage`/`shots`/`hits`); one flat list, `scoredBy` on the envelope, `limit` and `perPlayer` share one rule — default on omit, negative = uncapped, explicit `0` a 400 (`limit` also caps at 200); `windowMs` is bounded to `[1, match duration]` |
+| GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/hot-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
 | GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
