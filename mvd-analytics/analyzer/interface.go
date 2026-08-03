@@ -195,6 +195,8 @@ type (
 	LocEdge                = result.LocEdge
 	LocEdgeWeights         = result.LocEdgeWeights
 	Interval               = result.Interval
+	PlayerStream           = result.PlayerStream
+	PositionTrack          = result.PositionTrack
 	ItemsResult            = result.ItemsResult
 	ItemTimeline           = result.ItemTimeline
 	ItemPhase              = result.ItemPhase

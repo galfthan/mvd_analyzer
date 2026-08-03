@@ -212,7 +212,15 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 		t.Fatalf("totals A=%v B=%v want %v each", A.Total, B.Total, 2*D)
 	}
 
-	// Armed: both A samples, but only the first B sample (ms 100).
+	// Posture is integrated at INTERVAL boundaries, not snapped to sample
+	// instants: a pickup landing between two samples splits the interval
+	// exactly. The player occupies A over [0,100) and B over [100,200) (the
+	// last sample at 150 is held for one more 50 ms cadence).
+	//
+	// Armed = RL [0,101): all of A, and exactly 1 ms of B. The pre-v64
+	// per-sample walk credited B the whole 50 ms sample at ms 100, because it
+	// asked "was he armed at t=100?" and charged the answer to the sample's
+	// entire forward gap.
 	if A.Armed == nil || A.Armed.Total != 2*D {
 		t.Errorf("A.Armed = %+v, want total %v", A.Armed, 2*D)
 	} else {
@@ -223,33 +231,34 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 			t.Errorf("A.Armed.ByTeam[red] = %v, want %v", A.Armed.ByTeam["red"], 2*D)
 		}
 	}
-	if B.Armed == nil || B.Armed.Total != 1*D {
-		t.Errorf("B.Armed = %+v, want total %v", B.Armed, 1*D)
+	if B.Armed == nil || B.Armed.Total != 1 {
+		t.Errorf("B.Armed = %+v, want total 1 (RL ends at 101, B starts at 100)", B.Armed)
 	}
 
-	// Quad: only the B sample at ms 150 — A never had quad, so it stays nil.
+	// Quad [140,1000) ∩ B [100,200) = 60 ms. A never had quad, so it stays nil.
 	if A.Quad != nil {
 		t.Errorf("A.Quad = %+v, want nil", A.Quad)
 	}
-	if B.Quad == nil || B.Quad.Total != 1*D {
-		t.Errorf("B.Quad = %+v, want total %v", B.Quad, 1*D)
+	if B.Quad == nil || B.Quad.Total != 60 {
+		t.Errorf("B.Quad = %+v, want total 60", B.Quad)
 	}
 
-	// Pent: only the first A sample (ms 0) — B never had pent.
-	if A.Pent == nil || A.Pent.Total != 1*D {
-		t.Errorf("A.Pent = %+v, want total %v", A.Pent, 1*D)
+	// Pent [0,40) ∩ A [0,100) = 40 ms — the interval, not the 50 ms sample
+	// that contains it. B never had pent.
+	if A.Pent == nil || A.Pent.Total != 40 {
+		t.Errorf("A.Pent = %+v, want total 40", A.Pent)
 	}
 	if B.Pent != nil {
 		t.Errorf("B.Pent = %+v, want nil", B.Pent)
 	}
 
-	// Unarmed is the complement of Armed: only the ms-150 B sample lacked
-	// RL/LG, so A (both samples armed) has no Unarmed and B has one sample.
+	// Unarmed is the exact complement of Armed within each loc: B is armed for
+	// [100,101) and unarmed for [101,200).
 	if A.Unarmed != nil {
 		t.Errorf("A.Unarmed = %+v, want nil", A.Unarmed)
 	}
-	if B.Unarmed == nil || B.Unarmed.Total != 1*D {
-		t.Errorf("B.Unarmed = %+v, want total %v", B.Unarmed, 1*D)
+	if B.Unarmed == nil || B.Unarmed.Total != 99 {
+		t.Errorf("B.Unarmed = %+v, want total 99", B.Unarmed)
 	}
 	// Armed + Unarmed time must reconstitute each loc's total.
 	var armedB int32

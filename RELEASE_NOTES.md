@@ -5,6 +5,210 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (alive-gated-occupancy) — loc/region occupancy stops counting corpses, schema v64
+
+**A correctness fix.** Values move in `locGraph`,
+`timelineAnalysis.regionControl` and `/loc-trails`; no existing field
+changed shape or name, and no meaning is *replaced* — occupancy fields are
+narrowed to the semantics they were always meant to carry ("time spent in a
+loc" is now documented as "**alive, observed** time spent"), which is
+exactly the correctness-fix case the compatibility policy keeps in `/v1`.
+If you have pinned these numbers, expect them to fall.
+
+- **Dead players were being counted as present — and usually as *armed*.**
+  They keep streaming position at full rate (`mvdsv/src/sv_demo.c:1481-1519`
+  writes `svc_playerinfo` for every `cs_spawned` client), and on a gib the
+  player entity *itself* becomes the bouncing head
+  (`ktx/src/player.c:1070` `ThrowHead`), so a corpse's travels were tallied
+  as loc time, as region control, and as movement edges. RL/LG
+  possession spans death (`StatItems` bits clear only at respawn), so the
+  corpse counted as armed. `regionControl`'s own comment claimed `Li==0`
+  marked dead players; it never did. Expect region percentages and `byPlayer`
+  ms to drop by roughly (deaths × death-to-respawn time) per player.
+- **New `streams.players[].alive`** — each player's lives as half-open
+  intervals, the one canonical "was this player alive at t", derived from the
+  fused spawn/death markers. Deaths come from three detectors, and the
+  obituary path (`mvd-reader/parser/stats.go` `forceEmitDeath`) exists
+  precisely because the other two miss deaths, so liveness is derived from the
+  markers rather than from any single wire flag. Not `omitempty`: `null` /
+  `[]` / `[…]` are three distinct measuredness states.
+- **`locGraph` node time is now an exact time-weighted integral**, replacing a
+  forward difference clamped to 50 ms. Posture splits at interval boundaries
+  instead of snapping to sample instants, so an RL pickup landing between two
+  samples divides the interval exactly. The clamp itself was near-inert
+  (measured 0–96 ms lost per 60 s), so the corpse exclusion is what actually
+  moves the numbers.
+- **LOS and aim now read `alive` instead of re-deriving liveness — fixing a
+  latching bug.** `analyzer.losAliveAt` and `aimcore.aimAliveAt` were
+  byte-identical copies of the rule *"alive iff the most recent spawn is
+  STRICTLY later than the most recent death"*. That rule latches: when a death
+  and the respawn it triggers share a millisecond the two are equal, so it
+  reports dead — and keeps reporting dead until some later spawn arrives, i.e.
+  for the whole remaining life, not for an instant. Measured across the cached
+  corpus: 100.7 s of one player's 1143.7 s match (8.8%), 46.9 s of another's,
+  4.3 s and 3.4 s elsewhere; 16 of 20 demos were unaffected. `losAliveAt` is
+  deleted outright; `aimAliveAt` survives by name only — it is now a
+  three-line binary search over `PlayerStream.Alive`.
+  Visible effect: on `4on4_jah_ahoy_170526_defer_reconnect`, `biggz`'s
+  crosshair error improves on every affected sample — 117.6° → 3.7°,
+  64.6° → 13.3°, 63.9° → 35.1° — with the sample count unchanged. He was
+  aiming at `[nW].Veggie`, who had been wrongly dead since 349400 ms, so those
+  shots were being attributed to whatever distant player remained. A
+  117-degree "aim error" was never real.
+  `view.playerActiveInWindow` is deliberately NOT migrated: it asks whether a
+  player appears anywhere in a bucket window, which is a different question,
+  and it already resolves the tie correctly.
+- **`/loc-trails` is gated too.** A residence is dwell, i.e. presence, so it
+  now truncates at a death and resumes at the respawn. Without this the same
+  corpse travels loc-graph excludes would still have shown up as dwell and the
+  two endpoints would have answered the same question differently.
+- **`region-control`'s `bucketStates` strings change as well**, not just the
+  stats block: both walkers share one classification point, so a bucket in
+  which every present player is dead now reads `_` (empty) instead of
+  controlled or contested. The web Region Control timeline shifts accordingly.
+- **Sample-and-hold is now bounded, which the deleted 50 ms clamp had really
+  been doing.** A position sample's evidence expires after 250 ms
+  (`result.SampleStaleCapMs`); beyond that the player's location is unknown and
+  credited to nobody. This is inert on server-recorded demos (the worst gap
+  anywhere in the golden corpus is 74 ms) and decisive on **POV recordings**,
+  where only players inside the recorder's PVS get `svc_playerinfo`: on one such
+  demo the recorder had a 152 ms worst gap while the other seven players had
+  gaps up to **73 seconds**, and holding across them credited ~92% of a player's
+  loc time to wherever they were standing when they left view. `regionControl`
+  had this defect too, since v59.
+- **Both walks now end at a player's end-of-track** (`result.TrackHoldEnd`: the
+  last position sample held for one measured cadence, capped at 250 ms), so an
+  early quitter no longer holds their final loc and region through to match
+  end. This was the sharper half of the bug: region control evaluates each
+  interval at its LEFT endpoint, so a departed player's final sample credited
+  them everything up to the next event — on a recording that ends before the
+  match window, the entire remaining match (measured: 60 s of phantom presence
+  for a player who left after 2 s).
+- **`streams.players[].alive` is a truthful LIFE list.** The underlying
+  derivation starts everyone alive at `t=0` (deliberately — KTX emits a first
+  spawn only on the first respawn), which is right for a player present from
+  the start and wrong for everyone else, so it is clipped at the ends to
+  observed presence; a late joiner would otherwise claim to have been alive
+  before connecting. `playerStats` never saw this because it intersects with
+  its own presence window.
+  Two boundary rules matter for anyone reading it as lives: a **death splits a
+  life even when the respawn lands on the same millisecond** (the intervals
+  touch, so no dead time is invented, but the boundary survives — the ordinary
+  interval algebra would have merged them and erased the death), and a **hole
+  in the track does not split** one, because an unobserved stretch is not a
+  death. Refusing to credit unobserved time is the walkers' job, not this
+  field's. A reconnect gap inside a merged stream is still not represented.
+- **The loc-graph teleport threshold is scaled by the real inter-sample
+  delta** instead of an assumed 50 ms. The MVD sample rate is *not* fixed:
+  mvdsv gates demo frames on `sv_demofps` (default 30,
+  `mvdsv/src/sv_send.c:1339-1346`), and measured across the golden corpus the
+  cadence is bimodal — ~13–16 ms on servers at full tick, ~34–39 ms on servers
+  at the default. The docs' "~13 ms, virtually all gaps under 25 ms" was wrong
+  for a third of the corpus and is corrected.
+- **`/loc-trails` no longer re-merges dead gaps at `minDwellMs > 0`.** The
+  short-dwell fold ran after the alive gate and welded residences back
+  together across the gaps the gate had just cut, so at the MCP default
+  `minDwellMs=250` a player alive in one loc 0–30 s but dead 10–20 s came
+  back as a single 30 s residence — every default MCP caller was getting
+  dead time re-credited as dwell, and only `minDwellMs=0` callers saw the
+  documented behaviour. The merge is now gap-aware, and a residence that
+  *follows* a gap is kept even when it is shorter than `minDwellMs`
+  (folding it anywhere would hand the removed time back). Dwell totals on
+  default `/loc-trails` and `getLocTrails` calls fall accordingly.
+- **Spawn and death markers now count as presence evidence for `alive`.**
+  The life list was clipped to the position track alone, but obituaries are
+  broadcast to every recorder while `svc_playerinfo` is not: on a POV
+  recording a player who left the recorder's PVS had their track stop and
+  their later, marker-proven deaths fall *outside* every life (track to
+  10 s, death at 63 s → `alive: [{0,10010}]`), which a consumer reading
+  lives interprets as the player having left the game — dropping every
+  later life. `presenceBounds` now widens the clip with marker evidence,
+  and the ends stay deliberately asymmetric (a *death* before the track
+  drops the low clip, a *spawn* before it does not, since a join proves
+  nothing earlier). The high end distinguishes the two marker kinds: a
+  trailing **death** extends the clip exactly to it (a death ends its life,
+  so nothing after it is claimed), while a trailing **spawn** extends it to
+  the end of the alive window — clipping at the spawn made the life it
+  starts `[spawn, spawn)`, zero-width, and deleted it outright, so a
+  respawned player's frags landed on a life the same response said had
+  already ended. A truncated track past a trailing spawn is the same
+  evidential state as having no track at all, and now degrades the same
+  way. Server recordings have no track truncation, so goldens are
+  unchanged.
+- **`locGraph` edges are no longer recorded across unobserved holes.** The
+  edge walk had no stale-gap reset: past `locgraphTeleportMaxGapMs` it
+  skipped only the teleport *classification* and recorded the edge anyway,
+  minting a `kind:"normal"` adjacency between the locs bracketing a PVS
+  hole — worse than the old fixed-bound code, which at least branded such
+  jumps `teleport`, so a consumer filtering teleports out kept exactly the
+  invented ones. The cursor now resets past `result.SampleStaleCapMs`, the
+  same bound the node walk credits time under. Edge counts drop on POV
+  demos; inert on server recordings (worst corpus gap 74 ms, goldens
+  unchanged).
+- **`alive`'s three states now survive the API's demo cache.** `gob` omits
+  zero-valued fields and a length-0 slice is zero, so
+  `alive: []` (measured, never alive) decoded as `null` (not measurable) —
+  and every consumer degrades `null` to ungated, so mvd-api's tier-2 cache
+  answered liveness queries for such a player as if they were alive
+  throughout, disagreeing with a cold parse of the same demo. `PlayerStream`
+  now carries its own gob codec with an explicit measuredness flag. The JSON
+  contract is byte-identical and goldens are unchanged; the wire change
+  rides the v64-keyed cache tree, so no deployed cache holds old-format
+  bytes (a stale local dev cache fails decode and falls back to
+  re-analysis).
+- **`result.TrackHoldEnd` is total.** It read the final sample before its
+  length guard, so the exported policy function panicked on an empty track.
+  It now returns 0 — no sample, no evidence, nothing to hold. Defensive:
+  all five in-repo callers pre-check, so no served value changes.
+- Sibling to the **v59** region-stats fix, which removed the same
+  grid-versus-integral defect from region control and concluded it existed
+  nowhere else. Loc-graph was missed. A new reconciliation test now pins loc
+  totals to region totals so the two cannot drift apart again, and a
+  25-mutation pass over this work added pins for four behaviours the whole
+  suite (goldens included) had left unguarded: region control's stale cap,
+  the LOS alive gates, the reconcile identity's unpaired-player direction,
+  and `aimcore`'s liveness measuredness states.
+
+## unreleased (api-stability-policy) — the compatibility promise, written down
+
+Documentation only: no schema change, no code change, no served number or
+response shape changed.
+
+- **The API's compatibility policy is now stated where consumers can read
+  it.** [`mvd-api/API.md` §2.7](mvd-api/API.md) is the canonical text, with a
+  self-contained copy in the OpenAPI `info.description` (so it is served at
+  `/docs` to integrators who cannot follow repo paths) and a short version on
+  the Discord key portal's landing page.
+- **The policy**: `/v1` grows additively — new endpoints, fields and enum
+  members appear without announcement. A genuine break ships as
+  `/v2/<endpoint>` served **alongside** `/v1` rather than replacing it, and
+  old routes retire on a minimum of **8 weeks' notice**, in practice only
+  once measured usage has drained. Clients must ignore unknown fields and
+  enum values, and treat `openapi.yaml` as the contract.
+- **A correctness fix is explicitly not a break.** When a field's value
+  changes because it was being computed wrongly, the name and type are
+  unchanged and the documented meaning is not replaced — at most narrowed
+  to the semantics the field was always meant to have, with the docs
+  updated to say so (v64: loc/region "time spent" → "**alive, observed**
+  time spent"). Such changes stay in `/v1`, ride `schemaVersion`, and are
+  called out here with the direction and rough magnitude.
+- **Changing a parameter's default *value* is a break** and goes through
+  `/v2` — a caller who omits the parameter would otherwise get different
+  numbers without opting in. Widening a default *set* stays additive (see
+  below): the caller keeps everything they had and receives more.
+- **The MCP tool surface is covered by the same policy.** `mvd-mcp` and
+  `mvd-api` deploy in lockstep, so tool names, parameters and result
+  semantics move only under this process; new tools, parameters and result
+  fields appear additively.
+- **What the contract does *not* cover** is now written down: undocumented
+  ordering, rounding of derived floats, `omitempty` behaviour, rate-limit
+  thresholds, and which demos return `422 <section>_unavailable`. Adding a
+  member to a *default* set (e.g. the v58 `demomark` event type) counts as
+  additive even though it changes the rows a caller receives.
+- Fixes the previous §2.7, which described `/v1` as a prefix that would be
+  *bumped* on a break (implying replacement), and the stale
+  "currently `38`" schema-version claim in the top-level README.
+
 ## unreleased (info-links) — API & MCP discoverability, admin contact
 
 No schema change; no served number changed.

@@ -14939,26 +14939,26 @@
         "armed": {
           "byPlayer": {
             "mj": 2,
-            "speedball": 13
+            "speedball": 12
           },
           "byTeam": {
             "mj": 2,
-            "speedball": 13
+            "speedball": 12
           },
-          "total": 15
+          "total": 14
         },
         "byPlayer": {
           "mj": 2,
-          "speedball": 13
+          "speedball": 12
         },
         "byTeam": {
           "mj": 2,
-          "speedball": 13
+          "speedball": 12
         },
         "from": "LG",
         "kind": "normal",
         "to": "RA",
-        "total": 15
+        "total": 14
       },
       {
         "armed": {
@@ -14999,52 +14999,52 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 4,
+            "mj": 3,
             "speedball": 3
           },
           "byTeam": {
-            "mj": 4,
+            "mj": 3,
             "speedball": 3
           },
-          "total": 7
+          "total": 6
         },
         "byPlayer": {
-          "mj": 4,
+          "mj": 3,
           "speedball": 3
         },
         "byTeam": {
-          "mj": 4,
+          "mj": 3,
           "speedball": 3
         },
         "from": "LG",
         "kind": "normal",
         "to": "high LG packs",
-        "total": 7
+        "total": 6
       },
       {
         "armed": {
           "byPlayer": {
-            "mj": 8,
+            "mj": 7,
             "speedball": 14
           },
           "byTeam": {
-            "mj": 8,
+            "mj": 7,
             "speedball": 14
           },
-          "total": 22
+          "total": 21
         },
         "byPlayer": {
-          "mj": 11,
+          "mj": 10,
           "speedball": 16
         },
         "byTeam": {
-          "mj": 11,
+          "mj": 10,
           "speedball": 16
         },
         "from": "LG",
         "kind": "normal",
         "to": "low RL",
-        "total": 27,
+        "total": 26,
         "unarmed": {
           "byPlayer": {
             "mj": 3,
@@ -15738,27 +15738,27 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 7,
+            "mj": 6,
             "speedball": 16
           },
           "byTeam": {
-            "mj": 7,
+            "mj": 6,
             "speedball": 16
           },
-          "total": 23
+          "total": 22
         },
         "byPlayer": {
-          "mj": 12,
+          "mj": 11,
           "speedball": 16
         },
         "byTeam": {
-          "mj": 12,
+          "mj": 11,
           "speedball": 16
         },
         "from": "high LG packs",
         "kind": "normal",
         "to": "SNG",
-        "total": 28,
+        "total": 27,
         "unarmed": {
           "byPlayer": {
             "mj": 5
@@ -15939,25 +15939,25 @@
           "total": 18
         },
         "byPlayer": {
-          "mj": 15,
+          "mj": 14,
           "speedball": 12
         },
         "byTeam": {
-          "mj": 15,
+          "mj": 14,
           "speedball": 12
         },
         "from": "lava",
         "kind": "normal",
         "to": "YA",
-        "total": 27,
+        "total": 26,
         "unarmed": {
           "byPlayer": {
-            "mj": 9
+            "mj": 8
           },
           "byTeam": {
-            "mj": 9
+            "mj": 8
           },
-          "total": 9
+          "total": 8
         }
       },
       {
@@ -16072,27 +16072,27 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 6,
+            "mj": 5,
             "speedball": 8
           },
           "byTeam": {
-            "mj": 6,
+            "mj": 5,
             "speedball": 8
           },
-          "total": 14
+          "total": 13
         },
         "byPlayer": {
-          "mj": 7,
+          "mj": 6,
           "speedball": 8
         },
         "byTeam": {
-          "mj": 7,
+          "mj": 6,
           "speedball": 8
         },
         "from": "low RL",
         "kind": "normal",
         "to": "high LG packs",
-        "total": 15,
+        "total": 14,
         "unarmed": {
           "byPlayer": {
             "mj": 1
@@ -16108,25 +16108,25 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 19617,
+            "mj": 18623,
             "speedball": 25379
           },
           "byTeam": {
-            "mj": 19617,
+            "mj": 18623,
             "speedball": 25379
           },
-          "total": 44996
+          "total": 44002
         },
         "byPlayer": {
-          "mj": 28874,
+          "mj": 27880,
           "speedball": 26399
         },
         "byTeam": {
-          "mj": 28874,
+          "mj": 27880,
           "speedball": 26399
         },
         "name": "GA",
-        "total": 55273,
+        "total": 54279,
         "unarmed": {
           "byPlayer": {
             "mj": 9257,
@@ -16145,35 +16145,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 84210,
-            "speedball": 95439
+            "mj": 76800,
+            "speedball": 93783
           },
           "byTeam": {
-            "mj": 84210,
-            "speedball": 95439
+            "mj": 76800,
+            "speedball": 93783
           },
-          "total": 179649
+          "total": 170583
         },
         "byPlayer": {
-          "mj": 119750,
-          "speedball": 109822
+          "mj": 108726,
+          "speedball": 108166
         },
         "byTeam": {
-          "mj": 119750,
-          "speedball": 109822
+          "mj": 108726,
+          "speedball": 108166
         },
         "name": "GL",
-        "total": 229572,
+        "total": 216892,
         "unarmed": {
           "byPlayer": {
-            "mj": 35540,
+            "mj": 31926,
             "speedball": 14383
           },
           "byTeam": {
-            "mj": 35540,
+            "mj": 31926,
             "speedball": 14383
           },
-          "total": 49923
+          "total": 46309
         },
         "x": -176.5,
         "y": 288.125,
@@ -16182,25 +16182,25 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 24349,
-            "speedball": 31744
+            "mj": 20991,
+            "speedball": 31615
           },
           "byTeam": {
-            "mj": 24349,
-            "speedball": 31744
+            "mj": 20991,
+            "speedball": 31615
           },
-          "total": 56093
+          "total": 52606
         },
         "byPlayer": {
-          "mj": 27907,
-          "speedball": 34306
+          "mj": 24549,
+          "speedball": 34177
         },
         "byTeam": {
-          "mj": 27907,
-          "speedball": 34306
+          "mj": 24549,
+          "speedball": 34177
         },
         "name": "LG",
-        "total": 62213,
+        "total": 58726,
         "unarmed": {
           "byPlayer": {
             "mj": 3558,
@@ -16220,24 +16220,24 @@
         "armed": {
           "byPlayer": {
             "mj": 3382,
-            "speedball": 24026
+            "speedball": 23075
           },
           "byTeam": {
             "mj": 3382,
-            "speedball": 24026
+            "speedball": 23075
           },
-          "total": 27408
+          "total": 26457
         },
         "byPlayer": {
           "mj": 3382,
-          "speedball": 24026
+          "speedball": 23075
         },
         "byTeam": {
           "mj": 3382,
-          "speedball": 24026
+          "speedball": 23075
         },
         "name": "MH",
-        "total": 27408,
+        "total": 26457,
         "x": -484.5,
         "y": -105.5,
         "z": 104
@@ -16280,25 +16280,25 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 21574,
-            "speedball": 45287
+            "mj": 18787,
+            "speedball": 44099
           },
           "byTeam": {
-            "mj": 21574,
-            "speedball": 45287
+            "mj": 18787,
+            "speedball": 44099
           },
-          "total": 66861
+          "total": 62886
         },
         "byPlayer": {
-          "mj": 21574,
-          "speedball": 45287
+          "mj": 18787,
+          "speedball": 44099
         },
         "byTeam": {
-          "mj": 21574,
-          "speedball": 45287
+          "mj": 18787,
+          "speedball": 44099
         },
         "name": "RA",
-        "total": 66861,
+        "total": 62886,
         "x": -302.875,
         "y": 1201.875,
         "z": 152
@@ -16306,35 +16306,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 74538,
+            "mj": 68839,
             "speedball": 38966
           },
           "byTeam": {
-            "mj": 74538,
+            "mj": 68839,
             "speedball": 38966
           },
-          "total": 113504
+          "total": 107805
         },
         "byPlayer": {
-          "mj": 89922,
+          "mj": 83292,
           "speedball": 41098
         },
         "byTeam": {
-          "mj": 89922,
+          "mj": 83292,
           "speedball": 41098
         },
         "name": "RL",
-        "total": 131020,
+        "total": 124390,
         "unarmed": {
           "byPlayer": {
-            "mj": 15384,
+            "mj": 14453,
             "speedball": 2132
           },
           "byTeam": {
-            "mj": 15384,
+            "mj": 14453,
             "speedball": 2132
           },
-          "total": 17516
+          "total": 16585
         },
         "x": 564.25,
         "y": -55.75,
@@ -16343,35 +16343,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 26464,
+            "mj": 23673,
             "speedball": 74065
           },
           "byTeam": {
-            "mj": 26464,
+            "mj": 23673,
             "speedball": 74065
           },
-          "total": 100529
+          "total": 97738
         },
         "byPlayer": {
-          "mj": 34057,
+          "mj": 30390,
           "speedball": 76224
         },
         "byTeam": {
-          "mj": 34057,
+          "mj": 30390,
           "speedball": 76224
         },
         "name": "SNG",
-        "total": 110281,
+        "total": 106614,
         "unarmed": {
           "byPlayer": {
-            "mj": 7593,
+            "mj": 6717,
             "speedball": 2159
           },
           "byTeam": {
-            "mj": 7593,
+            "mj": 6717,
             "speedball": 2159
           },
-          "total": 9752
+          "total": 8876
         },
         "x": 1.5,
         "y": 448.5,
@@ -16380,35 +16380,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 40401,
-            "speedball": 55713
+            "mj": 37135,
+            "speedball": 55415
           },
           "byTeam": {
-            "mj": 40401,
-            "speedball": 55713
+            "mj": 37135,
+            "speedball": 55415
           },
-          "total": 96114
+          "total": 92550
         },
         "byPlayer": {
-          "mj": 78765,
-          "speedball": 57661
+          "mj": 72372,
+          "speedball": 57363
         },
         "byTeam": {
-          "mj": 78765,
-          "speedball": 57661
+          "mj": 72372,
+          "speedball": 57363
         },
         "name": "YA",
-        "total": 136426,
+        "total": 129735,
         "unarmed": {
           "byPlayer": {
-            "mj": 38364,
+            "mj": 35237,
             "speedball": 1948
           },
           "byTeam": {
-            "mj": 38364,
+            "mj": 35237,
             "speedball": 1948
           },
-          "total": 40312
+          "total": 37185
         },
         "x": 960.875,
         "y": 441.125,
@@ -16417,35 +16417,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 57642,
+            "mj": 51686,
             "speedball": 72386
           },
           "byTeam": {
-            "mj": 57642,
+            "mj": 51686,
             "speedball": 72386
           },
-          "total": 130028
+          "total": 124072
         },
         "byPlayer": {
-          "mj": 81691,
+          "mj": 73988,
           "speedball": 75674
         },
         "byTeam": {
-          "mj": 81691,
+          "mj": 73988,
           "speedball": 75674
         },
         "name": "high LG packs",
-        "total": 157365,
+        "total": 149662,
         "unarmed": {
           "byPlayer": {
-            "mj": 24049,
+            "mj": 22302,
             "speedball": 3288
           },
           "byTeam": {
-            "mj": 24049,
+            "mj": 22302,
             "speedball": 3288
           },
-          "total": 27337
+          "total": 25590
         },
         "x": 273.25,
         "y": 520.5,
@@ -16454,35 +16454,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 9673,
+            "mj": 8751,
             "speedball": 15718
           },
           "byTeam": {
-            "mj": 9673,
+            "mj": 8751,
             "speedball": 15718
           },
-          "total": 25391
+          "total": 24469
         },
         "byPlayer": {
-          "mj": 23584,
+          "mj": 22224,
           "speedball": 16482
         },
         "byTeam": {
-          "mj": 23584,
+          "mj": 22224,
           "speedball": 16482
         },
         "name": "lava",
-        "total": 40066,
+        "total": 38706,
         "unarmed": {
           "byPlayer": {
-            "mj": 13911,
+            "mj": 13473,
             "speedball": 764
           },
           "byTeam": {
-            "mj": 13911,
+            "mj": 13473,
             "speedball": 764
           },
-          "total": 14675
+          "total": 14237
         },
         "x": 736.875,
         "y": 88,
@@ -16491,35 +16491,35 @@
       {
         "armed": {
           "byPlayer": {
-            "mj": 70904,
-            "speedball": 86059
+            "mj": 63572,
+            "speedball": 85104
           },
           "byTeam": {
-            "mj": 70904,
-            "speedball": 86059
+            "mj": 63572,
+            "speedball": 85104
           },
-          "total": 156963
+          "total": 148676
         },
         "byPlayer": {
-          "mj": 80631,
-          "speedball": 89785
+          "mj": 72390,
+          "speedball": 88830
         },
         "byTeam": {
-          "mj": 80631,
-          "speedball": 89785
+          "mj": 72390,
+          "speedball": 88830
         },
         "name": "low RL",
-        "total": 170416,
+        "total": 161220,
         "unarmed": {
           "byPlayer": {
-            "mj": 9727,
+            "mj": 8818,
             "speedball": 3726
           },
           "byTeam": {
-            "mj": 9727,
+            "mj": 8818,
             "speedball": 3726
           },
-          "total": 13453
+          "total": 12544
         },
         "x": -45.875,
         "y": 1000.125,
@@ -18157,7 +18157,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 63,
+  "schemaVersion": 64,
   "shots": {
     "byPlayer": [
       {
@@ -30605,6 +30605,24 @@
             "v": 116
           }
         ],
+        "alive": [
+          {
+            "e": 7641,
+            "s": 0
+          },
+          {
+            "e": 35533,
+            "s": 8473
+          },
+          {
+            "e": 261292,
+            "s": 46474
+          },
+          {
+            "e": 600001,
+            "s": 575153
+          }
+        ],
         "at": [
           {
             "t": 0,
@@ -33086,6 +33104,36 @@
           {
             "t": 586261,
             "v": 0
+          }
+        ],
+        "alive": [
+          {
+            "e": 41740,
+            "s": 0
+          },
+          {
+            "e": 65500,
+            "s": 51499
+          },
+          {
+            "e": 68131,
+            "s": 66416
+          },
+          {
+            "e": 78027,
+            "s": 68975
+          },
+          {
+            "e": 585322,
+            "s": 574793
+          },
+          {
+            "e": 592958,
+            "s": 586261
+          },
+          {
+            "e": 600001,
+            "s": 594040
           }
         ],
         "at": [
@@ -36738,11 +36786,11 @@
     },
     "regionControl": {
       "bucketStates": {
-        "LG": "______________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________aaaaaaaaaaaa__________________________________________________________________________________________________________________aaaaaAAAAAAAAAAAAAAAAA____________________________________________BBBBBBBBBB_AAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBB_______________________________________________aaaaAAAAAAAAAAAAAAAAA____________________________________________________bbbbBBBBBBBBBBBBBBBBBBBBB____________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa________________________________BBBBBBBBBBBBB_______________AAAAAA___________________________bbbbBBBBBBBCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________BBBBBBBBBB____________________AAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb______________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBB______________________________________________________________bbbBBBBBBBBBBBBBBBBBBB_________________________bbbbb______________________________________________AAAAAAA___________AAAAAAAAA_________________________________________________________________________________________________AAAAAAA________________________________________AAAAAAAAAAAAAAAAAA__________________________________________AAAAAAAAA_________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAA____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___BBBBBBBB____________________________________________AAAAAAACCCCBBBBBBBBBBBBBB______________________________________________________AAAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____AAAAAAAAA______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________AAAAAAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBB_________________________________________________________________AAAAAAAAAAAAAAAAA_______________________________AAAAAAAAAAAA_________________________________________________________________________AAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAA________________________________________________________________________________________________________AAAAAAAA______________________________________________BBBBBBBBB___________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb___________________________________bbbbBBBBBBBBBBBBBBBB_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCBBBBBBBBBBBBBBBB___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________AAAAAAAAAAAAAAAA___bbbbBBBBBBBBBBB____________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAA____________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbb_____________________________________________________________________________________AAAAAAACCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA__________________________________________________________________________________________________________AAAAAAAAAAA___________________________________________________________________________________________________________aaaaaaaaAAAAAAAAAAACCCCCCCCCC___________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________BBBBBBBBBBBBBBBBBBBBBB______________BBBBBBBBBBBBBCCCCCCCCCCAAAAA_________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________bbbbb__________AAAAAAAAA_____________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________AAAAAAAAAAAAA___________________________________________________BBBBBBBBBBBBBBBBCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBB_________BCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________bbbbbbbbbbbbbb____________AAAAAAAAAAAA___________________________________________________________________________AAAAAAAAAAAAAA_______________________________________________________BBBBBBBCCCCCCCCCCCAAAAAAAAAAAAAAAAAA______________BBBBBBBBBBBBB_____________________________AAAAACCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________AAAAAAAAA________________________________________________________________________________________________________AAAAAAAAAAAAAAA_____________________BBBBBBBBBBBBBBBBBB_______________________bbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_________________________________________________________________________________________________________AAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________BBBBBB_____________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAA________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________BBBBBBB__________________________________________bbbbBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAA________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________AAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________BBBBBBBBBBBBBB________BBBBBBBBBBBBBBBBBBBBBBBBBBB________________AAAAAAAA_____________________________________bbbbbbbbbbbbbbbbbbbbbbbb__________AAAAAAAAAAAAAA___________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________BBBBBBBBBBBBB_________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAA________________AAAAAAA___________________BBBBBBBB________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________bbbbbbbbbbBBBBBBBB________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAA_____________________________________________________AAAAAAAAAAAAAAAAAAAA____________aaaaBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaa______________________________________________________________________________________BBBBBBBBBBBBBBB__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBB________________________________AAAAAAAAAACCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________AAAAAA__________________________________________AAAAAAAAAAAAA_____________________________________________________________________________bbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________AAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAA_______________________________________________________________________bbbbbbbbbb___________AAAAAAAA______________bbbbbbbbbbbbbbbb_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAA__________________________AAAAAAAAAAAAAAAA__________________________________________________AAAAAAAA_________________________________________________________________________________________________________________________________________________________bbbbBBBBBBBBBCCCCCCCAA_________________________________BBBBBBBBBBBBBBBBBBBBB_____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________AAAAAAAAA__________________________BBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________bbbbbbbbbbbbbbbbbAAAAAAAAAAAAAbbb_______________________________________________________________________________________________________________bbbbbbbb__________AAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbb__________________AAAAAAAAAAAAA_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "LG": "______________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________aaaaaaaaaaaa__________________________________________________________________________________________________________________aaaaaAAAAAAAAAAAAAAAAA____________________________________________BBBBBBBBBB_AAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBB_______________________________________________aaaaAAAAAAAAAAAAAAAAA____________________________________________________bbbbBBBBBBBBBBBBBBBBBBBBB____________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa________________________________BBBBBBBBBBBBB_______________AAAAAA___________________________bbbbBBBBBBBCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________BBBBBBBBBB____________________AAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBB______________________________________________________________bbbBBBBBBBBBBBBBBBBBBB_________________________bbbbb______________________________________________AAAAAAA___________AAAAAAAAA_________________________________________________________________________________________________AAAAAAA________________________________________AAAAAAAAAAAAAAAAAA__________________________________________AAAAAAAAA_________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAA____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___BBBBBBBB____________________________________________AAAAAAACCCCBBBBBBBBBBBBBB______________________________________________________AAAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____AAAAAAAAA______________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________________AAAAAAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBB_________________________________________________________________AAAAAAAAAAAAAAAAA_______________________________AAAAAAAAAAAA_________________________________________________________________________AAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________AAAAAAAAAAAAA________________________________________________________________________________________________________AAAAAAAA______________________________________________BBBBBBBBB___________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbb_____________________________________________________bbbbBBBBBBBBBBBBBBBB_________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCBBBBBBBBBBBBBBBB___________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________AAAAAAAAAAAAAAAA___bbbbBBBBBBBBBBB____________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAA____________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbb_____________________________________________________________________________________AAAAAAACCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA__________________________________________________________________________________________________________AAAAAAAAAAA___________________________________________________________________________________________________________aaaaaaaaAAAAAAAAAAACCCCCCCCCC___________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____________BBBBBBBBBBBBBBBBBBBBBB______________BBBBBBBBBBBBBCCCCCCCCCCAAAAA_________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbb_______________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________bbbbb__________AAAAAAAAA_____________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________AAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________AAAAAAAAAAAAA___________________________________________________BBBBBBBBBBBBBBBBCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBBB_________BCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________bbbbbbbbbbbbbb____________AAAAAAAAAAAA___________________________________________________________________________AAAAAAAAAAAAAA_______________________________________________________BBBBBBBCCCCCCCCCCCAAAAAAAAAAAAAAAAAA______________BBBBBBBBBBBBB_____________________________AAAAACCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBB_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________AAAAAAAAA________________________________________________________________________________________________________AAAAAAAAAAAAAAA______________________________________________________________bbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_____________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb_________________________________________________________________________________________________________AAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________BBBBBB_____________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAA________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________bbbbBBBBBBCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAA________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbb________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________AAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________BBBBBBBBBBBBBB________BBBBBBBB___________________________________AAAAAAAA_____________________________________bbbbbbbbbbbbbbbbbbbbbbbb__________AAAAAAAAAAAAAA___________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________BBBBBBBBBBBBB_________________________________________________________BBBBBBBB_________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAA________________AAAAAAA___________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________bbbbbbbbbbBBBBBBBB________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAA_____________________________________________________AAAAAAAAAAAAAAAAAA______________aaaaBBBBBBBBBBBBBBBaaaaaaaaaaaaaaaa______________________________________________________________________________________BBBBBBBBBBBBBBB__________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBB________________________________AAAAAAAAAACCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________AAAAAA__________________________________________AAAAAAAAAAAAA_____________________________________________________________________________bbbbbBBBBBBBBBBB_____________________________AAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAA_______________________________________________________________________bbbbbbbbbb___________AAAAAAAA______________bbbbbbbbbbbbbbbb_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAA__________________________AAAAAAAAAAAAAAAA__________________________________________________AAAAAAAA_________________________________________________________________________________________________________________________________________________________bbbbBBBBBBBBBCCCCCCCAA_________________________________BBBBBBBBBBBBBBBBBBBBB_____________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________AAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________AAAAAAAAA__________________________BBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________bbbbbbbbbbbbbbbbbAAAAAAAAAAAAAbbb_______________________________________________________________________________________________________________bbbbbbbb__________AAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________aaaaAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbb__________________AAAAAAAAAAAAA_______________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB",
         "QUAD": "____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbb____________________________________________________________________________________________BBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________bbbbbb______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbb_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbb_______________________________________________________________________________________________________BBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAA____________________________________________________BBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbb_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbb__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbb__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbb__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBB____________AAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
-        "RA": "________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________AAAAAAAAAAAAAAAAAAAA___________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAA_________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________AAAAAAAA_______AAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________BBBBBBBBBBB______________________________BBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBB___AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAA__________________________BBBBBBBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAA__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
-        "RL": "__________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________AAAAAAAAAAAAAA________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBBBBCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________BBBBBBBBBBBBB____________________________________________AAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBB______________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____AAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBB_____________________________BBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBB____________BBBBBB________________________________________bbbbbbbbbbbbbBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCBBBBBBBBBBBB_____________BBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________BBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBB_________________________________________BBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___AAAAAAAAAAAACCCCCCCCCCCCBBBBBBBBBBBBBBBBBBB____AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbBBBBBBBBBBBBB____________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBCCCAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________",
-        "low.RL": "aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAA__________________AAAAAAA_______________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCBBBBBBBBBCCCCCCCCCCCAAAAAAAAA_____________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________AAAAAAAAA________AAAAAAA___________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________BBBBBBBB_____________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_________BBBBBBBBBBBBBB____________________________AAAAAAAAA_________________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA______________________________________________________________bbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAA______________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________AAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________bbbbbbbbbbbbbbbBBBBCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbb______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAbbbbBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaBBBBBaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________BBBBBBBBBBBBBBBBB___________AAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________BBBBBBBBBBB_________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAA__________________________________________________________________________AAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "RA": "________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAA_________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________AAAAAAAA_______AAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________BBBBBBBBBBB______________________________BBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBB______BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAA__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAA______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+        "RL": "__________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________AAAAAAAAAAAAAA________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________BBBBBBBBBBB__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________BBBBBBBBBBBBB____________________________________________AAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAACCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________AAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________bbbbbbbBBBBBBBBBBBBB______________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB____AAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBB_____________________________BBBBBBBBBBBBB_____________AAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBB____________BBBBBB________________________________________bbbbbbbbbbbbbBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCBBBBBBBBBBBB_____________BBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________BBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________bbbbbbBBBBBBBBBBBBBBB_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBB_________________________________________BBBBBBBBBBBBBBBBBBBBBB____________________________________________________________________________________________aaaaaaaAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbb______________AAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___AAAAAAAAAAAACCCCCCCCCCCC_______________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB_________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________",
+        "low.RL": "aaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB______________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________aaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAA__________________AAAAAAA_______________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCBB_______AAAAAAAAAAAAAAAAAAAA_____________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________AAAAAAAAA________AAAAAAA___________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA__________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAA___BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_________BBBBBBBBBBBBBB____________________________AAAAAAAAA_________________________________________________________________________________________________bbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB_____________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA______________________________________________________________bbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA_________________________________________________AAAAAAAAAAAAAA______________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________AAAAAAA_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA______________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_________________________bbbbbbbbbbbbbbbB___AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCAAAAAAAAAAAA__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAA___________bbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCBBBBBBBCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAbbbbBB_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaBBBBBaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA________AAAAAAAAA_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB___________________________________________________________________________________________________________________________________________________________________________AAAAAAAAAAAAAAAAAAAAAAAAAA___________________________________________________________________________________________BBBBBBBBBBB_________________________________________________________________________________________________________________________________________bbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_______________________________________________________________________________________________________AAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCC_____________________________________________________________________________________________AAAAAAAAAAAAAAAAA___________________________________________________________________________________________________________________________________BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB________________________________________________________________________________________________________________________________________________________________________bbbbbbbbbBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       },
       "regions": [
         {
@@ -36837,22 +36885,22 @@
         "LG": {
           "byPlayer": {
             "mj": {
-              "armed": 81954,
+              "armed": 72677,
               "team": "mj",
-              "unarmed": 27607
+              "unarmed": 25860
             },
             "speedball": {
-              "armed": 104130,
+              "armed": 104001,
               "team": "speedball",
               "unarmed": 5850
             }
           },
-          "contested": 1.7,
-          "empty": 66,
-          "teamAControl": 15.7,
+          "contested": 1.5,
+          "empty": 67.7,
+          "teamAControl": 15.9,
           "teamAWeakControl": 0.8,
-          "teamBControl": 12,
-          "teamBWeakControl": 3.9,
+          "teamBControl": 10.6,
+          "teamBWeakControl": 3.6,
           "weakContested": 0
         },
         "QUAD": {
@@ -36879,30 +36927,30 @@
         "RA": {
           "byPlayer": {
             "mj": {
-              "armed": 21574,
+              "armed": 18787,
               "team": "mj",
               "unarmed": 0
             },
             "speedball": {
-              "armed": 45287,
+              "armed": 44099,
               "team": "speedball",
               "unarmed": 0
             }
           },
           "contested": 0,
-          "empty": 88.9,
-          "teamAControl": 7.5,
+          "empty": 89.5,
+          "teamAControl": 7.3,
           "teamAWeakControl": 0,
-          "teamBControl": 3.6,
+          "teamBControl": 3.1,
           "teamBWeakControl": 0,
           "weakContested": 0
         },
         "RL": {
           "byPlayer": {
             "mj": {
-              "armed": 74538,
+              "armed": 68839,
               "team": "mj",
-              "unarmed": 15384
+              "unarmed": 14453
             },
             "speedball": {
               "armed": 38966,
@@ -36910,32 +36958,32 @@
               "unarmed": 2132
             }
           },
-          "contested": 0.9,
-          "empty": 79.2,
-          "teamAControl": 5.6,
+          "contested": 0.7,
+          "empty": 80,
+          "teamAControl": 5.8,
           "teamAWeakControl": 0.4,
-          "teamBControl": 11.5,
-          "teamBWeakControl": 2.4,
+          "teamBControl": 10.8,
+          "teamBWeakControl": 2.3,
           "weakContested": 0
         },
         "low.RL": {
           "byPlayer": {
             "mj": {
-              "armed": 70904,
+              "armed": 63572,
               "team": "mj",
-              "unarmed": 9727
+              "unarmed": 8818
             },
             "speedball": {
-              "armed": 86022,
+              "armed": 85104,
               "team": "speedball",
               "unarmed": 3726
             }
           },
-          "contested": 2.1,
-          "empty": 74.4,
-          "teamAControl": 12.3,
+          "contested": 1.3,
+          "empty": 75,
+          "teamAControl": 12.9,
           "teamAWeakControl": 0.5,
-          "teamBControl": 9.8,
+          "teamBControl": 9.3,
           "teamBWeakControl": 1,
           "weakContested": 0
         }

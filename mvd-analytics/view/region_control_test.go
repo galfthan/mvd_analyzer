@@ -20,15 +20,24 @@ import (
 // [60000,61000) presence via the sample times themselves, so a 1000 ms
 // armed presence is attributed regardless of windowMs.
 func makeRegionResult() *result.Result {
+	// Sampled at a realistic native cadence (13 ms) through the contested
+	// stretch. A three-sample track with 60 s and 1 s gaps would be indistinct
+	// from a recording that simply stopped: since v64 a sample's evidence
+	// expires after result.SampleStaleCapMs, so unobserved time is credited to
+	// nobody, and the fixture has to actually observe the window it asserts on.
 	mkPlayer := func(name, team string) result.PlayerStream {
+		pt := &result.PositionTrack{T: []int32{0}, Li: []int16{2}} // spawn
+		for t := int32(60000); t < 61000; t += 13 {                // in "mid"
+			pt.T = append(pt.T, t)
+			pt.Li = append(pt.Li, 1)
+		}
+		pt.T = append(pt.T, 61000) // back to spawn
+		pt.Li = append(pt.Li, 2)
 		return result.PlayerStream{
-			Name: name,
-			Team: team,
-			Position: &result.PositionTrack{
-				T:  []int32{0, 60000, 61000},
-				Li: []int16{2, 1, 2},
-			},
-			RL: []result.Interval{{Start: 59000, End: 62000}},
+			Name:     name,
+			Team:     team,
+			Position: pt,
+			RL:       []result.Interval{{Start: 59000, End: 62000}},
 		}
 	}
 	return &result.Result{

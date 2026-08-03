@@ -15,7 +15,8 @@
 Reconstructs per-player state at native event rate into
 `result.Streams` — sparse change streams (health, armor, armor type,
 loc, ammo) + interval lists (weapons, powerups) + a columnar position
-track at the demo's native sampling cadence (~77 Hz). All higher-order
+track at the demo's native sampling cadence (server-configured via
+sv_demofps; see MVD_FORMAT.md). All higher-order
 analyses (frag streaks, region control, powerup events) are computed
 during finalize from this storage. Bucketed views are no longer baked
 at parse time; `mvd-analytics/view.Buckets` produces them on demand at
@@ -69,13 +70,27 @@ The analyser is split across several files:
    `Registry.SetRegionsOverride` can replace them at runtime.
 7. **Region control** (`view.RegionControl` in
    [`../view/region_control.go`](../view/region_control.go)):
-   walks each player's `PositionTrack` natively. For each bucket
-   window, sample the player's Li at `bucketStart` (carry-forward
-   from the latest position sample) and the armed state via the
-   RL/LG interval streams. Classify each bucket into one of seven
-   states (empty, teamA[Weak]Control, teamB[Weak]Control,
-   contested, weakContested). Output is per-region `bucketStates`
-   (one ASCII char per bucket) + match-aggregate `stats`. Region
+   walks each player's `PositionTrack` natively, through **two**
+   walks that share one classification point (`playerCursor.sampleAt`)
+   so they cannot disagree:
+   - `bucketStates` is the display walk: sample each player's Li at
+     `bucketStart` (carry-forward from the latest position sample)
+     and the armed state via the RL/LG interval streams, then classify
+     the bucket into one of seven states (empty,
+     teamA[Weak]Control, teamB[Weak]Control, contested,
+     weakContested). One ASCII char per bucket per region.
+   - `stats` is the exact walk (since v59): the match aggregate is a
+     time-weighted **integral** over the union of every player's
+     position sample times, their RL/LG armed boundaries and their
+     `alive` life boundaries — no grid, so it does not move with the
+     caller's `windowMs`.
+
+   Both walks apply the same three v64 bounds: a player is skipped
+   while **dead** (`PlayerStream.Alive`, the canonical lives — liveness
+   is not inferable from the samples, a corpse keeps streaming
+   position), while their last sample is more than
+   `result.SampleStaleCapMs` (250 ms) **stale**, and once past their
+   `result.TrackHoldEnd` **end-of-track**. Region
    definitions and team labels come from `TimelineAnalysisResult.
    RegionControl` (populated by analyzer Finalize); `BucketStates`
    and `Stats` are filled by the `regionControlPost` post-processor
@@ -136,9 +151,11 @@ authoritative table. Summary:
 
 ## Reference
 
-- Native position sampling cadence is the QW server tick rate
-  (typically ~77 Hz, ~13 ms between samples; varies with
-  `sv_demoPings` and per-player update rate).
+- Native position sampling cadence is set by the SERVER's `sv_demofps`
+  (default 30), quantised up to the server tick — not the tick rate
+  itself. Measured across the golden corpus it is bimodal: ~13-16 ms on
+  servers at full tick, ~34-39 ms on servers at the default. Never assume
+  a fixed interval; read it off the track.
 - Region / loc heuristics: see `mvd-analytics/loc/data/*.loc`.
   Auto-detect keywords live in `timeline_regions.go`; per-map
   region overrides ship as JSON in

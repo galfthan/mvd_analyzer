@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -37,16 +38,20 @@ func TestLosTargets(t *testing.T) {
 	}
 }
 
-func TestLosAliveAt(t *testing.T) {
+// LOS liveness now comes from PlayerStream.Alive via makeAliveGate, not from
+// a local re-derivation. These are the cases the removed losAliveAt covered,
+// re-pointed at the path LOS actually takes — plus the case that motivated
+// removing it.
+func TestLosLivenessFromAlive(t *testing.T) {
 	// Realistic KTX ordering: the match-start spawn is NOT recorded, so the
 	// first event is a death; each recorded spawn is a respawn that follows it.
-	deaths := []int32{300, 700}
-	spawns := []int32{450, 900}
+	alive := aliveOfMarkers(t, []int32{450, 900}, []int32{300, 700}, 2000)
+	gate := makeAliveGate(alive)
 	cases := []struct {
 		t    int32
 		want bool
 	}{
-		{50, true},   // before first death → alive since match start (no spawn recorded yet)
+		{50, true},   // before first death → alive since match start
 		{200, true},  // still pre-first-death → alive
 		{300, false}, // at first death → dead
 		{400, false}, // dead between death and respawn
@@ -57,21 +62,53 @@ func TestLosAliveAt(t *testing.T) {
 		{900, true},  // second respawn
 	}
 	for _, c := range cases {
-		if got := losAliveAt(spawns, deaths, c.t); got != c.want {
-			t.Errorf("losAliveAt(t=%d) = %v, want %v", c.t, got, c.want)
+		if got := gate(c.t); got != c.want {
+			t.Errorf("alive at t=%d = %v, want %v (alive=%v)", c.t, got, c.want, alive)
 		}
 	}
+
 	// No spawn/death records → alive throughout.
-	if !losAliveAt(nil, nil, 1234) {
+	if !makeAliveGate(aliveOfMarkers(t, nil, nil, 2000))(1234) {
 		t.Errorf("empty spawns/deaths must read alive")
 	}
 	// Deaths only (no respawn recorded) → alive until the death, dead after.
-	if !losAliveAt(nil, []int32{500}, 400) {
+	deathsOnly := makeAliveGate(aliveOfMarkers(t, nil, []int32{500}, 2000))
+	if !deathsOnly(400) {
 		t.Errorf("deaths-only: should be alive before the death")
 	}
-	if losAliveAt(nil, []int32{500}, 600) {
+	if deathsOnly(600) {
 		t.Errorf("deaths-only: should be dead after the death")
 	}
+}
+
+// The reason losAliveAt was removed rather than kept. Its rule was "alive iff
+// the most recent spawn is STRICTLY later than the most recent death", which
+// LATCHES on a same-millisecond death+respawn: the two are equal, so it reads
+// dead, and keeps reading dead until some later spawn arrives — the whole
+// remaining life, not an instant. Measured on cached demos before removal:
+// 100.7 s of one player's 1143.7 s match (8.8%), 46.9 s of another's.
+func TestLosLivenessSurvivesSameMsRespawn(t *testing.T) {
+	const tie = 10000
+	gate := makeAliveGate(aliveOfMarkers(t, []int32{tie}, []int32{tie}, 60000))
+
+	for _, at := range []int32{tie, tie + 1, tie + 5000, 59000} {
+		if !gate(at) {
+			t.Errorf("t=%d reads DEAD after a same-ms death+respawn at %d; "+
+				"the player respawned instantly and is alive", at, tie)
+		}
+	}
+}
+
+// aliveOfMarkers runs the real derivation so these tests exercise the same
+// path the pipeline does, rather than a hand-built interval list.
+func aliveOfMarkers(t *testing.T, spawns, deaths []int32, matchEnd int32) []result.Interval {
+	t.Helper()
+	s := &result.Streams{
+		Global:  result.GlobalStream{MatchEnd: matchEnd},
+		Players: []result.PlayerStream{{Name: "p", Spawns: spawns, Deaths: deaths}},
+	}
+	deriveAliveIntervals(s)
+	return s.Players[0].Alive
 }
 
 // TestComputeLOS_NoBSP: a 2-player demo whose map has no provisioned BSP returns
@@ -161,5 +198,75 @@ func TestComputeLOS_AlreadyLatched(t *testing.T) {
 	}
 	if err := ComputeLOS(res); err != nil {
 		t.Errorf("already-latched ComputeLOS = %v; want nil (fast path)", err)
+	}
+}
+
+// openWorldBSP is a degenerate map: one interior node whose two children are
+// the same empty leaf, that leaf carrying no vis row (so it sees everything),
+// and no solid anywhere but the leaf-0 sink. Every pair is therefore mutually
+// visible at every sample, which leaves the two liveness gates in losForLooker
+// as the only thing the emitted intervals can depend on.
+func openWorldBSP() *bspvis.BSP {
+	return &bspvis.BSP{
+		Version: "v29",
+		// Axial plane 1e6 units below the world, so every point and every box
+		// is on its front side and resolves to the single empty leaf.
+		Planes: []bspvis.Plane{{Normal: bspvis.Vec3{Z: 1}, Dist: -1e6, Type: 2}},
+		Nodes:  []bspvis.Node{{PlaneID: 0, Children: [2]int32{-2, -2}}},
+		Leaves: []bspvis.Leaf{
+			{Contents: bspvis.ContentsSolid},
+			{Contents: bspvis.ContentsEmpty, VisOfs: -1},
+		},
+		Models: []bspvis.Model{{HeadNodes: [4]int32{0}}},
+	}
+}
+
+// LOS is computed through the two alive gates in losForLooker: the looker's
+// own (no eye, no rays while dead) and each opponent's (a corpse, or the
+// bouncing gib head the player entity becomes, is not a sightline). Deleting
+// either only moved the BSP-gated golden corpus, so on a machine without
+// provisioned BSPs both could be removed silently. This runs the real walk
+// against a hand-built open world where visibility is decided by nothing else.
+func TestLosForLookerGatesOnAlive(t *testing.T) {
+	vb := openWorldBSP()
+	var ts []int32
+	for ms := int32(0); ms <= 2000; ms += 100 {
+		ts = append(ts, ms)
+	}
+	const matchEnd = 2000
+	full := []result.Interval{{Start: 0, End: matchEnd}}
+	// One death at 800, respawn at 1200.
+	split := []result.Interval{{Start: 0, End: 800}, {Start: 1200, End: matchEnd}}
+
+	seesAt := func(lookerAlive, otherAlive []result.Interval, at int32) bool {
+		players := []result.PlayerStream{
+			{Name: "A", Position: staticTrack(ts, 0, 0, 0), Alive: lookerAlive},
+			{Name: "B", Position: staticTrack(ts, 200, 0, 0), Alive: otherAlive},
+		}
+		los, _ := losForLooker(vb, players, 0, nil, matchEnd, map[int][]byte{}, buildEntityLeaves(vb, players))
+		for _, tr := range los {
+			if tr.Other != 1 {
+				continue
+			}
+			for _, iv := range tr.Iv {
+				if iv.Start <= at && at < iv.End {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	if !seesAt(full, full, 1000) {
+		t.Fatal("two live players in an open world do not see each other — the fixture pins nothing")
+	}
+	if seesAt(full, split, 1000) {
+		t.Error("the looker sees an opponent who is DEAD at t=1000: the opponent liveness gate is gone")
+	}
+	if seesAt(split, full, 1000) {
+		t.Error("a DEAD looker still has line of sight at t=1000: the looker liveness gate is gone")
+	}
+	if !seesAt(full, split, 400) {
+		t.Error("the opponent's live period at t=400 lost its sightline too — the gate is over-broad")
 	}
 }

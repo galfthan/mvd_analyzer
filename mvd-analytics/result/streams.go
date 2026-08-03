@@ -1,5 +1,10 @@
 package result
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 // Streams is the canonical native-rate storage for per-player and
 // global state changes. Read by the qwanalytics/view query API.
 //
@@ -169,6 +174,60 @@ type PlayerStream struct {
 	Spawns []int32 `json:"sp,omitempty"`
 	Deaths []int32 `json:"d,omitempty"`
 
+	// Alive is the player's LIVES: one half-open [Start, End) interval per
+	// spawn-to-death run, derived from Spawns/Deaths against the match
+	// window. It is the canonical STORED liveness — a consumer should read
+	// it rather than re-derive liveness from the marker lists.
+	//
+	// It is not yet the only implementation, and the name is overloaded on the
+	// wire: the columnar /buckets response already carries a per-column
+	// `alive` computed by view.playerActiveInWindow, which is a
+	// window-OVERLAP test with its own fallbacks — a different question from
+	// this field's instantaneous one. They can disagree, and neither is wrong.
+	//
+	// LOS, aim, loc-graph and region-control all read this field. The two
+	// predicates that used to re-derive liveness themselves —
+	// analyzer.losAliveAt and aimcore's aimAliveAt — are gone: their strict
+	// `lastSpawn > lastDeath` LATCHED on a same-millisecond death+respawn and
+	// reported the player dead for the whole remaining life (measured: 100.7 s
+	// of one player's match). view.playerActiveInWindow is deliberately NOT
+	// migrated — it asks whether a player appears anywhere in a bucket window,
+	// which is a different question, and it already resolves that tie
+	// correctly.
+	//
+	// Deaths are the FUSION of three detectors (DF_DEAD|DF_GIB on
+	// svc_playerinfo, STAT_HEALTH transitions, and the obituary path —
+	// mvd-reader/parser/stats.go forceEmitDeath), which is why this is
+	// derived from the marker lists rather than from any single wire flag:
+	// the obituary path exists precisely because the other two miss deaths
+	// (a death+respawn entirely between two MVD frames, and the KTX
+	// dtTELE2 pent deflection).
+	//
+	// Liveness rule: alive from match start until a death, each death
+	// beginning a dead period the next spawn ends. It deliberately does
+	// NOT require a recorded match-start spawn — KTX emits a player's
+	// first spawn only on their first RESPAWN. A death with no following
+	// spawn (the dtTELE2 deflection) correctly leaves them dead to the end.
+	//
+	// A death SPLITS a life even when the respawn lands on the same
+	// millisecond: the two intervals TOUCH ([..,T) and [T,..)) so no dead time
+	// is invented, but the boundary survives, because anything counting lives
+	// or attributing per-life stats has to see it. Conversely a hole in the
+	// position track does NOT split — an unobserved stretch is not a death,
+	// and on a POV recording (where only players inside the recorder's PVS are
+	// written) tracks are full of holes. Refusing to credit unobserved TIME is
+	// a separate question, answered by result.SampleStaleCapMs in the
+	// occupancy walkers rather than here.
+	//
+	// NOT omitempty, deliberately — the three states are distinct:
+	//   null  the match window is unknown, so liveness was not measurable;
+	//   []    measured, and the player was never alive in the window;
+	//   [...] the player's lives.
+	// A player who never died is a single interval spanning the match, so
+	// absence can never be read as "alive throughout". gob cannot carry the
+	// null/[] distinction on the slice itself — see PlayerStream.GobEncode.
+	Alive []Interval `json:"alive"`
+
 	// LOS records when this player (the looker) had a clear line of sight
 	// to each other player, one LosTrack per opponent ever seen (schema
 	// v37). Line of sight is asymmetric — the looker's single eye point vs.
@@ -193,6 +252,52 @@ type PlayerStream struct {
 	// is an occlusion-tolerant proximity/awareness signal. Raw transitions, no
 	// smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
+}
+
+// PlayerStream carries its own gob codec for exactly one field: Alive.
+//
+// encoding/gob omits zero-valued struct fields, and a length-0 slice is zero
+// — so an empty non-nil slice decodes as nil, collapsing two of Alive's three
+// documented states. "Measured, and never alive" would come back as "liveness
+// was not measurable", which every consumer degrades to UNGATED: region
+// control, trails and the lazy LOS pass would then treat that player as alive
+// for the whole match. mvd-api's tier-2 demo cache stores Streams as a gob
+// (result/cache.go) and evaluates liveness on the decoded Result at read time,
+// so without this the same demo answers differently on a cold parse and a
+// cache hit.
+//
+// playerStreamWire is a defined type with PlayerStream's fields and none of
+// its methods: gob encodes it structurally (no recursion back into GobEncode)
+// and a field added to PlayerStream is carried along automatically. Only the
+// nil-vs-empty distinction needs the explicit flag.
+type playerStreamWire PlayerStream
+
+type playerStreamGob struct {
+	Fields        playerStreamWire
+	AliveMeasured bool
+}
+
+func (p PlayerStream) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(playerStreamGob{
+		Fields:        playerStreamWire(p),
+		AliveMeasured: p.Alive != nil,
+	}); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (p *PlayerStream) GobDecode(data []byte) error {
+	var w playerStreamGob
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&w); err != nil {
+		return err
+	}
+	*p = PlayerStream(w.Fields)
+	if w.AliveMeasured && p.Alive == nil {
+		p.Alive = []Interval{}
+	}
+	return nil
 }
 
 // LosTrack is one looker's line-of-sight onto a single opponent, as the
@@ -341,8 +446,10 @@ type GlobalStream struct {
 // respawn teleport or an abnormal time gap (death / pause / reconnect),
 // so a velocity reads ~0 over those rather than spiking; an isolated
 // sample reads 0. The source x/y/z are float32 Quake units (the wire's
-// sub-unit origin, no longer rounded to whole units), sampled ~every
-// 13 ms, so the derivative is sub-unit precise — smooth client-side
+// sub-unit origin, no longer rounded to whole units), sampled at the demo's
+// native cadence (~13-40 ms depending on the recording server's sv_demofps;
+// see MVD_FORMAT.md), so the derivative is sub-unit precise at the fast end
+// and correspondingly coarser at the slow end — smooth client-side
 // only if a softer speed curve is wanted. Like x/y/z and h these are
 // native float32; only the JSON text is rounded to 3 decimals (see
 // PositionTrack.MarshalJSON / coord.go). Speed is hypot(vx,vy,vz); horizontal speed

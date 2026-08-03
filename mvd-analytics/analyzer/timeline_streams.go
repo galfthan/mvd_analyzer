@@ -956,11 +956,15 @@ func lqValue(level int, contents int32) int8 {
 }
 
 // velGapCapMs is the largest inter-sample time gap (ms) the velocity
-// estimator will differentiate across. Native position samples arrive
-// ~every 13 ms (virtually all gaps < 25 ms, MVD_FORMAT.md), so a gap
-// beyond this means the player was dead, the game was paused, or the
-// slot changed hands — not real motion. The two samples either side then
-// bound separate motion segments and no velocity spans them.
+// estimator will differentiate across. The sample cadence is
+// server-configured, not fixed: mvdsv gates whole demo frames on sv_demofps
+// (default 30, sv_demoIdlefps 10 while idle/paused; sv_send.c:1339-1346),
+// quantised up to the server tick, so measured cadence is bimodal —
+// ~13-16 ms on servers at full tick and ~34-39 ms on servers at the default
+// (MVD_FORMAT.md). 250 ms clears both comfortably, so a gap beyond it means
+// the slot changed hands or the recording stalled — not real motion. The two
+// samples either side then bound separate motion segments and no velocity
+// spans them.
 const velGapCapMs = 250
 
 // velTeleportSpeedUps is the speed (units/sec) above which a step between

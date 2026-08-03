@@ -53,6 +53,15 @@ of each per-demo endpoint, and
 for the view types (`BucketsView`, `EventsView`, etc.), the field-code
 vocabulary, and the reducer registry.
 
+**Stability.** The tool surface is covered by the API's compatibility
+policy ([`mvd-api/API.md` §2.7](../mvd-api/API.md#27-api-versioning-and-stability)):
+the shim and `mvd-api` deploy in lockstep, so tool names, parameters and
+result semantics move only under that process — new tools, parameters and
+result fields appear additively. Where a tool's default differs from the
+REST default because an agent-facing default is more useful (e.g.
+`getLocTrails` defaults `minDwellMs` to 250, REST to 0), the tool
+description says so.
+
 | Tool | Backing |
 |---|---|
 | `searchGames` | `mvd-api` `GET /v1/games/search` |

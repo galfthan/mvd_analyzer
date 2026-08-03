@@ -11,7 +11,7 @@ MVD (Multi-View Demo) is a demo recording format for QuakeWorld that captures th
 - **Delta compression**: Only changed values are transmitted
 - **Streaming support**: Can be streamed via QTV (QuakeTV) protocol
 - **Time representation**: Millisecond deltas (not absolute time like QWD)
-- **Server frame rate**: Typically ~77 Hz (MVDSV default `sys_maxfps`). Position updates (`svc_playerinfo`) are emitted every server frame for all players (~73 Hz observed), while stat updates (`svc_updatestat`) are event-driven and arrive at ~3 Hz per player
+- **Server frame rate**: typically ~77 Hz (MVDSV default `sys_maxfps`), but the MVD is **not** written at that rate — `SV_SendDemoMessage` gates each demo frame on `sv_demofps` (default 30), so the recorded position cadence is server-configured and measures ~13-16 ms or ~34-39 ms depending on the server. Position updates (`svc_playerinfo`) are written for all players in the same frame, so every player in a demo shares one timestamp series; stat updates (`svc_updatestat`) are event-driven and arrive at ~3 Hz per player. See [svc_playerinfo](#svc_playerinfo-42---player-state-update) for the measured distribution
 
 ### File Extensions
 
@@ -674,7 +674,23 @@ it as the authoritative per-shot LG signal (`Ent-1` is the shooter).
 
 This is the core message type for player positions in MVD. The format differs between MVD and standard QWD.
 
-**Update frequency**: Emitted every server frame (~77 Hz) for all players simultaneously. In a typical 4on4 match with 8 players, each `dem_all` message contains 8 `svc_playerinfo` commands — one per player. The median inter-update gap is ~13ms with virtually all gaps under 25ms. Uses delta compression, so only changed origin and view-angle components are transmitted per update.
+**Update frequency**: Emitted for all players simultaneously — in a typical 4on4 with 8 players, each `dem_all` message carries 8 `svc_playerinfo` commands, one per player, so every player in a demo shares one timestamp series. Uses delta compression, so only changed origin and view-angle components are transmitted per update.
+
+The rate is **server-configured, not fixed at the server tick**. `SV_SendDemoMessage` gates the whole demo frame on `sv_demofps` (`mvdsv/src/sv_send.c:1339-1346`):
+
+```c
+min_fps = max(4.0, (int)sv_demofps.value ? (int)sv_demofps.value : 20.0);
+if (curtime - demo.curtime < 1.0 / min_fps) return;   // whole frame skipped
+```
+
+`sv_demofps` defaults to **30** (`mvdsv/src/sv_demo.c`), dropping to `sv_demoIdlefps` (default 10) when no client is spawned or the game is paused, and the gate fires on the server's own tick boundaries so the effective interval is quantised up to a whole tick. Consequently the cadence is **bimodal across real demos** — measured over the golden corpus:
+
+| cadence | rate | share of the golden corpus |
+|---|---|---|
+| ~13–16 ms | ~60–72 Hz | 7 of 11 (servers at or near full tick) |
+| ~34–39 ms | ~26–29 Hz | 4 of 11 (`sv_demofps` left at the default 30) |
+
+So ~13 ms is common but **not universal**, and consumers must not hard-code a sample interval: derive it from the track, and where a per-sample duration is needed use the real delta between adjacent samples. (77 Hz is the *server tick* — what a client-side ezquake demo records — not what mvdsv writes into an `.mvd`.)
 
 ### MVD Format
 

@@ -3,7 +3,6 @@ package analyzer
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"sync"
 
 	"github.com/mvd-analyzer/mvd-analytics/bspvis"
@@ -347,6 +346,18 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 	pvsAcc := newVisAccum(n)
 	bcur := make([]int, n)
 
+	// Liveness comes from PlayerStream.Alive, the canonical stored life list.
+	// Monotone gates, not binary search: the sample loop below walks ap.T in
+	// ascending order and queries each opponent once per sample, so every
+	// cursor only moves forward — O(1) amortised where the old per-sample-pair
+	// binary search was O(log n). Reset here with bcur, so a caller may reuse
+	// one looker slice.
+	aAliveAt := makeAliveGate(a.Alive)
+	bAliveAt := make([]func(int32) bool, n)
+	for bi := range players {
+		bAliveAt[bi] = makeAliveGate(players[bi].Alive)
+	}
+
 	for mi := range movers {
 		movers[mi].cursor = 0
 	}
@@ -355,7 +366,7 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 	var fatScratch []int
 
 	for i, t := range ap.T {
-		aAlive := losAliveAt(a.Spawns, a.Deaths, t)
+		aAlive := aAliveAt(t)
 		var eye [3]float32
 		moversReady := false
 		if aAlive {
@@ -377,7 +388,7 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 				for bcur[bi]+1 < len(bp.T) && bp.T[bcur[bi]+1] <= t {
 					bcur[bi]++
 				}
-				if bj := bcur[bi]; bp.T[bj] <= t && losAliveAt(players[bi].Spawns, players[bi].Deaths, t) {
+				if bj := bcur[bi]; bp.T[bj] <= t && bAliveAt[bi](t) {
 					// Stage 1 — wire PVS gate (and the pvs metric): would the
 					// server send opponent bi to looker ai this frame?
 					if entityPotentiallyVisible(vb, fatRow, &entLeaves[bi], bj) {
@@ -516,30 +527,4 @@ func losTargets(ox, oy, oz float32, dst *[9][3]float32) {
 			}
 		}
 	}
-}
-
-// losAliveAt reports whether a player is alive at match-relative time t, given
-// their ascending Spawns/Deaths streams.
-//
-// A player is alive from match start and stays alive until a death; each death
-// begins a dead period that the next spawn ends. So liveness is decided by the
-// most recent event at or before t: a death ⇒ dead, a spawn ⇒ alive, neither
-// ⇒ alive (spawned at match start). Crucially this does NOT require a recorded
-// match-start spawn — KTX demos emit the first spawn only on the first
-// *respawn* (the spawn that starts a life follows the death that ended the
-// previous one), so a player's first recorded spawn is typically a minute+ in.
-// Keying off "most recent spawn" instead would wrongly mark everyone dead until
-// their first respawn and erase all early-match line of sight. This mirrors the
-// liveness semantics of view.playerActiveInWindow (the bucket view's canonical
-// alive test) — keep the two in sync. Binary search keeps this O(log n) since
-// it runs once per sample-pair.
-func losAliveAt(spawns, deaths []int32, t int32) bool {
-	di := sort.Search(len(deaths), func(i int) bool { return deaths[i] > t })
-	if di == 0 {
-		return true // no death yet ⇒ alive since match start
-	}
-	lastDeath := deaths[di-1]
-	si := sort.Search(len(spawns), func(i int) bool { return spawns[i] > t })
-	// Alive iff a spawn at or before t is more recent than that last death.
-	return si > 0 && spawns[si-1] > lastDeath
 }

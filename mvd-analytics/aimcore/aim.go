@@ -96,21 +96,19 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		return nil
 	}
 
-	// Position tracks keyed by canonical name, plus the spawn/death streams
+	// Position tracks keyed by canonical name, plus the canonical life lists
 	// backing the per-shot alive test (aliveAt below).
 	tracks := make(map[string]*result.PositionTrack)
-	spawnsOf := make(map[string][]int32)
-	deathsOf := make(map[string][]int32)
+	aliveOf := make(map[string][]result.Interval)
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
 		if p.Position != nil && len(p.Position.T) > 0 {
 			tracks[p.Name] = p.Position
 		}
-		spawnsOf[p.Name] = p.Spawns
-		deathsOf[p.Name] = p.Deaths
+		aliveOf[p.Name] = p.Alive
 	}
 	aliveAt := func(name string, t int32) bool {
-		return aimAliveAt(spawnsOf[name], deathsOf[name], t)
+		return aimAliveAt(aliveOf[name], t)
 	}
 
 	// Best-effort team per player from the (same-namespace) shot stream. Empty
@@ -761,16 +759,27 @@ func absInt32(v int32) int32 {
 	return v
 }
 
-// aimAliveAt reports whether name is alive at time t, from the sorted
-// spawn/death streams — the same liveness rule as the analyzer's losAliveAt
-// (kept local so aimcore has no analyzer dependency).
-func aimAliveAt(spawns, deaths []int32, t int32) bool {
-	di := sort.Search(len(deaths), func(i int) bool { return deaths[i] > t })
-	if di == 0 {
-		return true // no death yet ⇒ alive since match start
+// aimAliveAt reports whether a player is alive at time t, from
+// PlayerStream.Alive — the canonical stored life list.
+//
+// It used to re-derive liveness from the raw spawn/death markers with the rule
+// "alive iff the most recent spawn is STRICTLY later than the most recent
+// death". That rule latches: when a death and the respawn it triggers share a
+// millisecond the two are equal, so it reports dead, and keeps reporting dead
+// until some later spawn arrives — i.e. for the whole remaining life. Measured
+// across the cached corpus it cost one player 100.7 s of a 1143.7 s match
+// (8.8%), another 46.9 s. Alive resolves that tie to "alive", which is correct:
+// a player who respawns instantly is alive.
+//
+// Binary search rather than a forward cursor because callers query arbitrary
+// (player, t) pairs — per shot, and per candidate inside aimAttribute — so
+// there is no monotone order to exploit. Intervals are sorted and
+// non-overlapping. A nil list means liveness was not measurable; degrade to
+// "alive" rather than silently dropping every shot.
+func aimAliveAt(alive []result.Interval, t int32) bool {
+	if alive == nil {
+		return true
 	}
-	lastDeath := deaths[di-1]
-	si := sort.Search(len(spawns), func(i int) bool { return spawns[i] > t })
-	// Alive iff a spawn at or before t is more recent than that last death.
-	return si > 0 && spawns[si-1] > lastDeath
+	i := sort.Search(len(alive), func(i int) bool { return alive[i].End > t })
+	return i < len(alive) && alive[i].Start <= t
 }

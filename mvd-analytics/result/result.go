@@ -470,7 +470,8 @@ package result
 //
 // v43:
 //   - Aim target attribution gates candidates on being alive at fire time
-//     (losAliveAt over the spawn/death streams). Dead players keep streaming
+//     (then losAliveAt over the spawn/death streams; since v64 the stored
+//     PlayerStream.Alive). Dead players keep streaming
 //     position samples (the death-anim body), so a corpse could previously
 //     win nearest-crosshair attribution in team games. No field changes;
 //     crosshair sample counts/targets shift on team demos, and a duel fire
@@ -717,7 +718,7 @@ package result
 //     — `time` — so a v55 reader that still divides by 1000 (or reads the v56
 //     `t`, now gone) breaks loudly instead of silently.
 //   - PER-ITEM TIME KEY: the DENSE/SPARSE split (final v57 naming). Sample-
-//     rate-scaled arrays (~77 Hz stream tracks, columnar sample columns, aim
+//     rate-scaled arrays (native-cadence stream tracks, columnar sample columns, aim
 //     sample arrays) use the terse `t`; event-scaled sparse lists and singleton
 //     timestamps use the descriptive `time`. This is the v55 layout: every
 //     stored sparse list (frags/damage/shots/chat/backpacks/weapon-pickups/
@@ -813,8 +814,56 @@ package result
 //     was read, which is what a non-nil damage.taken says. Within a
 //     measured family an absent key means "dealt none with that weapon".
 //
+// v64 — canonical liveness, and alive-gated exact loc/region occupancy.
+// A CORRECTNESS FIX: values move in locGraph and timelineAnalysis.
+// regionControl; no existing field changed shape, name or meaning.
+//
+//   - streams.players[].alive (new, NOT omitempty): each player's lives as
+//     half-open [s,e) intervals, derived from the fused spawn/death markers.
+//     The one canonical answer to "was this player alive at t". Three states:
+//     null = liveness not measurable, [] = measured and never alive, [...] =
+//     the lives. A player who never died is one full-match interval, so
+//     absence can never read as "alive throughout".
+//   - locGraph node time is now an EXACT time-weighted integral over the
+//     union of position-sample times and RL/LG/quad/pent/alive interval
+//     endpoints, replacing a forward difference clamped to 50 ms. Posture is
+//     split at interval boundaries instead of snapped to sample instants, so
+//     a pickup landing between two samples divides the interval exactly.
+//   - locGraph AND regionControl now EXCLUDE DEAD PLAYERS. Dead players keep
+//     streaming position at full rate (mvdsv writes svc_playerinfo for every
+//     cs_spawned client, sv_demo.c:1481-1519), and on a gib the player entity
+//     itself is the bouncing head (ktx/src/player.c:1070 ThrowHead), so both
+//     were crediting a corpse's travels as presence — and as ARMED presence,
+//     since StatItems weapon bits do not clear until respawn. Expect region
+//     percentages and byPlayer ms to fall by roughly (deaths x
+//     death-to-respawn time) per player, and phantom "teleport" edges thrown
+//     by bouncing gib heads to disappear from locGraph.edges.
+//   - Both walks now bound sample-and-hold: a sample's evidence expires after
+//     result.SampleStaleCapMs (250 ms), and a track ends at result.TrackHoldEnd.
+//     This is what the deleted 50 ms clamp had really been doing. It matters
+//     most on POV (client) recordings, where only players inside the recorder's
+//     PVS get svc_playerinfo: measured on a POV demo the recorder had a 152 ms
+//     worst gap while the other seven players had gaps up to 73 SECONDS, and
+//     holding across them credited ~92% of a player's loc time to wherever they
+//     stood when they left view. Inert on server recordings (worst golden gap:
+//     74 ms). It also stops an early quitter holding their loc/region to match
+//     end — region control evaluated intervals at their left endpoint, so a
+//     departed player's final sample was credited to the next event.
+//     locGraph EDGES take the same bound: no transition is recorded across a
+//     gap longer than SampleStaleCapMs, which previously minted a kind
+//     "normal" adjacency between the locs bracketing a PVS hole (past
+//     locgraphTeleportMaxGapMs the displacement check cannot label it, so a
+//     consumer filtering teleports out kept exactly the invented edges).
+//     /loc-trails carries the same two bounds, and its minDwellMs fold never
+//     merges across the gaps they cut.
+//   - The loc-graph teleport threshold is scaled by the REAL inter-sample
+//     delta instead of an assumed 50 ms. The MVD sample rate is NOT fixed:
+//     mvdsv gates demo frames on sv_demofps (default 30), so measured cadence
+//     across the golden corpus is bimodal — ~13-16 ms on servers at full tick
+//     and ~34-39 ms on servers at the default.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 63
+const CurrentSchemaVersion = 64
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

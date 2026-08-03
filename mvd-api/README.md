@@ -267,6 +267,11 @@ guide around it:
   unit named by the constant `timeUnit` echo) and the always-ms dense
   payloads (raw stream entries, the columnar grid, aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
+- **API versioning and stability** ([§2.7](API.md#27-api-versioning-and-stability))
+  — the compatibility policy consumers build against: additive by default,
+  breaks ship as `/v2` alongside `/v1`, `schemaVersion` is a cache key not
+  a break signal, and what is / isn't covered by the contract. Mirrored in
+  the spec's own `info.description`, so it is served at `/docs` too.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.
 - **Recipes** — common frontend features → the call that backs them.

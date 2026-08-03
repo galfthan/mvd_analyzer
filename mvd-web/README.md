@@ -729,8 +729,9 @@ on load when the map has a corpus. Code: `drawMapEntities` /
 `loc-graph` still accepted — see the tab-alias note below.) Top to bottom:
 **Region Control**, then a standalone **Metric** selector, then the loc
 **graph** and **heatmap**. All read `result.locGraph` (loc nodes weighted
-by time-spent, transition edges; per-player and per-team breakdowns baked
-onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
+by **alive, observed** time-spent — dead players and unobserved holes are
+excluded since schema v64 — transition edges; per-player and per-team
+breakdowns baked onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
 — no extra analyzer pass.
 
 The **Metric** selector (`#locgraph-metric`, its own panel above the graph

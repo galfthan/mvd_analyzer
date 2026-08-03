@@ -576,9 +576,13 @@ type Result struct {
 ```
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
-is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (defined in `result/result.go`, with the full
-version history alongside it). For "how long was the match"
+is the wire contract with every consumer. `CurrentSchemaVersion`
+(defined in `result/result.go`, with the full version history alongside
+it) is a **regeneration counter**: it ticks on every observable change
+to the output, additive and corrective alike, so it is a cache key
+rather than a break signal. The HTTP-level compatibility policy —
+what may change, and how a genuine break ships — is
+[`mvd-api/API.md` §2.7](../mvd-api/API.md#27-api-versioning-and-stability). For "how long was the match"
 read `Match.Duration` (float, parser-derived) or `DemoInfo.Duration`
 (integer, KTX-authoritative); the legacy top-level `duration` was
 removed in v6.

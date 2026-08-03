@@ -420,27 +420,104 @@ key. `Access-Control-Allow-Origin: *` and a credentialed `Authorization`
 header coexist because the key travels as a plain header, not a cookie (the
 CORS credentials mode that `*` forbids applies to cookies, not bearer tokens).
 
-### 2.7 API versioning
+### 2.7 API versioning and stability
+
+The API is still growing. The deal is: it grows **additively**, and the rare
+genuine break arrives as a new route you can migrate to on your own
+schedule.
 
 Two version numbers move independently, and they mean different things:
 
-- **The `/v1` path prefix is the compatibility contract.** It is bumped
-  only for a *breaking* change — a field removed or renamed, an enum value
-  withdrawn, a type changed incompatibly, a default behaviour altered. As
-  long as you stay on `/v1`, existing integrations keep working.
+- **The `/v1` path prefix is the compatibility contract.** It never
+  changes meaning under you: a *breaking* change — a documented field
+  removed or renamed, an enum value withdrawn, a type changed
+  incompatibly, a documented default behaviour or default parameter value
+  altered — arrives as a new prefix (`/v2/<endpoint>`) served **alongside**
+  `/v1`, not as a replacement of it. As long as you stay on `/v1`, existing
+  integrations keep working.
 - **`schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and the
   OpenAPI `info.version`) is a regeneration counter.** It ticks on *every*
   observable change to the analysis output, including purely **additive**
-  ones — a new field, a new event type, a new enum value. It keys caches
-  and ETags, so bumping it invalidates stale client caches automatically; a
-  schema-version increase is **not** a signal that anything broke.
+  ones — a new field, a new endpoint, a new event type, a new enum value.
+  It keys caches and ETags, so bumping it invalidates stale client caches
+  automatically; a schema-version increase is **not** a signal that
+  anything broke.
 
-Within `/v1`, clients must **ignore unknown fields and unknown enum
-values** so that additive changes (which only raise `schemaVersion`) never
-require a client update. Pin behaviour to `/v1`, treat `schemaVersion` as a
-cache key, and let new fields/enum members flow through unread until you
-choose to consume them. (For example, schema v58 added the `demomark`
-event type to `/events` — a no-`types` caller simply began seeing new rows.)
+#### What you can rely on
+
+- **`/v1` grows, it doesn't shift.** New endpoints and new response fields
+  appear at any time without announcement. Documented fields and endpoints
+  don't change meaning, change type, or disappear outside the process
+  below.
+- **A breaking change ships as a new route** (`/v2/<endpoint>`) served
+  **alongside** the old one, not as a replacement. Both work during the
+  transition, so nothing forces a same-day migration.
+- **Old routes retire on notice**: a minimum of 8 weeks after the
+  deprecation is announced, and in practice only once measured usage of the
+  old route has drained — every request carries a key, so "is anyone still
+  on this?" is measured rather than guessed. The notice period is the
+  floor; drained usage can only delay a removal, never bring it forward.
+- **A correctness fix is not a break.** When a field's *value* changes
+  because it was being computed wrongly, the field keeps its name and its
+  type, and its documented meaning is not *replaced* — at most it is
+  **narrowed to the semantics the field was always meant to have**, with
+  the documentation updated to say so plainly. Schema v64 is the pattern:
+  loc and region occupancy stopped counting dead players and unobserved
+  time, so "time spent in a loc" is now documented as "**alive, observed**
+  time spent in a loc" — the same quantity the field was always intended
+  to report, finally measured. Such fixes ship inside `/v1` and ride
+  `schemaVersion` like any other regeneration, and are called out in
+  [RELEASE_NOTES.md](../RELEASE_NOTES.md) with the direction and rough
+  magnitude of the change. Giving a field a *different* meaning is a
+  break and goes through `/v2`. If you have pinned a golden file, expect
+  it to move; if you have pinned a *shape*, it won't.
+
+#### What is, and isn't, covered
+
+**Covered by the contract** — the documented request parameters, the
+documented response fields and their types, documented enum members, and
+documented status codes.
+
+**Not covered, and free to change without a version bump** — the ordering
+of array elements where no order is documented, rounding of derived
+floating-point values, whether an empty/zero field is omitted
+(`omitempty`) or emitted, rate-limit thresholds, and which demos return
+`422 <section>_unavailable` (a demo's capabilities are a property of the
+recording, not of the API).
+
+**Adding a member to a default set is additive**, even though it changes
+the rows you receive. Schema v58 added the `demomark` event type to
+`/events` *and* to its default type set, so a caller that omits `types`
+simply began seeing new rows. Filter explicitly if you need a fixed set.
+
+**Changing the default *value* of a parameter is a break**, and goes
+through `/v2`. Widening a default set leaves everything you already
+received in place and adds to it; changing a default `windowMs`,
+`limit` or `minDwellMs` instead makes the default-path response
+*different* — a caller who never passed the parameter gets other numbers
+without having opted into anything, which is the same reason an altered
+default *behaviour* is a break.
+
+**The MCP tool surface follows this policy too.** `mvd-mcp` forwards
+every call to `mvd-api` and the two deploy in lockstep, so tool names,
+tool parameters and the meaning of their results move only under the
+rules above: new tools, new parameters and new result fields appear
+additively; a genuine break rides the same `/v2` + notice process as the
+REST route behind it. MCP tool *defaults* may differ from the REST
+defaults where an agent-facing default is more useful (e.g.
+`getLocTrails` defaults `minDwellMs` to 250 while REST defaults it to
+0); each such difference is documented in the tool description and is
+itself covered by the rule above.
+
+#### What your client must do in return
+
+1. **Ignore unknown fields and unknown enum values.** Never treat an
+   unrecognised field as an error — additive evolution depends on it.
+2. **Treat [`/openapi.yaml`](/openapi.yaml) as the contract.** Undocumented
+   behaviour you happen to observe may change without notice.
+3. **Pin behaviour to `/v1`, treat `schemaVersion` as a cache key** — not
+   as a compatibility signal — and let new fields flow through unread until
+   you choose to consume them.
 
 ---
 
@@ -458,7 +535,7 @@ streams but in different shapes. Pick by what you're drawing:
 
 Concrete consequences:
 
-- **Native-rate positions (~77 fps)** come **only** from
+- **Native-rate positions (server-configured cadence, typically 13-40 ms per sample — see below)** come **only** from
   `/stream-slice?fields=pos`. `/buckets` and `/state-at` down-sample
   position to one sample per window / instant.
 - **Spawns & deaths**: `/events?types=spawn,death` is the authoritative
@@ -504,10 +581,10 @@ Common frontend features → the call that backs them.
   `delta` client-side; or `/buckets?fields=sp,d` for activity density.
 - **Health/armor chart for a player** → `GET /buckets?fields=h,a&windowMs=1000&players=X`
   (smooth grid) or `/stream-slice?fields=h,a&from=…&to=…` (every change).
-- **Map replay / movement trails (~77 fps)** → `GET /stream-slice?fields=pos&players=X&from=…&to=…`
+- **Map replay / movement trails (native cadence)** → `GET /stream-slice?fields=pos&players=X&from=…&to=…`
   — the only native-rate position source. Stitch windows for the full
   match. Remember positions are **int32 ms**.
-- **Aim arrows / sightlines / "who's looking at whom" (~77 fps)** →
+- **Aim arrows / sightlines / "who's looking at whom" (native cadence)** →
   add `view` to the fields: `GET /stream-slice?fields=pos,view&players=X&from=…&to=…`.
   Decode `vp`/`vya` with `deg = uint16(v)*360/65536`; forward vector
   `= (cos p·cos y, cos p·sin y, −sin p)`.
