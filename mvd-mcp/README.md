@@ -644,32 +644,48 @@ region layout. See RESULT_SCHEMA.md for the encoding of
 `bucketStates` (per-region one-char-per-bucket string) and `stats`
 (match-aggregate percentages).
 
-#### `getTopWindows({demoId, metric?, windowMs?, limit?, perPlayer?, ...})`
+#### `getTopWindows({demoId, metric?, mode?, windowMs?, gapMs?, limit?, perPlayer?, ...})`
 
-Each player's best fixed-length stretches: *"in these `windowMs` ms this
+Each player's best stretches, under one of two segmentations. `mode:"fixed"`
+(the default) is *"in these `windowMs` ms this
 player scored higher on `metric` than in any other stretch of the same
-length."*
+length."* `mode:"gap"` is *"a window is a maximal run of scoring events no
+more than `gapMs` apart; its score is their sum"* — the stretch lasts as long
+as he kept doing it, not as long as a stopwatch said.
 
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`    | `string` (required) | — | — |
 | `metric`    | `string` | `frags` | What the windows are ranked by, case-insensitive: `frags`, `deaths` (a player's WORST stretch), `netFrags`, `damageGiven`, `damageTaken`, `netDamage`, `shots`, `hits`. Any **summable** per-event quantity; ratios (accuracy) are deliberately absent — they don't sum, so "the best window" is undefined for them. Read them off the stats block instead. |
-| `windowMs`  | `int` | **30000** | Window length in **milliseconds** — the main knob (5000 = damage bursts, 30000 = hot streaks, 120000 = map-phase dominance). Sweep it; there is deliberately no adaptive mode. Bounded to `[1, match duration]`: omit for the default, and an out-of-range value (a `0`, a negative, or anything longer than the match) is rejected `400 invalid_param` naming the bound rather than clamped. |
+| `mode`      | `string` | **`fixed`** | The segmentation, case-insensitive: `fixed` (every window `windowMs` long) or `gap` (maximal runs of scoring events no more than `gapMs` apart). Each mode takes exactly ONE knob and **rejects the other's** with a `400` — `gapMs` under `fixed`, `windowMs` under `gap`. Under `gap`: rows are disjoint per player by construction, `end` is the run's **last** event (a lone event is a legitimate row with `durationMs` 0), signed metrics cluster on **all** their events (a death both extends a `netFrags` run and lowers its score), and a run **may span the player's own death** — `getLives` is the per-life view. Everything else — metric vocabulary, ranking + tie-break, both caps, `weapons`, `minScore`, the stats block, `score` == the same-named stat — is identical in both modes. |
+| `windowMs`  | `int` | **30000** | **Fixed mode's** window length in **milliseconds** — the main knob (5000 = damage bursts, 30000 = hot streaks, 120000 = map-phase dominance). Sweep it; there is deliberately no adaptive mode. Bounded to `[1, match duration]`: omit for the default, and an out-of-range value (a `0`, a negative, or anything longer than the match) is rejected `400 invalid_param` naming the bound rather than clamped. Rejected under `mode:"gap"`, and absent from a gap response. |
+| `gapMs`     | `int` | **none — required under `mode:"gap"`** | Gap mode's knob in **milliseconds**: consecutive scoring events no more than `gapMs` apart belong to the same window. It has **no default** on purpose — measured inter-**kill** gaps run p50 ≈ 11–12 s while inter-**damage-event** gaps run p50 ≈ 1.0–1.1 s, so no one value serves both, and omitting it under `mode:"gap"` is a `400` naming the starting points: **~10000 for the frag metrics, ~3000 for the damage and shot metrics**. Bounded to `[1, match duration]`, out-of-range rejected rather than clamped. Rejected under `mode:"fixed"`. |
 | `limit`     | `int` | **10** | Total windows across all players, max 200; **negative = uncapped**. Applied AFTER `perPlayer`. Omit for the default; an explicit `0` is rejected `400 invalid_param` (an omitted MCP integer arrives as 0, so 0 cannot mean "uncapped"). |
 | `perPlayer` | `int` | uncapped | Max windows from any ONE player. Applied BEFORE `limit`, so `perPlayer:3, limit:10` is "the top 10, at most 3 from anyone" — set it to spread a leaderboard across the roster. Same rule as `limit`: omit for the default, negative for uncapped. (REST rejects an explicit `perPlayer=0`; from this shim a `0` never leaves the query, so it simply reads as unset.) |
 | `players`   | `string[]` | all | Restrict to these **subject** players (whose windows are ranked) |
 | `weapons`   | `string[]` | all | Restrict the **scoring** events only. Valid tokens depend on the metric's own source — the frag log knows `hook`/`water`, the damage log `explobox`/`drown`, the shot stream only what can be fired; `water` and `drown` are accepted interchangeably. A bad token 400s naming the full valid set. |
 | `startTime` | `integer` | match start | Window-search lower bound, match-relative **milliseconds**. Bounds where a window may **start**, not what it covers |
-| `endTime`   | `integer` | match end | Window-search upper bound. It too bounds the **start**: a window anchored at `endTime` still runs the full `windowMs` past it, so `endTime:1000, windowMs:30000` gives the best window *anchored* in the first second, covering up to 31 s. Shrink `windowMs` to constrain what a window covers |
+| `endTime`   | `integer` | match end | Window-search upper bound. It too bounds the **start**: a window anchored at `endTime` still runs the full `windowMs` past it, so `endTime:1000, windowMs:30000` gives the best window *anchored* in the first second, covering up to 31 s. Shrink `windowMs` to constrain what a window covers. Under `mode:"gap"` the same rule applies to the run's first event — a cluster anchored before `endTime` still runs to its own last event past it |
 | `dmg`       | `string` | **`bounded`** | Damage family for the damage metrics and the stats block: `raw` \| `bounded`. `both` is rejected for **every** metric — a score and a stats block use one family, not two. |
 | `minScore`  | `int` | `1` | Drop windows scoring below this many points **of the chosen metric** — a score threshold, not a duration (the ms-valued filter on `getLives` is `minMs`). Matters for the net metrics, which go negative. An explicit `0` IS honoured (keep the windows that broke even). |
 
-Output: `{ timeUnit, scoredBy, dmg, boundedMode, windowMs, limit,
-perPlayer, measured, windows: [{ rank, player, team, start, end, score,
-…stats }, …] }`.
-Windows are anchored at **real event times** (not a grid),
-non-overlapping per player, and returned as ONE FLAT list sorted by
-score — group by player client-side with one reduce.
+Output: `{ timeUnit, scoredBy, dmg, boundedMode, mode, windowMs | gapMs,
+limit, perPlayer, measured, windows: [{ rank, player, team, start, end, score,
+…stats }, …] }`. `mode` is echoed on **every** response, and exactly one of
+`windowMs` (fixed) / `gapMs` (gap) accompanies it — never infer the
+segmentation from which knob is present.
+Fixed windows are anchored at **real event times** (not a grid) and taken
+greedily non-overlapping per player; gap windows are the runs themselves, so
+they are disjoint by construction. Either way the result is ONE FLAT list
+sorted by score — group by player client-side with one reduce.
+
+`getTopKills` is the adjacent surface, not a substitute: it is the per-**kill**
+view (kill-anchored, life-clipped, ranked by the burst that produced one kill,
+rows overlap) where gap windows are the per-**stretch** view (no kill required,
+rows disjoint, ranked by the metric's sum). They collapse onto each other only
+at `metric:"frags", weapons:["rl"], gapMs:3000`, where RL inter-kill gaps of
+p50 ≈ 11.8 s leave 85% of clusters singletons — use 8000–15000 for multi-kill
+stretches and ~3000 on the damage metrics for rampages.
 
 `scoredBy` (`{metric, weapons, dmg}`) sits on the **envelope, not on each
 row**: one query means one rule. It is also the only place the metric is

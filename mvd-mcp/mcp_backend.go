@@ -132,12 +132,15 @@ type GetRegionControlInput struct {
 
 // GetTopWindowsInput mirrors /v1/demos/{id}/top-windows query params.
 //
-// WindowMs, Limit and MinScore are POINTERS while PerPlayer is a plain int,
-// and the split is deliberate: an omitted MCP integer argument arrives as 0,
-// so a field whose 0 is rejected (windowMs must be >= 1; limit must be >= 1 or
-// negative for uncapped) or whose 0 differs from its default (minScore
-// defaults to 1, and minScore:0 is a real "keep zero-scoring windows" filter)
-// has to distinguish "unset" from "asked for 0".
+// WindowMs, GapMs, Limit and MinScore are POINTERS while PerPlayer is a plain
+// int, and the split is deliberate: an omitted MCP integer argument arrives as
+// 0, so a field whose 0 is rejected (windowMs and gapMs must be >= 1; limit
+// must be >= 1 or negative for uncapped) or whose 0 differs from its default
+// (minScore defaults to 1, and minScore:0 is a real "keep zero-scoring
+// windows" filter) has to distinguish "unset" from "asked for 0". GapMs needs
+// it twice over: an unset one is not merely a default, it is the request that
+// mode=gap rejects for having no gapMs at all, and that 400 is the message
+// carrying the per-metric starting points.
 //
 // PerPlayer stays a plain int even though REST now rejects an explicit
 // perPlayer=0 (limit's rule, applied to both caps): `intv` never forwards a 0,
@@ -147,7 +150,9 @@ type GetRegionControlInput struct {
 type GetTopWindowsInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Metric    string   `json:"metric,omitempty" jsonschema:"what the windows are ranked by (case-insensitive): frags (default), deaths (finds a player's WORST stretch), netFrags (kills minus deaths — usually what 'hot' means), damageGiven, damageTaken, netDamage, shots, hits. Ratios (accuracy, efficiency) are deliberately absent: they do not sum, so 'the best window' is undefined for them — read them off the per-window stats block instead"`
-	WindowMs  *int     `json:"windowMs,omitempty" jsonschema:"window length in integer MILLISECONDS; omit for the default 30000. The main knob — 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase dominance; sweep it rather than expecting one right value. Must be >= 1 and no longer than the match (an out-of-range value is rejected 400 invalid_param naming the bound; omit it for the default)"`
+	Mode      string   `json:"mode,omitempty" jsonschema:"the SEGMENTATION (case-insensitive): 'fixed' (default) cuts every window to windowMs; 'gap' makes a window a maximal run of scoring events no more than gapMs apart, scored by their sum — the stretch lasts as long as he kept doing it, not as long as a stopwatch says. Each mode takes exactly ONE knob and REJECTS the other's with a 400: gapMs under fixed, windowMs under gap. Under gap, rows are disjoint per player by construction, end is the run's LAST event (a lone event is a legitimate row with durationMs 0), signed metrics cluster on ALL their events (a death both extends a netFrags run and lowers its score), and a run MAY SPAN the player's own death — getLives is the per-life view"`
+	WindowMs  *int     `json:"windowMs,omitempty" jsonschema:"FIXED mode's window length in integer MILLISECONDS; omit for the default 30000. The main knob — 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase dominance; sweep it rather than expecting one right value. Must be >= 1 and no longer than the match (an out-of-range value is rejected 400 invalid_param naming the bound; omit it for the default). Rejected under mode:'gap', and absent from a gap response"`
+	GapMs     *int     `json:"gapMs,omitempty" jsonschema:"GAP mode's knob in integer MILLISECONDS: consecutive scoring events no more than gapMs apart belong to the same window. REQUIRED under mode:'gap' and deliberately WITHOUT a default — the metrics' cadences are too far apart for one value (measured inter-kill gaps p50 ~11-12 s vs inter-damage-event gaps p50 ~1.0-1.1 s), so omitting it is a 400. Measured starting points: ~10000 for the frag metrics (frags/deaths/netFrags), ~3000 for the damage and shot metrics. Range 1..the match duration, out-of-range rejected 400 naming the bound. Rejected under mode:'fixed'"`
 	Limit     *int     `json:"limit,omitempty" jsonschema:"total windows returned across all players; omit for the default 10, max 200, negative = uncapped. Applied AFTER perPlayer. An explicit 0 is rejected 400 invalid_param — omit it for the default"`
 	PerPlayer int      `json:"perPlayer,omitempty" jsonschema:"max windows contributed by any ONE player; omit (or pass a negative) for uncapped. Applied BEFORE limit, so perPlayer:3 with limit:10 is 'the top 10, at most 3 from anyone' — set it to spread a leaderboard across the roster"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict to these SUBJECT players (whose windows are ranked)"`

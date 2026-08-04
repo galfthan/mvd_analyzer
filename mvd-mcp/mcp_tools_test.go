@@ -414,7 +414,7 @@ func TestMCP_TopWindows_OmittedIntsNotSent(t *testing.T) {
 
 	// Nothing but demoId: no integer param may appear at all.
 	call(map[string]any{"demoId": "gameId:42"})
-	for _, k := range []string{"windowMs", "limit", "perPlayer", "minScore", "from", "to"} {
+	for _, k := range []string{"windowMs", "gapMs", "limit", "perPlayer", "minScore", "from", "to"} {
 		if seen.Has(k) {
 			t.Errorf("omitted %s reached the API as %q; it must stay out of the query", k, seen.Get(k))
 		}
@@ -425,11 +425,11 @@ func TestMCP_TopWindows_OmittedIntsNotSent(t *testing.T) {
 	// the deliberate exception: REST rejects an explicit 0 there too, but
 	// `intv` drops it before it can be sent, so from this shim perPlayer:0 is
 	// indistinguishable from omitting it and lands on the uncapped default.
-	call(map[string]any{"demoId": "gameId:42", "windowMs": 0, "limit": 0, "minScore": 0, "perPlayer": 0})
+	call(map[string]any{"demoId": "gameId:42", "windowMs": 0, "gapMs": 0, "limit": 0, "minScore": 0, "perPlayer": 0})
 	if seen.Has("perPlayer") {
 		t.Errorf("perPlayer:0 reached the API as %q; intv must drop it", seen.Get("perPlayer"))
 	}
-	for _, k := range []string{"windowMs", "limit", "minScore"} {
+	for _, k := range []string{"windowMs", "gapMs", "limit", "minScore"} {
 		if seen.Get(k) != "0" {
 			t.Errorf("explicit %s:0 forwarded as %q; want \"0\"", k, seen.Get(k))
 		}
@@ -449,6 +449,61 @@ func TestMCP_TopWindows_OmittedIntsNotSent(t *testing.T) {
 		if got := seen.Get(k); got != want {
 			t.Errorf("top-windows %s = %q; want %q", k, got, want)
 		}
+	}
+	if seen.Has("mode") {
+		t.Errorf("omitted mode reached the API as %q; an empty string must stay out so REST's default (fixed) applies", seen.Get("mode"))
+	}
+}
+
+// TestMCP_TopWindows_GapModeForwarding pins the second segmentation's own
+// forwarding shape: mode rides as a plain string (the API owns the
+// vocabulary), gapMs rides *int through intp, and the two travel together
+// with NO windowMs — sending one there would earn the conflict 400 for a
+// caller who never asked for it. The omitted-gapMs case is the load-bearing
+// one: gap mode has no default, so a dropped-to-0 gapMs would turn the 400
+// that names the per-metric starting points into a bare range error.
+func TestMCP_TopWindows_GapModeForwarding(t *testing.T) {
+	var seen url.Values
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.URL.Query()
+		w.Write([]byte(`{"windows":[]}`))
+	}))
+	defer api.Close()
+	sess := testMCPSession(t, newProxyBackend(api.URL, "", 5*time.Second))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	call := func(args map[string]any) {
+		t.Helper()
+		res, err := sess.CallTool(ctx, &mcp.CallToolParams{Name: "getTopWindows", Arguments: args})
+		if err != nil {
+			t.Fatalf("CallTool: %v", err)
+		}
+		if res.IsError {
+			t.Fatalf("isError=true; content=%+v", res.Content)
+		}
+	}
+
+	call(map[string]any{"demoId": "gameId:42", "mode": "gap", "gapMs": 10000, "metric": "frags"})
+	for k, want := range map[string]string{"mode": "gap", "gapMs": "10000", "metric": "frags"} {
+		if got := seen.Get(k); got != want {
+			t.Errorf("gap-mode %s = %q; want %q", k, got, want)
+		}
+	}
+	if seen.Has("windowMs") {
+		t.Errorf("windowMs = %q rode along with mode=gap; it must stay out (REST rejects it there)", seen.Get("windowMs"))
+	}
+
+	// mode:'gap' with no gapMs must reach the API AS SUCH, so the caller gets
+	// the "mode=gap requires gapMs and has no default" 400 with its measured
+	// starting points — not a silent gapMs=0.
+	call(map[string]any{"demoId": "gameId:42", "mode": "gap"})
+	if seen.Get("mode") != "gap" {
+		t.Errorf("mode = %q; want %q", seen.Get("mode"), "gap")
+	}
+	if seen.Has("gapMs") {
+		t.Errorf("omitted gapMs reached the API as %q; it must stay out so the missing-knob 400 is the one raised", seen.Get("gapMs"))
 	}
 }
 

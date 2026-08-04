@@ -70,8 +70,10 @@ that downstream consumers render, summarise, or feed to an agent.
   web Key Moments lists ride them), while `Lives` stays REST/MCP-only
   and the CLI exports none of the three.
   `TopWindows` (`topwindows.go` — **not** `top_windows.go`, which Go
-  would read as a `GOOS` build constraint) ranks fixed-length windows by
-  a caller-chosen summable metric; `Lives` (`lives.go`) cuts the match at
+  would read as a `GOOS` build constraint) ranks windows by
+  a caller-chosen summable metric, under either of two segmentations
+  (`Mode`): fixed-length `WindowMs`, or since v68 gap-delimited runs of
+  scoring events no more than `GapMs` apart; `Lives` (`lives.go`) cuts the match at
   the v64 `streams.players[].alive` boundaries. Both fill the same
   per-interval stats block from one builder (`interval_stats.go`), so a
   third segmentation means writing the segmentation, not the statistics.

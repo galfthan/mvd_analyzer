@@ -2572,6 +2572,9 @@ func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
 
 	for _, u := range []string{
 		"/v1/demos/gameId:99/top-windows?metric=damageGiven&dmg=bounded",
+		// The gap-mode clone rides along: the dmg gate is a shared,
+		// mode-agnostic call site in the handler, and this is what keeps it so.
+		"/v1/demos/gameId:99/top-windows?metric=damageGiven&mode=gap&gapMs=3000&dmg=bounded",
 		"/v1/demos/gameId:99/lives?dmg=bounded",
 		"/v1/demos/gameId:99/top-kills?dmg=bounded",
 	} {
@@ -2595,6 +2598,7 @@ func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
 	// family instead of 422-ing a caller who never asked for bounded.
 	for _, u := range []string{
 		"/v1/demos/gameId:99/top-windows?metric=damageGiven",
+		"/v1/demos/gameId:99/top-windows?metric=damageGiven&mode=gap&gapMs=3000",
 		"/v1/demos/gameId:99/lives",
 		"/v1/demos/gameId:99/top-kills",
 	} {
@@ -2794,6 +2798,146 @@ func TestTopWindows_MinScoreParam(t *testing.T) {
 	body, _ = getRaw(t, base+"?minScore=abc")
 	if _, msg := errEnvelope(t, body); !strings.Contains(msg, "integer score") {
 		t.Errorf("minScore=abc: message should hint the unit/range, got %q", msg)
+	}
+}
+
+// TestTopWindows_GapMode is the mode=gap happy path plus the fixed-mode
+// regression beside it. The two knobs are mutually exclusive on the envelope,
+// so each response must carry exactly the one belonging to its own mode: a
+// windowMs on a gap response would be a lie (those windows are as long as
+// their events), and a gapMs on a fixed one describes nothing.
+func TestTopWindows_GapMode(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
+
+	// bps kills at 10000/12000 (2000 apart) cluster at gapMs=3000; his kill at
+	// 90000 and valla's at 40000 are each their own singleton cluster.
+	gap := getJSON(t, base+"?mode=gap&gapMs=3000", 200)
+	if gap["mode"] != "gap" {
+		t.Errorf("mode echo = %v, want %q", gap["mode"], "gap")
+	}
+	if v, ok := gap["gapMs"]; !ok || int(v.(float64)) != 3000 {
+		t.Errorf("gapMs echo = %v (present=%v), want 3000", v, ok)
+	}
+	if v, ok := gap["windowMs"]; ok {
+		t.Errorf("gap response carries windowMs = %v; it must be omitted (the windows are as long as their events)", v)
+	}
+	wins := gap["windows"].([]any)
+	if len(wins) != 3 {
+		t.Fatalf("gap windows = %d, want 3 (bps 10000-12000, bps 90000, valla 40000); body=%v", len(wins), wins)
+	}
+	w0 := wins[0].(map[string]any)
+	if w0["player"] != "bps" || w0["score"].(float64) != 2 ||
+		w0["start"].(float64) != 10000 || w0["end"].(float64) != 12000 {
+		t.Errorf("top gap window = %v, want bps score 2 spanning 10000..12000", w0)
+	}
+
+	// Case-insensitive, like every other closed vocabulary on this endpoint.
+	if up := getJSON(t, base+"?mode=GAP&gapMs=3000", 200); up["mode"] != "gap" {
+		t.Errorf("mode=GAP echoed %v, want the canonical \"gap\"", up["mode"])
+	}
+
+	// Fixed mode is unchanged byte for byte, and now says so: mode is echoed
+	// on EVERY response so a consumer never has to infer the segmentation from
+	// which knob field happens to be present.
+	fixed := getJSON(t, base, 200)
+	if fixed["mode"] != "fixed" {
+		t.Errorf("default mode echo = %v, want %q", fixed["mode"], "fixed")
+	}
+	if v, ok := fixed["windowMs"]; !ok || int(v.(float64)) != topWindowsDefaultMs {
+		t.Errorf("fixed response windowMs = %v (present=%v), want %d", v, ok, topWindowsDefaultMs)
+	}
+	if v, ok := fixed["gapMs"]; ok {
+		t.Errorf("fixed response carries gapMs = %v; it must be omitted", v)
+	}
+	if explicit := getJSON(t, base+"?mode=fixed&windowMs=5000", 200); explicit["mode"] != "fixed" ||
+		int(explicit["windowMs"].(float64)) != 5000 {
+		t.Errorf("mode=fixed&windowMs=5000 echoed mode=%v windowMs=%v", explicit["mode"], explicit["windowMs"])
+	}
+}
+
+// TestTopWindows_GapModeErrors pins every 400 the second segmentation adds,
+// and WHERE each is produced. The vocabulary and cross-knob rules are the
+// view's (forwarded through the ErrInvalidFilter -> 400 invalid_param path, so
+// one request cannot get two wordings); the range gates are the handler's,
+// mirroring windowMs on the same match duration.
+func TestTopWindows_GapModeErrors(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
+
+	for _, tc := range []struct {
+		name  string
+		query string
+		// want are substrings the message must carry.
+		want []string
+	}{
+		// From the view: the vocabulary and the two conflict rules.
+		{"unknown mode", "?mode=sliding", []string{`unknown mode "sliding"`, "fixed, gap"}},
+		{"gapMs under fixed", "?mode=fixed&gapMs=3000", []string{"gapMs applies to mode=gap", "mode=fixed takes windowMs"}},
+		{"gapMs under the DEFAULT fixed", "?gapMs=3000", []string{"gapMs applies to mode=gap"}},
+		{"windowMs under gap", "?mode=gap&gapMs=3000&windowMs=5000", []string{"windowMs applies to mode=fixed", "mode=gap takes gapMs"}},
+		// gap mode has no default gapMs, so omitting it is an error that has
+		// to hand back the measured starting points — there is nothing else
+		// for the caller to go on.
+		{"missing gapMs", "?mode=gap", []string{"mode=gap requires gapMs and has no default", "~10000", "~3000"}},
+		// From the handler: the range, mirroring windowMs. 120000 is the
+		// fixture's match duration.
+		{"gapMs=0", "?mode=gap&gapMs=0", []string{"gapMs must be >= 1"}},
+		{"gapMs negative", "?mode=gap&gapMs=-5", []string{"gapMs must be >= 1"}},
+		{"gapMs above the match duration", "?mode=gap&gapMs=2147483647", []string{"120000", "the match duration"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body, status := getRaw(t, base+tc.query)
+			if status != 400 {
+				t.Fatalf("GET %s: status = %d, want 400 (body=%s)", tc.query, status, string(body))
+			}
+			code, msg := errEnvelope(t, body)
+			if code != "invalid_param" {
+				t.Errorf("code = %q, want invalid_param", code)
+			}
+			for _, w := range tc.want {
+				if !strings.Contains(msg, w) {
+					t.Errorf("message = %q, must contain %q", msg, w)
+				}
+			}
+		})
+	}
+
+	// The floor message must NOT offer the "omit it for the default" escape
+	// windowMs' does: gap mode has no default gapMs, and omitting it is its
+	// own 400. Pointing a caller at it would loop them between two errors.
+	body, _ := getRaw(t, base+"?mode=gap&gapMs=0")
+	if _, msg := errEnvelope(t, body); strings.Contains(msg, "omit") {
+		t.Errorf("gapMs=0 message = %q; it must not suggest omitting the parameter (there is no default)", msg)
+	}
+
+	// A malformed value names the unit, exactly as windowMs and from/to do.
+	body, _ = getRaw(t, base+"?mode=gap&gapMs=3.5")
+	if _, msg := errEnvelope(t, body); !strings.Contains(msg, "integer milliseconds") {
+		t.Errorf("gapMs=3.5: message should hint the unit, got %q", msg)
+	}
+}
+
+// TestTopWindows_GapMsOmittedIsNotZero is the omitted-integer contract at the
+// HTTP layer: an ABSENT gapMs is not the same request as gapMs=0. The MCP shim
+// turns an omitted integer argument into 0, so if the two collapsed here, a
+// forgotten argument would look like a deliberate one — the reason `limit` and
+// `windowMs` already reject an explicit 0.
+func TestTopWindows_GapMsOmittedIsNotZero(t *testing.T) {
+	srv := newTestServer(t, intervalStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
+
+	// Absent under the default (fixed) mode: served, and nothing echoed.
+	resp := getJSON(t, base, 200)
+	if v, ok := resp["gapMs"]; ok {
+		t.Errorf("omitted gapMs echoed as %v; it must stay absent", v)
+	}
+	// Explicit 0 under the same mode: rejected, not read as "absent".
+	if body, status := getRaw(t, base+"?gapMs=0"); status != 400 {
+		t.Errorf("gapMs=0: status = %d, want 400 (body=%s)", status, string(body))
 	}
 }
 

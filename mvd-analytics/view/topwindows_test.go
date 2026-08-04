@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -1323,5 +1324,452 @@ func TestTopWindowsNetFragsTieBreakOnDamageGiven(t *testing.T) {
 	}
 	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
 		t.Errorf("order = %v, want %v", order, want)
+	}
+}
+
+// gapOpts is a mode=gap query: gapMs is required there, so every gap-mode test
+// goes through this rather than repeating the two fields.
+func gapOpts(metric string, gapMs int32) TopWindowsOptions {
+	return TopWindowsOptions{Mode: TopWindowModeGap, Metric: metric, GapMs: gapMs}
+}
+
+// The whole gap contract in one test: "no more than gapMs apart" is a closed
+// bound, so a gap of exactly gapMs JOINS and gapMs+1 splits. The pair is the
+// only thing that pins which side of the boundary the rule falls on.
+func TestGapWindowsSplitBoundary(t *testing.T) {
+	// Two kills 2000 ms apart.
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"), kill(3000, "A", "B", "rl"),
+	}, 60000)
+	joined := mustHW(t, res, gapOpts(MetricFrags, 2000))
+	if len(joined.Windows) != 1 {
+		t.Fatalf("gapMs=2000: got %d windows, want 1 — a gap of exactly gapMs joins", len(joined.Windows))
+	}
+	w := joined.Windows[0]
+	if w.Start != 1000 || w.End != 3000 || w.Score != 2 {
+		t.Errorf("gapMs=2000: [%d,%d] score %d, want [1000,3000] score 2", w.Start, w.End, w.Score)
+	}
+	if w.DurationMs != 2000 {
+		t.Errorf("durationMs = %d, want 2000 — the window is exactly the span of its events", w.DurationMs)
+	}
+
+	split := mustHW(t, res, gapOpts(MetricFrags, 1999))
+	if len(split.Windows) != 2 {
+		t.Fatalf("gapMs=1999: got %d windows, want 2 — one ms over the gap splits", len(split.Windows))
+	}
+	for _, w := range split.Windows {
+		if w.Score != 1 || w.Start != w.End {
+			t.Errorf("gapMs=1999: [%d,%d] score %d, want a singleton scoring 1", w.Start, w.End, w.Score)
+		}
+	}
+}
+
+// A run of one is a legitimate cluster: a lone kill IS a moment, and it is the
+// ranking, not the segmentation, that decides whether it is an interesting one.
+func TestGapWindowsSingletonCluster(t *testing.T) {
+	w := topWindow(t, hwResult([]result.FragEntry{kill(4321, "A", "B", "rl")}, 60000),
+		gapOpts(MetricFrags, 3000))
+	if w.Start != 4321 || w.End != 4321 {
+		t.Errorf("[%d,%d], want the zero-length span [4321,4321]", w.Start, w.End)
+	}
+	if w.DurationMs != 0 {
+		t.Errorf("durationMs = %d, want 0", w.DurationMs)
+	}
+	if w.Score != 1 || w.Kills != 1 {
+		t.Errorf("score/kills = %d/%d, want 1/1", w.Score, w.Kills)
+	}
+}
+
+// The Part 3 invariant carries over with no new machinery: absent a weapons=
+// filter, every event of the metric inside [start, end] is a member of the run
+// by construction, so score equals the same-named stats field exactly.
+func TestGapWindowsScoreMatchesStats(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"), kill(2500, "A", "B", "lg"), kill(3200, "A", "B", "lg"),
+		kill(30000, "A", "B", "rl"),
+	}, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(900, "A", "B", "rl", 60), dmg(1000, "A", "B", "rl", 40),
+		dmg(2400, "A", "B", "lg", 70), dmg(29900, "A", "B", "rl", 110),
+	}}
+
+	frags := mustHW(t, res, gapOpts(MetricFrags, 2000))
+	if len(frags.Windows) != 2 {
+		t.Fatalf("frags: got %d windows, want 2 clusters", len(frags.Windows))
+	}
+	for _, w := range frags.Windows {
+		if w.Score != w.Kills {
+			t.Errorf("frags: score = %d but kills = %d over [%d,%d]", w.Score, w.Kills, w.Start, w.End)
+		}
+	}
+	damage := mustHW(t, res, gapOpts(MetricDamageGiven, 2000))
+	if len(damage.Windows) != 2 {
+		t.Fatalf("damageGiven: got %d windows, want 2 clusters", len(damage.Windows))
+	}
+	for _, w := range damage.Windows {
+		if w.Score != w.DamageGiven {
+			t.Errorf("damageGiven: score = %d but damageGiven = %d over [%d,%d]",
+				w.Score, w.DamageGiven, w.Start, w.End)
+		}
+	}
+}
+
+// A signed metric clusters on ALL its events, negatives included: a death
+// mid-run both EXTENDS the run — it is an event in the stream — and lowers the
+// score. metric=frags over the same fixture is the control: without the death
+// in the stream the two kills are too far apart to join at all.
+func TestGapWindowsSignedMetricClustersOnNegatives(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"),
+		{Time: 2000, Killer: "B", Victim: "A", Weapon: "rl"},
+		kill(3000, "A", "B", "rl"),
+	}, 60000)
+	opts := gapOpts(MetricNetFrags, 1500)
+	opts.Players = []string{"A"}
+
+	got := mustHW(t, res, opts)
+	if len(got.Windows) != 1 {
+		t.Fatalf("got %d windows, want 1 — the death at 2000 bridges two kills 2000 ms apart", len(got.Windows))
+	}
+	w := got.Windows[0]
+	if w.Start != 1000 || w.End != 3000 {
+		t.Errorf("[%d,%d], want [1000,3000]", w.Start, w.End)
+	}
+	if w.Score != 1 {
+		t.Errorf("score = %d, want 1 (2 kills - 1 death) — the death lowers the score it extended", w.Score)
+	}
+
+	ctl := TopWindowsOptions{Mode: TopWindowModeGap, Metric: MetricFrags, GapMs: 1500, Players: []string{"A"}}
+	if got := mustHW(t, res, ctl); len(got.Windows) != 2 {
+		t.Errorf("metric=frags: got %d windows, want 2 — the death is not in that stream, so nothing bridges the kills",
+			len(got.Windows))
+	}
+
+	// And min applies to the cluster's own signed total: a floor above it drops
+	// the row that the death sank.
+	two := 2
+	opts.Min = &two
+	if got := mustHW(t, res, opts); len(got.Windows) != 0 {
+		t.Errorf("min=2: got %+v, want nothing — the cluster nets 1", got.Windows)
+	}
+}
+
+// weapons= scopes the SCORING events, which in gap mode also means it scopes
+// the stream the clusters are cut from — while the stats block still describes
+// the whole window. Score is then a subset of the same-named stat.
+func TestGapWindowsWeaponFilterScopesScoringOnly(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "lg"), kill(1500, "A", "B", "rl"), kill(2000, "A", "B", "lg"),
+	}, 60000)
+	got := mustHW(t, res, TopWindowsOptions{
+		Mode: TopWindowModeGap, GapMs: 1000, Weapons: []string{"lg"},
+	})
+	w := firstWindow(t, got)
+	if w.Start != 1000 || w.End != 2000 {
+		t.Errorf("[%d,%d], want [1000,2000] — the cluster spans the filtered events", w.Start, w.End)
+	}
+	if w.Score != 2 {
+		t.Errorf("score = %d, want 2 (lg kills only)", w.Score)
+	}
+	if w.Kills != 3 || w.ByWeapon["rl"] != 1 {
+		t.Errorf("kills = %d, byWeapon = %v — the stats block is unfiltered", w.Kills, w.ByWeapon)
+	}
+	if got.ScoredBy.Metric != MetricFrags || len(got.ScoredBy.Weapons) != 1 || got.ScoredBy.Weapons[0] != "lg" {
+		t.Errorf("scoredBy = %+v, want metric=frags weapons=[lg]", got.ScoredBy)
+	}
+}
+
+// from/to bound where a cluster may START — its first event — never what it
+// covers. A cluster that begins before `from` is dropped even though it runs
+// well past it, which is the same caveat fixed mode documents.
+func TestGapWindowsFromToBoundTheStart(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"), kill(2500, "A", "B", "rl"), kill(4000, "A", "B", "rl"),
+		kill(50000, "A", "B", "lg"), kill(51000, "A", "B", "lg"),
+	}, 120000)
+
+	all := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 2000, Limit: -1})
+	if len(all.Windows) != 2 {
+		t.Fatalf("unbounded: got %d windows, want 2 clusters", len(all.Windows))
+	}
+
+	late := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 2000, From: 2000, Limit: -1})
+	if len(late.Windows) != 1 || late.Windows[0].Start != 50000 {
+		t.Fatalf("from=2000: got %+v, want only the late cluster — the early one starts at 1000 and is dropped "+
+			"even though it covers 2000..4000", late.Windows)
+	}
+	early := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 2000, To: 2000, Limit: -1})
+	if len(early.Windows) != 1 || early.Windows[0].Start != 1000 || early.Windows[0].End != 4000 {
+		t.Fatalf("to=2000: got %+v, want the cluster starting at 1000 and running to 4000", early.Windows)
+	}
+	inverted, err := TopWindows(res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 2000, From: 50000, To: 1000})
+	if err != nil {
+		t.Fatalf("inverted range: %v — rejecting it is the HTTP layer's job", err)
+	}
+	if len(inverted.Windows) != 0 {
+		t.Errorf("inverted range: got %+v, want nothing", inverted.Windows)
+	}
+}
+
+// min is the score floor in gap mode too, applied to the cluster's own sum.
+func TestGapWindowsMin(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"), kill(1500, "A", "B", "rl"),
+		kill(50000, "A", "B", "lg"),
+	}, 120000)
+	three := 3
+	if got := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 1000, Limit: -1}); len(got.Windows) != 2 {
+		t.Fatalf("default min: got %d windows, want 2", len(got.Windows))
+	}
+	got := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 1000, Limit: -1, Min: &three})
+	if len(got.Windows) != 0 {
+		t.Errorf("min=3: got %+v, want nothing — no cluster reaches 3", got.Windows)
+	}
+}
+
+// Ties are MORE common in gap mode than in fixed mode — many clusters hold one
+// or two kills — so the complementary secondary earns its keep here. The
+// ranking itself is shared with fixed mode; what this pins is that gap mode
+// actually feeds it, which a cluster built without `sec` would not.
+func TestGapWindowsTieBreakOnSecondaryMetric(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"),
+		kill(5000, "B", "X", "rl"), kill(5500, "B", "X", "rl"),
+	}, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 50), dmg(1500, "A", "X", "rl", 50),
+		dmg(5000, "B", "X", "rl", 200), dmg(5500, "B", "X", "rl", 200),
+	}}
+	got := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 1000, Limit: -1})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 2 {
+			t.Fatalf("%s scored %d, want 2 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v — the later cluster carried four times the damage", order, want)
+	}
+	if w := got.Windows[0]; w.DamageGiven != 400 {
+		t.Errorf("winner damageGiven = %d, want 400 — the tie broke on a number the row does not display", w.DamageGiven)
+	}
+
+	// Control: with no damage stream the secondary ties at 0 everywhere and the
+	// positional keys decide, exactly as in fixed mode.
+	res.Damage = nil
+	got = mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 1000, Limit: -1})
+	if got.Windows[0].Player != "A" {
+		t.Errorf("without a damage stream the earlier cluster must rank first, got %s", got.Windows[0].Player)
+	}
+}
+
+// The secondary integrates the CLOSED span — the end event included. The
+// distinction matters more here than in fixed mode: a frag cluster's last
+// event IS the kill, and the kill's damage lands at that instant, so a span
+// that stopped one tick short would silently drop exactly the damage that
+// closed the run and reorder tied rows. The fixture puts the winner's damage
+// ONLY on its end event, so sum(start, end-1) inverts the order (a mutation
+// the symmetric fixture above cannot see — mutation review, 2026-08-04).
+func TestGapWindowsTieBreakSpanIncludesEndEvent(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"),
+		kill(5000, "B", "X", "rl"), kill(5500, "B", "X", "rl"),
+	}, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 100), // A's damage sits at its cluster's START
+		dmg(5500, "B", "X", "rl", 300), // B's ONLY at its cluster's END
+	}}
+	got := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 1000, Limit: -1})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 2 {
+			t.Fatalf("%s scored %d, want 2 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v — the end event's damage must count toward the tie-break", order, want)
+	}
+}
+
+// A cluster may span the player's OWN death: kill, die, respawn, kill again
+// within gapMs is one window. The one-sentence contract has no life machinery
+// in it, and Lives is what serves the per-life question — so the death shows up
+// in the stats block without breaking the window.
+func TestGapWindowsClusterSpansTheOwnDeath(t *testing.T) {
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "B", "rl"),
+		{Time: 2000, Killer: "B", Victim: "A", Weapon: "rl"},
+		kill(3000, "A", "B", "rl"),
+	}, 60000)
+	opts := gapOpts(MetricFrags, 2500)
+	opts.Players = []string{"A"}
+	got := mustHW(t, res, opts)
+	if len(got.Windows) != 1 {
+		t.Fatalf("got %d windows, want 1 — a death does not end a cluster", len(got.Windows))
+	}
+	w := got.Windows[0]
+	if w.Start != 1000 || w.End != 3000 || w.Score != 2 {
+		t.Errorf("[%d,%d] score %d, want [1000,3000] score 2", w.Start, w.End, w.Score)
+	}
+	if w.Deaths != 1 {
+		t.Errorf("deaths = %d, want 1 — the death the cluster spans is visible in the stats block", w.Deaths)
+	}
+}
+
+// The envelope must name the segmentation on EVERY response, and carry only the
+// knob of its own mode: windowMs on a gap response would be a lie, and gapMs on
+// a fixed one is a value nothing used. The fixed half is a regression check —
+// `mode` is the only thing that response gained.
+func TestGapWindowsEnvelope(t *testing.T) {
+	res := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
+	keys := func(v *TopWindowsView) map[string]json.RawMessage {
+		t.Helper()
+		b, err := json.Marshal(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var m map[string]json.RawMessage
+		if err := json.Unmarshal(b, &m); err != nil {
+			t.Fatal(err)
+		}
+		return m
+	}
+
+	fixed := mustHW(t, res, TopWindowsOptions{WindowMs: 5000})
+	if fixed.Mode != TopWindowModeFixed || fixed.WindowMs != 5000 || fixed.GapMs != 0 {
+		t.Errorf("fixed envelope: mode=%q windowMs=%d gapMs=%d, want fixed/5000/0",
+			fixed.Mode, fixed.WindowMs, fixed.GapMs)
+	}
+	fm := keys(fixed)
+	if string(fm["mode"]) != `"fixed"` {
+		t.Errorf("fixed JSON mode = %s, want \"fixed\" — the mode is echoed even when it is the default", fm["mode"])
+	}
+	if string(fm["windowMs"]) != "5000" {
+		t.Errorf("fixed JSON windowMs = %s, want 5000", fm["windowMs"])
+	}
+	if _, ok := fm["gapMs"]; ok {
+		t.Errorf("fixed JSON carries gapMs = %s", fm["gapMs"])
+	}
+
+	gap := mustHW(t, res, gapOpts(MetricFrags, 3000))
+	if gap.Mode != TopWindowModeGap || gap.GapMs != 3000 || gap.WindowMs != 0 {
+		t.Errorf("gap envelope: mode=%q gapMs=%d windowMs=%d, want gap/3000/0",
+			gap.Mode, gap.GapMs, gap.WindowMs)
+	}
+	gm := keys(gap)
+	if string(gm["mode"]) != `"gap"` || string(gm["gapMs"]) != "3000" {
+		t.Errorf("gap JSON mode/gapMs = %s/%s, want \"gap\"/3000", gm["mode"], gm["gapMs"])
+	}
+	if _, ok := gm["windowMs"]; ok {
+		t.Errorf("gap JSON carries windowMs = %s — a gap window has no fixed length", gm["windowMs"])
+	}
+	// The rest of the envelope is mode-independent.
+	if gap.Limit != defaultTopWindowLimit || gap.ScoredBy.Metric != MetricFrags {
+		t.Errorf("gap envelope: limit=%d scoredBy=%+v, want the shared defaults", gap.Limit, gap.ScoredBy)
+	}
+}
+
+// The mode is matched case-insensitively and ECHOED canonically, like the
+// metric, so a caller can round-trip the value.
+func TestGapWindowsModeIsCaseInsensitive(t *testing.T) {
+	res := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
+	for _, in := range []string{"gap", "GAP", "Gap", "  gap  "} {
+		got := mustHW(t, res, TopWindowsOptions{Mode: in, GapMs: 3000})
+		if got.Mode != TopWindowModeGap {
+			t.Errorf("mode=%q echoed as %q, want %q", in, got.Mode, TopWindowModeGap)
+		}
+	}
+	for _, in := range []string{"", "fixed", "FIXED", " Fixed "} {
+		got := mustHW(t, res, TopWindowsOptions{Mode: in})
+		if got.Mode != TopWindowModeFixed {
+			t.Errorf("mode=%q echoed as %q, want %q", in, got.Mode, TopWindowModeFixed)
+		}
+	}
+}
+
+// A knob belonging to the other mode is REFUSED, not ignored: the response
+// echoes only its own mode's knob, so a silent drop would leave nothing in the
+// output to show that the caller's request was not the query that ran. And
+// gapMs has no default to fall back on — the error says so, and names the
+// measured starting points, because "required" without a value to try is a
+// dead end for the agent reading it.
+func TestGapWindowsModeAndKnobValidation(t *testing.T) {
+	res := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
+	for _, tc := range []struct {
+		name string
+		opts TopWindowsOptions
+		want []string // substrings the message must carry
+	}{
+		// The conflict substrings are ASYMMETRIC on purpose: "gapMs" and
+		// "windowMs" alone appear in both messages, so a test wanting only
+		// those would pass with the two messages exchanged (mutation review,
+		// 2026-08-04). "applies to mode=X" appears in exactly one each.
+		{"unknown mode", TopWindowsOptions{Mode: "adaptive"}, []string{"adaptive", "fixed", "gap"}},
+		{"gapMs under fixed", TopWindowsOptions{GapMs: 3000}, []string{"applies to mode=gap"}},
+		{"gapMs under an explicit fixed", TopWindowsOptions{Mode: TopWindowModeFixed, GapMs: 3000}, []string{"applies to mode=gap"}},
+		{"windowMs under gap", TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 3000, WindowMs: 30000}, []string{"applies to mode=fixed"}},
+		{"gapMs missing under gap", TopWindowsOptions{Mode: TopWindowModeGap}, []string{"gapMs", "10000", "3000"}},
+		{"gapMs negative under gap", TopWindowsOptions{Mode: TopWindowModeGap, GapMs: -1}, []string{"gapMs"}},
+		// A NEGATIVE wrong-mode knob is a conflict too, not a value to zero
+		// away: the gates are != 0, because any nonzero wrong-mode value is an
+		// expression of intent toward the wrong knob and silently dropping it
+		// is what the conflict 400 exists to prevent.
+		{"negative gapMs under fixed", TopWindowsOptions{GapMs: -7}, []string{"applies to mode=gap"}},
+		{"negative windowMs under gap", TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 3000, WindowMs: -3}, []string{"applies to mode=fixed"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := TopWindows(res, tc.opts)
+			if !errors.Is(err, ErrInvalidFilter) {
+				t.Fatalf("err = %v, want ErrInvalidFilter", err)
+			}
+			for _, want := range tc.want {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("err = %q, want it to name %q", err, want)
+				}
+			}
+		})
+	}
+	// The validation runs before the demo is touched, so it is the same error on
+	// a nil result — a caller cannot get ErrUnavailable for a malformed query.
+	if _, err := TopWindows(nil, TopWindowsOptions{Mode: "adaptive"}); !errors.Is(err, ErrInvalidFilter) {
+		t.Errorf("nil result, bad mode: err = %v, want ErrInvalidFilter", err)
+	}
+}
+
+// Same trap as the fixed-mode determinism test: identical input must give
+// identical bytes however Go orders its maps this run.
+func TestGapWindowsDeterministic(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "B", "lg"), kill(1100, "A", "C", "rl"),
+		kill(1200, "A", "B", "lg"), kill(1300, "A", "C", "rl"),
+		kill(5000, "Z", "B", "lg"), kill(5100, "Z", "C", "rl"),
+		kill(5200, "Z", "B", "lg"), kill(5300, "Z", "C", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	var first []byte
+	for i := 0; i < 50; i++ {
+		got := mustHW(t, res, TopWindowsOptions{Mode: TopWindowModeGap, GapMs: 500, Limit: -1})
+		b, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if i == 0 {
+			if len(got.Windows) != 2 {
+				t.Fatalf("got %d windows, want 2 — one cluster per player", len(got.Windows))
+			}
+			for _, w := range got.Windows {
+				if w.Score != 4 || w.MainWeapon != "lg" {
+					t.Fatalf("%s: score %d mainWeapon %q, want 4/lg (2 lg / 2 rl, ties break by name)",
+						w.Player, w.Score, w.MainWeapon)
+				}
+			}
+			first = b
+			continue
+		}
+		if string(b) != string(first) {
+			t.Fatalf("run %d differs from run 0:\n %s\n %s", i, first, b)
+		}
 	}
 }

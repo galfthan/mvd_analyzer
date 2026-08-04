@@ -1020,8 +1020,39 @@ package result
 //     new names, so it describes the endpoint as it is now rather than as it
 //     shipped.
 //
+// v68 — gap-delimited windows: `mode=gap` on /top-windows. THE STORED RESULT
+// GAINS NO FIELD, for v67's reason: nothing in this package changes shape, and
+// the bump is for the observable API surface alone.
+//
+//   - /top-windows gains a second SEGMENTATION behind `mode` (default `fixed`,
+//     so a pre-v68 request answers identically apart from the additive
+//     `mode:"fixed"` echo every response now carries). Under
+//     `mode=gap` a window is a maximal run of scoring events in which
+//     consecutive events are no more than `gapMs` apart, and its score is
+//     their sum — the stretch lasts as long as the player kept doing it
+//     rather than as long as a stopwatch says. It is NOT the adaptive
+//     segmentation dropped during planning: Ruzzo-Tompa needs a per-second
+//     penalty to stop the whole match being one segment, and that penalty is
+//     exactly the unexplainable constant this rule does without.
+//   - `gapMs` is REQUIRED under mode=gap and has NO default. Measured over the
+//     44-demo cache, per-player inter-kill gaps run p50 ~11-12 s while
+//     inter-damage-event gaps run p50 ~1.0-1.1 s, so no single value serves
+//     both: documented starting points are ~10000 for the frag metrics and
+//     ~3000 for the damage and shot metrics. Each mode REJECTS the other's
+//     knob with a 400 rather than ignoring it.
+//   - ADDITIVE on the /top-windows envelope: `mode` (always present, so a
+//     consumer never infers the segmentation from which knob is present) and
+//     `gapMs` (gap responses only); `windowMs` becomes fixed-only, since on a
+//     gap response a fixed length would be a lie. Rows need no new field —
+//     start/end already describe variable-length spans, and a gap row's `end`
+//     is its last scoring event rather than start+windowMs.
+//   - Gap clusters are disjoint per player by construction (no overlap
+//     suppression), signed metrics cluster on ALL their events (a death both
+//     extends a netFrags run and lowers its score), and a cluster MAY SPAN the
+//     player's own death — /lives stays the per-life view.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 67
+const CurrentSchemaVersion = 68
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
