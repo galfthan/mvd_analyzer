@@ -2266,20 +2266,25 @@ function renderTopDamageWindows(v, hubInfo, playerUserIDs) {
 
     for (const w of rows) {
         const tr = document.createElement('tr');
-        // The clip opens a few seconds before the run so the first frag is not
-        // already happening when playback starts.
-        const watchCell = topMomentsWatchCell(w.player, w.startSec - 3, w.endSec + 3, hubInfo, playerUserIDs);
+        // The clip is the window plus a 1 s lead-in — 11 s total, per the
+        // product ruling: enough not to open mid-swing, short enough that the
+        // clip IS the window. NOTE the hub URL's from/to are DEMO-relative
+        // (recording start), while this table displays match-relative time,
+        // so the hub scrubber reads demoOffset-1 higher than the Start cell;
+        // the content is aligned even though the numbers differ.
+        const watchCell = topMomentsWatchCell(w.player, w.startSec - 1, w.endSec, hubInfo, playerUserIDs);
 
         // score IS the window's bounded enemy damage (the ranking metric);
-        // frags comes from the stats block (IntervalStats is embedded, so its
-        // fields are inline on the row) — and is also what broke any damage
-        // tie, per the view's complementary tie-break.
+        // kills comes from the stats block (IntervalStats is embedded, so its
+        // fields are inline on the row — the JSON key is `kills`, not
+        // `frags`) and is also what broke any damage tie, per the view's
+        // complementary tie-break.
         tr.innerHTML = `
             <td class="time-cell time-link">${formatDuration(w.startSec)}</td>
             <td>${escapeHtml(w.player || 'Unknown')}</td>
             <td>${escapeHtml(w.team || '-')}</td>
             <td>${w.score ?? 0}</td>
-            <td>${w.frags ?? 0}</td>
+            <td>${w.kills ?? 0}</td>
             <td>${watchCell}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(w.startSec));
