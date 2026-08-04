@@ -2176,9 +2176,12 @@ const TOP_KILL_QUERIES = [
     { key: 'toplg', weapon: 'lg', gapMs: 1200, limit: 5 },
 ];
 
-// The window length for the frag-run ranking. 10 s is the "he just went off"
-// unit — long enough to hold a multi-frag burst, short enough that the window
-// is one fight rather than a lull plus a fight.
+// The window length for the damage-window ranking. 10 s is the "he just went
+// off" unit — long enough to hold a whole engagement's damage, short enough
+// that the window is one fight rather than a lull plus a fight. Ranked by
+// BOUNDED enemy damage (metric=damageGiven) so the table complements the
+// per-kill burst tables beside it: same family, same scoreboard semantics;
+// ties break on the window's frags (the view's complementary tie-break).
 const TOP_RUN_WINDOW_MS = 10000;
 
 // Bumped on every render so a reply for a superseded demo is dropped. A query
@@ -2195,7 +2198,7 @@ function renderTopMoments() {
 
     // Clear first: an in-flight query must never leave the previous demo's
     // rows on screen while it resolves.
-    for (const id of ['topruns', ...TOP_KILL_QUERIES.map(q => q.key)]) {
+    for (const id of ['topdmg', ...TOP_KILL_QUERIES.map(q => q.key)]) {
         const body = document.getElementById(`${id}-body`);
         if (body) body.innerHTML = '';
     }
@@ -2218,8 +2221,8 @@ function renderTopMoments() {
     };
 
     run('getTopWindows',
-        { metric: 'frags', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' },
-        v => renderTopFragRuns(v, hubInfo, playerUserIDs));
+        { metric: 'damageGiven', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' },
+        v => renderTopDamageWindows(v, hubInfo, playerUserIDs));
 
     for (const q of TOP_KILL_QUERIES) {
         run('getTopKills',
@@ -2244,11 +2247,11 @@ function topMomentsWatchCell(playerName, fromSec, toSec, hubInfo, playerUserIDs)
     return `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
 }
 
-// Top frag runs: the five 10 s stretches with the most enemy kills in them.
-// `v` is a TopWindowsView, or null when the query failed.
-function renderTopFragRuns(v, hubInfo, playerUserIDs) {
-    const body = document.getElementById('topruns-body');
-    const empty = document.getElementById('topruns-empty');
+// Top damage windows: the ten 10 s stretches with the most bounded enemy
+// damage dealt. `v` is a TopWindowsView, or null when the query failed.
+function renderTopDamageWindows(v, hubInfo, playerUserIDs) {
+    const body = document.getElementById('topdmg-body');
+    const empty = document.getElementById('topdmg-empty');
     if (!body) return;
     body.innerHTML = '';
 
@@ -2267,15 +2270,16 @@ function renderTopFragRuns(v, hubInfo, playerUserIDs) {
         // already happening when playback starts.
         const watchCell = topMomentsWatchCell(w.player, w.startSec - 3, w.endSec + 3, hubInfo, playerUserIDs);
 
-        // damageGiven comes from the window's own stats block (IntervalStats is
-        // embedded, so its fields are inline on the row) — enemy damage in the
-        // same window, in the family the envelope's `dmg` names.
+        // score IS the window's bounded enemy damage (the ranking metric);
+        // frags comes from the stats block (IntervalStats is embedded, so its
+        // fields are inline on the row) — and is also what broke any damage
+        // tie, per the view's complementary tie-break.
         tr.innerHTML = `
             <td class="time-cell time-link">${formatDuration(w.startSec)}</td>
             <td>${escapeHtml(w.player || 'Unknown')}</td>
             <td>${escapeHtml(w.team || '-')}</td>
             <td>${w.score ?? 0}</td>
-            <td>${w.damageGiven ?? 0}</td>
+            <td>${w.frags ?? 0}</td>
             <td>${watchCell}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(w.startSec));
@@ -3333,8 +3337,8 @@ function resetUIToCleanState() {
     // The view-query tables (filled asynchronously by renderTopMoments); the
     // token bump also drops any reply still in flight for the old demo.
     topMomentsToken++;
-    setHTML('topruns-body', '');
-    hide('topruns-empty');
+    setHTML('topdmg-body', '');
+    hide('topdmg-empty');
     setHTML('toprl-body', '');
     hide('toprl-empty');
     setHTML('toplg-body', '');

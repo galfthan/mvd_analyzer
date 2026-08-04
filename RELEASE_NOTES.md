@@ -86,9 +86,10 @@ observable change).
   damage (393 / 295 / 287 / 249 where they were 150 / 205 / 287 / 169) and
   gLAd's best three-frag window shifts 3.7 s earlier for 99 more damage.
 - **MCP gains `getTopKills`**, lockstep as always.
-- **Web app: Key Moments gains three ranked lists** — the top 10 frag runs
-  (the best 10 s windows by enemy kills), the top 10 RL and top 5 LG kill
-  bursts at the per-weapon gaps 2300 / 1200 ms; the powerup-run filter now
+- **Web app: Key Moments gains three ranked lists** — the top 10 damage
+  windows (the best 10 s stretches by bounded enemy damage, ties breaking
+  on frags), the top 10 RL and top 5 LG kill bursts at the per-weapon gaps
+  2300 / 1200 ms; the powerup-run filter now
   defaults to min 3 frags (a quad cycles every 60 s, so 0-2-frag runs are
   routine noise — the input still goes down to 0). They are view queries over the analysed
   demo (new WASM exports `getTopWindows` / `getTopKills`), so each table

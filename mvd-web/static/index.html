@@ -862,22 +862,22 @@
                     </div>
                 </div>
                 <div class="panel">
-                    <h3 title="The ten 10-second stretches with the most enemy kills in them">Top Frag Runs (10 s)</h3>
-                    <table class="stats-table" id="topruns-table">
+                    <h3 title="The ten 10-second stretches with the most bounded enemy damage dealt; ties break on frags">Top Damage Windows (10 s)</h3>
+                    <table class="stats-table" id="topdmg-table">
                         <thead>
                             <tr>
                                 <th>Start</th>
                                 <th>Player</th>
                                 <th>Team</th>
-                                <th>Frags</th>
-                                <th title="Enemy damage the player dealt inside the same window">Dmg</th>
+                                <th title="Bounded enemy damage dealt in the window — the ranking key">Dmg</th>
+                                <th title="Enemy kills inside the same window">Frags</th>
                                 <th>View</th>
                             </tr>
                         </thead>
-                        <tbody id="topruns-body"></tbody>
+                        <tbody id="topdmg-body"></tbody>
                     </table>
-                    <div id="topruns-empty" class="empty-message" style="display: none;">
-                        No frag runs in this demo.
+                    <div id="topdmg-empty" class="empty-message" style="display: none;">
+                        No damage windows in this demo (needs a damage stream).
                     </div>
                 </div>
                 <div class="panel">

@@ -137,8 +137,8 @@ measured; where the self split is not (a KTX-block-without-stream demo)
 the cell shows a `≥`-prefixed lower bound whose tooltip names what is
 missing, never a silently partial total.
 The **Key Moments** tab has seven tables in a two-column grid — powerup
-runs beside the longest frag streaks, **Top Frag Runs (10 s)** beside
-**Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
+runs beside the longest frag streaks, **Top Damage Windows (10 s)**
+beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
 full-width **Airborne Rocket Gibs** table — enemy rocket hits on airborne victims
 (`timelineAnalysis.airgibs`), sortable by any column and defaulting to
 height-above-shooter descending (the vertical gap the rocket climbed).
@@ -156,9 +156,11 @@ fill in a moment after the rest of the tab has painted. The Go exports
 (`getTopWindows`, `getTopKills`) live on the worker's global like every
 other one, so the main page reaches them through a `viewQuery` worker
 message (`viewQueryInWorker`) — the same round-trip as region recompute
-and line of sight. **Top Frag Runs (10 s)** is the top 10 windows by
-enemy kills (`metric=frags`, `windowMs=10000`), showing the window's own
-`damageGiven` beside the frag count; **Top RL Kills** (10) and **Top LG
+and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
+damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
+family as the kill-burst tables beside it, ties breaking on the window's
+frags via the view's complementary tie-break), showing the frag count
+beside the damage; **Top RL Kills** (10) and **Top LG
 Kills** (5) are the hardest kill bursts per weapon — the run of killing-weapon hits leading up to
 the kill — at the per-weapon gaps `gapMs=2300` (RL) and `1200` (LG),
 with the burst's damage, hits, span, the victim's weapon class and the
