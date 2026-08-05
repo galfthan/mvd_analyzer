@@ -3549,74 +3549,57 @@ func TestTopKills_Unavailable(t *testing.T) {
 	}
 }
 
-// TestOverview_TopKills: /overview carries the same rows at the documented
-// defaults, capped at 20, and OMITS the field on a demo that cannot answer
-// the query rather than failing the whole overview — one absent section is
-// not a failed request.
-func TestOverview_TopKills(t *testing.T) {
+// /overview stopped inlining highlight lists in v70: topKills was 62-77% of
+// the response and a verbatim copy of /top-kills at its defaults, while
+// topStreaks / topPowerups were reproducible field-for-field from /lives and
+// /events. What replaced them is the capability manifest — the thing a
+// consumer actually needs from a summary call, and the thing that tells it
+// whether /top-kills is even answerable here.
+func TestOverview_ServesTheManifestNotHighlights(t *testing.T) {
 	noLiveness := topKillsFixture("standard")
-	for i := range noLiveness.Streams.Players {
-		noLiveness.Streams.Players[i].Alive = nil
-	}
-	// A skipped:* demo has no bounded family, and /overview has no dmg echo to
-	// say which family it served — so the field is bounded or absent, never
-	// silently raw.
+	noLiveness.Streams = nil
 	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": topKillsFixture("standard"),
 		"gameId:60": noLiveness,
-		"gameId:61": topKillsFixture("skipped:no_ktx"),
 	}})
 	defer srv.Close()
 
 	ov := getJSON(t, srv.URL+"/v1/demos/gameId:42/overview", 200)
-	rows, ok := ov["topKills"].([]any)
-	if !ok {
-		t.Fatalf("overview has no topKills (keys=%v)", keysOf(ov))
-	}
-	if len(rows) == 0 || len(rows) > 20 {
-		t.Fatalf("topKills has %d rows, want 1..20", len(rows))
-	}
-	// The rows are /top-kills' rows verbatim — same field names, same values,
-	// same defaults — so a consumer can move between the two without a
-	// translation table.
-	endpoint := getJSON(t, srv.URL+"/v1/demos/gameId:42/top-kills", 200)["kills"].([]any)
-	if fmt.Sprint(rows) != fmt.Sprint(endpoint) {
-		t.Errorf("overview.topKills differs from /top-kills at its defaults:\n overview: %v\n endpoint: %v", rows, endpoint)
-	}
-
-	for _, id := range []string{"gameId:60", "gameId:61"} {
-		out := getJSON(t, srv.URL+"/v1/demos/"+id+"/overview", 200)
-		if v, present := out["topKills"]; present {
-			t.Errorf("%s: overview kept topKills = %v, want the field omitted", id, v)
-		}
-		if out["players"] == nil {
-			t.Errorf("%s: the rest of the overview must still be served", id)
+	for _, gone := range []string{"topKills", "topStreaks", "topPowerups", "hasRegionControl"} {
+		if v, present := ov[gone]; present {
+			t.Errorf("overview still carries %q = %v — removed in v70", gone, v)
 		}
 	}
-}
-
-// The overview's 20-row cap is real, not just the fixture running dry: a demo
-// with more than 20 rankable kills serves exactly 20 — the deliberate
-// top-20-not-top-5 sizing the field's comment argues for.
-func TestOverview_TopKillsCapsAtTwenty(t *testing.T) {
-	r := topKillsFixture("standard")
-	// Pile 30 additional one-hit rocket kills onto the fixture, spaced far
-	// apart so no two merge into one burst.
-	for i := 0; i < 30; i++ {
-		at := int32(200000 + i*10000)
-		r.Frags.Frags = append(r.Frags.Frags, result.FragEntry{Time: at, Killer: "alpha", Victim: "bravo", Weapon: "rl"})
-		r.Damage.Events = append(r.Damage.Events, result.DamageEntry{Time: at, Attacker: "alpha", Victim: "bravo", Weapon: "rl", Damage: 50 + i})
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:70": r}})
-	defer srv.Close()
-
-	ov := getJSON(t, srv.URL+"/v1/demos/gameId:70/overview", 200)
-	rows, ok := ov["topKills"].([]any)
+	avail, ok := ov["available"].(map[string]any)
 	if !ok {
-		t.Fatalf("overview has no topKills (keys=%v)", keysOf(ov))
+		t.Fatalf("overview has no available manifest (keys=%v)", keysOf(ov))
 	}
-	if len(rows) != 20 {
-		t.Fatalf("topKills has %d rows, want exactly 20 (the overview cap)", len(rows))
+	// The demo this fixture describes has a frag log and a damage log, which
+	// is exactly what /top-kills needs — so the manifest says so instead of
+	// shipping the rows.
+	if avail["frags"] != true || avail["damage"] != true {
+		t.Errorf("available = %v, want frags and damage true on the top-kills fixture", avail)
+	}
+	// Every flag is REQUIRED, including the false ones: a consumer branches on
+	// the value, so an omitted key would read as "unknown" and send it back to
+	// probing endpoints — the thing the manifest exists to stop.
+	for _, k := range []string{"demoInfo", "metadata", "frags", "damage", "shots", "aim",
+		"locGraph", "opening", "playerStats", "regionControl", "height", "liquid", "los"} {
+		if _, present := avail[k]; !present {
+			t.Errorf("available is missing the %q flag: %v", k, avail)
+		}
+	}
+
+	// A demo with no streams cannot answer the stream-derived views, and the
+	// manifest must say so rather than leaving a consumer to discover it via
+	// three 422s.
+	out := getJSON(t, srv.URL+"/v1/demos/gameId:60/overview", 200)
+	a2 := out["available"].(map[string]any)
+	if a2["playerStats"] != false || a2["los"] != false {
+		t.Errorf("available = %v on a stream-less demo, want playerStats and los false", a2)
+	}
+	if out["players"] == nil {
+		t.Errorf("the rest of the overview must still be served")
 	}
 }
 

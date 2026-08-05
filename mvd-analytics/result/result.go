@@ -1079,8 +1079,28 @@ package result
 //   - Computed in the ANALYZER, so unlike controlMs / speed the stored
 //     Result changes and the golden corpus moves.
 //
+// v70 — /overview becomes a capability manifest instead of a highlights
+// reel. NO stored Result field changes; this is an mvd-api response shape
+// bump, and a BREAKING one (fields are removed, not added).
+//   - REMOVED: overview's `topKills`, `topStreaks`, `topPowerups`. Measured
+//     across the corpus they were 78-88% of the response, topKills alone
+//     62-77%, and every one of them was a copy of a dedicated endpoint:
+//     /top-kills at its own defaults, and /lives + /events?type=streak,powerup
+//     field for field.
+//   - REMOVED: `hasRegionControl`, folded into the manifest below.
+//   - ADDED: `available`, one flag per detailed view, each mirroring the
+//     predicate behind that view's 422. Includes the three signals a
+//     consumer could not previously infer AT ALL, because they turn on which
+//     BSPs the server was provisioned with rather than on what the demo
+//     recorded: `height`, `liquid` and `los`. There is deliberately no
+//     separate `pvs` flag — PVS and LOS share one pass and one BSP gate
+//     (PVS is a superset of LOS by construction), so the two could never
+//     disagree.
+//   - A drift test pins the manifest to the 422 table, which is what the
+//     removed ad-hoc has* fields never had and why they went stale.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 69
+const CurrentSchemaVersion = 70
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -302,10 +302,14 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "load", method: "POST", url: "/v1/demos/gameId:42", path: "/v1/demos/{id}", status: 200},
 		{name: "upload", method: "POST", url: "/v1/demos", path: "/v1/demos", body: gzipDemoBody(t), status: 200},
 
-		// mustContain pins the v67 topKills section: it is omitempty, so an
-		// overview that stopped emitting it would still validate.
+		// mustContain pins the v70 capability manifest. It replaced the
+		// inlined topKills/topStreaks/topPowerups lists, and naming a
+		// specific flag keeps the case honest: `available` is a required
+		// object, but an empty one would still satisfy the schema, and the
+		// whole value of the manifest is that its flags are actually filled
+		// in from the 422 predicates.
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
-			mustContain: []string{`"topKills":[{"rank":1,`}},
+			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are

@@ -5,6 +5,50 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (overview-manifest) — /overview is a capability manifest, schema v70
+
+**BREAKING: `/overview` stops inlining highlight lists and starts answering
+"what can this demo actually tell me".** The stored `Result` is unchanged;
+this is an mvd-api response-shape bump.
+
+- **Removed: `topKills`, `topStreaks`, `topPowerups`.** Measured across the
+  cached corpus they were 78-88% of the response — `topKills` alone 62-77%,
+  at 3.5 KB of a 5.6 KB body — and each was a copy of a dedicated endpoint:
+  `topKills` was literally `/top-kills` at its own defaults, while
+  `topStreaks` and `topPowerups` are reproducible field-for-field from
+  `/lives` and `/events?type=streak,powerup`. An overview whose job is "help
+  me decide what to fetch next" should not be shipping another endpoint's rows.
+- **Removed: `hasRegionControl`**, folded into the block below.
+- **Added: `available`** — one flag per detailed view, each mirroring the
+  predicate behind that view's 422, so a `false` is exactly the 422 the call
+  would have returned. Covers `demoInfo`, `metadata`, `frags`, `damage`,
+  `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`,
+  `height`, `liquid`, `los`.
+- **`height` / `liquid` / `los` are the point.** They depend on which map
+  BSPs the SERVER was provisioned with, not on what the demo recorded — so
+  the same demo answers differently on two deployments and *nothing in the
+  response used to say so*. A consumer can discover "no damage stream" from
+  a single 422; it could never discover these.
+- **They report MEASURED, not NON-ZERO**, like every other flag in the
+  block. When a gate opens its column is filled for every position sample,
+  so a map with no water yields a full-length all-zero `lq` and `liquid`
+  stays **true** — a measured *"dry"*. Only an unprovisioned server reads
+  false. Keying the flag on "is any sample wet" would collapse those into
+  one value and leave a consumer unable to tell "this map has no water"
+  from "nobody looked". `height` and `liquid` also ride **separate** gates
+  (the collision hull vs the vis BSP), so they can legitimately disagree.
+- **No `pvs` flag, deliberately.** PVS and LOS come off one pass behind one
+  BSP gate, with PVS a superset of LOS by construction, so two flags could
+  never disagree — and a second one would only invite a consumer to think
+  they might.
+- **`los` is the one prediction** in an otherwise exact block: the pass is
+  heavy and lazy, so running it to answer an overview would defeat the
+  purpose. It reports the cheap half of the gate (streams, 2+ players, a
+  provisioned BSP); a provisioned-but-unvised BSP still 422s.
+- **A drift test pins the manifest to the 422 table.** The old `has*` fields
+  went stale precisely because nothing tied them to anything — a new 422-able
+  view can no longer be added without a flag appearing here.
+
 ## unreleased (ewep-kills) — the victim-weapon axis, schema v69
 
 **Every per-weapon stat we published was keyed on the attacker's weapon.**

@@ -418,8 +418,14 @@ means the demo **structurally lacks the signal** that section needs — a
 non-KTX server has no `demoinfo`/`damage`, a demo without a position track
 has no `loc-graph`, a map without a region layout has no `region-control`.
 These are **expected** for some demos; treat them as "this panel is
-unavailable for this demo", not a hard failure, and use `/overview`
-(`hasRegionControl`, `errors`) to hide panels up front. Endpoints whose data
+unavailable for this demo", not a hard failure. Better still, **don't
+probe at all**: `/overview`'s `available` block carries one flag per view,
+each mirroring the very predicate behind that view's `422`, so a `false`
+there is exactly the `422` you would have received. It is the only way to
+learn the BSP-derived ones (`height`, `liquid`, `los`) — those turn on the
+server's map provisioning rather than on the demo, so the same demo answers
+differently on two deployments. Use it (with `errors`) to hide panels up
+front. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.
@@ -800,8 +806,8 @@ Common frontend features → the call that backs them.
   ranking, `limit=-1` for all of them). `weapons=` scopes the *scoring*
   events, so `metric=damageGiven&weapons=lg` finds the best LG stretch
   and still reports everything that happened in it.
-- **Highlight reel ("find me the clips")** → one call: `GET /overview`,
-  read `topKills` (20 rows at the documented defaults), then filter
+- **Highlight reel ("find me the clips")** → `GET /top-kills` (20 rows at
+  the documented defaults; `/overview` stopped inlining them in v70), then filter
   client-side — keep the rows whose `maxGapMs` is within your weapon's
   cadence (LG ≈ 1200 ms, RL ≈ 2300 ms), whose `victimWep` says the victim was
   armed, and whose `returnDamage` clears whatever *you* call contested. That

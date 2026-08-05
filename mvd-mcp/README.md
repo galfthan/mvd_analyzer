@@ -768,9 +768,7 @@ this tool exists for.
 `killer`/`victim` are the frag log's names, so joining to
 `getPlayerStats` rows works by **name** — except where two identities
 share a display name, which that tool suffixes `name#slot` while the logs
-keep the bare name; strip the suffix to join. `getOverview` carries this
-same list at the defaults as `topKills` (20 rows) when you only need the
-highlights.
+keep the bare name; strip the suffix to join.
 
 Errors with `top_kills_unavailable` (422) when the demo lacks the frag
 log, the damage log, or measurable liveness — the last because the burst

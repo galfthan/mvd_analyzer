@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "69"
+  version: "70"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -3035,9 +3035,39 @@ components:
         gameDir:
           description: "Game directory (mod)."
           type: string
-        hasRegionControl:
-          description: "Region-control data is available for this demo."
-          type: boolean
+        available:
+          description: >
+            Per-demo CAPABILITY MANIFEST (schema v70): for each detailed view, whether THIS demo
+            on THIS deployment can answer it. Call /overview first and branch on this instead of
+            spending a request to discover a 422.
+
+            Each eager flag mirrors the predicate behind that view's 422, so a false here is
+            exactly the 422 you would have received. A true flag means the section EXISTS, not
+            that it is non-empty — a demo where nobody fired still reports shots: true with an
+            empty shot list.
+
+            height / liquid / los are the ones you CANNOT infer from anything else: they turn on
+            which BSPs the server was provisioned with, not on what the demo recorded, so the
+            same demo can answer differently on two deployments. There is deliberately no
+            separate `pvs` flag — PVS and LOS come off one pass behind one BSP gate (PVS is a
+            superset of LOS by construction), so two flags could never disagree.
+          additionalProperties: false
+          properties:
+            demoInfo: { description: "KTX demoinfo block (non-KTX / pre-match-abort demos lack it).", type: boolean }
+            metadata: { description: "Server cvars + KTX match settings (needs fullserverinfo / countdown centerprint).", type: boolean }
+            frags: { description: "Obituary-derived frag log.", type: boolean }
+            damage: { description: "Per-hit damage (needs the KTX mvdhidden_dmgdone stream).", type: boolean }
+            shots: { description: "Weapon-fire stream.", type: boolean }
+            aim: { description: "Aim analysis (needs shots + position/view streams).", type: boolean }
+            locGraph: { description: "Loc adjacency graph (needs a position track).", type: boolean }
+            opening: { description: "Opening analysis (needs a detected match start).", type: boolean }
+            playerStats: { description: "Canonical per-player statistics (needs player streams; a missing KTX block is NOT a reason for false).", type: boolean }
+            regionControl: { description: "Region-control output with at least one region. Was the top-level hasRegionControl before v70.", type: boolean }
+            height: { description: "BSP-DERIVED: the floor-height column (pos.h) was COMPUTED — not that it holds a non-zero value. Depends on server-side map provisioning (the collision hull). Where there is no floor beneath a sample the column carries the NoFloor sentinel, which is still a reading.", type: boolean }
+            liquid: { description: "BSP-DERIVED: the liquid column (pos.lq) was COMPUTED — not that any sample is wet. Depends on server-side map provisioning (the vis BSP), a SEPARATE gate from height. A map with no water yields a full-length all-zero column, and this flag stays TRUE: that is a measured `dry`, and is exactly what distinguishes it from an unprovisioned server, where the flag is false and the question is unanswerable.", type: boolean }
+            los: { description: "BSP-DERIVED: the line-of-sight pass can run, covering BOTH the los and pvs interval sets. Unlike the others this is a PREDICTION (streams, 2+ players, a provisioned BSP) because the pass is heavy and lazy; a provisioned BSP whose visibility data will not load still 422s.", type: boolean }
+          required: [demoInfo, metadata, frags, damage, shots, aim, locGraph, opening, playerStats, regionControl, height, liquid, los]
+          type: object
         locCount:
           description: "Number of named locs available for the map."
           type: integer
@@ -3164,85 +3194,6 @@ components:
           type:
             - "null"
             - object
-        topKills:
-          description: "The match's hardest kill BURSTS at /top-kills' documented defaults (gapMs 3000, contestedMs 4000, dmg bounded) — twenty rows, not the five its neighbours carry, because the per-weapon `maxGapMs` narrowing a highlight consumer runs off this list thins it. Row shape is /top-kills' verbatim; read that endpoint's description for the burst semantics before consuming them. Omitted when the demo cannot answer the query (no frag log, no damage log, or no measurable liveness) — and, since this response has no `dmg` echo to name a family, omitted rather than silently served raw on a demo with no bounded family. Absence is not a verdict: a demo with zero enemy kills also omits the field; read /top-kills itself when the distinction matters."
-          items: { $ref: "#/components/schemas/TopKill" }
-          type:
-            - "null"
-            - array
-        topPowerups:
-          description: "Top powerup runs (Key Moments)."
-          items:
-            additionalProperties: false
-            properties:
-              duration:
-                description: "Match duration, int32 ms."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              frags:
-                description: "Net QW frag score."
-                type: integer
-              player:
-                description: "Player display name."
-                type: string
-              start:
-                description: "Start time, int32 ms since match start."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              team:
-                description: "Team name."
-                type: string
-              type:
-                description: "Type discriminator."
-                type: string
-            required:
-              - player
-              - type
-              - start
-              - duration
-              - frags
-            type: object
-          type:
-            - "null"
-            - array
-        topStreaks:
-          description: "Top frag streaks (Key Moments)."
-          items:
-            additionalProperties: false
-            properties:
-              duration:
-                description: "Match duration, int32 ms."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              length:
-                description: "Streak length (kills)."
-                type: integer
-              player:
-                description: "Player display name."
-                type: string
-              start:
-                description: "Start time, int32 ms since match start."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              team:
-                description: "Team name."
-                type: string
-              weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
-                type: string
-            required:
-              - player
-              - length
-              - start
-              - duration
-            type: object
-          type:
-            - "null"
-            - array
       required:
         - schemaVersion
         - timeUnit
@@ -3251,7 +3202,7 @@ components:
         - matchEnd
         - players
         - locCount
-        - hasRegionControl
+        - available
       type: object
     Metadata:
       additionalProperties: false

@@ -4,6 +4,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/mapbsp"
+
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 )
@@ -25,28 +27,22 @@ type Overview struct {
 	// equals Map — the common case where the map has no distinct title
 	// (repo precedent: MessageClean elides when identical to the raw
 	// message).
-	MapTitle    string            `json:"mapTitle,omitempty"`
-	GameDir     string            `json:"gameDir,omitempty"`
-	Mode        string            `json:"mode,omitempty"`
-	Matchtag    string            `json:"matchtag,omitempty"`
-	Duration    int32             `json:"duration"`
-	MatchStart  int32             `json:"matchStart"`
-	MatchEnd    int32             `json:"matchEnd"`
-	Teams       []OverviewTeam    `json:"teams,omitempty"`
-	Players     []OverviewPlayer  `json:"players"`
-	TopStreaks  []OverviewStreak  `json:"topStreaks,omitempty"`
-	TopPowerups []OverviewPowerup `json:"topPowerups,omitempty"`
-	// TopKills is the match's hardest kill bursts at /top-kills' documented
-	// defaults (gapMs 3000, contestedMs 4000, dmg bounded), rows identical to
-	// that endpoint's. Twenty of them, not the five its neighbours carry: the
-	// per-weapon narrowing a highlight consumer runs off this list (keep the
-	// rows whose maxGapMs is within their weapon's cadence) leaves 16-20 of a
-	// top-20 and only 6-10 of a top-10 — too thin once an armed-victim or
-	// contested filter also bites. Omitted when the demo cannot answer the
-	// query at all.
-	TopKills         []view.TopKill `json:"topKills,omitempty"`
-	LocCount         int            `json:"locCount"`
-	HasRegionControl bool           `json:"hasRegionControl"`
+	MapTitle   string           `json:"mapTitle,omitempty"`
+	GameDir    string           `json:"gameDir,omitempty"`
+	Mode       string           `json:"mode,omitempty"`
+	Matchtag   string           `json:"matchtag,omitempty"`
+	Duration   int32            `json:"duration"`
+	MatchStart int32            `json:"matchStart"`
+	MatchEnd   int32            `json:"matchEnd"`
+	Teams      []OverviewTeam   `json:"teams,omitempty"`
+	Players    []OverviewPlayer `json:"players"`
+	// Available is the per-demo capability manifest: which detailed views
+	// this demo can actually answer. See OverviewAvailable — it is the
+	// reason to call this endpoint first, and replaces both the ad-hoc
+	// hasRegionControl flag and the inlined highlight lists that used to
+	// live here (schema v70).
+	Available OverviewAvailable `json:"available"`
+	LocCount  int               `json:"locCount"`
 	// Timing is the demo-open wall-clock anchor + pauses (from
 	// streams.global). It lets a REST/MCP consumer map any match-relative
 	// game time to real time without fetching streams. Omitted when the
@@ -108,26 +104,6 @@ type OverviewPlayer struct {
 	Kills    int    `json:"kills"`
 	Deaths   int    `json:"deaths"`
 	Suicides int    `json:"suicides"`
-}
-
-// OverviewStreak is a slimmed-down result.FragStreakEvent.
-type OverviewStreak struct {
-	Player   string `json:"player"`
-	Team     string `json:"team,omitempty"`
-	Weapon   string `json:"weapon,omitempty"`
-	Length   int    `json:"length"`
-	Start    int32  `json:"start"`    // ms
-	Duration int32  `json:"duration"` // ms
-}
-
-// OverviewPowerup is a slimmed-down result.PowerupEvent.
-type OverviewPowerup struct {
-	Player   string `json:"player"`
-	Team     string `json:"team,omitempty"`
-	Type     string `json:"type"`
-	Start    int32  `json:"start"`    // ms
-	Duration int32  `json:"duration"` // ms
-	Frags    int    `json:"frags"`
 }
 
 // BuildOverview composes an Overview from a parsed *Result. All inputs
@@ -192,17 +168,11 @@ func BuildOverview(r *result.Result) Overview {
 	}
 	if r.TimelineAnalysis != nil {
 		ov.LocCount = len(r.TimelineAnalysis.LocTable)
-		ov.HasRegionControl = r.TimelineAnalysis.RegionControl != nil &&
-			len(r.TimelineAnalysis.RegionControl.Regions) > 0
-
-		ov.TopStreaks = topStreaks(r.TimelineAnalysis.FragStreaks, 5)
-		ov.TopPowerups = topPowerups(r.TimelineAnalysis.PowerupEvents, 5)
-
 		if len(r.TimelineAnalysis.PlayerUserIDs) > 0 {
 			ov.PlayerUserIDs = r.TimelineAnalysis.PlayerUserIDs
 		}
 	}
-	ov.TopKills = topKills(r)
+	ov.Available = buildAvailability(r)
 
 	// Stable ordering — players by frags desc, teams by frags desc.
 	sort.SliceStable(ov.Players, func(i, j int) bool {
@@ -227,74 +197,156 @@ type OverviewEnvelope struct {
 	Overview
 }
 
-func topStreaks(in []result.FragStreakEvent, n int) []OverviewStreak {
-	if len(in) == 0 {
-		return nil
-	}
-	out := make([]OverviewStreak, 0, len(in))
-	for _, s := range in {
-		out = append(out, OverviewStreak{
-			Player:   s.PlayerName,
-			Team:     s.Team,
-			Weapon:   s.Ewep,
-			Length:   s.Frags,
-			Start:    s.Time,
-			Duration: s.Duration,
-		})
-	}
-	sort.SliceStable(out, func(i, j int) bool { return out[i].Length > out[j].Length })
-	if len(out) > n {
-		out = out[:n]
-	}
-	return out
-}
-
-// topKills is the /top-kills view at its REST defaults, or nil.
+// OverviewAvailable is the per-demo capability manifest (schema v70): for
+// each detailed view, whether THIS demo on THIS deployment can answer it.
 //
-// A demo that cannot answer the query — no frag log, no damage log, or no
-// measurable liveness to clip the bursts with — SILENTLY OMITS the field
-// rather than failing the overview: /overview is the one response that
-// describes whatever the demo happens to carry, and one absent section is not
-// a failed request (`teams`, `timing` and `playerUserIDs` are omitted on the
-// same terms). Dmg is set explicitly because the VIEW default is raw while
-// every REST surface serves bounded, and an overview whose damage family
-// disagreed with /top-kills' would be a quiet trap for a consumer joining the
-// two. There is deliberately no raw fallback for a skipped:* demo either —
-// this response has no dmg / boundedMode echo to say which family the numbers
-// are in, so the field is either bounded or absent, never silently raw.
-func topKills(r *result.Result) []view.TopKill {
-	out, err := view.TopKills(r, view.TopKillsOptions{
-		Limit: overviewTopKills,
-		Dmg:   "bounded",
-	})
-	if err != nil {
-		return nil
-	}
-	return out.Kills
+// It exists because availability was previously undiscoverable. A consumer
+// learned that a demo has no damage stream by calling /damage and reading a
+// 422, and for the BSP-derived capabilities it could not learn at all: those
+// depend on which BSPs the SERVER was provisioned with, so the same demo
+// answers differently on two deployments and nothing in the response said
+// so. That is precisely what an overview is for, and it is why this block
+// replaced the inlined highlight lists — those were copies of data three
+// other endpoints already served.
+//
+// Every eager flag mirrors the predicate behind that view's 422 (the
+// `eagerArtifacts` table in artifacts.go), and TestOverviewAvailabilityCovers
+// pins the two together so a new 422-able view cannot be added without a flag
+// appearing here. That drift guard is the point: the old ad-hoc has* fields
+// went stale precisely because nothing tied them to anything.
+//
+// A true flag means the section EXISTS, not that it is non-empty — a demo
+// where nobody fired still reports shots: true with an empty shot list.
+type OverviewAvailable struct {
+	// The eager sections, each mirroring its 422 predicate.
+	DemoInfo    bool `json:"demoInfo"`    // KTX demoinfo block (non-KTX / pre-match abort demos lack it)
+	Metadata    bool `json:"metadata"`    // fullserverinfo + countdown centerprint
+	Frags       bool `json:"frags"`       // obituary-derived frag log
+	Damage      bool `json:"damage"`      // KTX mvdhidden_dmgdone stream
+	Shots       bool `json:"shots"`       // decoded weapon fires
+	Aim         bool `json:"aim"`         // needs shots + position/view streams
+	LocGraph    bool `json:"locGraph"`    // needs a position track
+	Opening     bool `json:"opening"`     // needs a detected match start
+	PlayerStats bool `json:"playerStats"` // needs player streams (a missing KTX block is NOT a reason)
+
+	// RegionControl is the former hasRegionControl, unchanged in meaning:
+	// the timeline carries region-control output with at least one region.
+	RegionControl bool `json:"regionControl"`
+
+	// The BSP-derived trio — the ones a consumer cannot infer from anything
+	// else, because they turn on server-side map provisioning rather than on
+	// what the demo recorded.
+	//
+	// Height and Liquid report MEASUREDNESS, like every other flag here —
+	// whether the column was computed at all, NOT whether it holds a
+	// non-zero value. The distinction is the whole point: when the gate
+	// opens the column is filled for every position sample, so a map with
+	// no water yields an all-zero `lq` that is a genuine reading of "dry".
+	// A flag keyed on non-zero-ness would collapse that into the same false
+	// as an unprovisioned server, leaving a consumer unable to tell "this
+	// map has no water" from "nobody looked".
+	//
+	// They are separate flags because they ride SEPARATE gates: the floor
+	// trace needs the collision hull and the liquid probe needs the vis BSP
+	// (analyzer/timeline_streams.go:946-951), and a map can provision one
+	// without the other.
+	Height bool `json:"height"` // pos.h — floor-height column computed (NoFloor where there is no floor)
+	Liquid bool `json:"liquid"` // pos.lq — liquid column computed (0 where dry)
+
+	// LOS covers BOTH the los and pvs interval sets: they come off one pass
+	// (analyzer.ComputeLOS) behind one BSP gate, with PVS ⊇ LOS by
+	// construction (result/streams.go), so two flags could never disagree
+	// and a second one would only invite a consumer to think they might.
+	//
+	// Unlike the eager flags this is a PREDICTION, not a reading — the pass
+	// is heavy and lazy, so running it to answer an overview would defeat
+	// the point. It reports the cheap half of ComputeLOS's gate: streams,
+	// at least two players, a map name, and a provisioned BSP. The residual
+	// false positive is a provisioned BSP whose visibility data will not
+	// load, which /los still answers with a 422.
+	LOS bool `json:"los"`
 }
 
-// overviewTopKills is the row count — see Overview.TopKills for why it is not
-// its neighbours' 5.
-const overviewTopKills = 20
+// buildAvailability fills the manifest. Each eager flag calls the SAME view
+// accessor its endpoint does, rather than re-testing the underlying field, so
+// the manifest cannot disagree with the 422 it predicts — the accessors are
+// nil-checks, so this stays as cheap as the rest of the overview.
+func buildAvailability(r *result.Result) OverviewAvailable {
+	ok := func(err error) bool { return err == nil }
+	_, frags := view.Frags(r, view.FragOptions{})
+	_, damage := view.Damage(r, view.DamageOptions{Dmg: "both"})
+	_, shots := view.Shots(r)
+	_, aim := view.Aim(r, view.AimOptions{})
+	_, locGraph := view.LocGraph(r)
+	_, playerStats := view.PlayerStats(r, view.PlayerStatsOptions{})
+	_, demoInfo := view.DemoInfo(r)
+	_, metadata := view.Metadata(r)
 
-func topPowerups(in []result.PowerupEvent, n int) []OverviewPowerup {
-	if len(in) == 0 {
-		return nil
+	a := OverviewAvailable{
+		DemoInfo:    ok(demoInfo),
+		Metadata:    ok(metadata),
+		Frags:       ok(frags),
+		Damage:      ok(damage),
+		Shots:       ok(shots),
+		Aim:         ok(aim),
+		LocGraph:    ok(locGraph),
+		Opening:     r.Opening != nil,
+		PlayerStats: ok(playerStats),
 	}
-	out := make([]OverviewPowerup, 0, len(in))
-	for _, p := range in {
-		out = append(out, OverviewPowerup{
-			Player:   p.PlayerName,
-			Team:     p.Team,
-			Type:     p.PowerupType,
-			Start:    p.Time,
-			Duration: p.Duration,
-			Frags:    p.Frags,
-		})
+	if r.TimelineAnalysis != nil {
+		a.RegionControl = r.TimelineAnalysis.RegionControl != nil &&
+			len(r.TimelineAnalysis.RegionControl.Regions) > 0
 	}
-	sort.SliceStable(out, func(i, j int) bool { return out[i].Frags > out[j].Frags })
-	if len(out) > n {
-		out = out[:n]
+	a.Height, a.Liquid = bspDerivedMeasured(r)
+	a.LOS = losPredicted(r)
+	return a
+}
+
+// bspDerivedMeasured reports whether the BSP-derived position columns were
+// COMPUTED, which is what the manifest promises — not whether they hold a
+// non-zero value.
+//
+// Each column is allocated only when its gate opened and is then filled for
+// every sample (timeline_streams.go:946-951), so length is the exact test:
+// a dry map produces a full-length all-zero `lq`, which is a reading, while
+// an unprovisioned server produces no column at all. An earlier version of
+// this scanned for a non-zero entry and could not tell those apart — on
+// aerowalk, a map with no water, it reported the same false as a server
+// missing the BSP entirely.
+func bspDerivedMeasured(r *result.Result) (height, liquid bool) {
+	if r.Streams == nil {
+		return false, false
 	}
-	return out
+	for i := range r.Streams.Players {
+		pos := r.Streams.Players[i].Position
+		if pos == nil {
+			continue
+		}
+		height = height || len(pos.H) > 0
+		liquid = liquid || len(pos.Lq) > 0
+		if height && liquid {
+			return true, true
+		}
+	}
+	return height, liquid
+}
+
+// losPredicted is the cheap half of analyzer.ComputeLOS's gate — see
+// OverviewAvailable.LOS for why this is a prediction rather than a reading.
+// When the pass has already run, its own verdict is used instead, which is
+// exact.
+func losPredicted(r *result.Result) bool {
+	if r.Streams == nil || len(r.Streams.Players) < 2 {
+		return false
+	}
+	if r.Streams.LOSComputed {
+		for i := range r.Streams.Players {
+			if len(r.Streams.Players[i].PVS) > 0 {
+				return true
+			}
+		}
+		return false
+	}
+	m := r.EffectiveMap()
+	return m != "" && mapbsp.LoadBytes(m) != nil
 }
