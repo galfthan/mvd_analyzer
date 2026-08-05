@@ -577,7 +577,15 @@ accumulation). The REST `/damage` `dmg=raw|bounded|both` param picks the
 family. Schema v63 adds `byWeaponTeam` / `byWeaponSelf` beside `byWeapon`
 in both families (and in `playerStats.damage`): the same attacker-weapon
 split for team and self damage, with the KTX overlays sourcing the team
-map from `weapons[].damage.team`.
+map from `weapons[].damage.team`. Schema v69 adds the other axis to
+`playerStats`: `score.byEnemyWeapon` and `damage.byEnemyWeapon` split the
+same kills and the same enemy damage by what the **victim** was holding,
+in exclusive buckets (`both` / `rl` / `lg` / `mid` / `sg`) that partition
+`kills` and `given` — so "enemies killed while holding an RL" is
+`rl + both`, never `rl` alone. Both are derived from the victim's
+possession streams rather than overlaid: KTX's own `ekills` counts the
+kill side inclusively and force-zeroes whole buckets by mode, and on the
+damage side the server keeps only the RL+LG-lumped `enemyWeapons` scalar.
 
 `streams.global` carries a wall-clock anchor so a consumer can project any
 match-relative game time onto real-world time (for syncing voice tracks /

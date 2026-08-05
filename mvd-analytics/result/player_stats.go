@@ -253,7 +253,74 @@ type PlayerStatsScore struct {
 	// and telefrag over-counting the top-level stats do. Weapons the
 	// player never killed with are omitted, not zero-filled.
 	ByWeapon map[string]int `json:"byWeapon,omitempty"`
+	// ByEnemyWeapon is the OTHER axis: the same enemy kills split by what
+	// the VICTIM was holding when they died, keyed by the victim-weapon
+	// vocabulary (VictimWeapon* below), NOT by the weapon names ByWeapon
+	// uses. It is the weapon-denial figure — "how many armed enemies did
+	// I take out" — and the kill-side counterpart of
+	// PlayerStatsDamage.ByEnemyWeapon.
+	//
+	// A PARTITION of Kills: the buckets are mutually exclusive and sum to
+	// Kills exactly, which is the whole reason for the "both" bucket. Do
+	// not read `rl` alone as "enemy RLs killed" — that is `rl + both`.
+	// (KTX's own per-weapon ekills counter is INCLUSIVE instead, bumping
+	// every bucket the victim's inventory carried, and is not what this
+	// is: see the derivation note below.)
+	//
+	// Derived on every demo carrying streams, never overlaid from KTX —
+	// the same standing as ByWeapon, and for the same reason. KTX's
+	// ekills is defective for this purpose beyond the inclusive keying:
+	// it force-zeroes the axe and sg buckets, and zeroes EVERY bucket on
+	// deathmatch >= 4 and on k_instagib (ktx/src/stats_json.c:377-380),
+	// so its zeros are not readings. The verbatim KTX numbers remain
+	// available on the demoinfo section for anyone who wants them.
+	//
+	// Absent exactly when Kills is — the kill side is measured or omitted
+	// as one family. Within a present map, zero buckets are omitted like
+	// every other by-weapon map here.
+	ByEnemyWeapon map[string]int `json:"byEnemyWeapon,omitempty"`
 }
+
+// The victim-weapon vocabulary: the buckets that PlayerStatsScore
+// .ByEnemyWeapon and PlayerStatsDamage.ByEnemyWeapon are keyed by, and the
+// same classification the DamageResult EnemyVs* fields use
+// (analyzer.victimWeaponClass, mirroring ktx/src/combat.c:1084-1089).
+//
+// MUTUALLY EXCLUSIVE and applied in priority order RL+LG > RL > LG > mid >
+// sg, so every kill and every point of enemy damage lands in exactly one.
+// "Enemy RLs" is therefore VictimWeaponRL + VictimWeaponBoth, and likewise
+// for LG — the two overlap in Both by construction.
+//
+// The vocabulary is deliberately COARSER than the killer-weapon one: it
+// answers "how well armed was the target", where ssg/sng/gl are one tier
+// and the axe/sg/ng floor every player always carries is another. A
+// finer split would imply a precision the victim's inventory bitfield
+// does not carry — it says what they held, not what they would have used.
+const (
+	// VictimWeaponSG: the victim held nothing above the shotgun tier
+	// (axe / sg / ng only) — the loadout every player respawns with, so
+	// this bucket is "killed them while they had nothing".
+	VictimWeaponSG = "sg"
+	// VictimWeaponMid: the victim held ssg, sng and/or gl, but neither RL
+	// nor LG.
+	VictimWeaponMid = "mid"
+	// VictimWeaponLG: the victim held LG and not RL.
+	VictimWeaponLG = "lg"
+	// VictimWeaponRL: the victim held RL and not LG.
+	VictimWeaponRL = "rl"
+	// VictimWeaponBoth: the victim held BOTH RL and LG — the fully armed
+	// enemy, and the reason the buckets partition rather than overlap.
+	VictimWeaponBoth = "both"
+	// VictimWeaponUnknown: the kill is real but the victim's loadout is
+	// not knowable — they produced no possession stream at all (a
+	// scoreboard-only player, or a slot the stream builder never saw).
+	// Kept as its own bucket rather than folded into SG, which would
+	// assert the victim was unarmed, and rather than dropped, which would
+	// break the partition. Appears on the KILLS side only: the damage
+	// buckets classify from the victim's inventory carried on each hit,
+	// which is never missing when the hit itself was read.
+	VictimWeaponUnknown = "unknown"
+)
 
 // PlayerStatsDamage is the damage line under KTX scoreboard semantics
 // (armor absorbed, health damage capped to remaining health) — the
@@ -275,6 +342,34 @@ type PlayerStatsDamage struct {
 	// EnemyWeapons is enemy damage dealt to victims holding RL and/or LG
 	// (KTX dmg_eweapon / "ewep").
 	EnemyWeapons int `json:"enemyWeapons"`
+	// ByEnemyWeapon splits Given by what the VICTIM was holding at the
+	// moment of each hit, keyed by the victim-weapon vocabulary
+	// (VictimWeapon* — sg / mid / lg / rl / both). It is the full
+	// breakdown EnemyWeapons above summarises: EnemyWeapons is exactly
+	// lg + rl + both, and the two remaining buckets are the damage that
+	// went into targets who were NOT holding a big weapon, which no
+	// published figure carried before.
+	//
+	// A PARTITION of Given — the buckets are mutually exclusive and sum
+	// to it — and the damage counterpart of PlayerStatsScore
+	// .ByEnemyWeapon, keyed identically so the two axes read alike.
+	// "Damage into enemy RLs" is `rl + both`, not `rl`.
+	//
+	// DERIVED ONLY, and finer than the server's own accounting: KTX
+	// tracks a single dmg_eweapon scalar that lumps RL and LG together
+	// (ktx/src/combat.c:1075) and has no per-tier split at all, so this
+	// map rides through the KTX overlay untouched rather than being
+	// merged with it — the same treatment ByWeaponSelf gets, and for the
+	// same reason.
+	//
+	// MEASUREDNESS follows the damage STREAM, not the family: it needs
+	// the victim's inventory on each hit, so it is present exactly when
+	// Taken is (see ByWeaponSelf above) and absent on a demo carrying a
+	// KTX block but no damage stream. Telefrags and stomps are excluded
+	// like everywhere else in this family — positional kills, not weapon
+	// damage — which is one way this map differs from the kill-side
+	// sibling, where they ARE classified and counted.
+	ByEnemyWeapon map[string]int `json:"byEnemyWeapon,omitempty"`
 	// ByWeapon is enemy damage GIVEN split by the attacker's weapon, keyed
 	// like the rest of this section. Follows Src with the family: KTX's
 	// weapons[w].damage.enemy when the block carries it, else the bounded

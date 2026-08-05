@@ -1051,13 +1051,24 @@ function effPct(score) {
     return score.efficiency == null ? '-' : `${(score.efficiency * 100).toFixed(1)}%`;
 }
 
-// A by-weapon kill count. The map itself omits weapons the player never
-// killed with, so its absence cannot distinguish "no RL kills" from "no
-// frag log" — `kills` carries that signal for the whole family and is what
-// this branches on.
-function killsByWeapon(score, weapon) {
+// Enemy RLs / LGs killed, off `score.byEnemyWeapon` (schema v69): the
+// player's enemy kills split by what the VICTIM was holding when they died.
+// The complement of score.byWeapon, which counts the weapon the KILLER used
+// — kills made WITH each weapon are the Weapon Stats tab's K columns, which
+// is why they no longer take a slot here.
+//
+// The buckets are EXCLUSIVE (sg | mid | lg | rl | both) and partition kills,
+// so "enemies killed while holding an RL" is rl + both, not rl. Reading the
+// rl key alone would silently drop every fully-armed victim — on a duel that
+// is routinely a quarter of them.
+//
+// Measuredness rides with the rest of the kill family: the map is present
+// exactly when score.kills is, so branch on kills and render '-' when the
+// demo's frag log measured nothing, matching every other kill-side cell.
+function enemyWeaponKillCell(score, weapon) {
     if (score.kills == null) return '-';
-    return score.byWeapon?.[weapon] || 0;
+    const m = score.byEnemyWeapon || {};
+    return (m[weapon] || 0) + (m.both || 0);
 }
 
 function updateTopbarDemoInfo(result) {
@@ -1545,8 +1556,8 @@ function displayPlayerStats(rows) {
             <td>${s.frags || 0}</td>
             <td>${effPct(s)}</td>
             <td>${s.kills ?? '-'}</td>
-            <td>${killsByWeapon(s, 'rl')}</td>
-            <td>${killsByWeapon(s, 'lg')}</td>
+            <td>${enemyWeaponKillCell(s, 'rl')}</td>
+            <td>${enemyWeaponKillCell(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
@@ -1868,8 +1879,8 @@ function displayPlayerStatsTeams(teamRows) {
             <td>${s.frags || 0}</td>
             <td>${effPct(s)}</td>
             <td>${s.kills ?? '-'}</td>
-            <td>${killsByWeapon(s, 'rl')}</td>
-            <td>${killsByWeapon(s, 'lg')}</td>
+            <td>${enemyWeaponKillCell(s, 'rl')}</td>
+            <td>${enemyWeaponKillCell(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>

@@ -93351,6 +93351,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1583,
+            "rl": 744,
+            "sg": 5389
+          },
           "byWeapon": {
             "gl": 237,
             "rl": 966,
@@ -93506,6 +93511,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 10,
+            "rl": 5,
+            "sg": 38
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 9,
@@ -93569,6 +93579,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 3131,
+            "rl": 1990,
+            "sg": 5505
+          },
           "byWeapon": {
             "gl": 1022,
             "rl": 3133,
@@ -93715,6 +93730,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 21,
+            "rl": 11,
+            "sg": 42
+          },
           "byWeapon": {
             "gl": 6,
             "rl": 27,
@@ -93774,6 +93794,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1055,
+            "rl": 778,
+            "sg": 3565
+          },
           "byWeapon": {
             "gl": 109,
             "rl": 1595,
@@ -93915,6 +93940,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 6,
+            "rl": 4,
+            "sg": 21
+          },
           "byWeapon": {
             "rl": 13,
             "sg": 12,
@@ -93973,6 +94003,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 2578,
+            "rl": 1816,
+            "sg": 6800
+          },
           "byWeapon": {
             "gl": 557,
             "rl": 4740,
@@ -94117,6 +94152,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 17,
+            "rl": 8,
+            "sg": 56
+          },
           "byWeapon": {
             "gl": 2,
             "rl": 42,
@@ -94180,6 +94220,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1900,
+            "rl": 1253,
+            "sg": 4351
+          },
           "byWeapon": {
             "gl": 72,
             "ng": 9,
@@ -94335,6 +94380,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 13,
+            "rl": 5,
+            "sg": 34
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 17,
@@ -94394,6 +94444,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 2997,
+            "rl": 718,
+            "sg": 5362
+          },
           "byWeapon": {
             "gl": 100,
             "rl": 4143,
@@ -94537,6 +94592,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 19,
+            "rl": 5,
+            "sg": 50
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 37,
@@ -94596,6 +94656,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1693,
+            "rl": 585,
+            "sg": 3729
+          },
           "byWeapon": {
             "gl": 749,
             "rl": 420,
@@ -94736,6 +94801,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 13,
+            "rl": 6,
+            "sg": 22
+          },
           "byWeapon": {
             "gl": 6,
             "rl": 4,
@@ -94795,6 +94865,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1840,
+            "rl": 954,
+            "sg": 2955
+          },
           "byWeapon": {
             "gl": 385,
             "rl": 389,
@@ -94940,6 +95015,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 15,
+            "rl": 5,
+            "sg": 22
+          },
           "byWeapon": {
             "gl": 5,
             "rl": 4,
@@ -95008,6 +95088,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 8851,
+            "rl": 3863,
+            "sg": 21280
+          },
           "byWeapon": {
             "gl": 1643,
             "rl": 10269,
@@ -95164,6 +95249,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 59,
+            "rl": 24,
+            "sg": 166
+          },
           "byWeapon": {
             "gl": 10,
             "rl": 92,
@@ -95217,6 +95307,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 7926,
+            "rl": 4975,
+            "sg": 16376
+          },
           "byWeapon": {
             "gl": 1588,
             "ng": 9,
@@ -95373,6 +95468,11 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 55,
+            "rl": 25,
+            "sg": 119
+          },
           "byWeapon": {
             "gl": 12,
             "rl": 61,
@@ -95397,7 +95497,7 @@
       }
     ]
   },
-  "schemaVersion": 68,
+  "schemaVersion": 69,
   "shots": {
     "byPlayer": [
       {

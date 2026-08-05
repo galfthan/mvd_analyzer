@@ -794,3 +794,41 @@ func TestPlayerStatsTeamRowsSumVictimSplits(t *testing.T) {
 		t.Errorf("mixed team byWeaponTeam = %v, want {gl:700, sg:15}", red.Damage.ByWeaponTeam)
 	}
 }
+
+// The victim-weapon damage partition is DERIVED and finer than anything KTX
+// records — the server keeps one dmg_eweapon scalar that lumps RL and LG
+// together (ktx/src/combat.c:1075). The overlay must therefore carry it
+// through untouched on a KTX demo rather than dropping it while rebuilding
+// the damage family, and the team rebuild must sum it over the members that
+// measured one. Losing it would leave enemyWeapons (KTX's) beside no split
+// at all, on exactly the demos that have the most data.
+func TestPlayerStatsByEnemyWeaponSurvivesKTXOverlay(t *testing.T) {
+	r := storedResult(true)
+	r.PlayerStats.Players[0].Damage.ByEnemyWeapon = map[string]int{
+		"rl": 900, "both": 600, "lg": 300, "mid": 150, "sg": 50,
+	}
+	r.PlayerStats.Players[1].Damage.ByEnemyWeapon = map[string]int{"rl": 100, "sg": 25}
+
+	got := mustPlayerStats(t, r, PlayerStatsOptions{})
+	if got.Players[0].Damage.Src != result.SrcKTX {
+		t.Fatalf("damage src = %q, want ktx — this test only says something on an overlaid row", got.Players[0].Damage.Src)
+	}
+	bew := got.Players[0].Damage.ByEnemyWeapon
+	if bew["rl"] != 900 || bew["both"] != 600 || bew["sg"] != 50 {
+		t.Errorf("byEnemyWeapon = %v, want the derived map intact under a KTX overlay", bew)
+	}
+	// Damage into enemies who were holding an RL is rl + both, never rl
+	// alone — the buckets are exclusive.
+	if bew["rl"]+bew["both"] != 1500 {
+		t.Errorf("enemy-RL damage = %d, want 1500", bew["rl"]+bew["both"])
+	}
+
+	for i := range got.Teams {
+		if got.Teams[i].Name != "red" {
+			continue
+		}
+		if n := got.Teams[i].Damage.ByEnemyWeapon["rl"]; n != 900 {
+			t.Errorf("team byEnemyWeapon[rl] = %d, want 900 (summed over measured members)", n)
+		}
+	}
+}

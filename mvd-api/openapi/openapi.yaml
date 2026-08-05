@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "68"
+  version: "69"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -6995,6 +6995,29 @@ components:
                 killed with are omitted, not zero-filled.
               additionalProperties: { type: integer }
               type: object
+            byEnemyWeapon:
+              description: >
+                The SAME enemy kills split by what the VICTIM was holding when they died — the
+                other axis from byWeapon, which keys on the weapon the KILLER used. This is the
+                weapon-denial figure: "how many armed enemies did this player take out".
+
+                Buckets are MUTUALLY EXCLUSIVE and PARTITION `kills`: `both` (victim held RL and
+                LG), `rl` (RL, not LG), `lg` (LG, not RL), `mid` (ssg/sng/gl only), `sg` (nothing
+                above the shotgun tier — the respawn loadout), and `unknown` (the victim produced
+                no possession stream, so their loadout is unknowable). Enemies killed while
+                holding an RL is therefore `rl + both`, NEVER `rl` alone; likewise `lg + both`.
+                Those two overlap in `both` by construction, so adding them double-counts the
+                fully armed victims.
+
+                DERIVED on every demo carrying streams and never overlaid with KTX's `ekills`,
+                which counts the same events INCLUSIVELY (a victim holding RL+LG bumps both
+                counters) and is force-zeroed for axe/sg and for every bucket on `deathmatch >= 4`
+                and `k_instagib`. Where KTX measures honestly the two agree exactly:
+                `rl + both == ktx ekills.rl`, verified across the cached demo corpus. Unlike KTX's, this
+                also classifies telefrags and stomps. On the same footing as `kills` — absent with
+                it. Zero buckets are omitted.
+              additionalProperties: { type: integer }
+              type: object
           required: [src, frags, deaths]
           type: object
         damage:
@@ -7058,6 +7081,22 @@ components:
                     absent on a demo with a KTX block but no damage stream, whatever the player did.
                     Weapons the player dealt no self damage with are omitted. Telefrags and stomps
                     are excluded — their damage folds into givenSelf only.
+                  additionalProperties: { type: integer }
+                  type: object
+                byEnemyWeapon:
+                  description: >
+                    ENEMY damage GIVEN split by what the VICTIM was holding when each hit landed —
+                    the other axis from byWeapon, which keys on the ATTACKER's weapon. Buckets are
+                    MUTUALLY EXCLUSIVE and partition `given`: `both` (victim held RL and LG), `rl`
+                    (RL, not LG), `lg` (LG, not RL), `mid` (ssg/sng/gl only), `sg` (nothing above
+                    the shotgun tier). Damage into enemies holding an RL is therefore `rl + both`,
+                    NEVER `rl` alone. `enemyWeapons` above is exactly `lg + rl + both`.
+
+                    DERIVED-only and finer than the server's own accounting — KTX keeps a single
+                    dmg_eweapon scalar lumping RL and LG together — so it is MEASURED only where a
+                    damage stream was read, which is exactly what a present `taken` says: absent on
+                    a demo with a KTX block but no damage stream. Zero buckets are omitted.
+                    Telefrags and stomps are excluded, as everywhere in this family.
                   additionalProperties: { type: integer }
                   type: object
                 takenEnemy:

@@ -540,7 +540,8 @@ func TestDeriveScoreKillSide(t *testing.T) {
 	}
 
 	t.Run("measured", func(t *testing.T) {
-		s := deriveScore(base(), "a")
+		r := base()
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
 		if s.Frags != 62 || s.Deaths != 18 {
 			t.Errorf("frags/deaths = %d/%d, want 62/18", s.Frags, s.Deaths)
 		}
@@ -566,7 +567,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		r := base()
 		r.Frags.Frags = nil
 		r.Frags.KillsMeasured = killsMeasurable(r) // false: protocol deaths in ByPlayer
-		s := deriveScore(r, "a")
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
 		// Both measured sides survive — this is the whole point of not
 		// dropping the family wholesale.
 		if s.Frags != 62 || s.Deaths != 18 {
@@ -587,7 +588,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		// so a demo where nobody died has both at zero.
 		r.Frags.ByPlayer["a"].Kills, r.Frags.ByPlayer["a"].Deaths = 0, 0
 		r.Frags.KillsMeasured = killsMeasurable(r) // true: nothing to contradict
-		s := deriveScore(r, "a")
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
 		if s.Kills == nil || *s.Kills != 0 {
 			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
 		}
@@ -614,7 +615,7 @@ func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
 			},
 		},
 	}
-	s := deriveScore(r, "a")
+	s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
 	if s.Kills == nil || *s.Kills != 11 || s.Deaths != 7 {
 		t.Fatalf("kills/deaths = %v/%d, want the frag log's 11/7", s.Kills, s.Deaths)
 	}
@@ -1040,5 +1041,73 @@ func TestDeriveDamageCopiesVictimSplits(t *testing.T) {
 	}
 	if got, want := teams[0].Damage.ByWeaponSelf, map[string]int{"rl": 12}; !reflect.DeepEqual(got, want) {
 		t.Errorf("team byWeaponSelf = %v, want %v", got, want)
+	}
+}
+
+// --- victim-weapon kill split -------------------------------------------
+
+// The classification behind score.byEnemyWeapon: which bucket a kill lands
+// in is decided by what the VICTIM held at the kill instant, read off their
+// possession streams. The corpus test (checkEnemyWeaponKillsVsKTX) pins the
+// result against KTX on real demos; this pins the rules that produce it,
+// including the ones no cached demo happens to exercise.
+func TestDeriveEnemyWeaponKills(t *testing.T) {
+	// One victim per bucket, each holding their loadout for [1000, 5000).
+	r := &Result{
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "vBoth", RL: iv(1000, 5000), LG: iv(1000, 5000)},
+			{Name: "vRL", RL: iv(1000, 5000)},
+			{Name: "vLG", LG: iv(1000, 5000)},
+			{Name: "vMid", SNG: iv(1000, 5000)},
+			{Name: "vBare"},
+			{Name: "k"},
+		}},
+		Frags: &result.FragResult{
+			KillsMeasured: true,
+			Frags: []result.FragEntry{
+				{Time: 2000, Killer: "k", Victim: "vBoth", Weapon: "rl"},
+				{Time: 2000, Killer: "k", Victim: "vRL", Weapon: "rl"},
+				{Time: 2000, Killer: "k", Victim: "vLG", Weapon: "lg"},
+				{Time: 2000, Killer: "k", Victim: "vMid", Weapon: "rl"},
+				{Time: 2000, Killer: "k", Victim: "vBare", Weapon: "rl"},
+				// No stream at all: unknown, never "unarmed".
+				{Time: 2000, Killer: "k", Victim: "ghost", Weapon: "rl"},
+				// Positional kills classify like any other — unlike the
+				// damage side, which has no hit to read an inventory from.
+				{Time: 2000, Killer: "k", Victim: "vBoth", Weapon: "tele"},
+				// Neither a suicide nor a teamkill is an enemy kill, so
+				// neither may enter the partition.
+				{Time: 2000, Killer: "k", Victim: "k", Weapon: "rl", IsSuicide: true},
+				{Time: 2000, Killer: "k", Victim: "vRL", Weapon: "rl", IsTeamKill: true},
+			},
+		},
+	}
+
+	got := deriveEnemyWeaponKills(r)["k"]
+	want := map[string]int{"both": 2, "rl": 1, "lg": 1, "mid": 1, "sg": 1, "unknown": 1}
+	if len(got) != len(want) {
+		t.Fatalf("byEnemyWeapon = %v, want %v", got, want)
+	}
+	for k, n := range want {
+		if got[k] != n {
+			t.Errorf("byEnemyWeapon[%s] = %d, want %d (full map %v)", k, got[k], n, got)
+		}
+	}
+
+	// The half-open endpoint rule, which decides a real disagreement with
+	// KTX on the corpus (see heldAt): a run ending exactly at the kill
+	// instant means the server had already taken the weapon away.
+	edge := &Result{
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "v", RL: iv(1000, 2000)},
+		}},
+		Frags: &result.FragResult{KillsMeasured: true, Frags: []result.FragEntry{
+			{Time: 2000, Killer: "k", Victim: "v", Weapon: "rl"},
+			{Time: 1999, Killer: "k", Victim: "v", Weapon: "rl"},
+			{Time: 1000, Killer: "k", Victim: "v", Weapon: "rl"},
+		}},
+	}
+	if got := deriveEnemyWeaponKills(edge)["k"]; got["rl"] != 2 || got["sg"] != 1 {
+		t.Errorf("endpoint handling = %v, want rl:2 (t=1000 and t=1999) + sg:1 (t=2000, run already closed)", got)
 	}
 }

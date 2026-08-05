@@ -5,6 +5,50 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (ewep-kills) — the victim-weapon axis, schema v69
+
+**Every per-weapon stat we published was keyed on the attacker's weapon.**
+`score.byWeapon` is kills made *with* the RL; `damage.byWeapon` is damage
+dealt *with* it. Nothing answered the other half of the question — *how well
+armed was the enemy I killed?* — even though weapon denial is how teams
+actually read a match. The only figure keyed on what the target carried was
+`damage.enemyWeapons`, a single scalar lumping RL and LG together.
+
+- **`playerStats.score.byEnemyWeapon`** splits a player's enemy kills by
+  what the VICTIM held at death. **`playerStats.damage.byEnemyWeapon`** does
+  the same for enemy damage given. One vocabulary, exclusive buckets:
+  `both` / `rl` / `lg` / `mid` (ssg/sng/gl) / `sg` (the respawn loadout),
+  plus `unknown` on the kill side for a victim with no stream.
+- **They PARTITION.** The kill map sums to `score.kills`, the damage map to
+  `damage.given`. That is what `both` is for — and it is the one thing to
+  get right: **"enemy RLs killed" is `rl + both`, never `rl` alone.**
+- **Derived, not KTX.** Computed from the frag log and the damage stream
+  against the victim's possession streams, so they work on every demo
+  carrying streams rather than only those with a KTX demoinfo block, and
+  telefrags and stomps get classified too. KTX's own `ekills` counts the
+  kill side INCLUSIVELY (a victim holding RL+LG bumps both counters) and
+  force-zeroes axe/sg plus *every* bucket on `deathmatch >= 4` and
+  `k_instagib` (`ktx/src/stats_json.c:377-380`), so its zeros are not
+  readings; on the damage side the server has no per-tier split at all.
+- **Verified against the server.** `rl + both == ktx.ekills.rl` and
+  `lg + both == ktx.ekills.lg` on all 44 cached corpus demos, every player,
+  both weapons — pinned by a check that runs on every golden demo. The one
+  demo where the two ever disagreed (220498) turned out to be an endpoint
+  rule: a possession run ending on the same frame as the obituary means the
+  server had already taken the weapon away.
+- **Measuredness differs between the two maps.** The kill map rides the
+  kill family and is absent exactly when `score.kills` is. The damage map
+  needs the damage stream and is present exactly when `damage.taken` is.
+  `damage.enemyWeapons` is unchanged and equals `lg + rl + both`.
+- **Schema note:** this is computed in the analyzer, not folded in at read
+  time like `controlMs` / `speed`, so the stored `Result` changes and the
+  golden corpus moves with it.
+- **Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` /
+  `eLG`** (player and team tables), rendering `rl + both`. The columns they
+  replace were kills made *with* each weapon, which the Weapon Stats tab
+  already shows — so the scoreboard now carries the metric that was nowhere
+  instead of the one that was in two places.
+
 ## unreleased (gap-windows) — gap-delimited top windows, schema v68
 
 **`/top-windows` learns a second segmentation.** The stored `Result` gains

@@ -268,6 +268,15 @@ Two consequences worth knowing:
   tab (a 2003 kmod duel is the regression case). The one class with no
   section at all is a parse that produced no player streams — a race demo
   has no match — and that renders as empty tables.
+- **Basic Stats shows `eRL` / `eLG`, not kills-with-RL/LG.** Those two
+  columns come from `score.byEnemyWeapon` (schema v69) — enemies killed
+  while THEY were holding a rocket launcher / lightning gun. Kills made
+  *with* each weapon are the Weapon Stats tab's `K` columns, so the
+  scoreboard carries the metric that was nowhere rather than the one
+  already in two places. The buckets are exclusive, so each cell renders
+  **`rl + both`** (resp. `lg + both`): reading the `rl` key alone would
+  drop every victim who was carrying both. Measuredness rides the kill
+  family — the cell renders `-` exactly when `kills` does.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /

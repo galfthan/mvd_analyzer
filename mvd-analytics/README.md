@@ -621,7 +621,13 @@ both families — matching KTX's accumulation, which applies no positional-
 kill exclusion — while staying out of `events`, every per-weapon map,
 `matrix` and `ewep`. Since v63 `PlayerDamage` splits team and self damage
 by attacker weapon too (`byWeaponTeam` / `byWeaponSelf`, both families),
-measured wherever the damage family itself is.
+measured wherever the damage family itself is. Schema v69 adds the
+**victim**-weapon axis on `playerStats` — `score.byEnemyWeapon` and
+`damage.byEnemyWeapon`, exclusive buckets (`both` / `rl` / `lg` / `mid` /
+`sg`) partitioning `kills` and `given` respectively, classified from the
+victim's possession streams and never overlaid from KTX (whose `ekills` is
+inclusive and mode-suppressed). Read `rl + both` for "enemies killed while
+holding an RL".
 See [RESULT_SCHEMA.md](RESULT_SCHEMA.md#damageresult-damage) for the
 field-level reference.
 

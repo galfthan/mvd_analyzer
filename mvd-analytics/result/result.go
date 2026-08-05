@@ -1051,8 +1051,31 @@ package result
 //     extends a netFrags run and lowers its score), and a cluster MAY SPAN the
 //     player's own death — /lives stays the per-life view.
 //
+// v69 — the victim-weapon axis: `byEnemyWeapon` on kills and damage.
+// Every per-weapon figure in playerStats was keyed on the ATTACKER's
+// weapon. This adds the complement: the same kills and the same damage
+// split by what the VICTIM was holding when it landed — weapon denial.
+//   - PlayerStatsScore.ByEnemyWeapon partitions Kills;
+//     PlayerStatsDamage.ByEnemyWeapon partitions Given. One exclusive
+//     vocabulary (VictimWeapon*): both / rl / lg / mid / sg, plus
+//     `unknown` on the kill side for a victim with no stream.
+//   - "Enemy RLs killed" is rl + both, NEVER rl alone.
+//   - DERIVED on every demo carrying streams, never overlaid. KTX's own
+//     ekills counts the kill side INCLUSIVELY and force-zeroes axe/sg plus
+//     every bucket on deathmatch >= 4 / k_instagib
+//     (ktx/src/stats_json.c:377-380); for damage the server keeps only the
+//     RL+LG-lumped dmg_eweapon scalar. Ours reproduces KTX exactly where
+//     KTX measures honestly (rl + both == ekills.rl on all 44 cached
+//     demos) and additionally covers telefrags, stomps and demos with no
+//     demoinfo block.
+//   - Measuredness splits: the kill map is absent exactly when Kills is;
+//     the damage map needs the damage STREAM and is present exactly when
+//     Taken is.
+//   - Computed in the ANALYZER, so unlike controlMs / speed the stored
+//     Result changes and the golden corpus moves.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 68
+const CurrentSchemaVersion = 69
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
