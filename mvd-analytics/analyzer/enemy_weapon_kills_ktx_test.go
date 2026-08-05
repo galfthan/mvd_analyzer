@@ -86,6 +86,47 @@ func checkEnemyWeaponKillsVsKTX(t *testing.T, res *result.Result, label string) 
 					label, row.Name, sum, *row.Score.Kills, m)
 			}
 		}
+
+		// The cross-tab publishes a third view of the same kills, so both
+		// its marginals must reproduce the maps beside it — otherwise a
+		// consumer picking a different one of the three gets a different
+		// answer. Asserted on real demos because the two marginals reach
+		// the row by different routes: byWeapon is the frag analyzer's own
+		// tally (with its Finalize reclassification fixups), while the
+		// cross-tab is counted here from the finished entries.
+		if cross := row.Score.ByWeaponVsEnemyWeapon; len(cross) > 0 {
+			outer, inner := map[string]int{}, map[string]int{}
+			for w, byBucket := range cross {
+				for b, n := range byBucket {
+					outer[w] += n
+					inner[b] += n
+				}
+			}
+			for w, n := range outer {
+				if row.Score.ByWeapon[w] != n {
+					t.Errorf("%s: %s cross-tab[%s] sums to %d, want byWeapon[%s] = %d",
+						label, row.Name, w, n, w, row.Score.ByWeapon[w])
+				}
+			}
+			for w, n := range row.Score.ByWeapon {
+				if outer[w] != n {
+					t.Errorf("%s: %s byWeapon[%s] = %d but the cross-tab has %d — a weapon went missing",
+						label, row.Name, w, n, outer[w])
+				}
+			}
+			for b, n := range inner {
+				if m[b] != n {
+					t.Errorf("%s: %s cross-tab bucket %s sums to %d, want byEnemyWeapon[%s] = %d",
+						label, row.Name, b, n, b, m[b])
+				}
+			}
+			for b, n := range m {
+				if inner[b] != n {
+					t.Errorf("%s: %s byEnemyWeapon[%s] = %d but the cross-tab has %d",
+						label, row.Name, b, n, inner[b])
+				}
+			}
+		}
 	}
 
 	// A mode that suppresses ekills server-side (deathmatch >= 4,

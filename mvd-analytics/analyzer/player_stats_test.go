@@ -1083,7 +1083,7 @@ func TestDeriveEnemyWeaponKills(t *testing.T) {
 		},
 	}
 
-	got := deriveEnemyWeaponKills(r)["k"]
+	got := deriveEnemyWeaponKills(r)["k"].byBucket
 	want := map[string]int{"both": 2, "rl": 1, "lg": 1, "mid": 1, "sg": 1, "unknown": 1}
 	if len(got) != len(want) {
 		t.Fatalf("byEnemyWeapon = %v, want %v", got, want)
@@ -1092,6 +1092,35 @@ func TestDeriveEnemyWeaponKills(t *testing.T) {
 		if got[k] != n {
 			t.Errorf("byEnemyWeapon[%s] = %d, want %d (full map %v)", k, got[k], n, got)
 		}
+	}
+
+	// The cross-tab is the joint distribution the bucket map is a marginal
+	// of, so summing it over inner keys must give byWeapon and over outer
+	// keys must give byEnemyWeapon. Publishing three views of one kill set
+	// is only safe while that holds.
+	cross := deriveEnemyWeaponKills(r)["k"].cross
+	if cross["rl"]["both"] != 1 || cross["tele"]["both"] != 1 {
+		t.Errorf("cross[rl][both]=%d cross[tele][both]=%d, want 1 and 1 — a kill is keyed by BOTH the killer's weapon and the victim's loadout",
+			cross["rl"]["both"], cross["tele"]["both"])
+	}
+	if cross["lg"]["lg"] != 1 || len(cross["lg"]) != 1 {
+		t.Errorf("cross[lg] = %v, want exactly {lg:1}", cross["lg"])
+	}
+	outer := map[string]int{}
+	inner := map[string]int{}
+	for w, m := range cross {
+		for b, n := range m {
+			outer[w] += n
+			inner[b] += n
+		}
+	}
+	// byWeapon here is the frag log's own tally over the same entries.
+	wantOuter := map[string]int{"rl": 5, "lg": 1, "tele": 1}
+	if !reflect.DeepEqual(outer, wantOuter) {
+		t.Errorf("cross-tab summed over victim buckets = %v, want %v (= score.byWeapon)", outer, wantOuter)
+	}
+	if !reflect.DeepEqual(inner, got) {
+		t.Errorf("cross-tab summed over killer weapons = %v, want %v (= score.byEnemyWeapon)", inner, got)
 	}
 
 	// The half-open endpoint rule, which decides a real disagreement with
@@ -1107,7 +1136,7 @@ func TestDeriveEnemyWeaponKills(t *testing.T) {
 			{Time: 1000, Killer: "k", Victim: "v", Weapon: "rl"},
 		}},
 	}
-	if got := deriveEnemyWeaponKills(edge)["k"]; got["rl"] != 2 || got["sg"] != 1 {
+	if got := deriveEnemyWeaponKills(edge)["k"].byBucket; got["rl"] != 2 || got["sg"] != 1 {
 		t.Errorf("endpoint handling = %v, want rl:2 (t=1000 and t=1999) + sg:1 (t=2000, run already closed)", got)
 	}
 }

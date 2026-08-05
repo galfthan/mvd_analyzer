@@ -13842,6 +13842,15 @@
             "lg": 1,
             "rl": 9
           },
+          "byWeaponVsEnemyWeapon": {
+            "lg": {
+              "both": 1
+            },
+            "rl": {
+              "both": 8,
+              "rl": 1
+            }
+          },
           "deaths": 22,
           "efficiency": 0.3125,
           "frags": 9,
@@ -14035,6 +14044,17 @@
           "byWeapon": {
             "lg": 11,
             "rl": 10
+          },
+          "byWeaponVsEnemyWeapon": {
+            "lg": {
+              "both": 5,
+              "rl": 6
+            },
+            "rl": {
+              "both": 4,
+              "lg": 1,
+              "rl": 5
+            }
           },
           "deaths": 11,
           "efficiency": 0.6563,

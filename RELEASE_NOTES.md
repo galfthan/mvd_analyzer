@@ -36,6 +36,15 @@ actually read a match. The only figure keyed on what the target carried was
   demo where the two ever disagreed (220498) turned out to be an endpoint
   rule: a possession run ending on the same frame as the obituary means the
   server had already taken the weapon away.
+- **`score.byWeaponVsEnemyWeapon` is the cross-tab.** The two maps above are
+  marginals of the same kill set, so neither answers "how many of my LG kills
+  were against enemies carrying an RL" — the question that separates a weapon
+  winning fights from one finishing off the disarmed. This is the joint
+  distribution: killer weapon -> victim bucket -> kills. Summing it over inner
+  keys gives `byWeapon`, over outer keys `byEnemyWeapon`, and both identities
+  hold by construction (the marginal is summed from the cross-tab, not tallied
+  separately) and are asserted on every golden demo. It is the widest map in
+  the section, so skip it when a scoreboard is all you need.
 - **Measuredness differs between the two maps.** The kill map rides the
   kill family and is absent exactly when `score.kills` is. The damage map
   needs the damage stream and is present exactly when `damage.taken` is.

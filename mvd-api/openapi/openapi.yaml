@@ -7018,6 +7018,25 @@ components:
                 it. Zero buckets are omitted.
               additionalProperties: { type: integer }
               type: object
+            byWeaponVsEnemyWeapon:
+              description: >
+                The JOINT distribution byWeapon and byEnemyWeapon are the marginals of:
+                killer weapon -> victim-weapon bucket -> kills. Outer keys are byWeapon's
+                vocabulary, inner keys byEnemyWeapon's. Use it for what neither marginal can
+                answer — "how many of my LG kills were against enemies carrying an RL", the
+                question separating a weapon that wins fights from one that finishes off the
+                disarmed.
+
+                Summing it reproduces both maps EXACTLY: over inner keys it gives byWeapon,
+                over outer keys byEnemyWeapon. That is guaranteed by construction (the marginal
+                is summed from this table, not tallied separately), so the three maps can never
+                disagree. Same measuredness as its marginals — absent exactly when `kills` is —
+                and the same zero-dropping. This is the widest map in the response (up to
+                weapons-used x 6); skip it when a scoreboard is all you need.
+              additionalProperties:
+                additionalProperties: { type: integer }
+                type: object
+              type: object
           required: [src, frags, deaths]
           type: object
         damage:

@@ -110,7 +110,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 }
 
 // buildPlayerStatsRow assembles one streamed player's row.
-func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]map[string]int) result.PlayerStatsRow {
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsRow {
 	present := presenceWindow(p, matchMs)
 	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
 
@@ -153,7 +153,7 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 // entry. Reporting 0 kills and 0.0% efficiency there is
 // byte-indistinguishable from a genuinely killless team, so the fields
 // are omitted instead. See result.PlayerStatsScore.
-func deriveScore(res *Result, name string, enemyWeaponKills map[string]map[string]int) result.PlayerStatsScore {
+func deriveScore(res *Result, name string, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsScore {
 	s := result.PlayerStatsScore{Src: result.SrcDerived}
 	var kills, suicides, teamKills int
 	var byWeapon map[string]int
@@ -208,14 +208,29 @@ func deriveScore(res *Result, name string, enemyWeaponKills map[string]map[strin
 		// Same family, same gate: the victim-weapon split is a re-cut of
 		// the very kills Kills counts, so it can never be present while
 		// the kill side as a whole is not.
-		s.ByEnemyWeapon = enemyWeaponKills[name]
+		if k := enemyWeaponKills[name]; k != nil {
+			s.ByEnemyWeapon = k.byBucket
+			s.ByWeaponVsEnemyWeapon = k.cross
+		}
 	}
 	return s
 }
 
+// enemyWeaponKills is one killer's victim-weapon accounting: the joint
+// distribution over (killer weapon, victim bucket) and the bucket marginal
+// derived from it. Keeping the marginal a SUM of the cross-tab rather than
+// a second tally is what makes the published invariant
+// (sum over outer keys == byEnemyWeapon) true by construction instead of
+// by two code paths agreeing.
+type enemyWeaponKills struct {
+	byBucket map[string]int
+	cross    map[string]map[string]int
+}
+
 // deriveEnemyWeaponKills classifies every enemy kill in the frag log by
 // what the VICTIM was holding at the instant they died, tallied per
-// KILLER — the weapon-denial axis (result.PlayerStatsScore.ByEnemyWeapon).
+// KILLER — the weapon-denial axis (result.PlayerStatsScore.ByEnemyWeapon
+// and its joint form ByWeaponVsEnemyWeapon).
 //
 // The classification is the one the damage analyzer applies per hit
 // (victimWeaponClass, mirroring ktx/src/combat.c:1084-1089), but read off
@@ -229,8 +244,10 @@ func deriveScore(res *Result, name string, enemyWeaponKills map[string]map[strin
 // FragAnalyzer counts into PlayerFrags.Kills and ByWeapon (frag.go:143-153,
 // reading the entries after Finalize's teamkill reclassification), so these
 // buckets partition Kills on exactly the footing ByWeapon does — no better
-// and no worse.
-func deriveEnemyWeaponKills(res *Result) map[string]map[string]int {
+// and no worse. That shared predicate is also why the cross-tab's other
+// marginal reproduces ByWeapon: both count the same entries under the same
+// gate, keyed by the same FragEntry.Weapon.
+func deriveEnemyWeaponKills(res *Result) map[string]*enemyWeaponKills {
 	if res.Frags == nil || res.Streams == nil {
 		return nil
 	}
@@ -239,7 +256,7 @@ func deriveEnemyWeaponKills(res *Result) map[string]map[string]int {
 		p := &res.Streams.Players[i]
 		streams[p.Name] = p
 	}
-	out := map[string]map[string]int{}
+	out := map[string]*enemyWeaponKills{}
 	for i := range res.Frags.Frags {
 		f := &res.Frags.Frags[i]
 		if f.IsSuicide || f.IsTeamKill || isGenericPlayer(f.Killer) {
@@ -252,10 +269,19 @@ func deriveEnemyWeaponKills(res *Result) map[string]map[string]int {
 		if v := streams[f.Victim]; v != nil {
 			bucket = victimWeaponClassAt(v, f.Time)
 		}
-		if out[f.Killer] == nil {
-			out[f.Killer] = map[string]int{}
+		k := out[f.Killer]
+		if k == nil {
+			k = &enemyWeaponKills{
+				byBucket: map[string]int{},
+				cross:    map[string]map[string]int{},
+			}
+			out[f.Killer] = k
 		}
-		out[f.Killer][bucket]++
+		k.byBucket[bucket]++
+		if k.cross[f.Weapon] == nil {
+			k.cross[f.Weapon] = map[string]int{}
+		}
+		k.cross[f.Weapon][bucket]++
 	}
 	return out
 }
@@ -1300,6 +1326,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 			row.Score.TeamKills = addPtr(row.Score.TeamKills, m.Score.TeamKills)
 			row.Score.ByWeapon = addWeaponCounts(row.Score.ByWeapon, m.Score.ByWeapon)
 			row.Score.ByEnemyWeapon = addWeaponCounts(row.Score.ByEnemyWeapon, m.Score.ByEnemyWeapon)
+			row.Score.ByWeaponVsEnemyWeapon = addNestedWeaponCounts(row.Score.ByWeaponVsEnemyWeapon, m.Score.ByWeaponVsEnemyWeapon)
 
 			if m.Damage != nil {
 				if dmg == nil {
@@ -1428,6 +1455,24 @@ func addWeaponCounts(dst, src map[string]int) map[string]int {
 	}
 	for w, n := range src {
 		dst[w] += n
+	}
+	return dst
+}
+
+// addNestedWeaponCounts is addWeaponCounts one level deeper, for the
+// killer-weapon -> victim-bucket cross-tab. The inner maps are allocated
+// fresh for the same reason the outer one is: a one-member team must not
+// end up aliasing that member's own map and then mutating it when a
+// second member arrives.
+func addNestedWeaponCounts(dst, src map[string]map[string]int) map[string]map[string]int {
+	if len(src) == 0 {
+		return dst
+	}
+	if dst == nil {
+		dst = make(map[string]map[string]int, len(src))
+	}
+	for w, inner := range src {
+		dst[w] = addWeaponCounts(dst[w], inner)
 	}
 	return dst
 }

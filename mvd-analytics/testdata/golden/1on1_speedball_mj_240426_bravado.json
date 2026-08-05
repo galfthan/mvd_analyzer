@@ -17954,6 +17954,21 @@
             "lg": 32,
             "rl": 27
           },
+          "byWeaponVsEnemyWeapon": {
+            "lg": {
+              "both": 6,
+              "mid": 4,
+              "rl": 18,
+              "sg": 4
+            },
+            "rl": {
+              "both": 5,
+              "lg": 5,
+              "mid": 1,
+              "rl": 12,
+              "sg": 4
+            }
+          },
           "deaths": 7,
           "efficiency": 0.8939,
           "frags": 58,
@@ -18167,6 +18182,15 @@
           "byWeapon": {
             "lg": 2,
             "rl": 4
+          },
+          "byWeaponVsEnemyWeapon": {
+            "lg": {
+              "both": 2
+            },
+            "rl": {
+              "both": 2,
+              "rl": 2
+            }
           },
           "deaths": 59,
           "efficiency": 0.0923,

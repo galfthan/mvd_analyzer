@@ -279,6 +279,30 @@ type PlayerStatsScore struct {
 	// as one family. Within a present map, zero buckets are omitted like
 	// every other by-weapon map here.
 	ByEnemyWeapon map[string]int `json:"byEnemyWeapon,omitempty"`
+	// ByWeaponVsEnemyWeapon is the JOINT distribution the two maps above
+	// are the marginals of: killer weapon -> victim-weapon bucket -> kills.
+	// The outer key is ByWeapon's vocabulary (the obituary weapon codes,
+	// including tele / stomp / unknown), the inner key ByEnemyWeapon's
+	// (VictimWeapon*), and it answers what neither marginal can — "how many
+	// of my LG kills were against enemies carrying an RL", the question a
+	// team asks when it wants to know whether a weapon is winning fights or
+	// just finishing off the disarmed.
+	//
+	// Summing it recovers both marginals EXACTLY, which is the invariant
+	// this field rests on and the corpus check asserts:
+	//
+	//	sum over inner keys  -> ByWeapon
+	//	sum over outer keys  -> ByEnemyWeapon
+	//
+	// so a consumer never has to decide which of the three to trust. Same
+	// measuredness as its marginals (absent exactly when Kills is) and the
+	// same zero-dropping: an outer key exists only if the player killed
+	// with that weapon, an inner key only if that pairing happened.
+	//
+	// It is the widest map in this section — up to (weapons used) x 6 — so
+	// it is the one to skip when a consumer only needs a scoreboard. The
+	// marginals cost nothing and answer most questions.
+	ByWeaponVsEnemyWeapon map[string]map[string]int `json:"byWeaponVsEnemyWeapon,omitempty"`
 }
 
 // The victim-weapon vocabulary: the buckets that PlayerStatsScore

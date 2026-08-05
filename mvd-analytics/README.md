@@ -627,7 +627,10 @@ measured wherever the damage family itself is. Schema v69 adds the
 `sg`) partitioning `kills` and `given` respectively, classified from the
 victim's possession streams and never overlaid from KTX (whose `ekills` is
 inclusive and mode-suppressed). Read `rl + both` for "enemies killed while
-holding an RL".
+holding an RL". `score.byWeaponVsEnemyWeapon` carries the joint
+distribution those two kill maps are marginals of (killer weapon → victim
+bucket), for the question neither marginal answers — how many LG kills
+landed on enemies who were carrying an RL.
 See [RESULT_SCHEMA.md](RESULT_SCHEMA.md#damageresult-damage) for the
 field-level reference.
 

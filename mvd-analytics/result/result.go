@@ -1068,6 +1068,11 @@ package result
 //     KTX measures honestly (rl + both == ekills.rl on all 44 cached
 //     demos) and additionally covers telefrags, stomps and demos with no
 //     demoinfo block.
+//   - Score.ByWeaponVsEnemyWeapon is the JOINT distribution the two kill
+//     maps are marginals of (killer weapon -> victim bucket -> kills), for
+//     the question marginals cannot answer: how many of my LG kills were
+//     against enemies carrying an RL. Summing it reproduces both marginals
+//     exactly — guaranteed, since the marginal is summed from it.
 //   - Measuredness splits: the kill map is absent exactly when Kills is;
 //     the damage map needs the damage STREAM and is present exactly when
 //     Taken is.
