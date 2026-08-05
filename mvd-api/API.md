@@ -648,7 +648,7 @@ the match is cut up before the counting starts:
 |---|---|---|
 | **Whole-match** totals + the raw per-event logs | **`/frags`**, **`/damage`**, **`/player-stats`** | Authoritative stored aggregates; `/player-stats` is the one-call scoreboard. `/frags` carries `killsMeasured` — `false` means its zero `kills` are not measurements. |
 | A **fixed grid** of equal windows (charts) | **`/buckets`** | Every window, in order, whether or not anything happened in it. |
-| The **best stretches** — "when was X hot?" | **`/top-windows`** | Ranked fixed-length windows, chosen for you by a metric you pick. |
+| The **best stretches** — "when was X hot?" | **`/top-windows`** | Ranked windows, chosen for you by a metric you pick — fixed-length (`windowMs`) or gap-delimited (`mode=gap`, `gapMs`). |
 | The **natural unit** — one row per spawn-to-death life | **`/lives`** | Variable-length, and a partition, so per-life sums reconcile with the per-event **logs** (not necessarily the `byPlayer` scoreboards — see below). |
 | The **hardest single kills** — "find me the clips" | **`/top-kills`** | Ranked kill BURSTS: for each kill, the run of killing-weapon hits that produced it. |
 
@@ -656,11 +656,43 @@ Concrete consequences:
 
 - **`/top-windows` finds the windows; `/buckets` enumerates them.** Reach
   for top windows when the question is "which 30 seconds" rather than
-  "what did each 30 seconds look like". Its `windowMs` is the whole knob
+  "what did each 30 seconds look like". Under the default `mode=fixed`,
+  `windowMs` is the whole knob
   — 5000 for damage bursts, 30000 for hot streaks, 120000 for map-phase
-  dominance — so sweep it rather than expecting one right value. There is
-  deliberately no adaptive mode; the naturally variable-length unit is a
-  life, and that is `/lives`.
+  dominance — so sweep it rather than expecting one right value.
+- **`mode=gap` lets the play decide the length.** A gap window is a
+  maximal run of scoring events no more than `gapMs` apart, scored by
+  their sum — "the stretch lasted as long as he kept doing damage, not as
+  long as a stopwatch said". Use it when a fixed length is doing silent
+  editorial work (a 4-second double kill and a 10-second rampage both
+  reporting as "a 10 s window"). `gapMs` is **required** there and has no
+  default, because the metrics' cadences differ by an order of magnitude:
+  start at **~10000 for the frag metrics** and **~3000 for the damage and
+  shot metrics**. Each mode rejects the other's knob with a 400, and the
+  envelope always echoes `mode` plus exactly one of `windowMs` / `gapMs`.
+  Gap rows are disjoint per player, `end` is the run's last event (a lone
+  event is a legitimate row with `durationMs` 0), and a run may span the
+  player's own death — `/lives` is the per-life view. There is still
+  deliberately no adaptive mode with a tuning constant in it.
+- **`/top-windows mode=gap` vs `/top-kills`** — adjacent, not
+  substitutes:
+
+  | | `/top-kills` | `/top-windows mode=gap` |
+  |---|---|---|
+  | Unit / row | one kill + the burst that produced it | a stretch of sustained output |
+  | Ranked by | per-kill burst damage ("hardest kill") | the metric's sum ("best stretch") |
+  | Kill required? | yes (kill-anchored) | no — a 300-damage stretch with zero kills is a row |
+  | Life boundary | clipped at the killer's life start | not clipped; a run may span the player's own death |
+  | Rows overlap? | yes (each kill its own walk) | never (disjoint by construction) |
+  | Extras | `returnDamage`, victim weapon, `maxGapMs` narrowing | the full per-interval stats block |
+
+  They meet only in the degenerate regime: at
+  `metric=frags&weapons=rl&gapMs=3000`, RL inter-kill gaps run
+  p50 ≈ 11.8 s, so 85% of clusters are singletons and you have
+  `/top-kills`' unit with none of its content. At frag gaps of
+  8000–15000 gap mode answers what `/top-kills` structurally cannot
+  (multi-kill stretches), and at damage gaps around 3000 it is the
+  rampage view.
 - **Rows tied on `score` are ranked by a fixed complementary metric**
   (`damageGiven` under `frags`/`netFrags`/`shots`/`hits`, `frags` under
   `damageGiven`/`netDamage`, `damageTaken` under `deaths`, `deaths` under

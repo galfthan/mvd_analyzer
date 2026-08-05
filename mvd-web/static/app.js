@@ -2008,7 +2008,7 @@ function renderPowerupRuns(result) {
         // the pack-drop anchors).
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId && event.playerUserID) {
-            const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+            const demoOff = timelineState.demoOffset || 0;
             const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
             const toTime = Math.floor(event.endTime + demoOff) + 5;
             const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: event.playerUserID });
@@ -2065,7 +2065,7 @@ function displayKeyMoments(result) {
 
             let watchCell = '-';
             if (hubInfo && hubInfo.gameId) {
-                const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+                const demoOff = timelineState.demoOffset || 0;
                 const fromTime = Math.max(0, Math.floor(streak.time + demoOff));
                 const toTime = Math.floor(streak.endTime + demoOff) + 3;
                 const trackId = streak.playerUserID || 0;
@@ -2117,7 +2117,7 @@ function displayKeyMoments(result) {
 
             let watchCell = '-';
             if (hubInfo && hubInfo.gameId) {
-                const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+                const demoOff = timelineState.demoOffset || 0;
                 const fromTime = Math.max(0, Math.floor(marker.time + demoOff) - 10);
                 const toTime = fromTime + 20;
                 const trackId = marker.playerUserID || 0;
@@ -2239,8 +2239,8 @@ function topMomentsWatchCell(playerName, fromSec, toSec, hubInfo, playerUserIDs)
     if (!hubInfo || !hubInfo.gameId) return '-';
     const trackId = playerUserIDs[playerName];
     if (!trackId) return '-';
-    // Match-relative → hub's clip base (countdown start, assumed 10 s).
-    const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+    // Match-relative → demo-relative (Hub time includes countdown/warmup).
+    const demoOff = timelineState.demoOffset || 0;
     const from = Math.max(0, Math.floor(fromSec + demoOff));
     const to = Math.floor(toSec + demoOff);
     const url = hubReplayUrl({ gameId: hubInfo.gameId, from, to, track: trackId });
@@ -2268,8 +2268,10 @@ function renderTopDamageWindows(v, hubInfo, playerUserIDs) {
         const tr = document.createElement('tr');
         // The clip is the window plus a 1 s lead-in — 11 s total, per the
         // product ruling: enough not to open mid-swing, short enough that the
-        // clip IS the window. With hub's fixed base (HUB_COUNTDOWN_S) the hub
-        // clock reads exactly Start-1 when playback opens.
+        // clip IS the window. NOTE the hub URL's from/to are DEMO-relative
+        // (recording start), while this table displays match-relative time,
+        // so the hub scrubber reads demoOffset-1 higher than the Start cell;
+        // the content is aligned even though the numbers differ.
         const watchCell = topMomentsWatchCell(w.player, w.startSec - 1, w.endSec, hubInfo, playerUserIDs);
 
         // score IS the window's bounded enemy damage (the ranking metric);
@@ -2366,7 +2368,7 @@ function displayAirgibs(result) {
 
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId) {
-            const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+            const demoOff = timelineState.demoOffset || 0;
             const fromTime = Math.max(0, Math.floor(a.timeSec + demoOff) - 5);
             const toTime = Math.floor(a.timeSec + demoOff) + 3;
             const trackId = a.attackerUserID || 0; // shooter perspective
@@ -3007,7 +3009,7 @@ function renderPackDropRows() {
     const status = document.getElementById('packdrops-filter-status').value;
 
     const { rows, hubInfo, playerUserIDs } = packDropsState;
-    const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+    const demoOff = timelineState.demoOffset || 0;
 
     const hubAnchor = (from, to, trackName) => {
         if (!hubInfo || !hubInfo.gameId) return '-';
@@ -5892,20 +5894,25 @@ function updateTeamStatus() {
 // single "jump here" link (buildHubWatchLink) and pass it for a windowed
 // clip (powerups / streaks / airgibs / pack drops). Callers do their own
 // demoOffset conversion + window padding (each surface pads differently),
-// HUB_COUNTDOWN_S is the hub player's OWN time base, not ours. Its clip seek
-// treats `from` as seconds from the START OF THE COUNTDOWN and its clock
-// hard-codes a 10 s countdown (fteController.ts: _countdownDuration = 10.0),
-// so a link built with the demo's MEASURED offset (streams.global.demoOffset
-// — 15.1 s on servers running a 15 s countdown) makes every number hub
-// displays read offset-10 higher than this UI's match-relative times, which
-// users read as "the link is wrong". Using hub's constant keeps hub's clock
-// equal to our table on every demo; the cost is that playback starts
-// (demoOffset-10) s of extra lead early on long-countdown servers — early is
-// benign, late would cut the action. Do NOT "fix" this back to demoOffset.
-const HUB_COUNTDOWN_S = 10;
-
 // then hand the final demo-relative from/to/track here so the URL scheme
 // lives in exactly one place.
+//
+// from/to ARE DEMO-RELATIVE SECONDS — hub feeds `from` straight to
+// fte.demoJump() and pauses when the demo's elapsed time passes `to`
+// (hub.quakeworld.nu src/pages/games/player/clips/hooks.ts), with no
+// countdown arithmetic on either. So streams.global.demoOffset is the
+// correct conversion and the only one that puts the clip on the content.
+//
+// What is NOT correct is hub's displayed clock: fteController.ts hard-codes
+// _countdownDuration = 10.0 and shows demoElapsed-10, while the demo's own
+// hub metadata carries the real countdown (countdown_duration = 15.119 s on
+// qwleague servers, equal to our demoOffset to the millisecond) and the
+// player never reads it. On those demos hub's clock therefore reads
+// demoOffset-10 s HIGHER than the match time in our tables. That is an
+// upstream bug. Do not "fix" it by building links off hub's 10 s constant:
+// it drags every clip demoOffset-10 s earlier, and because `to` is a hard
+// pause point it truncates the payload — an airgib clip then ends before
+// the gib. Correct content, wrong-looking clock, is the trade we keep.
 function hubReplayUrl({ gameId, from, to, track }) {
     let url = `https://hub.quakeworld.nu/games/?gameId=${gameId}&from=${from}`;
     if (to != null) url += `&to=${to}`;
@@ -5918,9 +5925,8 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     const trackId = playerUserIDs[playerName];
     if (!trackId) return '';
     // Our times are match-relative (0 = match start). Hub uses demo-relative time
-    // (hub counts from the countdown start, assumed 10 s), so add hub's own
-    // constant — see HUB_COUNTDOWN_S.
-    const from = Math.floor(time + HUB_COUNTDOWN_S);
+    // (includes countdown/warmup), so add demoOffset to convert.
+    const from = Math.floor(time + (timelineState.demoOffset || 0));
     const url = hubReplayUrl({ gameId: hubInfo.gameId, from, track: trackId });
     return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }

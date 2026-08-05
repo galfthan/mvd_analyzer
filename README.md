@@ -197,7 +197,7 @@ servable artifact by name:
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
 | `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
 | `getRegionControl(demoId, windowMs, regions, …)` | `mvd-api` `/region-control` |
-| `getTopWindows(demoId, metric, windowMs, limit, perPlayer, …)` | `mvd-api` `/top-windows` (each player's best fixed-length stretches, ranked) |
+| `getTopWindows(demoId, metric, mode, windowMs, gapMs, limit, perPlayer, …)` | `mvd-api` `/top-windows` (each player's best stretches, ranked — fixed-length windows or gap-delimited runs) |
 | `getTopKills(demoId, gapMs, weapons, minDamage, …)` | `mvd-api` `/top-kills` (the hardest kill bursts, ranked) |
 | `getLives(demoId, players, minMs, …)` | `mvd-api` `/lives` (one row per spawn-to-death life) |
 | **Generic DAG artifacts** | |

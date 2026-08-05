@@ -1169,18 +1169,30 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 // handleTopWindows: GET /v1/demos/{id}/top-windows — each player's best
 // stretches of the match, computed on demand from the stored event logs.
 //
-// The contract is one sentence: "in these windowMs milliseconds this player
-// scored higher on metric than in any other stretch of the same length."
-// Windows are anchored at real event times (not a grid), non-overlapping per
-// player, and returned as one flat list under two independent caps —
-// perPlayer, then limit.
+// Two segmentations, one sentence each. Fixed (the default): "in these
+// windowMs milliseconds this player scored higher on metric than in any other
+// stretch of the same length." Gap: "a window is a maximal run of scoring
+// events in which consecutive events are no more than gapMs apart; its score
+// is their sum." Windows are anchored at real event times (not a grid),
+// non-overlapping per player, and returned as one flat list under two
+// independent caps — perPlayer, then limit.
 //
 // Query params:
 //
 //	metric     enum — frags (default) | deaths | netFrags | damageGiven |
 //	                  damageTaken | netDamage | shots | hits
-//	windowMs   int  — window length in ms (default 30000; an explicit value
-//	                  below 1 or above the match duration is a 400)
+//	mode       enum — fixed (default) | gap — the segmentation. Each mode
+//	                  REJECTS the other's knob with a 400 rather than
+//	                  ignoring it, and the resolved value is echoed on every
+//	                  response, fixed ones included.
+//	windowMs   int  — fixed mode's window length in ms (default 30000; an
+//	                  explicit value below 1 or above the match duration is a
+//	                  400). Rejected under mode=gap.
+//	gapMs      int  — gap mode's inter-event gap in ms, REQUIRED there: it has
+//	                  no default (the metrics' cadences are too far apart for
+//	                  one value — the 400 names the measured starting points).
+//	                  Below 1 or above the match duration is a 400. Rejected
+//	                  under mode=fixed.
 //	limit      int  — total windows (default 10; negative means uncapped; an
 //	                  explicit 0 and anything above 200 are both a 400, never
 //	                  a silent clamp)
@@ -1204,8 +1216,17 @@ func (s *server) handleTopWindows(w http.ResponseWriter, r *http.Request) {
 	// with "must be >= 0" while the endpoint's real floor is 1, so a caller
 	// told to retry with 0 failed again. One check below covers both.
 	windowMs := p.IntHint("windowMs", 0, "integer milliseconds")
+	// gapMs reads exactly the same way, for the same reason.
+	gapMs := p.IntHint("gapMs", 0, "integer milliseconds")
 	opts := view.TopWindowsOptions{
-		Metric:    p.Metric(),
+		Metric: p.Metric(),
+		// mode is forwarded UNVALIDATED. view.TopWindows owns the vocabulary
+		// and all three cross-knob rules (an unknown mode, either knob under
+		// the wrong mode, a missing gapMs under gap), and its ErrInvalidFilter
+		// lands on the 400 invalid_param path at the tail of this handler.
+		// Re-stating those messages here would give one request two wordings
+		// depending on which layer happened to see it first.
+		Mode:      p.Str("mode"),
 		Limit:     p.Int("limit", 0),
 		PerPlayer: p.Int("perPlayer", 0),
 		Players:   p.CSV("players"),
@@ -1239,12 +1260,31 @@ func (s *server) handleTopWindows(w http.ResponseWriter, r *http.Request) {
 	// asking for more describes time that does not exist. The view's clamp
 	// stays as defence in depth for its in-process callers; this makes it
 	// unreachable over HTTP.
-	if maxWin := matchDurationMs(res); windowMs > maxWin {
+	maxSpan := matchDurationMs(res)
+	if windowMs > maxSpan {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			fmt.Sprintf("windowMs must be <= %d (the match duration), got %d; a window longer than the match is the whole match", maxWin, windowMs))
+			fmt.Sprintf("windowMs must be <= %d (the match duration), got %d; a window longer than the match is the whole match", maxSpan, windowMs))
 		return
 	}
 	opts.WindowMs = int32(windowMs)
+	// gapMs is bounded at both ends exactly as windowMs is, on the same
+	// match duration — with one deliberate difference in wording. The floor
+	// message must NOT say "omit it for the default": gap mode has none, and
+	// omitting it under mode=gap is itself a 400 (the view's message, which
+	// names the measured starting points). Which mode the request asked for is
+	// not consulted here; a gapMs that is out of range is out of range whether
+	// or not it also belongs to the other mode, and the conflict 400 the view
+	// raises for an in-range one says the same thing more precisely.
+	if p.Present("gapMs") && gapMs < 1 {
+		writeError(w, http.StatusBadRequest, "invalid_param", "gapMs must be >= 1")
+		return
+	}
+	if gapMs > maxSpan {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("gapMs must be <= %d (the match duration), got %d; a gap that long joins every one of a player's events into a single window", maxSpan, gapMs))
+		return
+	}
+	opts.GapMs = int32(gapMs)
 	if p.Present("limit") && opts.Limit == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param",
 			"limit must be >= 1, or negative for uncapped; omit it for the default 10")

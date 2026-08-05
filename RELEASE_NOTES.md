@@ -5,6 +5,71 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (gap-windows) — gap-delimited top windows, schema v68
+
+**`/top-windows` learns a second segmentation.** The stored `Result` gains
+**no field** in v68 either: the bump is for the observable API surface alone.
+`mode` defaults to `fixed`, so a pre-v68 request answers identically apart
+from the additive `mode: "fixed"` echo every response now carries.
+
+- **`mode=gap` — the window is as long as the play was.** The contract is one
+  sentence: *a window is a maximal run of scoring events in which consecutive
+  events are no more than `gapMs` apart; its score is their sum.* A gap of
+  exactly `gapMs` joins and `gapMs+1` splits. It answers what a fixed length
+  structurally cannot — a 4-second double kill and a 10-second sustained
+  rampage both report as "a 10 s window" under `mode=fixed`, and that length
+  is doing silent editorial work. It is **not** the adaptive segmentation
+  dropped during planning: Ruzzo–Tompa needs a per-second penalty to stop the
+  whole match being one segment, and that penalty is exactly the
+  unexplainable tuning constant this rule does without.
+- **`gapMs` is REQUIRED under `mode=gap` and has no default** — measured, not
+  assumed. Over the 44-demo cache, per-player inter-**kill** gaps run
+  p50 ≈ 11–12 s (duel and team alike) while inter-**damage-event** gaps run
+  p50 ≈ 1.0–1.1 s, so no single value serves both: frag clusters read as a
+  streak at 8000–15000 (top clusters 18–22 kills) while damage clusters read
+  as a rampage at 2000–3000 (~900 damage over 13–21 s) and dissolve into
+  phase-length blobs by 8000 (2552 damage over 123 s). Documented starting
+  points: **~10000 for the frag metrics, ~3000 for the damage and shot
+  metrics**; the 400 for an omitted `gapMs` names them. Range is
+  `1..the match duration`, `windowMs`' rule exactly, and out-of-range is
+  rejected rather than clamped.
+- **Each mode rejects the other's knob with a 400**, explicitly rather than
+  silently ignoring it: `gapMs` under `mode=fixed`, `windowMs` under
+  `mode=gap`. A dropped knob would answer a question the caller did not ask,
+  and the envelope — which echoes only its own mode's knob — could not show
+  that anything had been discarded.
+- **Envelope: `mode` always, then exactly one knob.** `mode` is echoed on
+  every response, `fixed` ones included, so a consumer never infers the
+  segmentation from which field happens to be present; `gapMs` rides gap
+  responses and `windowMs` becomes fixed-only (on a gap response a fixed
+  length would be a lie). Rows need no new field — a gap row's `end` is its
+  last scoring event rather than `start + windowMs`, and `start`/`end`
+  already described variable-length spans.
+- **What carries over, and what does not.** Everything after the
+  segmentation is shared: the metric vocabulary, the v67 complementary
+  tie-break (which earns its keep *more* here — at `metric=frags`
+  `gapMs=8000` the primary alone fully separates the top-10 on 0/44 demos,
+  the secondary on 38/44), both caps, `weapons=` scoping, `minScore`, the
+  stats block, and **`score` still equals the same-named stat exactly**
+  absent a `weapons=` filter. What differs: clusters are disjoint per player
+  by construction (no greedy pass, no overlap suppression, no anchor
+  families), signed metrics cluster on **all** their events so a death both
+  extends a `netFrags` run and lowers its score, a run of one event is a
+  legitimate row with `durationMs` 0, and **a run may span the player's own
+  death** — `/lives` stays the per-life view.
+- **`mode=gap` is not `/top-kills` in disguise.** `/top-kills` is the
+  per-kill view (kill-anchored, life-clipped, ranked by the burst that
+  produced one kill, rows overlap); gap windows are the per-stretch view (no
+  kill required, rows disjoint, ranked by the metric's sum). They collapse
+  onto each other only at `metric=frags&weapons=rl&gapMs=3000`, where RL
+  inter-kill gaps of p50 ≈ 11.8 s leave 85% of clusters singletons — the
+  degenerate regime, and the choose-between table now lives in
+  [API.md](mvd-api/API.md).
+- **MCP `getTopWindows` gains `mode` and `gapMs`**, lockstep as always, with
+  the omitted-integer contract: an unset `gapMs` stays out of the query, so
+  `mode:"gap"` without one earns the 400 that names the starting points
+  instead of a silent `gapMs=0`.
+
 ## unreleased (top-kills) — kill bursts, and the `top-` endpoint family, schema v67
 
 **The highlight-reel view, plus one deliberate rename taken while it was

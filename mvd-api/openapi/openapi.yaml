@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "67"
+  version: "68"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -1343,14 +1343,46 @@ paths:
       tags: [timeline]
       summary: Each player's best stretches of the match
       description: |
-        Top-scoring fixed-length windows. The contract is one sentence: "in
-        these `windowMs` milliseconds this player scored higher on `metric`
-        than in any other stretch of the same length."
+        Top-scoring windows under one of two segmentations, chosen with
+        `mode`. Each has a one-sentence contract:
 
-        `windowMs` is the main knob — 5000 gives damage bursts, 30000 gives
-        hot streaks — and there is deliberately no adaptive mode; for the
+        - `mode=fixed` (the default) — "in these `windowMs` milliseconds this
+          player scored higher on `metric` than in any other stretch of the
+          same length."
+        - `mode=gap` — "a window is a maximal run of scoring events in which
+          consecutive events are no more than `gapMs` apart; its score is
+          their sum."
+
+        `windowMs` is fixed mode's main knob — 5000 gives damage bursts, 30000
+        gives hot streaks. `gapMs` is gap mode's, is REQUIRED there and has no
+        default; each mode rejects the other's knob with a 400. There is
+        deliberately no adaptive mode with a tuning constant in it; for the
         naturally variable-length unit use `/lives`, and for a fixed grid use
         `/buckets`.
+
+        **Everything below applies to BOTH modes** — metric vocabulary,
+        ranking and the tie-break, both caps, `weapons=` scoping, `minScore`,
+        the stats block, measuredness and the damage family — except where the
+        text names `windowMs`. What gap mode changes is only where a window
+        starts and ends: rows are the runs themselves (so they are disjoint
+        per player by construction, with no overlap suppression), `end` is the
+        run's last event rather than `start + windowMs`, a run of one event is
+        a legitimate row with `durationMs` 0, and a run may span the player's
+        own death — `/lives` is the per-life view. See the `mode` and `gapMs`
+        parameters for the per-metric starting points and the rest of the
+        contract.
+
+        **`/top-windows mode=gap` vs `/top-kills`.** They are adjacent but not
+        substitutes: `/top-kills` is the per-KILL view (each row one kill plus
+        the killing-weapon burst that produced it, kill-anchored, clipped at
+        the killer's life start, with `returnDamage` and `maxGapMs`), while
+        gap windows are the per-STRETCH view (best sustained output, no kill
+        required — a 300-damage stretch with zero kills is a row — and rows
+        never overlap). At `metric=frags&weapons=rl&gapMs=3000` the two do
+        collapse onto each other, and there gap mode is the wrong tool: RL
+        inter-kill gaps run p50 ≈ 11.8 s, so 85% of clusters would be
+        singletons. Use frag gaps of 8000-15000 for multi-kill stretches, or
+        damage gaps around 3000 for rampages.
 
         **`from`/`to` bound where a window may START, not what it covers** —
         the one place this endpoint departs from the shared parameter
@@ -1437,7 +1469,9 @@ paths:
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Metric"
+        - $ref: "#/components/parameters/TopWindowMode"
         - $ref: "#/components/parameters/TopWindowMs"
+        - $ref: "#/components/parameters/TopWindowGapMs"
         - $ref: "#/components/parameters/TopWindowLimit"
         - $ref: "#/components/parameters/PerPlayer"
         - $ref: "#/components/parameters/Players"
@@ -2237,14 +2271,103 @@ components:
           - hits
           # top-window-metric-enum:end
       example: netFrags
+    TopWindowMode:
+      name: mode
+      in: query
+      description: |
+        The SEGMENTATION — how a window's boundaries are decided (default
+        `fixed`, so a request written before this parameter existed is
+        unchanged). Case-insensitive; the resolved value is echoed on every
+        response, `fixed` ones included.
+
+        - `fixed` — every window is exactly `windowMs` long. "In these
+          `windowMs` ms this player scored higher on `metric` than in any
+          other stretch of the same length."
+        - `gap` — a window is a maximal run of scoring events in which
+          consecutive events are no more than `gapMs` apart; its score is
+          their sum. The stretch lasts as long as the player kept doing it,
+          not as long as a stopwatch says. A gap of EXACTLY `gapMs` joins and
+          `gapMs+1` splits; a run of one event is a legitimate window with
+          `durationMs` 0.
+
+        Each mode takes exactly ONE knob and REJECTS the other's with a 400
+        rather than ignoring it: `gapMs` under `mode=fixed`, and `windowMs`
+        under `mode=gap`. `gapMs` is REQUIRED under `mode=gap` and has no
+        default.
+
+        Gap-mode specifics worth knowing before you read the rows:
+
+        - Signed metrics (`netFrags`, `netDamage`) cluster on ALL their
+          events, negatives included — a death both extends the run and
+          lowers its score. That is "net" as the fight went, and it is what
+          keeps `score` equal to the same-named stat.
+        - A cluster MAY SPAN THE PLAYER'S OWN DEATH (kill, die, respawn, kill
+          again within `gapMs` is one window). `/lives` is the per-life view.
+        - Clusters are disjoint per player by construction, so unlike fixed
+          mode there is no overlap suppression to reason about.
+        - `from`/`to` still bound where a window may START — here, its first
+          event; the run may end past `to`. Note the consequence on the
+          `from` side: a cluster whose first event precedes `from` is not
+          returned AT ALL, its post-`from` mass included — `from` never
+          re-anchors a cluster. Slicing a match into `from`/`to` panes
+          therefore drops straddling clusters rather than truncating them.
+      schema:
+        type: string
+        default: fixed
+        enum:
+          # top-window-mode-enum:begin — TestOpenAPITopWindowModesCurrent pins this to view.KnownTopWindowModes
+          - fixed
+          - gap
+          # top-window-mode-enum:end
+      example: gap
+    TopWindowGapMs:
+      name: gapMs
+      in: query
+      description: |
+        Gap mode's knob, in integer MILLISECONDS: consecutive scoring events
+        no more than `gapMs` apart belong to the same window.
+
+        **REQUIRED under `mode=gap`, with deliberately NO default** — omitting
+        it is a 400. The metrics' event cadences are too far apart for one
+        value to serve them: measured over the 44-demo corpus, per-player
+        inter-KILL gaps run p50 ≈ 11-12 s while inter-damage-event gaps run
+        p50 ≈ 1.0-1.1 s, so the value that reads as "a streak" on frags
+        dissolves damage into phase-length blobs, and the value that reads as
+        "a rampage" on damage leaves 85% of RL frag clusters singletons.
+        Requiring it also keeps the mode honest: you state what "kept doing
+        it" means rather than inheriting a constant nobody can justify.
+
+        **Measured starting points: ~10000 for the frag metrics
+        (`frags`/`deaths`/`netFrags`), ~3000 for the damage and shot
+        metrics.** At `metric=frags` a gap of 8000-15000 reads as a streak
+        (top clusters 18-22 kills); at `metric=damageGiven` a gap of
+        2000-3000 reads as a rampage (~900 damage over 13-21 s) and 8000
+        already merges whole map phases.
+
+        **Range 1..the match duration**, `windowMs`' rule exactly, and an
+        out-of-range value is REJECTED with a 400 naming the bound rather than
+        clamped. The floor covers an explicit `gapMs=0` (an omitted MCP
+        integer arrives as 0, which must not look deliberate) and any negative
+        value; the ceiling is the match duration, past which every one of a
+        player's events joins a single window.
+
+        **Rejected under `mode=fixed`** with a 400 — an explicit conflict, not
+        a silent drop, since the response echoes only its own mode's knob and
+        so could not show that anything was discarded.
+      schema: { type: integer, format: int32, minimum: 1 }
+      example: 3000
     TopWindowMs:
       name: windowMs
       in: query
       description: |
-        Window length in integer MILLISECONDS (default 30000). The main knob:
-        5000 gives damage bursts, 30000 hot streaks, 120000 map-phase
+        FIXED MODE'S knob: the window length in integer MILLISECONDS (default
+        30000). 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase
         dominance. Sweep it — there is no single right value and the API does
         not pick one for you.
+
+        **Rejected under `mode=gap`** with a 400 (that mode's knob is
+        `gapMs`), and absent from a gap response, where a fixed length would
+        be a lie.
 
         **Bounded on both sides**, and an out-of-range value is REJECTED with
         a 400 naming the bound rather than clamped.
@@ -5152,17 +5275,52 @@ components:
     TopWindows:
       type: object
       additionalProperties: false
-      required: [scoredBy, windowMs, limit, perPlayer, measured, windows]
+      required: [scoredBy, mode, limit, perPlayer, measured, windows]
+      # EXACTLY ONE knob accompanies mode, machine-enforced: a fixed envelope
+      # carries windowMs and never gapMs, a gap envelope the mirror image. The
+      # branches discriminate on the mode const, so exactly one can match.
+      # TestTopWindowsEnvelopeExactlyOneKnob pins the invalid combinations.
+      oneOf:
+        - properties:
+            mode:
+              const: fixed
+              description: Branch discriminator — the fixed envelope.
+          required: [windowMs]
+          not: { required: [gapMs] }
+        - properties:
+            mode:
+              const: gap
+              description: Branch discriminator — the gap envelope.
+          required: [gapMs]
+          not: { required: [windowMs] }
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         scoredBy: { $ref: "#/components/schemas/ScoringRule" }
         measured: { $ref: "#/components/schemas/MeasuredSources" }
         dmg: { $ref: "#/components/schemas/IntervalDmgFamily" }
         boundedMode: { $ref: "#/components/schemas/IntervalBoundedMode" }
+        mode:
+          type: string
+          enum: [fixed, gap]
+          description: >
+            The segmentation these windows were cut by, echoed on EVERY
+            response — fixed ones included — so a consumer never has to infer
+            it from which knob field happens to be present. Exactly one of
+            `windowMs` (fixed) and `gapMs` (gap) accompanies it.
         windowMs:
           type: integer
           format: int32
-          description: Window length in ms (echoed).
+          description: >
+            Window length in ms (echoed). FIXED RESPONSES ONLY: it is absent
+            under `mode=gap`, where windows are as long as their events and a
+            fixed length would be a lie.
+        gapMs:
+          type: integer
+          format: int32
+          description: >
+            The inter-event gap these clusters were cut at, echoed. GAP
+            RESPONSES ONLY (it has no meaning, and no default, under
+            `mode=fixed`).
         limit:
           type: integer
           description: >
@@ -5193,9 +5351,12 @@ components:
           type: integer
           format: int32
           description: >
-            `start + windowMs` (the identity holds over REST because `windowMs`
-            is capped at the match duration; the view clamps `end` at the int32
-            ceiling for in-process callers, who face no such cap).
+            Under `mode=fixed`, `start + windowMs` (the identity holds over
+            REST because `windowMs` is capped at the match duration; the view
+            clamps `end` at the int32 ceiling for in-process callers, who face
+            no such cap). Under `mode=gap` it is the run's LAST scoring event,
+            so the row is as long as the stretch was and `end == start` on a
+            single-event run.
         score:
           type: integer
           description: >

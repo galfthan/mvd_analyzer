@@ -35,6 +35,20 @@ import (
 // exists. So a 30 s window is 30 s of play whether or not the match was paused
 // inside it, and subtracting pause time here would double-correct.
 
+// GAP MODE is the second segmentation, additive and opt-in, with its own
+// one-sentence contract:
+//
+//	A window is a maximal run of scoring events in which consecutive events
+//	are no more than gapMs apart; its score is their sum.
+//
+// It answers what a fixed length structurally cannot — "the stretch lasted as
+// long as he kept doing damage, not as long as a stopwatch said" — while
+// keeping the property that made the fixed mode explainable: one sentence, one
+// caller-chosen knob, no tuning constant. It is NOT the adaptive segmentation
+// that was dropped during planning; Ruzzo-Tompa needs a per-second penalty to
+// stop the whole match being one segment, and that penalty is exactly the
+// unexplainable constant this rule does without.
+//
 // TopWindowMetric names a summable per-event quantity. Ratios (accuracy,
 // efficiency) are deliberately absent: they do not sum, so "the best window"
 // is undefined for them. They ride the per-window stats block instead.
@@ -58,6 +72,18 @@ var KnownTopWindowMetrics = []string{
 	MetricShots, MetricHits,
 }
 
+// The two segmentations. "" resolves to fixed, so every caller written before
+// gap mode existed keeps its behaviour — the response differs only by the
+// additive Mode echo.
+const (
+	TopWindowModeFixed = "fixed" // every window exactly windowMs long
+	TopWindowModeGap   = "gap"   // maximal runs of events at most gapMs apart
+)
+
+// KnownTopWindowModes is the closed vocabulary, in the order the docs list it;
+// the openapi enum is drift-pinned to this slice.
+var KnownTopWindowModes = []string{TopWindowModeFixed, TopWindowModeGap}
+
 const (
 	defaultTopWindowMs    = 30000
 	defaultTopWindowLimit = 10
@@ -68,8 +94,26 @@ const (
 // "default"; From/To are match-relative int32 ms (0 disables that bound),
 // matching FragOptions / DamageOptions.
 type TopWindowsOptions struct {
-	Metric    string   // one of KnownTopWindowMetrics; "" → frags
-	WindowMs  int32    // window length; <=0 → 30000
+	Metric string // one of KnownTopWindowMetrics; "" → frags
+	// Mode is the segmentation: "" or "fixed" → fixed-length windows of
+	// WindowMs, "gap" → maximal runs of events at most GapMs apart. Matched
+	// case-insensitively like Metric.
+	Mode     string
+	WindowMs int32 // fixed mode's window length; <=0 → 30000. REJECTED under mode=gap
+	// GapMs is gap mode's knob, and it is REQUIRED there: there is deliberately
+	// NO default, because the metrics' event cadences are too far apart for one
+	// value to serve them. Measured over the 44-demo cache, per-player
+	// inter-KILL gaps run p50 ≈ 11-12 s while inter-damage-event gaps run
+	// p50 ≈ 1.0-1.1 s, so the value that reads as "a streak" on frags
+	// (8000-15000) dissolves damage into phase-length blobs, and the value that
+	// reads as "a rampage" on damage (2000-3000) leaves 85% of RL frag
+	// clusters singletons. Requiring it also keeps the mode's promise — the caller
+	// states what "kept doing it" means, rather than inheriting a constant
+	// nobody can justify. REJECTED under mode=fixed.
+	//
+	// Not capped against the match duration here, same split as WindowMs: the
+	// ceiling is the HTTP layer's gate.
+	GapMs     int32
 	Limit     int      // total windows returned; 0 → 10, <0 → uncapped
 	PerPlayer int      // max windows from any ONE player; <=0 → uncapped
 	Players   []string // restrict to these SUBJECT players (case-sensitive)
@@ -131,7 +175,17 @@ type TopWindowsView struct {
 	Dmg         string `json:"dmg,omitempty"`
 	BoundedMode string `json:"boundedMode,omitempty"`
 
-	WindowMs  int32 `json:"windowMs"`
+	// Mode is echoed on EVERY response, fixed ones included, so a consumer
+	// never has to infer the segmentation from which knob field happens to be
+	// present — the two knobs are mutually exclusive, and "windowMs is absent"
+	// is a much weaker statement than "mode is gap".
+	Mode string `json:"mode"`
+
+	// Exactly one of these describes the segmentation, matching Mode. WindowMs
+	// is omitempty because on a gap response it would be a lie: those windows
+	// are as long as their events, not as long as a number.
+	WindowMs  int32 `json:"windowMs,omitempty"`
+	GapMs     int32 `json:"gapMs,omitempty"`
 	Limit     int   `json:"limit"`
 	PerPlayer int   `json:"perPlayer"`
 
@@ -262,24 +316,57 @@ func (tr *sumTrack) sum(lo, hi int32) int {
 	return tr.pre[j] - tr.pre[i]
 }
 
-// TopWindows returns the top-scoring fixed-length windows across the match.
+// TopWindows returns each player's top-scoring windows across the match, under
+// whichever segmentation opts.Mode selects: fixed-length (windowMs) or
+// gap-delimited (gapMs). Everything after the segmentation — ranking, caps,
+// stats blocks, the score-equals-stat invariant — is shared.
 //
 // Returns ErrUnavailable when the demo carries no source stream for the
 // requested metric, ErrBoundedUnavailable for an explicit dmg=bounded on a
-// demo with no bounded family, and ErrInvalidFilter for a bad metric or
-// weapon token.
+// demo with no bounded family, and ErrInvalidFilter for a bad metric, mode or
+// weapon token, or a knob belonging to the other mode.
 func TopWindows(r *result.Result, opts TopWindowsOptions) (*TopWindowsView, error) {
 	metric, ok := canonicalMetric(opts.Metric)
 	if !ok {
 		return nil, fmt.Errorf("%w: unknown metric %q; valid: %s",
 			ErrInvalidFilter, opts.Metric, strings.Join(KnownTopWindowMetrics, ", "))
 	}
+	mode, ok := canonicalMode(opts.Mode)
+	if !ok {
+		return nil, fmt.Errorf("%w: unknown mode %q; valid: %s",
+			ErrInvalidFilter, opts.Mode, strings.Join(KnownTopWindowModes, ", "))
+	}
+	// A knob from the other mode is REFUSED, not ignored. Silently dropping it
+	// answers a question the caller did not ask — gapMs=3000 beside mode=fixed
+	// most likely means they believed they were getting gap clustering — and
+	// the response, which echoes only the knob of its own mode, would not show
+	// that anything was discarded. The gates are != 0, not > 0: an int option
+	// cannot tell an omitted zero from an explicit one, but every NONZERO
+	// wrong-mode value — negative included — is some expression of intent
+	// toward the wrong knob, and zeroing it away would be exactly the silent
+	// drop this block exists to prevent (cross-vendor review, 2026-08-04).
+	if mode == TopWindowModeFixed && opts.GapMs != 0 {
+		return nil, fmt.Errorf("%w: gapMs applies to mode=gap; mode=fixed takes windowMs", ErrInvalidFilter)
+	}
+	if mode == TopWindowModeGap {
+		if opts.WindowMs != 0 {
+			return nil, fmt.Errorf("%w: windowMs applies to mode=fixed; mode=gap takes gapMs", ErrInvalidFilter)
+		}
+		if opts.GapMs <= 0 {
+			return nil, fmt.Errorf("%w: mode=gap requires gapMs and has no default; "+
+				"measured starting points: ~10000 for the frag metrics, ~3000 for the damage and shot metrics",
+				ErrInvalidFilter)
+		}
+	}
 	if r == nil {
 		return nil, ErrUnavailable
 	}
 
+	// No default under gap mode: windowMs stays 0 there — the != 0 gates above
+	// guarantee the wrong-mode knob is exactly zero past this point, so the
+	// envelope's omitempty does the rest without a reset.
 	windowMs := opts.WindowMs
-	if windowMs <= 0 {
+	if mode == TopWindowModeFixed && windowMs <= 0 {
 		windowMs = defaultTopWindowMs
 	}
 	limit := opts.Limit
@@ -330,7 +417,13 @@ func TopWindows(r *result.Result, opts TopWindowsOptions) (*TopWindowsView, erro
 
 	var all []rankedWindow
 	for _, name := range names {
-		for _, c := range topWindowsFor(events[name], windowMs, lo, hi, min, sec[name]) {
+		var cands []windowCand
+		if mode == TopWindowModeGap {
+			cands = gapWindowsFor(events[name], opts.GapMs, lo, hi, min, sec[name])
+		} else {
+			cands = topWindowsFor(events[name], windowMs, lo, hi, min, sec[name])
+		}
+		for _, c := range cands {
 			all = append(all, rankedWindow{
 				TopWindow: TopWindow{Player: name, Start: c.start, End: c.end, Score: c.score},
 				sec:       c.sec,
@@ -365,7 +458,9 @@ func TopWindows(r *result.Result, opts TopWindowsOptions) (*TopWindowsView, erro
 		ScoredBy:    scoredBy,
 		Dmg:         fam,
 		BoundedMode: boundedModeOf(r),
+		Mode:        mode,
 		WindowMs:    windowMs,
+		GapMs:       opts.GapMs,
 		Limit:       limit,
 		PerPlayer:   opts.PerPlayer,
 		Measured:    sb.measured(),
@@ -383,6 +478,22 @@ func canonicalMetric(in string) (string, bool) {
 		return MetricFrags, true
 	}
 	for _, k := range KnownTopWindowMetrics {
+		if strings.EqualFold(k, m) {
+			return k, true
+		}
+	}
+	return "", false
+}
+
+// canonicalMode resolves a caller's mode case-insensitively, exactly as
+// canonicalMetric does. An empty value is the fixed mode, which is what keeps
+// every pre-gap caller's response identical.
+func canonicalMode(in string) (string, bool) {
+	m := strings.TrimSpace(in)
+	if m == "" {
+		return TopWindowModeFixed, true
+	}
+	for _, k := range KnownTopWindowModes {
 		if strings.EqualFold(k, m) {
 			return k, true
 		}
@@ -893,6 +1004,84 @@ func topWindowsFor(ev []scoreEvent, windowMs, lo, hi int32, min int, sec *sumTra
 		}
 		if !clash {
 			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// gapWindowsFor returns one player's gap-delimited clusters, in time order.
+//
+// A cluster is a maximal run of events in which consecutive events are no more
+// than gapMs apart; start is the first event, end is the last, score is their
+// sum. A gap of EXACTLY gapMs joins — "no more than gapMs apart" — and gapMs+1
+// splits. A run of one is a legitimate cluster with a zero duration: a lone
+// kill is a moment, and it is the RANKING's job, not the segmentation's, to
+// decide whether it is an interesting one.
+//
+// There is no candidate enumeration, no greedy pass and no overlap suppression
+// here, and that is the point of the mode rather than an omission: the clusters
+// partition the player's event stream, so they are disjoint by construction.
+// The anchor families topWindowsFor evaluates (t, t+1, t-windowMs) are an
+// artifact of a fixed width — a gap window has no start position to optimise,
+// because moving its start can only drop one of its own events.
+//
+// SIGNED METRICS CLUSTER ON ALL THEIR EVENTS, negatives included: on netFrags a
+// death both extends the run and lowers its score. That is the honest reading
+// of "net" — the fight as it went — and it is forced by the contract: the
+// alternative (cluster on the positives, then sum whatever negatives fall in
+// the span) would use two different event sets for the boundary and the score,
+// and would break score == stat, since the stats block integrates the closed
+// span whatever produced it. As it stands, absent a weapons= filter, every
+// event of the metric inside [start, end] IS a member of the run — members are
+// consecutive in the sorted per-player stream — so the score equals the
+// same-named stats field exactly, with no machinery beyond this loop.
+//
+// A CLUSTER MAY SPAN THE PLAYER'S OWN DEATH. Kill, die, respawn, kill again
+// within gapMs is one window here, because the one-sentence contract has no
+// life machinery in it and adding one would make the rule unexplainable. Lives
+// serves the per-life question.
+//
+// lo/hi bound where a window may START — its first event — never what it
+// covers, exactly as in fixed mode: a cluster anchored before hi still runs to
+// its own last event past it. The lo side is LOSSIER than fixed mode's: a
+// cluster starting before lo is dropped whole, its post-lo mass included,
+// because re-anchoring it at lo would report a run the contract's own rule
+// did not produce. A from > to query arrives as lo > hi and yields nothing,
+// under a 200; rejecting an inverted range is the HTTP layer's job.
+func gapWindowsFor(ev []scoreEvent, gapMs, lo, hi int32, min int, sec *sumTrack) []windowCand {
+	if len(ev) == 0 || gapMs <= 0 {
+		return nil
+	}
+	var out []windowCand
+	flush := func(run []scoreEvent) {
+		start, end := run[0].t, run[len(run)-1].t
+		if start < lo || (hi > 0 && start > hi) {
+			return
+		}
+		score := 0
+		for _, e := range run {
+			score += e.v
+		}
+		if score < min {
+			return
+		}
+		out = append(out, windowCand{
+			start: start,
+			end:   end,
+			score: score,
+			sec:   sec.sum(start, end),
+			// A cluster always begins on a scoring event; nothing downstream
+			// reads this in gap mode, but a false here would be a lie.
+			onEvent: true,
+		})
+	}
+	head := 0
+	for i := 1; i <= len(ev); i++ {
+		// int64 so a stream that straddles t=0 (warmup times are negative)
+		// cannot wrap the subtraction.
+		if i == len(ev) || int64(ev[i].t)-int64(ev[i-1].t) > int64(gapMs) {
+			flush(ev[head:i])
+			head = i
 		}
 	}
 	return out

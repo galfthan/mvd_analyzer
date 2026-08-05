@@ -384,6 +384,13 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "top-windows", url: "/v1/demos/gameId:42/top-windows", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-net", url: "/v1/demos/gameId:42/top-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-damage", url: "/v1/demos/gameId:42/top-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/top-windows", status: 200},
+		// The gap segmentation is the OTHER envelope shape: `windowMs` is
+		// absent and `gapMs` present, so it exercises the half of the schema
+		// the three fixed cases above cannot. mustContain names both echoes —
+		// additionalProperties/required alone would validate a response that
+		// silently fell back to fixed windows.
+		{name: "top-windows-gap", url: "/v1/demos/gameId:42/top-windows?mode=gap&gapMs=10000&limit=5", path: "/v1/demos/{id}/top-windows", status: 200,
+			mustContain: []string{`"mode":"gap"`, `"gapMs":10000`}},
 		// top-kills: mustContain names the two fields that make the response
 		// usable and that an empty `kills` array would validate without —
 		// maxGapMs (the exact client-side narrowing filter) and returnDamage.
@@ -575,6 +582,87 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestTopWindowsEnvelopeExactlyOneKnob pins the oneOf in the TopWindows
+// schema: exactly one of windowMs/gapMs accompanies mode, and the WRONG
+// combinations must FAIL validation. The positive halves ride real router
+// responses (so the fixtures cannot drift from the server); the negative
+// halves are those same bodies with one key injected or deleted — without
+// this, a schema that merely lists both knobs as optional properties
+// validates every combination and the prose promise has no teeth.
+func TestTopWindowsEnvelopeExactlyOneKnob(t *testing.T) {
+	sd := specDoc(t)
+	store := &fakeStore{byID: map[string]*result.Result{"gameId:42": goldenResult(t)}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	schema, hasJSON := sd.responseSchema(t, "/v1/demos/{id}/top-windows", http.MethodGet, "200")
+	if !hasJSON {
+		t.Fatal("top-windows documents no JSON 200 schema")
+	}
+
+	fetch := func(query string) map[string]any {
+		t.Helper()
+		resp, err := http.Get(srv.URL + "/v1/demos/gameId:42/top-windows" + query)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != 200 {
+			t.Fatalf("GET %s = %d; body: %.300s", query, resp.StatusCode, body)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(body, &m); err != nil {
+			t.Fatal(err)
+		}
+		return m
+	}
+	fixed := fetch("?limit=3")
+	gap := fetch("?mode=gap&gapMs=10000&limit=3")
+
+	mutate := func(base map[string]any, f func(map[string]any)) map[string]any {
+		clone := map[string]any{}
+		for k, v := range base {
+			clone[k] = v
+		}
+		f(clone)
+		return clone
+	}
+	for _, tc := range []struct {
+		name  string
+		body  map[string]any
+		valid bool
+	}{
+		{"fixed response", fixed, true},
+		{"gap response", gap, true},
+		{"fixed with gapMs injected", mutate(fixed, func(m map[string]any) { m["gapMs"] = 3000 }), false},
+		{"fixed without windowMs", mutate(fixed, func(m map[string]any) { delete(m, "windowMs") }), false},
+		{"gap with windowMs injected", mutate(gap, func(m map[string]any) { m["windowMs"] = 30000 }), false},
+		{"gap without gapMs", mutate(gap, func(m map[string]any) { delete(m, "gapMs") }), false},
+		{"fixed body claiming mode gap", mutate(fixed, func(m map[string]any) { m["mode"] = "gap" }), false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			// Round-trip through JSON so injected Go ints become the same
+			// float64s a real decoded response carries.
+			js, err := json.Marshal(tc.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var instance any
+			if err := json.Unmarshal(js, &instance); err != nil {
+				t.Fatal(err)
+			}
+			err = schema.Validate(instance)
+			if tc.valid && err != nil {
+				t.Errorf("must validate, got:\n%v", err)
+			}
+			if !tc.valid && err == nil {
+				t.Errorf("must FAIL validation — the oneOf is not enforcing the knob exclusivity")
+			}
+		})
+	}
 }
 
 // TestOpenAPIDescriptionCoverage enforces 100% description coverage: every

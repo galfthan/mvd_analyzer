@@ -674,16 +674,22 @@ func (p *proxyBackend) GetTopWindows(ctx context.Context, in GetTopWindowsInput)
 	}
 	q := query{}
 	q.str("metric", in.Metric)
-	// windowMs / limit / minScore go through intp, not intv: an omitted MCP
-	// integer argument arrives as 0, and mvd-api rejects 0 on windowMs and
-	// limit (and reads minScore=0 as a real filter distinct from its default
-	// 1). intp keeps an UNSET field out of the query so the REST default
-	// applies, and forwards an EXPLICIT 0 so it earns its documented 400
-	// instead of being silently dropped — the same contract searchGames' limit
-	// has. perPlayer stays on intv: REST rejects an explicit perPlayer=0 too,
-	// but intv drops a 0 before it can be sent, so from here the field is
-	// simply "uncapped unless set".
+	// Empty mode stays out of the query so REST's own default (fixed) applies;
+	// the vocabulary itself is the API's to police, exactly as metric is.
+	q.str("mode", in.Mode)
+	// windowMs / gapMs / limit / minScore go through intp, not intv: an
+	// omitted MCP integer argument arrives as 0, and mvd-api rejects 0 on
+	// windowMs, gapMs and limit (and reads minScore=0 as a real filter
+	// distinct from its default 1). intp keeps an UNSET field out of the query
+	// so the REST default applies — and for gapMs, so that mode=gap without
+	// one earns the 400 that names the per-metric starting points rather than
+	// a bare "gapMs must be >= 1" — and forwards an EXPLICIT 0 so it earns its
+	// documented 400 instead of being silently dropped; the same contract
+	// searchGames' limit has. perPlayer stays on intv: REST rejects an
+	// explicit perPlayer=0 too, but intv drops a 0 before it can be sent, so
+	// from here the field is simply "uncapped unless set".
 	q.intp("windowMs", in.WindowMs)
+	q.intp("gapMs", in.GapMs)
 	q.intp("limit", in.Limit)
 	q.intv("perPlayer", in.PerPlayer)
 	q.csv("players", in.Players)

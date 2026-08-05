@@ -304,6 +304,21 @@ func TestOpenAPITopWindowMetricsCurrent(t *testing.T) {
 	}
 }
 
+// TestOpenAPITopWindowModesCurrent pins the /top-windows mode= enum to
+// view.KnownTopWindowModes, the metric enum's mechanism applied to the second
+// closed vocabulary on the same endpoint: the handler forwards `mode`
+// unvalidated to the view, so a third segmentation would be accepted the day
+// the view learned it and stay invisible to every schema-driven client.
+func TestOpenAPITopWindowModesCurrent(t *testing.T) {
+	want := append([]string{}, view.KnownTopWindowModes...)
+	got := markerBlock(t, "top-window-mode-enum")
+	diffSets(t, "top-window mode enum", got, want)
+	if t.Failed() {
+		t.Logf("expected top-window-mode-enum block (view.KnownTopWindowModes order):\n          - %s",
+			strings.Join(want, "\n          - "))
+	}
+}
+
 // TestOpenAPIErrorCodesCurrent pins the ErrorCode enum to the writeError /
 // writeUnavailable call sites across the package (plus the eagerArtifacts
 // code table). Scanning source beats a canonical slice refactor: the codes

@@ -2347,7 +2347,7 @@ Two views cut the match into intervals and describe each one with the
 
 | View | REST | Segmentation |
 |---|---|---|
-| `TopWindows` | `/top-windows` | fixed-length windows, ranked by a caller-chosen metric |
+| `TopWindows` | `/top-windows` | fixed-length **or** gap-delimited windows (`mode`), ranked by a caller-chosen metric |
 | `Lives` | `/lives` | spawn → death, one row per life |
 
 Everything shared between them — `IntervalStats`, `IntervalLoc` and
@@ -2372,7 +2372,9 @@ everywhere else. Same trap for `_linux`, `_darwin`, `_amd64`.
 ```go
 view.TopWindows(r, view.TopWindowsOptions{
     Metric:    "netFrags",  // "" → frags
-    WindowMs:  30000,       // <=0 → 30000
+    Mode:      "fixed",     // "" → fixed; "gap" is the other segmentation
+    WindowMs:  30000,       // fixed only; <=0 → 30000. Rejected under gap
+    GapMs:     0,           // gap only, REQUIRED there (no default)
     Limit:     10,          // 0 → 10, <0 → uncapped, clamped to 200
     PerPlayer: 0,           // <=0 → uncapped
     Players:   []string{"ParadokS"},
@@ -2384,7 +2386,14 @@ view.TopWindows(r, view.TopWindowsOptions{
 // → *TopWindowsView
 ```
 
-The contract is one sentence: *"in these `windowMs` milliseconds this
+Two segmentations, selected by `mode` (`""`/`fixed` → fixed,
+`gap` → gap-delimited; matched case-insensitively). Each has a
+one-sentence contract, and everything after the segmentation — the metric
+vocabulary, ranking and tie-break, both caps, `weapons=` scoping, `min`,
+the stats block and the score-equals-stat invariant — is shared.
+
+**Fixed mode (the default).** The contract is one sentence: *"in these
+`windowMs` milliseconds this
 player scored higher on `metric` than in any other stretch of the same
 length."* Candidate windows are anchored at **real event times** (plus
 `t+1` and `t−windowMs`, the breakpoints the signed metrics need), never
@@ -2410,13 +2419,74 @@ starts on it. A demo with no stream for the secondary (no damage log
 under `metric=frags`) leaves every row tied at 0 and the positional keys
 decide, exactly as before v67.
 
+**Gap mode (`mode=gap`, schema v68).** The contract is again one
+sentence: *"a window is a maximal run of scoring events in which
+consecutive events are no more than `gapMs` apart; its score is their
+sum."* A gap of **exactly** `gapMs` joins and `gapMs+1` splits. `start`
+is the run's first event and `end` its last, so a run of one event is a
+legitimate window with `durationMs == 0` — a lone kill *is* a moment, and
+it is the ranking's job, not the segmentation's, to decide whether it is
+an interesting one.
+
+There is **no candidate enumeration, no greedy pass and no overlap
+suppression** here, and that is the point of the mode rather than an
+omission: the clusters partition the player's event stream, so they are
+disjoint by construction. The `t` / `t+1` / `t−windowMs` anchor families
+fixed mode evaluates are an artifact of a fixed width — a gap window has
+no start position to optimise, because moving its start can only drop
+one of its own events. This is **not** the adaptive segmentation dropped
+during planning: Ruzzo–Tompa needs a per-second penalty to stop the whole
+match being one segment, and that penalty is exactly the unexplainable
+tuning constant this rule does without.
+
+- **Signed metrics cluster on ALL their events, negatives included.** On
+  `netFrags` a death both extends the run and lowers its score. That is
+  the honest reading of "net" — the fight as it went — and it is forced
+  by the contract: clustering on the positives and then summing whatever
+  negatives fall in the span would use two different event sets for the
+  boundary and the score, and would break score == stat.
+- **`score` still equals the same-named stat exactly** absent a
+  `weapons=` filter, with no machinery beyond the split loop: every event
+  of the metric inside `[start, end]` is a member of the run (members are
+  consecutive in the sorted per-player stream), which is exactly what the
+  stats builder integrates over the closed span.
+- **A cluster may span the player's own death.** Kill, die, respawn, kill
+  again within `gapMs` is one window, because the one-sentence contract
+  has no life machinery in it and adding one would make the rule
+  unexplainable. [`Lives`](#lives-viewlives-rest-lives) serves the
+  per-life question.
+- **`from`/`to` bound where a window may START** — here, its first
+  event — never what it covers, exactly as in fixed mode: a cluster
+  anchored before `to` still runs to its own last event past it. The
+  `from` side is lossier than fixed mode's: a cluster whose first event
+  precedes `from` is not returned at all, its post-`from` mass included —
+  `from` never re-anchors a cluster, so slicing a match into `from`/`to`
+  panes drops straddling clusters rather than truncating them.
+- `GapMs` is **required** under this mode and has **no default**. The
+  metrics' event cadences are too far apart for one value to serve them:
+  measured over the 44-demo cache, per-player inter-KILL gaps run
+  p50 ≈ 11–12 s while inter-damage-event gaps run p50 ≈ 1.0–1.1 s.
+  Documented starting points: **~10000 for the frag metrics, ~3000 for
+  the damage and shot metrics.** `GapMs <= 0` under gap mode is an
+  `ErrInvalidFilter` whose message names those numbers.
+- The two knobs are **mutually exclusive and refused, not ignored**: any
+  **nonzero** `WindowMs` under `mode=gap` and any **nonzero** `GapMs` under
+  `mode=fixed` — negative values included — are each an `ErrInvalidFilter`.
+  Silently dropping one would answer a question the caller did not ask, and
+  the envelope — which echoes only its own mode's knob — could not show that
+  anything had been discarded. (An int option cannot tell an omitted zero
+  from an explicit one; zero is therefore the one value that reads as
+  "unset".)
+
 | Field | JSON key | Type | Intent |
 |---|---|---|---|
 | TimeUnit | `timeUnit` | string (omitempty) | `"ms"`, set by the REST layer. |
 | ScoredBy | `scoredBy` | ScoringRule | The scoring rule, **on the envelope, not per row**. |
 | Dmg | `dmg` | string (omitempty) | The damage family the STATS BLOCK was computed in — see [The damage-family echo](#the-damage-family-echo-dmg--boundedmode). |
 | BoundedMode | `boundedMode` | string (omitempty) | The demo's bounded-reconstruction state, same field as `/damage`'s. |
-| WindowMs | `windowMs` | int32 | Effective window length, echoed after defaulting. |
+| Mode | `mode` | string — **not** omitempty | The segmentation, `"fixed"` or `"gap"`, echoed on EVERY response so a consumer never has to infer it from which knob field is present. |
+| WindowMs | `windowMs` | int32 (omitempty) | Effective window length, echoed after defaulting. **Fixed responses only** — on a gap response it would be a lie, since those windows are as long as their events. |
+| GapMs | `gapMs` | int32 (omitempty) | The inter-event gap the clusters were cut at, echoed. **Gap responses only.** |
 | Limit | `limit` | int | Effective total cap, echoed after defaulting. |
 | PerPlayer | `perPlayer` | int | Effective per-player cap (`0` = uncapped). |
 | Measured | `measured` | MeasuredSources | **Not** omitempty — see below. |
@@ -2431,10 +2501,13 @@ only echo, and a per-row copy would repeat one invariant object up to
 `limit` times.
 
 `TopWindow` is `rank` (1-based over the returned list), `player`,
-`team` (omitempty), `start`, `end` (`= start + windowMs` — the identity
+`team` (omitempty), `start`, `end` (under `mode=fixed`,
+`= start + windowMs` — the identity
 holds over REST, where `windowMs` is capped at the match duration; the
 view clamps `end` at the int32 ceiling for in-process callers, who face
-no such cap), `score`, plus
+no such cap. Under `mode=gap` it is the run's LAST scoring event, so the
+row is as long as the stretch was and `end == start` on a single-event
+run), `score`, plus
 an embedded `IntervalStats`. For a top window `durationMs == end −
 start` exactly; the attribution window *is* the interval, closed at both
 ends.
@@ -2507,6 +2580,14 @@ default is 10 and anything above 200 is likewise a 400 rather than a
 silent clamp. `windowMs=0` is a 400 too. The **view** clamps to 200 as
 defence in depth for in-process callers (WASM, `qw-analyze`) that have
 no HTTP layer in front of them.
+
+`gapMs` is bounded at the HTTP layer exactly as `windowMs` is, on the
+same match duration: an explicit value below 1 is a 400 (`gapMs must be
+>= 1` — deliberately *without* "omit it for the default", since gap mode
+has none) and anything above the match duration is a 400 naming the
+bound. The unknown-`mode` and both cross-knob 400s come from the view's
+own `ErrInvalidFilter`, forwarded verbatim, so one request cannot get two
+wordings depending on which layer saw it first.
 
 ##### Lives (`view.Lives`, REST `/lives`)
 
@@ -3245,6 +3326,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v68 | **Gap-delimited windows: `mode=gap` on `/top-windows`.** The stored `Result` gains **no field** — like v67 the bump is for the observable API surface alone. `/top-windows` gains a second SEGMENTATION behind `mode` (default `fixed`, so a pre-v68 request answers identically apart from the additive `mode: "fixed"` echo every response now carries): under `mode=gap` a window is a maximal run of scoring events in which consecutive events are no more than `gapMs` apart, and its score is their sum — the stretch lasts as long as the player kept doing it rather than as long as a stopwatch says. `gapMs` is **required** there and has **no default**: measured over the 44-demo cache, per-player inter-kill gaps run p50 ≈ 11–12 s while inter-damage-event gaps run p50 ≈ 1.0–1.1 s, so no one value serves both (documented starting points ~10000 for the frag metrics, ~3000 for the damage and shot metrics), and each mode REJECTS the other's knob with a 400 rather than ignoring it. Additive on the envelope: **`mode`** (always present, so the segmentation is never inferred from which knob is present) and **`gapMs`** (gap responses only); **`windowMs` becomes fixed-only**, since a fixed length on a gap response would be a lie. Rows need no new field — `start`/`end` already describe variable-length spans, and a gap row's `end` is its last scoring event rather than `start + windowMs`. Clusters are disjoint per player by construction (no overlap suppression), signed metrics cluster on ALL their events (a death both extends a `netFrags` run and lowers its score), `score` still equals the same-named stat absent a `weapons=` filter, and a cluster MAY SPAN the player's own death — `/lives` stays the per-life view. See [TopWindows](#topwindows-viewtopwindows-rest-top-windows). |
 | v67 | **Kill bursts (`/top-kills`) and the `top-` endpoint family.** The stored `Result` gains **no field** — the bump is for the observable API surface alone. Additive: the [`TopKills`](#kill-bursts-topkills--schema-v67) view + endpoint (the match's hardest kill bursts, ranked by burst damage; same-weapon runs, a CAPTURE `gapMs` narrowed client-side via `maxGapMs`, positional kills absent and dead-killer kills present), an `overview.topKills` field carrying 20 of those rows at the documented defaults, and an mvd-mcp `getTopKills` tool. Plus a deliberate **rename** taken while the consumer count was one, with no alias route: `/hot-windows` → `/top-windows`, `hot_windows_unavailable` → `top_windows_unavailable`, MCP `getHotWindows` → `getTopWindows`. Ranked highlight scans now carry an explicit `top-` prefix (they have a `limit`, a min-filter and a sort key); plain nouns stay reserved for exhaustive logs and partitions (`/frags`, `/damage`, `/lives`). No response shape changed beyond the paths. |
 | v66 | **Userids are per session, not per wire slot** (a **correctness fix**: values move, no field is added, removed or retyped). `timelineAnalysis.playerUserIDs` and the `playerUserID` on `fragStreaks[]`, `powerupEvents[]`, `demoMarkers[]` and `airgibs[].attackerUserID`/`.victimUserID` used to carry the FIRST userid ever seen on a player's wire slot, latched for the whole demo. A userid names a connection, not a person (`SV_GenerateUserID`, `mvdsv/src/sv_main.c:538-556`, reissues them from a rotating pool), so every slot handover and every reconnect published somebody else's — or the player's own dead — id, and a consumer building the documented `?track=<userId>` deep link watched the wrong player. Two measured cases: hub 220637 served `(1)rusti (FU)` as **42**, the id of a spectator who had left after 26 s (now **43**), and 222649 served `bogojoker` as **12** sixteen minutes after he timed out and reconnected as **25** (now **25**), on the frag streak a viewer would click. Each id is now resolved from the *session* (one contiguous occupancy of a slot by one userid) that owned the slot at the value's own timestamp; where the reconnect unifier folded several sessions into one name, `playerUserIDs` publishes the **last session that had play** — a deliberate choice, being normally the id that is live at the end of the demo (the ranking is by last play evidence, so an exact tie in it resolves to the lower slot rather than to the surviving connection). Only demos with a mid-match handover or rejoin move (3 of 44 in the cached corpus); everything else is byte-identical. v66 also **exports the identity behind that resolution** (purely additive): `streams.players[]` and `playerStats.players[]` gain `identity` — the reconnect-unification key, equal for every row that is the same human — and `sessions[]`, the per-connection `{startMs, endMs, slot, userId, name}` windows it was folded from. Together they answer the two questions a name-keyed row cannot ("are these two rows one person" and "which userid do I track at time t"), which a consumer had been rebuilding with a fuzzy name matcher. The key is DEMO-LOCAL (derived from the first session's slot+userid) and must not be persisted or compared across demos. See [Player userids](#player-userids-schema-v66) and [Player identity and sessions](#player-identity-and-sessions-schema-v66). |
 | v65 | **Interval segmentations: top windows and lives**, plus one stored measuredness field. (This row is written in the current names — the endpoint shipped as `/hot-windows` and was renamed in v67.) Additive: the stored `Result` gains exactly one field and nothing existing changes shape, name or meaning, so the bump is the cache-key tick every observable change earns rather than a migration. (0) **`frags.killsMeasured`** — the demo-global verdict on whether kill ATTRIBUTION was observable, decided by `analyzer.killsMeasurable` since v62 but never stored, so it was applied on `playerStats` and nowhere else. `false` means the frag log is empty on a demo where players demonstrably died (every obituary went unmatched), so `kills: 0` beside a measured deaths count is not a measurement; present the kill side as unmeasured, not zero. Demo-global and unchanged by any filter, and republished verbatim by the interval views as `measured.frags`. (1) **`/top-windows`** (`view.TopWindows`) serves each player's best fixed-length stretches, ranked by a caller-chosen **summable** metric — `frags`, `deaths`, `netFrags`, `damageGiven`, `damageTaken`, `netDamage`, `shots`, `hits`. Ratios are deliberately absent (they do not sum, so "the best window" is undefined for them). Windows are anchored at real event times rather than a grid, non-overlapping per player, and returned as one flat ranked list; `weapons=` scopes the **scoring** events only, so a window's `score` can be a subset of the same-named stat beside it. The scoring rule is echoed **once, on the envelope**, as `scoredBy {metric, weapons, dmg}` — there is no top-level `metric` field and no per-row copy. `limit=0` is a **400**, not "uncapped" (an omitted MCP integer arrives as 0); negative is uncapped, the default is 10, and anything above 200 is rejected rather than clamped. (2) **`/lives`** (`view.Lives`) serves one row per spawn-to-death run, segmented by the v64 `streams.players[].alive` intervals. A player's lives **partition** `[matchStart, matchEnd]` — each life is attributed every event from its own start to the start of the next — so a posthumous rocket counts for the life that fired it and per-life sums reconcile exactly with match totals, while `durationMs` stays **alive time** and each row publishes the wider window it counted over as **`attrStart`/`attrEnd`** (divide by `attrEnd − attrStart` for an exact rate; the pair also makes the tiling property measurable). `deaths` is therefore **not capped at 1** (a life also carries any death recorded in the dead gap that followed it, the KTX `dtTELE2` deflection: 12 rows with 2 and one with 3 across 11 558 corpus lives), and the new `endReason` (`death` / `matchEnd` / `leftGame`) exists because an absent `killedBy` used to conflate all three. (3) Both responses carry a **`measured {frags, damage, shots, locs, items, liveness}` block on the envelope**: every numeric stat is emitted including a measured zero, so measuredness is read from there and **never** from a field's absence — the v55/v63 discipline made structural. Two flags are not "the section is non-nil": `frags` is the stored `killsMeasured` verdict above, and `liveness` says whether the spawn-to-death segmentation was measurable at all — `streams.players[].alive` distinguishes `null` "not measurable" from `[]` "never alive", and `/lives` now **422s `lives_unavailable`** on the first rather than serving a `lives: []` that reads as "nobody ever lived". (3b) Both envelopes also echo the **damage family** they were computed in, as `dmg` + `boundedMode`, exactly as `/damage` does — the stats block reports damage under EVERY metric, so the REST `bounded` default, its raw fallback on a `skipped:*` demo and the explicit-`bounded` 422 all apply whatever the metric, and `metric=frags` rows would otherwise carry a `damageGiven` with no stated family. (4) Positional-kill (telefrag / stomp) value **folds** into the shared stats block's `damageGiven`/`damageTaken` exactly as `/damage` reports it, so lives reconcile against that endpoint, and it **scores** on the same terms under every metric it contributes to — which is what makes an unfiltered `/top-windows` `score` equal the same-named stat beside it exactly. `weapons=` is the only thing that makes the two diverge (and it selects positional kills too: `weapons=tele` scores telefrags alone). The one exclusion is `damageByWeapon`, matching `/damage`'s own `byWeapon`: a positional kill carries no wire weapon. (5) The frag and damage weapon vocabularies now accept **`water` and `drown` interchangeably** — one event the two logs spell differently; purely additive, no emitted token changed. (6) **Liveness and position staleness become reachable over the API** (view-layer only; the stored `Result` is untouched). `/stream-slice` players gain **`alive`** — the stored [`streams.players[].alive`](#playerstream) clamped to the window, carrying all three of its states through the clip (`null` not measurable, `[]` measured but never alive **in this window**, `[…]` the lives) — and `/state-at` rows gain **`alive`** as the same three states at an instant (`true`/`false`/`null`). Neither is `omitempty` and neither is field-gated: `null` is a state, so a key that could be omitted would also mean "not requested". Until now the schema told consumers to read the canonical liveness rather than re-derive it from `sp`/`d`, while no endpoint served it — the re-derivation it warned against is the strict `lastSpawn > lastDeath` latch this schema version's predecessors deleted from the pipeline. `/state-at` rows also gain **`posAgeMs`**, the age of the position sample `pos`/`view`/`hgt`/`lq`/`vel` were snapped to (signed: negative = the nearest sample is a later one). *Which* position is reported is unchanged — the unbounded carry-forward is deliberate — but the evidence age is now published, so a caller can apply the same `>= result.SampleStaleCapMs` (250 ms) rule the occupancy surfaces use and get consistent "where was X at t" answers across `/state-at`, `/region-control`, `/loc-graph` and `/loc-trails`. See [Interval segmentations](#interval-segmentations-topwindows-lives--schema-v65). |
