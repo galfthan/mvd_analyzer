@@ -1166,7 +1166,7 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
 }
 
-// handleHotWindows: GET /v1/demos/{id}/hot-windows — each player's best
+// handleTopWindows: GET /v1/demos/{id}/top-windows — each player's best
 // stretches of the match, computed on demand from the stored event logs.
 //
 // The contract is one sentence: "in these windowMs milliseconds this player
@@ -1194,7 +1194,7 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 //	                  a window anchored at `to` still runs windowMs past it.
 //	dmg        enum — raw | bounded (default bounded); both is rejected
 //	minScore   int  — drop windows scoring below this (default 1)
-func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
+func (s *server) handleTopWindows(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
 		return
@@ -1204,7 +1204,7 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 	// with "must be >= 0" while the endpoint's real floor is 1, so a caller
 	// told to retry with 0 failed again. One check below covers both.
 	windowMs := p.IntHint("windowMs", 0, "integer milliseconds")
-	opts := view.HotWindowsOptions{
+	opts := view.TopWindowsOptions{
 		Metric:    p.Metric(),
 		Limit:     p.Int("limit", 0),
 		PerPlayer: p.Int("perPlayer", 0),
@@ -1228,7 +1228,7 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 	// a deliberate one.
 	if p.Present("windowMs") && windowMs < 1 {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			fmt.Sprintf("windowMs must be >= 1; omit it for the default %d", hotWindowsDefaultMs))
+			fmt.Sprintf("windowMs must be >= 1; omit it for the default %d", topWindowsDefaultMs))
 		return
 	}
 	// An UNBOUNDED windowMs makes the documented `end = start + windowMs`
@@ -1250,9 +1250,9 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 			"limit must be >= 1, or negative for uncapped; omit it for the default 10")
 		return
 	}
-	if opts.Limit > hotWindowsMaxLimit {
+	if opts.Limit > topWindowsMaxLimit {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			fmt.Sprintf("limit must be <= %d, got %d", hotWindowsMaxLimit, opts.Limit))
+			fmt.Sprintf("limit must be <= %d, got %d", topWindowsMaxLimit, opts.Limit))
 		return
 	}
 	// perPlayer follows limit's rule exactly rather than inventing a second
@@ -1266,9 +1266,9 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 			"perPlayer must be >= 1, or negative for uncapped; omit it for the default (uncapped)")
 		return
 	}
-	if err := view.HotWindowsAvailable(res, opts.Metric); err != nil {
-		s.writeUnavailable(w, r, err, "hot_windows_unavailable",
-			hotWindowsUnavailableMsg(opts.Metric))
+	if err := view.TopWindowsAvailable(res, opts.Metric); err != nil {
+		s.writeUnavailable(w, r, err, "top_windows_unavailable",
+			topWindowsUnavailableMsg(opts.Metric))
 		return
 	}
 
@@ -1280,10 +1280,10 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 	if !explicitDmg {
 		opts.Dmg = "bounded"
 	}
-	out, err := view.HotWindows(res, opts)
+	out, err := view.TopWindows(res, opts)
 	if errors.Is(err, view.ErrBoundedUnavailable) && !explicitDmg {
 		opts.Dmg = "raw"
-		out, err = view.HotWindows(res, opts)
+		out, err = view.TopWindows(res, opts)
 	}
 	if err != nil {
 		// A bogus weapons token is a 400 — it does not wrap ErrUnavailable, so
@@ -1304,29 +1304,29 @@ func (s *server) handleHotWindows(w http.ResponseWriter, r *http.Request) {
 				fmt.Sprintf("this demo has no bounded damage family (boundedMode %q); use dmg=raw", mode))
 			return
 		}
-		s.writeUnavailable(w, r, err, "hot_windows_unavailable",
-			hotWindowsUnavailableMsg(opts.Metric))
+		s.writeUnavailable(w, r, err, "top_windows_unavailable",
+			topWindowsUnavailableMsg(opts.Metric))
 		return
 	}
 	out.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, out)
 }
 
-// hotWindowsMaxLimit mirrors view's own cap. Duplicated deliberately: the
+// topWindowsMaxLimit mirrors view's own cap. Duplicated deliberately: the
 // handler REJECTS an over-limit request rather than letting the view clamp it,
 // so the number has to be known here to say what the bound is. (The view still
 // clamps behind us, as defence in depth for its in-process callers.)
 //
-// hotWindowsDefaultMs is likewise view's default window, needed here only so
+// topWindowsDefaultMs is likewise view's default window, needed here only so
 // the windowMs=0 rejection can name the value the caller gets by omitting it.
 const (
-	hotWindowsMaxLimit  = 200
-	hotWindowsDefaultMs = 30000
+	topWindowsMaxLimit  = 200
+	topWindowsDefaultMs = 30000
 )
 
-// hotWindowsUnavailableMsg names the stream the chosen metric needs, so a 422
+// topWindowsUnavailableMsg names the stream the chosen metric needs, so a 422
 // says which capability the demo lacks rather than just "unavailable".
-func hotWindowsUnavailableMsg(metric string) string {
+func topWindowsUnavailableMsg(metric string) string {
 	switch metric {
 	case view.MetricShots, view.MetricHits:
 		return "this demo has no weapon-fire stream"
@@ -1337,6 +1337,164 @@ func hotWindowsUnavailableMsg(metric string) string {
 	}
 }
 
+// topKillsUnavailableMsg names all THREE sources view.TopKillsAvailable
+// needs. The third is the one a caller would never guess: the burst walk is
+// clipped by the victim's current life start, so a demo whose liveness was
+// never measurable cannot be served without letting bursts absorb the victim's
+// previous life — and because the list is ranked BY damage, those are exactly
+// the rows that reach the top.
+const topKillsUnavailableMsg = "this demo has no frag log, no damage data (no KTX mvdhidden_dmgdone stream), or no measurable liveness to clip the bursts with"
+
+// topKills* mirror view's own defaults and caps. Duplicated for the same
+// reason the top-windows constants are: the handler REJECTS an out-of-range
+// request instead of letting the view clamp it, so it has to know the numbers
+// to name them in the 400. (The view still clamps behind us, as defence in
+// depth for its in-process callers.)
+const (
+	topKillsDefaultGapMs       = 3000
+	topKillsMaxGapMs           = 5000
+	topKillsDefaultContestedMs = 4000
+	topKillsMaxContestedMs     = 30000
+	topKillsDefaultLimit       = 20
+	topKillsMaxLimit           = 200
+)
+
+// handleTopKills: GET /v1/demos/{id}/top-kills — the match's hardest kill
+// BURSTS, ranked by burst damage.
+//
+// For each enemy kill the burst is the contiguous run of KILLING-WEAPON hits
+// the killer landed on that victim leading up to it. That is the endpoint's
+// meaning, not an approximation of "what the kill took": on ~8% of measured
+// kills a mixed-weapon kill (rocket softens, shotgun finishes) reports only
+// the finishing weapon's share, and /damage stays the place to ask the other
+// question.
+//
+// Query params:
+//
+//	gapMs       int  — CAPTURE gap of the backward walk (default 3000; an
+//	                   explicit value outside [1, 5000] is a 400). Generous on
+//	                   purpose: truncation is unrecoverable downstream while
+//	                   over-merge is filterable — keep the rows with
+//	                   maxGapMs <= g to reproduce the gap-g walk exactly.
+//	contestedMs int  — window returnDamage sums the victim's damage back over
+//	                   (default 4000; outside [1, 30000] is a 400)
+//	limit       int  — rows returned (default 20; negative means uncapped; an
+//	                   explicit 0 and anything above 200 are both a 400, never
+//	                   a silent clamp — /top-windows' rule verbatim)
+//	players     csv  — restrict to these KILLERS
+//	weapons     csv  — restrict the KILLING weapon (legacy alias: weapon)
+//	minDamage   int  — drop bursts below this many points (default 0)
+//	from / to   int  — bound the KILL instant, integer ms (0 = no bound).
+//	                   Unlike /top-windows' window anchors these bound the row
+//	                   itself; the burst behind it may reach back before `from`.
+//	dmg         enum — raw | bounded (default bounded); both is rejected
+func (s *server) handleTopKills(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	// gapMs / contestedMs are read as plain ints rather than through Ms: Ms
+	// rejects a negative with "must be >= 0" while both floors are 1, so a
+	// caller told to retry with 0 would fail again. The range checks below say
+	// it once, with both bounds.
+	gapMs := p.IntHint("gapMs", 0, "integer milliseconds")
+	contestedMs := p.IntHint("contestedMs", 0, "integer milliseconds")
+	opts := view.TopKillsOptions{
+		Limit:     p.Int("limit", 0),
+		Players:   p.CSV("players"),
+		Weapons:   p.CSVAny("weapons", "weapon"),
+		MinDamage: p.IntHint("minDamage", 0, "integer damage, >= 0"),
+		From:      p.Ms("from", 0),
+		To:        p.Ms("to", 0),
+		Dmg:       p.DmgFamily(),
+	}
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// Out-of-range durations are REJECTED, not clamped (the v59 ruling). Both
+	// are echoed on the response, so a silent clamp would answer a question
+	// the caller did not ask and only say so in a field they may not read.
+	if p.Present("gapMs") && (gapMs < 1 || gapMs > topKillsMaxGapMs) {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("gapMs must be between 1 and %d, got %d; omit it for the default %d",
+				topKillsMaxGapMs, gapMs, topKillsDefaultGapMs))
+		return
+	}
+	if p.Present("contestedMs") && (contestedMs < 1 || contestedMs > topKillsMaxContestedMs) {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("contestedMs must be between 1 and %d, got %d; omit it for the default %d",
+				topKillsMaxContestedMs, contestedMs, topKillsDefaultContestedMs))
+		return
+	}
+	opts.GapMs = int32(gapMs)
+	opts.ContestedMs = int32(contestedMs)
+	// limit follows /top-windows' shipped semantics exactly — an omitted MCP
+	// integer arrives as 0, so 0 cannot mean "uncapped" without making a
+	// forgotten argument look deliberate.
+	if p.Present("limit") && opts.Limit == 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("limit must be >= 1, or negative for uncapped; omit it for the default %d", topKillsDefaultLimit))
+		return
+	}
+	if opts.Limit > topKillsMaxLimit {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("limit must be <= %d, got %d", topKillsMaxLimit, opts.Limit))
+		return
+	}
+	// A negative minDamage is not a second spelling of "no filter" — 0 already
+	// is one, since a burst's damage is non-negative.
+	if opts.MinDamage < 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param", "minDamage must be >= 0")
+		return
+	}
+	if err := view.TopKillsAvailable(res); err != nil {
+		s.writeUnavailable(w, r, err, "top_kills_unavailable", topKillsUnavailableMsg)
+		return
+	}
+
+	// Same damage-family default resolution as handleDamage / handleTopWindows
+	// / handleLives: an unset dmg is bounded, and a DEFAULTED bounded on a
+	// skipped:* demo falls back to raw rather than 422-ing a caller who never
+	// asked for the bounded family.
+	explicitDmg := opts.Dmg != ""
+	if !explicitDmg {
+		opts.Dmg = "bounded"
+	}
+	out, err := view.TopKills(res, opts)
+	if errors.Is(err, view.ErrBoundedUnavailable) && !explicitDmg {
+		opts.Dmg = "raw"
+		out, err = view.TopKills(res, opts)
+	}
+	if err != nil {
+		// ErrInvalidFilter first, then the bounded 422, then the generic one —
+		// the order handleDamage documents: ErrBoundedUnavailable WRAPS
+		// ErrUnavailable, and writeInvalidParam 400s on any non-nil error, so
+		// an unconditional writeInvalidParam here would make both 422s below
+		// unreachable.
+		if errors.Is(err, view.ErrInvalidFilter) {
+			writeInvalidParam(w, err)
+			return
+		}
+		if errors.Is(err, view.ErrBoundedUnavailable) {
+			mode := ""
+			if res.Damage != nil {
+				mode = res.Damage.BoundedMode
+			}
+			writeError(w, http.StatusUnprocessableEntity, "bounded_unavailable",
+				fmt.Sprintf("this demo has no bounded damage family (boundedMode %q); use dmg=raw", mode))
+			return
+		}
+		s.writeUnavailable(w, r, err, "top_kills_unavailable", topKillsUnavailableMsg)
+		return
+	}
+	out.TimeUnit = view.UnitMs
+	writeJSON(w, http.StatusOK, out)
+}
+
 // livesUnavailableMsg names BOTH halves of view.LivesAvailable's gate. The
 // second half is not a footnote: a demo can carry per-player streams and still
 // have no measurable liveness (PlayerStream.Alive nil on every one of them),
@@ -1345,7 +1503,7 @@ func hotWindowsUnavailableMsg(metric string) string {
 const livesUnavailableMsg = "this demo has no per-player streams to segment into lives, or none on which liveness was measurable"
 
 // handleLives: GET /v1/demos/{id}/lives — one row per spawn-to-death run, with
-// the same per-interval stats block hot windows uses.
+// the same per-interval stats block top windows uses.
 //
 // Query params:
 //
@@ -1456,7 +1614,7 @@ func livesSummary(out *view.LivesView) {
 	}
 }
 
-// matchDurationMs is how long the match ran, in ms — the bound hot windows
+// matchDurationMs is how long the match ran, in ms — the bound top windows
 // caps windowMs against. Streams.Global.MatchEnd is the authority (MatchStart
 // is always 0, the match-relative origin); Match.Duration is the fallback for
 // a Result assembled without streams. Both absent leaves a half-int32 ceiling,

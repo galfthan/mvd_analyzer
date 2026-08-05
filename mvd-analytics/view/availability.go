@@ -174,7 +174,7 @@ func RegionControlAvailable(r *result.Result) error {
 	return nil
 }
 
-// HotWindowsAvailable reports whether the demo can answer a hot-windows query
+// TopWindowsAvailable reports whether the demo can answer a top-windows query
 // for the given metric. Availability is PER-METRIC because the three source
 // streams are independently present: a non-KTX demo has a frag log but no
 // damage stream, so metric=frags works and metric=damageGiven does not.
@@ -182,7 +182,7 @@ func RegionControlAvailable(r *result.Result) error {
 // Note this is a source check only. Absent loc data does NOT make the endpoint
 // unavailable — the segmentation needs the event log alone, so a demo with no
 // position track simply omits the per-window locs.
-func HotWindowsAvailable(r *result.Result, metric string) error {
+func TopWindowsAvailable(r *result.Result, metric string) error {
 	if r == nil {
 		return ErrUnavailable
 	}

@@ -240,6 +240,56 @@ func getStateAt(this js.Value, args []js.Value) interface{} {
 	return respondJSON(v)
 }
 
+// getTopWindows returns the best fixed-length windows of the match
+// (view.TopWindows). Argument is an optional JSON string of
+// view.TopWindowsOptions — field names match the Go struct
+// case-insensitively, so {"metric":"frags","windowMs":10000,"dmg":"bounded"}
+// is a full query. An empty argument takes the view's own defaults.
+//
+// The view's damage-family default is RAW while mvd-api substitutes bounded
+// (TopWindowsOptions.Dmg): this export resolves nothing on the caller's
+// behalf, so the Key Moments panel that calls it names the family it wants.
+func getTopWindows(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.TopWindowsOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	v, err := view.TopWindows(lastResult, opts)
+	if err != nil {
+		// Includes the documented unavailable cases (no source stream for the
+		// metric, an explicit dmg=bounded on a demo without that family). The
+		// frontend renders the error envelope as that table's empty state.
+		return errorJSON(err.Error())
+	}
+	return respondJSON(v)
+}
+
+// getTopKills returns the match's hardest kill bursts (view.TopKills).
+// Argument is an optional JSON string of view.TopKillsOptions, e.g.
+// {"weapons":["rl"],"gapMs":2300,"limit":5,"dmg":"bounded"}. Same
+// raw-by-default family caveat as getTopWindows.
+func getTopKills(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.TopKillsOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	v, err := view.TopKills(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(v)
+}
+
 // getLocTrails returns per-player loc residences.
 func getLocTrails(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
@@ -403,6 +453,8 @@ func main() {
 	js.Global().Set("getStreamSlice", js.FuncOf(getStreamSlice))
 	js.Global().Set("getStateAt", js.FuncOf(getStateAt))
 	js.Global().Set("getLocTrails", js.FuncOf(getLocTrails))
+	js.Global().Set("getTopWindows", js.FuncOf(getTopWindows))
+	js.Global().Set("getTopKills", js.FuncOf(getTopKills))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{

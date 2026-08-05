@@ -37,20 +37,20 @@ func dmg(t int32, attacker, victim, weapon string, v int) result.DamageEntry {
 }
 
 // mustHW runs a query that must succeed. Every error path this endpoint has is
-// pinned in one place (TestHotWindowsRejects); at every other call site an
+// pinned in one place (TestTopWindowsRejects); at every other call site an
 // error is a fixture bug, and spelling that out per call was a third of this
 // file.
-func mustHW(t *testing.T, r *result.Result, opts HotWindowsOptions) *HotWindowsView {
+func mustHW(t *testing.T, r *result.Result, opts TopWindowsOptions) *TopWindowsView {
 	t.Helper()
-	got, err := HotWindows(r, opts)
+	got, err := TopWindows(r, opts)
 	if err != nil {
-		t.Fatalf("HotWindows(%+v): %v", opts, err)
+		t.Fatalf("TopWindows(%+v): %v", opts, err)
 	}
 	return got
 }
 
 // firstWindow is the top-ranked row of a query that must produce at least one.
-func firstWindow(t *testing.T, v *HotWindowsView) HotWindow {
+func firstWindow(t *testing.T, v *TopWindowsView) TopWindow {
 	t.Helper()
 	if len(v.Windows) == 0 {
 		t.Fatal("no window")
@@ -59,7 +59,7 @@ func firstWindow(t *testing.T, v *HotWindowsView) HotWindow {
 }
 
 // topWindow is mustHW + firstWindow, the shape most tests here want.
-func topWindow(t *testing.T, r *result.Result, opts HotWindowsOptions) HotWindow {
+func topWindow(t *testing.T, r *result.Result, opts TopWindowsOptions) TopWindow {
 	t.Helper()
 	return firstWindow(t, mustHW(t, r, opts))
 }
@@ -67,7 +67,7 @@ func topWindow(t *testing.T, r *result.Result, opts HotWindowsOptions) HotWindow
 // The whole contract in one test: the returned window is the best stretch of
 // the requested length, and it is found even though it does not begin on any
 // round-number boundary.
-func TestHotWindowsFindsTheBestStretch(t *testing.T) {
+func TestTopWindowsFindsTheBestStretch(t *testing.T) {
 	// Four spread-out kills, then five inside 4 seconds starting at 60123.
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "rl"), kill(20000, "A", "B", "rl"),
@@ -76,7 +76,7 @@ func TestHotWindowsFindsTheBestStretch(t *testing.T) {
 		kill(62000, "A", "B", "lg"), kill(63000, "A", "B", "lg"),
 		kill(64123, "A", "B", "lg"),
 	}
-	got := mustHW(t, hwResult(frags, 120000), HotWindowsOptions{WindowMs: 5000, Limit: 1})
+	got := mustHW(t, hwResult(frags, 120000), TopWindowsOptions{WindowMs: 5000, Limit: 1})
 	if len(got.Windows) != 1 {
 		t.Fatalf("got %d windows, want 1", len(got.Windows))
 	}
@@ -102,14 +102,14 @@ func TestHotWindowsFindsTheBestStretch(t *testing.T) {
 // Returned windows must not be shifted copies of one run. Three separated runs
 // give three windows to compare; one run alone would leave the loop below with
 // nothing to do, which is how this test used to pass vacuously.
-func TestHotWindowsAreNonOverlapping(t *testing.T) {
+func TestTopWindowsAreNonOverlapping(t *testing.T) {
 	var frags []result.FragEntry
 	for _, base := range []int32{1000, 30000, 60000} {
 		for i := int32(0); i < 10; i++ {
 			frags = append(frags, kill(base+i*300, "A", "B", "lg"))
 		}
 	}
-	got := mustHW(t, hwResult(frags, 120000), HotWindowsOptions{WindowMs: 3000, Limit: 5})
+	got := mustHW(t, hwResult(frags, 120000), TopWindowsOptions{WindowMs: 3000, Limit: 5})
 	if len(got.Windows) != 3 {
 		t.Fatalf("got %d windows, want 3 (one per run) — nothing to check for overlap", len(got.Windows))
 	}
@@ -129,7 +129,7 @@ func TestHotWindowsAreNonOverlapping(t *testing.T) {
 // The two caps compose, and the ORDER matters: perPlayer is applied before
 // limit, so perPlayer=1&limit=3 means "the top 3, one per player" rather than
 // "the top player's best 1".
-func TestHotWindowsCaps(t *testing.T) {
+func TestTopWindowsCaps(t *testing.T) {
 	var frags []result.FragEntry
 	// A dominates; B and C each get one good run.
 	for i := int32(0); i < 6; i++ {
@@ -139,7 +139,7 @@ func TestHotWindowsCaps(t *testing.T) {
 	frags = append(frags, kill(15000, "C", "X", "lg"), kill(15500, "C", "X", "lg"))
 	res := hwResult(frags, 120000)
 
-	all := mustHW(t, res, HotWindowsOptions{WindowMs: 2000, Limit: -1})
+	all := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
 	byPlayer := map[string]int{}
 	for _, w := range all.Windows {
 		byPlayer[w.Player]++
@@ -148,7 +148,7 @@ func TestHotWindowsCaps(t *testing.T) {
 		t.Fatalf("fixture too weak: A has only %d windows", byPlayer["A"])
 	}
 
-	capped := mustHW(t, res, HotWindowsOptions{WindowMs: 2000, PerPlayer: 1, Limit: 3})
+	capped := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, PerPlayer: 1, Limit: 3})
 	if len(capped.Windows) != 3 {
 		t.Fatalf("got %d windows, want 3", len(capped.Windows))
 	}
@@ -165,13 +165,13 @@ func TestHotWindowsCaps(t *testing.T) {
 
 // Suicides and teamkills are not hot moments, so they never score — but they
 // are part of the narrative, so they do appear in the stats block.
-func TestHotWindowsSuicidesAndTeamkillsDoNotScore(t *testing.T) {
+func TestTopWindowsSuicidesAndTeamkillsDoNotScore(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "rl"),
 		{Time: 1200, Killer: "A", Victim: "T", Weapon: "teamkill", IsTeamKill: true},
 		{Time: 1400, Killer: "A", Victim: "A", Weapon: "suicide", IsSuicide: true},
 	}
-	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{WindowMs: 5000})
+	got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{WindowMs: 5000})
 	if len(got.Windows) != 1 {
 		t.Fatalf("got %d windows, want 1", len(got.Windows))
 	}
@@ -193,12 +193,12 @@ func TestHotWindowsSuicidesAndTeamkillsDoNotScore(t *testing.T) {
 // weapons= scopes the SCORING events only; the stats block still describes
 // everything that happened in the window. Score and the same-named stat
 // therefore differ, which is why scoredBy exists.
-func TestHotWindowsWeaponFilterScopesScoringOnly(t *testing.T) {
+func TestTopWindowsWeaponFilterScopesScoringOnly(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "lg"), kill(1500, "A", "B", "rl"),
 		kill(2000, "A", "B", "lg"),
 	}
-	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{
+	got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{
 		WindowMs: 5000, Weapons: []string{"lg"},
 	})
 	w := firstWindow(t, got)
@@ -219,7 +219,7 @@ func TestHotWindowsWeaponFilterScopesScoringOnly(t *testing.T) {
 }
 
 // netFrags is the metric that distinguishes a run from a trade.
-func TestHotWindowsNetFrags(t *testing.T) {
+func TestTopWindowsNetFrags(t *testing.T) {
 	// A gets 4 kills but dies 3 times in the same stretch.
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "rl"), kill(1200, "B", "A", "rl"),
@@ -229,8 +229,8 @@ func TestHotWindowsNetFrags(t *testing.T) {
 	}
 	res := hwResult(frags, 60000)
 
-	byFrags := topWindow(t, res, HotWindowsOptions{Metric: MetricFrags, WindowMs: 5000, Players: []string{"A"}})
-	byNet := topWindow(t, res, HotWindowsOptions{Metric: MetricNetFrags, WindowMs: 5000, Players: []string{"A"}})
+	byFrags := topWindow(t, res, TopWindowsOptions{Metric: MetricFrags, WindowMs: 5000, Players: []string{"A"}})
+	byNet := topWindow(t, res, TopWindowsOptions{Metric: MetricNetFrags, WindowMs: 5000, Players: []string{"A"}})
 	if byFrags.Score != 4 {
 		t.Errorf("frags score = %d, want 4", byFrags.Score)
 	}
@@ -240,11 +240,11 @@ func TestHotWindowsNetFrags(t *testing.T) {
 }
 
 // A net metric can go negative; those windows are not "hot" and are dropped.
-func TestHotWindowsDropsNonPositiveScores(t *testing.T) {
+func TestTopWindowsDropsNonPositiveScores(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "B", "A", "rl"), kill(1500, "B", "A", "rl"),
 	}
-	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{
+	got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{
 		Metric: MetricNetFrags, WindowMs: 5000, Players: []string{"A"},
 	})
 	if len(got.Windows) != 0 {
@@ -254,7 +254,7 @@ func TestHotWindowsDropsNonPositiveScores(t *testing.T) {
 
 // Every way a query can be refused, in one place — the closed vocabularies and
 // the two family errors, on the metrics that reach each of them.
-func TestHotWindowsRejects(t *testing.T) {
+func TestTopWindowsRejects(t *testing.T) {
 	withFrags := func() *result.Result {
 		return hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
 	}
@@ -274,27 +274,27 @@ func TestHotWindowsRejects(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		res  *result.Result
-		opts HotWindowsOptions
+		opts TopWindowsOptions
 		want error // nil = the query must be ACCEPTED
 	}{
-		{"unknown metric", withFrags(), HotWindowsOptions{Metric: "efficiency"}, ErrInvalidFilter},
-		{"unknown weapon", withFrags(), HotWindowsOptions{Weapons: []string{"banana"}}, ErrInvalidFilter},
+		{"unknown metric", withFrags(), TopWindowsOptions{Metric: "efficiency"}, ErrInvalidFilter},
+		{"unknown weapon", withFrags(), TopWindowsOptions{Weapons: []string{"banana"}}, ErrInvalidFilter},
 		// lava is a real frag cause but cannot be FIRED, so it is valid on a
 		// frag metric and invalid on a shot metric.
-		{"lava on a frag metric", withFrags(), HotWindowsOptions{Metric: MetricDeaths, Weapons: []string{"lava"}}, nil},
-		{"lava on a shot metric", withShots(), HotWindowsOptions{Metric: MetricShots, Weapons: []string{"lava"}}, ErrInvalidFilter},
-		{"no frag log", noStreams(), HotWindowsOptions{}, ErrUnavailable},
+		{"lava on a frag metric", withFrags(), TopWindowsOptions{Metric: MetricDeaths, Weapons: []string{"lava"}}, nil},
+		{"lava on a shot metric", withShots(), TopWindowsOptions{Metric: MetricShots, Weapons: []string{"lava"}}, ErrInvalidFilter},
+		{"no frag log", noStreams(), TopWindowsOptions{}, ErrUnavailable},
 		// An explicit dmg=bounded on a demo with no bounded family is the
 		// caller's error under EVERY metric, not only the damage ones — a
 		// silent fallback to raw is what let the family mismatch pinned by
-		// TestHotWindowsDamageFamilyAppliesUnderEveryMetric hide.
-		{"dmg=bounded on a skipped demo", skipped(), HotWindowsOptions{Metric: MetricDamageGiven, Dmg: "bounded"}, ErrBoundedUnavailable},
-		{"dmg=bounded on a skipped demo, metric=frags", skipped(), HotWindowsOptions{Metric: MetricFrags, Dmg: "bounded"}, ErrBoundedUnavailable},
-		{"dmg=both", skipped(), HotWindowsOptions{Metric: MetricDamageGiven, Dmg: "both"}, ErrInvalidFilter},
-		{"dmg=banana, metric=frags", skipped(), HotWindowsOptions{Metric: MetricFrags, Dmg: "banana"}, ErrInvalidFilter},
+		// TestTopWindowsDamageFamilyAppliesUnderEveryMetric hide.
+		{"dmg=bounded on a skipped demo", skipped(), TopWindowsOptions{Metric: MetricDamageGiven, Dmg: "bounded"}, ErrBoundedUnavailable},
+		{"dmg=bounded on a skipped demo, metric=frags", skipped(), TopWindowsOptions{Metric: MetricFrags, Dmg: "bounded"}, ErrBoundedUnavailable},
+		{"dmg=both", skipped(), TopWindowsOptions{Metric: MetricDamageGiven, Dmg: "both"}, ErrInvalidFilter},
+		{"dmg=banana, metric=frags", skipped(), TopWindowsOptions{Metric: MetricFrags, Dmg: "banana"}, ErrInvalidFilter},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := HotWindows(tc.res, tc.opts)
+			_, err := TopWindows(tc.res, tc.opts)
 			switch {
 			case tc.want == nil && err != nil:
 				t.Errorf("err = %v, want the query accepted", err)
@@ -307,7 +307,7 @@ func TestHotWindowsRejects(t *testing.T) {
 
 // The golden corpus pins output byte-for-byte, so identical input must give
 // identical bytes however Go decides to order its maps this run.
-func TestHotWindowsDeterministic(t *testing.T) {
+func TestTopWindowsDeterministic(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "lg"), kill(1100, "A", "C", "rl"),
 		kill(1200, "A", "B", "lg"), kill(1300, "A", "C", "rl"),
@@ -319,7 +319,7 @@ func TestHotWindowsDeterministic(t *testing.T) {
 	res := hwResult(frags, 60000)
 	var first []byte
 	for i := 0; i < 50; i++ {
-		got := mustHW(t, res, HotWindowsOptions{WindowMs: 2000, Limit: -1})
+		got := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
 		b, err := json.Marshal(got)
 		if err != nil {
 			t.Fatal(err)
@@ -354,7 +354,7 @@ func TestIntervalStatsBoundedAtZero(t *testing.T) {
 		kill(0, "A", "B", "rl"), kill(500, "A", "B", "rl"),
 		kill(50000, "A", "B", "lg"), // far outside the window
 	}
-	w := topWindow(t, hwResult(frags, 120000), HotWindowsOptions{WindowMs: 1000, Limit: 1})
+	w := topWindow(t, hwResult(frags, 120000), TopWindowsOptions{WindowMs: 1000, Limit: 1})
 	if w.Start != 0 {
 		t.Fatalf("start = %d, want 0", w.Start)
 	}
@@ -378,7 +378,7 @@ func TestIntervalStatsBoundedAtZero(t *testing.T) {
 // All three cases are brute-force verified optima that an anchor-poor version
 // got wrong — the first two returned NO window at all, the third a suboptimal
 // one.
-func TestHotWindowsFindsSignedOptimum(t *testing.T) {
+func TestTopWindowsFindsSignedOptimum(t *testing.T) {
 	t.Run("the optimum starts at the domain edge", func(t *testing.T) {
 		// A kills at t=1 (+1) and dies at t=11 (-1). windowMs=10.
 		// [0,10] scores +1; the only event-anchored candidate [1,11] scores 0.
@@ -386,7 +386,7 @@ func TestHotWindowsFindsSignedOptimum(t *testing.T) {
 			kill(1, "A", "B", "rl"),
 			{Time: 11, Killer: "B", Victim: "A", Weapon: "rl"},
 		}
-		got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{
+		got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{
 			Metric: MetricNetFrags, WindowMs: 10, Players: []string{"A"},
 		})
 		if len(got.Windows) == 0 {
@@ -404,7 +404,7 @@ func TestHotWindowsFindsSignedOptimum(t *testing.T) {
 		res.Damage = &result.DamageResult{Events: []result.DamageEntry{
 			dmg(1, "B", "A", "rl", 7), dmg(5, "A", "B", "rl", 2), dmg(7, "B", "A", "rl", 3),
 		}}
-		got := mustHW(t, res, HotWindowsOptions{
+		got := mustHW(t, res, TopWindowsOptions{
 			Metric: MetricNetDamage, WindowMs: 4, Players: []string{"A"},
 		})
 		if len(got.Windows) == 0 {
@@ -423,7 +423,7 @@ func TestHotWindowsFindsSignedOptimum(t *testing.T) {
 		res.Damage = &result.DamageResult{Events: []result.DamageEntry{
 			dmg(4, "B", "A", "rl", 4), dmg(7, "A", "B", "rl", 5),
 		}}
-		w := topWindow(t, res, HotWindowsOptions{
+		w := topWindow(t, res, TopWindowsOptions{
 			Metric: MetricNetDamage, WindowMs: 8, From: 1, To: 5, Players: []string{"A"},
 		})
 		if w.Score != 5 || w.Start != 5 {
@@ -436,7 +436,7 @@ func TestHotWindowsFindsSignedOptimum(t *testing.T) {
 // score must equal an O(n·T) reference over EVERY integer start in the domain.
 // Enumerating only the anchor families the implementation itself uses would
 // prove that the code agrees with its own theory, not that the theory is right.
-func TestHotWindowsMatchesBruteForce(t *testing.T) {
+func TestTopWindowsMatchesBruteForce(t *testing.T) {
 	const windowMs = 1000
 	const horizon = 20000
 	seedFrags := func(seed int) []result.FragEntry {
@@ -455,7 +455,7 @@ func TestHotWindowsMatchesBruteForce(t *testing.T) {
 	}
 	for seed := 0; seed < 40; seed++ {
 		frags := seedFrags(seed)
-		got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{
+		got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{
 			Metric: MetricNetFrags, WindowMs: windowMs, Players: []string{"A"}, Limit: 1,
 		})
 		// Reference: score every integer start the match window admits.
@@ -490,11 +490,11 @@ func TestHotWindowsMatchesBruteForce(t *testing.T) {
 // Spans are closed at both ends for scoring AND for the stats block, so two
 // windows sharing an endpoint would both claim an event at that instant. The
 // overlap test therefore treats touching as overlapping.
-func TestHotWindowsTouchingWindowsDoNotShareAnEvent(t *testing.T) {
+func TestTopWindowsTouchingWindowsDoNotShareAnEvent(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(0, "A", "B", "rl"), kill(10, "A", "B", "rl"), kill(20, "A", "B", "rl"),
 	}
-	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{WindowMs: 10, Limit: -1})
+	got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{WindowMs: 10, Limit: -1})
 	total := 0
 	for _, w := range got.Windows {
 		total += w.Score
@@ -508,9 +508,9 @@ func TestHotWindowsTouchingWindowsDoNotShareAnEvent(t *testing.T) {
 // The window is exactly windowMs long and its score covers all of it. Clipping
 // the scoring at `to` while reporting an unclipped span would make score
 // disagree with the stats block computed over that same span.
-func TestHotWindowsScoreMatchesStatsAtTheToBound(t *testing.T) {
+func TestTopWindowsScoreMatchesStatsAtTheToBound(t *testing.T) {
 	frags := []result.FragEntry{kill(90, "A", "B", "rl"), kill(110, "A", "B", "rl")}
-	w := topWindow(t, hwResult(frags, 60000), HotWindowsOptions{
+	w := topWindow(t, hwResult(frags, 60000), TopWindowsOptions{
 		WindowMs: 30, To: 100, Limit: 1,
 	})
 	if w.Score != w.Kills {
@@ -522,12 +522,12 @@ func TestHotWindowsScoreMatchesStatsAtTheToBound(t *testing.T) {
 // A non-world environmental hit still credits its player attacker in
 // view.Damage, so it must here too — otherwise metric=damageGiven disagrees
 // with the /damage endpoint on the same demo.
-func TestHotWindowsDamageMatchesDamageView(t *testing.T) {
+func TestTopWindowsDamageMatchesDamageView(t *testing.T) {
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
 		{Time: 1000, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 40, IsEnv: true},
 	}}
-	got := mustHW(t, res, HotWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000})
+	got := mustHW(t, res, TopWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000})
 	if len(got.Windows) == 0 || got.Windows[0].Score != 40 {
 		t.Errorf("got %+v, want a window scoring 40 — an IsEnv hit with a player attacker is enemy damage in /damage", got.Windows)
 	}
@@ -538,7 +538,7 @@ func TestHotWindowsDamageMatchesDamageView(t *testing.T) {
 // caller does not have to know which log backs the metric they picked. The
 // alias has to be in the VOCABULARY, not just the matcher: validation runs
 // first, so a matcher-only alias is inert and the request still 400s.
-func TestHotWindowsWaterDrownAliasAccepted(t *testing.T) {
+func TestTopWindowsWaterDrownAliasAccepted(t *testing.T) {
 	res := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
 	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
 		{Time: 1000, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 10},
@@ -549,7 +549,7 @@ func TestHotWindowsWaterDrownAliasAccepted(t *testing.T) {
 		{MetricDamageTaken, "drown"},
 		{MetricDamageTaken, "water"},
 	} {
-		if _, err := HotWindows(res, HotWindowsOptions{
+		if _, err := TopWindows(res, TopWindowsOptions{
 			Metric: tc.metric, Weapons: []string{tc.weapon}, WindowMs: 5000,
 		}); errors.Is(err, ErrInvalidFilter) {
 			t.Errorf("metric=%s weapons=%s rejected: %v", tc.metric, tc.weapon, err)
@@ -562,7 +562,7 @@ func TestHotWindowsWaterDrownAliasAccepted(t *testing.T) {
 	//
 	// Incident (adversarial review, 2026-08-01): the alias was added to the
 	// vocabularies (validation) while the expansion lived only in the
-	// hot-window scoring matcher. Measured on 212260, /frags?weapons=drown went
+	// top-window scoring matcher. Measured on 212260, /frags?weapons=drown went
 	// from a 400 to `200 {"totalFrags":0}` and /damage?weapons=water to
 	// `200 {"totalDamage":0}`, for the two tokens a caller is most likely to
 	// guess wrong.
@@ -590,7 +590,7 @@ func TestHotWindowsWaterDrownAliasAccepted(t *testing.T) {
 			t.Errorf("/damage?weapons=%s summed %d, want the one `drown` hit (6)", tok, dv.TotalDamage)
 		}
 		// And the scoring path agrees with them, from the same set builder.
-		w := topWindow(t, aliased, HotWindowsOptions{
+		w := topWindow(t, aliased, TopWindowsOptions{
 			Metric: MetricDeaths, Weapons: []string{tok}, WindowMs: 5000, Players: []string{"A"},
 		})
 		if w.Score != 1 {
@@ -605,14 +605,14 @@ func TestHotWindowsWaterDrownAliasAccepted(t *testing.T) {
 //
 // TimeUnit is deliberately not asserted: the view leaves it zero and the HTTP
 // layer stamps view.UnitMs on the way out, like every sibling envelope.
-func TestHotWindowsDefaultsAndEnvelope(t *testing.T) {
+func TestTopWindowsDefaultsAndEnvelope(t *testing.T) {
 	// 15 players, one kill each, spaced far enough apart that every player
 	// contributes exactly one window — so the row count measures `limit`.
 	var frags []result.FragEntry
 	for i := 0; i < 15; i++ {
 		frags = append(frags, kill(int32(1000+i*100000), string(rune('a'+i)), "X", "rl"))
 	}
-	got := mustHW(t, hwResult(frags, 2000000), HotWindowsOptions{})
+	got := mustHW(t, hwResult(frags, 2000000), TopWindowsOptions{})
 	if got.ScoredBy.Metric != MetricFrags {
 		t.Errorf("scoredBy.metric = %q, want %q", got.ScoredBy.Metric, MetricFrags)
 	}
@@ -643,7 +643,7 @@ func TestHotWindowsDefaultsAndEnvelope(t *testing.T) {
 
 // limit is capped, and the cap is echoed — a caller asking for 1000 must be
 // able to see from the response that it got 200.
-func TestHotWindowsLimitCap(t *testing.T) {
+func TestTopWindowsLimitCap(t *testing.T) {
 	var frags []result.FragEntry
 	for i := 0; i < 250; i++ {
 		frags = append(frags, result.FragEntry{
@@ -651,24 +651,24 @@ func TestHotWindowsLimitCap(t *testing.T) {
 			Victim: "X", Weapon: "rl",
 		})
 	}
-	got := mustHW(t, hwResult(frags, 30000000), HotWindowsOptions{WindowMs: 5000, Limit: 1000})
-	if len(got.Windows) != hotWindowMaxLimit {
-		t.Errorf("got %d windows, want the %d cap", len(got.Windows), hotWindowMaxLimit)
+	got := mustHW(t, hwResult(frags, 30000000), TopWindowsOptions{WindowMs: 5000, Limit: 1000})
+	if len(got.Windows) != topWindowMaxLimit {
+		t.Errorf("got %d windows, want the %d cap", len(got.Windows), topWindowMaxLimit)
 	}
-	if got.Limit != hotWindowMaxLimit {
-		t.Errorf("echoed limit = %d, want the effective %d", got.Limit, hotWindowMaxLimit)
+	if got.Limit != topWindowMaxLimit {
+		t.Errorf("echoed limit = %d, want the effective %d", got.Limit, topWindowMaxLimit)
 	}
 }
 
 // The metric name is matched case-insensitively but ECHOED canonically, so a
 // caller can round-trip the value. Lower-casing the input and comparing it
 // against the vocabulary directly would reject every camelCase name.
-func TestHotWindowsMetricIsCaseInsensitive(t *testing.T) {
+func TestTopWindowsMetricIsCaseInsensitive(t *testing.T) {
 	res := hwResult([]result.FragEntry{
 		kill(1000, "A", "B", "rl"), {Time: 1200, Killer: "B", Victim: "A", Weapon: "rl"},
 	}, 60000)
 	for _, in := range []string{"netFrags", "netfrags", "NETFRAGS", "NetFrags", "  netFrags  "} {
-		got := mustHW(t, res, HotWindowsOptions{Metric: in, WindowMs: 5000})
+		got := mustHW(t, res, TopWindowsOptions{Metric: in, WindowMs: 5000})
 		if got.ScoredBy.Metric != MetricNetFrags {
 			t.Errorf("metric=%q echoed as %q, want %q", in, got.ScoredBy.Metric, MetricNetFrags)
 		}
@@ -678,15 +678,15 @@ func TestHotWindowsMetricIsCaseInsensitive(t *testing.T) {
 // min is the score floor, and 0 is a MEANINGFUL request — "keep the windows
 // that broke even" is coherent for a net metric and unreachable if a plain int
 // carried it.
-func TestHotWindowsMin(t *testing.T) {
+func TestTopWindowsMin(t *testing.T) {
 	// A trades evenly: 2 kills, 2 deaths, so every window scores at most 0.
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "rl"), {Time: 1100, Killer: "B", Victim: "A", Weapon: "rl"},
 		kill(1200, "A", "B", "rl"), {Time: 1300, Killer: "B", Victim: "A", Weapon: "rl"},
 	}
 	res := hwResult(frags, 60000)
-	opts := func(min *int) HotWindowsOptions {
-		return HotWindowsOptions{Metric: MetricNetFrags, WindowMs: 5000, Players: []string{"A"}, Min: min}
+	opts := func(min *int) TopWindowsOptions {
+		return TopWindowsOptions{Metric: MetricNetFrags, WindowMs: 5000, Players: []string{"A"}, Min: min}
 	}
 	zero, three := 0, 3
 	if got := mustHW(t, res, opts(nil)); len(got.Windows) != 0 {
@@ -703,17 +703,17 @@ func TestHotWindowsMin(t *testing.T) {
 
 // From/To bound where a window may START, so the same demo yields the early run
 // under To and the late one under From.
-func TestHotWindowsFromTo(t *testing.T) {
+func TestTopWindowsFromTo(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "A", "B", "rl"), kill(1500, "A", "B", "rl"),
 		kill(50000, "A", "B", "lg"), kill(50500, "A", "B", "lg"),
 	}
 	res := hwResult(frags, 120000)
-	early := mustHW(t, res, HotWindowsOptions{WindowMs: 5000, To: 2000, Limit: -1})
+	early := mustHW(t, res, TopWindowsOptions{WindowMs: 5000, To: 2000, Limit: -1})
 	if len(early.Windows) != 1 || early.Windows[0].Start != 1000 {
 		t.Fatalf("to=2000: got %+v, want just the run starting at 1000", early.Windows)
 	}
-	late := mustHW(t, res, HotWindowsOptions{WindowMs: 5000, From: 40000, Limit: -1})
+	late := mustHW(t, res, TopWindowsOptions{WindowMs: 5000, From: 40000, Limit: -1})
 	if len(late.Windows) != 1 || late.Windows[0].Start != 50000 {
 		t.Fatalf("from=40000: got %+v, want just the run starting at 50000", late.Windows)
 	}
@@ -722,7 +722,7 @@ func TestHotWindowsFromTo(t *testing.T) {
 // The three damage metrics read the same log from three sides. damageTaken
 // counts ALL sources (matching PlayerDamage.Taken), so the self hit lands in
 // it; it is never "given".
-func TestHotWindowsDamageMetrics(t *testing.T) {
+func TestTopWindowsDamageMetrics(t *testing.T) {
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
 		{Time: 1000, Attacker: "A", Victim: "B", Weapon: "lg", Damage: 100},
@@ -742,7 +742,7 @@ func TestHotWindowsDamageMetrics(t *testing.T) {
 		{MetricDamageTaken, 50, 1200, 0, 50, 20}, // 30 from B + 20 self
 		{MetricNetDamage, 50, 1000, 100, 50, 20}, // 100 given - 50 taken
 	} {
-		got := mustHW(t, res, HotWindowsOptions{
+		got := mustHW(t, res, TopWindowsOptions{
 			Metric: tc.metric, WindowMs: 5000, Players: []string{"A"},
 		})
 		w := firstWindow(t, got)
@@ -767,7 +767,7 @@ func TestHotWindowsDamageMetrics(t *testing.T) {
 // dmg=bounded scores the KTX-scoreboard reconstruction instead of the raw hit,
 // and a nil Bounded means "equal to Damage" — the common no-overkill case, NOT
 // zero. Getting that backwards would silently halve every bounded window.
-func TestHotWindowsBoundedDamageFamily(t *testing.T) {
+func TestTopWindowsBoundedDamageFamily(t *testing.T) {
 	bounded := 45
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{
@@ -784,7 +784,7 @@ func TestHotWindowsBoundedDamageFamily(t *testing.T) {
 		{"raw", 240},
 		{"bounded", 85}, // 45 (capped overkill) + 40 (nil Bounded = Damage)
 	} {
-		got := mustHW(t, res, HotWindowsOptions{
+		got := mustHW(t, res, TopWindowsOptions{
 			Metric: MetricDamageGiven, WindowMs: 5000, Dmg: tc.dmg, Players: []string{"A"},
 		})
 		w := firstWindow(t, got)
@@ -811,7 +811,7 @@ func TestHotWindowsBoundedDamageFamily(t *testing.T) {
 // cached demos the 82 positional kills run 0..298 with a median of 100. Under
 // the old rule metric=damageGiven did not score damageGiven — a telefrag-only
 // stretch produced no candidate at all while /damage reported damage for it.
-func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
+func TestTopWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 	hit, tele := 100, 300
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{
@@ -823,7 +823,7 @@ func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 			{Time: 2000, Attacker: "A", Victim: "B", Bounded: &tele},
 		},
 	}
-	w := topWindow(t, res, HotWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
+	w := topWindow(t, res, TopWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
 	if w.Score != hit+tele {
 		t.Errorf("score = %d, want %d — the telefrag value scores as well as folding", w.Score, hit+tele)
 	}
@@ -850,7 +850,7 @@ func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 
 	// A telefrag-only stretch is now a candidate at all, which is what "the
 	// metric does not score itself" cost: [1990,6990] holds no hit.
-	late := topWindow(t, res, HotWindowsOptions{
+	late := topWindow(t, res, TopWindowsOptions{
 		Metric: MetricDamageGiven, WindowMs: 5000, From: 1990, Players: []string{"A"},
 	})
 	if late.Score != tele {
@@ -863,7 +863,7 @@ func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 	// to=500 pins the window to [0,5000], which holds both the hit and the
 	// telefrag, so the two numbers are comparable: the filter scopes the SCORE
 	// while the stats block still describes everything in the span.
-	only := topWindow(t, res, HotWindowsOptions{
+	only := topWindow(t, res, TopWindowsOptions{
 		Metric: MetricDamageGiven, WindowMs: 5000, To: 500, Weapons: []string{"tele"}, Players: []string{"A"},
 	})
 	if only.Score != tele {
@@ -873,7 +873,7 @@ func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 		t.Errorf("weapons=tele: damageGiven = %d, want %d — the filter scopes the SCORE, not the stats",
 			only.DamageGiven, hit+tele)
 	}
-	rlOnly := topWindow(t, res, HotWindowsOptions{
+	rlOnly := topWindow(t, res, TopWindowsOptions{
 		Metric: MetricDamageGiven, WindowMs: 5000, Weapons: []string{"rl"}, Players: []string{"A"},
 	})
 	if rlOnly.Score != hit {
@@ -885,7 +885,7 @@ func TestHotWindowsPositionalKillsScoreAndFoldAlike(t *testing.T) {
 // way, or score and stat part company on the very rows the fold exists for: a
 // TEAM telefrag is givenTeam and never damageGiven, a self-telefrag is
 // givenSelf, and both are `taken` for the victim whoever dealt them.
-func TestHotWindowsPositionalKillClassification(t *testing.T) {
+func TestTopWindowsPositionalKillClassification(t *testing.T) {
 	v := 200
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{
@@ -894,11 +894,11 @@ func TestHotWindowsPositionalKillClassification(t *testing.T) {
 			{Time: 1000, Attacker: "A", Victim: "T", IsTeam: true, Bounded: &v},
 		},
 	}
-	given := mustHW(t, res, HotWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
+	given := mustHW(t, res, TopWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
 	if len(given.Windows) != 0 {
 		t.Errorf("damageGiven scored %+v on a TEAM telefrag; team damage is not damageGiven", given.Windows)
 	}
-	w := topWindow(t, res, HotWindowsOptions{Metric: MetricDamageTaken, WindowMs: 5000, Players: []string{"T"}})
+	w := topWindow(t, res, TopWindowsOptions{Metric: MetricDamageTaken, WindowMs: 5000, Players: []string{"T"}})
 	if w.Score != v {
 		t.Fatalf("damageTaken score = %d, want %d", w.Score, v)
 	}
@@ -917,8 +917,8 @@ func TestHotWindowsPositionalKillClassification(t *testing.T) {
 // damageGiven 1676 against 795 from /damage over the same span, and nothing in
 // the response said which family produced either number. The rejection half —
 // an explicit dmg=bounded on a demo with no bounded family must fail under
-// EVERY metric, not fall back to raw — is pinned in TestHotWindowsRejects.
-func TestHotWindowsDamageFamilyAppliesUnderEveryMetric(t *testing.T) {
+// EVERY metric, not fall back to raw — is pinned in TestTopWindowsRejects.
+func TestTopWindowsDamageFamilyAppliesUnderEveryMetric(t *testing.T) {
 	bounded := 40
 	res := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
 	res.Damage = &result.DamageResult{
@@ -938,7 +938,7 @@ func TestHotWindowsDamageFamilyAppliesUnderEveryMetric(t *testing.T) {
 		{MetricDamageGiven, "bounded", 40},
 	} {
 		res.Shots = &result.ShotsResult{Shots: []result.Shot{{Time: 1000, Player: "A", Weapon: "rl", Hit: true}}}
-		got := mustHW(t, res, HotWindowsOptions{
+		got := mustHW(t, res, TopWindowsOptions{
 			Metric: tc.metric, Dmg: tc.dmg, WindowMs: 5000, Players: []string{"A"},
 		})
 		w := firstWindow(t, got)
@@ -966,7 +966,7 @@ func TestHotWindowsDamageFamilyAppliesUnderEveryMetric(t *testing.T) {
 	// A demo with no damage stream at all still answers a frag query: there is
 	// no family to resolve and no damage to report, and measured.damage says so.
 	noDmg := hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000)
-	got := mustHW(t, noDmg, HotWindowsOptions{Metric: MetricFrags, Dmg: "bounded"})
+	got := mustHW(t, noDmg, TopWindowsOptions{Metric: MetricFrags, Dmg: "bounded"})
 	if got.Dmg != "" || got.BoundedMode != "" || got.Measured.Damage {
 		t.Errorf("no damage stream: dmg=%q boundedMode=%q measured.damage=%v; want all empty/false",
 			got.Dmg, got.BoundedMode, got.Measured.Damage)
@@ -984,7 +984,7 @@ func TestHotWindowsDamageFamilyAppliesUnderEveryMetric(t *testing.T) {
 // there, so it pins nothing: this test passed unchanged with the scoring-side
 // gate in collectScoreEvents deleted. The gate, not the missing number, has to
 // be what stops the fold.
-func TestHotWindowsNoFoldWithoutABoundedFamily(t *testing.T) {
+func TestTopWindowsNoFoldWithoutABoundedFamily(t *testing.T) {
 	hit, tele := 100, 300
 	res := hwResult(nil, 60000)
 	res.Damage = &result.DamageResult{
@@ -996,7 +996,7 @@ func TestHotWindowsNoFoldWithoutABoundedFamily(t *testing.T) {
 		// fold value, and it must be ignored all the same.
 		Telefrags: []result.PositionalKill{{Time: 2000, Attacker: "A", Victim: "B", Damage: tele}},
 	}
-	w := topWindow(t, res, HotWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
+	w := topWindow(t, res, TopWindowsOptions{Metric: MetricDamageGiven, WindowMs: 5000, Players: []string{"A"}})
 	if w.Score != hit {
 		t.Errorf("score = %d, want %d — a skipped:* demo scores no positional kill", w.Score, hit)
 	}
@@ -1007,7 +1007,7 @@ func TestHotWindowsNoFoldWithoutABoundedFamily(t *testing.T) {
 
 // shots counts fires, hits counts connects — activity vs reward, over the same
 // stream and the same window.
-func TestHotWindowsShotsAndHits(t *testing.T) {
+func TestTopWindowsShotsAndHits(t *testing.T) {
 	res := hwResult(nil, 60000)
 	res.Shots = &result.ShotsResult{Shots: []result.Shot{
 		{Time: 1000, Player: "A", Weapon: "lg", Hit: true},
@@ -1027,7 +1027,7 @@ func TestHotWindowsShotsAndHits(t *testing.T) {
 		{MetricShots, []string{"lg"}, 3},
 		{MetricHits, []string{"lg"}, 2},
 	} {
-		w := topWindow(t, res, HotWindowsOptions{
+		w := topWindow(t, res, TopWindowsOptions{
 			Metric: tc.metric, Weapons: tc.weapons, WindowMs: 5000, Players: []string{"A"},
 		})
 		if w.Score != tc.want {
@@ -1046,7 +1046,7 @@ func TestHotWindowsShotsAndHits(t *testing.T) {
 // different questions and routinely disagree — this fixture makes them
 // disagree on purpose, because a builder that fed one from the other would
 // still pass a test where they match.
-func TestHotWindowsLocsAndEventLocs(t *testing.T) {
+func TestTopWindowsLocsAndEventLocs(t *testing.T) {
 	res := hwResult([]result.FragEntry{
 		kill(1000, "A", "B", "rl"), kill(3500, "A", "B", "lg"),
 	}, 60000)
@@ -1055,7 +1055,7 @@ func TestHotWindowsLocsAndEventLocs(t *testing.T) {
 		Name: "A",
 		Loc:  []result.ChangeI16{{T: 0, V: 1}, {T: 3000, V: 2}},
 	}}
-	w := topWindow(t, res, HotWindowsOptions{WindowMs: 5000, Limit: 1})
+	w := topWindow(t, res, TopWindowsOptions{WindowMs: 5000, Limit: 1})
 	if w.Start != 1000 || w.End != 6000 {
 		t.Fatalf("window = [%d,%d], want [1000,6000]", w.Start, w.End)
 	}
@@ -1086,9 +1086,9 @@ func TestHotWindowsLocsAndEventLocs(t *testing.T) {
 // windowMs reaches the view unclamped — the HTTP layer accepts any 0..MaxInt32
 // — so a MaxInt32 window wrapped to end = -2147482649, i.e. End < Start, a
 // negative durationMs and an overlap predicate comparing garbage.
-func TestHotWindowsClampsTheWindowEnd(t *testing.T) {
+func TestTopWindowsClampsTheWindowEnd(t *testing.T) {
 	got := mustHW(t, hwResult([]result.FragEntry{kill(1000, "A", "B", "rl")}, 60000),
-		HotWindowsOptions{WindowMs: math.MaxInt32, Limit: -1})
+		TopWindowsOptions{WindowMs: math.MaxInt32, Limit: -1})
 	if len(got.Windows) == 0 {
 		t.Fatal("no window")
 	}
@@ -1145,13 +1145,13 @@ func TestCollectScoreEventsFoldsOneTickPerMillisecond(t *testing.T) {
 // score, then the earlier window, then the player name. Five windows all
 // scoring 1 — four of them at the same instant — pin both halves, since a
 // name-before-start ranking would hoist AAA's later window to rank 1.
-func TestHotWindowsTieBreakStartThenPlayer(t *testing.T) {
+func TestTopWindowsTieBreakStartThenPlayer(t *testing.T) {
 	frags := []result.FragEntry{
 		kill(1000, "D", "X", "rl"), kill(1000, "B", "X", "rl"),
 		kill(1000, "C", "X", "rl"), kill(1000, "A", "X", "rl"),
 		kill(5000, "AAA", "X", "rl"),
 	}
-	got := mustHW(t, hwResult(frags, 60000), HotWindowsOptions{WindowMs: 2000, Limit: -1})
+	got := mustHW(t, hwResult(frags, 60000), TopWindowsOptions{WindowMs: 2000, Limit: -1})
 	var order []string
 	for _, w := range got.Windows {
 		if w.Score != 1 {
@@ -1160,6 +1160,168 @@ func TestHotWindowsTieBreakStartThenPlayer(t *testing.T) {
 		order = append(order, w.Player)
 	}
 	if want := []string{"A", "B", "C", "D", "AAA"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v", order, want)
+	}
+}
+
+// The complementary metric each primary is tied against. Fixed rather than a
+// parameter, and paired as "the other half of the same moment".
+func TestSecondaryMetricPairs(t *testing.T) {
+	for _, tc := range []struct{ primary, want string }{
+		{MetricFrags, MetricDamageGiven},
+		{MetricNetFrags, MetricDamageGiven},
+		{MetricDeaths, MetricDamageTaken},
+		{MetricDamageGiven, MetricFrags},
+		{MetricNetDamage, MetricFrags},
+		{MetricDamageTaken, MetricDeaths},
+		{MetricShots, MetricDamageGiven},
+		{MetricHits, MetricDamageGiven},
+	} {
+		if got := secondaryMetric(tc.primary); got != tc.want {
+			t.Errorf("secondaryMetric(%s) = %s, want %s", tc.primary, got, tc.want)
+		}
+	}
+}
+
+// Ties are the COMMON case — on metric=frags a whole page of windows holds the
+// same small integer — and breaking them positionally makes quality among
+// equals invisible. The complementary metric (damageGiven under frags) ranks
+// them, and here it INVERTS the positional order: B's window is later but was
+// four times the damage.
+func TestTopWindowsTieBreakOnSecondaryMetric(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"),
+		kill(5000, "B", "X", "rl"), kill(5500, "B", "X", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 50), dmg(1500, "A", "X", "rl", 50),
+		dmg(5000, "B", "X", "rl", 200), dmg(5500, "B", "X", "rl", 200),
+	}}
+
+	got := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 2 {
+			t.Fatalf("%s scored %d, want 2 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
+		t.Errorf("order = %v, want %v — the later window carried more damageGiven", order, want)
+	}
+	// The key is the number the row SHOWS: the secondary is summed unscoped, in
+	// the response's family, over the row's own closed span, so it equals the
+	// stats block exactly.
+	if w := got.Windows[0]; w.DamageGiven != 400 {
+		t.Errorf("winner damageGiven = %d, want 400 — the tie broke on a number the row does not display", w.DamageGiven)
+	}
+
+	// Control: the same fixture with no damage stream falls back to the
+	// positional keys, which is what the secondary displaced.
+	res.Damage = nil
+	got = mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	if got.Windows[0].Player != "A" {
+		t.Errorf("without a damage stream the earlier window must rank first, got %s", got.Windows[0].Player)
+	}
+}
+
+// The same key at the OTHER tie point: per-player candidate selection. Three
+// kills give two equal-scoring overlapping candidates, [1000,3000] and
+// [1500,3500], of which the greedy pass keeps exactly one. Both start on a
+// scoring event, so the old keys took the earlier; the later one carries a
+// 100-point hit the earlier misses, so it is the better stretch and now
+// survives.
+func TestTopWindowsCandidateTieBreakOnSecondaryMetric(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(1500, "A", "X", "rl"), kill(3200, "A", "X", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(1000, "A", "X", "rl", 10),
+		dmg(1600, "A", "X", "rl", 20),
+		dmg(3400, "A", "X", "rl", 100),
+	}}
+
+	w := topWindow(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1})
+	if w.Score != 2 {
+		t.Fatalf("score = %d, want 2", w.Score)
+	}
+	if w.Start != 1500 {
+		t.Errorf("start = %d, want 1500 — the equal-scoring candidate with more damage must survive the greedy pass", w.Start)
+	}
+	if w.DamageGiven != 120 {
+		t.Errorf("damageGiven = %d, want 120", w.DamageGiven)
+	}
+
+	res.Damage = nil
+	if w := topWindow(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1}); w.Start != 1000 {
+		t.Errorf("without a damage stream the earlier candidate must win, got start %d", w.Start)
+	}
+}
+
+// The secondary is summed in the SAME damage family the stats block used, so
+// raw and bounded can rank the same two windows differently — and must, since
+// the row displays the family's number. Summing one family beside a block
+// showing the other would order the list on an invisible quantity.
+func TestTopWindowsTieBreakRespectsTheDamageFamily(t *testing.T) {
+	bounded := 40
+	res := hwResult([]result.FragEntry{
+		kill(1000, "A", "X", "rl"), kill(5000, "B", "X", "rl"),
+	}, 60000)
+	res.Damage = &result.DamageResult{
+		BoundedMode: "standard",
+		Events: []result.DamageEntry{
+			{Time: 1000, Attacker: "A", Victim: "X", Weapon: "rl", Damage: 100}, // nil Bounded = 100
+			{Time: 5000, Attacker: "B", Victim: "X", Weapon: "rl", Damage: 300, Bounded: &bounded},
+		},
+	}
+	for _, tc := range []struct {
+		dmg  string
+		want []string
+	}{
+		{"raw", []string{"B", "A"}},     // 300 > 100
+		{"bounded", []string{"A", "B"}}, // 100 > 40
+	} {
+		got := mustHW(t, res, TopWindowsOptions{WindowMs: 2000, Limit: -1, Dmg: tc.dmg})
+		var order []string
+		for _, w := range got.Windows {
+			if w.Score != 1 {
+				t.Fatalf("dmg=%s: %s scored %d, want 1", tc.dmg, w.Player, w.Score)
+			}
+			order = append(order, w.Player)
+		}
+		if !reflect.DeepEqual(order, tc.want) {
+			t.Errorf("dmg=%s: order = %v, want %v", tc.dmg, order, tc.want)
+		}
+	}
+}
+
+// A signed primary ties too, and its secondary is the same plain non-negative
+// sum: netFrags is ranked among equals by damageGiven, not by a second signed
+// optimisation. Both players net +1; B's stretch cost four times the damage.
+func TestTopWindowsNetFragsTieBreakOnDamageGiven(t *testing.T) {
+	frags := []result.FragEntry{
+		kill(10000, "A", "X", "rl"), kill(11000, "X", "A", "rl"),
+		kill(30000, "B", "X", "rl"), kill(31000, "X", "B", "rl"),
+	}
+	res := hwResult(frags, 60000)
+	res.Damage = &result.DamageResult{Events: []result.DamageEntry{
+		dmg(9000, "A", "X", "rl", 50),
+		dmg(29000, "B", "X", "rl", 200),
+	}}
+	got := mustHW(t, res, TopWindowsOptions{
+		Metric: MetricNetFrags, WindowMs: 2000, Limit: -1,
+		Players: []string{"A", "B"}, // X is only here to be killed by, and to kill
+	})
+	var order []string
+	for _, w := range got.Windows {
+		if w.Score != 1 {
+			t.Fatalf("%s scored %d, want 1 — the fixture no longer ties", w.Player, w.Score)
+		}
+		order = append(order, w.Player)
+	}
+	if want := []string{"B", "A"}; !reflect.DeepEqual(order, want) {
 		t.Errorf("order = %v, want %v", order, want)
 	}
 }

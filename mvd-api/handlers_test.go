@@ -11,6 +11,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -2452,13 +2453,14 @@ func TestStubResultExercisesKTXOverlay(t *testing.T) {
 	}
 }
 
-// --- /hot-windows + /lives: the interval endpoints -----------------------
+// --- /top-windows + /lives + /top-kills: the on-demand damage endpoints --
 //
-// These two shipped with NO handler test, which is how a dead 422 branch got
-// past review: both handlers gated their error tail on a bare `err != nil`
+// The first two shipped with NO handler test, which is how a dead 422 branch
+// got past review: both handlers gated their error tail on a bare `err != nil`
 // via writeInvalidParam, and ErrBoundedUnavailable wraps ErrUnavailable, so
 // every explicit dmg=bounded on a demo without the bounded family answered
 // 400 invalid_param and the 422 the spec documents was unreachable.
+// /top-kills copies the same gate order, so it is pinned by the same tests.
 
 // intervalFixture is a Result carrying all five sources the interval
 // endpoints read — frag log, per-hit damage log, shot stream, alive
@@ -2569,8 +2571,9 @@ func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
 	defer srv.Close()
 
 	for _, u := range []string{
-		"/v1/demos/gameId:99/hot-windows?metric=damageGiven&dmg=bounded",
+		"/v1/demos/gameId:99/top-windows?metric=damageGiven&dmg=bounded",
 		"/v1/demos/gameId:99/lives?dmg=bounded",
+		"/v1/demos/gameId:99/top-kills?dmg=bounded",
 	} {
 		body, status := getRaw(t, srv.URL+u)
 		if status != 422 {
@@ -2591,8 +2594,9 @@ func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
 	// A DEFAULTED bounded (no dmg param) on the same demo serves the raw
 	// family instead of 422-ing a caller who never asked for bounded.
 	for _, u := range []string{
-		"/v1/demos/gameId:99/hot-windows?metric=damageGiven",
+		"/v1/demos/gameId:99/top-windows?metric=damageGiven",
 		"/v1/demos/gameId:99/lives",
+		"/v1/demos/gameId:99/top-kills",
 	} {
 		if body, status := getRaw(t, srv.URL+u); status != 200 {
 			t.Errorf("GET %s (defaulted): status = %d, want 200 (body=%s)", u, status, string(body))
@@ -2601,8 +2605,9 @@ func TestIntervalEndpoints_BoundedUnavailable(t *testing.T) {
 
 	// And on a demo that HAS the family, explicit bounded serves.
 	for _, u := range []string{
-		"/v1/demos/gameId:42/hot-windows?metric=damageGiven&dmg=bounded",
+		"/v1/demos/gameId:42/top-windows?metric=damageGiven&dmg=bounded",
 		"/v1/demos/gameId:42/lives?dmg=bounded",
+		"/v1/demos/gameId:42/top-kills?dmg=bounded",
 	} {
 		if body, status := getRaw(t, srv.URL+u); status != 200 {
 			t.Errorf("GET %s: status = %d, want 200 (body=%s)", u, status, string(body))
@@ -2619,10 +2624,11 @@ func TestIntervalEndpoints_DmgBothRejected(t *testing.T) {
 	defer srv.Close()
 
 	for _, u := range []string{
-		"/v1/demos/gameId:42/hot-windows?dmg=both",                    // default metric=frags
-		"/v1/demos/gameId:42/hot-windows?dmg=both&metric=damageGiven", // a damage metric
-		"/v1/demos/gameId:42/hot-windows?dmg=both&metric=shots",       // the shot stream
+		"/v1/demos/gameId:42/top-windows?dmg=both",                    // default metric=frags
+		"/v1/demos/gameId:42/top-windows?dmg=both&metric=damageGiven", // a damage metric
+		"/v1/demos/gameId:42/top-windows?dmg=both&metric=shots",       // the shot stream
 		"/v1/demos/gameId:42/lives?dmg=both",
+		"/v1/demos/gameId:42/top-kills?dmg=both",
 	} {
 		body, status := getRaw(t, srv.URL+u)
 		if status != 400 {
@@ -2638,9 +2644,10 @@ func TestIntervalEndpoints_DmgBothRejected(t *testing.T) {
 	}
 	// raw and bounded stay accepted on both.
 	for _, u := range []string{
-		"/v1/demos/gameId:42/hot-windows?dmg=raw",
-		"/v1/demos/gameId:42/hot-windows?dmg=bounded&metric=damageGiven",
+		"/v1/demos/gameId:42/top-windows?dmg=raw",
+		"/v1/demos/gameId:42/top-windows?dmg=bounded&metric=damageGiven",
 		"/v1/demos/gameId:42/lives?dmg=raw",
+		"/v1/demos/gameId:42/top-kills?dmg=raw",
 	} {
 		if body, status := getRaw(t, srv.URL+u); status != 200 {
 			t.Errorf("GET %s: status = %d, want 200 (body=%s)", u, status, string(body))
@@ -2648,15 +2655,15 @@ func TestIntervalEndpoints_DmgBothRejected(t *testing.T) {
 	}
 }
 
-// TestHotWindows_WindowMsBounds pins both ends of windowMs. The floor gives
+// TestTopWindows_WindowMsBounds pins both ends of windowMs. The floor gives
 // ONE message for 0 and for a negative — an agent told "must be >= 0" by the
 // negative retried with 0 and failed again. The ceiling is the match
 // duration: windowMs=MaxInt32 used to 200 with a 24.8-day window whose
 // durationMs covered time that does not exist.
-func TestHotWindows_WindowMsBounds(t *testing.T) {
+func TestTopWindows_WindowMsBounds(t *testing.T) {
 	srv := newTestServer(t, intervalStore())
 	defer srv.Close()
-	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
 
 	for _, v := range []string{"0", "-5"} {
 		body, status := getRaw(t, base+"?windowMs="+v)
@@ -2703,15 +2710,15 @@ func TestHotWindows_WindowMsBounds(t *testing.T) {
 	}
 }
 
-// TestHotWindows_CapsAreConsistent: limit and perPlayer are two caps on one
+// TestTopWindows_CapsAreConsistent: limit and perPlayer are two caps on one
 // endpoint and now follow ONE rule — omitted is the default, negative is
 // uncapped, an explicit 0 is rejected. The old shape rejected limit=0 but
 // accepted perPlayer=0, and rejected perPlayer=-1 but accepted limit=-1, so
 // an agent that learned either guessed the other wrong.
-func TestHotWindows_CapsAreConsistent(t *testing.T) {
+func TestTopWindows_CapsAreConsistent(t *testing.T) {
 	srv := newTestServer(t, intervalStore())
 	defer srv.Close()
-	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
 
 	for _, cap := range []string{"limit", "perPlayer"} {
 		body, status := getRaw(t, base+"?"+cap+"=0")
@@ -2736,7 +2743,7 @@ func TestHotWindows_CapsAreConsistent(t *testing.T) {
 	// handler's check the view still caps at 200 behind it, so limit=1000
 	// would answer 200 with a body that quietly disagrees with the request —
 	// exactly the "silently clamped" shape v59 removed, and the opposite of
-	// what /hot-windows' parameter docs promise.
+	// what /top-windows' parameter docs promise.
 	body, status := getRaw(t, base+"?limit=1000")
 	if status != 400 {
 		t.Fatalf("limit=1000: status = %d, want 400 (a clamped 200 is the bug this pins) (body=%s)", status, string(body))
@@ -2747,22 +2754,22 @@ func TestHotWindows_CapsAreConsistent(t *testing.T) {
 	}
 	// The message names both the bound and the value, so a caller can fix the
 	// request without consulting the spec.
-	if want := fmt.Sprintf("limit must be <= %d, got 1000", hotWindowsMaxLimit); msg != want {
+	if want := fmt.Sprintf("limit must be <= %d, got 1000", topWindowsMaxLimit); msg != want {
 		t.Errorf("limit=1000: message = %q, want %q", msg, want)
 	}
 	// The bound itself is inclusive — the rejection starts one past it.
-	if body, status := getRaw(t, base+"?limit="+strconv.Itoa(hotWindowsMaxLimit)); status != 200 {
-		t.Errorf("limit=%d: status = %d, want 200 (the cap is inclusive) (body=%s)", hotWindowsMaxLimit, status, string(body))
+	if body, status := getRaw(t, base+"?limit="+strconv.Itoa(topWindowsMaxLimit)); status != 200 {
+		t.Errorf("limit=%d: status = %d, want 200 (the cap is inclusive) (body=%s)", topWindowsMaxLimit, status, string(body))
 	}
 }
 
-// TestHotWindows_MinScoreParam: the filter is `minScore`, not the bare,
+// TestTopWindows_MinScoreParam: the filter is `minScore`, not the bare,
 // undimensioned `min` — on the sibling /lives the analogous `minMs` is a
 // DURATION, so `min` read as one. A malformed value names what a good one is.
-func TestHotWindows_MinScoreParam(t *testing.T) {
+func TestTopWindows_MinScoreParam(t *testing.T) {
 	srv := newTestServer(t, intervalStore())
 	defer srv.Close()
-	base := srv.URL + "/v1/demos/gameId:42/hot-windows"
+	base := srv.URL + "/v1/demos/gameId:42/top-windows"
 
 	// The old spelling is not silently accepted — it is an unknown param.
 	body, status := getRaw(t, base+"?min=1")
@@ -2851,17 +2858,17 @@ func TestLives_Summary(t *testing.T) {
 	}
 }
 
-// TestHotWindows_ToBoundsWindowStart pins the documented /hot-windows `to`
+// TestTopWindows_ToBoundsWindowStart pins the documented /top-windows `to`
 // semantics: it bounds where a window may START, not what it covers. A window
 // anchored at or before `to` still runs the full windowMs past it. This is
 // deliberate — clamping the scoring at `to` while the stats block ran
 // unclamped made a row's score disagree with its own stats — so the test
 // exists to keep the behaviour and the spec's caveat in step.
-func TestHotWindows_ToBoundsWindowStart(t *testing.T) {
+func TestTopWindows_ToBoundsWindowStart(t *testing.T) {
 	srv := newTestServer(t, intervalStore())
 	defer srv.Close()
 
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/hot-windows?to=1000&windowMs=30000&limit=1", 200)
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/top-windows?to=1000&windowMs=30000&limit=1", 200)
 	wins := resp["windows"].([]any)
 	if len(wins) == 0 {
 		t.Fatal("to=1000 returned no windows")
@@ -2879,12 +2886,12 @@ func TestHotWindows_ToBoundsWindowStart(t *testing.T) {
 	}
 }
 
-// TestHotWindows_Unavailable exercises the 422 over HTTP: the view's gate is
+// TestTopWindows_Unavailable exercises the 422 over HTTP: the view's gate is
 // per-METRIC, so the same demo answers 200 for one metric and 422 for another,
 // and the message has to name the stream the chosen metric needs rather than
-// say a bare "unavailable". Each arm of hotWindowsUnavailableMsg gets its own
+// say a bare "unavailable". Each arm of topWindowsUnavailableMsg gets its own
 // demo, so a message wired to the wrong metric class fails here.
-func TestHotWindows_Unavailable(t *testing.T) {
+func TestTopWindows_Unavailable(t *testing.T) {
 	// Each fixture drops exactly one source; everything else stays, so a 422
 	// can only come from the metric under test.
 	noShots := intervalFixture("standard")
@@ -2911,14 +2918,14 @@ func TestHotWindows_Unavailable(t *testing.T) {
 		{"gameId:12", "frags", "this demo has no frag log"},
 		{"gameId:12", "netFrags", "this demo has no frag log"},
 	} {
-		u := fmt.Sprintf("/v1/demos/%s/hot-windows?metric=%s", tc.id, tc.metric)
+		u := fmt.Sprintf("/v1/demos/%s/top-windows?metric=%s", tc.id, tc.metric)
 		body, status := getRaw(t, srv.URL+u)
 		if status != 422 {
 			t.Fatalf("GET %s: status = %d, want 422 (body=%s)", u, status, string(body))
 		}
 		code, msg := errEnvelope(t, body)
-		if code != "hot_windows_unavailable" {
-			t.Errorf("GET %s: code = %q, want hot_windows_unavailable", u, code)
+		if code != "top_windows_unavailable" {
+			t.Errorf("GET %s: code = %q, want top_windows_unavailable", u, code)
 		}
 		if msg != tc.wantMsg {
 			t.Errorf("GET %s: message = %q, want %q (it must name the missing stream)", u, msg, tc.wantMsg)
@@ -2928,9 +2935,9 @@ func TestHotWindows_Unavailable(t *testing.T) {
 	// The gate really is per-metric: the demo without a damage stream still
 	// serves the frag metrics, and vice versa.
 	for _, u := range []string{
-		"/v1/demos/gameId:11/hot-windows?metric=frags",
-		"/v1/demos/gameId:12/hot-windows?metric=damageGiven",
-		"/v1/demos/gameId:12/hot-windows?metric=shots",
+		"/v1/demos/gameId:11/top-windows?metric=frags",
+		"/v1/demos/gameId:12/top-windows?metric=damageGiven",
+		"/v1/demos/gameId:12/top-windows?metric=shots",
 	} {
 		if body, status := getRaw(t, srv.URL+u); status != 200 {
 			t.Errorf("GET %s: status = %d, want 200 — the gate is per-metric (body=%s)", u, status, string(body))
@@ -3007,7 +3014,7 @@ func TestLives_Unavailable(t *testing.T) {
 // handler's own `opts.MinMs < 0` guard is defence in depth behind it and its
 // message never reaches the wire. This test pins what a caller observes — 400
 // invalid_param naming the floor — which is the contract either layer owes,
-// rather than one layer's wording. (Contrast windowMs on /hot-windows, which
+// rather than one layer's wording. (Contrast windowMs on /top-windows, which
 // deliberately bypasses Ms because its real floor is 1, not 0.)
 func TestLives_MinMsFloor(t *testing.T) {
 	srv := newTestServer(t, intervalStore())
@@ -3031,11 +3038,11 @@ func TestLives_MinMsFloor(t *testing.T) {
 	}
 }
 
-// TestHotWindows_WindowMsCeilingFallbacks covers the two matchDurationMs arms
+// TestTopWindows_WindowMsCeilingFallbacks covers the two matchDurationMs arms
 // the intervalFixture (which carries Streams.Global.MatchEnd) never reaches.
 // The ceiling is what keeps the documented `end = start + windowMs` inside
 // int32, so a Result assembled without streams must still get one.
-func TestHotWindows_WindowMsCeilingFallbacks(t *testing.T) {
+func TestTopWindows_WindowMsCeilingFallbacks(t *testing.T) {
 	// No Streams at all: Match.Duration is the fallback authority.
 	fromMatch := intervalFixture("standard")
 	fromMatch.Streams = nil // Match.Duration is 120000
@@ -3062,7 +3069,7 @@ func TestHotWindows_WindowMsCeilingFallbacks(t *testing.T) {
 		{"gameId:30", "Match.Duration", 120000, 120001},
 		{"gameId:31", "no duration at all", halfInt32, halfInt32 + 1},
 	} {
-		base := srv.URL + "/v1/demos/" + tc.id + "/hot-windows"
+		base := srv.URL + "/v1/demos/" + tc.id + "/top-windows"
 		body, status := getRaw(t, base+"?windowMs="+strconv.Itoa(tc.overshot))
 		if status != 400 {
 			t.Fatalf("%s arm, windowMs=%d: status = %d, want 400 (body=%s)", tc.arm, tc.overshot, status, string(body))
@@ -3080,4 +3087,401 @@ func TestHotWindows_WindowMsCeilingFallbacks(t *testing.T) {
 				tc.arm, tc.bound, status, string(body))
 		}
 	}
+}
+
+// --- /top-kills: kill bursts ---------------------------------------------
+
+// topKillsFixture is intervalFixture with a frag + damage log shaped into
+// actual BURSTS. The interval fixture's damage lands NEAR its frags rather
+// than ON them, and the burst walk anchors on a killing-weapon hit at exactly
+// the frag instant (every one of the 1,866 measured enemy kills has one —
+// both are stamped from the same MVD frame), so that fixture yields no rows
+// at all. The runs below are laid out to exercise one contract each:
+//
+//	bps→valla rl  @10000  a three-hit run (7500/9000/10000) — span, maxGapMs
+//	bps→valla lg  @12000  a one-hit run with an rl hit at 11800 INSIDE it,
+//	                      which must neither join the run nor break it
+//	valla→bps rl  @40000  a hit 4000 ms earlier, i.e. OUTSIDE the default
+//	                      capture gap and inside gapMs=5000
+//	bps→valla rl  @41000  bps is DEAD here (alive is [0,40000],[42000,…]) —
+//	                      the row must survive
+//	bps→valla tele@90000  a positional kill: no damage event, so no row
+//
+// The bounded values differ from the raw ones throughout so that "which
+// family did this response use" is observable rather than a coincidence.
+func topKillsFixture(boundedMode string) *result.Result {
+	res := intervalFixture(boundedMode)
+	res.Frags = &result.FragResult{
+		TotalFrags: 5,
+		Frags: []result.FragEntry{
+			{Time: 10000, Killer: "bps", Victim: "valla", Weapon: "rl"},
+			{Time: 12000, Killer: "bps", Victim: "valla", Weapon: "lg"},
+			{Time: 40000, Killer: "valla", Victim: "bps", Weapon: "rl"},
+			{Time: 41000, Killer: "bps", Victim: "valla", Weapon: "rl"},
+			{Time: 90000, Killer: "bps", Victim: "valla", Weapon: "tele"},
+		},
+		ByWeapon: map[string]int{"rl": 3, "lg": 1, "tele": 1},
+		ByPlayer: map[string]*result.PlayerFrags{
+			"bps":   {Kills: 4, Deaths: 1},
+			"valla": {Kills: 1, Deaths: 4},
+		},
+	}
+	res.Damage.Events = []result.DamageEntry{
+		{Time: 7500, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 60, Bounded: intp(40)},
+		{Time: 8000, Attacker: "valla", Victim: "bps", Weapon: "rl", Damage: 25, Bounded: intp(20)},
+		{Time: 9000, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 70, Bounded: intp(50)},
+		{Time: 10000, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 100, Bounded: intp(80), VictimWep: "rl"},
+		{Time: 11800, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 15, Bounded: intp(15)},
+		{Time: 12000, Attacker: "bps", Victim: "valla", Weapon: "lg", Damage: 30, Bounded: intp(25), VictimWep: "lg"},
+		{Time: 36000, Attacker: "valla", Victim: "bps", Weapon: "rl", Damage: 40, Bounded: intp(40)},
+		{Time: 40000, Attacker: "valla", Victim: "bps", Weapon: "rl", Damage: 90, Bounded: intp(90), VictimWep: "rl"},
+		{Time: 41000, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 50, Bounded: intp(45), VictimWep: "sg"},
+	}
+	return res
+}
+
+// topKillsStore serves the burst fixture at gameId:42 (bounded family present)
+// and gameId:99 (bounded reconstruction skipped), matching intervalStore.
+func topKillsStore() *fakeStore {
+	return &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": topKillsFixture("standard"),
+		"gameId:99": topKillsFixture("skipped:no_ktx"),
+	}}
+}
+
+// TestTopKills_Rows pins the whole row contract on one response: the ranking,
+// the per-row burst arithmetic, the two semantics a caller cannot re-derive
+// (positional kills absent, dead-killer kills present) and the defaulted
+// damage family.
+func TestTopKills_Rows(t *testing.T) {
+	srv := newTestServer(t, topKillsStore())
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/top-kills", 200)
+
+	// The envelope echoes the RESOLVED parameters — they are what the numbers
+	// mean — plus the family, which defaults to bounded over REST.
+	for k, want := range map[string]float64{"gapMs": 3000, "contestedMs": 4000, "limit": 20} {
+		if got := resp[k].(float64); got != want {
+			t.Errorf("%s echo = %v, want %v", k, got, want)
+		}
+	}
+	if resp["dmg"] != "bounded" {
+		t.Errorf("dmg = %v, want bounded (the REST default)", resp["dmg"])
+	}
+	if resp["timeUnit"] != "ms" {
+		t.Errorf("timeUnit = %v, want ms", resp["timeUnit"])
+	}
+	if resp["measured"] == nil {
+		t.Error("measured block missing — it is never omitempty")
+	}
+
+	kills := resp["kills"].([]any)
+	if len(kills) != 4 {
+		t.Fatalf("got %d rows, want 4 (five frags, minus the telefrag that carries no damage event)", len(kills))
+	}
+	// Ranked by burst damage in the BOUNDED family: 170, 90, 45, 25.
+	wantDamage := []float64{170, 90, 45, 25}
+	for i, row := range kills {
+		m := row.(map[string]any)
+		if got := m["rank"].(float64); got != float64(i+1) {
+			t.Errorf("row %d: rank = %v, want %d", i, got, i+1)
+		}
+		if got := m["damage"].(float64); got != wantDamage[i] {
+			t.Errorf("row %d: damage = %v, want %v (bounded family, ranked desc)", i, got, wantDamage[i])
+		}
+	}
+
+	top := kills[0].(map[string]any)
+	for k, want := range map[string]any{
+		"killer": "bps", "victim": "valla", "team": "blue", "weapon": "rl",
+		"time": 10000.0, "hits": 3.0, "spanMs": 2500.0, "maxGapMs": 1500.0,
+		"victimWep": "rl", "returnDamage": 20.0,
+	} {
+		if got := top[k]; got != want {
+			t.Errorf("top row %s = %v, want %v", k, got, want)
+		}
+	}
+
+	// The lg kill's run is ONE hit: the rl hit at 11800 lands inside its span
+	// and neither joins it (wrong weapon) nor truncates it.
+	lg := kills[3].(map[string]any)
+	if lg["weapon"] != "lg" || lg["hits"].(float64) != 1 || lg["spanMs"].(float64) != 0 {
+		t.Errorf("lg row = %v, want a single-hit run (a different-weapon hit inside the span must not join)", lg)
+	}
+
+	// Kills by an already-dead killer stay in — bps is dead over [40000,42000)
+	// and still owns the 41000 row. Nobody should "fix" this.
+	found := false
+	for _, row := range kills {
+		if m := row.(map[string]any); m["time"].(float64) == 41000 && m["killer"] == "bps" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("the 41000 kill by an already-dead killer is missing — the walk must consult the VICTIM's liveness only")
+	}
+
+	// The telefrag carries no damage event, so it produces no row at all.
+	for _, row := range kills {
+		if m := row.(map[string]any); m["weapon"] == "tele" {
+			t.Errorf("positional kill ranked: %v — it has no damage to sum", m)
+		}
+	}
+
+	// dmg=raw is the same query in the other family, and the top burst's raw
+	// sum (60+70+100) differs from its bounded one, so the echo is not
+	// decorative.
+	raw := getJSON(t, srv.URL+"/v1/demos/gameId:42/top-kills?dmg=raw", 200)
+	if raw["dmg"] != "raw" {
+		t.Errorf("dmg echo = %v, want raw", raw["dmg"])
+	}
+	if got := raw["kills"].([]any)[0].(map[string]any)["damage"].(float64); got != 230 {
+		t.Errorf("raw top damage = %v, want 230", got)
+	}
+}
+
+// TestTopKills_GapIsACaptureGap pins the endpoint's central claim: gapMs is
+// the CAPTURE gap, and maxGapMs is the exact client-side narrowing filter.
+// The valla→bps kill has a hit 4000 ms earlier, so it is one hit at the
+// default 3000 and two at 5000 — and the row that gains it announces the fact
+// as maxGapMs 4000, which is precisely what a client filtering back down to
+// 3000 would drop.
+func TestTopKills_GapIsACaptureGap(t *testing.T) {
+	srv := newTestServer(t, topKillsStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-kills?dmg=raw&players=valla"
+
+	tight := getJSON(t, base, 200)["kills"].([]any)[0].(map[string]any)
+	if tight["hits"].(float64) != 1 || tight["damage"].(float64) != 90 || tight["maxGapMs"].(float64) != 0 {
+		t.Errorf("gapMs=3000 row = %v, want the single killing hit (90 damage, maxGapMs 0)", tight)
+	}
+
+	wide := getJSON(t, base+"&gapMs=5000", 200)
+	if got := wide["gapMs"].(float64); got != 5000 {
+		t.Errorf("gapMs echo = %v, want 5000", got)
+	}
+	w0 := wide["kills"].([]any)[0].(map[string]any)
+	if w0["hits"].(float64) != 2 || w0["damage"].(float64) != 130 || w0["maxGapMs"].(float64) != 4000 {
+		t.Errorf("gapMs=5000 row = %v, want the 2-hit run (130 damage, maxGapMs 4000)", w0)
+	}
+}
+
+// TestTopKills_ContestedWindow: returnDamage is a VALUE over a window the
+// server owns, not a flag. Narrowing contestedMs below the return hit's
+// distance drops it to zero without changing anything else about the row.
+func TestTopKills_ContestedWindow(t *testing.T) {
+	srv := newTestServer(t, topKillsStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-kills?dmg=raw&players=bps&weapons=rl"
+
+	// valla's 25-damage hit lands 2000 ms before the kill at 10000.
+	wide := getJSON(t, base+"&contestedMs=4000", 200)
+	if got := wide["contestedMs"].(float64); got != 4000 {
+		t.Errorf("contestedMs echo = %v, want 4000", got)
+	}
+	if got := wide["kills"].([]any)[0].(map[string]any)["returnDamage"].(float64); got != 25 {
+		t.Errorf("returnDamage at contestedMs=4000 = %v, want 25", got)
+	}
+	narrow := getJSON(t, base+"&contestedMs=1000", 200)
+	if got := narrow["kills"].([]any)[0].(map[string]any)["returnDamage"].(float64); got != 0 {
+		t.Errorf("returnDamage at contestedMs=1000 = %v, want 0 (the return hit is 2000 ms back)", got)
+	}
+}
+
+// TestTopKills_ParamValidation pins every rejected value. The rule throughout
+// is v59's: an out-of-range parameter is REJECTED with a message naming the
+// range and the escape, never silently clamped — a clamped 200 answers a
+// question the caller did not ask.
+func TestTopKills_ParamValidation(t *testing.T) {
+	srv := newTestServer(t, topKillsStore())
+	defer srv.Close()
+	base := srv.URL + "/v1/demos/gameId:42/top-kills"
+
+	for _, tc := range []struct {
+		name, query, wantCode string
+		wantIn                []string
+	}{
+		{"gapMs zero", "?gapMs=0", "invalid_param", []string{"gapMs must be between 1 and 5000", "default 3000"}},
+		{"gapMs negative", "?gapMs=-1", "invalid_param", []string{"gapMs must be between 1 and 5000"}},
+		{"gapMs oversize", "?gapMs=5001", "invalid_param", []string{"gapMs must be between 1 and 5000", "5001"}},
+		{"gapMs unit hint", "?gapMs=1.5", "invalid_param", []string{"integer milliseconds"}},
+		{"contestedMs zero", "?contestedMs=0", "invalid_param", []string{"contestedMs must be between 1 and 30000", "default 4000"}},
+		{"contestedMs oversize", "?contestedMs=30001", "invalid_param", []string{"contestedMs must be between 1 and 30000"}},
+		{"limit zero", "?limit=0", "invalid_param", []string{"negative for uncapped", "omit it for the default 20"}},
+		{"limit oversize", "?limit=1000", "invalid_param", []string{"limit must be <= 200, got 1000"}},
+		{"limit just over the cap", "?limit=201", "invalid_param", []string{"limit must be <= 200, got 201"}},
+		{"minDamage negative", "?minDamage=-1", "invalid_param", []string{"minDamage must be >= 0"}},
+		{"minDamage unit hint", "?minDamage=abc", "invalid_param", []string{"integer damage"}},
+		{"bad weapon", "?weapons=nosuchgun", "invalid_param", []string{`unknown weapon "nosuchgun"`, "valid:", "rl"}},
+		{"dead token: positional", "?weapons=tele", "invalid_param", []string{`unknown weapon "tele"`, "valid:"}},
+		{"dead token: environmental", "?weapons=lava", "invalid_param", []string{`unknown weapon "lava"`}},
+		{"bad dmg", "?dmg=nope", "invalid_param", []string{"raw", "bounded"}},
+		{"dmg both", "?dmg=both", "invalid_param", []string{"raw", "bounded"}},
+		{"unknown param", "?gap=3000", "unknown_param", []string{"gapms"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body, status := getRaw(t, base+tc.query)
+			if status != 400 {
+				t.Fatalf("GET %s: status = %d, want 400 (body=%s)", tc.query, status, string(body))
+			}
+			code, msg := errEnvelope(t, body)
+			if code != tc.wantCode {
+				t.Errorf("code = %q, want %q", code, tc.wantCode)
+			}
+			for _, want := range tc.wantIn {
+				if !strings.Contains(msg, want) {
+					t.Errorf("message = %q, must contain %q", msg, want)
+				}
+			}
+		})
+	}
+
+	// The accepted ends of each bound: the caps are inclusive, a negative
+	// limit is the uncapped spelling, and minDamage=0 is the no-op filter.
+	for _, q := range []string{
+		"?gapMs=1", "?gapMs=5000", "?contestedMs=1", "?contestedMs=30000",
+		"?limit=200", "?limit=-1", "?minDamage=0",
+	} {
+		if body, status := getRaw(t, base+q); status != 200 {
+			t.Errorf("GET %s: status = %d, want 200 (body=%s)", q, status, string(body))
+		}
+	}
+
+	// limit really cuts, and minDamage filters on the ranking figure.
+	if got := len(getJSON(t, base+"?limit=2", 200)["kills"].([]any)); got != 2 {
+		t.Errorf("limit=2 returned %d rows, want 2", got)
+	}
+	if got := len(getJSON(t, base+"?minDamage=100", 200)["kills"].([]any)); got != 1 {
+		t.Errorf("minDamage=100 returned %d rows, want 1 (only the 170-damage burst)", got)
+	}
+}
+
+// TestTopKills_Unavailable exercises the 422 over HTTP for all THREE sources
+// the gate needs. The liveness half is the one a caller would never guess, so
+// the message names it: without the victim's life start the burst walk reaches
+// into the life the killer already ended, and because the list is ranked BY
+// damage those contaminated rows are exactly the ones that float to the top.
+func TestTopKills_Unavailable(t *testing.T) {
+	noFrags := topKillsFixture("standard")
+	noFrags.Frags = nil
+	noDamage := topKillsFixture("standard")
+	noDamage.Damage = nil
+	nilLiveness := topKillsFixture("standard")
+	for i := range nilLiveness.Streams.Players {
+		nilLiveness.Streams.Players[i].Alive = nil
+	}
+
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:50": noFrags,
+		"gameId:51": noDamage,
+		"gameId:52": nilLiveness,
+	}})
+	defer srv.Close()
+
+	for _, tc := range []struct{ id, why string }{
+		{"gameId:50", "no frag log to anchor the bursts"},
+		{"gameId:51", "no damage log to sum"},
+		{"gameId:52", "no measurable liveness to clip the walk with"},
+	} {
+		u := "/v1/demos/" + tc.id + "/top-kills"
+		body, status := getRaw(t, srv.URL+u)
+		if status != 422 {
+			t.Fatalf("GET %s (%s): status = %d, want 422 (body=%s)", u, tc.why, status, string(body))
+		}
+		code, msg := errEnvelope(t, body)
+		if code != "top_kills_unavailable" {
+			t.Errorf("GET %s (%s): code = %q, want top_kills_unavailable", u, tc.why, code)
+		}
+		// One constant covers all three states, so it has to name all three.
+		if msg != topKillsUnavailableMsg {
+			t.Errorf("GET %s (%s): message = %q, want the shared constant %q", u, tc.why, msg, topKillsUnavailableMsg)
+		}
+		for _, half := range []string{"frag log", "damage data", "measurable liveness"} {
+			if !strings.Contains(msg, half) {
+				t.Errorf("message %q must name %q — a caller cannot tell which source is missing otherwise", msg, half)
+			}
+		}
+	}
+}
+
+// TestOverview_TopKills: /overview carries the same rows at the documented
+// defaults, capped at 20, and OMITS the field on a demo that cannot answer
+// the query rather than failing the whole overview — one absent section is
+// not a failed request.
+func TestOverview_TopKills(t *testing.T) {
+	noLiveness := topKillsFixture("standard")
+	for i := range noLiveness.Streams.Players {
+		noLiveness.Streams.Players[i].Alive = nil
+	}
+	// A skipped:* demo has no bounded family, and /overview has no dmg echo to
+	// say which family it served — so the field is bounded or absent, never
+	// silently raw.
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": topKillsFixture("standard"),
+		"gameId:60": noLiveness,
+		"gameId:61": topKillsFixture("skipped:no_ktx"),
+	}})
+	defer srv.Close()
+
+	ov := getJSON(t, srv.URL+"/v1/demos/gameId:42/overview", 200)
+	rows, ok := ov["topKills"].([]any)
+	if !ok {
+		t.Fatalf("overview has no topKills (keys=%v)", keysOf(ov))
+	}
+	if len(rows) == 0 || len(rows) > 20 {
+		t.Fatalf("topKills has %d rows, want 1..20", len(rows))
+	}
+	// The rows are /top-kills' rows verbatim — same field names, same values,
+	// same defaults — so a consumer can move between the two without a
+	// translation table.
+	endpoint := getJSON(t, srv.URL+"/v1/demos/gameId:42/top-kills", 200)["kills"].([]any)
+	if fmt.Sprint(rows) != fmt.Sprint(endpoint) {
+		t.Errorf("overview.topKills differs from /top-kills at its defaults:\n overview: %v\n endpoint: %v", rows, endpoint)
+	}
+
+	for _, id := range []string{"gameId:60", "gameId:61"} {
+		out := getJSON(t, srv.URL+"/v1/demos/"+id+"/overview", 200)
+		if v, present := out["topKills"]; present {
+			t.Errorf("%s: overview kept topKills = %v, want the field omitted", id, v)
+		}
+		if out["players"] == nil {
+			t.Errorf("%s: the rest of the overview must still be served", id)
+		}
+	}
+}
+
+// The overview's 20-row cap is real, not just the fixture running dry: a demo
+// with more than 20 rankable kills serves exactly 20 — the deliberate
+// top-20-not-top-5 sizing the field's comment argues for.
+func TestOverview_TopKillsCapsAtTwenty(t *testing.T) {
+	r := topKillsFixture("standard")
+	// Pile 30 additional one-hit rocket kills onto the fixture, spaced far
+	// apart so no two merge into one burst.
+	for i := 0; i < 30; i++ {
+		at := int32(200000 + i*10000)
+		r.Frags.Frags = append(r.Frags.Frags, result.FragEntry{Time: at, Killer: "alpha", Victim: "bravo", Weapon: "rl"})
+		r.Damage.Events = append(r.Damage.Events, result.DamageEntry{Time: at, Attacker: "alpha", Victim: "bravo", Weapon: "rl", Damage: 50 + i})
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:70": r}})
+	defer srv.Close()
+
+	ov := getJSON(t, srv.URL+"/v1/demos/gameId:70/overview", 200)
+	rows, ok := ov["topKills"].([]any)
+	if !ok {
+		t.Fatalf("overview has no topKills (keys=%v)", keysOf(ov))
+	}
+	if len(rows) != 20 {
+		t.Fatalf("topKills has %d rows, want exactly 20 (the overview cap)", len(rows))
+	}
+}
+
+// keysOf lists a decoded JSON object's keys, for failure messages.
+func keysOf(m map[string]any) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }

@@ -1325,7 +1325,7 @@ var weaponAliases = map[string]string{"water": "drown", "drown": "water"}
 
 // weaponFilterSet is toLowerSet plus that alias expansion, and it is the ONE
 // builder every weapons= filter in this package goes through — view.Frags,
-// view.Damage, view.Backpacks, view.WeaponPickups and the hot-window scoring
+// view.Damage, view.Backpacks, view.WeaponPickups and the top-window scoring
 // matcher (weaponMatcher).
 //
 // Incident (adversarial review, 2026-08-01): the alias tokens were added to the

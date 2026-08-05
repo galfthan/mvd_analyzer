@@ -25,19 +25,28 @@ type Overview struct {
 	// equals Map — the common case where the map has no distinct title
 	// (repo precedent: MessageClean elides when identical to the raw
 	// message).
-	MapTitle         string            `json:"mapTitle,omitempty"`
-	GameDir          string            `json:"gameDir,omitempty"`
-	Mode             string            `json:"mode,omitempty"`
-	Matchtag         string            `json:"matchtag,omitempty"`
-	Duration         int32             `json:"duration"`
-	MatchStart       int32             `json:"matchStart"`
-	MatchEnd         int32             `json:"matchEnd"`
-	Teams            []OverviewTeam    `json:"teams,omitempty"`
-	Players          []OverviewPlayer  `json:"players"`
-	TopStreaks       []OverviewStreak  `json:"topStreaks,omitempty"`
-	TopPowerups      []OverviewPowerup `json:"topPowerups,omitempty"`
-	LocCount         int               `json:"locCount"`
-	HasRegionControl bool              `json:"hasRegionControl"`
+	MapTitle    string            `json:"mapTitle,omitempty"`
+	GameDir     string            `json:"gameDir,omitempty"`
+	Mode        string            `json:"mode,omitempty"`
+	Matchtag    string            `json:"matchtag,omitempty"`
+	Duration    int32             `json:"duration"`
+	MatchStart  int32             `json:"matchStart"`
+	MatchEnd    int32             `json:"matchEnd"`
+	Teams       []OverviewTeam    `json:"teams,omitempty"`
+	Players     []OverviewPlayer  `json:"players"`
+	TopStreaks  []OverviewStreak  `json:"topStreaks,omitempty"`
+	TopPowerups []OverviewPowerup `json:"topPowerups,omitempty"`
+	// TopKills is the match's hardest kill bursts at /top-kills' documented
+	// defaults (gapMs 3000, contestedMs 4000, dmg bounded), rows identical to
+	// that endpoint's. Twenty of them, not the five its neighbours carry: the
+	// per-weapon narrowing a highlight consumer runs off this list (keep the
+	// rows whose maxGapMs is within their weapon's cadence) leaves 16-20 of a
+	// top-20 and only 6-10 of a top-10 — too thin once an armed-victim or
+	// contested filter also bites. Omitted when the demo cannot answer the
+	// query at all.
+	TopKills         []view.TopKill `json:"topKills,omitempty"`
+	LocCount         int            `json:"locCount"`
+	HasRegionControl bool           `json:"hasRegionControl"`
 	// Timing is the demo-open wall-clock anchor + pauses (from
 	// streams.global). It lets a REST/MCP consumer map any match-relative
 	// game time to real time without fetching streams. Omitted when the
@@ -193,6 +202,7 @@ func BuildOverview(r *result.Result) Overview {
 			ov.PlayerUserIDs = r.TimelineAnalysis.PlayerUserIDs
 		}
 	}
+	ov.TopKills = topKills(r)
 
 	// Stable ordering — players by frags desc, teams by frags desc.
 	sort.SliceStable(ov.Players, func(i, j int) bool {
@@ -238,6 +248,34 @@ func topStreaks(in []result.FragStreakEvent, n int) []OverviewStreak {
 	}
 	return out
 }
+
+// topKills is the /top-kills view at its REST defaults, or nil.
+//
+// A demo that cannot answer the query — no frag log, no damage log, or no
+// measurable liveness to clip the bursts with — SILENTLY OMITS the field
+// rather than failing the overview: /overview is the one response that
+// describes whatever the demo happens to carry, and one absent section is not
+// a failed request (`teams`, `timing` and `playerUserIDs` are omitted on the
+// same terms). Dmg is set explicitly because the VIEW default is raw while
+// every REST surface serves bounded, and an overview whose damage family
+// disagreed with /top-kills' would be a quiet trap for a consumer joining the
+// two. There is deliberately no raw fallback for a skipped:* demo either —
+// this response has no dmg / boundedMode echo to say which family the numbers
+// are in, so the field is either bounded or absent, never silently raw.
+func topKills(r *result.Result) []view.TopKill {
+	out, err := view.TopKills(r, view.TopKillsOptions{
+		Limit: overviewTopKills,
+		Dmg:   "bounded",
+	})
+	if err != nil {
+		return nil
+	}
+	return out.Kills
+}
+
+// overviewTopKills is the row count — see Overview.TopKills for why it is not
+// its neighbours' 5.
+const overviewTopKills = 20
 
 func topPowerups(in []result.PowerupEvent, n int) []OverviewPowerup {
 	if len(in) == 0 {

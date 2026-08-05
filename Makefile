@@ -126,7 +126,12 @@ test:
 # has been measured at ~9 minutes — close enough to go test's 600s default
 # that one more corpus demo, or a loaded machine, turns a passing run into a
 # confusing timeout panic rather than a failure. Raised well clear.
-	go test -timeout 1800s ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
+#
+# mvd-web is deliberately absent: its only Go is `//go:build js && wasm`
+# (cmd/wasm), so on a host GOOS the pattern matches zero packages — and since
+# go1.26 an empty match fails the whole `go test` invocation instead of
+# warning. The wasm build is exercised by `make build`.
+	go test -timeout 1800s ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...
 # The special-cases harness walks a per-machine demo directory and skips
 # when it is absent. `go test` caches that skip and does NOT invalidate it
 # when the demos later appear (a directory listing is not a cache input), so
@@ -139,9 +144,13 @@ test:
 clean:
 	rm -rf $(DIST_DIR)
 
-# Format every module.
+# Format every module. gofmt with directory args, not `go fmt` with package
+# patterns: go1.26's `go fmt` refuses cross-module patterns from the workspace
+# root ("directory prefix … does not contain main module"), and gofmt -w is
+# the same rewrite without package loading — it also reaches mvd-web, whose
+# js/wasm-only files no host package pattern matches.
 fmt:
-	go fmt ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
+	gofmt -w mvd-reader mvd-analytics mvd-api mvd-mcp mvd-web
 
 # Regenerate the committed artifact catalog from the DAG node metadata. A
 # drift test (analyzer/manifest_test.go) fails CI if this is stale.

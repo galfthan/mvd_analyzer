@@ -667,8 +667,8 @@ func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControl
 	return out, err
 }
 
-func (p *proxyBackend) GetHotWindows(ctx context.Context, in GetHotWindowsInput) (any, error) {
-	path, err := demoPath(in.DemoID, "/hot-windows")
+func (p *proxyBackend) GetTopWindows(ctx context.Context, in GetTopWindowsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/top-windows")
 	if err != nil {
 		return nil, err
 	}
@@ -695,6 +695,32 @@ func (p *proxyBackend) GetHotWindows(ctx context.Context, in GetHotWindowsInput)
 	// caller who never asked for the bounded family).
 	q.str("dmg", in.Dmg)
 	q.intp("minScore", in.MinScore)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
+func (p *proxyBackend) GetTopKills(ctx context.Context, in GetTopKillsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/top-kills")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	// gapMs / contestedMs / limit go through intp for the reason getTopWindows
+	// documents: mvd-api rejects an explicit 0 on all three, so an UNSET field
+	// must stay out of the query (REST default applies) while an EXPLICIT 0 is
+	// forwarded and earns its 400. minDamage stays on ms/intv terms — its
+	// default IS 0.
+	q.intp("gapMs", in.GapMs)
+	q.intp("contestedMs", in.ContestedMs)
+	q.intp("limit", in.Limit)
+	q.csv("players", in.Players)
+	q.csv("weapons", in.Weapons)
+	q.intv("minDamage", in.MinDamage)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
+	// Empty dmg stays out of the query so the REST default resolution applies
+	// (bounded, falling back to raw on a skipped:* demo rather than 422-ing a
+	// caller who never asked for the bounded family).
+	q.str("dmg", in.Dmg)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 

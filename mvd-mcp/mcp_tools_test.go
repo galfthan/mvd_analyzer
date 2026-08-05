@@ -28,10 +28,12 @@ func TestInputSchemasHaveNoNullUnions(t *testing.T) {
 		"getDamage":        inputSchema[GetDamageInput](),  // players, weapons, dmg
 		"getItems":         inputSchema[GetItemsInput](),   // items, players, kinds
 		"getWeaponPickups": inputSchema[GetWeaponPickupsInput](),
-		// hot-windows also carries *int params (windowMs/limit/min), which
+		// top-windows also carries *int params (windowMs/limit/min), which
 		// reflect to a ["null","integer"] union before stripping.
-		"getHotWindows": inputSchema[GetHotWindowsInput](),
-		"getLives":      inputSchema[GetLivesInput](),
+		"getTopWindows": inputSchema[GetTopWindowsInput](),
+		// top-kills likewise carries *int params (gapMs/contestedMs/limit).
+		"getTopKills": inputSchema[GetTopKillsInput](),
+		"getLives":    inputSchema[GetLivesInput](),
 	} {
 		assertNoNullTypes(t, name, s)
 	}
@@ -119,8 +121,11 @@ func (f *fakeBackend) GetLocTable(_ context.Context, _ GetLocTableInput) (any, e
 func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInput) (any, error) {
 	return map[string]any{"regions": []any{}, "stats": map[string]any{}}, nil
 }
-func (f *fakeBackend) GetHotWindows(_ context.Context, _ GetHotWindowsInput) (any, error) {
+func (f *fakeBackend) GetTopWindows(_ context.Context, _ GetTopWindowsInput) (any, error) {
 	return map[string]any{"metric": "frags", "windowMs": 30000, "windows": []any{}}, nil
+}
+func (f *fakeBackend) GetTopKills(_ context.Context, _ GetTopKillsInput) (any, error) {
+	return map[string]any{"gapMs": 3000, "contestedMs": 4000, "kills": []any{}}, nil
 }
 func (f *fakeBackend) GetLives(_ context.Context, _ GetLivesInput) (any, error) {
 	return map[string]any{"lives": []any{}}, nil
@@ -245,7 +250,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getBackpacks", "getItems", "getMapEntitiesByMap", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
-		"getHotWindows", "getLives",
+		"getTopWindows", "getTopKills", "getLives",
 		"listArtifacts", "getArtifact",
 	}
 	got := map[string]bool{}
@@ -378,13 +383,13 @@ func TestMCP_LoadDemo_BackendError(t *testing.T) {
 	}
 }
 
-// TestMCP_HotWindows_OmittedIntsNotSent pins the omitted-integer contract
+// TestMCP_TopWindows_OmittedIntsNotSent pins the omitted-integer contract
 // end to end (client JSON -> tool input struct -> proxy query): an argument
 // the caller never mentioned must NOT reach mvd-api as 0, because 0 is a
 // rejected value on windowMs/limit and a meaningful filter on min. An
 // EXPLICIT 0 must reach it, so the caller earns the documented 400 rather
 // than silently getting the default.
-func TestMCP_HotWindows_OmittedIntsNotSent(t *testing.T) {
+func TestMCP_TopWindows_OmittedIntsNotSent(t *testing.T) {
 	var seen url.Values
 	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		seen = r.URL.Query()
@@ -398,7 +403,7 @@ func TestMCP_HotWindows_OmittedIntsNotSent(t *testing.T) {
 
 	call := func(args map[string]any) {
 		t.Helper()
-		res, err := sess.CallTool(ctx, &mcp.CallToolParams{Name: "getHotWindows", Arguments: args})
+		res, err := sess.CallTool(ctx, &mcp.CallToolParams{Name: "getTopWindows", Arguments: args})
 		if err != nil {
 			t.Fatalf("CallTool: %v", err)
 		}
@@ -442,7 +447,72 @@ func TestMCP_HotWindows_OmittedIntsNotSent(t *testing.T) {
 		"dmg": "raw", "minScore": "2",
 	} {
 		if got := seen.Get(k); got != want {
-			t.Errorf("hot-windows %s = %q; want %q", k, got, want)
+			t.Errorf("top-windows %s = %q; want %q", k, got, want)
+		}
+	}
+}
+
+// TestMCP_TopKills_OmittedIntsNotSent is getTopKills' clone of the
+// top-windows omitted-integer contract: gapMs/contestedMs/limit ride *int
+// through intp (an unset field stays out of the query so the REST default
+// applies; an explicit 0 forwards and earns its 400), minDamage is a plain
+// intv (its default IS 0), and startTime/endTime encode as from/to.
+func TestMCP_TopKills_OmittedIntsNotSent(t *testing.T) {
+	var seen url.Values
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.URL.Query()
+		w.Write([]byte(`{"kills":[]}`))
+	}))
+	defer api.Close()
+	sess := testMCPSession(t, newProxyBackend(api.URL, "", 5*time.Second))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	call := func(args map[string]any) {
+		t.Helper()
+		res, err := sess.CallTool(ctx, &mcp.CallToolParams{Name: "getTopKills", Arguments: args})
+		if err != nil {
+			t.Fatalf("CallTool: %v", err)
+		}
+		if res.IsError {
+			t.Fatalf("isError=true; content=%+v", res.Content)
+		}
+	}
+
+	// Nothing but demoId: no integer param may appear at all.
+	call(map[string]any{"demoId": "gameId:42"})
+	for _, k := range []string{"gapMs", "contestedMs", "limit", "minDamage", "from", "to"} {
+		if seen.Has(k) {
+			t.Errorf("omitted %s reached the API as %q; it must stay out of the query", k, seen.Get(k))
+		}
+	}
+
+	// Explicit zeros on the pointer trio forward verbatim and earn their 400s
+	// server-side; minDamage:0 is indistinguishable from omitted (its default
+	// IS 0) and stays out.
+	call(map[string]any{"demoId": "gameId:42", "gapMs": 0, "contestedMs": 0, "limit": 0, "minDamage": 0})
+	for _, k := range []string{"gapMs", "contestedMs", "limit"} {
+		if seen.Get(k) != "0" {
+			t.Errorf("explicit %s:0 forwarded as %q; want \"0\"", k, seen.Get(k))
+		}
+	}
+	if seen.Has("minDamage") {
+		t.Errorf("minDamage:0 reached the API as %q; intv must drop it", seen.Get("minDamage"))
+	}
+
+	// A populated call encodes every param under its REST name.
+	call(map[string]any{
+		"demoId": "gameId:42", "gapMs": 2300, "contestedMs": 5000, "limit": 50,
+		"players": []any{"bps"}, "weapons": []any{"rl"}, "minDamage": 150,
+		"startTime": 60000, "endTime": 120000, "dmg": "raw",
+	})
+	for k, want := range map[string]string{
+		"gapMs": "2300", "contestedMs": "5000", "limit": "50", "players": "bps",
+		"weapons": "rl", "minDamage": "150", "from": "60000", "to": "120000", "dmg": "raw",
+	} {
+		if got := seen.Get(k); got != want {
+			t.Errorf("top-kills %s = %q; want %q", k, got, want)
 		}
 	}
 }

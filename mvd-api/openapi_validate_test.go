@@ -302,7 +302,10 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "load", method: "POST", url: "/v1/demos/gameId:42", path: "/v1/demos/{id}", status: 200},
 		{name: "upload", method: "POST", url: "/v1/demos", path: "/v1/demos", body: gzipDemoBody(t), status: 200},
 
-		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200},
+		// mustContain pins the v67 topKills section: it is omitempty, so an
+		// overview that stopped emitting it would still validate.
+		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{`"topKills":[{"rank":1,`}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are
@@ -378,9 +381,16 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
-		{name: "hot-windows", url: "/v1/demos/gameId:42/hot-windows", path: "/v1/demos/{id}/hot-windows", status: 200},
-		{name: "hot-windows-net", url: "/v1/demos/gameId:42/hot-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/hot-windows", status: 200},
-		{name: "hot-windows-damage", url: "/v1/demos/gameId:42/hot-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/hot-windows", status: 200},
+		{name: "top-windows", url: "/v1/demos/gameId:42/top-windows", path: "/v1/demos/{id}/top-windows", status: 200},
+		{name: "top-windows-net", url: "/v1/demos/gameId:42/top-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/top-windows", status: 200},
+		{name: "top-windows-damage", url: "/v1/demos/gameId:42/top-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/top-windows", status: 200},
+		// top-kills: mustContain names the two fields that make the response
+		// usable and that an empty `kills` array would validate without —
+		// maxGapMs (the exact client-side narrowing filter) and returnDamage.
+		{name: "top-kills", url: "/v1/demos/gameId:42/top-kills", path: "/v1/demos/{id}/top-kills", status: 200,
+			mustContain: []string{`"maxGapMs":`, `"returnDamage":`}},
+		{name: "top-kills-filtered", url: "/v1/demos/gameId:42/top-kills?weapons=rl&gapMs=2000&contestedMs=2000&minDamage=50&limit=5&dmg=bounded",
+			path: "/v1/demos/{id}/top-kills", status: 200},
 		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},

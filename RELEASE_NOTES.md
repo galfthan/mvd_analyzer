@@ -5,6 +5,121 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (top-kills) — kill bursts, and the `top-` endpoint family, schema v67
+
+**The highlight-reel view, plus one deliberate rename taken while it was
+cheap.** The stored `Result` gains **no field** in v67: the bump is for the
+observable API surface alone (it is the ETag cache key, so it ticks on every
+observable change).
+
+- **`GET /v1/demos/{id}/top-kills` — the match's hardest kill BURSTS**, ranked
+  by burst damage. For each enemy kill the burst is the contiguous run of
+  **killing-weapon** hits the killer landed on that victim leading up to it,
+  clipped below by the victim's current life start. Each row is
+  `{rank, killer, victim, team, time, weapon, damage, hits, spanMs, maxGapMs,
+  victimWep, returnDamage}`. Neighbours stay what they were: `/frags` is the
+  exhaustive kill log with no damage figure, `/damage` the aggregates plus the
+  per-hit log, `/top-windows` the best fixed-length stretches.
+- **Same-weapon by request, and that is the endpoint's meaning.** An earlier
+  revision grouped the burst across weapons; the end user rejected it — a
+  highlight row reading `weapon: sg, damage: 250` where 234 of it was rocket
+  damage is not a highlight they can present. So the burst IS the killing
+  weapon's run, and on **~8% of measured kills that understates** what
+  produced the kill (a rocket softens, a shotgun finishes). Documented
+  semantics rather than a defect: "how hard was this burst with this weapon"
+  is the question, and "what did the kill take across weapons" stays
+  derivable from `/damage`.
+- **`gapMs` is a CAPTURE gap; you narrow with `maxGapMs`.** Truncation is
+  unrecoverable downstream while over-merge is filterable, so the capture
+  default is a generous 3000 ms. Measured same-weapon cadence inside real
+  bursts is p95 2315 ms (rl) and 1876 ms (sg), and a baked 1200 ms gap
+  truncated 11% of rl and 23% of sg bursts — worst case a 291-damage
+  triple-rocket kill reported as **2**, the tail splash of the killing rocket.
+  Keeping exactly the rows with `maxGapMs <= g` gives every kept row its
+  gap-`g` value **verbatim** (dropping hits from a run only widens gaps);
+  a run with `maxGapMs > g` is dropped rather than truncated, so the
+  narrowed list is the gap-`g` ranking restricted to intact runs —
+  `?gapMs=g` on the endpoint is the exact walk when the truncated
+  remainders matter. `spanMs` is the display figure and cannot express even
+  the kept-row rule — 21 of the 24 over-merged rl bursts pass a
+  `span <= 2×gap` test. The per-weapon sweet spots the end user asked for:
+  RL ≈ 2300 sits on its p95 cadence; LG's 1200 is their operational gap,
+  comfortably above LG's p95 of 714.
+- **Two semantics that are decisions, not accidents.** Telefrags / stomps /
+  squishes carry no damage event, so they produce **no row** (13 of 1,879
+  measured kills) — absent from this ranking only, still present in `/frags`
+  and `/damage`. And **kills by an already-dead killer stay in** (38 of 1,866,
+  overwhelmingly posthumous rockets and mutual frags): the walk consults the
+  **victim's** liveness and never the killer's, which is exactly the
+  spawnluck / went-down-swinging highlight the endpoint exists for.
+- **422 `top_kills_unavailable` needs three sources** — the frag log, the
+  damage log, and *measurable liveness*. The third is load-bearing: at the
+  3000 ms capture gap the walk crosses the victim's previous death on 4% of
+  measured kills, and without the life clip those bursts absorb the victim's
+  previous life (worst measured: 355 reported where the current life took
+  62). Since the list is ranked **by** damage, the contaminated rows are
+  precisely the ones that reach the top, so an unmeasurable-liveness demo gets
+  the 422 rather than a plausible-looking list.
+- **`overview.topKills` — the same rows on the one call**, at the documented
+  defaults (`gapMs` 3000, `contestedMs` 4000, `dmg` bounded). **Twenty** of
+  them, not the five its `topStreaks` / `topPowerups` neighbours carry: the
+  point of the field is that a consumer runs armed / per-weapon / contested
+  filtering off `/overview` alone, and measured survival of the per-weapon
+  narrowing is 16-20 of a top-20 but only 6-10 of a top-10. Omitted — never
+  silently served raw — when the demo cannot answer the query, since
+  `/overview` has no `dmg` echo to name a family with.
+- **`/top-windows` ties now break on a fixed complementary metric.** Ties are
+  the common case — on `metric=frags` most of a page holds the same small
+  integer — and they used to break purely positionally (earlier start, then
+  player name), which made quality among equals invisible. Equal-scoring rows
+  are now ranked by the other half of the same moment: `damageGiven` under
+  `frags`/`netFrags`/`shots`/`hits`, `frags` under `damageGiven`/`netDamage`,
+  `damageTaken` under `deaths`, `deaths` under `damageTaken` — fixed per
+  metric, no new parameter, positional keys unchanged below it. The secondary
+  is summed **unscoped and in the response's own damage family**, so it is
+  exactly the same-named field of the row's stats block (`weapons=` scopes the
+  score, never the tie-break) and a demo with no stream for it simply ties at
+  0. The same key also picks among a player's overlapping equal-scoring
+  candidates, above the "start on a scoring event" preference, so a window may
+  now be the stretch that ENDS on the scoring event rather than the one that
+  starts on it: on 211805 at `windowMs=10000` the three-frag rows reorder by
+  damage (393 / 295 / 287 / 249 where they were 150 / 205 / 287 / 169) and
+  gLAd's best three-frag window shifts 3.7 s earlier for 99 more damage.
+- **MCP gains `getTopKills`**, lockstep as always.
+- **Web app: Key Moments gains three ranked lists** — the top 10 damage
+  windows (the best 10 s stretches by bounded enemy damage, ties breaking
+  on frags), the top 10 RL and top 5 LG kill bursts at the per-weapon gaps
+  2300 / 1200 ms; the powerup-run filter now
+  defaults to min 3 frags (a quad cycles every 60 s, so 0-2-frag runs are
+  routine noise — the input still goes down to 0). They are view queries over the analysed
+  demo (new WASM exports `getTopWindows` / `getTopKills`), so each table
+  fills in independently and shows its own empty state when the demo cannot
+  answer it.
+
+**And `/hot-windows` is now `/top-windows` — a rename, not an alias.** The
+API's ranked-highlight scans get an explicit `top-` prefix, while plain nouns
+stay reserved for exhaustive logs and partitions, so the split carries
+information instead of being an accident of history:
+
+| kind | rule | endpoints |
+|---|---|---|
+| log / partition | plain noun, exhaustive rows | `/frags`, `/damage`, `/lives`, … |
+| ranked highlight scan | `top-` prefix; has `limit`, a min-filter, a sort key | `/top-windows`, `/top-kills` |
+
+Concretely: **`/hot-windows` → `/top-windows`**, the 422 code
+**`hot_windows_unavailable` → `top_windows_unavailable`**, and the MCP tool
+**`getHotWindows` → `getTopWindows`**. It also removes a real ambiguity that
+the new endpoint would otherwise have created — `/kills` next to `/frags`
+would have been two endpoints that both sound like the kill log, one a log and
+one a ranked scan — and `overview.topX` now pairs with `/top-x` by rule.
+
+This **is** a break of the stability policy in [API.md
+§2.7](mvd-api/API.md#27-api-versioning-and-stability), and it is being taken
+deliberately, **while the consumer count is one**, with **no alias route**: an
+alias on a one-user API becomes permanent undocumented surface. The one
+consumer was told directly. Nothing else moved — no `Result` field, no
+response shape, no golden churn beyond the `schemaVersion` line.
+
 ## unreleased (player-identity) — userids follow the player, not the slot, schema v66
 
 **A correctness fix: the userids we publish were somebody else's.** No field

@@ -29,7 +29,8 @@ type MCPBackend interface {
 	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
 	GetLocTable(ctx context.Context, in GetLocTableInput) (any, error)
 	GetRegionControl(ctx context.Context, in GetRegionControlInput) (any, error)
-	GetHotWindows(ctx context.Context, in GetHotWindowsInput) (any, error)
+	GetTopWindows(ctx context.Context, in GetTopWindowsInput) (any, error)
+	GetTopKills(ctx context.Context, in GetTopKillsInput) (any, error)
 	GetLives(ctx context.Context, in GetLivesInput) (any, error)
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
@@ -129,7 +130,7 @@ type GetRegionControlInput struct {
 	Regions   string `json:"regions,omitempty" jsonschema:"polygon detail: 'full' (each region's ~6KB polygon points included — needed only for drawing the map overlay), 'summary' (points stripped; name/locs/centroids kept), 'none' (regions list omitted). MCP default 'summary' for token economy (REST differs: full); pass 'full' when you need the points."`
 }
 
-// GetHotWindowsInput mirrors /v1/demos/{id}/hot-windows query params.
+// GetTopWindowsInput mirrors /v1/demos/{id}/top-windows query params.
 //
 // WindowMs, Limit and MinScore are POINTERS while PerPlayer is a plain int,
 // and the split is deliberate: an omitted MCP integer argument arrives as 0,
@@ -143,7 +144,7 @@ type GetRegionControlInput struct {
 // so from this shim a perPlayer:0 argument — deliberate or forgotten — leaves
 // the query and lands on the REST default, which IS uncapped. There is nothing
 // for a pointer to disambiguate and no 400 to earn.
-type GetHotWindowsInput struct {
+type GetTopWindowsInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	Metric    string   `json:"metric,omitempty" jsonschema:"what the windows are ranked by (case-insensitive): frags (default), deaths (finds a player's WORST stretch), netFrags (kills minus deaths — usually what 'hot' means), damageGiven, damageTaken, netDamage, shots, hits. Ratios (accuracy, efficiency) are deliberately absent: they do not sum, so 'the best window' is undefined for them — read them off the per-window stats block instead"`
 	WindowMs  *int     `json:"windowMs,omitempty" jsonschema:"window length in integer MILLISECONDS; omit for the default 30000. The main knob — 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase dominance; sweep it rather than expecting one right value. Must be >= 1 and no longer than the match (an out-of-range value is rejected 400 invalid_param naming the bound; omit it for the default)"`
@@ -155,6 +156,28 @@ type GetHotWindowsInput struct {
 	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window-search upper bound in match-relative milliseconds (integer). It bounds where a window may START, not what it covers: the best window anchored at or before endTime still runs windowMs past it, so endTime:1000 returns the best window of the first 1000+windowMs ms, not of the first second"`
 	Dmg       string   `json:"dmg,omitempty" jsonschema:"damage family for the damage metrics and the stats block: raw | bounded (default bounded, the KTX-scoreboard value); 'both' is rejected here for every metric"`
 	MinScore  *int     `json:"minScore,omitempty" jsonschema:"drop windows scoring below this many points of the chosen metric; omit for the default 1. Matters most for the net metrics, which can go negative. An explicit 0 IS forwarded (it keeps zero-scoring windows)"`
+}
+
+// GetTopKillsInput mirrors /v1/demos/{id}/top-kills query params.
+//
+// GapMs, ContestedMs and Limit are POINTERS for the reason GetTopWindowsInput
+// documents: an omitted MCP integer argument arrives as 0, and mvd-api rejects
+// an explicit 0 on all three. `intp` keeps an UNSET field out of the query so
+// the REST default applies, and forwards an EXPLICIT 0 so it earns its
+// documented 400 instead of being silently dropped. MinDamage stays a plain
+// int — its REST default IS 0 ("no filter"), so an omitted argument asks for
+// exactly the default and there is nothing to disambiguate.
+type GetTopKillsInput struct {
+	DemoID      string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	GapMs       *int     `json:"gapMs,omitempty" jsonschema:"CAPTURE gap of the burst walk in integer MILLISECONDS: a hit joins the burst while it lands within gapMs of the burst's earliest hit so far. Omit for the default 3000, max 5000, an explicit 0 or a negative is rejected 400 invalid_param. Deliberately generous — do NOT lower it to get tighter bursts: filter the response by maxGapMs instead, which reproduces the tighter walk exactly and cannot lose damage the way a low capture gap does"`
+	ContestedMs *int     `json:"contestedMs,omitempty" jsonschema:"window the returnDamage figure sums the victim's damage back over, in integer MILLISECONDS before the kill; omit for the default 4000, max 30000. It sets the WINDOW only — the threshold that makes a kill 'contested' is yours, since returnDamage is a value and not a flag"`
+	Limit       *int     `json:"limit,omitempty" jsonschema:"rows returned; omit for the default 20, max 200, negative = uncapped. An explicit 0 is rejected 400 invalid_param — omit it for the default"`
+	Players     []string `json:"players,omitempty" jsonschema:"restrict to these KILLERS (the row's killer field). There is deliberately no victim-side filter — it would be a different question"`
+	Weapons     []string `json:"weapons,omitempty" jsonschema:"restrict the KILLING weapon, which is also the burst's own weapon. Burst-capable tokens only: rl, lg, gl, ssg, sng, ng, sg, axe, unknown — positional (tele/stomp) and environmental causes can never anchor a burst and are rejected 400 invalid_param naming the valid set"`
+	MinDamage   int      `json:"minDamage,omitempty" jsonschema:"drop bursts below this many points of burst damage (default 0 = keep all); a negative value is rejected"`
+	StartTime   int32    `json:"startTime,omitempty" jsonschema:"earliest KILL time in match-relative milliseconds (integer). It bounds the kill, not the burst: a kept row's burst may reach back before it"`
+	EndTime     int32    `json:"endTime,omitempty" jsonschema:"latest KILL time in match-relative milliseconds (integer)"`
+	Dmg         string   `json:"dmg,omitempty" jsonschema:"damage family for the burst damage AND returnDamage: raw | bounded (default bounded, the KTX-scoreboard value); 'both' is rejected here"`
 }
 
 // GetLivesInput mirrors /v1/demos/{id}/lives query params. Every INTEGER here

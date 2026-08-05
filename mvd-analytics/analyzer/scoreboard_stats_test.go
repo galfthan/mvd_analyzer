@@ -56,7 +56,7 @@ func TestScoreboardStatsPost_CopiesCorrectedKillsDeaths(t *testing.T) {
 // artifact, which is the whole point of storing it: view (which cannot import
 // this package) and player_stats read one answer instead of each re-deriving
 // the rule — and the second reader is how a demo judged unmeasurable by
-// /player-stats came to report `measured.frags: true` on /hot-windows.
+// /player-stats came to report `measured.frags: true` on /top-windows.
 // The inputs are shaped the way the PIPELINE presents them, which is the
 // whole point of this test: the match analyser emits scoreboard rows with
 // Name/Team/Frags and NOTHING else (match.go:518-521), so Deaths is 0 on every
@@ -219,7 +219,7 @@ func TestPipelineUnmatchedObituariesAreUnmeasured(t *testing.T) {
 	if res.Frags.KillsMeasured {
 		t.Error("killsMeasured is true on a pipeline-produced demo whose obituaries " +
 			"all went unmatched — every consumer of the stored verdict (/player-stats, " +
-			"/frags, /hot-windows, /lives) now publishes 0 kills as a measurement")
+			"/frags, /top-windows, /lives) now publishes 0 kills as a measurement")
 	}
 	// The downstream consequence the verdict exists to prevent: a row reading
 	// 0 kills beside a measured death count.

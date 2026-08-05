@@ -8,12 +8,12 @@ import (
 )
 
 // Lives: one row per spawn-to-death run — the natural unit of QuakeWorld
-// analysis, and the variable-length segmentation hot windows deliberately does
+// analysis, and the variable-length segmentation top windows deliberately does
 // not try to discover.
 //
 // It is cheap because both halves already exist: PlayerStream.Alive is the
 // segmentation (schema v64) and statsBuilder is the statistics, shared with
-// HotWindows. Adding a segmentation should mean writing the segmentation.
+// TopWindows. Adding a segmentation should mean writing the segmentation.
 //
 // Relationship to timelineAnalysis.fragStreaks: that is the top-10 projection
 // of this, ranked by frags and carrying only a count and an `ewep`. It is left
@@ -106,7 +106,7 @@ type LivesView struct {
 
 	// Dmg and BoundedMode name the damage family every row's damageGiven /
 	// damageTaken / damageByWeapon was computed in, echoed on every response
-	// exactly as /damage echoes them — and as /hot-windows now does, so the two
+	// exactly as /damage echoes them — and as /top-windows now does, so the two
 	// interval endpoints answer the same question the same way. Absent only on
 	// a demo with no damage stream, where measured.damage is false anyway.
 	Dmg         string `json:"dmg,omitempty"`
@@ -230,7 +230,7 @@ type LifeItem struct {
 // Returns ErrUnavailable when the demo carries no streams or no measurable
 // liveness (LivesAvailable is the same gate), and ErrBoundedUnavailable for an
 // explicit dmg=bounded on a demo with no bounded family — the same contract as
-// HotWindows.
+// TopWindows.
 func Lives(r *result.Result, opts LivesOptions) (*LivesView, error) {
 	if err := LivesAvailable(r); err != nil {
 		return nil, err
@@ -268,7 +268,7 @@ func Lives(r *result.Result, opts LivesOptions) (*LivesView, error) {
 	}
 	// An INVERTED window selects nothing, matching /frags and /damage — whose
 	// per-event `time >= from && time <= to` is empty for from > to — and
-	// matching HotWindows, where lo > hi yields no candidate start. The
+	// matching TopWindows, where lo > hi yields no candidate start. The
 	// overlap test below would instead have kept every life that straddles
 	// both bounds, so the two interval endpoints disagreed on the same query.
 	// Rejecting the range is the HTTP layer's call to make, not this one's.

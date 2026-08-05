@@ -48,7 +48,7 @@ grow on its own timeline. Today's concrete shape:
   match summaries, frag streaks, timeline buckets, or loc-graphs. New
   analytics land here. The `view/` sub-package turns the canonical `Streams`
   into bucketed timelines, event lists, point-in-time state, loc trails, and
-  interval segmentations (best-scoring hot windows, per-life rollups).
+  interval segmentations (best-scoring top windows, per-life rollups).
   Analytics never peeks at MVD bytes; it consumes events.
 - **Layer 3 consumers** read `Result` or call `view/` and produce something
   user-facing. When hosted, the service presents **four surfaces** — REST,
@@ -197,7 +197,8 @@ servable artifact by name:
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
 | `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
 | `getRegionControl(demoId, windowMs, regions, …)` | `mvd-api` `/region-control` |
-| `getHotWindows(demoId, metric, windowMs, limit, perPlayer, …)` | `mvd-api` `/hot-windows` (each player's best fixed-length stretches, ranked) |
+| `getTopWindows(demoId, metric, windowMs, limit, perPlayer, …)` | `mvd-api` `/top-windows` (each player's best fixed-length stretches, ranked) |
+| `getTopKills(demoId, gapMs, weapons, minDamage, …)` | `mvd-api` `/top-kills` (the hardest kill bursts, ranked) |
 | `getLives(demoId, players, minMs, …)` | `mvd-api` `/lives` (one row per spawn-to-death life) |
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
@@ -214,7 +215,8 @@ servable artifact by name:
 - **[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md)**
   — view types (`BucketsView` / `ColumnarBuckets`, `EventsView`,
   `StreamSliceView`, `StateAtView`, `LocTrailsView`,
-  `RegionControlResult`, `HotWindowsView`, `LivesView`), the
+  `RegionControlResult`, `TopWindowsView`, `LivesView`,
+  `TopKillsView`), the
   field-code vocabulary, the reducer registry, and the underlying
   `Result` / `Streams` types. View outputs are the same whether
   reached via WASM, the CLI, or MCP. The view layer is the
@@ -482,7 +484,7 @@ keeps the schema consistent and sensible to extend. As of schema v57
 inputs or outputs, so REST/MCP `from`/`to`/`time` params and every
 response time field are int32 ms alike. Schema v65 adds two **interval
 segmentations** to that same view layer:
-`hot-windows` (each player's best fixed-length stretches, ranked by a
+`top-windows` (each player's best fixed-length stretches, ranked by a
 caller-chosen summable metric) and `lives` (one row per spawn-to-death
 run, cut at the v64 `streams.players[].alive` boundaries). They share one
 per-interval stats block and one envelope `measured` marker — every
@@ -491,7 +493,13 @@ read from that marker and never from a field's absence — and a player's
 lives partition the match, so unfiltered per-life sums reconcile exactly
 with `frags.frags[]` on the frag side and with `/damage`'s non-summary
 aggregate on the damage side — not necessarily with the `byPlayer`
-scoreboards, which count deaths no log row recorded. `Result` itself gains exactly one field in v65,
+scoreboards, which count deaths no log row recorded. Schema v67 adds the
+third cut of the same primitive, `top-kills`: the match's hardest kill
+**bursts**, each the run of killing-weapon hits that produced one kill,
+ranked by burst damage. It is the one that is not an interval reduction and
+so carries no stats block — its `gapMs` is a CAPTURE gap narrowed
+client-side by each row's `maxGapMs`, positional kills produce no row, and
+kills by an already-dead killer stay in. `Result` itself gains exactly one field in v65,
 `frags.killsMeasured`: the demo-global verdict on whether kill
 attribution was observable at all, which the `measured` marker's `frags`
 flag republishes rather than re-deriving. Schema v9 adds visibility-aware loc

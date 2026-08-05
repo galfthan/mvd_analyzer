@@ -213,7 +213,7 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 // killsMeasurable below, evaluated once by the match-final node
 // (scoreboardStatsPost) and read from the stored field everywhere else —
 // including out in view.MeasuredSources.Frags, which cannot import this
-// package. Two implementations of this rule is how /hot-windows and /lives
+// package. Two implementations of this rule is how /top-windows and /lives
 // came to claim measured kill attribution on a demo /player-stats had already
 // judged unmeasurable.
 //

@@ -289,17 +289,17 @@ func TestOpenAPIEventTypesCurrent(t *testing.T) {
 	}
 }
 
-// TestOpenAPIHotWindowMetricsCurrent pins the /hot-windows metric= enum to
-// view.KnownHotWindowMetrics. The spec's marker comment CLAIMED this pin from
+// TestOpenAPITopWindowMetricsCurrent pins the /top-windows metric= enum to
+// view.KnownTopWindowMetrics. The spec's marker comment CLAIMED this pin from
 // the day the endpoint landed and no test implemented it, so a new metric
 // would have been accepted by the handler (params.go builds its canon table
 // from the same slice) and invisible to every schema-driven client.
-func TestOpenAPIHotWindowMetricsCurrent(t *testing.T) {
-	want := append([]string{}, view.KnownHotWindowMetrics...)
-	got := markerBlock(t, "hot-window-metric-enum")
-	diffSets(t, "hot-window metric enum", got, want)
+func TestOpenAPITopWindowMetricsCurrent(t *testing.T) {
+	want := append([]string{}, view.KnownTopWindowMetrics...)
+	got := markerBlock(t, "top-window-metric-enum")
+	diffSets(t, "top-window metric enum", got, want)
 	if t.Failed() {
-		t.Logf("expected hot-window-metric-enum block (view.KnownHotWindowMetrics order):\n          - %s",
+		t.Logf("expected top-window-metric-enum block (view.KnownTopWindowMetrics order):\n          - %s",
 			strings.Join(want, "\n          - "))
 	}
 }

@@ -96,7 +96,8 @@ belongs in the frontend.
   but red elsewhere. Use `getTeamOrder()` / `timelineState.teams` to map
   a team name to its color index. The CSS mirror is `--team-a..--team-d`.
 - **Always run tests.** `make test` (which runs
-  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...`)
+  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...` —
+  mvd-web is wasm-only and is exercised by `make build` instead)
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it. `make test` also
   gates on `gofmt -l` before running anything; `make fmt` fixes it.

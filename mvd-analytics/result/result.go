@@ -862,14 +862,14 @@ package result
 //     across the golden corpus is bimodal — ~13-16 ms on servers at full tick
 //     and ~34-39 ms on servers at the default.
 //
-// v65 — interval segmentations: hot windows and lives. ADDITIVE. Both are
-// VIEWS over data that was already there (view/hotwindows.go, view/lives.go,
+// v65 — interval segmentations: top windows and lives. ADDITIVE. Both are
+// VIEWS over data that was already there (view/topwindows.go, view/lives.go,
 // sharing the stats builder in view/interval_stats.go); the stored Result
 // gains exactly one field, FragResult.KillsMeasured, so that the demo-global
 // kill-attribution verdict is decided once by the analyzer instead of being
 // re-derived by every consumer that needs it.
 //
-//   - /hot-windows serves each player's best fixed-length stretches, ranked
+//   - /top-windows serves each player's best fixed-length stretches, ranked
 //     by a caller-chosen SUMMABLE metric (frags, deaths, netFrags,
 //     damageGiven, damageTaken, netDamage, shots, hits). Ratios are absent
 //     because "the best window" is undefined for a quantity that does not
@@ -904,7 +904,7 @@ package result
 //   - Positional-kill (telefrag / stomp) value FOLDS into the stats block's
 //     damageGiven / damageTaken exactly as /damage reports it, so lives
 //     reconcile against that endpoint, AND it scores for the damage metrics,
-//     so that absent a weapons= filter a hot window's score equals the
+//     so that absent a weapons= filter a top window's score equals the
 //     same-named field of its own stats block. (The values are the analyzer's
 //     reconstruction — 0..298, median 100 across the cached corpus — not the
 //     9999 wire sentinel an earlier round mistook them for.) It stays out of
@@ -959,8 +959,69 @@ package result
 //     and omitting occupancies the wire never gave a userid (KTX's ghost
 //     scoreboard row is not a connection). See PlayerSession.
 //
+// v67 — kill bursts (/top-kills) and the `top-` endpoint family. THE STORED
+// RESULT GAINS NO FIELD: nothing in this package changes shape, name or
+// meaning, and the bump is for the observable API surface alone (it is the
+// ETag / X-Schema-Version cache key, so it ticks on every observable change).
+//
+//   - /top-kills serves the match's hardest kill BURSTS, ranked by burst
+//     damage — a third segmentation over the same primitive (view/topkills.go),
+//     but the only one that is not an interval reduction, so it fills no
+//     IntervalStats: a burst row is a small backward walk over the damage log.
+//     For each enemy kill the burst is the contiguous run of KILLING-WEAPON
+//     hits the killer landed on that victim, clipped below by the victim's
+//     current life start. Same-weapon by design: on ~8% of measured kills that
+//     UNDERSTATES what produced the kill (a rocket softens, a shotgun
+//     finishes), which is documented endpoint semantics — "how hard was this
+//     burst with this weapon" — with /damage still answering the cross-weapon
+//     question.
+//   - gapMs (default 3000, max 5000) is a CAPTURE gap, not a display one:
+//     truncation is unrecoverable downstream while over-merge is filterable, so
+//     the capture is generous and each row carries maxGapMs, the EXACT
+//     client-side narrowing filter (a kept row carries its gap-g value
+//     verbatim; an over-merged row is dropped, not truncated — gapMs=g on
+//     the endpoint is the exact walk). spanMs is the display figure and
+//     cannot express that. Positional kills (telefrag / stomp / squish) carry
+//     no damage event and so produce NO ROW — absent from this ranking only,
+//     still present in /frags and /damage. Kills by an already-dead killer
+//     stay IN: the walk consults the victim's liveness and never the killer's.
+//   - The response echoes the resolved gapMs / contestedMs / limit, the
+//     measured block, and dmg + boundedMode, exactly as the v65 segmentations
+//     do. A demo with no measurable liveness is a 422 top_kills_unavailable
+//     rather than a plausible-looking list: at the 3000 ms capture gap the walk
+//     crosses the victim's previous death on 4% of measured kills, and the
+//     contaminated rows are precisely the ones that rank highest.
+//   - ADDITIVE on /overview: a topKills field carrying the same rows at the
+//     documented defaults, 20 of them rather than its neighbours' 5, because
+//     the per-weapon narrowing a consumer runs off that one call leaves 16-20
+//     of a top-20 and only 6-10 of a top-10. Omitted when the demo cannot
+//     answer the query. And an mvd-mcp getTopKills tool, lockstep as always.
+//   - ORDERING CHANGE on /top-windows: rows tied on `score` — the common case,
+//     since most of a metric=frags page holds the same small integer — now
+//     rank by a FIXED complementary metric (damageGiven under
+//     frags/netFrags/shots/hits, frags under damageGiven/netDamage,
+//     damageTaken under deaths, deaths under damageTaken) before the
+//     positional keys, and the same key picks among a player's overlapping
+//     equal-scoring candidates, so a window may end rather than start on the
+//     scoring event. No new parameter and no new field: the secondary is
+//     summed unscoped in the response's own damage family, which makes it
+//     exactly the same-named field of the row's stats block.
+//   - RENAME, a deliberate compatibility break: /hot-windows becomes
+//     /top-windows, its 422 code hot_windows_unavailable becomes
+//     top_windows_unavailable, and the MCP tool getHotWindows becomes
+//     getTopWindows. Ranked-highlight scans now carry an explicit `top-`
+//     prefix (they have a limit, a min-filter and a sort key) while plain
+//     nouns stay reserved for exhaustive logs and partitions — /frags,
+//     /damage, /lives — so the split carries information instead of being an
+//     accident of history, and overview.topX pairs with /top-x. Taken while
+//     the consumer count was ONE, with no alias route: an alias on a one-user
+//     API becomes permanent undocumented surface. No response shape changed
+//     beyond the paths themselves. NOTE the v65 text above is written in the
+//     new names, so it describes the endpoint as it is now rather than as it
+//     shipped.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 66
+const CurrentSchemaVersion = 67
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

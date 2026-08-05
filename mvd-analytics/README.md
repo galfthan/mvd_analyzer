@@ -52,27 +52,35 @@ that downstream consumers render, summarise, or feed to an agent.
   `airgibs.go`, `opening.go`, `player_stats.go`, `postprocess.go`, and
   `teamkill_telefrag.go`.
 - `view/` — **time-parameterised query API** over a finalised
-  `*Result`. Eight pure functions (`Buckets`, `Events`, `StreamSlice`,
-  `StateAt`, `LocTrails`, `RegionControl`, and since v65 the two
-  interval segmentations `HotWindows` and `Lives`) read `result.Streams`
+  `*Result`. Nine pure functions (`Buckets`, `Events`, `StreamSlice`,
+  `StateAt`, `LocTrails`, `RegionControl`, since v65 the two
+  interval segmentations `TopWindows` and `Lives`, and since v67
+  `TopKills`) read `result.Streams`
   and produce derived shapes (bucketed timelines, raw stream slices,
   point-in-time state, loc trails, region-control bucket states,
-  best-scoring stretches, per-life rollups) at
+  best-scoring stretches, per-life rollups, kill bursts) at
   the caller's chosen window / fields / reducers. Every entry takes
   at least one time-related option that the caller controls; static
   derivations (`FragResult`, `LocGraphResult`, `MetadataResult`, …)
   don't belong here and are served directly from result fields. The
   first six are what the CLI's `-view` family of flags and the WASM
   bridge export (`getBuckets` / `getEvents` / `getStreamSlice` /
-  `getStateAt` / `getLocTrails` / `recomputeRegionControl`); the two
-  v65 segmentations are reachable over REST and MCP only, and neither
-  the CLI nor the WASM bridge exports them.
-  `HotWindows` (`hotwindows.go` — **not** `hot_windows.go`, which Go
+  `getStateAt` / `getLocTrails` / `recomputeRegionControl`); since v67
+  the WASM bridge also exports `getTopWindows` and `getTopKills` (the
+  web Key Moments lists ride them), while `Lives` stays REST/MCP-only
+  and the CLI exports none of the three.
+  `TopWindows` (`topwindows.go` — **not** `top_windows.go`, which Go
   would read as a `GOOS` build constraint) ranks fixed-length windows by
   a caller-chosen summable metric; `Lives` (`lives.go`) cuts the match at
   the v64 `streams.players[].alive` boundaries. Both fill the same
   per-interval stats block from one builder (`interval_stats.go`), so a
   third segmentation means writing the segmentation, not the statistics.
+  The third one, `TopKills` (`topkills.go`, v67), then turned out not to
+  want it: it cuts the match at the **kill**, and a burst row — the run
+  of killing-weapon hits that produced one kill — is a small backward
+  walk over the damage log rather than a stats block. It shares the
+  `measured` marker and the damage-family echo, and fills no
+  `IntervalStats`.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -626,10 +634,10 @@ measured deaths count is not a measurement. It is demo-global and survives
 every filter.
 
 Otherwise v65 is additive at the view layer: the two interval segmentations
-(`HotWindows`, `Lives`) are **views** over data that was already stored, and
+(`TopWindows`, `Lives`) are **views** over data that was already stored, and
 the bump is the cache-key tick every observable change earns. Their response
 shapes are owned by `view/` and documented
-in [RESULT_SCHEMA.md](RESULT_SCHEMA.md#interval-segmentations-hotwindows-lives--schema-v65).
+in [RESULT_SCHEMA.md](RESULT_SCHEMA.md#interval-segmentations-topwindows-lives--schema-v65).
 Three contracts there are worth knowing before consuming either: their
 shared `measured` block is the **only** way to read measuredness (every
 numeric stat is emitted including a measured zero, so a field's absence

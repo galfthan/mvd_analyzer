@@ -219,7 +219,8 @@ worker.onmessage = (e) => {
     } else if (
         e.data.type === 'result' ||
         e.data.type === 'recompute_result' ||
-        e.data.type === 'los_result'
+        e.data.type === 'los_result' ||
+        e.data.type === 'view_result'
     ) {
         // Correlated success reply — hand the whole message to the caller's
         // resolver, which pulls the fields it needs (json/timings). Keyed by
@@ -229,7 +230,8 @@ worker.onmessage = (e) => {
     } else if (
         e.data.type === 'error' ||
         e.data.type === 'recompute_error' ||
-        e.data.type === 'los_error'
+        e.data.type === 'los_error' ||
+        e.data.type === 'view_error'
     ) {
         // Correlated failure reply. The WASM-load-failure 'error' emitted
         // before any analyze is issued carries no reqId → no pending entry →
@@ -350,6 +352,35 @@ function computeLosInWorker() {
             reject,
         });
         worker.postMessage({ type: 'computeLos', reqId });
+    });
+}
+
+// viewQueryInWorker runs ONE view-layer query (getTopWindows / getTopKills)
+// over the demo the worker already holds, for the same reason
+// recomputeInWorker and computeLosInWorker exist: those Go exports live on the
+// worker's global and the main page cannot reach them. `opts` is the view's
+// options struct, JSON-encoded here and decoded straight into the Go options
+// (field names match case-insensitively).
+//
+// Rejects on the {"error":...} envelope as well as on a worker failure, so one
+// .catch covers both the transport and the view's documented unavailable cases
+// (no damage log, no bounded family, unmeasurable liveness).
+function viewQueryInWorker(fn, opts) {
+    return new Promise((resolve, reject) => {
+        const reqId = nextWorkerReqId++;
+        pendingWorkerReqs.set(reqId, {
+            resolve: (payload) => {
+                try {
+                    const v = JSON.parse(payload.json);
+                    if (v && v.error) reject(new Error(v.error));
+                    else resolve(v);
+                } catch (e) {
+                    reject(e);
+                }
+            },
+            reject,
+        });
+        worker.postMessage({ type: 'viewQuery', reqId, fn, optsJSON: JSON.stringify(opts || {}) });
     });
 }
 
@@ -1895,11 +1926,13 @@ function getAccuracyClass(acc) {
 
 // Powerup-run display filter (Key Moments). A run is listed only when it
 // lasted at least `minDur` seconds AND scored at least `minFrags` frags —
-// the reading of "min length 5s and min frags 1" as a conjunction, which
-// hides long fragless runs by default. Both thresholds are editable down to
+// the reading of "min length 5s and min frags 3" as a conjunction, which
+// hides low-value quad cycles by default (a quad spawns every 60 s, so
+// 0-2-frag runs are routine noise; pent/ring runs clearing 3 frags are the
+// ones worth a highlight list too). Both thresholds are editable down to
 // 0 in the panel and the Result keeps every run either way, so this is a UI
 // control rather than a pipeline filter (CLAUDE.md "surface, don't filter").
-const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 1 };
+const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 3 };
 let keymomentsFilter = { ...KEYMOMENTS_FILTER_DEFAULTS };
 
 // Wired once at load; the inputs live outside the rebuilt table.
@@ -1975,7 +2008,7 @@ function renderPowerupRuns(result) {
         // the pack-drop anchors).
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId && event.playerUserID) {
-            const demoOff = timelineState.demoOffset || 0;
+            const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
             const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
             const toTime = Math.floor(event.endTime + demoOff) + 5;
             const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: event.playerUserID });
@@ -2032,7 +2065,7 @@ function displayKeyMoments(result) {
 
             let watchCell = '-';
             if (hubInfo && hubInfo.gameId) {
-                const demoOff = timelineState.demoOffset || 0;
+                const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
                 const fromTime = Math.max(0, Math.floor(streak.time + demoOff));
                 const toTime = Math.floor(streak.endTime + demoOff) + 3;
                 const trackId = streak.playerUserID || 0;
@@ -2084,7 +2117,7 @@ function displayKeyMoments(result) {
 
             let watchCell = '-';
             if (hubInfo && hubInfo.gameId) {
-                const demoOff = timelineState.demoOffset || 0;
+                const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
                 const fromTime = Math.max(0, Math.floor(marker.time + demoOff) - 10);
                 const toTime = fromTime + 20;
                 const trackId = marker.playerUserID || 0;
@@ -2115,6 +2148,180 @@ function displayKeyMoments(result) {
 
     // Airborne rocket gibs (sortable table, default by height).
     displayAirgibs(result);
+
+    // Top frag runs / top RL / top LG kills — view queries, so they fill in
+    // asynchronously and independently of everything above.
+    renderTopMoments();
+}
+
+// ─── Top frag runs and top kills (view queries) ─────────────────────────────
+//
+// These three tables are NOT stored Result fields: they are view-layer
+// rankings (view.TopWindows / view.TopKills) computed on demand from the
+// analysed demo the worker still holds, so they arrive after the rest of the
+// tab has painted. Each table settles on its own — a query the demo cannot
+// answer (no damage log, no measurable liveness, no bounded family) leaves
+// that table's empty state up and never disturbs its neighbours, exactly as
+// the powerup table stays independent of the frag streaks.
+
+// The end user's per-weapon sweet spots for the kill-burst walk. These go out
+// as gapMs — the EXACT per-weapon walk — rather than capturing at the default
+// 3000 and narrowing on maxGapMs: that filter exists for REST consumers who
+// already hold a capture-3000 response and want a tighter gap without a second
+// request. In-process a second request is free. See mvd-analytics/view/topkills.go.
+const TOP_KILL_QUERIES = [
+    // RL gets the wide list beside the frag runs; LG the short one beside the
+    // demo markers — the RL burst is the headline highlight in team games.
+    { key: 'toprl', weapon: 'rl', gapMs: 2300, limit: 10 },
+    { key: 'toplg', weapon: 'lg', gapMs: 1200, limit: 5 },
+];
+
+// The window length for the damage-window ranking. 10 s is the "he just went
+// off" unit — long enough to hold a whole engagement's damage, short enough
+// that the window is one fight rather than a lull plus a fight. Ranked by
+// BOUNDED enemy damage (metric=damageGiven) so the table complements the
+// per-kill burst tables beside it: same family, same scoreboard semantics;
+// ties break on the window's frags (the view's complementary tie-break).
+const TOP_RUN_WINDOW_MS = 10000;
+
+// Bumped on every render so a reply for a superseded demo is dropped. A query
+// still in flight when the user loads another demo would resolve with rows
+// rendered against the hub info and userids captured when it was issued — the
+// PREVIOUS demo's. The newer render issues its own queries, so dropping the
+// stale reply loses nothing.
+let topMomentsToken = 0;
+
+function renderTopMoments() {
+    const token = ++topMomentsToken;
+    const hubInfo = currentResult?.hubInfo || null;
+    const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+
+    // Clear first: an in-flight query must never leave the previous demo's
+    // rows on screen while it resolves.
+    for (const id of ['topdmg', ...TOP_KILL_QUERIES.map(q => q.key)]) {
+        const body = document.getElementById(`${id}-body`);
+        if (body) body.innerHTML = '';
+    }
+
+    // dmg is named explicitly on every query: the VIEW default is raw while
+    // mvd-api's is bounded, and these tables show the same numbers the API
+    // does. A demo whose bounded family was never reconstructed (BoundedMode
+    // "skipped:*" — the KTX midair / instagib / dmgfrags modes) therefore
+    // answers ErrBoundedUnavailable and the table shows its empty state,
+    // rather than quietly ranking a different damage family under the same
+    // heading.
+    const run = (fn, opts, render) => {
+        viewQueryInWorker(fn, opts)
+            .then(v => { if (token === topMomentsToken) render(v); })
+            .catch(err => {
+                if (token !== topMomentsToken) return;
+                console.warn(`[keymoments] ${fn} unavailable:`, err.message || err);
+                render(null);
+            });
+    };
+
+    run('getTopWindows',
+        { metric: 'damageGiven', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' },
+        v => renderTopDamageWindows(v, hubInfo, playerUserIDs));
+
+    for (const q of TOP_KILL_QUERIES) {
+        run('getTopKills',
+            { weapons: [q.weapon], gapMs: q.gapMs, limit: q.limit, dmg: 'bounded' },
+            v => renderTopKills(q.key, v, hubInfo, playerUserIDs));
+    }
+}
+
+// A windowed Hub clip link for a view row. Same rule as buildHubWatchLink and
+// the powerup / pack-drop anchors: a slot number is NOT a userid, so a name
+// that timelineAnalysis.playerUserIDs does not resolve gets NO link rather
+// than one that follows whoever happens to hold that id. Times in, seconds.
+function topMomentsWatchCell(playerName, fromSec, toSec, hubInfo, playerUserIDs) {
+    if (!hubInfo || !hubInfo.gameId) return '-';
+    const trackId = playerUserIDs[playerName];
+    if (!trackId) return '-';
+    // Match-relative → hub's clip base (countdown start, assumed 10 s).
+    const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
+    const from = Math.max(0, Math.floor(fromSec + demoOff));
+    const to = Math.floor(toSec + demoOff);
+    const url = hubReplayUrl({ gameId: hubInfo.gameId, from, to, track: trackId });
+    return `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
+}
+
+// Top damage windows: the ten 10 s stretches with the most bounded enemy
+// damage dealt. `v` is a TopWindowsView, or null when the query failed.
+function renderTopDamageWindows(v, hubInfo, playerUserIDs) {
+    const body = document.getElementById('topdmg-body');
+    const empty = document.getElementById('topdmg-empty');
+    if (!body) return;
+    body.innerHTML = '';
+
+    // ms→seconds at intake, as every other table in this tab does, so
+    // formatDuration / setCurrentTime / the hub from-to all see seconds.
+    const rows = (v?.windows || []).map(w => ({
+        ...w,
+        startSec: w.start * 0.001,
+        endSec: w.end * 0.001,
+    }));
+    if (empty) empty.style.display = rows.length === 0 ? 'block' : 'none';
+
+    for (const w of rows) {
+        const tr = document.createElement('tr');
+        // The clip is the window plus a 1 s lead-in — 11 s total, per the
+        // product ruling: enough not to open mid-swing, short enough that the
+        // clip IS the window. With hub's fixed base (HUB_COUNTDOWN_S) the hub
+        // clock reads exactly Start-1 when playback opens.
+        const watchCell = topMomentsWatchCell(w.player, w.startSec - 1, w.endSec, hubInfo, playerUserIDs);
+
+        // score IS the window's bounded enemy damage (the ranking metric);
+        // kills comes from the stats block (IntervalStats is embedded, so its
+        // fields are inline on the row — the JSON key is `kills`, not
+        // `frags`) and is also what broke any damage tie, per the view's
+        // complementary tie-break.
+        tr.innerHTML = `
+            <td class="time-cell time-link">${formatDuration(w.startSec)}</td>
+            <td>${escapeHtml(w.player || 'Unknown')}</td>
+            <td>${escapeHtml(w.team || '-')}</td>
+            <td>${w.score ?? 0}</td>
+            <td>${w.kills ?? 0}</td>
+            <td>${watchCell}</td>
+        `;
+        tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(w.startSec));
+        body.appendChild(tr);
+    }
+}
+
+// Top kills for one weapon. `v` is a TopKillsView, or null when the query
+// failed (the 422-equivalent: no damage log or no measurable liveness).
+function renderTopKills(key, v, hubInfo, playerUserIDs) {
+    const body = document.getElementById(`${key}-body`);
+    const empty = document.getElementById(`${key}-empty`);
+    if (!body) return;
+    body.innerHTML = '';
+
+    const rows = (v?.kills || []).map(k => ({ ...k, timeSec: k.time * 0.001 }));
+    if (empty) empty.style.display = rows.length === 0 ? 'block' : 'none';
+
+    for (const k of rows) {
+        const tr = document.createElement('tr');
+        // spanMs is the burst's own length (first hit → kill), so the clip
+        // covers the whole burst plus a lead-in, not just the killing hit.
+        const burstStartSec = k.timeSec - (k.spanMs || 0) * 0.001;
+        const watchCell = topMomentsWatchCell(k.killer, burstStartSec - 3, k.timeSec + 3, hubInfo, playerUserIDs);
+        const victimWep = k.victimWep ? k.victimWep.toUpperCase() : '-';
+
+        tr.innerHTML = `
+            <td class="time-cell time-link">${formatDuration(k.timeSec)}</td>
+            <td>${escapeHtml(k.killer || 'Unknown')} → ${escapeHtml(k.victim || 'Unknown')}</td>
+            <td>${k.damage ?? 0}</td>
+            <td>${k.hits ?? 0}</td>
+            <td>${((k.spanMs || 0) * 0.001).toFixed(1)} s</td>
+            <td>${escapeHtml(victimWep)}</td>
+            <td>${k.returnDamage ?? 0}</td>
+            <td>${watchCell}</td>
+        `;
+        tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(k.timeSec));
+        body.appendChild(tr);
+    }
 }
 
 // Render the airborne-rocket-gib table. Default view is height-above-shooter
@@ -2159,7 +2366,7 @@ function displayAirgibs(result) {
 
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId) {
-            const demoOff = timelineState.demoOffset || 0;
+            const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
             const fromTime = Math.max(0, Math.floor(a.timeSec + demoOff) - 5);
             const toTime = Math.floor(a.timeSec + demoOff) + 3;
             const trackId = a.attackerUserID || 0; // shooter perspective
@@ -2800,7 +3007,7 @@ function renderPackDropRows() {
     const status = document.getElementById('packdrops-filter-status').value;
 
     const { rows, hubInfo, playerUserIDs } = packDropsState;
-    const demoOff = timelineState.demoOffset || 0;
+    const demoOff = HUB_COUNTDOWN_S; // hub's base, not the measured offset — see HUB_COUNTDOWN_S
 
     const hubAnchor = (from, to, trackName) => {
         if (!hubInfo || !hubInfo.gameId) return '-';
@@ -3130,6 +3337,15 @@ function resetUIToCleanState() {
     hide('fragstreaks-empty');
     setHTML('demomarkers-body', '');
     hide('demomarkers-empty');
+    // The view-query tables (filled asynchronously by renderTopMoments); the
+    // token bump also drops any reply still in flight for the old demo.
+    topMomentsToken++;
+    setHTML('topdmg-body', '');
+    hide('topdmg-empty');
+    setHTML('toprl-body', '');
+    hide('toprl-empty');
+    setHTML('toplg-body', '');
+    hide('toplg-empty');
 
     // Pack drops
     setHTML('packdrops-body', '');
@@ -5676,6 +5892,18 @@ function updateTeamStatus() {
 // single "jump here" link (buildHubWatchLink) and pass it for a windowed
 // clip (powerups / streaks / airgibs / pack drops). Callers do their own
 // demoOffset conversion + window padding (each surface pads differently),
+// HUB_COUNTDOWN_S is the hub player's OWN time base, not ours. Its clip seek
+// treats `from` as seconds from the START OF THE COUNTDOWN and its clock
+// hard-codes a 10 s countdown (fteController.ts: _countdownDuration = 10.0),
+// so a link built with the demo's MEASURED offset (streams.global.demoOffset
+// — 15.1 s on servers running a 15 s countdown) makes every number hub
+// displays read offset-10 higher than this UI's match-relative times, which
+// users read as "the link is wrong". Using hub's constant keeps hub's clock
+// equal to our table on every demo; the cost is that playback starts
+// (demoOffset-10) s of extra lead early on long-countdown servers — early is
+// benign, late would cut the action. Do NOT "fix" this back to demoOffset.
+const HUB_COUNTDOWN_S = 10;
+
 // then hand the final demo-relative from/to/track here so the URL scheme
 // lives in exactly one place.
 function hubReplayUrl({ gameId, from, to, track }) {
@@ -5690,8 +5918,9 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     const trackId = playerUserIDs[playerName];
     if (!trackId) return '';
     // Our times are match-relative (0 = match start). Hub uses demo-relative time
-    // (includes countdown/warmup), so add demoOffset to convert.
-    const from = Math.floor(time + (timelineState.demoOffset || 0));
+    // (hub counts from the countdown start, assumed 10 s), so add hub's own
+    // constant — see HUB_COUNTDOWN_S.
+    const from = Math.floor(time + HUB_COUNTDOWN_S);
     const url = hubReplayUrl({ gameId: hubInfo.gameId, from, track: trackId });
     return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }

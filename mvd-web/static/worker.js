@@ -115,6 +115,13 @@ function logWorkerTimings(t) {
     }
 }
 
+// View exports the main thread may run over the already-analysed demo
+// ('viewQuery' below). These are read-only queries over lastResult on the Go
+// side, cheap enough to answer per request. Whitelisted by name rather than
+// dispatching whatever the message asks for: the message body decides which
+// global is invoked, so the set of invokable globals is pinned here.
+const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills']);
+
 let wasmReady = false;
 
 async function initWasm() {
@@ -239,6 +246,26 @@ onmessage = function(e) {
             postMessage({ type: 'recompute_result', reqId, json: jsonStr });
         } catch (err) {
             postMessage({ type: 'recompute_error', reqId, message: err.message || String(err) });
+        }
+    } else if (e.data.type === 'viewQuery') {
+        // One view-layer query (view.TopWindows / view.TopKills) over the demo
+        // already held on the Go side. Like recomputeRegions and computeLos,
+        // this has to round-trip through the worker: the Go exports live on
+        // this worker's global (js.Global() == worker scope), so the main page
+        // cannot call them at all.
+        if (!wasmReady) {
+            postMessage({ type: 'view_error', reqId, message: 'WASM not loaded yet' });
+            return;
+        }
+        const fn = VIEW_QUERY_FNS.has(e.data.fn) ? self[e.data.fn] : undefined;
+        if (typeof fn !== 'function') {
+            postMessage({ type: 'view_error', reqId, message: 'unknown view query: ' + e.data.fn });
+            return;
+        }
+        try {
+            postMessage({ type: 'view_result', reqId, json: fn(e.data.optsJSON || '') });
+        } catch (err) {
+            postMessage({ type: 'view_error', reqId, message: err.message || String(err) });
         }
     } else if (e.data.type === 'computeLos') {
         // Line of sight is computed lazily on this worker (same reason as
