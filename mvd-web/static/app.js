@@ -1760,15 +1760,52 @@ function displayWeaponStatsTable(rows) {
     }, player => teamOrder.indexOf(player.team || ''));
 }
 
-// One weapon's three cells for a playerStats row: accuracy from the
+// One weapon's four cells for a playerStats row: accuracy from the
 // `accuracy` family, kills from `score.byWeapon` (the corrected frag log),
-// damage from `damage.byWeapon`. A weapon the player never touched shows
-// '-' in all three rather than zeros.
+// damage from `damage.byWeapon`, and eK from `score.byWeaponVsEnemyWeapon`.
+// A weapon the player never touched shows '-' in all four rather than zeros.
 function formatWeaponCells(player, wn) {
     const acc = formatAccuracyCell(player.accuracy?.byWeapon?.[wn]);
     const kills = player.score?.byWeapon?.[wn] || 0;
     const dmg = player.damage?.byWeapon?.[wn] || 0;
-    return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>`;
+    return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>${enemyKillCell(player, wn)}`;
+}
+
+// The eK cell: of this weapon's kills, how many landed on an enemy who was
+// carrying an RL and/or LG. That is the `rl` + `lg` + `both` slice of this
+// weapon's row in score.byWeaponVsEnemyWeapon — the cross-tab of killer
+// weapon against what the VICTIM held (schema v69).
+//
+// It is what separates a weapon that wins fights from one that finishes off
+// the disarmed: a shotgun with 16 kills of which 12 were against players
+// holding nothing is a very different figure from an RL with 13 of which 9
+// were against armed opponents.
+//
+// The column shows only the "armed" total to keep the table narrow; the
+// FULL six-bucket breakdown rides in the cell's tooltip, so no part of the
+// cross-tab is hidden from a reader who wants it. Measuredness follows the
+// kill family, exactly like the K column beside it.
+function enemyWeaponKillBuckets(player, wn) {
+    return player.score?.byWeaponVsEnemyWeapon?.[wn] || null;
+}
+
+function enemyKillCell(player, wn) {
+    if (player.score?.kills == null) return '<td>-</td>';
+    const b = enemyWeaponKillBuckets(player, wn);
+    if (!b) return '<td>-</td>';
+    const armed = (b.rl || 0) + (b.lg || 0) + (b.both || 0);
+    // Ordered strongest-first so the tooltip reads as a loadout ladder.
+    const parts = [
+        ['RL+LG', b.both], ['RL', b.rl], ['LG', b.lg],
+        ['mid', b.mid], ['sg only', b.sg], ['unknown', b.unknown],
+    ].filter(([, n]) => n).map(([k, n]) => `${k}: ${n}`);
+    const title = `Victim was holding — ${parts.join(' · ')}`;
+    // `armed` prints even at 0. Reaching here means the player DID kill with
+    // this weapon and the classification ran, so 0 is a measurement — "every
+    // one of those kills was on someone carrying nothing", which is the most
+    // interesting reading this column has. Only an unmeasured cell gets '-',
+    // per the tables' absent-is-never-zero rule.
+    return `<td title="${escapeHtml(title)}">${armed}</td>`;
 }
 
 function displayItemsTable(rows) {

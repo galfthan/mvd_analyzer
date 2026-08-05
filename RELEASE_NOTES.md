@@ -52,6 +52,10 @@ actually read a match. The only figure keyed on what the target carried was
 - **Schema note:** this is computed in the analyzer, not folded in at read
   time like `controlMs` / `speed`, so the stored `Result` changes and the
   golden corpus moves with it.
+- **Web: Weapon Stats gains an `eK` column per weapon** — of that weapon's
+  kills, how many were against an enemy carrying an RL and/or LG, with the
+  full six-bucket breakdown in the cell tooltip. Both weapon tables scroll
+  inside their own box at 25 columns.
 - **Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` /
   `eLG`** (player and team tables), rendering `rl + both`. The columns they
   replace were kills made *with* each weapon, which the Weapon Stats tab

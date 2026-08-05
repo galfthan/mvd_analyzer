@@ -277,6 +277,17 @@ Two consequences worth knowing:
   **`rl + both`** (resp. `lg + both`): reading the `rl` key alone would
   drop every victim who was carrying both. Measuredness rides the kill
   family — the cell renders `-` exactly when `kills` does.
+- **Weapon Stats carries a fourth column per weapon, `eK`.** Of that
+  weapon's kills, how many landed on an enemy who was carrying an RL
+  and/or LG — the `rl + lg + both` slice of `score.byWeaponVsEnemyWeapon`
+  (schema v69), the cross-tab of killer weapon against victim loadout. It
+  separates a weapon that wins fights from one that finishes off the
+  disarmed. The column shows only that total to keep the table narrow; the
+  **full six-bucket breakdown is in each cell's tooltip**, so nothing is
+  hidden. A measured `0` prints as `0` — "every one of those kills was on
+  someone carrying nothing" is a reading, not a gap — and `-` appears only
+  where the `K` cell beside it is also `-`. Both weapon tables now scroll
+  inside their own box (`.items-table-wrap`) at 25 columns.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /
