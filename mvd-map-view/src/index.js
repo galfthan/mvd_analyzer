@@ -19,6 +19,23 @@ export {
     moverPoseAt,
 } from './geometry.js';
 
+export {
+    PITCH_MAX,
+    PITCH_MIN,
+    YAW_SNAP,
+    DEFAULT_PITCH,
+    DEFAULT_YAW,
+    newCamera,
+    is3D,
+    refreshTrig,
+    setAngles,
+    fit,
+    project,
+    toView,
+    toWorld,
+    setOrbitCenter,
+} from './camera.js';
+
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
 
 export { hexToRgba, scaleRgbaAlpha, getLocationColor } from './color.js';

@@ -6711,11 +6711,11 @@ function initMapView(result) {
     _wtc.panX = 0;
     _wtc.panY = 0;
     _wtc.zoomK = 1;
-    _wtc.yaw = MAP_DEFAULT_YAW;
-    _wtc.pitch = MAP_3D_DEFAULT_PITCH;
-    refreshMapCameraTrig();
+    _wtc.yaw = MapView.DEFAULT_YAW;
+    _wtc.pitch = MapView.DEFAULT_PITCH;
+    MapView.refreshTrig(_wtc);
     const btn3d = document.getElementById('map-3d-toggle');
-    if (btn3d) btn3d.classList.toggle('active', mapIs3D());
+    if (btn3d) btn3d.classList.toggle('active', MapView.is3D(_wtc));
     mapState.followPlayer = null;
     resizeMapCanvas();
 
@@ -7174,90 +7174,31 @@ function calculateMapBounds(result) {
     updateWorldToCanvasTransform();
 }
 
-// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change.
-// panX/panY/zoomK carry user-applied pan and zoom on top of the fit-to-canvas base. They persist
-// across transform recomputes (e.g. canvas resize, geometry reload) so the user's view survives.
+// Orbit-camera state, allocated by mvd-map-view (MapView.newCamera) — the
+// projection, the angle clamping and the fit-to-canvas math all live there;
+// see mvd-map-view/src/camera.js for what each field means. panX/panY/zoomK
+// carry user pan and zoom on top of the fit base and survive a refit
+// (canvas resize, geometry reload), so the user's view is not thrown away.
+// Call updateWorldToCanvasTransform() when bounds or the canvas change.
 //
-// yaw/pitch are the 3D orbit camera angles. pitch = π/2 is exact top-down —
-// the projection then degenerates to the classic 2D transform (screen x = x,
-// screen y = y, depth = z), so the default view is identical to the old 2D
-// map. Lowering pitch tilts the camera; yaw spins the map about its center.
-// cx/cy/zMid are the world-space orbit center (XY map center, mid height).
-// sinYaw..cosPitch are cached trig — refreshMapCameraTrig() keeps them in
-// sync whenever yaw/pitch change.
-let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0,
-             panX: 0, panY: 0, zoomK: 1,
-             yaw: 0, pitch: Math.PI / 2,
-             cx: 0, cy: 0, zMid: 0,
-             sinYaw: 0, cosYaw: 1, sinPitch: 1, cosPitch: 0 };
+// Null until the module bootstrap in index.html hands the namespace over,
+// which happens after this script's top level but before DOMContentLoaded —
+// so every reader (all of them inside functions) sees a live camera.
+let _wtc = null;
 
-// Camera pitch limits: π/2 is top-down (the 2D view); 0 is a true side
-// elevation (looking along the horizon). Nothing in the render path divides
-// by sinPitch anymore — the zoom anchor works in view space and
-// canvasToWorld guards its inverse — so the full range is allowed.
-const MAP_PITCH_MAX = Math.PI / 2;
-const MAP_PITCH_MIN = 0;
-
-// Yaw lightly snaps to the four cardinal directions when within this margin,
-// so "look straight along x / y" is easy to hit by hand. The orbit drag uses
-// absolute deltas from the drag start, so dragging through a snap point
-// escapes it naturally.
-const MAP_YAW_SNAP = 2 * Math.PI / 180;
-
-// Pitch applied by the "3D" toggle button — tilted enough that floors at
-// different heights separate clearly, while the layout stays recognizable.
-// 55° from top-down is also ~the isometric tilt (true iso ≈ 54.7°).
-const MAP_3D_DEFAULT_PITCH = 55 * Math.PI / 180;
-
-// Yaw for the default view — 45° spins the map onto a corner so it reads as a
-// classical isometric / three-quarter view (angled in both x and y) rather
-// than looking straight down an axis. Clears the ±2° cardinal snap.
-const MAP_DEFAULT_YAW = 45 * Math.PI / 180;
-
-// mapIs3D: true while the camera is rotated off the exact top-down view.
-function mapIs3D() {
-    return _wtc.pitch < MAP_PITCH_MAX - 1e-6 || Math.abs(_wtc.yaw) > 1e-6;
-}
-
-function refreshMapCameraTrig() {
-    _wtc.sinYaw = Math.sin(_wtc.yaw);
-    _wtc.cosYaw = Math.cos(_wtc.yaw);
-    _wtc.sinPitch = Math.sin(_wtc.pitch);
-    _wtc.cosPitch = Math.cos(_wtc.pitch);
-}
+window.onMapViewReady = (MapView) => {
+    _wtc = MapView.newCamera();
+};
 
 // setMapCamera: normalize + snap + clamp the orbit angles, sync the 3D
 // toggle button, and redraw. The single entry point for every rotation
 // source (button, drag).
 function setMapCamera(yaw, pitch) {
-    // Normalize yaw to (-π, π] so the numbers stay sane over long sessions.
-    const TWO_PI = 2 * Math.PI;
-    yaw = ((yaw % TWO_PI) + TWO_PI) % TWO_PI;
-    if (yaw > Math.PI) yaw -= TWO_PI;
-    // Light cardinal snap (0 / ±90° / 180°).
-    const snap = Math.round(yaw / (Math.PI / 2)) * (Math.PI / 2);
-    if (Math.abs(yaw - snap) < MAP_YAW_SNAP) yaw = snap;
-    _wtc.yaw = yaw;
-    _wtc.pitch = Math.min(MAP_PITCH_MAX, Math.max(MAP_PITCH_MIN, pitch));
-    refreshMapCameraTrig();
+    MapView.setAngles(_wtc, yaw, pitch);
     const btn = document.getElementById('map-3d-toggle');
-    if (btn) btn.classList.toggle('active', mapIs3D());
+    if (btn) btn.classList.toggle('active', MapView.is3D(_wtc));
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
-}
-
-// setOrbitCenter: move the orbit pivot to a new world point without any
-// visible jump — the new center is projected under the old and new
-// parameters and the pan difference is folded in, so the view only changes
-// on the *next* rotation, which then pivots about the new point.
-function setOrbitCenter(wx, wy, wz) {
-    const p0 = worldToCanvasNew(wx, wy, wz);
-    _wtc.cx = wx;
-    _wtc.cy = wy;
-    _wtc.zMid = wz;
-    const p1 = worldToCanvasNew(wx, wy, wz);
-    _wtc.panX += p0.x - p1.x;
-    _wtc.panY += p0.y - p1.y;
 }
 
 // currentOrbitPivot: where an orbit drag should pivot. Follow mode pivots on
@@ -7330,20 +7271,10 @@ function updateWorldToCanvasTransform() {
     if (!canvas) return;
     const cssW = mapState.canvasCssW || canvas.width;
     const cssH = mapState.canvasCssH || canvas.height;
-    const worldWidth = maxX - minX;
-    const worldHeight = maxY - minY;
-    const scale = Math.min(cssW / worldWidth, cssH / worldHeight);
-    _wtc.scale = scale;
-    _wtc.offsetX = (cssW - worldWidth * scale) / 2;
-    _wtc.offsetY = (cssH - worldHeight * scale) / 2;
-    _wtc.minX = minX;
-    _wtc.minY = minY;
-    _wtc.canvasH = cssH;
-    // Orbit center: the XY map center. zMid is set separately (initMapView)
-    // from the map's loc height range.
-    _wtc.cx = (minX + maxX) / 2;
-    _wtc.cy = (minY + maxY) / 2;
-    // panX, panY, zoomK, yaw, pitch intentionally preserved across recomputes.
+    // Orbit center lands on the XY map center; zMid is set separately
+    // (initMapView) from the map's loc height range, and pan/zoom/angles are
+    // preserved across a refit.
+    MapView.fit(_wtc, mapState.bounds, cssW, cssH);
 }
 
 function resetMapView() {
@@ -7360,75 +7291,33 @@ function resetMapView() {
     updateWorldToCanvasTransform();
     _wtc.zMid = _wtc.zMidDefault || 0;
     // Back to the default isometric view (also syncs the 3D button and redraws).
-    setMapCamera(MAP_DEFAULT_YAW, MAP_3D_DEFAULT_PITCH);
+    setMapCamera(MapView.DEFAULT_YAW, MapView.DEFAULT_PITCH);
 }
 
 // Reusable point to avoid GC — only use for immediate consumption, not storage
 const _tmpPt = { x: 0, y: 0, depth: 0 };
 
-// projectWorld: orbit-camera orthographic projection of a world-space point.
-// The point is rotated about the map center by yaw (about the world Z axis),
-// then tilted by pitch, and the result is pushed through the same
-// fit/zoom/pan linear map the 2D view used. At pitch=π/2, yaw=0 this is
-// exactly the old 2D transform (x→x, y→y) and depth degenerates to z, so the
-// pre-existing z-sort semantics carry over unchanged.
-//
-// `depth` is camera closeness — bigger means nearer the viewer — used by the
-// painter's sort for players / items / entities.
+// Projection wrappers over mvd-map-view's camera math. worldToCanvas reuses
+// the scratch point (immediate consumption only); worldToCanvasNew allocates
+// for results that get stored (tracks, caches).
 function projectWorld(x, y, z, out) {
-    const w = _wtc;
-    const dx = x - w.cx, dy = y - w.cy, dz = (z || 0) - w.zMid;
-    const xr = dx * w.cosYaw - dy * w.sinYaw;
-    const yr = dx * w.sinYaw + dy * w.cosYaw;
-    const u = w.cx + xr;
-    const v = w.cy + yr * w.sinPitch + dz * w.cosPitch;
-    const sx = w.scale * w.zoomK;
-    out.x = w.offsetX + (u - w.minX) * sx + w.panX;
-    out.y = w.canvasH - w.offsetY - (v - w.minY) * sx + w.panY;
-    out.depth = dz * w.sinPitch - yr * w.cosPitch;
-    return out;
+    return MapView.project(_wtc, x, y, z, out);
 }
 
 function worldToCanvas(x, y, z) {
-    return projectWorld(x, y, z, _tmpPt);
+    return MapView.project(_wtc, x, y, z, _tmpPt);
 }
 
-// Allocating version for cases where result is stored (e.g., tracks, caching)
 function worldToCanvasNew(x, y, z) {
-    return projectWorld(x, y, z, { x: 0, y: 0, depth: 0 });
+    return MapView.project(_wtc, x, y, z, { x: 0, y: 0, depth: 0 });
 }
 
-// canvasToView: invert only the linear screen part of the projection —
-// canvas pixel to the rotated view-plane coordinate (u, v) that projectWorld
-// feeds into the fit/zoom/pan map. Well-defined at any pitch (no division by
-// sinPitch), which is what makes the zoom anchor below safe all the way down
-// to a horizontal camera.
 function canvasToView(cx, cy) {
-    const w = _wtc;
-    const sx = w.scale * w.zoomK;
-    return {
-        u: w.minX + (cx - w.offsetX - w.panX) / sx,
-        v: w.minY + (w.canvasH - w.offsetY + w.panY - cy) / sx
-    };
+    return MapView.toView(_wtc, cx, cy);
 }
 
-// Inverse of worldToCanvas — canvas pixel to world coord. Needed for the
-// orbit-pivot pick and hit-testing. A single screen point maps to a world
-// *ray* under the orbit camera, so the inverse is taken on the horizontal
-// plane z = zPlane (default: the orbit center height). At top-down this is
-// the exact 2D inverse regardless of zPlane. Near pitch 0 that plane is
-// edge-on and the true inverse blows up — sinPitch is floored so callers
-// get a finite (if approximate) point instead of NaN.
 function canvasToWorld(cx, cy, zPlane) {
-    const w = _wtc;
-    const { u, v } = canvasToView(cx, cy);
-    const xr = u - w.cx;
-    const dz = (zPlane === undefined ? w.zMid : zPlane) - w.zMid;
-    const yr = (v - w.cy - dz * w.cosPitch) / Math.max(w.sinPitch, 0.05);
-    return {
-        x: w.cx + xr * w.cosYaw + yr * w.sinYaw,
-        y: w.cy - xr * w.sinYaw + yr * w.cosYaw
-    };
+    return MapView.toWorld(_wtc, cx, cy, zPlane);
 }
 
 function assignPlayerSymbols(result) {
@@ -8965,7 +8854,7 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     // Height-based symbol size scaling is a 2D-only cue: once the camera is
     // tilted, height is directly visible, and size differences would read as
     // distance instead.
-    const zSpan = mapIs3D() ? 0 : (zRange.hi - zRange.lo);
+    const zSpan = MapView.is3D(_wtc) ? 0 : (zRange.hi - zRange.lo);
 
     // Sort key is projected camera depth (closeness), which degenerates to
     // plain z at top-down — preserving the old sort exactly — and stays
@@ -9006,7 +8895,7 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     const itemSize = ITEM_MARKER_SIZE * iconScale;
     const itemHalf = itemSize / 2;
     const itemFontPx = Math.round(10 * iconScale);
-    const tilted = mapIs3D();
+    const tilted = MapView.is3D(_wtc);
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -9779,8 +9668,8 @@ function setupMapTrailControls() {
             // Toggle between top-down (2D, yaw 0) and the default isometric
             // view (yaw 45° / 55° tilt). Free rotation is available via
             // right-drag / Ctrl+drag.
-            setMapCamera(mapIs3D() ? 0 : MAP_DEFAULT_YAW,
-                         mapIs3D() ? MAP_PITCH_MAX : MAP_3D_DEFAULT_PITCH);
+            setMapCamera(MapView.is3D(_wtc) ? 0 : MapView.DEFAULT_YAW,
+                         MapView.is3D(_wtc) ? MapView.PITCH_MAX : MapView.DEFAULT_PITCH);
         });
     }
 
@@ -9874,7 +9763,7 @@ function setupMapTrailControls() {
 // installMapInteraction adds pan / zoom / rotate / click handlers to the map
 // canvas. Pan: left-drag. Rotate (3D orbit): right-drag or Ctrl/Cmd+left-drag
 // — horizontal motion spins the map (yaw), vertical motion tilts it (pitch,
-// clamped between MAP_PITCH_MIN and top-down). Zoom: mouse wheel (centered
+// clamped between PITCH_MIN and top-down). Zoom: mouse wheel (centered
 // on cursor). Click (no drag): dispatched through handleMapCanvasClick —
 // used by follow-player to toggle follow on a player symbol. Double-click
 // resets the view (including rotation).
@@ -9924,7 +9813,7 @@ function installMapInteraction(canvas) {
             // angles — the drag applies absolute deltas from these so the
             // cardinal yaw snap can be dragged through.
             const pv = currentOrbitPivot();
-            setOrbitCenter(pv.x, pv.y, pv.z);
+            MapView.setOrbitCenter(_wtc, pv.x, pv.y, pv.z);
             drag.yaw0 = _wtc.yaw;
             drag.pitch0 = _wtc.pitch;
         }

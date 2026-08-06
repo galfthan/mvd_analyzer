@@ -58,9 +58,50 @@ def serve(directory, port):
     return httpd, httpd.server_address[1]
 
 
+def interact(page, out_dir, label, t):
+    """Shots driven through real mouse input, not state pokes.
+
+    These cover what the JS states cannot: the orbit-pivot pick and the
+    zoom anchor both invert the projection (canvasToWorld / canvasToView),
+    so a regression there shows up here and nowhere else. The steps are
+    cumulative and end with Reset view, which restores the camera for
+    whatever runs next.
+    """
+    box = page.locator("#map-canvas").bounding_box()
+    cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+
+    def shot(name):
+        page.wait_for_timeout(80)
+        page.locator("#map-canvas").screenshot(path=str(out_dir / f"{label}-t{t}-{name}.png"))
+
+    page.mouse.move(cx, cy)
+    page.mouse.down()
+    page.mouse.move(cx + 90, cy - 40, steps=4)
+    page.mouse.up()
+    shot("i-pan")
+
+    # Right-drag orbits: re-centres the pivot on the view centre, then applies
+    # absolute yaw/pitch deltas from the drag start.
+    page.mouse.move(cx, cy)
+    page.mouse.down(button="right")
+    page.mouse.move(cx + 120, cy + 60, steps=6)
+    page.mouse.up(button="right")
+    shot("i-orbit")
+
+    # Wheel zoom anchors on the cursor, off-centre so a broken inverse moves
+    # the anchor point visibly.
+    page.mouse.move(cx - 150, cy + 100)
+    page.mouse.wheel(0, -600)
+    shot("i-wheelzoom")
+
+    page.click("#map-reset-view")
+    shot("i-resetview")
+
+
 def capture(page, out_dir, label, times):
     for t in times:
         page.evaluate(f"setCurrentTime({t})")
+        interact(page, out_dir, label, t)
         for name, js in STATES:
             if js:
                 page.evaluate(js)

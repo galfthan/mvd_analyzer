@@ -18,6 +18,7 @@ Moved so far:
 
 | Module | Contents |
 |---|---|
+| `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
@@ -68,10 +69,14 @@ mvd-web/test/compare-shots.sh /tmp/mapshots/baseline /tmp/mapshots/after
 ```
 
 The capture covers four demos (dm3 4on4, dm6 2on2, aerowalk 2on2, obsidian
-4on4) at several clock times in ten view states each — 3D and top-down,
+4on4) at several clock times. Each gets ten view states — 3D and top-down,
 trails, view/velocity arrows, LOS, PVS, learn mode, rotated and zoomed
-cameras — plus one run with the geometry fetch blocked so the convex-hull
-fallback path is covered. 100 shots; any `DIFF` is a real pixel change.
+cameras — plus four driven through real mouse input: pan drag, right-drag
+orbit, wheel zoom and Reset view. Those four matter because the orbit pivot
+and the zoom anchor are the only things that invert the projection, so a
+broken inverse shows up there and nowhere else. One run has the geometry
+fetch blocked, covering the convex-hull fallback. Any `DIFF` is a real
+pixel change.
 
 `mvd-web/test/mapshot.py` drives one demo and takes `--demo`, `--out`,
 `--times` (match-relative **seconds** — the frontend clock is seconds, unlike

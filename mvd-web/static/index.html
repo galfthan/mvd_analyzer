@@ -1172,6 +1172,9 @@
     <script type="module">
         import * as MapView from './map-view/index.js';
         window.MapView = MapView;
+        // app.js defines this on its top level (classic scripts run before
+        // deferred module ones), and uses it to allocate the camera.
+        if (window.onMapViewReady) window.onMapViewReady(MapView);
     </script>
     <script src="app.js"></script>
 </body>
