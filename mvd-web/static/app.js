@@ -6053,23 +6053,6 @@ function processLocationGroups(locations) {
 // within this many units of touching — roughly one corridor width.
 const FOCUS_NEIGHBOR_MARGIN = 160;
 
-// focusTier: null when no focus is active; otherwise which styling tier the
-// named group falls into.
-// farFadePredicate: the callback renderSolidEntries uses to decide whether an
-// entry's loc is outside the current focus and should draw in its faded tone.
-// Null when nothing is focused, which lets the component skip the test.
-function farFadePredicate() {
-    if (!mapState.focusGroupName) return null;
-    return (name) => focusTier(name) === 'far';
-}
-
-function focusTier(name) {
-    if (!mapState.focusGroupName) return null;
-    if (name === mapState.focusGroupName) return 'focus';
-    if (mapState.focusNeighbors && mapState.focusNeighbors.has(name)) return 'near';
-    return 'far';
-}
-
 function setFocusGroup(name) {
     mapState.focusGroupName = null;
     mapState.focusNeighbors = null;
@@ -6161,7 +6144,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
 
     // Colour-fill pass: tint each occupied region by the team(s) present so
     // the active area stands out against the otherwise-neutral floor. The
-    // floor is drawn neutral by default (buildFloorModel),
+    // floor is drawn neutral by default (the floor model),
     // so a tint only ever appears here, under a player. One translucent path
     // per region (single fill → no internal triangle seams).
     for (const [name, teams] of occupied) {
@@ -6178,7 +6161,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     }
 
     // Bold label pass — draw over the dimmer prerendered label so it pops.
-    const boldPx = Math.round(12 * mapIconScale());
+    const boldPx = Math.round(12 * mapView.iconScale());
     ctx.font = `bold ${boldPx}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -6245,7 +6228,7 @@ function drawRegionControlOverlay(ctx, controlStates) {
         for (const group of groups) {
             // Region focus: tint outside the focus neighborhood fades with
             // the base fills so the focused area keeps visual priority.
-            const tint = focusTier(group.name) === 'far'
+            const tint = mapView.focusTier(group.name) === 'far'
                 ? MapView.scaleRgbaAlpha(color, 0.3)
                 : color;
             MapView.fillRegion(ctx, group, tint, worldToCanvasNew);
@@ -6305,7 +6288,7 @@ function markMapDirty() {
 function applyMapGeometry(geom) {
     MapView.normalizeMapGeometry(geom);
     // The unnamed backdrop bucket (name === "") is drawn as a neutral
-    // underlay by drawLocationLayer; cache its triangle list separately so
+    // underlay by the world layer; cache its triangle list separately so
     // it isn't confused with loc groups keyed by name.
     const backdrop = geom.locs.find(l => l && l.name === '');
     geom.backdropTris = backdrop && Array.isArray(backdrop.tris) && backdrop.tris.length >= 9
@@ -7453,21 +7436,6 @@ function buildPlayerRegionIcon(player) {
     return canvas;
 }
 
-// drawLocationLayer: render the floor plan underlay (BSP backdrop triangles,
-// per-loc region fills, thin grey outlines, centroid labels) directly through
-// worldToCanvas so everything follows user pan / zoom and stays crisp. No
-// bitmap cache — at typical loc counts (~30 regions) this is a handful of
-// batched path fills / strokes per frame, trivially cheap.
-// Focus-tier styling: how a group's base fill / outline / label react to the
-// active focus. No focus → base styles untouched.
-function tierFill(group, tier) {
-    const base = group.color.fill;
-    if (tier === 'focus') return MapView.scaleRgbaAlpha(base, 6, 0.5);
-    if (tier === 'near')  return MapView.scaleRgbaAlpha(base, 3.5, 0.32);
-    if (tier === 'far')   return MapView.scaleRgbaAlpha(base, 0.3);
-    return base;
-}
-
 // ─── Floor-model geometry + shading helpers ─────────────────────────────────
 //
 // The floor model (buildFloorModel) extrudes the floor's outer boundary into
@@ -7475,16 +7443,8 @@ function tierFill(group, tier) {
 // an offscreen canvas keyed by the full camera state, so steady playback just
 // blits — only rotation / pan / zoom / focus changes re-render. The helpers
 // below find that boundary (floorBoundaryEdges / floorBoundaryWalls) and draw
-// the sorted entries (renderSolidEntries); SOLID_LIGHT shades the liquid
-// volumes.
-
-// Fixed light for face shading — high, slightly off-axis so faces pointing
-// different directions separate tonally (used by the liquid volumes).
-const SOLID_LIGHT = (() => {
-    const l = [0.35, 0.25, 0.9];
-    const n = Math.hypot(l[0], l[1], l[2]);
-    return [l[0] / n, l[1] / n, l[2] / n];
-})();
+// the sorted entries. The world layers themselves now live in
+// mvd-map-view's MvdMap; what remains here is the per-frame composition.
 
 
 // Mover (lift/door/plat/train) rendering. A mover reads as a moving piece of
@@ -7493,318 +7453,17 @@ const SOLID_LIGHT = (() => {
 // near-opaque floor). A touch lighter than the backdrop floor so the moving
 // piece stays legible at rest; when a player is riding it the mover takes the
 // brighter MOVER_FILL_ACTIVE tone so it stands out like an occupied region.
-const MOVER_FILL = 'rgba(96, 107, 140, 0.92)';
-const MOVER_FILL_ACTIVE = 'rgba(150, 170, 215, 0.95)';
-
-// moverMeshFaces returns a submodel mesh's per-triangle outward-test normals,
-// cached by submodel id (translation preserves normals, so this is pose-
-// independent). Only the normal is needed — the fill is one flat tone — so
-// drawMoverMesh can cull back faces and fill the near hull as a single
-// silhouette.
-function moverMeshFaces(sub) {
-    let cache = mapState._moverFaces;
-    if (!cache) cache = mapState._moverFaces = {};
-    if (cache[sub]) return cache[sub];
-    const tris = mapState.submodelMeshes[sub];
-    const faces = [];
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        const ux = tris[i + 3] - tris[i],     uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2];
-        const vx = tris[i + 6] - tris[i],     vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2];
-        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-        faces.push({ off: i, nx, ny, nz }); // unnormalized: only the sign matters
-    }
-    cache[sub] = faces;
-    return faces;
-}
-
-// moverLocalBBox returns a submodel mesh's local-space XY/Z bounds, cached per
-// submodel id. A pose is a pure translation, so the box is pose-independent;
-// the world footprint is this box shifted by the pose offset.
-function moverLocalBBox(sub) {
-    let cache = mapState._moverBBox;
-    if (!cache) cache = mapState._moverBBox = {};
-    if (cache[sub]) return cache[sub];
-    const mesh = mapState.submodelMeshes[sub];
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
-    for (let i = 0; i + 2 < mesh.length; i += 3) {
-        const x = mesh[i], y = mesh[i + 1], z = mesh[i + 2];
-        if (x < minX) minX = x; if (x > maxX) maxX = x;
-        if (y < minY) minY = y; if (y > maxY) maxY = y;
-        if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
-    }
-    cache[sub] = { minX, maxX, minY, maxY, minZ, maxZ };
-    return cache[sub];
-}
 
 // A player counts as "riding" a posed mover when their XY lands within its
 // footprint and their z sits within a player-height window of its top surface.
-const MOVER_RIDE_Z_BELOW = 24; // tolerance under the top (interp / step noise)
-const MOVER_RIDE_Z_ABOVE = 56; // ~player height above the top
-function playerOnMover(pose, sub, players) {
-    const bb = moverLocalBBox(sub);
-    const minX = bb.minX + pose.x, maxX = bb.maxX + pose.x;
-    const minY = bb.minY + pose.y, maxY = bb.maxY + pose.y;
-    const topZ = bb.maxZ + pose.z;
-    for (const p of players) {
-        if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) continue;
-        if (p.z < topZ - MOVER_RIDE_Z_BELOW || p.z > topZ + MOVER_RIDE_Z_ABOVE) continue;
-        return true;
-    }
-    return false;
-}
-
-// Living players (x,y,z) at the current frame, for mover-ride tests. Drawn
-// from the frame's playerData, stashed by renderMap before drawLocationLayer.
-function livingPlayersAtFrame() {
-    const pd = mapState._framePlayerData;
-    const out = [];
-    if (!pd) return out;
-    for (const d of Object.values(pd)) {
-        if (!d) continue;
-        if (d.d || (d.h !== undefined && d.h <= 0)) continue;
-        if (d.x === 0 && d.y === 0) continue;
-        out.push(d);
-    }
-    return out;
-}
-
-// drawMovers poses every mover at the current time and draws the visible
-// ones, highlighting any a player is currently riding. No-op unless both the
-// pose streams and the submodel meshes are present (the meshes ride the async
-// corpus v4 fetch).
-function drawMovers(ctx) {
-    const movers = mapState.movers;
-    const meshes = mapState.submodelMeshes;
-    if (!movers || movers.length === 0 || !meshes) return;
-    const tMs = mapState.currentTime * 1000;
-    const players = livingPlayersAtFrame();
-    for (const m of movers) {
-        const mesh = meshes[m.sub];
-        if (!mesh || mesh.length < 9) continue;
-        const pose = MapView.moverPoseAt(m, tMs);
-        if (!pose || !pose.vis) continue;
-        const active = players.length > 0 && playerOnMover(pose, m.sub, players);
-        MapView.drawMoverMesh(ctx, mesh, moverMeshFaces(m.sub), pose, active ? MOVER_FILL_ACTIVE : MOVER_FILL, _wtc, worldToCanvas);
-    }
-}
-
 // Colours for the weapon-fire overlays.
-const PROJECTILE_COLORS = { rl: '#ff7733', gl: '#66cc44' };
-const NAIL_COLOR = '#ffe066';
-const BEAM_COLOR = 'rgba(150, 200, 255, 0.85)';
 // A beam flashes for this half-window (ms) around its instant.
-const BEAM_FLASH_MS = 60;
-
-// drawFlightDots draws each flight (rocket/grenade/nail) live at the current
-// time as a dot interpolated along its spawn→despawn segment (linear — exact
-// for the straight-flying rocket, approximate for grenades/nails). Columns are
-// the parallel arrays of a ProjectileStreams (schema v40).
-function drawFlightDots(ctx, pr, radius, colorOf) {
-    if (!pr || !Array.isArray(pr.s) || pr.s.length === 0) return;
-    const tMs = mapState.currentTime * 1000;
-    ctx.save();
-    for (let i = 0; i < pr.s.length; i++) {
-        const t0 = pr.s[i], t1 = pr.e[i];
-        if (tMs < t0 || tMs > t1) continue;
-        const f = t1 > t0 ? (tMs - t0) / (t1 - t0) : 0;
-        const x = pr.sx[i] + (pr.ex[i] - pr.sx[i]) * f;
-        const y = pr.sy[i] + (pr.ey[i] - pr.sy[i]) * f;
-        const z = pr.sz[i] + (pr.ez[i] - pr.sz[i]) * f;
-        const p = worldToCanvas(x, y, z);
-        ctx.fillStyle = colorOf(pr.w[i]);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    ctx.restore();
-}
-
-// drawProjectiles draws rocket/grenade flights (and nails when present —
-// nails are opt-in, so usually absent) at the current playback time.
-function drawProjectiles(ctx) {
-    drawFlightDots(ctx, mapState.projectiles, 3, (w) => PROJECTILE_COLORS[w] || '#ffffff');
-    drawFlightDots(ctx, mapState.nails, 1.5, () => NAIL_COLOR);
-}
-
-// drawBeams draws each LG bolt active near the current time as a short-lived
-// line from muzzle to impact. Columns are parallel arrays in mapState.beams.
-function drawBeams(ctx) {
-    const bm = mapState.beams;
-    if (!bm || !Array.isArray(bm.t) || bm.t.length === 0) return;
-    const tMs = mapState.currentTime * 1000;
-    ctx.save();
-    ctx.strokeStyle = BEAM_COLOR;
-    ctx.lineWidth = 1.5;
-    for (let i = 0; i < bm.t.length; i++) {
-        if (Math.abs(bm.t[i] - tMs) > BEAM_FLASH_MS) continue;
-        const a = worldToCanvas(bm.sx[i], bm.sy[i], bm.sz[i]);
-        const ax = a.x, ay = a.y;
-        const b = worldToCanvas(bm.ex[i], bm.ey[i], bm.ez[i]);
-        ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-    }
-    ctx.restore();
-}
 
 // Liquid volumes (water/slime/lava) from corpus v4. Rendered as a shaded,
 // depth-sorted translucent solid: each face is Lambert-shaded (so the top
 // surface reads brighter than the descending sides) and painted back to
 // front, so the body reads as a 3D volume with visible depth rather than a
 // flat silhouette. Static geometry — drawn live on top of the floor model.
-const LIQUID_BASE = {
-    water: [64, 128, 255],
-    slime: [80, 200, 80],
-    lava:  [255, 120, 40],
-};
-const LIQUID_ALPHA = 0.15; // per-face; back-to-front stacking deepens it
-
-function drawLiquidFills(ctx) {
-    const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
-    if (!Array.isArray(liquids)) return;
-    for (const lq of liquids) {
-        if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
-        MapView.drawLiquidVolume(ctx, lq.tris, LIQUID_BASE[lq.kind] || LIQUID_BASE.water, LIQUID_ALPHA, SOLID_LIGHT, _wtc, worldToCanvas);
-    }
-}
-
-// drawCachedWorld: blit the depth-sorted floor model, re-rendering the
-// offscreen canvas only when a projection input changed. The painter sort
-// scatters same-colour triangles, so batching costs many fill() calls — too
-// much to redo every frame, hence the per-camera bitmap cache. cacheField/
-// keyField pick the cache slot. bakeLiquids folds the (static) liquid volumes
-// into the cache; the floor view passes false and draws them live on top.
-function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
-    if (!se) return;
-    const canvas = mapState.canvas;
-    const dpr = mapState.dpr || 1;
-    const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
-    const key = [
-        _wtc.yaw, _wtc.pitch, _wtc.zoomK, _wtc.panX, _wtc.panY,
-        _wtc.scale, _wtc.offsetX, _wtc.offsetY,
-        _wtc.cx, _wtc.cy, _wtc.zMid,
-        mapState.focusGroupName, canvas.width, canvas.height, dpr,
-        se.entries.length,
-        bakeLiquids && Array.isArray(liquids) ? liquids.length : 0,
-    ].join('|');
-    let cache = mapState[cacheField];
-    if (!cache) cache = mapState[cacheField] = document.createElement('canvas');
-    if (mapState[keyField] !== key) {
-        cache.width = canvas.width;   // also clears
-        cache.height = canvas.height;
-        const cctx = cache.getContext('2d');
-        cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        MapView.renderSolidEntries(cctx, se, _wtc, worldToCanvas, farFadePredicate());
-        // Liquids are static geometry, so they bake into the cache too — a
-        // translucent pass on top of the opaque world (large volumes tint
-        // whatever's behind them).
-        if (bakeLiquids) drawLiquidFills(cctx);
-        mapState[keyField] = key;
-    }
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(cache, 0, 0);
-    ctx.restore();
-}
-
-// buildFloorModel returns the depth-sortable floor render list for the
-// current geometry + groups, cached on mapState. The model is built by the
-// component; the caching (and its invalidation on a geometry reload) stays
-// here because mapState owns the lifetime.
-function buildFloorModel() {
-    const geom = mapState.mapGeometry;
-    const groups = mapState.locationGroups || [];
-    const m = mapState._floorModel;
-    if (m && m.geom === geom && m.groups === mapState.locationGroups) return m;
-    const built = MapView.buildFloorModel(geom, groups);
-    mapState._floorModel = built;
-    return built;
-}
-
-function drawLocationLayer(ctx) {
-    const groups = mapState.locationGroups || [];
-    const backdropTris = mapState.mapGeometry && mapState.mapGeometry.backdropTris;
-    if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
-
-    const focused = !!mapState.focusGroupName;
-    const floorModel = buildFloorModel();
-
-    if (floorModel) {
-        // One clean view: flat, near-opaque, depth-sorted region tops + 10u box
-        // sides. A higher floor covers a lower one (no translucent stacking),
-        // the sides read as solid thickness, and from overhead it's dead flat.
-        // Cached to an offscreen bitmap (per camera).
-        drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
-        // Liquids: translucent volumes above the floor, drawn live.
-        drawLiquidFills(ctx);
-    } else {
-        // No triangle geometry (loc-blob maps): the old flat translucent fills.
-        if (backdropTris && backdropTris.length >= 9) {
-            MapView.drawTriangleListFill(ctx, backdropTris,
-                focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)',
-                worldToCanvas);
-        }
-        for (const group of groups) {
-            if (group.tris && group.tris.length >= 9) {
-                MapView.drawTriangleListFill(ctx, group.tris,
-                    tierFill(group, focusTier(group.name)), worldToCanvas);
-            }
-        }
-        drawLiquidFills(ctx);
-    }
-
-    // Movers (lifts/doors/plats) posed at the current time — above the region
-    // fills and below the outlines/labels.
-    drawMovers(ctx);
-
-    // Weapon-fire overlays at the current time: rocket/grenade flights as
-    // moving dots, LG bolts as brief beams. No-op unless the spatial streams
-    // were built (WASM map build).
-    drawProjectiles(ctx);
-    drawBeams(ctx);
-
-    // Thin grey outlines around each traced region — drawn after all fills so
-    // they sit on top and stay visible regardless of adjacent region tinting.
-    // MapView.drawRegionOutline needs the allocating worldToCanvasNew because
-    // it holds both endpoints of an edge simultaneously.
-    for (const group of groups) {
-        if (!group.tris || group.tris.length < 9) continue;
-        const tier = focusTier(group.name);
-        // Idle baseline is kept quiet (faint outline) so the floor reads as one
-        // calm surface; the occupied overlay brightens the active region's
-        // outline on top when a player is in it.
-        let stroke = 'rgba(180, 180, 180, 0.22)';
-        let width = 1;
-        if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
-        else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
-        MapView.drawRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
-    }
-
-    const labelPx = Math.round(12 * mapIconScale());
-    ctx.font = `${labelPx}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    for (const group of groups) {
-        const tier = focusTier(group.name);
-        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-        ctx.fillStyle = tier === 'far'
-            ? MapView.scaleRgbaAlpha(group.color.text, 0.35)
-            : group.color.text;
-        ctx.fillText(group.name, pos.x, pos.y);
-    }
-}
-
-// mapIconScale: capped upscale applied to player symbols, item markers,
-// loc labels, and any other canvas UI that should stay legible as the user
-// zooms in. Linear ramp from 1.0 at zoomK=1, reaching the 1.5x cap around
-// zoomK≈4.3 so midrange zooms already show a clear size bump. Cap is
-// enforced at 1.5 (user requested "never more than 50% bigger").
-function mapIconScale() {
-    const k = _wtc.zoomK || 1;
-    if (k <= 1) return 1;
-    return Math.min(1.5, 1 + (k - 1) * 0.15);
-}
 
 // Pre-compute full trails for all players from high-res bucket data.
 // Stores world-space (wx, wy, wz) positions — drawTracks converts to canvas
@@ -7905,7 +7564,7 @@ function renderMap(time) {
     // from the native-rate streams; state badges stay on the bucket. Built
     // once here from a non-mutating overlay on the cached bucket.
     const playerData = bucket ? augmentPlayerData(bucket.p, time * 1000) : null;
-    // Stash for drawMovers (runs inside drawLocationLayer, which has no
+    // Stash for drawMovers (runs inside the world layer, which has no
     // playerData of its own) to highlight movers a player is riding.
     mapState._framePlayerData = playerData;
 
@@ -7943,7 +7602,7 @@ function renderMap(time) {
     // Draw the location underlay (backdrop + per-loc regions + outlines +
     // labels). Fresh each frame so it follows pan / zoom precisely and stays
     // crisp at any zoom level.
-    drawLocationLayer(ctx);
+    mapView.drawWorld(ctx);
 
     // Learn-map mode: static entity study view — keep the floor/loc base,
     // draw the designed entity layout, and skip all player/time-based layers.
@@ -8322,7 +7981,7 @@ const ITEM_Z_TOP_THRESHOLD = 48;
 // draws on top, and the common case of a player standing on a pickup
 // draws the player on top.
 function drawItemsAndPlayersZSorted(ctx, time, playerData) {
-    const iconScale = mapIconScale();
+    const iconScale = mapView.iconScale();
     const zRange = mapState.zRange || { lo: 0, hi: 0 };
     // Height-based symbol size scaling is a 2D-only cue: once the camera is
     // tilted, height is directly visible, and size differences would read as
@@ -8513,7 +8172,7 @@ function drawMapEntities(ctx) {
     const entities = mapState.mapEntities;
     if (!entities || entities.length === 0) return;
     const f = mapState.entityFilters;
-    const iconScale = mapIconScale();
+    const iconScale = mapView.iconScale();
     const size = ITEM_MARKER_SIZE * iconScale;
     const half = size / 2;
     const fontPx = Math.round(10 * iconScale);

@@ -23,10 +23,16 @@ drive design decisions until someone actually asks for it.
 ## The loader invariant
 
 **This package never loads anything.** No `fetch`, no `XMLHttpRequest`, no
-dynamic `import()`, no `window`, no `document`, no `location`, no webfonts —
-the only font families used are `monospace` and `sans-serif`. Every byte
-arrives through a setter, and the only browser object it touches is the
-canvas context it is handed.
+dynamic `import()`, no ambient `window` / `document` / `location`, no
+webfonts — the only font families used are `monospace` and `sans-serif`.
+Every byte arrives through a setter.
+
+The rule is about *ambient* globals, not the DOM as such: the canvas the host
+hands over is fair game, including reaching through it. The world bake needs
+an offscreen surface and gets it from `canvas.ownerDocument.createElement`,
+which works whatever document the canvas belongs to — where a bare
+`document.createElement` would assume the renderer and its canvas live in the
+same global, and that is exactly the assumption an iframe breaks.
 
 This is not stylistic. The MCP viewer runs behind a strict CSP with no
 network origins at all: its geometry arrives over `resources/read` and its
@@ -58,15 +64,16 @@ Moved so far:
 | `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
 | `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
+| `src/map.js` | `MvdMap` — the state container, camera, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays and the world layer (`drawWorld`) |
 | `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
 
-Still in `app.js`: the per-frame composition (`renderMap` and the layer
-functions it calls), player/item/trail drawing, pointer interaction, and all
-the DOM chrome. Those move with the stateful container.
+Still in `app.js`: the per-frame composition (`renderMap`), player / item /
+entity / trail drawing, the LOS and region overlays, pointer interaction, and
+all the DOM chrome and loaders.
 
 The intended end state is a `MvdMap` class taking geometry, a static entity
 corpus, and a windowed frame source, with the host application owning only
