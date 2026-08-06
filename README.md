@@ -125,16 +125,21 @@ identically. See [`mvd-api/README.md`](mvd-api/README.md) for the
 endpoint table; the running server also describes itself — an OpenAPI
 3.1 spec at `/openapi.yaml`, browsable at `/docs`.
 
-**API stability.** The API grows additively: new endpoints and response
-fields appear without announcement, documented fields don't change meaning
-or disappear, parameter defaults don't change value, and a genuine break
-ships as `/v2/<endpoint>` served *alongside* `/v1` (old routes retire on a
-minimum of 8 weeks' notice). A correctness fix — a value that changes
-because it was computed wrongly — keeps the field's name and type and at
-most narrows its documented meaning to what it was always meant to measure,
-so it stays in `/v1` and only raises `schemaVersion`, which is a cache key
-rather than a break signal. The MCP tool surface follows the same policy;
-the shim and the API deploy in lockstep. In return clients must ignore
+**API stability.** `/v1` is **not frozen yet**. Most change is additive —
+new endpoints and response fields appear without announcement — but a schema
+upgrade can still withdraw a documented field or change what one means
+(v70 removed four fields from `/overview` that were copies of other
+endpoints). What is guaranteed today is that nothing changes silently: every
+observable change bumps `schemaVersion` and is written up in
+[RELEASE_NOTES.md](RELEASE_NOTES.md) against that version, the served spec is
+generated from the running code and validated against real responses, and the
+MCP shim deploys in lockstep with the API. So `schemaVersion` is a cache key
+*and*, for now, the signal to go read what moved. The intended destination —
+additive-only `/v1`, breaks as `/v2/<endpoint>` served *alongside* it, old
+routes retiring on a minimum of 8 weeks' notice — is near-term, and stated as
+a direction rather than a promise already in force. A correctness fix (a value
+that changes because it was computed wrongly) keeps the field's name and type
+and at most narrows its documented meaning. In return clients must ignore
 unknown fields and enum values. The full policy is
 [`mvd-api/API.md` §2.7](mvd-api/API.md#27-api-versioning-and-stability),
 also served in the spec's own description at `/docs`.
@@ -650,9 +655,12 @@ proximity/awareness signal. Both are surfaced through the REST/MCP
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
 observable change to the analysis output — additive ones included, and
 largely view-only ones such as v65, whose two interval segmentations add
-no `Result` field at all — so it is
-a regeneration counter and cache key, not a break signal. Consumers can pin
-or feature-detect by reading `result.schemaVersion`. The full per-field
+no `Result` field at all — so it is first a regeneration counter and cache
+key. It is **not only** that while the surface is still settling: a bump can
+also carry a removal or a reshape (v70 dropped four `/overview` fields), so
+read the version's entry in [RELEASE_NOTES.md](RELEASE_NOTES.md) rather than
+assuming a bump was additive. Consumers can pin or feature-detect by reading
+`result.schemaVersion`. The full per-field
 reference and the complete version-history table live in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md); the
 HTTP-level compatibility policy is [`mvd-api/API.md`

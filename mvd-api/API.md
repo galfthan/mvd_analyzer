@@ -511,41 +511,74 @@ CORS credentials mode that `*` forbids applies to cookies, not bearer tokens).
 
 ### 2.7 API versioning and stability
 
-The API is still growing. The deal is: it grows **additively**, and the rare
-genuine break arrives as a new route you can migrate to on your own
-schedule.
+**`/v1` is not frozen yet, and this section says so plainly rather than
+promising a stability that has not been earned.** Most change here is
+additive — new endpoints and new response fields appear all the time. But a
+schema upgrade **can still withdraw a documented field or change what one
+means, inside `/v1`**.
+
+That is not hypothetical. Schema **v70** removed `topKills`, `topStreaks`,
+`topPowerups` and `hasRegionControl` from `/overview`, after they were
+measured at 78-88% of that response and found to be copies of `/top-kills`,
+`/lives` and `/events` — a strictly better endpoint, and a break for anyone
+who was reading those fields.
+
+So: build against this API, and expect to re-check it occasionally. Don't
+pin a response shape you cannot revisit.
 
 Two version numbers move independently, and they mean different things:
 
-- **The `/v1` path prefix is the compatibility contract.** It never
-  changes meaning under you: a *breaking* change — a documented field
-  removed or renamed, an enum value withdrawn, a type changed
-  incompatibly, a documented default behaviour or default parameter value
-  altered — arrives as a new prefix (`/v2/<endpoint>`) served **alongside**
-  `/v1`, not as a replacement of it. As long as you stay on `/v1`, existing
-  integrations keep working.
+- **The `/v1` path prefix is the surface, not yet a frozen contract.** It
+  is where everything lives and it is not going to move under you without
+  a version bump and a written-up reason — but "without a version bump" is
+  the guarantee today, not "never".
 - **`schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and the
   OpenAPI `info.version`) is a regeneration counter.** It ticks on *every*
-  observable change to the analysis output, including purely **additive**
-  ones — a new field, a new endpoint, a new event type, a new enum value.
-  It keys caches and ETags, so bumping it invalidates stale client caches
-  automatically; a schema-version increase is **not** a signal that
-  anything broke.
+  observable change to the analysis output, most of them purely additive —
+  a new field, a new endpoint, a new event type, a new enum value. It keys
+  caches and ETags, so bumping it invalidates stale client caches
+  automatically. **While `/v1` is still moving it is also your break
+  signal**: when it changes, read the release notes before assuming
+  nothing you depend on moved.
 
-#### What you can rely on
+#### What you can rely on today
 
-- **`/v1` grows, it doesn't shift.** New endpoints and new response fields
-  appear at any time without announcement. Documented fields and endpoints
-  don't change meaning, change type, or disappear outside the process
-  below.
+- **Nothing changes silently.** Every observable change bumps
+  `schemaVersion` and is written up in
+  [RELEASE_NOTES.md](../RELEASE_NOTES.md) against the version that carries
+  it, including what was removed and why.
+- **The spec is not aspirational.** `openapi.yaml` is generated from the
+  running code, drift-tested against it, and validated against real golden
+  responses in CI — so if the spec and the server disagree, CI fails
+  before you do.
+- **The MCP surface moves in lockstep.** `mvd-mcp` forwards every call to
+  this API and the two deploy together, so a REST change and its tool
+  change land at the same moment; you will never see a shim describing an
+  endpoint that no longer behaves that way.
+- **A correctness fix is still not a break** (see below) — those keep the
+  field's name and type.
+
+#### Where this is heading
+
+The intended destination, in the near future, is the contract this section
+used to claim outright:
+
+- **`/v1` grows, it doesn't shift.** Documented fields and endpoints don't
+  change meaning, change type, or disappear.
 - **A breaking change ships as a new route** (`/v2/<endpoint>`) served
-  **alongside** the old one, not as a replacement. Both work during the
-  transition, so nothing forces a same-day migration.
+  **alongside** the old one, not as a replacement, so nothing forces a
+  same-day migration.
 - **Old routes retire on notice**: a minimum of 8 weeks after the
   deprecation is announced, and in practice only once measured usage of the
   old route has drained — every request carries a key, so "is anyone still
-  on this?" is measured rather than guessed. The notice period is the
-  floor; drained usage can only delay a removal, never bring it forward.
+  on this?" is measured rather than guessed.
+
+Most of the machinery that policy needs already exists — versioned release
+notes, a drift-tested spec, per-key usage measurement, lockstep deploys.
+What is missing is the decision to stop moving the shape, and that is worth
+earning rather than announcing early: the surface is still finding the
+right cut, and v70 is what that looks like in practice. **Read the rules
+above as the destination, not as a promise already in force.**
 - **A correctness fix is not a break.** When a field's *value* changes
   because it was being computed wrongly, the field keeps its name and its
   type, and its documented meaning is not *replaced* — at most it is
@@ -589,10 +622,10 @@ default *behaviour* is a break.
 
 **The MCP tool surface follows this policy too.** `mvd-mcp` forwards
 every call to `mvd-api` and the two deploy in lockstep, so tool names,
-tool parameters and the meaning of their results move only under the
-rules above: new tools, new parameters and new result fields appear
-additively; a genuine break rides the same `/v2` + notice process as the
-REST route behind it. MCP tool *defaults* may differ from the REST
+tool parameters and the meaning of their results move under exactly the
+rules above — including the part where, until the freeze, a schema
+upgrade can withdraw or reshape one. v70 changed `getOverview`'s result
+and its tool description in the same deploy as the REST route. MCP tool *defaults* may differ from the REST
 defaults where an agent-facing default is more useful (e.g.
 `getLocTrails` defaults `minDwellMs` to 250 while REST defaults it to
 0); each such difference is documented in the tool description and is

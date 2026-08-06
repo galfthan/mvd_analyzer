@@ -81,20 +81,31 @@ info:
     nothing.
 
     ### API stability
-    The API grows **additively**, and the rare genuine break arrives as a
-    new route rather than a mutation of an old one.
+    **`/v1` is not frozen yet.** Most change is additive — new endpoints and
+    new response fields appear at any time without announcement — but a
+    schema upgrade **can still remove a documented field or change what one
+    means, inside `/v1`**. Schema v70 is the worked example: `/overview` lost
+    `topKills`, `topStreaks`, `topPowerups` and `hasRegionControl` once they
+    were measured at 78-88% of the response and found to be copies of
+    `/top-kills`, `/lives` and `/events`. Treat this surface as one you can
+    build against and will occasionally have to re-check, not one you can
+    pin and forget.
 
-    What you can rely on: **`/v1` grows, it doesn't shift** — new endpoints
-    and new response fields appear at any time without announcement, and
-    documented fields don't change meaning, change type, or disappear
-    outside the process here. A **breaking change ships as `/v2/<endpoint>`
-    served alongside `/v1`**, not as a replacement — that includes
-    withdrawing a documented field or enum member, changing a type,
-    altering a documented default behaviour, and changing the **default
-    value of a parameter** (a caller who omits it would otherwise get
-    different numbers without opting in). **Old routes retire on
-    a minimum of 8 weeks' notice**, and in practice only once measured
-    usage has drained. A **correctness fix is not a break**: when a value
+    What holds today is that **nothing changes silently**: every observable
+    change bumps `schemaVersion`, every change is written up in
+    RELEASE_NOTES.md against the version that carries it, this spec is
+    generated from the running code and validated against real responses in
+    CI, and the MCP shim deploys in lockstep with the API. So watch
+    `schemaVersion` — it is your cache key, and until the freeze it is also
+    the signal to go read what moved.
+
+    **Where this is going, in the near future:** an additive-only `/v1`
+    where documented fields don't change meaning, change type, or disappear;
+    a genuine break shipping as `/v2/<endpoint>` served alongside `/v1`
+    rather than replacing it; and old routes retiring on a minimum of 8
+    weeks' notice, in practice only once measured usage has drained. That
+    is the destination and the rules it will be run by — it is not a promise
+    that is already in force. A **correctness fix is not a break**: when a value
     changes because it was computed wrongly, the field keeps its name and
     type and its documented meaning is not replaced — at most narrowed to
     the semantics it was always meant to have, with the docs updated to say
@@ -105,9 +116,12 @@ info:
     result semantics change only under the process above.
 
     `schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and this
-    document's `info.version`) is a **regeneration counter, not a break
-    signal**. It ticks on every observable change including purely additive
-    ones. Treat it as a cache key.
+    document's `info.version`) is a **regeneration counter** that ticks on
+    every observable change, most of them purely additive. Treat it as a
+    cache key — and, while `/v1` is still moving, as the prompt to check
+    RELEASE_NOTES.md before assuming a bump was additive. Once the surface
+    is declared stable it goes back to being a pure cache key, because
+    breaks will live at `/v2` instead.
 
     Covered by the contract: documented request parameters, documented
     response fields and their types, documented enum members and status

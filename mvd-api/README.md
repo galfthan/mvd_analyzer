@@ -271,10 +271,14 @@ guide around it:
   payloads (raw stream entries, the columnar grid, aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
 - **API versioning and stability** ([§2.7](API.md#27-api-versioning-and-stability))
-  — the compatibility policy consumers build against: additive by default,
-  breaks ship as `/v2` alongside `/v1`, `schemaVersion` is a cache key not
-  a break signal, and what is / isn't covered by the contract. Mirrored in
-  the spec's own `info.description`, so it is served at `/docs` too.
+  — what consumers can actually rely on: `/v1` is **not frozen yet**, so a
+  schema upgrade can still withdraw or reshape a documented field (v70 did);
+  what is promised today is that no change is silent — versioned release
+  notes, a drift-tested spec, lockstep MCP deploys — which makes
+  `schemaVersion` a cache key *and*, for now, a break signal. The
+  additive-only `/v1` + `/v2`-for-breaks contract is stated there as the
+  near-term destination, not as current policy. Mirrored in the spec's own
+  `info.description`, so it is served at `/docs` too.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.
 - **Recipes** — common frontend features → the call that backs them.

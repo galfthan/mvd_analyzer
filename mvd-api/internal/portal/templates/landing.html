@@ -36,22 +36,35 @@
 
 <h2>API stability</h2>
 <p class="muted">
-  The API grows <strong>additively</strong>. New endpoints and new response
-  fields appear at any time without announcement; documented fields do not
-  change meaning, change type, or disappear, and parameter defaults do not
-  change value. A genuine breaking change ships
-  as a new route (<code>/v2/…</code>) served <em>alongside</em> <code>/v1</code>,
-  so you migrate on your own schedule — old routes retire on a minimum of
-  8 weeks' notice. The MCP tools follow the same policy; they deploy in
-  lockstep with the API.
+  <strong>The API is not frozen yet.</strong> Most change is additive — new
+  endpoints and new response fields appear at any time — but a schema
+  upgrade <em>can</em> still remove a documented field or change what one
+  means, inside <code>/v1</code>. That has happened: schema v70 dropped
+  <code>topKills</code>, <code>topStreaks</code>, <code>topPowerups</code> and
+  <code>hasRegionControl</code> from <code>/overview</code> when they turned
+  out to be copies of other endpoints. Build against it, but pin nothing you
+  cannot re-check.
 </p>
 <p class="muted">
-  <code>schemaVersion</code> is a regeneration counter, not a break signal: it
-  ticks on every change including additive ones, so treat it as a cache key.
-  A correctness fix — a value that changes because it was computed wrongly —
-  keeps the field's name and type, and at most narrows its documented meaning
-  to what the field was always meant to measure, so it ships inside
-  <code>/v1</code>.
+  What we do promise today is that <strong>no change is silent</strong>.
+  Every observable change bumps <code>schemaVersion</code> and is written up
+  in the release notes against that version, the spec served at
+  <a href="/docs">/docs</a> is generated from the running code and tested
+  against real responses, and the MCP tools deploy in lockstep with the API.
+  So <code>schemaVersion</code> is both your cache key <em>and</em>, for now,
+  the thing to watch: when it moves, read the notes before assuming nothing
+  broke.
+</p>
+<p class="muted">
+  This is heading somewhere more stable in the near future: an additive-only
+  <code>/v1</code>, with genuine breaks shipping as <code>/v2/…</code> served
+  <em>alongside</em> it and old routes retiring on a minimum of 8 weeks'
+  notice. The machinery for that is already in place — versioned notes, a
+  drift-tested spec, per-key usage measurement — what is missing is the
+  commitment to stop moving, and we would rather earn that than announce it
+  early. A correctness fix, where a value changes because it was computed
+  wrongly, keeps the field's name and type and at most narrows its documented
+  meaning to what it was always meant to measure.
 </p>
 <p class="muted">
   In return your client must <strong>ignore unknown fields and unknown enum
