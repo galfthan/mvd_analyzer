@@ -21,14 +21,23 @@ Moved so far:
 | `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
 | `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
+| `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
 
+Still in `app.js`: the per-frame composition (`renderMap` and the layer
+functions it calls), player/item/trail drawing, pointer interaction, and all
+the DOM chrome. Those move with the stateful container.
+
 The intended end state is a `MvdMap` class taking geometry, a static entity
 corpus, and a windowed frame source, with the host application owning only
 the chrome around the canvas. The design is in `plans/plan-embeddable-map.md`.
+
+Everything in `src/draw.js` takes its context, geometry and projection
+explicitly — no renderer state is read from module scope. That is what makes
+it the layer a WebGL backend replaces wholesale.
 
 ## Use
 

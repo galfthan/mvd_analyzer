@@ -49,6 +49,24 @@ export {
     FLOOR_TOP_ALPHA,
 } from './locgroups.js';
 
+export {
+    PLAYER_SYMBOL_BASE_SIZE,
+    ARROWHEAD_PX,
+    drawTriangleListFill,
+    drawRegionOutline,
+    fillRegion,
+    renderSolidEntries,
+    drawMoverMesh,
+    drawLiquidVolume,
+    drawPlayerSymbolAt,
+    drawBadge,
+    drawBadgesAroundCenter,
+    drawDeathX,
+    drawDropD,
+    drawWorldArrow,
+    drawArrow,
+} from './draw.js';
+
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
 
 export { hexToRgba, scaleRgbaAlpha, getLocationColor } from './color.js';

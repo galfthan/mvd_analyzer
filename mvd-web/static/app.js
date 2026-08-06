@@ -6041,60 +6041,6 @@ function processLocationGroups(locations) {
     return groups;
 }
 
-// Fill a flat triangle list (9 numbers per triangle — x,y,z per vertex)
-// with the given style. Shared by loc-group fills and the unnamed backdrop
-// underlay. All triangles are added to a single path and filled once so this
-// stays fast when called every frame with thousands of tris. Uses the
-// non-allocating worldToCanvas variant (shared _tmpPt) — safe because each
-// point's x/y is consumed by ctx.moveTo/lineTo before the next call
-// overwrites the buffer.
-function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
-    if (!tris || tris.length < 9) return;
-    ctx.fillStyle = fillStyle;
-    ctx.beginPath();
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        let p = worldToCanvasFunc(tris[i],     tris[i + 1], tris[i + 2]);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvasFunc(tris[i + 3], tris[i + 4], tris[i + 5]);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvasFunc(tris[i + 6], tris[i + 7], tris[i + 8]);
-        ctx.lineTo(p.x, p.y);
-        ctx.closePath();
-    }
-    ctx.fill();
-}
-
-// Compute boundary edges of a triangle soup: edges that belong to exactly one
-// triangle are on the outline; edges shared by two triangles are interior and
-// cancel. Edge identity includes z so two floors stacked at the same XY don't
-// cancel each other's boundaries. Returns a flat Float array of world-space
-// segment endpoints (x1,y1,z1,x2,y2,z2, ...). Also caches, aligned per edge,
-// the outward horizontal normal (2 floats, pointing away from the region
-// interior — derived from the owning triangle's centroid) in
-// group.outlineNormals. Cached on the group for reuse.
-// Stroke the outline of a location region as a set of boundary line segments.
-function drawLocationRegionOutline(ctx, group, worldToCanvasFunc, strokeStyle, lineWidth) {
-    const outline = MapView.computeRegionOutline(group);
-    if (!outline || outline.length < 6) return;
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    for (let i = 0; i + 5 < outline.length; i += 6) {
-        const a = worldToCanvasFunc(outline[i],     outline[i + 1], outline[i + 2]);
-        const b = worldToCanvasFunc(outline[i + 3], outline[i + 4], outline[i + 5]);
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-    }
-    ctx.stroke();
-}
-
-// Fill a location region using its BSP-derived triangle list. Groups
-// with no tris (map JSON absent, or a loc that didn't match any face)
-// silently no-op. Used by the region-control overlay.
-function fillLocationRegion(ctx, group, fillColor, worldToCanvasFunc) {
-    drawTriangleListFill(ctx, group.tris, fillColor, worldToCanvasFunc);
-}
-
 // ─── Region focus mode ──────────────────────────────────────────────────────
 //
 // Clicking a loc region (on empty floor, not a player symbol) focuses it:
@@ -6109,6 +6055,14 @@ const FOCUS_NEIGHBOR_MARGIN = 160;
 
 // focusTier: null when no focus is active; otherwise which styling tier the
 // named group falls into.
+// farFadePredicate: the callback renderSolidEntries uses to decide whether an
+// entry's loc is outside the current focus and should draw in its faded tone.
+// Null when nothing is focused, which lets the component skip the test.
+function farFadePredicate() {
+    if (!mapState.focusGroupName) return null;
+    return (name) => focusTier(name) === 'far';
+}
+
 function focusTier(name) {
     if (!mapState.focusGroupName) return null;
     if (name === mapState.focusGroupName) return 'focus';
@@ -6213,14 +6167,14 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     for (const [name, teams] of occupied) {
         const group = groupsByName[name];
         if (!group || !group.tris || group.tris.length < 9) continue;
-        drawTriangleListFill(ctx, group.tris, regionActiveTint(teams), worldToCanvas);
+        MapView.drawTriangleListFill(ctx, group.tris, regionActiveTint(teams), worldToCanvas);
     }
 
     // Brighter outline pass.
     for (const name of occupied.keys()) {
         const group = groupsByName[name];
         if (!group || !group.tris || group.tris.length < 9) continue;
-        drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
+        MapView.drawRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
     }
 
     // Bold label pass — draw over the dimmer prerendered label so it pops.
@@ -6294,7 +6248,7 @@ function drawRegionControlOverlay(ctx, controlStates) {
             const tint = focusTier(group.name) === 'far'
                 ? MapView.scaleRgbaAlpha(color, 0.3)
                 : color;
-            fillLocationRegion(ctx, group, tint, worldToCanvasNew);
+            MapView.fillRegion(ctx, group, tint, worldToCanvasNew);
         }
     }
 }
@@ -6376,27 +6330,6 @@ function getActiveBadges(data) {
         if (active) badges.push({ angle: def.angle, letter, color });
     }
     return badges;
-}
-
-function drawBadge(ctx, letter, color, x, y, radius) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.font = `bold ${Math.round(radius * 1.2)}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#000';
-    ctx.fillText(letter, x, y);
-}
-
-function drawBadgesAroundCenter(ctx, badges, cx, cy, orbitRadius, badgeRadius) {
-    for (const b of badges) {
-        const rad = (b.angle - 90) * Math.PI / 180;
-        const bx = cx + orbitRadius * Math.cos(rad);
-        const by = cy + orbitRadius * Math.sin(rad);
-        drawBadge(ctx, b.letter, b.color, bx, by, badgeRadius);
-    }
 }
 
 function markMapDirty() {
@@ -7226,30 +7159,6 @@ function assignPlayerSymbols(result) {
 // Base size (px) of a player symbol at iconScale=1. The letter circle
 // radius / outline width / letter font size all scale proportionally from
 // this when we draw for a different iconScale.
-const PLAYER_SYMBOL_BASE_SIZE = 32;
-
-// Draw a player symbol (team-colour-bordered circle + letter) directly onto
-// the supplied ctx, centered at (cx, cy) in CSS pixels. Fresh-drawn every
-// frame so it's always pixel-native at the current zoom and display DPR —
-// no bitmap cache, no upscale blur.
-function drawPlayerSymbolAt(ctx, letter, teamColor, cx, cy, size) {
-    const k = size / PLAYER_SYMBOL_BASE_SIZE;
-    const r = 13 * k;
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = '#0a0a15';
-    ctx.fill();
-    ctx.strokeStyle = teamColor;
-    ctx.lineWidth = 2 * k;
-    ctx.stroke();
-
-    ctx.font = `bold ${Math.round(16 * k)}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = teamColor;
-    ctx.fillText(letter, cx, cy);
-}
 
 function buildMapLegend() {
     const legend = document.getElementById('map-legend');
@@ -7569,11 +7478,11 @@ function buildPlayerRegionIcon(player) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Draw player symbol centered — fresh-drawn so it's crisp at DPR.
-    drawPlayerSymbolAt(ctx, letter, teamColor, size / 2, size / 2, PLAYER_SYMBOL_BASE_SIZE);
+    MapView.drawPlayerSymbolAt(ctx, letter, teamColor, size / 2, size / 2, MapView.PLAYER_SYMBOL_BASE_SIZE);
 
     // Draw status badges around player symbol
     if (badges.length > 0) {
-        drawBadgesAroundCenter(ctx, badges, size / 2, size / 2, 14, 5);
+        MapView.drawBadgesAroundCenter(ctx, badges, size / 2, size / 2, 14, 5);
     }
 
     cache.set(key, canvas);
@@ -7613,59 +7522,6 @@ const SOLID_LIGHT = (() => {
     return [l[0] / n, l[1] / n, l[2] / n];
 })();
 
-
-// renderSolidEntries: painter-sort by projected centroid depth (cached per
-// camera angle — the order only depends on yaw/pitch) and draw, batching
-// consecutive same-fill triangles into a single path.
-function renderSolidEntries(ctx, se) {
-    const w = _wtc;
-    const camKey = w.yaw + '|' + w.pitch;
-    if (se.sortedFor !== camKey) {
-        for (const e of se.entries) {
-            const dx = e.cx - w.cx, dy = e.cy - w.cy, dz = e.cz - w.zMid;
-            const yr = dx * w.sinYaw + dy * w.cosYaw;
-            e.depth = dz * w.sinPitch - yr * w.cosPitch;
-        }
-        se.entries.sort((a, b) => a.depth - b.depth);
-        se.sortedFor = camKey;
-    }
-    const focused = !!mapState.focusGroupName;
-    let curFill = null;
-    let open = false;
-    // Seal the anti-aliasing seams between adjacent triangles. The painter
-    // sort interleaves triangles, so even one continuous floor's same-colour
-    // tris land in separate sub-paths; canvas anti-aliases each shared edge
-    // against the backdrop, so the triangulation reads as a distracting mesh.
-    // Stroking every batch with its own fill colour at a hairline width covers
-    // those gaps. Genuine 3D edges (floor-top↔slab-side folds, walls) survive
-    // because they're a different colour and so aren't painted over.
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = 1;
-    const flush = () => {
-        ctx.fill();
-        ctx.strokeStyle = curFill;
-        ctx.stroke();
-    };
-    for (const e of se.entries) {
-        const fill = (focused && focusTier(e.name) === 'far') ? e.fillFaded : e.fill;
-        if (fill !== curFill) {
-            if (open) flush();
-            ctx.fillStyle = fill;
-            ctx.beginPath();
-            curFill = fill;
-            open = true;
-        }
-        const t = e.tris, i = e.off;
-        let p = worldToCanvas(t[i], t[i + 1], t[i + 2]);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvas(t[i + 3], t[i + 4], t[i + 5]);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvas(t[i + 6], t[i + 7], t[i + 8]);
-        ctx.lineTo(p.x, p.y);
-        ctx.closePath();
-    }
-    if (open) flush();
-}
 
 // Mover (lift/door/plat/train) rendering. A mover reads as a moving piece of
 // floor: a single flat silhouette (near hull only), no shading, at the same
@@ -7764,7 +7620,7 @@ function drawMovers(ctx) {
         const pose = MapView.moverPoseAt(m, tMs);
         if (!pose || !pose.vis) continue;
         const active = players.length > 0 && playerOnMover(pose, m.sub, players);
-        drawMoverMesh(ctx, mesh, m.sub, pose, active);
+        MapView.drawMoverMesh(ctx, mesh, moverMeshFaces(m.sub), pose, active ? MOVER_FILL_ACTIVE : MOVER_FILL, _wtc, worldToCanvas);
     }
 }
 
@@ -7828,34 +7684,6 @@ function drawBeams(ctx) {
     ctx.restore();
 }
 
-// drawMoverMesh draws one posed mover as a single flat translucent silhouette
-// in the floor colour: cull the back faces (the submodel triangulation winds
-// so its normals point *into* the solid, so the near hull is the faces whose
-// normal points away from the camera) and fill the near hull's union once.
-// One fill at one alpha → no per-face double-blend, no painter-sort flicker,
-// and it blends with the floor instead of standing out. worldToCanvas reuses
-// one object, so each projected point is consumed immediately.
-function drawMoverMesh(ctx, mesh, sub, pose, active) {
-    const ox = pose.x, oy = pose.y, oz = pose.z;
-    const w = _wtc;
-    const vx = -w.sinYaw * w.cosPitch, vy = -w.cosYaw * w.cosPitch, vz = w.sinPitch;
-    const faces = moverMeshFaces(sub);
-    ctx.fillStyle = active ? MOVER_FILL_ACTIVE : MOVER_FILL;
-    ctx.beginPath();
-    for (const f of faces) {
-        if (f.nx * vx + f.ny * vy + f.nz * vz >= 0) continue; // back-facing
-        const i = f.off;
-        let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 6] + ox, mesh[i + 7] + oy, mesh[i + 8] + oz);
-        ctx.lineTo(p.x, p.y);
-        ctx.closePath();
-    }
-    ctx.fill();
-}
-
 // Liquid volumes (water/slime/lava) from corpus v4. Rendered as a shaded,
 // depth-sorted translucent solid: each face is Lambert-shaded (so the top
 // surface reads brighter than the descending sides) and painted back to
@@ -7868,45 +7696,12 @@ const LIQUID_BASE = {
 };
 const LIQUID_ALPHA = 0.15; // per-face; back-to-front stacking deepens it
 
-function drawLiquidVolume(ctx, tris, base) {
-    const w = _wtc;
-    const faces = [];
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
-        const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
-        const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
-        const ux = bx - ax, uy = by - ay, uz = bz - az;
-        const vx = cx - ax, vy = cy - ay, vz = cz - az;
-        let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-        const nl = Math.hypot(nx, ny, nz) || 1;
-        const shade = 0.5 + 0.5 * Math.abs((nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl);
-        const dcx = (ax + bx + cx) / 3 - w.cx, dcy = (ay + by + cy) / 3 - w.cy, dcz = (az + bz + cz) / 3 - w.zMid;
-        const yr = dcx * w.sinYaw + dcy * w.cosYaw;
-        faces.push({ off: i, shade, depth: dcz * w.sinPitch - yr * w.cosPitch });
-    }
-    faces.sort((a, b) => a.depth - b.depth); // back to front for translucency
-    for (const f of faces) {
-        const q = Math.round(f.shade * 10) / 10;
-        ctx.fillStyle = `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, ${LIQUID_ALPHA})`;
-        ctx.beginPath();
-        const i = f.off;
-        let p = worldToCanvas(tris[i],     tris[i + 1], tris[i + 2]);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvas(tris[i + 3], tris[i + 4], tris[i + 5]);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvas(tris[i + 6], tris[i + 7], tris[i + 8]);
-        ctx.lineTo(p.x, p.y);
-        ctx.closePath();
-        ctx.fill();
-    }
-}
-
 function drawLiquidFills(ctx) {
     const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
     if (!Array.isArray(liquids)) return;
     for (const lq of liquids) {
         if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
-        drawLiquidVolume(ctx, lq.tris, LIQUID_BASE[lq.kind] || LIQUID_BASE.water);
+        MapView.drawLiquidVolume(ctx, lq.tris, LIQUID_BASE[lq.kind] || LIQUID_BASE.water, LIQUID_ALPHA, SOLID_LIGHT, _wtc, worldToCanvas);
     }
 }
 
@@ -7936,7 +7731,7 @@ function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
         cache.height = canvas.height;
         const cctx = cache.getContext('2d');
         cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        renderSolidEntries(cctx, se);
+        MapView.renderSolidEntries(cctx, se, _wtc, worldToCanvas, farFadePredicate());
         // Liquids are static geometry, so they bake into the cache too — a
         // translucent pass on top of the opaque world (large volumes tint
         // whatever's behind them).
@@ -7982,13 +7777,13 @@ function drawLocationLayer(ctx) {
     } else {
         // No triangle geometry (loc-blob maps): the old flat translucent fills.
         if (backdropTris && backdropTris.length >= 9) {
-            drawTriangleListFill(ctx, backdropTris,
+            MapView.drawTriangleListFill(ctx, backdropTris,
                 focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)',
                 worldToCanvas);
         }
         for (const group of groups) {
             if (group.tris && group.tris.length >= 9) {
-                drawTriangleListFill(ctx, group.tris,
+                MapView.drawTriangleListFill(ctx, group.tris,
                     tierFill(group, focusTier(group.name)), worldToCanvas);
             }
         }
@@ -8007,7 +7802,7 @@ function drawLocationLayer(ctx) {
 
     // Thin grey outlines around each traced region — drawn after all fills so
     // they sit on top and stay visible regardless of adjacent region tinting.
-    // drawLocationRegionOutline needs the allocating worldToCanvasNew because
+    // MapView.drawRegionOutline needs the allocating worldToCanvasNew because
     // it holds both endpoints of an edge simultaneously.
     for (const group of groups) {
         if (!group.tris || group.tris.length < 9) continue;
@@ -8019,7 +7814,7 @@ function drawLocationLayer(ctx) {
         let width = 1;
         if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
         else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
-        drawLocationRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
+        MapView.drawRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
     }
 
     const labelPx = Math.round(12 * mapIconScale());
@@ -8123,60 +7918,6 @@ function precomputeFullTrails() {
         mapState.enabledPlayers[name] = false;
         mapState.trailStartTimes[name] = 0;
     }
-}
-
-// Stroke a fading "X" at a death location, sized to match the player circle.
-// Color is the dead player's team color so kills are immediately attributable
-// without needing to also draw a label.
-// (DEATH_X_DURATION lives with the theme constants at the top of this file.)
-function drawDeathX(ctx, x, y, teamIdx, alpha) {
-    const r = 8; // a bit smaller than the player symbol circle (radius 13)
-    const hex = TEAM_COLORS[teamIdx] || '#ff5050';
-    const [rr, gg, bb] = hexToRgb(hex);
-    ctx.save();
-    ctx.strokeStyle = `rgba(${rr}, ${gg}, ${bb}, ${alpha.toFixed(2)})`;
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x - r, y - r);
-    ctx.lineTo(x + r, y + r);
-    ctx.moveTo(x + r, y - r);
-    ctx.lineTo(x - r, y + r);
-    ctx.stroke();
-    ctx.restore();
-}
-
-// Draw a fading "D" superimposed on the death-X to mark drops where the
-// dying player left an RL or LG backpack. Weapon-coded fill (RL red, LG
-// cyan) lets viewers tell the two apart at a glance; a black outline
-// keeps the letter readable against the team-colored X behind it. Fades
-// in lockstep with the underlying X (same DEATH_X_DURATION). We don't
-// yet track pickup time, so the D can't show a "still on ground" state —
-// it just fades, same as the death X.
-function drawDropD(ctx, x, y, weapon, alpha) {
-    const a = alpha.toFixed(2);
-    let fill;
-    if      (weapon === 'rl') fill = `rgba(255, 107, 107, ${a})`;
-    else if (weapon === 'lg') fill = `rgba(0, 217, 255, ${a})`;
-    else                      fill = `rgba(255, 255, 255, ${a})`;
-    ctx.save();
-    ctx.font = 'bold 28px sans-serif';
-    ctx.textAlign = 'center';
-    // Use the alphabetic baseline + measured glyph metrics to put the
-    // letter's *visual* center at (x, y). textBaseline:'middle' is
-    // close but not exact for sans-serif "D" — it leaves a few pixels
-    // of optical drift between the X center and the D center.
-    ctx.textBaseline = 'alphabetic';
-    const m = ctx.measureText('D');
-    const ascent  = m.actualBoundingBoxAscent  || 20; // sane fallback
-    const descent = m.actualBoundingBoxDescent || 0;
-    const yDraw = y + (ascent - descent) / 2;
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = `rgba(0, 0, 0, ${a})`;
-    ctx.strokeText('D', x, yDraw);
-    ctx.fillStyle = fill;
-    ctx.fillText('D', x, yDraw);
-    ctx.restore();
 }
 
 function renderMap(time) {
@@ -8286,7 +8027,7 @@ function renderMap(time) {
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
             const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
-            drawDeathX(ctx, pos.x, pos.y, e.teamIdx, alpha);
+            MapView.drawDeathX(ctx, pos.x, pos.y, hexToRgb(TEAM_COLORS[e.teamIdx] || '#ff5050'), alpha);
         }
     }
 
@@ -8300,7 +8041,7 @@ function renderMap(time) {
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
             const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
-            drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
+            MapView.drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
         }
     }
 }
@@ -8547,33 +8288,6 @@ const VIEW_ARROW_LEN = 64;            // world units — shows facing clearly
 const VEL_UNITS_PER_MAP_UNIT = 5;     // 5 u/s of speed → 1 world unit of arrow
 const VEL_ARROW_MIN_SPEED = 10;       // u/s below which no velocity arrow is drawn
 const VIEW_ARROW_COLOR = 'rgba(245, 245, 255, 0.92)';
-const ARROWHEAD_PX = 7;               // arrowhead length in screen px
-
-// drawWorldArrow strokes a shaft from world (ox,oy,oz) along world (dx,dy,dz)
-// and caps it with a screen-space arrowhead at the projected tip. Skipped when
-// the arrow projects to nearly a point (pointing at/away from the camera).
-function drawWorldArrow(ctx, ox, oy, oz, dx, dy, dz, color, width) {
-    const a = worldToCanvasNew(ox, oy, oz);
-    const b = worldToCanvasNew(ox + dx, oy + dy, oz + dz);
-    const sx = b.x - a.x, sy = b.y - a.y;
-    const slen = Math.hypot(sx, sy);
-    if (slen < 1) return;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-    const ux = sx / slen, uy = sy / slen;
-    const hl = ARROWHEAD_PX, hw = ARROWHEAD_PX * 0.6;
-    ctx.beginPath();
-    ctx.moveTo(b.x, b.y);
-    ctx.lineTo(b.x - ux * hl - uy * hw, b.y - uy * hl + ux * hw);
-    ctx.lineTo(b.x - ux * hl + uy * hw, b.y - uy * hl - ux * hw);
-    ctx.closePath();
-    ctx.fill();
-}
 
 // drawPlayerArrows draws the enabled arrows for one player. Velocity uses the
 // team colour (it's that player's motion); view uses a neutral light tone so
@@ -8585,8 +8299,8 @@ function drawPlayerArrows(ctx, data, symbolInfo) {
         if (speed > VEL_ARROW_MIN_SPEED) {
             const s = 1 / VEL_UNITS_PER_MAP_UNIT;
             const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-            drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
-                           MapView.hexToRgba(teamHex, 0.9), 3.5);
+            MapView.drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
+                                   MapView.hexToRgba(teamHex, 0.9), 3.5, worldToCanvasNew);
         }
     }
     if (mapState.showViewArrows && typeof data.vya === 'number') {
@@ -8594,11 +8308,11 @@ function drawPlayerArrows(ctx, data, symbolInfo) {
         const pitch = (data.vp || 0) * ANGLE16_TO_RAD;
         const cp = Math.cos(pitch);
         // Quake forward vector: +pitch looks down, so z = -sin(pitch).
-        drawWorldArrow(ctx, ox, oy, oz,
-                       cp * Math.cos(yaw) * VIEW_ARROW_LEN,
-                       cp * Math.sin(yaw) * VIEW_ARROW_LEN,
-                       -Math.sin(pitch) * VIEW_ARROW_LEN,
-                       VIEW_ARROW_COLOR, 3);
+        MapView.drawWorldArrow(ctx, ox, oy, oz,
+                               cp * Math.cos(yaw) * VIEW_ARROW_LEN,
+                               cp * Math.sin(yaw) * VIEW_ARROW_LEN,
+                               -Math.sin(pitch) * VIEW_ARROW_LEN,
+                               VIEW_ARROW_COLOR, 3, worldToCanvasNew);
     }
 }
 
@@ -8757,16 +8471,16 @@ function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan, pos) 
         zScale = 1 + 0.25 * t;
     }
     const totalScale = iconScale * zScale;
-    const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
+    const symSize = MapView.PLAYER_SYMBOL_BASE_SIZE * totalScale;
     const orbitRadius = 14 * totalScale;
     const badgeRadius = 5 * totalScale;
 
     const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-    drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
+    MapView.drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
 
     const badges = getActiveBadges(data);
     if (badges.length > 0) {
-        drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
+        MapView.drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
     }
 }
 
@@ -8850,7 +8564,7 @@ function drawMapEntities(ctx) {
         for (const a of mapState.teleportArrows) {
             const s = worldToCanvasNew(a.sx, a.sy, a.sz);
             const d = worldToCanvasNew(a.dx, a.dy, a.dz);
-            drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
+            MapView.drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
         }
         ctx.restore();
     }
@@ -8894,21 +8608,6 @@ function drawEntityMarker(ctx, e, style, size, half, fontPx, pos) {
         ctx.fillStyle = style.textColor || style.outline || '#fff';
         ctx.fillText(style.label, pos.x, pos.y + 1);
     }
-}
-
-// drawArrow draws a line with an arrowhead at the (x2,y2) end.
-function drawArrow(ctx, x1, y1, x2, y2, headLen) {
-    const ang = Math.atan2(y2 - y1, x2 - x1);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headLen * Math.cos(ang - Math.PI / 6), y2 - headLen * Math.sin(ang - Math.PI / 6));
-    ctx.lineTo(x2 - headLen * Math.cos(ang + Math.PI / 6), y2 - headLen * Math.sin(ang + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
 }
 
 // setLearnMode swaps the map between live playback and the static
