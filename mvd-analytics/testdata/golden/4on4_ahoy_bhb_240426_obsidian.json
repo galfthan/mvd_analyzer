@@ -93351,6 +93351,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1583,
+            "rl": 744,
+            "sg": 5389
+          },
           "byWeapon": {
             "gl": 237,
             "rl": 966,
@@ -93506,12 +93511,39 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 10,
+            "rl": 5,
+            "sg": 38
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 9,
             "sg": 31,
             "sng": 3,
             "ssg": 9
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 1
+            },
+            "rl": {
+              "mid": 2,
+              "rl": 1,
+              "sg": 6
+            },
+            "sg": {
+              "mid": 8,
+              "rl": 3,
+              "sg": 20
+            },
+            "sng": {
+              "sg": 3
+            },
+            "ssg": {
+              "rl": 1,
+              "sg": 8
+            }
           },
           "deaths": 65,
           "efficiency": 0.4492,
@@ -93569,6 +93601,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 3131,
+            "rl": 1990,
+            "sg": 5505
+          },
           "byWeapon": {
             "gl": 1022,
             "rl": 3133,
@@ -93715,12 +93752,41 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 21,
+            "rl": 11,
+            "sg": 42
+          },
           "byWeapon": {
             "gl": 6,
             "rl": 27,
             "sg": 22,
             "sng": 1,
             "ssg": 18
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "mid": 1,
+              "sg": 5
+            },
+            "rl": {
+              "mid": 8,
+              "rl": 6,
+              "sg": 13
+            },
+            "sg": {
+              "mid": 4,
+              "rl": 4,
+              "sg": 14
+            },
+            "sng": {
+              "sg": 1
+            },
+            "ssg": {
+              "mid": 8,
+              "rl": 1,
+              "sg": 9
+            }
           },
           "deaths": 66,
           "efficiency": 0.5286,
@@ -93774,6 +93840,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1055,
+            "rl": 778,
+            "sg": 3565
+          },
           "byWeapon": {
             "gl": 109,
             "rl": 1595,
@@ -93915,11 +93986,34 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 6,
+            "rl": 4,
+            "sg": 21
+          },
           "byWeapon": {
             "rl": 13,
             "sg": 12,
             "sng": 2,
             "ssg": 4
+          },
+          "byWeaponVsEnemyWeapon": {
+            "rl": {
+              "mid": 4,
+              "rl": 1,
+              "sg": 8
+            },
+            "sg": {
+              "mid": 2,
+              "rl": 3,
+              "sg": 7
+            },
+            "sng": {
+              "sg": 2
+            },
+            "ssg": {
+              "sg": 4
+            }
           },
           "deaths": 63,
           "efficiency": 0.3298,
@@ -93973,6 +94067,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 2578,
+            "rl": 1816,
+            "sg": 6800
+          },
           "byWeapon": {
             "gl": 557,
             "rl": 4740,
@@ -94117,12 +94216,40 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 17,
+            "rl": 8,
+            "sg": 56
+          },
           "byWeapon": {
             "gl": 2,
             "rl": 42,
             "sg": 27,
             "sng": 3,
             "ssg": 7
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "mid": 1,
+              "rl": 1
+            },
+            "rl": {
+              "mid": 9,
+              "rl": 3,
+              "sg": 30
+            },
+            "sg": {
+              "mid": 7,
+              "rl": 2,
+              "sg": 18
+            },
+            "sng": {
+              "sg": 3
+            },
+            "ssg": {
+              "rl": 2,
+              "sg": 5
+            }
           },
           "deaths": 53,
           "efficiency": 0.6045,
@@ -94180,6 +94307,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1900,
+            "rl": 1253,
+            "sg": 4351
+          },
           "byWeapon": {
             "gl": 72,
             "ng": 9,
@@ -94335,12 +94467,39 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 13,
+            "rl": 5,
+            "sg": 34
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 17,
             "sg": 23,
             "sng": 7,
             "ssg": 4
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 1
+            },
+            "rl": {
+              "mid": 6,
+              "rl": 2,
+              "sg": 9
+            },
+            "sg": {
+              "mid": 6,
+              "rl": 3,
+              "sg": 14
+            },
+            "sng": {
+              "sg": 7
+            },
+            "ssg": {
+              "mid": 1,
+              "sg": 3
+            }
           },
           "deaths": 67,
           "efficiency": 0.437,
@@ -94394,6 +94553,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 2997,
+            "rl": 718,
+            "sg": 5362
+          },
           "byWeapon": {
             "gl": 100,
             "rl": 4143,
@@ -94537,12 +94701,41 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 19,
+            "rl": 5,
+            "sg": 50
+          },
           "byWeapon": {
             "gl": 1,
             "rl": 37,
             "sg": 27,
             "sng": 5,
             "ssg": 4
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 1
+            },
+            "rl": {
+              "mid": 10,
+              "rl": 3,
+              "sg": 24
+            },
+            "sg": {
+              "mid": 5,
+              "rl": 1,
+              "sg": 21
+            },
+            "sng": {
+              "mid": 3,
+              "sg": 2
+            },
+            "ssg": {
+              "mid": 1,
+              "rl": 1,
+              "sg": 2
+            }
           },
           "deaths": 57,
           "efficiency": 0.5649,
@@ -94596,6 +94789,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1693,
+            "rl": 585,
+            "sg": 3729
+          },
           "byWeapon": {
             "gl": 749,
             "rl": 420,
@@ -94736,12 +94934,42 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 13,
+            "rl": 6,
+            "sg": 22
+          },
           "byWeapon": {
             "gl": 6,
             "rl": 4,
             "sg": 20,
             "sng": 6,
             "ssg": 5
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 6
+            },
+            "rl": {
+              "mid": 1,
+              "rl": 1,
+              "sg": 2
+            },
+            "sg": {
+              "mid": 7,
+              "rl": 3,
+              "sg": 10
+            },
+            "sng": {
+              "mid": 3,
+              "rl": 1,
+              "sg": 2
+            },
+            "ssg": {
+              "mid": 2,
+              "rl": 1,
+              "sg": 2
+            }
           },
           "deaths": 49,
           "efficiency": 0.4556,
@@ -94795,6 +95023,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 1840,
+            "rl": 954,
+            "sg": 2955
+          },
           "byWeapon": {
             "gl": 385,
             "rl": 389,
@@ -94940,12 +95173,42 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 15,
+            "rl": 5,
+            "sg": 22
+          },
           "byWeapon": {
             "gl": 5,
             "rl": 4,
             "sg": 20,
             "sng": 3,
             "ssg": 10
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "mid": 1,
+              "rl": 2,
+              "sg": 2
+            },
+            "rl": {
+              "mid": 1,
+              "sg": 3
+            },
+            "sg": {
+              "mid": 8,
+              "rl": 2,
+              "sg": 10
+            },
+            "sng": {
+              "mid": 1,
+              "sg": 2
+            },
+            "ssg": {
+              "mid": 4,
+              "rl": 1,
+              "sg": 5
+            }
           },
           "deaths": 73,
           "efficiency": 0.3652,
@@ -95008,6 +95271,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 8851,
+            "rl": 3863,
+            "sg": 21280
+          },
           "byWeapon": {
             "gl": 1643,
             "rl": 10269,
@@ -95164,12 +95432,44 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 59,
+            "rl": 24,
+            "sg": 166
+          },
           "byWeapon": {
             "gl": 10,
             "rl": 92,
             "sg": 105,
             "sng": 17,
             "ssg": 25
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "mid": 1,
+              "rl": 1,
+              "sg": 8
+            },
+            "rl": {
+              "mid": 22,
+              "rl": 8,
+              "sg": 62
+            },
+            "sg": {
+              "mid": 27,
+              "rl": 9,
+              "sg": 69
+            },
+            "sng": {
+              "mid": 6,
+              "rl": 1,
+              "sg": 10
+            },
+            "ssg": {
+              "mid": 3,
+              "rl": 5,
+              "sg": 17
+            }
           },
           "deaths": 224,
           "efficiency": 0.5264,
@@ -95217,6 +95517,11 @@
           "src": "derived"
         },
         "damage": {
+          "byEnemyWeapon": {
+            "mid": 7926,
+            "rl": 4975,
+            "sg": 16376
+          },
           "byWeapon": {
             "gl": 1588,
             "ng": 9,
@@ -95373,12 +95678,43 @@
           "src": "derived"
         },
         "score": {
+          "byEnemyWeapon": {
+            "mid": 55,
+            "rl": 25,
+            "sg": 119
+          },
           "byWeapon": {
             "gl": 12,
             "rl": 61,
             "sg": 77,
             "sng": 13,
             "ssg": 36
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "mid": 2,
+              "rl": 2,
+              "sg": 8
+            },
+            "rl": {
+              "mid": 19,
+              "rl": 9,
+              "sg": 33
+            },
+            "sg": {
+              "mid": 20,
+              "rl": 12,
+              "sg": 45
+            },
+            "sng": {
+              "mid": 1,
+              "sg": 12
+            },
+            "ssg": {
+              "mid": 13,
+              "rl": 2,
+              "sg": 21
+            }
           },
           "deaths": 269,
           "efficiency": 0.4252,
@@ -95397,7 +95733,7 @@
       }
     ]
   },
-  "schemaVersion": 68,
+  "schemaVersion": 70,
   "shots": {
     "byPlayer": [
       {

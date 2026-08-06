@@ -220,7 +220,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/docs/result-schema` | — | RESULT_SCHEMA.md rendered standalone (vendored marked.js; raw markdown at `/docs/result-schema.md`; auth-exempt) |
 | POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
-| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, top kills, playerUserIDs, analyzer `errors`). `topKills` carries `/top-kills`' rows verbatim at its defaults — 20 of them, and omitted rather than served raw on a demo the query cannot be answered for |
+| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, players, playerUserIDs, analyzer `errors`) plus **`available`**, the per-demo capability manifest: one flag per detailed view, each mirroring that view's 422 predicate, so a consumer branches instead of probing. Includes `height` / `liquid` / `los`, which depend on the server's BSP provisioning and are otherwise undiscoverable. The inlined `topKills` / `topStreaks` / `topPowerups` lists were removed in v70 — fetch `/top-kills`, `/lives` or `/events` for those rows. |
 | GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard, damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" or "ktx") |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
@@ -271,10 +271,14 @@ guide around it:
   payloads (raw stream entries, the columnar grid, aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
 - **API versioning and stability** ([§2.7](API.md#27-api-versioning-and-stability))
-  — the compatibility policy consumers build against: additive by default,
-  breaks ship as `/v2` alongside `/v1`, `schemaVersion` is a cache key not
-  a break signal, and what is / isn't covered by the contract. Mirrored in
-  the spec's own `info.description`, so it is served at `/docs` too.
+  — what consumers can actually rely on: `/v1` is **not frozen yet**, so a
+  schema upgrade can still withdraw or reshape a documented field (v70 did);
+  what is promised today is that no change is silent — versioned release
+  notes, a drift-tested spec, lockstep MCP deploys — which makes
+  `schemaVersion` a cache key *and*, for now, a break signal. The
+  additive-only `/v1` + `/v2`-for-breaks contract is stated there as the
+  near-term destination, not as current policy. Mirrored in the spec's own
+  `info.description`, so it is served at `/docs` too.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.
 - **Recipes** — common frontend features → the call that backs them.

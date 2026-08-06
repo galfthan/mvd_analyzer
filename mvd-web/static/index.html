@@ -226,12 +226,13 @@
                                 <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
                                 <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
                                 <th title="Enemy kills">Kills</th>
-                                <th title="Rocket launcher kills">RL K</th>
-                                <th title="Lightning gun kills">LG K</th>
+                                <th title="Enemy RLs killed: enemies killed while THEY were holding a rocket launcher (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eRL</th>
+                                <th title="Enemy LGs killed: enemies killed while THEY were holding a lightning gun (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eLG</th>
                                 <th title="Total deaths">Deaths</th>
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
                                 <th title="Damage given to enemies">Dmg</th>
+                                <th title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Meaningless in a duel, where it is always 0.">TDmg</th>
                                 <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
                                 <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
                                 <th title="Average damage taken to die — per-player only, since averaging averages across players with different death counts is meaningless">ToDie</th>
@@ -250,12 +251,13 @@
                                 <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
                                 <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
                                 <th title="Enemy kills">Kills</th>
-                                <th title="Rocket launcher kills">RL K</th>
-                                <th title="Lightning gun kills">LG K</th>
+                                <th title="Enemy RLs killed: enemies killed while THEY were holding a rocket launcher (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eRL</th>
+                                <th title="Enemy LGs killed: enemies killed while THEY were holding a lightning gun (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eLG</th>
                                 <th title="Total deaths">Deaths</th>
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
                                 <th title="Damage given to enemies">Dmg</th>
+                                <th title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Meaningless in a duel, where it is always 0.">TDmg</th>
                                 <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
                                 <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
                                 <th title="Average damage taken to die">ToDie</th>
@@ -269,51 +271,55 @@
                 <div id="weapons-summary-panel" class="panel">
                     <h3>Weapon Stats</h3>
                     <h4 class="team-aggregate-heading">Per Team</h4>
+                    <div class="items-table-wrap team-aggregate-table">
                     <table id="weapon-stats-team-table" class="stats-table weapon-stats-split team-aggregate-table">
                         <thead>
                             <tr>
                                 <th rowspan="2">Team</th>
-                                <th colspan="3" title="Shotgun">SG</th>
-                                <th colspan="3" title="Super Shotgun">SSG</th>
-                                <th colspan="3" title="Super Nailgun">SNG</th>
-                                <th colspan="3" title="Grenade Launcher">GL</th>
-                                <th colspan="3" title="Rocket Launcher">RL</th>
-                                <th colspan="3" title="Lightning Gun">LG</th>
+                                <th colspan="4" title="Shotgun">SG</th>
+                                <th colspan="4" title="Super Shotgun">SSG</th>
+                                <th colspan="4" title="Super Nailgun">SNG</th>
+                                <th colspan="4" title="Grenade Launcher">GL</th>
+                                <th colspan="4" title="Rocket Launcher">RL</th>
+                                <th colspan="4" title="Lightning Gun">LG</th>
                             </tr>
                             <tr>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
                             </tr>
                         </thead>
                         <tbody id="weapon-stats-team-body"></tbody>
                     </table>
+                    </div>
                     <h4 class="per-player-heading">Per Player</h4>
+                    <div class="items-table-wrap">
                     <table id="weapon-stats-table" class="stats-table weapon-stats-split">
                         <thead>
                             <tr>
                                 <th rowspan="2">Player</th>
-                                <th colspan="3" title="Shotgun">SG</th>
-                                <th colspan="3" title="Super Shotgun">SSG</th>
-                                <th colspan="3" title="Super Nailgun">SNG</th>
-                                <th colspan="3" title="Grenade Launcher">GL</th>
-                                <th colspan="3" title="Rocket Launcher">RL</th>
-                                <th colspan="3" title="Lightning Gun">LG</th>
+                                <th colspan="4" title="Shotgun">SG</th>
+                                <th colspan="4" title="Super Shotgun">SSG</th>
+                                <th colspan="4" title="Super Nailgun">SNG</th>
+                                <th colspan="4" title="Grenade Launcher">GL</th>
+                                <th colspan="4" title="Rocket Launcher">RL</th>
+                                <th colspan="4" title="Lightning Gun">LG</th>
                             </tr>
                             <tr>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
-                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th><th title="Of those kills, how many were against an enemy carrying an RL and/or LG. Hover a cell for the full breakdown by what the victim held.">eK</th>
                             </tr>
                         </thead>
                         <tbody id="weapon-stats-body"></tbody>
                     </table>
+                    </div>
                 </div>
 
                 <div id="items-panel" class="panel">

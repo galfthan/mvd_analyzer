@@ -49,11 +49,12 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 		ps.Sources.Pickups = result.SrcDerived
 	}
 	takenEnemy := deriveTakenEnemy(res)
+	enemyWeaponKills := deriveEnemyWeaponKills(res)
 	logins := deriveLogins(co)
 
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
-		row := buildPlayerStatsRow(res, p, matchMs, pickups, takenEnemy)
+		row := buildPlayerStatsRow(res, p, matchMs, pickups, takenEnemy, enemyWeaponKills)
 		row.Login = logins[row.Name]
 		ps.Players = append(ps.Players, row)
 	}
@@ -75,7 +76,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 				Team:   mp.Team,
 				Login:  logins[mp.Name],
 				Window: result.PlayerStatsWindow{MatchMs: matchMs},
-				Score:  deriveScore(res, mp.Name),
+				Score:  deriveScore(res, mp.Name, enemyWeaponKills),
 				Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 			}
 			row.Damage = deriveDamage(res, mp.Name, takenEnemy)
@@ -109,7 +110,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 }
 
 // buildPlayerStatsRow assembles one streamed player's row.
-func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int) result.PlayerStatsRow {
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsRow {
 	present := presenceWindow(p, matchMs)
 	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
 
@@ -129,7 +130,7 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 		Identity: p.Identity,
 		Sessions: p.Sessions,
 		Window:   w,
-		Score:    deriveScore(res, p.Name),
+		Score:    deriveScore(res, p.Name, enemyWeaponKills),
 		Damage:   deriveDamage(res, p.Name, takenEnemy),
 		Accuracy: deriveAccuracy(res, p.Name),
 		Pickups:  pickupsFor(pickups, p.Name),
@@ -152,7 +153,7 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 // entry. Reporting 0 kills and 0.0% efficiency there is
 // byte-indistinguishable from a genuinely killless team, so the fields
 // are omitted instead. See result.PlayerStatsScore.
-func deriveScore(res *Result, name string) result.PlayerStatsScore {
+func deriveScore(res *Result, name string, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsScore {
 	s := result.PlayerStatsScore{Src: result.SrcDerived}
 	var kills, suicides, teamKills int
 	var byWeapon map[string]int
@@ -204,8 +205,151 @@ func deriveScore(res *Result, name string) result.PlayerStatsScore {
 		s.Kills, s.Suicides, s.TeamKills = &kills, &suicides, &teamKills
 		s.Efficiency = &eff
 		s.ByWeapon = byWeapon
+		// Same family, same gate: the victim-weapon split is a re-cut of
+		// the very kills Kills counts, so it can never be present while
+		// the kill side as a whole is not.
+		if k := enemyWeaponKills[name]; k != nil {
+			s.ByEnemyWeapon = k.byBucket
+			s.ByWeaponVsEnemyWeapon = k.cross
+		}
 	}
 	return s
+}
+
+// enemyWeaponKills is one killer's victim-weapon accounting: the joint
+// distribution over (killer weapon, victim bucket) and the bucket marginal
+// derived from it. Keeping the marginal a SUM of the cross-tab rather than
+// a second tally is what makes the published invariant
+// (sum over outer keys == byEnemyWeapon) true by construction instead of
+// by two code paths agreeing.
+type enemyWeaponKills struct {
+	byBucket map[string]int
+	cross    map[string]map[string]int
+}
+
+// deriveEnemyWeaponKills classifies every enemy kill in the frag log by
+// what the VICTIM was holding at the instant they died, tallied per
+// KILLER — the weapon-denial axis (result.PlayerStatsScore.ByEnemyWeapon
+// and its joint form ByWeaponVsEnemyWeapon).
+//
+// The classification is the one the damage analyzer applies per hit
+// (victimWeaponClass, mirroring ktx/src/combat.c:1084-1089), but read off
+// the victim's POSSESSION STREAMS instead of a per-hit inventory bitfield.
+// That is what makes the figure derivable on every demo carrying streams
+// rather than only on those carrying a KTX damage stream, and it lets
+// telefrags and stomps be classified too — the damage side has to drop
+// them, having no hit to read an inventory from.
+//
+// The kill set is the frag log's enemy kills under the same predicate
+// FragAnalyzer counts into PlayerFrags.Kills and ByWeapon (frag.go:143-153,
+// reading the entries after Finalize's teamkill reclassification), so these
+// buckets partition Kills on exactly the footing ByWeapon does — no better
+// and no worse. That shared predicate is also why the cross-tab's other
+// marginal reproduces ByWeapon: both count the same entries under the same
+// gate, keyed by the same FragEntry.Weapon.
+func deriveEnemyWeaponKills(res *Result) map[string]*enemyWeaponKills {
+	if res.Frags == nil || res.Streams == nil {
+		return nil
+	}
+	streams := make(map[string]*result.PlayerStream, len(res.Streams.Players))
+	for i := range res.Streams.Players {
+		p := &res.Streams.Players[i]
+		streams[p.Name] = p
+	}
+	out := map[string]*enemyWeaponKills{}
+	for i := range res.Frags.Frags {
+		f := &res.Frags.Frags[i]
+		if f.IsSuicide || f.IsTeamKill || isGenericPlayer(f.Killer) {
+			continue
+		}
+		// A victim with no stream at all is UNKNOWN, not unarmed: folding
+		// them into the sg bucket would assert we saw an empty loadout,
+		// and dropping them would break the partition against Kills.
+		bucket := result.VictimWeaponUnknown
+		if v := streams[f.Victim]; v != nil {
+			bucket = victimWeaponClassAt(v, f.Time)
+		}
+		k := out[f.Killer]
+		if k == nil {
+			k = &enemyWeaponKills{
+				byBucket: map[string]int{},
+				cross:    map[string]map[string]int{},
+			}
+			out[f.Killer] = k
+		}
+		k.byBucket[bucket]++
+		if k.cross[f.Weapon] == nil {
+			k.cross[f.Weapon] = map[string]int{}
+		}
+		k.cross[f.Weapon][bucket]++
+	}
+	return out
+}
+
+// victimWeaponClassAt reads a victim's loadout at t off their possession
+// streams, in the same priority order victimWeaponClass applies to a
+// per-hit item bitfield (damage.go). The streams carry no nailgun run,
+// which costs nothing here: NG is shotgun-tier in that classification too.
+func victimWeaponClassAt(p *result.PlayerStream, t int32) string {
+	hasRL := heldAt(p.RL, t)
+	hasLG := heldAt(p.LG, t)
+	switch {
+	case hasRL && hasLG:
+		return result.VictimWeaponBoth
+	case hasRL:
+		return result.VictimWeaponRL
+	case hasLG:
+		return result.VictimWeaponLG
+	case heldAt(p.SSG, t) || heldAt(p.SNG, t) || heldAt(p.GL, t):
+		return result.VictimWeaponMid
+	default:
+		return result.VictimWeaponSG
+	}
+}
+
+// heldAt reports whether t falls inside one of a player's sorted,
+// non-overlapping possession runs, HALF-OPEN — [Start, End) — the same
+// convention makeInside uses for the region walks.
+//
+// The endpoint rule is load-bearing and was settled by measurement, not by
+// argument. A run's End is the instant the wire REPORTED the weapon gone,
+// which for a death is normally a frame after the obituary the kill time
+// comes from — so on almost every kill the two conventions pick the same
+// run and score identically. They part on the boundary case where the
+// items-cleared update lands in the same frame as the obituary and End ==
+// t exactly. There an inclusive test credits the victim with a weapon the
+// server had already taken away: on 220498 it turned one kill into a
+// "both" that KTX scored as neither, the single disagreement in the whole
+// cached corpus. Half-open reproduces KTX's own ekills EXACTLY on all 44
+// cached demos, every player, both weapons — pinned by
+// checkEnemyWeaponKillsVsKTX, which runs on every golden-corpus demo.
+func heldAt(ivs []result.Interval, t int32) bool {
+	for i := range ivs {
+		if ivs[i].Start > t {
+			return false
+		}
+		if t < ivs[i].End {
+			return true
+		}
+	}
+	return false
+}
+
+// nonZeroCounts drops the zero entries from a fixed-key tally, returning
+// nil when nothing survives — the zero-dropping rule every by-weapon map
+// in this section follows.
+func nonZeroCounts(m map[string]int) map[string]int {
+	var out map[string]int
+	for k, n := range m {
+		if n == 0 {
+			continue
+		}
+		if out == nil {
+			out = map[string]int{}
+		}
+		out[k] = n
+	}
+	return out
 }
 
 // killsMeasured is the demo-global kill-attribution verdict AS PUBLISHED on
@@ -311,6 +455,18 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 		EnemyWeapons: src.EWep,
 		Taken:        &taken,
 	}
+	// The victim-weapon partition of Given, which EnemyWeapons above only
+	// summarises (it is lg + rl + both). Same zero-dropping rule as every
+	// other map here; the damage analyzer already classified each hit on
+	// the target's inventory, so this is a rename of its five buckets into
+	// the shared vocabulary rather than a second classification.
+	out.ByEnemyWeapon = nonZeroCounts(map[string]int{
+		result.VictimWeaponSG:   src.EnemyVsSG,
+		result.VictimWeaponMid:  src.EnemyVsMid,
+		result.VictimWeaponLG:   src.EnemyVsLG,
+		result.VictimWeaponRL:   src.EnemyVsRL,
+		result.VictimWeaponBoth: src.EnemyVsBoth,
+	})
 	// The three given directions get the same zero-dropping copy: a weapon
 	// the player dealt nothing with in that direction is omitted, never
 	// zero-filled (result.PlayerStatsDamage documents the rule).
@@ -1169,6 +1325,8 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 			row.Score.Suicides = addPtr(row.Score.Suicides, m.Score.Suicides)
 			row.Score.TeamKills = addPtr(row.Score.TeamKills, m.Score.TeamKills)
 			row.Score.ByWeapon = addWeaponCounts(row.Score.ByWeapon, m.Score.ByWeapon)
+			row.Score.ByEnemyWeapon = addWeaponCounts(row.Score.ByEnemyWeapon, m.Score.ByEnemyWeapon)
+			row.Score.ByWeaponVsEnemyWeapon = addNestedWeaponCounts(row.Score.ByWeaponVsEnemyWeapon, m.Score.ByWeaponVsEnemyWeapon)
 
 			if m.Damage != nil {
 				if dmg == nil {
@@ -1188,6 +1346,7 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 				dmg.ByWeapon = addWeaponCounts(dmg.ByWeapon, m.Damage.ByWeapon)
 				dmg.ByWeaponTeam = addWeaponCounts(dmg.ByWeaponTeam, m.Damage.ByWeaponTeam)
 				dmg.ByWeaponSelf = addWeaponCounts(dmg.ByWeaponSelf, m.Damage.ByWeaponSelf)
+				dmg.ByEnemyWeapon = addWeaponCounts(dmg.ByEnemyWeapon, m.Damage.ByEnemyWeapon)
 			}
 			if m.Pickups != nil {
 				if pickups == nil {
@@ -1296,6 +1455,24 @@ func addWeaponCounts(dst, src map[string]int) map[string]int {
 	}
 	for w, n := range src {
 		dst[w] += n
+	}
+	return dst
+}
+
+// addNestedWeaponCounts is addWeaponCounts one level deeper, for the
+// killer-weapon -> victim-bucket cross-tab. The inner maps are allocated
+// fresh for the same reason the outer one is: a one-member team must not
+// end up aliasing that member's own map and then mutating it when a
+// second member arrives.
+func addNestedWeaponCounts(dst, src map[string]map[string]int) map[string]map[string]int {
+	if len(src) == 0 {
+		return dst
+	}
+	if dst == nil {
+		dst = make(map[string]map[string]int, len(src))
+	}
+	for w, inner := range src {
+		dst[w] = addWeaponCounts(dst[w], inner)
 	}
 	return dst
 }

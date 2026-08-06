@@ -100,6 +100,11 @@ func TestGoldenCorpus(t *testing.T) {
 			// coverage in the goldens. Gated on the BSP being resolvable above.
 			analyzer.ComputeLOS(result)
 
+			// Cross-check the derived victim-weapon kill split against
+			// KTX's own ekills. Rides along here rather than in its own
+			// test so it costs no second pass over the corpus.
+			checkEnemyWeaponKillsVsKTX(t, result, entry.Label)
+
 			actual, err := canonicalJSON(result, entry.Label)
 			if err != nil {
 				t.Fatalf("canonicalise: %v", err)

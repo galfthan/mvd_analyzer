@@ -268,6 +268,32 @@ Two consequences worth knowing:
   tab (a 2003 kmod duel is the regression case). The one class with no
   section at all is a parse that produced no player streams — a race demo
   has no match — and that renders as empty tables.
+- **Basic Stats shows `eRL` / `eLG`, not kills-with-RL/LG.** Those two
+  columns come from `score.byEnemyWeapon` (schema v69) — enemies killed
+  while THEY were holding a rocket launcher / lightning gun. Kills made
+  *with* each weapon are the Weapon Stats tab's `K` columns, so the
+  scoreboard carries the metric that was nowhere rather than the one
+  already in two places. The buckets are exclusive, so each cell renders
+  **`rl + both`** (resp. `lg + both`): reading the `rl` key alone would
+  drop every victim who was carrying both. Measuredness rides the kill
+  family — the cell renders `-` exactly when `kills` does.
+- **Weapon Stats carries a fourth column per weapon, `eK`.** Of that
+  weapon's kills, how many landed on an enemy who was carrying an RL
+  and/or LG — the `rl + lg + both` slice of `score.byWeaponVsEnemyWeapon`
+  (schema v69), the cross-tab of killer weapon against victim loadout. It
+  separates a weapon that wins fights from one that finishes off the
+  disarmed. The column shows only that total to keep the table narrow; the
+  **full six-bucket breakdown is in each cell's tooltip**, so nothing is
+  hidden. A measured `0` prints as `0` — "every one of those kills was on
+  someone carrying nothing" is a reading, not a gap — and `-` appears only
+  where the `K` cell beside it is also `-`. Both weapon tables now scroll
+  inside their own box (`.items-table-wrap`) at 25 columns.
+- **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
+  friendly fire DEALT. It is measured whenever the damage family is present,
+  so `0` there is a real reading rather than a gap, and it is deliberately
+  *not* folded into the victim's `Taken`-side story: this is what the player
+  put into teammates, a different question from `TK` (which counts only the
+  friendly damage that finished someone off). Always 0 in a duel.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /

@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "68"
+  version: "70"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -81,20 +81,31 @@ info:
     nothing.
 
     ### API stability
-    The API grows **additively**, and the rare genuine break arrives as a
-    new route rather than a mutation of an old one.
+    **`/v1` is not frozen yet.** Most change is additive — new endpoints and
+    new response fields appear at any time without announcement — but a
+    schema upgrade **can still remove a documented field or change what one
+    means, inside `/v1`**. Schema v70 is the worked example: `/overview` lost
+    `topKills`, `topStreaks`, `topPowerups` and `hasRegionControl` once they
+    were measured at 78-88% of the response and found to be copies of
+    `/top-kills`, `/lives` and `/events`. Treat this surface as one you can
+    build against and will occasionally have to re-check, not one you can
+    pin and forget.
 
-    What you can rely on: **`/v1` grows, it doesn't shift** — new endpoints
-    and new response fields appear at any time without announcement, and
-    documented fields don't change meaning, change type, or disappear
-    outside the process here. A **breaking change ships as `/v2/<endpoint>`
-    served alongside `/v1`**, not as a replacement — that includes
-    withdrawing a documented field or enum member, changing a type,
-    altering a documented default behaviour, and changing the **default
-    value of a parameter** (a caller who omits it would otherwise get
-    different numbers without opting in). **Old routes retire on
-    a minimum of 8 weeks' notice**, and in practice only once measured
-    usage has drained. A **correctness fix is not a break**: when a value
+    What holds today is that **nothing changes silently**: every observable
+    change bumps `schemaVersion`, every change is written up in
+    RELEASE_NOTES.md against the version that carries it, this spec is
+    generated from the running code and validated against real responses in
+    CI, and the MCP shim deploys in lockstep with the API. So watch
+    `schemaVersion` — it is your cache key, and until the freeze it is also
+    the signal to go read what moved.
+
+    **Where this is going, in the near future:** an additive-only `/v1`
+    where documented fields don't change meaning, change type, or disappear;
+    a genuine break shipping as `/v2/<endpoint>` served alongside `/v1`
+    rather than replacing it; and old routes retiring on a minimum of 8
+    weeks' notice, in practice only once measured usage has drained. That
+    is the destination and the rules it will be run by — it is not a promise
+    that is already in force. A **correctness fix is not a break**: when a value
     changes because it was computed wrongly, the field keeps its name and
     type and its documented meaning is not replaced — at most narrowed to
     the semantics it was always meant to have, with the docs updated to say
@@ -105,9 +116,12 @@ info:
     result semantics change only under the process above.
 
     `schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and this
-    document's `info.version`) is a **regeneration counter, not a break
-    signal**. It ticks on every observable change including purely additive
-    ones. Treat it as a cache key.
+    document's `info.version`) is a **regeneration counter** that ticks on
+    every observable change, most of them purely additive. Treat it as a
+    cache key — and, while `/v1` is still moving, as the prompt to check
+    RELEASE_NOTES.md before assuming a bump was additive. Once the surface
+    is declared stable it goes back to being a pure cache key, because
+    breaks will live at `/v2` instead.
 
     Covered by the contract: documented request parameters, documented
     response fields and their types, documented enum members and status
@@ -3035,9 +3049,39 @@ components:
         gameDir:
           description: "Game directory (mod)."
           type: string
-        hasRegionControl:
-          description: "Region-control data is available for this demo."
-          type: boolean
+        available:
+          description: >
+            Per-demo CAPABILITY MANIFEST (schema v70): for each detailed view, whether THIS demo
+            on THIS deployment can answer it. Call /overview first and branch on this instead of
+            spending a request to discover a 422.
+
+            Each eager flag mirrors the predicate behind that view's 422, so a false here is
+            exactly the 422 you would have received. A true flag means the section EXISTS, not
+            that it is non-empty — a demo where nobody fired still reports shots: true with an
+            empty shot list.
+
+            height / liquid / los are the ones you CANNOT infer from anything else: they turn on
+            which BSPs the server was provisioned with, not on what the demo recorded, so the
+            same demo can answer differently on two deployments. There is deliberately no
+            separate `pvs` flag — PVS and LOS come off one pass behind one BSP gate (PVS is a
+            superset of LOS by construction), so two flags could never disagree.
+          additionalProperties: false
+          properties:
+            demoInfo: { description: "KTX demoinfo block (non-KTX / pre-match-abort demos lack it).", type: boolean }
+            metadata: { description: "Server cvars + KTX match settings (needs fullserverinfo / countdown centerprint).", type: boolean }
+            frags: { description: "Obituary-derived frag log.", type: boolean }
+            damage: { description: "Per-hit damage (needs the KTX mvdhidden_dmgdone stream).", type: boolean }
+            shots: { description: "Weapon-fire stream.", type: boolean }
+            aim: { description: "Aim analysis (needs shots + position/view streams).", type: boolean }
+            locGraph: { description: "Loc adjacency graph (needs a position track).", type: boolean }
+            opening: { description: "Opening analysis (needs a detected match start).", type: boolean }
+            playerStats: { description: "Canonical per-player statistics (needs player streams; a missing KTX block is NOT a reason for false).", type: boolean }
+            regionControl: { description: "Region-control output with at least one region. Was the top-level hasRegionControl before v70.", type: boolean }
+            height: { description: "BSP-DERIVED: the floor-height column (pos.h) was COMPUTED — not that it holds a non-zero value. Depends on server-side map provisioning (the collision hull). Where there is no floor beneath a sample the column carries the NoFloor sentinel, which is still a reading.", type: boolean }
+            liquid: { description: "BSP-DERIVED: the liquid column (pos.lq) was COMPUTED — not that any sample is wet. Depends on server-side map provisioning (the vis BSP), a SEPARATE gate from height. A map with no water yields a full-length all-zero column, and this flag stays TRUE: that is a measured `dry`, and is exactly what distinguishes it from an unprovisioned server, where the flag is false and the question is unanswerable.", type: boolean }
+            los: { description: "BSP-DERIVED: the line-of-sight pass can run, covering BOTH the los and pvs interval sets. Unlike the others this is a PREDICTION (streams, 2+ players, a provisioned BSP) because the pass is heavy and lazy; a provisioned BSP whose visibility data will not load still 422s.", type: boolean }
+          required: [demoInfo, metadata, frags, damage, shots, aim, locGraph, opening, playerStats, regionControl, height, liquid, los]
+          type: object
         locCount:
           description: "Number of named locs available for the map."
           type: integer
@@ -3164,85 +3208,6 @@ components:
           type:
             - "null"
             - object
-        topKills:
-          description: "The match's hardest kill BURSTS at /top-kills' documented defaults (gapMs 3000, contestedMs 4000, dmg bounded) — twenty rows, not the five its neighbours carry, because the per-weapon `maxGapMs` narrowing a highlight consumer runs off this list thins it. Row shape is /top-kills' verbatim; read that endpoint's description for the burst semantics before consuming them. Omitted when the demo cannot answer the query (no frag log, no damage log, or no measurable liveness) — and, since this response has no `dmg` echo to name a family, omitted rather than silently served raw on a demo with no bounded family. Absence is not a verdict: a demo with zero enemy kills also omits the field; read /top-kills itself when the distinction matters."
-          items: { $ref: "#/components/schemas/TopKill" }
-          type:
-            - "null"
-            - array
-        topPowerups:
-          description: "Top powerup runs (Key Moments)."
-          items:
-            additionalProperties: false
-            properties:
-              duration:
-                description: "Match duration, int32 ms."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              frags:
-                description: "Net QW frag score."
-                type: integer
-              player:
-                description: "Player display name."
-                type: string
-              start:
-                description: "Start time, int32 ms since match start."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              team:
-                description: "Team name."
-                type: string
-              type:
-                description: "Type discriminator."
-                type: string
-            required:
-              - player
-              - type
-              - start
-              - duration
-              - frags
-            type: object
-          type:
-            - "null"
-            - array
-        topStreaks:
-          description: "Top frag streaks (Key Moments)."
-          items:
-            additionalProperties: false
-            properties:
-              duration:
-                description: "Match duration, int32 ms."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              length:
-                description: "Streak length (kills)."
-                type: integer
-              player:
-                description: "Player display name."
-                type: string
-              start:
-                description: "Start time, int32 ms since match start."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              team:
-                description: "Team name."
-                type: string
-              weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
-                type: string
-            required:
-              - player
-              - length
-              - start
-              - duration
-            type: object
-          type:
-            - "null"
-            - array
       required:
         - schemaVersion
         - timeUnit
@@ -3251,7 +3216,7 @@ components:
         - matchEnd
         - players
         - locCount
-        - hasRegionControl
+        - available
       type: object
     Metadata:
       additionalProperties: false
@@ -6995,6 +6960,48 @@ components:
                 killed with are omitted, not zero-filled.
               additionalProperties: { type: integer }
               type: object
+            byEnemyWeapon:
+              description: >
+                The SAME enemy kills split by what the VICTIM was holding when they died — the
+                other axis from byWeapon, which keys on the weapon the KILLER used. This is the
+                weapon-denial figure: "how many armed enemies did this player take out".
+
+                Buckets are MUTUALLY EXCLUSIVE and PARTITION `kills`: `both` (victim held RL and
+                LG), `rl` (RL, not LG), `lg` (LG, not RL), `mid` (ssg/sng/gl only), `sg` (nothing
+                above the shotgun tier — the respawn loadout), and `unknown` (the victim produced
+                no possession stream, so their loadout is unknowable). Enemies killed while
+                holding an RL is therefore `rl + both`, NEVER `rl` alone; likewise `lg + both`.
+                Those two overlap in `both` by construction, so adding them double-counts the
+                fully armed victims.
+
+                DERIVED on every demo carrying streams and never overlaid with KTX's `ekills`,
+                which counts the same events INCLUSIVELY (a victim holding RL+LG bumps both
+                counters) and is force-zeroed for axe/sg and for every bucket on `deathmatch >= 4`
+                and `k_instagib`. Where KTX measures honestly the two agree exactly:
+                `rl + both == ktx ekills.rl`, verified across the cached demo corpus. Unlike KTX's, this
+                also classifies telefrags and stomps. On the same footing as `kills` — absent with
+                it. Zero buckets are omitted.
+              additionalProperties: { type: integer }
+              type: object
+            byWeaponVsEnemyWeapon:
+              description: >
+                The JOINT distribution byWeapon and byEnemyWeapon are the marginals of:
+                killer weapon -> victim-weapon bucket -> kills. Outer keys are byWeapon's
+                vocabulary, inner keys byEnemyWeapon's. Use it for what neither marginal can
+                answer — "how many of my LG kills were against enemies carrying an RL", the
+                question separating a weapon that wins fights from one that finishes off the
+                disarmed.
+
+                Summing it reproduces both maps EXACTLY: over inner keys it gives byWeapon,
+                over outer keys byEnemyWeapon. That is guaranteed by construction (the marginal
+                is summed from this table, not tallied separately), so the three maps can never
+                disagree. Same measuredness as its marginals — absent exactly when `kills` is —
+                and the same zero-dropping. This is the widest map in the response (up to
+                weapons-used x 6); skip it when a scoreboard is all you need.
+              additionalProperties:
+                additionalProperties: { type: integer }
+                type: object
+              type: object
           required: [src, frags, deaths]
           type: object
         damage:
@@ -7058,6 +7065,22 @@ components:
                     absent on a demo with a KTX block but no damage stream, whatever the player did.
                     Weapons the player dealt no self damage with are omitted. Telefrags and stomps
                     are excluded — their damage folds into givenSelf only.
+                  additionalProperties: { type: integer }
+                  type: object
+                byEnemyWeapon:
+                  description: >
+                    ENEMY damage GIVEN split by what the VICTIM was holding when each hit landed —
+                    the other axis from byWeapon, which keys on the ATTACKER's weapon. Buckets are
+                    MUTUALLY EXCLUSIVE and partition `given`: `both` (victim held RL and LG), `rl`
+                    (RL, not LG), `lg` (LG, not RL), `mid` (ssg/sng/gl only), `sg` (nothing above
+                    the shotgun tier). Damage into enemies holding an RL is therefore `rl + both`,
+                    NEVER `rl` alone. `enemyWeapons` above is exactly `lg + rl + both`.
+
+                    DERIVED-only and finer than the server's own accounting — KTX keeps a single
+                    dmg_eweapon scalar lumping RL and LG together — so it is MEASURED only where a
+                    damage stream was read, which is exactly what a present `taken` says: absent on
+                    a demo with a KTX block but no damage stream. Zero buckets are omitted.
+                    Telefrags and stomps are excluded, as everywhere in this family.
                   additionalProperties: { type: integer }
                   type: object
                 takenEnemy:

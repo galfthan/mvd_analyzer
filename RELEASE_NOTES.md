@@ -5,6 +5,113 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (overview-manifest) — /overview is a capability manifest, schema v70
+
+**BREAKING: `/overview` stops inlining highlight lists and starts answering
+"what can this demo actually tell me".** The stored `Result` is unchanged;
+this is an mvd-api response-shape bump.
+
+- **Removed: `topKills`, `topStreaks`, `topPowerups`.** Measured across the
+  cached corpus they were 78-88% of the response — `topKills` alone 62-77%,
+  at 3.5 KB of a 5.6 KB body — and each was a copy of a dedicated endpoint:
+  `topKills` was literally `/top-kills` at its own defaults, while
+  `topStreaks` and `topPowerups` are reproducible field-for-field from
+  `/lives` and `/events?type=streak,powerup`. An overview whose job is "help
+  me decide what to fetch next" should not be shipping another endpoint's rows.
+- **Removed: `hasRegionControl`**, folded into the block below.
+- **Added: `available`** — one flag per detailed view, each mirroring the
+  predicate behind that view's 422, so a `false` is exactly the 422 the call
+  would have returned. Covers `demoInfo`, `metadata`, `frags`, `damage`,
+  `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`,
+  `height`, `liquid`, `los`.
+- **`height` / `liquid` / `los` are the point.** They depend on which map
+  BSPs the SERVER was provisioned with, not on what the demo recorded — so
+  the same demo answers differently on two deployments and *nothing in the
+  response used to say so*. A consumer can discover "no damage stream" from
+  a single 422; it could never discover these.
+- **They report MEASURED, not NON-ZERO**, like every other flag in the
+  block. When a gate opens its column is filled for every position sample,
+  so a map with no water yields a full-length all-zero `lq` and `liquid`
+  stays **true** — a measured *"dry"*. Only an unprovisioned server reads
+  false. Keying the flag on "is any sample wet" would collapse those into
+  one value and leave a consumer unable to tell "this map has no water"
+  from "nobody looked". `height` and `liquid` also ride **separate** gates
+  (the collision hull vs the vis BSP), so they can legitimately disagree.
+- **No `pvs` flag, deliberately.** PVS and LOS come off one pass behind one
+  BSP gate, with PVS a superset of LOS by construction, so two flags could
+  never disagree — and a second one would only invite a consumer to think
+  they might.
+- **`los` is the one prediction** in an otherwise exact block: the pass is
+  heavy and lazy, so running it to answer an overview would defeat the
+  purpose. It reports the cheap half of the gate (streams, 2+ players, a
+  provisioned BSP); a provisioned-but-unvised BSP still 422s.
+- **A drift test pins the manifest to the 422 table.** The old `has*` fields
+  went stale precisely because nothing tied them to anything — a new 422-able
+  view can no longer be added without a flag appearing here.
+
+## unreleased (ewep-kills) — the victim-weapon axis, schema v69
+
+**Every per-weapon stat we published was keyed on the attacker's weapon.**
+`score.byWeapon` is kills made *with* the RL; `damage.byWeapon` is damage
+dealt *with* it. Nothing answered the other half of the question — *how well
+armed was the enemy I killed?* — even though weapon denial is how teams
+actually read a match. The only figure keyed on what the target carried was
+`damage.enemyWeapons`, a single scalar lumping RL and LG together.
+
+- **`playerStats.score.byEnemyWeapon`** splits a player's enemy kills by
+  what the VICTIM held at death. **`playerStats.damage.byEnemyWeapon`** does
+  the same for enemy damage given. One vocabulary, exclusive buckets:
+  `both` / `rl` / `lg` / `mid` (ssg/sng/gl) / `sg` (the respawn loadout),
+  plus `unknown` on the kill side for a victim with no stream.
+- **They PARTITION.** The kill map sums to `score.kills`, the damage map to
+  `damage.given`. That is what `both` is for — and it is the one thing to
+  get right: **"enemy RLs killed" is `rl + both`, never `rl` alone.**
+- **Derived, not KTX.** Computed from the frag log and the damage stream
+  against the victim's possession streams, so they work on every demo
+  carrying streams rather than only those with a KTX demoinfo block, and
+  telefrags and stomps get classified too. KTX's own `ekills` counts the
+  kill side INCLUSIVELY (a victim holding RL+LG bumps both counters) and
+  force-zeroes axe/sg plus *every* bucket on `deathmatch >= 4` and
+  `k_instagib` (`ktx/src/stats_json.c:377-380`), so its zeros are not
+  readings; on the damage side the server has no per-tier split at all.
+- **Verified against the server.** `rl + both == ktx.ekills.rl` and
+  `lg + both == ktx.ekills.lg` on all 44 cached corpus demos, every player,
+  both weapons — pinned by a check that runs on every golden demo. The one
+  demo where the two ever disagreed (220498) turned out to be an endpoint
+  rule: a possession run ending on the same frame as the obituary means the
+  server had already taken the weapon away.
+- **`score.byWeaponVsEnemyWeapon` is the cross-tab.** The two maps above are
+  marginals of the same kill set, so neither answers "how many of my LG kills
+  were against enemies carrying an RL" — the question that separates a weapon
+  winning fights from one finishing off the disarmed. This is the joint
+  distribution: killer weapon -> victim bucket -> kills. Summing it over inner
+  keys gives `byWeapon`, over outer keys `byEnemyWeapon`, and both identities
+  hold by construction (the marginal is summed from the cross-tab, not tallied
+  separately) and are asserted on every golden demo. It is the widest map in
+  the section, so skip it when a scoreboard is all you need.
+- **Measuredness differs between the two maps.** The kill map rides the
+  kill family and is absent exactly when `score.kills` is. The damage map
+  needs the damage stream and is present exactly when `damage.taken` is.
+  `damage.enemyWeapons` is unchanged and equals `lg + rl + both`.
+- **Schema note:** this is computed in the analyzer, not folded in at read
+  time like `controlMs` / `speed`, so the stored `Result` changes and the
+  golden corpus moves with it.
+- **Web: Basic Stats gains `TDmg`** (between `Dmg` and `Taken`) — friendly
+  fire dealt, `damage.givenTeam`, which the scoreboard carried nowhere despite
+  `TK` sitting a few columns to its left. The two are not the same signal: a
+  teamkill is friendly damage that happened to finish someone, so a player can
+  pour damage into teammates without a single TK. Unrelated to the
+  victim-weapon work above; it rides along because it is the same table.
+- **Web: Weapon Stats gains an `eK` column per weapon** — of that weapon's
+  kills, how many were against an enemy carrying an RL and/or LG, with the
+  full six-bucket breakdown in the cell tooltip. Both weapon tables scroll
+  inside their own box at 25 columns.
+- **Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` /
+  `eLG`** (player and team tables), rendering `rl + both`. The columns they
+  replace were kills made *with* each weapon, which the Weapon Stats tab
+  already shows — so the scoreboard now carries the metric that was nowhere
+  instead of the one that was in two places.
+
 ## unreleased (gap-windows) — gap-delimited top windows, schema v68
 
 **`/top-windows` learns a second segmentation.** The stored `Result` gains

@@ -763,6 +763,9 @@ never does.
 | `score.byWeapon` | always **derived** | enemy kills split by weapon, from the corrected frag log — same footing as `score.kills`, which is why KTX's per-weapon counts (subject to the same reconnect / telefrag over-counting) never overlay it. Its key set is the *obituary* vocabulary, not `DeathTypeToWeapon`'s: beyond rl/lg/gl/sg/ssg/sng/ng/axe it can carry `tele`, `stomp`, `squish`, `unknown` and (on mods that have them) `hook`/`rail`. `tele` is in the committed corpus. Iterate the map. |
 | `login` | **ktx** when present, else the `*auth` userinfo login | genuinely on the wire (`mvd-reader/parser/userinfo.go:177` in `parseSetInfo`, `:229` in `parseUserInfoString`). |
 | `controlMs` / `speed` | **ktx-only** | KTX's own control clock and speed summary; no wire-side equivalent is computed today. |
+| `score.byEnemyWeapon` | always **derived** | the victim-weapon split of the same kills `score.byWeapon` splits by killer weapon, classified from the victim's possession streams. Never overlaid: KTX's `ekills` counts the same events but keys them INCLUSIVELY (a victim holding RL+LG bumps both) and is force-zeroed for axe/sg and for every weapon on `deathmatch >= 4` / `k_instagib` (`ktx/src/stats_json.c:377-380`), so its zeros are not readings. Ours reproduces it exactly where KTX measures honestly — `rl + both` equals `ekills.rl` on all 44 cached demos, every player. |
+| `score.byWeaponVsEnemyWeapon` | always **derived** | the joint distribution the two by-weapon kill maps are marginals of (killer weapon → victim bucket). Summing it reproduces both, by construction. |
+| `damage.byEnemyWeapon` | always **derived** | finer than the server's own: KTX keeps one `dmg_eweapon` scalar lumping RL and LG together (`ktx/src/combat.c:1075`), so there is nothing to merge. Needs the damage stream — see the measuredness rules below. |
 | `ping` / `handicap` / `bot` | **ktx-only** | server-side state with no wire signal. (`svc_updateping` does carry ping, but the parser skips it today — `mvd-reader/parser/parser.go:809`, in `skipCommand`.) |
 | `pickups` took / totalTook / dropped | **ktx** when present, else derived from `items` + `weaponPickups` + `backpacks` | direct server-side counters, identical semantics. |
 | `pickups` xfer / xferSelf | always **derived** | we can decompose what KTX conflates — see below. |
@@ -816,7 +819,7 @@ stays consistent with the timeline's powerup runs.
 | Speed | `speed` | *PlayerStatsSpeed | **KTX-only**: `max` / `avg` in Quake units/second. The position streams could support a derived version — a follow-up. |
 | Members | `members` | *int | TEAM rows only, and **always present** there (including 0): how many players were folded in, and the count `shareMatch`'s denominator rests on. Absent on player rows. |
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
-| Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency` and `byWeapon` **optional together** — see below. |
+| Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency`, `byWeapon`, `byEnemyWeapon` and `byWeaponVsEnemyWeapon` **optional together** — see below. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
 | Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
@@ -897,6 +900,121 @@ team mixing a KTX-only member with a stream-derived one, the team's
 `byWeaponSelf` therefore under-counts `givenSelf` by the KTX-only
 member's share; `src: "mixed"` on the family is the canary, and such
 teams only arise when the roster invariant is already broken.
+
+#### The victim-weapon axis: `byEnemyWeapon` (schema v69)
+
+Every per-weapon figure above this point is keyed on the **attacker's**
+weapon: `score.byWeapon` is kills made *with* the RL, `damage.byWeapon` is
+damage dealt *with* it. `byEnemyWeapon` is the other axis — the same kills
+and the same damage, split by what the **victim** was holding at the moment
+it landed. It answers weapon denial: *how many armed enemies did this player
+take out, and how much damage went into them.*
+
+Both maps use one vocabulary, and the buckets are **mutually exclusive**,
+applied in priority order:
+
+| Key | The victim held |
+|---|---|
+| `both` | RL **and** LG — the fully armed enemy |
+| `rl` | RL, not LG |
+| `lg` | LG, not RL |
+| `mid` | ssg / sng / gl, but neither RL nor LG |
+| `sg` | nothing above the shotgun tier (axe / sg / ng) — the respawn loadout |
+| `unknown` | kills side only: the victim produced no possession stream, so their loadout is not knowable |
+
+**They are a PARTITION.** `score.byEnemyWeapon` sums to `score.kills`;
+`damage.byEnemyWeapon` sums to `damage.given`. That is what the `both`
+bucket is for, and it is the one thing a consumer must not get wrong:
+
+> **"Enemy RLs killed" is `rl + both`, never `rl` alone.** Same for LG.
+> The two overlap in `both` by construction, so `enemyRL + enemyLG`
+> double-counts the fully armed victims — that is a real quantity
+> (`both`), not an error, but it is not a sum of kills.
+
+The vocabulary is deliberately coarser than the killer-weapon one. It
+describes *how well armed the target was*, where ssg/sng/gl are one tier
+and the floor every player respawns with is another; a finer split would
+imply a precision the victim's inventory does not carry, since it says what
+they held, not what they would have used.
+
+**Both maps are derived, and neither is ever overlaid from KTX.** The
+server counts the kill side itself (`ekills`, `ktx/src/client.c:4703-4741`)
+but keys it INCLUSIVELY — a victim holding RL+LG bumps both counters — and
+force-zeroes the axe and sg buckets plus **every** bucket on
+`deathmatch >= 4` and `k_instagib` (`ktx/src/stats_json.c:377-380`), so an
+all-zero KTX block is a suppressed counter rather than a reading. Ours is
+computed from the frag log against the victim's possession streams, which
+makes it available on every demo carrying streams instead of only on those
+with a demoinfo block, and lets telefrags and stomps be classified too. It
+reproduces KTX exactly where KTX measures honestly:
+
+```
+ktx.ekills.rl == byEnemyWeapon.rl + byEnemyWeapon.both
+ktx.ekills.lg == byEnemyWeapon.lg + byEnemyWeapon.both
+```
+
+measured across all 44 demos in the local cache — every player, both
+weapons, no disagreement — and pinned by `checkEnemyWeaponKillsVsKTX`, which
+asserts the identity on every golden-corpus demo. The verbatim KTX counters
+remain on `demoInfo` for anyone who wants to diff them.
+
+**Measuredness differs between the two maps**, because they rest on
+different evidence:
+
+- `score.byEnemyWeapon` is part of the **kill family** and absent exactly
+  when `score.kills` is — it is a re-cut of those very kills.
+- `damage.byEnemyWeapon` needs the **damage stream**, so it follows rule 2
+  above: present exactly when `damage.taken` is, and absent on a demo with
+  a KTX block but no stream. `damage.enemyWeapons` (KTX's `dmg_eweapon`)
+  survives there and is exactly `lg + rl + both` when both are present.
+
+The damage side excludes telefrags and stomps like every other figure in
+that family — positional kills, not weapon damage. The kill side does
+**not**: it has a victim and a timestamp, which is all the classification
+needs. Team rows sum both maps over the members that measured one.
+
+##### The cross-tab: `score.byWeaponVsEnemyWeapon`
+
+`byWeapon` and `byEnemyWeapon` are two **marginals of the same kill set**,
+and marginals cannot answer "how many of my LG kills were against enemies
+carrying an RL" — the question that separates a weapon winning fights from
+one finishing off the disarmed. `score.byWeaponVsEnemyWeapon` is the joint
+distribution: **killer weapon → victim bucket → kills**, outer key from
+`byWeapon`'s obituary vocabulary, inner key from `byEnemyWeapon`'s.
+
+Measured on `2on2_pys_wd_250426_aerowalk`, one player's 45 kills:
+
+| | both | rl | lg | mid | sg | **total** |
+|---|---|---|---|---|---|---|
+| `sg` | 1 | 2 | 1 | 3 | 9 | **16** |
+| `rl` | 0 | 5 | 3 | 1 | 4 | **13** |
+| `ssg` | 0 | 0 | 0 | 0 | 5 | **5** |
+| `lg` | 0 | 1 | 1 | 1 | 1 | **4** |
+| `sng` | 0 | 0 | 0 | 0 | 4 | **4** |
+| `tele` | 0 | 1 | 0 | 0 | 1 | **2** |
+| `ng` | 0 | 0 | 0 | 0 | 1 | **1** |
+| **total** | **1** | **9** | **5** | **5** | **25** | **45** |
+
+The row totals are `byWeapon`, the column totals are `byEnemyWeapon`, and
+that is a **guaranteed identity**, not a coincidence:
+
+```
+sum over inner keys  ==  score.byWeapon
+sum over outer keys  ==  score.byEnemyWeapon
+```
+
+The marginal is computed *from* the cross-tab rather than tallied
+separately, so the two cannot drift; both identities are asserted on every
+golden-corpus demo (`checkEnemyWeaponKillsVsKTX`) and were measured to hold
+on all 44 cached demos, player and team rows alike. A consumer therefore
+never has to decide which of the three maps to trust.
+
+Same measuredness as its marginals (absent exactly when `kills` is) and the
+same zero-dropping — an outer key exists only if the player killed with
+that weapon, an inner key only if that pairing occurred. It is the widest
+map in the section (up to *weapons used* x 6), so it is the one to skip
+when only a scoreboard is needed; the marginals cost nothing and answer
+most questions.
 
 #### Why `accuracy` is swapped wholesale and `damage.byWeapon` is merged
 
@@ -3326,6 +3444,8 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v70 | **`/overview` becomes a capability manifest instead of a highlights reel.** The stored `Result` gains **no field** — this is an mvd-api response-shape bump, and the first BREAKING one in a while: fields are REMOVED. Gone are `topKills`, `topStreaks` and `topPowerups`, measured across the corpus at 78-88% of the response (`topKills` alone 62-77%), every one of them a copy of a dedicated endpoint — `/top-kills` at its own defaults, and `/lives` + `/events?type=streak,powerup` field for field. Gone too is `hasRegionControl`, folded into the new block. Added is **`available`**, one flag per detailed view, each mirroring the predicate behind that view's 422, so a `false` is exactly the 422 the call would have returned: `demoInfo`, `metadata`, `frags`, `damage`, `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`, plus the three a consumer could not previously infer AT ALL — **`height`**, **`liquid`** and **`los`** — which turn on which map BSPs the SERVER was provisioned with rather than on what the demo recorded, so the same demo answers differently on two deployments. Like every other flag in the block these report **measured, not non-zero**: a gate that opens fills its column for every position sample, so a map with no water yields an all-zero `lq` and `liquid` stays **true** — a measured *dry*, distinguishable from the unprovisioned `false` where the question is simply unanswerable. `height` and `liquid` ride separate gates (collision hull vs vis BSP) and can disagree. There is deliberately no `pvs` flag: PVS and LOS come off one pass behind one BSP gate (PVS ⊇ LOS by construction), so two flags could never disagree. `los` is the one PREDICTION in the block — the pass is heavy and lazy, so it reports the cheap half of the gate (streams, 2+ players, a provisioned BSP) and a provisioned-but-unvised BSP still 422s. A drift test pins the manifest to the 422 table, which is exactly what the removed ad-hoc `has*` fields never had and why they went stale. |
+| v69 | **The victim-weapon axis: `byEnemyWeapon` on kills and damage.** Every per-weapon figure in `playerStats` was keyed on the ATTACKER's weapon; this bump adds the complement — the same kills and the same damage split by what the **victim** was holding when it landed, the weapon-denial question. `score.byEnemyWeapon` partitions `score.kills`, `damage.byEnemyWeapon` partitions `damage.given`, and both use one exclusive vocabulary: `both` / `rl` / `lg` / `mid` / `sg` (plus `unknown` on the kill side, for a victim with no stream). **`both` is the trap and the point**: "enemy RLs killed" is `rl + both`, never `rl` alone. Both are **DERIVED on every demo carrying streams**, never overlaid — KTX's own `ekills` counts the kill side inclusively (a victim holding RL+LG bumps both) and force-zeroes axe/sg plus every bucket on `deathmatch >= 4` / `k_instagib` (`ktx/src/stats_json.c:377-380`), while for damage the server keeps only the RL+LG-lumped `dmg_eweapon` scalar. Ours reproduces KTX exactly where KTX measures honestly — `rl + both == ekills.rl` on all 44 cached demos, every player, both weapons — and additionally covers telefrags/stomps and old demos with no demoinfo block. `damage.enemyWeapons` stays as the `lg + rl + both` summary it always was. Measuredness: the kill map rides the kill family (absent exactly when `kills` is), the damage map rides the damage STREAM (present exactly when `taken` is). The stored `Result` DOES change — this is computed in the analyzer, not folded in at read time — so the golden corpus moves. Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` / `eLG`, the metric that was nowhere, since kills made WITH each weapon are already in the Weapon Stats tab. See [The victim-weapon axis](#the-victim-weapon-axis-byenemyweapon-schema-v69). | Also adds **`score.byWeaponVsEnemyWeapon`**, the joint distribution the two kill maps are marginals of — killer weapon → victim bucket → kills — because marginals cannot answer "how many of my LG kills were against enemies carrying an RL". Summing it over inner keys reproduces `byWeapon` and over outer keys `byEnemyWeapon`, an identity guaranteed by construction (the marginal is summed FROM the cross-tab) and asserted on every golden demo.
 | v68 | **Gap-delimited windows: `mode=gap` on `/top-windows`.** The stored `Result` gains **no field** — like v67 the bump is for the observable API surface alone. `/top-windows` gains a second SEGMENTATION behind `mode` (default `fixed`, so a pre-v68 request answers identically apart from the additive `mode: "fixed"` echo every response now carries): under `mode=gap` a window is a maximal run of scoring events in which consecutive events are no more than `gapMs` apart, and its score is their sum — the stretch lasts as long as the player kept doing it rather than as long as a stopwatch says. `gapMs` is **required** there and has **no default**: measured over the 44-demo cache, per-player inter-kill gaps run p50 ≈ 11–12 s while inter-damage-event gaps run p50 ≈ 1.0–1.1 s, so no one value serves both (documented starting points ~10000 for the frag metrics, ~3000 for the damage and shot metrics), and each mode REJECTS the other's knob with a 400 rather than ignoring it. Additive on the envelope: **`mode`** (always present, so the segmentation is never inferred from which knob is present) and **`gapMs`** (gap responses only); **`windowMs` becomes fixed-only**, since a fixed length on a gap response would be a lie. Rows need no new field — `start`/`end` already describe variable-length spans, and a gap row's `end` is its last scoring event rather than `start + windowMs`. Clusters are disjoint per player by construction (no overlap suppression), signed metrics cluster on ALL their events (a death both extends a `netFrags` run and lowers its score), `score` still equals the same-named stat absent a `weapons=` filter, and a cluster MAY SPAN the player's own death — `/lives` stays the per-life view. See [TopWindows](#topwindows-viewtopwindows-rest-top-windows). |
 | v67 | **Kill bursts (`/top-kills`) and the `top-` endpoint family.** The stored `Result` gains **no field** — the bump is for the observable API surface alone. Additive: the [`TopKills`](#kill-bursts-topkills--schema-v67) view + endpoint (the match's hardest kill bursts, ranked by burst damage; same-weapon runs, a CAPTURE `gapMs` narrowed client-side via `maxGapMs`, positional kills absent and dead-killer kills present), an `overview.topKills` field carrying 20 of those rows at the documented defaults, and an mvd-mcp `getTopKills` tool. Plus a deliberate **rename** taken while the consumer count was one, with no alias route: `/hot-windows` → `/top-windows`, `hot_windows_unavailable` → `top_windows_unavailable`, MCP `getHotWindows` → `getTopWindows`. Ranked highlight scans now carry an explicit `top-` prefix (they have a `limit`, a min-filter and a sort key); plain nouns stay reserved for exhaustive logs and partitions (`/frags`, `/damage`, `/lives`). No response shape changed beyond the paths. |
 | v66 | **Userids are per session, not per wire slot** (a **correctness fix**: values move, no field is added, removed or retyped). `timelineAnalysis.playerUserIDs` and the `playerUserID` on `fragStreaks[]`, `powerupEvents[]`, `demoMarkers[]` and `airgibs[].attackerUserID`/`.victimUserID` used to carry the FIRST userid ever seen on a player's wire slot, latched for the whole demo. A userid names a connection, not a person (`SV_GenerateUserID`, `mvdsv/src/sv_main.c:538-556`, reissues them from a rotating pool), so every slot handover and every reconnect published somebody else's — or the player's own dead — id, and a consumer building the documented `?track=<userId>` deep link watched the wrong player. Two measured cases: hub 220637 served `(1)rusti (FU)` as **42**, the id of a spectator who had left after 26 s (now **43**), and 222649 served `bogojoker` as **12** sixteen minutes after he timed out and reconnected as **25** (now **25**), on the frag streak a viewer would click. Each id is now resolved from the *session* (one contiguous occupancy of a slot by one userid) that owned the slot at the value's own timestamp; where the reconnect unifier folded several sessions into one name, `playerUserIDs` publishes the **last session that had play** — a deliberate choice, being normally the id that is live at the end of the demo (the ranking is by last play evidence, so an exact tie in it resolves to the lower slot rather than to the surviving connection). Only demos with a mid-match handover or rejoin move (3 of 44 in the cached corpus); everything else is byte-identical. v66 also **exports the identity behind that resolution** (purely additive): `streams.players[]` and `playerStats.players[]` gain `identity` — the reconnect-unification key, equal for every row that is the same human — and `sessions[]`, the per-connection `{startMs, endMs, slot, userId, name}` windows it was folded from. Together they answer the two questions a name-keyed row cannot ("are these two rows one person" and "which userid do I track at time t"), which a consumer had been rebuilding with a fuzzy name matcher. The key is DEMO-LOCAL (derived from the first session's slot+userid) and must not be persisted or compared across demos. See [Player userids](#player-userids-schema-v66) and [Player identity and sessions](#player-identity-and-sessions-schema-v66). |

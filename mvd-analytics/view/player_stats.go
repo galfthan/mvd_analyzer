@@ -289,6 +289,11 @@ func overlayDamage(derived *result.PlayerStatsDamage, di *result.DemoInfoPlayer)
 		// KTX block but no damage stream (the same condition Taken above
 		// tracks).
 		out.ByWeaponSelf = cloneCounts(derived.ByWeaponSelf)
+		// Likewise derived-only: KTX tracks a single dmg_eweapon scalar
+		// that lumps RL and LG together (ktx/src/combat.c:1075) and no
+		// per-tier split at all, so there is nothing to merge and the
+		// finer map rides through intact.
+		out.ByEnemyWeapon = cloneCounts(derived.ByEnemyWeapon)
 	}
 	// KTX's own per-weapon enemy damage wins where it carries one, weapon
 	// by weapon rather than family-wide.
@@ -563,6 +568,15 @@ func reaggregateTeams(players, teams []result.PlayerStatsRow) []result.PlayerSta
 						dmg.ByWeaponSelf = map[string]int{}
 					}
 					dmg.ByWeaponSelf[w] += n
+				}
+				// Same partial sum, same reason: the victim-weapon
+				// partition is stream-derived, so a KTX-only member
+				// contributes nothing rather than voiding the team's.
+				for w, n := range p.Damage.ByEnemyWeapon {
+					if dmg.ByEnemyWeapon == nil {
+						dmg.ByEnemyWeapon = map[string]int{}
+					}
+					dmg.ByEnemyWeapon[w] += n
 				}
 				// TakenToDie is an average; averaging averages across
 				// players with different death counts is meaningless, so a
