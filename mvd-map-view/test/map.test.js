@@ -187,3 +187,110 @@ test('the world bake takes its scratch canvas from the target canvas document', 
     assert.deepEqual(map.scratchCanvas(), { tag: 'canvas' });
     assert.equal(asked, 1);
 });
+
+// ─── Actor layers ───────────────────────────────────────────────────────────
+
+// Item phases are int32 ms; the renderer's clock is seconds, so every one of
+// these paths promotes the clock before comparing. A unit mix-up here would
+// show a whole map of items in the wrong state.
+const ITEM = { phases: [{ availableFrom: 0, takenAt: 10_000, respawnAt: 30_000 }] };
+
+test('isItemUp brackets the taken window', () => {
+    const map = new MvdMap();
+    assert.equal(map.isItemUp(ITEM, 5), true, 'before it was taken');
+    assert.equal(map.isItemUp(ITEM, 10), false, 'at the instant it was taken');
+    assert.equal(map.isItemUp(ITEM, 20), false, 'mid respawn');
+    assert.equal(map.isItemUp(ITEM, 30), true, 'at respawn');
+});
+
+test('isItemUp treats an item with no phase history as up', () => {
+    const map = new MvdMap();
+    assert.equal(map.isItemUp({ phases: [] }, 100), true);
+    assert.equal(map.isItemUp({}, 100), true);
+});
+
+test('isItemUp keeps an open phase up, and a pending MH down', () => {
+    const map = new MvdMap();
+    assert.equal(map.isItemUp({ phases: [{ availableFrom: 0, takenAt: 0 }] }, 500), true);
+    // MH in its rot window: taken, no respawn scheduled yet.
+    assert.equal(map.isItemUp({ phases: [{ availableFrom: 0, takenAt: 1000, respawnAt: 0 }] }, 5), false);
+});
+
+test('itemStatus reports the wait in seconds and flags the pending MH', () => {
+    const map = new MvdMap();
+    const up = map.itemStatus(ITEM, 5);
+    assert.equal(up.up, true);
+    assert.equal(up.secsToRespawn, null, 'no countdown while it is up');
+    const down = map.itemStatus(ITEM, 20);
+    assert.equal(down.up, false);
+    assert.equal(down.secsToRespawn, 10, 'seconds, not milliseconds');
+    const mh = map.itemStatus({ phases: [{ availableFrom: 0, takenAt: 1000, respawnAt: 0 }] }, 5);
+    assert.equal(mh.pending, true);
+});
+
+test('entityCategory maps item kinds and folds both teleporter ends together', () => {
+    const map = new MvdMap();
+    assert.equal(map.entityCategory({ type: 'item', kind: 'rl' }), 'weapon');
+    assert.equal(map.entityCategory({ type: 'item', kind: 'ra' }), 'armor');
+    assert.equal(map.entityCategory({ type: 'item', kind: 'nosuch' }), 'item');
+    assert.equal(map.entityCategory({ type: 'teleportSrc' }), 'teleporter');
+    assert.equal(map.entityCategory({ type: 'teleportDst' }), 'teleporter');
+    assert.equal(map.entityCategory({ type: 'spawn' }), 'spawn');
+});
+
+test('buildTeleportArrows pairs each entrance with its named exit', () => {
+    const map = new MvdMap();
+    map.state.mapEntities = [
+        { type: 'teleportSrc', target: 'tp1', x: 0, y: 0, z: 0 },
+        { type: 'teleportDst', targetName: 'tp1', x: 100, y: 50, z: 24 },
+        { type: 'teleportSrc', target: 'nowhere', x: 5, y: 5, z: 0 },
+    ];
+    map.buildTeleportArrows();
+    assert.equal(map.state.teleportArrows.length, 1, 'the unmatched entrance is dropped');
+    const a = map.state.teleportArrows[0];
+    assert.deepEqual([a.sx, a.sy, a.sz], [0, 0, 0]);
+    assert.deepEqual([a.dx, a.dy, a.dz], [100, 50, 24]);
+});
+
+test('getActiveBadges surfaces held powerups and weapons, and colours armour by type', () => {
+    const map = new MvdMap();
+    const letters = (d) => map.getActiveBadges(d).map(b => b.letter).sort();
+    assert.deepEqual(letters({}), []);
+    assert.deepEqual(letters({ q: true, rl: true }), ['Q', 'R']);
+    // The armour badge is keyed off the armour TYPE, not the amount, and its
+    // letter is that type — so it clears when the type does, which is what the
+    // armour stream reports once a vest is chewed through.
+    const armour = map.getActiveBadges({ a: 100, at: 'ra' }).find(b => b.letter === 'RA');
+    assert.equal(armour.color, 'rgb(255, 50, 50)', 'red armour reads red');
+    assert.deepEqual(letters({ a: 0, at: '' }), []);
+});
+
+test('getActiveBadges distinguishes the two nailgun tiers on one badge', () => {
+    const map = new MvdMap();
+    // sng and ssg share a slot: super-nailgun wins, and each has its own letter.
+    assert.deepEqual(map.getActiveBadges({ sng: true }).map(b => b.letter), ['N']);
+    assert.deepEqual(map.getActiveBadges({ ssg: true }).map(b => b.letter), ['S']);
+    assert.deepEqual(map.getActiveBadges({ sng: true, ssg: true }).map(b => b.letter), ['N']);
+});
+
+test('the mega badge tracks overhealth rather than a pickup flag', () => {
+    const map = new MvdMap();
+    assert.deepEqual(map.getActiveBadges({ h: 100 }).map(b => b.letter), []);
+    assert.deepEqual(map.getActiveBadges({ h: 101 }).map(b => b.letter), ['M']);
+});
+
+test('streamPosAt carries the last sample forward and reports no track as null', () => {
+    const map = new MvdMap();
+    map.state.posStreams = {
+        nlk: { t: [0, 1000, 2000], x: [0, 10, 20], y: [0, 0, 0], z: [0, 0, 0] },
+    };
+    assert.equal(map.streamPosAt('missing', 0), null);
+    assert.equal(map.streamPosAt('nlk', 1500).x, 10, 'carry-forward, not interpolation');
+    assert.equal(map.streamPosAt('nlk', 99999).x, 20);
+});
+
+test('the team palette defaults to the canonical order and can be overridden', () => {
+    assert.equal(new MvdMap().teamColors[0], '#ff5050');
+    const custom = new MvdMap(null, { teamColors: ['#111', '#222'] });
+    assert.equal(custom.teamColors[1], '#222');
+});

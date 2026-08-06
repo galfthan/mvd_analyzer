@@ -8,26 +8,6 @@
 // in styles.css as :root custom properties (kept in sync by hand: see the
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
-const ARMOR_COLORS = {
-    ra: 'rgb(255, 50, 50)',
-    ya: 'rgb(255, 200, 0)',
-    ga: 'rgb(0, 180, 0)',
-};
-
-// Badge layout / colours used by the map view to draw inventory icons around
-// each player marker. Hoisted from the map-rendering section so the palette
-// lives next to the rest of the theme.
-const BADGE_DEFS = [
-    { angle:   0, key: 'q',   letter: 'Q', color: 'rgb(0, 150, 255)' },
-    { angle:  45, key: 'rl',  letter: 'R', color: 'rgb(255, 107, 107)' },
-    { angle:  90, key: 'lg',  letter: 'L', color: 'rgb(0, 217, 255)' },
-    { angle: 135, key: 'sng', letter: 'N', color: 'rgb(180, 140, 100)' },
-    { angle: 180, key: 'mh',  letter: 'M', color: 'rgb(0, 200, 83)' },
-    { angle: 225, key: 'arm', letter: 'A', color: null },
-    { angle: 270, key: 'pe',  letter: 'P', color: 'rgb(255, 0, 0)' },
-    { angle: 315, key: 'r',   letter: 'I', color: 'rgb(255, 235, 59)' },
-];
-
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
 // Timing / layout constants used by the chat scroller and the map playback.
@@ -36,7 +16,6 @@ const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 // the other.
 const CHAT_PX_PER_SEC   = 17.5; // ~same density as the original 40s/700px window
 const CHAT_ITEM_HEIGHT  = 18;
-const DEATH_X_DURATION  = 2.0;  // seconds an "X" death marker stays on the map
 const PLAYBACK_FPS_MS   = 16;   // map playback throttle (~60 fps = 16 ms/frame)
 
 // Derive a strong (darkened) color variant from a hex color for region
@@ -6249,34 +6228,6 @@ let mapState = null;
 // (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
 // the theme constants at the top of this file.)
 
-function getActiveBadges(data) {
-    const badges = [];
-    for (const def of BADGE_DEFS) {
-        let active = false, color = def.color, letter = def.letter;
-        switch (def.key) {
-            case 'q':   active = !!data.q; break;
-            case 'rl':  active = !!data.rl; break;
-            case 'lg':  active = !!data.lg; break;
-            case 'sng':
-                if (data.sng) { active = true; letter = 'N'; }
-                else if (data.ssg) { active = true; letter = 'S'; }
-                break;
-            case 'mh':  active = data.h > 100; break;
-            case 'arm':
-                if (data.at) {
-                    active = true;
-                    color = ARMOR_COLORS[data.at] || 'rgb(180, 180, 180)';
-                    letter = data.at.toUpperCase();
-                }
-                break;
-            case 'pe':  active = !!data.pe; break;
-            case 'r':   active = !!data.r; break;
-        }
-        if (active) badges.push({ angle: def.angle, letter, color });
-    }
-    return badges;
-}
-
 function markMapDirty() {
     mapState.renderDirty = true;
 }
@@ -6383,9 +6334,14 @@ function initMapView(result) {
     mapState.losPending = false;
 
     // Static map-entity corpus (result.mapEntities) for the "learn map" view.
+    // Item spawners for the map's live markers. The renderer reads these from
+    // its own state rather than the app's result object — it has no notion of
+    // a Result, and in the MCP viewer there isn't one to reach for.
+    mapState.items = (result.items && Array.isArray(result.items.items)) ? result.items.items : null;
+
     mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
         ? result.mapEntities.entities : [];
-    buildTeleportArrows();
+    mapView.buildTeleportArrows();
     // Fresh demo always starts in live mode; only offer learn mode when the
     // map has a static entity corpus.
     mapState.learnMode = false;
@@ -6930,7 +6886,7 @@ function currentOrbitPivot() {
     if (mapState.followPlayer) {
         // Match the stream-sourced symbol position so the orbit pivots
         // exactly on the drawn symbol.
-        const sp = streamPosAt(mapState.followPlayer, mapState.currentTime * 1000);
+        const sp = mapView.streamPosAt(mapState.followPlayer, mapState.currentTime * 1000);
         if (sp && !(sp.x === 0 && sp.y === 0)) {
             return { x: sp.x, y: sp.y, z: sp.z || 0 };
         }
@@ -7406,7 +7362,7 @@ function buildPlayerRegionIcon(player) {
     const sym = player.sym;
     const letter = sym?.symbol || player.name.charAt(0).toUpperCase();
     const teamColor = TEAM_COLORS[sym?.teamIdx ?? player.teamIdx] || TEAM_COLORS[0];
-    const badges = getActiveBadges(player.data);
+    const badges = mapView.getActiveBadges(player.data);
 
     const cache = mapState._regionIconCache || (mapState._regionIconCache = new Map());
     const key = `${player.name}|${letter}|${teamColor}|${badges.join(',')}`;
@@ -7563,7 +7519,7 @@ function renderMap(time) {
     // Player positions (and the floor-height fh for the anchor stem) come
     // from the native-rate streams; state badges stay on the bucket. Built
     // once here from a non-mutating overlay on the cached bucket.
-    const playerData = bucket ? augmentPlayerData(bucket.p, time * 1000) : null;
+    const playerData = bucket ? mapView.augmentPlayerData(bucket.p, time * 1000) : null;
     // Stash for drawMovers (runs inside the world layer, which has no
     // playerData of its own) to highlight movers a player is riding.
     mapState._framePlayerData = playerData;
@@ -7607,7 +7563,7 @@ function renderMap(time) {
     // Learn-map mode: static entity study view — keep the floor/loc base,
     // draw the designed entity layout, and skip all player/time-based layers.
     if (mapState.learnMode) {
-        drawMapEntities(ctx);
+        mapView.drawMapEntities(ctx);
         return;
     }
 
@@ -7637,7 +7593,7 @@ function renderMap(time) {
     // player also draws on top. Items carry a downward sort bias
     // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
     // them — the common case — but win when they sit a real floor above.
-    drawItemsAndPlayersZSorted(ctx, time, playerData);
+    mapView.drawItemsAndPlayersZSorted(ctx, time, playerData);
 
     // Recent-death markers — drawn last so the X sits on top of everything
     // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
@@ -7647,8 +7603,8 @@ function renderMap(time) {
     if (deaths && deaths.length > 0) {
         for (const e of deaths) {
             const dt = time - e.t;
-            if (dt < 0 || dt > DEATH_X_DURATION) continue;
-            const alpha = 1 - dt / DEATH_X_DURATION;
+            if (dt < 0 || dt > MapView.DEATH_X_DURATION) continue;
+            const alpha = 1 - dt / MapView.DEATH_X_DURATION;
             const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
             MapView.drawDeathX(ctx, pos.x, pos.y, hexToRgb(TEAM_COLORS[e.teamIdx] || '#ff5050'), alpha);
         }
@@ -7661,8 +7617,8 @@ function renderMap(time) {
     if (drops && drops.length > 0) {
         for (const e of drops) {
             const dt = time - e.t;
-            if (dt < 0 || dt > DEATH_X_DURATION) continue;
-            const alpha = 1 - dt / DEATH_X_DURATION;
+            if (dt < 0 || dt > MapView.DEATH_X_DURATION) continue;
+            const alpha = 1 - dt / MapView.DEATH_X_DURATION;
             const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
             MapView.drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
         }
@@ -7677,108 +7633,11 @@ function renderMap(time) {
 // short text label that reuses the timeline colour palette so users
 // pattern-match weapons across views. Items currently taken are dimmed.
 
-// Display metadata per item kind. Armors render as a solid-coloured
-// square with black text; weapons / MH / powerups as a black square
-// with a coloured outline and text in the outline colour. Kinds not
-// listed here (ammo, small health) are skipped on the map and in the
-// sidebar.
-const ITEM_MARKER_STYLES = {
-    ra:   { fill: 'rgb(255, 50, 50)',   outline: null,                   label: 'RA', textColor: '#000' },
-    ya:   { fill: 'rgb(255, 200, 0)',   outline: null,                   label: 'YA', textColor: '#000' },
-    ga:   { fill: 'rgb(0, 180, 0)',     outline: null,                   label: 'GA', textColor: '#000' },
-    mh:   { fill: '#000',               outline: 'rgb(0, 200, 83)',      label: 'MH' },
-    rl:   { fill: '#000',               outline: 'rgb(255, 107, 107)',   label: 'RL' },
-    lg:   { fill: '#000',               outline: 'rgb(0, 217, 255)',     label: 'LG' },
-    ssg:  { fill: '#000',               outline: '#aaaaaa',              label: 'SS' },
-    gl:   { fill: '#000',               outline: '#c78a3a',              label: 'GL' },
-    ng:   { fill: '#000',               outline: '#8090a0',              label: 'NG' },
-    sng:  { fill: '#000',               outline: 'rgb(180, 140, 100)',   label: 'SN' },
-    quad: { fill: '#000',               outline: 'rgb(0, 150, 255)',     label: 'Q'  },
-    pent: { fill: '#000',               outline: 'rgb(255, 0, 0)',       label: 'P'  },
-    ring: { fill: '#000',               outline: 'rgb(255, 235, 59)',    label: 'I'  },
-};
-
 // Kinds surfaced in the sidebar Items panel. Armors, MH, the two
 // "fight-over" weapons (RL, LG), and powerups — the core resources
 // players actively contest. Other weapons / ammo / small health are
 // still rendered on the map but omitted from the scrolling list.
 const PANEL_ITEM_KINDS = new Set(['ra', 'ya', 'ga', 'mh', 'rl', 'lg', 'quad', 'pent', 'ring']);
-
-const ITEM_MARKER_SIZE = 20;  // 25% larger than the prior 16 px baseline
-const ITEM_DIM_ALPHA = 0.35;  // alpha multiplier when item is taken
-
-// isItemUp returns true if the item is available to be picked up at the
-// given time — i.e., we're inside an "available" phase. Handles the MH
-// pending-respawn case (phase with TakenAt set but RespawnAt==0 is
-// still held).
-//
-// `time` is in seconds (mapState.currentTime). Schema v8: item.phases[]
-// .availableFrom / .takenAt / .respawnAt are int32 ms — promote `time`
-// to ms once here so all comparisons happen in the phase's native unit.
-function isItemUp(item, time) {
-    const phases = item.phases;
-    if (!phases || phases.length === 0) return true;
-    const timeMs = time * 1000;
-    for (let i = 0; i < phases.length; i++) {
-        const p = phases[i];
-        if (p.availableFrom > timeMs) break;
-        const takenAt = p.takenAt || 0;
-        if (takenAt === 0) return true; // phase open, not yet taken (this phase is current → up)
-        if (timeMs < takenAt) return true; // available window
-        // taken at takenAt; respawnAt may be 0 (MH pending) or a future/past value
-        const respawnAt = p.respawnAt || 0;
-        if (respawnAt > 0 && timeMs >= respawnAt) {
-            // Respawned; if this is the last phase or the next phase
-            // opens at respawnAt, let the loop continue.
-            continue;
-        }
-        return false;
-    }
-    return true;
-}
-
-// itemStatus returns a small object describing status at the given time:
-//   { up: bool, secsToRespawn: number|null, pending: bool }
-// secsToRespawn is the wait time in seconds (null when up).
-// pending is true for MH in its rot window (TakenAt set, RespawnAt==0).
-//
-// `time` is in seconds. Schema v8: phase fields are ms — promote `time`
-// to ms for comparisons, then convert the result back to seconds before
-// returning.
-function itemStatus(item, time) {
-    const phases = item.phases;
-    if (!phases || phases.length === 0) {
-        return { up: true, secsToRespawn: null, pending: false };
-    }
-    const timeMs = time * 1000;
-    // Find the phase whose window contains `time` (availableFrom <= timeMs < nextAvailableFrom).
-    let activePhase = null;
-    for (let i = 0; i < phases.length; i++) {
-        const p = phases[i];
-        const next = phases[i + 1];
-        if (p.availableFrom <= timeMs && (!next || next.availableFrom > timeMs)) {
-            activePhase = p;
-            break;
-        }
-    }
-    if (!activePhase) {
-        // Before the first phase opens — treat as up.
-        return { up: true, secsToRespawn: null, pending: false };
-    }
-    const takenAt = activePhase.takenAt || 0;
-    if (takenAt === 0 || timeMs < takenAt) {
-        return { up: true, secsToRespawn: null, pending: false };
-    }
-    const respawnAt = activePhase.respawnAt || 0;
-    if (respawnAt === 0) {
-        // Held with pending respawn (MH during rot).
-        return { up: false, secsToRespawn: null, pending: true };
-    }
-    if (timeMs >= respawnAt) {
-        return { up: true, secsToRespawn: null, pending: false };
-    }
-    return { up: false, secsToRespawn: (respawnAt - timeMs) * 0.001, pending: false };
-}
 
 // ─── Player → floor anchor stems (3D views) ─────────────────────────────────
 //
@@ -7788,325 +7647,6 @@ function itemStatus(item, time) {
 // otherwise leaves symbols floating ambiguously between decks), and its
 // length doubles as an air-height cue for jumps and falls.
 
-// A standing player's origin sits this far above the floor (mins.z = -24 in
-// standard Quake 1).
-const PLAYER_ORIGIN_ABOVE_FLOOR = 24;
-// result.NoFloor sentinel in PositionTrack.H — no floor to measure from.
-const MAP_NO_FLOOR = -2147483648;
-
-// streamPosAt returns {x, y, z, h} from a player's native-rate position
-// track at tMs (match-relative ms): the last sample at or before tMs,
-// clamped to the first. h is the PositionTrack.H floor-height (or null when
-// the column is absent / NoFloor). Binary search — tracks are dense.
-function streamPosAt(name, tMs) {
-    const pos = mapState.posStreams && mapState.posStreams[name];
-    if (!pos || !pos.t || pos.t.length === 0) return null;
-    const t = pos.t;
-    const n = t.length;
-    // Clamp times before the first sample to it (dense, strictly increasing
-    // tracks, so this matches the previous tMs<=t[0] guard exactly).
-    let idx = MapView.lowerBoundIndex(t, tMs, (a, i) => a[i]);
-    if (idx < 0) idx = 0;
-    let h = null;
-    if (pos.h && pos.h.length === n && pos.h[idx] !== MAP_NO_FLOOR) h = pos.h[idx];
-    const out = { x: pos.x[idx], y: pos.y[idx], z: pos.z[idx], h };
-    // View direction (raw angle16) and velocity (u/s) ride the same stream
-    // when present (schema v31–v32); the map's optional arrows read them.
-    if (pos.vya && pos.vya.length === n) {
-        out.vya = pos.vya[idx];
-        out.vp = (pos.vp && pos.vp.length === n) ? pos.vp[idx] : 0;
-    }
-    if (pos.vx && pos.vx.length === n) {
-        out.vx = pos.vx[idx];
-        out.vy = (pos.vy && pos.vy.length === n) ? pos.vy[idx] : 0;
-        out.vz = (pos.vz && pos.vz.length === n) ? pos.vz[idx] : 0;
-    }
-    return out;
-}
-
-// augmentPlayerData overlays stream-sourced position (x/y/z) and the
-// per-sample floor-height (fh) onto the bucket-reconstructed player map,
-// without mutating the cached bucket. State fields (health/armor/weapons)
-// are carried through from the bucket unchanged. Players with no position
-// stream keep their bucket position.
-function augmentPlayerData(bucketPlayers, tMs) {
-    if (!bucketPlayers) return bucketPlayers;
-    const out = {};
-    for (const name in bucketPlayers) {
-        const d = bucketPlayers[name];
-        const sp = streamPosAt(name, tMs);
-        if (sp) {
-            out[name] = Object.assign({}, d, {
-                x: sp.x, y: sp.y, z: sp.z, fh: sp.h,
-                vya: sp.vya, vp: sp.vp, vx: sp.vx, vy: sp.vy, vz: sp.vz,
-            });
-        } else {
-            out[name] = d;
-        }
-    }
-    return out;
-}
-// Slack added when searching for the supporting floor, so interpolation
-// noise on ramps / step edges doesn't make the search miss the surface the
-// player is actually standing on.
-const FLOOR_SNAP_TOLERANCE = 4;
-
-// floorZUnder: highest floor surface at world (x, y) with z <= zMax, or null
-// when no loaded floor triangle covers that point. Scans the named groups +
-// backdrop with a cheap bbox reject; z on the face is interpolated
-// barycentrically so sloped floors anchor correctly. Walls are not floors
-// and are never scanned.
-function floorZUnder(x, y, zMax) {
-    const geom = mapState.mapGeometry;
-    if (!geom) return null;
-    let best = null;
-    const scan = (tris) => {
-        if (!tris) return;
-        for (let i = 0; i + 8 < tris.length; i += 9) {
-            const ax = tris[i],     ay = tris[i + 1];
-            const bx = tris[i + 3], by = tris[i + 4];
-            const cx = tris[i + 6], cy = tris[i + 7];
-            if (x < ax && x < bx && x < cx) continue;
-            if (x > ax && x > bx && x > cx) continue;
-            if (y < ay && y < by && y < cy) continue;
-            if (y > ay && y > by && y > cy) continue;
-            const denom = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
-            if (denom === 0) continue;
-            const w1 = ((by - cy) * (x - cx) + (cx - bx) * (y - cy)) / denom;
-            if (w1 < 0 || w1 > 1) continue;
-            const w2 = ((cy - ay) * (x - cx) + (ax - cx) * (y - cy)) / denom;
-            if (w2 < 0 || w1 + w2 > 1) continue;
-            const z = w1 * tris[i + 2] + w2 * tris[i + 5]
-                    + (1 - w1 - w2) * tris[i + 8];
-            if (z <= zMax && (best === null || z > best)) best = z;
-        }
-    };
-    scan(geom.backdropTris);
-    for (const group of mapState.locationGroups || []) scan(group.tris);
-    return best;
-}
-
-// playerFloorZ: memoised floorZUnder per player — a paused timeline or a
-// rotation drag re-renders with unchanged positions, so the triangle scan
-// runs only when the player actually moved.
-function playerFloorZ(name, x, y, z) {
-    let cache = mapState._floorZCache;
-    if (!cache) cache = mapState._floorZCache = new Map();
-    const e = cache.get(name);
-    if (e && e.x === x && e.y === y && e.z === z) return e.floorZ;
-    const floorZ = floorZUnder(x, y, z - PLAYER_ORIGIN_ABOVE_FLOOR + FLOOR_SNAP_TOLERANCE);
-    cache.set(name, { x, y, z, floorZ });
-    return floorZ;
-}
-
-// ─── Per-player 3D arrows: view direction + velocity ────────────────────────
-//
-// Both arrows are true 3D: the shaft runs from the player origin to a
-// world-space tip (projected through the orbit camera), and a small arrowhead
-// is drawn at the projected tip, oriented along the projected shaft. The view
-// arrow is a short fixed-length facing indicator; the velocity arrow's length
-// encodes speed at VEL_UNITS_PER_MAP_UNIT u/s per world unit.
-const ANGLE16_TO_RAD = (360 / 65536) * (Math.PI / 180); // raw angle16 → radians
-const VIEW_ARROW_LEN = 64;            // world units — shows facing clearly
-const VEL_UNITS_PER_MAP_UNIT = 5;     // 5 u/s of speed → 1 world unit of arrow
-const VEL_ARROW_MIN_SPEED = 10;       // u/s below which no velocity arrow is drawn
-const VIEW_ARROW_COLOR = 'rgba(245, 245, 255, 0.92)';
-
-// drawPlayerArrows draws the enabled arrows for one player. Velocity uses the
-// team colour (it's that player's motion); view uses a neutral light tone so
-// the two are distinguishable when both are on.
-function drawPlayerArrows(ctx, data, symbolInfo) {
-    const ox = data.x, oy = data.y, oz = data.z;
-    if (mapState.showVelArrows && typeof data.vx === 'number') {
-        const speed = Math.hypot(data.vx, data.vy, data.vz);
-        if (speed > VEL_ARROW_MIN_SPEED) {
-            const s = 1 / VEL_UNITS_PER_MAP_UNIT;
-            const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-            MapView.drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
-                                   MapView.hexToRgba(teamHex, 0.9), 3.5, worldToCanvasNew);
-        }
-    }
-    if (mapState.showViewArrows && typeof data.vya === 'number') {
-        const yaw = data.vya * ANGLE16_TO_RAD;
-        const pitch = (data.vp || 0) * ANGLE16_TO_RAD;
-        const cp = Math.cos(pitch);
-        // Quake forward vector: +pitch looks down, so z = -sin(pitch).
-        MapView.drawWorldArrow(ctx, ox, oy, oz,
-                               cp * Math.cos(yaw) * VIEW_ARROW_LEN,
-                               cp * Math.sin(yaw) * VIEW_ARROW_LEN,
-                               -Math.sin(pitch) * VIEW_ARROW_LEN,
-                               VIEW_ARROW_COLOR, 3, worldToCanvasNew);
-    }
-}
-
-function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
-    const z = data.z || 0;
-    // Prefer the per-sample computed floor height H (data.fh): the floor
-    // surface is z - 24 - H (H is measured from the bottom of the player's
-    // bounding box, which sits 24 below the origin). H is accurate on lifts
-    // (the floor pass stands players on movers) and makes the stem a direct
-    // visual readout of H. Fall back to scanning the static floor geometry
-    // when H is unavailable (no BSP) or NoFloor (over a void).
-    let bottomZ;
-    if (typeof data.fh === 'number') {
-        bottomZ = z - PLAYER_ORIGIN_ABOVE_FLOOR - data.fh;
-    } else {
-        const floorZ = playerFloorZ(name, data.x, data.y, z);
-        bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
-    }
-    const bot = worldToCanvasNew(data.x, data.y, bottomZ);
-    const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-    ctx.strokeStyle = MapView.hexToRgba(teamHex, 0.55);
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.lineTo(bot.x, bot.y);
-    ctx.stroke();
-    ctx.fillStyle = MapView.hexToRgba(teamHex, 0.7);
-    ctx.beginPath();
-    ctx.arc(bot.x, bot.y, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-}
-
-// Items are biased this much below their real z when sorting against
-// players, so a player standing at the same floor as an item (same z)
-// draws on top. An item only occludes a player when its z exceeds the
-// player's by at least this clearance — i.e. the item sits on a real
-// level above the player.
-const ITEM_Z_TOP_THRESHOLD = 48;
-
-// Combined z-sorted items-and-players pass. Building a single list lets
-// the draw order mix items and players correctly — two players on
-// different decks occlude in z order, an item clearly above a player
-// draws on top, and the common case of a player standing on a pickup
-// draws the player on top.
-function drawItemsAndPlayersZSorted(ctx, time, playerData) {
-    const iconScale = mapView.iconScale();
-    const zRange = mapState.zRange || { lo: 0, hi: 0 };
-    // Height-based symbol size scaling is a 2D-only cue: once the camera is
-    // tilted, height is directly visible, and size differences would read as
-    // distance instead.
-    const zSpan = MapView.is3D(_wtc) ? 0 : (zRange.hi - zRange.lo);
-
-    // Sort key is projected camera depth (closeness), which degenerates to
-    // plain z at top-down — preserving the old sort exactly — and stays
-    // correct under any rotation. The item bias is applied along the same
-    // axis (z contributes sinPitch to depth) so the "player standing on a
-    // pickup wins the tie" rule keeps working when tilted.
-    const drawables = [];
-    const items = currentResult?.items?.items;
-    if (items && items.length > 0) {
-        for (const item of items) {
-            const style = ITEM_MARKER_STYLES[item.kind];
-            if (!style) continue;
-            const pos = worldToCanvasNew(item.x, item.y, item.z);
-            drawables.push({
-                kind: 'i',
-                sortDepth: pos.depth - ITEM_Z_TOP_THRESHOLD * _wtc.sinPitch,
-                pos, item, style
-            });
-        }
-    }
-    if (playerData) {
-        for (const [name, data] of Object.entries(playerData)) {
-            if (data.x === 0 && data.y === 0) continue;
-            const symbolInfo = mapState.playerSymbols[name];
-            if (!symbolInfo) continue;
-            const pos = worldToCanvasNew(data.x, data.y, data.z);
-            drawables.push({
-                kind: 'p',
-                sortDepth: pos.depth,
-                pos, name, data, symbolInfo
-            });
-        }
-    }
-    if (drawables.length === 0) return;
-
-    drawables.sort((a, b) => a.sortDepth - b.sortDepth);
-
-    const itemSize = ITEM_MARKER_SIZE * iconScale;
-    const itemHalf = itemSize / 2;
-    const itemFontPx = Math.round(10 * iconScale);
-    const tilted = MapView.is3D(_wtc);
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    for (const d of drawables) {
-        if (d.kind === 'i') {
-            drawSingleMapItem(ctx, time, d.item, d.style,
-                              itemSize, itemHalf, itemFontPx, d.pos);
-        } else {
-            // Floor anchor stem under the symbol — tilted views only (at
-            // top-down it projects to a point).
-            if (tilted) {
-                drawPlayerFloorStem(ctx, d.name, d.data, d.symbolInfo, d.pos);
-            }
-            // Optional view/velocity arrows (work at any tilt — xy shows even
-            // top-down). Drawn under the symbol so the letter stays legible.
-            if (mapState.showViewArrows || mapState.showVelArrows) {
-                drawPlayerArrows(ctx, d.data, d.symbolInfo);
-            }
-            drawSinglePlayer(ctx, d.data, d.symbolInfo,
-                             iconScale, zRange, zSpan, d.pos);
-        }
-    }
-
-    ctx.globalAlpha = 1.0;
-    ctx.restore();
-}
-
-function drawSingleMapItem(ctx, time, item, style, size, half, fontPx, pos) {
-    const up = isItemUp(item, time);
-    ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
-
-    const x = Math.round(pos.x - half);
-    const y = Math.round(pos.y - half);
-
-    ctx.fillStyle = style.fill;
-    ctx.fillRect(x, y, size, size);
-
-    if (style.outline) {
-        ctx.strokeStyle = style.outline;
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-    }
-
-    if (style.label) {
-        ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.fillStyle = style.textColor || style.outline || '#fff';
-        ctx.fillText(style.label, pos.x, pos.y + 1);
-    }
-    ctx.globalAlpha = 1.0;
-}
-
-function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan, pos) {
-    // Per-player z-based size scale: players near the top of the map
-    // (98th percentile z) render 25% larger than those near the bottom
-    // (2nd percentile), linearly interpolated. Applied on top of the
-    // zoom-driven iconScale.
-    let zScale = 1;
-    if (zSpan > 0) {
-        let t = ((data.z || 0) - zRange.lo) / zSpan;
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        zScale = 1 + 0.25 * t;
-    }
-    const totalScale = iconScale * zScale;
-    const symSize = MapView.PLAYER_SYMBOL_BASE_SIZE * totalScale;
-    const orbitRadius = 14 * totalScale;
-    const badgeRadius = 5 * totalScale;
-
-    const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-    MapView.drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
-
-    const badges = getActiveBadges(data);
-    if (badges.length > 0) {
-        MapView.drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
-    }
-}
-
 // ─── Learn-map entity overlay ───────────────────────────────────────────────
 //
 // Static study view (mapState.learnMode): draws result.mapEntities — the
@@ -8114,124 +7654,6 @@ function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan, pos) 
 // of players, with per-category toggles (mapState.entityFilters) and arrows
 // linking each teleport entrance to its exit. Reuses worldToCanvas so markers
 // land exactly where players do.
-
-// Item kind → filter category.
-const ITEM_KIND_CATEGORY = {
-    rl: 'weapon', lg: 'weapon', gl: 'weapon', ssg: 'weapon', sng: 'weapon', ng: 'weapon',
-    ra: 'armor', ya: 'armor', ga: 'armor',
-    mh: 'health', h25: 'health', h15: 'health',
-    shells: 'ammo', nails: 'ammo', rockets: 'ammo', cells: 'ammo',
-    quad: 'powerup', pent: 'powerup', ring: 'powerup', suit: 'powerup',
-};
-
-// Item markers reuse the playback palette plus the kinds it omits (ammo,
-// small health, suit). Structural entities get their own glyphs.
-const LEARN_ITEM_STYLES = Object.assign({}, ITEM_MARKER_STYLES, {
-    h25:     { fill: '#000', outline: 'rgb(0, 200, 83)',  label: 'H'  },
-    h15:     { fill: '#000', outline: '#6f8f6f',          label: 'h'  },
-    shells:  { fill: '#000', outline: '#b0a070',          label: 'sh' },
-    nails:   { fill: '#000', outline: '#8090a0',          label: 'nl' },
-    rockets: { fill: '#000', outline: 'rgb(255,107,107)', label: 'rk' },
-    cells:   { fill: '#000', outline: 'rgb(0,217,255)',   label: 'cl' },
-    suit:    { fill: '#000', outline: '#00e676',          label: 'ES' },
-});
-
-const TELEPORT_COLOR = '#b388ff';
-
-const STRUCTURAL_STYLES = {
-    spawn:       { fill: '#15151f',       outline: '#888',         label: 'S' },
-    teleportSrc: { fill: '#1a0a2a',       outline: TELEPORT_COLOR, label: 'T' },
-    teleportDst: { fill: TELEPORT_COLOR,  outline: TELEPORT_COLOR, label: '', circle: true },
-    button:      { fill: '#000',          outline: '#ff9800',      label: 'B' },
-    door:        { fill: '#000',          outline: '#a1887f',      label: 'D' },
-};
-
-function entityCategory(e) {
-    if (e.type === 'item') return ITEM_KIND_CATEGORY[e.kind] || 'item';
-    if (e.type === 'teleportSrc' || e.type === 'teleportDst') return 'teleporter';
-    return e.type; // 'spawn' | 'button' | 'door'
-}
-
-// buildTeleportArrows pairs each entrance (teleportSrc.target) with its exit
-// (teleportDst.targetName), storing world-coord endpoints for the arrows.
-function buildTeleportArrows() {
-    mapState.teleportArrows = [];
-    const dstByName = {};
-    for (const e of mapState.mapEntities) {
-        if (e.type === 'teleportDst' && e.targetName) dstByName[e.targetName] = e;
-    }
-    for (const e of mapState.mapEntities) {
-        if (e.type !== 'teleportSrc' || !e.target) continue;
-        const dst = dstByName[e.target];
-        if (!dst) continue;
-        mapState.teleportArrows.push({ sx: e.x, sy: e.y, sz: e.z, dx: dst.x, dy: dst.y, dz: dst.z });
-    }
-}
-
-function drawMapEntities(ctx) {
-    const entities = mapState.mapEntities;
-    if (!entities || entities.length === 0) return;
-    const f = mapState.entityFilters;
-    const iconScale = mapView.iconScale();
-    const size = ITEM_MARKER_SIZE * iconScale;
-    const half = size / 2;
-    const fontPx = Math.round(10 * iconScale);
-
-    // Connection arrows first, beneath the markers.
-    if (f.teleporter && mapState.teleportArrows.length > 0) {
-        ctx.save();
-        ctx.strokeStyle = TELEPORT_COLOR;
-        ctx.fillStyle = TELEPORT_COLOR;
-        ctx.globalAlpha = 0.55;
-        ctx.lineWidth = Math.max(1, 1.5 * iconScale);
-        for (const a of mapState.teleportArrows) {
-            const s = worldToCanvasNew(a.sx, a.sy, a.sz);
-            const d = worldToCanvasNew(a.dx, a.dy, a.dz);
-            MapView.drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
-        }
-        ctx.restore();
-    }
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    // Farther-from-camera first so nearer markers draw on top (degenerates
-    // to lower-decks-first at top-down).
-    const sorted = entities
-        .map(e => ({ e, pos: worldToCanvasNew(e.x, e.y, e.z) }))
-        .sort((a, b) => a.pos.depth - b.pos.depth);
-    for (const { e, pos } of sorted) {
-        if (!f[entityCategory(e)]) continue;
-        const style = e.type === 'item' ? LEARN_ITEM_STYLES[e.kind] : STRUCTURAL_STYLES[e.type];
-        if (style) drawEntityMarker(ctx, e, style, size, half, fontPx, pos);
-    }
-    ctx.restore();
-}
-
-function drawEntityMarker(ctx, e, style, size, half, fontPx, pos) {
-    if (style.circle) {
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, half, 0, Math.PI * 2);
-        ctx.fillStyle = style.fill;
-        ctx.fill();
-        if (style.outline) { ctx.strokeStyle = style.outline; ctx.lineWidth = 1.5; ctx.stroke(); }
-    } else {
-        const x = Math.round(pos.x - half);
-        const y = Math.round(pos.y - half);
-        ctx.fillStyle = style.fill;
-        ctx.fillRect(x, y, size, size);
-        if (style.outline) {
-            ctx.strokeStyle = style.outline;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-        }
-    }
-    if (style.label) {
-        ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.fillStyle = style.textColor || style.outline || '#fff';
-        ctx.fillText(style.label, pos.x, pos.y + 1);
-    }
-}
 
 // setLearnMode swaps the map between live playback and the static
 // entity-study view, swapping the sidebar panels accordingly.
@@ -8284,7 +7706,7 @@ function buildEntityTable() {
 
     for (const e of ents) {
         if (e.type === 'teleportSrc' || e.type === 'teleportDst') continue;
-        const cat = entityCategory(e);
+        const cat = mapView.entityCategory(e);
         if (!f[cat]) continue;
         rows.push({
             cls: ENTITY_CLASS_LABEL[cat] || cat,
@@ -8380,7 +7802,7 @@ function renderItemsPanel() {
         // the sidebar stays focused on the items players contest.
         const KIND_ORDER = { ra: 0, ya: 1, ga: 2, mh: 3, rl: 4, lg: 5, quad: 6, pent: 7, ring: 8 };
         const sorted = items
-            .filter(it => PANEL_ITEM_KINDS.has(it.kind) && ITEM_MARKER_STYLES[it.kind])
+            .filter(it => PANEL_ITEM_KINDS.has(it.kind) && MapView.ITEM_MARKER_STYLES[it.kind])
             .sort((a, b) => {
                 const ka = KIND_ORDER[a.kind] ?? 99;
                 const kb = KIND_ORDER[b.kind] ?? 99;
@@ -8388,7 +7810,7 @@ function renderItemsPanel() {
                 return a.name.localeCompare(b.name);
             });
         for (const item of sorted) {
-            const style = ITEM_MARKER_STYLES[item.kind];
+            const style = MapView.ITEM_MARKER_STYLES[item.kind];
             const tr = document.createElement('tr');
             const swatch = document.createElement('td');
             swatch.className = 'item-swatch-cell';
@@ -8413,7 +7835,7 @@ function renderItemsPanel() {
 
 function updateItemsPanelStatus(time) {
     for (const row of _itemsPanelState.rows) {
-        const s = itemStatus(row.item, time);
+        const s = mapView.itemStatus(row.item, time);
         row.tr.classList.toggle('taken', !s.up);
         if (s.up) {
             row.statusTd.textContent = 'up';
@@ -9056,7 +8478,7 @@ function hitTestPlayerSymbol(cx, cy, time) {
     let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
     for (const [name, data] of Object.entries(bucket.p)) {
         // Hit-test against the stream-sourced position the symbol is drawn at.
-        const sp = streamPosAt(name, time * 1000);
+        const sp = mapView.streamPosAt(name, time * 1000);
         const x = sp ? sp.x : data.x, y = sp ? sp.y : data.y, z = sp ? sp.z : data.z;
         if (x === 0 && y === 0) continue;
         const pos = worldToCanvas(x, y, z);

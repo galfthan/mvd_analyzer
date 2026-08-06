@@ -21,7 +21,14 @@ export {
     moverPoseAt,
 } from './geometry.js';
 
-export { MvdMap, newState } from './map.js';
+export {
+    MvdMap,
+    newState,
+    DEATH_X_DURATION,
+    ITEM_MARKER_STYLES,
+    LEARN_ITEM_STYLES,
+    ITEM_KIND_CATEGORY,
+} from './map.js';
 
 export {
     PITCH_MAX,
