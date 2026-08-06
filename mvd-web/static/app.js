@@ -1562,6 +1562,7 @@ function displayPlayerStats(rows) {
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
+            <td>${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>${d?.takenToDie ?? '-'}</td>
@@ -1922,6 +1923,7 @@ function displayPlayerStatsTeams(teamRows) {
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
+            <td>${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>-</td>

@@ -96,6 +96,12 @@ actually read a match. The only figure keyed on what the target carried was
 - **Schema note:** this is computed in the analyzer, not folded in at read
   time like `controlMs` / `speed`, so the stored `Result` changes and the
   golden corpus moves with it.
+- **Web: Basic Stats gains `TDmg`** (between `Dmg` and `Taken`) — friendly
+  fire dealt, `damage.givenTeam`, which the scoreboard carried nowhere despite
+  `TK` sitting a few columns to its left. The two are not the same signal: a
+  teamkill is friendly damage that happened to finish someone, so a player can
+  pour damage into teammates without a single TK. Unrelated to the
+  victim-weapon work above; it rides along because it is the same table.
 - **Web: Weapon Stats gains an `eK` column per weapon** — of that weapon's
   kills, how many were against an enemy carrying an RL and/or LG, with the
   full six-bucket breakdown in the cell tooltip. Both weapon tables scroll

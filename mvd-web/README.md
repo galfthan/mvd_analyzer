@@ -288,6 +288,12 @@ Two consequences worth knowing:
   someone carrying nothing" is a reading, not a gap — and `-` appears only
   where the `K` cell beside it is also `-`. Both weapon tables now scroll
   inside their own box (`.items-table-wrap`) at 25 columns.
+- **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
+  friendly fire DEALT. It is measured whenever the damage family is present,
+  so `0` there is a real reading rather than a gap, and it is deliberately
+  *not* folded into the victim's `Taken`-side story: this is what the player
+  put into teammates, a different question from `TK` (which counts only the
+  friendly damage that finished someone off). Always 0 in a duel.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /
