@@ -20,6 +20,7 @@ Moved so far:
 |---|---|
 | `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
+| `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |

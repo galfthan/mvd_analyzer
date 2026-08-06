@@ -36,6 +36,19 @@ export {
     setOrbitCenter,
 } from './camera.js';
 
+export {
+    processLocationGroups,
+    computeRegionOutline,
+    groupWorldBBox,
+    computeRegionStacking,
+    buildFloorModel,
+    REGION_STACK_Z_EPS,
+    REGION_STACK_OVERLAP_FRAC,
+    BACKDROP_FLOOR_RGB,
+    FLOOR_BOX_SIDE_RGB,
+    FLOOR_TOP_ALPHA,
+} from './locgroups.js';
+
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
 
 export { hexToRgba, scaleRgbaAlpha, getLocationColor } from './color.js';

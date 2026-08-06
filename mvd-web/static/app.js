@@ -6032,61 +6032,13 @@ function getFragsAtTime(time) {
 // Map Visualization
 // =============================================================================
 
-// Group locations by normalized name and calculate centroid
+// processLocationGroups builds the named loc regions from the analyzer's
+// per-loc points plus whatever BSP geometry is loaded, and caches the
+// normalized-name lookup the per-frame occupancy highlighting keys into.
 function processLocationGroups(locations) {
-    const groups = {};
-
-    for (const loc of locations) {
-        const normalizedName = MapView.normalizeLocationName(loc.name);
-        if (!groups[normalizedName]) {
-            groups[normalizedName] = {
-                name: normalizedName,
-                points: [],
-                centroid: { x: 0, y: 0 },
-                color: MapView.getLocationColor(normalizedName)
-            };
-        }
-        groups[normalizedName].points.push({ x: loc.x, y: loc.y, z: loc.z });
-    }
-
-    // Calculate centroid for each group. z rides along so labels project to
-    // the group's actual floor height in the 3D view.
-    for (const group of Object.values(groups)) {
-        let sumX = 0, sumY = 0, sumZ = 0;
-        for (const p of group.points) {
-            sumX += p.x;
-            sumY += p.y;
-            sumZ += p.z || 0;
-        }
-        group.centroid = {
-            x: sumX / group.points.length,
-            y: sumY / group.points.length,
-            z: sumZ / group.points.length
-        };
-    }
-
-    // If BSP-derived geometry is loaded, attach per-loc triangle lists so
-    // the renderer can draw real floor shapes instead of convex-hull blobs.
-    // Keys must match NormalizeLocationName (Go) <-> normalizeLocationName (JS).
-    // Entries with an empty name are the unnamed backdrop bucket (faces
-    // that couldn't be matched to a loc); they're handled separately by
-    // drawLocationLayer as a neutral underlay.
-    if (mapState.mapGeometry && Array.isArray(mapState.mapGeometry.locs)) {
-        const geomByName = {};
-        for (const l of mapState.mapGeometry.locs) {
-            if (l.name === '') continue;
-            geomByName[l.name] = l;
-        }
-        for (const group of Object.values(groups)) {
-            const g = geomByName[group.name];
-            group.tris = g && Array.isArray(g.tris) && g.tris.length >= 9 ? g.tris : null;
-        }
-    }
-
-    // Cache normalized-name → group lookup for per-frame occupancy highlighting.
-    mapState.locationGroupByName = groups;
-
-    return Object.values(groups);
+    const { groups, byName } = MapView.processLocationGroups(locations, mapState.mapGeometry);
+    mapState.locationGroupByName = byName;
+    return groups;
 }
 
 // Fill a flat triangle list (9 numbers per triangle — x,y,z per vertex)
@@ -6120,66 +6072,9 @@ function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
 // the outward horizontal normal (2 floats, pointing away from the region
 // interior — derived from the owning triangle's centroid) in
 // group.outlineNormals. Cached on the group for reuse.
-function computeRegionOutline(group) {
-    if (group.outline !== undefined) return group.outline;
-    const tris = group.tris;
-    if (!tris || tris.length < 9) {
-        group.outline = null;
-        group.outlineNormals = null;
-        return null;
-    }
-    const edgeInfo = new Map();
-    const keyFor = (x1, y1, z1, x2, y2, z2) => {
-        // Canonical order so (a,b) and (b,a) hash equally.
-        if (x1 < x2 || (x1 === x2 && (y1 < y2 || (y1 === y2 && z1 <= z2)))) {
-            return x1 + ',' + y1 + ',' + z1 + '|' + x2 + ',' + y2 + ',' + z2;
-        }
-        return x2 + ',' + y2 + ',' + z2 + '|' + x1 + ',' + y1 + ',' + z1;
-    };
-    const bump = (key, tcx, tcy) => {
-        const info = edgeInfo.get(key);
-        if (info) info.count++;
-        else edgeInfo.set(key, { count: 1, tcx, tcy });
-    };
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
-        const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
-        const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
-        // XY centroid of the owning triangle marks the interior side of
-        // each of its edges.
-        const tcx = (ax + bx + cx) / 3;
-        const tcy = (ay + by + cy) / 3;
-        bump(keyFor(ax, ay, az, bx, by, bz), tcx, tcy);
-        bump(keyFor(bx, by, bz, cx, cy, cz), tcx, tcy);
-        bump(keyFor(cx, cy, cz, ax, ay, az), tcx, tcy);
-    }
-    const outline = [];
-    const normals = [];
-    for (const [key, info] of edgeInfo) {
-        if (info.count !== 1) continue;
-        const [p1, p2] = key.split('|');
-        const [x1, y1, z1] = p1.split(',').map(Number);
-        const [x2, y2, z2] = p2.split(',').map(Number);
-        outline.push(x1, y1, z1, x2, y2, z2);
-        // Edge perpendicular in XY, signed to point away from the interior.
-        let nx = y2 - y1;
-        let ny = x1 - x2;
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        if (nx * (info.tcx - mx) + ny * (info.tcy - my) > 0) {
-            nx = -nx;
-            ny = -ny;
-        }
-        normals.push(nx, ny);
-    }
-    group.outline = outline;
-    group.outlineNormals = normals;
-    return outline;
-}
-
 // Stroke the outline of a location region as a set of boundary line segments.
 function drawLocationRegionOutline(ctx, group, worldToCanvasFunc, strokeStyle, lineWidth) {
-    const outline = computeRegionOutline(group);
+    const outline = MapView.computeRegionOutline(group);
     if (!outline || outline.length < 6) return;
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = lineWidth;
@@ -6221,36 +6116,17 @@ function focusTier(name) {
     return 'far';
 }
 
-// World-XY bbox of a group's floor triangles, cached on the group (geometry
-// is static per demo).
-function groupWorldBBox(group) {
-    if (group._wbbox) return group._wbbox;
-    const tris = group.tris;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        for (let v = 0; v < 9; v += 3) {
-            const x = tris[i + v], y = tris[i + v + 1];
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-        }
-    }
-    group._wbbox = { minX, maxX, minY, maxY };
-    return group._wbbox;
-}
-
 function setFocusGroup(name) {
     mapState.focusGroupName = null;
     mapState.focusNeighbors = null;
     const focus = name ? mapState.locationGroupByName?.[name] : null;
     if (focus && focus.tris && focus.tris.length >= 9) {
         mapState.focusGroupName = name;
-        const fb = groupWorldBBox(focus);
+        const fb = MapView.groupWorldBBox(focus);
         const nb = new Set();
         for (const g of mapState.locationGroups || []) {
             if (g === focus || !g.tris || g.tris.length < 9) continue;
-            const gb = groupWorldBBox(g);
+            const gb = MapView.groupWorldBBox(g);
             const gapX = Math.max(gb.minX - fb.maxX, fb.minX - gb.maxX);
             const gapY = Math.max(gb.minY - fb.maxY, fb.minY - gb.maxY);
             if (Math.max(gapX, gapY) <= FOCUS_NEIGHBOR_MARGIN) nb.add(g.name);
@@ -6370,42 +6246,6 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
 // empty upper deck's tint. Clamped final alpha to 0.5 so regions never
 // become opaque.
 const REGION_OPACITY_BOOST = 1.9;
-const REGION_STACK_Z_EPS = 32;      // world units — roughly one step height
-const REGION_STACK_OVERLAP_FRAC = 0.25;
-
-// Precompute per-region bbox, median z, and the list of regions stacked
-// above it (XY-overlapping and higher in z). Called from applyRegionConfig
-// after mapState.controlRegions is refreshed.
-function computeRegionStacking(regions) {
-    for (const r of regions) {
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        const zs = [];
-        for (const pt of r.points) {
-            if (pt.x < minX) minX = pt.x;
-            if (pt.x > maxX) maxX = pt.x;
-            if (pt.y < minY) minY = pt.y;
-            if (pt.y > maxY) maxY = pt.y;
-            zs.push(pt.z ?? 0);
-        }
-        r._bbox = { minX, maxX, minY, maxY };
-        zs.sort((a, b) => a - b);
-        r._z = zs.length > 0 ? zs[zs.length >> 1] : 0;
-        r._bboxArea = Math.max(1, (maxX - minX) * (maxY - minY));
-    }
-    for (const r of regions) {
-        const above = [];
-        for (const r2 of regions) {
-            if (r2 === r) continue;
-            if (r2._z <= r._z + REGION_STACK_Z_EPS) continue;
-            const ox = Math.max(0, Math.min(r._bbox.maxX, r2._bbox.maxX) - Math.max(r._bbox.minX, r2._bbox.minX));
-            const oy = Math.max(0, Math.min(r._bbox.maxY, r2._bbox.maxY) - Math.max(r._bbox.minY, r2._bbox.minY));
-            if ((ox * oy) / r._bboxArea >= REGION_STACK_OVERLAP_FRAC) {
-                above.push(r2);
-            }
-        }
-        r._above = above;
-    }
-}
 
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
@@ -6809,7 +6649,7 @@ function initRegionControlData(result) {
             mapState.locToRegion[pt.name] = region.name;
         }
     }
-    computeRegionStacking(mapState.controlRegions);
+    MapView.computeRegionStacking(mapState.controlRegions);
 
     // v7: bucketStates and stats are populated by analyzeInWorker —
     // the worker calls recomputeRegionControl with the default regions
@@ -6963,7 +6803,7 @@ async function applyRegionConfig() {
     }
 
     mapState.controlRegions = regions;
-    computeRegionStacking(regions);
+    MapView.computeRegionStacking(regions);
 
     // Build loc-name-to-region lookup
     mapState.locToRegion = {};
@@ -7174,7 +7014,7 @@ function calculateMapBounds(result) {
     updateWorldToCanvasTransform();
 }
 
-// Orbit-camera state, allocated by mvd-map-view (MapView.newCamera) — the
+// Orbit-camera state, allocated by mvd-map-view (newCamera) — the
 // projection, the angle clamping and the fit-to-canvas math all live there;
 // see mvd-map-view/src/camera.js for what each field means. panX/panY/zoomK
 // carry user pan and zoom on top of the fit base and survive a refit
@@ -8109,63 +7949,18 @@ function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
     ctx.restore();
 }
 
-// Floor-model tones. Region tops use the loc's own colour; the backdrop
-// (unnamed floor) and the box sides each use one flat tone. No Lambert/normal
-// shading anywhere — every surface is a single flat colour, so from overhead
-// the floor reads dead flat. Near-opaque so a higher floor cleanly covers a
-// lower one (no translucent stacking, which was the apparent "shading").
-const BACKDROP_FLOOR_RGB = [70, 80, 110];
-const FLOOR_BOX_SIDE_RGB = [44, 50, 72]; // darker than the tops → reads as a side
-const FLOOR_TOP_ALPHA = 0.95;
-
-// buildFloorModel builds the per-triangle render list for the one clean view:
-// flat region tops (loc colour) + the backdrop + the 10u box sides, each a
-// single flat tone, with a centroid for the painter sort. Rendered opaque and
-// depth-sorted by renderSolidEntries. Cached per (geometry, groups). Returns null when the map has
-// no triangle geometry at all (callers fall back to the flat translucent
-// fills / loc blobs).
+// buildFloorModel returns the depth-sortable floor render list for the
+// current geometry + groups, cached on mapState. The model is built by the
+// component; the caching (and its invalidation on a geometry reload) stays
+// here because mapState owns the lifetime.
 function buildFloorModel() {
     const geom = mapState.mapGeometry;
     const groups = mapState.locationGroups || [];
-    const backdropTris = geom && geom.backdropTris;
-    const haveBackdrop = backdropTris && backdropTris.length >= 9;
-    if (!haveBackdrop && groups.length === 0) return null;
-
-    let m = mapState._floorModel;
+    const m = mapState._floorModel;
     if (m && m.geom === geom && m.groups === mapState.locationGroups) return m;
-
-    const entries = [];
-    const push = (tris, rgb, name) => {
-        if (!tris || tris.length < 9) return;
-        const fill = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${FLOOR_TOP_ALPHA})`;
-        const fillFaded = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${FLOOR_TOP_ALPHA * 0.18})`;
-        for (let i = 0; i + 8 < tris.length; i += 9) {
-            entries.push({
-                tris, off: i,
-                cx: (tris[i] + tris[i + 3] + tris[i + 6]) / 3,
-                cy: (tris[i + 1] + tris[i + 4] + tris[i + 7]) / 3,
-                cz: (tris[i + 2] + tris[i + 5] + tris[i + 8]) / 3,
-                name, fill, fillFaded, depth: 0,
-            });
-        }
-    };
-
-    if (haveBackdrop) push(backdropTris, BACKDROP_FLOOR_RGB, null);
-    // Region tops default to the neutral backdrop tone. Colouring every loc by
-    // its own hue was mostly visual noise; a region only takes on its loc
-    // colour when a player is in it, via drawOccupiedRegionsOverlay's live
-    // fill pass. The name is still carried so that overlay can find the tris.
-    for (const g of groups) {
-        if (!g.tris || g.tris.length < 9) continue;
-        push(g.tris, BACKDROP_FLOOR_RGB, g.name);
-    }
-    const sides = MapView.floorBoundaryWalls(backdropTris, groups);
-    if (sides.length >= 9) push(sides, FLOOR_BOX_SIDE_RGB, null);
-
-    if (entries.length === 0) return null;
-    m = { geom, groups: mapState.locationGroups, entries, sortedFor: null };
-    mapState._floorModel = m;
-    return m;
+    const built = MapView.buildFloorModel(geom, groups);
+    mapState._floorModel = built;
+    return built;
 }
 
 function drawLocationLayer(ctx) {
