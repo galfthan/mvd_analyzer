@@ -7071,10 +7071,18 @@ components:
                   description: >
                     ENEMY damage GIVEN split by what the VICTIM was holding when each hit landed —
                     the other axis from byWeapon, which keys on the ATTACKER's weapon. Buckets are
-                    MUTUALLY EXCLUSIVE and partition `given`: `both` (victim held RL and LG), `rl`
+                    MUTUALLY EXCLUSIVE: `both` (victim held RL and LG), `rl`
                     (RL, not LG), `lg` (LG, not RL), `mid` (ssg/sng/gl only), `sg` (nothing above
                     the shotgun tier). Damage into enemies holding an RL is therefore `rl + both`,
                     NEVER `rl` alone. `enemyWeapons` above is exactly `lg + rl + both`.
+
+                    They partition the enemy damage THIS PIPELINE RECONSTRUCTED, which equals
+                    `given` exactly on a `src: derived` row but NOT on a `src: ktx` one — there
+                    `given` is KTX's own counter while this split stays ours, since KTX records no
+                    per-tier equivalent. Measured residual across the corpus: 66 of 82 KTX rows,
+                    worst 16 damage, 0.03% of total given. Do not expect a share-of-given computed
+                    from these buckets to reach exactly 100% on a KTX row. The KILL-side sibling
+                    `score.byEnemyWeapon` has no such gap — score is never overlaid.
 
                     DERIVED-only and finer than the server's own accounting — KTX keeps a single
                     dmg_eweapon scalar lumping RL and LG together — so it is MEASURED only where a

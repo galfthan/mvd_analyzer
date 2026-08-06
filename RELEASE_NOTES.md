@@ -63,9 +63,13 @@ actually read a match. The only figure keyed on what the target carried was
   the same for enemy damage given. One vocabulary, exclusive buckets:
   `both` / `rl` / `lg` / `mid` (ssg/sng/gl) / `sg` (the respawn loadout),
   plus `unknown` on the kill side for a victim with no stream.
-- **They PARTITION.** The kill map sums to `score.kills`, the damage map to
-  `damage.given`. That is what `both` is for — and it is the one thing to
-  get right: **"enemy RLs killed" is `rl + both`, never `rl` alone.**
+- **They PARTITION** — that is what `both` is for, and it is the one thing to
+  get right: **"enemy RLs killed" is `rl + both`, never `rl` alone.** The kill
+  map sums to `score.kills` exactly (the score family is never overlaid). The
+  damage map sums to the enemy damage *this pipeline reconstructed*, which
+  equals `damage.given` on a `derived` row but **not on a `ktx` one**, where
+  `given` is KTX's own counter and the split stays ours — a residual of 0.03%
+  over the corpus (66 of 82 KTX rows, worst 16 damage).
 - **Derived, not KTX.** Computed from the frag log and the damage stream
   against the victim's possession streams, so they work on every demo
   carrying streams rather than only those with a KTX demoinfo block, and

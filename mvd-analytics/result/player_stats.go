@@ -374,10 +374,22 @@ type PlayerStatsDamage struct {
 	// went into targets who were NOT holding a big weapon, which no
 	// published figure carried before.
 	//
-	// A PARTITION of Given — the buckets are mutually exclusive and sum
-	// to it — and the damage counterpart of PlayerStatsScore
-	// .ByEnemyWeapon, keyed identically so the two axes read alike.
-	// "Damage into enemy RLs" is `rl + both`, not `rl`.
+	// The buckets are MUTUALLY EXCLUSIVE, and the damage counterpart of
+	// PlayerStatsScore.ByEnemyWeapon, keyed identically so the two axes
+	// read alike. "Damage into enemy RLs" is `rl + both`, not `rl`.
+	//
+	// They partition the enemy damage THIS PIPELINE RECONSTRUCTED, which
+	// is not always the same number as Given. On a derived row the two
+	// agree exactly. On a KTX-OVERLAID row they do not: Given becomes
+	// KTX's own dmg.given counter while this split stays the
+	// reconstruction's, since KTX has no per-tier equivalent to merge in.
+	// Measured over the cached corpus (82 KTX rows), 66 carried a
+	// residual, the largest 16 damage, 208 in total against 659,577 given
+	// — 0.03%. So do not compute a share-of-given from these buckets and
+	// expect it to reach exactly 100% on a `src: "ktx"` row.
+	//
+	// The KILL side has no such gap: Score is never overlaid, so
+	// PlayerStatsScore.ByEnemyWeapon sums to Kills exactly.
 	//
 	// DERIVED ONLY, and finer than the server's own accounting: KTX
 	// tracks a single dmg_eweapon scalar that lumps RL and LG together

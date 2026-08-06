@@ -922,14 +922,26 @@ applied in priority order:
 | `sg` | nothing above the shotgun tier (axe / sg / ng) — the respawn loadout |
 | `unknown` | kills side only: the victim produced no possession stream, so their loadout is not knowable |
 
-**They are a PARTITION.** `score.byEnemyWeapon` sums to `score.kills`;
-`damage.byEnemyWeapon` sums to `damage.given`. That is what the `both`
-bucket is for, and it is the one thing a consumer must not get wrong:
+**They are a PARTITION**, which is what the `both` bucket is for — and the
+one thing a consumer must not get wrong:
 
 > **"Enemy RLs killed" is `rl + both`, never `rl` alone.** Same for LG.
 > The two overlap in `both` by construction, so `enemyRL + enemyLG`
 > double-counts the fully armed victims — that is a real quantity
 > (`both`), not an error, but it is not a sum of kills.
+
+**What each one sums to** differs, and only one of the two is exact:
+
+- `score.byEnemyWeapon` sums to `score.kills` **exactly**, always. The score
+  family is never overlaid from KTX, so both sides come from the one frag log.
+- `damage.byEnemyWeapon` sums to the enemy damage **this pipeline
+  reconstructed**. On a `src: "derived"` row that is `damage.given` exactly.
+  On a **`src: "ktx"` row it is not**: `given` becomes KTX's own `dmg.given`
+  counter while the split stays the reconstruction's, because KTX records no
+  per-tier equivalent to merge in. Measured across the cached corpus (82 KTX
+  rows) 66 carried a residual, the largest **16 damage**, 208 in total against
+  659,577 given — **0.03%**. Don't compute a share-of-`given` from these
+  buckets and expect exactly 100% on a KTX row.
 
 The vocabulary is deliberately coarser than the killer-weapon one. It
 describes *how well armed the target was*, where ssg/sng/gl are one tier
