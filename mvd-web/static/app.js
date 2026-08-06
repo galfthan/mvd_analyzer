@@ -5507,7 +5507,7 @@ function prepRegionControlData(startTime, endTime, teams) {
             const bt = bucketTimeSec(view, i);
             if (bt > endTime) break;
             const c = i < s.length ? s[i] : '_';
-            const state = decodeRegionStateChar(c);
+            const state = MapView.decodeRegionStateChar(c);
             if (state !== curState) {
                 if (curState) spans.push({ start: curStart, end: bt, state: curState });
                 curState = state;
@@ -5981,53 +5981,6 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }
 
-// ─── Location Lookup ────────────────────────────────────────────────────────
-
-function findNearestLocation(x, y, locations) {
-    if (!locations || locations.length === 0) return '';
-    let bestDist = Infinity;
-    let bestName = '';
-    for (const loc of locations) {
-        const dx = x - loc.x, dy = y - loc.y;
-        const d = dx * dx + dy * dy;
-        if (d < bestDist) {
-            bestDist = d;
-            bestName = loc.name;
-        }
-    }
-    return bestName;
-}
-
-// Compute the 2nd / 98th percentile of z across all map locations. These
-// endpoints are used to scale player-symbol size by "height on the map": a
-// player at the lo end renders at base size, one at the hi end 25% larger.
-// Percentiles (not min / max) so a single out-of-bounds loc doesn't squash
-// the useful range.
-function computeMapZRange(locations) {
-    if (!locations || locations.length === 0) return { lo: 0, hi: 0 };
-    const zs = [];
-    for (const loc of locations) zs.push(loc.z || 0);
-    zs.sort((a, b) => a - b);
-    const n = zs.length;
-    const lo = zs[Math.floor(n * 0.02)];
-    const hi = zs[Math.min(n - 1, Math.floor(n * 0.98))];
-    return { lo, hi };
-}
-
-// Map the compact one-char-per-bucket state codes emitted by the Go
-// analyzer (qwanalytics/analyzer/region_control.go) back to the JS
-// state names used by the region-control timeline / drawRegionControlOverlay.
-const REGION_STATE_BY_CHAR = {
-    '_': 'empty',
-    'A': 'teamAControl', 'a': 'teamAWeakControl',
-    'B': 'teamBControl', 'b': 'teamBWeakControl',
-    'C': 'contested',    'c': 'weakContested',
-};
-
-function decodeRegionStateChar(c) {
-    return REGION_STATE_BY_CHAR[c] || 'empty';
-}
-
 // findHighResBucketIndexAtTime returns the bucket index whose span contains
 // `time` — used for cheap O(1) lookups into Go-supplied bucketStates strings
 // (which share the bucket view's grid).
@@ -6048,7 +6001,7 @@ function resolvePlayerLoc(data, locations) {
         }
         if (data.location) return data.location;
     }
-    return findNearestLocation(data ? data.x : 0, data ? data.y : 0, locations);
+    return MapView.findNearestLocation(data ? data.x : 0, data ? data.y : 0, locations);
 }
 
 // ─── Precomputed Frag Counts ────────────────────────────────────────────────
@@ -6070,23 +6023,8 @@ function precomputeFragCounts() {
     }
 }
 
-// Largest index i in a time-sorted container such that accessor(arr, i) <= t,
-// or -1 when t precedes the first element (or the container is empty). Works
-// over arrays of objects (accessor reads a field, e.g. (a, i) => a[i].time)
-// and over parallel arrays where `arr` IS the key array ((a, i) => a[i]).
-function lowerBoundIndex(arr, t, accessor) {
-    let lo = 0, hi = arr.length - 1;
-    if (hi < 0 || accessor(arr, 0) > t) return -1;
-    while (lo < hi) {
-        const mid = (lo + hi + 1) >> 1;
-        if (accessor(arr, mid) <= t) lo = mid;
-        else hi = mid - 1;
-    }
-    return lo;
-}
-
 function getFragsAtTime(time) {
-    const idx = lowerBoundIndex(precomputedFrags, time, (a, i) => a[i].time);
+    const idx = MapView.lowerBoundIndex(precomputedFrags, time, (a, i) => a[i].time);
     return idx < 0 ? {} : precomputedFrags[idx].cumulative;
 }
 
@@ -6094,63 +6032,18 @@ function getFragsAtTime(time) {
 // Map Visualization
 // =============================================================================
 
-// Item keywords that should remain uppercase in location names
-const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'SSG', 'SG', 'MEGA', 'QUAD', 'PENT', 'RING'];
-
-// Normalize location name: "RA.below" → "RA.below", "Quad low" → "QUAD.low"
-function normalizeLocationName(name) {
-    return name
-        .trim()
-        .replace(/[\s-]+/g, '.')
-        .split('.')
-        .map(part => {
-            const upper = part.toUpperCase();
-            return ITEM_KEYWORDS.includes(upper) ? upper : part.toLowerCase();
-        })
-        .join('.');
-}
-
-// Get color for location based on item type in name
-function getLocationColor(name) {
-    const nameLower = name.toLowerCase();
-
-    // Powerups - bright colors (dimmed 50%)
-    if (nameLower.includes('quad'))  return { fill: 'rgba(80, 120, 255, 0.075)', stroke: 'rgba(80, 120, 255, 0.5)', text: 'rgba(112, 144, 255, 0.5)' };
-    if (nameLower.includes('pent'))  return { fill: 'rgba(255, 0, 255, 0.075)', stroke: 'rgba(255, 0, 255, 0.5)', text: 'rgba(255, 102, 255, 0.5)' };
-    if (nameLower.includes('ring'))  return { fill: 'rgba(255, 255, 0, 0.075)', stroke: 'rgba(255, 255, 0, 0.5)', text: 'rgba(255, 255, 102, 0.5)' };
-
-    // Armors
-    if (nameLower.includes('ra'))    return { fill: 'rgba(255, 80, 80, 0.075)', stroke: 'rgba(255, 80, 80, 0.5)', text: 'rgba(255, 128, 128, 0.5)' };
-    if (nameLower.includes('ya'))    return { fill: 'rgba(255, 200, 50, 0.075)', stroke: 'rgba(255, 200, 50, 0.5)', text: 'rgba(255, 216, 102, 0.5)' };
-    if (nameLower.includes('ga'))    return { fill: 'rgba(80, 200, 80, 0.075)', stroke: 'rgba(80, 200, 80, 0.5)', text: 'rgba(128, 216, 128, 0.5)' };
-
-    // Health
-    if (nameLower.includes('mh'))    return { fill: 'rgba(80, 200, 255, 0.075)', stroke: 'rgba(80, 200, 255, 0.5)', text: 'rgba(128, 216, 255, 0.5)' };
-
-    // Weapons
-    if (nameLower.includes('rl'))    return { fill: 'rgba(200, 100, 50, 0.06)', stroke: 'rgba(200, 100, 50, 0.5)', text: 'rgba(216, 128, 80, 0.5)' };
-    if (nameLower.includes('lg'))    return { fill: 'rgba(150, 150, 255, 0.06)', stroke: 'rgba(150, 150, 255, 0.5)', text: 'rgba(176, 176, 255, 0.5)' };
-    if (nameLower.includes('gl'))    return { fill: 'rgba(100, 180, 100, 0.06)', stroke: 'rgba(100, 180, 100, 0.5)', text: 'rgba(128, 200, 128, 0.5)' };
-    if (nameLower.includes('sng') || nameLower.includes('ng'))
-                                     return { fill: 'rgba(180, 140, 80, 0.06)', stroke: 'rgba(180, 140, 80, 0.5)', text: 'rgba(200, 160, 96, 0.5)' };
-
-    // Default - neutral gray (brightened so passageways like cemetary.tele
-    // stay legible against the dark background).
-    return { fill: 'rgba(170, 170, 190, 0.12)', stroke: 'rgba(150, 150, 160, 0.6)', text: 'rgba(180, 180, 190, 0.7)' };
-}
-
 // Group locations by normalized name and calculate centroid
 function processLocationGroups(locations) {
     const groups = {};
 
     for (const loc of locations) {
-        const normalizedName = normalizeLocationName(loc.name);
+        const normalizedName = MapView.normalizeLocationName(loc.name);
         if (!groups[normalizedName]) {
             groups[normalizedName] = {
                 name: normalizedName,
                 points: [],
                 centroid: { x: 0, y: 0 },
-                color: getLocationColor(normalizedName)
+                color: MapView.getLocationColor(normalizedName)
             };
         }
         groups[normalizedName].points.push({ x: loc.x, y: loc.y, z: loc.z });
@@ -6307,19 +6200,6 @@ function fillLocationRegion(ctx, group, fillColor, worldToCanvasFunc) {
     drawTriangleListFill(ctx, group.tris, fillColor, worldToCanvasFunc);
 }
 
-// scaleRgbaAlpha: multiply the alpha of an 'rgba(r, g, b, a)' string by k,
-// clamped to cap. All map fill/stroke styles are rgba strings, so this is
-// how the focus tiers brighten/fade them without a parallel color table.
-function scaleRgbaAlpha(rgba, k, cap) {
-    return rgba.replace(/rgba\(([^,]+),([^,]+),([^,]+),([^)]+)\)/,
-        (m, r, g, b, a) => {
-            let na = parseFloat(a) * k;
-            if (cap !== undefined && na > cap) na = cap;
-            if (na > 1) na = 1;
-            return `rgba(${r},${g},${b},${na})`;
-        });
-}
-
 // ─── Region focus mode ──────────────────────────────────────────────────────
 //
 // Clicking a loc region (on empty floor, not a player symbol) focuses it:
@@ -6381,15 +6261,6 @@ function setFocusGroup(name) {
     renderMap(mapState.currentTime);
 }
 
-function pointInTriangle(px, py, a, b, c) {
-    const d1 = (px - b.x) * (a.y - b.y) - (a.x - b.x) * (py - b.y);
-    const d2 = (px - c.x) * (b.y - c.y) - (b.x - c.x) * (py - c.y);
-    const d3 = (px - a.x) * (c.y - a.y) - (c.x - a.x) * (py - a.y);
-    const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-    return !(hasNeg && hasPos);
-}
-
 // pickLocGroupAt: which named loc region is under the canvas point. Tests
 // every projected floor triangle; among hits the one nearest the camera
 // wins, so clicking a spot where two floors stack resolves to the visible
@@ -6404,7 +6275,7 @@ function pickLocGroupAt(cx, cy) {
             const a = worldToCanvasNew(tris[i],     tris[i + 1], tris[i + 2]);
             const b = worldToCanvasNew(tris[i + 3], tris[i + 4], tris[i + 5]);
             const c = worldToCanvasNew(tris[i + 6], tris[i + 7], tris[i + 8]);
-            if (!pointInTriangle(cx, cy, a, b, c)) continue;
+            if (!MapView.pointInTriangle(cx, cy, a, b, c)) continue;
             const depth = Math.max(a.depth, b.depth, c.depth);
             if (depth > bestDepth) {
                 bestDepth = depth;
@@ -6430,7 +6301,7 @@ function computeOccupiedGroupTeams(playerData) {
         if (data.x === 0 && data.y === 0) continue;
         const locName = resolvePlayerLoc(data, locations);
         if (!locName) continue;
-        const key = normalizeLocationName(locName);
+        const key = MapView.normalizeLocationName(locName);
         let teams = occupied.get(key);
         if (!teams) { teams = new Set(); occupied.set(key, teams); }
         teams.add(symbols[name] ? symbols[name].teamIdx : 0);
@@ -6446,7 +6317,7 @@ const REGION_TINT_CONTESTED = `rgba(235, 235, 245, ${REGION_TINT_ALPHA})`;
 function regionActiveTint(teams) {
     if (!teams || teams.size !== 1) return REGION_TINT_CONTESTED;
     const teamIdx = teams.values().next().value;
-    return hexToRgba(TEAM_COLORS[teamIdx] || TEAM_COLORS[0], REGION_TINT_ALPHA);
+    return MapView.hexToRgba(TEAM_COLORS[teamIdx] || TEAM_COLORS[0], REGION_TINT_ALPHA);
 }
 
 // Highlight loc regions that contain at least one player. Drawn on top of
@@ -6575,22 +6446,17 @@ function drawRegionControlOverlay(ctx, controlStates) {
             if (!anyAboveOccupied) boost = REGION_OPACITY_BOOST;
         }
         const finalAlpha = Math.min(0.5, baseAlpha * boost);
-        const color = hexToRgba(hex, finalAlpha);
+        const color = MapView.hexToRgba(hex, finalAlpha);
 
         for (const group of groups) {
             // Region focus: tint outside the focus neighborhood fades with
             // the base fills so the focused area keeps visual priority.
             const tint = focusTier(group.name) === 'far'
-                ? scaleRgbaAlpha(color, 0.3)
+                ? MapView.scaleRgbaAlpha(color, 0.3)
                 : color;
             fillLocationRegion(ctx, group, tint, worldToCanvasNew);
         }
     }
-}
-
-function hexToRgba(hex, alpha) {
-    const [r, g, b] = hexToRgb(hex);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // Map View State
@@ -6697,18 +6563,12 @@ function markMapDirty() {
     mapState.renderDirty = true;
 }
 
-// normalizeMapGeometry: upgrade a fetched geometry JSON to the version-2
-// shape in place. Version 2 (mapgen ≥ schema bump) emits 9 floats per
-// triangle (x,y,z per vertex); version 1 files emitted 6 (XY only). Old
-// files — e.g. a stale browser cache — are expanded by flattening every
-// vertex to the region's median z, which reproduces the v1 look exactly
-// at top-down and gives a usable (if flat-per-region) 3D view.
 // applyMapGeometry: install (or re-install, after an edit / regeneration)
 // a geometry object as the map's floor/wall source. Normalizes legacy
 // versions, splits out the unnamed backdrop, drops every geometry-derived
 // cache, and rebuilds the loc groups + region-control references.
 function applyMapGeometry(geom) {
-    normalizeMapGeometry(geom);
+    MapView.normalizeMapGeometry(geom);
     // The unnamed backdrop bucket (name === "") is drawn as a neutral
     // underlay by drawLocationLayer; cache its triangle list separately so
     // it isn't confused with loc groups keyed by name.
@@ -6742,24 +6602,6 @@ function applyMapGeometry(geom) {
         markMapDirty();
         renderMap(mapState.currentTime);
     }
-}
-
-function normalizeMapGeometry(geom) {
-    if (geom.version >= 2) return;
-    for (const l of geom.locs) {
-        if (!l || !Array.isArray(l.tris)) continue;
-        const t6 = l.tris;
-        const z = l.z || 0;
-        const t9 = new Array((t6.length / 6) * 9);
-        let j = 0;
-        for (let i = 0; i + 5 < t6.length; i += 6) {
-            t9[j++] = t6[i];     t9[j++] = t6[i + 1]; t9[j++] = z;
-            t9[j++] = t6[i + 2]; t9[j++] = t6[i + 3]; t9[j++] = z;
-            t9[j++] = t6[i + 4]; t9[j++] = t6[i + 5]; t9[j++] = z;
-        }
-        l.tris = t9;
-    }
-    geom.version = 2;
 }
 
 function initMapView(result) {
@@ -6918,7 +6760,7 @@ function initMapView(result) {
     // Cache the map's z percentile range — drives per-player z-based size
     // scaling in renderMap (players higher up on the map render up to 25%
     // larger than those on the lowest level).
-    mapState.zRange = computeMapZRange(mapState.locations);
+    mapState.zRange = MapView.computeMapZRange(mapState.locations);
 
     // Orbit-camera reference height: tilting pivots about the map's vertical
     // middle so high and low floors fan out symmetrically around the screen
@@ -7274,7 +7116,7 @@ function getRegionControlAtTime(time) {
     for (const region of mapState.controlRegions) {
         const s = mapState.bucketStates[region.name];
         if (typeof s !== 'string' || idx >= s.length) continue;
-        states[region.name] = decodeRegionStateChar(s[idx]);
+        states[region.name] = MapView.decodeRegionStateChar(s[idx]);
     }
     return states;
 }
@@ -8018,9 +7860,9 @@ function buildPlayerRegionIcon(player) {
 // active focus. No focus → base styles untouched.
 function tierFill(group, tier) {
     const base = group.color.fill;
-    if (tier === 'focus') return scaleRgbaAlpha(base, 6, 0.5);
-    if (tier === 'near')  return scaleRgbaAlpha(base, 3.5, 0.32);
-    if (tier === 'far')   return scaleRgbaAlpha(base, 0.3);
+    if (tier === 'focus') return MapView.scaleRgbaAlpha(base, 6, 0.5);
+    if (tier === 'near')  return MapView.scaleRgbaAlpha(base, 3.5, 0.32);
+    if (tier === 'far')   return MapView.scaleRgbaAlpha(base, 0.3);
     return base;
 }
 
@@ -8042,65 +7884,6 @@ const SOLID_LIGHT = (() => {
     return [l[0] / n, l[1] / n, l[2] / n];
 })();
 
-// floorBoundaryEdges returns the floor's outer-boundary edges: edges that
-// belong to exactly one floor triangle across all regions + the backdrop —
-// the floor's true outer perimeter plus its internal step risers. Edges
-// shared by two triangles (loc-region boundaries inside a continuous floor)
-// are interior and excluded, so nothing is extruded inside a flat floor.
-// Each returned edge carries its outward horizontal normal (nx, ny) for
-// backface culling. Quantized edge keys absorb float noise.
-function floorBoundaryEdges(backdropTris, groups) {
-    const edges = new Map();
-    const k = (x, y, z) => Math.round(x * 8) + ',' + Math.round(y * 8) + ',' + Math.round(z * 8);
-    const add = (tris) => {
-        if (!tris || tris.length < 9) return;
-        for (let i = 0; i + 8 < tris.length; i += 9) {
-            for (let e = 0; e < 3; e++) {
-                const o1 = i + e * 3, o2 = i + ((e + 1) % 3) * 3, o3 = i + ((e + 2) % 3) * 3;
-                const ka = k(tris[o1], tris[o1 + 1], tris[o1 + 2]);
-                const kb = k(tris[o2], tris[o2 + 1], tris[o2 + 2]);
-                const key = ka < kb ? ka + '|' + kb : kb + '|' + ka;
-                const info = edges.get(key);
-                if (info) { info.count++; continue; }
-                edges.set(key, {
-                    count: 1,
-                    ax: tris[o1], ay: tris[o1 + 1], az: tris[o1 + 2],
-                    bx: tris[o2], by: tris[o2 + 1], bz: tris[o2 + 2],
-                    ox: tris[o3], oy: tris[o3 + 1], // opposite vertex → outward dir
-                });
-            }
-        }
-    };
-    add(backdropTris);
-    for (const g of groups) add(g.tris);
-    const out = [];
-    for (const info of edges.values()) {
-        if (info.count !== 1) continue; // interior edge → no box side
-        const { ax, ay, az, bx, by, bz, ox, oy } = info;
-        // Horizontal normal ⟂ the edge, flipped to point away from the
-        // triangle's opposite vertex (i.e. out of the floor).
-        let nx = -(by - ay), ny = bx - ax;
-        const mx = (ax + bx) / 2, my = (ay + by) / 2;
-        if (nx * (ox - mx) + ny * (oy - my) > 0) { nx = -nx; ny = -ny; }
-        const nl = Math.hypot(nx, ny) || 1;
-        out.push({ ax, ay, az, bx, by, bz, nx: nx / nl, ny: ny / nl });
-    }
-    return out;
-}
-
-// floorBoundaryWalls extrudes the boundary edges into the side-wall triangles
-// that turn the floor into one solid box FLOOR_SLAB_DEPTH units tall — used by
-// the floor model, which depth-sorts opaque triangles (no per-edge culling).
-function floorBoundaryWalls(backdropTris, groups) {
-    const walls = [];
-    for (const e of floorBoundaryEdges(backdropTris, groups)) {
-        const { ax, ay, az, bx, by, bz } = e;
-        const az2 = az - FLOOR_SLAB_DEPTH, bz2 = bz - FLOOR_SLAB_DEPTH;
-        walls.push(ax, ay, az, bx, by, bz, bx, by, bz2);
-        walls.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
-    }
-    return walls;
-}
 
 // renderSolidEntries: painter-sort by projected centroid depth (cached per
 // camera angle — the order only depends on yaw/pitch) and draw, batching
@@ -8163,21 +7946,6 @@ function renderSolidEntries(ctx, se) {
 // brighter MOVER_FILL_ACTIVE tone so it stands out like an occupied region.
 const MOVER_FILL = 'rgba(96, 107, 140, 0.92)';
 const MOVER_FILL_ACTIVE = 'rgba(150, 170, 215, 0.95)';
-
-// moverPoseAt returns the mover's {x, y, z, vis} at tMs (match-relative
-// milliseconds): the last recorded sample at or before tMs, clamped to the
-// first sample for earlier times. Binary search — tracks can be long for a
-// lift that ran the whole match.
-function moverPoseAt(m, tMs) {
-    const t = m.t;
-    const n = t ? t.length : 0;
-    if (n === 0) return null;
-    // Clamp times before the first sample to it (strictly increasing tracks,
-    // so this matches the previous tMs<=t[0] guard exactly).
-    let idx = lowerBoundIndex(t, tMs, (a, i) => a[i]);
-    if (idx < 0) idx = 0;
-    return { x: m.x[idx], y: m.y[idx], z: m.z[idx], vis: m.vis[idx] };
-}
 
 // moverMeshFaces returns a submodel mesh's per-triangle outward-test normals,
 // cached by submodel id (translation preserves normals, so this is pose-
@@ -8264,7 +8032,7 @@ function drawMovers(ctx) {
     for (const m of movers) {
         const mesh = meshes[m.sub];
         if (!mesh || mesh.length < 9) continue;
-        const pose = moverPoseAt(m, tMs);
+        const pose = MapView.moverPoseAt(m, tMs);
         if (!pose || !pose.vis) continue;
         const active = players.length > 0 && playerOnMover(pose, m.sub, players);
         drawMoverMesh(ctx, mesh, m.sub, pose, active);
@@ -8452,12 +8220,6 @@ function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
     ctx.restore();
 }
 
-// Floors are this many units tall. Both views extrude the floor's outer
-// boundary (perimeter + step risers, via floorBoundaryEdges) down by this
-// much into box sides (floorBoundaryWalls), baked into the depth-sorted
-// floor model so the floor reads as one solid slab.
-const FLOOR_SLAB_DEPTH = 10;
-
 // Floor-model tones. Region tops use the loc's own colour; the backdrop
 // (unnamed floor) and the box sides each use one flat tone. No Lambert/normal
 // shading anywhere — every surface is a single flat colour, so from overhead
@@ -8508,7 +8270,7 @@ function buildFloorModel() {
         if (!g.tris || g.tris.length < 9) continue;
         push(g.tris, BACKDROP_FLOOR_RGB, g.name);
     }
-    const sides = floorBoundaryWalls(backdropTris, groups);
+    const sides = MapView.floorBoundaryWalls(backdropTris, groups);
     if (sides.length >= 9) push(sides, FLOOR_BOX_SIDE_RGB, null);
 
     if (entries.length === 0) return null;
@@ -8584,7 +8346,7 @@ function drawLocationLayer(ctx) {
         const tier = focusTier(group.name);
         const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
         ctx.fillStyle = tier === 'far'
-            ? scaleRgbaAlpha(group.color.text, 0.35)
+            ? MapView.scaleRgbaAlpha(group.color.text, 0.35)
             : group.color.text;
         ctx.fillText(group.name, pos.x, pos.y);
     }
@@ -8995,7 +8757,7 @@ function streamPosAt(name, tMs) {
     const n = t.length;
     // Clamp times before the first sample to it (dense, strictly increasing
     // tracks, so this matches the previous tMs<=t[0] guard exactly).
-    let idx = lowerBoundIndex(t, tMs, (a, i) => a[i]);
+    let idx = MapView.lowerBoundIndex(t, tMs, (a, i) => a[i]);
     if (idx < 0) idx = 0;
     let h = null;
     if (pos.h && pos.h.length === n && pos.h[idx] !== MAP_NO_FLOOR) h = pos.h[idx];
@@ -9140,7 +8902,7 @@ function drawPlayerArrows(ctx, data, symbolInfo) {
             const s = 1 / VEL_UNITS_PER_MAP_UNIT;
             const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
             drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
-                           hexToRgba(teamHex, 0.9), 3.5);
+                           MapView.hexToRgba(teamHex, 0.9), 3.5);
         }
     }
     if (mapState.showViewArrows && typeof data.vya === 'number') {
@@ -9173,13 +8935,13 @@ function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
     }
     const bot = worldToCanvasNew(data.x, data.y, bottomZ);
     const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-    ctx.strokeStyle = hexToRgba(teamHex, 0.55);
+    ctx.strokeStyle = MapView.hexToRgba(teamHex, 0.55);
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
     ctx.lineTo(bot.x, bot.y);
     ctx.stroke();
-    ctx.fillStyle = hexToRgba(teamHex, 0.7);
+    ctx.fillStyle = MapView.hexToRgba(teamHex, 0.7);
     ctx.beginPath();
     ctx.arc(bot.x, bot.y, 2.5, 0, Math.PI * 2);
     ctx.fill();
@@ -9660,11 +9422,6 @@ function updateItemsPanelStatus(time) {
     }
 }
 
-// Index of the last point with t <= time, or -1 if time precedes the first.
-function trailIndexAtTime(points, time) {
-    return lowerBoundIndex(points, time, (a, i) => a[i].t);
-}
-
 // ensureLosComputed runs the lazy line-of-sight pass once via the worker, then
 // builds mapState.losByPair / pvsByPair and re-renders. One pass fills both LOS
 // and PVS (the reply carries los and pvs per player), so the LOS and PVS
@@ -9797,12 +9554,12 @@ function drawTracks(ctx, time) {
         }
 
         // Find the end index: last point at or before current time
-        const endIdx = trailIndexAtTime(points, time);
+        const endIdx = MapView.trailIndexAtTime(points, time);
         if (endIdx < 1) continue;
 
         // Find start: trail window starts at max(time - trailDuration, trailStartTime)
         const trailStart = Math.max(time - trailDuration, mapState.trailStartTimes[name] || 0);
-        let startIdx = trailIndexAtTime(points, trailStart);
+        let startIdx = MapView.trailIndexAtTime(points, trailStart);
         if (startIdx < 0) startIdx = 0;
 
         if (endIdx - startIdx < 1) continue;
@@ -9819,9 +9576,9 @@ function drawTracks(ctx, time) {
         }
 
         const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
-        const solidColor = hexToRgba(teamHex, 0.4);
-        const dashColor = hexToRgba(teamHex, 0.2);
-        const markerColor = hexToRgba(teamHex, 0.8);
+        const solidColor = MapView.hexToRgba(teamHex, 0.4);
+        const dashColor = MapView.hexToRgba(teamHex, 0.2);
+        const markerColor = MapView.hexToRgba(teamHex, 0.8);
 
         // Collect death/spawn markers to draw after lines
         const markers = [];

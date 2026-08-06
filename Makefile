@@ -15,6 +15,7 @@ API_MAIN   := ./mvd-api
 MCP_MAIN   := ./mvd-mcp
 DIST_DIR   := dist
 STATIC_DIR := mvd-web/static
+MAPVIEW_SRC := mvd-map-view/src
 LOC_DATA   := mvd-analytics/loc/data
 MAPENTS_DATA := mvd-analytics/mapents/data
 BSP_DIR    := bsps
@@ -42,6 +43,8 @@ build:
 	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
 	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
 	@cp -r $(STATIC_DIR)/vendor $(DIST_DIR)/
+	@echo "Copying mvd-map-view component..."
+	@mkdir -p $(DIST_DIR)/map-view && cp $(MAPVIEW_SRC)/*.js $(DIST_DIR)/map-view/
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
@@ -139,6 +142,14 @@ test:
 # without demos. -count=1 is the only reliable fix; it costs nothing when
 # the directory really is absent.
 	go test -count=1 -timeout 1800s ./mvd-analytics/corpus/
+# mvd-map-view is plain ESM with no dependencies, so node's built-in runner
+# covers it without adding a JS toolchain. Skipped (loudly) where node is
+# absent rather than failing a Go-only checkout.
+	@if command -v node >/dev/null 2>&1; then \
+		node --test mvd-map-view/test/; \
+	else \
+		echo "SKIP mvd-map-view tests (no node on PATH)"; \
+	fi
 
 # Remove dist/.
 clean:

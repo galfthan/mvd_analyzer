@@ -1,0 +1,16 @@
+{
+  "name": "mvd-map-view",
+  "version": "0.0.0",
+  "description": "Embeddable QuakeWorld map renderer — the 3D map from mvd-analyzer, as a standalone component",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": ["src"],
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "license": "MIT",
+  "private": true
+}

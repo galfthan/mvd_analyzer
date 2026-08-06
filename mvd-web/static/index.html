@@ -1162,6 +1162,17 @@
         </main>
     </div>
 
+    <!-- mvd-map-view (the embeddable map renderer) is authored as ESM, while
+         app.js has to stay a classic script — index.html carries inline
+         handlers that call its globals. This bootstrap bridges the two: it
+         publishes the module namespace as window.MapView. Module scripts are
+         deferred, so it runs after app.js's top level but before
+         DOMContentLoaded — every MapView.* call site is inside a function
+         that runs later still. -->
+    <script type="module">
+        import * as MapView from './map-view/index.js';
+        window.MapView = MapView;
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
