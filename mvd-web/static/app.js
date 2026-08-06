@@ -6254,52 +6254,14 @@ function drawRegionControlOverlay(ctx, controlStates) {
 }
 
 // Map View State
-let mapState = {
-    canvas: null,
-    ctx: null,
-    locations: [],
-    locationGroups: null, // Cached processed location groups
-    mapGeometry: null,    // BSP-derived per-loc polygons (optional, loaded async)
-    bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
-    currentTime: 0,
-    isPlaying: false,
-    playbackSpeed: 1,
-    animationFrameId: null,
-    lastRenderTime: 0,
-    trailDuration: 10,          // Current trail window in seconds
-    fullTrails: {},             // playerName -> [{wx, wy, wz, t, teamIdx, tp}] — pre-computed from all buckets
-    trailStartTimes: {},        // playerName -> time when trail tracking started (for extending forward)
-    enabledPlayers: {},         // playerName -> boolean — per-player trail toggle
-    teams: [],
-    playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
-    showViewArrows: false,      // per-player 3D view-direction arrows (opt-in)
-    showVelArrows: false,       // per-player 3D velocity arrows (opt-in)
-    showLos: false,             // line-of-sight debug lines between players (opt-in)
-    showPvs: false,             // potential-visibility (PVS) lines, thinner than LOS (opt-in)
-    losByPair: {},              // looker name -> { target name -> [{s,e} intervals] } (schema v37)
-    pvsByPair: {},              // looker name -> { target name -> [{s,e} intervals] } (schema v38)
-    losComputed: false,         // lazy LOS/PVS pass has run for this demo (one pass fills both)
-    losPending: false,          // a computeLos worker round-trip is in flight
-    initialized: false,
-    lastRenderedBucket: null, // Skip redundant redraws
-    renderDirty: false,       // Force redraw on track toggle/reset/etc
-    followPlayer: null,       // Name of the player the camera re-centers on each frame, or null
-    fullscreen: false,        // True while the map panel is in fullscreen (set by fullscreenchange)
-    // "Learn map" mode: a static study view that hides players and shows
-    // the map's designed entity layout (result.mapEntities) instead.
-    learnMode: false,
-    focusGroupName: null,     // normalized loc-group name under region focus, or null
-    focusNeighbors: null,     // Set of group names adjacent to the focused one
-    movers: [],               // result.streams.movers — brush-model pose timelines (v32)
-    submodelMeshes: null,     // { submodelId -> tris } from corpus v4 geom.submodels
-    posStreams: {},           // name -> PositionTrack {t,x,y,z,h,lq} for stream-sourced animation
-    mapEntities: [],          // result.mapEntities.entities for the current demo
-    teleportArrows: [],       // precomputed {sx,sy,sz,dx,dy,dz} entrance→exit world-coord pairs
-    entityFilters: {          // per-category visibility in learn mode
-        weapon: true, armor: true, health: true, ammo: true, powerup: true,
-        teleporter: true, spawn: false, button: false, door: false
-    }
-};
+// Renderer state, owned by mvd-map-view's MvdMap. app.js keeps the two
+// aliases it has always used — mapState for the state bag, _wtc for the
+// camera — so the render path is unchanged while the draw layers move across
+// group by group. Both are null until the module bootstrap runs (see
+// onMapViewReady below), which is before DOMContentLoaded and therefore
+// before anything can read them.
+let mapView = null;
+let mapState = null;
 
 // (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
 // the theme constants at the top of this file.)
@@ -6960,7 +6922,9 @@ function calculateMapBounds(result) {
 let _wtc = null;
 
 window.onMapViewReady = (MapView) => {
-    _wtc = MapView.newCamera();
+    mapView = new MapView.MvdMap();
+    mapState = mapView.state;
+    _wtc = mapView.camera;
 };
 
 // setMapCamera: normalize + snap + clamp the orbit angles, sync the 3D

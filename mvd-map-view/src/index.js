@@ -1,13 +1,15 @@
 // mvd-map-view — the QuakeWorld map renderer from mvd-analyzer, as a
 // standalone component.
 //
-// Extraction is in progress: this currently exports the pure helpers the
-// renderer is built on. The stateful `MvdMap` class (camera, floor model,
-// draw layers, interaction) lands as later groups move across from
-// mvd-web/static/app.js. Until then mvd-web calls these directly.
+// Extraction is in progress. `MvdMap` owns the renderer state and the camera;
+// the per-frame composition and the pointer interaction still live in
+// mvd-web/static/app.js and move across group by group, verified against a
+// screenshot corpus at each step. The helpers below are exported directly
+// because app.js still calls them while that is true.
 //
 // Everything here is dependency-free ESM and runs unchanged in a browser, in
-// a Web Worker, and under `node --test`.
+// a Web Worker, and under `node --test`. It loads nothing — see the loader
+// invariant in the README.
 
 export {
     FLOOR_SLAB_DEPTH,
@@ -18,6 +20,8 @@ export {
     floorBoundaryWalls,
     moverPoseAt,
 } from './geometry.js';
+
+export { MvdMap, newState } from './map.js';
 
 export {
     PITCH_MAX,

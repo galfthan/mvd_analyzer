@@ -6,6 +6,43 @@ standalone component so other applications can embed it.
 Zero runtime dependencies, plain ESM, no build step. It runs unchanged in a
 browser, in a Web Worker, and under `node --test`.
 
+## Who this is for
+
+Two consumers, both real:
+
+1. **mvd-web** — the analyzer UI, which owns a WASM pipeline in-page and a
+   large amount of DOM chrome around the canvas.
+2. **The MCP Apps viewer** — a `ui://` resource rendered in a sandboxed
+   iframe inside a chat host, whose data arrives over postMessage and whose
+   size is dictated by the host.
+
+Anything else (a standalone page drawing a map, a third-party app on the REST
+API, npm publication, a `<mvd-map>` element) is speculative and must not
+drive design decisions until someone actually asks for it.
+
+## The loader invariant
+
+**This package never loads anything.** No `fetch`, no `XMLHttpRequest`, no
+dynamic `import()`, no `window`, no `document`, no `location`, no webfonts —
+the only font families used are `monospace` and `sans-serif`. Every byte
+arrives through a setter, and the only browser object it touches is the
+canvas context it is handed.
+
+This is not stylistic. The MCP viewer runs behind a strict CSP with no
+network origins at all: its geometry arrives over `resources/read` and its
+player samples over `tools/call`, as a `FrameSource`. A single `fetch` inside
+the renderer would make it unusable there, and the failure would only show up
+in a chat host, not in `make test`.
+
+Two consequences for anyone moving code in here:
+
+- The geometry fetch in `app.js` (`initMapView`) stays host-side when the
+  rest of that function moves.
+- The component takes its canvas **and its size** explicitly. It must never
+  measure a container or listen for window resizes — the MCP host controls
+  the iframe's dimensions and reports changes via `ui/notifications/size-changed`,
+  so sizing is always something the host pushes in.
+
 ## Status
 
 **Extraction in progress.** The package currently owns the renderer's pure
