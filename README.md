@@ -80,7 +80,13 @@ environment variables to export).
 go run ./mvd-analytics/cmd/qw-analyze demo.mvd.gz                 # Result JSON to stdout
 go run ./mvd-analytics/cmd/qw-analyze -format md demo.mvd.gz      # human summary
 go run ./mvd-analytics/cmd/qw-analyze -format events demo.mvd.gz  # line-delimited events
+go run ./mvd-analytics/cmd/qw-analyze -view top-kills demo.mvd.gz # one query-API view
 ```
+
+`-view` runs a single view instead of the whole Result: `buckets`, `events`,
+`stream-slice`, `state-at`, `trails`, `region-control`, `top-kills`,
+`top-windows`, `lives`, `items-summary`, `airgibs`. See
+[`mvd-analytics/README.md`](mvd-analytics/README.md) for the per-view knobs.
 
 ### Run the web UI locally
 

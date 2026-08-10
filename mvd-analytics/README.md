@@ -134,6 +134,46 @@ that downstream consumers render, summarise, or feed to an agent.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
+  `-view <name>` runs one query-API view instead of the whole Result:
+
+  | `-view` | View function | Principal knobs |
+  |---|---|---|
+  | `full` (default) | — (the stored `Result`) | `-include` |
+  | `buckets` | `view.Buckets` | `-bucket`, `-fields`, `-reducer`, `-include-team` |
+  | `events` | `view.Events` | `-event-types` |
+  | `stream-slice` | `view.StreamSlice` | `-fields` |
+  | `state-at` | `view.StateAt` | `-time` (required), `-fields` |
+  | `trails` | `view.LocTrails` | `-min-dwell` |
+  | `region-control` | `view.RegionControl` | `-bucket` |
+  | `top-kills` | `view.TopKills` | `-limit`, `-gap`, `-contested`, `-min-damage`, `-weapons`, `-dmg` |
+  | `top-windows` | `view.TopWindows` | `-metric`, `-mode`, `-window`, `-gap`, `-limit`, `-per-player`, `-min-score`, `-weapons`, `-dmg` |
+  | `lives` | `view.Lives` | `-min-life`, `-dmg` |
+  | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
+  | `airgibs` | `view.Airgibs` | — |
+
+  The five views in the lower half also take `-players`, `-from` and `-to`,
+  except `airgibs` — `view.Airgibs` takes no options, so it accepts none.
+  On those five, any view-scoped flag that belongs to a different view is
+  **rejected** rather than ignored — `-view lives -limit 5` and `-view
+  airgibs -bucket 1s` are both errors — mirroring the way every mvd-api
+  handler rejects an unknown query param: a knob that silently does nothing
+  reads as one that worked. The seven views in the upper half predate the
+  check and keep their existing leniency. Global flags (`-format`, `-pretty`,
+  `-bulk`, `-out-dir`, `-regions`) are never affected.
+
+Build the CLI once instead of `go run`-ing it each time with `make
+build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze` and
+`dist/mapgen`. Note `make build` clears `dist/` first.
+
+  **`-dmg` defaults differ from REST.** On `top-kills`, `top-windows` and
+  `lives` an unset `-dmg` gets the *view* default, `raw`, while mvd-api
+  substitutes `bounded` on the same queries. The CLI follows the library it
+  wraps; pass `-dmg bounded` to reproduce a REST response.
+
+  `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
+  `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is
+  deliberately no default, because frag and damage event cadences are too far
+  apart for one value to serve both — and rejects `-window`.
 
 ## Pipeline architecture
 

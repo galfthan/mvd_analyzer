@@ -9,7 +9,18 @@
 // At schema v7 the parse-time HighResBuckets field is gone; bucketed
 // data is produced on demand by view.Buckets, accessible via the
 // -view buckets flag below. Other views (events, stream-slice,
-// state-at, trails, region-control) are also available.
+// state-at, trails, region-control, top-kills, top-windows, lives,
+// items-summary, airgibs) are also available.
+//
+// The derived views (top-kills, top-windows, lives) take a -dmg damage
+// family whose default is the VIEW default, raw. mvd-api substitutes
+// bounded on the same queries, so an unset -dmg does not reproduce the
+// REST response; pass -dmg bounded for that.
+//
+// On those views and items-summary/airgibs, a flag belonging to a
+// different view is rejected rather than ignored — the CLI analogue of
+// mvd-api's unknown-query-param rejection. The seven original views
+// predate the check and keep their existing leniency.
 //
 // Example invocations:
 //
@@ -24,6 +35,12 @@
 //	qw-analyze -view state-at -time 432.5 demo.mvd.gz
 //	qw-analyze -view trails -min-dwell 500ms demo.mvd.gz
 //	qw-analyze -view region-control -bucket 1s demo.mvd.gz
+//	qw-analyze -view top-kills -limit 10 demo.mvd.gz     # hardest kill bursts
+//	qw-analyze -view top-windows -metric damageGiven -window 30s demo.mvd.gz
+//	qw-analyze -view top-windows -mode gap -gap 8s demo.mvd.gz
+//	qw-analyze -view lives -players alice -min-life 5s demo.mvd.gz
+//	qw-analyze -view items-summary -kinds armor demo.mvd.gz
+//	qw-analyze -view airgibs demo.mvd.gz
 //	qw-analyze -graph mermaid                            # print the pipeline DAG (no demo)
 //	qw-analyze -bulk demos/ -out-dir analyses/          # batch mode
 package main
@@ -33,8 +50,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -60,7 +79,59 @@ type viewOptions struct {
 	timeSet     bool // -time was given (distinguishes an explicit -time 0 from "flag missing")
 	includeTeam bool
 	include     map[string]bool // -include positions etc. for -view full
+
+	// Derived-view knobs. The view package speaks int32 ms; the CLI speaks
+	// durations like every other time flag here, so these convert at the
+	// dispatch boundary.
+	limit     int
+	perPlayer int
+	minDamage int
+	minScore  *int // nil = unset; 0 is a meaningful value, so this cannot be a plain int
+	dmg       string
+	metric    string
+	mode      string
+	weapons   []string
+	items     []string
+	kinds     []string
+	window    time.Duration
+	gap       time.Duration
+	gapSet    bool // -gap was given: top-windows gap mode requires it, and 0 is not a default
+	contested time.Duration
+	minLife   time.Duration
 }
+
+// derivedViewFlags maps each view added on top of the original seven to the
+// flags it consumes. A flag the user typed that is absent here is REJECTED
+// rather than ignored, matching every mvd-api handler's writeUnknownParam:
+// a knob that silently does nothing reads as one that worked. Only the new
+// flags and the new views are policed — the original seven views predate
+// this and are left as they were rather than breaking existing invocations.
+var derivedViewFlags = map[string]map[string]bool{
+	"top-kills":     {"limit": true, "gap": true, "contested": true, "min-damage": true, "weapons": true, "dmg": true, "players": true, "from": true, "to": true},
+	"top-windows":   {"limit": true, "per-player": true, "metric": true, "mode": true, "window": true, "gap": true, "weapons": true, "dmg": true, "min-score": true, "players": true, "from": true, "to": true},
+	"lives":         {"min-life": true, "dmg": true, "players": true, "from": true, "to": true},
+	"items-summary": {"items": true, "kinds": true, "players": true, "from": true, "to": true},
+	"airgibs":       {}, // view.Airgibs takes no options at all
+}
+
+// derivedOnlyFlags are the flags introduced for the views above. They are
+// meaningless on the original seven, so typing one there is also rejected.
+var derivedOnlyFlags = []string{
+	"limit", "per-player", "min-damage", "min-score", "dmg", "metric",
+	"mode", "weapons", "items", "kinds", "window", "gap", "contested", "min-life",
+}
+
+// viewScopedFlags is every flag that selects or shapes a view, as opposed to
+// the global ones (-format, -pretty, -bulk, -out-dir, -regions) that apply
+// whatever is being produced. The applicability check consults this list to
+// decide whether an unrecognised-for-this-view flag is its business: the
+// legacy eight belong to specific original views, so they are just as wrong
+// on -view airgibs as -metric is, and get the same rejection.
+var viewScopedFlags = append([]string{
+	"players", "from", "to",
+	"bucket", "fields", "reducer", "event-types", "min-dwell", "time",
+	"include-team", "include",
+}, derivedOnlyFlags...)
 
 func main() {
 	format := flag.String("format", "json", "output format: json | md | events")
@@ -69,7 +140,7 @@ func main() {
 	indent := flag.Bool("pretty", false, "pretty-print JSON output (single-demo mode only); pipe to `jq .` for human reading")
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
 
-	viewName := flag.String("view", "full", "view: full | buckets | events | trails | stream-slice | state-at | region-control")
+	viewName := flag.String("view", "full", "view: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items-summary | airgibs")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
 	fieldsStr := flag.String("fields", "", "comma-separated field codes (see mvd-analytics/view docs)")
 	reducerArgs := stringListFlag("reducer", "field=name reducer override; repeatable (e.g. -reducer h=min)")
@@ -81,6 +152,20 @@ func main() {
 	timeStr := flag.String("time", "", "time for -view state-at (required)")
 	includeTeam := flag.Bool("include-team", false, "emit per-team aggregates on -view buckets")
 	includeStr := flag.String("include", "", "comma-separated extras for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity; los (line-of-sight + pvs potential-visibility intervals, computed on request); projectiles, beams (spatial rocket/grenade-flight and LG-beam streams for the map); nails (ng/sng nail tracking — links ng/sng fires to damage + nail map stream; high volume)")
+	limit := flag.Int("limit", 0, "max rows for -view top-kills / top-windows; 0 = the view's default (20 and 10), negative = uncapped")
+	perPlayer := flag.Int("per-player", 0, "max windows from any one player for -view top-windows; <=0 = uncapped")
+	minDamage := flag.Int("min-damage", 0, "drop bursts below this burst damage for -view top-kills")
+	dmgStr := flag.String("dmg", "", "damage family for -view top-kills / top-windows / lives: raw | bounded; empty = the view default (raw). Note mvd-api defaults the same queries to bounded, so an unset -dmg does NOT reproduce the REST response")
+	metric := flag.String("metric", "", "ranking metric for -view top-windows: frags | deaths | netFrags | damageGiven | damageTaken | netDamage | shots | hits; empty = frags")
+	mode := flag.String("mode", "", "segmentation for -view top-windows: fixed (windows of -window) | gap (runs of events at most -gap apart, which -gap must then set); empty = fixed")
+	weaponsStr := flag.String("weapons", "", "comma-separated weapons; restricts the killing weapon for -view top-kills and the scoring events for -view top-windows")
+	itemsStr := flag.String("items", "", "comma-separated item instances (ya_1) or kind tokens (ya) for -view items-summary")
+	kindsStr := flag.String("kinds", "", "comma-separated item categories (armor, mega, ...) for -view items-summary")
+	windowStr := flag.String("window", "0", "fixed window length for -view top-windows (e.g. 30s); 0 = the view default 30s. Rejected under -mode gap")
+	gapStr := flag.String("gap", "", "for -view top-kills, the burst capture gap (default 3s); for -view top-windows -mode gap, the required inter-event gap")
+	contestedStr := flag.String("contested", "0", "return-damage window for -view top-kills (e.g. 4s); 0 = the view default 4s")
+	minLifeStr := flag.String("min-life", "0", "drop lives shorter than this for -view lives")
+	minScore := flag.Int("min-score", 0, "drop windows scoring below this for -view top-windows; unset = the view default 1 (an explicit 0 is meaningful — it keeps zero-scoring windows on the net metrics)")
 	graphFmt := flag.String("graph", "", "print the analyzer dependency graph (mermaid | json) and exit; no demo argument needed")
 	artifactsMD := flag.Bool("artifacts-md", false, "print the generated artifact catalog (ARTIFACTS.md) and exit; no demo argument needed")
 
@@ -125,7 +210,29 @@ func main() {
 		regionsOverride = loaded
 	}
 
-	vopts, err := parseViewOptions(*viewName, *bucketStr, *fieldsStr, *reducerArgs, *fromStr, *toStr, *playersStr, *eventTypesStr, *minDwellStr, *timeStr, *includeTeam, *includeStr)
+	// Which flags the user actually typed. Go's flag package cannot tell an
+	// omitted flag from one set to its zero value, and two things here need
+	// that distinction: -min-score, where 0 is meaningful, and the
+	// applicability check that rejects a knob aimed at the wrong -view.
+	setFlags := map[string]bool{}
+	flag.Visit(func(f *flag.Flag) { setFlags[f.Name] = true })
+
+	vopts, err := parseViewOptions(*viewName, *bucketStr, *fieldsStr, *reducerArgs, *fromStr, *toStr, *playersStr, *eventTypesStr, *minDwellStr, *timeStr, *includeTeam, *includeStr, setFlags, derivedFlags{
+		limit:     *limit,
+		perPlayer: *perPlayer,
+		minDamage: *minDamage,
+		dmg:       *dmgStr,
+		metric:    *metric,
+		mode:      *mode,
+		weapons:   *weaponsStr,
+		items:     *itemsStr,
+		kinds:     *kindsStr,
+		window:    *windowStr,
+		gap:       *gapStr,
+		contested: *contestedStr,
+		minLife:   *minLifeStr,
+		minScore:  *minScore,
+	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "qw-analyze:", err)
 		os.Exit(2)
@@ -149,8 +256,100 @@ func main() {
 	}
 }
 
-func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []string, fromStr, toStr, playersStr, eventTypesStr, minDwellStr, timeStr string, includeTeam bool, includeStr string) (*viewOptions, error) {
+// derivedFlags carries the raw -view top-kills / top-windows / lives /
+// items-summary knobs. They travel as one struct rather than a dozen more
+// positional parameters on parseViewOptions, which is already at its limit.
+type derivedFlags struct {
+	limit, perPlayer, minDamage     int
+	minScore                        int
+	dmg, metric, mode               string
+	weapons, items, kinds           string
+	window, gap, contested, minLife string
+}
+
+// maxInt32Ms guards the duration→int32-ms conversions below. A duration past
+// this wraps when narrowed, and a wrapped value lands back in the view's
+// "0 means default" branch — an explicit huge argument silently becoming a
+// default is the one outcome worse than an error.
+const maxInt32Ms = time.Duration(math.MaxInt32) * time.Millisecond
+
+// msConv narrows durations to the int32 ms the view layer takes, rejecting the
+// negatives and overflows that would otherwise read as "0, so use the default".
+// It accumulates the first error so a whole options struct can be built inline
+// and checked once, rather than four times per view.
+type msConv struct{ err error }
+
+func (c *msConv) v(name string, d time.Duration) int32 {
+	if c.err != nil {
+		return 0
+	}
+	if d < 0 {
+		c.err = fmt.Errorf("%s must not be negative, got %s", name, d)
+		return 0
+	}
+	if d > maxInt32Ms {
+		c.err = fmt.Errorf("%s is too large: %s exceeds the %s the view layer can represent", name, d, maxInt32Ms)
+		return 0
+	}
+	return int32(d / time.Millisecond)
+}
+
+// df, not d: the blocks below shadow d with time.ParseDuration results.
+func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []string, fromStr, toStr, playersStr, eventTypesStr, minDwellStr, timeStr string, includeTeam bool, includeStr string, setFlags map[string]bool, df derivedFlags) (*viewOptions, error) {
 	v := &viewOptions{view: viewName, includeTeam: includeTeam, include: map[string]bool{}}
+
+	v.limit = df.limit
+	v.perPlayer = df.perPlayer
+	v.minDamage = df.minDamage
+	v.dmg = df.dmg
+	v.metric = df.metric
+	v.mode = df.mode
+	if setFlags["min-score"] {
+		v.minScore = &df.minScore
+	}
+	if df.weapons != "" {
+		v.weapons = splitCSV(df.weapons)
+	}
+	if df.items != "" {
+		v.items = splitCSV(df.items)
+	}
+	if df.kinds != "" {
+		v.kinds = splitCSV(df.kinds)
+	}
+	// -gap has no default: top-windows gap mode requires an explicit value
+	// (see TopWindowsOptions.GapMs), so "unset" has to stay distinguishable
+	// from "0". Sub-millisecond values are rejected here rather than allowed
+	// to truncate to 0 — that would clear the distinction again and make the
+	// view report the flag as missing when it was passed.
+	if df.gap != "" {
+		dur, err := time.ParseDuration(df.gap)
+		if err != nil {
+			return nil, fmt.Errorf("bad -gap: %w", err)
+		}
+		if dur < time.Millisecond {
+			return nil, fmt.Errorf("-gap must be at least 1ms, got %s", dur)
+		}
+		v.gap = dur
+		v.gapSet = true
+	}
+	for _, f := range []struct {
+		name string
+		raw  string
+		dst  *time.Duration
+	}{
+		{"-window", df.window, &v.window},
+		{"-contested", df.contested, &v.contested},
+		{"-min-life", df.minLife, &v.minLife},
+	} {
+		if f.raw == "" {
+			continue
+		}
+		dur, err := time.ParseDuration(f.raw)
+		if err != nil {
+			return nil, fmt.Errorf("bad %s: %w", f.name, err)
+		}
+		*f.dst = dur
+	}
 
 	if bucketStr != "" {
 		d, err := time.ParseDuration(bucketStr)
@@ -212,9 +411,47 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 	}
 
 	switch v.view {
-	case "full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control":
+	case "full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control",
+		"top-kills", "top-windows", "lives", "items-summary", "airgibs":
 	default:
 		return nil, fmt.Errorf("unknown -view %q", v.view)
+	}
+	// Reject knobs aimed at a different view before spending a full analysis
+	// pass on a query that would silently ignore them.
+	if allowed, ok := derivedViewFlags[v.view]; ok {
+		for name := range setFlags {
+			if allowed[name] {
+				continue
+			}
+			if !slices.Contains(viewScopedFlags, name) {
+				continue // a global flag like -format or -pretty
+			}
+			return nil, fmt.Errorf("-%s does not apply to -view %s", name, v.view)
+		}
+	} else {
+		for _, name := range derivedOnlyFlags {
+			if setFlags[name] {
+				return nil, fmt.Errorf("-%s applies only to -view top-kills / top-windows / lives / items-summary", name)
+			}
+		}
+	}
+	// -window and -gap are mutually exclusive under top-windows: the view
+	// rejects the one that does not belong to the chosen mode rather than
+	// silently ignoring it, so catch it here where the flag name is known.
+	if v.view == "top-windows" {
+		switch strings.ToLower(v.mode) {
+		case "gap":
+			if !v.gapSet {
+				return nil, fmt.Errorf("-mode gap requires -gap (there is deliberately no default: frag and damage cadences differ too much for one value)")
+			}
+			if v.window != 0 {
+				return nil, fmt.Errorf("-window does not apply under -mode gap")
+			}
+		case "", "fixed":
+			if v.gapSet {
+				return nil, fmt.Errorf("-gap does not apply under -mode fixed; use -window")
+			}
+		}
 	}
 	return v, nil
 }
@@ -407,6 +644,102 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			return err
 		}
 		return enc.Encode(tv)
+
+	case "top-kills":
+		var c msConv
+		opts := view.TopKillsOptions{
+			GapMs:       c.v("-gap", vopts.gap),
+			ContestedMs: c.v("-contested", vopts.contested),
+			Limit:       vopts.limit,
+			Players:     vopts.players,
+			Weapons:     vopts.weapons,
+			MinDamage:   vopts.minDamage,
+			From:        c.v("-from", vopts.from),
+			To:          c.v("-to", vopts.to),
+			Dmg:         vopts.dmg,
+		}
+		if c.err != nil {
+			return c.err
+		}
+		tkv, err := view.TopKills(res, opts)
+		if err != nil {
+			return err
+		}
+		// The view functions do not stamp TimeUnit; every mvd-api handler
+		// sets it after the call. Mirror that so the CLI and REST bodies
+		// agree rather than differing by a missing echo.
+		tkv.TimeUnit = view.UnitMs
+		return enc.Encode(tkv)
+
+	case "top-windows":
+		var c msConv
+		opts := view.TopWindowsOptions{
+			Metric:    vopts.metric,
+			Mode:      vopts.mode,
+			WindowMs:  c.v("-window", vopts.window),
+			GapMs:     c.v("-gap", vopts.gap),
+			Limit:     vopts.limit,
+			PerPlayer: vopts.perPlayer,
+			Players:   vopts.players,
+			Weapons:   vopts.weapons,
+			From:      c.v("-from", vopts.from),
+			To:        c.v("-to", vopts.to),
+			Dmg:       vopts.dmg,
+			Min:       vopts.minScore,
+		}
+		if c.err != nil {
+			return c.err
+		}
+		twv, err := view.TopWindows(res, opts)
+		if err != nil {
+			return err
+		}
+		twv.TimeUnit = view.UnitMs
+		return enc.Encode(twv)
+
+	case "lives":
+		var c msConv
+		opts := view.LivesOptions{
+			Players: vopts.players,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+			Dmg:     vopts.dmg,
+			MinMs:   c.v("-min-life", vopts.minLife),
+		}
+		if c.err != nil {
+			return c.err
+		}
+		lv, err := view.Lives(res, opts)
+		if err != nil {
+			return err
+		}
+		lv.TimeUnit = view.UnitMs
+		return enc.Encode(lv)
+
+	case "items-summary":
+		var c msConv
+		opts := view.ItemOptions{
+			Items:   vopts.items,
+			Players: vopts.players,
+			Kinds:   vopts.kinds,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+		}
+		if c.err != nil {
+			return c.err
+		}
+		// Items/ItemsSummary are always available — an absent section is an
+		// empty list, not an error — so there is no error return to check.
+		sv := view.ItemsSummary(res, opts)
+		sv.TimeUnit = view.UnitMs
+		return enc.Encode(sv)
+
+	case "airgibs":
+		airgibs, err := view.Airgibs(res)
+		if err != nil {
+			return fmt.Errorf("airgibs unavailable for this demo (no timeline analysis): %w", err)
+		}
+		return enc.Encode(view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
 
 	case "region-control":
 		ta := res.TimelineAnalysis

@@ -13,6 +13,8 @@
 WASM_MAIN  := ./mvd-web/cmd/wasm
 API_MAIN   := ./mvd-api
 MCP_MAIN   := ./mvd-mcp
+QW_ANALYZE_MAIN := ./mvd-analytics/cmd/qw-analyze
+MAPGEN_MAIN     := ./mvd-analytics/cmd/mapgen
 DIST_DIR   := dist
 STATIC_DIR := mvd-web/static
 LOC_DATA   := mvd-analytics/loc/data
@@ -26,6 +28,7 @@ LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_T
 .PHONY: build build-api build-mcp build-bin build-all-platforms \
         build-api-linux build-api-darwin build-api-windows \
         build-mcp-linux build-mcp-darwin build-mcp-windows \
+        build-tools build-qw-analyze build-mapgen \
         bsps serve clean test fmt artifacts-md help
 
 # Build the deployable web bundle into dist/.
@@ -66,6 +69,21 @@ build-mcp:
 	go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp $(MCP_MAIN)
 
 build-bin: build-api build-mcp
+
+# Build the local developer tools into dist/. Neither ships anywhere — these
+# are the CLIs the contributor docs drive with `go run`, built once so a
+# repeated analyze loop skips recompiling. No $(LDFLAGS): the version stamp
+# is for the distributed binaries, and neither tool reports one.
+build-qw-analyze:
+	@mkdir -p $(DIST_DIR)
+	go build -o $(DIST_DIR)/qw-analyze $(QW_ANALYZE_MAIN)
+
+build-mapgen:
+	@mkdir -p $(DIST_DIR)
+	go build -o $(DIST_DIR)/mapgen $(MAPGEN_MAIN)
+
+build-tools: build-qw-analyze build-mapgen
+	@ls -lh $(DIST_DIR)/qw-analyze $(DIST_DIR)/mapgen
 
 # Cross-compile binaries for distribution.
 build-api-linux:
@@ -168,6 +186,11 @@ help:
 	@echo "  build-mcp           Build mvd-mcp binary for the host platform"
 	@echo "  build-bin           build-api + build-mcp"
 	@echo "  build-all-platforms Cross-compile mvd-api and mvd-mcp for linux/darwin/windows"
+	@echo "  build-tools         Build the local CLIs (qw-analyze, mapgen) into dist/"
+	@echo "  build-qw-analyze    Build just qw-analyze into dist/"
+	@echo "  build-mapgen        Build just mapgen into dist/"
+	@echo "                      NB: 'make build' clears dist/ first, so build the web"
+	@echo "                      bundle before the binaries if you want both."
 	@echo "  bsps                Download competitive QW BSPs into $(BSP_DIR)/ for locvis visibility filter"
 	@echo "  serve               make build, then python3 -m http.server 8080 in dist/"
 	@echo "  test                Run tests across every module"

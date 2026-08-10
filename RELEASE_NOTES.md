@@ -5,6 +5,64 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (qw-analyze-derived-views) — the derived views reach the CLI
+
+**`qw-analyze -view` gains `top-kills`, `top-windows`, `lives`,
+`items-summary` and `airgibs`.** No schema change and no new analysis: these
+five view functions already existed in `mvd-analytics/view` and were reachable
+only over HTTP, so a local demo could not be asked the questions a hosted one
+could. Four of the five — `top-kills`, `top-windows`, `lives`,
+`items-summary` — are computed on request rather than stored on `Result`, so
+`-view full` cannot answer them at all. `airgibs` is the exception: it is
+stored, and `-view full` does carry it under `timelineAnalysis.airgibs`; it is
+here for the envelope and for parity with `/v1/demos/{id}/airgibs`, not
+because the data was unreachable. (`loc-table` is stored the same way, under
+`timelineAnalysis.locTable`, and is left out.)
+
+- **New knobs**, each scoped to the views that use it: `-limit`,
+  `-per-player`, `-min-damage`, `-min-score`, `-dmg`, `-metric`, `-mode`,
+  `-weapons`, `-items`, `-kinds`, `-window`, `-gap`, `-contested`,
+  `-min-life`. The existing `-players`, `-from` and `-to` apply to the four
+  filterable new views but **not** to `airgibs`, whose view function takes no
+  options. Time-valued knobs are Go durations (`-gap 8s`), matching `-bucket`
+  and `-min-dwell` rather than the view layer's raw ms.
+- **A knob aimed at the wrong `-view` is rejected, not ignored** — the CLI
+  analogue of every handler's `writeUnknownParam`. `-view top-kills -metric
+  damageGiven`, `-view airgibs -players x` and `-view lives -include-team`
+  now fail at parse time instead of silently returning un-narrowed data, and
+  the rejection lands before the analysis pass rather than after it. The
+  check covers every view-scoped flag, new and legacy alike, but only on the
+  five new views; the original seven keep their existing leniency rather than
+  breaking working invocations. Global flags (`-format`, `-pretty`, `-bulk`,
+  `-out-dir`, `-regions`) are unaffected everywhere.
+- **`-min-score`** exposes `TopWindowsOptions.Min`, the one option field the
+  first cut left unreachable. It is a genuine tri-state — unset means the
+  default floor of 1, while an explicit `-min-score 0` keeps zero-scoring
+  windows, which is a coherent request on the net metrics — so it reads
+  `flag.Visit` rather than treating 0 as absent.
+- **`make build-tools`** (plus `build-qw-analyze` / `build-mapgen`) builds the
+  two local CLIs into `dist/`. They had no Make target at all — the docs drive
+  both through `go run` — so a repeated analyze loop recompiled every time.
+  No `LDFLAGS`: the version stamp belongs to the distributed binaries, and
+  neither tool reports one.
+- **Out-of-range durations are errors, not silent defaults.** A `-window`
+  past what int32 ms can hold used to wrap negative and land back in the
+  view's "0 means default" branch, so an explicit 600h quietly became 30s;
+  sub-millisecond and negative values truncated to 0 the same way, and under
+  `-mode gap` that produced a view error claiming the required `-gap` was
+  missing when it had been passed.
+- **`-dmg` defaults to the view default `raw`, not the REST default
+  `bounded`.** The divergence is pre-existing and documented on
+  `TopKillsOptions.Dmg` / `LivesOptions.Dmg` / `TopWindowsOptions.Dmg`; the
+  CLI is an in-process caller, so it follows the library it wraps. Pass
+  `-dmg bounded` to reproduce a REST response. Called out in `-h`, the
+  package doc and the analytics README, because a silently different damage
+  family is exactly the sort of thing that gets compared across transports.
+- **`top-windows` segmentation is validated in the CLI**, where the flag
+  names are known: `-mode gap` requires `-gap` and rejects `-window`;
+  `-mode fixed` rejects `-gap`. The view rejects the wrong-mode knob too,
+  but reports it in its own vocabulary.
+
 ## unreleased (overview-manifest) — /overview is a capability manifest, schema v70
 
 **BREAKING: `/overview` stops inlining highlight lists and starts answering
