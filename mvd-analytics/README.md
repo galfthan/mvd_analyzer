@@ -161,6 +161,25 @@ that downstream consumers render, summarise, or feed to an agent.
   check and keep their existing leniency. Global flags (`-format`, `-pretty`,
   `-bulk`, `-out-dir`, `-regions`) are never affected.
 
+  **`-view` takes a comma-separated list.** Analysis is essentially the whole
+  runtime — the view functions are microseconds on an assembled `Result` — so
+  several views share **one** pass instead of one each:
+
+  ```
+  qw-analyze -view top-kills,lives,airgibs demo.mvd.gz
+  ```
+
+  Two or more views come back in an object keyed by view name, in the order
+  listed; a single view is returned bare, unchanged. A knob is judged against
+  the union of what the listed views accept and applies to every listed view
+  that takes it — `-view top-kills,top-windows -limit 3` caps both. The one
+  exception is `-gap`, which top-kills (burst gap) and top-windows (`-mode
+  gap` interval) define differently: listing both with `-gap` is rejected
+  rather than silently reshaping the top-kills bursts. `full` may appear in
+  the list and is always rendered last, because it strips the native-rate
+  position columns that `trails` / `state-at` / `region-control` /
+  `stream-slice` read.
+
 Build the CLI once instead of `go run`-ing it each time with `make
 build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze` and
 `dist/mapgen`. Note `make build` clears `dist/` first.

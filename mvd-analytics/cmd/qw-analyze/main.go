@@ -22,6 +22,14 @@
 // mvd-api's unknown-query-param rejection. The seven original views
 // predate the check and keep their existing leniency.
 //
+// -view accepts a comma-separated list. Analysis dominates the runtime,
+// so several views share ONE pass and come back in an object keyed by
+// view name, in the order listed; a single view is returned bare, as
+// before. A knob is judged against the union of what the listed views
+// accept and applies to each that takes it — with the exception of
+// -gap, which top-kills and top-windows define differently and which is
+// therefore rejected when both are listed.
+//
 // Example invocations:
 //
 //	qw-analyze demo.mvd.gz                              # full JSON to stdout
@@ -41,6 +49,7 @@
 //	qw-analyze -view lives -players alice -min-life 5s demo.mvd.gz
 //	qw-analyze -view items-summary -kinds armor demo.mvd.gz
 //	qw-analyze -view airgibs demo.mvd.gz
+//	qw-analyze -view top-kills,airgibs demo.mvd.gz       # both, one analysis pass
 //	qw-analyze -graph mermaid                            # print the pipeline DAG (no demo)
 //	qw-analyze -bulk demos/ -out-dir analyses/          # batch mode
 package main
@@ -67,7 +76,10 @@ import (
 // viewOptions bundles every flag that's meaningful only for the
 // non-full views. Parsed once in main().
 type viewOptions struct {
-	view        string
+	// views is -view split on commas, in the order given — which is the order
+	// they are emitted in. A single entry keeps the bare, unwrapped response
+	// shape; two or more wrap them in an object keyed by view name.
+	views       []string
 	bucketDur   time.Duration
 	fields      []string
 	reducers    map[string]string
@@ -140,7 +152,7 @@ func main() {
 	indent := flag.Bool("pretty", false, "pretty-print JSON output (single-demo mode only); pipe to `jq .` for human reading")
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
 
-	viewName := flag.String("view", "full", "view: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items-summary | airgibs")
+	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items-summary | airgibs. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
 	fieldsStr := flag.String("fields", "", "comma-separated field codes (see mvd-analytics/view docs)")
 	reducerArgs := stringListFlag("reducer", "field=name reducer override; repeatable (e.g. -reducer h=min)")
@@ -296,7 +308,15 @@ func (c *msConv) v(name string, d time.Duration) int32 {
 
 // df, not d: the blocks below shadow d with time.ParseDuration results.
 func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []string, fromStr, toStr, playersStr, eventTypesStr, minDwellStr, timeStr string, includeTeam bool, includeStr string, setFlags map[string]bool, df derivedFlags) (*viewOptions, error) {
-	v := &viewOptions{view: viewName, includeTeam: includeTeam, include: map[string]bool{}}
+	v := &viewOptions{views: splitCSV(viewName), includeTeam: includeTeam, include: map[string]bool{}}
+	if len(v.views) == 0 {
+		return nil, fmt.Errorf("-view must name at least one view")
+	}
+	for i, name := range v.views {
+		if slices.Contains(v.views[:i], name) {
+			return nil, fmt.Errorf("-view lists %q twice", name)
+		}
+	}
 
 	v.limit = df.limit
 	v.perPlayer = df.perPlayer
@@ -410,35 +430,56 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 		v.include[opt] = true
 	}
 
-	switch v.view {
-	case "full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control",
-		"top-kills", "top-windows", "lives", "items-summary", "airgibs":
-	default:
-		return nil, fmt.Errorf("unknown -view %q", v.view)
+	// A flag is judged against the UNION of what the selected views accept: with
+	// several views in play a knob only has to be meaningful to one of them.
+	// The original seven predate the check and accept any view-scoped flag, so
+	// selecting one of them widens the union to match their old leniency.
+	allowedUnion := map[string]bool{}
+	lenientSelected, derivedSelected := false, false
+	for _, name := range v.views {
+		switch name {
+		case "full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control":
+			lenientSelected = true
+		case "top-kills", "top-windows", "lives", "items-summary", "airgibs":
+			derivedSelected = true
+			for f := range derivedViewFlags[name] {
+				allowedUnion[f] = true
+			}
+		default:
+			return nil, fmt.Errorf("unknown -view %q", name)
+		}
+	}
+	if lenientSelected {
+		for _, f := range viewScopedFlags {
+			if !slices.Contains(derivedOnlyFlags, f) {
+				allowedUnion[f] = true
+			}
+		}
 	}
 	// Reject knobs aimed at a different view before spending a full analysis
 	// pass on a query that would silently ignore them.
-	if allowed, ok := derivedViewFlags[v.view]; ok {
-		for name := range setFlags {
-			if allowed[name] {
-				continue
-			}
-			if !slices.Contains(viewScopedFlags, name) {
-				continue // a global flag like -format or -pretty
-			}
-			return nil, fmt.Errorf("-%s does not apply to -view %s", name, v.view)
+	for _, name := range viewScopedFlags {
+		if !setFlags[name] || allowedUnion[name] {
+			continue
 		}
-	} else {
-		for _, name := range derivedOnlyFlags {
-			if setFlags[name] {
-				return nil, fmt.Errorf("-%s applies only to -view top-kills / top-windows / lives / items-summary", name)
-			}
+		// Name the views that would accept it when none of them is listed —
+		// more use than "does not apply to -view buckets" on its own.
+		if slices.Contains(derivedOnlyFlags, name) && !derivedSelected {
+			return nil, fmt.Errorf("-%s applies only to -view top-kills / top-windows / lives / items-summary", name)
 		}
+		return nil, fmt.Errorf("-%s does not apply to -view %s", name, strings.Join(v.views, ","))
+	}
+	// -gap is the one flag two views define differently: on top-kills it is the
+	// burst capture gap (default 3s), on top-windows the required inter-event
+	// gap of mode=gap. Applying one value to both would silently reshape the
+	// top-kills bursts, so ask for two invocations instead of guessing.
+	if setFlags["gap"] && slices.Contains(v.views, "top-kills") && slices.Contains(v.views, "top-windows") {
+		return nil, fmt.Errorf("-gap means different things to top-kills (burst gap) and top-windows (mode=gap interval); run them separately")
 	}
 	// -window and -gap are mutually exclusive under top-windows: the view
 	// rejects the one that does not belong to the chosen mode rather than
 	// silently ignoring it, so catch it here where the flag name is known.
-	if v.view == "top-windows" {
+	if slices.Contains(v.views, "top-windows") {
 		switch strings.ToLower(v.mode) {
 		case "gap":
 			if !v.gapSet {
@@ -448,6 +489,8 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 				return nil, fmt.Errorf("-window does not apply under -mode gap")
 			}
 		case "", "fixed":
+			// Reachable only when top-windows is -gap's sole consumer: the
+			// collision check above already rejected pairing it with top-kills.
 			if v.gapSet {
 				return nil, fmt.Errorf("-gap does not apply under -mode fixed; use -window")
 			}
@@ -473,7 +516,7 @@ func runOne(path string, w io.Writer, format string, pretty bool, regionsOverrid
 	case "events":
 		return dumpEvents(path, w)
 	case "json":
-		if vopts != nil && vopts.view != "full" {
+		if vopts != nil && (len(vopts.views) > 1 || vopts.views[0] != "full") {
 			return dumpView(path, w, regionsOverride, vopts, pretty)
 		}
 		return dumpJSON(path, w, pretty, regionsOverride, vopts)
@@ -566,10 +609,41 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	return enc.Encode(res)
 }
 
-// dumpView analyses the demo, runs the requested view function on the
-// finalised Result, and writes its JSON to w.
+// namedView pairs a view name with its already-marshalled body, so a
+// multi-view response can be emitted in the order the user listed rather
+// than the alphabetical order a map would impose.
+type namedView struct {
+	name string
+	raw  json.RawMessage
+}
+
+type namedViews []namedView
+
+func (n namedViews) MarshalJSON() ([]byte, error) {
+	var b []byte
+	b = append(b, '{')
+	for i, nv := range n {
+		if i > 0 {
+			b = append(b, ',')
+		}
+		key, err := json.Marshal(nv.name)
+		if err != nil {
+			return nil, err
+		}
+		b = append(b, key...)
+		b = append(b, ':')
+		b = append(b, nv.raw...)
+	}
+	return append(b, '}'), nil
+}
+
+// dumpView analyses the demo ONCE and writes the requested views' JSON to w.
+// A single -view keeps the bare response shape; several wrap them in an object
+// keyed by view name. Analysis dominates the runtime — the view functions
+// themselves are microseconds — so the whole point is that N views cost one
+// pass, not N.
 func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverride, vopts *viewOptions, pretty bool) error {
-	res, err := analyzePath(path, regionsOverride, analyzeOptions{})
+	res, err := analyzePath(path, regionsOverride, analyzeOptionsFor(vopts))
 	if err != nil {
 		return err
 	}
@@ -579,7 +653,82 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 		enc.SetIndent("", "  ")
 	}
 
-	switch vopts.view {
+	if len(vopts.views) == 1 {
+		v, err := renderView(res, vopts.views[0], vopts)
+		if err != nil {
+			return err
+		}
+		return enc.Encode(v)
+	}
+
+	// "full" is rendered last because it strips the native-rate position
+	// columns off the shared Result, which the position-derived views
+	// (trails, state-at, region-control, stream-slice) still need.
+	order := make([]string, 0, len(vopts.views))
+	for _, name := range vopts.views {
+		if name != "full" {
+			order = append(order, name)
+		}
+	}
+	if slices.Contains(vopts.views, "full") {
+		order = append(order, "full")
+	}
+
+	bodies := map[string]json.RawMessage{}
+	for _, name := range order {
+		v, err := renderView(res, name, vopts)
+		if err != nil {
+			return fmt.Errorf("view %s: %w", name, err)
+		}
+		raw, err := json.Marshal(v)
+		if err != nil {
+			return fmt.Errorf("view %s: %w", name, err)
+		}
+		bodies[name] = raw
+	}
+
+	out := make(namedViews, 0, len(vopts.views))
+	for _, name := range vopts.views {
+		out = append(out, namedView{name: name, raw: bodies[name]})
+	}
+	return enc.Encode(out)
+}
+
+// analyzeOptionsFor derives the registry/parser knobs from -include. Only
+// -view full consumes the position columns, but the knobs are cheap to read
+// here and the applicability check has already rejected -include on the
+// selections that cannot use it.
+func analyzeOptionsFor(vopts *viewOptions) analyzeOptions {
+	var opts analyzeOptions
+	if vopts != nil {
+		opts.buildShotStreams = vopts.include["projectiles"] || vopts.include["beams"]
+		opts.buildNails = vopts.include["nails"]
+		opts.computeLOS = vopts.include["los"]
+	}
+	return opts
+}
+
+// renderView runs one view function against an already-analysed Result and
+// returns the value to encode.
+func renderView(res *result.Result, name string, vopts *viewOptions) (any, error) {
+	switch name {
+	case "full":
+		// Position-track columns are opt-in: by default strip the whole
+		// native-rate track to keep the output small (~12 MB per 4on4 match).
+		stripStreamColumns(res, streamColumnSelection{
+			positions: vopts.include["positions"],
+			view:      vopts.include["view"],
+			height:    vopts.include["height"],
+			liquid:    vopts.include["liquid"],
+			velocity:  vopts.include["velocity"],
+		})
+		return res, nil
+	}
+	return renderQueryView(res, name, vopts)
+}
+
+func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, error) {
+	switch name {
 	case "buckets":
 		bv, err := view.Buckets(res, view.BucketsOptions{
 			WindowMs:    int(vopts.bucketDur / time.Millisecond),
@@ -591,9 +740,9 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			IncludeTeam: vopts.includeTeam,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(bv)
+		return bv, nil
 
 	case "events":
 		ev, err := view.Events(res, view.EventsFilter{
@@ -603,9 +752,9 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			Types:     vopts.eventTypes,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(ev)
+		return ev, nil
 
 	case "stream-slice":
 		ssv, err := view.StreamSlice(res, view.StreamSliceOptions{
@@ -615,13 +764,13 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			Fields:  vopts.fields,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(ssv)
+		return ssv, nil
 
 	case "state-at":
 		if !vopts.timeSet {
-			return fmt.Errorf("-view state-at requires -time")
+			return nil, fmt.Errorf("-view state-at requires -time")
 		}
 		v, err := view.StateAt(res, view.StateAtOptions{
 			Time:    int32(vopts.timeAt.Milliseconds()),
@@ -629,9 +778,9 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			Fields:  vopts.fields,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(v)
+		return v, nil
 
 	case "trails":
 		tv, err := view.LocTrails(res, view.LocTrailsOptions{
@@ -641,9 +790,9 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			EndTime:    int32(vopts.to.Milliseconds()),
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(tv)
+		return tv, nil
 
 	case "top-kills":
 		var c msConv
@@ -659,17 +808,17 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			Dmg:         vopts.dmg,
 		}
 		if c.err != nil {
-			return c.err
+			return nil, c.err
 		}
 		tkv, err := view.TopKills(res, opts)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		// The view functions do not stamp TimeUnit; every mvd-api handler
 		// sets it after the call. Mirror that so the CLI and REST bodies
 		// agree rather than differing by a missing echo.
 		tkv.TimeUnit = view.UnitMs
-		return enc.Encode(tkv)
+		return tkv, nil
 
 	case "top-windows":
 		var c msConv
@@ -688,14 +837,14 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			Min:       vopts.minScore,
 		}
 		if c.err != nil {
-			return c.err
+			return nil, c.err
 		}
 		twv, err := view.TopWindows(res, opts)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		twv.TimeUnit = view.UnitMs
-		return enc.Encode(twv)
+		return twv, nil
 
 	case "lives":
 		var c msConv
@@ -707,14 +856,14 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			MinMs:   c.v("-min-life", vopts.minLife),
 		}
 		if c.err != nil {
-			return c.err
+			return nil, c.err
 		}
 		lv, err := view.Lives(res, opts)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		lv.TimeUnit = view.UnitMs
-		return enc.Encode(lv)
+		return lv, nil
 
 	case "items-summary":
 		var c msConv
@@ -726,35 +875,35 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			To:      c.v("-to", vopts.to),
 		}
 		if c.err != nil {
-			return c.err
+			return nil, c.err
 		}
 		// Items/ItemsSummary are always available — an absent section is an
 		// empty list, not an error — so there is no error return to check.
 		sv := view.ItemsSummary(res, opts)
 		sv.TimeUnit = view.UnitMs
-		return enc.Encode(sv)
+		return sv, nil
 
 	case "airgibs":
 		airgibs, err := view.Airgibs(res)
 		if err != nil {
-			return fmt.Errorf("airgibs unavailable for this demo (no timeline analysis): %w", err)
+			return nil, fmt.Errorf("airgibs unavailable for this demo (no timeline analysis): %w", err)
 		}
-		return enc.Encode(view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
+		return view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs}, nil
 
 	case "region-control":
 		ta := res.TimelineAnalysis
 		if ta == nil || ta.RegionControl == nil {
-			return fmt.Errorf("region-control unavailable for this demo")
+			return nil, fmt.Errorf("region-control unavailable for this demo")
 		}
 		rcv, err := view.RegionControl(res, view.RegionControlOptions{
 			WindowMs: int(vopts.bucketDur / time.Millisecond),
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return enc.Encode(rcv)
+		return rcv, nil
 	}
-	return fmt.Errorf("unhandled view %q", vopts.view)
+	return nil, fmt.Errorf("unhandled view %q", name)
 }
 
 // streamColumnSelection records which position-track columns the

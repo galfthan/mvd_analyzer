@@ -19,6 +19,20 @@ here for the envelope and for parity with `/v1/demos/{id}/airgibs`, not
 because the data was unreachable. (`loc-table` is stored the same way, under
 `timelineAnalysis.locTable`, and is left out.)
 
+- **`-view` takes a comma-separated list**, and the list shares ONE analysis
+  pass. That is the whole point: on a 4on4 demo a view costs ~5.5 s of
+  analysis and microseconds of view function, so `-view top-kills,lives,
+  airgibs` runs in 5.5 s where three invocations cost 16.5 s. Two or more
+  views return an object keyed by view name in the order listed; a single
+  view returns bare, exactly as before, so no existing invocation changes
+  shape. A knob applies to every listed view that accepts it (`-view
+  top-kills,top-windows -limit 3` caps both), and is rejected only when no
+  listed view accepts it. `-gap` is the exception — top-kills (burst gap) and
+  top-windows (`-mode gap` interval) define it differently, so listing both
+  with `-gap` is rejected rather than silently reshaping the bursts. `full`
+  may appear in the list and is always rendered last: it strips the
+  native-rate position columns that `trails` / `state-at` / `region-control`
+  / `stream-slice` read off the shared `Result`.
 - **New knobs**, each scoped to the views that use it: `-limit`,
   `-per-player`, `-min-damage`, `-min-score`, `-dmg`, `-metric`, `-mode`,
   `-weapons`, `-items`, `-kinds`, `-window`, `-gap`, `-contested`,

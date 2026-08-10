@@ -83,9 +83,11 @@ go run ./mvd-analytics/cmd/qw-analyze -format events demo.mvd.gz  # line-delimit
 go run ./mvd-analytics/cmd/qw-analyze -view top-kills demo.mvd.gz # one query-API view
 ```
 
-`-view` runs a single view instead of the whole Result: `buckets`, `events`,
+`-view` runs one view instead of the whole Result: `buckets`, `events`,
 `stream-slice`, `state-at`, `trails`, `region-control`, `top-kills`,
-`top-windows`, `lives`, `items-summary`, `airgibs`. See
+`top-windows`, `lives`, `items-summary`, `airgibs`. It also takes a
+comma-separated list — `-view top-kills,airgibs` returns both from a single
+analysis pass, keyed by view name. See
 [`mvd-analytics/README.md`](mvd-analytics/README.md) for the per-view knobs.
 
 ### Run the web UI locally
