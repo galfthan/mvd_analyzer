@@ -37,6 +37,12 @@ type Context struct {
 	// Off by default; set from Registry.BuildNails. Requires the parser's
 	// nail decode to be enabled (the registry wires both together).
 	Nails bool
+
+	// Parallel opts heavy finalize passes (currently the floor-height
+	// traces) into using goroutines. Off by default: batch hosts already
+	// parallelize across demos, so a single analysis stays single-threaded
+	// unless the caller asks. Results are identical either way.
+	Parallel bool
 }
 
 // SlotDemoInfo holds the resolved demoinfo player for a slot.

@@ -5,6 +5,26 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (optimize) — analysis ~2x faster, opt-in parallel finalize
+
+No schema change: the Result JSON is byte-identical to the previous
+release on the whole golden corpus, sequential and parallel alike.
+
+- **~2x faster single-threaded analysis.** The parser's entity-frame
+  tracking moved from per-frame `map[int]*EntityState` copies to flat
+  entity-indexed slices with a per-packet mentioned-entity diff and a
+  memoized model classification; the floor-height pass fast-rejects
+  liquid probes with a liquid-leaf AABB index and reuses the previous
+  sample's trace when the origin and mover scene are unchanged; the
+  loc/region boundary walks replaced hash-set + full-sort collection
+  with sorted merges, and `TrackHoldEnd`'s median gap is counted, not
+  sorted.
+- **Opt-in in-process parallelism** (`Registry.Parallel` /
+  `qw-analyze -parallel`): fans the per-slot floor-height traces out to
+  goroutines. Off by default so bulk pipelines that already run one
+  demo per worker don't oversubscribe; mvd-api opts in (interactive
+  requests arrive in bursts, so latency wins).
+
 ## unreleased (overview-manifest) — /overview is a capability manifest, schema v70
 
 **BREAKING: `/overview` stops inlining highlight lists and starts answering

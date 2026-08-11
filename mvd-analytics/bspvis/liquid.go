@@ -35,6 +35,113 @@ func IsLiquid(contents int32) bool {
 	return contents == ContentsWater || contents == ContentsSlime || contents == ContentsLava
 }
 
+// liquidIdx is the liquid-leaf AABB index behind the fast reject in
+// WaterLevel / LiquidSurfaceBelow. A point inside a liquid leaf is
+// necessarily inside that leaf's bounding box, so a probe outside every
+// box is provably dry and a column that misses every box in XY (or
+// starts below them all) provably has no liquid surface beneath it —
+// the reject changes no answers, it only skips BSP walks that would
+// return "dry"/"no liquid". Boxes cover every liquid leaf in the file
+// (submodel leaves included), which can only make the reject more
+// conservative.
+type liquidIdx struct {
+	boxes      []liquidBox
+	umin, umax [3]float32 // union of boxes, valid when len(boxes) > 0
+
+	// disabled: some liquid leaf carries a degenerate (zero or inverted)
+	// bounding box — a hand-built or corrupt file — so AABB absence
+	// proves nothing and every query must run the real BSP walk.
+	disabled bool
+}
+
+type liquidBox struct {
+	min, max [3]float32
+}
+
+// liquidIndex builds the index on first use (guarded for the opt-in
+// parallel floor pass, which probes from several goroutines).
+func (b *BSP) liquidIndex() *liquidIdx {
+	b.liquidOnce.Do(func() {
+		idx := &b.liquid
+		for i := range b.Leaves {
+			l := &b.Leaves[i]
+			if !IsLiquid(l.Contents) {
+				continue
+			}
+			bb := liquidBox{
+				min: [3]float32{l.Mins.X, l.Mins.Y, l.Mins.Z},
+				max: [3]float32{l.Maxs.X, l.Maxs.Y, l.Maxs.Z},
+			}
+			if bb.min[0] >= bb.max[0] || bb.min[1] >= bb.max[1] || bb.min[2] >= bb.max[2] {
+				idx.disabled = true
+				idx.boxes = nil
+				return
+			}
+			if len(idx.boxes) == 0 {
+				idx.umin, idx.umax = bb.min, bb.max
+			} else {
+				for a := 0; a < 3; a++ {
+					if bb.min[a] < idx.umin[a] {
+						idx.umin[a] = bb.min[a]
+					}
+					if bb.max[a] > idx.umax[a] {
+						idx.umax[a] = bb.max[a]
+					}
+				}
+			}
+			idx.boxes = append(idx.boxes, bb)
+		}
+	})
+	return &b.liquid
+}
+
+// mayContain reports whether (x, y, z) is inside some liquid leaf's
+// AABB — false proves the point is not in liquid.
+func (idx *liquidIdx) mayContain(x, y, z float32) bool {
+	if idx.disabled {
+		return true
+	}
+	if len(idx.boxes) == 0 {
+		return false
+	}
+	if x < idx.umin[0] || x > idx.umax[0] || y < idx.umin[1] || y > idx.umax[1] ||
+		z < idx.umin[2] || z > idx.umax[2] {
+		return false
+	}
+	for i := range idx.boxes {
+		bb := &idx.boxes[i]
+		if x >= bb.min[0] && x <= bb.max[0] && y >= bb.min[1] && y <= bb.max[1] &&
+			z >= bb.min[2] && z <= bb.max[2] {
+			return true
+		}
+	}
+	return false
+}
+
+// columnMayHit reports whether a straight-down ray from (x, y, z) could
+// enter some liquid leaf's AABB — false proves no liquid surface lies
+// below the point.
+func (idx *liquidIdx) columnMayHit(x, y, z float32) bool {
+	if idx.disabled {
+		return true
+	}
+	if len(idx.boxes) == 0 {
+		return false
+	}
+	if x < idx.umin[0] || x > idx.umax[0] || y < idx.umin[1] || y > idx.umax[1] ||
+		z < idx.umin[2] {
+		return false
+	}
+	for i := range idx.boxes {
+		bb := &idx.boxes[i]
+		if x >= bb.min[0] && x <= bb.max[0] && y >= bb.min[1] && y <= bb.max[1] &&
+			z >= bb.min[2] {
+			return true
+		}
+	}
+	return false
+}
+
 // WaterLevel classifies how deep a player origin at (x, y, z) sits in
 // liquid, mirroring PM_CategorizePosition (mvdsv/src/pmove.c:646-665):
 // 0 dry; 1 feet (z-23 in liquid); 2 waist (z+4); 3 eyes (z+22).
@@ -42,6 +149,9 @@ func IsLiquid(contents int32) bool {
 // Lava), meaningful only when level >= 1; ContentsEmpty otherwise.
 func (b *BSP) WaterLevel(x, y, z float32) (level int, contents int32) {
 	contents = ContentsEmpty
+	if !b.liquidIndex().mayContain(x, y, z+waterFeetOffset) {
+		return 0, contents
+	}
 	cont := b.LeafContents(b.PointInLeaf([3]float32{x, y, z + waterFeetOffset}))
 	if !IsLiquid(cont) {
 		return 0, contents
@@ -78,6 +188,9 @@ const (
 // floor trace there is no footprint sampling — one column is exact.
 func (b *BSP) LiquidSurfaceBelow(x, y, z float32) (surfZ float32, contents int32, ok bool) {
 	if len(b.Models) == 0 || len(b.Nodes) == 0 {
+		return 0, ContentsEmpty, false
+	}
+	if !b.liquidIndex().columnMayHit(x, y, z) {
 		return 0, ContentsEmpty, false
 	}
 	bottom := b.Models[0].Mins.Z - liquidTraceMargin

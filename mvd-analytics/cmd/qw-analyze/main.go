@@ -60,6 +60,7 @@ type viewOptions struct {
 	timeSet     bool // -time was given (distinguishes an explicit -time 0 from "flag missing")
 	includeTeam bool
 	include     map[string]bool // -include positions etc. for -view full
+	parallel    bool            // -parallel: goroutine fan-out inside heavy passes
 }
 
 func main() {
@@ -68,6 +69,7 @@ func main() {
 	bulk := flag.Bool("bulk", false, "treat the input path as a directory and analyze every demo in it")
 	indent := flag.Bool("pretty", false, "pretty-print JSON output (single-demo mode only); pipe to `jq .` for human reading")
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
+	parallel := flag.Bool("parallel", false, "use goroutines inside heavy analysis passes (opt-in: leave off when running many analyses concurrently)")
 
 	viewName := flag.String("view", "full", "view: full | buckets | events | trails | stream-slice | state-at | region-control")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
@@ -130,6 +132,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "qw-analyze:", err)
 		os.Exit(2)
 	}
+	vopts.parallel = *parallel
 
 	if *bulk || *outDir != "" {
 		if *outDir == "" {
@@ -256,6 +259,7 @@ type analyzeOptions struct {
 	buildShotStreams bool // -include projectiles/beams: spatial rocket/grenade/LG streams
 	buildNails       bool // -include nails: svc_nails decode + ng/sng nail linkage (also flips the parser)
 	computeLOS       bool // -include los: run the lazy line-of-sight/PVS pass after analyze
+	parallel         bool // -parallel: goroutine fan-out inside heavy passes
 }
 
 // analyzePath opens the demo, runs the default registry with the region
@@ -281,6 +285,7 @@ func analyzePath(path string, regionsOverride []config.MapRegionOverride, opts a
 		reg.BuildNails = true
 		src.Parser().SetDecodeNails(true)
 	}
+	reg.Parallel = opts.parallel
 	res, err := reg.AnalyzeSource(src, filepath.Base(path))
 	if err != nil {
 		return nil, err
@@ -303,6 +308,7 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 		opts.buildShotStreams = vopts.include["projectiles"] || vopts.include["beams"]
 		opts.buildNails = vopts.include["nails"]
 		opts.computeLOS = vopts.include["los"]
+		opts.parallel = vopts.parallel
 	}
 	res, err := analyzePath(path, regionsOverride, opts)
 	if err != nil {
@@ -332,7 +338,7 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 // dumpView analyses the demo, runs the requested view function on the
 // finalised Result, and writes its JSON to w.
 func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverride, vopts *viewOptions, pretty bool) error {
-	res, err := analyzePath(path, regionsOverride, analyzeOptions{})
+	res, err := analyzePath(path, regionsOverride, analyzeOptions{parallel: vopts != nil && vopts.parallel})
 	if err != nil {
 		return err
 	}
