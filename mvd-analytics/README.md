@@ -147,19 +147,39 @@ that downstream consumers render, summarise, or feed to an agent.
   | `region-control` | `view.RegionControl` | `-bucket` |
   | `top-kills` | `view.TopKills` | `-limit`, `-gap`, `-contested`, `-min-damage`, `-weapons`, `-dmg` |
   | `top-windows` | `view.TopWindows` | `-metric`, `-mode`, `-window`, `-gap`, `-limit`, `-per-player`, `-min-score`, `-weapons`, `-dmg` |
-  | `lives` | `view.Lives` | `-min-life`, `-dmg` |
+  | `lives` | `view.Lives` | `-min-life`, `-dmg`, `-summary` |
   | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
+  | `items` | `view.Items` | `-items`, `-kinds` (the full phase timeline) |
   | `airgibs` | `view.Airgibs` | — |
+  | `frags` | `view.Frags` | `-weapons`, `-summary` |
+  | `damage` | `view.Damage` | `-weapons`, `-summary`, `-dmg` |
+  | `aim` | `view.Aim` | `-summary` (`-from`/`-to` *recompute* over the window) |
+  | `chat` | `view.Chat` | `-chat-types` |
+  | `backpacks` | `view.Backpacks` | `-weapons` |
+  | `weapon-pickups` | `view.WeaponPickups` | `-weapons`, `-source` |
+  | `player-stats` | `view.PlayerStats` | `-teams` |
+  | `shots` | `view.Shots` | — |
+  | `loc-graph` | `view.LocGraph` | — |
+  | `loc-table` | (interned loc names) | — (decodes `-loc index` output) |
+  | `metadata` | `view.Metadata` | — |
+  | `demoinfo` | `view.DemoInfo` | — |
 
-  The five views in the lower half also take `-players`, `-from` and `-to`,
-  except `airgibs` — `view.Airgibs` takes no options, so it accepts none.
-  On those five, any view-scoped flag that belongs to a different view is
-  **rejected** rather than ignored — `-view lives -limit 5` and `-view
+  Most lower-half views also take `-players`, `-from` and `-to`; the ones
+  whose view function has no such option (`airgibs`, `shots`, `loc-graph`,
+  `loc-table`, `metadata`, `demoinfo`) accept none, and `player-stats` takes
+  `-players`/`-teams` but no window.
+
+  On every lower-half view, a view-scoped flag belonging to a different view
+  is **rejected** rather than ignored — `-view lives -limit 5` and `-view
   airgibs -bucket 1s` are both errors — mirroring the way every mvd-api
   handler rejects an unknown query param: a knob that silently does nothing
-  reads as one that worked. The seven views in the upper half predate the
-  check and keep their existing leniency. Global flags (`-format`, `-pretty`,
-  `-bulk`, `-out-dir`, `-regions`) are never affected.
+  reads as one that worked. The error names the views that *would* take it.
+  The seven upper-half views keep their pre-existing leniency, but only for
+  flags that predate the check: `-loc`, `-layout` and `-region-detail` are
+  policed there too, since grandfathering cannot cover a flag that did not
+  exist. Global flags (`-format`, `-pretty`, `-bulk`, `-out-dir`, `-regions`)
+  are never affected, and `-view` under `-format md|events` is an error
+  rather than silently ignored.
 
   **`-view` takes a comma-separated list.** Analysis is essentially the whole
   runtime — the view functions are microseconds on an assembled `Result` — so
@@ -184,10 +204,29 @@ Build the CLI once instead of `go run`-ing it each time with `make
 build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze` and
 `dist/mapgen`. Note `make build` clears `dist/` first.
 
-  **`-dmg` defaults differ from REST.** On `top-kills`, `top-windows` and
-  `lives` an unset `-dmg` gets the *view* default, `raw`, while mvd-api
-  substitutes `bounded` on the same queries. The CLI follows the library it
-  wraps; pass `-dmg bounded` to reproduce a REST response.
+  **Two CLI-vs-REST defaults differ.** On `top-kills`, `top-windows`, `lives`
+  and `damage` an unset `-dmg` gets the *view* default `raw` where mvd-api
+  substitutes `bounded`; and `-view buckets` defaults to row layout where
+  `GET /buckets` defaults to `layout=column`. The CLI follows the library it
+  wraps in both cases — pass `-dmg bounded` / `-layout column` to reproduce a
+  REST response.
+
+  **`-view player-stats` is not `-view full`'s `playerStats`.** The view
+  applies the KTX overlay at read time (`view.PlayerStats`), adding `ping`,
+  `speed`, `controlMs` and the other KTX-native columns; the stored section
+  `full` carries is the pre-overlay derived row. Use the view for the
+  canonical statistics row.
+
+  **`-loc index`** switches `buckets` / `events` / `stream-slice` /
+  `state-at` / `trails` from resolved loc names to raw `li` indices, which
+  decode against `-view loc-table`.
+
+  **Nailgun accuracy needs `-include nails`.** ng/sng hit attribution
+  requires `svc_nails` decoding, which is off by default because the nail
+  stream is high volume — so `shots`/`aim` omit `hits` for those weapons
+  (omitted, not zeroed: absence means unmeasured). mvd-api always builds
+  them, so this is the one place default CLI output diverges from the same
+  demo over REST; the CLI prints a stderr warning when it happens.
 
   `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
   `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is

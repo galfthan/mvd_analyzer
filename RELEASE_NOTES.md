@@ -5,6 +5,59 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (qw-analyze-full-surface) — every view reaches the CLI
+
+Follow-up to the entry below, closing the gaps two coverage audits found
+between `qw-analyze` and the REST surface. **Three were defects, not missing
+features:**
+
+- **`-view region-control` silently ignored `-from`/`-to`.** The flags parsed,
+  were accepted, and were never passed to `view.RegionControl` — windowed and
+  unwindowed output were byte-identical. REST has served the window since it
+  shipped (`handlers.go:1103`). Now wired, so "who held RA in the first two
+  minutes" is answerable locally.
+- **`-format md` / `-format events` silently ignored `-view`.** A valid `-view`
+  was dropped and an *invalid* one still exited 2 — the analysis was validated
+  and then discarded. `-view` under a non-json format is now rejected, since
+  those formats have their own fixed shape.
+- **Nailgun accuracy silently absent.** ng/sng hit attribution needs
+  `svc_nails` decoding, off by default because the nail stream is high volume,
+  while mvd-api always builds it. The rows were honest — `hits` omitted, not
+  zeroed — but absence is only a signal to a reader who knows to look, and
+  `.hits // 0` reads it as perfect inaccuracy. A stderr warning now names the
+  fire count and the fix. The default is deliberately unchanged: building
+  nails by default would bloat every `-view full` with a high-volume stream.
+
+**Thirteen views added**, closing the rest of the surface: `frags`, `damage`,
+`aim`, `chat`, `backpacks`, `weapon-pickups`, `player-stats`, `items` (the
+full phase timeline beside the existing `items-summary`), `shots`,
+`loc-graph`, `loc-table`, `metadata`, `demoinfo`. Two matter beyond
+convenience:
+
+- **`player-stats` was unreachable in its canonical form.** `view.PlayerStats`
+  applies the KTX overlay at read time, so `-view full`'s stored `playerStats`
+  is the *pre-overlay* derived row — missing `ping`, `speed`, `controlMs` and
+  the rest. The row its own docs call canonical could not be produced locally
+  at all.
+- **`aim` windowing is a recompute, not a filter** — `-from`/`-to` re-run
+  `aimcore.Compute` over the windowed shot slice, which no amount of
+  post-processing `full` can reproduce.
+
+**New knobs:** `-summary` (frags/damage/aim/lives), `-teams`, `-source`,
+`-chat-types`, `-loc name|index`, `-layout row|column`, `-region-detail
+full|summary|none`. `-loc index` covers all five views with a `LocIndex`
+field and decodes against the new `loc-table` view.
+
+**Second CLI-vs-REST default divergence documented:** `-view buckets` builds
+row layout, `GET /buckets` defaults to `layout=column`. `-layout column`
+reproduces the REST body; previously no CLI invocation could.
+
+**Shared shaping helpers moved into `view`:** `SummarizeLives` and
+`ShapeRegions` were an unexported handler function and an inline block in
+mvd-api. Both are pure shaping over view types, so they now live in
+`mvd-analytics/view` and mvd-api calls them — the CLI and the API trim
+identically instead of each carrying its own copy of the field list.
+
 ## unreleased (qw-analyze-derived-views) — the derived views reach the CLI
 
 **`qw-analyze -view` gains `top-kills`, `top-windows`, `lives`,

@@ -10,7 +10,18 @@
 // data is produced on demand by view.Buckets, accessible via the
 // -view buckets flag below. Other views (events, stream-slice,
 // state-at, trails, region-control, top-kills, top-windows, lives,
-// items-summary, airgibs) are also available.
+// items, items-summary, airgibs, frags, damage, aim, chat, backpacks,
+// weapon-pickups, player-stats, shots, loc-graph, loc-table, metadata,
+// demoinfo) are also available — the full mvd-api view surface.
+//
+// -view player-stats is NOT -view full's playerStats: the view applies
+// the KTX overlay at read time (ping, speed, controlMs), where the
+// stored section is the pre-overlay derived row.
+//
+// ng/sng hit attribution needs -include nails (svc_nails decoding is off
+// by default because the nail stream is high volume). shots/aim omit
+// `hits` for those weapons without it — omitted, not zeroed — and a
+// stderr warning says so. mvd-api always builds them.
 //
 // The derived views (top-kills, top-windows, lives) take a -dmg damage
 // family whose default is the VIEW default, raw. mvd-api substitutes
@@ -50,6 +61,11 @@
 //	qw-analyze -view items-summary -kinds armor demo.mvd.gz
 //	qw-analyze -view airgibs demo.mvd.gz
 //	qw-analyze -view top-kills,airgibs demo.mvd.gz       # both, one analysis pass
+//	qw-analyze -view player-stats demo.mvd.gz            # canonical KTX-overlaid rows
+//	qw-analyze -view damage -summary -weapons rl demo.mvd.gz
+//	qw-analyze -view aim -from 2m -to 3m30s demo.mvd.gz  # windowed aim RECOMPUTE
+//	qw-analyze -view buckets -layout column demo.mvd.gz  # what GET /buckets returns
+//	qw-analyze -view trails,loc-table -loc index demo.mvd.gz
 //	qw-analyze -graph mermaid                            # print the pipeline DAG (no demo)
 //	qw-analyze -bulk demos/ -out-dir analyses/          # batch mode
 package main
@@ -63,6 +79,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -110,6 +127,14 @@ type viewOptions struct {
 	gapSet    bool // -gap was given: top-windows gap mode requires it, and 0 is not a default
 	contested time.Duration
 	minLife   time.Duration
+
+	summary      bool
+	teams        []string
+	source       string
+	chatTypes    []string
+	locIndex     bool   // -loc index
+	layout       string // "" / row / column
+	regionDetail string // "" / full / summary / none
 }
 
 // derivedViewFlags maps each view added on top of the original seven to the
@@ -119,11 +144,86 @@ type viewOptions struct {
 // flags and the new views are policed — the original seven views predate
 // this and are left as they were rather than breaking existing invocations.
 var derivedViewFlags = map[string]map[string]bool{
-	"top-kills":     {"limit": true, "gap": true, "contested": true, "min-damage": true, "weapons": true, "dmg": true, "players": true, "from": true, "to": true},
-	"top-windows":   {"limit": true, "per-player": true, "metric": true, "mode": true, "window": true, "gap": true, "weapons": true, "dmg": true, "min-score": true, "players": true, "from": true, "to": true},
-	"lives":         {"min-life": true, "dmg": true, "players": true, "from": true, "to": true},
-	"items-summary": {"items": true, "kinds": true, "players": true, "from": true, "to": true},
-	"airgibs":       {}, // view.Airgibs takes no options at all
+	"top-kills":      {"limit": true, "gap": true, "contested": true, "min-damage": true, "weapons": true, "dmg": true, "players": true, "from": true, "to": true},
+	"top-windows":    {"limit": true, "per-player": true, "metric": true, "mode": true, "window": true, "gap": true, "weapons": true, "dmg": true, "min-score": true, "players": true, "from": true, "to": true},
+	"lives":          {"min-life": true, "dmg": true, "summary": true, "players": true, "from": true, "to": true},
+	"items-summary":  {"items": true, "kinds": true, "players": true, "from": true, "to": true},
+	"items":          {"items": true, "kinds": true, "players": true, "from": true, "to": true},
+	"airgibs":        {}, // view.Airgibs takes no options at all
+	"frags":          {"players": true, "weapons": true, "from": true, "to": true, "summary": true},
+	"damage":         {"players": true, "weapons": true, "from": true, "to": true, "summary": true, "dmg": true},
+	"aim":            {"players": true, "from": true, "to": true, "summary": true, "include": true},
+	"chat":           {"players": true, "from": true, "to": true, "chat-types": true},
+	"backpacks":      {"players": true, "weapons": true, "from": true, "to": true},
+	"weapon-pickups": {"players": true, "weapons": true, "source": true, "from": true, "to": true},
+	"player-stats":   {"players": true, "teams": true},
+	"metadata":       {},
+	"demoinfo":       {},
+	"loc-graph":      {},
+	"loc-table":      {},
+	// shots/aim take -include because nailgun hit attribution rides on
+	// -include nails — which is exactly what warnUnlinkedNails tells the user
+	// to pass, so rejecting it here would make the advice unfollowable.
+	"shots": {"include": true},
+}
+
+// lenientViewNewFlags names, per original-seven view, the flags introduced
+// after the leniency carve-out was drawn. Grandfathering exists so
+// invocations that already worked keep working; it cannot justify silently
+// swallowing a flag that did not exist then, so these are policed on the
+// lenient views too.
+var lenientViewNewFlags = map[string]map[string]bool{
+	"full":           {},
+	"buckets":        {"loc": true, "layout": true},
+	"events":         {"loc": true},
+	"trails":         {"loc": true},
+	"stream-slice":   {"loc": true},
+	"state-at":       {"loc": true},
+	"region-control": {"region-detail": true},
+}
+
+// postLenientFlags are those newer flags: the derived-view knobs plus the
+// three enum flags. A lenient view accepts one only if it appears above.
+var postLenientFlags = append(slices.Clone(derivedOnlyFlags), "loc", "layout", "region-detail")
+
+// Closed vocabularies the REST layer owns and the view layer deliberately
+// does not check. Kept in step with handleChat, handleWeaponPickups and the
+// openapi dmg enum.
+var (
+	knownChatTypes     = []string{"chat", "teamsay"}
+	knownPickupSources = []string{"world", "backpack", "unknown"}
+	knownDmgFamilies   = []string{"raw", "bounded", "both"}
+)
+
+// lenientViews are the seven that predate the flag-applicability check. They
+// accept any view-scoped flag, including ones they ignore, rather than break
+// invocations that already worked.
+var lenientViews = []string{"full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control"}
+
+// viewsAccepting lists, in stable order, the views that consume the named
+// flag — the vocabulary an error message should quote.
+func viewsAccepting(flagName string) []string {
+	var out []string
+	for _, name := range lenientViews {
+		if lenientViewNewFlags[name][flagName] {
+			out = append(out, name)
+		}
+	}
+	for _, name := range sortedKeys(derivedViewFlags) {
+		if derivedViewFlags[name][flagName] {
+			out = append(out, name)
+		}
+	}
+	return out
+}
+
+func sortedKeys[V any](m map[string]V) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // derivedOnlyFlags are the flags introduced for the views above. They are
@@ -131,6 +231,7 @@ var derivedViewFlags = map[string]map[string]bool{
 var derivedOnlyFlags = []string{
 	"limit", "per-player", "min-damage", "min-score", "dmg", "metric",
 	"mode", "weapons", "items", "kinds", "window", "gap", "contested", "min-life",
+	"summary", "teams", "source", "chat-types",
 }
 
 // viewScopedFlags is every flag that selects or shapes a view, as opposed to
@@ -142,7 +243,7 @@ var derivedOnlyFlags = []string{
 var viewScopedFlags = append([]string{
 	"players", "from", "to",
 	"bucket", "fields", "reducer", "event-types", "min-dwell", "time",
-	"include-team", "include",
+	"include-team", "include", "loc", "layout", "region-detail",
 }, derivedOnlyFlags...)
 
 func main() {
@@ -152,7 +253,7 @@ func main() {
 	indent := flag.Bool("pretty", false, "pretty-print JSON output (single-demo mode only); pipe to `jq .` for human reading")
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
 
-	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items-summary | airgibs. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
+	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | airgibs | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
 	fieldsStr := flag.String("fields", "", "comma-separated field codes (see mvd-analytics/view docs)")
 	reducerArgs := stringListFlag("reducer", "field=name reducer override; repeatable (e.g. -reducer h=min)")
@@ -167,7 +268,7 @@ func main() {
 	limit := flag.Int("limit", 0, "max rows for -view top-kills / top-windows; 0 = the view's default (20 and 10), negative = uncapped")
 	perPlayer := flag.Int("per-player", 0, "max windows from any one player for -view top-windows; <=0 = uncapped")
 	minDamage := flag.Int("min-damage", 0, "drop bursts below this burst damage for -view top-kills")
-	dmgStr := flag.String("dmg", "", "damage family for -view top-kills / top-windows / lives: raw | bounded; empty = the view default (raw). Note mvd-api defaults the same queries to bounded, so an unset -dmg does NOT reproduce the REST response")
+	dmgStr := flag.String("dmg", "", "damage family for -view top-kills / top-windows / lives / damage: raw | bounded (damage also takes both); empty = the view default (raw). Note mvd-api defaults the same queries to bounded, so an unset -dmg does NOT reproduce the REST response")
 	metric := flag.String("metric", "", "ranking metric for -view top-windows: frags | deaths | netFrags | damageGiven | damageTaken | netDamage | shots | hits; empty = frags")
 	mode := flag.String("mode", "", "segmentation for -view top-windows: fixed (windows of -window) | gap (runs of events at most -gap apart, which -gap must then set); empty = fixed")
 	weaponsStr := flag.String("weapons", "", "comma-separated weapons; restricts the killing weapon for -view top-kills and the scoring events for -view top-windows")
@@ -178,6 +279,13 @@ func main() {
 	contestedStr := flag.String("contested", "0", "return-damage window for -view top-kills (e.g. 4s); 0 = the view default 4s")
 	minLifeStr := flag.String("min-life", "0", "drop lives shorter than this for -view lives")
 	minScore := flag.Int("min-score", 0, "drop windows scoring below this for -view top-windows; unset = the view default 1 (an explicit 0 is meaningful — it keeps zero-scoring windows on the net metrics)")
+	summary := flag.Bool("summary", false, "aggregates only, dropping the per-event log: -view frags | damage | aim | lives")
+	teamsStr := flag.String("teams", "", "comma-separated team names for -view player-stats")
+	source := flag.String("source", "", "pickup source for -view weapon-pickups: world | backpack | unknown")
+	chatTypes := flag.String("chat-types", "", "comma-separated message types for -view chat; empty = chat,teamsay")
+	locMode := flag.String("loc", "", "loc representation for -view buckets / events / stream-slice / state-at / trails: name (default) | index (raw li indices, decode against -view loc-table)")
+	layout := flag.String("layout", "", "bucket layout for -view buckets: row (default) | column. mvd-api defaults to column, so an unset -layout does NOT reproduce the REST response")
+	regionDetail := flag.String("region-detail", "", "region list detail for -view region-control: full (default) | summary (drop polygon points) | none")
 	graphFmt := flag.String("graph", "", "print the analyzer dependency graph (mermaid | json) and exit; no demo argument needed")
 	artifactsMD := flag.Bool("artifacts-md", false, "print the generated artifact catalog (ARTIFACTS.md) and exit; no demo argument needed")
 
@@ -229,6 +337,15 @@ func main() {
 	setFlags := map[string]bool{}
 	flag.Visit(func(f *flag.Flag) { setFlags[f.Name] = true })
 
+	// -view only means anything under -format json: md renders its own fixed
+	// summary and events dumps the Layer-1 stream. Both used to accept a -view
+	// and throw it away, which is the same silent-ignore the per-view flag
+	// check exists to prevent — one level up.
+	if setFlags["view"] && *format != "json" {
+		fmt.Fprintf(os.Stderr, "qw-analyze: -view does not apply to -format %s (it selects a view of the analysed Result; -format %s has its own fixed shape)\n", *format, *format)
+		os.Exit(2)
+	}
+
 	vopts, err := parseViewOptions(*viewName, *bucketStr, *fieldsStr, *reducerArgs, *fromStr, *toStr, *playersStr, *eventTypesStr, *minDwellStr, *timeStr, *includeTeam, *includeStr, setFlags, derivedFlags{
 		limit:     *limit,
 		perPlayer: *perPlayer,
@@ -244,6 +361,14 @@ func main() {
 		contested: *contestedStr,
 		minLife:   *minLifeStr,
 		minScore:  *minScore,
+
+		summary:      *summary,
+		teams:        *teamsStr,
+		source:       *source,
+		chatTypes:    *chatTypes,
+		locMode:      *locMode,
+		layout:       *layout,
+		regionDetail: *regionDetail,
 	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "qw-analyze:", err)
@@ -277,6 +402,10 @@ type derivedFlags struct {
 	dmg, metric, mode               string
 	weapons, items, kinds           string
 	window, gap, contested, minLife string
+
+	summary                       bool
+	teams, source, chatTypes      string
+	locMode, layout, regionDetail string
 }
 
 // maxInt32Ms guards the duration→int32-ms conversions below. A duration past
@@ -326,6 +455,57 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 	v.mode = df.mode
 	if setFlags["min-score"] {
 		v.minScore = &df.minScore
+	}
+	v.summary = df.summary
+	if df.teams != "" {
+		v.teams = splitCSV(df.teams)
+	}
+	// The next three mirror validation the REST layer does and the view
+	// deliberately does not: view.Chat matches types case-sensitively and
+	// view.Damage documents that it treats any unrecognised Dmg as raw, so
+	// without a check here a typo is a silently empty or silently wrong body.
+	if df.chatTypes != "" {
+		v.chatTypes = splitCSV(df.chatTypes)
+		for i, t := range v.chatTypes {
+			t = strings.ToLower(t)
+			if !slices.Contains(knownChatTypes, t) {
+				return nil, fmt.Errorf("-chat-types %q is not one of %s", t, strings.Join(knownChatTypes, ", "))
+			}
+			v.chatTypes[i] = t
+		}
+	}
+	if df.source != "" {
+		v.source = strings.ToLower(df.source)
+		if !slices.Contains(knownPickupSources, v.source) {
+			return nil, fmt.Errorf("-source must be one of %s, got %q", strings.Join(knownPickupSources, ", "), df.source)
+		}
+	}
+	if df.dmg != "" && !slices.Contains(knownDmgFamilies, strings.ToLower(df.dmg)) {
+		return nil, fmt.Errorf("-dmg must be one of %s, got %q", strings.Join(knownDmgFamilies, ", "), df.dmg)
+	}
+	// The three enum flags are checked here rather than left to the view,
+	// which either has no vocabulary for them (-loc, -region-detail are CLI
+	// spellings of a bool and a response shape) or would only reject them
+	// after a full analysis pass.
+	switch strings.ToLower(df.locMode) {
+	case "", "name":
+	case "index":
+		v.locIndex = true
+	default:
+		return nil, fmt.Errorf("-loc must be name or index, got %q", df.locMode)
+	}
+	switch strings.ToLower(df.layout) {
+	case "", "row", "column":
+		v.layout = strings.ToLower(df.layout)
+	default:
+		return nil, fmt.Errorf("-layout must be row or column, got %q", df.layout)
+	}
+	if df.regionDetail != "" {
+		if !slices.Contains(view.KnownRegionModes, strings.ToLower(df.regionDetail)) {
+			return nil, fmt.Errorf("-region-detail must be one of %s, got %q",
+				strings.Join(view.KnownRegionModes, ", "), df.regionDetail)
+		}
+		v.regionDetail = strings.ToLower(df.regionDetail)
 	}
 	if df.weapons != "" {
 		v.weapons = splitCSV(df.weapons)
@@ -432,26 +612,36 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 
 	// A flag is judged against the UNION of what the selected views accept: with
 	// several views in play a knob only has to be meaningful to one of them.
-	// The original seven predate the check and accept any view-scoped flag, so
-	// selecting one of them widens the union to match their old leniency.
+	// The original seven predate the check and accept any PRE-EXISTING
+	// view-scoped flag, so selecting one widens the union to match their old
+	// leniency — but not for flags added since (see lenientViewNewFlags).
 	allowedUnion := map[string]bool{}
-	lenientSelected, derivedSelected := false, false
+	lenientSelected := false
 	for _, name := range v.views {
-		switch name {
-		case "full", "buckets", "events", "trails", "stream-slice", "state-at", "region-control":
+		switch {
+		case slices.Contains(lenientViews, name):
 			lenientSelected = true
-		case "top-kills", "top-windows", "lives", "items-summary", "airgibs":
-			derivedSelected = true
+		case derivedViewFlags[name] != nil:
 			for f := range derivedViewFlags[name] {
 				allowedUnion[f] = true
 			}
 		default:
-			return nil, fmt.Errorf("unknown -view %q", name)
+			return nil, fmt.Errorf("unknown -view %q (valid: %s)", name,
+				strings.Join(append(slices.Clone(lenientViews), sortedKeys(derivedViewFlags)...), ", "))
 		}
 	}
 	if lenientSelected {
+		// A lenient view widens the union with the flags that predate the
+		// check — but only those. Its post-carve-out flags come from
+		// lenientViewNewFlags, so -view trails -layout column is an error
+		// rather than a no-op.
 		for _, f := range viewScopedFlags {
-			if !slices.Contains(derivedOnlyFlags, f) {
+			if !slices.Contains(postLenientFlags, f) {
+				allowedUnion[f] = true
+			}
+		}
+		for _, name := range v.views {
+			for f := range lenientViewNewFlags[name] {
 				allowedUnion[f] = true
 			}
 		}
@@ -462,10 +652,11 @@ func parseViewOptions(viewName, bucketStr, fieldsStr string, reducerArgs []strin
 		if !setFlags[name] || allowedUnion[name] {
 			continue
 		}
-		// Name the views that would accept it when none of them is listed —
-		// more use than "does not apply to -view buckets" on its own.
-		if slices.Contains(derivedOnlyFlags, name) && !derivedSelected {
-			return nil, fmt.Errorf("-%s applies only to -view top-kills / top-windows / lives / items-summary", name)
+		// Name the views that WOULD accept it — more use than "does not apply
+		// to -view buckets" on its own. Derived from the tables so it cannot
+		// drift out of date the way a hand-written list does.
+		if takers := viewsAccepting(name); len(takers) > 0 && !slices.ContainsFunc(v.views, func(s string) bool { return slices.Contains(takers, s) }) {
+			return nil, fmt.Errorf("-%s applies only to -view %s", name, strings.Join(takers, " / "))
 		}
 		return nil, fmt.Errorf("-%s does not apply to -view %s", name, strings.Join(v.views, ","))
 	}
@@ -538,6 +729,34 @@ type analyzeOptions struct {
 	computeLOS       bool // -include los: run the lazy line-of-sight/PVS pass after analyze
 }
 
+// warnUnlinkedNails reports ng/sng fires whose hits were never attributed,
+// which is what a run without -include nails produces: the nail linkage needs
+// svc_nails decoding, off by default because the nail stream is high volume.
+// The shots rows are honest about it — Hits is omitted rather than zeroed —
+// but "the key is absent" is only a signal to a reader who knows to look, and
+// a consumer doing `.hits // 0` silently reads it as perfect inaccuracy.
+// mvd-api always builds nails (democache sets BuildNails), so this is also
+// the one place default CLI output diverges from the same demo over REST.
+func warnUnlinkedNails(res *result.Result, w io.Writer) {
+	if res == nil || res.Shots == nil {
+		return
+	}
+	var shots int
+	for _, p := range res.Shots.ByPlayer {
+		for _, wp := range p.ByWeapon {
+			if wp.Weapon != "ng" && wp.Weapon != "sng" {
+				continue
+			}
+			if wp.Hits == 0 {
+				shots += wp.Shots
+			}
+		}
+	}
+	if shots > 0 {
+		fmt.Fprintf(w, "qw-analyze: %d ng/sng fires have no hit attribution — pass -include nails for nailgun accuracy (mvd-api always builds it, so this run differs from the same demo over REST)\n", shots)
+	}
+}
+
 // analyzePath opens the demo, runs the default registry with the region
 // override and any requested knobs, and returns the finalised Result.
 // Shared by dumpJSON, dumpView and dumpMarkdown.
@@ -587,6 +806,9 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	res, err := analyzePath(path, regionsOverride, opts)
 	if err != nil {
 		return err
+	}
+	if !opts.buildNails {
+		warnUnlinkedNails(res, os.Stderr)
 	}
 
 	// Position-track columns are opt-in: by default strip the whole
@@ -643,9 +865,13 @@ func (n namedViews) MarshalJSON() ([]byte, error) {
 // themselves are microseconds — so the whole point is that N views cost one
 // pass, not N.
 func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverride, vopts *viewOptions, pretty bool) error {
-	res, err := analyzePath(path, regionsOverride, analyzeOptionsFor(vopts))
+	opts := analyzeOptionsFor(vopts)
+	res, err := analyzePath(path, regionsOverride, opts)
 	if err != nil {
 		return err
+	}
+	if !opts.buildNails && (slices.Contains(vopts.views, "shots") || slices.Contains(vopts.views, "aim") || slices.Contains(vopts.views, "full")) {
+		warnUnlinkedNails(res, os.Stderr)
 	}
 
 	enc := json.NewEncoder(w)
@@ -730,7 +956,7 @@ func renderView(res *result.Result, name string, vopts *viewOptions) (any, error
 func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, error) {
 	switch name {
 	case "buckets":
-		bv, err := view.Buckets(res, view.BucketsOptions{
+		opts := view.BucketsOptions{
 			WindowMs:    int(vopts.bucketDur / time.Millisecond),
 			StartTime:   int32(vopts.from.Milliseconds()),
 			EndTime:     int32(vopts.to.Milliseconds()),
@@ -738,7 +964,21 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 			Fields:      vopts.fields,
 			Reducers:    vopts.reducers,
 			IncludeTeam: vopts.includeTeam,
-		})
+			LocIndex:    vopts.locIndex,
+			Layout:      vopts.layout,
+		}
+		// Layout picks the builder, exactly as handleBuckets does. The CLI
+		// default stays row — REST defaults to column, and -layout column is
+		// how you reproduce it.
+		if opts.Layout == "column" {
+			cb, err := view.BucketsColumnar(res, opts)
+			if err != nil {
+				return nil, err
+			}
+			cb.TimeUnit = view.UnitMs // handleBuckets stamps the columnar body
+			return cb, nil
+		}
+		bv, err := view.Buckets(res, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -750,6 +990,7 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 			EndTime:   int32(vopts.to.Milliseconds()),
 			Players:   vopts.players,
 			Types:     vopts.eventTypes,
+			LocIndex:  vopts.locIndex,
 		})
 		if err != nil {
 			return nil, err
@@ -773,9 +1014,10 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 			return nil, fmt.Errorf("-view state-at requires -time")
 		}
 		v, err := view.StateAt(res, view.StateAtOptions{
-			Time:    int32(vopts.timeAt.Milliseconds()),
-			Players: vopts.players,
-			Fields:  vopts.fields,
+			Time:     int32(vopts.timeAt.Milliseconds()),
+			Players:  vopts.players,
+			Fields:   vopts.fields,
+			LocIndex: vopts.locIndex,
 		})
 		if err != nil {
 			return nil, err
@@ -788,6 +1030,7 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 			MinDwellMs: int(vopts.minDwell / time.Millisecond),
 			StartTime:  int32(vopts.from.Milliseconds()),
 			EndTime:    int32(vopts.to.Milliseconds()),
+			LocIndex:   vopts.locIndex,
 		})
 		if err != nil {
 			return nil, err
@@ -862,6 +1105,9 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 		if err != nil {
 			return nil, err
 		}
+		if vopts.summary {
+			view.SummarizeLives(lv)
+		}
 		lv.TimeUnit = view.UnitMs
 		return lv, nil
 
@@ -895,13 +1141,186 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 		if ta == nil || ta.RegionControl == nil {
 			return nil, fmt.Errorf("region-control unavailable for this demo")
 		}
-		rcv, err := view.RegionControl(res, view.RegionControlOptions{
+		var c msConv
+		opts := view.RegionControlOptions{
 			WindowMs: int(vopts.bucketDur / time.Millisecond),
+			// Wired since the CLI accepted -from/-to and dropped them: the
+			// window is what makes "who held RA in the first two minutes"
+			// answerable, and REST has served it all along.
+			StartTime: c.v("-from", vopts.from),
+			EndTime:   c.v("-to", vopts.to),
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		rcv, err := view.RegionControl(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.RegionControlEnvelope{
+			TimeUnit:            view.UnitMs,
+			RegionControlResult: view.ShapeRegions(rcv, vopts.regionDetail),
+		}, nil
+
+	case "frags":
+		var c msConv
+		opts := view.FragOptions{
+			Players: vopts.players,
+			Weapons: vopts.weapons,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+			Summary: vopts.summary,
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		fv, err := view.Frags(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.FragsEnvelope{TimeUnit: view.UnitMs, FragResult: fv}, nil
+
+	case "damage":
+		var c msConv
+		opts := view.DamageOptions{
+			Players: vopts.players,
+			Weapons: vopts.weapons,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+			Summary: vopts.summary,
+			Dmg:     vopts.dmg,
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		dv, err := view.Damage(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.DamageEnvelope{TimeUnit: view.UnitMs, DamageResult: dv}, nil
+
+	case "aim":
+		var c msConv
+		opts := view.AimOptions{
+			Players: vopts.players,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+			Summary: vopts.summary,
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		av, err := view.Aim(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.AimEnvelope{TimeUnit: view.UnitMs, AimResult: av}, nil
+
+	case "chat":
+		var c msConv
+		opts := view.ChatOptions{
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+			Players: vopts.players,
+			Types:   vopts.chatTypes,
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		return view.ChatEnvelope{TimeUnit: view.UnitMs, Messages: view.Chat(res, opts)}, nil
+
+	case "backpacks":
+		var c msConv
+		opts := view.BackpackOptions{
+			Players: vopts.players,
+			Weapons: vopts.weapons,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		bp, err := view.Backpacks(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: bp}, nil
+
+	case "weapon-pickups":
+		var c msConv
+		opts := view.WeaponPickupOptions{
+			Players: vopts.players,
+			Weapons: vopts.weapons,
+			Source:  vopts.source,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		wp, err := view.WeaponPickups(res, opts)
+		if err != nil {
+			return nil, err
+		}
+		return view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: wp}, nil
+
+	case "player-stats":
+		// view.PlayerStats applies the KTX overlay at read time, which is why
+		// -view full's stored playerStats is NOT the same row: this is the
+		// canonical one.
+		ps, err := view.PlayerStats(res, view.PlayerStatsOptions{
+			Players: vopts.players,
+			Teams:   vopts.teams,
 		})
 		if err != nil {
 			return nil, err
 		}
-		return rcv, nil
+		return view.PlayerStatsEnvelope{TimeUnit: view.UnitMs, PlayerStatsResult: ps}, nil
+
+	case "items":
+		var c msConv
+		opts := view.ItemOptions{
+			Items:   vopts.items,
+			Players: vopts.players,
+			Kinds:   vopts.kinds,
+			From:    c.v("-from", vopts.from),
+			To:      c.v("-to", vopts.to),
+		}
+		if c.err != nil {
+			return nil, c.err
+		}
+		return view.ItemsEnvelope{TimeUnit: view.UnitMs, ItemsResult: view.Items(res, opts)}, nil
+
+	case "metadata":
+		// No timeUnit echo: metadata carries no match-position time.
+		return view.Metadata(res)
+
+	case "demoinfo":
+		return view.DemoInfo(res)
+
+	case "loc-graph":
+		lg, err := view.LocGraph(res)
+		if err != nil {
+			return nil, err
+		}
+		return view.LocGraphEnvelope{TimeUnit: view.UnitMs, LocGraphResult: lg}, nil
+
+	case "loc-table":
+		// The interned loc names, index 0 the "" sentinel — what -loc index
+		// output is decoded against. No timeUnit: no time values at all.
+		// Shape matches handleLocTable, including the empty-not-null table.
+		table := []string{}
+		if res.TimelineAnalysis != nil && res.TimelineAnalysis.LocTable != nil {
+			table = res.TimelineAnalysis.LocTable
+		}
+		return map[string]any{"locTable": table}, nil
+
+	case "shots":
+		sh, err := view.Shots(res)
+		if err != nil {
+			return nil, err
+		}
+		return view.ShotsEnvelope{TimeUnit: view.UnitMs, ShotsResult: sh}, nil
 	}
 	return nil, fmt.Errorf("unhandled view %q", name)
 }

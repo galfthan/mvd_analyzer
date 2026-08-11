@@ -834,3 +834,30 @@ func classifyRegionState(aWpn, aNo, bWpn, bNo int) byte {
 	}
 	return RegionStateWeakContested
 }
+
+// KnownRegionModes is the closed vocabulary for ShapeRegions, in the order
+// the docs list it; the openapi enum is pinned to the same set.
+var KnownRegionModes = []string{"full", "summary", "none"}
+
+// ShapeRegions returns a copy of rc whose Regions list is trimmed to mode:
+// "full" (default) keeps the polygons, "summary" drops each region's Points
+// (~6 KB) while keeping name/locs/centroids, "none" omits the list entirely.
+// The stored Result's slice is never mutated — the copy is the point.
+func ShapeRegions(rc *result.RegionControlResult, mode string) *result.RegionControlResult {
+	if rc == nil {
+		return nil
+	}
+	body := *rc
+	switch strings.ToLower(mode) {
+	case "summary":
+		slim := make([]result.ControlRegion, len(rc.Regions))
+		for i, rg := range rc.Regions {
+			rg.Points = nil
+			slim[i] = rg
+		}
+		body.Regions = slim
+	case "none":
+		body.Regions = nil
+	}
+	return &body
+}
