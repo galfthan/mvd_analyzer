@@ -149,6 +149,12 @@ func (p *Parser) parseModelList(r *mvd.BufferReader) error {
 		}
 		idx++
 	}
+	// The classification memo is keyed by model index; drop it so classOf
+	// rebuilds against the updated list (covers in-place overwrites too),
+	// and make the next entity diff rescan every entity — a model list
+	// arriving after baselines is what resolves their late classification.
+	p.modelClass = nil
+	p.classifyAllPending = true
 	_, err = r.ReadByte()
 	return err
 }
