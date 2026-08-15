@@ -28,6 +28,8 @@ export {
     ITEM_MARKER_STYLES,
     LEARN_ITEM_STYLES,
     ITEM_KIND_CATEGORY,
+    buildVisByPair,
+    losCovers,
 } from './map.js';
 
 export {

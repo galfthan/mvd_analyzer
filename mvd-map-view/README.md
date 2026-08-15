@@ -64,16 +64,17 @@ Moved so far:
 | `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
 | `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
-| `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), and the actor layer: the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, and the static entity view |
+| `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), the actor layer (the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, the static entity view), the overlay layer (trails, LOS/PVS sightlines, region occupancy and control tints), loc resolution (`resolvePlayerLoc`) and hit testing (`pickLocGroupAt`, `hitTestPlayerSymbol`) |
 | `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
 
-Still in `app.js`: the per-frame composition (`renderMap`), trails, the LOS
-and region-control overlays, pointer interaction and hit-testing, and all the
-DOM chrome and loaders.
+Still in `app.js`: the per-frame composition (`renderMap`), pointer
+interaction, the frame source (bucket reconstruction — `hitTestPlayerSymbol`
+takes the frame's player map as an argument until that seam exists), and all
+the DOM chrome and loaders.
 
 A note on data: the renderer reads item spawners from its own
 `state.items`, not from an analyzer Result — it has no notion of one, and in
@@ -106,7 +107,7 @@ site is inside a function that runs later still.
 ## Tests
 
 ```bash
-node --test mvd-map-view/test/      # also run by `make test`
+node --test mvd-map-view/test/*.test.js      # also run by `make test`
 ```
 
 ## Parity testing

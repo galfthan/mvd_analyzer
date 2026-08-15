@@ -17,15 +17,16 @@
 // the move verifiable a group at a time. The render methods follow.
 
 import { newCamera, project, is3D } from './camera.js';
-import { moverPoseAt } from './geometry.js';
+import { moverPoseAt, pointInTriangle } from './geometry.js';
 import { buildFloorModel } from './locgroups.js';
 import { scaleRgbaAlpha, hexToRgba } from './color.js';
 import {
-    drawTriangleListFill, drawRegionOutline, renderSolidEntries,
+    drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
     drawMoverMesh, drawLiquidVolume, drawPlayerSymbolAt, drawBadgesAroundCenter,
     drawWorldArrow, drawArrow, PLAYER_SYMBOL_BASE_SIZE,
 } from './draw.js';
-import { lowerBoundIndex } from './util.js';
+import { lowerBoundIndex, trailIndexAtTime } from './util.js';
+import { normalizeLocationName, findNearestLocation } from './locs.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
 // different directions separate tonally (used by the liquid volumes).
@@ -180,6 +181,74 @@ const VIEW_ARROW_LEN = 64;            // world units — shows facing clearly
 
 export const DEATH_X_DURATION  = 2.0;  // seconds an "X" death marker stays on the map
 
+// regionActiveTint: tint for a region by the team(s) currently in it — one
+// team → that team's canonical colour, both teams → white (contested). Drawn
+// over the neutral floor, so colour here always means "a player is here".
+const REGION_TINT_ALPHA = 0.3;
+const REGION_TINT_CONTESTED = `rgba(235, 235, 245, ${REGION_TINT_ALPHA})`;
+
+// Stack-aware opacity boost: regions with no overlapping, higher-z region
+// currently occupied are drawn at this multiple of their base alpha, so a
+// lower deck standing alone reads cleanly rather than washing out against an
+// empty upper deck's tint. Clamped final alpha to 0.5 so regions never
+// become opaque.
+const REGION_OPACITY_BOOST = 1.9;
+
+// Line-of-sight / PVS debug colours. White when both players see each other;
+// the one-way case is coloured by which of the pair (as ordered in the name
+// list) is the sole seer — red = the first, blue = the second. The colours are
+// debug-arbitrary, not team colours. The PVS palette is the same hues at a
+// lower alpha so the (much denser) potential-visibility lines read as a faint
+// backdrop under the solid LOS lines.
+const LOS_STYLE = {
+    width: 3,
+    mutual: 'rgba(255,255,255,0.65)',
+    first: 'rgba(255,80,80,0.65)',
+    second: 'rgba(90,150,255,0.65)',
+};
+const PVS_STYLE = {
+    width: 1.5,
+    mutual: 'rgba(255,255,255,0.35)',
+    first: 'rgba(255,80,80,0.35)',
+    second: 'rgba(90,150,255,0.35)',
+};
+
+// Slightly larger than the base symbol radius so the click-to-follow hit
+// area stays generous even when a high-deck / max-zoom player renders at
+// the 1.5 * 1.25 ≈ 1.88x upper bound.
+const FOLLOW_HIT_RADIUS_PX = 24;
+
+// buildVisByPair flattens the worker's per-player [{name, los/pvs:[{o,iv}]}]
+// reply into byPair[lookerName][targetName] = [{s,e},…] for the given field
+// ('los' or 'pvs'). The track's o indexes the players array; resolve it to that
+// player's name. Both metrics are asymmetric, so each direction is stored under
+// its own looker.
+export function buildVisByPair(players, field) {
+    const byPair = {};
+    if (!Array.isArray(players)) return byPair;
+    const idxToName = players.map(p => p && p.name);
+    for (const p of players) {
+        if (!p || !Array.isArray(p[field])) continue;
+        const byTarget = (byPair[p.name] ||= {});
+        for (const tr of p[field]) {
+            const other = idxToName[tr.other];
+            if (other != null && Array.isArray(tr.intervals)) byTarget[other] = tr.intervals;
+        }
+    }
+    return byPair;
+}
+
+// losCovers reports whether the half-open [s,e) interval list (ascending,
+// match-relative ms) covers tMs. Linear is fine — a pair has few intervals.
+export function losCovers(iv, tMs) {
+    if (!iv) return false;
+    for (let i = 0; i < iv.length; i++) {
+        if (tMs >= iv[i].s && tMs < iv[i].e) return true;
+        if (iv[i].s > tMs) break;
+    }
+    return false;
+}
+
 // newState returns the renderer's mutable state. Fields are grouped by what
 // they answer: what the map IS, what is being SHOWN, and what has been
 // DERIVED and cached from those two.
@@ -192,8 +261,11 @@ export function newState() {
 
         // What the map is.
         locations: [],        // MapLocation[] — loc points, positions + names
+        locTable: [''],       // interned loc-name table; index 0 = no-loc sentinel
         locationGroups: null, // cached processed loc regions
         locationGroupByName: null,
+        controlRegions: null, // region-control definitions (host-supplied)
+        regionToGroups: {},   // region name -> [loc groups] for the control overlay
         mapGeometry: null,    // BSP-derived per-loc polygons (optional)
         submodelMeshes: null, // { submodelId -> tris } from corpus v4 geom.submodels
         items: null,          // item spawners with their phase timelines
@@ -981,6 +1053,374 @@ export class MvdMap {
             return { up: true, secsToRespawn: null, pending: false };
         }
         return { up: false, secsToRespawn: (respawnAt - timeMs) * 0.001, pending: false };
+    }
+
+    // ─── Overlays: trails, sightlines, occupancy, region control ───────────
+
+    // Prefer the server-resolved loc name (3D nearest, matches ezQuake
+    // exactly). High-res buckets carry an integer index `li` into
+    // state.locTable; older 1s buckets carry the resolved name in
+    // `data.location`. Falls back to the 2D nearest-neighbor only when
+    // neither field is present (e.g. demos with no .loc file). The 2D
+    // fallback is harmless in that case because there is no stacked-loc
+    // disambiguation to do without a loc file in the first place.
+    resolvePlayerLoc(data) {
+        if (data) {
+            if (data.li && this.state.locTable) {
+                return this.state.locTable[data.li] || '';
+            }
+            if (data.location) return data.location;
+        }
+        return findNearestLocation(data ? data.x : 0, data ? data.y : 0, this.state.locations);
+    }
+
+    // Compute, per loc-group occupied by at least one living player this
+    // bucket, the set of team indices present in it. Keyed by normalized loc
+    // name. Uses the server-resolved 3D-nearest loc (matches ezQuake) via
+    // resolvePlayerLoc; each player's team index comes from the canonical
+    // playerSymbols mapping.
+    computeOccupiedGroupTeams(playerData) {
+        const occupied = new Map(); // normalized loc name -> Set<teamIdx>
+        if (!playerData) return occupied;
+        const symbols = this.state.playerSymbols || {};
+        for (const [name, data] of Object.entries(playerData)) {
+            if (!data) continue;
+            if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+            if (data.x === 0 && data.y === 0) continue;
+            const locName = this.resolvePlayerLoc(data);
+            if (!locName) continue;
+            const key = normalizeLocationName(locName);
+            let teams = occupied.get(key);
+            if (!teams) { teams = new Set(); occupied.set(key, teams); }
+            teams.add(symbols[name] ? symbols[name].teamIdx : 0);
+        }
+        return occupied;
+    }
+
+    regionActiveTint(teams) {
+        if (!teams || teams.size !== 1) return REGION_TINT_CONTESTED;
+        const teamIdx = teams.values().next().value;
+        return hexToRgba(this.teamColors[teamIdx] || this.teamColors[0], REGION_TINT_ALPHA);
+    }
+
+    // Highlight loc regions that contain at least one player. Drawn on top of
+    // the prerendered background and the team-control tint, so the player's
+    // current region is always identifiable at a glance.
+    drawOccupiedRegionsOverlay(ctx, playerData) {
+        const groupsByName = this.state.locationGroupByName;
+        if (!groupsByName) return;
+        const occupied = this.computeOccupiedGroupTeams(playerData);
+        if (occupied.size === 0) return;
+
+        // Colour-fill pass: tint each occupied region by the team(s) present so
+        // the active area stands out against the otherwise-neutral floor. The
+        // floor is drawn neutral by default (the floor model),
+        // so a tint only ever appears here, under a player. One translucent path
+        // per region (single fill → no internal triangle seams).
+        for (const [name, teams] of occupied) {
+            const group = groupsByName[name];
+            if (!group || !group.tris || group.tris.length < 9) continue;
+            drawTriangleListFill(ctx, group.tris, this.regionActiveTint(teams), this._toCanvas);
+        }
+
+        // Brighter outline pass.
+        for (const name of occupied.keys()) {
+            const group = groupsByName[name];
+            if (!group || !group.tris || group.tris.length < 9) continue;
+            drawRegionOutline(ctx, group, this._toCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
+        }
+
+        // Bold label pass — draw over the dimmer prerendered label so it pops.
+        const boldPx = Math.round(12 * this.iconScale());
+        ctx.font = `bold ${boldPx}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const name of occupied.keys()) {
+            const group = groupsByName[name];
+            if (!group) continue;
+            const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
+            // Soft shadow so the label stays legible against any underlying tint.
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+            ctx.fillText(group.name, pos.x + 1, pos.y + 1);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillText(group.name, pos.x, pos.y);
+        }
+    }
+
+    // Draw control overlay for regions based on current control state
+    drawRegionControlOverlay(ctx, controlStates) {
+        const regions = this.state.controlRegions;
+        if (!regions) return;
+
+        // Build the set of regions that are occupied (any non-empty state).
+        // Used by the stacking rule: a region is boosted when no region above it
+        // in its stack is currently occupied.
+        const occupied = new Set();
+        for (const [name, state] of Object.entries(controlStates)) {
+            if (state !== 'empty') occupied.add(name);
+        }
+
+        // Index regions by name for the boost lookup.
+        const regionByName = {};
+        for (const r of regions) regionByName[r.name] = r;
+
+        for (const [regionName, state] of Object.entries(controlStates)) {
+            const groups = this.state.regionToGroups[regionName];
+            if (!groups || groups.length === 0) continue;
+
+            let baseAlpha, hex;
+            switch (state) {
+                case 'teamAControl':     baseAlpha = 0.24; hex = this.teamColors[0]; break;
+                case 'teamAWeakControl': baseAlpha = 0.14; hex = this.teamColors[0]; break;
+                case 'teamBControl':     baseAlpha = 0.24; hex = this.teamColors[1]; break;
+                case 'teamBWeakControl': baseAlpha = 0.14; hex = this.teamColors[1]; break;
+                case 'contested':        baseAlpha = 0.14; hex = '#ffffff'; break;
+                case 'weakContested':    baseAlpha = 0.07; hex = '#ffffff'; break;
+                default: continue; // empty
+            }
+
+            const r = regionByName[regionName];
+            let boost = 1.0;
+            if (r && r._above && r._above.length > 0) {
+                const anyAboveOccupied = r._above.some(ra => occupied.has(ra.name));
+                if (!anyAboveOccupied) boost = REGION_OPACITY_BOOST;
+            }
+            const finalAlpha = Math.min(0.5, baseAlpha * boost);
+            const color = hexToRgba(hex, finalAlpha);
+
+            for (const group of groups) {
+                // Region focus: tint outside the focus neighborhood fades with
+                // the base fills so the focused area keeps visual priority.
+                const tint = this.focusTier(group.name) === 'far'
+                    ? scaleRgbaAlpha(color, 0.3)
+                    : color;
+                fillRegion(ctx, group, tint, this._toCanvasNew);
+            }
+        }
+    }
+
+    // drawVisLines draws a line between every player pair whose byPair intervals
+    // currently cover the playhead, styled per `style` (width + mutual/one-way
+    // colours). Endpoints sit at eye height (origin + 22) for visual honesty.
+    // White = mutual; red/blue = one-way.
+    drawVisLines(ctx, byPair, time, playerData, style) {
+        if (!byPair || !playerData) return;
+        const tMs = time * 1000;
+        const names = Object.keys(playerData);
+        ctx.save();
+        ctx.lineWidth = style.width;
+        for (let i = 0; i < names.length; i++) {
+            const a = names[i], pa = playerData[a];
+            if (!pa || typeof pa.x !== 'number') continue;
+            for (let j = i + 1; j < names.length; j++) {
+                const b = names[j], pb = playerData[b];
+                if (!pb || typeof pb.x !== 'number') continue;
+                const aSeesB = losCovers(byPair[a] && byPair[a][b], tMs);
+                const bSeesA = losCovers(byPair[b] && byPair[b][a], tMs);
+                if (!aSeesB && !bSeesA) continue;
+                const ea = this.toCanvasNew(pa.x, pa.y, pa.z + 22);
+                const eb = this.toCanvasNew(pb.x, pb.y, pb.z + 22);
+                ctx.strokeStyle = (aSeesB && bSeesA) ? style.mutual
+                    : aSeesB ? style.first : style.second;
+                ctx.beginPath();
+                ctx.moveTo(ea.x, ea.y);
+                ctx.lineTo(eb.x, eb.y);
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
+
+    // drawLosLines renders the PVS overlay (thin, faint — potential visibility)
+    // underneath the LOS overlay (solid — actual sightline), each gated by its
+    // own toggle. PVS first so LOS lines draw on top. No-op unless data is
+    // present (BSP-backed maps only).
+    drawLosLines(ctx, time, playerData) {
+        const s = this.state;
+        if (s.showPvs) this.drawVisLines(ctx, s.pvsByPair, time, playerData, PVS_STYLE);
+        if (s.showLos) this.drawVisLines(ctx, s.losByPair, time, playerData, LOS_STYLE);
+    }
+
+    drawTracks(ctx, time) {
+        const s = this.state;
+        const trailDuration = s.trailDuration;
+
+        for (const [name, points] of Object.entries(s.fullTrails)) {
+            if (!s.enabledPlayers[name]) continue;
+            if (points.length < 2) continue;
+
+            // If current time is before trail start, pull start back so trail grows from here
+            if (time < (s.trailStartTimes[name] || 0)) {
+                s.trailStartTimes[name] = time;
+            }
+
+            // Find the end index: last point at or before current time
+            const endIdx = trailIndexAtTime(points, time);
+            if (endIdx < 1) continue;
+
+            // Find start: trail window starts at max(time - trailDuration, trailStartTime)
+            const trailStart = Math.max(time - trailDuration, s.trailStartTimes[name] || 0);
+            let startIdx = trailIndexAtTime(points, trailStart);
+            if (startIdx < 0) startIdx = 0;
+
+            if (endIdx - startIdx < 1) continue;
+
+            // Pre-convert the visible window of world-space points into canvas
+            // pixels at the current pan / zoom so the inner draw loop stays
+            // allocation-free and the scratch projection point isn't clobbered
+            // between consecutive reads.
+            const cpts = new Array(endIdx - startIdx + 1);
+            for (let i = startIdx; i <= endIdx; i++) {
+                const pt = points[i];
+                const c = this.toCanvasNew(pt.wx, pt.wy, pt.wz);
+                cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
+            }
+
+            const teamHex = this.teamColors[points[0].teamIdx] || this.teamColors[0];
+            const solidColor = hexToRgba(teamHex, 0.4);
+            const dashColor = hexToRgba(teamHex, 0.2);
+            const markerColor = hexToRgba(teamHex, 0.8);
+
+            // Collect death/spawn markers to draw after lines
+            const markers = [];
+
+            let inDash = false;
+            let afterDeath = false; // suppress line from death to next spawn
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = solidColor;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(cpts[0].x, cpts[0].y);
+
+            if (cpts[0].spawn) markers.push({ x: cpts[0].x, y: cpts[0].y, type: 'spawn' });
+
+            for (let i = 1; i < cpts.length; i++) {
+                const pt = cpts[i];
+
+                if (pt.spawn) {
+                    // Spawn: start a new line segment (gap from death)
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = solidColor;
+                    inDash = false;
+                    afterDeath = false;
+                    ctx.moveTo(pt.x, pt.y);
+                    markers.push({ x: pt.x, y: pt.y, type: 'spawn' });
+                    continue;
+                }
+
+                if (pt.death) {
+                    // Death: draw line to death point, then mark it
+                    ctx.lineTo(pt.x, pt.y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    afterDeath = true;
+                    markers.push({ x: pt.x, y: pt.y, type: 'death' });
+                    continue;
+                }
+
+                if (afterDeath) {
+                    // Between death and spawn — don't draw
+                    ctx.moveTo(pt.x, pt.y);
+                    continue;
+                }
+
+                const needDash = !!pt.tp;
+                if (needDash !== inDash) {
+                    ctx.stroke();
+                    ctx.beginPath();
+                    const prev = cpts[i - 1];
+                    ctx.moveTo(prev.x, prev.y);
+                    if (needDash) {
+                        ctx.setLineDash([4, 6]);
+                        ctx.strokeStyle = dashColor;
+                    } else {
+                        ctx.setLineDash([]);
+                        ctx.strokeStyle = solidColor;
+                    }
+                    inDash = needDash;
+                }
+                ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw death (✕) and spawn (●) markers on top
+            ctx.fillStyle = markerColor;
+            ctx.strokeStyle = markerColor;
+            ctx.lineWidth = 2;
+            for (const m of markers) {
+                if (m.type === 'death') {
+                    // Draw ✕
+                    const sz = 5;
+                    ctx.beginPath();
+                    ctx.moveTo(m.x - sz, m.y - sz);
+                    ctx.lineTo(m.x + sz, m.y + sz);
+                    ctx.moveTo(m.x + sz, m.y - sz);
+                    ctx.lineTo(m.x - sz, m.y + sz);
+                    ctx.stroke();
+                } else {
+                    // Draw ●
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+    }
+
+    // ─── Hit testing ────────────────────────────────────────────────────────
+
+    // pickLocGroupAt: which named loc region is under the canvas point. Tests
+    // every projected floor triangle; among hits the one nearest the camera
+    // wins, so clicking a spot where two floors stack resolves to the visible
+    // (upper, under the current rotation) one. One-off per click — no caching.
+    pickLocGroupAt(cx, cy) {
+        let bestName = null;
+        let bestDepth = -Infinity;
+        for (const group of this.state.locationGroups || []) {
+            const tris = group.tris;
+            if (!tris || tris.length < 9) continue;
+            for (let i = 0; i + 8 < tris.length; i += 9) {
+                const a = this.toCanvasNew(tris[i],     tris[i + 1], tris[i + 2]);
+                const b = this.toCanvasNew(tris[i + 3], tris[i + 4], tris[i + 5]);
+                const c = this.toCanvasNew(tris[i + 6], tris[i + 7], tris[i + 8]);
+                if (!pointInTriangle(cx, cy, a, b, c)) continue;
+                const depth = Math.max(a.depth, b.depth, c.depth);
+                if (depth > bestDepth) {
+                    bestDepth = depth;
+                    bestName = group.name;
+                }
+            }
+        }
+        return bestName;
+    }
+
+    // hitTestPlayerSymbol: the player whose drawn symbol is nearest the canvas
+    // point, within the follow hit radius. `bucketPlayers` is the frame's
+    // player map — the host supplies it because the frame source (bucket
+    // reconstruction) still lives host-side; positions are refined through the
+    // native-rate streams exactly like the draw pass.
+    hitTestPlayerSymbol(cx, cy, time, bucketPlayers) {
+        if (!bucketPlayers) return null;
+        let best = null;
+        let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
+        for (const [name, data] of Object.entries(bucketPlayers)) {
+            // Hit-test against the stream-sourced position the symbol is drawn at.
+            const sp = this.streamPosAt(name, time * 1000);
+            const x = sp ? sp.x : data.x, y = sp ? sp.y : data.y, z = sp ? sp.z : data.z;
+            if (x === 0 && y === 0) continue;
+            const pos = this.toCanvas(x, y, z);
+            const dx = pos.x - cx;
+            const dy = pos.y - cy;
+            const d2 = dx * dx + dy * dy;
+            if (d2 <= bestD2) {
+                bestD2 = d2;
+                best = name;
+            }
+        }
+        return best;
     }
 
     // floorZUnder: highest floor surface at world (x, y) with z <= zMax, or null

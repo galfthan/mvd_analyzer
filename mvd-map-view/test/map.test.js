@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 
-import { MvdMap, newState } from '../src/map.js';
+import { MvdMap, newState, buildVisByPair, losCovers } from '../src/map.js';
+import { fit } from '../src/camera.js';
 
 test('a fresh map has its own state and camera', () => {
     const a = new MvdMap();
@@ -293,4 +294,109 @@ test('the team palette defaults to the canonical order and can be overridden', (
     assert.equal(new MvdMap().teamColors[0], '#ff5050');
     const custom = new MvdMap(null, { teamColors: ['#111', '#222'] });
     assert.equal(custom.teamColors[1], '#222');
+});
+
+// ─── Overlays and hit testing ───────────────────────────────────────────────
+
+test('losCovers honours the half-open interval convention', () => {
+    const iv = [{ s: 1000, e: 2000 }, { s: 5000, e: 6000 }];
+    assert.equal(losCovers(iv, 999), false);
+    assert.equal(losCovers(iv, 1000), true, 'inclusive start');
+    assert.equal(losCovers(iv, 1999), true);
+    assert.equal(losCovers(iv, 2000), false, 'exclusive end');
+    assert.equal(losCovers(iv, 5500), true, 'later interval');
+    assert.equal(losCovers(null, 1500), false, 'no data → not covered');
+});
+
+test('buildVisByPair resolves the other-player index to a name per direction', () => {
+    const players = [
+        { name: 'a', los: [{ other: 1, intervals: [{ s: 0, e: 100 }] }] },
+        { name: 'b', los: [] },
+        null,
+    ];
+    const byPair = buildVisByPair(players, 'los');
+    assert.deepEqual(byPair.a.b, [{ s: 0, e: 100 }]);
+    assert.equal(byPair.b?.a, undefined, 'asymmetric — b never saw a');
+    assert.deepEqual(buildVisByPair('junk', 'los'), {}, 'non-array reply → empty');
+});
+
+test('regionActiveTint colours a lone team and whites out a contested region', () => {
+    const map = new MvdMap(null, { teamColors: ['#ff0000', '#0000ff'] });
+    assert.equal(map.regionActiveTint(new Set([1])), 'rgba(0, 0, 255, 0.3)');
+    assert.match(map.regionActiveTint(new Set([0, 1])), /rgba\(235, 235, 245/);
+    assert.match(map.regionActiveTint(new Set()), /rgba\(235, 235, 245/);
+});
+
+test('resolvePlayerLoc prefers the interned index, then the resolved name', () => {
+    const map = new MvdMap();
+    map.state.locTable = ['', 'RA.entry'];
+    map.state.locations = [{ name: 'fallback', x: 0, y: 0 }];
+    assert.equal(map.resolvePlayerLoc({ li: 1 }), 'RA.entry');
+    assert.equal(map.resolvePlayerLoc({ location: 'bridge' }), 'bridge');
+    assert.equal(map.resolvePlayerLoc({ x: 1, y: 1 }), 'fallback', '2D nearest fallback');
+});
+
+test('computeOccupiedGroupTeams keys living players by normalized loc and team', () => {
+    const map = new MvdMap();
+    map.state.locTable = ['', 'RA Entry'];
+    map.state.playerSymbols = { p1: { teamIdx: 0 }, p2: { teamIdx: 1 }, p3: { teamIdx: 1 } };
+    const occupied = map.computeOccupiedGroupTeams({
+        p1: { x: 10, y: 10, li: 1, h: 100 },
+        p2: { x: 20, y: 20, li: 1, h: 100 },
+        p3: { x: 30, y: 30, li: 1, h: 0 },   // dead — excluded
+        p4: null,
+    });
+    assert.equal(occupied.size, 1);
+    const teams = occupied.values().next().value;
+    assert.deepEqual([...teams].sort(), [0, 1], 'both teams present, the dead man absent');
+});
+
+// A camera fitted to a 100×100 world on a 100×100 canvas at top-down maps
+// world (x, y) → canvas (x, 100 - y) — easy to reason about in tests.
+function topDownMap() {
+    const map = new MvdMap();
+    fit(map.camera, { minX: 0, maxX: 100, minY: 0, maxY: 100 }, 100, 100);
+    return map;
+}
+
+test('pickLocGroupAt resolves stacked floors to the nearer one', () => {
+    const map = topDownMap();
+    const square = (z) => [10, 10, z, 90, 10, z, 90, 90, z, 10, 10, z, 90, 90, z, 10, 90, z];
+    map.state.locationGroups = [
+        { name: 'low',  tris: square(0) },
+        { name: 'high', tris: square(128) },
+        { name: 'thin', tris: [0, 0, 0] },   // malformed — skipped
+    ];
+    assert.equal(map.pickLocGroupAt(50, 50), 'high', 'top-down: higher z wins');
+    assert.equal(map.pickLocGroupAt(5, 5), null, 'outside every region');
+});
+
+test('hitTestPlayerSymbol picks the nearest drawn symbol within the radius', () => {
+    const map = topDownMap();
+    map.state.posStreams = {
+        streamed: { t: [0], x: [40], y: [40], z: [0] },
+    };
+    const bucket = {
+        streamed: { x: 90, y: 90, z: 0 },     // stale bucket pos — stream wins
+        bucketed: { x: 60, y: 60, z: 0 },
+        parked:   { x: 0, y: 0, z: 0 },       // unpositioned — ignored
+    };
+    // Streamed player draws at canvas (40, 60); bucketed at (60, 40).
+    assert.equal(map.hitTestPlayerSymbol(41, 61, 0, bucket), 'streamed');
+    assert.equal(map.hitTestPlayerSymbol(59, 41, 0, bucket), 'bucketed');
+    assert.equal(map.hitTestPlayerSymbol(5, 5, 0, bucket), null, 'nothing in radius');
+    assert.equal(map.hitTestPlayerSymbol(41, 61, 0, null), null, 'no frame data');
+});
+
+test('drawTracks pulls a trail start back when the clock rewinds past it', () => {
+    const map = new MvdMap();
+    const noop = () => {};
+    const ctx = new Proxy({}, { get: () => noop, set: () => true });
+    map.state.fullTrails = {
+        p1: [{ wx: 0, wy: 0, wz: 0, t: 5, teamIdx: 0 }, { wx: 10, wy: 0, wz: 0, t: 6, teamIdx: 0 }],
+    };
+    map.state.enabledPlayers = { p1: true };
+    map.state.trailStartTimes = { p1: 8 };
+    map.drawTracks(ctx, 6);
+    assert.equal(map.state.trailStartTimes.p1, 6, 'start follows the rewound clock');
 });

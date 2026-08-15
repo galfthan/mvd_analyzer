@@ -6025,22 +6025,6 @@ function findHighResBucketIndexAtTime(time) {
     return bucketIndexAtTime(timelineState.bucketView, time);
 }
 
-// Prefer the server-resolved loc name (3D nearest, matches ezQuake exactly).
-// High-res buckets carry an integer index `li` into mapState.locTable; older
-// 1s buckets carry the resolved name in `data.location`. Falls back to the
-// 2D nearest-neighbor only when neither field is present (e.g. demos with
-// no .loc file). The 2D fallback is harmless in that case because there is
-// no stacked-loc disambiguation to do without a loc file in the first place.
-function resolvePlayerLoc(data, locations) {
-    if (data) {
-        if (data.li && mapState.locTable) {
-            return mapState.locTable[data.li] || '';
-        }
-        if (data.location) return data.location;
-    }
-    return MapView.findNearestLocation(data ? data.x : 0, data ? data.y : 0, locations);
-}
-
 // ─── Precomputed Frag Counts ────────────────────────────────────────────────
 
 // Sorted array of { time, cumulative: { player: frags } }
@@ -6111,167 +6095,8 @@ function setFocusGroup(name) {
     renderMap(mapState.currentTime);
 }
 
-// pickLocGroupAt: which named loc region is under the canvas point. Tests
-// every projected floor triangle; among hits the one nearest the camera
-// wins, so clicking a spot where two floors stack resolves to the visible
-// (upper, under the current rotation) one. One-off per click — no caching.
-function pickLocGroupAt(cx, cy) {
-    let bestName = null;
-    let bestDepth = -Infinity;
-    for (const group of mapState.locationGroups || []) {
-        const tris = group.tris;
-        if (!tris || tris.length < 9) continue;
-        for (let i = 0; i + 8 < tris.length; i += 9) {
-            const a = worldToCanvasNew(tris[i],     tris[i + 1], tris[i + 2]);
-            const b = worldToCanvasNew(tris[i + 3], tris[i + 4], tris[i + 5]);
-            const c = worldToCanvasNew(tris[i + 6], tris[i + 7], tris[i + 8]);
-            if (!MapView.pointInTriangle(cx, cy, a, b, c)) continue;
-            const depth = Math.max(a.depth, b.depth, c.depth);
-            if (depth > bestDepth) {
-                bestDepth = depth;
-                bestName = group.name;
-            }
-        }
-    }
-    return bestName;
-}
-
-// Compute, per loc-group occupied by at least one living player this bucket,
-// the set of team indices present in it. Keyed by normalized loc name. Uses
-// the server-resolved 3D-nearest loc (matches ezQuake) via resolvePlayerLoc;
-// each player's team index comes from the canonical playerSymbols mapping.
-function computeOccupiedGroupTeams(playerData) {
-    const occupied = new Map(); // normalized loc name -> Set<teamIdx>
-    if (!playerData) return occupied;
-    const locations = mapState.locations;
-    const symbols = mapState.playerSymbols || {};
-    for (const [name, data] of Object.entries(playerData)) {
-        if (!data) continue;
-        if (data.d || (data.h !== undefined && data.h <= 0)) continue;
-        if (data.x === 0 && data.y === 0) continue;
-        const locName = resolvePlayerLoc(data, locations);
-        if (!locName) continue;
-        const key = MapView.normalizeLocationName(locName);
-        let teams = occupied.get(key);
-        if (!teams) { teams = new Set(); occupied.set(key, teams); }
-        teams.add(symbols[name] ? symbols[name].teamIdx : 0);
-    }
-    return occupied;
-}
-
-// regionActiveTint: tint for a region by the team(s) currently in it — one
-// team → that team's canonical colour, both teams → white (contested). Drawn
-// over the neutral floor, so colour here always means "a player is here".
-const REGION_TINT_ALPHA = 0.3;
-const REGION_TINT_CONTESTED = `rgba(235, 235, 245, ${REGION_TINT_ALPHA})`;
-function regionActiveTint(teams) {
-    if (!teams || teams.size !== 1) return REGION_TINT_CONTESTED;
-    const teamIdx = teams.values().next().value;
-    return MapView.hexToRgba(TEAM_COLORS[teamIdx] || TEAM_COLORS[0], REGION_TINT_ALPHA);
-}
-
-// Highlight loc regions that contain at least one player. Drawn on top of
-// the prerendered background and the team-control tint, so the player's
-// current region is always identifiable at a glance.
-function drawOccupiedRegionsOverlay(ctx, playerData) {
-    const groupsByName = mapState.locationGroupByName;
-    if (!groupsByName) return;
-    const occupied = computeOccupiedGroupTeams(playerData);
-    if (occupied.size === 0) return;
-
-    // Colour-fill pass: tint each occupied region by the team(s) present so
-    // the active area stands out against the otherwise-neutral floor. The
-    // floor is drawn neutral by default (the floor model),
-    // so a tint only ever appears here, under a player. One translucent path
-    // per region (single fill → no internal triangle seams).
-    for (const [name, teams] of occupied) {
-        const group = groupsByName[name];
-        if (!group || !group.tris || group.tris.length < 9) continue;
-        MapView.drawTriangleListFill(ctx, group.tris, regionActiveTint(teams), worldToCanvas);
-    }
-
-    // Brighter outline pass.
-    for (const name of occupied.keys()) {
-        const group = groupsByName[name];
-        if (!group || !group.tris || group.tris.length < 9) continue;
-        MapView.drawRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
-    }
-
-    // Bold label pass — draw over the dimmer prerendered label so it pops.
-    const boldPx = Math.round(12 * mapView.iconScale());
-    ctx.font = `bold ${boldPx}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    for (const name of occupied.keys()) {
-        const group = groupsByName[name];
-        if (!group) continue;
-        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-        // Soft shadow so the label stays legible against any underlying tint.
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-        ctx.fillText(group.name, pos.x + 1, pos.y + 1);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.fillText(group.name, pos.x, pos.y);
-    }
-}
-
-// Stack-aware opacity boost: regions with no overlapping, higher-z region
-// currently occupied are drawn at this multiple of their base alpha, so a
-// lower deck standing alone reads cleanly rather than washing out against an
-// empty upper deck's tint. Clamped final alpha to 0.5 so regions never
-// become opaque.
-const REGION_OPACITY_BOOST = 1.9;
-
-// Draw control overlay for regions based on current control state
-function drawRegionControlOverlay(ctx, controlStates) {
-    const regions = mapState.controlRegions;
-    if (!regions) return;
-
-    // Build the set of regions that are occupied (any non-empty state).
-    // Used by the stacking rule: a region is boosted when no region above it
-    // in its stack is currently occupied.
-    const occupied = new Set();
-    for (const [name, state] of Object.entries(controlStates)) {
-        if (state !== 'empty') occupied.add(name);
-    }
-
-    // Index regions by name for the boost lookup.
-    const regionByName = {};
-    for (const r of regions) regionByName[r.name] = r;
-
-    for (const [regionName, state] of Object.entries(controlStates)) {
-        const groups = mapState.regionToGroups[regionName];
-        if (!groups || groups.length === 0) continue;
-
-        let baseAlpha, hex;
-        switch (state) {
-            case 'teamAControl':     baseAlpha = 0.24; hex = TEAM_COLORS[0]; break;
-            case 'teamAWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[0]; break;
-            case 'teamBControl':     baseAlpha = 0.24; hex = TEAM_COLORS[1]; break;
-            case 'teamBWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[1]; break;
-            case 'contested':        baseAlpha = 0.14; hex = '#ffffff'; break;
-            case 'weakContested':    baseAlpha = 0.07; hex = '#ffffff'; break;
-            default: continue; // empty
-        }
-
-        const r = regionByName[regionName];
-        let boost = 1.0;
-        if (r && r._above && r._above.length > 0) {
-            const anyAboveOccupied = r._above.some(ra => occupied.has(ra.name));
-            if (!anyAboveOccupied) boost = REGION_OPACITY_BOOST;
-        }
-        const finalAlpha = Math.min(0.5, baseAlpha * boost);
-        const color = MapView.hexToRgba(hex, finalAlpha);
-
-        for (const group of groups) {
-            // Region focus: tint outside the focus neighborhood fades with
-            // the base fills so the focused area keeps visual priority.
-            const tint = mapView.focusTier(group.name) === 'far'
-                ? MapView.scaleRgbaAlpha(color, 0.3)
-                : color;
-            MapView.fillRegion(ctx, group, tint, worldToCanvasNew);
-        }
-    }
-}
+// (pickLocGroupAt, computeOccupiedGroupTeams, regionActiveTint and the two
+// region overlays now live on MvdMap in mvd-map-view/src/map.js.)
 
 // Map View State
 // Renderer state, owned by mvd-map-view's MvdMap. app.js keeps the two
@@ -6343,7 +6168,7 @@ function initMapView(result) {
     mapState.locations = timeline.locationData || [];
     // Interned loc-name table — index 0 is the empty/no-loc sentinel.
     // High-res player records carry an integer Li indexing into this; the
-    // resolvePlayerLoc helper hides the indirection from call sites.
+    // mapView.resolvePlayerLoc helper hides the indirection from call sites.
     mapState.locTable = (timeline && timeline.locTable) ? timeline.locTable : [''];
     mapState.locationGroups = null; // Clear cached groups for new demo
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
@@ -7237,13 +7062,12 @@ function updateMapLegend() {
     }
 
     // Update per-player cells
-    const locations = mapState.locations;
     const locCells = legend.querySelectorAll('.map-legend-loc');
     for (const cell of locCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
         if (data && !(data.x === 0 && data.y === 0)) {
-            cell.textContent = resolvePlayerLoc(data, locations) || '';
+            cell.textContent = mapView.resolvePlayerLoc(data) || '';
         } else {
             cell.textContent = '';
         }
@@ -7307,8 +7131,6 @@ function updateRegionStatus() {
     const playerData = bucket ? (bucket.p) : null;
     const teams = mapState.teams || [];
 
-    const locations = mapState.locations;
-
     // Build per-region player lists
     const regionPlayers = {};
     for (const r of mapState.controlRegions) {
@@ -7320,7 +7142,7 @@ function updateRegionStatus() {
             if (data.d || (data.h !== undefined && data.h <= 0)) continue;
             if (data.x === 0 && data.y === 0) continue;
 
-            const nearest = resolvePlayerLoc(data, locations);
+            const nearest = mapView.resolvePlayerLoc(data);
             if (!nearest) continue;
             const regionName = mapState.locToRegion?.[nearest];
             if (!regionName || !regionPlayers[regionName]) continue;
@@ -7629,22 +7451,22 @@ function renderMap(time) {
     if (mapState.controlRegions && mapState.regionToGroups) {
         const controlStates = getRegionControlAtTime(time);
         if (controlStates) {
-            drawRegionControlOverlay(ctx, controlStates);
+            mapView.drawRegionControlOverlay(ctx, controlStates);
         }
     }
 
     // Highlight regions that currently contain at least one player so the
     // viewer can tell which loc each symbol belongs to without squinting.
     if (playerData) {
-        drawOccupiedRegionsOverlay(ctx, playerData);
+        mapView.drawOccupiedRegionsOverlay(ctx, playerData);
     }
 
     // Draw tracks (per-player visibility controlled by enabledPlayers)
-    drawTracks(ctx, time);
+    mapView.drawTracks(ctx, time);
 
     // Line-of-sight debug overlay (opt-in): connects players who can see each
     // other at the current time. Drawn under the player symbols.
-    drawLosLines(ctx, time, playerData);
+    mapView.drawLosLines(ctx, time, playerData);
 
     // Z-depth pass for items + players: overlapping players occlude by z
     // (higher deck on top), and an item whose z is clearly higher than a
@@ -7922,8 +7744,8 @@ async function ensureLosComputed(losBtn) {
         const json = await computeLosInWorker();
         const players = JSON.parse(json);
         if (players && players.error) throw new Error(players.error);
-        mapState.losByPair = buildVisByPair(players, 'los');
-        mapState.pvsByPair = buildVisByPair(players, 'pvs');
+        mapState.losByPair = MapView.buildVisByPair(players, 'los');
+        mapState.pvsByPair = MapView.buildVisByPair(players, 'pvs');
         mapState.losComputed = true;
     } catch (err) {
         console.warn('computeLineOfSight:', err.message);
@@ -7936,224 +7758,8 @@ async function ensureLosComputed(losBtn) {
     }
 }
 
-// buildVisByPair flattens the worker's per-player [{name, los/pvs:[{o,iv}]}]
-// reply into byPair[lookerName][targetName] = [{s,e},…] for the given field
-// ('los' or 'pvs'). The track's o indexes the players array; resolve it to that
-// player's name. Both metrics are asymmetric, so each direction is stored under
-// its own looker.
-function buildVisByPair(players, field) {
-    const byPair = {};
-    if (!Array.isArray(players)) return byPair;
-    const idxToName = players.map(p => p && p.name);
-    for (const p of players) {
-        if (!p || !Array.isArray(p[field])) continue;
-        const byTarget = (byPair[p.name] ||= {});
-        for (const tr of p[field]) {
-            const other = idxToName[tr.other];
-            if (other != null && Array.isArray(tr.intervals)) byTarget[other] = tr.intervals;
-        }
-    }
-    return byPair;
-}
-
-// losCovers reports whether the half-open [s,e) interval list (ascending,
-// match-relative ms) covers tMs. Linear is fine — a pair has few intervals.
-function losCovers(iv, tMs) {
-    if (!iv) return false;
-    for (let i = 0; i < iv.length; i++) {
-        if (tMs >= iv[i].s && tMs < iv[i].e) return true;
-        if (iv[i].s > tMs) break;
-    }
-    return false;
-}
-
-// Line-of-sight / PVS debug colours. White when both players see each other;
-// the one-way case is coloured by which of the pair (as ordered in the name
-// list) is the sole seer — red = the first, blue = the second. The colours are
-// debug-arbitrary, not team colours. The PVS palette is the same hues at a
-// lower alpha so the (much denser) potential-visibility lines read as a faint
-// backdrop under the solid LOS lines.
-const LOS_STYLE = {
-    width: 3,
-    mutual: 'rgba(255,255,255,0.65)',
-    first: 'rgba(255,80,80,0.65)',
-    second: 'rgba(90,150,255,0.65)',
-};
-const PVS_STYLE = {
-    width: 1.5,
-    mutual: 'rgba(255,255,255,0.35)',
-    first: 'rgba(255,80,80,0.35)',
-    second: 'rgba(90,150,255,0.35)',
-};
-
-// drawVisLines draws a line between every player pair whose byPair intervals
-// currently cover the playhead, styled per `style` (width + mutual/one-way
-// colours). Endpoints sit at eye height (origin + 22) for visual honesty.
-// White = mutual; red/blue = one-way.
-function drawVisLines(ctx, byPair, time, playerData, style) {
-    if (!byPair || !playerData) return;
-    const tMs = time * 1000;
-    const names = Object.keys(playerData);
-    ctx.save();
-    ctx.lineWidth = style.width;
-    for (let i = 0; i < names.length; i++) {
-        const a = names[i], pa = playerData[a];
-        if (!pa || typeof pa.x !== 'number') continue;
-        for (let j = i + 1; j < names.length; j++) {
-            const b = names[j], pb = playerData[b];
-            if (!pb || typeof pb.x !== 'number') continue;
-            const aSeesB = losCovers(byPair[a] && byPair[a][b], tMs);
-            const bSeesA = losCovers(byPair[b] && byPair[b][a], tMs);
-            if (!aSeesB && !bSeesA) continue;
-            const ea = worldToCanvasNew(pa.x, pa.y, pa.z + 22);
-            const eb = worldToCanvasNew(pb.x, pb.y, pb.z + 22);
-            ctx.strokeStyle = (aSeesB && bSeesA) ? style.mutual
-                : aSeesB ? style.first : style.second;
-            ctx.beginPath();
-            ctx.moveTo(ea.x, ea.y);
-            ctx.lineTo(eb.x, eb.y);
-            ctx.stroke();
-        }
-    }
-    ctx.restore();
-}
-
-// drawLosLines renders the PVS overlay (thin, faint — potential visibility)
-// underneath the LOS overlay (solid — actual sightline), each gated by its own
-// toggle. PVS first so LOS lines draw on top. No-op unless data is present
-// (BSP-backed maps only).
-function drawLosLines(ctx, time, playerData) {
-    if (mapState.showPvs) drawVisLines(ctx, mapState.pvsByPair, time, playerData, PVS_STYLE);
-    if (mapState.showLos) drawVisLines(ctx, mapState.losByPair, time, playerData, LOS_STYLE);
-}
-
-function drawTracks(ctx, time) {
-    const trailDuration = mapState.trailDuration;
-
-    for (const [name, points] of Object.entries(mapState.fullTrails)) {
-        if (!mapState.enabledPlayers[name]) continue;
-        if (points.length < 2) continue;
-
-        // If current time is before trail start, pull start back so trail grows from here
-        if (time < (mapState.trailStartTimes[name] || 0)) {
-            mapState.trailStartTimes[name] = time;
-        }
-
-        // Find the end index: last point at or before current time
-        const endIdx = MapView.trailIndexAtTime(points, time);
-        if (endIdx < 1) continue;
-
-        // Find start: trail window starts at max(time - trailDuration, trailStartTime)
-        const trailStart = Math.max(time - trailDuration, mapState.trailStartTimes[name] || 0);
-        let startIdx = MapView.trailIndexAtTime(points, trailStart);
-        if (startIdx < 0) startIdx = 0;
-
-        if (endIdx - startIdx < 1) continue;
-
-        // Pre-convert the visible window of world-space points into canvas
-        // pixels at the current pan / zoom so the inner draw loop stays
-        // allocation-free and worldToCanvas's shared _tmpPt isn't clobbered
-        // between consecutive reads.
-        const cpts = new Array(endIdx - startIdx + 1);
-        for (let i = startIdx; i <= endIdx; i++) {
-            const pt = points[i];
-            const c = worldToCanvasNew(pt.wx, pt.wy, pt.wz);
-            cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
-        }
-
-        const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
-        const solidColor = MapView.hexToRgba(teamHex, 0.4);
-        const dashColor = MapView.hexToRgba(teamHex, 0.2);
-        const markerColor = MapView.hexToRgba(teamHex, 0.8);
-
-        // Collect death/spawn markers to draw after lines
-        const markers = [];
-
-        let inDash = false;
-        let afterDeath = false; // suppress line from death to next spawn
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = solidColor;
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.moveTo(cpts[0].x, cpts[0].y);
-
-        if (cpts[0].spawn) markers.push({ x: cpts[0].x, y: cpts[0].y, type: 'spawn' });
-
-        for (let i = 1; i < cpts.length; i++) {
-            const pt = cpts[i];
-
-            if (pt.spawn) {
-                // Spawn: start a new line segment (gap from death)
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.setLineDash([]);
-                ctx.strokeStyle = solidColor;
-                inDash = false;
-                afterDeath = false;
-                ctx.moveTo(pt.x, pt.y);
-                markers.push({ x: pt.x, y: pt.y, type: 'spawn' });
-                continue;
-            }
-
-            if (pt.death) {
-                // Death: draw line to death point, then mark it
-                ctx.lineTo(pt.x, pt.y);
-                ctx.stroke();
-                ctx.beginPath();
-                afterDeath = true;
-                markers.push({ x: pt.x, y: pt.y, type: 'death' });
-                continue;
-            }
-
-            if (afterDeath) {
-                // Between death and spawn — don't draw
-                ctx.moveTo(pt.x, pt.y);
-                continue;
-            }
-
-            const needDash = !!pt.tp;
-            if (needDash !== inDash) {
-                ctx.stroke();
-                ctx.beginPath();
-                const prev = cpts[i - 1];
-                ctx.moveTo(prev.x, prev.y);
-                if (needDash) {
-                    ctx.setLineDash([4, 6]);
-                    ctx.strokeStyle = dashColor;
-                } else {
-                    ctx.setLineDash([]);
-                    ctx.strokeStyle = solidColor;
-                }
-                inDash = needDash;
-            }
-            ctx.lineTo(pt.x, pt.y);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Draw death (✕) and spawn (●) markers on top
-        ctx.fillStyle = markerColor;
-        ctx.strokeStyle = markerColor;
-        ctx.lineWidth = 2;
-        for (const m of markers) {
-            if (m.type === 'death') {
-                // Draw ✕
-                const s = 5;
-                ctx.beginPath();
-                ctx.moveTo(m.x - s, m.y - s);
-                ctx.lineTo(m.x + s, m.y + s);
-                ctx.moveTo(m.x + s, m.y - s);
-                ctx.lineTo(m.x - s, m.y + s);
-                ctx.stroke();
-            } else {
-                // Draw ●
-                ctx.beginPath();
-                ctx.arc(m.x, m.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    }
-}
+// (buildVisByPair, losCovers, the LOS/PVS line overlays and drawTracks now
+// live in mvd-map-view — see MvdMap.drawLosLines / drawTracks.)
 
 // Reconstruct the row-shape bucket ({t, p, td}) at `time` from the columnar
 // view. Memoised on (view, index): repeated calls at the same time return the
@@ -8509,12 +8115,14 @@ function installMapInteraction(canvas) {
 // Player symbols win first (toggle follow), then the click picks a loc
 // region for focus mode — same region or empty space clears it.
 function handleMapCanvasClick(cx, cy, ev) {
-    const hit = hitTestPlayerSymbol(cx, cy, mapState.currentTime);
+    const bucket = findBucketAtTime(mapState.currentTime);
+    const hit = mapView.hitTestPlayerSymbol(cx, cy, mapState.currentTime,
+                                            bucket ? bucket.p : null);
     if (hit) {
         setFollowPlayer(mapState.followPlayer === hit ? null : hit);
         return;
     }
-    const region = pickLocGroupAt(cx, cy);
+    const region = mapView.pickLocGroupAt(cx, cy);
     if (region && region !== mapState.focusGroupName) {
         setFocusGroup(region);
     } else if (mapState.focusGroupName) {
@@ -8523,33 +8131,6 @@ function handleMapCanvasClick(cx, cy, ev) {
 }
 
 // ─── Follow-player ────────────────────────────────────────────────────────
-
-// Slightly larger than the base symbol radius so the click-to-follow hit
-// area stays generous even when a high-deck / max-zoom player renders at
-// the 1.5 * 1.25 ≈ 1.88x upper bound.
-const FOLLOW_HIT_RADIUS_PX = 24;
-
-function hitTestPlayerSymbol(cx, cy, time) {
-    const bucket = findBucketAtTime(time);
-    if (!bucket || !bucket.p) return null;
-    let best = null;
-    let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
-    for (const [name, data] of Object.entries(bucket.p)) {
-        // Hit-test against the stream-sourced position the symbol is drawn at.
-        const sp = mapView.streamPosAt(name, time * 1000);
-        const x = sp ? sp.x : data.x, y = sp ? sp.y : data.y, z = sp ? sp.z : data.z;
-        if (x === 0 && y === 0) continue;
-        const pos = worldToCanvas(x, y, z);
-        const dx = pos.x - cx;
-        const dy = pos.y - cy;
-        const d2 = dx * dx + dy * dy;
-        if (d2 <= bestD2) {
-            bestD2 = d2;
-            best = name;
-        }
-    }
-    return best;
-}
 
 function setFollowPlayer(name) {
     mapState.followPlayer = name || null;

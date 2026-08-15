@@ -82,17 +82,22 @@ Notes that cost me time:
 | `06a85d3` | `MvdMap` container (state bag + camera); loader invariant pinned by test |
 | `402e243` | world layers → `MvdMap.drawWorld` (floors, liquids, movers, projectiles/beams, outlines, labels) |
 | `16fdedf` | actor layers → the z-sorted item/player pass, badges, stems, arrows, item phase clock, entity view |
+| `17ffadb` | merge of main. Semantic fix the textual merge missed: TEAM_COLORS is now a per-match permutation (assignTeamColors), so setCanonicalTeams re-points mapView.teamColors — without that the canvas painted the unpermuted palette while the DOM showed the permuted one |
+| (2b)      | batch 2b — trails, LOS/PVS lines + buildVisByPair/losCovers, occupied-region + region-control overlays, resolvePlayerLoc, pickLocGroupAt, hitTestPlayerSymbol (takes the frame's player map as an argument — the frame source is still host-side). Harness: the LOS/PVS states now wait out the lazy worker raycast (`!mapState.losPending`), the only nondeterminism ever caught in the shots |
 
-State: `app.js` 10,386 lines (−1,815). `mvd-map-view/` ~2,000 lines of source,
-86 unit tests. `make test` green; 126/126 parity on every commit.
+State: `app.js` ~9,900 lines. `mvd-map-view/` ~2,600 lines of source,
+94 unit tests. `make test` green; full-shot parity on every commit (the set is
+140 shots since the LOS-wait fix).
 
 Current boundary:
 
 ```
 mvd-map-view/   camera · geometry · loc regions · floor model · draw primitives
                 · MvdMap state container · world layers · actor layers
-app.js          renderMap composition · trails · LOS/PVS lines · region-control
-                and occupancy overlays · pointer interaction + hit-testing
+                · trails · LOS/PVS lines · occupancy + region-control overlays
+                · loc resolution · hit-testing
+app.js          renderMap composition · frame source (bucket reconstruction)
+                · precomputeFullTrails · pointer interaction
                 · all DOM chrome · all loaders
 ```
 
@@ -100,33 +105,23 @@ app.js          renderMap composition · trails · LOS/PVS lines · region-contr
 
 In the order I would do it:
 
-1. **Batch 2b — the rest of the actor work.** `drawTracks` (trails, ~126
-   lines, reads `mapState.fullTrails`), `drawVisLines`/`drawLosLines`/
-   `buildVisByPair`/`losCovers`, `drawOccupiedRegionsOverlay`,
-   `drawRegionControlOverlay`, `computeOccupiedGroupTeams`, `regionActiveTint`,
-   `pickLocGroupAt`, `hitTestPlayerSymbol`. All are `mapState`-only — I
-   surveyed them and none touch `timelineState` or `currentResult`, so they
-   move the same mechanical way as batch 2a.
-   - Exception: `precomputeFullTrails` reads `timelineState.bucketView` and
-     `highResDuration`. It is a data transform, not drawing. Leave it in
-     `app.js` until the `FrameSource` seam exists, and move only `drawTracks`.
-2. **Step 3 — `renderMap` itself**, plus **`resize(w, h)` as push-only API**.
+1. **Step 3 — `renderMap` itself**, plus **`resize(w, h)` as push-only API**.
    `resizeMapCanvas` currently measures a container and reads
    `document.fullscreenElement`; both must become host-side, because the MCP
    host owns the iframe's dimensions and reports changes via
    `ui/notifications/size-changed`. This is the last piece the MCP viewer
    needs before it can mount the component at all.
-3. **`FrameSource` seam + `WasmFrameSource`** (mvd-web). Interface:
+2. **`FrameSource` seam + `WasmFrameSource`** (mvd-web). Interface:
    `{duration, coarse(), window(fromMs,toMs), markers(fromMs,toMs)}`, async
    from the start even though WASM resolves immediately — the component must
    tolerate a partially-loaded timeline, and retrofitting that later touches
    every render path.
-4. **Pointer interaction** (`installMapInteraction`) as component API with
+3. **Pointer interaction** (`installMapInteraction`) as component API with
    host-supplied event wiring.
-5. **Public surface**: setters (`setGeometry`/`setEntities`/`setLocTable`/
+4. **Public surface**: setters (`setGeometry`/`setEntities`/`setLocTable`/
    `setLocations`/`setFrames`/`setMarkers`), `seek(ms)`/`play()`/`pause()`,
    `follow()`, `setOverlays()`, and `on('select'|'camera'|'hoverloc')`.
-6. **Then** the two follow-on parts, in this order: WebGL backend
+5. **Then** the two follow-on parts, in this order: WebGL backend
    (perf/effects, see below), then the MCP Apps viewer in `mvd-mcp`.
 
 ---
