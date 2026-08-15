@@ -249,6 +249,18 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   envelope `dmg` / `boundedMode`, exactly as `/damage` does; read `dmg`
   rather than assuming the default took. Both echoes are absent only on a
   demo with no damage stream at all (`measured.damage: false`).
+
+  **Damage provenance (`source`, schema v71).** `/damage` responses carry
+  `source: "ktx"` when the log was decoded from the wire's damage stream
+  (every figure a measurement) or `source: "reconstructed"` when the demo
+  predates that instrumentation and the section was rebuilt from the
+  state streams (health/armor deltas + beams / projectile flights / fire
+  sounds / position tracks / the frag log). Reconstructed magnitudes are
+  near-exact; attribution is best-effort — treat per-player match totals
+  as ~1% estimates and prefer aggregates over individual hits (accuracy
+  tables: `mvd-analytics/damagerecon/ACCURACY.md`). Distinct from
+  `boundedSource` above, which records the KTX-scoreboard substitution
+  WITHIN a KTX-sourced summary.
 - **`time`** — match-relative **integer milliseconds**; **required** on
   `/state-at`. A non-integer value 400s `invalid_param` with an `(integer
   milliseconds)` hint.
@@ -386,7 +398,7 @@ Non-2xx responses use a stable envelope:
 | 422 | `playerstats_unavailable` | parse degraded to no player streams. **Not** raised for a missing KTX block — `/player-stats` serves those normally |
 | 422 | `metadata_unavailable` | no fullserverinfo / countdown centerprint |
 | 422 | `frags_unavailable` | no frag log |
-| 422 | `damage_unavailable` | no KTX `mvdhidden_dmgdone` damage stream |
+| 422 | `damage_unavailable` | no damage section at all: no KTX `mvdhidden_dmgdone` stream AND the reconstruction stood down (no player streams, or a midair/instagib/dmgfrags mode). Since schema v71 pre-instrumentation demos normally serve a **reconstructed** section instead of this 422 — check the response's `source` field (see "Damage provenance" in §2) |
 | 422 | `bounded_unavailable` | `dmg=bounded` on a demo whose bounded reconstruction was skipped (midair / instagib / dmgfrags mode) |
 | 422 | `shots_unavailable` | no shot data (no weapon fires decoded) |
 | 422 | `aim_unavailable` | no aim data (needs shots + position/view streams) |

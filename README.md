@@ -463,7 +463,9 @@ match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
 damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
-KTX `mvdhidden_dmgdone` stream, with a scoreboard cross-check),
+KTX `mvdhidden_dmgdone` stream with a scoreboard cross-check, or
+reconstructed from the state streams on pre-instrumentation demos;
+`damage.source` = `ktx` | `reconstructed` tells which),
 shots (per-shot weapon-fire stream — who fired what at exactly what ms,
 from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams — with same-frame hitscan→damage
 links, entity-tracked rocket/grenade→impact links, per-victim
@@ -602,6 +604,13 @@ in exclusive buckets (`both` / `rl` / `lg` / `mid` / `sg`) that partition
 possession streams rather than overlaid: KTX's own `ekills` counts the
 kill side inclusively and force-zeroes whole buckets by mode, and on the
 damage side the server keeps only the RL+LG-lumped `enemyWeapons` scalar.
+Schema v71 makes the section available on **every** demo: where the wire
+never carried the damage stream (~45% of the archive), the `damage-recon`
+node reconstructs it from the h/a change streams + beams / projectiles /
+fire sounds / position tracks / the frag log, at ~1% median per-player
+total error against KTX ground truth; `damage.source`
+(`ktx`&nbsp;|&nbsp;`reconstructed`) says which kind a consumer is holding
+(see [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)).
 
 `streams.global` carries a wall-clock anchor so a consumer can project any
 match-relative game time onto real-world time (for syncing voice tracks /
@@ -844,6 +853,16 @@ diff -r /tmp/before /tmp/after
 ```
 
 ## Known limitations
+
+0. **Reconstructed damage is an estimate.** On pre-instrumentation demos
+   (no KTX `mvdhidden_dmgdone` stream) the damage section is rebuilt from
+   the state streams by the `damage-recon` node and stamped
+   `source: "reconstructed"`. Magnitudes are near-exact (the health/armor
+   delta IS the bounded value) but attribution is inference: per-player
+   match totals run ~1% median error against ground truth, individual
+   hits can be misattributed, and team/self splits are indicative only.
+   Full accuracy tables and trust guidance:
+   [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of

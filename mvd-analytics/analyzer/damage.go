@@ -546,6 +546,9 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 
 	out.Matrix = flattenMatrix(matrix)
 	out.Scoreboard = a.reconcile(out.ByPlayer, enemyTakenBounded, boundedSkip == "")
+	// This section came from the wire's KTX damage stream — every figure a
+	// measurement. The damage-recon post stamps "reconstructed" instead.
+	out.Source = damageSourceKTX
 	if boundedSkip == "" {
 		out.Dmg = "both"
 		out.BoundedMode = "standard"

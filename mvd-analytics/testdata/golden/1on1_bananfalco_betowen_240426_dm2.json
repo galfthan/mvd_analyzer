@@ -3579,6 +3579,7 @@
         }
       }
     },
+    "source": "ktx",
     "totalDamage": 14339
   },
   "demoInfo": {
@@ -11191,7 +11192,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {

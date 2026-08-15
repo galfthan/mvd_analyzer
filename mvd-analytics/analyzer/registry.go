@@ -400,6 +400,14 @@ func NewDefaultRegistry() *Registry {
 	// match:final / frags:final, so the DAG runs it after the two fix-up
 	// nodes.
 	r.RegisterPostProcessor(playerStatsPost)
+	// Damage reconstruction registers LAST deliberately: on a
+	// pre-instrumentation demo it fills res.Damage from the state streams,
+	// and the damage-consuming posts above (aim, airgibs, player-stats)
+	// must keep binding the wire-measured artifact only — their behaviour
+	// on old demos (graceful degradation) is unchanged. Feeding
+	// reconstructed damage into them is a separate, per-consumer
+	// provenance decision (see plan-damage-recon.md §7).
+	r.RegisterPostProcessor(damageReconPost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

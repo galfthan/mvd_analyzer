@@ -5,6 +5,41 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (reconstruct-damage) — damage on every demo, schema v71
+
+~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:
+those demos had no `damage` section, so `/damage`, `/top-kills`, `/lives`
+and `/top-windows` damage figures answered 422. The new `damage-recon`
+DAG node (package `mvd-analytics/damagerecon`) now reconstructs the
+section on exactly those demos from spectator-visible state: the
+health/armor change streams (change-driven per server frame, so the
+observed delta IS KTX's bounded value), LG beam segments, rocket/grenade
+entity flights, fire sounds, position/view/velocity tracks, the frag log,
+and the map BSP (splash/line-of-sight feasibility gates). Both damage
+families are produced — raw (overkill-inclusive; model-derived where the
+wire's −99 corpse clamp hides it) and bounded — in the exact stored
+shapes, so every damage-shaped endpoint starts working with no consumer
+changes.
+
+Provenance is explicit: `damage.source` is `"ktx"` on wire-measured
+sections (stamped by the existing analyzer — the one golden-visible
+change on modern demos) and `"reconstructed"` on rebuilt ones; the view
+passes it through filtered/family-transformed responses and the OpenAPI
+`Damage` schema documents it. Validated blind against KTX ground truth
+on the modern golden corpus: per-player match totals at ~1% median error
+(bounded given 1.1%, bounded taken 0.05%, raw given 1.3%, raw taken
+0.9%), 99.6% of ground-truth damage instants covered, 97.6% attacker
+attribution — full tables, error anatomy and trust guidance in
+`mvd-analytics/damagerecon/ACCURACY.md`, with a regression harness at
+`mvd-analytics/cmd/qw-recon-eval` and a fast pinned subset in
+`damagerecon/eval_test.go`. Reconstruction requires the spatial shot
+streams (always built by mvd-api and the web WASM; `-include
+projectiles,beams` on the CLI), never overwrites a measured section, and
+stands down on `skipped:*` server modes (midair/instagib/dmgfrags).
+Non-finite wire origins (a pre-instrumentation-era corruption that made
+~6% of old demos abort JSON encoding with NaN) are now dropped at
+ingestion in positions, movers, projectiles and item spawns.
+
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 
 No schema change; web UI only. Team colors used to follow finishing order —

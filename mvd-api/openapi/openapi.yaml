@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "70"
+  version: "71"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -3710,6 +3710,21 @@ components:
       additionalProperties: false
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        source:
+          description: >
+            Where the damage log itself came from — `ktx` when decoded from
+            the wire's KTX mvdhidden_dmgdone stream (every figure a direct
+            measurement), or `reconstructed` when the demo predates that
+            instrumentation and the log was rebuilt from the health/armor
+            change streams + spectator-visible evidence (LG beams, projectile
+            flights, fire sounds, position tracks, the frag log). On
+            reconstructed data magnitudes are near-exact but attribution is
+            best-effort inference; treat per-player figures as ~1-2%%
+            estimates. Absent only on pre-v71 cached results. Distinct from
+            `boundedSource`, which records a view-time substitution WITHIN a
+            KTX-sourced payload.
+          type: string
+          enum: [ktx, reconstructed]
         boundedMode:
           description: >
             Whether the bounded family was reconstructed — `standard`, or a

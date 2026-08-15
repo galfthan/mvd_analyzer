@@ -1099,8 +1099,24 @@ package result
 //   - A drift test pins the manifest to the 422 table, which is what the
 //     removed ad-hoc has* fields never had and why they went stale.
 //
+// v71 — reconstructed damage for pre-instrumentation demos + damage
+// provenance.
+//   - ADDED: DamageResult.Source ("ktx" | "reconstructed") — where the
+//     damage log came from. The KTX analyzer stamps "ktx" on every demo it
+//     decodes (a stored-Result change: goldens move); the new damage-recon
+//     post-processor stamps "reconstructed".
+//   - ADDED: the damage-recon DAG node (package mvd-analytics/damagerecon).
+//     On demos whose wire carried no mvdhidden_dmgdone stream (~45% of the
+//     archive: res.Damage was absent and /damage 422'd), the damage section
+//     is now reconstructed from the health/armor change streams + LG beams,
+//     projectile flights, fire sounds, position/velocity tracks and the
+//     frag log — raw AND bounded families, same shapes, same match window.
+//     Wire-measured sections are never touched; consumers distinguish the
+//     two by `source`. Validation against KTX ground truth on modern demos:
+//     see mvd-analytics/damagerecon/ACCURACY.md.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 70
+const CurrentSchemaVersion = 71
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

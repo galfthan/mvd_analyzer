@@ -197,6 +197,12 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "opening",
 		desc:      "Match opening: each player's match-start spawn location plus the first in-match take of every contested spawner (armors, mega, powerups, RL/LG). A pure projection of items + streams, kept small for one-call fetches.",
 	},
+	"damageReconPost": {
+		name: "damage-recon", mutates: true,
+		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
+		provides: []string{"damage:final"},
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. Registered last so the other damage consumers (aim, airgibs, player-stats) keep reading the wire-measured artifact only.",
+	},
 }
 
 // specFromMeta builds a nodeSpec from a live handle's metadata, attaching

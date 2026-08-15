@@ -63,6 +63,17 @@ type DamageResult struct {
 	// is attempted and every Bounded field is absent.
 	BoundedMode string `json:"boundedMode,omitempty"`
 
+	// Source records where the damage log itself came from:
+	// DamageSourceKTX when it was decoded from the wire's KTX
+	// mvdhidden_dmgdone stream (every figure a direct measurement), or
+	// DamageSourceReconstructed when the demo predates that instrumentation
+	// and the log was reconstructed from the health/armor change streams +
+	// spectator-visible evidence (package mvd-analytics/damagerecon —
+	// magnitudes are near-exact, attribution is best-effort inference).
+	// Absent only in pre-v71 stored results. Distinct from BoundedSource,
+	// which records a view-time substitution WITHIN a KTX-sourced payload.
+	Source string `json:"source,omitempty"`
+
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
 	// end-of-match scoreboard totals (demoInfo.players[].dmg +
@@ -80,6 +91,13 @@ type DamageResult struct {
 	// weapons[].damage sub-block.
 	BoundedSource string `json:"boundedSource,omitempty"`
 }
+
+// DamageResult.Source vocabulary. DamageSourceKTX also serves as the
+// BoundedSource "ktx" token (same meaning: KTX-measured figures).
+const (
+	DamageSourceKTX           = "ktx"
+	DamageSourceReconstructed = "reconstructed"
+)
 
 // PositionalKill is one telefrag (deathtype "tele") or stomp (deathtype
 // "stomp") — an instant kill from occupying a player's space rather than

@@ -1,0 +1,364 @@
+package damagerecon
+
+import (
+	"math"
+	"sort"
+	"strings"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
+
+// beam is one TE_LIGHTNING2 segment (one LG attack).
+type beam struct {
+	t    int32
+	s, e vec3
+}
+
+// projectile is one bracketed rocket/grenade entity flight with the
+// resolved shooter (the wire carries no owner; resolution is spawn
+// proximity + aim-vs-flight-direction + fire-sound gating, ported from the
+// prototype).
+type projectile struct {
+	weapon  string
+	spawnT  int32
+	endT    int32
+	sp, ep  vec3
+	shooter string // "" when unresolved
+}
+
+// firedShot is one damage-free fire observation (sound or beam) from the
+// shots stream.
+type firedShot struct {
+	t      int32
+	player string
+	weapon string
+}
+
+// inputs is everything the attribution pass reads, assembled once.
+type inputs struct {
+	players map[string]*result.PlayerStream
+	tracks  map[string]*track
+	teams   map[string]string
+	order   []string // deterministic player iteration order
+
+	fragAt map[fragKey]*result.FragEntry
+	// fragAnyAt also holds suicide/teamkill entries — the obituary for an
+	// enemy telefrag is a killer-less "was telefragged" that parses as a
+	// suicide, yet it still proves (and types) the masked death.
+	fragAnyAt map[fragKey]*result.FragEntry
+	frags     []result.FragEntry
+	beams     []beam       // sorted by t
+	projs     []projectile // sorted by endT
+	shots     []firedShot  // sorted by t
+	nailShots []firedShot  // ng/sng subset, sorted by t
+	// consumedRL: per shooter, spawn times of rockets that HAVE an entity
+	// track — such a shot must not also act as a trackless point-blank
+	// candidate.
+	consumedRL map[string][]int32
+
+	// discharges: LG water discharges, detected from a player's cells
+	// stream dropping to exactly 0 while alive and holding LG. Base damage
+	// is 35*cells (id1 W_FireLightning), radius-dealt (self halved).
+	discharges []discharge
+
+	duel    bool
+	selfPen float64
+	bsp     *bspGate
+	// rlLo/rlHi: the demo's rocket direct-damage range. Vanilla default
+	// 100+random*20; narrowed to exactly 110 when detectRocketRegime
+	// recognises a fixed-constant server.
+	rlLo, rlHi float64
+}
+
+type fragKey struct {
+	victim string
+	t      int32
+}
+
+// isPositionalWeapon: frag weapons that are positional instant kills, not
+// weapon damage — folded like analyzer/damage.go's telefrag/stomp path.
+// (squish is NOT here: the KTX pipeline logs crush damage as normal events
+// under the "squish" weapon token, so the reconstruction does the same.)
+func isPositionalWeapon(w string) bool {
+	return w == "tele" || w == "stomp"
+}
+
+func buildInputs(res *result.Result) *inputs {
+	in := &inputs{
+		players:    make(map[string]*result.PlayerStream),
+		tracks:     make(map[string]*track),
+		teams:      make(map[string]string),
+		fragAt:     make(map[fragKey]*result.FragEntry),
+		fragAnyAt:  make(map[fragKey]*result.FragEntry),
+		consumedRL: make(map[string][]int32),
+		rlLo:       100,
+		rlHi:       120,
+	}
+	for i := range res.Streams.Players {
+		p := &res.Streams.Players[i]
+		in.players[p.Name] = p
+		in.teams[p.Name] = p.Team
+		if tr := newTrack(p.Position); tr != nil {
+			in.tracks[p.Name] = tr
+		}
+		in.order = append(in.order, p.Name)
+	}
+	sort.Strings(in.order)
+
+	mode := ""
+	if res.DemoInfo != nil {
+		mode = strings.ToLower(res.DemoInfo.Mode)
+	}
+	in.duel = mode == "duel" || mode == "1on1" ||
+		(mode == "" && len(res.Streams.Players) == 2)
+	// Enemy-attribution prior (study §"The enemy-attribution prior"):
+	// prefer the enemy explanation of an ambiguous delta. Mode-aware — the
+	// bias earns duel recall but costs team-game precision.
+	// Values re-tuned on per-player-total error after the engine-true
+	// self-splash model landed (the study's 0.6 was tuned for burst recall
+	// against the weaker model and inflates duel given ~8%; swept
+	// 0.0-0.6 on the eval corpus, 0.15 is the totals optimum).
+	if in.duel {
+		in.selfPen = 0.15
+	} else {
+		in.selfPen = 0.1
+	}
+
+	if res.Frags != nil {
+		in.frags = res.Frags.Frags
+		for i := range res.Frags.Frags {
+			f := &res.Frags.Frags[i]
+			in.fragAnyAt[fragKey{f.Victim, f.Time}] = f
+			if f.IsSuicide || f.IsTeamKill {
+				continue
+			}
+			in.fragAt[fragKey{f.Victim, f.Time}] = f
+		}
+	}
+
+	if bs := res.Streams.Beams; bs != nil {
+		for i := range bs.T {
+			in.beams = append(in.beams, beam{
+				t: bs.T[i],
+				s: vec3{float64(bs.Sx[i]), float64(bs.Sy[i]), float64(bs.Sz[i])},
+				e: vec3{float64(bs.Ex[i]), float64(bs.Ey[i]), float64(bs.Ez[i])},
+			})
+		}
+		sort.SliceStable(in.beams, func(i, j int) bool { return in.beams[i].t < in.beams[j].t })
+	}
+
+	if res.Shots != nil {
+		for i := range res.Shots.Shots {
+			s := &res.Shots.Shots[i]
+			fs := firedShot{t: s.Time, player: s.Player, weapon: s.Weapon}
+			in.shots = append(in.shots, fs)
+			if s.Weapon == "ng" || s.Weapon == "sng" {
+				in.nailShots = append(in.nailShots, fs)
+			}
+		}
+		sort.SliceStable(in.shots, func(i, j int) bool { return in.shots[i].t < in.shots[j].t })
+		sort.SliceStable(in.nailShots, func(i, j int) bool { return in.nailShots[i].t < in.nailShots[j].t })
+	}
+
+	in.resolveProjectiles(res.Streams.Projectiles)
+	in.detectDischarges()
+	return in
+}
+
+// discharge is one detected LG water discharge.
+type discharge struct {
+	t      int32
+	player string
+	cells  int
+}
+
+// detectDischarges scans each player's cells stream for the discharge
+// signature: cells drop to exactly 0 (all consumed at once) while the
+// player is alive and holds LG. A discharge multicasts no beam and often no
+// stat besides the ammo wipe — its damage (35*cells, radius-dealt) is
+// otherwise invisible to the reconstruction.
+func (in *inputs) detectDischarges() {
+	const minDischargeCells = 10
+	for _, name := range in.order {
+		p := in.players[name]
+		prev := 0
+		for i := range p.Cells {
+			c := p.Cells[i]
+			// Alive check is inclusive-end (inWeaponIntervals semantics): a
+			// discharge usually KILLS the discharger, closing the alive
+			// interval at the same instant the cells row lands.
+			if c.V == 0 && prev >= minDischargeCells &&
+				inWeaponIntervals(p.Alive, c.T) && inWeaponIntervals(p.LG, c.T) {
+				in.discharges = append(in.discharges, discharge{t: c.T, player: name, cells: prev})
+			}
+			prev = int(c.V)
+		}
+	}
+}
+
+// projShooterMaxAimDeg / projAimScore / projDistScore: the prototype's
+// shooter-resolution scoring constants.
+const (
+	projShooterSoundTolMs = 80
+	projShooterMaxAimDeg  = 55.0
+	rProjSrc              = 220.0 // units projectile spawn to shooter (p50=81, p90=152)
+)
+
+// resolveProjectiles brackets the columnar projectile stream into flights
+// and resolves each flight's shooter: players who fired that weapon within
+// the sound tolerance (else everyone), scored by spawn proximity and — for
+// rockets, which fly exactly where aimed — the angle between the shooter's
+// aim and the flight direction.
+func (in *inputs) resolveProjectiles(ps *result.ProjectileStreams) {
+	if ps == nil {
+		return
+	}
+	// weapon -> sorted fire times/players
+	shotsByWeapon := make(map[string][]firedShot)
+	for _, s := range in.shots {
+		shotsByWeapon[s.weapon] = append(shotsByWeapon[s.weapon], s)
+	}
+
+	for i := range ps.Spawn {
+		w := ps.Weapon[i]
+		sT := ps.Spawn[i]
+		sp := vec3{float64(ps.Sx[i]), float64(ps.Sy[i]), float64(ps.Sz[i])}
+		ep := vec3{float64(ps.Ex[i]), float64(ps.Ey[i]), float64(ps.Ez[i])}
+
+		var pool []string
+		for _, s := range shotsByWeapon[w] {
+			if abs32(s.t-sT) <= projShooterSoundTolMs {
+				pool = append(pool, s.player)
+			}
+		}
+		if len(pool) == 0 {
+			pool = in.order
+		}
+
+		fd := ep.sub(sp)
+		fl := fd.length()
+		best, bestScore := "", math.Inf(1)
+		for _, name := range pool {
+			tr := in.tracks[name]
+			if tr == nil {
+				continue
+			}
+			dd := tr.posAt(sT).distTo(sp)
+			if dd > rProjSrc {
+				continue
+			}
+			score := dd * 0.02
+			if w == "rl" && fl > 60 {
+				if fw, ok := tr.aimAt(sT); ok {
+					c := fw.dot(fd) / fl
+					ang := math.Acos(math.Max(-1, math.Min(1, c))) * 180.0 / math.Pi
+					if ang > projShooterMaxAimDeg {
+						continue
+					}
+					score += ang * 0.12
+				}
+			}
+			if score < bestScore {
+				best, bestScore = name, score
+			}
+		}
+		in.projs = append(in.projs, projectile{
+			weapon: w, spawnT: sT, endT: ps.End[i], sp: sp, ep: ep, shooter: best,
+		})
+	}
+	sort.SliceStable(in.projs, func(i, j int) bool { return in.projs[i].endT < in.projs[j].endT })
+
+	for _, pr := range in.projs {
+		if pr.weapon == "rl" && pr.shooter != "" {
+			in.consumedRL[pr.shooter] = append(in.consumedRL[pr.shooter], pr.spawnT)
+		}
+	}
+	for _, lst := range in.consumedRL {
+		sort.Slice(lst, func(i, j int) bool { return lst[i] < lst[j] })
+	}
+}
+
+// shotConsumed reports whether the player's RL fire at ts is accounted for
+// by a tracked projectile (within tol ms).
+func (in *inputs) shotConsumed(player string, ts int32, tol int32) bool {
+	lst := in.consumedRL[player]
+	i := sort.Search(len(lst), func(k int) bool { return lst[k] >= ts })
+	for _, j := range [2]int{i - 1, i} {
+		if j >= 0 && j < len(lst) && abs32(lst[j]-ts) <= tol {
+			return true
+		}
+	}
+	return false
+}
+
+// Telefrag-attacker inference gates (recovery when the obituary names no
+// killer — "was telefragged" parses as a suicide).
+const (
+	teleArrivalWindowMs = 150
+	teleJumpMinDist     = 250.0
+	teleArrivalMaxDist  = 200.0
+	teleStandMaxDist    = 130.0
+)
+
+// teleportArrivalAt finds the telefrag attacker at instant t. Two
+// mechanisms, tried in order:
+//
+//  1. classic teleporter telefrag — the attacker's track JUMPS onto the
+//     victim's spot (adjacent samples > teleJumpMinDist apart, landing
+//     near the victim);
+//  2. spawn telefrag — the victim (re)spawned onto an occupied spot and
+//     the spawn rules deflected the kill onto them: the attacker is simply
+//     the nearest live player standing within telefrag range.
+//
+// The victim's position is sampled just AFTER t: in the respawn+instant-
+// telefrag cycle the victim's only wire-visible position near t is the new
+// corpse on the contested pad.
+func (in *inputs) teleportArrivalAt(victim string, t int32) string {
+	vtrack := in.tracks[victim]
+	if vtrack == nil {
+		return ""
+	}
+	vpos := vtrack.posAt(t + 60)
+	best, bestDist := "", teleArrivalMaxDist
+	standBest, standDist := "", teleStandMaxDist
+	for _, name := range in.order {
+		if name == victim {
+			continue
+		}
+		tr := in.tracks[name]
+		if tr == nil {
+			continue
+		}
+		pt := tr.pt
+		i := sort.Search(len(pt.T), func(k int) bool { return pt.T[k] >= t-teleArrivalWindowMs })
+		for ; i < len(pt.T) && pt.T[i] <= t+teleArrivalWindowMs; i++ {
+			if i == 0 {
+				continue
+			}
+			a := vec3{float64(pt.X[i-1]), float64(pt.Y[i-1]), float64(pt.Z[i-1])}
+			b := vec3{float64(pt.X[i]), float64(pt.Y[i]), float64(pt.Z[i])}
+			if a.distTo(b) < teleJumpMinDist {
+				continue
+			}
+			if dd := b.distTo(vpos); dd < bestDist {
+				best, bestDist = name, dd
+			}
+		}
+		if inIntervals(in.players[name].Alive, t) {
+			if dd := tr.posAt(t).distTo(vpos); dd < standDist {
+				standBest, standDist = name, dd
+			}
+		}
+	}
+	if best != "" {
+		return best
+	}
+	return standBest
+}
+
+func abs32(v int32) int32 {
+	if v < 0 {
+		return -v
+	}
+	return v
+}
