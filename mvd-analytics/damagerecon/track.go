@@ -149,6 +149,26 @@ func (tr *track) velDelta(t int32, preMs, postMs int32) (vec3, bool) {
 	}, true
 }
 
+// minVzIn returns the minimum vertical velocity over samples in [t0, t1]
+// — the landing detector for fall damage (the engine hurts a landing at
+// vz < -650). ok is false without velocity columns or samples in range.
+func (tr *track) minVzIn(t0, t1 int32) (float64, bool) {
+	pt := tr.pt
+	n := len(pt.T)
+	if len(pt.VZ) != n {
+		return 0, false
+	}
+	i := sort.Search(n, func(k int) bool { return pt.T[k] >= t0 })
+	min, found := 0.0, false
+	for ; i < n && pt.T[i] <= t1; i++ {
+		v := float64(pt.VZ[i])
+		if !found || v < min {
+			min, found = v, true
+		}
+	}
+	return min, found
+}
+
 // inIntervals reports whether t lies in any half-open [Start,End) interval.
 func inIntervals(ivs []result.Interval, t int32) bool {
 	for _, iv := range ivs {

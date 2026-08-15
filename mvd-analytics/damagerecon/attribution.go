@@ -4,6 +4,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -32,11 +33,16 @@ type candidate struct {
 	geom     float64 // geometry-quality penalty (lower is better)
 	attacker string
 	weapon   string
-	kind     string  // "beam" | "proj" | "hitscan" | "nail" | "rl-sound"
+	kind     string  // "beam" | "proj" | "hitscan" | "nail" | "rl-sound" | "discharge" | "env"
 	dEnd     float64 // explosion-to-victim distance; <0 = unknown
 	ep       vec3    // explosion point (kind == "proj" only)
 	hasEP    bool
 	isSplash bool
+	// mLo/mHi: precomputed damage-model bounds for the kinds whose range
+	// depends on per-candidate state the generic model cannot see
+	// ("discharge": 35*cells; "env": the engine's lava/slime/drown/fall
+	// tick values at the victim's measured liquid state).
+	mLo, mHi float64
 }
 
 // reconEvent is one attributed damage observation — the reconstruction's
@@ -244,7 +250,7 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 	if ap := in.players[e.attacker]; ap != nil {
 		quad = inIntervals(ap.Quad, d.t)
 	}
-	pen, ok := in.damageModelScore(d.bounded, false, e.weapon, e.kind, e.dEnd, e.isSelf, quad)
+	pen, ok := in.damageModelScore(d.bounded, false, &candidate{weapon: e.weapon, kind: e.kind, dEnd: e.dEnd}, e.isSelf, quad)
 	if !ok || pen < 0.5 {
 		return single
 	}
@@ -267,6 +273,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.envCandidates(victim, d.t, vpos, vtrack)...)
 
 	type bounded struct {
 		c      candidate
@@ -278,7 +285,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 		if ap := in.players[c.attacker]; ap != nil {
 			quad = inIntervals(ap.Quad, d.t)
 		}
-		lo, hi, ok := in.modelBounds(c.weapon, c.kind, c.dEnd, c.attacker == victim, quad)
+		lo, hi, ok := in.modelBounds(&c, c.attacker == victim, quad)
 		if !ok || (lo == 0 && hi == 0) {
 			continue
 		}
@@ -370,6 +377,17 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		}
 	}
 
+	if d.died {
+		// Environmental deaths carry typed suicide obituaries ("burst into
+		// flames" → lava): the category is authoritative there, no model
+		// needed.
+		if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.IsSuicide {
+			if w := envObituaryWeapon(f.Weapon); w != "" {
+				return in.mkEvent(d, "world", victim, w, "env-anchor")
+			}
+		}
+	}
+
 	var cands []candidate
 	if vtrack != nil {
 		vpos := vtrack.posAt(d.t)
@@ -379,6 +397,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.dischargeCandidates(victim, d.t, vpos)...)
+		cands = append(cands, in.envCandidates(victim, d.t, vpos, vtrack)...)
 	}
 
 	best, ok := in.scoreCandidates(victim, vtrack, d, cands)
@@ -389,6 +408,17 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		if d.died {
 			if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.IsTeamKill && f.Killer != "" && f.Killer != victim {
 				return in.mkEvent(d, f.Killer, victim, "unknown", "teamkill-anchor")
+			}
+		}
+		// No weapon candidate fit — but an environmental candidate whose
+		// VALUE fits still classifies the tick. The value check matters:
+		// classifying by state alone stamped "fall" (a flat 5) onto
+		// arbitrary unexplained kill deltas.
+		if vtrack != nil {
+			for _, c := range in.envCandidates(victim, d.t, vtrack.posAt(d.t), vtrack) {
+				if pen, feasible := in.damageModelScore(d.bounded, d.died, &c, false, false); feasible && pen == 0 {
+					return in.mkEvent(d, "world", victim, c.weapon, "env-fallback")
+				}
 			}
 		}
 		return in.mkEvent(d, "world", victim, "unknown", "none")
@@ -532,7 +562,7 @@ func (in *inputs) scoreCandidates(victim string, vtrack *track, d delta, cands [
 		if ap := in.players[c.attacker]; ap != nil {
 			quad = inIntervals(ap.Quad, d.t)
 		}
-		pen, feasible := in.damageModelScore(d.bounded, d.died, c.weapon, c.kind, c.dEnd, c.attacker == victim, quad)
+		pen, feasible := in.damageModelScore(d.bounded, d.died, &c, c.attacker == victim, quad)
 		if !feasible {
 			continue
 		}
@@ -568,8 +598,8 @@ func (in *inputs) scoreCandidates(victim string, vtrack *track, d delta, cands [
 // attacker's own splash = D − 0.25·dist. Rocket D = 100..120, grenade 120.
 // LG = 30/cell, sg pellet 4×6, ssg ×14, ng spike 9, sng 18, axe 20.
 // Quad multiplies ×4.
-func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd float64, isSelf, quad bool) (float64, bool) {
-	lo, hi, feasible := in.modelBounds(weapon, kind, dEnd, isSelf, quad)
+func (in *inputs) damageModelScore(obs int, died bool, c *candidate, isSelf, quad bool) (float64, bool) {
+	lo, hi, feasible := in.modelBounds(c, isSelf, quad)
 	if !feasible {
 		return 0, false
 	}
@@ -590,6 +620,13 @@ func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd
 	default:
 		return 0, true
 	}
+	if c.kind == "env" {
+		// Environmental tick values are engine-exact (10·wl lava, flat-5
+		// fall, ...): a value outside the band is not a poor fit, it is a
+		// different cause. Without this a lone landing candidate "won"
+		// arbitrary unexplained kill deltas as fall damage.
+		return 0, false
+	}
 	return pen / math.Max(10.0, 0.25*hi), true
 }
 
@@ -597,7 +634,8 @@ func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd
 // candidate explanation ((0,0) for an unmodeled kind — no opinion).
 // Factored out of damageModelScore so the same-frame pair-split can test
 // whether TWO candidates' ranges sum to the observation.
-func (in *inputs) modelBounds(weapon, kind string, dEnd float64, isSelf, quad bool) (float64, float64, bool) {
+func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64, bool) {
+	weapon, kind, dEnd := c.weapon, c.kind, c.dEnd
 	q := 1.0
 	if quad {
 		q = 4.0
@@ -657,10 +695,11 @@ func (in *inputs) modelBounds(weapon, kind string, dEnd float64, isSelf, quad bo
 		default: // axe
 			lo, hi = 20.0*q, 20.0*q
 		}
-	case "discharge":
-		// dEnd carries the expected value (35*cells radius model, computed
-		// per candidate); quad/self already folded in there.
-		lo, hi = dEnd*0.75-10, dEnd*1.1+10
+	case "discharge", "env":
+		// Bounds precomputed per candidate (35*cells for a discharge; the
+		// engine tick values at the measured liquid state / a flat 5 for a
+		// landing). Quad/self never apply to these.
+		lo, hi = c.mLo, c.mHi
 	case "nail":
 		per := 9.0
 		if weapon == "sng" {
@@ -875,6 +914,84 @@ func (in *inputs) rlSoundCandidates(victim string, t int32, vpos vec3) []candida
 	return out
 }
 
+// Environmental damage models (ktx/src/client.c WaterMove + the landing
+// path): lava = 10*waterlevel every 0.2s, slime = 4*waterlevel every 1s,
+// drowning = escalating 4,6,8,10,12,14 every 1s once fully submerged with
+// air out, a landing = flat 5 at vz < -650. The liquid state comes from
+// the BSP at the victim's interpolated position (one level of slack for
+// interpolation error); the landing from the velocity track.
+const fallLandingVz = -650.0
+
+func (in *inputs) envCandidates(victim string, t int32, vpos vec3, vtrack *track) []candidate {
+	var out []candidate
+	if level, contents := in.bsp.waterLevelAt(vpos); level > 0 {
+		switch contents {
+		case bspvis.ContentsLava:
+			lo := 10.0 * float64(max(1, level-1))
+			hi := 10.0 * float64(min(3, level+1))
+			out = append(out, candidate{geom: 0.12, attacker: "world",
+				weapon: "lava", kind: "env", dEnd: -1, mLo: lo, mHi: hi})
+		case bspvis.ContentsSlime:
+			lo := 4.0 * float64(max(1, level-1))
+			hi := 4.0 * float64(min(3, level+1))
+			out = append(out, candidate{geom: 0.12, attacker: "world",
+				weapon: "slime", kind: "env", dEnd: -1, mLo: lo, mHi: hi})
+		default: // water: only drowning hurts, and only fully submerged
+			// ... for 12+ seconds (air_finished): probe the last 12s of
+			// track — anything less submerged and this delta cannot be a
+			// drown tick, no matter how well the value fits (shotgun
+			// damage overlaps the 4-14 drown range, and without this gate
+			// sg hits on swimming victims got misread as drowning).
+			if level >= 3 && in.submergedFor(vtrack, t, 11500) {
+				out = append(out, candidate{geom: 0.12, attacker: "world",
+					weapon: "drown", kind: "env", dEnd: -1, mLo: 4, mHi: 14})
+			}
+		}
+	}
+	if vtrack != nil {
+		// The velocity columns are derived from ~13-40ms position samples,
+		// so the pre-impact peak is routinely under-measured — probe a
+		// window and accept a slightly softer threshold than the engine's
+		// -650. Safe to loosen: the value gate (a landing is exactly 5) is
+		// what keeps this candidate honest.
+		if vz, ok := vtrack.minVzIn(t-300, t); ok && vz < fallLandingVz+75 {
+			out = append(out, candidate{geom: 0.1, attacker: "world",
+				weapon: "fall", kind: "env", dEnd: -1, mLo: 5, mHi: 5})
+		}
+	}
+	return out
+}
+
+// submergedFor reports whether the victim's track shows full submersion
+// (waterlevel 3) at every probe over the trailing durMs window.
+func (in *inputs) submergedFor(vtrack *track, t int32, durMs int32) bool {
+	if vtrack == nil {
+		return false
+	}
+	const step = 1500
+	for dt := int32(0); dt <= durMs; dt += step {
+		level, _ := in.bsp.waterLevelAt(vtrack.posAt(t - dt))
+		if level < 3 {
+			return false
+		}
+	}
+	return true
+}
+
+// envObituaryWeapon maps a suicide obituary's weapon token to the damage
+// vocabulary's environmental category, or "" when the obituary does not
+// name an environmental death ("water" is the obituary token for
+// drowning; the damage log spells it "drown").
+func envObituaryWeapon(w string) string {
+	switch w {
+	case "lava", "slime", "fall", "trigger":
+		return w
+	case "water", "drown":
+		return "drown"
+	}
+	return ""
+}
+
 // dischargeCandidates: LG water discharges hitting the victim — a radius
 // blast of 35*cells from the discharger's position. Expected damage is
 // computed here (the model needs the per-discharge cells count, which the
@@ -909,6 +1026,7 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		out = append(out, candidate{
 			geom: 0.1, attacker: dc.player, weapon: "lg",
 			kind: "discharge", dEnd: expected,
+			mLo: expected*0.75 - 10, mHi: expected*1.1 + 10,
 		})
 	}
 	return out

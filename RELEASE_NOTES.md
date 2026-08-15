@@ -46,7 +46,12 @@ artifact, so its damage family exists on old demos too, with
 `derived:unbounded`) keeping the evidence grade legible per row and in
 the `sources` roll-up. Aim and airgibs deliberately keep binding
 wire-measured damage only — reconstructed per-hit attribution is not
-measurement-grade enough for shot-level analytics. One honesty guard
+measurement-grade enough for shot-level analytics. Environmental damage is modeled
+too: reconstructed sections categorize world damage as lava / slime /
+drown / fall (BSP liquid contents + landing detection + typed env
+suicide obituaries, engine-exact tick values as all-or-nothing
+candidates — lava 97% / fall 95% category accuracy vs ground truth)
+instead of a flat "unknown". One honesty guard
 shipped with it: old recorders often FREEZE the StatItems weapon bits
 (a player "holds" RL from 0:00 through every death), which would have
 classified every reconstructed hit into the top EWep bucket — the

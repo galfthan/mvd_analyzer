@@ -76,7 +76,19 @@ port adds, each verified against ground truth in the eval:
   hides it (quad rockets, discharges);
 - same-frame pair splitting: a merged multi-attacker instant that no
   single candidate's damage range can explain, but a pair of different
-  attackers sums to, is split between them (range-midpoint proportional).
+  attackers sums to, is split between them (range-midpoint proportional);
+- environmental classification (ktx/src/client.c WaterMove + the landing
+  path): lava = 10·waterlevel/0.2s, slime = 4·waterlevel/1s, drowning =
+  escalating 4..14/1s after 12s of full submersion, landings = flat 5 at
+  vz < −650 — categorized from BSP liquid contents at the victim's
+  position, the velocity track, and typed env suicide obituaries.
+  Category accuracy vs GT: lava 97%, fall 95%, drown 83% (n=6); env
+  values are exact-fit-only candidates so they can never absorb an
+  unexplained weapon delta. GT's env `ng`/`sng` rows (a disconnected
+  shooter's nails, attacker slot −1 on the wire) stay attributed to the
+  actual shooter here — a deliberate divergence. Mover crush (`squish`
+  ticks) stays `unknown`. Without a provisioned BSP the liquid
+  categories degrade to `unknown` (fall still works).
 
 ## Old-recorder degradations (detected per demo, withheld not faked)
 

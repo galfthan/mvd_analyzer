@@ -118,7 +118,7 @@ type confCell struct {
 func classify(attacker, victim, weapon string, isEnv, isSelf, isTeam bool) string {
 	switch {
 	case isEnv:
-		return "env"
+		return "env:" + weapon
 	case isSelf:
 		return "self"
 	case isTeam:

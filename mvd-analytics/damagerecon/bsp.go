@@ -33,6 +33,17 @@ func loadBSPGate(res *result.Result) *bspGate {
 	return &bspGate{b: b}
 }
 
+// waterLevelAt classifies the liquid state at a player origin (engine
+// PM_CategorizePosition semantics: level 0 dry / 1 feet / 2 waist /
+// 3 eyes; contents is the liquid type). A nil gate reports dry — the
+// environmental classification then falls back to "unknown".
+func (g *bspGate) waterLevelAt(p vec3) (level int, contents int32) {
+	if g == nil {
+		return 0, 0
+	}
+	return g.b.WaterLevel(float32(p.x), float32(p.y), float32(p.z))
+}
+
 // rayClear reports whether the segment a→b crosses no solid geometry.
 // A nil gate is always clear.
 func (g *bspGate) rayClear(a, b vec3) bool {

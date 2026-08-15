@@ -149,8 +149,9 @@ func TestDamageModelScoreSelfRocketCeiling(t *testing.T) {
 	in := &inputs{rlLo: 110, rlHi: 110}
 	// 110 observed as SELF splash is impossible (ceiling ~55): must carry a
 	// heavy penalty relative to the enemy explanation.
-	selfPen, selfOK := in.damageModelScore(110, false, "rl", "rl-sound", -1, true, false)
-	enemyPen, enemyOK := in.damageModelScore(110, false, "rl", "rl-sound", -1, false, false)
+	c := &candidate{weapon: "rl", kind: "rl-sound", dEnd: -1}
+	selfPen, selfOK := in.damageModelScore(110, false, c, true, false)
+	enemyPen, enemyOK := in.damageModelScore(110, false, c, false, false)
 	if !selfOK || !enemyOK {
 		t.Fatalf("both should be scoreable")
 	}
@@ -166,8 +167,23 @@ func TestDamageModelScoreQuadBeforeFalloff(t *testing.T) {
 	in := &inputs{rlLo: 110, rlHi: 110}
 	// Quad splash at 200u: engine computes 440 - 100 = 340 (base×4 first).
 	// The wrong order 4×(110-100) = 40 would reject 340.
-	if pen, ok := in.damageModelScore(340, false, "rl", "proj", 200, false, true); !ok || pen != 0 {
+	c := &candidate{weapon: "rl", kind: "proj", dEnd: 200}
+	if pen, ok := in.damageModelScore(340, false, c, false, true); !ok || pen != 0 {
 		t.Fatalf("quad splash 340 at 200u must fit exactly, got pen=%v ok=%v", pen, ok)
+	}
+}
+
+func TestDamageModelScoreEnvExactFitOnly(t *testing.T) {
+	in := &inputs{}
+	// Environmental tick values are engine-exact: a landing is 5, and any
+	// other value must be INFEASIBLE (not merely penalized) so a lone fall
+	// candidate can never absorb an unexplained delta.
+	c := &candidate{weapon: "fall", kind: "env", dEnd: -1, mLo: 5, mHi: 5}
+	if pen, ok := in.damageModelScore(5, false, c, false, false); !ok || pen != 0 {
+		t.Fatalf("a flat-5 landing must fit exactly, got pen=%v ok=%v", pen, ok)
+	}
+	if _, ok := in.damageModelScore(155, true, c, false, false); ok {
+		t.Fatalf("a 155 delta must be infeasible as fall damage")
 	}
 }
 
