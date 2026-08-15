@@ -18,23 +18,31 @@ over the golden-corpus cache (`mvd-analytics/testdata/cache/`, 13 demos:
 run). A fast regression subset is pinned in `eval_test.go` (runs in
 `make test`, skips without the cache).
 
-## Headline numbers (2026-08-15, 13 demos, 75 player rows with GT ≥ 200)
+## Headline numbers (2026-08-15, after temp-entity evidence)
 
-Per-player match totals, relative error vs the KTX log:
+Per-player match totals, relative error vs the KTX log. Golden cache
+(13 demos, 75 player rows with GT ≥ 200):
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 1.02% | 1.20% | 2.30% | 48% | 79% |
+| bounded given | 0.75% | 0.91% | 1.95% | 68% | 91% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 1.32% | 1.78% | 3.64% | 37% | 69% |
-| raw taken | 0.93% | 1.52% | 4.02% | 51% | 72% |
-| bounded ewep | ~1.9% | ~2.3% | ~5.5% | 29% | 53% |
-| bounded givenTeam | 7.5% | 7.9% | — | small denominators (200–700) |
-| bounded givenSelf | 9.4% | 9.7% | — | small denominators |
+| raw given | 1.23% | 1.63% | 3.91% | 44% | 72% |
+| raw taken | 0.90% | 1.53% | 4.07% | 52% | 72% |
+| bounded ewep | 1.06% | 1.59% | 3.21% | 48% | 68% |
+| bounded givenTeam | 4.3% | 6.6% | — | small denominators (200–700) |
+| bounded givenSelf | 3.9% | 5.3% | — | small denominators |
 
-Event level: 99.6% of ground-truth damage instants have a same-instant
-reconstructed delta; 98.8% of those match the bounded value exactly;
-attacker attribution is 97.6% on unambiguous enemy instants.
+The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — see
+`.reports/qw-recon-eval-dm2dm3-2026-08-15/`, fetched with
+`cmd/fetch-eval-corpus`) scores slightly better: bounded given median
+**0.61%** (mean 0.83%, p90 1.85%, ≤2% 92%), bounded taken 0.04%, raw
+given 1.24%, raw taken 1.78%.
+
+Event level (60-demo corpus): 99.6% of ground-truth damage instants have
+a same-instant reconstructed delta; 98.9% of those match the bounded
+value exactly; attacker attribution is 98.4% on unambiguous enemy
+instants (rl 99.5%, lg 99.5%, sg 97.8%, axe 100%).
 
 ## Why the errors are what they are
 
@@ -77,6 +85,21 @@ port adds, each verified against ground truth in the eval:
 - same-frame pair splitting: a merged multi-attacker instant that no
   single candidate's damage range can explain, but a pair of different
   attackers sums to, is split between them (range-midpoint proportional);
+- temp-entity hit telemetry (`streams.pointEffects`, 2026-08-15):
+  TE_EXPLOSION snaps tracked flight endpoints to the exact detonation
+  point and anchors the point-blank rockets/grenades whose entity never
+  broadcast (shooter recovered by flight-time + aim to the detonation
+  point — replacing the geometry-less rl-sound guess); TE_BLOOD confirms
+  hitscan hits on the victim, with per-demo count calibration
+  (`calibrateBloods`: 4·Σcounts == delta on ≥70% of single-shotgunner
+  samples) unlocking count-pinned volley magnitudes and softening the
+  aim-cone gate's false negatives; TE_LIGHTNINGBLOOD separates LG hits
+  from beams that merely pass near the victim. Absence of the stream
+  (older parses, `-include` without projectiles/beams) degrades
+  gracefully to the pre-telemetry behaviour;
+- the axe: swings enter the shots stream (`weapons/ax1.wav`) and link at
+  their engine-true +200ms traceline delay (W_FireAxe fires two 0.1s
+  animation thinks after the swing sound) — axe attribution 21% → 100%;
 - environmental classification (ktx/src/client.c WaterMove + the landing
   path): lava = 10·waterlevel/0.2s, slime = 4·waterlevel/1s, drowning =
   escalating 4..14/1s after 12s of full submersion, landings = flat 5 at
@@ -113,8 +136,9 @@ detection rather than fabrication:
 ## Trust guidance for consumers
 
 `damage.source == "reconstructed"` means: bounded **taken** is
-measurement-grade; bounded **given** is a ~1% estimate for match totals;
-per-hit attribution is ~98% but individual hits can be misattributed
+measurement-grade; bounded **given** is a well-under-1%-median estimate
+for match totals; per-hit attribution is ~98% but individual hits can be
+misattributed
 (prefer aggregates to single events); team/self splits are indicative,
 not exact; raw overkill beyond the -99 corpse clamp is model-derived on
 killing hits. Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
