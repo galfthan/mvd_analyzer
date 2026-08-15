@@ -71,10 +71,15 @@ Moved so far:
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
 
-Still in `app.js`: the per-frame composition (`renderMap`), pointer
-interaction, the frame source (bucket reconstruction — `hitTestPlayerSymbol`
-takes the frame's player map as an argument until that seam exists), and all
-the DOM chrome and loaders.
+The frame composition is `MvdMap.render(time, bucket, controlStates)`, and
+size arrives only through `resize(cssW, cssH, dpr)` — the host measures
+whatever it wants (container, fullscreen element, iframe) and pushes the
+result in.
+
+Still in `app.js`: the frame source (bucket reconstruction and the
+region-control lookup — `render` and `hitTestPlayerSymbol` take the frame's
+data as arguments until the `FrameSource` seam exists), pointer interaction,
+all measuring, and all the DOM chrome and loaders.
 
 A note on data: the renderer reads item spawners from its own
 `state.items`, not from an analyzer Result — it has no notion of one, and in

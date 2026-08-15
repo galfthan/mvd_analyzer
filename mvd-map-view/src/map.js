@@ -16,14 +16,14 @@
 // this was a module-level object in app.js — that equivalence is what keeps
 // the move verifiable a group at a time. The render methods follow.
 
-import { newCamera, project, is3D } from './camera.js';
+import { newCamera, project, is3D, fit } from './camera.js';
 import { moverPoseAt, pointInTriangle } from './geometry.js';
-import { buildFloorModel } from './locgroups.js';
-import { scaleRgbaAlpha, hexToRgba } from './color.js';
+import { buildFloorModel, processLocationGroups } from './locgroups.js';
+import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
 import {
     drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
     drawMoverMesh, drawLiquidVolume, drawPlayerSymbolAt, drawBadgesAroundCenter,
-    drawWorldArrow, drawArrow, PLAYER_SYMBOL_BASE_SIZE,
+    drawWorldArrow, drawArrow, drawDeathX, drawDropD, PLAYER_SYMBOL_BASE_SIZE,
 } from './draw.js';
 import { lowerBoundIndex, trailIndexAtTime } from './util.js';
 import { normalizeLocationName, findNearestLocation } from './locs.js';
@@ -255,9 +255,14 @@ export function losCovers(iv, tMs) {
 export function newState() {
     return {
         // Target surface. The host supplies both; the component never looks
-        // either of them up.
+        // either of them up. Size arrives only through resize() — the
+        // component never measures a container (loader invariant: the MCP
+        // host owns the iframe's dimensions and pushes changes in).
         canvas: null,
         ctx: null,
+        canvasCssW: 0,
+        canvasCssH: 0,
+        dpr: 1,
 
         // What the map is.
         locations: [],        // MapLocation[] — loc points, positions + names
@@ -289,6 +294,8 @@ export function newState() {
         // What is being shown.
         trailDuration: 10,
         fullTrails: {},
+        deathEvents: [],      // time-sorted {t, wx, wy, wz, teamIdx} death frames
+        dropEvents: [],       // backpack drops, same shape + weapon
         trailStartTimes: {},
         enabledPlayers: {},
         showViewArrows: false,
@@ -341,6 +348,39 @@ export class MvdMap {
     attach(canvas) {
         this.state.canvas = canvas;
         this.state.ctx = canvas.getContext('2d');
+    }
+
+    // resize sets the canvas surface to cssW × cssH CSS pixels, backed by a
+    // physical-pixel bitmap sized for `dpr` so lines and text render at
+    // device resolution. Push-only: the host measures whatever it wants
+    // (container, fullscreen element, iframe) and hands the result in. All
+    // draw code works in CSS pixels; render() applies setTransform(dpr, ...)
+    // so ctx operations map from CSS → physical automatically. Refits the
+    // world→canvas map; pan/zoom/angles survive (a resize must not throw
+    // away the user's view).
+    resize(cssW, cssH, dpr = 1) {
+        const s = this.state;
+        const canvas = s.canvas;
+        if (!canvas) return;
+        s.dpr = dpr;
+        s.canvasCssW = cssW;
+        s.canvasCssH = cssH;
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+        this.refit();
+    }
+
+    // refit recomputes the world→canvas linear map from the current bounds
+    // and surface size. Also re-centres the orbit pivot on the map's XY
+    // centre (see camera.fit); zMid is the caller's to manage.
+    refit() {
+        const s = this.state;
+        if (!s.canvas) return;
+        const cssW = s.canvasCssW || s.canvas.width;
+        const cssH = s.canvasCssH || s.canvas.height;
+        fit(this.camera, s.bounds, cssW, cssH);
     }
 
     // ─── Projection ─────────────────────────────────────────────────────────
@@ -1522,5 +1562,149 @@ export class MvdMap {
             }
         }
         return out;
+    }
+
+    // ─── Frame composition ──────────────────────────────────────────────────
+
+    // rebuildLocationGroups (re)derives the named loc regions from the loc
+    // points plus whatever geometry is loaded, and refreshes the
+    // normalized-name lookup the per-frame occupancy highlighting keys into.
+    rebuildLocationGroups() {
+        const s = this.state;
+        const { groups, byName } = processLocationGroups(s.locations, s.mapGeometry);
+        s.locationGroups = groups;
+        s.locationGroupByName = byName;
+        return groups;
+    }
+
+    // render composes one frame at `time` (seconds). The two host-supplied
+    // arguments exist because the frame source still lives host-side until
+    // the FrameSource seam lands:
+    //   bucket        — the reconstructed 50 ms bucket at `time` (memoised by
+    //                   the host, so its identity doubles as the redraw key),
+    //                   or null before the bucket view arrives.
+    //   controlStates — region name → control state at `time`, or null when
+    //                   region control is absent / not yet resolved.
+    render(time, bucket, controlStates) {
+        const s = this.state;
+        const ctx = s.ctx;
+        const canvas = s.canvas;
+
+        if (!ctx || !canvas) return;
+
+        // Skip redraw if same data bucket and nothing else changed — but NOT
+        // during playback: positions come from the native-rate streams, so the
+        // map must repaint every frame to animate at native rate (the old
+        // bucket-gated repaint froze the view between 50 ms buckets, which read
+        // as ~2 fps in slow motion). When paused/idle the skip still elides
+        // redundant redraws.
+        if (bucket === s.lastRenderedBucket && !s.renderDirty && !s.isPlaying) return;
+        s.lastRenderedBucket = bucket;
+        s.renderDirty = false;
+
+        // Player positions (and the floor-height fh for the anchor stem) come
+        // from the native-rate streams; state badges stay on the bucket. Built
+        // once here from a non-mutating overlay on the cached bucket.
+        const playerData = bucket ? this.augmentPlayerData(bucket.p, time * 1000) : null;
+        // Stash for drawMovers (runs inside the world layer, which has no
+        // playerData of its own) to highlight movers a player is riding.
+        s._framePlayerData = playerData;
+
+        // Normalize to CSS pixel coordinates. The canvas backing store is sized
+        // to cssDims * devicePixelRatio for sharp rendering on HiDPI displays;
+        // setTransform(dpr,...) makes every subsequent draw interpret its
+        // coordinates in CSS px while rasterising at physical resolution.
+        const dpr = s.dpr || 1;
+        const cssW = s.canvasCssW || canvas.width;
+        const cssH = s.canvasCssH || canvas.height;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Follow-player: pin the camera on the tracked player this frame by
+        // adjusting panX/panY so their symbol lands at canvas center.
+        if (s.followPlayer && playerData) {
+            const fp = playerData[s.followPlayer];
+            if (fp && !(fp.x === 0 && fp.y === 0)) {
+                this.camera.panX = 0;
+                this.camera.panY = 0;
+                const pos = this.toCanvas(fp.x, fp.y, fp.z);
+                this.camera.panX = cssW / 2 - pos.x;
+                this.camera.panY = cssH / 2 - pos.y;
+            }
+        }
+
+        // Clear
+        ctx.fillStyle = '#0a0a15';
+        ctx.fillRect(0, 0, cssW, cssH);
+
+        // Process location groups once (cached on the state)
+        if (!s.locationGroups && s.locations.length > 0) {
+            this.rebuildLocationGroups();
+        }
+
+        // Draw the location underlay (backdrop + per-loc regions + outlines +
+        // labels). Fresh each frame so it follows pan / zoom precisely and stays
+        // crisp at any zoom level.
+        this.drawWorld(ctx);
+
+        // Learn-map mode: static entity study view — keep the floor/loc base,
+        // draw the designed entity layout, and skip all player/time-based layers.
+        if (s.learnMode) {
+            this.drawMapEntities(ctx);
+            return;
+        }
+
+        // Draw region control overlay (colored by controlling team)
+        if (controlStates) {
+            this.drawRegionControlOverlay(ctx, controlStates);
+        }
+
+        // Highlight regions that currently contain at least one player so the
+        // viewer can tell which loc each symbol belongs to without squinting.
+        if (playerData) {
+            this.drawOccupiedRegionsOverlay(ctx, playerData);
+        }
+
+        // Draw tracks (per-player visibility controlled by enabledPlayers)
+        this.drawTracks(ctx, time);
+
+        // Line-of-sight debug overlay (opt-in): connects players who can see each
+        // other at the current time. Drawn under the player symbols.
+        this.drawLosLines(ctx, time, playerData);
+
+        // Z-depth pass for items + players: overlapping players occlude by z
+        // (higher deck on top), and an item whose z is clearly higher than a
+        // player also draws on top. Items carry a downward sort bias
+        // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
+        // them — the common case — but win when they sit a real floor above.
+        this.drawItemsAndPlayersZSorted(ctx, time, playerData);
+
+        // Recent-death markers — drawn last so the X sits on top of everything
+        // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
+        // Linear scan is fine: a long match has on the order of 100-200 deaths
+        // and this loop runs at most once per bucket tick.
+        const deaths = s.deathEvents;
+        if (deaths && deaths.length > 0) {
+            for (const e of deaths) {
+                const dt = time - e.t;
+                if (dt < 0 || dt > DEATH_X_DURATION) continue;
+                const alpha = 1 - dt / DEATH_X_DURATION;
+                const pos = this.toCanvasNew(e.wx, e.wy, e.wz);
+                drawDeathX(ctx, pos.x, pos.y, hexToRgb(this.teamColors[e.teamIdx] || '#ff5050'), alpha);
+            }
+        }
+
+        // Drop markers — superimposed on the death X at the same world
+        // position (KTX drops the backpack at the dying player's origin).
+        // Fades on the same timeline as the X.
+        const drops = s.dropEvents;
+        if (drops && drops.length > 0) {
+            for (const e of drops) {
+                const dt = time - e.t;
+                if (dt < 0 || dt > DEATH_X_DURATION) continue;
+                const alpha = 1 - dt / DEATH_X_DURATION;
+                const pos = this.toCanvasNew(e.wx, e.wy, e.wz);
+                drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
+            }
+        }
     }
 }

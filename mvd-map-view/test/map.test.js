@@ -388,6 +388,73 @@ test('hitTestPlayerSymbol picks the nearest drawn symbol within the radius', () 
     assert.equal(map.hitTestPlayerSymbol(41, 61, 0, null), null, 'no frame data');
 });
 
+// A canvas stub good enough for resize()/render(): records property sets,
+// swallows every draw call, and hands back a context that does the same.
+function stubCanvas() {
+    const calls = [];
+    const ctx = new Proxy({}, {
+        get: (t, prop) => (prop === 'canvas' ? canvas : (...a) => { calls.push(String(prop)); }),
+        set: () => true,
+    });
+    const canvas = {
+        width: 0, height: 0,
+        style: {},
+        getContext: () => ctx,
+        ownerDocument: { createElement: () => stubCanvas().canvas },
+    };
+    return { canvas, ctx, calls };
+}
+
+test('resize backs the surface at dpr and refits without touching the view', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+    map.camera.zoomK = 3;
+    map.camera.panX = 17;
+    map.resize(800, 400, 2);
+    assert.equal(canvas.width, 1600, 'bitmap is css × dpr');
+    assert.equal(canvas.height, 800);
+    assert.equal(canvas.style.width, '800px', 'CSS size is the logical size');
+    assert.equal(map.state.dpr, 2);
+    assert.equal(map.camera.scale, 4, 'fit: 400 css px over a 100-unit world');
+    assert.equal(map.camera.zoomK, 3, 'user zoom survives');
+    assert.equal(map.camera.panX, 17, 'user pan survives');
+});
+
+test('resize without a canvas is a harmless no-op', () => {
+    new MvdMap().resize(800, 400, 2);
+});
+
+test('render skips a clean repeated frame but repaints when dirty or playing', () => {
+    const { canvas, calls } = stubCanvas();
+    const map = new MvdMap(canvas);
+    const bucket = { p: null };
+    map.render(1, bucket, null);
+    const first = calls.length;
+    assert.ok(first > 0, 'first frame draws');
+    map.render(1, bucket, null);
+    assert.equal(calls.length, first, 'same bucket, clean, paused → skipped');
+    map.state.renderDirty = true;
+    map.render(1, bucket, null);
+    assert.ok(calls.length > first, 'dirty → repainted');
+    const afterDirty = calls.length;
+    map.state.isPlaying = true;
+    map.render(1, bucket, null);
+    assert.ok(calls.length > afterDirty, 'playing → repaints every frame');
+});
+
+test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
+    const map = new MvdMap();
+    map.state.locations = [
+        { name: 'RA', x: 0, y: 0, z: 0 },
+        { name: 'RA', x: 50, y: 0, z: 0 },
+        { name: 'RA', x: 0, y: 50, z: 0 },
+    ];
+    const groups = map.rebuildLocationGroups();
+    assert.equal(map.state.locationGroups, groups);
+    assert.ok(map.state.locationGroupByName, 'lookup populated');
+});
+
 test('drawTracks pulls a trail start back when the clock rewinds past it', () => {
     const map = new MvdMap();
     const noop = () => {};

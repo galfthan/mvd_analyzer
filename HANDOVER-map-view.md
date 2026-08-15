@@ -84,6 +84,7 @@ Notes that cost me time:
 | `16fdedf` | actor layers → the z-sorted item/player pass, badges, stems, arrows, item phase clock, entity view |
 | `17ffadb` | merge of main. Semantic fix the textual merge missed: TEAM_COLORS is now a per-match permutation (assignTeamColors), so setCanonicalTeams re-points mapView.teamColors — without that the canvas painted the unpermuted palette while the DOM showed the permuted one |
 | (2b)      | batch 2b — trails, LOS/PVS lines + buildVisByPair/losCovers, occupied-region + region-control overlays, resolvePlayerLoc, pickLocGroupAt, hitTestPlayerSymbol (takes the frame's player map as an argument — the frame source is still host-side). Harness: the LOS/PVS states now wait out the lazy worker raycast (`!mapState.losPending`), the only nondeterminism ever caught in the shots |
+| (3)       | `MvdMap.render(time, bucket, controlStates)` — the whole frame composition; app.js renderMap is a thin wrapper resolving the two host-side time-indexed inputs. `resize(cssW, cssH, dpr)` / `refit()` as the push-only size API — all measuring (fullscreen, DPR) stays in app.js. `rebuildLocationGroups()` replaces the app-side wrapper |
 
 State: `app.js` ~9,900 lines. `mvd-map-view/` ~2,600 lines of source,
 94 unit tests. `make test` green; full-shot parity on every commit (the set is
@@ -96,8 +97,9 @@ mvd-map-view/   camera · geometry · loc regions · floor model · draw primiti
                 · MvdMap state container · world layers · actor layers
                 · trails · LOS/PVS lines · occupancy + region-control overlays
                 · loc resolution · hit-testing
-app.js          renderMap composition · frame source (bucket reconstruction)
-                · precomputeFullTrails · pointer interaction
+                · render(time, bucket, controlStates) · resize/refit push API
+app.js          frame source (bucket reconstruction + region-control lookup)
+                · precomputeFullTrails · pointer interaction · all measuring
                 · all DOM chrome · all loaders
 ```
 
@@ -105,23 +107,17 @@ app.js          renderMap composition · frame source (bucket reconstruction)
 
 In the order I would do it:
 
-1. **Step 3 — `renderMap` itself**, plus **`resize(w, h)` as push-only API**.
-   `resizeMapCanvas` currently measures a container and reads
-   `document.fullscreenElement`; both must become host-side, because the MCP
-   host owns the iframe's dimensions and reports changes via
-   `ui/notifications/size-changed`. This is the last piece the MCP viewer
-   needs before it can mount the component at all.
-2. **`FrameSource` seam + `WasmFrameSource`** (mvd-web). Interface:
+1. **`FrameSource` seam + `WasmFrameSource`** (mvd-web). Interface:
    `{duration, coarse(), window(fromMs,toMs), markers(fromMs,toMs)}`, async
    from the start even though WASM resolves immediately — the component must
    tolerate a partially-loaded timeline, and retrofitting that later touches
    every render path.
-3. **Pointer interaction** (`installMapInteraction`) as component API with
+2. **Pointer interaction** (`installMapInteraction`) as component API with
    host-supplied event wiring.
-4. **Public surface**: setters (`setGeometry`/`setEntities`/`setLocTable`/
+3. **Public surface**: setters (`setGeometry`/`setEntities`/`setLocTable`/
    `setLocations`/`setFrames`/`setMarkers`), `seek(ms)`/`play()`/`pause()`,
    `follow()`, `setOverlays()`, and `on('select'|'camera'|'hoverloc')`.
-5. **Then** the two follow-on parts, in this order: WebGL backend
+4. **Then** the two follow-on parts, in this order: WebGL backend
    (perf/effects, see below), then the MCP Apps viewer in `mvd-mcp`.
 
 ---

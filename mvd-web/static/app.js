@@ -6053,15 +6053,6 @@ function getFragsAtTime(time) {
 // Map Visualization
 // =============================================================================
 
-// processLocationGroups builds the named loc regions from the analyzer's
-// per-loc points plus whatever BSP geometry is loaded, and caches the
-// normalized-name lookup the per-frame occupancy highlighting keys into.
-function processLocationGroups(locations) {
-    const { groups, byName } = MapView.processLocationGroups(locations, mapState.mapGeometry);
-    mapState.locationGroupByName = byName;
-    return groups;
-}
-
 // ─── Region focus mode ──────────────────────────────────────────────────────
 //
 // Clicking a loc region (on empty floor, not a player symbol) focuses it:
@@ -6147,7 +6138,7 @@ function applyMapGeometry(geom) {
     // Rebuild groups with tris attached, then refresh region->group
     // references so the control overlay doesn't keep pointing at the
     // previous (stale-tris) group objects.
-    mapState.locationGroups = processLocationGroups(mapState.locations);
+    mapView.rebuildLocationGroups();
     if (mapState.rcResult) {
         applyRegionConfig(); // also calls renderMap
     } else {
@@ -6394,7 +6385,7 @@ function initRegionControl(result) {
 
     // Ensure location groups are processed
     if (!mapState.locationGroups && mapState.locations.length > 0) {
-        mapState.locationGroups = processLocationGroups(mapState.locations);
+        mapView.rebuildLocationGroups();
     }
 
     // Build region config UI (editable text fields per region)
@@ -6728,7 +6719,7 @@ function calculateMapBounds(result) {
         minY: minY - padY,
         maxY: maxY + padY
     };
-    updateWorldToCanvasTransform();
+    mapView.refit();
 }
 
 // Orbit-camera state, allocated by mvd-map-view (newCamera) — the
@@ -6736,7 +6727,7 @@ function calculateMapBounds(result) {
 // see mvd-map-view/src/camera.js for what each field means. panX/panY/zoomK
 // carry user pan and zoom on top of the fit base and survive a refit
 // (canvas resize, geometry reload), so the user's view is not thrown away.
-// Call updateWorldToCanvasTransform() when bounds or the canvas change.
+// Call mapView.refit() when bounds or the canvas change.
 //
 // Null until the module bootstrap in index.html hands the namespace over,
 // which happens after this script's top level but before DOMContentLoaded —
@@ -6790,6 +6781,10 @@ function currentOrbitPivot() {
 // Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
 const MAP_CANVAS_BASE_WIDTH = 850;
 
+// resizeMapCanvas measures the surface the map should fill — the fullscreen
+// panel when active, a fixed width shaped by the world aspect otherwise —
+// and pushes the result into the component. All measurement stays here:
+// MvdMap.resize is push-only (the MCP host owns its iframe's dimensions).
 function resizeMapCanvas() {
     const canvas = mapState.canvas;
     if (!canvas) return;
@@ -6809,31 +6804,7 @@ function resizeMapCanvas() {
             ? Math.round(Math.max(400, Math.min(850, cssW * (worldH / worldW))))
             : 700;
     }
-    // Back the canvas with a physical-pixel bitmap sized for the display DPR
-    // so lines and text render at device resolution. All draw code works in
-    // CSS pixels; renderMap applies setTransform(dpr, 0, 0, dpr, 0, 0) before
-    // each render so ctx operations map from CSS → physical automatically.
-    const dpr = window.devicePixelRatio || 1;
-    mapState.dpr = dpr;
-    mapState.canvasCssW = cssW;
-    mapState.canvasCssH = cssH;
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    updateWorldToCanvasTransform();
-}
-
-function updateWorldToCanvasTransform() {
-    const { minX, maxX, minY, maxY } = mapState.bounds;
-    const canvas = mapState.canvas;
-    if (!canvas) return;
-    const cssW = mapState.canvasCssW || canvas.width;
-    const cssH = mapState.canvasCssH || canvas.height;
-    // Orbit center lands on the XY map center; zMid is set separately
-    // (initMapView) from the map's loc height range, and pan/zoom/angles are
-    // preserved across a refit.
-    MapView.fit(_wtc, mapState.bounds, cssW, cssH);
+    mapView.resize(cssW, cssH, window.devicePixelRatio || 1);
 }
 
 function resetMapView() {
@@ -6847,7 +6818,7 @@ function resetMapView() {
     if (mapState.focusGroupName) setFocusGroup(null);
     // Restore the default orbit pivot (map center / mid height) — orbit
     // drags may have re-centered it.
-    updateWorldToCanvasTransform();
+    mapView.refit();
     _wtc.zMid = _wtc.zMidDefault || 0;
     // Back to the default isometric view (also syncs the 3D button and redraws).
     setMapCamera(MapView.DEFAULT_YAW, MapView.DEFAULT_PITCH);
@@ -7379,130 +7350,15 @@ function precomputeFullTrails() {
     }
 }
 
+// renderMap resolves the two time-indexed inputs the component cannot reach
+// (the reconstructed bucket and the region-control states — both live on
+// host data structures until the FrameSource seam lands) and hands the frame
+// to MvdMap.render, which owns the whole composition.
 function renderMap(time) {
-    const ctx = mapState.ctx;
-    const canvas = mapState.canvas;
-
-    if (!ctx || !canvas) return;
-
-    // Skip redraw if same data bucket and nothing else changed — but NOT
-    // during playback: positions come from the native-rate streams, so the
-    // map must repaint every frame to animate at native rate (the old
-    // bucket-gated repaint froze the view between 50 ms buckets, which read
-    // as ~2 fps in slow motion). When paused/idle the skip still elides
-    // redundant redraws.
     const bucket = findBucketAtTime(time);
-    if (bucket === mapState.lastRenderedBucket && !mapState.renderDirty && !mapState.isPlaying) return;
-    mapState.lastRenderedBucket = bucket;
-    mapState.renderDirty = false;
-
-    // Player positions (and the floor-height fh for the anchor stem) come
-    // from the native-rate streams; state badges stay on the bucket. Built
-    // once here from a non-mutating overlay on the cached bucket.
-    const playerData = bucket ? mapView.augmentPlayerData(bucket.p, time * 1000) : null;
-    // Stash for drawMovers (runs inside the world layer, which has no
-    // playerData of its own) to highlight movers a player is riding.
-    mapState._framePlayerData = playerData;
-
-    // Normalize to CSS pixel coordinates. The canvas backing store is sized
-    // to cssDims * devicePixelRatio for sharp rendering on HiDPI displays;
-    // setTransform(dpr,...) makes every subsequent draw interpret its
-    // coordinates in CSS px while rasterising at physical resolution.
-    const dpr = mapState.dpr || 1;
-    const cssW = mapState.canvasCssW || canvas.width;
-    const cssH = mapState.canvasCssH || canvas.height;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    // Follow-player: pin the camera on the tracked player this frame by
-    // adjusting panX/panY so their symbol lands at canvas center.
-    if (mapState.followPlayer && playerData) {
-        const fp = playerData[mapState.followPlayer];
-        if (fp && !(fp.x === 0 && fp.y === 0)) {
-            _wtc.panX = 0;
-            _wtc.panY = 0;
-            const pos = worldToCanvas(fp.x, fp.y, fp.z);
-            _wtc.panX = cssW / 2 - pos.x;
-            _wtc.panY = cssH / 2 - pos.y;
-        }
-    }
-
-    // Clear
-    ctx.fillStyle = '#0a0a15';
-    ctx.fillRect(0, 0, cssW, cssH);
-
-    // Process location groups once (cache in mapState)
-    if (!mapState.locationGroups && mapState.locations.length > 0) {
-        mapState.locationGroups = processLocationGroups(mapState.locations);
-    }
-
-    // Draw the location underlay (backdrop + per-loc regions + outlines +
-    // labels). Fresh each frame so it follows pan / zoom precisely and stays
-    // crisp at any zoom level.
-    mapView.drawWorld(ctx);
-
-    // Learn-map mode: static entity study view — keep the floor/loc base,
-    // draw the designed entity layout, and skip all player/time-based layers.
-    if (mapState.learnMode) {
-        mapView.drawMapEntities(ctx);
-        return;
-    }
-
-    // Draw region control overlay (colored by controlling team)
-    if (mapState.controlRegions && mapState.regionToGroups) {
-        const controlStates = getRegionControlAtTime(time);
-        if (controlStates) {
-            mapView.drawRegionControlOverlay(ctx, controlStates);
-        }
-    }
-
-    // Highlight regions that currently contain at least one player so the
-    // viewer can tell which loc each symbol belongs to without squinting.
-    if (playerData) {
-        mapView.drawOccupiedRegionsOverlay(ctx, playerData);
-    }
-
-    // Draw tracks (per-player visibility controlled by enabledPlayers)
-    mapView.drawTracks(ctx, time);
-
-    // Line-of-sight debug overlay (opt-in): connects players who can see each
-    // other at the current time. Drawn under the player symbols.
-    mapView.drawLosLines(ctx, time, playerData);
-
-    // Z-depth pass for items + players: overlapping players occlude by z
-    // (higher deck on top), and an item whose z is clearly higher than a
-    // player also draws on top. Items carry a downward sort bias
-    // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
-    // them — the common case — but win when they sit a real floor above.
-    mapView.drawItemsAndPlayersZSorted(ctx, time, playerData);
-
-    // Recent-death markers — drawn last so the X sits on top of everything
-    // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
-    // Linear scan is fine: a long match has on the order of 100-200 deaths
-    // and this loop runs at most once per bucket tick.
-    const deaths = mapState.deathEvents;
-    if (deaths && deaths.length > 0) {
-        for (const e of deaths) {
-            const dt = time - e.t;
-            if (dt < 0 || dt > MapView.DEATH_X_DURATION) continue;
-            const alpha = 1 - dt / MapView.DEATH_X_DURATION;
-            const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
-            MapView.drawDeathX(ctx, pos.x, pos.y, hexToRgb(TEAM_COLORS[e.teamIdx] || '#ff5050'), alpha);
-        }
-    }
-
-    // Drop markers — superimposed on the death X at the same world
-    // position (KTX drops the backpack at the dying player's origin).
-    // Fades on the same timeline as the X.
-    const drops = mapState.dropEvents;
-    if (drops && drops.length > 0) {
-        for (const e of drops) {
-            const dt = time - e.t;
-            if (dt < 0 || dt > MapView.DEATH_X_DURATION) continue;
-            const alpha = 1 - dt / MapView.DEATH_X_DURATION;
-            const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
-            MapView.drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
-        }
-    }
+    const controlStates = (mapState.controlRegions && mapState.regionToGroups)
+        ? getRegionControlAtTime(time) : null;
+    mapView.render(time, bucket, controlStates);
 }
 
 // ─── Map Items (armor / weapon / MH / powerup overlays) ────────────────────

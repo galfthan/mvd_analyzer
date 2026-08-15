@@ -4,9 +4,10 @@
 // the host app: this package has no dependencies, and a three-field hex parse
 // is not a "system" worth sharing across the boundary. Loc *naming*, by
 // contrast, is a system — see locs.js, which owns the one canonical
-// normalizer for the whole app.
+// normalizer for the whole app. (Exported since the death-marker pass moved
+// in — drawDeathX takes its colour as an [r, g, b] triple.)
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
     return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
 
