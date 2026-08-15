@@ -73,12 +73,24 @@ victim-weapon fields (`victimWep` empty, `enemyVs*`/`ewep` zero)
 instead of fabricating them.
 
 The axe joins the `shots` stream: `weapons/ax1.wav` (the per-attack swing
-sound, CHAN_WEAPON) now maps to a `weapon: "axe"` fire, with same-frame
-damage linking like the shotguns — so axe swings appear in the per-shot
-stream, `byPlayer` accuracy, the KTX reconciliation and the aim weapon
-counters. This also lets the damage reconstruction's existing axe
-candidates actually fire (axe attribution was 21% on the validation
-corpus purely because the swing never reached the shots artifact).
+sound, CHAN_WEAPON) now maps to a `weapon: "axe"` fire, linked to its
+damage at the swing's real timing — W_FireAxe runs the traceline exactly
+200ms after the sound (the third 0.1s animation think), so both the shot
+linker and the reconstruction search that delayed window. Axe swings
+appear in the per-shot stream, `byPlayer` accuracy, the KTX
+reconciliation and the aim weapon counters, and reconstructed axe
+attacker attribution went 20% → 100% on the 60-demo validation corpus.
+
+The parser now surfaces every point-effect temp entity
+(`PointEffectEvent`; previously length-skipped), and the analyzer exposes
+them as a new `streams.pointEffects` spatial stream behind the
+shot-streams gate: TE_BLOOD (hitscan damage striking a player, with the
+per-volley pellet count), TE_LIGHTNINGBLOOD (per-cell LG hit),
+TE_EXPLOSION (the exact rocket/grenade detonation point, including
+point-blank rockets whose entity never broadcast) and TE_GUNSHOT (the
+wall-puff miss pattern). These are per-hit damage telemetry present on
+every demo generation back to original qwprogs — the wire evidence the
+damage reconstruction consumes next.
 
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 

@@ -37,6 +37,12 @@ type ShotsAnalyzer struct {
 	// beams holds every LG bolt's geometry for the spatial beam stream.
 	beams []rawBeam
 
+	// pointEffects holds every point-effect temp entity (blood, explosion,
+	// gunshot, ...) for the spatial point-effect stream. Collected only when
+	// shot streams are requested (unlike beams it has no per-shot consumer
+	// inside this analyzer, and a 4on4 carries tens of thousands).
+	pointEffects []rawPointEffect
+
 	// Nail tracking (opt-in, ctx.Nails). svc_nails2 ids are stable while a
 	// nail lives, so openNail brackets each flight (spawn → despawn) the same
 	// way projectile entnums bracket rockets. nailFlights are the completed
@@ -101,6 +107,15 @@ type rawBeam struct {
 	tMs   int32
 	start [3]float32
 	end   [3]float32
+}
+
+// rawPointEffect is one point-effect temp entity (TE type + count byte +
+// origin), kept for the spatial point-effect stream.
+type rawPointEffect struct {
+	tMs    int32
+	teType int
+	count  int
+	origin [3]float32
 }
 
 const (
@@ -170,6 +185,12 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 		a.onSound(e)
 	case *events.BeamEvent:
 		a.onBeam(e)
+	case *events.PointEffectEvent:
+		if a.ctx.ShotStreams {
+			a.pointEffects = append(a.pointEffects, rawPointEffect{
+				tMs: e.TimeMs, teType: e.Type, count: e.Count, origin: e.Origin,
+			})
+		}
 	case *events.ProjectileSpawnEvent:
 		a.openProj[e.EntNum] = &rawProjectile{kind: e.Kind, spawnTMs: e.TimeMs, spawnOrigin: e.Origin}
 	case *events.ProjectileDespawnEvent:
@@ -431,6 +452,11 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 					bm.T[i] -= ms
 				}
 			}
+			if pe := s.PointEffects; pe != nil {
+				for i := range pe.T {
+					pe.T[i] -= ms
+				}
+			}
 		}
 	}
 	return nil
@@ -464,6 +490,19 @@ func (a *ShotsAnalyzer) buildSpatialStreams(result *Result) {
 				bs.Ez = append(bs.Ez, b.end[2])
 			}
 			result.Streams.Beams = bs
+		}
+		if len(a.pointEffects) > 0 {
+			ps := &PointEffectStreams{}
+			for i := range a.pointEffects {
+				pe := &a.pointEffects[i]
+				ps.T = append(ps.T, pe.tMs)
+				ps.Type = append(ps.Type, int32(pe.teType))
+				ps.Count = append(ps.Count, int32(pe.count))
+				ps.X = append(ps.X, pe.origin[0])
+				ps.Y = append(ps.Y, pe.origin[1])
+				ps.Z = append(ps.Z, pe.origin[2])
+			}
+			result.Streams.PointEffects = ps
 		}
 		// Latch truthfully: the eager build ran with the shot-streams flag on,
 		// so the projectile/beam streams (possibly empty) are as complete as
