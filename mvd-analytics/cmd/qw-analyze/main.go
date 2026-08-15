@@ -108,6 +108,7 @@ type viewOptions struct {
 	timeSet     bool // -time was given (distinguishes an explicit -time 0 from "flag missing")
 	includeTeam bool
 	include     map[string]bool // -include positions etc. for -view full
+	parallel    bool            // -parallel: goroutine fan-out inside heavy passes
 
 	// Derived-view knobs. The view package speaks int32 ms; the CLI speaks
 	// durations like every other time flag here, so these convert at the
@@ -252,6 +253,7 @@ func main() {
 	bulk := flag.Bool("bulk", false, "treat the input path as a directory and analyze every demo in it")
 	indent := flag.Bool("pretty", false, "pretty-print JSON output (single-demo mode only); pipe to `jq .` for human reading")
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
+	parallel := flag.Bool("parallel", false, "use goroutines inside heavy analysis passes (opt-in: leave off when running many analyses concurrently)")
 
 	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | airgibs | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
@@ -374,6 +376,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "qw-analyze:", err)
 		os.Exit(2)
 	}
+	vopts.parallel = *parallel
 
 	if *bulk || *outDir != "" {
 		if *outDir == "" {
@@ -727,6 +730,7 @@ type analyzeOptions struct {
 	buildShotStreams bool // -include projectiles/beams: spatial rocket/grenade/LG streams
 	buildNails       bool // -include nails: svc_nails decode + ng/sng nail linkage (also flips the parser)
 	computeLOS       bool // -include los: run the lazy line-of-sight/PVS pass after analyze
+	parallel         bool // -parallel: goroutine fan-out inside heavy passes
 }
 
 // warnUnlinkedNails reports ng/sng fires whose hits were never attributed,
@@ -780,6 +784,7 @@ func analyzePath(path string, regionsOverride []config.MapRegionOverride, opts a
 		reg.BuildNails = true
 		src.Parser().SetDecodeNails(true)
 	}
+	reg.Parallel = opts.parallel
 	res, err := reg.AnalyzeSource(src, filepath.Base(path))
 	if err != nil {
 		return nil, err
@@ -802,6 +807,7 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 		opts.buildShotStreams = vopts.include["projectiles"] || vopts.include["beams"]
 		opts.buildNails = vopts.include["nails"]
 		opts.computeLOS = vopts.include["los"]
+		opts.parallel = vopts.parallel
 	}
 	res, err := analyzePath(path, regionsOverride, opts)
 	if err != nil {
@@ -920,16 +926,17 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 	return enc.Encode(out)
 }
 
-// analyzeOptionsFor derives the registry/parser knobs from -include. Only
-// -view full consumes the position columns, but the knobs are cheap to read
-// here and the applicability check has already rejected -include on the
-// selections that cannot use it.
+// analyzeOptionsFor derives the registry/parser knobs from -include and
+// -parallel. Only -view full consumes the position columns, but the knobs are
+// cheap to read here and the applicability check has already rejected
+// -include on the selections that cannot use it.
 func analyzeOptionsFor(vopts *viewOptions) analyzeOptions {
 	var opts analyzeOptions
 	if vopts != nil {
 		opts.buildShotStreams = vopts.include["projectiles"] || vopts.include["beams"]
 		opts.buildNails = vopts.include["nails"]
 		opts.computeLOS = vopts.include["los"]
+		opts.parallel = vopts.parallel
 	}
 	return opts
 }

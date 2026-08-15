@@ -3,6 +3,7 @@ package analyzer
 import (
 	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/mapclip"
@@ -817,13 +818,24 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() []string {
 		} else {
 			b.posLi = b.posLi[:len(b.posT)]
 		}
+		// Consecutive samples at the exact same origin resolve to the
+		// same loc — reuse the previous answer instead of re-running the
+		// finder (a standing player re-samples its position every frame).
+		var lastX, lastY, lastZ float32
+		var lastLi int16
+		lastValid := false
 		for i := range b.posT {
 			x, y, z := b.posX[i], b.posY[i], b.posZ[i]
 			if x == 0 && y == 0 && z == 0 {
 				b.posLi[i] = 0
 				continue
 			}
+			if lastValid && x == lastX && y == lastY && z == lastZ {
+				b.posLi[i] = lastLi
+				continue
+			}
 			b.posLi[i] = indexFor(a.locFinder.FindNearest(x, y, z))
+			lastX, lastY, lastZ, lastLi, lastValid = x, y, z, b.posLi[i], true
 		}
 	}
 
@@ -872,6 +884,13 @@ func (b *streamBuilder) emitLocStream() {
 	}
 }
 
+// posableMover is one mover whose submodel hull was built: its origin
+// timeline plus the hull the floor-height scene poses at each sample.
+type posableMover struct {
+	track *moverTrack
+	hull  *mapclip.Hull
+}
+
 // resolveFloorHeights populates each player's PositionTrack.H column —
 // the feet-above-floor height — by tracing straight down through the
 // map's player clip hulls at every native-rate sample (schema v24).
@@ -910,10 +929,6 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 	}
 
 	// Movers whose submodel hull was built, in entity-number order.
-	type posableMover struct {
-		track *moverTrack
-		hull  *mapclip.Hull
-	}
 	moverEnts := make([]int, 0, len(a.movers))
 	for ent, mt := range a.movers {
 		if a.moverHulls[mt.subModel] != nil {
@@ -926,22 +941,26 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 		mt := a.movers[ent]
 		posable[i] = posableMover{track: mt, hull: a.moverHulls[mt.subModel]}
 	}
-	cursors := make([]int, len(posable))
-	scratch := make([]mapclip.PosedHull, 0, len(posable))
-
 	slots := make([]int, 0, len(a.playerState))
 	for slot := range a.playerState {
 		slots = append(slots, slot)
 	}
 	sort.Ints(slots)
 
+	// Slots are independent — each writes only its own posH / posLq and
+	// scans the mover tracks with private cursors — so with
+	// Context.Parallel they fan out into goroutines; the default is the
+	// plain sequential loop (batch hosts parallelize across demos, not
+	// inside one). Results are byte-identical either way: every
+	// per-sample input (hulls, mover tracks, BSP) is read-only here.
+	parallel := a.ctx != nil && a.ctx.Parallel
+	var wg sync.WaitGroup
+	cursors := make([]int, len(posable))
+	scratch := make([]mapclip.PosedHull, 0, len(posable))
 	for _, slot := range slots {
 		b := &a.playerState[slot].streams
 		if len(b.posT) == 0 {
 			continue
-		}
-		for i := range cursors {
-			cursors[i] = -1 // each slot rescans the tracks from the start
 		}
 		if a.clipHull != nil {
 			b.posH = make([]float32, len(b.posT))
@@ -949,63 +968,132 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 		if a.visBSP != nil {
 			b.posLq = make([]int8, len(b.posT))
 		}
-		for i := range b.posT {
-			x, y, z := b.posX[i], b.posY[i], b.posZ[i]
-			if x == 0 && y == 0 && z == 0 {
-				if b.posH != nil {
-					b.posH[i] = result.NoFloor
-				}
-				continue
+		if !parallel {
+			for i := range cursors {
+				cursors[i] = -1 // each slot rescans the tracks from the start
 			}
+			a.resolveFloorHeightsSlot(b, posable, cursors, scratch)
+			continue
+		}
+		wg.Add(1)
+		go func(b *streamBuilder) {
+			defer wg.Done()
+			cursors := make([]int, len(posable))
+			for i := range cursors {
+				cursors[i] = -1
+			}
+			scratch := make([]mapclip.PosedHull, 0, len(posable))
+			a.resolveFloorHeightsSlot(b, posable, cursors, scratch)
+		}(b)
+	}
+	wg.Wait()
+}
 
-			// Liquid state first: a submerged sample is supported by the
-			// liquid and skips the floor traces entirely.
-			if a.visBSP != nil {
-				level, cont := a.visBSP.WaterLevel(x, y, z)
-				b.posLq[i] = lqValue(level, cont)
-				if b.posLq[i] != 0 {
-					if b.posH != nil {
-						b.posH[i] = 0
-					}
-					continue
-				}
-			}
-			if b.posH == nil {
-				continue
-			}
+// resolveFloorHeightsSlot traces one player slot's samples — the loop
+// body resolveFloorHeights fans out per slot.
+//
+// Consecutive samples at the exact same origin with the exact same mover
+// poses (a standing player, an intermission freeze) are pure repeats of
+// the previous trace, so the previous sample's outcome is reused
+// verbatim instead of re-tracing — the inputs are bit-identical, so the
+// outputs are too.
+func (a *TimelineAnalyzer) resolveFloorHeightsSlot(b *streamBuilder, posable []posableMover, cursors []int, scratch []mapclip.PosedHull) {
+	var lastPoses []mapclip.PosedHull
+	var lastX, lastY, lastZ, lastH float32
+	var lastLq int8
+	lastValid := false
 
-			scratch = scratch[:0]
-			for mi := range posable {
-				org, vis := posable[mi].track.atCursor(b.posT[i], &cursors[mi])
-				if !vis {
-					continue
-				}
-				scratch = append(scratch, mapclip.PosedHull{H: posable[mi].hull, Origin: org})
-			}
-			h, solidOk := mapclip.HeightAboveFloorBoxScene(a.clipHull, scratch, x, y, z)
-			// A liquid surface below the origin competes as a support:
-			// the higher of solid floor and surface wins. Heights are
-			// feet-relative, so smaller h = higher support.
-			if a.visBSP != nil {
-				if surfZ, _, ok := a.visBSP.LiquidSurfaceBelow(x, y, z); ok {
-					hSurf := (z - mapclip.PlayerFeetOffset) - surfZ
-					if hSurf < 0 {
-						// Feet a sub-unit into the surface while the feet
-						// probe still reads dry — supported by the liquid.
-						hSurf = 0
-					}
-					if !solidOk || hSurf < h {
-						h, solidOk = hSurf, true
-					}
-				}
-			}
-			if solidOk {
-				b.posH[i] = h
-			} else {
+	for i := range b.posT {
+		x, y, z := b.posX[i], b.posY[i], b.posZ[i]
+		if x == 0 && y == 0 && z == 0 {
+			if b.posH != nil {
 				b.posH[i] = result.NoFloor
 			}
+			continue
+		}
+
+		// Mover poses advance per sample regardless of the liquid
+		// short-circuit below: atCursor is a monotonic forward scan, so
+		// touching it every sample keeps the cursors cheap and lets the
+		// repeat check compare this sample's scene against the last.
+		scratch = scratch[:0]
+		for mi := range posable {
+			org, vis := posable[mi].track.atCursor(b.posT[i], &cursors[mi])
+			if !vis {
+				continue
+			}
+			scratch = append(scratch, mapclip.PosedHull{H: posable[mi].hull, Origin: org})
+		}
+
+		if lastValid && x == lastX && y == lastY && z == lastZ && posesEqual(scratch, lastPoses) {
+			if b.posLq != nil {
+				b.posLq[i] = lastLq
+			}
+			if b.posH != nil {
+				b.posH[i] = lastH
+			}
+			continue
+		}
+		lastX, lastY, lastZ = x, y, z
+		lastPoses = append(lastPoses[:0], scratch...)
+		lastValid = true
+		lastLq = 0
+		lastH = 0
+
+		// Liquid state first: a submerged sample is supported by the
+		// liquid and skips the floor traces entirely.
+		if a.visBSP != nil {
+			level, cont := a.visBSP.WaterLevel(x, y, z)
+			b.posLq[i] = lqValue(level, cont)
+			if b.posLq[i] != 0 {
+				lastLq = b.posLq[i]
+				if b.posH != nil {
+					b.posH[i] = 0
+				}
+				continue
+			}
+		}
+		if b.posH == nil {
+			continue
+		}
+		h, solidOk := mapclip.HeightAboveFloorBoxScene(a.clipHull, scratch, x, y, z)
+		// A liquid surface below the origin competes as a support:
+		// the higher of solid floor and surface wins. Heights are
+		// feet-relative, so smaller h = higher support.
+		if a.visBSP != nil {
+			if surfZ, _, ok := a.visBSP.LiquidSurfaceBelow(x, y, z); ok {
+				hSurf := (z - mapclip.PlayerFeetOffset) - surfZ
+				if hSurf < 0 {
+					// Feet a sub-unit into the surface while the feet
+					// probe still reads dry — supported by the liquid.
+					hSurf = 0
+				}
+				if !solidOk || hSurf < h {
+					h, solidOk = hSurf, true
+				}
+			}
+		}
+		if solidOk {
+			b.posH[i] = h
+		} else {
+			b.posH[i] = result.NoFloor
+		}
+		lastH = b.posH[i]
+	}
+}
+
+// posesEqual reports whether two posed-hull scenes are identical —
+// same hulls, same origins, same order.
+func posesEqual(a, b []mapclip.PosedHull) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].H != b[i].H || a[i].Origin != b[i].Origin {
+			return false
 		}
 	}
+	return true
 }
 
 // lqValue packs a bspvis.WaterLevel result into the PositionTrack.Lq

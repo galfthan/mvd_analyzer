@@ -173,14 +173,26 @@ type Parser struct {
 	// itself can emit ItemSpawnEvent / ItemStateEvent for every pickup
 	// and respawn without downstream analyzers having to reconstruct
 	// entity state. See entities.go for the decoder.
-	modelList              []string
-	soundList              []string       // sound-index table from svc_soundlist; index 0 reserved
-	spawnedProjectiles     map[int]string // ent -> projectile kind ("rl"/"gl") while in flight; cleared on despawn (entnums recycle)
-	baselines              map[int]*EntityState
-	currentEntities        map[int]*EntityState
-	spawnedItems           map[int]string // ent -> kind, set once per item
-	spawnedMovers          map[int]int    // ent -> BSP submodel index, set once per inline brush entity
-	lastEntityPacketTimeMs int32          // wire-native demo ms of the packet we're currently processing
+	modelList  []string
+	soundList  []string     // sound-index table from svc_soundlist; index 0 reserved
+	modelClass []modelClass // per-modelindex classification memo, invalidated by svc_modellist (see classOf)
+
+	// Per-entity state, indexed by entity number (see ensureEnt). A slot
+	// with Present==false is "not in the frame" — every populated slot has
+	// Present==true, so the flag doubles as the membership test the old
+	// map representation expressed via key existence.
+	entCur             []EntityState // rolling current frame
+	entPrev            []EntityState // prior frame snapshot (full-packet diffs only)
+	entLimit           int           // 1 + highest entity number touched so far
+	entScratch         []entDelta    // per-delta-packet pre-mutation states of the mentioned entities
+	classifyAllPending bool          // model list changed: next diff must rescan every entity, not just the mentioned ones
+	baselines          []EntityState
+	baselineValid      []bool
+	spawnedProjectiles []string // ent -> projectile kind ("rl"/"gl") while in flight; "" on despawn (entnums recycle)
+	spawnedItems       []string // ent -> kind, set once per item ("" = unclassified)
+	spawnedMovers      []int    // ent -> BSP submodel index, set once per inline brush entity (0 = not a known mover)
+
+	lastEntityPacketTimeMs int32 // wire-native demo ms of the packet we're currently processing
 }
 
 // NewParser creates a new parser

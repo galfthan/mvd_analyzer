@@ -92,30 +92,60 @@ func makeInside(ivs []Interval) func(int32) bool {
 // sample-and-hold, which is what makes the walk an exact integral rather than
 // a grid approximation. Mirrors the event-union in view.walkRegionExact.
 func collectBoundaries(lo, hi int32, sampleT []int32, extra []int32, ivs ...[]Interval) []int32 {
-	set := make(map[int32]struct{}, len(sampleT)+16)
-	add := func(t int32) {
+	// sampleT is ascending (position/track times are recorded in order),
+	// so the union is a sorted merge of it with the small set of extra
+	// instants + interval endpoints — no hash set, no O(n log n) sort of
+	// the whole union. The small side is sorted; the merge dedups.
+	pts := make([]int32, 0, len(extra)+16)
+	addPt := func(t int32) {
 		if t > lo && t < hi {
-			set[t] = struct{}{}
+			pts = append(pts, t)
 		}
 	}
-	for _, t := range sampleT {
-		add(t)
-	}
 	for _, t := range extra {
-		add(t)
+		addPt(t)
 	}
 	for _, iv := range ivs {
 		for _, v := range iv {
-			add(v.Start)
-			add(v.End)
+			addPt(v.Start)
+			addPt(v.End)
 		}
 	}
-	out := make([]int32, 0, len(set)+2)
-	out = append(out, lo)
-	for t := range set {
-		out = append(out, t)
+	for i := 1; i < len(sampleT); i++ {
+		if sampleT[i] < sampleT[i-1] {
+			// Out-of-order samples (shouldn't happen for track times):
+			// sort a copy so the merge below stays valid.
+			cp := append([]int32(nil), sampleT...)
+			sort.Slice(cp, func(i, j int) bool { return cp[i] < cp[j] })
+			sampleT = cp
+			break
+		}
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	sort.Slice(pts, func(i, j int) bool { return pts[i] < pts[j] })
+
+	out := make([]int32, 0, len(sampleT)+len(pts)+2)
+	out = append(out, lo)
+	pi := 0
+	last := lo
+	emit := func(t int32) {
+		if t != last {
+			out = append(out, t)
+			last = t
+		}
+	}
+	for _, t := range sampleT {
+		if t <= lo || t >= hi {
+			continue
+		}
+		for pi < len(pts) && pts[pi] <= t {
+			emit(pts[pi])
+			pi++
+		}
+		emit(t)
+	}
+	for ; pi < len(pts); pi++ {
+		emit(pts[pi])
+	}
 	return append(out, hi)
 }
 

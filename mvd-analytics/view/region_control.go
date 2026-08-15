@@ -548,6 +548,49 @@ func classifyRegions(
 // regions) for the per-interval classify; per-player cursors advance
 // monotonically, so no quadratic blowup. Returns nil only for a zero-length
 // window; an empty roster still yields every region at Empty:100.
+// mergeUniqueClipped merges ascending int32 lists into one sorted,
+// deduped slice of the values strictly inside (lo, hi). A list that
+// turns out not to be ascending (defensive — track times always are) is
+// sorted on a copy first so the merge stays correct.
+func mergeUniqueClipped(lists [][]int32, lo, hi int32) []int32 {
+	for i, l := range lists {
+		for j := 1; j < len(l); j++ {
+			if l[j] < l[j-1] {
+				cp := append([]int32(nil), l...)
+				sort.Slice(cp, func(a, b int) bool { return cp[a] < cp[b] })
+				lists[i] = cp
+				break
+			}
+		}
+	}
+	idx := make([]int, len(lists))
+	total := 0
+	for i, l := range lists {
+		idx[i] = sort.Search(len(l), func(k int) bool { return l[k] > lo })
+		total += len(l) - idx[i]
+	}
+	out := make([]int32, 0, total)
+	for {
+		bi := -1
+		var best int32
+		for i, l := range lists {
+			if idx[i] < len(l) {
+				if v := l[idx[i]]; bi < 0 || v < best {
+					best, bi = v, i
+				}
+			}
+		}
+		if bi < 0 || best >= hi {
+			break
+		}
+		if n := len(out); n == 0 || out[n-1] != best {
+			out = append(out, best)
+		}
+		idx[bi]++
+	}
+	return out
+}
+
 func walkRegionExact(
 	r *result.Result,
 	regions []result.ControlRegion,
@@ -571,10 +614,14 @@ func walkRegionExact(
 		cursor playerCursor
 	}
 	var players []exactPlayer
-	eventSet := make(map[int32]struct{})
+	// Interior events: each player's position track is already ascending,
+	// so the union is a k-way merge of those tracks with the (small,
+	// sorted) list of interval endpoints — no hash set, no full sort.
+	var eventLists [][]int32
+	var extraEvts []int32
 	addEvt := func(t int32) {
 		if t > gridStart && t < gridEnd {
-			eventSet[t] = struct{}{}
+			extraEvts = append(extraEvts, t)
 		}
 	}
 	for i := range r.Streams.Players {
@@ -592,9 +639,7 @@ func walkRegionExact(
 			team:   team,
 			cursor: newPlayerCursor(pt, p, liToRegion),
 		})
-		for _, t := range pt.T {
-			addEvt(t)
-		}
+		eventLists = append(eventLists, pt.T)
 		for _, iv := range p.RL {
 			addEvt(iv.Start)
 			addEvt(iv.End)
@@ -629,11 +674,9 @@ func walkRegionExact(
 	// empty-roster semantics (total>0 is already guarded above, so no
 	// division by zero).
 
-	interior := make([]int32, 0, len(eventSet))
-	for t := range eventSet {
-		interior = append(interior, t)
-	}
-	sort.Slice(interior, func(i, j int) bool { return interior[i] < interior[j] })
+	sort.Slice(extraEvts, func(i, j int) bool { return extraEvts[i] < extraEvts[j] })
+	eventLists = append(eventLists, extraEvts)
+	interior := mergeUniqueClipped(eventLists, gridStart, gridEnd)
 
 	// Boundaries: gridStart, all interior events (strictly increasing,
 	// unique), gridEnd. Every [boundaries[k], boundaries[k+1]) is an

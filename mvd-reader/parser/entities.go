@@ -290,6 +290,103 @@ func (p *Parser) resolveModel(modelIndex int) string {
 	return p.modelList[modelIndex]
 }
 
+// modelClass caches the classify* results for one model-list slot so the
+// per-frame entity diff doesn't re-run the string lookups (ToLower + map)
+// on every entity of every frame. Rebuilt lazily by classOf; parseModelList
+// invalidates the memo whenever the list changes.
+type modelClass struct {
+	itemKind string // classifyItem result for non-armor paths ("" = not a tracked item)
+	isArmor  bool   // progs/armor.mdl — kind depends on the skin, resolved in itemKindOf
+	projKind string // classifyProjectile result
+	isNail   bool   // sv_nailhack spike model (classifyNail)
+	mover    int    // classifyMover submodel index (0 = not an inline brush model)
+}
+
+// classOf returns the memoized classification for a model index, or nil
+// when the index is out of range / the null model — the same cases where
+// resolveModel returns "".
+func (p *Parser) classOf(modelIndex int) *modelClass {
+	if modelIndex <= 0 || modelIndex >= len(p.modelList) {
+		return nil
+	}
+	if len(p.modelClass) != len(p.modelList) {
+		p.modelClass = make([]modelClass, len(p.modelList))
+		for i, path := range p.modelList {
+			if path == "" {
+				continue
+			}
+			c := &p.modelClass[i]
+			c.isArmor = strings.EqualFold(path, "progs/armor.mdl")
+			if !c.isArmor {
+				c.itemKind = classifyItem(path, 0)
+			}
+			c.projKind = classifyProjectile(path)
+			c.isNail = classifyNail(path) != ""
+			c.mover, _ = classifyMover(path)
+		}
+	}
+	return &p.modelClass[modelIndex]
+}
+
+// itemKindOf is the memoized equivalent of
+// classifyItem(p.resolveModel(modelIndex), skin).
+func (p *Parser) itemKindOf(modelIndex, skin int) string {
+	c := p.classOf(modelIndex)
+	if c == nil {
+		return ""
+	}
+	if c.isArmor {
+		switch skin {
+		case 0:
+			return "ga"
+		case 1:
+			return "ya"
+		case 2:
+			return "ra"
+		}
+		return ""
+	}
+	return c.itemKind
+}
+
+// ensureEnt grows every per-entity slice so entity number n is a valid
+// index and bumps entLimit (the diff scan bound). Entity numbers are
+// 0..2047 on the wire (9 bits + FTE entitydbl), so one allocation covers
+// a whole demo; the growth path beyond that exists only for defence
+// against malformed svc_spawnbaseline entity numbers.
+func (p *Parser) ensureEnt(n int) {
+	if n >= len(p.entCur) {
+		size := 2048
+		for size <= n {
+			size *= 2
+		}
+		grow := func(s []EntityState) []EntityState {
+			ns := make([]EntityState, size)
+			copy(ns, s)
+			return ns
+		}
+		p.entCur = grow(p.entCur)
+		p.entPrev = grow(p.entPrev)
+		p.baselines = grow(p.baselines)
+		nb := make([]bool, size)
+		copy(nb, p.baselineValid)
+		p.baselineValid = nb
+		growS := func(s []string) []string {
+			ns := make([]string, size)
+			copy(ns, s)
+			return ns
+		}
+		p.spawnedProjectiles = growS(p.spawnedProjectiles)
+		p.spawnedItems = growS(p.spawnedItems)
+		nm := make([]int, size)
+		copy(nm, p.spawnedMovers)
+		p.spawnedMovers = nm
+	}
+	if n+1 > p.entLimit {
+		p.entLimit = n + 1
+	}
+}
+
 // parseSpawnBaseline decodes svc_spawnbaseline (2-byte entnum +
 // baseline body). Mirrors ezquake CL_ParseBaseline at cl_parse.c:1817.
 func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {
@@ -375,34 +472,18 @@ func (p *Parser) parseSpawnBaseline2(r *mvd.BufferReader, timeMs int32, floatCoo
 // a tracked item kind and MoverSpawnEvent if it is an inline
 // brush-model entity.
 func (p *Parser) registerBaseline(entNum int, state *EntityState, timeMs int32) error {
-	if p.baselines == nil {
-		p.baselines = make(map[int]*EntityState)
-	}
-	if p.currentEntities == nil {
-		p.currentEntities = make(map[int]*EntityState)
-	}
-	if p.spawnedItems == nil {
-		p.spawnedItems = make(map[int]string)
-	}
-	if p.spawnedMovers == nil {
-		p.spawnedMovers = make(map[int]int)
-	}
-	prev := p.currentEntities[entNum]
-	baseline := *state
-	p.baselines[entNum] = &baseline
+	p.ensureEnt(entNum)
+	prev := p.entCur[entNum] // zero value (Present=false) doubles as "no prior state"
+	p.baselines[entNum] = *state
+	p.baselineValid[entNum] = true
 	// A baseline replacing a prior one is rare but legal (server can
 	// resend). The current-frame state reflects the fresh baseline.
-	currCopy := *state
-	p.currentEntities[entNum] = &currCopy
+	p.entCur[entNum] = *state
 
 	// Classify against the model list. If the model list hasn't been
 	// received yet (rare — svc_modellist normally precedes baselines),
 	// re-classification runs again in diffEntityTransitions.
-	path := p.resolveModel(state.ModelIndex)
-	kind := ""
-	if path != "" {
-		kind = classifyItem(path, state.SkinNum)
-	}
+	kind := p.itemKindOf(state.ModelIndex, state.SkinNum)
 	if kind != "" && p.spawnedItems[entNum] == "" {
 		p.spawnedItems[entNum] = kind
 		return p.emit(&ItemSpawnEvent{
@@ -412,20 +493,20 @@ func (p *Parser) registerBaseline(entNum int, state *EntityState, timeMs int32) 
 			TimeMs: timeMs,
 		})
 	}
-	if sub, ok := classifyMover(path); ok {
-		if _, seen := p.spawnedMovers[entNum]; !seen {
-			p.spawnedMovers[entNum] = sub
+	if c := p.classOf(state.ModelIndex); c != nil && c.mover > 0 {
+		if p.spawnedMovers[entNum] == 0 {
+			p.spawnedMovers[entNum] = c.mover
 			return p.emit(&MoverSpawnEvent{
 				EntNum:   entNum,
-				Model:    path,
-				SubModel: sub,
+				Model:    p.resolveModel(state.ModelIndex),
+				SubModel: c.mover,
 				Origin:   state.Origin,
 				TimeMs:   timeMs,
 			})
 		}
 		// A resent baseline for a known mover resets its pose; surface
 		// it as a state change when it actually differs.
-		if prev == nil || prev.Origin != state.Origin || !prev.Present || prev.ModelIndex == 0 {
+		if !prev.Present || prev.Origin != state.Origin || prev.ModelIndex == 0 {
 			return p.emit(&MoverStateEvent{
 				EntNum:  entNum,
 				Origin:  state.Origin,
@@ -457,24 +538,30 @@ func (p *Parser) parsePacketEntities(r *mvd.BufferReader, delta, floatCoords boo
 		}
 	}
 
-	// newFrame is the entity set after applying this packet.
+	// entCur becomes the entity set after applying this packet. For the
+	// transition diff, each mentioned entity's pre-mutation state is
+	// recorded in entScratch — an unmentioned entity cannot transition
+	// (its Present flag, model, and origin are all unchanged, and its
+	// classification can only change when the model list does, which
+	// classifyAllPending catches), so the diff only needs the mentioned
+	// ones. A FULL packet is the exception: entities absent from it
+	// vanish without a U_REMOVE mention, so it snapshots the whole
+	// frame into entPrev and diffs every slot.
 	//
 	// FULL packet: the packet *is* the current visible set. Start
-	//   empty; whatever lands in the packet becomes the whole
-	//   current state.
+	//   empty (clear every Present flag); whatever lands in the packet
+	//   becomes the whole current state.
 	// DELTA packet: packet describes changes relative to the prior
-	//   frame. Deep-copy current state, then apply deltas on top
-	//   (U_REMOVE deletes, other flags update).
-	var newFrame map[int]*EntityState
-	if delta {
-		newFrame = make(map[int]*EntityState, len(p.currentEntities))
-		for k, v := range p.currentEntities {
-			cp := *v
-			newFrame[k] = &cp
+	//   frame. Keep current state, apply deltas on top (U_REMOVE
+	//   deletes, other flags update).
+	if !delta {
+		copy(p.entPrev[:p.entLimit], p.entCur[:p.entLimit])
+		for i := range p.entCur[:p.entLimit] {
+			p.entCur[i].Present = false
 		}
-	} else {
-		newFrame = make(map[int]*EntityState)
 	}
+	p.entScratch = p.entScratch[:0]
+	sorted := true
 
 	for {
 		word, err := r.ReadUint16()
@@ -489,35 +576,63 @@ func (p *Parser) parsePacketEntities(r *mvd.BufferReader, delta, floatCoords boo
 		if err != nil {
 			return err
 		}
+		p.ensureEnt(entNum)
+		if n := len(p.entScratch); n == 0 || p.entScratch[n-1].ent != entNum {
+			if n > 0 && p.entScratch[n-1].ent > entNum {
+				sorted = false
+			}
+			p.entScratch = append(p.entScratch, entDelta{ent: entNum, old: p.entCur[entNum]})
+		}
 
 		if bits&uRemove != 0 {
-			delete(newFrame, entNum)
+			p.entCur[entNum].Present = false
 			continue
 		}
 
 		// "From" state for the delta: prior frame's entry, else
-		// baseline. Matches ezquake cl_ents.c:807.
-		from := newFrame[entNum]
-		if from == nil {
-			from = p.baselines[entNum]
+		// baseline, else the zero state. Matches ezquake cl_ents.c:807.
+		base := p.entCur[entNum]
+		if !base.Present {
+			if p.baselineValid[entNum] {
+				base = p.baselines[entNum]
+			} else {
+				base = EntityState{}
+			}
 		}
-		var base EntityState
-		if from != nil {
-			base = *from
-		}
-		state, err := p.applyDeltaFields(r, bits, morebits, &base, floatCoords, fteExt)
-		if err != nil {
+		if err := p.applyDeltaFields(r, bits, morebits, &base, floatCoords, fteExt); err != nil {
 			return err
 		}
-		state.Present = true
-		newFrame[entNum] = state
+		base.Present = true
+		p.entCur[entNum] = base
 	}
 
-	if err := p.diffEntityTransitions(newFrame, p.currentEntities, p.lastEntityPacketTimeMs); err != nil {
-		return err
+	if !sorted {
+		// The wire writes entities in ascending order (mvdsv
+		// SV_EmitPacketEntities walks both frames in parallel); tolerate
+		// a violation by restoring the ascending diff order, keeping the
+		// first-recorded (pre-packet) state per entity.
+		sort.SliceStable(p.entScratch, func(i, j int) bool { return p.entScratch[i].ent < p.entScratch[j].ent })
+		dst := p.entScratch[:0]
+		for _, d := range p.entScratch {
+			if n := len(dst); n > 0 && dst[n-1].ent == d.ent {
+				continue
+			}
+			dst = append(dst, d)
+		}
+		p.entScratch = dst
 	}
-	p.currentEntities = newFrame
-	return nil
+
+	if !delta {
+		return p.diffEntityTransitionsFull(p.lastEntityPacketTimeMs)
+	}
+	return p.diffEntityTransitions(p.lastEntityPacketTimeMs)
+}
+
+// entDelta records one packet-mentioned entity's state as it was before
+// the packet mutated it — the "old" side of the frame diff.
+type entDelta struct {
+	ent int
+	old EntityState
 }
 
 // readDeltaBits reads the low-order U_MOREBITS byte and the FTE
@@ -578,26 +693,26 @@ func (p *Parser) readEntityDelta(r *mvd.BufferReader, word uint32, from *EntityS
 	if err != nil {
 		return nil, 0, err
 	}
-	state, err := p.applyDeltaFields(r, bits, morebits, from, floatCoords, fteExt)
-	if err != nil {
+	state := *from
+	if err := p.applyDeltaFields(r, bits, morebits, &state, floatCoords, fteExt); err != nil {
 		return nil, 0, err
 	}
 	state.Present = true
-	return state, entNum, nil
+	return &state, entNum, nil
 }
 
 // applyDeltaFields reads the entity-delta field payload after the flag
-// word(s) have been consumed (by readDeltaBits) and fills in the target
-// state. The FTE trans / colourmod fields are gated on the negotiated
-// extension, exactly as both mvdsv's writer (sv_ents.c:217, 226) and
-// ezquake's reader (cl_ents.c:580, 586) gate them — the flag bit alone
-// is not enough to decide the field is present.
-func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, from *EntityState, floatCoords bool, fteExt uint32) (*EntityState, error) {
-	state := *from
+// word(s) have been consumed (by readDeltaBits) and applies it to
+// *state in place (state starts as the "from" entity and each set flag
+// bit overwrites one field). The FTE trans / colourmod fields are gated
+// on the negotiated extension, exactly as both mvdsv's writer
+// (sv_ents.c:217, 226) and ezquake's reader (cl_ents.c:580, 586) gate
+// them — the flag bit alone is not enough to decide the field is present.
+func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, state *EntityState, floatCoords bool, fteExt uint32) error {
 	if bits&uModel != 0 {
 		b, err := r.ReadByte()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.ModelIndex = int(b)
 		if morebits&uFTEModelDbl != 0 {
@@ -606,35 +721,35 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 	} else if morebits&uFTEModelDbl != 0 {
 		mi, err := r.ReadUint16()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.ModelIndex = int(mi)
 	}
 	if bits&uFrame != 0 {
 		b, err := r.ReadByte()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Frame = int(b)
 	}
 	if bits&uColormap != 0 {
 		b, err := r.ReadByte()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Colormap = int(b)
 	}
 	if bits&uSkin != 0 {
 		b, err := r.ReadByte()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.SkinNum = int(b)
 	}
 	if bits&uEffects != 0 {
 		b, err := r.ReadByte()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Effects = int(b)
 	}
@@ -648,37 +763,37 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 	if bits&uOrigin1 != 0 {
 		v, err := readCoord()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Origin[0] = v
 	}
 	if bits&uAngle1 != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if bits&uOrigin2 != 0 {
 		v, err := readCoord()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Origin[1] = v
 	}
 	if bits&uAngle2 != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if bits&uOrigin3 != 0 {
 		v, err := readCoord()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		state.Origin[2] = v
 	}
 	if bits&uAngle3 != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	// U_SOLID has no payload in QW (see ezquake cl_ents.c:574-576).
@@ -691,28 +806,28 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 	// if a full-FTE stream does set one, consuming the byte keeps us aligned.
 	if morebits&uFTETrans != 0 && fteExt&mvd.FTEPextTrans != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if morebits&uFTEScale != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if morebits&uFTEFatness != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if morebits&uFTEColourMod != 0 && fteExt&mvd.FTEPextColourMod != 0 {
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 		if _, err := r.ReadByte(); err != nil {
-			return nil, err
+			return err
 		}
 	}
 	// Other FTE flags (drawflags, abslight, etc.) are rarer still
@@ -722,7 +837,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 	// will desynchronise and the parser will error — which is the
 	// safe failure mode.
 
-	return &state, nil
+	return nil
 }
 
 // diffEntityTransitions compares the prior current-frame state against
@@ -738,38 +853,83 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 // Also emits ItemSpawnEvent / MoverSpawnEvent for entities that hadn't
 // been classified yet (e.g. baseline arrived before the model list)
 // when we can now resolve the kind.
-func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, timeMs int32) error {
-	// Union of keys from old + new (tracked entities only). Sort the
-	// entity numbers before emitting so that downstream stateful
-	// consumers (e.g. items.go's layered attribution) see same-frame
-	// events in a deterministic order across runs.
-	seen := make(map[int]bool, len(newFrame)+len(oldFrame))
-	for k := range newFrame {
-		seen[k] = true
-	}
-	for k := range oldFrame {
-		seen[k] = true
-	}
-	ents := make([]int, 0, len(seen))
-	for k := range seen {
-		ents = append(ents, k)
-	}
-	sort.Ints(ents)
-
-	for _, ent := range ents {
-		s := newFrame[ent]
-		o := oldFrame[ent]
-		if err := p.diffItemEntity(ent, s, o, timeMs); err != nil {
-			return err
+func (p *Parser) diffEntityTransitions(timeMs int32) error {
+	// Delta packets: only the mentioned entities (entScratch, ascending)
+	// can have transitioned. After a model-list change every entity gets
+	// one rescan — that is when entities whose baselines predate the
+	// list resolve their late classification, exactly as the previous
+	// every-frame full walk did on its next pass.
+	if p.classifyAllPending {
+		p.classifyAllPending = false
+		si := 0
+		for ent := 0; ent < p.entLimit; ent++ {
+			var s, o *EntityState
+			if p.entCur[ent].Present {
+				s = &p.entCur[ent]
+			}
+			if si < len(p.entScratch) && p.entScratch[si].ent == ent {
+				if p.entScratch[si].old.Present {
+					o = &p.entScratch[si].old
+				}
+				si++
+			} else {
+				o = s // unmentioned: prior state == current state
+			}
+			if err := p.diffEntity(ent, s, o, timeMs); err != nil {
+				return err
+			}
 		}
-		if err := p.diffMoverEntity(ent, s, o, timeMs); err != nil {
-			return err
+		return nil
+	}
+	for i := range p.entScratch {
+		d := &p.entScratch[i]
+		var s, o *EntityState
+		if p.entCur[d.ent].Present {
+			s = &p.entCur[d.ent]
 		}
-		if err := p.diffProjectileEntity(ent, s, o, timeMs); err != nil {
+		if d.old.Present {
+			o = &d.old
+		}
+		if err := p.diffEntity(d.ent, s, o, timeMs); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// diffEntityTransitionsFull diffs every slot against the entPrev
+// snapshot — the full-packet path, where entities absent from the
+// packet vanished without a mention.
+func (p *Parser) diffEntityTransitionsFull(timeMs int32) error {
+	p.classifyAllPending = false
+	for ent := 0; ent < p.entLimit; ent++ {
+		var s, o *EntityState
+		if p.entCur[ent].Present {
+			s = &p.entCur[ent]
+		}
+		if p.entPrev[ent].Present {
+			o = &p.entPrev[ent]
+		}
+		if err := p.diffEntity(ent, s, o, timeMs); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// diffEntity runs the three per-entity transition checks in the fixed
+// item → mover → projectile order every diff walk shares.
+func (p *Parser) diffEntity(ent int, s, o *EntityState, timeMs int32) error {
+	if s == nil && o == nil {
+		return nil
+	}
+	if err := p.diffItemEntity(ent, s, o, timeMs); err != nil {
+		return err
+	}
+	if err := p.diffMoverEntity(ent, s, o, timeMs); err != nil {
+		return err
+	}
+	return p.diffProjectileEntity(ent, s, o, timeMs)
 }
 
 // diffProjectileEntity emits ProjectileSpawnEvent the first frame a rocket
@@ -778,22 +938,20 @@ func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, 
 // numbers are stable — projectile entnums are recycled, so the per-ent
 // classification is cleared on despawn and re-derived on the next spawn.
 func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, timeMs int32) error {
-	if p.spawnedProjectiles == nil {
-		p.spawnedProjectiles = make(map[int]string)
-	}
 	curKind := ""
 	if s != nil && s.Present && s.ModelIndex != 0 {
-		path := p.resolveModel(s.ModelIndex)
-		curKind = classifyProjectile(path)
-		if curKind == "" && p.decodeNails {
-			// sv_nailhack servers send spikes as packet entities; track them
-			// only when nail tracking is enabled (they are high volume).
-			curKind = classifyNail(path)
+		if c := p.classOf(s.ModelIndex); c != nil {
+			curKind = c.projKind
+			if curKind == "" && p.decodeNails && c.isNail {
+				// sv_nailhack servers send spikes as packet entities; track them
+				// only when nail tracking is enabled (they are high volume).
+				curKind = "nail"
+			}
 		}
 	}
-	tracked, isTracked := p.spawnedProjectiles[ent]
+	tracked := p.spawnedProjectiles[ent]
 
-	if !isTracked {
+	if tracked == "" {
 		if curKind == "" {
 			return nil
 		}
@@ -812,7 +970,7 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, timeMs int32) 
 	if o != nil {
 		origin = o.Origin
 	}
-	delete(p.spawnedProjectiles, ent)
+	p.spawnedProjectiles[ent] = ""
 	if err := p.emit(&ProjectileDespawnEvent{EntNum: ent, Kind: tracked, Origin: origin, TimeMs: timeMs}); err != nil {
 		return err
 	}
@@ -835,22 +993,20 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error 
 			src = o
 		}
 		if src != nil {
-			if path := p.resolveModel(src.ModelIndex); path != "" {
-				kind = classifyItem(path, src.SkinNum)
-				if kind != "" {
-					p.spawnedItems[ent] = kind
-					origin := src.Origin
-					if b := p.baselines[ent]; b != nil {
-						origin = b.Origin
-					}
-					if err := p.emit(&ItemSpawnEvent{
-						EntNum: ent,
-						Kind:   kind,
-						Origin: origin,
-						TimeMs: timeMs,
-					}); err != nil {
-						return err
-					}
+			kind = p.itemKindOf(src.ModelIndex, src.SkinNum)
+			if kind != "" {
+				p.spawnedItems[ent] = kind
+				origin := src.Origin
+				if p.baselineValid[ent] {
+					origin = p.baselines[ent].Origin
+				}
+				if err := p.emit(&ItemSpawnEvent{
+					EntNum: ent,
+					Kind:   kind,
+					Origin: origin,
+					TimeMs: timeMs,
+				}); err != nil {
+					return err
 				}
 			}
 		}
@@ -878,7 +1034,7 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error 
 // moves, and the analyzer's pose timeline is exactly those changes
 // (hold-last between them, see MoverStateEvent).
 func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, timeMs int32) error {
-	if _, seenMover := p.spawnedMovers[ent]; !seenMover {
+	if p.spawnedMovers[ent] == 0 {
 		// Late classification: a mover whose baseline arrived before
 		// the model list gets its spawn here, same as items.
 		src := s
@@ -888,20 +1044,19 @@ func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, timeMs int32) error
 		if src == nil {
 			return nil
 		}
-		path := p.resolveModel(src.ModelIndex)
-		sub, ok := classifyMover(path)
-		if !ok {
+		c := p.classOf(src.ModelIndex)
+		if c == nil || c.mover == 0 {
 			return nil
 		}
-		p.spawnedMovers[ent] = sub
+		p.spawnedMovers[ent] = c.mover
 		origin := src.Origin
-		if b := p.baselines[ent]; b != nil {
-			origin = b.Origin
+		if p.baselineValid[ent] {
+			origin = p.baselines[ent].Origin
 		}
 		if err := p.emit(&MoverSpawnEvent{
 			EntNum:   ent,
-			Model:    path,
-			SubModel: sub,
+			Model:    p.resolveModel(src.ModelIndex),
+			SubModel: c.mover,
 			Origin:   origin,
 			TimeMs:   timeMs,
 		}); err != nil {
