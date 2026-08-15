@@ -25,18 +25,24 @@ from playwright.sync_api import sync_playwright
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
-# Each state is (name, javascript). The JS runs in page context with the
-# clock already parked; it mutates view state and returns once the map has
+# Each state is (name, javascript[, wait]). The JS runs in page context with
+# the clock already parked; it mutates view state and returns once the map has
 # been redrawn. Buttons are clicked rather than state poked directly so the
-# capture exercises the same paths a user does.
+# capture exercises the same paths a user does. `wait` is an optional page
+# condition polled before the shot — the LOS/PVS toggles kick off a lazy,
+# multi-second worker raycast on first use, and shooting before it lands made
+# those shots depend on scheduler luck (the only nondeterminism ever seen in
+# this harness).
 STATES = [
     ("default3d", ""),
     ("topdown", "document.getElementById('map-3d-toggle').click()"),
     ("trails", "document.getElementById('map-trails-all').click()"),
     ("viewarrows", "document.getElementById('map-view-arrows').click()"),
     ("velarrows", "document.getElementById('map-vel-arrows').click()"),
-    ("los", "document.getElementById('map-los').click()"),
-    ("pvs", "document.getElementById('map-pvs').click()"),
+    ("los", "document.getElementById('map-los').click()",
+     "mapState && !mapState.losPending"),
+    ("pvs", "document.getElementById('map-pvs').click()",
+     "mapState && !mapState.losPending"),
     ("learn", "document.getElementById('map-learn-toggle').click()"),
     ("rotated", "setMapCamera(1.9, 0.6); renderMap(mapState.currentTime)"),
     ("zoomed", "_wtc.zoomK = 2.5; markMapDirty(); renderMap(mapState.currentTime)"),
@@ -102,9 +108,12 @@ def capture(page, out_dir, label, times):
     for t in times:
         page.evaluate(f"setCurrentTime({t})")
         interact(page, out_dir, label, t)
-        for name, js in STATES:
+        for name, js, *rest in STATES:
             if js:
                 page.evaluate(js)
+                page.wait_for_timeout(120)
+            if rest:
+                page.wait_for_function(rest[0], timeout=120_000)
                 page.wait_for_timeout(120)
             page.evaluate("renderMap(mapState.currentTime)")
             page.wait_for_timeout(60)
