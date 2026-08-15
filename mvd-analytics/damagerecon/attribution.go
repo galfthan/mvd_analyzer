@@ -24,6 +24,7 @@ const (
 	nailSpeed         = 1000.0 // nails AND rockets fly 1000 ups
 	rocketSpeed       = 1000.0
 	tolFlightMs       = 180.0 // flight-time consistency for the trackless-rocket fallback
+	tolBlastMs        = 40    // TE_EXPLOSION multicast to damage frame (same server function)
 	rAxe              = 110.0
 	rHitscan          = 3000.0
 	sgAimGateDeg      = 50.0 // real sg hits are within ~25° (p95); hard gate at 2×
@@ -39,6 +40,7 @@ type candidate struct {
 	dEnd     float64 // explosion-to-victim distance; <0 = unknown
 	ep       vec3    // explosion point (kind == "proj" only)
 	hasEP    bool
+	epExact  bool // ep is a TE_EXPLOSION detonation point, not an interpolated track end
 	isSplash bool
 	// mLo/mHi: precomputed damage-model bounds for the kinds whose range
 	// depends on per-candidate state the generic model cannot see
@@ -395,6 +397,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		vpos := vtrack.posAt(d.t)
 		cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.projCandidates(d.t, vpos)...)
+		cands = append(cands, in.explosionCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
@@ -451,6 +454,10 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		if e.isSelf {
 			selfF = 0.5
 		}
+		// The top-up floor keeps the full ±60 slack even on explosion-snapped
+		// geometry: it fires on KILLS, where the victim is typically moving
+		// fast and the victim-side interpolation error dominates — the tight
+		// exact-point slack over-raised raw measurably (eval corpus).
 		modelMin := (dLo*q - 0.5*(best.dEnd+60.0)) * selfF
 		if m := int(modelMin); m > e.raw {
 			e.raw = m
@@ -482,6 +489,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 		}
 		vpos := vtrack.posAt(e.t)
 		bestD := -1.0
+		exact := false
 		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjMs })
 		for i := lo; i < len(in.projs) && in.projs[i].endT <= e.t+tolProjMs; i++ {
 			pr := in.projs[i]
@@ -489,12 +497,28 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 				continue
 			}
 			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
-				bestD = d
+				bestD, exact = d, pr.epExact
 			}
 		}
 		if bestD < 0 {
-			return // trackless kill: no geometry, keep the observation
+			// Trackless kill (point-blank, no entity broadcast): the
+			// unclaimed TE_EXPLOSION at the instant is the exact geometry.
+			elo := sort.Search(len(in.explosions), func(i int) bool { return in.explosions[i].t >= e.t-tolBlastMs })
+			for i := elo; i < len(in.explosions) && in.explosions[i].t <= e.t+tolBlastMs; i++ {
+				ex := &in.explosions[i]
+				if ex.claimed {
+					continue
+				}
+				if d := ex.p.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
+					bestD, exact = d, true
+				}
+			}
 		}
+		if bestD < 0 {
+			return // no geometry at all: keep the observation
+		}
+		// Full slack even on exact geometry — see the attributeOne top-up.
+		_ = exact
 		model = dLo*q - 0.5*(bestD+60.0)
 	case "lg":
 		// A discharge kill (35*cells radius blast) hides almost all of its
@@ -668,6 +692,15 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		// falloff subtracts 0.5*dist (T_RadiusDamage) — so a quad splash is
 		// 4D - 0.5d, not 4(D - 0.5d). Self splash halves the post-falloff
 		// points.
+		// Splash-distance slack: the tracked-flight endpoint is the last
+		// broadcast entity position (up to a frame short of the detonation)
+		// and the victim position is interpolated — ±60 covers both. An
+		// explosion-snapped endpoint is the true detonation point, so only
+		// the victim-side interpolation slack remains.
+		slack := 60.0
+		if c.epExact {
+			slack = 24.0
+		}
 		if kind == "rl-sound" || dEnd < 0 || dEnd < rDirect {
 			// Direct hit (or unknown explosion point): full damage possible
 			// for an enemy; splash-only ceiling for self.
@@ -678,11 +711,11 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 				lo = 25.0 * q * selfF
 			} else if isSelf && dEnd >= 0 {
 				// Tracked explosion right at the shooter: pure close splash.
-				lo = math.Max(1.0, (dLo*q-0.5*(dEnd+60.0))*selfF)
+				lo = math.Max(1.0, (dLo*q-0.5*(dEnd+slack))*selfF)
 			}
 		} else {
-			lo = (dLo*q - 0.5*(dEnd+60.0)) * selfF // slack for interpolation error
-			hi = (dHi*q - 0.5*math.Max(0, dEnd-60.0)) * selfF
+			lo = (dLo*q - 0.5*(dEnd+slack)) * selfF
+			hi = (dHi*q - 0.5*math.Max(0, dEnd-slack)) * selfF
 			if hi <= 0 {
 				return 0, 0, false
 			}
@@ -768,9 +801,74 @@ func (in *inputs) projCandidates(t int32, vpos vec3) []candidate {
 		}
 		out = append(out, candidate{
 			geom: dEnd / rSplash * 0.5, attacker: pr.shooter, weapon: pr.weapon,
-			kind: "proj", dEnd: dEnd, ep: pr.ep, hasEP: true,
+			kind: "proj", dEnd: dEnd, ep: pr.ep, hasEP: true, epExact: pr.epExact,
 			isSplash: dEnd >= rDirect,
 		})
+	}
+	return out
+}
+
+// explosionCandidates: TE_EXPLOSION detonations at the damage instant that
+// no tracked projectile claimed — the point-blank rockets (and short-lob
+// grenades) that exploded before their entity was ever broadcast. The
+// explosion names the exact place; the shooter is recovered from the rl/gl
+// fires whose flight time from muzzle to THAT POINT is consistent, aimed
+// there (rockets fly straight; grenades lob, so no aim gate). Where the
+// old rl-sound fallback guessed geometry from flight time to the victim,
+// this measures it — the candidate carries an exact dEnd, so the
+// self-splash value ceiling and the quad model discriminate sharply.
+func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candidate {
+	var out []candidate
+	elo := sort.Search(len(in.explosions), func(i int) bool { return in.explosions[i].t >= t-tolBlastMs })
+	for i := elo; i < len(in.explosions) && in.explosions[i].t <= t+tolBlastMs; i++ {
+		ex := &in.explosions[i]
+		if ex.claimed {
+			continue // a tracked flight owns this detonation (projCandidates)
+		}
+		dEnd := ex.p.distTo(vpos)
+		if dEnd > rSplash {
+			continue
+		}
+		if dEnd >= rDirect && !in.bsp.splashReaches(ex.p, vpos) {
+			continue
+		}
+		slo := sort.Search(len(in.shots), func(k int) bool { return in.shots[k].t >= ex.t-2000 })
+		for k := slo; k < len(in.shots) && in.shots[k].t <= ex.t+40; k++ {
+			s := in.shots[k]
+			if s.weapon != "rl" && s.weapon != "gl" {
+				continue
+			}
+			if s.weapon == "rl" && in.shotConsumed(s.player, s.t, 100) {
+				continue
+			}
+			tr := in.tracks[s.player]
+			if tr == nil {
+				continue
+			}
+			spos := tr.posAt(s.t)
+			flight := spos.distTo(ex.p) / rocketSpeed * 1000.0
+			ferr := math.Abs(float64(ex.t-s.t) - flight)
+			if ferr > tolFlightMs {
+				continue
+			}
+			apen := 0.0
+			if s.weapon == "rl" {
+				// Rockets fly straight at the crosshair: the shooter was
+				// aiming at the detonation point. Grenades lob — no gate.
+				if ang, ok := tr.aimAngleTo(s.t, ex.p); ok {
+					if ang > rlSoundAimGateDeg {
+						continue
+					}
+					apen = math.Min(ang/30.0, 2.0) * 0.15
+				}
+			}
+			out = append(out, candidate{
+				geom:     0.1 + dEnd/rSplash*0.4 + ferr/tolFlightMs*0.15 + apen,
+				attacker: s.player, weapon: s.weapon, kind: "proj",
+				dEnd: dEnd, ep: ex.p, hasEP: true, epExact: true,
+				isSplash: dEnd >= rDirect,
+			})
+		}
 	}
 	return out
 }

@@ -14,6 +14,28 @@ type beam struct {
 	s, e vec3
 }
 
+// pointFx is one damage-telemetry temp entity from streams.pointEffects:
+// an explosion (exact rocket/grenade detonation point), a blood splat
+// (hitscan damage striking a player, count = the raw count byte) or a
+// lightning blood (an LG cell connecting). claimed marks an explosion
+// matched to a tracked projectile's endpoint so the trackless-rocket
+// search does not reuse it.
+type pointFx struct {
+	t       int32
+	count   int
+	p       vec3
+	claimed bool
+}
+
+// Temp-entity types consumed from streams.pointEffects (values mirror
+// events.Te* — the protocol constants, stable since original QW).
+const (
+	teGunshot        = 2
+	teExplosion      = 3
+	teBlood          = 12
+	teLightningBlood = 13
+)
+
 // projectile is one bracketed rocket/grenade entity flight with the
 // resolved shooter (the wire carries no owner; resolution is spawn
 // proximity + aim-vs-flight-direction + fire-sound gating, ported from the
@@ -24,6 +46,9 @@ type projectile struct {
 	endT    int32
 	sp, ep  vec3
 	shooter string // "" when unresolved
+	// epExact: ep was snapped to a matching TE_EXPLOSION — the true
+	// detonation point rather than the last broadcast entity position.
+	epExact bool
 }
 
 // firedShot is one damage-free fire observation (sound or beam) from the
@@ -51,6 +76,13 @@ type inputs struct {
 	projs     []projectile // sorted by endT
 	shots     []firedShot  // sorted by t
 	nailShots []firedShot  // ng/sng subset, sorted by t
+	// Point-effect damage telemetry (streams.pointEffects), each sorted by
+	// t. Absent (nil) on demos whose recording predates the stream or when
+	// shot streams were built without it — consumers must treat absence as
+	// "not measured", never as "no hits".
+	explosions []pointFx // TE_EXPLOSION: exact rl/gl detonation points
+	bloods     []pointFx // TE_BLOOD: hitscan damage on a player, count byte
+	lgBloods   []pointFx // TE_LIGHTNINGBLOOD: LG cell hits
 	// consumedRL: per shooter, spawn times of rockets that HAVE an entity
 	// track — such a shot must not also act as a trackless point-blank
 	// candidate.
@@ -167,6 +199,28 @@ func buildInputs(res *result.Result) *inputs {
 		}
 		sort.SliceStable(in.shots, func(i, j int) bool { return in.shots[i].t < in.shots[j].t })
 		sort.SliceStable(in.nailShots, func(i, j int) bool { return in.nailShots[i].t < in.nailShots[j].t })
+	}
+
+	if pe := res.Streams.PointEffects; pe != nil {
+		for i := range pe.T {
+			fx := pointFx{
+				t:     pe.T[i],
+				count: int(pe.Count[i]),
+				p:     vec3{float64(pe.X[i]), float64(pe.Y[i]), float64(pe.Z[i])},
+			}
+			switch pe.Type[i] {
+			case teExplosion:
+				in.explosions = append(in.explosions, fx)
+			case teBlood:
+				in.bloods = append(in.bloods, fx)
+			case teLightningBlood:
+				in.lgBloods = append(in.lgBloods, fx)
+			}
+		}
+		for _, lst := range []*[]pointFx{&in.explosions, &in.bloods, &in.lgBloods} {
+			l := *lst
+			sort.SliceStable(l, func(i, j int) bool { return l[i].t < l[j].t })
+		}
 	}
 
 	in.resolveProjectiles(res.Streams.Projectiles)
@@ -298,6 +352,7 @@ func (in *inputs) resolveProjectiles(ps *result.ProjectileStreams) {
 		})
 	}
 	sort.SliceStable(in.projs, func(i, j int) bool { return in.projs[i].endT < in.projs[j].endT })
+	in.snapProjectilesToExplosions()
 
 	for _, pr := range in.projs {
 		if pr.weapon == "rl" && pr.shooter != "" {
@@ -306,6 +361,45 @@ func (in *inputs) resolveProjectiles(ps *result.ProjectileStreams) {
 	}
 	for _, lst := range in.consumedRL {
 		sort.Slice(lst, func(i, j int) bool { return lst[i] < lst[j] })
+	}
+}
+
+// Explosion-snap gates: a tracked projectile's despawn origin is the
+// entity's LAST BROADCAST position — up to one server frame short of the
+// true detonation point. TE_EXPLOSION is that true point; snapping the
+// flight endpoint to the matching explosion makes every splash-distance
+// use (candidate dEnd, the raw overkill top-up) exact.
+const (
+	explosionSnapMs   = 80    // despawn frame to explosion multicast
+	explosionSnapDist = 130.0 // one frame of rocket travel + wire rounding
+)
+
+// snapProjectilesToExplosions replaces each tracked flight's interpolated
+// endpoint with the exact TE_EXPLOSION detonation point when one matches in
+// time and space, and marks that explosion claimed so the trackless-rocket
+// candidate search does not reuse it. Nearest-explosion-first per flight;
+// each explosion claims at most one flight.
+func (in *inputs) snapProjectilesToExplosions() {
+	if len(in.explosions) == 0 {
+		return
+	}
+	for i := range in.projs {
+		pr := &in.projs[i]
+		lo := sort.Search(len(in.explosions), func(k int) bool { return in.explosions[k].t >= pr.endT-explosionSnapMs })
+		bestJ, bestD := -1, explosionSnapDist
+		for j := lo; j < len(in.explosions) && in.explosions[j].t <= pr.endT+explosionSnapMs; j++ {
+			if in.explosions[j].claimed {
+				continue
+			}
+			if d := in.explosions[j].p.distTo(pr.ep); d < bestD {
+				bestJ, bestD = j, d
+			}
+		}
+		if bestJ >= 0 {
+			in.explosions[bestJ].claimed = true
+			pr.ep = in.explosions[bestJ].p
+			pr.epExact = true
+		}
 	}
 }
 
