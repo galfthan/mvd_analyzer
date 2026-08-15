@@ -86,21 +86,22 @@ Notes that cost me time:
 | (2b)      | batch 2b — trails, LOS/PVS lines + buildVisByPair/losCovers, occupied-region + region-control overlays, resolvePlayerLoc, pickLocGroupAt, hitTestPlayerSymbol (takes the frame's player map as an argument — the frame source is still host-side). Harness: the LOS/PVS states now wait out the lazy worker raycast (`!mapState.losPending`), the only nondeterminism ever caught in the shots |
 | (3)       | `MvdMap.render(time, bucket, controlStates)` — the whole frame composition; app.js renderMap is a thin wrapper resolving the two host-side time-indexed inputs. `resize(cssW, cssH, dpr)` / `refit()` as the push-only size API — all measuring (fullscreen, DPR) stays in app.js. `rebuildLocationGroups()` replaces the app-side wrapper |
 | (4)       | the frames seam — the columnar accessors move to `src/frames.js` (one implementation; app.js keeps wrapper names for the panels), the view is pushed in via `setFrames`, and `frameAt(time)` / `regionControlAt(time)` own the memoised lookup. `render(time)` and `hitTestPlayerSymbol(cx, cy, time)` lose their host-data parameters. NOTE: this is the synchronous half of the planned FrameSource — see "Not done" |
+| (5)       | interaction — the pointer state machine (`pointerDown/Move/Up`, `wheelZoom`), click dispatch, `setCamera`, `setFocusGroup`, `setFollowPlayer`, `currentOrbitPivot`, `resetView`, and a minimal emitter (`on('follow'\|'camera')`) all live on MvdMap. app.js keeps only DOM event glue (installMapInteraction), chrome sync via the two events, and thin global wrappers (setMapCamera / resetMapView / setFocusGroup / setFollowPlayer) for buttons + the harness. The app-side projection wrappers (worldToCanvas etc.) are gone |
 
-State: `app.js` ~9,900 lines. `mvd-map-view/` ~2,600 lines of source,
-94 unit tests. `make test` green; full-shot parity on every commit (the set is
-140 shots since the LOS-wait fix).
+State: `app.js` ~9,300 lines. `mvd-map-view/` ~3,300 lines of source,
+115 unit tests. `make test` green; full-shot parity on every commit (the set
+is 140 shots since the LOS-wait fix).
 
 Current boundary:
 
 ```
 mvd-map-view/   camera · geometry · loc regions · floor model · draw primitives
-                · MvdMap state container · world layers · actor layers
-                · trails · LOS/PVS lines · occupancy + region-control overlays
-                · loc resolution · hit-testing
-                · render(time, bucket, controlStates) · resize/refit push API
-app.js          frame source (bucket reconstruction + region-control lookup)
-                · precomputeFullTrails · pointer interaction · all measuring
+                · MvdMap state container · world/actor/overlay layers
+                · loc resolution · hit-testing · frames seam (setFrames/frameAt)
+                · render(time) · resize/refit push API · pointer state machine
+                · focus/follow/camera/resetView · on('follow'|'camera')
+app.js          setFrames push (worker plumbing) · precomputeFullTrails
+                · DOM event glue + chrome sync · all measuring
                 · all DOM chrome · all loaders
 ```
 
@@ -118,12 +119,12 @@ In the order I would do it:
    windows arrive — not a render-path retrofit. Deliberately deferred until
    the MCP viewer exists to drive the window/marker semantics ("two
    consumers" rule: don't shape the API on a consumer that isn't asking yet).
-2. **Pointer interaction** (`installMapInteraction`) as component API with
-   host-supplied event wiring.
-3. **Public surface**: setters (`setGeometry`/`setEntities`/`setLocTable`/
-   `setLocations`/`setFrames`/`setMarkers`), `seek(ms)`/`play()`/`pause()`,
-   `follow()`, `setOverlays()`, and `on('select'|'camera'|'hoverloc')`.
-4. **Then** the two follow-on parts, in this order: WebGL backend
+2. **Public surface**: the remaining setters (`setGeometry`/`setEntities`/
+   `setLocTable`/`setLocations`/`setMarkers` — `setFrames`, `setFollowPlayer`,
+   `setFocusGroup`, `setCamera`, `resetView`, `on('follow'|'camera')` exist),
+   `seek(ms)`/`play()`/`pause()`, `setOverlays()`, and
+   `on('select'|'hoverloc')` if the MCP viewer needs them.
+3. **Then** the two follow-on parts, in this order: WebGL backend
    (perf/effects, see below), then the MCP Apps viewer in `mvd-mcp`.
 
 ---

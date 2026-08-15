@@ -500,6 +500,135 @@ test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
     assert.ok(map.state.locationGroupByName, 'lookup populated');
 });
 
+// ─── Camera, follow, focus, pointer interaction ─────────────────────────────
+
+test('setCamera notifies the host and repaints', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    const seen = [];
+    map.on('camera', (c) => seen.push(c));
+    map.setCamera(1.0, 0.5);
+    assert.equal(seen.length, 1);
+    assert.equal(map.camera.pitch, 0.5);
+});
+
+test('setFollowPlayer clears manual pan and emits follow', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    const seen = [];
+    map.on('follow', (n) => seen.push(n));
+    map.camera.panX = 50;
+    map.setFollowPlayer('nlk');
+    assert.equal(map.state.followPlayer, 'nlk');
+    assert.equal(map.camera.panX, 0, 'entering follow resets pan');
+    map.setFollowPlayer(null);
+    assert.deepEqual(seen, ['nlk', null]);
+});
+
+test('a pan drag moves the camera and drops follow; a small press stays a click', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.followPlayer = 'nlk';
+    const seen = [];
+    map.on('follow', (n) => seen.push(n));
+    map.pointerDown(100, 100, 'pan', 0);
+    map.pointerMove(102, 101);   // under the click threshold
+    assert.equal(map.state.followPlayer, 'nlk', 'not yet a drag');
+    assert.equal(map.camera.panX, 0);
+    map.pointerMove(140, 120);   // now a real drag
+    assert.equal(map.state.followPlayer, null, 'pan breaks follow');
+    assert.deepEqual(seen, [null]);
+    // dx counts from the LAST pointer position (102), not the press point —
+    // sub-threshold motion is never retroactively applied as pan.
+    assert.equal(map.camera.panX, 38);
+    map.pointerUp(140, 120);
+    assert.equal(map.camera.panX, 38, 'release does not dispatch a click after a drag');
+});
+
+test('an orbit drag applies absolute yaw/pitch deltas from the start angles', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+    map.resize(100, 100, 1);
+    const yaw0 = map.camera.yaw, pitch0 = map.camera.pitch;
+    map.pointerDown(50, 50, 'orbit', 2);
+    map.pointerMove(150, 90);
+    assert.ok(Math.abs(map.camera.yaw - (yaw0 + 100 * 0.008)) < 1e-9);
+    assert.ok(Math.abs(map.camera.pitch - Math.min(Math.PI / 2, pitch0 + 40 * 0.005)) < 1e-9);
+    map.pointerUp(150, 90);
+});
+
+test('a click toggles follow on the player symbol under the cursor', () => {
+    const map = topDownMap();
+    map.state.canvas = { style: {} };
+    map.state.ctx = null;   // render is a no-op without a context
+    map.setFrames({
+        windowMs: 50, start: 0, count: 1,
+        players: { nlk: { first: 0, n: 1, alive: [1], x: [40], y: [40], z: [0] } },
+    });
+    map.pointerDown(41, 61, 'pan', 0);
+    map.pointerUp(41, 61);
+    assert.equal(map.state.followPlayer, 'nlk', 'click on the symbol follows');
+    map.pointerDown(41, 61, 'pan', 0);
+    map.pointerUp(41, 61);
+    assert.equal(map.state.followPlayer, null, 'second click unfollows');
+});
+
+test('wheelZoom keeps the world point under the cursor fixed', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+    map.resize(100, 100, 1);
+    const before = map.toCanvasNew(30, 70, 0);
+    map.wheelZoom(before.x, before.y, -600);
+    assert.ok(map.camera.zoomK > 1, 'wheel up zooms in');
+    const after = map.toCanvasNew(30, 70, 0);
+    assert.ok(Math.abs(after.x - before.x) < 1e-6 && Math.abs(after.y - before.y) < 1e-6,
+        'the anchor point stays put');
+    map.wheelZoom(50, 50, 99999);
+    assert.equal(map.camera.zoomK, 0.5, 'zoom-out clamps at the floor');
+});
+
+test('resetView restores the baseline and drops follow and focus', () => {
+    const { canvas } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.bounds = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+    map.resize(100, 100, 1);
+    map.camera.zoomK = 4;
+    map.camera.panX = 33;
+    map.camera.zMidDefault = 64;
+    map.state.followPlayer = 'nlk';
+    map.state.focusGroupName = 'RA';
+    const follows = [];
+    map.on('follow', (n) => follows.push(n));
+    map.resetView();
+    assert.equal(map.camera.zoomK, 1);
+    assert.equal(map.camera.panX, 0);
+    assert.equal(map.camera.zMid, 64);
+    assert.equal(map.state.followPlayer, null);
+    assert.equal(map.state.focusGroupName, null);
+    assert.deepEqual(follows, [null]);
+});
+
+test('setFocusGroup marks the region and its bbox neighbours', () => {
+    const map = new MvdMap();
+    map.state.ctx = null;
+    const square = (x0, y0) => [x0, y0, 0, x0 + 100, y0, 0, x0 + 100, y0 + 100, 0];
+    map.state.locationGroups = [
+        { name: 'RA', tris: square(0, 0) },
+        { name: 'near', tris: square(150, 0) },     // 50 units away → neighbour
+        { name: 'far', tris: square(1000, 0) },     // too far
+    ];
+    map.state.locationGroupByName = Object.fromEntries(
+        map.state.locationGroups.map(g => [g.name, g]));
+    map.setFocusGroup('RA');
+    assert.equal(map.state.focusGroupName, 'RA');
+    assert.ok(map.state.focusNeighbors.has('near'));
+    assert.ok(!map.state.focusNeighbors.has('far'));
+    map.setFocusGroup(null);
+    assert.equal(map.state.focusGroupName, null);
+});
+
 test('drawTracks pulls a trail start back when the clock rewinds past it', () => {
     const map = new MvdMap();
     const noop = () => {};

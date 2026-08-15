@@ -5975,29 +5975,8 @@ function getFragsAtTime(time) {
 // readable. Click the same region, empty space, Escape, or Reset view to
 // clear. Focus also becomes the orbit-drag pivot (currentOrbitPivot).
 
-// Two named regions are "neighbors" when their world-XY bounding boxes are
-// within this many units of touching — roughly one corridor width.
-const FOCUS_NEIGHBOR_MARGIN = 160;
-
 function setFocusGroup(name) {
-    mapState.focusGroupName = null;
-    mapState.focusNeighbors = null;
-    const focus = name ? mapState.locationGroupByName?.[name] : null;
-    if (focus && focus.tris && focus.tris.length >= 9) {
-        mapState.focusGroupName = name;
-        const fb = MapView.groupWorldBBox(focus);
-        const nb = new Set();
-        for (const g of mapState.locationGroups || []) {
-            if (g === focus || !g.tris || g.tris.length < 9) continue;
-            const gb = MapView.groupWorldBBox(g);
-            const gapX = Math.max(gb.minX - fb.maxX, fb.minX - gb.maxX);
-            const gapY = Math.max(gb.minY - fb.maxY, fb.minY - gb.maxY);
-            if (Math.max(gapX, gapY) <= FOCUS_NEIGHBOR_MARGIN) nb.add(g.name);
-        }
-        mapState.focusNeighbors = nb;
-    }
-    mapState.renderDirty = true;
-    renderMap(mapState.currentTime);
+    mapView.setFocusGroup(name);
 }
 
 // (pickLocGroupAt, computeOccupiedGroupTeams, regionActiveTint and the two
@@ -6643,44 +6622,20 @@ window.onMapViewReady = (MapView) => {
     mapView = new MapView.MvdMap();
     mapState = mapView.state;
     _wtc = mapView.camera;
+    // Mirror component-side changes into the page chrome. The elements are
+    // looked up at event time — these listeners attach before DOMContentLoaded.
+    mapView.on('follow', () => syncFollowSelectUI());
+    mapView.on('camera', () => {
+        const btn = document.getElementById('map-3d-toggle');
+        if (btn) btn.classList.toggle('active', MapView.is3D(_wtc));
+    });
 };
 
-// setMapCamera: normalize + snap + clamp the orbit angles, sync the 3D
-// toggle button, and redraw. The single entry point for every rotation
-// source (button, drag).
+// setMapCamera: the single entry point for every rotation source (button,
+// harness poke). The 3D-toggle highlight follows via the 'camera' event
+// listener installed in onMapViewReady.
 function setMapCamera(yaw, pitch) {
-    MapView.setAngles(_wtc, yaw, pitch);
-    const btn = document.getElementById('map-3d-toggle');
-    if (btn) btn.classList.toggle('active', MapView.is3D(_wtc));
-    mapState.renderDirty = true;
-    renderMap(mapState.currentTime);
-}
-
-// currentOrbitPivot: where an orbit drag should pivot. Follow mode pivots on
-// the tracked player; a focused region pivots on its centroid (at its real
-// floor height, so pitch changes don't swing a high floor across the
-// screen); otherwise the world point currently at canvas center — so
-// "pan/zoom to a place, then rotate" orbits where you're looking.
-function currentOrbitPivot() {
-    if (mapState.followPlayer) {
-        // Match the stream-sourced symbol position so the orbit pivots
-        // exactly on the drawn symbol.
-        const sp = mapView.streamPosAt(mapState.followPlayer, mapState.currentTime * 1000);
-        if (sp && !(sp.x === 0 && sp.y === 0)) {
-            return { x: sp.x, y: sp.y, z: sp.z || 0 };
-        }
-        const bucket = findBucketAtTime(mapState.currentTime);
-        const fp = bucket && bucket.p ? bucket.p[mapState.followPlayer] : null;
-        if (fp && !(fp.x === 0 && fp.y === 0)) {
-            return { x: fp.x, y: fp.y, z: fp.z || 0 };
-        }
-    }
-    if (mapState.focusGroupName && mapState.locationGroupByName) {
-        const g = mapState.locationGroupByName[mapState.focusGroupName];
-        if (g) return { x: g.centroid.x, y: g.centroid.y, z: g.centroid.z };
-    }
-    const c = canvasToWorld((mapState.canvasCssW || 0) / 2, (mapState.canvasCssH || 0) / 2);
-    return { x: c.x, y: c.y, z: _wtc.zMid };
+    mapView.setCamera(yaw, pitch);
 }
 
 // Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
@@ -6713,47 +6668,11 @@ function resizeMapCanvas() {
 }
 
 function resetMapView() {
-    _wtc.panX = 0;
-    _wtc.panY = 0;
-    _wtc.zoomK = 1;
-    if (mapState.followPlayer) {
-        mapState.followPlayer = null;
-        syncFollowSelectUI();
-    }
-    if (mapState.focusGroupName) setFocusGroup(null);
-    // Restore the default orbit pivot (map center / mid height) — orbit
-    // drags may have re-centered it.
-    mapView.refit();
-    _wtc.zMid = _wtc.zMidDefault || 0;
-    // Back to the default isometric view (also syncs the 3D button and redraws).
-    setMapCamera(MapView.DEFAULT_YAW, MapView.DEFAULT_PITCH);
+    mapView.resetView();
 }
 
-// Reusable point to avoid GC — only use for immediate consumption, not storage
-const _tmpPt = { x: 0, y: 0, depth: 0 };
-
-// Projection wrappers over mvd-map-view's camera math. worldToCanvas reuses
-// the scratch point (immediate consumption only); worldToCanvasNew allocates
-// for results that get stored (tracks, caches).
-function projectWorld(x, y, z, out) {
-    return MapView.project(_wtc, x, y, z, out);
-}
-
-function worldToCanvas(x, y, z) {
-    return MapView.project(_wtc, x, y, z, _tmpPt);
-}
-
-function worldToCanvasNew(x, y, z) {
-    return MapView.project(_wtc, x, y, z, { x: 0, y: 0, depth: 0 });
-}
-
-function canvasToView(cx, cy) {
-    return MapView.toView(_wtc, cx, cy);
-}
-
-function canvasToWorld(cx, cy, zPlane) {
-    return MapView.toWorld(_wtc, cx, cy, zPlane);
-}
+// (The projection wrappers — worldToCanvas and friends — are gone: every
+// consumer now lives on MvdMap and projects through the component's camera.)
 
 function assignPlayerSymbols(result) {
     // Roster source: the KTX demoinfo block where the demo has one, else
@@ -7700,37 +7619,19 @@ function setupMapTrailControls() {
     }
 }
 
-// installMapInteraction adds pan / zoom / rotate / click handlers to the map
-// canvas. Pan: left-drag. Rotate (3D orbit): right-drag or Ctrl/Cmd+left-drag
-// — horizontal motion spins the map (yaw), vertical motion tilts it (pitch,
-// clamped between PITCH_MIN and top-down). Zoom: mouse wheel (centered
-// on cursor). Click (no drag): dispatched through handleMapCanvasClick —
-// used by follow-player to toggle follow on a player symbol. Double-click
-// resets the view (including rotation).
+// installMapInteraction wires the DOM events to the component's pointer
+// state machine. The gesture semantics (pan / orbit / click-to-follow /
+// wheel zoom anchored on the cursor) live on MvdMap; this glue only turns
+// browser events into canvas-space CSS-pixel calls. mousemove/mouseup attach
+// to window so a drag keeps tracking outside the canvas.
 function installMapInteraction(canvas) {
     if (!canvas || canvas.__mapInteractionInstalled) return;
     canvas.__mapInteractionInstalled = true;
 
-    const CLICK_MAX_MOTION_PX = 5;
-    const ZOOM_MIN = 0.5;
-    const ZOOM_MAX = 12;
-    const ORBIT_YAW_PER_PX = 0.008;   // rad of yaw per horizontal pixel
-    const ORBIT_PITCH_PER_PX = 0.005; // rad of pitch per vertical pixel
-
-    const drag = {
-        active: false,
-        button: -1,
-        mode: 'pan', // 'pan' | 'orbit'
-        startX: 0, startY: 0,
-        lastX: 0, lastY: 0,
-        yaw0: 0, pitch0: 0, // camera angles at orbit-drag start
-        moved: false,
-    };
-
     function canvasPointFromEvent(ev) {
         // CSS pixel coords relative to the canvas origin — matches what
-        // renderMap / worldToCanvas use now that setTransform(dpr) handles
-        // the CSS → physical scaling for drawing.
+        // the renderer uses now that setTransform(dpr) handles the CSS →
+        // physical scaling for drawing.
         const rect = canvas.getBoundingClientRect();
         return {
             x: ev.clientX - rect.left,
@@ -7741,22 +7642,8 @@ function installMapInteraction(canvas) {
     canvas.addEventListener('mousedown', (ev) => {
         if (ev.button !== 0 && ev.button !== 2) return;
         const p = canvasPointFromEvent(ev);
-        drag.active = true;
-        drag.button = ev.button;
-        drag.mode = (ev.button === 2 || ev.ctrlKey || ev.metaKey) ? 'orbit' : 'pan';
-        drag.startX = drag.lastX = p.x;
-        drag.startY = drag.lastY = p.y;
-        drag.moved = false;
-        if (drag.mode === 'orbit') {
-            // Re-center the orbit on what the user is looking at (followed
-            // player > focused region > view center) and capture the start
-            // angles — the drag applies absolute deltas from these so the
-            // cardinal yaw snap can be dragged through.
-            const pv = currentOrbitPivot();
-            MapView.setOrbitCenter(_wtc, pv.x, pv.y, pv.z);
-            drag.yaw0 = _wtc.yaw;
-            drag.pitch0 = _wtc.pitch;
-        }
+        const mode = (ev.button === 2 || ev.ctrlKey || ev.metaKey) ? 'orbit' : 'pan';
+        mapView.pointerDown(p.x, p.y, mode, ev.button);
         ev.preventDefault();
     });
 
@@ -7765,79 +7652,19 @@ function installMapInteraction(canvas) {
     canvas.addEventListener('contextmenu', (ev) => ev.preventDefault());
 
     window.addEventListener('mousemove', (ev) => {
-        if (!drag.active) return;
         const p = canvasPointFromEvent(ev);
-        const dx = p.x - drag.lastX;
-        const dy = p.y - drag.lastY;
-        drag.lastX = p.x;
-        drag.lastY = p.y;
-        if (!drag.moved) {
-            const totalDx = p.x - drag.startX;
-            const totalDy = p.y - drag.startY;
-            if (Math.abs(totalDx) > CLICK_MAX_MOTION_PX ||
-                Math.abs(totalDy) > CLICK_MAX_MOTION_PX) {
-                drag.moved = true;
-                // Starting a pan drops follow-mode so the user isn't fighting
-                // the camera. Orbiting keeps it — rotation composes fine with
-                // the per-frame follow re-center.
-                if (drag.mode === 'pan' && mapState.followPlayer) {
-                    mapState.followPlayer = null;
-                    syncFollowSelectUI();
-                }
-                canvas.style.cursor = 'grabbing';
-            }
-        }
-        if (drag.moved) {
-            if (drag.mode === 'orbit') {
-                // Horizontal drag spins, vertical drag tilts (up = tilt
-                // further toward horizontal, down = back toward top-down).
-                // Absolute from the drag-start angles, not incremental, so
-                // the yaw snap in setMapCamera can't capture the drag.
-                setMapCamera(drag.yaw0 + (p.x - drag.startX) * ORBIT_YAW_PER_PX,
-                             drag.pitch0 + (p.y - drag.startY) * ORBIT_PITCH_PER_PX);
-            } else {
-                _wtc.panX += dx;
-                _wtc.panY += dy;
-                mapState.renderDirty = true;
-                renderMap(mapState.currentTime);
-            }
-        }
+        mapView.pointerMove(p.x, p.y);
     });
 
     window.addEventListener('mouseup', (ev) => {
-        if (!drag.active) return;
-        const wasClick = !drag.moved && drag.button === 0;
-        drag.active = false;
-        drag.button = -1;
-        canvas.style.cursor = '';
-        if (wasClick) {
-            const p = canvasPointFromEvent(ev);
-            handleMapCanvasClick(p.x, p.y, ev);
-        }
+        const p = canvasPointFromEvent(ev);
+        mapView.pointerUp(p.x, p.y);
     });
 
     canvas.addEventListener('wheel', (ev) => {
         ev.preventDefault();
         const p = canvasPointFromEvent(ev);
-        // Anchor the zoom in *view space*: the (u, v) under the cursor is
-        // found by inverting only the linear screen map (rotation plays no
-        // part), so this is exact at any pitch — including a fully
-        // horizontal camera, where a world-plane inverse would be singular.
-        const vb = canvasToView(p.x, p.y);
-        let newZoom = _wtc.zoomK * Math.exp(-ev.deltaY * 0.0015);
-        if (newZoom < ZOOM_MIN) newZoom = ZOOM_MIN;
-        if (newZoom > ZOOM_MAX) newZoom = ZOOM_MAX;
-        if (newZoom === _wtc.zoomK) return;
-        _wtc.zoomK = newZoom;
-        // Re-solve pan so the same (u, v) lands back under the cursor.
-        // Follow-mode intentionally survives zoom — renderMap's follow step
-        // will re-center on the tracked player using the new zoom level, so
-        // zoom becomes "zoom in on the player" rather than dropping follow.
-        const sx = _wtc.scale * _wtc.zoomK;
-        _wtc.panX = p.x - _wtc.offsetX - (vb.u - _wtc.minX) * sx;
-        _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (vb.v - _wtc.minY) * sx;
-        mapState.renderDirty = true;
-        renderMap(mapState.currentTime);
+        mapView.wheelZoom(p.x, p.y, ev.deltaY);
     }, { passive: false });
 
     canvas.addEventListener('dblclick', (ev) => {
@@ -7848,36 +7675,10 @@ function installMapInteraction(canvas) {
     canvas.style.cursor = 'grab';
 }
 
-// Dispatched from installMapInteraction on a true click (no drag).
-// Player symbols win first (toggle follow), then the click picks a loc
-// region for focus mode — same region or empty space clears it.
-function handleMapCanvasClick(cx, cy, ev) {
-    const hit = mapView.hitTestPlayerSymbol(cx, cy, mapState.currentTime);
-    if (hit) {
-        setFollowPlayer(mapState.followPlayer === hit ? null : hit);
-        return;
-    }
-    const region = mapView.pickLocGroupAt(cx, cy);
-    if (region && region !== mapState.focusGroupName) {
-        setFocusGroup(region);
-    } else if (mapState.focusGroupName) {
-        setFocusGroup(null);
-    }
-}
-
 // ─── Follow-player ────────────────────────────────────────────────────────
 
 function setFollowPlayer(name) {
-    mapState.followPlayer = name || null;
-    if (mapState.followPlayer) {
-        // Entering follow mode clears any previous manual pan so the camera
-        // lock is relative to a fit-to-canvas baseline. Zoom is preserved.
-        _wtc.panX = 0;
-        _wtc.panY = 0;
-    }
-    syncFollowSelectUI();
-    mapState.renderDirty = true;
-    renderMap(mapState.currentTime);
+    mapView.setFollowPlayer(name);
 }
 
 function syncFollowSelectUI() {

@@ -16,9 +16,12 @@
 // this was a module-level object in app.js — that equivalence is what keeps
 // the move verifiable a group at a time. The render methods follow.
 
-import { newCamera, project, is3D, fit } from './camera.js';
+import {
+    newCamera, project, is3D, fit, setAngles, setOrbitCenter, toView, toWorld,
+    DEFAULT_YAW, DEFAULT_PITCH,
+} from './camera.js';
 import { moverPoseAt, pointInTriangle } from './geometry.js';
-import { buildFloorModel, processLocationGroups } from './locgroups.js';
+import { buildFloorModel, processLocationGroups, groupWorldBBox } from './locgroups.js';
 import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
 import {
     drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
@@ -223,6 +226,20 @@ const PVS_STYLE = {
 // the 1.5 * 1.25 ≈ 1.88x upper bound.
 const FOLLOW_HIT_RADIUS_PX = 24;
 
+// Two named regions are "neighbors" when their world-XY bounding boxes are
+// within this many units of touching — roughly one corridor width.
+const FOCUS_NEIGHBOR_MARGIN = 160;
+
+// Pointer interaction tuning. Pan: left-drag. Rotate (3D orbit): the host
+// maps right-drag / Ctrl+drag to 'orbit' — horizontal motion spins the map
+// (yaw), vertical motion tilts it (pitch). Zoom: wheel, centered on cursor.
+// A press that moves less than CLICK_MAX_MOTION_PX is a click.
+const CLICK_MAX_MOTION_PX = 5;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 12;
+const ORBIT_YAW_PER_PX = 0.008;   // rad of yaw per horizontal pixel
+const ORBIT_PITCH_PER_PX = 0.005; // rad of pitch per vertical pixel
+
 // buildVisByPair flattens the worker's per-player [{name, los/pvs:[{o,iv}]}]
 // reply into byPair[lookerName][targetName] = [{s,e},…] for the given field
 // ('los' or 'pvs'). The track's o indexes the players array; resolve it to that
@@ -348,6 +365,19 @@ export class MvdMap {
         this._toCanvasNew = (x, y, z) => this.toCanvasNew(x, y, z);
         if (canvas) this.attach(canvas);
         this.options = opts;
+        // Host-facing events ('follow', 'camera') and the pointer-drag state
+        // machine. The host wires DOM events to the pointer methods and
+        // mirrors the emitted changes into its own chrome.
+        this._listeners = {};
+        this._drag = {
+            active: false,
+            button: -1,
+            mode: 'pan', // 'pan' | 'orbit'
+            startX: 0, startY: 0,
+            lastX: 0, lastY: 0,
+            yaw0: 0, pitch0: 0, // camera angles at orbit-drag start
+            moved: false,
+        };
         // Team palette, indexed by a team's position in the host's frag-sorted
         // team order. mvd-web owns that canonical ordering and passes its own
         // array; the default reproduces it for a host that passes none.
@@ -1774,5 +1804,244 @@ export class MvdMap {
                 drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
             }
         }
+    }
+
+    // ─── Events ─────────────────────────────────────────────────────────────
+
+    // on registers a host listener. Two events today: 'follow' (the followed
+    // player changed — null when cleared) and 'camera' (the orbit angles
+    // changed). The host mirrors these into its own chrome (a select box, a
+    // 3D-toggle highlight); the component never reaches out to find one.
+    on(name, fn) {
+        (this._listeners[name] ||= []).push(fn);
+        return this;
+    }
+
+    _emit(name, arg) {
+        const l = this._listeners[name];
+        if (l) for (const fn of l) fn(arg);
+    }
+
+    // ─── Camera, focus, follow ──────────────────────────────────────────────
+
+    // setCamera: normalize + snap + clamp the orbit angles, notify the host,
+    // and redraw. The single entry point for every rotation source (button,
+    // drag).
+    setCamera(yaw, pitch) {
+        setAngles(this.camera, yaw, pitch);
+        this._emit('camera', { yaw: this.camera.yaw, pitch: this.camera.pitch });
+        this.state.renderDirty = true;
+        this.render(this.state.currentTime);
+    }
+
+    // setFocusGroup: focus a named loc region (or clear with null). The
+    // region and its XY-neighbors render solid and saturated while everything
+    // else fades, so a zoomed-in fight area stays readable. Focus also
+    // becomes the orbit-drag pivot (currentOrbitPivot).
+    setFocusGroup(name) {
+        const s = this.state;
+        s.focusGroupName = null;
+        s.focusNeighbors = null;
+        const focus = name ? s.locationGroupByName?.[name] : null;
+        if (focus && focus.tris && focus.tris.length >= 9) {
+            s.focusGroupName = name;
+            const fb = groupWorldBBox(focus);
+            const nb = new Set();
+            for (const g of s.locationGroups || []) {
+                if (g === focus || !g.tris || g.tris.length < 9) continue;
+                const gb = groupWorldBBox(g);
+                const gapX = Math.max(gb.minX - fb.maxX, fb.minX - gb.maxX);
+                const gapY = Math.max(gb.minY - fb.maxY, fb.minY - gb.maxY);
+                if (Math.max(gapX, gapY) <= FOCUS_NEIGHBOR_MARGIN) nb.add(g.name);
+            }
+            s.focusNeighbors = nb;
+        }
+        s.renderDirty = true;
+        this.render(s.currentTime);
+    }
+
+    setFollowPlayer(name) {
+        const s = this.state;
+        s.followPlayer = name || null;
+        if (s.followPlayer) {
+            // Entering follow mode clears any previous manual pan so the
+            // camera lock is relative to a fit-to-canvas baseline. Zoom is
+            // preserved.
+            this.camera.panX = 0;
+            this.camera.panY = 0;
+        }
+        this._emit('follow', s.followPlayer);
+        s.renderDirty = true;
+        this.render(s.currentTime);
+    }
+
+    // currentOrbitPivot: where an orbit drag should pivot. Follow mode pivots
+    // on the tracked player; a focused region pivots on its centroid (at its
+    // real floor height, so pitch changes don't swing a high floor across the
+    // screen); otherwise the world point currently at canvas center — so
+    // "pan/zoom to a place, then rotate" orbits where you're looking.
+    currentOrbitPivot() {
+        const s = this.state;
+        const w = this.camera;
+        if (s.followPlayer) {
+            // Match the stream-sourced symbol position so the orbit pivots
+            // exactly on the drawn symbol.
+            const sp = this.streamPosAt(s.followPlayer, s.currentTime * 1000);
+            if (sp && !(sp.x === 0 && sp.y === 0)) {
+                return { x: sp.x, y: sp.y, z: sp.z || 0 };
+            }
+            const frame = this.frameAt(s.currentTime);
+            const fp = frame && frame.p ? frame.p[s.followPlayer] : null;
+            if (fp && !(fp.x === 0 && fp.y === 0)) {
+                return { x: fp.x, y: fp.y, z: fp.z || 0 };
+            }
+        }
+        if (s.focusGroupName && s.locationGroupByName) {
+            const g = s.locationGroupByName[s.focusGroupName];
+            if (g) return { x: g.centroid.x, y: g.centroid.y, z: g.centroid.z };
+        }
+        const c = toWorld(w, (s.canvasCssW || 0) / 2, (s.canvasCssH || 0) / 2);
+        return { x: c.x, y: c.y, z: w.zMid };
+    }
+
+    // resetView: back to the fit-to-canvas baseline — pan/zoom cleared,
+    // follow and focus dropped, orbit pivot restored to the map center /
+    // mid height, default isometric angles.
+    resetView() {
+        const s = this.state;
+        const w = this.camera;
+        w.panX = 0;
+        w.panY = 0;
+        w.zoomK = 1;
+        if (s.followPlayer) {
+            s.followPlayer = null;
+            this._emit('follow', null);
+        }
+        if (s.focusGroupName) this.setFocusGroup(null);
+        // Restore the default orbit pivot (map center / mid height) — orbit
+        // drags may have re-centered it.
+        this.refit();
+        w.zMid = w.zMidDefault || 0;
+        // Back to the default isometric view (also notifies the host and
+        // redraws).
+        this.setCamera(DEFAULT_YAW, DEFAULT_PITCH);
+    }
+
+    // ─── Pointer interaction ────────────────────────────────────────────────
+    //
+    // The host owns the DOM events and forwards them here in canvas-space CSS
+    // pixels; the component owns the gesture semantics. Pan: 'pan' drag.
+    // Rotate: 'orbit' drag (absolute deltas from the drag-start angles, so
+    // the cardinal yaw snap can be dragged through). A press that never
+    // exceeds the click threshold dispatches as a click on release: player
+    // symbols toggle follow, loc regions toggle focus.
+
+    pointerDown(x, y, mode = 'pan', button = 0) {
+        const d = this._drag;
+        d.active = true;
+        d.button = button;
+        d.mode = mode === 'orbit' ? 'orbit' : 'pan';
+        d.startX = d.lastX = x;
+        d.startY = d.lastY = y;
+        d.moved = false;
+        if (d.mode === 'orbit') {
+            // Re-center the orbit on what the user is looking at (followed
+            // player > focused region > view center) and capture the start
+            // angles.
+            const pv = this.currentOrbitPivot();
+            setOrbitCenter(this.camera, pv.x, pv.y, pv.z);
+            d.yaw0 = this.camera.yaw;
+            d.pitch0 = this.camera.pitch;
+        }
+    }
+
+    pointerMove(x, y) {
+        const d = this._drag;
+        if (!d.active) return;
+        const s = this.state;
+        const dx = x - d.lastX;
+        const dy = y - d.lastY;
+        d.lastX = x;
+        d.lastY = y;
+        if (!d.moved) {
+            const totalDx = x - d.startX;
+            const totalDy = y - d.startY;
+            if (Math.abs(totalDx) > CLICK_MAX_MOTION_PX ||
+                Math.abs(totalDy) > CLICK_MAX_MOTION_PX) {
+                d.moved = true;
+                // Starting a pan drops follow-mode so the user isn't fighting
+                // the camera. Orbiting keeps it — rotation composes fine with
+                // the per-frame follow re-center.
+                if (d.mode === 'pan' && s.followPlayer) {
+                    s.followPlayer = null;
+                    this._emit('follow', null);
+                }
+                if (s.canvas) s.canvas.style.cursor = 'grabbing';
+            }
+        }
+        if (d.moved) {
+            if (d.mode === 'orbit') {
+                // Horizontal drag spins, vertical drag tilts (up = tilt
+                // further toward horizontal, down = back toward top-down).
+                // Absolute from the drag-start angles, not incremental, so
+                // the yaw snap in setCamera can't capture the drag.
+                this.setCamera(d.yaw0 + (x - d.startX) * ORBIT_YAW_PER_PX,
+                               d.pitch0 + (y - d.startY) * ORBIT_PITCH_PER_PX);
+            } else {
+                this.camera.panX += dx;
+                this.camera.panY += dy;
+                s.renderDirty = true;
+                this.render(s.currentTime);
+            }
+        }
+    }
+
+    pointerUp(x, y) {
+        const d = this._drag;
+        if (!d.active) return;
+        const wasClick = !d.moved && d.button === 0;
+        d.active = false;
+        d.button = -1;
+        if (this.state.canvas) this.state.canvas.style.cursor = '';
+        if (wasClick) this._dispatchClick(x, y);
+    }
+
+    _dispatchClick(cx, cy) {
+        const s = this.state;
+        const hit = this.hitTestPlayerSymbol(cx, cy, s.currentTime);
+        if (hit) {
+            this.setFollowPlayer(s.followPlayer === hit ? null : hit);
+            return;
+        }
+        const region = this.pickLocGroupAt(cx, cy);
+        if (region && region !== s.focusGroupName) {
+            this.setFocusGroup(region);
+        } else if (s.focusGroupName) {
+            this.setFocusGroup(null);
+        }
+    }
+
+    // wheelZoom: exponential zoom anchored in *view space* — the (u, v) under
+    // the cursor is found by inverting only the linear screen map (rotation
+    // plays no part), so this is exact at any pitch, including a fully
+    // horizontal camera where a world-plane inverse would be singular.
+    wheelZoom(x, y, deltaY) {
+        const w = this.camera;
+        const s = this.state;
+        const vb = toView(w, x, y);
+        let newZoom = w.zoomK * Math.exp(-deltaY * 0.0015);
+        if (newZoom < ZOOM_MIN) newZoom = ZOOM_MIN;
+        if (newZoom > ZOOM_MAX) newZoom = ZOOM_MAX;
+        if (newZoom === w.zoomK) return;
+        w.zoomK = newZoom;
+        // Re-solve pan so the same (u, v) lands back under the cursor.
+        // Follow-mode intentionally survives zoom — render's follow step
+        // will re-center on the tracked player using the new zoom level, so
+        // zoom becomes "zoom in on the player" rather than dropping follow.
+        const sx = w.scale * w.zoomK;
+        w.panX = x - w.offsetX - (vb.u - w.minX) * sx;
+        w.panY = y - w.canvasH + w.offsetY + (vb.v - w.minY) * sx;
+        s.renderDirty = true;
+        this.render(s.currentTime);
     }
 }
