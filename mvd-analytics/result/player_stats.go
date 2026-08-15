@@ -81,6 +81,18 @@ const (
 	// Applies to the damage family only, and inherits into the Sources
 	// roll-up like any other per-row value.
 	SrcDerivedUnbounded = "derived:unbounded"
+	// SrcReconstructed: the damage family only, on demos whose wire never
+	// carried the KTX damage stream — the numbers come from the
+	// damage-recon node's reconstruction (DamageResult.Source ==
+	// DamageSourceReconstructed: health/armor deltas + spectator-visible
+	// evidence, see mvd-analytics/damagerecon). Magnitudes are near-exact
+	// but attribution is inference: treat given/givenTeam/givenSelf as
+	// ~1% / indicative estimates (damagerecon/ACCURACY.md has the
+	// per-field error tables). Distinct from SrcDerived, which is computed
+	// from the WIRE damage stream and is measurement-grade; the same
+	// legibility rule as SrcDerivedUnbounded — the number must never
+	// silently change grade while reading "derived".
+	SrcReconstructed = "reconstructed"
 	// SrcMixed appears in the Sources roll-up and on TEAM rows whose
 	// members disagreed about where the family came from (the shared-or-
 	// mixed aggregation rule — see AggregateAccuracy and the view's team

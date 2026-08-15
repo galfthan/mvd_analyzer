@@ -474,7 +474,7 @@ flowchart TB
   damage -->|"damage"| aim
   damage -->|"damage"| airgibs
   damage -->|"damage"| damage_recon
-  damage -->|"damage"| player_stats
+  damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| damage
   demoinfo -->|"demoinfo"| damage_recon

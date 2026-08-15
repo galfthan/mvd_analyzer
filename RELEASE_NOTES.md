@@ -40,6 +40,20 @@ Non-finite wire origins (a pre-instrumentation-era corruption that made
 ~6% of old demos abort JSON encoding with NaN) are now dropped at
 ingestion in positions, movers, projectiles and item spawns.
 
+`playerStats` rides along: the node now binds the `damage:final`
+artifact, so its damage family exists on old demos too, with
+`src: "reconstructed"` (a new value beside `derived` / `ktx` /
+`derived:unbounded`) keeping the evidence grade legible per row and in
+the `sources` roll-up. Aim and airgibs deliberately keep binding
+wire-measured damage only — reconstructed per-hit attribution is not
+measurement-grade enough for shot-level analytics. One honesty guard
+shipped with it: old recorders often FREEZE the StatItems weapon bits
+(a player "holds" RL from 0:00 through every death), which would have
+classified every reconstructed hit into the top EWep bucket — the
+reconstruction now detects frozen bits per demo and withholds the
+victim-weapon fields (`victimWep` empty, `enemyVs*`/`ewep` zero)
+instead of fabricating them.
+
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 
 No schema change; web UI only. Team colors used to follow finishing order —

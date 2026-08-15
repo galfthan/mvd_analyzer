@@ -187,7 +187,7 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
 		resultKey: "playerStats",
 		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
 	},
@@ -201,7 +201,7 @@ var postNodeMeta = map[string]nodeMeta{
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
 		provides: []string{"damage:final"},
-		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. Registered last so the other damage consumers (aim, airgibs, player-stats) keep reading the wire-measured artifact only.",
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed); aim and airgibs deliberately keep the raw `damage` edge — per-shot hit attribution must stay wire-measured.",
 	},
 }
 

@@ -61,6 +61,15 @@ type inputs struct {
 	// is 35*cells (id1 W_FireLightning), radius-dealt (self halved).
 	discharges []discharge
 
+	// weaponBitsLive: whether the demo's StatItems weapon bits actually
+	// cycle with pickups/deaths. Old recorders freeze them (a player
+	// "holds" RL from 0:00 through every death while the armor bits in the
+	// SAME stat cycle normally), which would classify every hit into the
+	// top EWep bucket — confidently wrong. When frozen, the victim-weapon
+	// classification is withheld entirely (VictimWep "" and empty
+	// enemyVs*/ewep) rather than fabricated.
+	weaponBitsLive bool
+
 	duel    bool
 	selfPen float64
 	bsp     *bspGate
@@ -162,7 +171,29 @@ func buildInputs(res *result.Result) *inputs {
 
 	in.resolveProjectiles(res.Streams.Projectiles)
 	in.detectDischarges()
+	in.weaponBitsLive = weaponBitsCycle(res.Streams.Players)
 	return in
+}
+
+// weaponBitsCycle reports whether any weapon-inventory interval opens
+// after the match start — the signature of live StatItems weapon bits
+// (a weapon is picked up seconds into a life). A frozen-bits recording
+// shows exactly one [0, end) interval per held weapon and nothing else.
+func weaponBitsCycle(players []result.PlayerStream) bool {
+	for i := range players {
+		p := &players[i]
+		for _, ivs := range [][]result.Interval{p.RL, p.LG, p.GL, p.SSG, p.SNG} {
+			for _, iv := range ivs {
+				if iv.Start > 0 {
+					return true
+				}
+			}
+			if len(ivs) > 1 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // discharge is one detected LG water discharge.

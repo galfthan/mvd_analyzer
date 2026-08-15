@@ -443,7 +443,16 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 	// that row would both overstate the degradation and split a team's
 	// members across two src values.
 	srcName := result.SrcDerived
-	if strings.HasPrefix(res.Damage.BoundedMode, "skipped:") {
+	switch {
+	case res.Damage.Source == result.DamageSourceReconstructed:
+		// The damage section itself is the damage-recon node's
+		// reconstruction (no wire damage stream on this demo) — a
+		// different evidence grade than wire-derived, marked so the
+		// consumer can tell (SrcReconstructed doc). Mutually exclusive
+		// with the skipped:* branch: reconstruction stands down on those
+		// modes and the section would be absent entirely.
+		srcName = result.SrcReconstructed
+	case strings.HasPrefix(res.Damage.BoundedMode, "skipped:"):
 		srcName = result.SrcDerivedUnbounded
 	}
 	taken := src.Taken

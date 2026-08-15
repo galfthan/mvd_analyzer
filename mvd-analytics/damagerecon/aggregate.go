@@ -31,7 +31,7 @@ func aggregate(in *inputs, events []reconEvent) *result.DamageResult {
 		}
 
 		vw := ""
-		if !e.isEnv && !e.isSelf && !e.isTeam {
+		if !e.isEnv && !e.isSelf && !e.isTeam && in.weaponBitsLive {
 			if vp := in.players[e.victim]; vp != nil {
 				vw = victimWeaponClass(vp, e.t)
 			}
@@ -86,10 +86,14 @@ func aggregate(in *inputs, events []reconEvent) *result.DamageResult {
 			ap.ByWeapon = result.AddWeaponDamage(ap.ByWeapon, e.weapon, e.raw)
 			out.ByWeapon[e.weapon] += e.raw
 			addToMatrix(matrix, e.attacker, e.victim, e.weapon, e.raw)
-			addVictimWeaponBucket(ap, vw, e.raw)
+			if vw != "" {
+				addVictimWeaponBucket(ap, vw, e.raw)
+			}
 			ab.Given += e.bounded
 			ab.ByWeapon = result.AddWeaponDamage(ab.ByWeapon, e.weapon, e.bounded)
-			addVictimWeaponBucket(ab, vw, e.bounded)
+			if vw != "" {
+				addVictimWeaponBucket(ab, vw, e.bounded)
+			}
 		}
 	}
 
@@ -136,11 +140,13 @@ func aggregatePositional(in *inputs, out *result.DamageResult, e reconEvent) {
 			ap.Given += raw
 			ap.BoundedNest().Given += b
 			vw := ""
-			if vps := in.players[e.victim]; vps != nil {
+			if vps := in.players[e.victim]; vps != nil && in.weaponBitsLive {
 				vw = victimWeaponClass(vps, e.t)
 			}
-			addVictimWeaponBucket(ap, vw, raw)
-			addVictimWeaponBucket(ap.BoundedNest(), vw, b)
+			if vw != "" {
+				addVictimWeaponBucket(ap, vw, raw)
+				addVictimWeaponBucket(ap.BoundedNest(), vw, b)
+			}
 			kill.VictimWep = vw
 		}
 	}

@@ -12,8 +12,9 @@ rewritten below:
   machine-readable per-demo evidence counts.
 - **§2 node edges**: final `requires` are `damage, timeline, shots,
   frags:final, metadata, demoinfo` (clock/roster turned out unused — all
-  inputs arrive match-relative and team-labeled). The node registers LAST
-  so aim/airgibs/player-stats keep binding wire-measured damage only.
+  inputs arrive match-relative and team-labeled). Aim/airgibs keep
+  binding wire-measured `damage`; player-stats binds `damage:final`
+  (see the §7 amendment below).
 - **§5 delta upgrades**: pickup-unmasking and merged-rot-tick correction
   were NOT needed — bounded taken hit 0.05% median without them. What WAS
   needed instead (found against ground truth): masked death+respawn and
@@ -24,6 +25,11 @@ rewritten below:
 - **§4 burst-level metrics** are not in the Go eval yet; burst parity
   rests on the study's oracle test (4398/4398) plus the shared
   view-layer `killBurstFor` reading our events.
+- **§7 partially reversed on request**: playerStats DOES consume the
+  reconstruction now (binds `damage:final`, `src: "reconstructed"`) —
+  it aggregates exactly the per-player totals the eval validates.
+  Aim/airgibs stay wire-only as planned (per-shot attribution is a
+  different evidence grade).
 
 | phase | scope | state |
 |---|---|---|

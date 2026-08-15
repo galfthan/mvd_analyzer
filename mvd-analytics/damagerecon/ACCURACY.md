@@ -78,6 +78,26 @@ port adds, each verified against ground truth in the eval:
   single candidate's damage range can explain, but a pair of different
   attackers sums to, is split between them (range-midpoint proportional).
 
+## Old-recorder degradations (detected per demo, withheld not faked)
+
+Pre-instrumentation recordings often freeze parts of the StatItems/ammo
+stat channel: weapon inventory bits never cycle (a player "holds" RL from
+0:00 through every death while the armor bits in the same stat update
+normally) and ammo counts stay constant. Consequences, all handled by
+detection rather than fabrication:
+
+- **victim-weapon buckets** (`victimWep`, `enemyVs*`, `ewep`): when the
+  demo's weapon bits never cycle, the classification is withheld —
+  `victimWep` is empty and the buckets stay zero (they would otherwise
+  ALL land in the top bucket, confidently wrong). `ewep: 0` on a
+  `source: "reconstructed"` section therefore means *unmeasurable*, not
+  "no damage to armed enemies" — the frozen-bits case is the norm for
+  old demos.
+- **LG discharges** need the cells stream; with frozen ammo they are not
+  detected (their raw value stays at the clamp-limited observation).
+- **quad/pent intervals** come from the same stat; where a recorder froze
+  powerup bits the ×4 model and pent synthesis quietly stand down.
+
 ## Trust guidance for consumers
 
 `damage.source == "reconstructed"` means: bounded **taken** is
