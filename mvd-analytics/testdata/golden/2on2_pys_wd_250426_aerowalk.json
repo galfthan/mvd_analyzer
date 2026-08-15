@@ -3104,6 +3104,11 @@
             "hits": 0,
             "shots": 6,
             "weapon": "sng"
+          },
+          {
+            "hits": 0,
+            "shots": 5,
+            "weapon": "axe"
           }
         ]
       },
@@ -38076,6 +38081,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 5,
+              "hits": 0
+            },
             "gl": {
               "attacks": 10,
               "hits": 1
@@ -39021,6 +39030,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 5,
+              "hits": 0
+            },
             "gl": {
               "attacks": 27,
               "hits": 2
@@ -39256,6 +39269,10 @@
       {
         "byWeapon": [
           {
+            "shots": 5,
+            "weapon": "axe"
+          },
+          {
             "accuracy": 0.4444444444444444,
             "enemyHits": 12,
             "hits": 12,
@@ -39293,7 +39310,7 @@
         ],
         "player": "psy*overon",
         "team": "pys",
-        "total": 480
+        "total": 485
       },
       {
         "byWeapon": [
@@ -39414,6 +39431,13 @@
     "reconciliation": {
       "byPlayer": {
         "psy*overon": [
+          {
+            "ktxAttacks": 5,
+            "ktxHits": 0,
+            "streamAttacks": 5,
+            "streamShots": 5,
+            "weapon": "axe"
+          },
           {
             "ktxAttacks": 162,
             "ktxHits": 50,
@@ -47665,6 +47689,13 @@
         "weapon": "lg"
       },
       {
+        "player": "psy*overon",
+        "source": "sound",
+        "team": "pys",
+        "time": 289847,
+        "weapon": "axe"
+      },
+      {
         "player": "wd.dilbert",
         "source": "beam",
         "team": "pys",
@@ -48906,6 +48937,13 @@
         "weapon": "rl"
       },
       {
+        "player": "psy*overon",
+        "source": "sound",
+        "team": "pys",
+        "time": 334504,
+        "weapon": "axe"
+      },
+      {
         "player": "wd.char",
         "source": "beam",
         "team": "wd",
@@ -49514,6 +49552,13 @@
         "weapon": "sg"
       },
       {
+        "player": "psy*overon",
+        "source": "sound",
+        "team": "pys",
+        "time": 348171,
+        "weapon": "axe"
+      },
+      {
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
@@ -49799,6 +49844,13 @@
         "team": "pys",
         "time": 355223,
         "weapon": "sg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "sound",
+        "team": "pys",
+        "time": 356543,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -53965,6 +54017,13 @@
         "team": "wd",
         "time": 499373,
         "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "sound",
+        "team": "pys",
+        "time": 500894,
+        "weapon": "axe"
       },
       {
         "player": "wd.dilbert",

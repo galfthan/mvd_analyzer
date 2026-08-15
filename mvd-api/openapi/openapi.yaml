@@ -2261,7 +2261,7 @@ components:
         **`shots`/`hits` want a `weapons=` filter.** A "shot" is one discrete
         fire (an LG beam tick and a rocket each count 1), so the unfiltered
         sum is dominated by fast-cycling weapons; and hits are counted only
-        for weapons whose fires LINK to damage (sg/ssg/lg always, rl/gl via
+        for weapons whose fires LINK to damage (axe/sg/ssg/lg always, rl/gl via
         projectile tracking, ng/sng only when nail decoding ran), so the
         unfiltered figure mixes measured and unmeasured weapons. A rocket's
         SPLASH is a hit — including a rocket jump's self-splash (KTX-accuracy
@@ -3661,7 +3661,7 @@ components:
                 description: "Victim (killed player) name."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -3983,7 +3983,7 @@ components:
                 description: "Victim weapon class at hit time (sg|mid|lg|rl|both)."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -4240,7 +4240,7 @@ components:
                       description: "Fires with ≥1 teammate victim."
                       type: integer
                     weapon:
-                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                      description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -4289,7 +4289,7 @@ components:
                       description: "Detected discrete fires (this pipeline)."
                       type: integer
                     weapon:
-                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                      description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -4346,7 +4346,7 @@ components:
                   - "null"
                   - array
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -4965,7 +4965,7 @@ components:
           description: "Victim (killed player) name."
           type: string
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -5002,7 +5002,7 @@ components:
           minimum: -2.147483648e+09
           type: integer
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -5057,7 +5057,7 @@ components:
           minimum: -2.147483648e+09
           type: integer
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -6741,7 +6741,7 @@ components:
                 description: "Victim (killed player) name."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -7368,7 +7368,7 @@ components:
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
                   duration: { type: integer, description: streak duration, int32 ms }
-                  weapon: { type: string, description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)." }
+                  weapon: { type: string, description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)." }
                   victim: { type: string, description: "Victim (killed player) name." }
                   damage: { type: integer, description: "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value)." }
                   isSplash: { type: boolean, description: "Indirect hit (e.g. rocket splash)." }

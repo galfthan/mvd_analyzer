@@ -9,9 +9,9 @@ import (
 
 // ShotsAnalyzer derives a per-shot weapon-fire stream from the raw wire
 // signals: svc_sound fire sounds (which carry the firing entity on
-// CHAN_WEAPON) for SG/SSG/RL/GL/NG/SNG, and TE_LIGHTNING2 beams for LG —
+// CHAN_WEAPON) for AXE/SG/SSG/RL/GL/NG/SNG, and TE_LIGHTNING2 beams for LG —
 // the one weapon with no per-shot fire sound. Instantaneous hitscan fires
-// (sg/ssg/lg) are linked to the damage they caused in the same server frame
+// (axe/sg/ssg/lg) are linked to the damage they caused in the same server frame
 // via the KTX damage stream; projectile fires are linked through their
 // tracked entity flight (linkProjectiles) — rl/gl on every parse, ng/sng
 // when nail decoding is enabled.
@@ -617,8 +617,8 @@ func emitKinds(kinds []string) []string {
 
 // buildByPlayer flattens the match-time aggregates into the result shape,
 // sorted by player then by a stable weapon order. Hits/Accuracy are emitted
-// only for linkable weapons (hitscan sg/ssg/lg + projectile rl/gl) and only
-// when a damage stream was present.
+// only for linkable weapons (same-frame axe/sg/ssg/lg + projectile rl/gl)
+// and only when a damage stream was present.
 func (a *ShotsAnalyzer) buildByPlayer(aggByName map[string]*shotAgg, order []string) []PlayerShots {
 	sort.Strings(order)
 	out := make([]PlayerShots, 0, len(order))
@@ -712,7 +712,7 @@ type weaponAgg struct {
 
 // weaponOrder is the stable output order for per-weapon aggregates and
 // reconciliation rows (matches the KTX WpName ordering).
-var weaponOrder = []string{"sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
+var weaponOrder = []string{"axe", "sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
 
 // fireSoundWeapon maps a precached sound path to the weapon it fires, or
 // (",false) when the sound is not a weapon-fire sound. The Quake sound
@@ -720,9 +720,12 @@ var weaponOrder = []string{"sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
 // the rocket launcher fires "weapons/sgun1.wav" and the nailgun fires
 // "weapons/rocket1i.wav" (ktx/src/weapons.c W_FireRocket / W_FireSpikes).
 // Non-fire weapon sounds (the grenade bounce, the LG hit/start, ricochets,
-// spike tinks, the axe) are deliberately excluded.
+// spike tinks, the axe wall-clank "player/axhit2.wav") are deliberately
+// excluded.
 func fireSoundWeapon(name string) (string, bool) {
 	switch name {
+	case "weapons/ax1.wav":
+		return "axe", true // axe swing, one per attack (W_Attack IT_AXE)
 	case "weapons/guncock.wav":
 		return "sg", true // shotgun (W_FireShotgun)
 	case "weapons/shotgn2.wav":
@@ -742,10 +745,11 @@ func fireSoundWeapon(name string) (string, bool) {
 }
 
 // isHitscanWeapon reports whether a weapon's shot and its damage land in the
-// same server frame (so they link via same-frame matching). Nail/rocket/
+// same server frame (so they link via same-frame matching). The axe is melee,
+// not hitscan, but its traceline damage is equally same-frame. Nail/rocket/
 // grenade fires are projectiles and are excluded.
 func isHitscanWeapon(w string) bool {
-	return w == "sg" || w == "ssg" || w == "lg"
+	return w == "axe" || w == "sg" || w == "ssg" || w == "lg"
 }
 
 // isProjectileWeapon reports whether a fire launches a tracked slow

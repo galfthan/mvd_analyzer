@@ -72,6 +72,14 @@ reconstruction now detects frozen bits per demo and withholds the
 victim-weapon fields (`victimWep` empty, `enemyVs*`/`ewep` zero)
 instead of fabricating them.
 
+The axe joins the `shots` stream: `weapons/ax1.wav` (the per-attack swing
+sound, CHAN_WEAPON) now maps to a `weapon: "axe"` fire, with same-frame
+damage linking like the shotguns — so axe swings appear in the per-shot
+stream, `byPlayer` accuracy, the KTX reconciliation and the aim weapon
+counters. This also lets the damage reconstruction's existing axe
+candidates actually fire (axe attribution was 21% on the validation
+corpus purely because the swing never reached the shots artifact).
+
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 
 No schema change; web UI only. Team colors used to follow finishing order —
