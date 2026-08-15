@@ -556,6 +556,13 @@ Three equivalent entry points:
 All three fill the same `Result`. `AnalyzeSource` is the source-agnostic
 primitive; the other two wrap an MVD source around the input.
 
+Set `reg.Parallel = true` (CLI: `qw-analyze -parallel`) to let heavy
+finalize passes — currently the per-slot floor-height traces — fan out
+into goroutines. It is off by default because bulk pipelines typically
+already parallelize across demos; turn it on when analyses arrive one
+at a time and latency matters (mvd-api does). The Result is
+byte-identical either way.
+
 ### Custom pipeline
 
 Drop or add analyzers:

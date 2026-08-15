@@ -29,6 +29,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"sync"
 )
 
 // Vec3 is a 3D vector in world units (the same scale as the rest of the
@@ -102,6 +103,11 @@ type BSP struct {
 	Leaves  []Leaf
 	VisData []byte // raw RLE PVS bytes, decompressed lazily
 	Models  []Model
+
+	// Liquid-leaf AABB index, built lazily by liquidIndex() (liquid.go)
+	// for the per-sample liquid probes' fast reject.
+	liquidOnce sync.Once
+	liquid     liquidIdx
 }
 
 // Q1 BSP lump indices (matches mvdsv/src/bspfile.h:66-82).

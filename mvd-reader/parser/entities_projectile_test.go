@@ -62,7 +62,7 @@ func TestProjectile_SpawnThenDespawn(t *testing.T) {
 	if d := despawns[0]; d.EntNum != 50 || d.Kind != "rl" || d.Origin != origin || d.TimeMs != 1500 {
 		t.Errorf("despawn = %+v, want ent 50 kind rl origin %v t 1500", d, origin)
 	}
-	if _, stillTracked := p.spawnedProjectiles[50]; stillTracked {
+	if p.spawnedProjectiles[50] != "" {
 		t.Errorf("ent 50 still tracked after despawn — entnum reuse would misclassify")
 	}
 }
