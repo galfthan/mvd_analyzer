@@ -530,10 +530,16 @@ func (a *ShotsAnalyzer) linkProjectiles(flights []rawProjectile, dmgBySlot map[i
 
 // flightsToStream packs a flight slice into the columnar ProjectileStreams
 // shape (one entry per flight). Shared by the rocket/grenade and nail streams.
+// Flights carrying a non-finite coordinate (seen in some
+// pre-instrumentation demos) are dropped: encoding/json refuses NaN, and a
+// NaN origin is unusable as spatial evidence anyway.
 func flightsToStream(flights []rawProjectile) *ProjectileStreams {
 	ps := &ProjectileStreams{}
 	for i := range flights {
 		p := &flights[i]
+		if !finiteVec3(p.spawnOrigin) || !finiteVec3(p.despawnOrigin) {
+			continue
+		}
 		ps.Weapon = append(ps.Weapon, p.kind)
 		ps.Spawn = append(ps.Spawn, p.spawnTMs)
 		ps.End = append(ps.End, p.despawnTMs)
