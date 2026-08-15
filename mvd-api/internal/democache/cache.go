@@ -108,6 +108,10 @@ func defaultParse(ctx context.Context, mvdBytes []byte, filename string) (*resul
 	registry := analyzer.NewDefaultRegistry()
 	registry.BuildShotStreams = true
 	registry.BuildNails = true
+	// API parses serve interactive requests that arrive in bursts rather
+	// than saturating every core, so latency wins over per-core
+	// throughput: opt into the analyzer's internal fan-out.
+	registry.Parallel = true
 	return registry.AnalyzeReader(&ctxReader{ctx: ctx, r: bytes.NewReader(mvdBytes)}, filename)
 }
 

@@ -5,6 +5,165 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (team-colors-by-name) — web UI team colors follow the team name
+
+No schema change; web UI only. Team colors used to follow finishing order —
+winner red, runner-up blue — so the same two teams could swap colors between
+demos of a series. They are now assigned by team name: a team literally named
+"red" (case-insensitive) is always red and "blue" always blue; every other
+team takes the remaining palette entries in name sort order. `[fu]` vs `-s-`
+therefore colors identically in every demo of that matchup, whoever wins.
+Winner-first ordering (scoreboard rows, timeline top/bottom, chat columns) is
+unchanged — only the palette assignment moved off it. The CSS mirror
+`--team-a..--team-d` is re-pointed per match to stay in step, and the lethal
+airgib badge switched to a fixed danger-red so it no longer inherits whatever
+color team A happens to get.
+
+## unreleased (qw-analyze-full-surface) — every view reaches the CLI
+
+Follow-up to the entry below, closing the gaps two coverage audits found
+between `qw-analyze` and the REST surface. **Three were defects, not missing
+features:**
+
+- **`-view region-control` silently ignored `-from`/`-to`.** The flags parsed,
+  were accepted, and were never passed to `view.RegionControl` — windowed and
+  unwindowed output were byte-identical. REST has served the window since it
+  shipped (`handlers.go:1103`). Now wired, so "who held RA in the first two
+  minutes" is answerable locally.
+- **`-format md` / `-format events` silently ignored `-view`.** A valid `-view`
+  was dropped and an *invalid* one still exited 2 — the analysis was validated
+  and then discarded. `-view` under a non-json format is now rejected, since
+  those formats have their own fixed shape.
+- **Nailgun accuracy silently absent.** ng/sng hit attribution needs
+  `svc_nails` decoding, off by default because the nail stream is high volume,
+  while mvd-api always builds it. The rows were honest — `hits` omitted, not
+  zeroed — but absence is only a signal to a reader who knows to look, and
+  `.hits // 0` reads it as perfect inaccuracy. A stderr warning now names the
+  fire count and the fix. The default is deliberately unchanged: building
+  nails by default would bloat every `-view full` with a high-volume stream.
+
+**Thirteen views added**, closing the rest of the surface: `frags`, `damage`,
+`aim`, `chat`, `backpacks`, `weapon-pickups`, `player-stats`, `items` (the
+full phase timeline beside the existing `items-summary`), `shots`,
+`loc-graph`, `loc-table`, `metadata`, `demoinfo`. Two matter beyond
+convenience:
+
+- **`player-stats` was unreachable in its canonical form.** `view.PlayerStats`
+  applies the KTX overlay at read time, so `-view full`'s stored `playerStats`
+  is the *pre-overlay* derived row — missing `ping`, `speed`, `controlMs` and
+  the rest. The row its own docs call canonical could not be produced locally
+  at all.
+- **`aim` windowing is a recompute, not a filter** — `-from`/`-to` re-run
+  `aimcore.Compute` over the windowed shot slice, which no amount of
+  post-processing `full` can reproduce.
+
+**New knobs:** `-summary` (frags/damage/aim/lives), `-teams`, `-source`,
+`-chat-types`, `-loc name|index`, `-layout row|column`, `-region-detail
+full|summary|none`. `-loc index` covers all five views with a `LocIndex`
+field and decodes against the new `loc-table` view.
+
+**Second CLI-vs-REST default divergence documented:** `-view buckets` builds
+row layout, `GET /buckets` defaults to `layout=column`. `-layout column`
+reproduces the REST body; previously no CLI invocation could.
+
+**Shared shaping helpers moved into `view`:** `SummarizeLives` and
+`ShapeRegions` were an unexported handler function and an inline block in
+mvd-api. Both are pure shaping over view types, so they now live in
+`mvd-analytics/view` and mvd-api calls them — the CLI and the API trim
+identically instead of each carrying its own copy of the field list.
+
+## unreleased (qw-analyze-derived-views) — the derived views reach the CLI
+
+**`qw-analyze -view` gains `top-kills`, `top-windows`, `lives`,
+`items-summary` and `airgibs`.** No schema change and no new analysis: these
+five view functions already existed in `mvd-analytics/view` and were reachable
+only over HTTP, so a local demo could not be asked the questions a hosted one
+could. Four of the five — `top-kills`, `top-windows`, `lives`,
+`items-summary` — are computed on request rather than stored on `Result`, so
+`-view full` cannot answer them at all. `airgibs` is the exception: it is
+stored, and `-view full` does carry it under `timelineAnalysis.airgibs`; it is
+here for the envelope and for parity with `/v1/demos/{id}/airgibs`, not
+because the data was unreachable. (`loc-table` is stored the same way, under
+`timelineAnalysis.locTable`, and is left out.)
+
+- **`-view` takes a comma-separated list**, and the list shares ONE analysis
+  pass. That is the whole point: on a 4on4 demo a view costs ~5.5 s of
+  analysis and microseconds of view function, so `-view top-kills,lives,
+  airgibs` runs in 5.5 s where three invocations cost 16.5 s. Two or more
+  views return an object keyed by view name in the order listed; a single
+  view returns bare, exactly as before, so no existing invocation changes
+  shape. A knob applies to every listed view that accepts it (`-view
+  top-kills,top-windows -limit 3` caps both), and is rejected only when no
+  listed view accepts it. `-gap` is the exception — top-kills (burst gap) and
+  top-windows (`-mode gap` interval) define it differently, so listing both
+  with `-gap` is rejected rather than silently reshaping the bursts. `full`
+  may appear in the list and is always rendered last: it strips the
+  native-rate position columns that `trails` / `state-at` / `region-control`
+  / `stream-slice` read off the shared `Result`.
+- **New knobs**, each scoped to the views that use it: `-limit`,
+  `-per-player`, `-min-damage`, `-min-score`, `-dmg`, `-metric`, `-mode`,
+  `-weapons`, `-items`, `-kinds`, `-window`, `-gap`, `-contested`,
+  `-min-life`. The existing `-players`, `-from` and `-to` apply to the four
+  filterable new views but **not** to `airgibs`, whose view function takes no
+  options. Time-valued knobs are Go durations (`-gap 8s`), matching `-bucket`
+  and `-min-dwell` rather than the view layer's raw ms.
+- **A knob aimed at the wrong `-view` is rejected, not ignored** — the CLI
+  analogue of every handler's `writeUnknownParam`. `-view top-kills -metric
+  damageGiven`, `-view airgibs -players x` and `-view lives -include-team`
+  now fail at parse time instead of silently returning un-narrowed data, and
+  the rejection lands before the analysis pass rather than after it. The
+  check covers every view-scoped flag, new and legacy alike, but only on the
+  five new views; the original seven keep their existing leniency rather than
+  breaking working invocations. Global flags (`-format`, `-pretty`, `-bulk`,
+  `-out-dir`, `-regions`) are unaffected everywhere.
+- **`-min-score`** exposes `TopWindowsOptions.Min`, the one option field the
+  first cut left unreachable. It is a genuine tri-state — unset means the
+  default floor of 1, while an explicit `-min-score 0` keeps zero-scoring
+  windows, which is a coherent request on the net metrics — so it reads
+  `flag.Visit` rather than treating 0 as absent.
+- **`make build-tools`** (plus `build-qw-analyze` / `build-mapgen`) builds the
+  two local CLIs into `dist/`. They had no Make target at all — the docs drive
+  both through `go run` — so a repeated analyze loop recompiled every time.
+  No `LDFLAGS`: the version stamp belongs to the distributed binaries, and
+  neither tool reports one.
+- **Out-of-range durations are errors, not silent defaults.** A `-window`
+  past what int32 ms can hold used to wrap negative and land back in the
+  view's "0 means default" branch, so an explicit 600h quietly became 30s;
+  sub-millisecond and negative values truncated to 0 the same way, and under
+  `-mode gap` that produced a view error claiming the required `-gap` was
+  missing when it had been passed.
+- **`-dmg` defaults to the view default `raw`, not the REST default
+  `bounded`.** The divergence is pre-existing and documented on
+  `TopKillsOptions.Dmg` / `LivesOptions.Dmg` / `TopWindowsOptions.Dmg`; the
+  CLI is an in-process caller, so it follows the library it wraps. Pass
+  `-dmg bounded` to reproduce a REST response. Called out in `-h`, the
+  package doc and the analytics README, because a silently different damage
+  family is exactly the sort of thing that gets compared across transports.
+- **`top-windows` segmentation is validated in the CLI**, where the flag
+  names are known: `-mode gap` requires `-gap` and rejects `-window`;
+  `-mode fixed` rejects `-gap`. The view rejects the wrong-mode knob too,
+  but reports it in its own vocabulary.
+
+## unreleased (optimize) — analysis ~2x faster, opt-in parallel finalize
+
+No schema change: the Result JSON is byte-identical to the previous
+release on the whole golden corpus, sequential and parallel alike.
+
+- **~2x faster single-threaded analysis.** The parser's entity-frame
+  tracking moved from per-frame `map[int]*EntityState` copies to flat
+  entity-indexed slices with a per-packet mentioned-entity diff and a
+  memoized model classification; the floor-height pass fast-rejects
+  liquid probes with a liquid-leaf AABB index and reuses the previous
+  sample's trace when the origin and mover scene are unchanged; the
+  loc/region boundary walks replaced hash-set + full-sort collection
+  with sorted merges, and `TrackHoldEnd`'s median gap is counted, not
+  sorted.
+- **Opt-in in-process parallelism** (`Registry.Parallel` /
+  `qw-analyze -parallel`): fans the per-slot floor-height traces out to
+  goroutines. Off by default so bulk pipelines that already run one
+  demo per worker don't oversubscribe; mvd-api opts in (interactive
+  requests arrive in bursts, so latency wins).
+
 ## unreleased (overview-manifest) — /overview is a capability manifest, schema v70
 
 **BREAKING: `/overview` stops inlining highlight lists and starts answering

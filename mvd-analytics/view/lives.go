@@ -566,3 +566,22 @@ func (sb *statsBuilder) locNameFor(player string, t int32) string {
 	}
 	return locNameAt(sb.locTable, locIndexAt(stream, t))
 }
+
+// SummarizeLives strips the per-life breakdown collections in place, keeping
+// the scalar totals. It is what the REST `summary=true` serves, exported here
+// so the HTTP layer and in-process callers (qw-analyze) trim identically
+// rather than each carrying its own list of fields to nil.
+func SummarizeLives(v *LivesView) {
+	if v == nil {
+		return
+	}
+	for i := range v.Lives {
+		l := &v.Lives[i]
+		l.ItemsTaken = nil
+		l.Locs = nil
+		l.EventLocs = nil
+		l.Victims = nil
+		l.ByWeapon = nil
+		l.DamageByWeapon = nil
+	}
+}

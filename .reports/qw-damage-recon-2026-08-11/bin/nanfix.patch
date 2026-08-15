@@ -1,0 +1,134 @@
+diff --git a/mvd-analytics/analyzer/items.go b/mvd-analytics/analyzer/items.go
+index bc05539..336e1cb 100644
+--- a/mvd-analytics/analyzer/items.go
++++ b/mvd-analytics/analyzer/items.go
+@@ -327,6 +327,12 @@ func (a *ItemAnalyzer) handleItemSpawn(e *events.ItemSpawnEvent) {
+ 	if e.Kind == "" || e.Kind == "backpack" {
+ 		return
+ 	}
++	// A non-finite origin (corrupt wire data in some pre-instrumentation
++	// demos) is zeroed: the phase timeline is still usable, and
++	// encoding/json refuses NaN/Inf.
++	if !finiteVec3(e.Origin) {
++		e.Origin = [3]float32{}
++	}
+ 	it := a.items[e.EntNum]
+ 	if it == nil {
+ 		it = &itemEntity{
+diff --git a/mvd-analytics/analyzer/shots.go b/mvd-analytics/analyzer/shots.go
+index e687557..807ee0e 100644
+--- a/mvd-analytics/analyzer/shots.go
++++ b/mvd-analytics/analyzer/shots.go
+@@ -530,10 +530,16 @@ func (a *ShotsAnalyzer) linkProjectiles(flights []rawProjectile, dmgBySlot map[i
+ 
+ // flightsToStream packs a flight slice into the columnar ProjectileStreams
+ // shape (one entry per flight). Shared by the rocket/grenade and nail streams.
++// Flights carrying a non-finite coordinate (seen in some pre-instrumentation
++// demos) are dropped: encoding/json refuses NaN, and a NaN origin is unusable
++// as spatial evidence anyway.
+ func flightsToStream(flights []rawProjectile) *ProjectileStreams {
+ 	ps := &ProjectileStreams{}
+ 	for i := range flights {
+ 		p := &flights[i]
++		if !finiteVec3(p.spawnOrigin) || !finiteVec3(p.despawnOrigin) {
++			continue
++		}
+ 		ps.Weapon = append(ps.Weapon, p.kind)
+ 		ps.Spawn = append(ps.Spawn, p.spawnTMs)
+ 		ps.End = append(ps.End, p.despawnTMs)
+diff --git a/mvd-analytics/analyzer/timeline_movers.go b/mvd-analytics/analyzer/timeline_movers.go
+index 0a701f2..eba3a23 100644
+--- a/mvd-analytics/analyzer/timeline_movers.go
++++ b/mvd-analytics/analyzer/timeline_movers.go
+@@ -42,6 +42,12 @@ func (m *moverTrack) atCursor(tMs int32, cur *int) (org [3]float32, visible bool
+ }
+ 
+ func (m *moverTrack) append(tMs int32, org [3]float32, visible bool) {
++	// Drop samples with a non-finite origin (seen in some
++	// pre-instrumentation demos): they poison the floor-height and LOS
++	// probes downstream, and encoding/json refuses NaN/Inf.
++	if !finiteVec3(org) {
++		return
++	}
+ 	m.t = append(m.t, tMs)
+ 	m.org = append(m.org, org)
+ 	m.vis = append(m.vis, visible)
+diff --git a/mvd-analytics/analyzer/timeline_streams.go b/mvd-analytics/analyzer/timeline_streams.go
+index fa5dd57..954ec91 100644
+--- a/mvd-analytics/analyzer/timeline_streams.go
++++ b/mvd-analytics/analyzer/timeline_streams.go
+@@ -1,6 +1,7 @@
+ package analyzer
+ 
+ import (
++	"math"
+ 	"sort"
+ 	"strconv"
+ 
+@@ -80,6 +81,12 @@ func (b *streamBuilder) recordCells(tMs int32, v int16) {
+ // PositionTrack column checklist site 2 (record-time append); see the
+ // checklist in result/coord.go (PositionTrack.MarshalJSON).
+ func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32, vp, vya int16) {
++	// Skip samples with a non-finite origin (seen in some
++	// pre-instrumentation demos): encoding/json refuses NaN/Inf, and a
++	// non-finite sample would poison the derived velocity columns too.
++	if !finiteVec3([3]float32{x, y, z}) {
++		return
++	}
+ 	b.posT = append(b.posT, tMs)
+ 	b.posX = append(b.posX, x)
+ 	b.posY = append(b.posY, y)
+@@ -723,17 +730,22 @@ func (a *TimelineAnalyzer) buildMoverStreams() []result.MoverStream {
+ 		if mt == nil || len(mt.t) == 0 {
+ 			continue
+ 		}
+-		ms := result.MoverStream{
+-			EntNum:   ent,
+-			SubModel: mt.subModel,
+-			T:        append([]int32(nil), mt.t...),
+-			X:        make([]float32, len(mt.org)),
+-			Y:        make([]float32, len(mt.org)),
+-			Z:        make([]float32, len(mt.org)),
+-			Vis:      append([]bool(nil), mt.vis...),
+-		}
++		// Samples with a non-finite origin (seen in some pre-instrumentation
++		// demos) are dropped: encoding/json refuses NaN/Inf and the sample
++		// carries no usable geometry.
++		ms := result.MoverStream{EntNum: ent, SubModel: mt.subModel}
+ 		for i, o := range mt.org {
+-			ms.X[i], ms.Y[i], ms.Z[i] = o[0], o[1], o[2]
++			if !finiteVec3(o) {
++				continue
++			}
++			ms.T = append(ms.T, mt.t[i])
++			ms.X = append(ms.X, o[0])
++			ms.Y = append(ms.Y, o[1])
++			ms.Z = append(ms.Z, o[2])
++			ms.Vis = append(ms.Vis, mt.vis[i])
++		}
++		if len(ms.T) == 0 {
++			continue
+ 		}
+ 		out = append(out, ms)
+ 	}
+@@ -748,6 +760,20 @@ const (
+ 	maxInt32 = int32(1<<31 - 1)
+ )
+ 
++// finiteVec3 reports whether every component is a finite float (no
++// NaN/Inf). Some pre-instrumentation demos carry non-finite origins on
++// the wire; encoding/json refuses them, so ingestion sites drop such
++// samples (recordPosition, buildMoverStreams, flightsToStream).
++func finiteVec3(v [3]float32) bool {
++	for _, c := range v {
++		f := float64(c)
++		if math.IsNaN(f) || math.IsInf(f, 0) {
++			return false
++		}
++	}
++	return true
++}
++
+ // isEmpty reports whether the builder recorded no player activity at
+ // all — no vitals, positions, intervals, spawns or deaths. Used to drop
+ // phantom identities (a vacated slot taken by someone who never played).

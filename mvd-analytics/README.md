@@ -134,6 +134,104 @@ that downstream consumers render, summarise, or feed to an agent.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
+  `-view <name>` runs one query-API view instead of the whole Result:
+
+  | `-view` | View function | Principal knobs |
+  |---|---|---|
+  | `full` (default) | — (the stored `Result`) | `-include` |
+  | `buckets` | `view.Buckets` | `-bucket`, `-fields`, `-reducer`, `-include-team` |
+  | `events` | `view.Events` | `-event-types` |
+  | `stream-slice` | `view.StreamSlice` | `-fields` |
+  | `state-at` | `view.StateAt` | `-time` (required), `-fields` |
+  | `trails` | `view.LocTrails` | `-min-dwell` |
+  | `region-control` | `view.RegionControl` | `-bucket` |
+  | `top-kills` | `view.TopKills` | `-limit`, `-gap`, `-contested`, `-min-damage`, `-weapons`, `-dmg` |
+  | `top-windows` | `view.TopWindows` | `-metric`, `-mode`, `-window`, `-gap`, `-limit`, `-per-player`, `-min-score`, `-weapons`, `-dmg` |
+  | `lives` | `view.Lives` | `-min-life`, `-dmg`, `-summary` |
+  | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
+  | `items` | `view.Items` | `-items`, `-kinds` (the full phase timeline) |
+  | `airgibs` | `view.Airgibs` | — |
+  | `frags` | `view.Frags` | `-weapons`, `-summary` |
+  | `damage` | `view.Damage` | `-weapons`, `-summary`, `-dmg` |
+  | `aim` | `view.Aim` | `-summary` (`-from`/`-to` *recompute* over the window) |
+  | `chat` | `view.Chat` | `-chat-types` |
+  | `backpacks` | `view.Backpacks` | `-weapons` |
+  | `weapon-pickups` | `view.WeaponPickups` | `-weapons`, `-source` |
+  | `player-stats` | `view.PlayerStats` | `-teams` |
+  | `shots` | `view.Shots` | — |
+  | `loc-graph` | `view.LocGraph` | — |
+  | `loc-table` | (interned loc names) | — (decodes `-loc index` output) |
+  | `metadata` | `view.Metadata` | — |
+  | `demoinfo` | `view.DemoInfo` | — |
+
+  Most lower-half views also take `-players`, `-from` and `-to`; the ones
+  whose view function has no such option (`airgibs`, `shots`, `loc-graph`,
+  `loc-table`, `metadata`, `demoinfo`) accept none, and `player-stats` takes
+  `-players`/`-teams` but no window.
+
+  On every lower-half view, a view-scoped flag belonging to a different view
+  is **rejected** rather than ignored — `-view lives -limit 5` and `-view
+  airgibs -bucket 1s` are both errors — mirroring the way every mvd-api
+  handler rejects an unknown query param: a knob that silently does nothing
+  reads as one that worked. The error names the views that *would* take it.
+  The seven upper-half views keep their pre-existing leniency, but only for
+  flags that predate the check: `-loc`, `-layout` and `-region-detail` are
+  policed there too, since grandfathering cannot cover a flag that did not
+  exist. Global flags (`-format`, `-pretty`, `-bulk`, `-out-dir`, `-regions`)
+  are never affected, and `-view` under `-format md|events` is an error
+  rather than silently ignored.
+
+  **`-view` takes a comma-separated list.** Analysis is essentially the whole
+  runtime — the view functions are microseconds on an assembled `Result` — so
+  several views share **one** pass instead of one each:
+
+  ```
+  qw-analyze -view top-kills,lives,airgibs demo.mvd.gz
+  ```
+
+  Two or more views come back in an object keyed by view name, in the order
+  listed; a single view is returned bare, unchanged. A knob is judged against
+  the union of what the listed views accept and applies to every listed view
+  that takes it — `-view top-kills,top-windows -limit 3` caps both. The one
+  exception is `-gap`, which top-kills (burst gap) and top-windows (`-mode
+  gap` interval) define differently: listing both with `-gap` is rejected
+  rather than silently reshaping the top-kills bursts. `full` may appear in
+  the list and is always rendered last, because it strips the native-rate
+  position columns that `trails` / `state-at` / `region-control` /
+  `stream-slice` read.
+
+  Build the CLI once instead of `go run`-ing it each time with `make
+  build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze`
+  and `dist/mapgen`. Note `make build` clears `dist/` first.
+
+  **Two CLI-vs-REST defaults differ.** On `top-kills`, `top-windows`, `lives`
+  and `damage` an unset `-dmg` gets the *view* default `raw` where mvd-api
+  substitutes `bounded`; and `-view buckets` defaults to row layout where
+  `GET /buckets` defaults to `layout=column`. The CLI follows the library it
+  wraps in both cases — pass `-dmg bounded` / `-layout column` to reproduce a
+  REST response.
+
+  **`-view player-stats` is not `-view full`'s `playerStats`.** The view
+  applies the KTX overlay at read time (`view.PlayerStats`), adding `ping`,
+  `speed`, `controlMs` and the other KTX-native columns; the stored section
+  `full` carries is the pre-overlay derived row. Use the view for the
+  canonical statistics row.
+
+  **`-loc index`** switches `buckets` / `events` / `stream-slice` /
+  `state-at` / `trails` from resolved loc names to raw `li` indices, which
+  decode against `-view loc-table`.
+
+  **Nailgun accuracy needs `-include nails`.** ng/sng hit attribution
+  requires `svc_nails` decoding, which is off by default because the nail
+  stream is high volume — so `shots`/`aim` omit `hits` for those weapons
+  (omitted, not zeroed: absence means unmeasured). mvd-api always builds
+  them, so this is the one place default CLI output diverges from the same
+  demo over REST; the CLI prints a stderr warning when it happens.
+
+  `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
+  `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is
+  deliberately no default, because frag and damage event cadences are too far
+  apart for one value to serve both — and rejects `-window`.
 
 ## Pipeline architecture
 
@@ -555,6 +653,13 @@ Three equivalent entry points:
 
 All three fill the same `Result`. `AnalyzeSource` is the source-agnostic
 primitive; the other two wrap an MVD source around the input.
+
+Set `reg.Parallel = true` (CLI: `qw-analyze -parallel`) to let heavy
+finalize passes — currently the per-slot floor-height traces — fan out
+into goroutines. It is off by default because bulk pipelines typically
+already parallelize across demos; turn it on when analyses arrive one
+at a time and latency matters (mvd-api does). The Result is
+byte-identical either way.
 
 ### Custom pipeline
 

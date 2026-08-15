@@ -1,0 +1,206 @@
+demos scored: 60
+
+event level (GT enemy+self+team instants): covered 80012/80373 (99.6%)  value-exact 98.8% of covered  attacker-correct 97.7% of matched-enemy
+
+== bounded given     n=317 median   0.87%  mean   1.24%  p90   2.74%  <=1%  54.3%  <=2%  80.4%
+    11.93%  dm2_232186 duel lindbergh            gt=3261 rc=2872
+     8.07%  dm2_232179 team george               gt=8887 rc=8170
+     6.76%  dm2_232081 team paniagua             gt=651 rc=607
+     6.59%  dm2_232179 team Schotty              gt=4856 rc=4536
+     6.30%  dm3_232176 team george               gt=9083 rc=8511
+     5.58%  dm2_232343 duel cronus               gt=3313 rc=3128
+     5.24%  dm2_232186 duel Awup                 gt=4198 rc=3978
+     4.37%  dm2_232375 team BLooD_DoG(D_P)       gt=10973 rc=10493
+     4.07%  dm2_232289 team kwn                  gt=6020 rc=6265
+     3.87%  dm3_231469 team evalcat              gt=4263 rc=4098
+
+== bounded taken     n=318 median   0.05%  mean   0.15%  p90   0.33%  <=1%  98.4%  <=2%  99.4%
+     5.46%  dm3_231221 team rbags                gt=7312 rc=6913
+     2.18%  dm2_232397 duel stepcop              gt=5055 rc=5165
+     2.00%  dm3_231137 team wch                  gt=8269 rc=8104
+     1.50%  dm3_232053 team mm2                  gt=6608 rc=6509
+     1.18%  dm2_232049 team niw                  gt=7290 rc=7204
+     0.83%  dm2_232049 team [Lame].MaMmoTh       gt=8033 rc=7966
+     0.75%  dm3_231714 team N1ckAllEye           gt=6145 rc=6099
+     0.75%  dm2_232378 team T                    gt=6158 rc=6112
+     0.73%  dm3_232422 team Darky                gt=6458 rc=6411
+     0.72%  dm2_232179 team george               gt=12366 rc=12277
+
+== bounded ewep      n=316 median   1.46%  mean   2.18%  p90   5.11%  <=1%  37.7%  <=2%  62.0%
+    13.39%  dm2_232186 duel lindbergh            gt=2906 rc=2517
+    12.54%  dm3_231820 team serp                 gt=1922 rc=1681
+    12.51%  dm3_231709 team ekz                  gt=2343 rc=2050
+    11.69%  dm3_232176 team Schotty              gt=616 rc=688
+    10.97%  dm3_231491 team stedanko             gt=1130 rc=1006
+    10.44%  dm3_231359 team jsmith               gt=1216 rc=1089
+    10.14%  dm2_232375 team BLooD_DoG(D_P)       gt=3855 rc=3464
+     9.23%  dm2_232179 team george               gt=2892 rc=2625
+     8.68%  dm2_232081 team paniagua             gt=507 rc=463
+     8.43%  dm3_232367 team Pierre               gt=2135 rc=1955
+
+== bounded givenTeam n=196 median   5.05%  mean   7.91%  p90  20.48%  <=1%  26.5%  <=2%  32.1%
+    66.20%  dm3_231221 team Nilton               gt=722 rc=244
+    47.41%  dm2_232358 team Tiba                 gt=580 rc=305
+    45.48%  dm3_231714 team KreatoR              gt=310 rc=169
+    39.67%  dm3_231106 team mihawk               gt=421 rc=588
+    39.15%  dm3_231923 team splif                gt=235 rc=327
+    36.62%  dm3_231359 team spekyr               gt=213 rc=291
+    35.27%  dm3_231908 team fix                  gt=224 rc=145
+    34.17%  dm2_232289 team Nexus                gt=515 rc=339
+    29.22%  dm3_231221 team rbags                gt=616 rc=436
+    28.72%  dm3_231977 team Schotty              gt=376 rc=268
+
+== bounded givenSelf n=272 median   4.38%  mean   6.76%  p90  15.38%  <=1%  18.4%  <=2%  27.6%
+    37.93%  dm3_231820 team omicron              gt=290 rc=400
+    36.05%  dm3_232239 team Anza                 gt=344 rc=220
+    33.82%  dm2_232358 team Supreme              gt=760 rc=1017
+    33.33%  dm3_231523 team kippo (FU)           gt=213 rc=142
+    32.95%  dm3_231264 team mythic               gt=264 rc=177
+    31.50%  dm2_232358 team Tiba                 gt=619 rc=814
+    29.67%  dm3_231221 team 13                   gt=337 rc=237
+    28.05%  dm2_232289 team rghst                gt=467 rc=336
+    26.44%  dm3_231221 team Muttley              gt=208 rc=153
+    26.34%  dm3_232176 team Schotty              gt=205 rc=151
+
+== raw given     n=317 median   1.35%  mean   2.17%  p90   5.28%  <=1%  41.6%  <=2%  62.8%
+    16.26%  dm3_231106 team fudencio             gt=9677 rc=11250
+    14.50%  dm2_232242 team Anza                 gt=9849 rc=8421
+    11.63%  dm2_232186 duel lindbergh            gt=3516 rc=3107
+    11.08%  dm2_232081 team gnoffa               gt=4404 rc=4892
+     9.36%  dm3_231221 team KreatoR              gt=5601 rc=6125
+     9.25%  dm2_232378 team rOSH                 gt=9337 rc=10201
+     8.99%  dm2_232380 team Dilbert              gt=8484 rc=7721
+     8.81%  dm3_231923 team mm2                  gt=11204 rc=12191
+     8.48%  dm3_231977 team BLooD_DoG(D_P)       gt=15981 rc=17336
+     8.41%  dm3_231709 team Bass                 gt=8138 rc=7454
+
+== raw taken     n=318 median   1.71%  mean   2.25%  p90   4.88%  <=1%  34.9%  <=2%  55.3%
+    14.83%  dm3_231820 team war                  gt=13642 rc=11619
+    12.70%  dm3_231923 team mm2                  gt=6002 rc=6764
+    12.53%  dm2_232081 team rghst                gt=2722 rc=3063
+    12.09%  dm3_231106 team supreme              gt=16536 rc=18535
+    10.24%  dm2_232081 team splif                gt=967 rc=1066
+     9.13%  dm3_231264 team mille                gt=10582 rc=11548
+     8.75%  dm2_232179 team george               gt=17544 rc=16009
+     8.65%  dm2_232358 team Supreme              gt=8620 rc=9366
+     8.54%  dm3_231977 team Pred                 gt=11765 rc=12770
+     7.63%  dm3_231137 team rosh                 gt=13160 rc=14164
+
+== raw ewep      n=316 median   2.26%  mean   3.42%  p90   7.84%  <=1%  29.1%  <=2%  48.4%
+    33.54%  dm2_232081 team rusti                gt=316 rc=422
+    26.00%  dm3_231491 team stedanko             gt=1523 rc=1127
+    24.27%  dm3_231221 team Nilton               gt=3510 rc=2658
+    20.82%  dm3_231709 team Bass                 gt=3160 rc=2502
+    18.23%  dm2_232179 team namtsui              gt=4345 rc=3553
+    17.08%  dm3_231709 team ekz                  gt=2723 rc=2258
+    14.74%  dm2_232277 team rusti                gt=4185 rc=4802
+    14.51%  dm2_232078 team Hooraytio            gt=3778 rc=3230
+    14.15%  dm2_232375 team Pierre               gt=5285 rc=4537
+    13.91%  dm3_232176 team Schotty              gt=654 rc=745
+
+== raw givenTeam n=210 median  11.27%  mean  16.51%  p90  41.09%  <=1%  12.4%  <=2%  16.7%
+    94.63%  dm3_231491 team stedanko             gt=242 rc=471
+    79.86%  dm3_231221 team 13                   gt=278 rc=500
+    77.49%  dm3_231106 team mihawk               gt=471 rc=836
+    71.61%  dm3_231714 team Le1no                gt=310 rc=532
+    65.39%  dm3_231221 team Nilton               gt=731 rc=253
+    65.04%  dm3_231908 team wo0tzaj              gt=226 rc=373
+    63.52%  dm3_231908 team rusti                gt=318 rc=520
+    62.86%  dm3_232422 team zzz                  gt=315 rc=513
+    59.50%  dm3_232422 team swoop                gt=200 rc=319
+    57.69%  dm2_232405 team rOSH                 gt=234 rc=369
+
+== raw givenSelf n=291 median   4.61%  mean   9.80%  p90  21.37%  <=1%  17.9%  <=2%  26.8%
+   223.61%  dm3_231264 team mille                gt=288 rc=932
+    93.11%  dm3_231923 team mm2                  gt=784 rc=1514
+    81.64%  dm3_231469 team stedanko             gt=256 rc=47
+    75.13%  dm3_231820 team war                  gt=2280 rc=567
+    69.11%  dm3_231714 team KreatoR              gt=531 rc=164
+    67.70%  dm3_232367 team Flynn                gt=387 rc=125
+    56.48%  dm3_231491 team evalcat              gt=710 rc=309
+    46.84%  dm2_232358 team Supreme              gt=760 rc=1116
+    42.40%  dm3_232422 team foe                  gt=1762 rc=2509
+    42.37%  dm3_232367 team yeti                 gt=1298 rc=1848
+
+== per-attacker-weapon event accuracy (GT single-source enemy instants)
+   weapon instants    gt-dmg   covered  val-exact attacker-ok class-enemy
+   rl        16749   1172135    100.0%      98.8%       99.2%       99.4%
+   sg        40557    700404     99.5%      98.6%       97.0%       98.0%
+   lg         6086    203532     99.8%      99.1%       99.6%       99.8%
+   ssg        3038     86494     99.5%      98.0%       97.3%       98.1%
+   gl          655     50982     99.8%      99.7%       98.2%       98.6%
+   sng        1655     30201     99.3%      99.1%       96.7%       97.7%
+   ng          721      6443    100.0%      99.3%       95.3%       97.9%
+   axe         113      2245    100.0%      96.5%       21.2%       24.8%
+   squish       37      1662    100.0%     100.0%       35.1%       35.1%
+   unknown        1         2    100.0%     100.0%        0.0%        0.0%
+
+== misattribution flows (by bounded damage moved)
+      9700 dmg    100 instants  PHANTOM -> team
+      4779 dmg    265 instants  enemy:sg -> enemy:WRONG-ATTACKER
+      4424 dmg    207 instants  enemy:sg -> enemy:lg
+      4408 dmg     47 instants  mixed -> enemy:rl
+      4198 dmg     61 instants  enemy:rl -> env:unknown
+      4112 dmg    198 instants  enemy:sg -> self
+      3865 dmg    122 instants  self -> enemy:rl
+      3521 dmg    369 instants  enemy:sg -> env:unknown
+      2848 dmg    142 instants  enemy:sg -> team
+      2431 dmg     74 instants  self -> env:unknown
+      1780 dmg     43 instants  team -> env:unknown
+      1740 dmg     81 instants  enemy:axe -> env:unknown
+      1720 dmg     16 instants  enemy:rl -> mixed
+      1668 dmg     22 instants  enemy:rl -> self
+      1244 dmg     20 instants  enemy:rl -> enemy:WRONG-ATTACKER
+      1065 dmg     22 instants  mixed -> self
+       999 dmg     18 instants  mixed -> enemy:lg
+       978 dmg     28 instants  self -> enemy:lg
+       925 dmg     17 instants  enemy:rl -> enemy:lg
+       828 dmg     43 instants  enemy:sng -> enemy:lg
+       772 dmg     21 instants  self -> enemy:sng
+       766 dmg     30 instants  self -> enemy:sg
+       664 dmg     25 instants  enemy:ssg -> self
+       640 dmg     32 instants  enemy:sg -> enemy:rl
+       628 dmg     17 instants  enemy:ssg -> enemy:lg
+       604 dmg      7 instants  enemy:gl -> env:unknown
+       596 dmg     69 instants  enemy:sg -> env:drown
+       549 dmg     17 instants  self -> team
+       538 dmg     15 instants  enemy:lg -> enemy:WRONG-ATTACKER
+       516 dmg    206 instants  enemy:sg -> MISSING
+       470 dmg      5 instants  enemy:lg -> env:unknown
+       440 dmg     96 instants  PHANTOM -> env:unknown
+       429 dmg    116 instants  PHANTOM -> self
+       427 dmg      8 instants  enemy:rl -> team
+       400 dmg     17 instants  PHANTOM -> enemy:rl
+       383 dmg     11 instants  mixed -> enemy:sg
+       372 dmg     19 instants  team -> enemy:sg
+       344 dmg     22 instants  enemy:ssg -> env:unknown
+       296 dmg      8 instants  team -> enemy:rl
+       288 dmg     16 instants  enemy:sng -> enemy:sg
+       284 dmg     12 instants  enemy:sg -> enemy:sng
+       280 dmg      9 instants  self -> enemy:ssg
+       270 dmg     15 instants  enemy:sng -> team
+       252 dmg      8 instants  enemy:sng -> env:unknown
+       241 dmg      3 instants  enemy:rl -> enemy:gl
+       240 dmg      8 instants  enemy:lg -> team
+       237 dmg     13 instants  team -> enemy:lg
+       236 dmg     18 instants  team -> MISSING
+       227 dmg     13 instants  enemy:sng -> self
+       220 dmg     13 instants  enemy:sg -> enemy:ssg
+       218 dmg      2 instants  enemy:gl -> self
+       212 dmg      2 instants  PHANTOM -> enemy:sng
+       209 dmg      2 instants  enemy:gl -> enemy:rl
+       204 dmg      7 instants  enemy:ssg -> team
+       198 dmg     98 instants  env:squish -> env:unknown
+       175 dmg      2 instants  mixed -> enemy:gl
+       172 dmg      5 instants  enemy:ssg -> enemy:rl
+       157 dmg      2 instants  enemy:gl -> enemy:lg
+       153 dmg     17 instants  enemy:ng -> enemy:sg
+       144 dmg     13 instants  enemy:ssg -> enemy:sg
+       132 dmg      6 instants  enemy:sg -> env:lava
+       130 dmg      6 instants  self -> enemy:ng
+       127 dmg      4 instants  mixed -> enemy:ssg
+       122 dmg      3 instants  mixed -> team
+       119 dmg      3 instants  team -> self
+       114 dmg      3 instants  mixed -> enemy:sng
+       110 dmg     31 instants  env:fall -> env:unknown
+       108 dmg      5 instants  enemy:sg -> enemy:ng

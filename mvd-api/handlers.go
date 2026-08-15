@@ -1124,24 +1124,10 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	// Shallow value copy of the view result so we can vary Regions per mode
 	// without mutating the stored Result — embedding the copy keeps the body
 	// in lock-step with the RegionControlResult shape (no shadow envelope).
-	body := *rcv
-	switch regionsMode {
-	case "summary":
-		// Copy each region and drop its Points polygon (~6KB total) — never
-		// mutate the stored Result's slice. name/locs/centroids are kept.
-		slim := make([]result.ControlRegion, len(rcv.Regions))
-		for i, rg := range rcv.Regions {
-			rg.Points = nil
-			slim[i] = rg
-		}
-		body.Regions = slim
-	case "none":
-		// Regions omitted from the response entirely (regions,omitempty).
-		body.Regions = nil
-	default: // "full"
-		// body.Regions is already rcv.Regions.
-	}
-	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: &body})
+	// view.ShapeRegions owns the trim so this and qw-analyze produce the same
+	// body; it copies rather than mutating the stored Result's slice.
+	body := view.ShapeRegions(rcv, regionsMode)
+	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: body})
 }
 
 // handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list
@@ -1614,7 +1600,7 @@ func (s *server) handleLives(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if summary {
-		livesSummary(out)
+		view.SummarizeLives(out)
 	}
 	out.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, out)
@@ -1642,17 +1628,6 @@ func (s *server) handleLives(w http.ResponseWriter, r *http.Request) {
 //
 // This trims mvd-api's own response, not the view: view.Lives has no Summary
 // option, and adding one there is mvd-analytics' call.
-func livesSummary(out *view.LivesView) {
-	for i := range out.Lives {
-		l := &out.Lives[i]
-		l.ItemsTaken = nil
-		l.Locs = nil
-		l.EventLocs = nil
-		l.Victims = nil
-		l.ByWeapon = nil
-		l.DamageByWeapon = nil
-	}
-}
 
 // matchDurationMs is how long the match ran, in ms — the bound top windows
 // caps windowMs against. Streams.Global.MatchEnd is the authority (MatchStart

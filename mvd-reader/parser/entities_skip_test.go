@@ -157,7 +157,7 @@ func TestBaselineBody_DecodeParity(t *testing.T) {
 		t.Fatalf("parseSpawnBaseline: %v", err)
 	}
 	got := p.baselines[42]
-	if got == nil || got.Origin != origin || got.ModelIndex != 9 || got.SkinNum != 2 {
+	if !p.baselineValid[42] || got.Origin != origin || got.ModelIndex != 9 || got.SkinNum != 2 {
 		t.Errorf("registered baseline = %+v, want the same body decode", got)
 	}
 }

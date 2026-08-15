@@ -69,6 +69,12 @@ type Registry struct {
 	// volume, so this is a separate request (qw-analyze -include nails).
 	BuildNails bool
 
+	// Parallel opts heavy finalize passes into goroutine fan-out (see
+	// Context.Parallel). Off by default so bulk hosts that already run
+	// one demo per worker don't oversubscribe; single-demo callers
+	// (qw-analyze -parallel) can turn it on. Output is identical.
+	Parallel bool
+
 	// PhaseTimings holds per-phase wall-clock durations from the most
 	// recent analyzeSource run (init, event pass, each analyzer's
 	// Finalize, each post-processor). Repopulated every run; read by the
@@ -180,6 +186,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	ctx := &Context{
 		ShotStreams: r.BuildShotStreams,
 		Nails:       r.BuildNails,
+		Parallel:    r.Parallel,
 	}
 
 	// Execution is driven by the DAG's topological node order (dag.go).

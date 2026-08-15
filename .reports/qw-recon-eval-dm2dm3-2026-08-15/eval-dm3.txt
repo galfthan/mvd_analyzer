@@ -1,0 +1,114 @@
+demos scored: 30
+
+event level (GT enemy+self+team instants): covered 50717/51058 (99.3%)  value-exact 98.8% of covered  attacker-correct 97.7% of matched-enemy
+
+== bounded given     n=184 median   0.87%  mean   1.16%  p90   2.63%  <=1%  54.3%  <=2%  79.9%
+     6.30%  dm3_232176 team george               gt=9083 rc=8511
+     3.87%  dm3_231469 team evalcat              gt=4263 rc=4098
+     3.85%  dm3_232109 team rghst                gt=6877 rc=6612
+     3.74%  dm3_231714 team Evil_ua              gt=5832 rc=5614
+     3.72%  dm3_231820 team viag                 gt=9120 rc=8781
+     3.55%  dm3_232176 team namtsui              gt=6081 rc=5865
+     3.21%  dm3_231977 team Flynn                gt=7096 rc=6868
+     3.18%  dm3_231221 team 13                   gt=5845 rc=5659
+
+== bounded taken     n=184 median   0.05%  mean   0.15%  p90   0.29%  <=1%  98.4%  <=2%  99.5%
+     5.46%  dm3_231221 team rbags                gt=7312 rc=6913
+     2.00%  dm3_231137 team wch                  gt=8269 rc=8104
+     1.50%  dm3_232053 team mm2                  gt=6608 rc=6509
+     0.75%  dm3_231714 team N1ckAllEye           gt=6145 rc=6099
+     0.73%  dm3_232422 team Darky                gt=6458 rc=6411
+     0.70%  dm3_232239 team mythic               gt=8997 rc=9060
+     0.68%  dm3_231267 team sickness             gt=6776 rc=6730
+     0.66%  dm3_231264 team mythic               gt=8947 rc=8888
+
+== bounded ewep      n=184 median   1.75%  mean   2.51%  p90   5.69%  <=1%  32.1%  <=2%  55.4%
+    12.54%  dm3_231820 team serp                 gt=1922 rc=1681
+    12.51%  dm3_231709 team ekz                  gt=2343 rc=2050
+    11.69%  dm3_232176 team Schotty              gt=616 rc=688
+    10.97%  dm3_231491 team stedanko             gt=1130 rc=1006
+    10.44%  dm3_231359 team jsmith               gt=1216 rc=1089
+     8.43%  dm3_232367 team Pierre               gt=2135 rc=1955
+     7.42%  dm3_232109 team rghst                gt=2089 rc=1934
+     6.93%  dm3_231106 team lit                  gt=3058 rc=2846
+
+== bounded givenTeam n=119 median   5.25%  mean   8.68%  p90  21.65%  <=1%  26.1%  <=2%  32.8%
+    66.20%  dm3_231221 team Nilton               gt=722 rc=244
+    45.48%  dm3_231714 team KreatoR              gt=310 rc=169
+    39.67%  dm3_231106 team mihawk               gt=421 rc=588
+    39.15%  dm3_231923 team splif                gt=235 rc=327
+    36.62%  dm3_231359 team spekyr               gt=213 rc=291
+    35.27%  dm3_231908 team fix                  gt=224 rc=145
+    29.22%  dm3_231221 team rbags                gt=616 rc=436
+    28.72%  dm3_231977 team Schotty              gt=376 rc=268
+
+== bounded givenSelf n=145 median   5.46%  mean   7.70%  p90  17.89%  <=1%  20.7%  <=2%  28.3%
+    37.93%  dm3_231820 team omicron              gt=290 rc=400
+    36.05%  dm3_232239 team Anza                 gt=344 rc=220
+    33.33%  dm3_231523 team kippo (FU)           gt=213 rc=142
+    32.95%  dm3_231264 team mythic               gt=264 rc=177
+    29.67%  dm3_231221 team 13                   gt=337 rc=237
+    26.44%  dm3_231221 team Muttley              gt=208 rc=153
+    26.34%  dm3_232176 team Schotty              gt=205 rc=151
+    25.35%  dm3_231267 team Xerial               gt=647 rc=483
+
+== raw given     n=184 median   1.33%  mean   1.99%  p90   4.49%  <=1%  41.8%  <=2%  65.2%
+    16.26%  dm3_231106 team fudencio             gt=9677 rc=11250
+     9.36%  dm3_231221 team KreatoR              gt=5601 rc=6125
+     8.81%  dm3_231923 team mm2                  gt=11204 rc=12191
+     8.48%  dm3_231977 team BLooD_DoG(D_P)       gt=15981 rc=17336
+     8.41%  dm3_231709 team Bass                 gt=8138 rc=7454
+     7.87%  dm3_231137 team yeti                 gt=15388 rc=16599
+     7.38%  dm3_231523 team rgh   (FU)           gt=10092 rc=10837
+     6.44%  dm3_231908 team mm2                  gt=9639 rc=10260
+
+== raw taken     n=184 median   1.93%  mean   2.42%  p90   4.93%  <=1%  30.4%  <=2%  51.6%
+    14.83%  dm3_231820 team war                  gt=13642 rc=11619
+    12.70%  dm3_231923 team mm2                  gt=6002 rc=6764
+    12.09%  dm3_231106 team supreme              gt=16536 rc=18535
+     9.13%  dm3_231264 team mille                gt=10582 rc=11548
+     8.54%  dm3_231977 team Pred                 gt=11765 rc=12770
+     7.63%  dm3_231137 team rosh                 gt=13160 rc=14164
+     7.48%  dm3_231221 team gandi                gt=11920 rc=11028
+     6.76%  dm3_232422 team foe                  gt=10866 rc=11600
+
+== raw ewep      n=184 median   2.80%  mean   3.87%  p90   8.15%  <=1%  21.2%  <=2%  39.7%
+    26.00%  dm3_231491 team stedanko             gt=1523 rc=1127
+    24.27%  dm3_231221 team Nilton               gt=3510 rc=2658
+    20.82%  dm3_231709 team Bass                 gt=3160 rc=2502
+    17.08%  dm3_231709 team ekz                  gt=2723 rc=2258
+    13.91%  dm3_232176 team Schotty              gt=654 rc=745
+    12.92%  dm3_232053 team raket                gt=1757 rc=1984
+    12.08%  dm3_231221 team darff                gt=5532 rc=4864
+    12.00%  dm3_231106 team mihawk               gt=2525 rc=2828
+
+== raw givenTeam n=127 median  11.71%  mean  18.43%  p90  49.07%  <=1%  10.2%  <=2%  15.0%
+    94.63%  dm3_231491 team stedanko             gt=242 rc=471
+    79.86%  dm3_231221 team 13                   gt=278 rc=500
+    77.49%  dm3_231106 team mihawk               gt=471 rc=836
+    71.61%  dm3_231714 team Le1no                gt=310 rc=532
+    65.39%  dm3_231221 team Nilton               gt=731 rc=253
+    65.04%  dm3_231908 team wo0tzaj              gt=226 rc=373
+    63.52%  dm3_231908 team rusti                gt=318 rc=520
+    62.86%  dm3_232422 team zzz                  gt=315 rc=513
+
+== raw givenSelf n=164 median   6.35%  mean  12.85%  p90  27.68%  <=1%  20.1%  <=2%  26.2%
+   223.61%  dm3_231264 team mille                gt=288 rc=932
+    93.11%  dm3_231923 team mm2                  gt=784 rc=1514
+    81.64%  dm3_231469 team stedanko             gt=256 rc=47
+    75.13%  dm3_231820 team war                  gt=2280 rc=567
+    69.11%  dm3_231714 team KreatoR              gt=531 rc=164
+    67.70%  dm3_232367 team Flynn                gt=387 rc=125
+    56.48%  dm3_231491 team evalcat              gt=710 rc=309
+    42.40%  dm3_232422 team foe                  gt=1762 rc=2509
+
+== per-attacker-weapon event accuracy (GT single-source enemy instants)
+   weapon instants    gt-dmg   covered  val-exact attacker-ok class-enemy
+   rl         7330    486120    100.0%      99.1%       99.2%       99.5%
+   sg        28020    469316     99.3%      98.5%       97.1%       98.1%
+   lg         6086    203532     99.8%      99.1%       99.6%       99.8%
+   ssg        1915     51337     99.2%      98.2%       96.9%       98.1%
+   sng        1655     30201     99.3%      99.1%       96.7%       97.7%
+   gl          390     29541     99.7%      99.7%       98.5%       99.0%
+   ng          402      3602    100.0%      99.5%       96.0%       98.5%
+   axe          53      1187    100.0%      98.1%       18.9%       24.5%

@@ -7,7 +7,62 @@
 // it can be tweaked in one place — including the values that are duplicated
 // in styles.css as :root custom properties (kept in sync by hand: see the
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
-const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+
+// Per-match team colours. TEAM_COLORS[i] is the colour of
+// timelineState.teams[i] — the winner-first index convention every call site
+// uses — but WHICH palette entry lands at each index is decided by team NAME
+// (assignTeamColors, called from displayResults), so a team keeps its colour
+// across demos regardless of who won. The CSS mirror --team-a..--team-d is
+// re-pointed at the same values there.
+let TEAM_COLORS = [...TEAM_PALETTE];
+
+// Deterministic name-based palette assignment. Teams literally named "red" /
+// "blue" (case-insensitive) claim those palette entries outright; every other
+// team takes the remaining entries in code-unit sort order of its name, so
+// e.g. [fu] vs -s- colours the same way in every demo of that matchup. The
+// returned array is always at least palette-length: unused palette entries
+// pad the tail so defensive TEAM_COLORS[i] lookups past the team count still
+// resolve; a fifth-or-later team (palette exhausted) falls back to grey.
+function assignTeamColors(teams) {
+    const slotOf = new Array(teams.length).fill(-1);
+    const taken = new Set();
+    teams.forEach((t, i) => {
+        const n = String(t).toLowerCase();
+        const fixed = n === 'red' ? 0 : n === 'blue' ? 1 : -1;
+        if (fixed >= 0 && !taken.has(fixed)) { slotOf[i] = fixed; taken.add(fixed); }
+    });
+    const rest = teams.map((_, i) => i).filter(i => slotOf[i] < 0)
+        .sort((a, b) => (teams[a] < teams[b] ? -1 : teams[a] > teams[b] ? 1 : 0));
+    let next = 0;
+    for (const i of rest) {
+        while (taken.has(next)) next++;
+        if (next >= TEAM_PALETTE.length) break;
+        slotOf[i] = next;
+        taken.add(next);
+    }
+    const colors = teams.map((_, i) => TEAM_PALETTE[slotOf[i]] ?? '#cccccc');
+    for (let s = 0; s < TEAM_PALETTE.length; s++) {
+        if (!taken.has(s)) colors.push(TEAM_PALETTE[s]);
+    }
+    return colors;
+}
+
+// Single entry point for the canonical team order: every path that decides
+// the order goes through here, so timelineState.teams, TEAM_COLORS and the
+// CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
+// "A vs B" spans, anything on var(--team-*)) can never disagree.
+function setCanonicalTeams(teams) {
+    timelineState.teams = teams;
+    TEAM_COLORS = assignTeamColors(teams);
+    // The map component keeps its own palette reference (it never reads app
+    // globals); re-point it so the canvas layers repaint in the same colours
+    // the DOM shows. mapView exists before any demo load (module bootstrap).
+    if (mapView) mapView.teamColors = TEAM_COLORS;
+    const rootStyle = document.documentElement.style;
+    ['--team-a', '--team-b', '--team-c', '--team-d'].forEach((v, i) =>
+        rootStyle.setProperty(v, TEAM_COLORS[i]));
+}
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
 // Timing / layout constants used by the chat scroller and the map playback.
@@ -1221,26 +1276,16 @@ function displayResults(result) {
     // their own name (a property only true after the Go-side rewrite).
     applyDuelModeUI(result);
 
-    // Teams summary box. Rows come from playerStats where it exists so the
-    // scores match the scoreboard below; demoInfo is the fallback.
-    {
-        const rows = playerStatsRows(result);
-        if (rows.length) {
-            displayTeamsSummary(rows);
-        } else if (demoInfo && demoInfo.teams) {
-            displayTeamsSummary(demoInfo.players);
-        } else if (result.match && result.match.teams) {
-            displayTeams(result.match.teams);
-        }
-    }
-
-    // Set team order early (sorted by total frags, highest first) for consistent
-    // colors everywhere. CLAUDE.md: this is the ONE canonical team→colour source
-    // — TEAM_COLORS indexed by position in timelineState.teams, winner at 0 —
-    // and it must never be derived from demoInfo.teams order or any per-feature
-    // ordering. playerStats is the frag source now (its score.frags is the
-    // corrected net score and it exists on demos with no KTX block at all), with
-    // demoInfo/match retained only to enumerate the team NAMES.
+    // Set team order first (sorted by total frags, highest first) so every
+    // panel below — the Teams summary box included — sees this demo's order,
+    // not the previous demo's. CLAUDE.md: this is the ONE canonical
+    // team→colour source — TEAM_COLORS indexed by position in
+    // timelineState.teams, winner at 0, with the palette entry at each index
+    // assigned by team name (assignTeamColors) — and it must never be derived
+    // from demoInfo.teams order or any per-feature ordering. playerStats is
+    // the frag source (its score.frags is the corrected net score and it
+    // exists on demos with no KTX block at all), with demoInfo/match retained
+    // only to enumerate the team NAMES.
     {
         const psTeams = playerStatsTeamRows(result);
         let teams = [];
@@ -1258,7 +1303,20 @@ function displayResults(result) {
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        timelineState.teams = teams;
+        setCanonicalTeams(teams);
+    }
+
+    // Teams summary box. Rows come from playerStats where it exists so the
+    // scores match the scoreboard below; demoInfo is the fallback.
+    {
+        const rows = playerStatsRows(result);
+        if (rows.length) {
+            displayTeamsSummary(rows);
+        } else if (demoInfo && demoInfo.teams) {
+            displayTeamsSummary(demoInfo.players);
+        } else if (result.match && result.match.teams) {
+            displayTeams(result.match.teams);
+        }
     }
 
     updateTopbarDemoInfo(result);
@@ -3501,9 +3559,9 @@ function displayTimelineAnalysis(result) {
     // Teams already set (frag-sorted) in displayResults; only set if missing
     if (!timelineState.teams || timelineState.teams.length === 0) {
         if (demoInfo?.teams) {
-            timelineState.teams = demoInfo.teams;
+            setCanonicalTeams([...demoInfo.teams]);
         } else if (result.match?.teams) {
-            timelineState.teams = result.match.teams.map(t => t.name);
+            setCanonicalTeams(result.match.teams.map(t => t.name));
         }
     }
     const teams = timelineState.teams;
