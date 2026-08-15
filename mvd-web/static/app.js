@@ -6000,38 +6000,13 @@ function markMapDirty() {
 }
 
 // applyMapGeometry: install (or re-install, after an edit / regeneration)
-// a geometry object as the map's floor/wall source. Normalizes legacy
-// versions, splits out the unnamed backdrop, drops every geometry-derived
-// cache, and rebuilds the loc groups + region-control references.
+// a geometry object as the map's floor/wall source. The state half —
+// normalization, backdrop split, submodel indexing, cache invalidation,
+// group rebuild — is MvdMap.setGeometry; this wrapper only refreshes the
+// region->group references (the control overlay must not keep pointing at
+// the previous, stale-tris group objects) and repaints.
 function applyMapGeometry(geom) {
-    MapView.normalizeMapGeometry(geom);
-    // The unnamed backdrop bucket (name === "") is drawn as a neutral
-    // underlay by the world layer; cache its triangle list separately so
-    // it isn't confused with loc groups keyed by name.
-    const backdrop = geom.locs.find(l => l && l.name === '');
-    geom.backdropTris = backdrop && Array.isArray(backdrop.tris) && backdrop.tris.length >= 9
-        ? backdrop.tris : null;
-    mapState.mapGeometry = geom;
-    // Submodel meshes (corpus v4) keyed by id for the mover renderer.
-    mapState.submodelMeshes = null;
-    if (Array.isArray(geom.submodels)) {
-        const sm = {};
-        for (const s of geom.submodels) {
-            if (s && Number.isInteger(s.id) && Array.isArray(s.tris) && s.tris.length >= 9) {
-                sm[s.id] = s.tris;
-            }
-        }
-        if (Object.keys(sm).length > 0) mapState.submodelMeshes = sm;
-    }
-    // Geometry-derived caches are stale now.
-    mapState._floorZCache = null;
-    mapState._floorModel = null;
-    mapState._floorCanvasKey = null;
-    mapState._moverFaces = null;
-    // Rebuild groups with tris attached, then refresh region->group
-    // references so the control overlay doesn't keep pointing at the
-    // previous (stale-tris) group objects.
-    mapView.rebuildLocationGroups();
+    mapView.setGeometry(geom);
     if (mapState.rcResult) {
         applyRegionConfig(); // also calls renderMap
     } else {
@@ -7096,82 +7071,11 @@ function buildPlayerRegionIcon(player) {
 // front, so the body reads as a 3D volume with visible depth rather than a
 // flat silhouette. Static geometry — drawn live on top of the floor model.
 
-// Pre-compute full trails for all players from high-res bucket data.
-// Stores world-space (wx, wy, wz) positions — drawTracks converts to canvas
-// via worldToCanvas at draw time so trails follow user pan/zoom/rotation.
+// precomputeFullTrails: derive the trail tracks and death markers from the
+// installed frame view — MvdMap.rebuildTrails reads its own frames, player
+// symbols and camera scale.
 function precomputeFullTrails() {
-    mapState.fullTrails = {};
-    // Sorted-by-time list of death frames in world space, used by renderMap
-    // to draw a fading red "X" at the death location for a couple of seconds.
-    mapState.deathEvents = [];
-    const view = timelineState.bucketView;
-    if (!view || !view.players) return;
-
-    const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
-    // "Meaningful movement" threshold — 2 canvas pixels at the base fit-to-canvas
-    // scale, translated to world units so the filter is applied in world space.
-    const MIN_MOVE_WORLD = _wtc.scale > 0 ? (2 / _wtc.scale) : 0;
-
-    // Walk each player's dense columns over their active span. Dead buckets
-    // (alive=0) are skipped, which breaks the trail across death→respawn just
-    // as the old row shape did by omitting the player from those buckets.
-    for (const name in view.players) {
-        const cp = view.players[name];
-        const symbolInfo = mapState.playerSymbols[name];
-        if (!symbolInfo) continue;
-        const xs = cp.x, ys = cp.y, zs = cp.z, ds = cp.d, sps = cp.sp;
-        if (!xs || !ys) continue;
-
-        let lastWorld = null;
-        for (let rel = 0; rel < cp.n; rel++) {
-            if (!cp.alive[rel]) continue;
-            const x = xs[rel], y = ys[rel];
-            const z = zs ? zs[rel] : 0;
-            if (x === 0 && y === 0) continue;
-
-            const i = cp.first + rel;
-            const t = bucketTimeSec(view, i);
-            const isDeath = ds ? !!ds[rel] : false;
-            const isSpawn = sps ? !!sps[rel] : false;
-
-            if (!mapState.fullTrails[name]) mapState.fullTrails[name] = [];
-            const track = mapState.fullTrails[name];
-            const last = track[track.length - 1];
-
-            // Death frames also get added to the standalone deathEvents list
-            // so renderMap can find them without scanning every player trail.
-            // teamIdx is captured so the X is painted in the dead player's
-            // own team color rather than a generic red.
-            if (isDeath) {
-                mapState.deathEvents.push({ t, wx: x, wy: y, wz: z, teamIdx: symbolInfo.teamIdx });
-            }
-
-            // Always include death/spawn markers regardless of distance.
-            if (!isDeath && !isSpawn) {
-                if (last && Math.abs(last.wx - x) <= MIN_MOVE_WORLD && Math.abs(last.wy - y) <= MIN_MOVE_WORLD) {
-                    lastWorld = { x, y };
-                    continue;
-                }
-            }
-
-            // Teleport detection in world units (scale-independent)
-            const isTeleport = !isDeath && !isSpawn && lastWorld && (Math.abs(x - lastWorld.x) > MAX_MOVE_PER_BUCKET || Math.abs(y - lastWorld.y) > MAX_MOVE_PER_BUCKET);
-
-            lastWorld = { x, y };
-            track.push({ wx: x, wy: y, wz: z, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
-        }
-    }
-
-    // deathEvents was filled per-player; renderMap expects it time-ordered.
-    mapState.deathEvents.sort((a, b) => a.t - b.t);
-
-    // Initialize all players as disabled (user enables via All button or per-player checkboxes)
-    mapState.enabledPlayers = {};
-    mapState.trailStartTimes = {};
-    for (const name of Object.keys(mapState.fullTrails)) {
-        mapState.enabledPlayers[name] = false;
-        mapState.trailStartTimes[name] = 0;
-    }
+    mapView.rebuildTrails();
 }
 
 // renderMap: the component owns the whole composition, including the frame

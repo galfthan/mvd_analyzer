@@ -20,7 +20,7 @@ import {
     newCamera, project, is3D, fit, setAngles, setOrbitCenter, toView, toWorld,
     DEFAULT_YAW, DEFAULT_PITCH,
 } from './camera.js';
-import { moverPoseAt, pointInTriangle } from './geometry.js';
+import { moverPoseAt, pointInTriangle, normalizeMapGeometry } from './geometry.js';
 import { buildFloorModel, processLocationGroups, groupWorldBBox } from './locgroups.js';
 import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
 import {
@@ -1660,6 +1660,126 @@ export class MvdMap {
             states[region.name] = decodeRegionStateChar(str[idx]);
         }
         return states;
+    }
+
+    // setGeometry installs (or re-installs, after an edit / regeneration) a
+    // geometry object as the map's floor/wall source. Normalizes legacy
+    // versions, splits out the unnamed backdrop, indexes the submodel meshes
+    // for the mover renderer, drops every geometry-derived cache, and
+    // rebuilds the loc groups so their tris attach to the new geometry.
+    setGeometry(geom) {
+        const s = this.state;
+        normalizeMapGeometry(geom);
+        // The unnamed backdrop bucket (name === "") is drawn as a neutral
+        // underlay by the world layer; cache its triangle list separately so
+        // it isn't confused with loc groups keyed by name.
+        const backdrop = geom.locs.find(l => l && l.name === '');
+        geom.backdropTris = backdrop && Array.isArray(backdrop.tris) && backdrop.tris.length >= 9
+            ? backdrop.tris : null;
+        s.mapGeometry = geom;
+        // Submodel meshes (corpus v4) keyed by id for the mover renderer.
+        s.submodelMeshes = null;
+        if (Array.isArray(geom.submodels)) {
+            const sm = {};
+            for (const sub of geom.submodels) {
+                if (sub && Number.isInteger(sub.id) && Array.isArray(sub.tris) && sub.tris.length >= 9) {
+                    sm[sub.id] = sub.tris;
+                }
+            }
+            if (Object.keys(sm).length > 0) s.submodelMeshes = sm;
+        }
+        // Geometry-derived caches are stale now.
+        s._floorZCache = null;
+        s._floorModel = null;
+        s._floorCanvasKey = null;
+        s._moverFaces = null;
+        this.rebuildLocationGroups();
+    }
+
+    // rebuildTrails derives the per-player trail tracks (world-space points
+    // with death/spawn/teleport marks) and the standalone death-marker list
+    // from the installed frame view. Trails all start disabled — the host's
+    // trail controls enable them.
+    rebuildTrails() {
+        const s = this.state;
+        s.fullTrails = {};
+        // Sorted-by-time list of death frames in world space, used by render
+        // to draw a fading "X" at the death location for a couple of seconds.
+        s.deathEvents = [];
+        const view = s.frames;
+        if (!view || !view.players) return;
+
+        // Teleport threshold: no player covers more than 2500 u/s of ground
+        // legitimately, so a bigger per-bucket step is a teleporter (or a
+        // respawn, which the death/spawn marks already break the trail on).
+        const MAX_MOVE_PER_BUCKET = 2500 * ((view.windowMs || 50) / 1000);
+        // "Meaningful movement" threshold — 2 canvas pixels at the base
+        // fit-to-canvas scale, translated to world units so the filter is
+        // applied in world space.
+        const MIN_MOVE_WORLD = this.camera.scale > 0 ? (2 / this.camera.scale) : 0;
+
+        // Walk each player's dense columns over their active span. Dead
+        // buckets (alive=0) are skipped, which breaks the trail across
+        // death→respawn just as the old row shape did by omitting the player
+        // from those buckets.
+        for (const name in view.players) {
+            const cp = view.players[name];
+            const symbolInfo = s.playerSymbols[name];
+            if (!symbolInfo) continue;
+            const xs = cp.x, ys = cp.y, zs = cp.z, ds = cp.d, sps = cp.sp;
+            if (!xs || !ys) continue;
+
+            let lastWorld = null;
+            for (let rel = 0; rel < cp.n; rel++) {
+                if (!cp.alive[rel]) continue;
+                const x = xs[rel], y = ys[rel];
+                const z = zs ? zs[rel] : 0;
+                if (x === 0 && y === 0) continue;
+
+                const i = cp.first + rel;
+                const t = bucketTimeSec(view, i);
+                const isDeath = ds ? !!ds[rel] : false;
+                const isSpawn = sps ? !!sps[rel] : false;
+
+                if (!s.fullTrails[name]) s.fullTrails[name] = [];
+                const track = s.fullTrails[name];
+                const last = track[track.length - 1];
+
+                // Death frames also get added to the standalone deathEvents
+                // list so render can find them without scanning every player
+                // trail. teamIdx is captured so the X is painted in the dead
+                // player's own team color rather than a generic red.
+                if (isDeath) {
+                    s.deathEvents.push({ t, wx: x, wy: y, wz: z, teamIdx: symbolInfo.teamIdx });
+                }
+
+                // Always include death/spawn markers regardless of distance.
+                if (!isDeath && !isSpawn) {
+                    if (last && Math.abs(last.wx - x) <= MIN_MOVE_WORLD && Math.abs(last.wy - y) <= MIN_MOVE_WORLD) {
+                        lastWorld = { x, y };
+                        continue;
+                    }
+                }
+
+                // Teleport detection in world units (scale-independent)
+                const isTeleport = !isDeath && !isSpawn && lastWorld && (Math.abs(x - lastWorld.x) > MAX_MOVE_PER_BUCKET || Math.abs(y - lastWorld.y) > MAX_MOVE_PER_BUCKET);
+
+                lastWorld = { x, y };
+                track.push({ wx: x, wy: y, wz: z, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+            }
+        }
+
+        // deathEvents was filled per-player; render expects it time-ordered.
+        s.deathEvents.sort((a, b) => a.t - b.t);
+
+        // All players start disabled (the host's All button / per-player
+        // checkboxes enable them).
+        s.enabledPlayers = {};
+        s.trailStartTimes = {};
+        for (const name of Object.keys(s.fullTrails)) {
+            s.enabledPlayers[name] = false;
+            s.trailStartTimes[name] = 0;
+        }
     }
 
     // rebuildLocationGroups (re)derives the named loc regions from the loc

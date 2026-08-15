@@ -500,6 +500,63 @@ test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
     assert.ok(map.state.locationGroupByName, 'lookup populated');
 });
 
+test('setGeometry splits the backdrop, indexes submodels and drops stale caches', () => {
+    const map = new MvdMap();
+    const tris = [0, 0, 0, 10, 0, 0, 10, 10, 0];
+    map.state._floorModel = { stale: true };
+    map.state._floorCanvasKey = 'stale';
+    map.state._floorZCache = new Map();
+    map.state._moverFaces = { 1: [] };
+    map.setGeometry({
+        version: 2,
+        locs: [{ name: '', tris }, { name: 'RA', tris }],
+        submodels: [{ id: 3, tris }, { id: 4, tris: [0, 0, 0] }],
+    });
+    assert.equal(map.state.mapGeometry.backdropTris, tris);
+    assert.deepEqual(Object.keys(map.state.submodelMeshes), ['3'], 'degenerate submodel dropped');
+    assert.equal(map.state._floorModel, null);
+    assert.equal(map.state._floorCanvasKey, null);
+    assert.equal(map.state._floorZCache, null);
+    assert.equal(map.state._moverFaces, null);
+    assert.ok(map.state.locationGroupByName, 'groups rebuilt against the new geometry');
+});
+
+test('rebuildTrails derives tracks, breaks on death, and flags teleports', () => {
+    const map = new MvdMap();
+    map.camera.scale = 1;
+    map.state.playerSymbols = { nlk: { teamIdx: 1 }, ghost: null };
+    map.setFrames({
+        windowMs: 50, start: 0, count: 5,
+        players: {
+            nlk: {
+                first: 0, n: 5, alive: [1, 1, 1, 1, 1],
+                x: [100, 110, 111, 4000, 4010],   // 111→4000 exceeds 125 u/bucket → teleport
+                y: [0, 0, 0, 0, 0],
+                z: [0, 0, 0, 0, 0],
+                d: [0, 0, 1, 0, 0],               // death at bucket 2
+                sp: [1, 0, 0, 1, 0],              // spawns at 0 and 3
+            },
+            ghost: { first: 0, n: 1, alive: [1], x: [5], y: [5] },  // no symbol → skipped
+        },
+    });
+    map.rebuildTrails();
+    const track = map.state.fullTrails.nlk;
+    assert.ok(track.length >= 4);
+    assert.equal(map.state.fullTrails.ghost, undefined);
+    assert.equal(map.state.deathEvents.length, 1);
+    assert.equal(map.state.deathEvents[0].teamIdx, 1);
+    assert.equal(track.filter(p => p.tp).length, 0,
+        'a step right after death/spawn marks is not a teleport');
+    assert.equal(map.state.enabledPlayers.nlk, false, 'trails start disabled');
+    // A plain oversized step (no death/spawn adjacency) IS a teleport.
+    map.setFrames({
+        windowMs: 50, start: 0, count: 3,
+        players: { nlk: { first: 0, n: 3, alive: [1, 1, 1], x: [0, 10, 5000], y: [0, 0, 0], z: [0, 0, 0] } },
+    });
+    map.rebuildTrails();
+    assert.equal(map.state.fullTrails.nlk.filter(p => p.tp).length, 1);
+});
+
 // ─── Camera, follow, focus, pointer interaction ─────────────────────────────
 
 test('setCamera notifies the host and repaints', () => {
