@@ -80,7 +80,18 @@ environment variables to export).
 go run ./mvd-analytics/cmd/qw-analyze demo.mvd.gz                 # Result JSON to stdout
 go run ./mvd-analytics/cmd/qw-analyze -format md demo.mvd.gz      # human summary
 go run ./mvd-analytics/cmd/qw-analyze -format events demo.mvd.gz  # line-delimited events
+go run ./mvd-analytics/cmd/qw-analyze -view top-kills demo.mvd.gz # one query-API view
 ```
+
+`-view` runs one view instead of the whole Result, covering the same surface
+mvd-api serves: `buckets`, `events`, `stream-slice`, `state-at`, `trails`,
+`region-control`, `top-kills`, `top-windows`, `lives`, `items`,
+`items-summary`, `airgibs`, `frags`, `damage`, `aim`, `chat`, `backpacks`,
+`weapon-pickups`, `player-stats`, `shots`, `loc-graph`, `loc-table`,
+`metadata`, `demoinfo`. It also takes a comma-separated list — `-view
+top-kills,airgibs` returns both from a single analysis pass, keyed by view
+name. See [`mvd-analytics/README.md`](mvd-analytics/README.md) for the
+per-view knobs and the two places CLI defaults differ from REST.
 
 ### Run the web UI locally
 
