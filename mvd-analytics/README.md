@@ -200,9 +200,9 @@ that downstream consumers render, summarise, or feed to an agent.
   position columns that `trails` / `state-at` / `region-control` /
   `stream-slice` read.
 
-Build the CLI once instead of `go run`-ing it each time with `make
-build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze` and
-`dist/mapgen`. Note `make build` clears `dist/` first.
+  Build the CLI once instead of `go run`-ing it each time with `make
+  build-tools` (or `make build-qw-analyze`), which writes `dist/qw-analyze`
+  and `dist/mapgen`. Note `make build` clears `dist/` first.
 
   **Two CLI-vs-REST defaults differ.** On `top-kills`, `top-windows`, `lives`
   and `damage` an unset `-dmg` gets the *view* default `raw` where mvd-api
