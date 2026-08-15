@@ -82,6 +82,17 @@ export {
 
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
 
+export {
+    bucketTimeSec,
+    bucketIndexAtTime,
+    bucketIndexAtOrAfter,
+    playerValAt,
+    playerAliveAt,
+    reconstructBucketPlayers,
+    teamSnapshot,
+    reconstructBucketTeams,
+} from './frames.js';
+
 export { hexToRgba, scaleRgbaAlpha, getLocationColor } from './color.js';
 
 export { ITEM_KEYWORDS, normalizeLocationName, findNearestLocation } from './locs.js';

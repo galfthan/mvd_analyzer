@@ -27,6 +27,11 @@ import {
 } from './draw.js';
 import { lowerBoundIndex, trailIndexAtTime } from './util.js';
 import { normalizeLocationName, findNearestLocation } from './locs.js';
+import {
+    bucketTimeSec, bucketIndexAtTime,
+    reconstructBucketPlayers, reconstructBucketTeams,
+} from './frames.js';
+import { decodeRegionStateChar } from './regions.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
 // different directions separate tonally (used by the liquid volumes).
@@ -277,6 +282,13 @@ export function newState() {
         mapEntities: [],      // the map's designed entity layout
         teleportArrows: [],   // precomputed entrance→exit world-coord pairs
         bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
+
+        // The frame feed: the column-major ColumnarBuckets view (frames.js
+        // documents the shape), pushed in whole via setFrames. Null until it
+        // arrives — the map draws a world with nobody on it, which is exactly
+        // the partially-loaded-timeline state a windowed source produces too.
+        frames: null,
+        bucketStates: null,   // region name → per-bucket control-state string
 
         // Who is on it.
         teams: [],
@@ -1438,11 +1450,12 @@ export class MvdMap {
     }
 
     // hitTestPlayerSymbol: the player whose drawn symbol is nearest the canvas
-    // point, within the follow hit radius. `bucketPlayers` is the frame's
-    // player map — the host supplies it because the frame source (bucket
-    // reconstruction) still lives host-side; positions are refined through the
-    // native-rate streams exactly like the draw pass.
-    hitTestPlayerSymbol(cx, cy, time, bucketPlayers) {
+    // point, within the follow hit radius. Reads the same frame the draw pass
+    // rendered from; positions are refined through the native-rate streams
+    // exactly like the draw pass.
+    hitTestPlayerSymbol(cx, cy, time) {
+        const frame = this.frameAt(time);
+        const bucketPlayers = frame && frame.p;
         if (!bucketPlayers) return null;
         let best = null;
         let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
@@ -1566,6 +1579,59 @@ export class MvdMap {
 
     // ─── Frame composition ──────────────────────────────────────────────────
 
+    // setFrames installs (or clears) the columnar bucket view the frame
+    // lookups read from. Whole-view replacement is the contract: a windowed
+    // source hands in a view covering what it has, and the component treats
+    // "no frames yet" as a first-class state rather than an error.
+    setFrames(view) {
+        const s = this.state;
+        s.frames = view || null;
+        s._frameRecon = null;
+        s.lastRenderedBucket = null;
+        s.renderDirty = true;
+    }
+
+    // frameAt: the reconstructed row-shape frame ({t, idx, p, td}) whose
+    // bucket span contains `time` (seconds), or null before frames arrive.
+    // Memoised on (view, index): repeated calls at the same time return the
+    // same object, so render's `bucket === lastRenderedBucket` redraw-skip
+    // and the host's legend/region/hit-test callers all share one
+    // reconstruction per frame.
+    frameAt(time) {
+        const s = this.state;
+        const view = s.frames;
+        if (!view || !view.count) return null;
+        const i = bucketIndexAtTime(view, time);
+        if (i < 0) return null;
+        const c = s._frameRecon;
+        if (c && c.view === view && c.i === i) return c.frame;
+        const frame = {
+            t: bucketTimeSec(view, i),
+            idx: i,
+            p: reconstructBucketPlayers(view, i),
+            td: reconstructBucketTeams(view, i),
+        };
+        s._frameRecon = { view, i, frame };
+        return frame;
+    }
+
+    // regionControlAt: region name → control state at `time`, decoded from
+    // the per-region bucket-state strings (which share the frame grid), or
+    // null when region control is absent or the frames haven't arrived.
+    regionControlAt(time) {
+        const s = this.state;
+        if (!s.controlRegions || !s.bucketStates) return null;
+        const idx = bucketIndexAtTime(s.frames, time);
+        if (idx < 0) return null;
+        const states = {};
+        for (const region of s.controlRegions) {
+            const str = s.bucketStates[region.name];
+            if (typeof str !== 'string' || idx >= str.length) continue;
+            states[region.name] = decodeRegionStateChar(str[idx]);
+        }
+        return states;
+    }
+
     // rebuildLocationGroups (re)derives the named loc regions from the loc
     // points plus whatever geometry is loaded, and refreshes the
     // normalized-name lookup the per-frame occupancy highlighting keys into.
@@ -1577,20 +1643,19 @@ export class MvdMap {
         return groups;
     }
 
-    // render composes one frame at `time` (seconds). The two host-supplied
-    // arguments exist because the frame source still lives host-side until
-    // the FrameSource seam lands:
-    //   bucket        — the reconstructed 50 ms bucket at `time` (memoised by
-    //                   the host, so its identity doubles as the redraw key),
-    //                   or null before the bucket view arrives.
-    //   controlStates — region name → control state at `time`, or null when
-    //                   region control is absent / not yet resolved.
-    render(time, bucket, controlStates) {
+    // render composes one frame at `time` (seconds) from the installed frame
+    // feed (setFrames). Rendering with no frames yet draws the world with
+    // nobody on it — the partially-loaded-timeline state.
+    render(time) {
         const s = this.state;
         const ctx = s.ctx;
         const canvas = s.canvas;
 
         if (!ctx || !canvas) return;
+
+        // The frame's identity doubles as the redraw key (frameAt memoises
+        // per bucket index).
+        const bucket = this.frameAt(time);
 
         // Skip redraw if same data bucket and nothing else changed — but NOT
         // during playback: positions come from the native-rate streams, so the
@@ -1654,8 +1719,11 @@ export class MvdMap {
         }
 
         // Draw region control overlay (colored by controlling team)
-        if (controlStates) {
-            this.drawRegionControlOverlay(ctx, controlStates);
+        if (s.controlRegions && s.regionToGroups) {
+            const controlStates = this.regionControlAt(time);
+            if (controlStates) {
+                this.drawRegionControlOverlay(ctx, controlStates);
+            }
         }
 
         // Highlight regions that currently contain at least one player so the

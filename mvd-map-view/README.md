@@ -66,20 +66,23 @@ Moved so far:
 | `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
 | `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), the actor layer (the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, the static entity view), the overlay layer (trails, LOS/PVS sightlines, region occupancy and control tints), loc resolution (`resolvePlayerLoc`) and hit testing (`pickLocGroupAt`, `hitTestPlayerSymbol`) |
 | `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
+| `src/frames.js` | the columnar bucket-view accessors — `bucketTimeSec`, `bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot` and friends. One implementation shared by the map (via `setFrames`/`frameAt`) and the host's timeline panels |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
 
-The frame composition is `MvdMap.render(time, bucket, controlStates)`, and
-size arrives only through `resize(cssW, cssH, dpr)` — the host measures
+The frame composition is `MvdMap.render(time)`: the host pushes the columnar
+bucket view in via `setFrames`, and `frameAt(time)` / `regionControlAt(time)`
+own the memoised per-frame lookups. Rendering before frames arrive draws the
+world with nobody on it — the partially-loaded-timeline state is first-class.
+Size arrives only through `resize(cssW, cssH, dpr)` — the host measures
 whatever it wants (container, fullscreen element, iframe) and pushes the
 result in.
 
-Still in `app.js`: the frame source (bucket reconstruction and the
-region-control lookup — `render` and `hitTestPlayerSymbol` take the frame's
-data as arguments until the `FrameSource` seam exists), pointer interaction,
-all measuring, and all the DOM chrome and loaders.
+Still in `app.js`: pointer interaction, all measuring, all the DOM chrome
+and loaders, and the trail precomputation (a data transform over the same
+frame view).
 
 A note on data: the renderer reads item spawners from its own
 `state.items`, not from an analyzer Result — it has no notion of one, and in

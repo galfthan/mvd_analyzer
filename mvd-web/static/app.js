@@ -3519,6 +3519,7 @@ function resetTimelineState() {
     mapState.renderDirty = true;
 
     timelineState.bucketView = null;
+    mapView.setFrames(null);
     timelineState.highResDuration = 0.05;
     timelineState.events = [];
     timelineState.fragEvents = [];
@@ -3571,6 +3572,7 @@ function displayTimelineAnalysis(result) {
     // stashes the resulting column-major ColumnarBuckets object on
     // timeline.bucketView. The panels read it via the bucket-view accessors.
     timelineState.bucketView = timeline?.bucketView || null;
+    mapView.setFrames(timelineState.bucketView);
     timelineState.highResDuration = 0.05;
     // Schema v8: raw time fields on result/timelineAnalysis flipped from
     // float seconds to int32 ms. The frontend internally still works in
@@ -3631,116 +3633,35 @@ function displayTimelineAnalysis(result) {
 
 // ─── Columnar bucket-view accessors ──────────────────────────────────────────
 //
-// The worker ships a column-major ColumnarBuckets object (see
-// mvd-analytics/view/columnar.go), stored on timelineState.bucketView:
-//   { windowMs, start, count,
-//     players: { name: { first, n, alive:[0/1], validFrom:{f:idx},
-//                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[i32], at:[str],
-//                        rl|lg|gl|ssg|sng|q|pe|r|sp|d:[0/1] } },
-//     teams:   { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta:[int], abt:{ra|ya|ga:[int]} } } }
-// Time axis is implicit: time(i) = (start + i*windowMs)/1000 seconds, so
-// time→index is O(1) arithmetic (no more per-bucket binary search). Booleans
-// and the alive mask are 0/1. A player only "exists" at bucket i while alive[i]
-// is set; values carry forward through dead buckets, so callers must gate on
-// liveness exactly as the old row shape omitted dead players per bucket.
+// The column-major ColumnarBuckets object (see mvd-analytics/view/columnar.go)
+// is stored on timelineState.bucketView and pushed into the map component via
+// mapView.setFrames. The accessors themselves live in
+// mvd-map-view/src/frames.js — one implementation, so the timeline panels and
+// the map can never disagree on the row shape. These wrappers keep the
+// long-standing local names for the panel code.
 
 function bucketTimeSec(view, i) {
-    return (view.start + i * view.windowMs) / 1000;
+    return MapView.bucketTimeSec(view, i);
 }
 
-// Bucket whose half-open span contains tSec (floor), clamped to a valid index.
 function bucketIndexAtTime(view, tSec) {
-    if (!view || !view.count) return -1;
-    let i = Math.floor((tSec * 1000 - view.start) / view.windowMs);
-    if (i < 0) i = 0;
-    if (i >= view.count) i = view.count - 1;
-    return i;
+    return MapView.bucketIndexAtTime(view, tSec);
 }
 
-// First bucket at or after tSec (ceil), clamped to [0, count]. Replaces the old
-// binarySearchBucketStart for range scans over a visible window.
 function bucketIndexAtOrAfter(view, tSec) {
-    if (!view || !view.count) return 0;
-    let i = Math.ceil((tSec * 1000 - view.start) / view.windowMs);
-    if (i < 0) i = 0;
-    if (i > view.count) i = view.count;
-    return i;
+    return MapView.bucketIndexAtOrAfter(view, tSec);
 }
 
-// Value of a player's field column at absolute bucket i, or undefined when the
-// player is absent there (outside [first,first+n), dead, or before validFrom).
 function playerValAt(p, field, i) {
-    if (!p) return undefined;
-    const rel = i - p.first;
-    if (rel < 0 || rel >= p.n) return undefined;
-    if (!p.alive[rel]) return undefined;
-    const vf = p.validFrom && p.validFrom[field];
-    if (vf !== undefined && i < vf) return undefined;
-    const arr = p[field];
-    if (!arr) return undefined;
-    return arr[rel];
+    return MapView.playerValAt(p, field, i);
 }
 
 function playerAliveAt(p, i) {
-    if (!p) return false;
-    const rel = i - p.first;
-    return rel >= 0 && rel < p.n && !!p.alive[rel];
+    return MapView.playerAliveAt(p, i);
 }
 
-// Field codes whose row-shape value is a boolean (emitted 0/1 in the columnar
-// wire form) vs a number. armorType ("at") is a string.
-const COLUMNAR_NUM_FIELDS = ['x', 'y', 'z', 'h', 'a', 'li', 'sh', 'nl', 'rk', 'cl'];
-const COLUMNAR_BOOL_FIELDS = ['rl', 'lg', 'gl', 'ssg', 'sng', 'q', 'pe', 'r', 'sp', 'd'];
-
-// reconstructBucketPlayers rebuilds the old row-shape p{} (player → field map)
-// for the players alive at bucket i. Mirrors the Go columnarToRow oracle so the
-// panels that still think row-major keep working unchanged.
-function reconstructBucketPlayers(view, i) {
-    const out = {};
-    const players = view.players || {};
-    for (const name in players) {
-        const cp = players[name];
-        if (!playerAliveAt(cp, i)) continue;
-        const pd = {};
-        for (const f of COLUMNAR_NUM_FIELDS) {
-            const v = playerValAt(cp, f, i);
-            if (v !== undefined) pd[f] = v;
-        }
-        for (const f of COLUMNAR_BOOL_FIELDS) {
-            const v = playerValAt(cp, f, i);
-            if (v !== undefined) pd[f] = !!v;
-        }
-        const at = playerValAt(cp, 'at', i);
-        if (at !== undefined) pd.at = at;
-        out[name] = pd;
-    }
-    return out;
-}
-
-// teamSnapshot returns the old row-shape team-data object (counters + abt) for
-// one team at bucket i, or {} when the team is absent.
 function teamSnapshot(view, team, i) {
-    const t = view.teams && view.teams[team];
-    if (!t) return {};
-    const o = {};
-    for (const k in t) {
-        if (k === 'abt') {
-            const abt = {};
-            for (const a in t.abt) abt[a] = t.abt[a][i] || 0;
-            o.abt = abt;
-            continue;
-        }
-        o[k] = t[k][i] || 0;
-    }
-    return o;
-}
-
-// reconstructBucketTeams rebuilds the old row-shape td{} (team → data) at i.
-function reconstructBucketTeams(view, i) {
-    if (!view.teams) return undefined;
-    const td = {};
-    for (const team in view.teams) td[team] = teamSnapshot(view, team, i);
-    return td;
+    return MapView.teamSnapshot(view, team, i);
 }
 
 // ─── Unified Canvas Graph Renderer ──────────────────────────────────────────
@@ -6018,13 +5939,6 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }
 
-// findHighResBucketIndexAtTime returns the bucket index whose span contains
-// `time` — used for cheap O(1) lookups into Go-supplied bucketStates strings
-// (which share the bucket view's grid).
-function findHighResBucketIndexAtTime(time) {
-    return bucketIndexAtTime(timelineState.bucketView, time);
-}
-
 // ─── Precomputed Frag Counts ────────────────────────────────────────────────
 
 // Sorted array of { time, cumulative: { player: frags } }
@@ -6654,19 +6568,10 @@ function loadRegionConfig(file) {
     reader.readAsText(file);
 }
 
-// Look up region control state at a given time by indexing into the
-// Go-supplied bucketStates strings (view.RegionControl).
+// Look up region control state at a given time — MvdMap.regionControlAt
+// indexes the Go-supplied bucketStates strings on the frame grid.
 function getRegionControlAtTime(time) {
-    if (!mapState.controlRegions || !mapState.bucketStates) return null;
-    const idx = findHighResBucketIndexAtTime(time);
-    if (idx < 0) return null;
-    const states = {};
-    for (const region of mapState.controlRegions) {
-        const s = mapState.bucketStates[region.name];
-        if (typeof s !== 'string' || idx >= s.length) continue;
-        states[region.name] = MapView.decodeRegionStateChar(s[idx]);
-    }
-    return states;
+    return mapView.regionControlAt(time);
 }
 
 function calculateMapBounds(result) {
@@ -7350,15 +7255,12 @@ function precomputeFullTrails() {
     }
 }
 
-// renderMap resolves the two time-indexed inputs the component cannot reach
-// (the reconstructed bucket and the region-control states — both live on
-// host data structures until the FrameSource seam lands) and hands the frame
-// to MvdMap.render, which owns the whole composition.
+// renderMap: the component owns the whole composition, including the frame
+// lookup (the columnar view is pushed in via mapView.setFrames). The global
+// wrapper survives because ~30 call sites and the parity harness invoke it
+// by name.
 function renderMap(time) {
-    const bucket = findBucketAtTime(time);
-    const controlStates = (mapState.controlRegions && mapState.regionToGroups)
-        ? getRegionControlAtTime(time) : null;
-    mapView.render(time, bucket, controlStates);
+    mapView.render(time);
 }
 
 // ─── Map Items (armor / weapon / MH / powerup overlays) ────────────────────
@@ -7617,32 +7519,11 @@ async function ensureLosComputed(losBtn) {
 // (buildVisByPair, losCovers, the LOS/PVS line overlays and drawTracks now
 // live in mvd-map-view — see MvdMap.drawLosLines / drawTracks.)
 
-// Reconstruct the row-shape bucket ({t, p, td}) at `time` from the columnar
-// view. Memoised on (view, index): repeated calls at the same time return the
-// same object so renderMap's `bucket === lastRenderedBucket` redraw-skip and
-// the legend/region/hit-test callers all share one reconstruction per frame.
-let _bucketReconCache = { view: null, i: -1, bucket: null };
-function findHighResBucketAtTime(time) {
-    const view = timelineState.bucketView;
-    if (!view || !view.count) return null;
-    const i = bucketIndexAtTime(view, time);
-    if (i < 0) return null;
-    if (_bucketReconCache.view === view && _bucketReconCache.i === i) {
-        return _bucketReconCache.bucket;
-    }
-    const bucket = {
-        t: bucketTimeSec(view, i),
-        idx: i,
-        p: reconstructBucketPlayers(view, i),
-        td: reconstructBucketTeams(view, i),
-    };
-    _bucketReconCache = { view, i, bucket };
-    return bucket;
-}
-
-
+// findBucketAtTime: the reconstructed row-shape frame at `time`, memoised by
+// the component (see MvdMap.frameAt). The legend and region panels share the
+// exact object the map rendered from, one reconstruction per frame.
 function findBucketAtTime(time) {
-    return findHighResBucketAtTime(time);
+    return mapView.frameAt(time);
 }
 
 // updateTrailButtonStates: reflect the current trail selection in the control
@@ -7971,9 +7852,7 @@ function installMapInteraction(canvas) {
 // Player symbols win first (toggle follow), then the click picks a loc
 // region for focus mode — same region or empty space clears it.
 function handleMapCanvasClick(cx, cy, ev) {
-    const bucket = findBucketAtTime(mapState.currentTime);
-    const hit = mapView.hitTestPlayerSymbol(cx, cy, mapState.currentTime,
-                                            bucket ? bucket.p : null);
+    const hit = mapView.hitTestPlayerSymbol(cx, cy, mapState.currentTime);
     if (hit) {
         setFollowPlayer(mapState.followPlayer === hit ? null : hit);
         return;

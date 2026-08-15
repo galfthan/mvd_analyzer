@@ -376,16 +376,19 @@ test('hitTestPlayerSymbol picks the nearest drawn symbol within the radius', () 
     map.state.posStreams = {
         streamed: { t: [0], x: [40], y: [40], z: [0] },
     };
-    const bucket = {
-        streamed: { x: 90, y: 90, z: 0 },     // stale bucket pos — stream wins
-        bucketed: { x: 60, y: 60, z: 0 },
-        parked:   { x: 0, y: 0, z: 0 },       // unpositioned — ignored
-    };
+    assert.equal(map.hitTestPlayerSymbol(41, 61, 0), null, 'no frames yet');
+    map.setFrames({
+        windowMs: 50, start: 0, count: 1,
+        players: {
+            streamed: { first: 0, n: 1, alive: [1], x: [90], y: [90], z: [0] }, // stale bucket pos — stream wins
+            bucketed: { first: 0, n: 1, alive: [1], x: [60], y: [60], z: [0] },
+            parked:   { first: 0, n: 1, alive: [1], x: [0], y: [0], z: [0] },   // unpositioned — ignored
+        },
+    });
     // Streamed player draws at canvas (40, 60); bucketed at (60, 40).
-    assert.equal(map.hitTestPlayerSymbol(41, 61, 0, bucket), 'streamed');
-    assert.equal(map.hitTestPlayerSymbol(59, 41, 0, bucket), 'bucketed');
-    assert.equal(map.hitTestPlayerSymbol(5, 5, 0, bucket), null, 'nothing in radius');
-    assert.equal(map.hitTestPlayerSymbol(41, 61, 0, null), null, 'no frame data');
+    assert.equal(map.hitTestPlayerSymbol(41, 61, 0), 'streamed');
+    assert.equal(map.hitTestPlayerSymbol(59, 41, 0), 'bucketed');
+    assert.equal(map.hitTestPlayerSymbol(5, 5, 0), null, 'nothing in radius');
 });
 
 // A canvas stub good enough for resize()/render(): records property sets,
@@ -428,19 +431,61 @@ test('resize without a canvas is a harmless no-op', () => {
 test('render skips a clean repeated frame but repaints when dirty or playing', () => {
     const { canvas, calls } = stubCanvas();
     const map = new MvdMap(canvas);
-    const bucket = { p: null };
-    map.render(1, bucket, null);
+    map.setFrames({ windowMs: 50, start: 0, count: 100, players: {} });
+    map.render(1);
     const first = calls.length;
     assert.ok(first > 0, 'first frame draws');
-    map.render(1, bucket, null);
+    map.render(1);
     assert.equal(calls.length, first, 'same bucket, clean, paused → skipped');
     map.state.renderDirty = true;
-    map.render(1, bucket, null);
+    map.render(1);
     assert.ok(calls.length > first, 'dirty → repainted');
     const afterDirty = calls.length;
     map.state.isPlaying = true;
-    map.render(1, bucket, null);
+    map.render(1);
     assert.ok(calls.length > afterDirty, 'playing → repaints every frame');
+});
+
+test('setFrames resets the redraw key so the next render paints', () => {
+    const { canvas, calls } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.setFrames({ windowMs: 50, start: 0, count: 100, players: {} });
+    map.render(1);
+    const first = calls.length;
+    map.setFrames({ windowMs: 50, start: 0, count: 100, players: {} });
+    map.render(1);
+    assert.ok(calls.length > first, 'new frames → repaint even at the same clock');
+});
+
+test('frameAt reconstructs the row shape and memoises per bucket', () => {
+    const map = new MvdMap();
+    assert.equal(map.frameAt(1), null, 'no frames yet');
+    map.setFrames({
+        windowMs: 50, start: 0, count: 2,
+        players: {
+            nlk: { first: 0, n: 2, alive: [1, 1], x: [5, 6], y: [7, 8], z: [0, 0], rl: [0, 1] },
+            gone: { first: 0, n: 2, alive: [0, 0], x: [1, 1], y: [1, 1] },
+        },
+    });
+    const f = map.frameAt(0.01);
+    assert.equal(f.idx, 0);
+    assert.equal(f.p.nlk.x, 5);
+    assert.equal(f.p.nlk.rl, false, '0/1 column decodes to a boolean');
+    assert.equal(f.p.gone, undefined, 'dead players are omitted from the frame');
+    assert.equal(map.frameAt(0.02), f, 'same bucket → same object');
+    assert.notEqual(map.frameAt(0.06), f, 'next bucket → fresh reconstruction');
+});
+
+test('regionControlAt decodes the per-region state strings on the frame grid', () => {
+    const map = new MvdMap();
+    assert.equal(map.regionControlAt(0), null, 'absent region control');
+    map.setFrames({ windowMs: 50, start: 0, count: 3, players: {} });
+    map.state.controlRegions = [{ name: 'RA' }, { name: 'YA' }, { name: 'late' }];
+    map.state.bucketStates = { RA: '_Ab', YA: 'C_c', late: '_' };
+    const states = map.regionControlAt(0.06); // bucket 1
+    assert.equal(states.RA, 'teamAControl');
+    assert.equal(states.YA, 'empty');
+    assert.equal(states.late, undefined, 'string too short → region omitted');
 });
 
 test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
