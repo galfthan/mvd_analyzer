@@ -79,6 +79,7 @@ type reconEvent struct {
 // pass rescores with the exact-110 model, which discriminates close
 // self/enemy rocket ambiguity far more sharply.
 func attribute(in *inputs) []reconEvent {
+	calibrateBloods(in)
 	events := attributePass(in)
 	if lo, hi, fixed := detectRocketRegime(in, events); fixed {
 		in.rlLo, in.rlHi = lo, hi
@@ -722,6 +723,13 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 			lo = math.Max(1.0, lo)
 		}
 	case "hitscan":
+		if c.mLo > 0 {
+			// Blood-count-pinned volley (calibrated TE_BLOOD, single
+			// shooter): the expected value is exact, ±one pellet of slop
+			// for count/delta rounding at the edges.
+			lo, hi = c.mLo-4.0, c.mHi+4.0
+			break
+		}
 		switch weapon {
 		case "sg":
 			lo, hi = 4.0*q, 24.0*q
@@ -749,7 +757,21 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 
 // beamCandidates: LG beams whose segment passes near the victim at the
 // same frame; the attacker is the nearest player to the beam start.
+// TE_LIGHTNINGBLOOD is the per-cell hit confirmation (LightningDamage
+// writes one on the victim at the trace endpoint): on demos that carry
+// them, blood at the instant strengthens the LG explanation and its
+// absence penalizes it — a beam that merely PASSES near the victim (the
+// segment gate cannot tell a miss from a hit) stops absorbing same-frame
+// shotgun damage.
 func (in *inputs) beamCandidates(victim string, t int32, vpos vec3) []candidate {
+	lgPen := 0.0
+	if len(in.lgBloods) > 0 {
+		if in.lgBloodNear(t, vpos) {
+			lgPen = -0.15
+		} else {
+			lgPen = 0.5
+		}
+	}
 	var out []candidate
 	lo := sort.Search(len(in.beams), func(i int) bool { return in.beams[i].t >= t-tolBeamMs })
 	for i := lo; i < len(in.beams) && in.beams[i].t <= t+tolBeamMs; i++ {
@@ -773,7 +795,7 @@ func (in *inputs) beamCandidates(victim string, t int32, vpos vec3) []candidate 
 		}
 		if best != "" {
 			out = append(out, candidate{
-				geom: sd / rBeamSeg * 0.3, attacker: best, weapon: "lg",
+				geom: math.Max(0, sd/rBeamSeg*0.3+lgPen), attacker: best, weapon: "lg",
 				kind: "beam", dEnd: -1,
 			})
 		}
@@ -900,6 +922,22 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 			kind: "hitscan", dEnd: dd,
 		})
 	}
+	// TE_BLOOD shaping (demos that carry it): blood on the victim at the
+	// instant confirms a hitscan hit — strengthen the shotgun explanations
+	// and, when the demo's count packaging calibrated AND exactly one
+	// shotgunner fired, pin the expected magnitude to 4·(summed counts).
+	// No blood on a blood-carrying demo means the pellets did not strike
+	// this victim — penalize (soft: coverage is ~99.9%, not 100%).
+	bloodPen, nBlood, sumBlood := 0.0, 0, 0
+	if len(in.bloods) > 0 {
+		nBlood, sumBlood = in.bloodsNear(t, vpos)
+		if nBlood > 0 {
+			bloodPen = -0.15
+		} else {
+			bloodPen = 0.4
+		}
+	}
+	singleSG := in.countHitscanFires(t) == 1
 	lo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-tolShotMs })
 	for i := lo; i < len(in.shots) && in.shots[i].t <= t+tolShotMs; i++ {
 		s := in.shots[i]
@@ -923,7 +961,12 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 			// within a few degrees, the others tens.
 			apen := 0.0
 			if ang, ok := tr.aimAngleTo(s.t, vpos); ok {
-				if ang > sgAimGateDeg {
+				// Blood on the victim proves SOMEONE's pellets struck them
+				// this instant: with only one shotgunner firing, the aim
+				// cone stops being a hard gate (its false negatives — snap
+				// flicks, stale view samples — were the sg→env leak) and
+				// rides on as a capped penalty instead.
+				if ang > sgAimGateDeg && !(nBlood > 0 && singleSG) {
 					continue
 				}
 				apen = math.Min(ang/10.0, 3.0) * 0.3
@@ -935,10 +978,21 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 			if !in.bsp.reachesBody(eyeOf(spos), vpos) {
 				continue
 			}
-			out = append(out, candidate{
-				geom: 0.15 + apen + tpen, attacker: s.player, weapon: s.weapon,
+			c := candidate{
+				geom: math.Max(0, 0.15+apen+tpen+bloodPen), attacker: s.player, weapon: s.weapon,
 				kind: "hitscan", dEnd: dd,
-			})
+			}
+			if in.bloodTrust && singleSG && nBlood > 0 && sumBlood > 0 {
+				// Calibrated count with a single shooter: the volley dealt
+				// exactly 4·sum (quad-scaled in modelBounds via mLo/mHi
+				// carrying the base value — quad applied here).
+				q := 1.0
+				if ap := in.players[s.player]; ap != nil && inIntervals(ap.Quad, t) {
+					q = 4.0
+				}
+				c.mLo, c.mHi = 4.0*float64(sumBlood)*q, 4.0*float64(sumBlood)*q
+			}
+			out = append(out, c)
 		}
 	}
 	return out

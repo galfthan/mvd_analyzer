@@ -11,6 +11,10 @@
 //     (armor absorbed + health share capped at remaining health);
 //   - LG beam segments and rocket/grenade entity flights
 //     (result.Streams.Beams / .Projectiles);
+//   - the point-effect temp entities (result.Streams.PointEffects):
+//     TE_EXPLOSION anchors rockets/grenades on their exact detonation
+//     points, TE_BLOOD confirms hitscan hits (count-pinned magnitudes
+//     after per-demo calibration), TE_LIGHTNINGBLOOD confirms LG hits;
 //   - weapon fire sounds (result.ShotsResult — only the damage-free
 //     Time/Player/Weapon columns; Hit/Victims are damage-derived and are
 //     deliberately never read);

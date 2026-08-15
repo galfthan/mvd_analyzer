@@ -93,6 +93,16 @@ type inputs struct {
 	// is 35*cells (id1 W_FireLightning), radius-dealt (self halved).
 	discharges []discharge
 
+	// bloodTrust: the demo's TE_BLOOD count bytes passed per-demo
+	// calibration — 4·(summed counts near the victim) reproduced the
+	// observed h/a delta on enough unambiguous single-shotgunner instants
+	// (both KTX packagings satisfy the summed identity: modern one-message-
+	// per-volley with count = pellet hits, and old one-message-per-pellet
+	// with count = 1). When false the counts stay presence/position
+	// evidence only (axe/nail bloods carry damage-valued counts, and at
+	// least one mod writes nonstandard constants).
+	bloodTrust bool
+
 	// weaponBitsLive: whether the demo's StatItems weapon bits actually
 	// cycle with pickups/deaths. Old recorders freeze them (a player
 	// "holds" RL from 0:00 through every death while the armor bits in the
@@ -401,6 +411,92 @@ func (in *inputs) snapProjectilesToExplosions() {
 			pr.epExact = true
 		}
 	}
+}
+
+// Blood matching gates: TE_BLOOD / TE_LIGHTNINGBLOOD spawn on the victim's
+// body at the pellet / beam impact point, so they sit within the victim's
+// bbox plus interpolation error of the track position; the multicast lands
+// in the same server frame as the damage.
+const (
+	bloodNearDist = 100.0
+	bloodNearMs   = 40
+)
+
+// bloodsNear returns how many TE_BLOOD messages landed near the victim at
+// the instant and their summed count bytes.
+func (in *inputs) bloodsNear(t int32, vpos vec3) (n, sum int) {
+	lo := sort.Search(len(in.bloods), func(i int) bool { return in.bloods[i].t >= t-bloodNearMs })
+	for i := lo; i < len(in.bloods) && in.bloods[i].t <= t+bloodNearMs; i++ {
+		if in.bloods[i].p.distTo(vpos) <= bloodNearDist {
+			n++
+			sum += in.bloods[i].count
+		}
+	}
+	return n, sum
+}
+
+// lgBloodNear reports whether a TE_LIGHTNINGBLOOD landed near the victim
+// at the instant — the per-cell LG hit confirmation.
+func (in *inputs) lgBloodNear(t int32, vpos vec3) bool {
+	lo := sort.Search(len(in.lgBloods), func(i int) bool { return in.lgBloods[i].t >= t-bloodNearMs })
+	for i := lo; i < len(in.lgBloods) && in.lgBloods[i].t <= t+bloodNearMs; i++ {
+		if in.lgBloods[i].p.distTo(vpos) <= bloodNearDist {
+			return true
+		}
+	}
+	return false
+}
+
+// countHitscanFires counts sg/ssg fires within the hitscan window of t.
+func (in *inputs) countHitscanFires(t int32) int {
+	n := 0
+	lo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-tolShotMs })
+	for i := lo; i < len(in.shots) && in.shots[i].t <= t+tolShotMs; i++ {
+		if w := in.shots[i].weapon; w == "sg" || w == "ssg" {
+			n++
+		}
+	}
+	return n
+}
+
+// calibrateBloods validates the demo's TE_BLOOD count packaging against
+// the observed deltas: on survived instants with exactly one shotgun fire
+// in the window and blood on the victim, both KTX generations satisfy
+// 4·(summed counts) == the h/a delta (one volley message with count =
+// pellet hits, or per-pellet messages with count = 1). A demo where the
+// identity holds on a clear majority of samples earns bloodTrust —
+// count-pinned magnitude bounds; anything else (nonstandard mods, exotic
+// progs) keeps counts as presence evidence only.
+func calibrateBloods(in *inputs) {
+	if len(in.bloods) == 0 {
+		return
+	}
+	match, miss := 0, 0
+	for _, victim := range in.order {
+		p := in.players[victim]
+		vtrack := in.tracks[victim]
+		if p == nil || vtrack == nil {
+			continue
+		}
+		for _, d := range victimDeltas(p, nil) {
+			if d.died || d.masked {
+				continue
+			}
+			if in.countHitscanFires(d.t) != 1 {
+				continue
+			}
+			n, sum := in.bloodsNear(d.t, vtrack.posAt(d.t))
+			if n == 0 || sum == 0 {
+				continue
+			}
+			if 4*sum == d.bounded {
+				match++
+			} else {
+				miss++
+			}
+		}
+	}
+	in.bloodTrust = match >= 10 && float64(match) >= 0.7*float64(match+miss)
 }
 
 // shotConsumed reports whether the player's RL fire at ts is accounted for
