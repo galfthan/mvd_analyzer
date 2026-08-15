@@ -24,13 +24,13 @@ Per-player match totals, relative error vs the KTX log:
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 1.08% | 1.23% | 2.63% | 47% | 83% |
+| bounded given | 1.02% | 1.20% | 2.30% | 48% | 79% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 1.32% | 1.79% | 3.75% | 39% | 69% |
+| raw given | 1.32% | 1.78% | 3.64% | 37% | 69% |
 | raw taken | 0.93% | 1.52% | 4.02% | 51% | 72% |
-| bounded ewep | 1.92% | 2.34% | 5.47% | 29% | 53% |
-| bounded givenTeam | 6.8% | 7.7% | — | small denominators (200–700) |
-| bounded givenSelf | 9.4% | 10.1% | — | small denominators |
+| bounded ewep | ~1.9% | ~2.3% | ~5.5% | 29% | 53% |
+| bounded givenTeam | 7.5% | 7.9% | — | small denominators (200–700) |
+| bounded givenSelf | 9.4% | 9.7% | — | small denominators |
 
 Event level: 99.6% of ground-truth damage instants have a same-instant
 reconstructed delta; 98.8% of those match the bounded value exactly;
@@ -73,7 +73,10 @@ port adds, each verified against ground truth in the eval:
 - nullified-hit raw recovery (armor-only drops: raw = save/fraction);
 - LG water discharges (cells→0 signature, 35·cells radius model);
 - kill overkill top-up from the damage model where the -99 corpse clamp
-  hides it (quad rockets, discharges).
+  hides it (quad rockets, discharges);
+- same-frame pair splitting: a merged multi-attacker instant that no
+  single candidate's damage range can explain, but a pair of different
+  attackers sums to, is split between them (range-midpoint proportional).
 
 ## Trust guidance for consumers
 

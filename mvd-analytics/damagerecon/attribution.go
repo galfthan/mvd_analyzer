@@ -90,7 +90,7 @@ func attributePass(in *inputs) []reconEvent {
 		}
 		deltas := victimDeltas(p, anchors)
 		for _, d := range deltas {
-			events = append(events, in.attributeOne(victim, vtrack, d))
+			events = append(events, in.attributeDelta(victim, vtrack, d)...)
 		}
 		events = append(events, in.pentSyntheticEvents(victim, p, vtrack, deltas)...)
 	}
@@ -222,6 +222,111 @@ func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, fixed 
 		return 110, 110, true
 	}
 	return 0, 0, false
+}
+
+// attributeDelta explains one delta, usually as one event; a same-frame
+// multi-attacker merge that no single candidate can explain but a PAIR sums
+// to is split into two (the "mixed instant": e.g. a rocket and a shotgun
+// blast landing in the same server frame produce one h/a delta).
+func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconEvent {
+	e := in.attributeOne(victim, vtrack, d)
+	single := []reconEvent{e}
+	if d.died || d.masked || vtrack == nil {
+		return single
+	}
+	switch e.kind {
+	case "beam", "proj", "hitscan", "nail", "rl-sound":
+	default:
+		return single
+	}
+	// Only bother when the winning single explanation misfits the value.
+	quad := false
+	if ap := in.players[e.attacker]; ap != nil {
+		quad = inIntervals(ap.Quad, d.t)
+	}
+	pen, ok := in.damageModelScore(d.bounded, false, e.weapon, e.kind, e.dEnd, e.isSelf, quad)
+	if !ok || pen < 0.5 {
+		return single
+	}
+	if pair, ok := in.trySplitPair(victim, vtrack, d); ok {
+		return pair
+	}
+	return single
+}
+
+// trySplitPair searches the candidate set for two DIFFERENT attackers whose
+// model ranges sum to the observed delta, and splits the value between them
+// proportionally to the range midpoints (each share clamped into its own
+// range). Survived deltas only — a killing delta's bounded cap breaks the
+// sum identity.
+func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEvent, bool) {
+	vpos := vtrack.posAt(d.t)
+	var cands []candidate
+	cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.projCandidates(d.t, vpos)...)
+	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
+
+	type bounded struct {
+		c      candidate
+		lo, hi float64
+	}
+	var bs []bounded
+	for _, c := range cands {
+		quad := false
+		if ap := in.players[c.attacker]; ap != nil {
+			quad = inIntervals(ap.Quad, d.t)
+		}
+		lo, hi, ok := in.modelBounds(c.weapon, c.kind, c.dEnd, c.attacker == victim, quad)
+		if !ok || (lo == 0 && hi == 0) {
+			continue
+		}
+		bs = append(bs, bounded{c: c, lo: lo, hi: hi})
+	}
+	obs := float64(d.bounded)
+	bestScore := math.Inf(1)
+	var bi, bj *bounded
+	for i := range bs {
+		for j := i + 1; j < len(bs); j++ {
+			a, b := &bs[i], &bs[j]
+			if a.c.attacker == b.c.attacker {
+				continue
+			}
+			if obs < a.lo+b.lo-1 || obs > a.hi+b.hi+1 {
+				continue
+			}
+			score := a.c.geom + b.c.geom + 0.3 // pair prior: prefer single explanations
+			if a.c.attacker == victim || b.c.attacker == victim {
+				score += in.selfPen
+			}
+			if score < bestScore {
+				bestScore, bi, bj = score, a, b
+			}
+		}
+	}
+	if bi == nil {
+		return nil, false
+	}
+	midI := (bi.lo + bi.hi) / 2
+	midJ := (bj.lo + bj.hi) / 2
+	share := obs / 2
+	if midI+midJ > 0 {
+		share = obs * midI / (midI + midJ)
+	}
+	vi := math.Max(bi.lo, math.Min(bi.hi, share))
+	vj := obs - vi
+	if vj < bj.lo || vj > bj.hi {
+		vj = math.Max(bj.lo, math.Min(bj.hi, vj))
+		vi = obs - vj
+	}
+	di := delta{t: d.t, raw: int(vi + 0.5), bounded: int(vi + 0.5)}
+	dj := delta{t: d.t, raw: d.raw - di.raw, bounded: d.bounded - di.bounded}
+	e1 := in.mkEventSplash(di, bi.c.attacker, victim, bi.c.weapon, bi.c.kind, bi.c.isSplash)
+	e1.dEnd = bi.c.dEnd
+	e2 := in.mkEventSplash(dj, bj.c.attacker, victim, bj.c.weapon, bj.c.kind, bj.c.isSplash)
+	e2.dEnd = bj.c.dEnd
+	return []reconEvent{e1, e2}, true
 }
 
 func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent {
@@ -464,6 +569,35 @@ func (in *inputs) scoreCandidates(victim string, vtrack *track, d delta, cands [
 // LG = 30/cell, sg pellet 4×6, ssg ×14, ng spike 9, sng 18, axe 20.
 // Quad multiplies ×4.
 func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd float64, isSelf, quad bool) (float64, bool) {
+	lo, hi, feasible := in.modelBounds(weapon, kind, dEnd, isSelf, quad)
+	if !feasible {
+		return 0, false
+	}
+	if lo == 0 && hi == 0 {
+		return 0, true // unmodeled kind: no magnitude opinion
+	}
+	if died {
+		// Killing hit: bounded is capped below raw; low observations are fine.
+		lo = 1.0
+	}
+	o := float64(obs)
+	var pen float64
+	switch {
+	case o < lo-0.5:
+		pen = lo - o
+	case o > hi+0.5:
+		pen = o - hi
+	default:
+		return 0, true
+	}
+	return pen / math.Max(10.0, 0.25*hi), true
+}
+
+// modelBounds returns the QW damage model's feasible [lo, hi] for one
+// candidate explanation ((0,0) for an unmodeled kind — no opinion).
+// Factored out of damageModelScore so the same-frame pair-split can test
+// whether TWO candidates' ranges sum to the observation.
+func (in *inputs) modelBounds(weapon, kind string, dEnd float64, isSelf, quad bool) (float64, float64, bool) {
 	q := 1.0
 	if quad {
 		q = 4.0
@@ -510,7 +644,7 @@ func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd
 			lo = (dLo*q - 0.5*(dEnd+60.0)) * selfF // slack for interpolation error
 			hi = (dHi*q - 0.5*math.Max(0, dEnd-60.0)) * selfF
 			if hi <= 0 {
-				return 0, false
+				return 0, 0, false
 			}
 			lo = math.Max(1.0, lo)
 		}
@@ -534,23 +668,9 @@ func (in *inputs) damageModelScore(obs int, died bool, weapon, kind string, dEnd
 		}
 		lo, hi = per*q, per*q*3 // up to a few spikes per frame
 	default:
-		return 0, true
+		return 0, 0, true
 	}
-	if died {
-		// Killing hit: bounded is capped below raw; low observations are fine.
-		lo = 1.0
-	}
-	o := float64(obs)
-	var pen float64
-	switch {
-	case o < lo-0.5:
-		pen = lo - o
-	case o > hi+0.5:
-		pen = o - hi
-	default:
-		return 0, true
-	}
-	return pen / math.Max(10.0, 0.25*hi), true
+	return lo, hi, true
 }
 
 // beamCandidates: LG beams whose segment passes near the victim at the
