@@ -5,6 +5,20 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (team-colors-by-name) — web UI team colors follow the team name
+
+No schema change; web UI only. Team colors used to follow finishing order —
+winner red, runner-up blue — so the same two teams could swap colors between
+demos of a series. They are now assigned by team name: a team literally named
+"red" (case-insensitive) is always red and "blue" always blue; every other
+team takes the remaining palette entries in name sort order. `[fu]` vs `-s-`
+therefore colors identically in every demo of that matchup, whoever wins.
+Winner-first ordering (scoreboard rows, timeline top/bottom, chat columns) is
+unchanged — only the palette assignment moved off it. The CSS mirror
+`--team-a..--team-d` is re-pointed per match to stay in step, and the lethal
+airgib badge switched to a fixed danger-red so it no longer inherits whatever
+color team A happens to get.
+
 ## unreleased (qw-analyze-full-surface) — every view reaches the CLI
 
 Follow-up to the entry below, closing the gaps two coverage audits found

@@ -1,5 +1,9 @@
 :root {
-    /* Team palette (used by the JS layer too — see TEAM_COLORS in app.js) */
+    /* Team palette (used by the JS layer too — see TEAM_PALETTE in app.js).
+     * These are only the pre-load defaults: displayResults() re-points
+     * --team-a..--team-d at the per-match, name-assigned colours
+     * (assignTeamColors), so don't use them for anything that isn't
+     * literally "the colour of team at index N". */
     --team-a: #ff5050;
     --team-b: #50a0ff;
     --team-c: #4ecdc4;
@@ -106,8 +110,8 @@ body {
 
 body.no-demo .topbar-demo-info { display: none; }
 
-.topbar-demo-info .topbar-team-a { color: #ff5050; }
-.topbar-demo-info .topbar-team-b { color: #50a0ff; }
+.topbar-demo-info .topbar-team-a { color: var(--team-a); }
+.topbar-demo-info .topbar-team-b { color: var(--team-b); }
 .topbar-demo-info .topbar-vs { color: #7a8ba8; font-weight: 500; }
 .topbar-demo-info .topbar-score { color: #e8eef7; font-variant-numeric: tabular-nums; }
 .topbar-demo-info .topbar-map { color: var(--accent-cyan-dim, #7ad7e8); }
@@ -2549,9 +2553,11 @@ th.sortable.sort-desc::after {
 .sortable-table thead th.sort-asc::after { content: ' \25B2'; font-size: 0.75em; opacity: 0.85; }
 .sortable-table thead th.sort-desc::after { content: ' \25BC'; font-size: 0.75em; opacity: 0.85; }
 
-/* Lethal airgib badge. */
+/* Lethal airgib badge. Deliberately NOT var(--team-a): that var is
+ * re-pointed per match by team name, and this badge wants a stable
+ * danger-red, which --armor-ra already is. */
 .airgib-lethal {
-    color: var(--team-a);
+    color: var(--armor-ra);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.78rem;
