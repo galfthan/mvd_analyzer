@@ -56,6 +56,7 @@ func main() {
 	var rows []playerRow
 	var evCovered, evTotal, evExact, attMatched, attTotal int
 	confusion := map[string]*confCell{}
+	weaponStats := map[string]*wepCell{}
 	for _, path := range paths {
 		reg := analyzer.NewDefaultRegistry()
 		reg.BuildShotStreams = true
@@ -90,6 +91,7 @@ func main() {
 		if *diag {
 			collectConfusion(gt, rc, confusion)
 		}
+		collectWeaponStats(gt, rc, weaponStats)
 	}
 
 	fmt.Printf("demos scored: %d\n", len(paths))
@@ -102,8 +104,118 @@ func main() {
 			printMetric(rows, family, field, *minGT, *worst)
 		}
 	}
+	printWeaponStats(weaponStats)
 	if *diag {
 		printConfusion(confusion)
+	}
+}
+
+// wepCell accumulates event-level accuracy for one GT attacker-weapon
+// category (enemy instants with a single GT attacker).
+type wepCell struct {
+	instants, dmg          int
+	covered, valExact      int
+	attTotal, attRight     int
+	classRight, coveredDmg int
+}
+
+// collectWeaponStats scores GT ENEMY damage instants per attacker weapon:
+// coverage (a same-instant recon delta exists), exact bounded value,
+// attacker attribution, and class survival (still classified enemy).
+func collectWeaponStats(gt, rc *result.DamageResult, out map[string]*wepCell) {
+	type key struct {
+		victim string
+		t      int32
+	}
+	type inst struct {
+		weapon   string
+		attacker string
+		bounded  int
+		multi    bool
+	}
+	gtI := map[key]*inst{}
+	for i := range gt.Events {
+		e := &gt.Events[i]
+		if e.IsEnv || e.IsSelf || e.IsTeam {
+			continue
+		}
+		b := e.Damage
+		if e.Bounded != nil {
+			b = *e.Bounded
+		}
+		k := key{e.Victim, e.Time}
+		if g, ok := gtI[k]; ok {
+			g.bounded += b
+			if g.attacker != e.Attacker || g.weapon != e.Weapon {
+				g.multi = true
+			}
+		} else {
+			gtI[k] = &inst{weapon: e.Weapon, attacker: e.Attacker, bounded: b}
+		}
+	}
+	type rcInst struct {
+		bounded  int
+		attacker string
+		enemy    bool
+	}
+	rcI := map[key]*rcInst{}
+	for i := range rc.Events {
+		e := &rc.Events[i]
+		b := e.Damage
+		if e.Bounded != nil {
+			b = *e.Bounded
+		}
+		k := key{e.Victim, e.Time}
+		r, ok := rcI[k]
+		if !ok {
+			r = &rcInst{attacker: e.Attacker, enemy: !e.IsEnv && !e.IsSelf && !e.IsTeam}
+			rcI[k] = r
+		}
+		r.bounded += b
+	}
+	for k, g := range gtI {
+		if g.multi {
+			continue // merged multi-source instants scored in the confusion table instead
+		}
+		c, ok2 := out[g.weapon]
+		if !ok2 {
+			c = &wepCell{}
+			out[g.weapon] = c
+		}
+		c.instants++
+		c.dmg += g.bounded
+		r, ok := rcI[k]
+		if !ok {
+			continue
+		}
+		c.covered++
+		c.coveredDmg += g.bounded
+		if r.bounded == g.bounded {
+			c.valExact++
+		}
+		c.attTotal++
+		if r.enemy {
+			c.classRight++
+		}
+		if r.attacker == g.attacker {
+			c.attRight++
+		}
+	}
+}
+
+func printWeaponStats(m map[string]*wepCell) {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool { return m[keys[i]].dmg > m[keys[j]].dmg })
+	fmt.Printf("\n== per-attacker-weapon event accuracy (GT single-source enemy instants)\n")
+	fmt.Printf("   %-6s %8s %9s %9s %10s %11s %11s\n", "weapon", "instants", "gt-dmg", "covered", "val-exact", "attacker-ok", "class-enemy")
+	for _, k := range keys {
+		c := m[k]
+		fmt.Printf("   %-6s %8d %9d %8.1f%% %9.1f%% %10.1f%% %10.1f%%\n",
+			k, c.instants, c.dmg, pct(c.covered, c.instants),
+			pct(c.valExact, c.covered), pct(c.attRight, c.attTotal), pct(c.classRight, c.attTotal))
 	}
 }
 

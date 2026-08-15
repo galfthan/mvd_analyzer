@@ -31,6 +31,7 @@ package damagerecon
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -61,7 +62,7 @@ func Compute(res *result.Result) (*result.DamageResult, error) {
 	if !res.Streams.ShotStreamsComputed {
 		return nil, ErrNoSpatialStreams
 	}
-	if mode := skipModeReason(res); mode != "" {
+	if mode := SkipModeReasonFromResult(res); mode != "" {
 		return nil, ErrSkippedMode
 	}
 
@@ -71,15 +72,34 @@ func Compute(res *result.Result) (*result.DamageResult, error) {
 	return aggregate(in, events), nil
 }
 
-// skipModeReason mirrors DamageAnalyzer.boundedSkipReason on the assembled
-// Result: a serverinfo cvar naming a mode whose T_Damage rewrites are not
-// observable per hit. On such demos the study's ground truth itself refuses
-// a bounded figure, so no reconstruction is attempted at all.
-func skipModeReason(res *result.Result) string {
+// SkipModeReasonFromResult applies SkipModeReason to the assembled
+// Result's serverinfo.
+func SkipModeReasonFromResult(res *result.Result) string {
 	if res.Metadata == nil || res.Metadata.ServerInfo == nil {
 		return ""
 	}
-	si := res.Metadata.ServerInfo
+	return SkipModeReason(res.Metadata.ServerInfo)
+}
+
+// SkipModeReason names the server mode that makes damage arithmetic
+// unreconstructable from the wire, or "" when the standard rules apply.
+// Shared by this package's gate and the KTX-side bounded reconstruction
+// (analyzer/damage.go boundedSkipReason) so the two can never disagree.
+//
+// Two detection layers, because KTX moved the signal:
+//
+//   - legacy cvar keys (k_midair / k_instagib / k_dmgfrags), which older
+//     servers published in serverinfo directly;
+//   - the modern composite `mode` string, `umode[-submode...]` built by
+//     SetMode4ServerInfo (ktx/src/world.c:1475): submode tokens -midair,
+//     -instagib, -df (dmgfrags), -ca / -wo (k_clan_arena 1/2), -ra
+//     (rocket arena), -lgc, -race — plus the base umodes that imply an
+//     arena ruleset outright (wipeout, ca, race). Clan-arena modes
+//     suppress drowning/fall damage and ignore almost all damage between
+//     rounds while STILL multicasting raw values (combat.c:475-491);
+//     lgc rewrites non-LG damage; dmgfrags inverts pent/telefrag
+//     accounting — none observable per hit.
+func SkipModeReason(si map[string]string) string {
 	for _, m := range [...]struct{ cvar, mode string }{
 		{"k_midair", "midair"},
 		{"k_instagib", "instagib"},
@@ -87,6 +107,28 @@ func skipModeReason(res *result.Result) string {
 	} {
 		if v := si[m.cvar]; v != "" && v != "0" {
 			return m.mode
+		}
+	}
+	parts := strings.Split(si["mode"], "-")
+	if len(parts) == 0 || parts[0] == "" {
+		return ""
+	}
+	switch parts[0] {
+	case "wipeout", "ca", "race":
+		return parts[0]
+	}
+	for _, sub := range parts[1:] {
+		switch sub {
+		case "midair", "instagib", "lgc", "race":
+			return sub
+		case "df":
+			return "dmgfrags"
+		case "ca":
+			return "ca"
+		case "wo":
+			return "wipeout"
+		case "ra":
+			return "ra"
 		}
 	}
 	return ""

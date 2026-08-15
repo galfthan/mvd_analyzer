@@ -3730,9 +3730,13 @@ components:
             Whether the bounded family was reconstructed — `standard`, or a
             `skipped:*` reason when the server mode rewrites the take in ways
             the wire does not expose (every bounded field is then absent).
-            Survives a raw view.
+            Survives a raw view. The clan-arena family (`ca`, `wipeout`,
+            `ra`), `lgc` and `race` joined the skip set with schema v71 —
+            detected from the composite serverinfo `mode` string, the only
+            place newer KTX exposes its submodes.
           type: string
-          enum: [standard, "skipped:midair", "skipped:instagib", "skipped:dmgfrags"]
+          enum: [standard, "skipped:midair", "skipped:instagib", "skipped:dmgfrags",
+                 "skipped:ca", "skipped:wipeout", "skipped:ra", "skipped:lgc", "skipped:race"]
         boundedSource:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —

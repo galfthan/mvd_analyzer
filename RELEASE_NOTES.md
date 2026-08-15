@@ -40,6 +40,19 @@ Non-finite wire origins (a pre-instrumentation-era corruption that made
 ~6% of old demos abort JSON encoding with NaN) are now dropped at
 ingestion in positions, movers, projectiles and item spawns.
 
+The `skipped:*` mode detection got real teeth while validating on a
+fresh 60-demo dm2/dm3 corpus: newer KTX does not publish `k_midair` /
+`k_instagib` / `k_dmgfrags` in serverinfo at all — the submodes live
+only in the composite `mode` string (`wipeout-wo-df`) — so wipeout /
+clan-arena demos were previously served a confidently wrong bounded
+family (CA suppresses drowning/fall damage and ignores almost all
+damage between rounds while still multicasting raw values). Detection
+now parses the mode string, is shared between the KTX-side bounded pass
+and the reconstruction (`damagerecon.SkipModeReason`), and skips the
+whole clan-arena family: `skipped:ca` / `skipped:wipeout` /
+`skipped:ra` / `skipped:lgc` / `skipped:race` join the boundedMode
+vocabulary.
+
 `playerStats` rides along: the node now binds the `damage:final`
 artifact, so its damage family exists on old demos too, with
 `src: "reconstructed"` (a new value beside `derived` / `ktx` /

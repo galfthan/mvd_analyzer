@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
@@ -933,18 +934,16 @@ func (a *DamageAnalyzer) tpModeApplies() bool {
 // reconstruction impossible, or "" when the standard arithmetic applies.
 // k_midair rewrites take from the victim's height above ground (combat.c:
 // 644-694), k_instagib flattens it to 5000 (698-709), k_dmgfrags inverts
-// the pent/telefrag accumulation (758-777) — none observable per hit.
+// the pent/telefrag accumulation (758-777), and the clan-arena family
+// (ca/wipeout/ra/lgc/race) suppresses or rewrites whole damage classes
+// while still multicasting raw values (combat.c:475-491) — none
+// observable per hit. Detection is shared with the damage-recon gate
+// (damagerecon.SkipModeReason): legacy k_* cvar keys plus the modern
+// composite serverinfo `mode` string, which is the ONLY place newer KTX
+// exposes the submodes (a wipeout demo reads mode=wipeout-wo-df with no
+// k_dmgfrags key at all).
 func (a *DamageAnalyzer) boundedSkipReason() string {
-	for _, m := range [...]struct{ cvar, mode string }{
-		{"k_midair", "midair"},
-		{"k_instagib", "instagib"},
-		{"k_dmgfrags", "dmgfrags"},
-	} {
-		if v := a.serverInfo[m.cvar]; v != "" && v != "0" {
-			return m.mode
-		}
-	}
-	return ""
+	return damagerecon.SkipModeReason(a.serverInfo)
 }
 
 func addToMatrix(m map[string]*DamagePair, attacker, victim, weapon string, dmg int) {

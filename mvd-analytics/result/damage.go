@@ -56,11 +56,15 @@ type DamageResult struct {
 	// bounded family into the raw field names, absent on a raw view.
 	Dmg string `json:"dmg,omitempty"`
 	// BoundedMode is "standard" when the bounded family was reconstructed,
-	// or "skipped:midair" / "skipped:instagib" / "skipped:dmgfrags" when the
-	// server mode rewrites T_Damage's take in ways the wire does not expose
-	// (midair height rule / flat 5000 / inverted pent+tele accounting) — a
-	// best-effort reconstruction there would be confidently wrong, so none
-	// is attempted and every Bounded field is absent.
+	// or "skipped:<mode>" when the server mode rewrites T_Damage's take in
+	// ways the wire does not expose — a best-effort reconstruction there
+	// would be confidently wrong, so none is attempted and every Bounded
+	// field is absent. Skip set: midair (height rule), instagib (flat
+	// 5000), dmgfrags (inverted pent+tele accounting), and since v71 the
+	// clan-arena family ca / wipeout / ra plus lgc and race (whole damage
+	// classes suppressed or rewritten between rounds; see
+	// damagerecon.SkipModeReason for the shared detection incl. the
+	// composite serverinfo mode string).
 	BoundedMode string `json:"boundedMode,omitempty"`
 
 	// Source records where the damage log itself came from:

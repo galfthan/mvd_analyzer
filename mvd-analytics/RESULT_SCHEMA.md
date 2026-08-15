@@ -276,7 +276,7 @@ a `frag` event.
 | Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or a RESTRICTIVE time filter OMITS it entirely, since it cannot be recomputed against those filters; an explicit `from`/`to` window covering the whole match counts as unfiltered) |
 | Source | `source` | string (omitempty — `ktx` = decoded from the wire damage stream, `reconstructed` = rebuilt from state streams by damage-recon; absent only pre-v71) |
 | Dmg | `dmg` | string (omitempty — family echo: `both` as stored, `bounded` from the view, absent on a raw view) |
-| BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:midair`/`skipped:instagib`/`skipped:dmgfrags`) |
+| BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:<mode>` with mode ∈ midair/instagib/dmgfrags/ca/wipeout/ra/lgc/race; the clan-arena family joined in v71, detected from the composite serverinfo `mode` string) |
 | BoundedSource | `boundedSource` | string (omitempty — provenance of a SUMMARY response's per-player bounded figures: `ktx` when substituted with KTX's exact end-of-match scoreboard totals, else `reconstructed`; set by the view ONLY on an unfiltered summary serving the bounded family — `dmg=bounded`/`dmg=both`; the stored Result never carries it) |
 
 ### PositionalKill
