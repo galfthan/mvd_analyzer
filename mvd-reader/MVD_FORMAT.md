@@ -656,8 +656,35 @@ Offset  Size  Field
 ```
 
 The parser decodes the **lightning beams** into `BeamEvent` (firing entity +
-start/end) and consumes every other type for its known length; an unknown
-type bails rather than guessing a length and drifting the cursor.
+start/end) and every other known type into `PointEffectEvent` (type, count,
+origin); an unknown type bails rather than guessing a length and drifting
+the cursor.
+
+**Damage telemetry in the point effects.** Two QW-specific types are written
+from the server's damage code itself, so they are direct hit evidence on
+every demo back to original qwprogs (the aggregation lives in the progs, not
+the engine):
+
+- **`TE_BLOOD` (12)** — hitscan damage striking a player. KTX `TraceAttack`
+  increments `blood_count` once per pellet that strikes a player and
+  `Multi_Finish` multicasts ONE message per volley with `count` = pellet
+  hits and the impact origin (`ktx/src/weapons.c:226,313-327`); volley
+  damage = 4·count. Older generations (KTX 1.38, vanilla qwprogs) write one
+  message **per pellet** with `count` = 1 (volley damage = 4·messages). Axe
+  and nail hits write `count` = the damage itself (axe: 20). The packaging
+  convention varies per server generation and per mod (one RL-only mod
+  writes rocket directs with a constant count of 5), so consumers must
+  calibrate per demo — validate 4·count against observed health/armor
+  deltas — rather than assume a convention.
+- **`TE_LIGHTNINGBLOOD` (13)** — an LG cell's damage striking a player at
+  the beam's trace endpoint (`ktx/src/weapons.c` `LightningDamage`), one
+  per hit, no count. The beam fires on every attack; the blood only on a
+  hit — together they measure LG accuracy directly.
+
+`TE_GUNSHOT` (2) is the complementary miss signal (wall puff where pellets
+struck geometry, with the same count-byte packaging), and `TE_EXPLOSION`
+(3) is the exact rocket/grenade detonation point — including point-blank
+explosions whose projectile entity was never broadcast.
 
 **Player Lightning Gun.** `TE_LIGHTNING2` is the bolt KTX writes once per LG
 fire tick (`ktx/src/weapons.c` `W_FireLightning`), carrying the firing

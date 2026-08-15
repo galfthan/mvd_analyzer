@@ -61,6 +61,7 @@ const (
 	EventDemoMark
 	EventPlayerDeparture
 	EventPlayerRejoin
+	EventPointEffect
 )
 
 // IntermissionEvent is emitted when the server enters intermission
