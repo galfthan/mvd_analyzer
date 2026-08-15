@@ -15,6 +15,8 @@ const (
 	tolBeamMs         = 30     // beam flash to damage frame (measured: 0)
 	tolProjMs         = 130    // projectile end to damage frame (p5=-81, p99=261 → asymmetric window below)
 	tolShotMs         = 60     // hitscan sound to damage frame
+	axeSwingDelayMs   = 200    // ax1.wav swing to W_FireAxe traceline (2×0.1s thinks)
+	axeSwingJitterMs  = 80     // demo-frame quantization on both timestamps
 	rBeamSeg          = 90.0   // units victim to beam segment (p99 measured 60, max 79)
 	rBeamSrc          = 160.0  // units beam start to attacker eye
 	rSplash           = 380.0  // units projectile end to victim (p95=199)
@@ -773,10 +775,33 @@ func (in *inputs) projCandidates(t int32, vpos vec3) []candidate {
 	return out
 }
 
-// hitscanCandidates: sg/ssg/axe fire sounds at the same frame, gated by
-// range (axe) or aim cone (shotguns).
+// hitscanCandidates: sg/ssg fire sounds at the same frame gated by aim
+// cone, plus axe swings 200ms BEFORE the damage gated by melee range: the
+// axe fire sound (weapons/ax1.wav, W_Attack) precedes the damage traceline
+// by exactly two 0.1s animation thinks (W_FireAxe at player_axe3 and its
+// b/c/d siblings, ktx/src/player.c), so the swing is searched around
+// t−200ms and the range is measured at the trace time, not the swing.
 func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candidate {
 	var out []candidate
+	axeLo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-axeSwingDelayMs-axeSwingJitterMs })
+	for i := axeLo; i < len(in.shots) && in.shots[i].t <= t-axeSwingDelayMs+axeSwingJitterMs; i++ {
+		s := in.shots[i]
+		if s.weapon != "axe" || s.player == victim {
+			continue
+		}
+		tr := in.tracks[s.player]
+		if tr == nil {
+			continue
+		}
+		dd := tr.posAt(t).distTo(vpos)
+		if dd > rAxe {
+			continue
+		}
+		out = append(out, candidate{
+			geom: 0.1 + dd/rAxe*0.2, attacker: s.player, weapon: s.weapon,
+			kind: "hitscan", dEnd: dd,
+		})
+	}
 	lo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-tolShotMs })
 	for i := lo; i < len(in.shots) && in.shots[i].t <= t+tolShotMs; i++ {
 		s := in.shots[i]
@@ -788,15 +813,6 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 			continue
 		}
 		switch s.weapon {
-		case "axe":
-			dd := tr.posAt(s.t).distTo(vpos)
-			if dd > rAxe {
-				continue
-			}
-			out = append(out, candidate{
-				geom: 0.1 + dd/rAxe*0.2, attacker: s.player, weapon: s.weapon,
-				kind: "hitscan", dEnd: dd,
-			})
 		case "sg", "ssg":
 			spos := tr.posAt(s.t)
 			dd := spos.distTo(vpos)

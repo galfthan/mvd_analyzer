@@ -112,6 +112,17 @@ const (
 	// jitter while staying far below any weapon's refire interval.
 	hitscanLinkWindowMs = 26
 
+	// The axe's damage does NOT land at its fire sound: W_Attack plays
+	// weapons/ax1.wav and starts the swing animation, and every one of the
+	// four swing chains calls W_FireAxe (the damage traceline) at its
+	// third 0.1s think frame — exactly 200ms after the sound
+	// (ktx/src/player.c player_axe3/axeb3/axec3/axed3). The window around
+	// that offset absorbs demo-frame quantization on both timestamps and
+	// stays well inside the 0.5s refire, so consecutive swings cannot
+	// cross-link.
+	axeLinkDelayMs  = 200
+	axeLinkJitterMs = 80
+
 	// beamLightningLG is the TE_LIGHTNING2 type — the player Lightning Gun
 	// bolt KTX emits once per fire tick (TE_LIGHTNING1/3 are non-player).
 	beamLightningLG = 6
@@ -573,7 +584,13 @@ func (a *ShotsAnalyzer) linkHitscan(dmgs []*rawShotDmg, s *rawShot, duel bool) (
 		if d.used || d.weapon != s.weapon {
 			continue
 		}
-		if absInt32(d.tMs-s.tMs) > hitscanLinkWindowMs {
+		// The axe's traceline runs 200ms after its fire sound (see
+		// axeLinkDelayMs); everything else lands in the fire's own frame.
+		if s.weapon == "axe" {
+			if absInt32(d.tMs-s.tMs-axeLinkDelayMs) > axeLinkJitterMs {
+				continue
+			}
+		} else if absInt32(d.tMs-s.tMs) > hitscanLinkWindowMs {
 			continue
 		}
 		d.used = true

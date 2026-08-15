@@ -93,15 +93,22 @@ func TestShots_HitscanLinking(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 2000))
 	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtRL, Damage: 80, TimeMs: 2000})
 
-	// Axe swing by slot 3 at 3000ms; melee damage links same-frame like
-	// the shotguns.
+	// Axe swing by slot 3 at 3000ms; W_FireAxe runs the damage traceline
+	// 200ms after the swing sound (player_axe3), so the damage lands at
+	// 3200ms and links through the axe's delayed window.
 	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 3000))
-	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 3000})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 3200})
+
+	// A second swing at 4000ms with a same-frame axe damage event: the
+	// engine cannot produce that timing (the traceline is always two think
+	// frames late), so it must NOT link.
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 4000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 1, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 4000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
 
-	var sg, rl, axe *Shot
+	var sg, rl, axe, axe2 *Shot
 	for i := range r.Shots.Shots {
 		switch r.Shots.Shots[i].Weapon {
 		case "sg":
@@ -109,7 +116,11 @@ func TestShots_HitscanLinking(t *testing.T) {
 		case "rl":
 			rl = &r.Shots.Shots[i]
 		case "axe":
-			axe = &r.Shots.Shots[i]
+			if r.Shots.Shots[i].Time == 3000 {
+				axe = &r.Shots.Shots[i]
+			} else {
+				axe2 = &r.Shots.Shots[i]
+			}
 		}
 	}
 	if sg == nil || !sg.Hit || len(sg.Victims) != 2 {
@@ -123,6 +134,9 @@ func TestShots_HitscanLinking(t *testing.T) {
 	}
 	if axe == nil || !axe.Hit || len(axe.Victims) != 1 || axe.Victims[0] != "victimA" {
 		t.Errorf("axe shot = %+v, want Hit with victim victimA", axe)
+	}
+	if axe2 == nil || axe2.Hit {
+		t.Errorf("axe shot@4000 = %+v, want unlinked (same-frame axe damage is engine-impossible)", axe2)
 	}
 
 	// Aggregate accuracy: 1 connecting SG shot of 1 SG shot = 1.0.
