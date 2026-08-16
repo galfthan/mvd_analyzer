@@ -7233,7 +7233,14 @@ function runMapBenchmark() {
             finishMapBenchmark(saved, samples);
             return;
         }
-        MapView.setAngles(cam, pose.yaw, pose.pitch);
+        // Set the angles directly, NOT through setAngles: its ±2° cardinal
+        // yaw snap freezes a continuous sweep at every 90° crossing (~0.1 s
+        // each at this sweep rate), which reads as a periodic judder in the
+        // benchmark. The script's pitch is already clamped; yaw needs no
+        // normalisation for rendering.
+        cam.yaw = pose.yaw;
+        cam.pitch = pose.pitch;
+        MapView.refreshTrig(cam);
         cam.zoomK = pose.zoomK;
         cam.panX = 0;
         cam.panY = 0;
