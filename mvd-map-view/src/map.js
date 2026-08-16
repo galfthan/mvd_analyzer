@@ -21,7 +21,9 @@ import {
     DEFAULT_YAW, DEFAULT_PITCH,
 } from './camera.js';
 import { moverPoseAt, pointInTriangle, normalizeMapGeometry } from './geometry.js';
-import { buildFloorModel, processLocationGroups, groupWorldBBox } from './locgroups.js';
+import {
+    buildFloorModel, processLocationGroups, groupWorldBBox, computeRegionOutline,
+} from './locgroups.js';
 import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
 import {
     drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
@@ -747,13 +749,63 @@ export class MvdMap {
     }
 
     // _glDynamic collects the per-frame dynamic world content for the GL
-    // backend: posed movers (with the riding-player highlight), live
-    // projectile/nail dots and beam flashes. `pxScale` converts CSS-pixel
-    // sizes to the physical pixels the GL surface rasterises at.
+    // backend: posed movers (with the riding-player highlight), the region
+    // outlines and overlay tints, live projectile/nail dots and beam
+    // flashes. `pxScale` converts CSS-pixel sizes to the physical pixels the
+    // GL surface rasterises at.
     _glDynamic(pxScale) {
         const s = this.state;
         const tMs = s.currentTime * 1000;
-        const dyn = { movers: [], points: [], lines: [] };
+        const dyn = {
+            movers: [], points: [], lines: [],
+            regionOutlines: [], fills: [], fillOutlines: [],
+        };
+
+        // Thin baseline outlines around every traced region, styled by the
+        // focus tier — the quiet strokes the occupied overlay brightens.
+        for (const group of s.locationGroups || []) {
+            if (!group.tris || group.tris.length < 9) continue;
+            const outline = computeRegionOutline(group);
+            if (!outline || outline.length < 6) continue;
+            const tier = this.focusTier(group.name);
+            let stroke = 'rgba(180, 180, 180, 0.22)';
+            let width = 1;
+            if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
+            else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
+            dyn.regionOutlines.push({
+                outline, tint: parseColor(stroke), halfWidth: (width / 2) * pxScale,
+            });
+        }
+
+        // Overlay tints — region control under the occupancy highlight, both
+        // playback-only (learn mode studies the bare map).
+        s._frameOccupiedNames = null;
+        if (!s.learnMode) {
+            if (s.controlRegions && s.regionToGroups) {
+                const controlStates = this.regionControlAt(s.currentTime);
+                const ctrl = controlStates ? this.computeControlFills(controlStates) : null;
+                if (ctrl) {
+                    for (const { group, tint } of ctrl) {
+                        dyn.fills.push({ tris: group.tris, tint: parseColor(tint) });
+                    }
+                }
+            }
+            const ov = s._framePlayerData
+                ? this.computeOccupiedOverlay(s._framePlayerData) : null;
+            if (ov) {
+                s._frameOccupiedNames = ov.names;
+                const outlineTint = parseColor('rgba(220, 220, 220, 0.7)');
+                for (const { group, tint } of ov.groups) {
+                    dyn.fills.push({ tris: group.tris, tint: parseColor(tint) });
+                    const outline = computeRegionOutline(group);
+                    if (outline && outline.length >= 6) {
+                        dyn.fillOutlines.push({
+                            outline, tint: outlineTint, halfWidth: 0.5 * pxScale,
+                        });
+                    }
+                }
+            }
+        }
 
         if (s.movers && s.movers.length > 0 && s.submodelMeshes) {
             const players = this.livingPlayersAtFrame();
@@ -789,6 +841,15 @@ export class MvdMap {
         collectFlights(s.projectiles, 3, (w) => PROJECTILE_COLORS[w] || '#ffffff');
         collectFlights(s.nails, 1.5, () => NAIL_COLOR);
 
+        // Trails and sightlines draw under the weapon fire, so collect them
+        // into dyn.lines / dyn.points first (playback only, like the 2D
+        // pass ordering in render()).
+        if (!s.learnMode) {
+            this._collectTrails(dyn, pxScale);
+            if (s.showPvs) this._collectVisLines(dyn, s.pvsByPair, PVS_STYLE, pxScale);
+            if (s.showLos) this._collectVisLines(dyn, s.losByPair, LOS_STYLE, pxScale);
+        }
+
         const bm = s.beams;
         if (bm && Array.isArray(bm.t) && bm.t.length > 0) {
             const beamColor = parseColor(BEAM_COLOR);
@@ -803,6 +864,114 @@ export class MvdMap {
             }
         }
         return dyn;
+    }
+
+    // _collectTrails: the trail window as GL line segments and marker
+    // sprites — the same windowing, death/spawn gaps and teleport-dash rules
+    // as the 2D drawTracks, expressed as data. Segments are world-space, so
+    // trails will foreshorten correctly under any future camera.
+    _collectTrails(dyn, pxScale) {
+        const s = this.state;
+        const time = s.currentTime;
+        const trailDuration = s.trailDuration;
+
+        for (const [name, points] of Object.entries(s.fullTrails)) {
+            if (!s.enabledPlayers[name]) continue;
+            if (points.length < 2) continue;
+
+            // If current time is before trail start, pull start back so the
+            // trail grows from here (same rule as the 2D path).
+            if (time < (s.trailStartTimes[name] || 0)) {
+                s.trailStartTimes[name] = time;
+            }
+
+            const endIdx = trailIndexAtTime(points, time);
+            if (endIdx < 1) continue;
+            const trailStart = Math.max(time - trailDuration, s.trailStartTimes[name] || 0);
+            let startIdx = trailIndexAtTime(points, trailStart);
+            if (startIdx < 0) startIdx = 0;
+            if (endIdx - startIdx < 1) continue;
+
+            const teamHex = this.teamColors[points[0].teamIdx] || this.teamColors[0];
+            const solid = parseColor(hexToRgba(teamHex, 0.4));
+            const dashCol = parseColor(hexToRgba(teamHex, 0.2));
+            const markCol = parseColor(hexToRgba(teamHex, 0.8));
+            const halfWidth = 1.5 * pxScale;              // lineWidth 3
+            const dash = [4 * pxScale, 6 * pxScale];
+            const spawnDot = { size: 6 * pxScale, shape: 0 };
+            const deathX = { size: 12 * pxScale, shape: 1 };
+
+            let afterDeath = false;
+            let prev = points[startIdx];
+            const mark = (pt, kind) => dyn.points.push({
+                x: pt.wx, y: pt.wy, z: pt.wz,
+                size: kind.size, shape: kind.shape, color: markCol,
+            });
+            if (prev.spawn) mark(prev, spawnDot);
+
+            for (let i = startIdx + 1; i <= endIdx; i++) {
+                const pt = points[i];
+                if (pt.spawn) {
+                    // Spawn: new segment start (gap from the death before it).
+                    afterDeath = false;
+                    mark(pt, spawnDot);
+                    prev = pt;
+                    continue;
+                }
+                if (pt.death) {
+                    dyn.lines.push({
+                        sx: prev.wx, sy: prev.wy, sz: prev.wz,
+                        ex: pt.wx, ey: pt.wy, ez: pt.wz,
+                        halfWidth, color: solid,
+                    });
+                    mark(pt, deathX);
+                    afterDeath = true;
+                    prev = pt;
+                    continue;
+                }
+                if (afterDeath) {
+                    // Between death and spawn — don't draw.
+                    prev = pt;
+                    continue;
+                }
+                dyn.lines.push({
+                    sx: prev.wx, sy: prev.wy, sz: prev.wz,
+                    ex: pt.wx, ey: pt.wy, ez: pt.wz,
+                    halfWidth,
+                    color: pt.tp ? dashCol : solid,
+                    dash: pt.tp ? dash : null,
+                });
+                prev = pt;
+            }
+        }
+    }
+
+    // _collectVisLines: the LOS/PVS sightlines as GL segments — endpoints at
+    // eye height, coloured mutual/one-way exactly like the 2D drawVisLines.
+    _collectVisLines(dyn, byPair, style, pxScale) {
+        const playerData = this.state._framePlayerData;
+        if (!byPair || !playerData) return;
+        const tMs = this.state.currentTime * 1000;
+        const names = Object.keys(playerData);
+        const halfWidth = (style.width / 2) * pxScale;
+        for (let i = 0; i < names.length; i++) {
+            const a = names[i], pa = playerData[a];
+            if (!pa || typeof pa.x !== 'number') continue;
+            for (let j = i + 1; j < names.length; j++) {
+                const b = names[j], pb = playerData[b];
+                if (!pb || typeof pb.x !== 'number') continue;
+                const aSeesB = losCovers(byPair[a] && byPair[a][b], tMs);
+                const bSeesA = losCovers(byPair[b] && byPair[b][a], tMs);
+                if (!aSeesB && !bSeesA) continue;
+                dyn.lines.push({
+                    sx: pa.x, sy: pa.y, sz: pa.z + 22,
+                    ex: pb.x, ey: pb.y, ez: pb.z + 22,
+                    halfWidth,
+                    color: parseColor((aSeesB && bSeesA) ? style.mutual
+                        : aSeesB ? style.first : style.second),
+                });
+            }
+        }
     }
 
     // drawWorld: the static layers under the actors — floors, liquids, movers,
@@ -858,18 +1027,21 @@ export class MvdMap {
         }
 
         // Thin outlines around each traced region, after all fills so they sit
-        // on top and stay visible regardless of adjacent tinting. These need
-        // the allocating projection: an edge holds both endpoints at once.
-        for (const group of groups) {
-            if (!group.tris || group.tris.length < 9) continue;
-            const tier = this.focusTier(group.name);
-            // Idle baseline stays quiet so the floor reads as one calm
-            // surface; the occupied overlay brightens the active region on top.
-            let stroke = 'rgba(180, 180, 180, 0.22)';
-            let width = 1;
-            if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
-            else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
-            drawRegionOutline(ctx, group, this._toCanvasNew, stroke, width);
+        // on top and stay visible regardless of adjacent tinting. The GL
+        // backend draws these inside the world pass (cached quad-line VBOs);
+        // this 2D loop runs only on the fallback path.
+        if (!usedGL) {
+            for (const group of groups) {
+                if (!group.tris || group.tris.length < 9) continue;
+                const tier = this.focusTier(group.name);
+                // Idle baseline stays quiet so the floor reads as one calm
+                // surface; the occupied overlay brightens the active region on top.
+                let stroke = 'rgba(180, 180, 180, 0.22)';
+                let width = 1;
+                if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
+                else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
+                drawRegionOutline(ctx, group, this._toCanvasNew, stroke, width);
+            }
         }
 
         const labelPx = Math.round(12 * this.iconScale());
@@ -884,6 +1056,7 @@ export class MvdMap {
                 : group.color.text;
             ctx.fillText(group.name, pos.x, pos.y);
         }
+        return usedGL;
     }
 
     // ─── Actors: players, items, entities ───────────────────────────────────
@@ -1312,39 +1485,37 @@ export class MvdMap {
         return hexToRgba(this.teamColors[teamIdx] || this.teamColors[0], REGION_TINT_ALPHA);
     }
 
-    // Highlight loc regions that contain at least one player. Drawn on top of
-    // the prerendered background and the team-control tint, so the player's
-    // current region is always identifiable at a glance.
-    drawOccupiedRegionsOverlay(ctx, playerData) {
+    // computeOccupiedOverlay: the occupied-region highlight as data — per
+    // occupied group with geometry: the group, its team tint, and its name
+    // (for the outline and bold-label passes). Shared by both backends.
+    computeOccupiedOverlay(playerData) {
         const groupsByName = this.state.locationGroupByName;
-        if (!groupsByName) return;
+        if (!groupsByName) return null;
         const occupied = this.computeOccupiedGroupTeams(playerData);
-        if (occupied.size === 0) return;
-
-        // Colour-fill pass: tint each occupied region by the team(s) present so
-        // the active area stands out against the otherwise-neutral floor. The
-        // floor is drawn neutral by default (the floor model),
-        // so a tint only ever appears here, under a player. One translucent path
-        // per region (single fill → no internal triangle seams).
+        if (occupied.size === 0) return null;
+        const out = { names: [], groups: [] };
         for (const [name, teams] of occupied) {
             const group = groupsByName[name];
-            if (!group || !group.tris || group.tris.length < 9) continue;
-            drawTriangleListFill(ctx, group.tris, this.regionActiveTint(teams), this._toCanvas);
+            if (!group) continue;
+            out.names.push(name);
+            if (group.tris && group.tris.length >= 9) {
+                out.groups.push({ group, tint: this.regionActiveTint(teams) });
+            }
         }
+        return out;
+    }
 
-        // Brighter outline pass.
-        for (const name of occupied.keys()) {
-            const group = groupsByName[name];
-            if (!group || !group.tris || group.tris.length < 9) continue;
-            drawRegionOutline(ctx, group, this._toCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
-        }
-
-        // Bold label pass — draw over the dimmer prerendered label so it pops.
+    // drawOccupiedLabels: the bold label pass — drawn over the dimmer
+    // prerendered label so the occupied region's name pops. Text stays on
+    // the 2D layer for now (the sprite/atlas step will absorb it).
+    drawOccupiedLabels(ctx, names) {
+        const groupsByName = this.state.locationGroupByName;
+        if (!groupsByName || !names || names.length === 0) return;
         const boldPx = Math.round(12 * this.iconScale());
         ctx.font = `bold ${boldPx}px monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        for (const name of occupied.keys()) {
+        for (const name of names) {
             const group = groupsByName[name];
             if (!group) continue;
             const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
@@ -1356,10 +1527,32 @@ export class MvdMap {
         }
     }
 
-    // Draw control overlay for regions based on current control state
-    drawRegionControlOverlay(ctx, controlStates) {
+    // Highlight loc regions that contain at least one player (2D fallback
+    // path; the GL path draws the fills and outlines inside the world pass).
+    drawOccupiedRegionsOverlay(ctx, playerData) {
+        const ov = this.computeOccupiedOverlay(playerData);
+        if (!ov) return;
+
+        // Colour-fill pass: tint each occupied region by the team(s) present
+        // so the active area stands out against the otherwise-neutral floor.
+        // One translucent path per region (single fill → no internal seams).
+        for (const { group, tint } of ov.groups) {
+            drawTriangleListFill(ctx, group.tris, tint, this._toCanvas);
+        }
+
+        // Brighter outline pass.
+        for (const { group } of ov.groups) {
+            drawRegionOutline(ctx, group, this._toCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
+        }
+
+        this.drawOccupiedLabels(ctx, ov.names);
+    }
+
+    // computeControlFills: the region-control overlay as data — one entry
+    // per group with geometry, in draw order. Shared by both backends.
+    computeControlFills(controlStates) {
         const regions = this.state.controlRegions;
-        if (!regions) return;
+        if (!regions || !controlStates) return null;
 
         // Build the set of regions that are occupied (any non-empty state).
         // Used by the stacking rule: a region is boosted when no region above it
@@ -1373,6 +1566,7 @@ export class MvdMap {
         const regionByName = {};
         for (const r of regions) regionByName[r.name] = r;
 
+        const fills = [];
         for (const [regionName, state] of Object.entries(controlStates)) {
             const groups = this.state.regionToGroups[regionName];
             if (!groups || groups.length === 0) continue;
@@ -1398,13 +1592,25 @@ export class MvdMap {
             const color = hexToRgba(hex, finalAlpha);
 
             for (const group of groups) {
+                if (!group.tris || group.tris.length < 9) continue;
                 // Region focus: tint outside the focus neighborhood fades with
                 // the base fills so the focused area keeps visual priority.
                 const tint = this.focusTier(group.name) === 'far'
                     ? scaleRgbaAlpha(color, 0.3)
                     : color;
-                fillRegion(ctx, group, tint, this._toCanvasNew);
+                fills.push({ group, tint });
             }
+        }
+        return fills;
+    }
+
+    // Draw control overlay for regions based on current control state (2D
+    // fallback path).
+    drawRegionControlOverlay(ctx, controlStates) {
+        const fills = this.computeControlFills(controlStates);
+        if (!fills) return;
+        for (const { group, tint } of fills) {
+            fillRegion(ctx, group, tint, this._toCanvasNew);
         }
     }
 
@@ -1986,7 +2192,7 @@ export class MvdMap {
         // Draw the location underlay (backdrop + per-loc regions + outlines +
         // labels). Fresh each frame so it follows pan / zoom precisely and stays
         // crisp at any zoom level.
-        this.drawWorld(ctx);
+        const usedGL = this.drawWorld(ctx);
 
         // Learn-map mode: static entity study view — keep the floor/loc base,
         // draw the designed entity layout, and skip all player/time-based layers.
@@ -1995,26 +2201,35 @@ export class MvdMap {
             return;
         }
 
-        // Draw region control overlay (colored by controlling team)
-        if (s.controlRegions && s.regionToGroups) {
-            const controlStates = this.regionControlAt(time);
-            if (controlStates) {
-                this.drawRegionControlOverlay(ctx, controlStates);
+        if (usedGL) {
+            // The GL world pass drew the control and occupancy tints and the
+            // occupied outlines; only the bold occupied labels are still 2D
+            // (text moves to the sprite atlas later).
+            this.drawOccupiedLabels(ctx, s._frameOccupiedNames);
+        } else {
+            // Draw region control overlay (colored by controlling team)
+            if (s.controlRegions && s.regionToGroups) {
+                const controlStates = this.regionControlAt(time);
+                if (controlStates) {
+                    this.drawRegionControlOverlay(ctx, controlStates);
+                }
+            }
+
+            // Highlight regions that currently contain at least one player so
+            // the viewer can tell which loc each symbol belongs to without
+            // squinting.
+            if (playerData) {
+                this.drawOccupiedRegionsOverlay(ctx, playerData);
             }
         }
 
-        // Highlight regions that currently contain at least one player so the
-        // viewer can tell which loc each symbol belongs to without squinting.
-        if (playerData) {
-            this.drawOccupiedRegionsOverlay(ctx, playerData);
+        // Trails and the LOS/PVS sightlines: the GL world pass drew them
+        // already (as quad-lines + marker sprites); the 2D versions run only
+        // on the fallback path.
+        if (!usedGL) {
+            this.drawTracks(ctx, time);
+            this.drawLosLines(ctx, time, playerData);
         }
-
-        // Draw tracks (per-player visibility controlled by enabledPlayers)
-        this.drawTracks(ctx, time);
-
-        // Line-of-sight debug overlay (opt-in): connects players who can see each
-        // other at the current time. Drawn under the player symbols.
-        this.drawLosLines(ctx, time, playerData);
 
         // Z-depth pass for items + players: overlapping players occlude by z
         // (higher deck on top), and an item whose z is clearly higher than a

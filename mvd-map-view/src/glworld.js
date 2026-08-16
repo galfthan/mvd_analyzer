@@ -31,6 +31,8 @@
 // Parse an rgba()/rgb()/#rrggbb string into premultiplied [r, g, b, a]
 // floats. Memoised — the floor model reuses a handful of distinct colour
 // strings across thousands of entries.
+const ONE_TINT = [1, 1, 1, 1];
+
 const _colorCache = new Map();
 export function parseColor(str) {
     let c = _colorCache.get(str);
@@ -188,8 +190,10 @@ in vec4 vColor;
 out vec4 outColor;
 void main() { outColor = vColor; }`;
 
-// Point sprites (projectile / nail dots): world-space centre, per-point size
-// in physical pixels, round shape cut in the fragment shader.
+// Point sprites (projectile / nail dots; trail and actor markers):
+// world-space centre, per-point size in physical pixels, shape cut in the
+// fragment shader — 0: disc, 1: ✕, 2: ring (param = inner radius fraction),
+// 3: filled square, 4: square outline (param = border fraction).
 const POINT_VERT_SRC = `#version 300 es
 uniform vec4 uRowX;
 uniform vec4 uRowY;
@@ -197,22 +201,83 @@ uniform vec4 uRowZ;
 in vec3 aPos;
 in vec4 aColor;
 in float aSize;
+in float aShape;
+in float aParam;
 out vec4 vColor;
+flat out float vShape;
+flat out float vParam;
 void main() {
     vec4 p = vec4(aPos, 1.0);
     gl_Position = vec4(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p), 1.0);
     gl_PointSize = aSize;
     vColor = aColor;
+    vShape = aShape;
+    vParam = aParam;
 }`;
 
 const POINT_FRAG_SRC = `#version 300 es
 precision mediump float;
 in vec4 vColor;
+flat in float vShape;
+flat in float vParam;
 out vec4 outColor;
 void main() {
-    vec2 c = gl_PointCoord - 0.5;
-    if (dot(c, c) > 0.25) discard;
+    vec2 c = gl_PointCoord * 2.0 - 1.0;
+    if (vShape < 0.5) {
+        if (dot(c, c) > 1.0) discard;                  // disc
+    } else if (vShape < 1.5) {
+        if (abs(abs(c.x) - abs(c.y)) > 0.4) discard;   // ✕ arms
+    } else if (vShape < 2.5) {
+        float r2 = dot(c, c);                          // ring
+        if (r2 > 1.0 || r2 < vParam * vParam) discard;
+    } else if (vShape < 3.5) {
+        // filled square — nothing cut
+    } else {
+        if (max(abs(c.x), abs(c.y)) < 1.0 - vParam) discard;  // square outline
+    }
     outColor = vColor;
+}`;
+
+// Textured billboards: a world-space anchor plus a physical-pixel corner
+// offset, sampling the label atlas. Tint multiplies (fades the drop-D).
+const SPRITE_VERT_SRC = `#version 300 es
+uniform vec4 uRowX;
+uniform vec4 uRowY;
+uniform vec4 uRowZ;
+uniform vec2 uViewPx;
+in vec3 aPos;
+in vec2 aOffPx;
+in vec2 aUV;
+in vec4 aTint;
+out vec2 vUV;
+out vec4 vTint;
+void main() {
+    vec4 p = vec4(aPos, 1.0);
+    vec3 clip = vec3(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p));
+    vec2 px = vec2((clip.x + 1.0) * 0.5 * uViewPx.x, (1.0 - clip.y) * 0.5 * uViewPx.y) + aOffPx;
+    gl_Position = vec4(px.x / uViewPx.x * 2.0 - 1.0, 1.0 - px.y / uViewPx.y * 2.0, clip.z, 1.0);
+    vUV = aUV;
+    vTint = aTint;
+}`;
+
+const SPRITE_FRAG_SRC = `#version 300 es
+precision mediump float;
+uniform sampler2D uTex;
+in vec2 vUV;
+in vec4 vTint;
+out vec4 outColor;
+void main() { outColor = texture(uTex, vUV) * vTint; }`;
+
+// Plain screen-space triangles (arrowheads): physical-pixel coordinates in,
+// flat colour out.
+const TRI2D_VERT_SRC = `#version 300 es
+uniform vec2 uViewPx;
+in vec2 aPx;
+in vec4 aColor;
+out vec4 vColor;
+void main() {
+    gl_Position = vec4(aPx.x / uViewPx.x * 2.0 - 1.0, 1.0 - aPx.y / uViewPx.y * 2.0, 0.0, 1.0);
+    vColor = aColor;
 }`;
 
 // Screen-space extruded line segments (beams; later trails / sightlines).
@@ -225,12 +290,17 @@ uniform vec4 uRowX;
 uniform vec4 uRowY;
 uniform vec4 uRowZ;
 uniform vec2 uViewPx;
+uniform vec4 uTint;        // multiplies aColor — lets cached geometry restyle per draw
+uniform float uWidthScale; // multiplies aHalfWidth — same reason
 in vec3 aStart;
 in vec3 aEnd;
 in vec2 aParam;   // x: side (-1 | 1), y: end (0 | 1)
 in vec4 aColor;
-in float aHalfWidth; // physical px
+in float aHalfWidth; // physical px (pre-scale)
+in vec2 aDash;       // (on px, off px); (0, 0) = solid
 out vec4 vColor;
+out float vDistPx;
+flat out vec2 vDash;
 vec3 clipOf(vec3 world) {
     vec4 p = vec4(world, 1.0);
     return vec3(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p));
@@ -244,10 +314,26 @@ void main() {
     float len = max(length(d), 1e-6);
     vec2 n = vec2(-d.y, d.x) / len;
     vec2 base = mix(sPx, ePx, aParam.y);
-    vec2 px = base + n * aParam.x * aHalfWidth;
+    vec2 px = base + n * aParam.x * aHalfWidth * uWidthScale;
     float z = mix(s.z, e.z, aParam.y);
     gl_Position = vec4(px.x / uViewPx.x * 2.0 - 1.0, 1.0 - px.y / uViewPx.y * 2.0, z, 1.0);
-    vColor = aColor;
+    vColor = aColor * uTint;
+    vDistPx = aParam.y * len;
+    vDash = aDash;
+}`;
+
+// Line fragments honour the per-segment dash pattern (distance along the
+// segment in physical px — each segment restarts its phase, which matches
+// how the dashes are actually used: a dashed segment IS one teleport jump).
+const LINE_FRAG_SRC = `#version 300 es
+precision mediump float;
+in vec4 vColor;
+in float vDistPx;
+flat in vec2 vDash;
+out vec4 outColor;
+void main() {
+    if (vDash.x > 0.0 && mod(vDistPx, vDash.x + vDash.y) > vDash.x) discard;
+    outColor = vColor;
 }`;
 
 // One batch of triangles. Opaque batches draw in array order under the
@@ -356,21 +442,57 @@ export class GlWorld {
             aPos: gl.getAttribLocation(pt, 'aPos'),
             aColor: gl.getAttribLocation(pt, 'aColor'),
             aSize: gl.getAttribLocation(pt, 'aSize'),
+            aShape: gl.getAttribLocation(pt, 'aShape'),
+            aParam: gl.getAttribLocation(pt, 'aParam'),
             vbo: gl.createBuffer(),
         };
 
-        const ln = link(LINE_VERT_SRC, FRAG_SRC);
+        const sp = link(SPRITE_VERT_SRC, SPRITE_FRAG_SRC);
+        this.spriteProg = {
+            prog: sp,
+            uRowX: gl.getUniformLocation(sp, 'uRowX'),
+            uRowY: gl.getUniformLocation(sp, 'uRowY'),
+            uRowZ: gl.getUniformLocation(sp, 'uRowZ'),
+            uViewPx: gl.getUniformLocation(sp, 'uViewPx'),
+            uTex: gl.getUniformLocation(sp, 'uTex'),
+            aPos: gl.getAttribLocation(sp, 'aPos'),
+            aOffPx: gl.getAttribLocation(sp, 'aOffPx'),
+            aUV: gl.getAttribLocation(sp, 'aUV'),
+            aTint: gl.getAttribLocation(sp, 'aTint'),
+            vbo: gl.createBuffer(),
+        };
+        this.atlasTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.atlasTex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        this._atlasGeneration = -1;
+
+        const t2 = link(TRI2D_VERT_SRC, FRAG_SRC);
+        this.tri2dProg = {
+            prog: t2,
+            uViewPx: gl.getUniformLocation(t2, 'uViewPx'),
+            aPx: gl.getAttribLocation(t2, 'aPx'),
+            aColor: gl.getAttribLocation(t2, 'aColor'),
+            vbo: gl.createBuffer(),
+        };
+
+        const ln = link(LINE_VERT_SRC, LINE_FRAG_SRC);
         this.lineProg = {
             prog: ln,
             uRowX: gl.getUniformLocation(ln, 'uRowX'),
             uRowY: gl.getUniformLocation(ln, 'uRowY'),
             uRowZ: gl.getUniformLocation(ln, 'uRowZ'),
             uViewPx: gl.getUniformLocation(ln, 'uViewPx'),
+            uTint: gl.getUniformLocation(ln, 'uTint'),
+            uWidthScale: gl.getUniformLocation(ln, 'uWidthScale'),
             aStart: gl.getAttribLocation(ln, 'aStart'),
             aEnd: gl.getAttribLocation(ln, 'aEnd'),
             aParam: gl.getAttribLocation(ln, 'aParam'),
             aColor: gl.getAttribLocation(ln, 'aColor'),
             aHalfWidth: gl.getAttribLocation(ln, 'aHalfWidth'),
+            aDash: gl.getAttribLocation(ln, 'aDash'),
             vbo: gl.createBuffer(),
         };
 
@@ -385,6 +507,11 @@ export class GlWorld {
         this._floorFocus = null;
         this._liquidFaces = null;
         this._moverMeshes = new Map();  // submodel id -> {vbo, count}
+        // Region-overlay geometry, keyed by the source array's identity —
+        // group tris / outlines are rebuilt wholesale on geometry reload, so
+        // a WeakMap keeps exactly the live generation alive.
+        this._fillVbos = new WeakMap();     // group tris -> {vbo, count}
+        this._outlineVbos = new WeakMap();  // group outline -> {vbo, count}
     }
 
     // syncFloor (re)builds the floor batches when the model or the focus
@@ -502,63 +629,84 @@ export class GlWorld {
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
     }
 
-    // _drawPoints: round dots ([{x, y, z, size(px), color: [r,g,b,a]}]) as
-    // point sprites from a per-frame stream buffer.
-    _drawPoints(points, t) {
-        if (!points || points.length === 0) return;
+    // _drawFills: translucent region tints ([{tris, tint: [r,g,b,a]}]) —
+    // per-group position VBOs cached by the tris array's identity, coloured
+    // by the tint uniform, in list order (control under occupancy).
+    _drawFills(fills) {
+        if (!fills || fills.length === 0) return;
         const gl = this.gl;
-        const p = this.pointProg;
-        const data = new Float32Array(points.length * 8);
-        let i = 0;
-        for (const pt of points) {
-            data[i++] = pt.x; data[i++] = pt.y; data[i++] = pt.z;
-            data[i++] = pt.color[0]; data[i++] = pt.color[1];
-            data[i++] = pt.color[2]; data[i++] = pt.color[3];
-            data[i++] = pt.size;
+        gl.disableVertexAttribArray(this.aColor);
+        gl.vertexAttrib4f(this.aColor, 1, 1, 1, 1);
+        for (const f of fills) {
+            let mesh = this._fillVbos.get(f.tris);
+            if (!mesh) {
+                const vbo = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(f.tris), gl.STATIC_DRAW);
+                mesh = { vbo, count: f.tris.length / 3 };
+                this._fillVbos.set(f.tris, mesh);
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vbo);
+            gl.enableVertexAttribArray(this.aPos);
+            gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 12, 0);
+            gl.uniform4fv(this.uTint, f.tint);
+            gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
         }
-        gl.useProgram(p.prog);
-        gl.uniform4fv(p.uRowX, t.rx);
-        gl.uniform4fv(p.uRowY, t.ry);
-        gl.uniform4fv(p.uRowZ, t.rz);
-        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-        gl.enableVertexAttribArray(p.aPos);
-        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, 32, 0);
-        gl.enableVertexAttribArray(p.aColor);
-        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 32, 12);
-        gl.enableVertexAttribArray(p.aSize);
-        gl.vertexAttribPointer(p.aSize, 1, gl.FLOAT, false, 32, 28);
-        gl.drawArrays(gl.POINTS, 0, points.length);
+        gl.uniform4f(this.uTint, 1, 1, 1, 1);
     }
 
-    // _drawLines: screen-space extruded segments
-    // ([{sx..sz, ex..ez, halfWidth(px), color: [r,g,b,a]}]).
-    _drawLines(segs, t, pxW, pxH) {
-        if (!segs || segs.length === 0) return;
+    // _drawOutlines: region boundary strokes ([{outline, tint, halfWidth}])
+    // through the quad-line program. The segment geometry is camera-free
+    // (extrusion happens in the shader), so each outline bakes to a static
+    // VBO; colour and width restyle per draw via uniforms.
+    _drawOutlines(outlines, t, pxW, pxH) {
+        if (!outlines || outlines.length === 0) return;
         const gl = this.gl;
         const p = this.lineProg;
-        // Two triangles per segment; 13 floats per vertex.
-        const CORNERS = [[-1, 0], [1, 0], [1, 1], [-1, 0], [1, 1], [-1, 1]];
-        const data = new Float32Array(segs.length * 6 * 13);
-        let i = 0;
-        for (const s of segs) {
-            for (const [side, end] of CORNERS) {
-                data[i++] = s.sx; data[i++] = s.sy; data[i++] = s.sz;
-                data[i++] = s.ex; data[i++] = s.ey; data[i++] = s.ez;
-                data[i++] = side; data[i++] = end;
-                data[i++] = s.color[0]; data[i++] = s.color[1];
-                data[i++] = s.color[2]; data[i++] = s.color[3];
-                data[i++] = s.halfWidth;
-            }
-        }
         gl.useProgram(p.prog);
         gl.uniform4fv(p.uRowX, t.rx);
         gl.uniform4fv(p.uRowY, t.ry);
         gl.uniform4fv(p.uRowZ, t.rz);
         gl.uniform2f(p.uViewPx, pxW, pxH);
-        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-        const stride = 52;
+        const CORNERS = [[-1, 0], [1, 0], [1, 1], [-1, 0], [1, 1], [-1, 1]];
+        for (const o of outlines) {
+            let mesh = this._outlineVbos.get(o.outline);
+            if (!mesh) {
+                const segs = o.outline.length / 6;
+                const data = new Float32Array(segs * 6 * 15);
+                let i = 0;
+                for (let s = 0; s + 5 < o.outline.length; s += 6) {
+                    for (const [side, end] of CORNERS) {
+                        data[i++] = o.outline[s];     data[i++] = o.outline[s + 1]; data[i++] = o.outline[s + 2];
+                        data[i++] = o.outline[s + 3]; data[i++] = o.outline[s + 4]; data[i++] = o.outline[s + 5];
+                        data[i++] = side; data[i++] = end;
+                        data[i++] = 1; data[i++] = 1; data[i++] = 1; data[i++] = 1;
+                        data[i++] = 1;
+                        data[i++] = 0; data[i++] = 0;
+                    }
+                }
+                const vbo = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+                gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+                mesh = { vbo, count: segs * 6 };
+                this._outlineVbos.set(o.outline, mesh);
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vbo);
+            this._bindLineAttribs();
+            gl.uniform4fv(p.uTint, o.tint);
+            gl.uniform1f(p.uWidthScale, o.halfWidth);
+            gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+        }
+        gl.uniform4f(p.uTint, 1, 1, 1, 1);
+        gl.uniform1f(p.uWidthScale, 1);
+        // Back to the triangle program for whoever draws next.
+        gl.useProgram(this.prog);
+    }
+
+    _bindLineAttribs() {
+        const gl = this.gl;
+        const p = this.lineProg;
+        const stride = 60;
         gl.enableVertexAttribArray(p.aStart);
         gl.vertexAttribPointer(p.aStart, 3, gl.FLOAT, false, stride, 0);
         gl.enableVertexAttribArray(p.aEnd);
@@ -569,16 +717,179 @@ export class GlWorld {
         gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, stride, 32);
         gl.enableVertexAttribArray(p.aHalfWidth);
         gl.vertexAttribPointer(p.aHalfWidth, 1, gl.FLOAT, false, stride, 48);
+        gl.enableVertexAttribArray(p.aDash);
+        gl.vertexAttribPointer(p.aDash, 2, gl.FLOAT, false, stride, 52);
+    }
+
+    // _drawPoints: round dots ([{x, y, z, size(px), color: [r,g,b,a]}]) as
+    // point sprites from a per-frame stream buffer.
+    _drawPoints(points, t) {
+        if (!points || points.length === 0) return;
+        const gl = this.gl;
+        const p = this.pointProg;
+        const data = new Float32Array(points.length * 10);
+        let i = 0;
+        for (const pt of points) {
+            data[i++] = pt.x; data[i++] = pt.y; data[i++] = pt.z;
+            data[i++] = pt.color[0]; data[i++] = pt.color[1];
+            data[i++] = pt.color[2]; data[i++] = pt.color[3];
+            data[i++] = pt.size;
+            data[i++] = pt.shape || 0;
+            data[i++] = pt.param || 0;
+        }
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        gl.enableVertexAttribArray(p.aPos);
+        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, 40, 0);
+        gl.enableVertexAttribArray(p.aColor);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 40, 12);
+        gl.enableVertexAttribArray(p.aSize);
+        gl.vertexAttribPointer(p.aSize, 1, gl.FLOAT, false, 40, 28);
+        gl.enableVertexAttribArray(p.aShape);
+        gl.vertexAttribPointer(p.aShape, 1, gl.FLOAT, false, 40, 32);
+        gl.enableVertexAttribArray(p.aParam);
+        gl.vertexAttribPointer(p.aParam, 1, gl.FLOAT, false, 40, 36);
+        gl.drawArrays(gl.POINTS, 0, points.length);
+    }
+
+    // syncAtlas uploads the label atlas page when it changed.
+    syncAtlas(atlas) {
+        if (!atlas || (!atlas.dirty && this._atlasGeneration === atlas.generation)) return;
+        const gl = this.gl;
+        gl.bindTexture(gl.TEXTURE_2D, this.atlasTex);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas.canvas);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        atlas.dirty = false;
+        this._atlasGeneration = atlas.generation;
+    }
+
+    // _drawSprites: textured billboards ([{x, y, z, offX, offY, w, h, e:
+    // atlas entry, tint?}]) — a world anchor plus a physical-pixel corner
+    // offset, sampling the atlas.
+    _drawSprites(sprites, t, pxW, pxH) {
+        if (!sprites || sprites.length === 0) return;
+        const gl = this.gl;
+        const p = this.spriteProg;
+        const data = new Float32Array(sprites.length * 6 * 11);
+        let i = 0;
+        for (const sp of sprites) {
+            const e = sp.e;
+            const tint = sp.tint || ONE_TINT;
+            const corners = [
+                [sp.offX, sp.offY, e.u0, e.v0],
+                [sp.offX + sp.w, sp.offY, e.u1, e.v0],
+                [sp.offX + sp.w, sp.offY + sp.h, e.u1, e.v1],
+                [sp.offX, sp.offY, e.u0, e.v0],
+                [sp.offX + sp.w, sp.offY + sp.h, e.u1, e.v1],
+                [sp.offX, sp.offY + sp.h, e.u0, e.v1],
+            ];
+            for (const [ox, oy, u, v] of corners) {
+                data[i++] = sp.x; data[i++] = sp.y; data[i++] = sp.z;
+                data[i++] = ox; data[i++] = oy;
+                data[i++] = u; data[i++] = v;
+                data[i++] = tint[0]; data[i++] = tint[1];
+                data[i++] = tint[2]; data[i++] = tint[3];
+            }
+        }
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.uniform2f(p.uViewPx, pxW, pxH);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.atlasTex);
+        gl.uniform1i(p.uTex, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        const stride = 44;
+        gl.enableVertexAttribArray(p.aPos);
+        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(p.aOffPx);
+        gl.vertexAttribPointer(p.aOffPx, 2, gl.FLOAT, false, stride, 12);
+        gl.enableVertexAttribArray(p.aUV);
+        gl.vertexAttribPointer(p.aUV, 2, gl.FLOAT, false, stride, 20);
+        gl.enableVertexAttribArray(p.aTint);
+        gl.vertexAttribPointer(p.aTint, 4, gl.FLOAT, false, stride, 28);
+        gl.drawArrays(gl.TRIANGLES, 0, sprites.length * 6);
+    }
+
+    // _drawScreenTris: flat-coloured physical-pixel triangles
+    // ([{pts: [x0,y0,x1,y1,x2,y2], color}]) — the arrowheads.
+    _drawScreenTris(tris, pxW, pxH) {
+        if (!tris || tris.length === 0) return;
+        const gl = this.gl;
+        const p = this.tri2dProg;
+        const data = new Float32Array(tris.length * 3 * 6);
+        let i = 0;
+        for (const tr of tris) {
+            for (let v = 0; v < 6; v += 2) {
+                data[i++] = tr.pts[v]; data[i++] = tr.pts[v + 1];
+                data[i++] = tr.color[0]; data[i++] = tr.color[1];
+                data[i++] = tr.color[2]; data[i++] = tr.color[3];
+            }
+        }
+        gl.useProgram(p.prog);
+        gl.uniform2f(p.uViewPx, pxW, pxH);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        gl.enableVertexAttribArray(p.aPx);
+        gl.vertexAttribPointer(p.aPx, 2, gl.FLOAT, false, 24, 0);
+        gl.enableVertexAttribArray(p.aColor);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 24, 8);
+        gl.drawArrays(gl.TRIANGLES, 0, tris.length * 3);
+    }
+
+    // _drawLines: screen-space extruded segments
+    // ([{sx..sz, ex..ez, halfWidth(px), color: [r,g,b,a]}]).
+    _drawLines(segs, t, pxW, pxH) {
+        if (!segs || segs.length === 0) return;
+        const gl = this.gl;
+        const p = this.lineProg;
+        // Two triangles per segment; 15 floats per vertex.
+        const CORNERS = [[-1, 0], [1, 0], [1, 1], [-1, 0], [1, 1], [-1, 1]];
+        const data = new Float32Array(segs.length * 6 * 15);
+        let i = 0;
+        for (const s of segs) {
+            const dashOn = s.dash ? s.dash[0] : 0;
+            const dashOff = s.dash ? s.dash[1] : 0;
+            for (const [side, end] of CORNERS) {
+                data[i++] = s.sx; data[i++] = s.sy; data[i++] = s.sz;
+                data[i++] = s.ex; data[i++] = s.ey; data[i++] = s.ez;
+                data[i++] = side; data[i++] = end;
+                data[i++] = s.color[0]; data[i++] = s.color[1];
+                data[i++] = s.color[2]; data[i++] = s.color[3];
+                data[i++] = s.halfWidth;
+                data[i++] = dashOn; data[i++] = dashOff;
+            }
+        }
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.uniform2f(p.uViewPx, pxW, pxH);
+        gl.uniform4f(p.uTint, 1, 1, 1, 1);
+        gl.uniform1f(p.uWidthScale, 1);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        this._bindLineAttribs();
         gl.drawArrays(gl.TRIANGLES, 0, segs.length * 6);
     }
 
     // render draws the world for the given camera into the backing canvas,
     // sized to pxW × pxH physical pixels; cssW/cssH are the logical size the
-    // camera math targets. Passes: opaque floors + movers (depth-tested),
-    // then focus fade and liquids (blended over, depth-read-only), then the
-    // always-visible weapon-fire overlays (projectile dots, beam lines —
-    // depth test off: the analyzer wants them seen, not occluded).
-    // `dyn` is the per-frame dynamic content: {movers, points, lines}.
+    // camera math targets. Pass order (mirrors the 2D layer stack):
+    //   1. opaque floors + movers — depth-tested and -written
+    //   2. focus fade + liquids — blended, depth-read-only
+    //   3. thin region outlines — the quiet baseline strokes
+    //   4. region tints (control under occupancy) + the occupied outlines
+    //   5. weapon fire (projectile dots, beam lines) — on top, always visible
+    // Everything from 3 down draws depth-test-off, like the 2D overlays did.
+    // `dyn` is the per-frame dynamic content from MvdMap._glDynamic.
     render(w, cssW, cssH, pxW, pxH, dyn = {}) {
         const gl = this.gl;
         if (this.canvas.width !== pxW || this.canvas.height !== pxH) {
@@ -609,8 +920,26 @@ export class GlWorld {
         this._drawBlended(this.liquidBatch, w);
 
         gl.disable(gl.DEPTH_TEST);
-        this._drawPoints(dyn.points, t);
+        this._drawOutlines(dyn.regionOutlines, t, pxW, pxH);
+        this._drawFills(dyn.fills);
+        this._drawOutlines(dyn.fillOutlines, t, pxW, pxH);
+        // Lines under points: trail/death markers and projectile dots read
+        // on top of trail lines, sightlines and beams.
         this._drawLines(dyn.lines, t, pxW, pxH);
+        this._drawPoints(dyn.points, t);
+
+        // The actor pass: an ordered command list (the caller z-sorts
+        // drawables and flushes on primitive-type change, so cross-type
+        // occlusion between overlapping actors keeps the painter order).
+        if (dyn.actorBatches && dyn.actorBatches.length > 0) {
+            if (dyn.atlas) this.syncAtlas(dyn.atlas);
+            for (const b of dyn.actorBatches) {
+                if (b.type === 'points') this._drawPoints(b.items, t);
+                else if (b.type === 'lines') this._drawLines(b.items, t, pxW, pxH);
+                else if (b.type === 'sprites') this._drawSprites(b.items, t, pxW, pxH);
+                else if (b.type === 'tris') this._drawScreenTris(b.items, pxW, pxH);
+            }
+        }
         gl.depthMask(true);
     }
 }

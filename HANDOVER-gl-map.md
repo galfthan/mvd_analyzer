@@ -85,3 +85,17 @@ player models, fog, occlusion, better lighting, first-person view.
   sightlines will reuse, dashes as a shader pattern). The 2D versions still
   exist and run on the fallback path only. Worst strong-diff shot vs step 1:
   0.031% of pixels (the dots/movers themselves).
+- **Step 3 landed** — region tints (control under occupancy) and all region
+  outlines render in the GL pass: per-group fill VBOs cached by tris
+  identity + restyled via a tint uniform, outlines as cached quad-line VBOs
+  (extrusion is in the shader, so the VBO is camera-free) restyled via
+  tint/width uniforms. The occupied bold labels are the only overlay piece
+  still 2D (text). Worst strong-diff vs step 2: 0.024%.
+- **Step 4 landed** — trails (with the death/spawn gap rules, teleport
+  dashes via the shader pattern, death-✕/spawn-dot marker sprites) and the
+  LOS/PVS sightlines collect into the GL line/point passes. The actor
+  z-order machinery for step 5 is in place: shaped point sprites
+  (disc/✕/ring/square/square-outline), a textured-billboard program fed by
+  a lazily-baked label atlas (glatlas.js), a screen-space triangle program
+  for arrowheads, and an ordered actor-batch dispatch in render(). Worst
+  strong-diff vs step 3: 0.024%.
