@@ -44,6 +44,18 @@ a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.4% on unambiguous enemy
 instants (rl 99.5%, lg 99.5%, sg 97.8%, ssg 98.1%, axe 100%).
 
+A third corpus generalizes the result across server generations: 216
+**archive-era instrumented demos** (a random sample of the 51k-demo
+archive with GT present — older KTX/MVDSV builds, maps and modes far
+outside the dm2/dm3 tuning set) score bounded given median 0.64%
+(mean 1.38%, ≤2% 89%), attacker attribution 98.7% (rl 99.0%, lg 99.5%),
+with no per-corpus tuning. Residual outlier rows are characterized:
+skull-map crusher damage (GT logs mover-crush squish ticks; the
+reconstruction deliberately leaves crush `unknown`) and small-
+denominator old-FFA rows. The un-instrumented half of the archive runs
+end-to-end with a 0.4% median / 1.9% mean unattributed-damage share
+(`cmd/qw-corpus-survey`).
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the
