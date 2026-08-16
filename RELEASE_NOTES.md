@@ -88,6 +88,17 @@ appear in the per-shot stream, `byPlayer` accuracy, the KTX
 reconciliation and the aim weapon counters, and reconstructed axe
 attacker attribution went 20% → 100% on the 60-demo validation corpus.
 
+A long-standing parser bug on `sv_bigcoords` demos (~5% of the old
+archive, MVDSV 0.33/0.34 era) is fixed: entity ANGLES are 2-byte shorts
+under the same `FTE_PEXT_FLOATCOORDS` negotiation that widens coords
+(`sv_bigcoords` raises `msg_anglesize` with `msg_coordsize`), but the
+parser always read 1 byte — under-reading every angle-carrying entity
+and silently desyncing the rest of the packet. Those demos lost over
+half their item entities and logged tens of thousands of
+`svc_deltapacketentities` warnings, visible only in diagnostic mode.
+Verified on the 24 affected demos of the archive survey sample: desync
+warnings 44,386 → 1,935 (−95.6%), zero entity-stream EOFs remain.
+
 A truthfulness regression the reconstruction itself introduced is
 fixed: `playerStats.accuracy` and `aim` used to treat mere PRESENCE of
 the damage section as "hits were measured" — correct while only wire

@@ -2684,14 +2684,25 @@ Offset  Size     Field
 5       1        colormap
 6       1        skinnum
 7       2 or 4   origin[0] (coord or float if FLOATCOORDS)
-+       1        angles[0] (angle byte)
++       1 or 2   angles[0] (angle byte; short if FLOATCOORDS)
 +       2 or 4   origin[1]
-+       1        angles[1]
++       1 or 2   angles[1]
 +       2 or 4   origin[2]
-+       1        angles[2]
++       1 or 2   angles[2]
 ```
 
-**Total size**: 15 bytes (standard coords) or 21 bytes (float coords).
+**Total size**: 15 bytes (standard coords) or 24 bytes (float coords).
+
+**Angle width follows the coord negotiation.** `sv_bigcoords` raises
+BOTH `msg_coordsize` (2→4) and `msg_anglesize` (1→2) in one switch
+(`mvdsv/src/sv_init.c:326-336`), and the demo advertises it through the
+same `FTE_PEXT_FLOATCOORDS` bit (`mvdsv/src/sv_demo.c:1247-1253`);
+ezquake's `MSG_ReadAngle` reads a short in that mode
+(`com_msg.c:653-666`). Reading a fixed 1-byte angle on a bigcoords demo
+(~5% of the old archive, MVDSV 0.33/0.34 era) under-reads every
+angle-carrying entity and silently desyncs the rest of the packet —
+this applies to the baseline above AND the per-axis `U_ANGLE1/2/3`
+fields of `svc_packetentities` / `svc_deltapacketentities`.
 
 ### svc_fte_spawnbaseline2 (66) — FTE Extended Baseline
 
