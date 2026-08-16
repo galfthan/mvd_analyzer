@@ -87,6 +87,8 @@ Notes that cost me time:
 | (3)       | `MvdMap.render(time, bucket, controlStates)` — the whole frame composition; app.js renderMap is a thin wrapper resolving the two host-side time-indexed inputs. `resize(cssW, cssH, dpr)` / `refit()` as the push-only size API — all measuring (fullscreen, DPR) stays in app.js. `rebuildLocationGroups()` replaces the app-side wrapper |
 | (4)       | the frames seam — the columnar accessors move to `src/frames.js` (one implementation; app.js keeps wrapper names for the panels), the view is pushed in via `setFrames`, and `frameAt(time)` / `regionControlAt(time)` own the memoised lookup. `render(time)` and `hitTestPlayerSymbol(cx, cy, time)` lose their host-data parameters. NOTE: this is the synchronous half of the planned FrameSource — see "Not done" |
 | (5)       | interaction — the pointer state machine (`pointerDown/Move/Up`, `wheelZoom`), click dispatch, `setCamera`, `setFocusGroup`, `setFollowPlayer`, `currentOrbitPivot`, `resetView`, and a minimal emitter (`on('follow'\|'camera')`) all live on MvdMap. app.js keeps only DOM event glue (installMapInteraction), chrome sync via the two events, and thin global wrappers (setMapCamera / resetMapView / setFocusGroup / setFollowPlayer) for buttons + the harness. The app-side projection wrappers (worldToCanvas etc.) are gone |
+| (6)       | data transforms — `rebuildTrails` (was precomputeFullTrails; teleport threshold now derives from the view's windowMs) and `setGeometry` (was applyMapGeometry's state half) |
+| (7)       | **WebGL world backend** (`src/glworld.js`): floors + liquids as two sorted GPU batches, painter order kept (sorted on angle change only), premultiplied-alpha blending, camera folded into two row-vector uniforms (`makeWorldTransform`, pinned equal to `project()` by test). Renders into an internal offscreen canvas blitted under the 2D layers, so the single-canvas contract and the loader invariant hold. Auto-fallback to the 2D painter on missing/lost context; `?gl=0` forces it. Verified: 2D-anchor shots 140/140 byte-identical to pre-GL; GL shots differ only in AA/rounding (0.00% of pixels differ by >60/255 in sampled shots) |
 
 State: `app.js` ~9,300 lines. `mvd-map-view/` ~3,300 lines of source,
 115 unit tests. `make test` green; full-shot parity on every commit (the set
@@ -124,8 +126,8 @@ In the order I would do it:
    `setFocusGroup`, `setCamera`, `resetView`, `on('follow'|'camera')` exist),
    `seek(ms)`/`play()`/`pause()`, `setOverlays()`, and
    `on('select'|'hoverloc')` if the MCP viewer needs them.
-3. **Then** the two follow-on parts, in this order: WebGL backend
-   (perf/effects, see below), then the MCP Apps viewer in `mvd-mcp`.
+3. **The MCP Apps viewer in `mvd-mcp`** (the WebGL backend landed — see
+   the Done table).
 
 ---
 

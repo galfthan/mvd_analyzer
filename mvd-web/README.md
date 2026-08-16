@@ -620,10 +620,19 @@ side triangles. Because everything is **near-opaque and painter-sorted**,
 a higher floor cleanly *covers* a lower one rather than tinting it through
 translucency (the translucent stacking used to read as "shading"); the box
 sides read as solid thickness, not a dark smear. Players, items, liquids
-and overlays all draw live on top. `renderSolidEntries` also strokes each
-fill-batch with its own colour at a hairline width, sealing the
+and overlays all draw live on top.
+
+The floor model and the liquid volumes render through a **WebGL2 backend**
+by default (`mvd-map-view/src/glworld.js`): two GPU triangle batches in the
+same painter order, re-sorted only when the camera *angle* changes, so
+rotating/panning/zooming costs a uniform update instead of a full
+re-rasterisation. On the canvas-2D fallback path, `renderSolidEntries` also
+strokes each fill-batch with its own colour at a hairline width, sealing the
 anti-aliasing seams between adjacent triangles so a continuous floor reads
-as one clean surface instead of showing its triangulation as a mesh.
+as one clean surface instead of showing its triangulation as a mesh — GL
+rasterisation has no such seams, so the GL path skips the hack (and its
+double rasterisation cost) entirely. `?gl=0` forces the 2D path; a failed or
+lost WebGL context falls back to it automatically.
 
 **Occupied-region overlay** — a region a living player currently stands
 in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one
@@ -670,12 +679,12 @@ on first need), so the first toggle-on incurs the heaviest
 position-derived pass and later toggles are instant. BSP-gated — the
 toggles are inert on maps without a provisioned BSP.
 
-The floor model renders into an offscreen canvas keyed by the full camera
-state (`drawCachedWorld`); steady playback just blits it (~1 ms), only
-rotation/pan/zoom/focus changes re-render. The painter sort scatters
-same-colour triangles so per-frame batching would cost many `fill()`
-calls — hence the bitmap cache. Code: `buildFloorModel` /
-`renderSolidEntries` / `drawCachedWorld`.
+On the 2D fallback path the floor model renders into an offscreen canvas
+keyed by the full camera state (`drawCachedWorld`); steady playback just
+blits it (~1 ms), but every rotation/pan/zoom/focus change re-renders the
+whole model — which is exactly the cost the WebGL backend removes. Code:
+`buildFloorModel` / `renderSolidEntries` / `drawCachedWorld` (2D) and
+`GlWorld` / `drawWorldGL` (GL).
 
 (An earlier occluding **Solid** mode drew the map's vertical walls on top
 of the floor model; it was removed, and the generator no longer emits the

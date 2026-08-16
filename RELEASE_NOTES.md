@@ -5,6 +5,33 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (map-view-extract) — reusable map component + WebGL world
+
+No schema change; web UI only, in two parts.
+
+**The map renderer is now a standalone component** —
+[`mvd-map-view/`](mvd-map-view/README.md), a dependency-free ESM package
+holding the camera, the world/actor/overlay draw layers, the frame feed, hit
+testing and the pointer gesture semantics behind an `MvdMap` class. mvd-web
+mounts it through a small module bootstrap; behaviour is pixel-identical by
+construction (every extraction step was gated on a byte-exact screenshot
+corpus). This is groundwork for embedding the same map outside mvd-web (an
+MCP Apps viewer), where it must run behind a strict CSP — hence the package's
+loader invariant: it never fetches, never touches ambient globals, and takes
+data and size only through its API.
+
+**The static world now renders on the GPU.** Floors and liquid volumes draw
+through a WebGL2 backend: rotating, tilting or zooming the map no longer
+re-rasterises the whole floor model per frame (the old path re-baked ~2–25k
+triangles to an offscreen canvas on every camera-motion frame), and the
+hairline seam-sealing stroke the 2D painter needed between adjacent
+triangles is gone — GL rasterisation has no such seams, so the floor reads
+cleaner at every angle. Painter order and colours are unchanged, so the look
+is the same apart from the crisper edges. Canvas-2D remains as an automatic
+fallback wherever WebGL2 is unavailable (or lost mid-session), and `?gl=0`
+forces it — that path stays byte-identical to the previous release and
+remains the parity harness's anchor.
+
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 
 No schema change; web UI only. Team colors used to follow finishing order —

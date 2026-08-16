@@ -67,6 +67,7 @@ Moved so far:
 | `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), the actor layer (the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, the static entity view), the overlay layer (trails, LOS/PVS sightlines, region occupancy and control tints), loc resolution (`resolvePlayerLoc`) and hit testing (`pickLocGroupAt`, `hitTestPlayerSymbol`) |
 | `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
 | `src/frames.js` | the columnar bucket-view accessors — `bucketTimeSec`, `bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot` and friends. One implementation shared by the map (via `setFrames`/`frameAt`) and the host's timeline panels |
+| `src/glworld.js` | the WebGL2 world backend — floors + liquids as two sorted GPU batches. Camera motion is a uniform update instead of a full re-bake, and the 2D painter's AA seam-sealing stroke is unnecessary. Falls back to the 2D path when a context can't be created (or is lost); `state.useGL = false` forces 2D |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
@@ -95,8 +96,12 @@ corpus, and a windowed frame source, with the host application owning only
 the chrome around the canvas. The design is in `plans/plan-embeddable-map.md`.
 
 Everything in `src/draw.js` takes its context, geometry and projection
-explicitly — no renderer state is read from module scope. That is what makes
-it the layer a WebGL backend replaces wholesale.
+explicitly — no renderer state is read from module scope. That is what let
+the WebGL backend (`src/glworld.js`) replace the world half of it wholesale:
+floors and liquids render on the GPU by default, with the 2D painter kept as
+the automatic fallback and the parity anchor. The symbol/marker/text half
+stays canvas-2D on top — those are a few dozen cheap draws per frame, and
+text on the GPU buys nothing here.
 
 ## Use
 
@@ -149,4 +154,12 @@ pixel change.
 
 `mvd-web/test/mapshot.py` drives one demo and takes `--demo`, `--out`,
 `--times` (match-relative **seconds** — the frontend clock is seconds, unlike
-the ms-native API) and `--no-geometry`.
+the ms-native API), `--no-geometry` and `--no-webgl`.
+
+Two backends, two comparison rules. The canvas-2D path (`--no-webgl`, or
+`MAPSHOT_FLAGS=--no-webgl` through `capture-baseline.sh`) is byte-exact
+against any baseline captured on the same machine and is the anchor for
+refactors. The WebGL path is deterministic on one machine + driver, so
+GL-vs-GL before/after pairs compare byte-exactly too — but never compare a
+GL set against a 2D set (the anti-aliasing legitimately differs), and never
+across machines.

@@ -83,6 +83,16 @@ export {
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
 
 export {
+    GlWorld,
+    parseColor,
+    makeWorldTransform,
+    entryDepth,
+    buildEntryVertices,
+    sortedIndices,
+    buildLiquidFaces,
+} from './glworld.js';
+
+export {
     bucketTimeSec,
     bucketIndexAtTime,
     bucketIndexAtOrAfter,

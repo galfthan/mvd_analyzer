@@ -488,6 +488,24 @@ test('regionControlAt decodes the per-region state strings on the frame grid', (
     assert.equal(states.late, undefined, 'string too short → region omitted');
 });
 
+test('a dead WebGL probe latches to the 2D world path', () => {
+    // The stub canvas hands back a junk context for 'webgl2', so GlWorld's
+    // program build throws, create() returns null, and the component must
+    // fall back to the 2D painter — permanently, without re-probing.
+    const { canvas, calls } = stubCanvas();
+    const map = new MvdMap(canvas);
+    map.state.locations = [{ name: 'RA', x: 0, y: 0, z: 0 }];
+    map.setGeometry({
+        version: 2,
+        locs: [{ name: '', tris: [0, 0, 0, 100, 0, 0, 100, 100, 0] }],
+    });
+    map.setFrames({ windowMs: 50, start: 0, count: 10, players: {} });
+    map.render(0);
+    assert.equal(map._glFailed, true, 'failed probe latched');
+    assert.equal(map._glWorld, null);
+    assert.ok(calls.includes('drawImage'), 'the 2D bake blit ran instead');
+});
+
 test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
     const map = new MvdMap();
     map.state.locations = [

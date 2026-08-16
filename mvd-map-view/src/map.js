@@ -35,6 +35,7 @@ import {
     reconstructBucketPlayers, reconstructBucketTeams,
 } from './frames.js';
 import { decodeRegionStateChar } from './regions.js';
+import { GlWorld, buildLiquidFaces } from './glworld.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
 // different directions separate tonally (used by the liquid volumes).
@@ -285,6 +286,11 @@ export function newState() {
         canvasCssW: 0,
         canvasCssH: 0,
         dpr: 1,
+        // World backend: WebGL2 when available (floors + liquids render on
+        // the GPU — no per-camera-frame rebake, no AA seam hack), with the
+        // canvas-2D painter as automatic fallback. Hosts can force 2D
+        // (mvd-web: ?gl=0) — the parity harness anchors on that path.
+        useGL: true,
 
         // What the map is.
         locations: [],        // MapLocation[] — loc points, positions + names
@@ -369,6 +375,11 @@ export class MvdMap {
         // machine. The host wires DOM events to the pointer methods and
         // mirrors the emitted changes into its own chrome.
         this._listeners = {};
+        // WebGL world backend, created lazily on the first drawn frame.
+        // _glFailed latches a failed/lost context so every later frame takes
+        // the 2D fallback without re-probing.
+        this._glWorld = null;
+        this._glFailed = false;
         this._drag = {
             active: false,
             button: -1,
@@ -686,6 +697,50 @@ export class MvdMap {
         ctx.restore();
     }
 
+    // drawWorldGL: render floors + liquids through the WebGL backend into an
+    // internal offscreen canvas and blit it under the 2D layers. Returns
+    // false when GL is off, unavailable, or lost — the caller falls back to
+    // the 2D painter, so a dead driver degrades to the old path instead of a
+    // black map. The blit keeps the component's single-canvas contract: the
+    // host still sees one canvas, and the DOM never changes.
+    drawWorldGL(ctx, floorModel) {
+        const s = this.state;
+        if (!s.useGL || this._glFailed) return false;
+        if (!this._glWorld) {
+            const glw = GlWorld.create(this.scratchCanvas());
+            if (!glw) {
+                this._glFailed = true;
+                return false;
+            }
+            this._glWorld = glw;
+        }
+        const glw = this._glWorld;
+        if (glw.gl.isContextLost()) {
+            this._glFailed = true;
+            this._glWorld = null;
+            return false;
+        }
+        glw.syncFloor(floorModel, s.focusGroupName, this.farFadePredicate());
+        // Liquid faces are static per geometry (fixed light): identity-cache
+        // them next to the geometry they came from.
+        const geom = s.mapGeometry;
+        if (s._liquidFacesGeom !== geom) {
+            s._liquidFaces = buildLiquidFaces(geom && geom.liquids,
+                                              LIQUID_BASE, LIQUID_ALPHA, SOLID_LIGHT);
+            s._liquidFacesGeom = geom;
+        }
+        glw.syncLiquids(s._liquidFaces);
+        const canvas = s.canvas;
+        const cssW = s.canvasCssW || canvas.width;
+        const cssH = s.canvasCssH || canvas.height;
+        glw.render(this.camera, cssW, cssH, canvas.width, canvas.height);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.drawImage(glw.canvas, 0, 0);
+        ctx.restore();
+        return true;
+    }
+
     // drawWorld: the static layers under the actors — floors, liquids, movers,
     // weapon-fire overlays, region outlines and loc labels.
     drawWorld(ctx) {
@@ -701,10 +756,17 @@ export class MvdMap {
             // One clean view: flat, near-opaque, depth-sorted region tops + box
             // sides. A higher floor covers a lower one (no translucent
             // stacking), the sides read as solid thickness, and from overhead
-            // it is dead flat. Cached to an offscreen bitmap (per camera).
-            this.drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
-            // Liquids: translucent volumes above the floor, drawn live.
-            this.drawLiquids(ctx);
+            // it is dead flat.
+            //
+            // Preferred backend: WebGL (floors + liquids in two sorted GPU
+            // batches — camera motion is a uniform update, not a rebake).
+            // Fallback: the 2D painter, cached to an offscreen bitmap per
+            // camera pose.
+            if (!this.drawWorldGL(ctx, floorModel)) {
+                this.drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
+                // Liquids: translucent volumes above the floor, drawn live.
+                this.drawLiquids(ctx);
+            }
         } else {
             // No triangle geometry (loc-blob maps): flat translucent fills.
             if (backdropTris && backdropTris.length >= 9) {
