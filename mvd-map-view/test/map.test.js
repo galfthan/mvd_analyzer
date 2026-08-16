@@ -396,7 +396,13 @@ test('hitTestPlayerSymbol picks the nearest drawn symbol within the radius', () 
 function stubCanvas() {
     const calls = [];
     const ctx = new Proxy({}, {
-        get: (t, prop) => (prop === 'canvas' ? canvas : (...a) => { calls.push(String(prop)); }),
+        get: (t, prop) => {
+            if (prop === 'canvas') return canvas;
+            if (prop === 'measureText') {
+                return () => ({ width: 10, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2 });
+            }
+            return (...a) => { calls.push(String(prop)); };
+        },
         set: () => true,
     });
     const canvas = {
@@ -489,7 +495,7 @@ test('regionControlAt decodes the per-region state strings on the frame grid', (
 });
 
 test('_glDynamic interpolates flights, windows beams, and scales to physical px', () => {
-    const map = new MvdMap();
+    const map = new MvdMap(stubCanvas().canvas);
     map.state.currentTime = 10;   // 10 000 ms
     map.state.projectiles = {
         s: [8000, 20000], e: [12000, 21000],
@@ -511,6 +517,41 @@ test('_glDynamic interpolates flights, windows beams, and scales to physical px'
     assert.equal(dyn.lines.length, 1, 'only the beam inside the flash window');
     assert.equal(dyn.lines[0].halfWidth, 1.5);
     assert.deepEqual(dyn.movers, [], 'no movers without submodel meshes');
+});
+
+test('_glActors composes players, items, arrows and learn mode without throwing', () => {
+    // Regression: a missing import in any actor sub-path throws inside the
+    // GL frame build and blacks the whole map — exercise every branch.
+    const map = new MvdMap(stubCanvas().canvas);
+    map.state.currentTime = 1;
+    map.state.showViewArrows = true;
+    map.state.showVelArrows = true;
+    map.camera.pitch = 0.9;   // tilted → floor stems
+    map.state.playerSymbols = { nlk: { symbol: 'N', teamIdx: 0 } };
+    map.state._framePlayerData = {
+        nlk: { x: 10, y: 20, z: 30, h: 100, rl: true, q: true, at: 'ra',
+               vya: 8192, vp: 0, vx: 400, vy: 0, vz: 0, fh: 6 },
+    };
+    map.state.items = [{ kind: 'ra', x: 5, y: 5, z: 5, phases: [] }];
+    map.state.deathEvents = [{ t: 0.5, wx: 1, wy: 1, wz: 1, teamIdx: 0 }];
+    map.state.dropEvents = [{ t: 0.5, wx: 1, wy: 1, wz: 1, weapon: 'rl' }];
+    const dyn = map._glDynamic(2);
+    const types = new Set(dyn.actorBatches.map(b => b.type));
+    assert.ok(types.has('points'), 'symbol/marker sprites emitted');
+    assert.ok(types.has('sprites'), 'letter/label billboards emitted');
+    assert.ok(types.has('lines'), 'stem/arrow shafts emitted');
+    assert.ok(types.has('tris'), 'arrowheads emitted');
+
+    // Learn mode swaps to the entity study view, teleport arrows included.
+    map.state.learnMode = true;
+    map.state.mapEntities = [
+        { type: 'item', kind: 'rl', x: 1, y: 2, z: 3 },
+        { type: 'teleportSrc', target: 'tp1', x: 0, y: 0, z: 0 },
+        { type: 'teleportDst', targetName: 'tp1', x: 9, y: 9, z: 9 },
+    ];
+    map.buildTeleportArrows();
+    const learn = map._glDynamic(2);
+    assert.ok(learn.actorBatches.length > 0, 'entity markers emitted');
 });
 
 test('a dead WebGL probe latches to the 2D world path', () => {

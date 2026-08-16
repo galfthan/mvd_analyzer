@@ -99,3 +99,15 @@ player models, fog, occlusion, better lighting, first-person view.
   a lazily-baked label atlas (glatlas.js), a screen-space triangle program
   for arrowheads, and an ordered actor-batch dispatch in render(). Worst
   strong-diff vs step 3: 0.024%.
+- **Step 5 landed** — the whole actor layer and every label render in GL:
+  the z-sorted items+players composition (squares/outlines/labels, circles/
+  letters/badges with screen-offset point sprites, floor stems, view/vel
+  arrows with screen-space triangle heads), the fading death-✕/drop-D
+  markers, loc labels + occupied bold labels (shadow via tint on one white
+  atlas entry), and the learn-mode entity view with teleport links. On the
+  GL path the 2D canvas now draws NOTHING per frame — the entire scene is
+  in the blit. Worst strong-diff vs step 4: 0.77% (the label-dense learn
+  view; atlas text vs per-frame canvas text). Found by the gate: a missing
+  ARROWHEAD_PX import threw inside the GL frame build and blacked every
+  arrow/learn shot — now covered by a node test that exercises every actor
+  sub-path headlessly.

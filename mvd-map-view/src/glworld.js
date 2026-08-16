@@ -198,7 +198,9 @@ const POINT_VERT_SRC = `#version 300 es
 uniform vec4 uRowX;
 uniform vec4 uRowY;
 uniform vec4 uRowZ;
+uniform vec2 uViewPx;
 in vec3 aPos;
+in vec2 aOff;     // screen-space offset in physical px (badge orbit slots)
 in vec4 aColor;
 in float aSize;
 in float aShape;
@@ -208,7 +210,9 @@ flat out float vShape;
 flat out float vParam;
 void main() {
     vec4 p = vec4(aPos, 1.0);
-    gl_Position = vec4(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p), 1.0);
+    vec3 clip = vec3(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p));
+    vec2 px = vec2((clip.x + 1.0) * 0.5 * uViewPx.x, (1.0 - clip.y) * 0.5 * uViewPx.y) + aOff;
+    gl_Position = vec4(px.x / uViewPx.x * 2.0 - 1.0, 1.0 - px.y / uViewPx.y * 2.0, clip.z, 1.0);
     gl_PointSize = aSize;
     vColor = aColor;
     vShape = aShape;
@@ -444,6 +448,8 @@ export class GlWorld {
             aSize: gl.getAttribLocation(pt, 'aSize'),
             aShape: gl.getAttribLocation(pt, 'aShape'),
             aParam: gl.getAttribLocation(pt, 'aParam'),
+            aOff: gl.getAttribLocation(pt, 'aOff'),
+            uViewPx: gl.getUniformLocation(pt, 'uViewPx'),
             vbo: gl.createBuffer(),
         };
 
@@ -721,16 +727,19 @@ export class GlWorld {
         gl.vertexAttribPointer(p.aDash, 2, gl.FLOAT, false, stride, 52);
     }
 
-    // _drawPoints: round dots ([{x, y, z, size(px), color: [r,g,b,a]}]) as
-    // point sprites from a per-frame stream buffer.
-    _drawPoints(points, t) {
+    // _drawPoints: shaped dots ([{x, y, z, size(px), shape, param, offX,
+    // offY, color: [r,g,b,a]}]) as point sprites from a per-frame stream
+    // buffer. offX/offY hang the sprite at a screen offset from its anchor
+    // (badge orbit slots).
+    _drawPoints(points, t, pxW, pxH) {
         if (!points || points.length === 0) return;
         const gl = this.gl;
         const p = this.pointProg;
-        const data = new Float32Array(points.length * 10);
+        const data = new Float32Array(points.length * 12);
         let i = 0;
         for (const pt of points) {
             data[i++] = pt.x; data[i++] = pt.y; data[i++] = pt.z;
+            data[i++] = pt.offX || 0; data[i++] = pt.offY || 0;
             data[i++] = pt.color[0]; data[i++] = pt.color[1];
             data[i++] = pt.color[2]; data[i++] = pt.color[3];
             data[i++] = pt.size;
@@ -741,18 +750,22 @@ export class GlWorld {
         gl.uniform4fv(p.uRowX, t.rx);
         gl.uniform4fv(p.uRowY, t.ry);
         gl.uniform4fv(p.uRowZ, t.rz);
+        gl.uniform2f(p.uViewPx, pxW, pxH);
         gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        const stride = 48;
         gl.enableVertexAttribArray(p.aPos);
-        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, 40, 0);
+        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(p.aOff);
+        gl.vertexAttribPointer(p.aOff, 2, gl.FLOAT, false, stride, 12);
         gl.enableVertexAttribArray(p.aColor);
-        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 40, 12);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, stride, 20);
         gl.enableVertexAttribArray(p.aSize);
-        gl.vertexAttribPointer(p.aSize, 1, gl.FLOAT, false, 40, 28);
+        gl.vertexAttribPointer(p.aSize, 1, gl.FLOAT, false, stride, 36);
         gl.enableVertexAttribArray(p.aShape);
-        gl.vertexAttribPointer(p.aShape, 1, gl.FLOAT, false, 40, 32);
+        gl.vertexAttribPointer(p.aShape, 1, gl.FLOAT, false, stride, 40);
         gl.enableVertexAttribArray(p.aParam);
-        gl.vertexAttribPointer(p.aParam, 1, gl.FLOAT, false, 40, 36);
+        gl.vertexAttribPointer(p.aParam, 1, gl.FLOAT, false, stride, 44);
         gl.drawArrays(gl.POINTS, 0, points.length);
     }
 
@@ -920,21 +933,24 @@ export class GlWorld {
         this._drawBlended(this.liquidBatch, w);
 
         gl.disable(gl.DEPTH_TEST);
+        if (dyn.atlas) this.syncAtlas(dyn.atlas);
         this._drawOutlines(dyn.regionOutlines, t, pxW, pxH);
+        this._drawSprites(dyn.labels, t, pxW, pxH);
+        gl.useProgram(this.prog);
         this._drawFills(dyn.fills);
         this._drawOutlines(dyn.fillOutlines, t, pxW, pxH);
+        this._drawSprites(dyn.boldLabels, t, pxW, pxH);
         // Lines under points: trail/death markers and projectile dots read
         // on top of trail lines, sightlines and beams.
         this._drawLines(dyn.lines, t, pxW, pxH);
-        this._drawPoints(dyn.points, t);
+        this._drawPoints(dyn.points, t, pxW, pxH);
 
         // The actor pass: an ordered command list (the caller z-sorts
         // drawables and flushes on primitive-type change, so cross-type
         // occlusion between overlapping actors keeps the painter order).
         if (dyn.actorBatches && dyn.actorBatches.length > 0) {
-            if (dyn.atlas) this.syncAtlas(dyn.atlas);
             for (const b of dyn.actorBatches) {
-                if (b.type === 'points') this._drawPoints(b.items, t);
+                if (b.type === 'points') this._drawPoints(b.items, t, pxW, pxH);
                 else if (b.type === 'lines') this._drawLines(b.items, t, pxW, pxH);
                 else if (b.type === 'sprites') this._drawSprites(b.items, t, pxW, pxH);
                 else if (b.type === 'tris') this._drawScreenTris(b.items, pxW, pxH);

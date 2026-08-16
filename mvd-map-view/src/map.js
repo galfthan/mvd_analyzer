@@ -28,7 +28,8 @@ import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
 import {
     drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
     drawMoverMesh, drawLiquidVolume, drawPlayerSymbolAt, drawBadgesAroundCenter,
-    drawWorldArrow, drawArrow, drawDeathX, drawDropD, PLAYER_SYMBOL_BASE_SIZE,
+    drawWorldArrow, drawArrow, drawDeathX, drawDropD,
+    PLAYER_SYMBOL_BASE_SIZE, ARROWHEAD_PX,
 } from './draw.js';
 import { lowerBoundIndex, trailIndexAtTime } from './util.js';
 import { normalizeLocationName, findNearestLocation } from './locs.js';
@@ -38,6 +39,7 @@ import {
 } from './frames.js';
 import { decodeRegionStateChar } from './regions.js';
 import { GlWorld, buildLiquidFaces, parseColor } from './glworld.js';
+import { GlAtlas } from './glatlas.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
 // different directions separate tonally (used by the liquid volumes).
@@ -756,10 +758,26 @@ export class MvdMap {
     _glDynamic(pxScale) {
         const s = this.state;
         const tMs = s.currentTime * 1000;
+        const atlas = this._atlas();
+        const iconScale = this.iconScale();
         const dyn = {
             movers: [], points: [], lines: [],
             regionOutlines: [], fills: [], fillOutlines: [],
+            labels: [], boldLabels: [], actorBatches: [],
+            atlas,
         };
+
+        // Loc labels — every named region, tier-faded like the 2D pass.
+        const labelFont = `${Math.round(12 * iconScale * pxScale)}px monospace`;
+        for (const group of s.locationGroups || []) {
+            const tier = this.focusTier(group.name);
+            const color = tier === 'far'
+                ? scaleRgbaAlpha(group.color.text, 0.35)
+                : group.color.text;
+            const sp = this._glLabelSprite(atlas, group.name, labelFont, color,
+                group.centroid.x, group.centroid.y, group.centroid.z);
+            if (sp) dyn.labels.push(sp);
+        }
 
         // Thin baseline outlines around every traced region, styled by the
         // focus tier — the quiet strokes the occupied overlay brightens.
@@ -803,6 +821,24 @@ export class MvdMap {
                             outline, tint: outlineTint, halfWidth: 0.5 * pxScale,
                         });
                     }
+                }
+                // Bold labels over the dimmer baseline ones — a black shadow
+                // sprite offset one pixel under the white text (both reuse
+                // one white atlas entry, restyled by tint).
+                const boldFont = `bold ${Math.round(12 * iconScale * pxScale)}px monospace`;
+                const groupsByName = s.locationGroupByName || {};
+                for (const name of ov.names) {
+                    const g = groupsByName[name];
+                    if (!g) continue;
+                    const shadow = this._glLabelSprite(atlas, g.name, boldFont,
+                        'rgba(255, 255, 255, 0.95)',
+                        g.centroid.x, g.centroid.y, g.centroid.z,
+                        pxScale, pxScale, [0, 0, 0, 0.65 / 0.95]);
+                    if (shadow) dyn.boldLabels.push(shadow);
+                    const sp = this._glLabelSprite(atlas, g.name, boldFont,
+                        'rgba(255, 255, 255, 0.95)',
+                        g.centroid.x, g.centroid.y, g.centroid.z);
+                    if (sp) dyn.boldLabels.push(sp);
                 }
             }
         }
@@ -863,7 +899,354 @@ export class MvdMap {
                 });
             }
         }
+
+        // The actor pass: items + players (or the learn-mode entity view),
+        // plus the fading death/drop markers.
+        this._glActors(dyn, pxScale);
         return dyn;
+    }
+
+    // ─── GL actor pass ──────────────────────────────────────────────────────
+    //
+    // The z-sorted items-and-players composition, the death/drop markers,
+    // the loc labels and the learn-mode entity view as GL data. Text comes
+    // from the label atlas (whole strings baked once, drawn as billboards);
+    // shapes are point sprites; arrowheads are screen-space triangles. The
+    // ordered batch list preserves painter order across primitive types, so
+    // a nearer player's circle still covers a farther player's letter.
+
+    _atlas() {
+        if (!this._labelAtlas) {
+            this._labelAtlas = new GlAtlas(this.state.canvas.ownerDocument);
+        }
+        return this._labelAtlas;
+    }
+
+    // _batcher: an ordered command list that merges consecutive same-type
+    // primitives into one draw.
+    _batcher(batches) {
+        return (type, item) => {
+            const last = batches[batches.length - 1];
+            if (last && last.type === type) last.items.push(item);
+            else batches.push({ type, items: [item] });
+        };
+    }
+
+    // _glLabelSprite: a centred label billboard at a world anchor.
+    _glLabelSprite(atlas, text, font, color, x, y, z, dxPx = 0, dyPx = 0, tint = null, stroke = null) {
+        const e = atlas.get(text, font, color, stroke);
+        if (!e) return null;
+        return {
+            x, y, z, e, tint,
+            offX: -e.w / 2 + dxPx,
+            offY: -e.midY + dyPx,
+            w: e.w, h: e.h,
+        };
+    }
+
+    // _glActors fills dyn with everything the 2D actor layer drew:
+    // items + players (z-sorted, mixed), stems, arrows, badges, the fading
+    // death/drop markers, and — in learn mode — the entity study view.
+    _glActors(dyn, pxScale) {
+        const s = this.state;
+        const atlas = this._atlas();
+        const time = s.currentTime;
+        const playerData = s._framePlayerData;
+        const push = this._batcher(dyn.actorBatches);
+        const iconScale = this.iconScale();
+
+        if (s.learnMode) {
+            this._glMapEntities(dyn, atlas, push, pxScale, iconScale);
+            return;
+        }
+
+        const zRange = s.zRange || { lo: 0, hi: 0 };
+        const zSpan = is3D(this.camera) ? 0 : (zRange.hi - zRange.lo);
+        const tilted = is3D(this.camera);
+
+        // Same drawable list + sort key as the 2D pass.
+        const drawables = [];
+        if (s.items && s.items.length > 0) {
+            for (const item of s.items) {
+                const style = ITEM_MARKER_STYLES[item.kind];
+                if (!style) continue;
+                const pos = this.toCanvasNew(item.x, item.y, item.z);
+                drawables.push({
+                    kind: 'i',
+                    sortDepth: pos.depth - ITEM_Z_TOP_THRESHOLD * this.camera.sinPitch,
+                    item, style,
+                });
+            }
+        }
+        if (playerData) {
+            for (const [name, data] of Object.entries(playerData)) {
+                if (data.x === 0 && data.y === 0) continue;
+                const symbolInfo = s.playerSymbols[name];
+                if (!symbolInfo) continue;
+                const pos = this.toCanvasNew(data.x, data.y, data.z);
+                drawables.push({ kind: 'p', sortDepth: pos.depth, name, data, symbolInfo });
+            }
+        }
+        drawables.sort((a, b) => a.sortDepth - b.sortDepth);
+
+        const itemSize = ITEM_MARKER_SIZE * iconScale * pxScale;
+        const itemFontPx = Math.round(10 * iconScale * pxScale);
+        const itemFont = `bold ${itemFontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        const DIM = [ITEM_DIM_ALPHA, ITEM_DIM_ALPHA, ITEM_DIM_ALPHA, ITEM_DIM_ALPHA];
+
+        for (const d of drawables) {
+            if (d.kind === 'i') {
+                this._glItemMarker(push, atlas, d.item, d.style, time,
+                                   itemSize, itemFont, DIM, pxScale);
+            } else {
+                if (tilted) this._glPlayerStem(push, d.name, d.data, d.symbolInfo, pxScale);
+                if (s.showViewArrows || s.showVelArrows) {
+                    this._glPlayerArrows(dyn, push, d.data, d.symbolInfo, pxScale);
+                }
+                this._glPlayerSymbol(push, atlas, d.data, d.symbolInfo,
+                                     iconScale, zRange, zSpan, pxScale);
+            }
+        }
+
+        // Recent-death and backpack-drop markers, fading over
+        // DEATH_X_DURATION — on top of the actors like the 2D pass.
+        const deaths = s.deathEvents;
+        if (deaths && deaths.length > 0) {
+            for (const e of deaths) {
+                const dt = time - e.t;
+                if (dt < 0 || dt > DEATH_X_DURATION) continue;
+                const alpha = 1 - dt / DEATH_X_DURATION;
+                const [r, g, b] = parseColor(this.teamColors[e.teamIdx] || '#ff5050');
+                push('points', {
+                    x: e.wx, y: e.wy, z: e.wz,
+                    size: 16 * pxScale, shape: 1,
+                    color: [r * alpha, g * alpha, b * alpha, alpha],
+                });
+            }
+        }
+        const drops = s.dropEvents;
+        if (drops && drops.length > 0) {
+            const dropFont = `bold ${Math.round(28 * pxScale)}px sans-serif`;
+            for (const e of drops) {
+                const dt = time - e.t;
+                if (dt < 0 || dt > DEATH_X_DURATION) continue;
+                const alpha = 1 - dt / DEATH_X_DURATION;
+                const fill = e.weapon === 'rl' ? 'rgb(255, 107, 107)'
+                    : e.weapon === 'lg' ? 'rgb(0, 217, 255)' : '#ffffff';
+                const sp = this._glLabelSprite(atlas, 'D', dropFont, fill,
+                    e.wx, e.wy, e.wz, 0, 0, [alpha, alpha, alpha, alpha], '#000000');
+                if (sp) push('sprites', sp);
+            }
+        }
+    }
+
+    _glItemMarker(push, atlas, item, style, time, size, font, DIM, pxScale) {
+        const up = this.isItemUp(item, time);
+        const tint = up ? null : DIM;
+        const mul = (c) => {
+            if (up) return c;
+            return [c[0] * ITEM_DIM_ALPHA, c[1] * ITEM_DIM_ALPHA,
+                    c[2] * ITEM_DIM_ALPHA, c[3] * ITEM_DIM_ALPHA];
+        };
+        push('points', {
+            x: item.x, y: item.y, z: item.z,
+            size, shape: 3, color: mul(parseColor(style.fill)),
+        });
+        if (style.outline) {
+            push('points', {
+                x: item.x, y: item.y, z: item.z,
+                size, shape: 4, param: (3 * pxScale) / size,
+                color: mul(parseColor(style.outline)),
+            });
+        }
+        if (style.label) {
+            const sp = this._glLabelSprite(atlas, style.label, font,
+                style.textColor || style.outline || '#fff',
+                item.x, item.y, item.z, 0, 1, tint);
+            if (sp) push('sprites', sp);
+        }
+    }
+
+    _glPlayerSymbol(push, atlas, data, symbolInfo, iconScale, zRange, zSpan, pxScale) {
+        // Per-player z-based size scale, identical to the 2D pass.
+        let zScale = 1;
+        if (zSpan > 0) {
+            let t = ((data.z || 0) - zRange.lo) / zSpan;
+            if (t < 0) t = 0;
+            if (t > 1) t = 1;
+            zScale = 1 + 0.25 * t;
+        }
+        const k = iconScale * zScale;
+        const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
+        const teamCol = parseColor(teamHex);
+        // Circle: team ring (radius 13k, stroke 2k) over a dark disc.
+        push('points', {
+            x: data.x, y: data.y, z: data.z,
+            size: 28 * k * pxScale, shape: 0, color: teamCol,
+        });
+        push('points', {
+            x: data.x, y: data.y, z: data.z,
+            size: 24 * k * pxScale, shape: 0, color: parseColor('#0a0a15'),
+        });
+        const letterFont = `bold ${Math.round(16 * k * pxScale)}px monospace`;
+        const sp = this._glLabelSprite(atlas, symbolInfo.symbol, letterFont, teamHex,
+            data.x, data.y, data.z);
+        if (sp) push('sprites', sp);
+
+        const badges = this.getActiveBadges(data);
+        if (badges.length > 0) {
+            const orbitR = 14 * k * pxScale;
+            const badgeR = 5 * k * pxScale;
+            const badgeFont = `bold ${Math.round(badgeR * 1.2)}px monospace`;
+            for (const b of badges) {
+                const rad = (b.angle - 90) * Math.PI / 180;
+                const bx = orbitR * Math.cos(rad);
+                const by = orbitR * Math.sin(rad);
+                push('points', {
+                    x: data.x, y: data.y, z: data.z,
+                    size: badgeR * 2, shape: 0,
+                    color: parseColor(b.color || '#b4b4b4'),
+                    offX: bx, offY: by,
+                });
+                const bsp = this._glLabelSprite(atlas, b.letter, badgeFont, '#000000',
+                    data.x, data.y, data.z, bx, by);
+                if (bsp) push('sprites', bsp);
+            }
+        }
+    }
+
+    _glPlayerStem(push, name, data, symbolInfo, pxScale) {
+        const z = data.z || 0;
+        let bottomZ;
+        if (typeof data.fh === 'number') {
+            bottomZ = z - PLAYER_ORIGIN_ABOVE_FLOOR - data.fh;
+        } else {
+            const floorZ = this.playerFloorZ(name, data.x, data.y, z);
+            bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
+        }
+        const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
+        push('lines', {
+            sx: data.x, sy: data.y, sz: z,
+            ex: data.x, ey: data.y, ez: bottomZ,
+            halfWidth: 1.5 * pxScale,
+            color: parseColor(hexToRgba(teamHex, 0.55)),
+        });
+        push('points', {
+            x: data.x, y: data.y, z: bottomZ,
+            size: 5 * pxScale, shape: 0,
+            color: parseColor(hexToRgba(teamHex, 0.7)),
+        });
+    }
+
+    _glPlayerArrows(dyn, push, data, symbolInfo, pxScale) {
+        const s = this.state;
+        const ox = data.x, oy = data.y, oz = data.z;
+        if (s.showVelArrows && typeof data.vx === 'number') {
+            const speed = Math.hypot(data.vx, data.vy, data.vz);
+            if (speed > VEL_ARROW_MIN_SPEED) {
+                const sc = 1 / VEL_UNITS_PER_MAP_UNIT;
+                const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
+                this._glWorldArrow(push, ox, oy, oz,
+                    data.vx * sc, data.vy * sc, data.vz * sc,
+                    parseColor(hexToRgba(teamHex, 0.9)), 1.75 * pxScale, pxScale);
+            }
+        }
+        if (s.showViewArrows && typeof data.vya === 'number') {
+            const yaw = data.vya * ANGLE16_TO_RAD;
+            const pitch = (data.vp || 0) * ANGLE16_TO_RAD;
+            const cp = Math.cos(pitch);
+            this._glWorldArrow(push, ox, oy, oz,
+                cp * Math.cos(yaw) * VIEW_ARROW_LEN,
+                cp * Math.sin(yaw) * VIEW_ARROW_LEN,
+                -Math.sin(pitch) * VIEW_ARROW_LEN,
+                parseColor(VIEW_ARROW_COLOR), 1.5 * pxScale, pxScale);
+        }
+    }
+
+    // _glWorldArrow: shaft as a world-space line, arrowhead as a
+    // screen-space triangle at the projected tip (matching drawWorldArrow).
+    _glWorldArrow(push, ox, oy, oz, dx, dy, dz, color, halfWidth, pxScale) {
+        const a = this.toCanvasNew(ox, oy, oz);
+        const b = this.toCanvasNew(ox + dx, oy + dy, oz + dz);
+        const sx = (b.x - a.x), sy = (b.y - a.y);
+        const slen = Math.hypot(sx, sy);
+        if (slen < 1 / pxScale) return;
+        push('lines', {
+            sx: ox, sy: oy, sz: oz,
+            ex: ox + dx, ey: oy + dy, ez: oz + dz,
+            halfWidth, color,
+        });
+        const ux = sx / slen, uy = sy / slen;
+        const hl = ARROWHEAD_PX, hw = ARROWHEAD_PX * 0.6;
+        const bx = b.x * pxScale, by = b.y * pxScale;
+        push('tris', {
+            pts: [
+                bx, by,
+                (b.x - ux * hl - uy * hw) * pxScale, (b.y - uy * hl + ux * hw) * pxScale,
+                (b.x - ux * hl + uy * hw) * pxScale, (b.y - uy * hl - ux * hw) * pxScale,
+            ],
+            color,
+        });
+    }
+
+    // _glMapEntities: the learn-mode entity study view — teleport link
+    // arrows under depth-ordered markers, like drawMapEntities.
+    _glMapEntities(dyn, atlas, push, pxScale, iconScale) {
+        const s = this.state;
+        const entities = s.mapEntities;
+        if (!entities || entities.length === 0) return;
+        const f = s.entityFilters;
+        const size = ITEM_MARKER_SIZE * iconScale * pxScale;
+        const fontPx = Math.round(10 * iconScale * pxScale);
+        const font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
+
+        if (f.teleporter && s.teleportArrows.length > 0) {
+            const col = parseColor(hexToRgba(TELEPORT_COLOR, 0.55));
+            const halfWidth = Math.max(0.5, 0.75 * iconScale) * pxScale;
+            for (const a of s.teleportArrows) {
+                this._glWorldArrow(push, a.sx, a.sy, a.sz,
+                    a.dx - a.sx, a.dy - a.sy, a.dz - a.sz, col, halfWidth, pxScale);
+            }
+        }
+
+        const sorted = entities
+            .map(e => ({ e, depth: this.toCanvasNew(e.x, e.y, e.z).depth }))
+            .sort((a, b) => a.depth - b.depth);
+        for (const { e } of sorted) {
+            if (!f[this.entityCategory(e)]) continue;
+            const style = e.type === 'item' ? LEARN_ITEM_STYLES[e.kind] : STRUCTURAL_STYLES[e.type];
+            if (!style) continue;
+            if (style.circle) {
+                push('points', {
+                    x: e.x, y: e.y, z: e.z,
+                    size, shape: 0, color: parseColor(style.fill),
+                });
+                if (style.outline) {
+                    push('points', {
+                        x: e.x, y: e.y, z: e.z,
+                        size, shape: 2, param: 1 - (3 * pxScale) / size,
+                        color: parseColor(style.outline),
+                    });
+                }
+            } else {
+                push('points', {
+                    x: e.x, y: e.y, z: e.z,
+                    size, shape: 3, color: parseColor(style.fill),
+                });
+                if (style.outline) {
+                    push('points', {
+                        x: e.x, y: e.y, z: e.z,
+                        size, shape: 4, param: (3 * pxScale) / size,
+                        color: parseColor(style.outline),
+                    });
+                }
+            }
+            if (style.label) {
+                const sp = this._glLabelSprite(atlas, style.label, font,
+                    style.textColor || style.outline || '#fff', e.x, e.y, e.z, 0, 1);
+                if (sp) push('sprites', sp);
+            }
+        }
     }
 
     // _collectTrails: the trail window as GL line segments and marker
@@ -1044,17 +1427,19 @@ export class MvdMap {
             }
         }
 
-        const labelPx = Math.round(12 * this.iconScale());
-        ctx.font = `${labelPx}px monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        for (const group of groups) {
-            const tier = this.focusTier(group.name);
-            const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-            ctx.fillStyle = tier === 'far'
-                ? scaleRgbaAlpha(group.color.text, 0.35)
-                : group.color.text;
-            ctx.fillText(group.name, pos.x, pos.y);
+        if (!usedGL) {
+            const labelPx = Math.round(12 * this.iconScale());
+            ctx.font = `${labelPx}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (const group of groups) {
+                const tier = this.focusTier(group.name);
+                const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
+                ctx.fillStyle = tier === 'far'
+                    ? scaleRgbaAlpha(group.color.text, 0.35)
+                    : group.color.text;
+                ctx.fillText(group.name, pos.x, pos.y);
+            }
         }
         return usedGL;
     }
@@ -2197,16 +2582,11 @@ export class MvdMap {
         // Learn-map mode: static entity study view — keep the floor/loc base,
         // draw the designed entity layout, and skip all player/time-based layers.
         if (s.learnMode) {
-            this.drawMapEntities(ctx);
+            if (!usedGL) this.drawMapEntities(ctx);
             return;
         }
 
-        if (usedGL) {
-            // The GL world pass drew the control and occupancy tints and the
-            // occupied outlines; only the bold occupied labels are still 2D
-            // (text moves to the sprite atlas later).
-            this.drawOccupiedLabels(ctx, s._frameOccupiedNames);
-        } else {
+        if (!usedGL) {
             // Draw region control overlay (colored by controlling team)
             if (s.controlRegions && s.regionToGroups) {
                 const controlStates = this.regionControlAt(time);
@@ -2230,6 +2610,11 @@ export class MvdMap {
             this.drawTracks(ctx, time);
             this.drawLosLines(ctx, time, playerData);
         }
+
+        // The actor composition and the fading death/drop markers: the GL
+        // pass drew them already (see _glActors); the 2D versions run only
+        // on the fallback path.
+        if (usedGL) return;
 
         // Z-depth pass for items + players: overlapping players occlude by z
         // (higher deck on top), and an item whose z is clearly higher than a
