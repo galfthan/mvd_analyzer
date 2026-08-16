@@ -11837,7 +11837,7 @@ function drawAimDensity(canvas, c, idx) {
         const hxi = aimClampIndex(Math.floor((x + AIM_X_HALF) / AIM_HOVER_BIN), hx);
         const hyi = aimClampIndex(Math.floor((AIM_Y_HALF - y) / AIM_HOVER_BIN), hy);
         hShots[hyi * hx + hxi]++;
-        if (c.hit[i]) hHits[hyi * hx + hxi]++;
+        if (c.hit && c.hit[i]) hHits[hyi * hx + hxi]++;
     }
 
     // Separable gaussian blur, kernel normalized to sum 1 so values keep the
@@ -11960,7 +11960,7 @@ function drawAimDensity(canvas, c, idx) {
     ctx.fillText('0', bx + CB + 4, MT + PH - 3);
 
     // Hover read-out: shot/hit counts in the coarse bin under the cursor.
-    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H };
+    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H, hitsKnown: !!c.hit };
     if (!canvas._aimWired) {
         canvas.addEventListener('mousemove', e => {
             const d = canvas._aimHover;
@@ -11984,7 +11984,8 @@ function drawAimDensity(canvas, c, idx) {
             const yhi = AIM_Y_HALF - yi * AIM_HOVER_BIN;
             const range = `x ${fmt(xlo)}…${fmt(xlo + AIM_HOVER_BIN)} qu, y ${fmt(yhi - AIM_HOVER_BIN)}…${fmt(yhi)} qu`;
             canvas.title = s
-                ? `${range}: ${s} shot${s === 1 ? '' : 's'}, ${h} hit (${Math.round(h / s * 100)}%)`
+                ? `${range}: ${s} shot${s === 1 ? '' : 's'}` +
+                    (d.hitsKnown ? `, ${h} hit (${Math.round(h / s * 100)}%)` : '')
                 : `${range}: no shots`;
         });
         canvas._aimWired = true;
@@ -12009,7 +12010,9 @@ function renderAimHistRow(prefix, c, idx, ramp) {
         AIM_X_HALF, AIM_HIST_BIN, i => aimOffX(c, i), c, idx, AIM_HULL_HALF_W));
     row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', 'qu',
         AIM_Y_HALF, AIM_HIST_BIN, i => aimOffY(c, i), c, idx, AIM_HULL_HALF_H));
-    if (ramp && ramp.since && ramp.since.length) row.appendChild(buildAimRampHist(ramp));
+    // The ramp panel is hit-% by construction — without a measured hit
+    // column (aim.hitsMeasured false) it would read a fabricated flat 0%.
+    if (ramp && ramp.since && ramp.since.length && ramp.hit) row.appendChild(buildAimRampHist(ramp));
 }
 
 function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
@@ -12024,7 +12027,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
     for (const i of idx) {
         const b = bins[binOf(val(i))];
         b.shots++;
-        if (c.hit[i]) b.hits++;
+        if (c.hit && c.hit[i]) b.hits++;
         if (b.shots > max) max = b.shots;
     }
 
@@ -12055,7 +12058,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
         const lo = (bi - mid) * w - w / 2;
         col.title = `${lo.toFixed(0)} … ${(lo + w).toFixed(0)} ${unit}: ` +
             `${b.shots} shot${b.shots === 1 ? '' : 's'}` +
-            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+            (b.shots && c.hit ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
         const fill = document.createElement('div');
         fill.className = 'aim-hist-fill';
         fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;

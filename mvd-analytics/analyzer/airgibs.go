@@ -44,6 +44,15 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 	if res == nil || res.Damage == nil || res.Streams == nil || res.TimelineAnalysis == nil {
 		return
 	}
+	// Wire-measured damage only, checked by SOURCE, not presence: the
+	// damage-recon post fills res.Damage on pre-instrumentation demos, and
+	// the DAG declares no edge between these two nodes — gating on Source
+	// keeps this output identical under every valid topological order
+	// (dag.go's order-independence invariant) instead of depending on
+	// registration position.
+	if res.Damage.Source != result.DamageSourceKTX {
+		return
+	}
 
 	streamByName := make(map[string]*result.PlayerStream, len(res.Streams.Players))
 	anyHeight := false

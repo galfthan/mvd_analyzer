@@ -76,9 +76,11 @@ type CrosshairSamples struct {
 	NYaw   []float32 `json:"nyaw"`
 	NPitch []float32 `json:"npitch"`
 	Dist   []float32 `json:"dist"`
-	Hit    []bool    `json:"hit"`
-	Target []string  `json:"tgt"`
-	Team   []bool    `json:"team,omitempty"`
+	// Hit is omitted entirely when AimResult.HitsMeasured is false — a
+	// per-fire false there would be a fabricated miss, not a measurement.
+	Hit    []bool   `json:"hit,omitempty"`
+	Target []string `json:"tgt"`
+	Team   []bool   `json:"team,omitempty"`
 }
 
 // LGRampSamples is the columnar per-LG-fire "ramp onto target" series. Since
@@ -88,8 +90,10 @@ type CrosshairSamples struct {
 // when none.
 type LGRampSamples struct {
 	Since []int32 `json:"since"`
-	Hit   []bool  `json:"hit"`
-	Team  []bool  `json:"team,omitempty"`
+	// Hit is omitted when AimResult.HitsMeasured is false (see
+	// CrosshairSamples.Hit).
+	Hit  []bool `json:"hit,omitempty"`
+	Team []bool `json:"team,omitempty"`
 }
 
 // WeaponAim is one weapon's effectiveness for a player. Shots (fires) and Hits

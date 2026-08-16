@@ -332,7 +332,9 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 		cs.NYaw = append(cs.NYaw, float32(e.nYaw))
 		cs.NPitch = append(cs.NPitch, float32(e.nPitch))
 		cs.Dist = append(cs.Dist, float32(e.dist))
-		cs.Hit = append(cs.Hit, sh.Hit)
+		if hitsMeasured {
+			cs.Hit = append(cs.Hit, sh.Hit)
+		}
 		cs.Target = append(cs.Target, tgt)
 		// The victim class is only knowable for a confirmed victim; the
 		// miss/fallback heuristic attributes to enemies by construction.
@@ -362,7 +364,9 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 			started = true
 		}
 		ramp.Since = append(ramp.Since, sh.Time-shaftStart)
-		ramp.Hit = append(ramp.Hit, sh.Hit)
+		if hitsMeasured {
+			ramp.Hit = append(ramp.Hit, sh.Hit)
+		}
 		// A fire that connected but hit no enemy is a teammate-only hit —
 		// flagged so consumers can score the ramp per victim class.
 		teamOnly := sh.Hit && !shotHasKind(&sh, "enemy") && shotHasKind(&sh, "team")

@@ -201,7 +201,7 @@ var postNodeMeta = map[string]nodeMeta{
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
 		provides: []string{"damage:final"},
-		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed); aim and airgibs deliberately keep the raw `damage` edge — per-shot hit attribution must stay wire-measured.",
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed); aim and airgibs stay wire-measured-only by gating on Damage.Source == ktx inside their own passes (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
 	},
 }
 

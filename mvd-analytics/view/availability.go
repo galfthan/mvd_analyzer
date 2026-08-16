@@ -98,7 +98,9 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 		if len(players) == 0 {
 			base = r.Aim
 		} else {
-			base = &result.AimResult{}
+			// Carry HitsMeasured: dropping it would claim "not measured"
+			// on a wire-damage demo whose copied rows still hold real hits.
+			base = &result.AimResult{HitsMeasured: r.Aim.HitsMeasured}
 			for i := range r.Aim.Players {
 				if players[r.Aim.Players[i].Player] {
 					base.Players = append(base.Players, r.Aim.Players[i])
