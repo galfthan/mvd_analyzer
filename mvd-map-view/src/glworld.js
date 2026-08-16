@@ -33,6 +33,15 @@
 // strings across thousands of entries.
 const ONE_TINT = [1, 1, 1, 1];
 
+// Fixed bake light for the optional floor lighting — high and slightly
+// off-axis (same direction the liquid shading uses), so tops brighten and
+// the slab sides fall off by facing.
+const BAKE_LIGHT = (() => {
+    const l = [0.35, 0.25, 0.9];
+    const n = Math.hypot(l[0], l[1], l[2]);
+    return [l[0] / n, l[1] / n, l[2] / n];
+})();
+
 const _colorCache = new Map();
 export function parseColor(str) {
     let c = _colorCache.get(str);
@@ -102,7 +111,7 @@ export function entryDepth(w, cx, cy, cz) {
 // `forceOpaque` snaps alpha to 1 (the depth-buffered opaque pass — floor
 // fills carry the historical 0.95, which the z-buffer makes meaningless).
 // Also returns the per-entry centroids for the angle sort.
-export function buildEntryVertices(entries, colorOf, forceOpaque = false) {
+export function buildEntryVertices(entries, colorOf, forceOpaque = false, lightStrength = 0) {
     const verts = new Float32Array(entries.length * 3 * 7);
     const centroids = new Float32Array(entries.length * 3);
     let vi = 0;
@@ -111,6 +120,18 @@ export function buildEntryVertices(entries, colorOf, forceOpaque = false) {
         let [r, g, b, a] = parseColor(colorOf(entry));
         if (forceOpaque && a > 0) {
             r /= a; g /= a; b /= a; a = 1;
+        }
+        if (lightStrength > 0) {
+            // Directional Lambert against the fixed high light, mixed in by
+            // strength so 0 keeps the deliberate flat look exactly.
+            const t0 = entry.tris, i0 = entry.off;
+            const ux = t0[i0 + 3] - t0[i0], uy = t0[i0 + 4] - t0[i0 + 1], uz = t0[i0 + 5] - t0[i0 + 2];
+            const vx = t0[i0 + 6] - t0[i0], vy = t0[i0 + 7] - t0[i0 + 1], vz = t0[i0 + 8] - t0[i0 + 2];
+            const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+            const nl = Math.hypot(nx, ny, nz) || 1;
+            const lambert = Math.abs((nx * BAKE_LIGHT[0] + ny * BAKE_LIGHT[1] + nz * BAKE_LIGHT[2]) / nl);
+            const shade = 1 - lightStrength * (1 - (0.45 + 0.55 * lambert));
+            r *= shade; g *= shade; b *= shade;
         }
         const t = entry.tris, i = entry.off;
         for (let v = 0; v < 9; v += 3) {
@@ -170,6 +191,25 @@ precision mediump float;
 in vec4 vColor;
 out vec4 outColor;
 void main() { outColor = vColor; }`;
+
+// The world triangles (floors, movers, liquids, tints) support depth fog:
+// gl_FragCoord.z grows with camera distance (clip z is negated closeness),
+// so fog is a mix toward the fog colour past the map's mid-depth. uFogScale
+// is precomputed host-side from the map's world size; 0 disables.
+const WORLD_FRAG_SRC = `#version 300 es
+precision mediump float;
+uniform float uFogScale;
+uniform vec3 uFogColor;
+in vec4 vColor;
+out vec4 outColor;
+void main() {
+    vec4 c = vColor;
+    if (uFogScale > 0.0) {
+        float f = clamp((gl_FragCoord.z - 0.5) * uFogScale, 0.0, 0.9);
+        c = vec4(mix(c.rgb, uFogColor * c.a, f), c.a);
+    }
+    outColor = c;
+}`;
 
 // Point sprites (projectile / nail dots; trail and actor markers):
 // world-space centre, per-point size in physical pixels, shape cut in the
@@ -404,13 +444,15 @@ export class GlWorld {
             return prog;
         };
 
-        const tri = link(VERT_SRC, FRAG_SRC);
+        const tri = link(VERT_SRC, WORLD_FRAG_SRC);
         this.prog = tri;
         this.uRowX = gl.getUniformLocation(tri, 'uRowX');
         this.uRowY = gl.getUniformLocation(tri, 'uRowY');
         this.uRowZ = gl.getUniformLocation(tri, 'uRowZ');
         this.uOffset = gl.getUniformLocation(tri, 'uOffset');
         this.uTint = gl.getUniformLocation(tri, 'uTint');
+        this.uFogScale = gl.getUniformLocation(tri, 'uFogScale');
+        this.uFogColor = gl.getUniformLocation(tri, 'uFogColor');
         this.aPos = gl.getAttribLocation(tri, 'aPos');
         this.aColor = gl.getAttribLocation(tri, 'aColor');
 
@@ -503,13 +545,15 @@ export class GlWorld {
     // focus tier: everything outside the focus fade renders opaque under the
     // depth test (order-free), the faded remainder blends on top without
     // depth writes.
-    syncFloor(model, focusName, isFaded) {
+    syncFloor(model, focusName, isFaded, lightStrength = 0) {
         const focus = focusName ?? null;
-        if (model === this._floorModel && focus === this._floorFocus) return;
+        if (model === this._floorModel && focus === this._floorFocus
+            && lightStrength === this._floorLight) return;
         if (this.floorOpaque) { this.floorOpaque.dispose(); this.floorOpaque = null; }
         if (this.floorFaded) { this.floorFaded.dispose(); this.floorFaded = null; }
         this._floorModel = model;
         this._floorFocus = focus;
+        this._floorLight = lightStrength;
         if (!model) return;
         const opaque = [];
         const faded = [];
@@ -518,7 +562,7 @@ export class GlWorld {
             else opaque.push(e);
         }
         if (opaque.length > 0) {
-            const { verts, centroids } = buildEntryVertices(opaque, (e) => e.fill, true);
+            const { verts, centroids } = buildEntryVertices(opaque, (e) => e.fill, true, lightStrength);
             this.floorOpaque = new GlBatch(this.gl, verts, centroids);
         }
         if (faded.length > 0) {
@@ -872,7 +916,10 @@ export class GlWorld {
 
     // render draws the world for the given camera into the backing canvas,
     // sized to pxW × pxH physical pixels; cssW/cssH are the logical size the
-    // camera math targets. Pass order (mirrors the 2D layer stack):
+    // camera math targets. dyn.fogScale > 0 fogs the world triangles;
+    // dyn.occludeActors depth-tests (LEQUAL, read-only) everything above the
+    // world, so floors hide what is behind them — the "realistic occlusion"
+    // view mode. Pass order (mirrors the 2D layer stack):
     //   1. opaque floors + movers — depth-tested and -written
     //   2. focus fade + liquids — blended, depth-read-only
     //   3. thin region outlines — the quiet baseline strokes
@@ -898,6 +945,9 @@ export class GlWorld {
         gl.uniform4fv(this.uRowZ, t.rz);
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
+        gl.uniform1f(this.uFogScale, dyn.fogScale || 0);
+        const fc = dyn.fogColor || [0.039, 0.039, 0.082];
+        gl.uniform3f(this.uFogColor, fc[0], fc[1], fc[2]);
 
         // Loc-blob underlay (maps with no floor model): translucent fills
         // under everything, like the old flat view.
@@ -917,7 +967,14 @@ export class GlWorld {
         this._drawBlended(this.floorFaded, w);
         this._drawBlended(this.liquidBatch, w);
 
-        gl.disable(gl.DEPTH_TEST);
+        // Overlays and actors: depth-test-off normally (the analyzer wants
+        // everything visible); the occlusion view mode reads the world depth
+        // instead — LEQUAL so tints lying exactly on floor faces still pass.
+        if (dyn.occludeActors) {
+            gl.depthFunc(gl.LEQUAL);
+        } else {
+            gl.disable(gl.DEPTH_TEST);
+        }
         if (dyn.atlas) this.syncAtlas(dyn.atlas);
         this._drawOutlines(dyn.regionOutlines, t, pxW, pxH);
         this._drawSprites(dyn.labels, t, pxW, pxH);
@@ -942,6 +999,7 @@ export class GlWorld {
             }
         }
         gl.depthMask(true);
+        gl.depthFunc(gl.LESS);
     }
 }
 

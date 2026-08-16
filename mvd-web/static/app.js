@@ -7484,6 +7484,22 @@ function setupMapTrailControls() {
         });
     }
 
+    // Effect toggles (GL renderer): depth fog, floor shading, realistic
+    // occlusion. Each just flips the component state and repaints.
+    const fxToggle = (id, apply) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            const on = apply();
+            btn.classList.toggle('active', on);
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    };
+    fxToggle('map-fog', () => (mapState.fog = mapState.fog > 0 ? 0 : 1) > 0);
+    fxToggle('map-light', () => (mapState.worldLight = mapState.worldLight > 0 ? 0 : 0.6) > 0);
+    fxToggle('map-occlude', () => (mapState.occludeActors = !mapState.occludeActors));
+
     const resetViewBtn = document.getElementById('map-reset-view');
     if (resetViewBtn) {
         resetViewBtn.addEventListener('click', () => { resetMapView(); });

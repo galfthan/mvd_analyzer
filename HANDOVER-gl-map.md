@@ -122,3 +122,17 @@ player models, fog, occlusion, better lighting, first-person view.
   pixels), nogeom look unchanged. NOTE: label positions can shift by a
   texel when the atlas repacks across code changes — same-build captures
   stay byte-deterministic, which is what the harness compares.
+- **Effects PoC (owner: review together before building on it).** Three
+  toggles landed as proof-of-concept, defaults all OFF (140/140 shots
+  identical to step 6 with them off): **Fog** (depth fog in the world
+  fragment shader, scaled to the map's world radius), **Light**
+  (directional Lambert baked into the floor vertex colours at strength
+  0.6 — 0 keeps the flat look exactly), **Occl** (overlays/actors
+  depth-test LEQUAL against the world, so floors hide what's behind them;
+  the analyzer default keeps everyone visible). Buttons sit after 3D in
+  the map toolbar. The remaining effects (3D player models, perspective /
+  first-person camera) are deliberately NOT started — next steps to be
+  designed together.
+- Harness hardening: mapshot.py now fails hard on any uncaught page error
+  — a thrown exception in the render path used to show up only as a
+  silently black screenshot.

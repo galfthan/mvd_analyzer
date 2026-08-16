@@ -155,6 +155,10 @@ def main():
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1600, "height": 1100})
             page.on("console", lambda m: m.type == "error" and print("[console]", m.text))
+            # A thrown exception anywhere in the render path blanks the map
+            # silently in screenshots — surface it as a hard failure instead.
+            page_errors = []
+            page.on("pageerror", lambda e: page_errors.append(str(e)))
             if args.no_geometry:
                 page.route("**/maps/*.json", lambda route: route.abort())
             page.goto(f"http://127.0.0.1:{port}/index.html?tab=map")
@@ -175,6 +179,10 @@ def main():
             page.wait_for_timeout(500)
             capture(page, out_dir, label, times)
             browser.close()
+            if page_errors:
+                for e in page_errors[:5]:
+                    print("[pageerror]", e)
+                raise SystemExit(f"{len(page_errors)} uncaught page error(s)")
     finally:
         httpd.shutdown()
 

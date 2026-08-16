@@ -33,7 +33,7 @@ import {
     reconstructBucketPlayers, reconstructBucketTeams,
 } from './frames.js';
 import { decodeRegionStateChar } from './regions.js';
-import { GlWorld, buildLiquidFaces, parseColor } from './glworld.js';
+import { GlWorld, buildLiquidFaces, parseColor, DEPTH_SCALE } from './glworld.js';
 import { GlAtlas } from './glatlas.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
@@ -329,6 +329,14 @@ export function newState() {
         enabledPlayers: {},
         showViewArrows: false,
         showVelArrows: false,
+        // Effects (GL renderer). fog: 0..1 depth-fog density. worldLight:
+        // 0..1 directional shading strength on the floor model (0 keeps the
+        // deliberate flat look). occludeActors: depth-test overlays/actors
+        // against the world — realistic occlusion instead of the analyzer's
+        // everyone-always-visible default.
+        fog: 0,
+        worldLight: 0,
+        occludeActors: false,
         showLos: false,
         showPvs: false,
         followPlayer: null,
@@ -602,7 +610,7 @@ export class MvdMap {
             this._glWorld = null;
             return false;
         }
-        glw.syncFloor(floorModel, s.focusGroupName, this.farFadePredicate());
+        glw.syncFloor(floorModel, s.focusGroupName, this.farFadePredicate(), s.worldLight);
         // Liquid faces are static per geometry (fixed light): identity-cache
         // them next to the geometry they came from.
         const geom = s.mapGeometry;
@@ -799,6 +807,15 @@ export class MvdMap {
         // The actor pass: items + players (or the learn-mode entity view),
         // plus the fading death/drop markers.
         this._glActors(dyn, pxScale);
+
+        // Effects. Fog scale maps the map's world radius onto the clip-z
+        // range so density 1 reads clearly on any map size.
+        if (s.fog > 0) {
+            const w = this.camera;
+            const halfDiag = Math.hypot(w.cx - w.minX, w.cy - w.minY) || 1;
+            dyn.fogScale = s.fog * (2 / (halfDiag * DEPTH_SCALE)) * 0.9;
+        }
+        dyn.occludeActors = s.occludeActors;
         return dyn;
     }
 
