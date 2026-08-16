@@ -259,6 +259,15 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 	if !ok || pen < 0.5 {
 		return single
 	}
+	// Blood-count split first: two shotgunners' volleys write two TE_BLOOD
+	// messages whose counts ARE the per-shooter magnitudes — where they
+	// pass the guards the split is exact, beating the generic range-sum
+	// split's midpoint-proportional shares. Gated behind the misfit test
+	// like the generic split: a stray extra blood (corpse hits write blood
+	// too) must not break up a value a single volley already explains.
+	if pair, ok := in.tryBloodSplit(victim, vtrack, d); ok {
+		return pair
+	}
 	if pair, ok := in.trySplitPair(victim, vtrack, d); ok {
 		return pair
 	}
@@ -339,6 +348,124 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	e2 := in.mkEventSplash(dj, bj.c.attacker, victim, bj.c.weapon, bj.c.kind, bj.c.isSplash)
 	e2.dEnd = bj.c.dEnd
 	return []reconEvent{e1, e2}, true
+}
+
+// tryBloodSplit resolves a two-shotgunner merge exactly from TE_BLOOD:
+// modern KTX multicasts ONE blood message per volley (Multi_Finish), so
+// two shotgunners striking the same victim in one frame leave TWO
+// messages whose counts are the exact per-shooter pellet hits — the split
+// values are 4·count·quad, and the impact points sit on each shooter's
+// firing line, which resolves who dealt which. Applies only when the
+// demo's count packaging calibrated (bloodTrust), exactly two shotgun
+// fires from different players surround the instant, exactly two blood
+// messages landed on the victim, and the quad-scaled counts sum to the
+// observed delta — anything looser falls through to the generic
+// range-sum pair split.
+func (in *inputs) tryBloodSplit(victim string, vtrack *track, d delta) ([]reconEvent, bool) {
+	if !in.bloodTrust {
+		return nil, false
+	}
+	vpos := vtrack.posAt(d.t)
+
+	// The two blood messages on the victim. Multi_Finish positions a
+	// volley's single blood at its LAST pellet impact and counts pellets
+	// across EVERY victim it sprayed — so a blood that could also belong
+	// to another nearby player is ambiguous evidence, and a split built
+	// on it flips attackers. Precision over recall: require both bloods
+	// unambiguously on this victim.
+	var fx []*pointFx
+	blo := sort.Search(len(in.bloods), func(i int) bool { return in.bloods[i].t >= d.t-bloodNearMs })
+	for i := blo; i < len(in.bloods) && in.bloods[i].t <= d.t+bloodNearMs; i++ {
+		if in.bloods[i].p.distTo(vpos) <= bloodNearDist {
+			fx = append(fx, &in.bloods[i])
+		}
+	}
+	if len(fx) != 2 || fx[0].count < 1 || fx[1].count < 1 {
+		return nil, false
+	}
+	for _, b := range fx {
+		for _, name := range in.order {
+			if name == victim {
+				continue
+			}
+			tr := in.tracks[name]
+			if tr == nil {
+				continue
+			}
+			if tr.posAt(d.t).distTo(b.p) <= bloodNearDist {
+				return nil, false // another player could own this blood
+			}
+		}
+	}
+
+	// The two shotgun fires from different players (per-volley packaging
+	// means one message per fire; a 3+-shooter pileup is out of scope).
+	type shooter struct {
+		player string
+		weapon string
+		eye    vec3
+		q      float64
+	}
+	var sh []shooter
+	slo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= d.t-tolShotMs })
+	for i := slo; i < len(in.shots) && in.shots[i].t <= d.t+tolShotMs; i++ {
+		s := in.shots[i]
+		if s.weapon != "sg" && s.weapon != "ssg" {
+			continue
+		}
+		if s.player == victim {
+			return nil, false // hitscan cannot strike its own shooter
+		}
+		tr := in.tracks[s.player]
+		if tr == nil {
+			return nil, false
+		}
+		q := 1.0
+		if ap := in.players[s.player]; ap != nil && inIntervals(ap.Quad, d.t) {
+			q = 4.0
+		}
+		sh = append(sh, shooter{player: s.player, weapon: s.weapon, eye: eyeOf(tr.posAt(s.t)), q: q})
+	}
+	if len(sh) != 2 || sh[0].player == sh[1].player {
+		return nil, false
+	}
+	for _, s := range sh {
+		if !in.bsp.reachesBody(s.eye, vpos) {
+			return nil, false
+		}
+	}
+
+	// Try both count→shooter assignments; keep those whose quad-scaled sum
+	// reproduces the delta, then pick by impact-point geometry (a volley's
+	// blood sits on its shooter's firing line through the victim).
+	obs := float64(d.bounded)
+	bestPen := math.Inf(1)
+	bestA := -1
+	for a := 0; a < 2; a++ {
+		c0, c1 := fx[a], fx[1-a]
+		v0 := 4.0 * float64(c0.count) * sh[0].q
+		v1 := 4.0 * float64(c1.count) * sh[1].q
+		if math.Abs(v0+v1-obs) > 2.0 {
+			continue
+		}
+		pen := segDist(c0.p, sh[0].eye, vpos) + segDist(c1.p, sh[1].eye, vpos)
+		if pen < bestPen {
+			bestPen, bestA = pen, a
+		}
+	}
+	// Both impact points must sit close to their shooters' firing lines —
+	// a poor best assignment means the geometry does not actually support
+	// the pairing (interpolated positions, spray across geometry).
+	if bestA < 0 || bestPen > 120.0 {
+		return nil, false
+	}
+	c0 := fx[bestA]
+	v0 := int(4.0*float64(c0.count)*sh[0].q + 0.5)
+	d0 := delta{t: d.t, raw: v0, bounded: v0}
+	d1 := delta{t: d.t, raw: d.raw - v0, bounded: d.bounded - v0}
+	e0 := in.mkEvent(d0, sh[0].player, victim, sh[0].weapon, "hitscan")
+	e1 := in.mkEvent(d1, sh[1].player, victim, sh[1].weapon, "hitscan")
+	return []reconEvent{e0, e1}, true
 }
 
 func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent {
@@ -982,10 +1109,12 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 				geom: math.Max(0, 0.15+apen+tpen+bloodPen), attacker: s.player, weapon: s.weapon,
 				kind: "hitscan", dEnd: dd,
 			}
-			if in.bloodTrust && singleSG && nBlood > 0 && sumBlood > 0 {
-				// Calibrated count with a single shooter: the volley dealt
-				// exactly 4·sum (quad-scaled in modelBounds via mLo/mHi
-				// carrying the base value — quad applied here).
+			if in.bloodTrust && nBlood == 1 && sumBlood > 0 {
+				// Calibrated count, one blood message = one connecting
+				// volley: whoever fired it dealt exactly 4·sum·(their
+				// quad). Pinned per candidate — with differing quad states
+				// this rules the mismatched shooter out; with equal states
+				// it pins the magnitude either way.
 				q := 1.0
 				if ap := in.players[s.player]; ap != nil && inIntervals(ap.Quad, t) {
 					q = 4.0

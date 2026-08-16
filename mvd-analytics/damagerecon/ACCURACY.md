@@ -36,13 +36,13 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — see
 `.reports/qw-recon-eval-dm2dm3-2026-08-15/`, fetched with
 `cmd/fetch-eval-corpus`) scores slightly better: bounded given median
-**0.61%** (mean 0.83%, p90 1.85%, ≤2% 92%), bounded taken 0.04%, raw
+**0.59%** (mean 0.82%, p90 1.88%, ≤2% 92%), bounded taken 0.04%, raw
 given 1.24%, raw taken 1.78%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.4% on unambiguous enemy
-instants (rl 99.5%, lg 99.5%, sg 97.8%, axe 100%).
+instants (rl 99.5%, lg 99.5%, sg 97.8%, ssg 98.1%, axe 100%).
 
 ## Why the errors are what they are
 
