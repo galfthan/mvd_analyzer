@@ -488,6 +488,31 @@ test('regionControlAt decodes the per-region state strings on the frame grid', (
     assert.equal(states.late, undefined, 'string too short → region omitted');
 });
 
+test('_glDynamic interpolates flights, windows beams, and scales to physical px', () => {
+    const map = new MvdMap();
+    map.state.currentTime = 10;   // 10 000 ms
+    map.state.projectiles = {
+        s: [8000, 20000], e: [12000, 21000],
+        sx: [0, 0], sy: [0, 0], sz: [0, 0],
+        ex: [100, 9], ey: [40, 9], ez: [-20, 9],
+        w: ['rl', 'gl'],
+    };
+    map.state.beams = {
+        t: [10030, 12000],
+        sx: [1, 0], sy: [2, 0], sz: [3, 0],
+        ex: [4, 0], ey: [5, 0], ez: [6, 0],
+    };
+    const dyn = map._glDynamic(2);
+    assert.equal(dyn.points.length, 1, 'the not-yet-fired rocket is excluded');
+    assert.deepEqual(
+        [dyn.points[0].x, dyn.points[0].y, dyn.points[0].z],
+        [50, 20, -10], 'midpoint of the live flight');
+    assert.equal(dyn.points[0].size, 12, 'radius 3 → 6 css px → 12 physical at pxScale 2');
+    assert.equal(dyn.lines.length, 1, 'only the beam inside the flash window');
+    assert.equal(dyn.lines[0].halfWidth, 1.5);
+    assert.deepEqual(dyn.movers, [], 'no movers without submodel meshes');
+});
+
 test('a dead WebGL probe latches to the 2D world path', () => {
     // The stub canvas hands back a junk context for 'webgl2', so GlWorld's
     // program build throws, create() returns null, and the component must

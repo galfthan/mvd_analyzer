@@ -35,7 +35,7 @@ import {
     reconstructBucketPlayers, reconstructBucketTeams,
 } from './frames.js';
 import { decodeRegionStateChar } from './regions.js';
-import { GlWorld, buildLiquidFaces } from './glworld.js';
+import { GlWorld, buildLiquidFaces, parseColor } from './glworld.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
 // different directions separate tonally (used by the liquid volumes).
@@ -737,12 +737,72 @@ export class MvdMap {
         const canvas = s.canvas;
         const cssW = s.canvasCssW || canvas.width;
         const cssH = s.canvasCssH || canvas.height;
-        glw.render(this.camera, cssW, cssH, canvas.width, canvas.height);
+        glw.render(this.camera, cssW, cssH, canvas.width, canvas.height,
+                   this._glDynamic(canvas.width / cssW));
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(glw.canvas, 0, 0);
         ctx.restore();
         return true;
+    }
+
+    // _glDynamic collects the per-frame dynamic world content for the GL
+    // backend: posed movers (with the riding-player highlight), live
+    // projectile/nail dots and beam flashes. `pxScale` converts CSS-pixel
+    // sizes to the physical pixels the GL surface rasterises at.
+    _glDynamic(pxScale) {
+        const s = this.state;
+        const tMs = s.currentTime * 1000;
+        const dyn = { movers: [], points: [], lines: [] };
+
+        if (s.movers && s.movers.length > 0 && s.submodelMeshes) {
+            const players = this.livingPlayersAtFrame();
+            for (const m of s.movers) {
+                const mesh = s.submodelMeshes[m.sub];
+                if (!mesh || mesh.length < 9) continue;
+                const pose = moverPoseAt(m, tMs);
+                if (!pose || !pose.vis) continue;
+                const active = players.length > 0 && this.playerOnMover(pose, m.sub, players);
+                dyn.movers.push({
+                    sub: m.sub, tris: mesh,
+                    x: pose.x, y: pose.y, z: pose.z,
+                    tint: parseColor(active ? MOVER_FILL_ACTIVE : MOVER_FILL),
+                });
+            }
+        }
+
+        const collectFlights = (pr, radius, colorOf) => {
+            if (!pr || !Array.isArray(pr.s) || pr.s.length === 0) return;
+            for (let i = 0; i < pr.s.length; i++) {
+                const t0 = pr.s[i], t1 = pr.e[i];
+                if (tMs < t0 || tMs > t1) continue;
+                const f = t1 > t0 ? (tMs - t0) / (t1 - t0) : 0;
+                dyn.points.push({
+                    x: pr.sx[i] + (pr.ex[i] - pr.sx[i]) * f,
+                    y: pr.sy[i] + (pr.ey[i] - pr.sy[i]) * f,
+                    z: pr.sz[i] + (pr.ez[i] - pr.sz[i]) * f,
+                    size: radius * 2 * pxScale,
+                    color: parseColor(colorOf(pr.w ? pr.w[i] : null)),
+                });
+            }
+        };
+        collectFlights(s.projectiles, 3, (w) => PROJECTILE_COLORS[w] || '#ffffff');
+        collectFlights(s.nails, 1.5, () => NAIL_COLOR);
+
+        const bm = s.beams;
+        if (bm && Array.isArray(bm.t) && bm.t.length > 0) {
+            const beamColor = parseColor(BEAM_COLOR);
+            for (let i = 0; i < bm.t.length; i++) {
+                if (Math.abs(bm.t[i] - tMs) > BEAM_FLASH_MS) continue;
+                dyn.lines.push({
+                    sx: bm.sx[i], sy: bm.sy[i], sz: bm.sz[i],
+                    ex: bm.ex[i], ey: bm.ey[i], ez: bm.ez[i],
+                    halfWidth: 0.75 * pxScale,
+                    color: beamColor,
+                });
+            }
+        }
+        return dyn;
     }
 
     // drawWorld: the static layers under the actors — floors, liquids, movers,
@@ -755,18 +815,19 @@ export class MvdMap {
 
         const focused = !!s.focusGroupName;
         const floorModel = this.floorModel();
+        let usedGL = false;
 
         if (floorModel) {
-            // One clean view: flat, near-opaque, depth-sorted region tops + box
-            // sides. A higher floor covers a lower one (no translucent
-            // stacking), the sides read as solid thickness, and from overhead
-            // it is dead flat.
+            // One clean view: flat region tops + box sides. A higher floor
+            // covers a lower one, the sides read as solid thickness, and from
+            // overhead it is dead flat.
             //
-            // Preferred backend: WebGL (floors + liquids in two sorted GPU
-            // batches — camera motion is a uniform update, not a rebake).
-            // Fallback: the 2D painter, cached to an offscreen bitmap per
-            // camera pose.
-            if (!this.drawWorldGL(ctx, floorModel)) {
+            // Preferred backend: WebGL — opaque depth-buffered floors and
+            // movers, blended liquids/fade, GPU weapon-fire overlays; camera
+            // motion is a uniform update, not a rebake. Fallback: the 2D
+            // painter, cached to an offscreen bitmap per camera pose.
+            usedGL = this.drawWorldGL(ctx, floorModel);
+            if (!usedGL) {
                 this.drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
                 // Liquids: translucent volumes above the floor, drawn live.
                 this.drawLiquids(ctx);
@@ -787,14 +848,14 @@ export class MvdMap {
             this.drawLiquids(ctx);
         }
 
-        // Movers (lifts/doors/plats) posed at the current time — above the
-        // region fills and below the outlines and labels.
-        this.drawMovers(ctx);
-
-        // Weapon-fire overlays at the current time. No-op unless the spatial
-        // streams were built.
-        this.drawProjectiles(ctx);
-        this.drawBeams(ctx);
+        // Movers (lifts/doors/plats) posed at the current time, and the
+        // weapon-fire overlays — the GL backend draws these itself (see
+        // _glDynamic); the 2D versions run only on the fallback path.
+        if (!usedGL) {
+            this.drawMovers(ctx);
+            this.drawProjectiles(ctx);
+            this.drawBeams(ctx);
+        }
 
         // Thin outlines around each traced region, after all fills so they sit
         // on top and stay visible regardless of adjacent tinting. These need

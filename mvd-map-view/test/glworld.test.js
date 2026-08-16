@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {
     parseColor, makeWorldTransform, entryDepth,
     buildEntryVertices, sortedIndices, buildLiquidFaces,
-    isSoftwareRenderer, GlWorld,
+    isSoftwareRenderer, GlWorld, DEPTH_SCALE,
 } from '../src/glworld.js';
 import { newCamera, refreshTrig, fit, project } from '../src/camera.js';
 
@@ -41,7 +41,19 @@ test('makeWorldTransform reproduces project() at any camera pose', () => {
         assert.ok(Math.abs(sx - p.x) < 1e-6, `x: ${sx} vs ${p.x}`);
         assert.ok(Math.abs(sy - p.y) < 1e-6, `y: ${sy} vs ${p.y}`);
         assert.ok(Math.abs(entryDepth(w, x, y, z) - p.depth) < 1e-9, 'depth matches too');
+        // The clip-z row: nearer (bigger closeness) must produce SMALLER
+        // clip z so it wins the LESS depth test.
+        const clipZ = t.rz[0] * x + t.rz[1] * y + t.rz[2] * z + t.rz[3];
+        assert.ok(Math.abs(clipZ - (-p.depth * DEPTH_SCALE)) < 1e-9, 'clip z is scaled negated closeness');
     }
+});
+
+test('forceOpaque unpremultiplies and snaps alpha to one', () => {
+    const tris = [0, 0, 0, 1, 0, 0, 1, 1, 0];
+    const entries = [{ tris, off: 0, cx: 0, cy: 0, cz: 0, fill: 'rgba(100, 200, 50, 0.95)' }];
+    const { verts } = buildEntryVertices(entries, (e) => e.fill, true);
+    assert.ok(Math.abs(verts[3] - 100 / 255) < 1e-6, 'red back at full strength');
+    assert.equal(verts[6], 1, 'alpha snapped to 1');
 });
 
 test('buildEntryVertices interleaves positions with premultiplied colours', () => {

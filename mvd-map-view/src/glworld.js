@@ -4,13 +4,14 @@
 //
 // Design notes, in the order they matter:
 //
-// - **Painter order is kept.** Floors are near-opaque (FLOOR_TOP_ALPHA) and
-//   liquids genuinely translucent, and the 2D path composites both back to
-//   front. Rendering the same order with premultiplied-alpha blending
-//   reproduces that compositing exactly — no depth buffer, no z-fighting,
-//   and no look change beyond the anti-aliasing. The sort only depends on
-//   yaw/pitch (same invariant renderSolidEntries relies on), so pan/zoom
-//   frames re-upload nothing but a handful of uniforms.
+// - **Opaque floors ride the depth buffer.** The floor model's "near-opaque,
+//   higher floor covers lower" design is exactly what a z-buffer gives for
+//   free, so the opaque pass draws in plain array order — the per-angle
+//   painter sort the 2D path needed no longer exists for floors, and the
+//   depth buffer this leaves behind is the foundation for occlusion, fog
+//   and the other depth-aware effects. Genuinely translucent content
+//   (liquids; the focus fade) blends on top with depth reads but no writes;
+//   liquids keep a back-to-front sort re-keyed only on camera angle.
 //
 // - **No seam hack.** The 2D path strokes every triangle batch with its own
 //   fill colour to seal anti-aliasing seams between adjacent triangles
@@ -18,29 +19,30 @@
 //   one draw call has no such seams, so the hack — and the double
 //   rasterisation it cost — simply disappears.
 //
-// - **The camera is six coefficients.** project() is affine in (x, y, z):
-//   u/v are linear maps of the rotated point and the screen map is linear
-//   too. makeWorldTransform folds the whole thing into row vectors for
-//   clip-x and clip-y, computed on the CPU each frame.
+// - **The camera is three row vectors.** project() is affine in (x, y, z):
+//   u/v are linear maps of the rotated point, the screen map is linear, and
+//   camera closeness is affine too. makeWorldTransform folds the whole
+//   thing into row vectors for clip x/y/z, computed on the CPU each frame.
 //
 // - **The loader invariant holds.** This module receives its WebGL context
 //   from the caller (who created the backing canvas via
 //   canvas.ownerDocument.createElement) and touches no ambient global.
-//
-// The 2D implementations stay: they are the fallback when a context cannot
-// be created, and the parity harness's anchor (?gl=0 in mvd-web).
 
-// Parse an rgba()/rgb() string into premultiplied [r, g, b, a] floats.
-// Memoised — the floor model reuses a handful of distinct colour strings
-// across thousands of entries.
+// Parse an rgba()/rgb()/#rrggbb string into premultiplied [r, g, b, a]
+// floats. Memoised — the floor model reuses a handful of distinct colour
+// strings across thousands of entries.
 const _colorCache = new Map();
 export function parseColor(str) {
     let c = _colorCache.get(str);
     if (c) return c;
     const m = /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)/.exec(str);
+    const h = /^#([0-9a-f]{6})$/i.exec(str);
     if (m) {
         const a = m[4] === undefined ? 1 : parseFloat(m[4]);
         c = [(+m[1] / 255) * a, (+m[2] / 255) * a, (+m[3] / 255) * a, a];
+    } else if (h) {
+        const v = parseInt(h[1], 16);
+        c = [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255, 1];
     } else {
         c = [0, 0, 0, 1];
     }
@@ -52,6 +54,12 @@ export function parseColor(str) {
 // the CSS-px → clip-space map into two row vectors:
 //   clipX = rx[0]*x + rx[1]*y + rx[2]*z + rx[3]
 //   clipY = ry[0]*x + ry[1]*y + ry[2]*z + ry[3]
+// Clip-space depth scale: camera-closeness (world units) × DEPTH_SCALE →
+// clip z. Quake worlds live within ±4096 units per axis, so closeness stays
+// well inside ±32768; a 24-bit depth buffer over that range still resolves
+// ~256 steps per world unit.
+export const DEPTH_SCALE = 1 / 32768;
+
 // cssW/cssH are the logical surface size project() targets.
 export function makeWorldTransform(w, cssW, cssH) {
     const A = w.scale * w.zoomK;
@@ -65,10 +73,17 @@ export function makeWorldTransform(w, cssW, cssH) {
     // screenY = -A*v + by;  clipY = 1 - screenY * 2/cssH
     const by = w.canvasH - w.offsetY + A * w.minY + w.panY;
     const ky = (2 * A) / cssH;
+    // closeness = -sinYaw*cosPitch*x - cosYaw*cosPitch*y + sinPitch*z + cd
+    // (entryDepth as a row vector). Nearer fragments must win the LESS
+    // depth test, so clipZ = -closeness * DEPTH_SCALE.
+    const cd = (w.cx * w.sinYaw + w.cy * w.cosYaw) * w.cosPitch - w.zMid * w.sinPitch;
+    const kz = -DEPTH_SCALE;
     return {
         rx: [kx * w.cosYaw, -kx * w.sinYaw, 0, kx * cu + (2 * bx) / cssW - 1],
         ry: [ky * w.sinYaw * w.sinPitch, ky * w.cosYaw * w.sinPitch, ky * w.cosPitch,
              ky * cv - (2 * by) / cssH + 1],
+        rz: [kz * -w.sinYaw * w.cosPitch, kz * -w.cosYaw * w.cosPitch,
+             kz * w.sinPitch, kz * cd],
     };
 }
 
@@ -82,14 +97,19 @@ export function entryDepth(w, cx, cy, cz) {
 
 // buildEntryVertices: interleaved [x, y, z, r, g, b, a] × 3 per entry, with
 // premultiplied per-vertex colours. `colorOf(entry)` picks fill vs faded.
+// `forceOpaque` snaps alpha to 1 (the depth-buffered opaque pass — floor
+// fills carry the historical 0.95, which the z-buffer makes meaningless).
 // Also returns the per-entry centroids for the angle sort.
-export function buildEntryVertices(entries, colorOf) {
+export function buildEntryVertices(entries, colorOf, forceOpaque = false) {
     const verts = new Float32Array(entries.length * 3 * 7);
     const centroids = new Float32Array(entries.length * 3);
     let vi = 0;
     for (let e = 0; e < entries.length; e++) {
         const entry = entries[e];
-        const [r, g, b, a] = parseColor(colorOf(entry));
+        let [r, g, b, a] = parseColor(colorOf(entry));
+        if (forceOpaque && a > 0) {
+            r /= a; g /= a; b /= a; a = 1;
+        }
         const t = entry.tris, i = entry.off;
         for (let v = 0; v < 9; v += 3) {
             verts[vi++] = t[i + v];
@@ -150,13 +170,16 @@ export function isSoftwareRenderer(renderer) {
 const VERT_SRC = `#version 300 es
 uniform vec4 uRowX;
 uniform vec4 uRowY;
+uniform vec4 uRowZ;
+uniform vec3 uOffset;
+uniform vec4 uTint;
 in vec3 aPos;
 in vec4 aColor;
 out vec4 vColor;
 void main() {
-    vec4 p = vec4(aPos, 1.0);
-    gl_Position = vec4(dot(uRowX, p), dot(uRowY, p), 0.0, 1.0);
-    vColor = aColor;
+    vec4 p = vec4(aPos + uOffset, 1.0);
+    gl_Position = vec4(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p), 1.0);
+    vColor = aColor * uTint;
 }`;
 
 const FRAG_SRC = `#version 300 es
@@ -165,17 +188,81 @@ in vec4 vColor;
 out vec4 outColor;
 void main() { outColor = vColor; }`;
 
-// One sortable, blendable batch of triangles (the floor model, or one liquid
-// volume). Owns its VBO and its angle-sorted index buffer.
+// Point sprites (projectile / nail dots): world-space centre, per-point size
+// in physical pixels, round shape cut in the fragment shader.
+const POINT_VERT_SRC = `#version 300 es
+uniform vec4 uRowX;
+uniform vec4 uRowY;
+uniform vec4 uRowZ;
+in vec3 aPos;
+in vec4 aColor;
+in float aSize;
+out vec4 vColor;
+void main() {
+    vec4 p = vec4(aPos, 1.0);
+    gl_Position = vec4(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p), 1.0);
+    gl_PointSize = aSize;
+    vColor = aColor;
+}`;
+
+const POINT_FRAG_SRC = `#version 300 es
+precision mediump float;
+in vec4 vColor;
+out vec4 outColor;
+void main() {
+    vec2 c = gl_PointCoord - 0.5;
+    if (dot(c, c) > 0.25) discard;
+    outColor = vColor;
+}`;
+
+// Screen-space extruded line segments (beams; later trails / sightlines).
+// Each vertex carries both endpoints plus (side, end): the shader projects
+// the endpoints, extrudes perpendicular in physical-pixel space by the
+// half-width, and re-emits clip coordinates — constant on-screen width at
+// any camera.
+const LINE_VERT_SRC = `#version 300 es
+uniform vec4 uRowX;
+uniform vec4 uRowY;
+uniform vec4 uRowZ;
+uniform vec2 uViewPx;
+in vec3 aStart;
+in vec3 aEnd;
+in vec2 aParam;   // x: side (-1 | 1), y: end (0 | 1)
+in vec4 aColor;
+in float aHalfWidth; // physical px
+out vec4 vColor;
+vec3 clipOf(vec3 world) {
+    vec4 p = vec4(world, 1.0);
+    return vec3(dot(uRowX, p), dot(uRowY, p), dot(uRowZ, p));
+}
+void main() {
+    vec3 s = clipOf(aStart);
+    vec3 e = clipOf(aEnd);
+    vec2 sPx = vec2((s.x + 1.0) * 0.5 * uViewPx.x, (1.0 - s.y) * 0.5 * uViewPx.y);
+    vec2 ePx = vec2((e.x + 1.0) * 0.5 * uViewPx.x, (1.0 - e.y) * 0.5 * uViewPx.y);
+    vec2 d = ePx - sPx;
+    float len = max(length(d), 1e-6);
+    vec2 n = vec2(-d.y, d.x) / len;
+    vec2 base = mix(sPx, ePx, aParam.y);
+    vec2 px = base + n * aParam.x * aHalfWidth;
+    float z = mix(s.z, e.z, aParam.y);
+    gl_Position = vec4(px.x / uViewPx.x * 2.0 - 1.0, 1.0 - px.y / uViewPx.y * 2.0, z, 1.0);
+    vColor = aColor;
+}`;
+
+// One batch of triangles. Opaque batches draw in array order under the
+// depth test — no sorting exists for them at all. Sortable (translucent)
+// batches own an angle-sorted index buffer for back-to-front blending.
 class GlBatch {
-    constructor(gl, verts, centroids) {
+    constructor(gl, verts, centroids, { sortable = false } = {}) {
         this.gl = gl;
         this.count = centroids.length / 3;
         this.centroids = centroids;
         this.vbo = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
         gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
-        this.ibo = gl.createBuffer();
+        this.sortable = sortable;
+        this.ibo = sortable ? gl.createBuffer() : null;
         this.sortedFor = null;
     }
 
@@ -193,7 +280,7 @@ class GlBatch {
 
     dispose() {
         this.gl.deleteBuffer(this.vbo);
-        this.gl.deleteBuffer(this.ibo);
+        if (this.ibo) this.gl.deleteBuffer(this.ibo);
     }
 }
 
@@ -211,7 +298,7 @@ export class GlWorld {
             const gl = canvas.getContext('webgl2', {
                 alpha: true,
                 antialias: true,
-                depth: false,
+                depth: true,
                 premultipliedAlpha: true,
                 preserveDrawingBuffer: false,
             });
@@ -239,44 +326,95 @@ export class GlWorld {
             }
             return sh;
         };
-        const prog = gl.createProgram();
-        gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT_SRC));
-        gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG_SRC));
-        gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-            throw new Error('link: ' + gl.getProgramInfoLog(prog));
-        }
-        this.prog = prog;
-        this.uRowX = gl.getUniformLocation(prog, 'uRowX');
-        this.uRowY = gl.getUniformLocation(prog, 'uRowY');
-        this.aPos = gl.getAttribLocation(prog, 'aPos');
-        this.aColor = gl.getAttribLocation(prog, 'aColor');
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        // Premultiplied-alpha over — matches the canvas compositor and the
-        // 2D source-over the painter order emulates.
+        const link = (vs, fs) => {
+            const prog = gl.createProgram();
+            gl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));
+            gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fs));
+            gl.linkProgram(prog);
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+                throw new Error('link: ' + gl.getProgramInfoLog(prog));
+            }
+            return prog;
+        };
+
+        const tri = link(VERT_SRC, FRAG_SRC);
+        this.prog = tri;
+        this.uRowX = gl.getUniformLocation(tri, 'uRowX');
+        this.uRowY = gl.getUniformLocation(tri, 'uRowY');
+        this.uRowZ = gl.getUniformLocation(tri, 'uRowZ');
+        this.uOffset = gl.getUniformLocation(tri, 'uOffset');
+        this.uTint = gl.getUniformLocation(tri, 'uTint');
+        this.aPos = gl.getAttribLocation(tri, 'aPos');
+        this.aColor = gl.getAttribLocation(tri, 'aColor');
+
+        const pt = link(POINT_VERT_SRC, POINT_FRAG_SRC);
+        this.pointProg = {
+            prog: pt,
+            uRowX: gl.getUniformLocation(pt, 'uRowX'),
+            uRowY: gl.getUniformLocation(pt, 'uRowY'),
+            uRowZ: gl.getUniformLocation(pt, 'uRowZ'),
+            aPos: gl.getAttribLocation(pt, 'aPos'),
+            aColor: gl.getAttribLocation(pt, 'aColor'),
+            aSize: gl.getAttribLocation(pt, 'aSize'),
+            vbo: gl.createBuffer(),
+        };
+
+        const ln = link(LINE_VERT_SRC, FRAG_SRC);
+        this.lineProg = {
+            prog: ln,
+            uRowX: gl.getUniformLocation(ln, 'uRowX'),
+            uRowY: gl.getUniformLocation(ln, 'uRowY'),
+            uRowZ: gl.getUniformLocation(ln, 'uRowZ'),
+            uViewPx: gl.getUniformLocation(ln, 'uViewPx'),
+            aStart: gl.getAttribLocation(ln, 'aStart'),
+            aEnd: gl.getAttribLocation(ln, 'aEnd'),
+            aParam: gl.getAttribLocation(ln, 'aParam'),
+            aColor: gl.getAttribLocation(ln, 'aColor'),
+            aHalfWidth: gl.getAttribLocation(ln, 'aHalfWidth'),
+            vbo: gl.createBuffer(),
+        };
+
+        // Premultiplied-alpha over for the blended passes — matches the
+        // canvas compositor.
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        this.floorBatch = null;
-        this.liquidBatch = null;
+        gl.depthFunc(gl.LESS);
+        this.floorOpaque = null;   // depth-tested, unsorted
+        this.floorFaded = null;    // focus-faded regions — blended, no depth write
+        this.liquidBatch = null;   // blended, angle-sorted
         this._floorModel = null;
         this._floorFocus = null;
         this._liquidFaces = null;
+        this._moverMeshes = new Map();  // submodel id -> {vbo, count}
     }
 
-    // syncFloor (re)builds the floor batch when the model or the focus
+    // syncFloor (re)builds the floor batches when the model or the focus
     // changed — both rare, user-driven events. Model identity is the cache
-    // key (floorModel() memoises per geometry+groups); `focusName` keys the
-    // faded-fill variant exactly like the 2D bake key does.
+    // key (floorModel() memoises per geometry+groups). The entries split by
+    // focus tier: everything outside the focus fade renders opaque under the
+    // depth test (order-free), the faded remainder blends on top without
+    // depth writes.
     syncFloor(model, focusName, isFaded) {
         const focus = focusName ?? null;
         if (model === this._floorModel && focus === this._floorFocus) return;
-        if (this.floorBatch) { this.floorBatch.dispose(); this.floorBatch = null; }
+        if (this.floorOpaque) { this.floorOpaque.dispose(); this.floorOpaque = null; }
+        if (this.floorFaded) { this.floorFaded.dispose(); this.floorFaded = null; }
         this._floorModel = model;
         this._floorFocus = focus;
         if (!model) return;
-        const { verts, centroids } = buildEntryVertices(model.entries,
-            (e) => (isFaded && isFaded(e.name)) ? e.fillFaded : e.fill);
-        this.floorBatch = new GlBatch(this.gl, verts, centroids);
+        const opaque = [];
+        const faded = [];
+        for (const e of model.entries) {
+            if (isFaded && isFaded(e.name)) faded.push(e);
+            else opaque.push(e);
+        }
+        if (opaque.length > 0) {
+            const { verts, centroids } = buildEntryVertices(opaque, (e) => e.fill, true);
+            this.floorOpaque = new GlBatch(this.gl, verts, centroids);
+        }
+        if (faded.length > 0) {
+            const { verts, centroids } = buildEntryVertices(faded, (e) => e.fillFaded);
+            this.floorFaded = new GlBatch(this.gl, verts, centroids);
+        }
     }
 
     // syncLiquids (re)builds the liquid batch. `faces` is a prebuilt entry
@@ -289,26 +427,159 @@ export class GlWorld {
         this._liquidFaces = faces;
         if (!faces || faces.length === 0) return;
         const { verts, centroids } = buildEntryVertices(faces, (e) => e.fill);
-        this.liquidBatch = new GlBatch(this.gl, verts, centroids);
+        this.liquidBatch = new GlBatch(this.gl, verts, centroids, { sortable: true });
     }
 
-    _drawBatch(batch, w) {
-        if (!batch) return;
+    _bindBatch(batch) {
         const gl = this.gl;
-        batch.ensureSorted(w);
         gl.bindBuffer(gl.ARRAY_BUFFER, batch.vbo);
         gl.enableVertexAttribArray(this.aPos);
         gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 28, 0);
         gl.enableVertexAttribArray(this.aColor);
         gl.vertexAttribPointer(this.aColor, 4, gl.FLOAT, false, 28, 12);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, batch.ibo);
-        gl.drawElements(gl.TRIANGLES, batch.count * 3, gl.UNSIGNED_INT, 0);
     }
 
-    // render draws floors then liquids (the 2D layer order) for the given
-    // camera into the backing canvas, sized to pxW × pxH physical pixels.
-    // cssW/cssH are the logical size the camera math targets.
-    render(w, cssW, cssH, pxW, pxH) {
+    // Opaque pass: depth-tested, depth-written, array order — the GPU's
+    // z-buffer does what the 2D path needed a per-angle painter sort for.
+    _drawOpaque(batch) {
+        if (!batch) return;
+        const gl = this.gl;
+        this._bindBatch(batch);
+        gl.drawArrays(gl.TRIANGLES, 0, batch.count * 3);
+    }
+
+    // Blended pass: reads depth (so opaque geometry occludes it) but never
+    // writes it. `sorted` draws back-to-front through the angle-keyed index
+    // buffer (liquids — visibly translucent volumes); unsorted is for the
+    // focus fade, whose alpha is too low for ordering to read.
+    _drawBlended(batch, w) {
+        if (!batch) return;
+        const gl = this.gl;
+        this._bindBatch(batch);
+        if (batch.sortable) {
+            batch.ensureSorted(w);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, batch.ibo);
+            gl.drawElements(gl.TRIANGLES, batch.count * 3, gl.UNSIGNED_INT, 0);
+        } else {
+            gl.drawArrays(gl.TRIANGLES, 0, batch.count * 3);
+        }
+    }
+
+    // _moverMesh: a submodel's mesh as a position-only VBO, uploaded once
+    // per id (poses are pure translations, applied via uOffset).
+    _moverMesh(sub, tris) {
+        let m = this._moverMeshes.get(sub);
+        if (m) return m;
+        const gl = this.gl;
+        const verts = new Float32Array(tris.length);
+        verts.set(tris);
+        const vbo = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+        m = { vbo, count: tris.length / 3 };
+        this._moverMeshes.set(sub, m);
+        return m;
+    }
+
+    // _drawMovers: opaque, depth-tested meshes at their per-frame poses.
+    // The z-buffer replaces the 2D path's backface-culled silhouette trick:
+    // drawing every face flat-coloured under depth testing produces the same
+    // near hull. `movers` is [{sub, tris, x, y, z, tint: [r,g,b,a] premult}].
+    _drawMovers(movers) {
+        const gl = this.gl;
+        gl.disableVertexAttribArray(this.aColor);
+        gl.vertexAttrib4f(this.aColor, 1, 1, 1, 1);
+        for (const m of movers) {
+            const mesh = this._moverMesh(m.sub, m.tris);
+            gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vbo);
+            gl.enableVertexAttribArray(this.aPos);
+            gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 12, 0);
+            gl.uniform3f(this.uOffset, m.x, m.y, m.z);
+            gl.uniform4fv(this.uTint, m.tint);
+            gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+        }
+        gl.uniform3f(this.uOffset, 0, 0, 0);
+        gl.uniform4f(this.uTint, 1, 1, 1, 1);
+    }
+
+    // _drawPoints: round dots ([{x, y, z, size(px), color: [r,g,b,a]}]) as
+    // point sprites from a per-frame stream buffer.
+    _drawPoints(points, t) {
+        if (!points || points.length === 0) return;
+        const gl = this.gl;
+        const p = this.pointProg;
+        const data = new Float32Array(points.length * 8);
+        let i = 0;
+        for (const pt of points) {
+            data[i++] = pt.x; data[i++] = pt.y; data[i++] = pt.z;
+            data[i++] = pt.color[0]; data[i++] = pt.color[1];
+            data[i++] = pt.color[2]; data[i++] = pt.color[3];
+            data[i++] = pt.size;
+        }
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        gl.enableVertexAttribArray(p.aPos);
+        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, 32, 0);
+        gl.enableVertexAttribArray(p.aColor);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 32, 12);
+        gl.enableVertexAttribArray(p.aSize);
+        gl.vertexAttribPointer(p.aSize, 1, gl.FLOAT, false, 32, 28);
+        gl.drawArrays(gl.POINTS, 0, points.length);
+    }
+
+    // _drawLines: screen-space extruded segments
+    // ([{sx..sz, ex..ez, halfWidth(px), color: [r,g,b,a]}]).
+    _drawLines(segs, t, pxW, pxH) {
+        if (!segs || segs.length === 0) return;
+        const gl = this.gl;
+        const p = this.lineProg;
+        // Two triangles per segment; 13 floats per vertex.
+        const CORNERS = [[-1, 0], [1, 0], [1, 1], [-1, 0], [1, 1], [-1, 1]];
+        const data = new Float32Array(segs.length * 6 * 13);
+        let i = 0;
+        for (const s of segs) {
+            for (const [side, end] of CORNERS) {
+                data[i++] = s.sx; data[i++] = s.sy; data[i++] = s.sz;
+                data[i++] = s.ex; data[i++] = s.ey; data[i++] = s.ez;
+                data[i++] = side; data[i++] = end;
+                data[i++] = s.color[0]; data[i++] = s.color[1];
+                data[i++] = s.color[2]; data[i++] = s.color[3];
+                data[i++] = s.halfWidth;
+            }
+        }
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.uniform2f(p.uViewPx, pxW, pxH);
+        gl.bindBuffer(gl.ARRAY_BUFFER, p.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
+        const stride = 52;
+        gl.enableVertexAttribArray(p.aStart);
+        gl.vertexAttribPointer(p.aStart, 3, gl.FLOAT, false, stride, 0);
+        gl.enableVertexAttribArray(p.aEnd);
+        gl.vertexAttribPointer(p.aEnd, 3, gl.FLOAT, false, stride, 12);
+        gl.enableVertexAttribArray(p.aParam);
+        gl.vertexAttribPointer(p.aParam, 2, gl.FLOAT, false, stride, 24);
+        gl.enableVertexAttribArray(p.aColor);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, stride, 32);
+        gl.enableVertexAttribArray(p.aHalfWidth);
+        gl.vertexAttribPointer(p.aHalfWidth, 1, gl.FLOAT, false, stride, 48);
+        gl.drawArrays(gl.TRIANGLES, 0, segs.length * 6);
+    }
+
+    // render draws the world for the given camera into the backing canvas,
+    // sized to pxW × pxH physical pixels; cssW/cssH are the logical size the
+    // camera math targets. Passes: opaque floors + movers (depth-tested),
+    // then focus fade and liquids (blended over, depth-read-only), then the
+    // always-visible weapon-fire overlays (projectile dots, beam lines —
+    // depth test off: the analyzer wants them seen, not occluded).
+    // `dyn` is the per-frame dynamic content: {movers, points, lines}.
+    render(w, cssW, cssH, pxW, pxH, dyn = {}) {
         const gl = this.gl;
         if (this.canvas.width !== pxW || this.canvas.height !== pxH) {
             this.canvas.width = pxW;
@@ -316,13 +587,31 @@ export class GlWorld {
         }
         gl.viewport(0, 0, pxW, pxH);
         gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clearDepth(1);
+        gl.depthMask(true);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(this.prog);
         const t = makeWorldTransform(w, cssW, cssH);
         gl.uniform4fv(this.uRowX, t.rx);
         gl.uniform4fv(this.uRowY, t.ry);
-        this._drawBatch(this.floorBatch, w);
-        this._drawBatch(this.liquidBatch, w);
+        gl.uniform4fv(this.uRowZ, t.rz);
+        gl.uniform3f(this.uOffset, 0, 0, 0);
+        gl.uniform4f(this.uTint, 1, 1, 1, 1);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.BLEND);
+        this._drawOpaque(this.floorOpaque);
+        if (dyn.movers && dyn.movers.length > 0) this._drawMovers(dyn.movers);
+
+        gl.enable(gl.BLEND);
+        gl.depthMask(false);
+        this._drawBlended(this.floorFaded, w);
+        this._drawBlended(this.liquidBatch, w);
+
+        gl.disable(gl.DEPTH_TEST);
+        this._drawPoints(dyn.points, t);
+        this._drawLines(dyn.lines, t, pxW, pxH);
+        gl.depthMask(true);
     }
 }
 
