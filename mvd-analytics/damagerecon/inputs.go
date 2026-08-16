@@ -74,9 +74,9 @@ type inputs struct {
 	explosions []pointFx // TE_EXPLOSION: exact rl/gl detonation points
 	bloods     []pointFx // TE_BLOOD: hitscan damage on a player, count byte
 	lgBloods   []pointFx // TE_LIGHTNINGBLOOD: LG cell hits
-	// consumedRL: per shooter, spawn times of rockets that HAVE an entity
-	// track — such a shot must not also act as a trackless point-blank
-	// candidate.
+	// consumedRL: per shooter, spawn times of rockets AND grenades that
+	// HAVE an entity track — such a fire must not also act as a trackless
+	// point-blank candidate.
 	consumedRL map[string][]int32
 
 	// discharges: LG water discharges, detected from a player's cells
@@ -87,10 +87,10 @@ type inputs struct {
 	// lgAmmoFires: every small cells decrement (1..3, alive) per player —
 	// the ammo-side record of LG attacks, one entry per stat update.
 	// lgBeamSparse marks a demo whose recorded TE_LIGHTNING2 beams cover
-	// well under half of the cells actually spent: old servers (observed
-	// on MVDSV 0.33-era recordings) drop most LG beam multicasts from the
-	// demo, so beam-gated attribution misses whole shaft fights — the
-	// ammo drain is the fallback fire evidence there.
+	// under 90% of the cells actually spent (modern KTX is ~100%): old
+	// servers (observed on MVDSV 0.33-era recordings, 76% coverage) drop
+	// LG beam multicasts from the demo, so beam-gated attribution misses
+	// whole shaft bursts — the ammo drain is the fallback fire evidence.
 	lgAmmoFires  []firedShot // sorted by t, weapon "lg"
 	lgBeamSparse bool
 
@@ -188,7 +188,10 @@ func buildInputs(res *result.Result) *inputs {
 	}
 
 	if bs := res.Streams.Beams; bs != nil {
-		for i := range bs.T {
+		// Guard against hand-built/migrated Results with unequal columns —
+		// the in-process builders always emit parallel slices.
+		n := min(len(bs.T), len(bs.Sx), len(bs.Sy), len(bs.Sz), len(bs.Ex), len(bs.Ey), len(bs.Ez))
+		for i := 0; i < n; i++ {
 			in.beams = append(in.beams, beam{
 				t: bs.T[i],
 				s: vec3{float64(bs.Sx[i]), float64(bs.Sy[i]), float64(bs.Sz[i])},
@@ -212,7 +215,8 @@ func buildInputs(res *result.Result) *inputs {
 	}
 
 	if pe := res.Streams.PointEffects; pe != nil {
-		for i := range pe.T {
+		n := min(len(pe.T), len(pe.Type), len(pe.Count), len(pe.X), len(pe.Y), len(pe.Z))
+		for i := 0; i < n; i++ {
 			fx := pointFx{
 				t:     pe.T[i],
 				count: int(pe.Count[i]),
@@ -394,7 +398,10 @@ func (in *inputs) resolveProjectiles(ps *result.ProjectileStreams) {
 	in.snapProjectilesToExplosions()
 
 	for _, pr := range in.projs {
-		if pr.weapon == "rl" && pr.shooter != "" {
+		if pr.shooter != "" {
+			// rl AND gl: a fire whose projectile has an entity track must
+			// not double as a trackless candidate (rl-sound fallback or
+			// explosion-anchored gl) for a second explosion.
 			in.consumedRL[pr.shooter] = append(in.consumedRL[pr.shooter], pr.spawnT)
 		}
 	}
@@ -424,6 +431,13 @@ func (in *inputs) snapProjectilesToExplosions() {
 	}
 	for i := range in.projs {
 		pr := &in.projs[i]
+		// A shooter-unresolved flight never becomes a candidate
+		// (projCandidates skips it) — claiming its explosion would only
+		// lock the detonation away from explosionCandidates' fire-sound
+		// shooter recovery, turning the hit into an attribution dead-end.
+		if pr.shooter == "" {
+			continue
+		}
 		lo := sort.Search(len(in.explosions), func(k int) bool { return in.explosions[k].t >= pr.endT-explosionSnapMs })
 		bestJ, bestD := -1, explosionSnapDist
 		for j := lo; j < len(in.explosions) && in.explosions[j].t <= pr.endT+explosionSnapMs; j++ {
@@ -476,16 +490,20 @@ func (in *inputs) lgBloodNear(t int32, vpos vec3) bool {
 	return n > 0
 }
 
-// countHitscanFires counts sg/ssg fires within the hitscan window of t.
-func (in *inputs) countHitscanFires(t int32) int {
-	n := 0
+// hitscanFiresAt returns the sg/ssg fires within the hitscan window of t
+// and, when exactly one fired, that shooter's name.
+func (in *inputs) hitscanFiresAt(t int32) (n int, soloShooter string) {
 	lo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-tolShotMs })
 	for i := lo; i < len(in.shots) && in.shots[i].t <= t+tolShotMs; i++ {
 		if w := in.shots[i].weapon; w == "sg" || w == "ssg" {
 			n++
+			soloShooter = in.shots[i].player
 		}
 	}
-	return n
+	if n != 1 {
+		soloShooter = ""
+	}
+	return n, soloShooter
 }
 
 // calibrateBloods validates the demo's TE_BLOOD count packaging against
@@ -511,14 +529,18 @@ func calibrateBloods(in *inputs) {
 			if d.died || d.masked {
 				continue
 			}
-			if in.countHitscanFires(d.t) != 1 {
+			nf, shooter := in.hitscanFiresAt(d.t)
+			if nf != 1 {
 				continue
 			}
 			n, sum := in.bloodsNear(d.t, vtrack.posAt(d.t))
 			if n == 0 || sum == 0 {
 				continue
 			}
-			if 4*sum == d.bounded {
+			// Quad-aware: a quadded volley deals 16 per pellet — testing the
+			// bare 4x identity would count it as a miss and could cost a
+			// quad-heavy demo its bloodTrust entirely.
+			if int(4.0*float64(sum)*in.quadFactor(shooter, d.t)) == d.bounded {
 				match++
 			} else {
 				miss++

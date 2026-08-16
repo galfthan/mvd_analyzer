@@ -62,9 +62,9 @@ func main() {
 			mode, _ := gm["mode"].(string)
 			gameID := int(id)
 			dest := filepath.Join(*out, fmt.Sprintf("%s_%d.mvd.gz", m, gameID))
-			manifest = append(manifest, row{GameID: gameID, Map: m, Mode: mode})
 			if _, err := os.Stat(dest); err == nil {
 				fmt.Printf("  %d cached\n", gameID)
+				manifest = append(manifest, row{GameID: gameID, Map: m, Mode: mode})
 				continue
 			}
 			info, err := client.Resolve(gameID)
@@ -81,6 +81,9 @@ func main() {
 				fmt.Fprintf(os.Stderr, "  write %d: %v\n", gameID, err)
 				os.Exit(1)
 			}
+			// Only demos that actually landed on disk enter the manifest — a
+			// failed resolve/download must not overstate the pinned corpus.
+			manifest = append(manifest, row{GameID: gameID, Map: m, Mode: mode})
 			fmt.Printf("  %d fetched (%d KB, mode %s)\n", gameID, len(data)/1024, mode)
 		}
 	}

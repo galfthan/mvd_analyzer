@@ -12,25 +12,33 @@ import (
 // ground-truth demos in the 2026-08-11 study (values are the study's
 // measured percentiles with slack; see REPORT.md).
 const (
-	tolBeamMs         = 30     // beam flash to damage frame (measured: 0)
-	tolProjMs         = 130    // projectile end to damage frame (p5=-81, p99=261 → asymmetric window below)
-	tolShotMs         = 60     // hitscan sound to damage frame
-	axeSwingDelayMs   = 200    // ax1.wav swing to W_FireAxe traceline (2×0.1s thinks)
-	axeSwingJitterMs  = 80     // demo-frame quantization on both timestamps
-	rBeamSeg          = 90.0   // units victim to beam segment (p99 measured 60, max 79)
-	rBeamSrc          = 160.0  // units beam start to attacker eye
-	rSplash           = 380.0  // units projectile end to victim (p95=199)
-	rDirect           = 48.0   // below this, treat as a possible direct hit
-	nailSpeed         = 1000.0 // nails AND rockets fly 1000 ups
-	rocketSpeed       = 1000.0
-	tolFlightMs       = 180.0 // flight-time consistency for the trackless-rocket fallback
-	tolBlastMs        = 40    // TE_EXPLOSION multicast to damage frame (same server function)
-	rAxe              = 110.0
-	rHitscan          = 3000.0
-	rLGRange          = 700.0 // id1 LG traceline reaches 600 units; interp slack
-	tolLGAmmoMs       = 250   // cells stat update to damage frame (old low-fps recordings lag)
-	sgAimGateDeg      = 50.0  // real sg hits are within ~25° (p95); hard gate at 2×
-	rlSoundAimGateDeg = 60.0
+	tolBeamMs = 30 // beam flash to damage frame (measured: 0)
+	// The projectile-end→damage delay is asymmetric (measured p5=-81,
+	// p99=261: the tracked despawn usually PRECEDES the damage frame, by up
+	// to a couple hundred ms on low-fps recordings). The searches below use
+	// [t-tolProjBeforeMs, t+tolProjAfterMs] on endT accordingly.
+	tolProjBeforeMs = 261
+	tolProjAfterMs  = 81
+
+	tolShotMs           = 60     // hitscan sound to damage frame
+	axeSwingDelayMs     = 200    // ax1.wav swing to W_FireAxe traceline (2×0.1s thinks)
+	axeSwingJitterMs    = 80     // demo-frame quantization on both timestamps
+	rBeamSeg            = 90.0   // units victim to beam segment (p99 measured 60, max 79)
+	rBeamSrc            = 160.0  // units beam start to attacker eye
+	rSplash             = 380.0  // units projectile end to victim (p95=199)
+	rDirect             = 48.0   // below this, treat as a possible direct hit
+	nailSpeed           = 1000.0 // nails AND rockets fly 1000 ups
+	rocketSpeed         = 1000.0
+	tolFlightMs         = 180.0 // flight-time consistency for the trackless-rocket fallback
+	tolBlastMs          = 40    // TE_EXPLOSION multicast to damage frame (same server function)
+	rGrenadeContact     = 350.0 // trackless grenade: muzzle to contact detonation (one frame of lob)
+	tolGrenadeContactMs = 350   // trackless grenade: launch to contact detonation
+	rAxe                = 110.0
+	rHitscan            = 3000.0
+	rLGRange            = 700.0 // id1 LG traceline reaches 600 units; interp slack
+	tolLGAmmoMs         = 250   // cells stat update to damage frame (old low-fps recordings lag)
+	sgAimGateDeg        = 50.0  // real sg hits are within ~25° (p95); hard gate at 2×
+	rlSoundAimGateDeg   = 60.0
 )
 
 // candidate is one possible explanation for a delta.
@@ -128,8 +136,13 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 	for _, d := range deltas {
 		seen[d.t] = true
 	}
+	// The exclusion window must cover projCandidates' attribution window
+	// exactly: an endpoint at endT can explain deltas in
+	// [endT-tolProjAfterMs, endT+tolProjBeforeMs] — any delta in that span
+	// already carries the hit, and a narrower window here would ALSO
+	// synthesize a pent event from the same explosion, double-counting it.
 	deltaNear := func(t int32) bool {
-		for dt := int32(-60); dt <= 60; dt++ {
+		for dt := int32(-tolProjAfterMs); dt <= tolProjBeforeMs; dt++ {
 			if seen[t+dt] {
 				return true
 			}
@@ -320,7 +333,22 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 		vj = math.Max(bj.lo, math.Min(bj.hi, vj))
 		vi = obs - vj
 	}
-	di := delta{t: d.t, raw: int(vi + 0.5), bounded: int(vi + 0.5)}
+	// A share rounding to zero would emit a phantom zero-damage hit row
+	// charged to a named attacker — treat the pair as unsplittable instead.
+	if vi < 1 || obs-vi < 1 {
+		return nil, false
+	}
+	// Bounded splits by the model shares; raw splits PROPORTIONALLY to
+	// them — assigning "raw minus my bounded share" to the second
+	// candidate would silently hand it all of the raw-vs-bounded excess
+	// (an armor-nullified merge has raw > bounded), biasing raw attacker
+	// totals by candidate order.
+	bndI := int(vi + 0.5)
+	rawI := bndI
+	if d.bounded > 0 {
+		rawI = int(float64(d.raw)*vi/obs + 0.5)
+	}
+	di := delta{t: d.t, raw: rawI, bounded: bndI}
 	dj := delta{t: d.t, raw: d.raw - di.raw, bounded: d.bounded - di.bounded}
 	e1 := in.mkEventSplash(di, bi.c.attacker, victim, bi.c.weapon, bi.c.kind, bi.c.isSplash)
 	e1.dEnd = bi.c.dEnd
@@ -470,10 +498,17 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 		dLo, _ := in.blastDamage(e.weapon)
 		vpos := vtrack.posAt(e.t)
 		bestD := -1.0
-		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjMs })
-		for i := lo; i < len(in.projs) && in.projs[i].endT <= e.t+tolProjMs; i++ {
+		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjBeforeMs })
+		for i := lo; i < len(in.projs) && in.projs[i].endT <= e.t+tolProjAfterMs; i++ {
 			pr := in.projs[i]
 			if pr.weapon != e.weapon {
+				continue
+			}
+			// The geometry must belong to the CREDITED attacker: without
+			// this, quad player A's kill can be topped up from player B's
+			// same-frame rocket. An unresolved shooter ("") stays eligible —
+			// it may well be the attacker's own flight.
+			if pr.shooter != "" && pr.shooter != e.attacker {
 				continue
 			}
 			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
@@ -524,10 +559,17 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 		if q == 1 {
 			return // a single non-quad cell (30) never out-runs the clamp
 		}
-		// Each same-frame TE_LIGHTNING2 is one cell at 30q.
+		// Each same-frame TE_LIGHTNING2 is one cell at 30q — counting only
+		// beams that START at the credited attacker (same rBeamSrc gate as
+		// beamCandidates), so a second shafter's bolt cannot inflate this
+		// attacker's top-up.
 		cells := 0
+		atr := in.tracks[e.attacker]
 		lo := sort.Search(len(in.beams), func(i int) bool { return in.beams[i].t >= e.t-tolBeamMs })
 		for i := lo; i < len(in.beams) && in.beams[i].t <= e.t+tolBeamMs; i++ {
+			if atr != nil && atr.posAt(in.beams[i].t).distTo(in.beams[i].s) > rBeamSrc {
+				continue
+			}
 			cells++
 		}
 		if cells == 0 {
@@ -787,11 +829,15 @@ func (in *inputs) lgAmmoCandidates(victim string, t int32, vpos vec3) []candidat
 	if !in.lgBeamSparse {
 		return nil
 	}
-	// Only where the beam record is silent: any beam at the instant means
-	// the beam evidence is live here and stays the sharper signal.
+	// Only where the beam record is silent FOR THIS VICTIM: a recorded
+	// beam passing near them at the instant means the sharper beam
+	// evidence is live here. A beam elsewhere on the map is someone
+	// else's shaft and must not suppress recovery of an unrecorded one.
 	blo := sort.Search(len(in.beams), func(i int) bool { return in.beams[i].t >= t-tolBeamMs })
-	if blo < len(in.beams) && in.beams[blo].t <= t+tolBeamMs {
-		return nil
+	for i := blo; i < len(in.beams) && in.beams[i].t <= t+tolBeamMs; i++ {
+		if segDist(vpos, in.beams[i].s, in.beams[i].e) <= rBeamSeg {
+			return nil
+		}
 	}
 	var out []candidate
 	lo := sort.Search(len(in.lgAmmoFires), func(i int) bool { return in.lgAmmoFires[i].t >= t-tolLGAmmoMs })
@@ -831,8 +877,8 @@ func (in *inputs) lgAmmoCandidates(victim string, t int32, vpos vec3) []candidat
 // the same frame.
 func (in *inputs) projCandidates(t int32, vpos vec3) []candidate {
 	var out []candidate
-	lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= t-tolProjMs })
-	for i := lo; i < len(in.projs) && in.projs[i].endT <= t+tolProjMs; i++ {
+	lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= t-tolProjBeforeMs })
+	for i := lo; i < len(in.projs) && in.projs[i].endT <= t+tolProjAfterMs; i++ {
 		pr := in.projs[i]
 		if pr.shooter == "" {
 			continue
@@ -884,28 +930,40 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 			if s.weapon != "rl" && s.weapon != "gl" {
 				continue
 			}
-			if s.weapon == "rl" && in.shotConsumed(s.player, s.t, 100) {
-				continue
+			if in.shotConsumed(s.player, s.t, 100) {
+				continue // this fire's projectile HAS an entity track
 			}
 			tr := in.tracks[s.player]
 			if tr == nil {
 				continue
 			}
 			spos := tr.posAt(s.t)
-			flight := spos.distTo(ex.p) / rocketSpeed * 1000.0
-			ferr := math.Abs(float64(ex.t-s.t) - flight)
-			if ferr > tolFlightMs {
-				continue
-			}
 			apen := 0.0
+			ferr := 0.0
 			if s.weapon == "rl" {
-				// Rockets fly straight at the crosshair: the shooter was
-				// aiming at the detonation point. Grenades lob — no gate.
+				// Rockets fly 1000 ups in a straight line at the crosshair:
+				// flight-time consistency plus an aim gate toward the
+				// detonation point.
+				flight := spos.distTo(ex.p) / rocketSpeed * 1000.0
+				ferr = math.Abs(float64(ex.t-s.t) - flight)
+				if ferr > tolFlightMs {
+					continue
+				}
 				if ang, ok := tr.aimAngleTo(s.t, ex.p); ok {
 					if ang > rlSoundAimGateDeg {
 						continue
 					}
 					apen = math.Min(ang/30.0, 2.0) * 0.15
+				}
+			} else {
+				// Grenades lob (~600 ups launch, gravity, bouncing, 2.5s
+				// fuse) — rocket flight physics would reject or misassign
+				// them. A TRACKLESS grenade means the entity was never
+				// broadcast, i.e. it detonated on contact within a frame of
+				// launch: gate on short range and a tight launch-to-blast
+				// delay instead of a flight model.
+				if spos.distTo(ex.p) > rGrenadeContact || ex.t-s.t > tolGrenadeContactMs {
+					continue
 				}
 			}
 			out = append(out, candidate{
@@ -961,7 +1019,8 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 			bloodPen = 0.4
 		}
 	}
-	singleSG := in.countHitscanFires(t) == 1
+	nSG, _ := in.hitscanFiresAt(t)
+	singleSG := nSG == 1
 	lo := sort.Search(len(in.shots), func(i int) bool { return in.shots[i].t >= t-tolShotMs })
 	for i := lo; i < len(in.shots) && in.shots[i].t <= t+tolShotMs; i++ {
 		s := in.shots[i]
@@ -1160,13 +1219,18 @@ func (in *inputs) submergedFor(vtrack *track, t int32, durMs int32) bool {
 		return false
 	}
 	const step = 1500
-	for dt := int32(0); dt <= durMs; dt += step {
+	for dt := int32(0); ; dt += step {
+		if dt > durMs {
+			dt = durMs // final probe lands exactly at the window edge
+		}
 		level, _ := in.bsp.waterLevelAt(vtrack.posAt(t - dt))
 		if level < 3 {
 			return false
 		}
+		if dt == durMs {
+			return true
+		}
 	}
-	return true
 }
 
 // envObituaryWeapon maps a suicide obituary's weapon token to the damage

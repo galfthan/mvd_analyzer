@@ -25,24 +25,24 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 0.75% | 0.91% | 1.95% | 68% | 91% |
+| bounded given | 0.58% | 0.81% | 1.98% | 75% | 91% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 1.23% | 1.63% | 3.91% | 44% | 72% |
-| raw taken | 0.90% | 1.53% | 4.07% | 52% | 72% |
-| bounded ewep | 1.06% | 1.59% | 3.21% | 48% | 68% |
-| bounded givenTeam | 4.3% | 6.6% | — | small denominators (200–700) |
-| bounded givenSelf | 3.9% | 5.3% | — | small denominators |
+| raw given | 1.15% | 1.57% | 3.91% | 41% | 71% |
+| raw taken | 0.90% | 1.51% | 4.07% | 52% | 73% |
+| bounded ewep | 1.04% | 1.50% | 3.05% | 49% | 68% |
+| bounded givenTeam | 2.4% | 5.7% | — | small denominators (200–700) |
+| bounded givenSelf | 3.7% | 5.1% | — | small denominators |
 
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — see
 `.reports/qw-recon-eval-dm2dm3-2026-08-15/`, fetched with
-`cmd/fetch-eval-corpus`) scores slightly better: bounded given median
-**0.59%** (mean 0.82%, p90 1.88%, ≤2% 92%), bounded taken 0.04%, raw
-given 1.24%, raw taken 1.78%.
+`cmd/fetch-eval-corpus`) scores comparably: bounded given median
+**0.60%** (mean 0.81%, p90 1.85%, ≤2% 92%), bounded taken 0.04%, raw
+given 1.23%, raw taken 1.71%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
-value exactly; attacker attribution is 98.4% on unambiguous enemy
-instants (rl 99.5%, lg 99.5%, sg 97.8%, ssg 98.1%, axe 100%).
+value exactly; attacker attribution is 98.5% on unambiguous enemy
+instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.2%, gl 99.5%, axe 98%).
 
 A third corpus generalizes the result across server generations: 216
 **archive-era instrumented demos** (a random sample of the 51k-demo
@@ -111,7 +111,7 @@ port adds, each verified against ground truth in the eval:
   gracefully to the pre-telemetry behaviour;
 - the axe: swings enter the shots stream (`weapons/ax1.wav`) and link at
   their engine-true +200ms traceline delay (W_FireAxe fires two 0.1s
-  animation thinks after the swing sound) — axe attribution 21% → 100%;
+  animation thinks after the swing sound) — axe attribution 21% → ~100%;
 - environmental classification (ktx/src/client.c WaterMove + the landing
   path): lava = 10·waterlevel/0.2s, slime = 4·waterlevel/1s, drowning =
   escalating 4..14/1s after 12s of full submersion, landings = flat 5 at

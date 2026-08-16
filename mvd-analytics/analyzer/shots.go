@@ -296,6 +296,14 @@ func (a *ShotsAnalyzer) onBeam(e *events.BeamEvent) {
 
 func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	if len(a.shots) == 0 {
+		// No recognized fire sounds (modded servers with foreign weapon
+		// wavs): the requested spatial streams and their Computed latches
+		// must still build — projectile flights, beams and point effects
+		// were collected regardless, and damage reconstruction refuses to
+		// run on an unlatched Result even though those streams are exactly
+		// the evidence it needs on such demos.
+		a.buildSpatialStreams(result)
+		a.rebaseSpatialStreams(result)
 		return nil
 	}
 
@@ -437,29 +445,47 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 		for i := range out.Shots {
 			out.Shots[i].Time -= ms
 		}
-		if s := result.Streams; s != nil {
-			for _, pr := range []*ProjectileStreams{s.Projectiles, s.Nails} {
-				if pr == nil {
-					continue
-				}
-				for i := range pr.Spawn {
-					pr.Spawn[i] -= ms
-					pr.End[i] -= ms
-				}
-			}
-			if bm := s.Beams; bm != nil {
-				for i := range bm.T {
-					bm.T[i] -= ms
-				}
-			}
-			if pe := s.PointEffects; pe != nil {
-				for i := range pe.T {
-					pe.T[i] -= ms
-				}
-			}
+	}
+	a.rebaseSpatialStreams(result)
+	return nil
+}
+
+// rebaseSpatialStreams shifts the spatial streams this node produced
+// (Projectiles/Nails/Beams/PointEffects) from the demo clock to
+// match-relative time. Split out of Finalize so the zero-shots path can
+// build and rebase them too. Nothing shifts when no match start was
+// detected.
+func (a *ShotsAnalyzer) rebaseSpatialStreams(result *Result) {
+	if a.core == nil {
+		return
+	}
+	ms := a.core.MatchStartMs()
+	if ms <= 0 {
+		return
+	}
+	s := result.Streams
+	if s == nil {
+		return
+	}
+	for _, pr := range []*ProjectileStreams{s.Projectiles, s.Nails} {
+		if pr == nil {
+			continue
+		}
+		for i := range pr.Spawn {
+			pr.Spawn[i] -= ms
+			pr.End[i] -= ms
 		}
 	}
-	return nil
+	if bm := s.Beams; bm != nil {
+		for i := range bm.T {
+			bm.T[i] -= ms
+		}
+	}
+	if pe := s.PointEffects; pe != nil {
+		for i := range pe.T {
+			pe.T[i] -= ms
+		}
+	}
 }
 
 // buildSpatialStreams attaches the projectile-flight and LG-beam streams to

@@ -36,7 +36,12 @@ type delta struct {
 func armorFracAt(p *result.PlayerStream, t int32) float64 {
 	at := ""
 	for i := range p.ArmorType {
-		if p.ArmorType[i].T > t {
+		// Strictly-before: a transition AT t is this hit's own end-of-frame
+		// broadcast (an RA hit that consumes the last armor point writes
+		// ArmorType "" on the same instant) — reading it would compute the
+		// absorption fraction from the post-hit state and lose the
+		// nullified-hit raw recovery below.
+		if p.ArmorType[i].T >= t {
 			break
 		}
 		at = p.ArmorType[i].V
@@ -103,10 +108,19 @@ func victimDeltas(p *result.PlayerStream, killAnchors map[int32]bool) []delta {
 			j++
 		}
 	}
+	// Membership check via a set, NOT sort.Search: appending inside the loop
+	// unsorts the slice, and deaths iterate in random map order — a later
+	// death's binary search over the unsorted tail could miss its existing
+	// row and append a duplicate instant, which the corpse-state rule below
+	// would then re-process into a phantom masked kill (nondeterministic
+	// double count).
+	have := make(map[int32]bool, len(merged))
+	for _, m := range merged {
+		have[m.t] = true
+	}
 	needSort := false
 	for t := range deaths {
-		k := sort.Search(len(merged), func(i int) bool { return merged[i].t >= t })
-		if k < len(merged) && merged[k].t == t {
+		if have[t] {
 			continue // a change row exists at this instant already
 		}
 		merged = append(merged, instant{t: t})
