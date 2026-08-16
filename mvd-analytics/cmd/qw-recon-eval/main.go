@@ -113,10 +113,10 @@ func main() {
 // wepCell accumulates event-level accuracy for one GT attacker-weapon
 // category (enemy instants with a single GT attacker).
 type wepCell struct {
-	instants, dmg          int
-	covered, valExact      int
-	attTotal, attRight     int
-	classRight, coveredDmg int
+	instants, dmg      int
+	covered, valExact  int
+	attTotal, attRight int
+	classRight         int
 }
 
 // collectWeaponStats scores GT ENEMY damage instants per attacker weapon:
@@ -189,7 +189,6 @@ func collectWeaponStats(gt, rc *result.DamageResult, out map[string]*wepCell) {
 			continue
 		}
 		c.covered++
-		c.coveredDmg += g.bounded
 		if r.bounded == g.bounded {
 			c.valExact++
 		}
@@ -225,9 +224,9 @@ type confCell struct {
 	bounded  int
 }
 
-// classOf buckets an instant by its relation for the attribution confusion:
-// "enemy:<weapon>", "self", "team", "env", or "missing".
-func classify(attacker, victim, weapon string, isEnv, isSelf, isTeam bool) string {
+// classify buckets an instant by its relation for the attribution
+// confusion: "enemy:<weapon>", "self", "team" or "env:<weapon>".
+func classify(weapon string, isEnv, isSelf, isTeam bool) string {
 	switch {
 	case isEnv:
 		return "env:" + weapon
@@ -261,7 +260,7 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 			b = *e.Bounded
 		}
 		k := key{e.Victim, e.Time}
-		c := classify(e.Attacker, e.Victim, e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
+		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
 		if g, ok := gtI[k]; ok {
 			g.bounded += b
 			if g.class != c {
@@ -279,7 +278,7 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 			b = *e.Bounded
 		}
 		k := key{e.Victim, e.Time}
-		c := classify(e.Attacker, e.Victim, e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
+		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
 		if g, ok := rcI[k]; ok {
 			g.bounded += b
 			if g.class != c {
