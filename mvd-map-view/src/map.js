@@ -162,6 +162,13 @@ export const LEARN_ITEM_STYLES = Object.assign({}, ITEM_MARKER_STYLES, {
 // result.NoFloor sentinel in PositionTrack.H — no floor to measure from.
 const MAP_NO_FLOOR = -2147483648;
 
+// perfNow: monotonic ms for the frame-stat samples. `performance` exists in
+// browsers, workers and node alike; the Date fallback only matters in exotic
+// embedders and merely degrades precision.
+const perfNow = typeof performance !== 'undefined'
+    ? () => performance.now()
+    : () => Date.now();
+
 // A standing player's origin sits this far above the floor (mins.z = -24 in
 // standard Quake 1).
 const PLAYER_ORIGIN_ABOVE_FLOOR = 24;
@@ -382,6 +389,11 @@ export class MvdMap {
         // the 2D fallback without re-probing.
         this._glWorld = null;
         this._glFailed = false;
+        // Per-frame perf sample, refreshed by every GL frame (drawWorldGL).
+        // The host's perf HUD / benchmark reads it after render(); perfCapture
+        // additionally turns on the GPU timer queries.
+        this.lastFrameStats = null;
+        this.perfCapture = false;
         this._drag = {
             active: false,
             button: -1,
@@ -623,12 +635,29 @@ export class MvdMap {
         const canvas = s.canvas;
         const cssW = s.canvasCssW || canvas.width;
         const cssH = s.canvasCssH || canvas.height;
-        glw.render(this.camera, cssW, cssH, canvas.width, canvas.height,
-                   this._glDynamic(canvas.width / cssW));
+        // Perf sampling: split the frame into the CPU-side command build
+        // (_glDynamic), the GL submit (render) and the canvas blit; the GPU
+        // side is measured by GlWorld's timer queries when perfCapture is on.
+        glw.captureGpu = !!this.perfCapture;
+        const t0 = perfNow();
+        const dyn = this._glDynamic(canvas.width / cssW);
+        const t1 = perfNow();
+        glw.render(this.camera, cssW, cssH, canvas.width, canvas.height, dyn);
+        const t2 = perfNow();
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.drawImage(glw.canvas, 0, 0);
         ctx.restore();
+        const t3 = perfNow();
+        const gs = glw.stats;
+        this.lastFrameStats = {
+            t: t3,
+            buildMs: t1 - t0, submitMs: t2 - t1, blitMs: t3 - t2,
+            gpuMs: glw.lastGpuMs,
+            draws: gs.draws, worldTris: gs.worldTris, points: gs.points,
+            lineSegs: gs.lineSegs, sprites: gs.sprites,
+            screenTris: gs.screenTris, streamBytes: gs.streamBytes,
+        };
         return true;
     }
 

@@ -7084,6 +7084,242 @@ function precomputeFullTrails() {
 // by name.
 function renderMap(time) {
     mapView.render(time);
+    mapPerfSample();
+}
+
+// ─── Map render perf HUD + benchmark ────────────────────────────────────────
+//
+// The component measures (MvdMap.lastFrameStats: CPU build / GL submit /
+// blit split, GlWorld draw counters, optional GPU timer); the host owns the
+// presentation. The FPS toggle shows a live overlay; the Bench button plays
+// the demo under a fixed 18 s camera script (MapView.benchCameraAt) and
+// reports fps + frame-time percentiles, compared against earlier runs of
+// the same demo kept in localStorage.
+
+const mapPerf = {
+    hudEnabled: false,
+    benchActive: false,
+    samples: [],     // recent MvdMap.lastFrameStats, newest last
+    hudTimer: null,
+};
+
+const MAP_BENCH_HISTORY_KEY = 'mvd-map-bench-history';
+
+// mapPerfSample: called after every renderMap. A frame that hit the
+// redraw-skip leaves lastFrameStats untouched — the unchanged timestamp
+// dedupes it, so the HUD's fps counts *presented* map frames.
+function mapPerfSample() {
+    if ((!mapPerf.hudEnabled && !mapPerf.benchActive) || !mapView) return;
+    const fs = mapView.lastFrameStats;
+    if (!fs) return;
+    const list = mapPerf.samples;
+    if (list.length > 0 && list[list.length - 1].t === fs.t) return;
+    list.push(fs);
+    if (list.length > 600) list.splice(0, list.length - 300);
+}
+
+function updateMapPerfHud() {
+    const hud = document.getElementById('map-perf-hud');
+    if (!hud || mapPerf.benchActive) return;
+    const now = performance.now();
+    const recent = mapPerf.samples.filter(s => now - s.t < 1000);
+    if (recent.length === 0) {
+        hud.textContent = 'map idle — play or drag to sample';
+        return;
+    }
+    const avg = (field) => {
+        let sum = 0, n = 0;
+        for (const s of recent) {
+            if (typeof s[field] === 'number') { sum += s[field]; n++; }
+        }
+        return n > 0 ? sum / n : null;
+    };
+    const ms1 = (v) => v === null ? '—' : v.toFixed(1);
+    const last = recent[recent.length - 1];
+    const gpu = avg('gpuMs');
+    hud.textContent =
+        `${recent.length} fps\n` +
+        `build ${ms1(avg('buildMs'))}  submit ${ms1(avg('submitMs'))}` +
+        `  blit ${ms1(avg('blitMs'))}  gpu ${ms1(gpu)} ms\n` +
+        `draws ${last.draws}  tris ${last.worldTris}  pts ${last.points}` +
+        `  segs ${last.lineSegs}  spr ${last.sprites}\n` +
+        `stream ${(last.streamBytes / 1024).toFixed(0)} KiB/frame`;
+}
+
+function toggleMapPerfHud() {
+    const btn = document.getElementById('map-perf');
+    const hud = document.getElementById('map-perf-hud');
+    mapPerf.hudEnabled = !mapPerf.hudEnabled;
+    if (btn) btn.classList.toggle('active', mapPerf.hudEnabled);
+    if (hud) hud.style.display = mapPerf.hudEnabled ? '' : 'none';
+    if (mapView) mapView.perfCapture = mapPerf.hudEnabled || mapPerf.benchActive;
+    if (mapPerf.hudEnabled) {
+        mapPerf.samples = [];
+        updateMapPerfHud();
+        mapPerf.hudTimer = setInterval(updateMapPerfHud, 250);
+        // Seed a sample so the HUD is live before the user touches anything.
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    } else if (mapPerf.hudTimer) {
+        clearInterval(mapPerf.hudTimer);
+        mapPerf.hudTimer = null;
+    }
+}
+
+// mapBenchDemoKey: identifies "the same demo" across sessions for run
+// comparisons. The result JSON carries no filename, so map + canonical
+// teams + rounded duration is the fingerprint.
+function mapBenchDemoKey() {
+    const map = currentResult?.demoInfo?.map || currentResult?.match?.map || '?';
+    const teams = (timelineState.teams || []).join('+');
+    return `${map}|${teams}|${Math.round(timelineState.duration || 0)}s`;
+}
+
+function loadMapBenchHistory() {
+    try {
+        const raw = localStorage.getItem(MAP_BENCH_HISTORY_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveMapBenchHistory(list) {
+    try {
+        localStorage.setItem(MAP_BENCH_HISTORY_KEY, JSON.stringify(list.slice(-30)));
+    } catch (e) { /* storage unavailable — the console log still has the run */ }
+}
+
+function runMapBenchmark() {
+    if (!mapView || !mapState || mapPerf.benchActive || !currentResult) return;
+    if (mapState.isPlaying) stopPlayback();
+    const cam = mapView.camera;
+    const saved = {
+        yaw: cam.yaw, pitch: cam.pitch, zoomK: cam.zoomK,
+        panX: cam.panX, panY: cam.panY,
+        cx: cam.cx, cy: cam.cy, zMid: cam.zMid,
+        time: mapState.currentTime,
+        follow: mapState.followPlayer,
+        focus: mapState.focusGroupName,
+    };
+    if (saved.follow) mapView.setFollowPlayer(null);
+    if (saved.focus) mapView.setFocusGroup(null);
+    // Deterministic launch pose: fit-to-canvas pivot, no pan, scripted
+    // camera; the demo plays at 1× from a fixed early timestamp.
+    cam.panX = 0;
+    cam.panY = 0;
+    mapView.refit();
+    cam.zMid = cam.zMidDefault || 0;
+    const t0Demo = Math.min(30, (timelineState.duration || 600) * 0.25);
+    mapPerf.benchActive = true;
+    mapView.perfCapture = true;
+    const benchBtn = document.getElementById('map-bench');
+    if (benchBtn) benchBtn.classList.add('active');
+    const hud = document.getElementById('map-perf-hud');
+    if (hud) {
+        hud.style.display = '';
+        hud.textContent = 'benchmarking… (18 s)';
+    }
+    const samples = [];
+    const start = performance.now();
+    let lastTick = start;
+    const step = () => {
+        if (!mapPerf.benchActive) return;   // demo unloaded mid-run
+        const now = performance.now();
+        const elapsed = (now - start) / 1000;
+        const pose = MapView.benchCameraAt(elapsed);
+        if (pose.done) {
+            finishMapBenchmark(saved, samples);
+            return;
+        }
+        MapView.setAngles(cam, pose.yaw, pose.pitch);
+        cam.zoomK = pose.zoomK;
+        cam.panX = 0;
+        cam.panY = 0;
+        mapState.currentTime = t0Demo + elapsed;
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+        const fs = mapView.lastFrameStats;
+        if (fs) samples.push(Object.assign({ dtMs: now - lastTick }, fs));
+        lastTick = now;
+        requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
+
+function finishMapBenchmark(saved, samples) {
+    const summary = MapView.summarizeBench(samples);
+    const noFrames = summary.frames === 0;
+    const canvas = mapState.canvas;
+    const record = Object.assign({
+        demo: mapBenchDemoKey(),
+        px: canvas ? `${canvas.width}x${canvas.height}` : '?',
+        date: new Date().toISOString(),
+    }, summary);
+    let prior = [];
+    if (!noFrames) {
+        // No GL frames presented (context lost / no geometry) → don't record
+        // a meaningless run.
+        console.log('[map-bench] ' + JSON.stringify(record));
+        const history = loadMapBenchHistory();
+        prior = history.filter(r => r.demo === record.demo && r.px === record.px);
+        saveMapBenchHistory(history.concat([record]));
+    }
+
+    // Restore the user's view and clock.
+    const cam = mapView.camera;
+    mapPerf.benchActive = false;
+    mapView.perfCapture = mapPerf.hudEnabled;
+    const benchBtn = document.getElementById('map-bench');
+    if (benchBtn) benchBtn.classList.remove('active');
+    cam.cx = saved.cx;
+    cam.cy = saved.cy;
+    cam.zMid = saved.zMid;
+    cam.zoomK = saved.zoomK;
+    cam.panX = saved.panX;
+    cam.panY = saved.panY;
+    if (saved.focus) mapView.setFocusGroup(saved.focus);
+    if (saved.follow) mapView.setFollowPlayer(saved.follow);
+    mapView.setCamera(saved.yaw, saved.pitch);
+    setCurrentTime(saved.time);
+
+    // Results overlay: this run, plus the newest earlier run of the same
+    // demo at the same surface size when there is one.
+    const hud = document.getElementById('map-perf-hud');
+    if (hud) {
+        hud.style.display = '';
+        if (noFrames) {
+            hud.textContent = 'bench: no GL frames rendered';
+            return;
+        }
+        const f = summary.frameMs || {};
+        let text =
+            `bench ${record.demo}\n` +
+            `${summary.avgFps} fps avg  ${summary.frames} frames  ` +
+            `${summary.longFrames} hitches\n` +
+            `frame ms p50 ${f.p50} p95 ${f.p95} max ${f.max}\n` +
+            `build p50 ${summary.buildMs?.p50}  submit p50 ${summary.submitMs?.p50}` +
+            (summary.gpuMs ? `  gpu p50 ${summary.gpuMs.p50}` : '') + '\n' +
+            `draws avg ${summary.draws.avg}`;
+        const prev = prior[prior.length - 1];
+        if (prev) {
+            const d = (record.avgFps - prev.avgFps).toFixed(1);
+            text += `\nvs ${prev.date.slice(0, 10)}: ${prev.avgFps} fps` +
+                ` (${d >= 0 ? '+' : ''}${d})`;
+        }
+        text += '\nfull record in the console';
+        hud.textContent = text;
+        if (!mapPerf.hudEnabled) {
+            // Leave the results up for a while, then hide (the FPS toggle
+            // owns the overlay otherwise).
+            setTimeout(() => {
+                if (!mapPerf.hudEnabled && !mapPerf.benchActive) {
+                    hud.style.display = 'none';
+                }
+            }, 30000);
+        }
+    }
 }
 
 // ─── Map Items (armor / weapon / MH / powerup overlays) ────────────────────
@@ -7499,6 +7735,15 @@ function setupMapTrailControls() {
     fxToggle('map-fog', () => (mapState.fog = mapState.fog > 0 ? 0 : 1) > 0);
     fxToggle('map-light', () => (mapState.worldLight = mapState.worldLight > 0 ? 0 : 0.6) > 0);
     fxToggle('map-occlude', () => (mapState.occludeActors = !mapState.occludeActors));
+
+    const perfBtn = document.getElementById('map-perf');
+    if (perfBtn) {
+        perfBtn.addEventListener('click', () => toggleMapPerfHud());
+    }
+    const benchBtn = document.getElementById('map-bench');
+    if (benchBtn) {
+        benchBtn.addEventListener('click', () => runMapBenchmark());
+    }
 
     const resetViewBtn = document.getElementById('map-reset-view');
     if (resetViewBtn) {

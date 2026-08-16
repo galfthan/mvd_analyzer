@@ -22,6 +22,19 @@ player models, first-person camera). A machine without WebGL2 sees a
 "WebGL2 required" notice on the map tab; software rasterisers
 (SwiftShader/llvmpipe) still work, just slower. `?gl=0`/`?gl=1` are gone.
 
+**Render-performance instrumentation.** The map toolbar gains two buttons.
+**FPS** shows a live overlay: presented map-frames per second, the frame
+split (CPU command build / GL submit / canvas blit / GPU time where the
+`EXT_disjoint_timer_query_webgl2` extension exists), and per-frame draw
+stats (draw calls, world triangles, points, line segments, sprites,
+streamed bytes). **Bench** plays the demo from a fixed timestamp while the
+camera runs a deterministic 18 s spin / tilt / zoom script, then reports
+average fps, frame-time percentiles (p50/p95/max), hitch count and the
+frame split; each run is logged to the console as one JSON line and kept
+in localStorage, so re-running on the same demo at the same canvas size
+shows the fps delta against the previous run — before/after comparisons
+for renderer changes on real hardware.
+
 ## unreleased (map-view-extract) — reusable map component + WebGL world
 
 No schema change; web UI only, in two parts.

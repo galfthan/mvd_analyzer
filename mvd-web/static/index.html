@@ -599,6 +599,7 @@
                     <div class="map-main-content">
                         <div class="map-canvas-container">
                             <canvas id="map-canvas" width="850" height="850"></canvas>
+                            <div id="map-perf-hud" class="map-perf-hud" style="display: none;"></div>
                             <div id="map-no-data" class="map-no-data" style="display: none;">
                                 <p>No location data available for this map.</p>
                                 <p>Player positions will still be shown.</p>
@@ -667,6 +668,8 @@
                         <button id="map-fog" title="Depth fog — the far side of the map fades into the dark (reads best in a tilted view)">Fog</button>
                         <button id="map-light" title="Directional shading on the floors — tops brighten, sides fall off by facing">Light</button>
                         <button id="map-occlude" title="Realistic occlusion — floors hide players, items and lines behind them (the default keeps everything visible)">Occl</button>
+                        <button id="map-perf" title="Render performance overlay — fps, frame-time split (CPU build / GL submit / blit / GPU) and per-frame draw stats">FPS</button>
+                        <button id="map-bench" title="Map render benchmark — plays the demo while the camera runs a fixed 18 s spin / tilt / zoom script, then reports fps and frame-time percentiles (logged to the console; compared against earlier runs of the same demo)">Bench</button>
                         <button id="map-reset-view" title="Reset pan / zoom / rotation">Reset view</button>
                         <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
                     </div>

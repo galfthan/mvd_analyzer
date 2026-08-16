@@ -72,6 +72,7 @@ Modules:
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
 | `src/regions.js` | `REGION_STATE_BY_CHAR`, `decodeRegionStateChar` |
+| `src/bench.js` | benchmark support, pure math — `benchCameraAt` (the deterministic 18 s spin/tilt/zoom camera script), `summarizeBench` (per-frame samples → fps + p50/p95/max percentiles), `percentile`. The host drives the run loop; per-frame timings come from `MvdMap.lastFrameStats` (CPU build / GL submit / blit split, `GlWorld.stats` draw counters, and GPU time via `EXT_disjoint_timer_query_webgl2` while `MvdMap.perfCapture` is set) |
 
 The frame composition is `MvdMap.render(time)`: the host pushes the columnar
 bucket view in via `setFrames`, and `frameAt(time)` / `regionControlAt(time)`

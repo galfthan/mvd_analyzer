@@ -3099,6 +3099,23 @@ th.sortable.sort-desc::after {
     flex-shrink: 0;
 }
 
+/* Render-performance overlay (FPS toggle / benchmark results) — floats over
+   the map canvas, never intercepts pointer input. */
+.map-perf-hud {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 5;
+    padding: 6px 9px;
+    background: rgba(5, 8, 18, 0.78);
+    border: 1px solid rgba(120, 140, 200, 0.35);
+    border-radius: 4px;
+    color: #9fe8c8;
+    font: 11px/1.5 monospace;
+    white-space: pre;
+    pointer-events: none;
+}
+
 #map-canvas {
     background: #0a0a15;
     border: 1px solid rgba(0, 217, 255, 0.15);

@@ -98,3 +98,10 @@ export { hexToRgba, scaleRgbaAlpha, getLocationColor } from './color.js';
 export { ITEM_KEYWORDS, normalizeLocationName, findNearestLocation } from './locs.js';
 
 export { REGION_STATE_BY_CHAR, decodeRegionStateChar } from './regions.js';
+
+export {
+    BENCH_DURATION_S,
+    benchCameraAt,
+    percentile,
+    summarizeBench,
+} from './bench.js';

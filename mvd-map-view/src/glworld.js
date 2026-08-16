@@ -525,6 +525,22 @@ export class GlWorld {
         // canvas compositor.
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         gl.depthFunc(gl.LESS);
+        // Per-frame render statistics, reset at the top of every render():
+        // draw calls issued, primitive counts per pass, and bytes streamed
+        // into the per-frame STREAM_DRAW buffers. Integer adds only — always
+        // on, read by the host's perf HUD / benchmark after render returns.
+        this.stats = {
+            draws: 0, worldTris: 0, points: 0, lineSegs: 0,
+            sprites: 0, screenTris: 0, streamBytes: 0,
+        };
+        // Optional GPU frame timing (EXT_disjoint_timer_query_webgl2).
+        // Queries are issued only while captureGpu is set (perf HUD /
+        // benchmark active) — zero overhead otherwise. Results arrive
+        // frames later; lastGpuMs holds the newest resolved value.
+        this.captureGpu = false;
+        this.lastGpuMs = null;
+        this._timerExt = gl.getExtension('EXT_disjoint_timer_query_webgl2');
+        this._gpuQueries = [];
         this.floorOpaque = null;   // depth-tested, unsorted
         this.floorFaded = null;    // focus-faded regions — blended, no depth write
         this.liquidBatch = null;   // blended, angle-sorted
@@ -600,6 +616,8 @@ export class GlWorld {
         const gl = this.gl;
         this._bindBatch(batch);
         gl.drawArrays(gl.TRIANGLES, 0, batch.count * 3);
+        this.stats.draws++;
+        this.stats.worldTris += batch.count;
     }
 
     // Blended pass: reads depth (so opaque geometry occludes it) but never
@@ -617,6 +635,8 @@ export class GlWorld {
         } else {
             gl.drawArrays(gl.TRIANGLES, 0, batch.count * 3);
         }
+        this.stats.draws++;
+        this.stats.worldTris += batch.count;
     }
 
     // _moverMesh: a submodel's mesh as a position-only VBO, uploaded once
@@ -651,6 +671,8 @@ export class GlWorld {
             gl.uniform3f(this.uOffset, m.x, m.y, m.z);
             gl.uniform4fv(this.uTint, m.tint);
             gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+            this.stats.draws++;
+            this.stats.worldTris += mesh.count / 3;
         }
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
@@ -678,6 +700,8 @@ export class GlWorld {
             gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 12, 0);
             gl.uniform4fv(this.uTint, f.tint);
             gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+            this.stats.draws++;
+            this.stats.worldTris += mesh.count / 3;
         }
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
     }
@@ -723,6 +747,8 @@ export class GlWorld {
             gl.uniform4fv(p.uTint, o.tint);
             gl.uniform1f(p.uWidthScale, o.halfWidth);
             gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+            this.stats.draws++;
+            this.stats.lineSegs += mesh.count / 6;
         }
         gl.uniform4f(p.uTint, 1, 1, 1, 1);
         gl.uniform1f(p.uWidthScale, 1);
@@ -788,6 +814,9 @@ export class GlWorld {
         gl.enableVertexAttribArray(p.aParam);
         gl.vertexAttribPointer(p.aParam, 1, gl.FLOAT, false, stride, 44);
         gl.drawArrays(gl.POINTS, 0, points.length);
+        this.stats.draws++;
+        this.stats.points += points.length;
+        this.stats.streamBytes += data.byteLength;
     }
 
     // syncAtlas uploads the label atlas page when it changed.
@@ -850,6 +879,9 @@ export class GlWorld {
         gl.enableVertexAttribArray(p.aTint);
         gl.vertexAttribPointer(p.aTint, 4, gl.FLOAT, false, stride, 28);
         gl.drawArrays(gl.TRIANGLES, 0, sprites.length * 6);
+        this.stats.draws++;
+        this.stats.sprites += sprites.length;
+        this.stats.streamBytes += data.byteLength;
     }
 
     // _drawScreenTris: flat-coloured physical-pixel triangles
@@ -876,6 +908,9 @@ export class GlWorld {
         gl.enableVertexAttribArray(p.aColor);
         gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 24, 8);
         gl.drawArrays(gl.TRIANGLES, 0, tris.length * 3);
+        this.stats.draws++;
+        this.stats.screenTris += tris.length;
+        this.stats.streamBytes += data.byteLength;
     }
 
     // _drawLines: screen-space extruded segments
@@ -912,6 +947,9 @@ export class GlWorld {
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
         this._bindLineAttribs();
         gl.drawArrays(gl.TRIANGLES, 0, segs.length * 6);
+        this.stats.draws++;
+        this.stats.lineSegs += segs.length;
+        this.stats.streamBytes += data.byteLength;
     }
 
     // render draws the world for the given camera into the backing canvas,
@@ -929,6 +967,10 @@ export class GlWorld {
     // `dyn` is the per-frame dynamic content from MvdMap._glDynamic.
     render(w, cssW, cssH, pxW, pxH, dyn = {}) {
         const gl = this.gl;
+        const st = this.stats;
+        st.draws = 0; st.worldTris = 0; st.points = 0;
+        st.lineSegs = 0; st.sprites = 0; st.screenTris = 0; st.streamBytes = 0;
+        const gpuQuery = this._beginGpuTimer();
         if (this.canvas.width !== pxW || this.canvas.height !== pxH) {
             this.canvas.width = pxW;
             this.canvas.height = pxH;
@@ -1000,6 +1042,42 @@ export class GlWorld {
         }
         gl.depthMask(true);
         gl.depthFunc(gl.LESS);
+        if (gpuQuery) this._endGpuTimer();
+    }
+
+    // GPU frame timing via EXT_disjoint_timer_query_webgl2 when available
+    // and requested (captureGpu). One TIME_ELAPSED query wraps each render;
+    // results resolve a few frames later, so pending queries are polled at
+    // the next begin and the newest resolved value lands in lastGpuMs. A
+    // disjoint event (GPU context interruption) invalidates every pending
+    // query — drop them and keep going.
+    _beginGpuTimer() {
+        const ext = this._timerExt;
+        if (!ext) return null;
+        const gl = this.gl;
+        while (this._gpuQueries.length > 0) {
+            if (gl.getParameter(ext.GPU_DISJOINT_EXT)) {
+                for (const q of this._gpuQueries) gl.deleteQuery(q);
+                this._gpuQueries.length = 0;
+                break;
+            }
+            const q = this._gpuQueries[0];
+            if (!gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE)) break;
+            this.lastGpuMs = gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6;
+            gl.deleteQuery(q);
+            this._gpuQueries.shift();
+        }
+        if (!this.captureGpu || this._gpuQueries.length >= 8) return null;
+        const q = gl.createQuery();
+        gl.beginQuery(ext.TIME_ELAPSED_EXT, q);
+        this._activeGpuQuery = q;
+        return q;
+    }
+
+    _endGpuTimer() {
+        this.gl.endQuery(this._timerExt.TIME_ELAPSED_EXT);
+        this._gpuQueries.push(this._activeGpuQuery);
+        this._activeGpuQuery = null;
     }
 }
 
