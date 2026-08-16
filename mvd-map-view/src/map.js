@@ -286,11 +286,15 @@ export function newState() {
         canvasCssW: 0,
         canvasCssH: 0,
         dpr: 1,
-        // World backend: WebGL2 when available (floors + liquids render on
-        // the GPU — no per-camera-frame rebake, no AA seam hack), with the
-        // canvas-2D painter as automatic fallback. Hosts can force 2D
-        // (mvd-web: ?gl=0) — the parity harness anchors on that path.
+        // World backend: WebGL2 when a real GPU is available (floors +
+        // liquids render on the GPU — no per-camera-frame rebake, no AA seam
+        // hack), with the canvas-2D painter as automatic fallback — including
+        // on software rasterisers (SwiftShader/llvmpipe), where GL is slower
+        // than the 2D painter. Hosts can force 2D (mvd-web: ?gl=0) — the
+        // parity harness anchors on that path — or force GL on a software
+        // renderer (forceGL; mvd-web: ?gl=1) for testing.
         useGL: true,
+        forceGL: false,
 
         // What the map is.
         locations: [],        // MapLocation[] — loc points, positions + names
@@ -707,7 +711,7 @@ export class MvdMap {
         const s = this.state;
         if (!s.useGL || this._glFailed) return false;
         if (!this._glWorld) {
-            const glw = GlWorld.create(this.scratchCanvas());
+            const glw = GlWorld.create(this.scratchCanvas(), { allowSoftware: s.forceGL });
             if (!glw) {
                 this._glFailed = true;
                 return false;

@@ -90,6 +90,8 @@ export {
     buildEntryVertices,
     sortedIndices,
     buildLiquidFaces,
+    rendererString,
+    isSoftwareRenderer,
 } from './glworld.js';
 
 export {

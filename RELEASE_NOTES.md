@@ -28,9 +28,12 @@ hairline seam-sealing stroke the 2D painter needed between adjacent
 triangles is gone — GL rasterisation has no such seams, so the floor reads
 cleaner at every angle. Painter order and colours are unchanged, so the look
 is the same apart from the crisper edges. Canvas-2D remains as an automatic
-fallback wherever WebGL2 is unavailable (or lost mid-session), and `?gl=0`
-forces it — that path stays byte-identical to the previous release and
-remains the parity harness's anchor.
+fallback wherever WebGL2 is unavailable (or lost mid-session) — including on
+machines with no usable GPU, where the browser hands out a software
+rasteriser (SwiftShader/llvmpipe) that is slower than the 2D painter; the
+map detects those and stays on 2D. `?gl=0` forces 2D and `?gl=1` forces GL
+even on a software renderer; the 2D path stays byte-identical to the
+previous release and remains the parity harness's anchor.
 
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 

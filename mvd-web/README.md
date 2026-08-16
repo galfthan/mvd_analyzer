@@ -632,7 +632,11 @@ anti-aliasing seams between adjacent triangles so a continuous floor reads
 as one clean surface instead of showing its triangulation as a mesh — GL
 rasterisation has no such seams, so the GL path skips the hack (and its
 double rasterisation cost) entirely. `?gl=0` forces the 2D path; a failed or
-lost WebGL context falls back to it automatically.
+lost WebGL context falls back to it automatically, and so does a **software
+rasteriser** (SwiftShader/llvmpipe — a GPU-less machine's GL is slower than
+the 2D painter, measured ~46 ms vs ~32 ms per rotated dm3 frame). `?gl=1`
+forces GL even there, which is how the harness exercises the GL path on a
+headless box.
 
 **Occupied-region overlay** — a region a living player currently stands
 in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one

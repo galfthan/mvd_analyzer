@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
     parseColor, makeWorldTransform, entryDepth,
     buildEntryVertices, sortedIndices, buildLiquidFaces,
+    isSoftwareRenderer, GlWorld,
 } from '../src/glworld.js';
 import { newCamera, refreshTrig, fit, project } from '../src/camera.js';
 
@@ -76,4 +77,22 @@ test('buildLiquidFaces quantises the shade exactly like drawLiquidVolume', () =>
     assert.equal(faces.length, 2, 'degenerate/null volumes dropped');
     assert.equal(faces[0].fill, 'rgba(64, 128, 255, 0.15)');
     assert.equal(faces[1].fill, `rgba(${Math.round(255 * 0.5)}, ${Math.round(120 * 0.5)}, ${Math.round(40 * 0.5)}, 0.15)`);
+});
+
+test('a software rasteriser is refused unless explicitly allowed', () => {
+    assert.equal(isSoftwareRenderer('Google SwiftShader'), true);
+    assert.equal(isSoftwareRenderer('llvmpipe (LLVM 17.0.6, 256 bits)'), true);
+    assert.equal(isSoftwareRenderer('ANGLE (NVIDIA GeForce RTX 4070)'), false);
+    assert.equal(isSoftwareRenderer(''), false);
+    // create() consults the renderer string before building the program, so
+    // a stub context with only the identity APIs is enough to prove the gate.
+    const softGl = {
+        getExtension: (name) => name === 'WEBGL_debug_renderer_info'
+            ? { UNMASKED_RENDERER_WEBGL: 0x9246 } : null,
+        getParameter: () => 'Google SwiftShader',
+    };
+    const canvas = { getContext: (kind) => (kind === 'webgl2' ? softGl : null) };
+    assert.equal(GlWorld.create(canvas), null, 'software GL → 2D fallback');
+    assert.equal(GlWorld.create(canvas, { allowSoftware: true }) === null, true,
+        'allowSoftware proceeds past the gate (and then fails on the stub program build)');
 });

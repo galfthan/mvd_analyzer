@@ -6599,10 +6599,12 @@ window.onMapViewReady = (MapView) => {
     _wtc = mapView.camera;
     // ?gl=0 forces the canvas-2D world backend — the escape hatch for driver
     // trouble and the anchor the parity harness byte-compares against
-    // (WebGL output is not byte-stable across machines/drivers).
-    if (new URLSearchParams(window.location.search).get('gl') === '0') {
-        mapState.useGL = false;
-    }
+    // (WebGL output is not byte-stable across machines/drivers). ?gl=1
+    // forces GL even on a software rasteriser, where the component would
+    // otherwise prefer the (faster there) 2D painter.
+    const glParam = new URLSearchParams(window.location.search).get('gl');
+    if (glParam === '0') mapState.useGL = false;
+    if (glParam === '1') mapState.forceGL = true;
     // Mirror component-side changes into the page chrome. The elements are
     // looked up at event time — these listeners attach before DOMContentLoaded.
     mapView.on('follow', () => syncFollowSelectUI());

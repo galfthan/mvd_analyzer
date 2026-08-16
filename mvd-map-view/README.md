@@ -67,7 +67,7 @@ Moved so far:
 | `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), the actor layer (the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, the static entity view), the overlay layer (trails, LOS/PVS sightlines, region occupancy and control tints), loc resolution (`resolvePlayerLoc`) and hit testing (`pickLocGroupAt`, `hitTestPlayerSymbol`) |
 | `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
 | `src/frames.js` | the columnar bucket-view accessors — `bucketTimeSec`, `bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot` and friends. One implementation shared by the map (via `setFrames`/`frameAt`) and the host's timeline panels |
-| `src/glworld.js` | the WebGL2 world backend — floors + liquids as two sorted GPU batches. Camera motion is a uniform update instead of a full re-bake, and the 2D painter's AA seam-sealing stroke is unnecessary. Falls back to the 2D path when a context can't be created (or is lost); `state.useGL = false` forces 2D |
+| `src/glworld.js` | the WebGL2 world backend — floors + liquids as two sorted GPU batches. Camera motion is a uniform update instead of a full re-bake, and the 2D painter's AA seam-sealing stroke is unnecessary. Falls back to the 2D path when a context can't be created (or is lost), and on software rasterisers, where GL is slower than the 2D painter; `state.useGL = false` forces 2D, `state.forceGL = true` overrides the software gate |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
@@ -162,4 +162,5 @@ against any baseline captured on the same machine and is the anchor for
 refactors. The WebGL path is deterministic on one machine + driver, so
 GL-vs-GL before/after pairs compare byte-exactly too — but never compare a
 GL set against a 2D set (the anti-aliasing legitimately differs), and never
-across machines.
+across machines. On a GPU-less box the app auto-prefers 2D (software GL is
+slower), so GL captures there need `--force-webgl`.

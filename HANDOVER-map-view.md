@@ -88,11 +88,13 @@ Notes that cost me time:
 | (4)       | the frames seam — the columnar accessors move to `src/frames.js` (one implementation; app.js keeps wrapper names for the panels), the view is pushed in via `setFrames`, and `frameAt(time)` / `regionControlAt(time)` own the memoised lookup. `render(time)` and `hitTestPlayerSymbol(cx, cy, time)` lose their host-data parameters. NOTE: this is the synchronous half of the planned FrameSource — see "Not done" |
 | (5)       | interaction — the pointer state machine (`pointerDown/Move/Up`, `wheelZoom`), click dispatch, `setCamera`, `setFocusGroup`, `setFollowPlayer`, `currentOrbitPivot`, `resetView`, and a minimal emitter (`on('follow'\|'camera')`) all live on MvdMap. app.js keeps only DOM event glue (installMapInteraction), chrome sync via the two events, and thin global wrappers (setMapCamera / resetMapView / setFocusGroup / setFollowPlayer) for buttons + the harness. The app-side projection wrappers (worldToCanvas etc.) are gone |
 | (6)       | data transforms — `rebuildTrails` (was precomputeFullTrails; teleport threshold now derives from the view's windowMs) and `setGeometry` (was applyMapGeometry's state half) |
-| (7)       | **WebGL world backend** (`src/glworld.js`): floors + liquids as two sorted GPU batches, painter order kept (sorted on angle change only), premultiplied-alpha blending, camera folded into two row-vector uniforms (`makeWorldTransform`, pinned equal to `project()` by test). Renders into an internal offscreen canvas blitted under the 2D layers, so the single-canvas contract and the loader invariant hold. Auto-fallback to the 2D painter on missing/lost context; `?gl=0` forces it. Verified: 2D-anchor shots 140/140 byte-identical to pre-GL; GL shots differ only in AA/rounding (0.00% of pixels differ by >60/255 in sampled shots) |
+| (7)       | **WebGL world backend** (`src/glworld.js`): floors + liquids as two sorted GPU batches, painter order kept (sorted on angle change only), premultiplied-alpha blending, camera folded into two row-vector uniforms (`makeWorldTransform`, pinned equal to `project()` by test). Renders into an internal offscreen canvas blitted under the 2D layers, so the single-canvas contract and the loader invariant hold. Auto-fallback to the 2D painter on missing/lost context AND on software rasterisers (SwiftShader/llvmpipe — measured slower than the 2D painter, ~46 vs ~32 ms per rotated dm3 frame on the GPU-less dev box); `?gl=0` forces 2D, `?gl=1` / `--force-webgl` forces GL through the software gate. Verified: 2D-anchor shots 140/140 byte-identical to pre-GL; GL shots differ only in AA/rounding (0.00% of pixels differ by >60/255 in sampled shots) |
 
-State: `app.js` ~9,300 lines. `mvd-map-view/` ~3,300 lines of source,
-115 unit tests. `make test` green; full-shot parity on every commit (the set
-is 140 shots since the LOS-wait fix).
+State: `app.js` ~9,000 lines. `mvd-map-view/` ~4,000 lines of source,
+123 unit tests. `make test` green; full-shot parity on every commit (the set
+is 140 shots since the LOS-wait fix; since the WebGL backend the byte-exact
+anchor is the `--no-webgl` capture, and GL-vs-GL pairs compare byte-exactly
+on one machine).
 
 Current boundary:
 
@@ -102,7 +104,8 @@ mvd-map-view/   camera · geometry · loc regions · floor model · draw primiti
                 · loc resolution · hit-testing · frames seam (setFrames/frameAt)
                 · render(time) · resize/refit push API · pointer state machine
                 · focus/follow/camera/resetView · on('follow'|'camera')
-app.js          setFrames push (worker plumbing) · precomputeFullTrails
+                · trails + geometry install · WebGL world backend (2D fallback)
+app.js          setFrames/geometry push (worker + fetch plumbing)
                 · DOM event glue + chrome sync · all measuring
                 · all DOM chrome · all loaders
 ```
