@@ -451,29 +451,29 @@ const (
 	bloodNearMs   = 40
 )
 
-// bloodsNear returns how many TE_BLOOD messages landed near the victim at
-// the instant and their summed count bytes.
-func (in *inputs) bloodsNear(t int32, vpos vec3) (n, sum int) {
-	lo := sort.Search(len(in.bloods), func(i int) bool { return in.bloods[i].t >= t-bloodNearMs })
-	for i := lo; i < len(in.bloods) && in.bloods[i].t <= t+bloodNearMs; i++ {
-		if in.bloods[i].p.distTo(vpos) <= bloodNearDist {
+// fxNear returns how many of the effects landed near the victim at the
+// instant and their summed count bytes. The list must be sorted by t.
+func fxNear(fx []pointFx, t int32, vpos vec3) (n, sum int) {
+	lo := sort.Search(len(fx), func(i int) bool { return fx[i].t >= t-bloodNearMs })
+	for i := lo; i < len(fx) && fx[i].t <= t+bloodNearMs; i++ {
+		if fx[i].p.distTo(vpos) <= bloodNearDist {
 			n++
-			sum += in.bloods[i].count
+			sum += fx[i].count
 		}
 	}
 	return n, sum
 }
 
-// lgBloodNear reports whether a TE_LIGHTNINGBLOOD landed near the victim
-// at the instant — the per-cell LG hit confirmation.
+// bloodsNear counts the TE_BLOOD messages on the victim at the instant
+// (with their summed count bytes); lgBloodNear reports the same presence
+// test for TE_LIGHTNINGBLOOD — the per-cell LG hit confirmation.
+func (in *inputs) bloodsNear(t int32, vpos vec3) (n, sum int) {
+	return fxNear(in.bloods, t, vpos)
+}
+
 func (in *inputs) lgBloodNear(t int32, vpos vec3) bool {
-	lo := sort.Search(len(in.lgBloods), func(i int) bool { return in.lgBloods[i].t >= t-bloodNearMs })
-	for i := lo; i < len(in.lgBloods) && in.lgBloods[i].t <= t+bloodNearMs; i++ {
-		if in.lgBloods[i].p.distTo(vpos) <= bloodNearDist {
-			return true
-		}
-	}
-	return false
+	n, _ := fxNear(in.lgBloods, t, vpos)
+	return n > 0
 }
 
 // countHitscanFires counts sg/ssg fires within the hitscan window of t.

@@ -329,6 +329,22 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	return []reconEvent{e1, e2}, true
 }
 
+// telefragAnchor types a delta whose obituary is a telefrag the frag log
+// left killer-less ("X was telefragged" parses as a suicide). The attacker
+// is inferable: the player whose track TELEPORTS onto the victim's spot at
+// that instant, or "world" when none is identifiable.
+func (in *inputs) telefragAnchor(victim string, d delta) (reconEvent, bool) {
+	f := in.fragAnyAt[fragKey{victim, d.t}]
+	if f == nil || f.Weapon != "tele" {
+		return reconEvent{}, false
+	}
+	att := in.teleportArrivalAt(victim, d.t)
+	if att == "" {
+		att = "world"
+	}
+	return in.mkEvent(d, att, victim, "tele", "positional"), true
+}
+
 func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent {
 	// Frag anchor: a non-suicide non-teamkill frag at the exact instant
 	// names killer + weapon authoritatively.
@@ -345,32 +361,19 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		return e
 	}
 	if d.masked {
-		// Masked death with no killer-naming frag. A "was telefragged"
-		// obituary parses as a killer-less suicide, but the attacker is
-		// still inferable: the player whose track TELEPORTS onto the
-		// victim's spot at that instant.
-		if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.Weapon == "tele" {
-			if att := in.teleportArrivalAt(victim, d.t); att != "" {
-				return in.mkEvent(d, att, victim, "tele", "positional")
-			}
-			return in.mkEvent(d, "world", victim, "tele", "positional")
+		// Masked death with no killer-naming frag — still typed (and often
+		// attributed) by the killer-less telefrag obituary.
+		if e, ok := in.telefragAnchor(victim, d); ok {
+			return e
 		}
 		return in.mkEvent(d, "world", victim, "unknown", "masked-kill")
 	}
 
 	if d.died {
-		// A visible killing delta whose obituary is a killer-less telefrag
-		// ("was telefragged" parses as suicide): type it positional and
-		// infer the attacker from the teleport arrival.
-		if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.Weapon == "tele" {
-			if att := in.teleportArrivalAt(victim, d.t); att != "" {
-				return in.mkEvent(d, att, victim, "tele", "positional")
-			}
-			return in.mkEvent(d, "world", victim, "tele", "positional")
+		// A visible killing delta whose obituary is a killer-less telefrag.
+		if e, ok := in.telefragAnchor(victim, d); ok {
+			return e
 		}
-	}
-
-	if d.died {
 		// Environmental deaths carry typed suicide obituaries ("burst into
 		// flames" → lava): the category is authoritative there, no model
 		// needed.
