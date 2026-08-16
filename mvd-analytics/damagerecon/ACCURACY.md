@@ -130,6 +130,14 @@ detection rather than fabrication:
   old demos.
 - **LG discharges** need the cells stream; with frozen ammo they are not
   detected (their raw value stays at the clamp-limited observation).
+- **LG beams themselves can be under-recorded**: old servers (observed
+  MVDSV 0.33) drop a fraction of TE_LIGHTNING2 multicasts from the demo —
+  whole shaft bursts with no beam at all. Detected per demo (recorded
+  beams < 90% of fire-sized cells decrements; modern KTX is ~100%) and
+  recovered from the ammo side: on such demos, at instants with no beam,
+  a cells decrement within 250ms generates an LG candidate gated by the
+  id1 LG range, line of sight and the aim cone. With frozen ammo this
+  fallback quietly stands down too.
 - **quad/pent intervals** come from the same stat; where a recorder froze
   powerup bits the ×4 model and pent synthesis quietly stand down.
 
