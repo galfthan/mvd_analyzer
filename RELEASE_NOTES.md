@@ -88,6 +88,20 @@ appear in the per-shot stream, `byPlayer` accuracy, the KTX
 reconciliation and the aim weapon counters, and reconstructed axe
 attacker attribution went 20% → 100% on the 60-demo validation corpus.
 
+A truthfulness regression the reconstruction itself introduced is
+fixed: `playerStats.accuracy` and `aim` used to treat mere PRESENCE of
+the damage section as "hits were measured" — correct while only wire
+demos had one, but the reconstruction now fills the section on
+pre-instrumentation demos where the shot linker never saw a wire damage
+event, so every weapon read a fabricated `hits: 0` (~52% of the
+archive). Both now gate on `damage.source == "ktx"`: accuracy `hits`
+stays absent, and `aim` withholds all hit-derived counters (hits,
+pellet full/partial/miss, direct/splash, the LG whiff classes) behind a
+new top-level `aim.hitsMeasured` flag — `weapons[].hits` becomes
+omitempty, so with `hitsMeasured: true` an absent value is a measured
+zero. Shots, crosshair error and the LG ramp are shot/track-derived and
+keep working on every demo.
+
 The parser now surfaces every point-effect temp entity
 (`PointEffectEvent`; previously length-skipped), and the analyzer exposes
 them as a new `streams.pointEffects` spatial stream behind the

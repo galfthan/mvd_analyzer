@@ -4544,7 +4544,7 @@ components:
                       description: "Fires where all pellets hit."
                       type: integer
                     hits:
-                      description: "Fires that connected."
+                      description: "Fires that connected. Omitted when the top-level hitsMeasured is false (no wire damage stream to link against); with hitsMeasured true, absent means a measured zero."
                       type: integer
                     miss:
                       description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
@@ -4629,7 +4629,6 @@ components:
                   required:
                     - weapon
                     - shots
-                    - hits
                   type: object
                 type:
                   - "null"
@@ -4641,12 +4640,21 @@ components:
           type:
             - "null"
             - array
+        hitsMeasured:
+          description: >-
+            Whether the hit-derived counters (hits, pellet full/partial/miss,
+            direct/splash, LG whiff classes) were measured against a wire KTX
+            damage stream. False on reconstructed/absent damage — those fields
+            are withheld there rather than fabricated as zeros; when true an
+            absent per-weapon `hits` means a measured zero.
+          type: boolean
       required:
         # timeUnit is flattened INTO the governed /aim response (always echoed)
         # but carried as an /artifacts envelope SIBLING of the `aim` key
         # (required on that branch, not inside this object), so within this
         # reused schema it stays optional-but-declared.
         - players
+        - hitsMeasured
       type: object
     LocGraph:
       additionalProperties: false

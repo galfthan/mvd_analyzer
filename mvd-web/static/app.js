@@ -11524,7 +11524,7 @@ const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
-    hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
+    hits: { h: 'Hits', t: 'Fires that connected (— when the demo carries no wire damage stream to measure hits against)', cell: w => w.hitsMeasured === false ? '—' : (w.hits || 0) },
     // Joined in from playerStats.damage's three per-weapon maps, which
     // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
     // the measuredness rules). The cell carries a {n, lower, note} object,
@@ -11535,7 +11535,7 @@ const AIM_COL = {
         cell: w => aimDamageText(w.dmg),
         sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
     },
-    hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
+    hitPct: { h: 'Hit %', t: 'Share of fires that connected (— when hits are not measured on this demo)', cell: w => w.hitsMeasured === false ? '—' : pctCell(w.shots ? (w.hits || 0) / w.shots * 100 : 0) },
     fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
     pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
     pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
@@ -11671,6 +11671,9 @@ function renderAimWeaponTables(result) {
     container.innerHTML = '';
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return;
+    // hitsMeasured=false: the demo carried no wire damage stream — the
+    // hit-derived columns are withheld server-side and the cells show "—".
+    const hitsMeasured = result.aim.hitsMeasured !== false;
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
@@ -11686,7 +11689,7 @@ function renderAimWeaponTables(result) {
             const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
+                w: w ? { ...w, hitsMeasured, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table

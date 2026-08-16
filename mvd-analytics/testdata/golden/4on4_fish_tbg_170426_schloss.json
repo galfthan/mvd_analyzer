@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -3427,7 +3428,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 115,
             "weapon": "sng"
           }
@@ -7317,12 +7317,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 21,
             "weapon": "axe"
           }
@@ -10885,7 +10883,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 169,
             "weapon": "sng"
           }
@@ -16184,7 +16181,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 66,
             "weapon": "sng"
           }
@@ -21100,13 +21096,11 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 2,
             "shots": 2,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 97,
             "weapon": "sng"
           }
@@ -23806,7 +23800,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 2,
             "shots": 2,
             "weapon": "gl"
@@ -29356,12 +29349,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 141,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 50,
             "weapon": "axe"
           }
@@ -32622,12 +32613,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 162,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
           }

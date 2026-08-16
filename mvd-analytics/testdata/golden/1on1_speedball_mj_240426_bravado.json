@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -6384,7 +6385,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 14,
             "shots": 14,
             "weapon": "gl"

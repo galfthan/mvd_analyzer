@@ -22,6 +22,16 @@ package result
 //     samples, so a corpse would otherwise remain a candidate).
 type AimResult struct {
 	Players []PlayerAim `json:"players"`
+	// HitsMeasured reports whether the hit-derived counters (hits, the
+	// pellet full/partial/miss split, direct/splash, the LG whiff classes)
+	// were measured against a wire KTX damage stream. On demos whose
+	// damage section is reconstructed (or absent) the shot linker never
+	// saw a wire damage event, so every per-shot Hit is false by
+	// construction — the hit-derived fields are withheld there rather than
+	// fabricated as zeros, and consumers should show "not measured".
+	// Shots, crosshair error and LG ramp are shot/track-derived and stay
+	// valid either way.
+	HitsMeasured bool `json:"hitsMeasured"`
 }
 
 // PlayerAim holds one player's aim sub-blocks. Sub-blocks are nil when their
@@ -106,7 +116,11 @@ type LGRampSamples struct {
 type WeaponAim struct {
 	Weapon string `json:"weapon"`
 	Shots  int    `json:"shots"`
-	Hits   int    `json:"hits"`
+	// Hits is omitted (with every other hit-derived counter) when the demo
+	// carried no wire damage stream to link fires against — see
+	// AimResult.HitsMeasured. When HitsMeasured is true an absent hits
+	// means a measured zero.
+	Hits int `json:"hits,omitempty"`
 
 	// Enemy/Team/Self slice the hit counters by victim class (see
 	// Shot.VictimKinds); a multi-victim fire counts in every bucket it has a

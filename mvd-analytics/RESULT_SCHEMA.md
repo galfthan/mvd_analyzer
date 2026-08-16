@@ -556,6 +556,17 @@ any victim class without re-deriving it.
 | Field | JSON key | Type |
 |---|---|---|
 | Players | `players` | []PlayerAim |
+| HitsMeasured | `hitsMeasured` | bool |
+
+`hitsMeasured` reports whether the hit-derived counters (`hits`, the
+pellet full/partial/miss split, direct/splash, the LG whiff classes)
+were measured against a wire KTX damage stream (`damage.source ==
+"ktx"`). On reconstructed/absent damage the shot linker never saw a
+wire damage event, so those fields are **withheld** (schema v71) rather
+than fabricated as zeros — `weapons[].hits` is omitempty, and when
+`hitsMeasured` is true an absent `hits` means a measured zero. Shots,
+crosshair error and the LG ramp are shot/track-derived and remain valid
+either way.
 
 ### PlayerAim
 
@@ -753,8 +764,11 @@ path is the one nobody tests.
 
 The limit is honesty, not effort: a value that cannot be MEASURED stays
 absent rather than becoming a zero. Hence `accuracy.byWeapon[].hits` is
-omitted (not zeroed) when there is no damage stream to link fires
-against, and KTX's `taken-to-die` 99999 no-deaths sentinel is never
+omitted (not zeroed) when there is no WIRE damage stream to link fires
+against — mere presence of a `damage` section is not enough, since the
+reconstruction fills it on pre-instrumentation demos while the shot
+linker still never saw a wire damage event (`damage.source` must be
+`ktx`) — and KTX's `taken-to-die` 99999 no-deaths sentinel is never
 served as a number.
 
 Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
@@ -854,7 +868,7 @@ stays consistent with the timeline's powerup runs.
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency`, `byWeapon`, `byEnemyWeapon` and `byWeaponVsEnemyWeapon` **optional together** — see below. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no WIRE damage stream to link fires against (`damage.source` `reconstructed` counts as absent here: the linker never saw those events); `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
 

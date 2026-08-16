@@ -163,8 +163,16 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// damage analyzer drops out-of-match hits), so it is exactly in-match
 	// already. Window it here on the same [from,to] as the shots so the
 	// direct/splash split scopes to the window too.
+	// Hit-derived counters are only meaningful against a WIRE damage
+	// stream: on reconstructed (or absent) damage the shot linker never saw
+	// a DamageEvent, so every Shot.Hit is false by construction and both
+	// the counters and the reconstructed events must be withheld — feeding
+	// recon events into the pellet/direct splits would mix evidence grades
+	// aim documents as wire-only.
+	hitsMeasured := res.Damage != nil && res.Damage.Source == result.DamageSourceKTX
+
 	dmgByPlayer := make(map[string][]*dmgRec)
-	if res.Damage != nil {
+	if hitsMeasured {
 		for _, d := range res.Damage.Events {
 			if d.IsSelf || d.Attacker == "" {
 				continue
@@ -192,12 +200,12 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		}
 	}
 
-	out := &result.AimResult{}
+	out := &result.AimResult{HitsMeasured: hitsMeasured}
 	for _, player := range order {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], res.Streams, aliveAt, projLinked); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -258,7 +266,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -410,8 +418,14 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// fire into full / partial / whiff — overall and per victim class (the
 	// per-fire damage sum splits exactly by dmgRec.team, except when the
 	// perFire clamp triggers, e.g. quad-multiplied damage, where the
-	// enemy/team allocation within that fire is approximate).
-	for wn, perFire := range aimPellets {
+	// enemy/team allocation within that fire is approximate). Withheld
+	// when hits were never measured: classify(0) would stamp every fire a
+	// whiff.
+	pellets := aimPellets
+	if !hitsMeasured {
+		pellets = nil
+	}
+	for wn, perFire := range pellets {
 		wa := wagg[wn]
 		if wa == nil {
 			continue
@@ -503,8 +517,9 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	}
 
 	// LG: classify each missed fire by where its beam ran relative to the
-	// live enemy hulls (needs the beams).
-	if streams.Beams != nil && shooterTrack != nil {
+	// live enemy hulls (needs the beams). Withheld when hits were never
+	// measured — every fire would read as a miss to classify.
+	if hitsMeasured && streams.Beams != nil && shooterTrack != nil {
 		if wa := wagg["lg"]; wa != nil {
 			for _, sh := range shots {
 				if sh.Weapon != "lg" || sh.Hit {

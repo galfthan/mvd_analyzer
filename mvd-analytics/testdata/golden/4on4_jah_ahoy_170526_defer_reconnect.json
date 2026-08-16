@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -4996,17 +4997,14 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "shots": 81,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "ng"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "axe"
           }
@@ -12314,17 +12312,14 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 24,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "axe"
           }
@@ -16328,7 +16323,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           }
@@ -21035,18 +21029,15 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 15,
             "shots": 15,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 284,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
           }
@@ -25228,18 +25219,15 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 3,
             "shots": 3,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 20,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 25,
             "weapon": "axe"
           }
@@ -32118,7 +32106,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 23,
             "weapon": "sng"
           }
@@ -37386,7 +37373,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 65,
             "weapon": "sng"
           }
@@ -41485,13 +41471,11 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 2,
             "shots": 2,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           }

@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -3101,12 +3102,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 6,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "axe"
           }
@@ -10552,7 +10551,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "shots": 9,
             "weapon": "sng"
           }
@@ -13282,7 +13280,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 6,
             "weapon": "sng"
           }

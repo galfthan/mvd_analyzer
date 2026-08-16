@@ -137,7 +137,7 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 
 	// Summary: drop the big per-fire sample blocks, keep the aggregates. Copy
 	// each PlayerAim so the shared stored values are never mutated.
-	out := &result.AimResult{Players: make([]result.PlayerAim, len(base.Players))}
+	out := &result.AimResult{Players: make([]result.PlayerAim, len(base.Players)), HitsMeasured: base.HitsMeasured}
 	for i := range base.Players {
 		pa := base.Players[i]
 		pa.Crosshair = nil

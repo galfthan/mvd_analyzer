@@ -890,10 +890,18 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 		t.Error("real/virtual are KTX-only and must never appear on a derived block")
 	}
 
-	// With a damage stream the link is meaningful, so hits appears.
-	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{}}, "a")
+	// With a WIRE damage stream the link is meaningful, so hits appears.
+	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a")
 	if h := withDmg.ByWeapon["rl"].Hits; h == nil || *h != 0 {
 		t.Errorf("hits with a damage stream = %v, want an observed 0", h)
+	}
+
+	// A RECONSTRUCTED damage section is not linkage: the shot linker never
+	// saw a wire damage event there, so hits must stay absent — presence of
+	// the section alone must not re-fabricate the zero.
+	recon := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}, "a")
+	if h := recon.ByWeapon["rl"].Hits; h != nil {
+		t.Errorf("hits with reconstructed damage = %d, want ABSENT", *h)
 	}
 }
 

@@ -623,12 +623,17 @@ func deriveAccuracy(res *Result, name string) *result.PlayerStatsAccuracy {
 		if ps.Player != name {
 			continue
 		}
-		// Hits come from linking each fire to a damage event, so they are
-		// only meaningful when the demo carries a damage stream at all.
+		// Hits come from linking each fire to a WIRE damage event, so they
+		// are only meaningful when the demo carried the KTX damage stream.
 		// Without one every weapon would read hits=0, i.e. "shot and never
 		// hit" — a fabricated zero where the honest answer is "not
-		// measurable". Attacks still stand on their own.
-		linkable := res.Damage != nil
+		// measurable". Attacks still stand on their own. The check must be
+		// on Source, not mere presence: since the damage-recon post fills
+		// res.Damage on pre-instrumentation demos too, presence alone
+		// re-introduced exactly the fabricated zero this guard exists to
+		// prevent (the shot linker never saw a DamageEvent there, so every
+		// Hit is false by construction, not by measurement).
+		linkable := res.Damage != nil && res.Damage.Source == result.DamageSourceKTX
 		byWeapon := map[string]result.PlayerStatsAcc{}
 		for _, w := range ps.ByWeapon {
 			if w.Shots == 0 {
