@@ -161,9 +161,13 @@ type Parser struct {
 	// printLines buffers svc_print fragments per (level, dem_single
 	// target) until the line they belong to is terminated. See
 	// assemblePrintLine in print.go.
-	printLines     map[printLineKey]*printLineBuf
-	handlers       []Handler
-	floatCoords    bool
+	printLines  map[printLineKey]*printLineBuf
+	handlers    []Handler
+	floatCoords bool
+	// msgWide mirrors msg_coordsize/msg_anglesize (sv_bigcoords /
+	// FTE_PEXT_FLOATCOORDS only — see serverdata.go). floatCoords above is
+	// the combined FTE|MVD1 flag and governs entity-delta ORIGINS only.
+	msgWide        bool
 	fteExtensions  uint32 // FTE protocol extension flags
 	diagnosticMode bool
 	decodeNails    bool // opt-in: decode svc_nails/svc_nails2 into NailsFrameEvent (off by default; high volume)
@@ -408,10 +412,17 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 
 		case mvd.SvcIntermission:
-			// 3 short coords (6) + 3 byte angles (3) = 9 bytes camera pose.
-			// We don't need the pose but we do need to signal intermission to
-			// downstream analyzers so they can stop sampling player state.
-			if err := r.Skip(9); err != nil {
+			// Camera pose: 3 coords + 3 angles, both width-negotiated
+			// (short/byte normally; float/short under FLOATCOORDS — ezquake
+			// CL_ParseServerMessage reads MSG_ReadCoord×3 + MSG_ReadAngle×3,
+			// honoring msg_coordsize/msg_anglesize). We don't need the pose
+			// but we do need to signal intermission to downstream analyzers
+			// so they can stop sampling player state.
+			coordSize := 2
+			if p.msgWide {
+				coordSize = 4
+			}
+			if err := r.Skip(3*coordSize + 3*angleSize(p.msgWide)); err != nil {
 				p.warn(msg.TimeMs, "parse_error", "svc_intermission: %v", err)
 				return nil
 			}
@@ -811,7 +822,11 @@ func (p *Parser) skipCommand(r *mvd.BufferReader, cmd byte) error {
 	case mvd.SvcBad:
 		return nil
 	case mvd.SvcSetAngle:
-		return r.Skip(3) // 3 angles (bytes)
+		// MVD framing carries a leading client-number byte before the 3
+		// width-negotiated angles (mvdsv sv_send.c writes svc_setangle +
+		// clnum + 3×MSG_WriteAngle; ezquake's mvdplayback path reads the
+		// byte back before the angles).
+		return r.Skip(1 + 3*angleSize(p.msgWide))
 	case mvd.SvcLightStyle:
 		_, err := r.ReadByte()
 		if err != nil {
@@ -831,7 +846,7 @@ func (p *Parser) skipCommand(r *mvd.BufferReader, cmd byte) error {
 		// svc_spawnstatic has no entity-number prefix — CL_ParseStatic calls
 		// CL_ParseBaseline directly (ezquake cl_parse.c). Decode the shared
 		// baseline body and discard: static entities are scenery, not tracked.
-		_, err := readBaselineBody(r, p.floatCoords)
+		_, err := readBaselineBody(r, p.floatCoords, p.msgWide)
 		return err
 	case mvd.SvcKilledMonster:
 		return nil

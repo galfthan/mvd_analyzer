@@ -394,7 +394,7 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 	if err != nil {
 		return err
 	}
-	state, err := readBaselineBody(r, floatCoords)
+	state, err := readBaselineBody(r, floatCoords, p.msgWide)
 	if err != nil {
 		return err
 	}
@@ -409,16 +409,19 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 // decode-and-discard (skipCommand) callers. Mirrors ezquake
 // CL_ParseBaseline (cl_parse.c:1817).
 // angleSize is the wire width of one entity angle: 1 byte normally, a
-// 2-byte short when FTE_PEXT_FLOATCOORDS was negotiated (sv_bigcoords
-// raises msg_anglesize with msg_coordsize).
-func angleSize(floatCoords bool) int {
-	if floatCoords {
+// 2-byte short when sv_bigcoords raised msg_anglesize — advertised as
+// FTE_PEXT_FLOATCOORDS. Callers must pass the FTE-only msgWide flag, NOT
+// the combined floatCoords: MVD_PEXT1_FLOATCOORDS widens entity-delta
+// origins only, its angles stay 1 byte (mvdsv sv_ents.c writes them with
+// the plain MSG_WriteAngle).
+func angleSize(msgWide bool) int {
+	if msgWide {
 		return 2
 	}
 	return 1
 }
 
-func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, error) {
+func readBaselineBody(r *mvd.BufferReader, floatCoords, msgWide bool) (*EntityState, error) {
 	modelIdx, err := r.ReadByte()
 	if err != nil {
 		return nil, err
@@ -451,7 +454,7 @@ func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, erro
 		// (mvdsv/src/sv_init.c:326-336; client mirror ezquake
 		// com_msg.c MSG_ReadAngle), so a fixed 1-byte read desyncs
 		// every entity on those demos.
-		if err := r.Skip(angleSize(floatCoords)); err != nil {
+		if err := r.Skip(angleSize(msgWide)); err != nil {
 			return nil, err
 		}
 	}
@@ -785,7 +788,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[0] = v
 	}
 	if bits&uAngle1 != 0 {
-		if err := r.Skip(angleSize(floatCoords)); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -797,7 +800,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[1] = v
 	}
 	if bits&uAngle2 != 0 {
-		if err := r.Skip(angleSize(floatCoords)); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -809,7 +812,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[2] = v
 	}
 	if bits&uAngle3 != 0 {
-		if err := r.Skip(angleSize(floatCoords)); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
