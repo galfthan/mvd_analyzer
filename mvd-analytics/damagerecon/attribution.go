@@ -494,7 +494,6 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 		}
 		vpos := vtrack.posAt(e.t)
 		bestD := -1.0
-		exact := false
 		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjMs })
 		for i := lo; i < len(in.projs) && in.projs[i].endT <= e.t+tolProjMs; i++ {
 			pr := in.projs[i]
@@ -502,7 +501,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 				continue
 			}
 			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
-				bestD, exact = d, pr.epExact
+				bestD = d
 			}
 		}
 		if bestD < 0 {
@@ -515,7 +514,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 					continue
 				}
 				if d := ex.p.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
-					bestD, exact = d, true
+					bestD = d
 				}
 			}
 		}
@@ -523,7 +522,6 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			return // no geometry at all: keep the observation
 		}
 		// Full slack even on exact geometry — see the attributeOne top-up.
-		_ = exact
 		model = dLo*q - 0.5*(bestD+60.0)
 	case "lg":
 		// A discharge kill (35*cells radius blast) hides almost all of its

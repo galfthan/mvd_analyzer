@@ -26,6 +26,7 @@ import (
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 type row struct {
@@ -142,12 +143,12 @@ func surveyOne(path string) row {
 		r.matchMs = res.Streams.Global.MatchEnd
 		if pe := res.Streams.PointEffects; pe != nil {
 			for _, ty := range pe.Type {
-				switch ty {
-				case 12:
+				switch int(ty) {
+				case events.TeBlood:
 					r.bloods++
-				case 3:
+				case events.TeExplosion:
 					r.expls++
-				case 13:
+				case events.TeLightningBlood:
 					r.lgbl++
 				}
 			}

@@ -27,9 +27,7 @@ type delta struct {
 	// pre-instant h/a (armor + remaining health — exact for a telefrag, an
 	// upper bound on the armor share otherwise). Attribution anchors these
 	// on the frag log.
-	masked  bool
-	hBefore int
-	aBefore int
+	masked bool
 }
 
 // armorFracAt returns the victim's armor absorption fraction at t (GA 0.3 /
@@ -137,8 +135,7 @@ func victimDeltas(p *result.PlayerStream, killAnchors map[int32]bool) []delta {
 			// respawn+instant-kill cycle both of whose broadcasts were
 			// masked. Charge the spawn capacity (KTX saw 100/0).
 			out = append(out, delta{
-				t: m.t, raw: 100, bounded: 100,
-				died: true, masked: true, hBefore: 100, aBefore: 0,
+				t: m.t, raw: 100, bounded: 100, died: true, masked: true,
 			})
 			ph, pa = nh, na
 			continue
@@ -150,7 +147,7 @@ func victimDeltas(p *result.PlayerStream, killAnchors map[int32]bool) []delta {
 			if deaths[m.t] && ph > 0 {
 				out = append(out, delta{
 					t: m.t, raw: ph + pa, bounded: ph + pa,
-					died: true, masked: true, hBefore: ph, aBefore: pa,
+					died: true, masked: true,
 				})
 			}
 			// The post-spawn state: the change rows when present (they are
@@ -211,10 +208,7 @@ func victimDeltas(p *result.PlayerStream, killAnchors map[int32]bool) []delta {
 				raw = dh
 			}
 			if b > 0 || raw > 0 {
-				out = append(out, delta{
-					t: m.t, raw: raw, bounded: b, died: died,
-					hBefore: ph, aBefore: pa,
-				})
+				out = append(out, delta{t: m.t, raw: raw, bounded: b, died: died})
 			}
 		}
 		ph, pa = nh, na

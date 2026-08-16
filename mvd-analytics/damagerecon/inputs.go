@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // beam is one TE_LIGHTNING2 segment (one LG attack).
@@ -26,15 +27,6 @@ type pointFx struct {
 	p       vec3
 	claimed bool
 }
-
-// Temp-entity types consumed from streams.pointEffects (values mirror
-// events.Te* — the protocol constants, stable since original QW).
-const (
-	teGunshot        = 2
-	teExplosion      = 3
-	teBlood          = 12
-	teLightningBlood = 13
-)
 
 // projectile is one bracketed rocket/grenade entity flight with the
 // resolved shooter (the wire carries no owner; resolution is spawn
@@ -71,7 +63,6 @@ type inputs struct {
 	// enemy telefrag is a killer-less "was telefragged" that parses as a
 	// suicide, yet it still proves (and types) the masked death.
 	fragAnyAt map[fragKey]*result.FragEntry
-	frags     []result.FragEntry
 	beams     []beam       // sorted by t
 	projs     []projectile // sorted by endT
 	shots     []firedShot  // sorted by t
@@ -186,7 +177,6 @@ func buildInputs(res *result.Result) *inputs {
 	}
 
 	if res.Frags != nil {
-		in.frags = res.Frags.Frags
 		for i := range res.Frags.Frags {
 			f := &res.Frags.Frags[i]
 			in.fragAnyAt[fragKey{f.Victim, f.Time}] = f
@@ -228,12 +218,12 @@ func buildInputs(res *result.Result) *inputs {
 				count: int(pe.Count[i]),
 				p:     vec3{float64(pe.X[i]), float64(pe.Y[i]), float64(pe.Z[i])},
 			}
-			switch pe.Type[i] {
-			case teExplosion:
+			switch int(pe.Type[i]) {
+			case events.TeExplosion:
 				in.explosions = append(in.explosions, fx)
-			case teBlood:
+			case events.TeBlood:
 				in.bloods = append(in.bloods, fx)
-			case teLightningBlood:
+			case events.TeLightningBlood:
 				in.lgBloods = append(in.lgBloods, fx)
 			}
 		}
