@@ -76,13 +76,37 @@ func Compute(res *result.Result) (*result.DamageResult, error) {
 	return aggregate(in, events), nil
 }
 
-// SkipModeReasonFromResult applies SkipModeReason to the assembled
-// Result's serverinfo.
+// SkipModeReasonFromResult applies the full two-source skip detection to
+// the assembled Result: serverinfo plus the countdown-derived match
+// settings.
 func SkipModeReasonFromResult(res *result.Result) string {
-	if res.Metadata == nil || res.Metadata.ServerInfo == nil {
+	if res.Metadata == nil {
 		return ""
 	}
-	return SkipModeReason(res.Metadata.ServerInfo)
+	return SkipModeReasonFull(res.Metadata.ServerInfo, res.Metadata.MatchSettings)
+}
+
+// SkipModeReasonFull folds the countdown-centerprint MatchSettings over
+// the serverinfo detection. Old KTX (observed 1.41-beta on archive
+// demos) published NO mode signal in serverinfo at all — no k_* cvars,
+// no composite `mode` string — while its countdown table still printed
+// "Midair on"; the parsed MatchSettings are the only wire record of the
+// ruleset there. Serverinfo wins when both speak.
+func SkipModeReasonFull(si map[string]string, ms *result.MatchSettings) string {
+	if r := SkipModeReason(si); r != "" {
+		return r
+	}
+	if ms != nil {
+		switch {
+		case ms.Midair:
+			return "midair"
+		case ms.Instagib:
+			return "instagib"
+		case ms.Dmgfrags:
+			return "dmgfrags"
+		}
+	}
+	return ""
 }
 
 // SkipModeReason names the server mode that makes damage arithmetic

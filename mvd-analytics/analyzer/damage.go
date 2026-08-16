@@ -272,7 +272,7 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// string carries the gt* verdict ("team"/"ctf" vs "duel"/"ffa"); with
 	// no demoinfo we fall back to the non-duel gate alone (team
 	// classification still requires matching non-empty team strings).
-	boundedSkip := a.boundedSkipReason()
+	boundedSkip := a.boundedSkipReason(result)
 	tp := 0
 	if !duel && a.tpModeApplies() {
 		tp, _ = strconv.Atoi(a.serverInfo["teamplay"])
@@ -938,12 +938,19 @@ func (a *DamageAnalyzer) tpModeApplies() bool {
 // (ca/wipeout/ra/lgc/race) suppresses or rewrites whole damage classes
 // while still multicasting raw values (combat.c:475-491) — none
 // observable per hit. Detection is shared with the damage-recon gate
-// (damagerecon.SkipModeReason): legacy k_* cvar keys plus the modern
-// composite serverinfo `mode` string, which is the ONLY place newer KTX
-// exposes the submodes (a wipeout demo reads mode=wipeout-wo-df with no
-// k_dmgfrags key at all).
-func (a *DamageAnalyzer) boundedSkipReason() string {
-	return damagerecon.SkipModeReason(a.serverInfo)
+// (damagerecon.SkipModeReasonFull): legacy k_* cvar keys, the modern
+// composite serverinfo `mode` string (the ONLY place newer KTX exposes
+// the submodes — a wipeout demo reads mode=wipeout-wo-df with no
+// k_dmgfrags key at all), and the countdown-derived MatchSettings (the
+// ONLY signal on old KTX 1.41-era demos, whose serverinfo carries no
+// mode record whatsoever — the dag makes this node require metadata so
+// the settings are populated here).
+func (a *DamageAnalyzer) boundedSkipReason(result *Result) string {
+	var ms *MatchSettings
+	if result.Metadata != nil {
+		ms = result.Metadata.MatchSettings
+	}
+	return damagerecon.SkipModeReasonFull(a.serverInfo, ms)
 }
 
 func addToMatrix(m map[string]*DamagePair, attacker, victim, weapon string, dmg int) {

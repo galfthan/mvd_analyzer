@@ -51,7 +51,14 @@ now parses the mode string, is shared between the KTX-side bounded pass
 and the reconstruction (`damagerecon.SkipModeReason`), and skips the
 whole clan-arena family: `skipped:ca` / `skipped:wipeout` /
 `skipped:ra` / `skipped:lgc` / `skipped:race` join the boundedMode
-vocabulary.
+vocabulary. A third detection layer covers old KTX (observed 1.41-beta
+on archive demos), which published NO mode signal in serverinfo at all —
+no `k_*` cvars, no composite `mode` string — while its countdown
+centerprint still printed "Midair on": the countdown-derived
+MatchSettings now feed the same shared gate
+(`damagerecon.SkipModeReasonFull`; the `damage` DAG node requires
+`metadata` for it), so archive-era midair/instagib/dmgfrags demos stop
+being served a confidently wrong bounded family.
 
 `playerStats` rides along: the node now binds the `damage:final`
 artifact, so its damage family exists on old demos too, with

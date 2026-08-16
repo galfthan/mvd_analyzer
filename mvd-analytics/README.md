@@ -510,6 +510,7 @@ flowchart TB
   match -->|"match"| match_final
   match -->|"match"| region_control
   match_final -->|"match:final"| player_stats
+  metadata -->|"metadata"| damage
   metadata -->|"metadata"| damage_recon
   metadata -->|"metadata"| los
   metadata -->|"metadata"| match

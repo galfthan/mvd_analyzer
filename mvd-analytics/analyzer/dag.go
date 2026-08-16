@@ -113,7 +113,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, airgibs, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
 	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
-	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "damage",
+	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster", "metadata"}, resultKey: "damage",
 		desc: "Per-hit damage from the KTX stream: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check."},
 	"shots": {name: "shots", requires: []string{"clock", "demoinfo", "identity", "timeline", "roster"}, resultKey: "shots",
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
