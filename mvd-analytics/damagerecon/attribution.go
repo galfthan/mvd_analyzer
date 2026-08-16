@@ -149,14 +149,8 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		if !in.bsp.splashReaches(pr.ep, vpos) {
 			continue
 		}
-		dLo := 120.0
-		if pr.weapon == "rl" {
-			dLo = in.rlLo
-		}
-		q := 1.0
-		if ap := in.players[pr.shooter]; ap != nil && inIntervals(ap.Quad, pr.endT) {
-			q = 4.0
-		}
+		dLo, _ := in.blastDamage(pr.weapon)
+		q := in.quadFactor(pr.shooter, pr.endT)
 		selfF := 1.0
 		if pr.shooter == victim {
 			selfF = 0.5
@@ -186,10 +180,7 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		if in.shotConsumed(victim, s.t, 100) || deltaNear(s.t) {
 			continue
 		}
-		q := 1.0
-		if inIntervals(p.Quad, s.t) {
-			q = 4.0
-		}
+		q := in.quadFactor(victim, s.t)
 		raw := int((in.rlLo*q - 0.5*pentJumpNominalDist) * 0.5)
 		if raw <= 0 {
 			continue
@@ -217,7 +208,7 @@ func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, fixed 
 		if e.kind != "proj" || e.weapon != "rl" || e.isSelf || e.isTeam || e.isEnv || e.died {
 			continue
 		}
-		if ap := in.players[e.attacker]; ap != nil && inIntervals(ap.Quad, e.t) {
+		if in.hasQuad(e.attacker, e.t) {
 			continue
 		}
 		if e.bounded < 95 || e.bounded > 125 {
@@ -253,10 +244,7 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 		return single
 	}
 	// Only bother when the winning single explanation misfits the value.
-	quad := false
-	if ap := in.players[e.attacker]; ap != nil {
-		quad = inIntervals(ap.Quad, d.t)
-	}
+	quad := in.hasQuad(e.attacker, d.t)
 	pen, ok := in.damageModelScore(d.bounded, false, &candidate{weapon: e.weapon, kind: e.kind, dEnd: e.dEnd}, e.isSelf, quad)
 	if !ok || pen < 0.5 {
 		return single
@@ -289,10 +277,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	}
 	var bs []bounded
 	for _, c := range cands {
-		quad := false
-		if ap := in.players[c.attacker]; ap != nil {
-			quad = inIntervals(ap.Quad, d.t)
-		}
+		quad := in.hasQuad(c.attacker, d.t)
 		lo, hi, ok := in.modelBounds(&c, c.attacker == victim, quad)
 		if !ok || (lo == 0 && hi == 0) {
 			continue
@@ -447,14 +432,8 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// killing hit; the damage model still knows the floor the wire
 		// value cannot have been under (quad rockets are the big case:
 		// 440-ish raw vs ~200 observable). Only ever raises raw.
-		dLo := 120.0
-		if best.weapon == "rl" {
-			dLo = in.rlLo
-		}
-		q := 1.0
-		if ap := in.players[best.attacker]; ap != nil && inIntervals(ap.Quad, d.t) {
-			q = 4.0
-		}
+		dLo, _ := in.blastDamage(best.weapon)
+		q := in.quadFactor(best.attacker, d.t)
 		selfF := 1.0
 		if e.isSelf {
 			selfF = 0.5
@@ -481,17 +460,11 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 	if !e.died || vtrack == nil {
 		return
 	}
-	q := 1.0
-	if ap := in.players[e.attacker]; ap != nil && inIntervals(ap.Quad, e.t) {
-		q = 4.0
-	}
+	q := in.quadFactor(e.attacker, e.t)
 	model := 0.0
 	switch e.weapon {
 	case "rl", "gl":
-		dLo := 120.0
-		if e.weapon == "rl" {
-			dLo = in.rlLo
-		}
+		dLo, _ := in.blastDamage(e.weapon)
 		vpos := vtrack.posAt(e.t)
 		bestD := -1.0
 		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjMs })
@@ -587,10 +560,7 @@ func (in *inputs) scoreCandidates(victim string, vtrack *track, d delta, cands [
 	bestScore := math.Inf(1)
 	found := false
 	for _, c := range cands {
-		quad := false
-		if ap := in.players[c.attacker]; ap != nil {
-			quad = inIntervals(ap.Quad, d.t)
-		}
+		quad := in.hasQuad(c.attacker, d.t)
 		pen, feasible := in.damageModelScore(d.bounded, d.died, &c, c.attacker == victim, quad)
 		if !feasible {
 			continue
@@ -677,10 +647,7 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		// nullifies the health share (povdmm4-style).
 		lo, hi = 9.0*q, 60.0*q
 	case "proj", "rl-sound":
-		dLo, dHi := 120.0, 120.0
-		if weapon == "rl" {
-			dLo, dHi = in.rlLo, in.rlHi
-		}
+		dLo, dHi := in.blastDamage(weapon)
 		// Self splash is HALVED by the engine (T_RadiusDamage,
 		// ktx/src/combat.c:1183-1194: points = damage - 0.5*dist, then
 		// *0.5 when head == attacker), and a direct self-hit is impossible
@@ -1042,10 +1009,7 @@ func (in *inputs) hitscanCandidates(victim string, t int32, vpos vec3) []candida
 				// quad). Pinned per candidate — with differing quad states
 				// this rules the mismatched shooter out; with equal states
 				// it pins the magnitude either way.
-				q := 1.0
-				if ap := in.players[s.player]; ap != nil && inIntervals(ap.Quad, t) {
-					q = 4.0
-				}
+				q := in.quadFactor(s.player, t)
 				c.mLo, c.mHi = 4.0*float64(sumBlood)*q, 4.0*float64(sumBlood)*q
 			}
 			out = append(out, c)
@@ -1233,10 +1197,7 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		}
 		spos := tr.posAt(dc.t)
 		d := spos.distTo(vpos)
-		base := 35.0 * float64(dc.cells)
-		if ap := in.players[dc.player]; ap != nil && inIntervals(ap.Quad, dc.t) {
-			base *= 4
-		}
+		base := 35.0 * float64(dc.cells) * in.quadFactor(dc.player, dc.t)
 		expected := base - 0.5*d
 		if dc.player == victim {
 			expected *= 0.5
@@ -1254,6 +1215,32 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		})
 	}
 	return out
+}
+
+// blastDamage is a radius weapon's base damage range before the falloff:
+// the demo's calibrated rocket range (vanilla 100..120, exactly 110 on a
+// fixed-constant server — see detectRocketRegime) for rl, the engine's
+// fixed 120 for gl.
+func (in *inputs) blastDamage(weapon string) (lo, hi float64) {
+	if weapon == "rl" {
+		return in.rlLo, in.rlHi
+	}
+	return 120.0, 120.0
+}
+
+// hasQuad reports whether the player held the quad at t; quadFactor is the
+// same signal as the engine's ×4 damage multiplier. An unknown name (world,
+// a departed player) is never quadded.
+func (in *inputs) hasQuad(name string, t int32) bool {
+	ap := in.players[name]
+	return ap != nil && inIntervals(ap.Quad, t)
+}
+
+func (in *inputs) quadFactor(name string, t int32) float64 {
+	if in.hasQuad(name, t) {
+		return 4.0
+	}
+	return 1.0
 }
 
 // eyeOf: the shooter-side trace endpoint used by the BSP gates (los.go's
