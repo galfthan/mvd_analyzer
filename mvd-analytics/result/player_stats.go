@@ -365,11 +365,13 @@ const (
 // EXCEPT where the server mode made the bounded reconstruction
 // impossible, in which case these are RAW wire numbers including overkill
 // and Src says so: see SrcDerivedUnbounded. This is the one family whose
-// Src is three-valued.
+// Src goes beyond derived/ktx.
 type PlayerStatsDamage struct {
-	// Src is "ktx", "derived", or "derived:unbounded" — the last meaning
-	// the numbers are raw wire damage because no bounded reconstruction
-	// exists for this demo (DamageResult.BoundedMode is skipped:*).
+	// Src is "ktx", "derived", "derived:unbounded" (raw wire numbers —
+	// no bounded reconstruction exists for this demo,
+	// DamageResult.BoundedMode is skipped:*), or "reconstructed" (the
+	// whole family rides the damage reconstruction on a
+	// pre-instrumentation demo — see SrcReconstructed).
 	Src string `json:"src"`
 	// Given is damage dealt to enemies.
 	Given     int `json:"given"`

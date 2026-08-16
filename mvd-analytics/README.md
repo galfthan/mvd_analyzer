@@ -131,6 +131,15 @@ that downstream consumers render, summarise, or feed to an agent.
   with BSPs) is pruned this way against recent competitive games —
   [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
   exact map → mode → hub gameIds used, so the prune is reproducible.
+- `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs
+  the reconstruction blind on wire-instrumented demos and scores it
+  against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
+  prints misattribution flows.
+- `cmd/fetch-eval-corpus/` — pins a hub eval corpus to disk (demos +
+  a manifest of gameIds, so eval runs are reproducible).
+- `cmd/qw-corpus-survey/` — sweeps a demo directory through the full
+  pipeline and classifies outcomes (wire vs reconstructed vs skipped),
+  with per-demo CSV output.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.

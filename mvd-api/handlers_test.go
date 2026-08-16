@@ -3057,8 +3057,8 @@ func TestTopWindows_Unavailable(t *testing.T) {
 	}{
 		{"gameId:10", "shots", "this demo has no weapon-fire stream"},
 		{"gameId:10", "hits", "this demo has no weapon-fire stream"},
-		{"gameId:11", "damageGiven", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
-		{"gameId:11", "netDamage", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:11", "damageGiven", "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"},
+		{"gameId:11", "netDamage", "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"},
 		{"gameId:12", "frags", "this demo has no frag log"},
 		{"gameId:12", "netFrags", "this demo has no frag log"},
 	} {

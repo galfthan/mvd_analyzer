@@ -454,7 +454,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.writeUnavailable(w, r, err, "damage_unavailable",
-			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
+			"this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)")
 		return
 	}
 	writeJSON(w, http.StatusOK, view.DamageEnvelope{TimeUnit: view.UnitMs, DamageResult: out})
@@ -1357,7 +1357,7 @@ func topWindowsUnavailableMsg(metric string) string {
 	case view.MetricShots, view.MetricHits:
 		return "this demo has no weapon-fire stream"
 	case view.MetricDamageGiven, view.MetricDamageTaken, view.MetricNetDamage:
-		return "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"
+		return "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"
 	default:
 		return "this demo has no frag log"
 	}

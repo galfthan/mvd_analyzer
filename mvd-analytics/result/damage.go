@@ -69,7 +69,8 @@ type DamageResult struct {
 
 	// Source records where the damage log itself came from:
 	// DamageSourceKTX when it was decoded from the wire's KTX
-	// mvdhidden_dmgdone stream (every figure a direct measurement), or
+	// mvdhidden_dmgdone stream (raw per-hit values are direct
+	// measurements; the bounded family is arithmetic over them), or
 	// DamageSourceReconstructed when the demo predates that instrumentation
 	// and the log was reconstructed from the health/armor change streams +
 	// spectator-visible evidence (package mvd-analytics/damagerecon —

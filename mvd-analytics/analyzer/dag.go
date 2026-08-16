@@ -114,7 +114,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
 	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster", "metadata"}, resultKey: "damage",
-		desc: "Per-hit damage from the KTX stream: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check."},
+		desc: "Per-hit damage: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check. Decoded from the wire KTX stream when present (source=ktx); on pre-instrumentation demos the damage-recon post fills the same section (source=reconstructed), so the served artifact carries whichever the demo yielded."},
 	"shots": {name: "shots", requires: []string{"clock", "demoinfo", "identity", "timeline", "roster"}, resultKey: "shots",
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",

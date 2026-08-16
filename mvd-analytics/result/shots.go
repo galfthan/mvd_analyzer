@@ -23,11 +23,14 @@ type ShotsResult struct {
 
 // Shot is one weapon fire. Time is match-relative milliseconds (same clock
 // as DamageEntry.Time). Weapon is the lowercase KTX weapon name
-// ("sg","ssg","ng","sng","gl","rl","lg"). Source is "sound" (a CHAN_WEAPON
-// fire sound) or "beam" (an LG TE_LIGHTNING2 bolt).
+// ("axe","sg","ssg","ng","sng","gl","rl","lg"). Source is "sound" (a
+// CHAN_WEAPON fire sound) or "beam" (an LG TE_LIGHTNING2 bolt).
 //
-// Hit/Victims are populated for instantaneous hitscan weapons (sg/ssg/lg),
-// where the shot and its damage land in the same server frame and link
+// Hit/Victims are populated for the linkable same-frame weapons: the
+// hitscan set (sg/ssg/lg), whose damage lands in the fire's own server
+// frame, and the axe, whose traceline runs exactly 200ms after the swing
+// sound (the third 0.1s animation think) and links through that delayed
+// window. Both link
 // truthfully via the KTX damage stream, and for projectile fires whose
 // tracked flight (entity spawn→despawn) brackets back to the fire and
 // forward to impact damage — rl/gl on every parse, ng/sng only when nail

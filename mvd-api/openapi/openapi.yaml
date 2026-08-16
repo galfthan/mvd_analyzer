@@ -555,7 +555,8 @@ paths:
         with no KTX demoinfo block (a missing KTX block is never a reason to
         422 — see the 422 response below for the one case that is). Each stat
         family carries `src` ("derived" | "ktx" | "derived:unbounded" on
-        damage; "mixed" on a team row is the phantom-roster canary) naming its
+        damage; "reconstructed" on damage rebuilt for a pre-instrumentation
+        demo; "mixed" on a team row is the phantom-roster canary) naming its
         source, with a `sources` roll-up; `/demoinfo` stays the verbatim KTX
         pass-through to diff against.
 
@@ -659,8 +660,9 @@ paths:
 
         `boundedMode` reports whether that reconstruction ran (`standard`) or
         was skipped (`skipped:midair` / `skipped:instagib` /
-        `skipped:dmgfrags`, where the server mode rewrites the take in ways
-        the wire does not expose).
+        `skipped:dmgfrags` / `skipped:ca` / `skipped:wipeout` / `skipped:ra` /
+        `skipped:lgc` / `skipped:race`, where the server mode rewrites or
+        suppresses damage in ways the wire does not expose).
 
         An unset `dmg` defaults to `bounded` for both the summary and the full
         log; an unfiltered bounded/both SUMMARY sources its per-player bounded
@@ -681,10 +683,12 @@ paths:
         active (an explicit `from`/`to` window covering the whole match counts
         as unfiltered).
 
-        **Errors.** 422 `damage_unavailable` without the KTX
-        mvdhidden_dmgdone stream, or `bounded_unavailable` for an EXPLICIT
-        `dmg=bounded` on a skipped:* demo (a DEFAULTED bounded there falls
-        back to raw).
+        **Errors.** 422 `damage_unavailable` only when neither the wire KTX
+        mvdhidden_dmgdone stream nor a reconstructed section is available
+        (reconstruction covers most pre-instrumentation demos; `source`
+        tells which family you got), or `bounded_unavailable` for an
+        EXPLICIT `dmg=bounded` on a skipped:* demo (a DEFAULTED bounded
+        there falls back to raw).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -2541,9 +2545,9 @@ components:
           boundedMode survives).
         - `bounded` — KTX-scoreboard semantics (armor absorbed + health capped
           to remaining) materialized into the same field names; an EXPLICIT
-          `dmg=bounded` is a 422 `bounded_unavailable` on midair / instagib /
-          dmgfrags demos, whose server mode makes the reconstruction
-          impossible.
+          `dmg=bounded` is a 422 `bounded_unavailable` on `skipped:*` demos
+          (midair / instagib / dmgfrags / the clan-arena family), whose
+          server mode makes the reconstruction impossible.
         - `both` — the raw fields plus per-player `bounded` nests and a
           per-event `bounded`.
 
@@ -3070,7 +3074,7 @@ components:
             demoInfo: { description: "KTX demoinfo block (non-KTX / pre-match-abort demos lack it).", type: boolean }
             metadata: { description: "Server cvars + KTX match settings (needs fullserverinfo / countdown centerprint).", type: boolean }
             frags: { description: "Obituary-derived frag log.", type: boolean }
-            damage: { description: "Per-hit damage (needs the KTX mvdhidden_dmgdone stream).", type: boolean }
+            damage: { description: "Per-hit damage (the wire KTX mvdhidden_dmgdone stream, or the reconstructed section on pre-instrumentation demos — check /damage `source`).", type: boolean }
             shots: { description: "Weapon-fire stream.", type: boolean }
             aim: { description: "Aim analysis (needs shots + position/view streams).", type: boolean }
             locGraph: { description: "Loc adjacency graph (needs a position track).", type: boolean }
@@ -6860,7 +6864,7 @@ components:
           additionalProperties: false
           properties:
             score: { description: "Provenance of the scoreboard family — a constant: the kill side is always the frag-log reconstruction.", type: string, enum: [derived] }
-            damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, mixed] }
+            damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, reconstructed, mixed] }
             accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
             hold: { description: "Provenance of the possession-time family — a constant: no other source carries it.", type: string, enum: [derived] }
@@ -7048,7 +7052,7 @@ components:
                     magnitude on instagib's flat 5000/hit, so do not compare
                     these figures with a bounded demo's.
                   type: string
-                  enum: [derived, "derived:unbounded", ktx, mixed]
+                  enum: [derived, "derived:unbounded", ktx, reconstructed, mixed]
                 given: { description: "Dealt to enemies.", type: integer }
                 givenTeam: { description: "Dealt to teammates.", type: integer }
                 givenSelf: { description: "Dealt to self.", type: integer }
@@ -7056,9 +7060,10 @@ components:
                 taken:
                   description: >
                     From ALL sources (enemy + team + self + env) — NOT the same
-                    quantity as KTX dmg.taken. Only the per-hit reconstruction
-                    measures it, so it is ABSENT (not zero) on a demo that
-                    carries a KTX block but no damage stream.
+                    quantity as KTX dmg.taken. Only the per-hit fold measures
+                    it, so it is ABSENT (not zero) when the demo has no damage
+                    section at all (since v71 the reconstruction fills one on
+                    most pre-instrumentation demos, src "reconstructed").
                   type: integer
                 teamWeapons:
                   description: "KTX-only: damage dealt to TEAMMATES holding RL and/or LG (KTX twep) — the friendly-fire mirror of enemyWeapons. The reconstruction does not bucket team damage by the victim's inventory, so this is absent without a demoinfo block."
@@ -7158,7 +7163,7 @@ components:
                     additionalProperties: false
                     properties:
                       attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
-                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no damage stream to link fires against — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no WIRE damage stream to link fires against (a reconstructed damage section does not count — the shot linker never saw those events) — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
                       real: { description: "Not aggregated on team rows (KTX omits the pair unless it recorded one). KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
                       virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
                     required: [attacks]

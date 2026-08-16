@@ -62,7 +62,7 @@ var eagerArtifacts = map[string]eagerArtifact{
 	// unset default is the raw strip, which would silently delete the
 	// stored bounded family from an endpoint contracted to serve it.
 	"damage": {extract: func(r *result.Result) (any, error) { return view.Damage(r, view.DamageOptions{Dmg: "both"}) },
-		code: "damage_unavailable", msg: "this demo has no damage data (no KTX mvdhidden_dmgdone stream)", echoMs: true},
+		code: "damage_unavailable", msg: "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)", echoMs: true},
 	"shots": {extract: func(r *result.Result) (any, error) { return view.Shots(r) },
 		code: "shots_unavailable", msg: "this demo has no shot data (no weapon fires decoded)", echoMs: true},
 	"aim": {extract: func(r *result.Result) (any, error) { return view.Aim(r, view.AimOptions{}) },

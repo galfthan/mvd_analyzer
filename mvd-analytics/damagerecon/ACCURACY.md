@@ -33,8 +33,9 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 | bounded givenTeam | 2.4% | 5.7% | — | small denominators (200–700) |
 | bounded givenSelf | 3.7% | 5.1% | — | small denominators |
 
-The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — see
-`.reports/qw-recon-eval-dm2dm3-2026-08-15/`, fetched with
+The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
+eval outputs in `.reports/qw-recon-eval-dm2dm3-2026-08-15/`, an
+untracked per-machine report directory; fetched with
 `cmd/fetch-eval-corpus`) scores comparably: bounded given median
 **0.60%** (mean 0.81%, p90 1.85%, ≤2% 92%), bounded taken 0.04%, raw
 given 1.23%, raw taken 1.71%.
@@ -160,7 +161,11 @@ measurement-grade; bounded **given** is a well-under-1%-median estimate
 for match totals; per-hit attribution is ~98% but individual hits can be
 misattributed
 (prefer aggregates to single events); team/self splits are indicative,
-not exact; raw overkill beyond the -99 corpse clamp is model-derived on
+not exact; **pre-MVDSV-0.30 recordings carry 10-50× sparser hitscan
+telemetry (TE_BLOOD/TE_GUNSHOT) than the corpora above, and no GT eval
+covers them yet — treat reconstructed sections on that oldest slice
+(~40% of the archive) as unvalidated estimates**; raw overkill beyond
+the -99 corpse clamp is model-derived on
 killing hits. Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
 CTF were out of validation scope (study §trust tiers); midair/instagib/
 dmgfrags server modes are skipped entirely (no section).

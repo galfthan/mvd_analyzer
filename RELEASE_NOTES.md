@@ -8,8 +8,9 @@ detail.
 ## unreleased (reconstruct-damage) — damage on every demo, schema v71
 
 ~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:
-those demos had no `damage` section, so `/damage`, `/top-kills`, `/lives`
-and `/top-windows` damage figures answered 422. The new `damage-recon`
+those demos had no `damage` section, so `/damage` answered 422 and the
+damage-shaped figures on `/top-kills`, `/lives` and `/top-windows` were
+absent. The new `damage-recon`
 DAG node (package `mvd-analytics/damagerecon`) now reconstructs the
 section on exactly those demos from spectator-visible state: the
 health/armor change streams (change-driven per server frame, so the
@@ -26,16 +27,17 @@ sections (stamped by the existing analyzer — the one golden-visible
 change on modern demos) and `"reconstructed"` on rebuilt ones; the view
 passes it through filtered/family-transformed responses and the OpenAPI
 `Damage` schema documents it. Validated blind against KTX ground truth
-on the modern golden corpus: per-player match totals at ~1% median error
-(bounded given 1.1%, bounded taken 0.05%, raw given 1.3%, raw taken
-0.9%), 99.6% of ground-truth damage instants covered, 97.6% attacker
-attribution — full tables, error anatomy and trust guidance in
+against KTX ground truth: golden corpus bounded given median 0.58%
+(taken 0.05%, raw given 1.15%); on the 60-demo blind dm2/dm3 corpus
+99.6% of ground-truth damage instants covered, 98.9% value-exact,
+98.5% attacker attribution — full tables, error anatomy and trust guidance in
 `mvd-analytics/damagerecon/ACCURACY.md`, with a regression harness at
 `mvd-analytics/cmd/qw-recon-eval` and a fast pinned subset in
 `damagerecon/eval_test.go`. Reconstruction requires the spatial shot
 streams (always built by mvd-api and the web WASM; `-include
 projectiles,beams` on the CLI), never overwrites a measured section, and
-stands down on `skipped:*` server modes (midair/instagib/dmgfrags).
+stands down on `skipped:*` server modes (midair / instagib / dmgfrags /
+the clan-arena family ca/wipeout/ra/lgc/race).
 Non-finite wire origins (a pre-instrumentation-era corruption that made
 ~6% of old demos abort JSON encoding with NaN) are now dropped at
 ingestion in positions, movers, projectiles and item spawns.
@@ -86,7 +88,7 @@ damage at the swing's real timing — W_FireAxe runs the traceline exactly
 linker and the reconstruction search that delayed window. Axe swings
 appear in the per-shot stream, `byPlayer` accuracy, the KTX
 reconciliation and the aim weapon counters, and reconstructed axe
-attacker attribution went 20% → 100% on the 60-demo validation corpus.
+attacker attribution went 21% → ~100% on the 60-demo validation corpus.
 
 A long-standing parser bug on `sv_bigcoords` demos (~5% of the old
 archive, MVDSV 0.33/0.34 era) is fixed: entity ANGLES are 2-byte shorts

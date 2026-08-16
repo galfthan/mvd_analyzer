@@ -423,6 +423,9 @@ path; weapon-fire sounds drive the shots analyzer),
 flight brackets — the shots analyzer links RL/GL fires to their impacts),
 `BeamEvent` (`svc_temp_entity` lightning beams — `TE_LIGHTNING2` is the
 per-tick LG fire signal),
+`PointEffectEvent` (`svc_temp_entity` point effects — TE_BLOOD /
+TE_LIGHTNINGBLOOD per-hit damage telemetry, TE_EXPLOSION detonation
+points, TE_GUNSHOT miss puffs, plus the rest of the TE vocabulary),
 `NailsFrameEvent` (`svc_nails` spike snapshots — opt-in, off by default),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
@@ -861,8 +864,14 @@ diff -r /tmp/before /tmp/after
    delta IS the bounded value) but attribution is inference: per-player
    match totals run ~1% median error against ground truth, individual
    hits can be misattributed, and team/self splits are indicative only.
-   Full accuracy tables and trust guidance:
-   [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md).
+   Pre-MVDSV-0.30 recordings additionally carry far sparser hit
+   telemetry and are not yet ground-truth-validated. Full accuracy
+   tables and trust guidance:
+   [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md);
+   the feature's design/validation history lives in
+   [`plan-damage-recon.md`](plan-damage-recon.md), and the follow-up
+   backlog distilled from the archive survey in
+   [`plan-archive-features.md`](plan-archive-features.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of
