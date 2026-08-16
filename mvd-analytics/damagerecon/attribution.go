@@ -27,7 +27,9 @@ const (
 	tolBlastMs        = 40    // TE_EXPLOSION multicast to damage frame (same server function)
 	rAxe              = 110.0
 	rHitscan          = 3000.0
-	sgAimGateDeg      = 50.0 // real sg hits are within ~25° (p95); hard gate at 2×
+	rLGRange          = 700.0 // id1 LG traceline reaches 600 units; interp slack
+	tolLGAmmoMs       = 250   // cells stat update to damage frame (old low-fps recordings lag)
+	sgAimGateDeg      = 50.0  // real sg hits are within ~25° (p95); hard gate at 2×
 	rlSoundAimGateDeg = 60.0
 )
 
@@ -283,6 +285,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	vpos := vtrack.posAt(d.t)
 	var cands []candidate
 	cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.lgAmmoCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.projCandidates(d.t, vpos)...)
 	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
@@ -524,6 +527,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 	if vtrack != nil {
 		vpos := vtrack.posAt(d.t)
 		cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
+		cands = append(cands, in.lgAmmoCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.projCandidates(d.t, vpos)...)
 		cands = append(cands, in.explosionCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
@@ -926,6 +930,58 @@ func (in *inputs) beamCandidates(victim string, t int32, vpos vec3) []candidate 
 				kind: "beam", dEnd: -1,
 			})
 		}
+	}
+	return out
+}
+
+// lgAmmoCandidates: LG attacks recovered from the shooter's cells drain on
+// beam-sparse recordings (old servers drop most TE_LIGHTNING2 multicasts
+// from the demo — observed MVDSV 0.33 demos carry beams for under 20% of
+// cells spent, leaving whole shaft fights beam-invisible). A cells
+// decrement at the instant is the fire; range (id1 LG traces 600 units),
+// line of sight and the aim cone gate the target. Only generated on
+// demos flagged lgBeamSparse — where beams are healthy they are the
+// sharper signal and these duplicates would only add noise.
+func (in *inputs) lgAmmoCandidates(victim string, t int32, vpos vec3) []candidate {
+	if !in.lgBeamSparse {
+		return nil
+	}
+	// Only where the beam record is silent: any beam at the instant means
+	// the beam evidence is live here and stays the sharper signal.
+	blo := sort.Search(len(in.beams), func(i int) bool { return in.beams[i].t >= t-tolBeamMs })
+	if blo < len(in.beams) && in.beams[blo].t <= t+tolBeamMs {
+		return nil
+	}
+	var out []candidate
+	lo := sort.Search(len(in.lgAmmoFires), func(i int) bool { return in.lgAmmoFires[i].t >= t-tolLGAmmoMs })
+	for i := lo; i < len(in.lgAmmoFires) && in.lgAmmoFires[i].t <= t+tolLGAmmoMs; i++ {
+		s := in.lgAmmoFires[i]
+		if s.player == victim {
+			continue
+		}
+		tr := in.tracks[s.player]
+		if tr == nil {
+			continue
+		}
+		spos := tr.posAt(t)
+		dd := spos.distTo(vpos)
+		if dd > rLGRange {
+			continue
+		}
+		apen := 0.0
+		if ang, ok := tr.aimAngleTo(t, vpos); ok {
+			if ang > sgAimGateDeg {
+				continue
+			}
+			apen = math.Min(ang/10.0, 3.0) * 0.2
+		}
+		if !in.bsp.reachesBody(eyeOf(spos), vpos) {
+			continue
+		}
+		out = append(out, candidate{
+			geom: 0.3 + dd/rLGRange*0.15 + apen, attacker: s.player, weapon: "lg",
+			kind: "beam", dEnd: -1,
+		})
 	}
 	return out
 }

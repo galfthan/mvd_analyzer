@@ -93,6 +93,16 @@ type inputs struct {
 	// is 35*cells (id1 W_FireLightning), radius-dealt (self halved).
 	discharges []discharge
 
+	// lgAmmoFires: every small cells decrement (1..3, alive) per player —
+	// the ammo-side record of LG attacks, one entry per stat update.
+	// lgBeamSparse marks a demo whose recorded TE_LIGHTNING2 beams cover
+	// well under half of the cells actually spent: old servers (observed
+	// on MVDSV 0.33-era recordings) drop most LG beam multicasts from the
+	// demo, so beam-gated attribution misses whole shaft fights — the
+	// ammo drain is the fallback fire evidence there.
+	lgAmmoFires  []firedShot // sorted by t, weapon "lg"
+	lgBeamSparse bool
+
 	// bloodTrust: the demo's TE_BLOOD count bytes passed per-demo
 	// calibration — 4·(summed counts near the victim) reproduced the
 	// observed h/a delta on enough unambiguous single-shotgunner instants
@@ -235,8 +245,37 @@ func buildInputs(res *result.Result) *inputs {
 
 	in.resolveProjectiles(res.Streams.Projectiles)
 	in.detectDischarges()
+	in.detectLGAmmoFires()
 	in.weaponBitsLive = weaponBitsCycle(res.Streams.Players)
 	return in
+}
+
+// detectLGAmmoFires scans each player's cells stream for fire-sized
+// decrements (1..3 cells while alive — a discharge wipes to zero and is
+// detected separately) and flags the demo beam-sparse when the recorded
+// TE_LIGHTNING2 beams account for less than half the cells spent. On such
+// recordings the ammo drain is the only reliable LG fire record.
+func (in *inputs) detectLGAmmoFires() {
+	totalDrops := 0
+	for _, name := range in.order {
+		p := in.players[name]
+		prev := -1
+		for i := range p.Cells {
+			c := p.Cells[i]
+			v := int(c.V)
+			if prev >= 0 && v < prev && prev-v <= 3 && inWeaponIntervals(p.Alive, c.T) {
+				totalDrops += prev - v
+				in.lgAmmoFires = append(in.lgAmmoFires, firedShot{t: c.T, player: name, weapon: "lg"})
+			}
+			prev = v
+		}
+	}
+	sort.SliceStable(in.lgAmmoFires, func(i, j int) bool { return in.lgAmmoFires[i].t < in.lgAmmoFires[j].t })
+	// Modern KTX writes exactly one beam per cell (beam count == acc.attacks),
+	// so healthy recordings sit at ~100% coverage; the old recordings that
+	// need the ammo fallback sit visibly below (observed 76% on MVDSV 0.33,
+	// with whole shaft bursts beam-less).
+	in.lgBeamSparse = totalDrops > 20 && float64(len(in.beams)) < 0.9*float64(totalDrops)
 }
 
 // weaponBitsCycle reports whether any weapon-inventory interval opens
