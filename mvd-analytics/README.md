@@ -1264,9 +1264,17 @@ Four layers exercise different things:
    against a manifest of hub.quakeworld.nu game IDs in
    `testdata/corpus.json`. On first run it downloads each demo into
    `testdata/cache/<gameId>.mvd.gz` (gitignored) and pins the
-   serialised `Result` against `testdata/golden/<label>.json`. The
-   manifest currently ships with ten demos (three 1on1, three 2on2,
-   four 4on4); `t.Skip` keeps `make test` green if it is ever emptied.
+   serialised `Result` against `testdata/golden/<label>.json`;
+   `t.Skip` keeps `make test` green if the manifest is ever emptied.
+   An entry may instead name a **local-only demo** (`file` +
+   `shotStreams` keys) for demos the hub doesn't have — currently one
+   pre-instrumentation 2on2 (QW 2.40 era) that exercises damage
+   reconstruction end-to-end. Local demos live in `testdata/demos/`
+   (gitignored, never committed — the entry skips when the file is
+   absent on this machine; provenance sha256 in the manifest, ask a
+   maintainer for the bytes). `shotStreams` runs that entry with
+   `Registry.BuildShotStreams` so the reconstruction actually engages
+   instead of standing down.
    Regenerate goldens after an intentional change:
 
    ```bash
@@ -1297,7 +1305,7 @@ Four layers exercise different things:
    the committed corpus. On top of that, the dense per-sample
    position/view track (`streams.players[].pos`: x/y/z, vp/vya, h/lq/li,
    velocity) is pinned on only two demos — a full 4on4 and a duel
-   (`densePosDemos`) — and dropped from the other eight by
+   (`densePosDemos`) — and dropped from the rest by
    `dropPositionTracks`, since the emitter / BSP-trace code is identical
    across demos. That keeps the committed corpus ~13 MB (was ~34 MB)
    while still exercising the position pipeline on two demos and every

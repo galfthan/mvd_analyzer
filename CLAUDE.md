@@ -121,7 +121,11 @@ belongs in the frontend.
      gameIds), fetches each demo on first run into
      `mvd-analytics/testdata/cache/` (gitignored), and pins the full
      pipeline output to `mvd-analytics/testdata/golden/<label>.json`
-     (committed). Steady-state runs are offline.
+     (committed). Steady-state runs are offline. Entries may also name
+     local-only demos (`file` key, `mvd-analytics/testdata/demos/`,
+     gitignored) for archive demos the hub doesn't have — those skip
+     when the demo is absent on this machine (goldens stay committed;
+     provenance sha256 in the manifest).
   3. **Special-cases invariants** in `mvd-analytics/corpus/` — walks
      `demo-test-data/mvd/special-cases/` (per-machine, no-op when
      absent) and asserts roster/frag oracles: team totals vs the
