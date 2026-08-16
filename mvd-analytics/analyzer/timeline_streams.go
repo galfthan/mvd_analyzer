@@ -731,22 +731,19 @@ func (a *TimelineAnalyzer) buildMoverStreams() []result.MoverStream {
 		if mt == nil || len(mt.t) == 0 {
 			continue
 		}
-		// Samples with a non-finite origin (seen in some pre-instrumentation
-		// demos) are dropped: encoding/json refuses NaN/Inf and the sample
-		// carries no usable geometry.
-		ms := result.MoverStream{EntNum: ent, SubModel: mt.subModel}
-		for i, o := range mt.org {
-			if !finiteVec3(o) {
-				continue
-			}
-			ms.T = append(ms.T, mt.t[i])
-			ms.X = append(ms.X, o[0])
-			ms.Y = append(ms.Y, o[1])
-			ms.Z = append(ms.Z, o[2])
-			ms.Vis = append(ms.Vis, mt.vis[i])
+		// Non-finite origins are dropped at record time (moverTrack.append),
+		// so every sample here carries usable geometry.
+		ms := result.MoverStream{
+			EntNum:   ent,
+			SubModel: mt.subModel,
+			T:        append([]int32(nil), mt.t...),
+			X:        make([]float32, len(mt.org)),
+			Y:        make([]float32, len(mt.org)),
+			Z:        make([]float32, len(mt.org)),
+			Vis:      append([]bool(nil), mt.vis...),
 		}
-		if len(ms.T) == 0 {
-			continue
+		for i, o := range mt.org {
+			ms.X[i], ms.Y[i], ms.Z[i] = o[0], o[1], o[2]
 		}
 		out = append(out, ms)
 	}
@@ -764,8 +761,8 @@ const (
 // finiteVec3 reports whether every component is a finite float (no
 // NaN/Inf). Some pre-instrumentation demos carry non-finite origins on
 // the wire; encoding/json refuses them, so ingestion sites drop such
-// samples (recordPosition, buildMoverStreams, flightsToStream,
-// handleItemSpawn, moverTrack.append).
+// samples (recordPosition, moverTrack.append, flightsToStream,
+// handleItemSpawn).
 func finiteVec3(v [3]float32) bool {
 	for _, c := range v {
 		f := float64(c)
