@@ -51,23 +51,23 @@ Two consequences for anyone moving code in here:
 
 ## Status
 
-**Extraction in progress.** The package currently owns the renderer's pure
-helpers; the stateful renderer (camera, floor model, draw layers, pointer
-interaction) still lives in `mvd-web/static/app.js` and moves across in
-groups. Each group is verified byte-identical against a screenshot corpus
-before it lands — see [Parity testing](#parity-testing).
+**The extraction is complete and the renderer is pure WebGL2.** `MvdMap`
+owns the camera, the frame feed, every scene layer, hit testing and the
+pointer gesture semantics; mvd-web owns only loaders, measuring and DOM
+chrome. The 2D scene painter is gone — see `src/glworld.js`.
 
-Moved so far:
+Modules:
 
 | Module | Contents |
 |---|---|
 | `src/camera.js` | the orbit camera — `newCamera`, `project`, `toView`, `toWorld`, `fit`, `setAngles`, `setOrbitCenter`, `is3D`, `refreshTrig`, and the pitch/yaw limits |
 | `src/geometry.js` | `normalizeMapGeometry`, `pointInTriangle`, `computeMapZRange`, `floorBoundaryEdges`, `floorBoundaryWalls`, `moverPoseAt`, `FLOOR_SLAB_DEPTH` |
 | `src/locgroups.js` | loc regions and the floor model — `processLocationGroups`, `computeRegionOutline`, `groupWorldBBox`, `computeRegionStacking`, `buildFloorModel` |
-| `src/map.js` | `MvdMap` — the state container, projection helpers, region focus, the floor-model cache, movers, weapon-fire overlays, the world layer (`drawWorld`), the actor layer (the z-sorted item/player pass, player symbols and badges, floor stems, view/velocity arrows, the item phase clock, the static entity view), the overlay layer (trails, LOS/PVS sightlines, region occupancy and control tints), loc resolution (`resolvePlayerLoc`) and hit testing (`pickLocGroupAt`, `hitTestPlayerSymbol`) |
-| `src/draw.js` | the canvas-2D primitives — `drawTriangleListFill`, `renderSolidEntries`, `drawMoverMesh`, `drawLiquidVolume`, `drawRegionOutline`, `fillRegion`, the player symbol, badges, death markers and arrows |
+| `src/map.js` | `MvdMap` — the state container, camera control, the frame feed (`setFrames`/`frameAt`), `render(time)` (which builds the per-frame GL command data: world, movers, overlays, trails, sightlines, actors, labels), the push-only `resize` API, the pointer state machine, focus/follow/reset, loc resolution and hit testing |
+| `src/draw.js` | canvas-2D **icon rasterisers** for host chrome (the DOM player-symbol badges) — not a scene layer |
 | `src/frames.js` | the columnar bucket-view accessors — `bucketTimeSec`, `bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot` and friends. One implementation shared by the map (via `setFrames`/`frameAt`) and the host's timeline panels |
-| `src/glworld.js` | the WebGL2 world backend — floors + liquids as two sorted GPU batches. Camera motion is a uniform update instead of a full re-bake, and the 2D painter's AA seam-sealing stroke is unnecessary. Falls back to the 2D path when a context can't be created (or is lost), and on software rasterisers, where GL is slower than the 2D painter; `state.useGL = false` forces 2D, `state.forceGL = true` overrides the software gate |
+| `src/glworld.js` | **the renderer.** WebGL2 only: opaque depth-buffered floors and movers (no painter sort), blended liquids/focus-fade, region tints and outlines (cached per-group VBOs restyled by uniforms), shader-dashed quad-lines (trails, sightlines, beams, stems), shaped point sprites (dots, markers, symbols, item squares), textured label billboards, screen-space arrowhead triangles. A lost or unavailable context shows a "WebGL2 required" notice — there is no 2D scene path |
+| `src/glatlas.js` | the label atlas — whole strings baked through an offscreen 2D context (used strictly as a texture rasteriser), shelf-packed into one 1024px page |
 | `src/util.js` | `lowerBoundIndex`, `trailIndexAtTime` |
 | `src/color.js` | `hexToRgba`, `scaleRgbaAlpha`, `getLocationColor` |
 | `src/locs.js` | `normalizeLocationName` (**the** canonical loc normalizer), `findNearestLocation`, `ITEM_KEYWORDS` |
@@ -81,9 +81,8 @@ Size arrives only through `resize(cssW, cssH, dpr)` — the host measures
 whatever it wants (container, fullscreen element, iframe) and pushes the
 result in.
 
-Still in `app.js`: pointer interaction, all measuring, all the DOM chrome
-and loaders, and the trail precomputation (a data transform over the same
-frame view).
+Still in `app.js`: all measuring, all the DOM chrome, all loaders, and the
+DOM event glue that forwards pointer events into the component.
 
 A note on data: the renderer reads item spawners from its own
 `state.items`, not from an analyzer Result — it has no notion of one, and in
@@ -95,13 +94,10 @@ The intended end state is a `MvdMap` class taking geometry, a static entity
 corpus, and a windowed frame source, with the host application owning only
 the chrome around the canvas. The design is in `plans/plan-embeddable-map.md`.
 
-Everything in `src/draw.js` takes its context, geometry and projection
-explicitly — no renderer state is read from module scope. That is what let
-the WebGL backend (`src/glworld.js`) replace the world half of it wholesale:
-floors and liquids render on the GPU by default, with the 2D painter kept as
-the automatic fallback and the parity anchor. The symbol/marker/text half
-stays canvas-2D on top — those are a few dozen cheap draws per frame, and
-text on the GPU buys nothing here.
+`src/draw.js` is no longer a scene layer: the whole scene renders through
+`src/glworld.js`, and what remains in draw.js are the icon rasterisers the
+HOST chrome uses to bake little player-symbol canvases for DOM panels —
+the same "2D context as texture baker" category as the label atlas.
 
 ## Use
 
@@ -156,11 +152,7 @@ pixel change.
 `--times` (match-relative **seconds** — the frontend clock is seconds, unlike
 the ms-native API), `--no-geometry` and `--no-webgl`.
 
-Two backends, two comparison rules. The canvas-2D path (`--no-webgl`, or
-`MAPSHOT_FLAGS=--no-webgl` through `capture-baseline.sh`) is byte-exact
-against any baseline captured on the same machine and is the anchor for
-refactors. The WebGL path is deterministic on one machine + driver, so
-GL-vs-GL before/after pairs compare byte-exactly too — but never compare a
-GL set against a 2D set (the anti-aliasing legitimately differs), and never
-across machines. On a GPU-less box the app auto-prefers 2D (software GL is
-slower), so GL captures there need `--force-webgl`.
+One backend, one comparison rule: shots are byte-comparable against a
+baseline captured on the same machine + driver (SwiftShader on a GPU-less
+box renders deterministically too). Never compare across machines or after
+a driver update.

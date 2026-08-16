@@ -65,19 +65,9 @@ export {
 export {
     PLAYER_SYMBOL_BASE_SIZE,
     ARROWHEAD_PX,
-    drawTriangleListFill,
-    drawRegionOutline,
-    fillRegion,
-    renderSolidEntries,
-    drawMoverMesh,
-    drawLiquidVolume,
     drawPlayerSymbolAt,
     drawBadge,
     drawBadgesAroundCenter,
-    drawDeathX,
-    drawDropD,
-    drawWorldArrow,
-    drawArrow,
 } from './draw.js';
 
 export { lowerBoundIndex, trailIndexAtTime } from './util.js';
@@ -90,8 +80,6 @@ export {
     buildEntryVertices,
     sortedIndices,
     buildLiquidFaces,
-    rendererString,
-    isSoftwareRenderer,
 } from './glworld.js';
 
 export {

@@ -554,10 +554,10 @@ test('_glActors composes players, items, arrows and learn mode without throwing'
     assert.ok(learn.actorBatches.length > 0, 'entity markers emitted');
 });
 
-test('a dead WebGL probe latches to the 2D world path', () => {
+test('a dead WebGL probe latches and shows the WebGL-required notice', () => {
     // The stub canvas hands back a junk context for 'webgl2', so GlWorld's
-    // program build throws, create() returns null, and the component must
-    // fall back to the 2D painter — permanently, without re-probing.
+    // program build throws, create() returns null, and the component shows
+    // the notice — permanently, without re-probing.
     const { canvas, calls } = stubCanvas();
     const map = new MvdMap(canvas);
     map.state.locations = [{ name: 'RA', x: 0, y: 0, z: 0 }];
@@ -569,7 +569,8 @@ test('a dead WebGL probe latches to the 2D world path', () => {
     map.render(0);
     assert.equal(map._glFailed, true, 'failed probe latched');
     assert.equal(map._glWorld, null);
-    assert.ok(calls.includes('drawImage'), 'the 2D bake blit ran instead');
+    assert.ok(calls.includes('fillText'), 'the notice text was drawn');
+    assert.ok(!calls.includes('drawImage'), 'no GL blit happened');
 });
 
 test('rebuildLocationGroups fills both the list and the by-name lookup', () => {
@@ -770,15 +771,18 @@ test('setFocusGroup marks the region and its bbox neighbours', () => {
     assert.equal(map.state.focusGroupName, null);
 });
 
-test('drawTracks pulls a trail start back when the clock rewinds past it', () => {
-    const map = new MvdMap();
-    const noop = () => {};
-    const ctx = new Proxy({}, { get: () => noop, set: () => true });
+test('the trail collector pulls a trail start back when the clock rewinds past it', () => {
+    const map = new MvdMap(stubCanvas().canvas);
+    map.state.currentTime = 6;
     map.state.fullTrails = {
         p1: [{ wx: 0, wy: 0, wz: 0, t: 5, teamIdx: 0 }, { wx: 10, wy: 0, wz: 0, t: 6, teamIdx: 0 }],
     };
     map.state.enabledPlayers = { p1: true };
     map.state.trailStartTimes = { p1: 8 };
-    map.drawTracks(ctx, 6);
+    let dyn = map._glDynamic(1);
     assert.equal(map.state.trailStartTimes.p1, 6, 'start follows the rewound clock');
+    assert.equal(dyn.lines.length, 0, 'window collapsed to a point — nothing to draw yet');
+    map.state.trailStartTimes.p1 = 0;
+    dyn = map._glDynamic(1);
+    assert.equal(dyn.lines.length, 1, 'full window → the segment is emitted');
 });

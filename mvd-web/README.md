@@ -622,21 +622,17 @@ translucency (the translucent stacking used to read as "shading"); the box
 sides read as solid thickness, not a dark smear. Players, items, liquids
 and overlays all draw live on top.
 
-The floor model and the liquid volumes render through a **WebGL2 backend**
-by default (`mvd-map-view/src/glworld.js`): two GPU triangle batches in the
-same painter order, re-sorted only when the camera *angle* changes, so
-rotating/panning/zooming costs a uniform update instead of a full
-re-rasterisation. On the canvas-2D fallback path, `renderSolidEntries` also
-strokes each fill-batch with its own colour at a hairline width, sealing the
-anti-aliasing seams between adjacent triangles so a continuous floor reads
-as one clean surface instead of showing its triangulation as a mesh — GL
-rasterisation has no such seams, so the GL path skips the hack (and its
-double rasterisation cost) entirely. `?gl=0` forces the 2D path; a failed or
-lost WebGL context falls back to it automatically, and so does a **software
-rasteriser** (SwiftShader/llvmpipe — a GPU-less machine's GL is slower than
-the 2D painter, measured ~46 ms vs ~32 ms per rotated dm3 frame). `?gl=1`
-forces GL even there, which is how the harness exercises the GL path on a
-headless box.
+The whole map scene renders through **WebGL2**
+(`mvd-map-view/src/glworld.js`): opaque depth-buffered floors (the painter
+sort is gone — the z-buffer decides), blended liquids and focus fade,
+GPU-side movers/overlays/trails/sightlines/actors, and atlas-baked labels.
+Camera motion costs a uniform update instead of a full re-rasterisation,
+and GL rasterisation of shared-edge triangles has no anti-aliasing seams,
+so the old hairline seam-sealing stroke (and its double rasterisation cost)
+no longer exists. There is no canvas-2D scene path: a machine without
+WebGL2 sees a "WebGL2 required" notice on the map tab (everything else in
+the app still works), and software rasterisers (SwiftShader/llvmpipe) are
+accepted as the slow-but-working fallback.
 
 **Occupied-region overlay** — a region a living player currently stands
 in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one
@@ -683,12 +679,8 @@ on first need), so the first toggle-on incurs the heaviest
 position-derived pass and later toggles are instant. BSP-gated — the
 toggles are inert on maps without a provisioned BSP.
 
-On the 2D fallback path the floor model renders into an offscreen canvas
-keyed by the full camera state (`drawCachedWorld`); steady playback just
-blits it (~1 ms), but every rotation/pan/zoom/focus change re-renders the
-whole model — which is exactly the cost the WebGL backend removes. Code:
-`buildFloorModel` / `renderSolidEntries` / `drawCachedWorld` (2D) and
-`GlWorld` / `drawWorldGL` (GL).
+Code: `buildFloorModel` (the render list) and `GlWorld` / `drawWorldGL` /
+`_glDynamic` (the GL passes).
 
 (An earlier occluding **Solid** mode drew the map's vertical walls on top
 of the floor model; it was removed, and the generator no longer emits the

@@ -24,13 +24,8 @@ import { moverPoseAt, pointInTriangle, normalizeMapGeometry } from './geometry.j
 import {
     buildFloorModel, processLocationGroups, groupWorldBBox, computeRegionOutline,
 } from './locgroups.js';
-import { scaleRgbaAlpha, hexToRgba, hexToRgb } from './color.js';
-import {
-    drawTriangleListFill, drawRegionOutline, fillRegion, renderSolidEntries,
-    drawMoverMesh, drawLiquidVolume, drawPlayerSymbolAt, drawBadgesAroundCenter,
-    drawWorldArrow, drawArrow, drawDeathX, drawDropD,
-    PLAYER_SYMBOL_BASE_SIZE, ARROWHEAD_PX,
-} from './draw.js';
+import { scaleRgbaAlpha, hexToRgba } from './color.js';
+import { ARROWHEAD_PX } from './draw.js';
 import { lowerBoundIndex, trailIndexAtTime } from './util.js';
 import { normalizeLocationName, findNearestLocation } from './locs.js';
 import {
@@ -290,15 +285,6 @@ export function newState() {
         canvasCssW: 0,
         canvasCssH: 0,
         dpr: 1,
-        // World backend: WebGL2 when a real GPU is available (floors +
-        // liquids render on the GPU — no per-camera-frame rebake, no AA seam
-        // hack), with the canvas-2D painter as automatic fallback — including
-        // on software rasterisers (SwiftShader/llvmpipe), where GL is slower
-        // than the 2D painter. Hosts can force 2D (mvd-web: ?gl=0) — the
-        // parity harness anchors on that path — or force GL on a software
-        // renderer (forceGL; mvd-web: ?gl=1) for testing.
-        useGL: true,
-        forceGL: false,
 
         // What the map is.
         locations: [],        // MapLocation[] — loc points, positions + names
@@ -575,89 +561,14 @@ export class MvdMap {
         return out;
     }
 
-    drawMovers(ctx) {
-        const s = this.state;
-        const movers = s.movers;
-        const meshes = s.submodelMeshes;
-        if (!movers || movers.length === 0 || !meshes) return;
-        const tMs = s.currentTime * 1000;
-        const players = this.livingPlayersAtFrame();
-        for (const m of movers) {
-            const mesh = meshes[m.sub];
-            if (!mesh || mesh.length < 9) continue;
-            const pose = moverPoseAt(m, tMs);
-            if (!pose || !pose.vis) continue;
-            const active = players.length > 0 && this.playerOnMover(pose, m.sub, players);
-            drawMoverMesh(ctx, mesh, this.moverMeshFaces(m.sub), pose,
-                          active ? MOVER_FILL_ACTIVE : MOVER_FILL,
-                          this.camera, this._toCanvas);
-        }
-    }
 
     // ─── Weapon-fire overlays ───────────────────────────────────────────────
 
-    // drawFlightDots: each flight (rocket/grenade/nail) live at the current
-    // time, interpolated along its spawn→despawn segment — linear, so exact
-    // for the straight-flying rocket and approximate for grenades and nails.
-    drawFlightDots(ctx, pr, radius, colorOf) {
-        if (!pr || !Array.isArray(pr.s) || pr.s.length === 0) return;
-        const tMs = this.state.currentTime * 1000;
-        ctx.save();
-        for (let i = 0; i < pr.s.length; i++) {
-            const t0 = pr.s[i], t1 = pr.e[i];
-            if (tMs < t0 || tMs > t1) continue;
-            const f = t1 > t0 ? (tMs - t0) / (t1 - t0) : 0;
-            const x = pr.sx[i] + (pr.ex[i] - pr.sx[i]) * f;
-            const y = pr.sy[i] + (pr.ey[i] - pr.sy[i]) * f;
-            const z = pr.sz[i] + (pr.ez[i] - pr.sz[i]) * f;
-            const p = this.toCanvas(x, y, z);
-            ctx.fillStyle = colorOf(pr.w[i]);
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
-    }
 
-    drawProjectiles(ctx) {
-        const s = this.state;
-        this.drawFlightDots(ctx, s.projectiles, 3, (w) => PROJECTILE_COLORS[w] || '#ffffff');
-        this.drawFlightDots(ctx, s.nails, 1.5, () => NAIL_COLOR);
-    }
 
-    // drawBeams: each LG bolt active near the current time, as a short-lived
-    // line from muzzle to impact.
-    drawBeams(ctx) {
-        const bm = this.state.beams;
-        if (!bm || !Array.isArray(bm.t) || bm.t.length === 0) return;
-        const tMs = this.state.currentTime * 1000;
-        ctx.save();
-        ctx.strokeStyle = BEAM_COLOR;
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < bm.t.length; i++) {
-            if (Math.abs(bm.t[i] - tMs) > BEAM_FLASH_MS) continue;
-            const a = this.toCanvas(bm.sx[i], bm.sy[i], bm.sz[i]);
-            const ax = a.x, ay = a.y;
-            const b = this.toCanvas(bm.ex[i], bm.ey[i], bm.ez[i]);
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-        }
-        ctx.restore();
-    }
 
     // ─── World layers ───────────────────────────────────────────────────────
 
-    drawLiquids(ctx) {
-        const liquids = this.state.mapGeometry && this.state.mapGeometry.liquids;
-        if (!Array.isArray(liquids)) return;
-        for (const lq of liquids) {
-            if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
-            drawLiquidVolume(ctx, lq.tris, LIQUID_BASE[lq.kind] || LIQUID_BASE.water,
-                             LIQUID_ALPHA, SOLID_LIGHT, this.camera, this._toCanvas);
-        }
-    }
 
     // scratchCanvas: an offscreen surface for the world bake, taken from the
     // document that owns the target canvas — NOT the ambient `document`, which
@@ -667,43 +578,6 @@ export class MvdMap {
         return this.state.canvas.ownerDocument.createElement('canvas');
     }
 
-    // drawCachedWorld: blit the depth-sorted floor model, re-rendering the
-    // offscreen bake only when the camera, the canvas or the focus changed.
-    // Steady playback at a fixed camera is therefore one drawImage.
-    drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
-        if (!se) return;
-        const s = this.state;
-        const w = this.camera;
-        const canvas = s.canvas;
-        const dpr = s.dpr || 1;
-        const liquids = s.mapGeometry && s.mapGeometry.liquids;
-        const key = [
-            w.yaw, w.pitch, w.zoomK, w.panX, w.panY,
-            w.scale, w.offsetX, w.offsetY,
-            w.cx, w.cy, w.zMid,
-            s.focusGroupName, canvas.width, canvas.height, dpr,
-            se.entries.length,
-            bakeLiquids && Array.isArray(liquids) ? liquids.length : 0,
-        ].join('|');
-        let cache = s[cacheField];
-        if (!cache) cache = s[cacheField] = this.scratchCanvas();
-        if (s[keyField] !== key) {
-            cache.width = canvas.width;   // also clears
-            cache.height = canvas.height;
-            const cctx = cache.getContext('2d');
-            cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            renderSolidEntries(cctx, se, w, this._toCanvas, this.farFadePredicate());
-            // Liquids are static geometry, so they bake into the cache too — a
-            // translucent pass on top of the opaque world (large volumes tint
-            // whatever is behind them).
-            if (bakeLiquids) this.drawLiquids(cctx);
-            s[keyField] = key;
-        }
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(cache, 0, 0);
-        ctx.restore();
-    }
 
     // drawWorldGL: render floors + liquids through the WebGL backend into an
     // internal offscreen canvas and blit it under the 2D layers. Returns
@@ -713,9 +587,9 @@ export class MvdMap {
     // host still sees one canvas, and the DOM never changes.
     drawWorldGL(ctx, floorModel) {
         const s = this.state;
-        if (!s.useGL || this._glFailed) return false;
+        if (this._glFailed) return false;
         if (!this._glWorld) {
-            const glw = GlWorld.create(this.scratchCanvas(), { allowSoftware: s.forceGL });
+            const glw = GlWorld.create(this.scratchCanvas());
             if (!glw) {
                 this._glFailed = true;
                 return false;
@@ -762,10 +636,32 @@ export class MvdMap {
         const iconScale = this.iconScale();
         const dyn = {
             movers: [], points: [], lines: [],
-            regionOutlines: [], fills: [], fillOutlines: [],
+            baseFills: [], regionOutlines: [], fills: [], fillOutlines: [],
             labels: [], boldLabels: [], actorBatches: [],
             atlas,
         };
+
+        // Loc-blob maps (no triangle geometry → no floor model): the flat
+        // translucent underlay the 2D painter used to draw, as blended fills
+        // under everything else.
+        if (!this.floorModel()) {
+            const focused = !!s.focusGroupName;
+            const backdropTris = s.mapGeometry && s.mapGeometry.backdropTris;
+            if (backdropTris && backdropTris.length >= 9) {
+                dyn.baseFills.push({
+                    tris: backdropTris,
+                    tint: parseColor(focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)'),
+                });
+            }
+            for (const group of s.locationGroups || []) {
+                if (group.tris && group.tris.length >= 9) {
+                    dyn.baseFills.push({
+                        tris: group.tris,
+                        tint: parseColor(this.tierFill(group, this.focusTier(group.name))),
+                    });
+                }
+            }
+        }
 
         // Loc labels — every named region, tier-faded like the 2D pass.
         const labelFont = `${Math.round(12 * iconScale * pxScale)}px monospace`;
@@ -1357,291 +1253,24 @@ export class MvdMap {
         }
     }
 
-    // drawWorld: the static layers under the actors — floors, liquids, movers,
-    // weapon-fire overlays, region outlines and loc labels.
+    // drawWorld: the whole scene, through the WebGL backend — floors (or
+    // the loc-blob fills on maps with no triangle geometry), liquids,
+    // movers, overlays, weapon fire, labels and actors. Returns false when
+    // WebGL is unavailable, in which case the caller shows the notice.
     drawWorld(ctx) {
         const s = this.state;
         const groups = s.locationGroups || [];
         const backdropTris = s.mapGeometry && s.mapGeometry.backdropTris;
-        if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
-
-        const focused = !!s.focusGroupName;
-        const floorModel = this.floorModel();
-        let usedGL = false;
-
-        if (floorModel) {
-            // One clean view: flat region tops + box sides. A higher floor
-            // covers a lower one, the sides read as solid thickness, and from
-            // overhead it is dead flat.
-            //
-            // Preferred backend: WebGL — opaque depth-buffered floors and
-            // movers, blended liquids/fade, GPU weapon-fire overlays; camera
-            // motion is a uniform update, not a rebake. Fallback: the 2D
-            // painter, cached to an offscreen bitmap per camera pose.
-            usedGL = this.drawWorldGL(ctx, floorModel);
-            if (!usedGL) {
-                this.drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
-                // Liquids: translucent volumes above the floor, drawn live.
-                this.drawLiquids(ctx);
-            }
-        } else {
-            // No triangle geometry (loc-blob maps): flat translucent fills.
-            if (backdropTris && backdropTris.length >= 9) {
-                drawTriangleListFill(ctx, backdropTris,
-                    focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)',
-                    this._toCanvas);
-            }
-            for (const group of groups) {
-                if (group.tris && group.tris.length >= 9) {
-                    drawTriangleListFill(ctx, group.tris,
-                        this.tierFill(group, this.focusTier(group.name)), this._toCanvas);
-                }
-            }
-            this.drawLiquids(ctx);
-        }
-
-        // Movers (lifts/doors/plats) posed at the current time, and the
-        // weapon-fire overlays — the GL backend draws these itself (see
-        // _glDynamic); the 2D versions run only on the fallback path.
-        if (!usedGL) {
-            this.drawMovers(ctx);
-            this.drawProjectiles(ctx);
-            this.drawBeams(ctx);
-        }
-
-        // Thin outlines around each traced region, after all fills so they sit
-        // on top and stay visible regardless of adjacent tinting. The GL
-        // backend draws these inside the world pass (cached quad-line VBOs);
-        // this 2D loop runs only on the fallback path.
-        if (!usedGL) {
-            for (const group of groups) {
-                if (!group.tris || group.tris.length < 9) continue;
-                const tier = this.focusTier(group.name);
-                // Idle baseline stays quiet so the floor reads as one calm
-                // surface; the occupied overlay brightens the active region on top.
-                let stroke = 'rgba(180, 180, 180, 0.22)';
-                let width = 1;
-                if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
-                else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
-                drawRegionOutline(ctx, group, this._toCanvasNew, stroke, width);
-            }
-        }
-
-        if (!usedGL) {
-            const labelPx = Math.round(12 * this.iconScale());
-            ctx.font = `${labelPx}px monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            for (const group of groups) {
-                const tier = this.focusTier(group.name);
-                const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-                ctx.fillStyle = tier === 'far'
-                    ? scaleRgbaAlpha(group.color.text, 0.35)
-                    : group.color.text;
-                ctx.fillText(group.name, pos.x, pos.y);
-            }
-        }
-        return usedGL;
+        if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return true;
+        return this.drawWorldGL(ctx, this.floorModel());
     }
 
     // ─── Actors: players, items, entities ───────────────────────────────────
 
-    // Combined z-sorted items-and-players pass. Building a single list lets
-    // the draw order mix items and players correctly — two players on
-    // different decks occlude in z order, an item clearly above a player
-    // draws on top, and the common case of a player standing on a pickup
-    // draws the player on top.
-    drawItemsAndPlayersZSorted(ctx, time, playerData) {
-        const iconScale = this.iconScale();
-        const zRange = this.state.zRange || { lo: 0, hi: 0 };
-        // Height-based symbol size scaling is a 2D-only cue: once the camera is
-        // tilted, height is directly visible, and size differences would read as
-        // distance instead.
-        const zSpan = is3D(this.camera) ? 0 : (zRange.hi - zRange.lo);
 
-        // Sort key is projected camera depth (closeness), which degenerates to
-        // plain z at top-down — preserving the old sort exactly — and stays
-        // correct under any rotation. The item bias is applied along the same
-        // axis (z contributes sinPitch to depth) so the "player standing on a
-        // pickup wins the tie" rule keeps working when tilted.
-        const drawables = [];
-        const items = this.state.items;
-        if (items && items.length > 0) {
-            for (const item of items) {
-                const style = ITEM_MARKER_STYLES[item.kind];
-                if (!style) continue;
-                const pos = this.toCanvasNew(item.x, item.y, item.z);
-                drawables.push({
-                    kind: 'i',
-                    sortDepth: pos.depth - ITEM_Z_TOP_THRESHOLD * this.camera.sinPitch,
-                    pos, item, style
-                });
-            }
-        }
-        if (playerData) {
-            for (const [name, data] of Object.entries(playerData)) {
-                if (data.x === 0 && data.y === 0) continue;
-                const symbolInfo = this.state.playerSymbols[name];
-                if (!symbolInfo) continue;
-                const pos = this.toCanvasNew(data.x, data.y, data.z);
-                drawables.push({
-                    kind: 'p',
-                    sortDepth: pos.depth,
-                    pos, name, data, symbolInfo
-                });
-            }
-        }
-        if (drawables.length === 0) return;
 
-        drawables.sort((a, b) => a.sortDepth - b.sortDepth);
 
-        const itemSize = ITEM_MARKER_SIZE * iconScale;
-        const itemHalf = itemSize / 2;
-        const itemFontPx = Math.round(10 * iconScale);
-        const tilted = is3D(this.camera);
 
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        for (const d of drawables) {
-            if (d.kind === 'i') {
-                this.drawSingleMapItem(ctx, time, d.item, d.style,
-                                  itemSize, itemHalf, itemFontPx, d.pos);
-            } else {
-                // Floor anchor stem under the symbol — tilted views only (at
-                // top-down it projects to a point).
-                if (tilted) {
-                    this.drawPlayerFloorStem(ctx, d.name, d.data, d.symbolInfo, d.pos);
-                }
-                // Optional view/velocity arrows (work at any tilt — xy shows even
-                // top-down). Drawn under the symbol so the letter stays legible.
-                if (this.state.showViewArrows || this.state.showVelArrows) {
-                    this.drawPlayerArrows(ctx, d.data, d.symbolInfo);
-                }
-                this.drawSinglePlayer(ctx, d.data, d.symbolInfo,
-                                 iconScale, zRange, zSpan, d.pos);
-            }
-        }
-
-        ctx.globalAlpha = 1.0;
-        ctx.restore();
-    }
-
-    drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan, pos) {
-        // Per-player z-based size scale: players near the top of the map
-        // (98th percentile z) render 25% larger than those near the bottom
-        // (2nd percentile), linearly interpolated. Applied on top of the
-        // zoom-driven iconScale.
-        let zScale = 1;
-        if (zSpan > 0) {
-            let t = ((data.z || 0) - zRange.lo) / zSpan;
-            if (t < 0) t = 0;
-            if (t > 1) t = 1;
-            zScale = 1 + 0.25 * t;
-        }
-        const totalScale = iconScale * zScale;
-        const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
-        const orbitRadius = 14 * totalScale;
-        const badgeRadius = 5 * totalScale;
-
-        const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
-        drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
-
-        const badges = this.getActiveBadges(data);
-        if (badges.length > 0) {
-            drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
-        }
-    }
-
-    drawSingleMapItem(ctx, time, item, style, size, half, fontPx, pos) {
-        const up = this.isItemUp(item, time);
-        ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
-
-        const x = Math.round(pos.x - half);
-        const y = Math.round(pos.y - half);
-
-        ctx.fillStyle = style.fill;
-        ctx.fillRect(x, y, size, size);
-
-        if (style.outline) {
-            ctx.strokeStyle = style.outline;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-        }
-
-        if (style.label) {
-            ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
-            ctx.fillStyle = style.textColor || style.outline || '#fff';
-            ctx.fillText(style.label, pos.x, pos.y + 1);
-        }
-        ctx.globalAlpha = 1.0;
-    }
-
-    drawMapEntities(ctx) {
-        const entities = this.state.mapEntities;
-        if (!entities || entities.length === 0) return;
-        const f = this.state.entityFilters;
-        const iconScale = this.iconScale();
-        const size = ITEM_MARKER_SIZE * iconScale;
-        const half = size / 2;
-        const fontPx = Math.round(10 * iconScale);
-
-        // Connection arrows first, beneath the markers.
-        if (f.teleporter && this.state.teleportArrows.length > 0) {
-            ctx.save();
-            ctx.strokeStyle = TELEPORT_COLOR;
-            ctx.fillStyle = TELEPORT_COLOR;
-            ctx.globalAlpha = 0.55;
-            ctx.lineWidth = Math.max(1, 1.5 * iconScale);
-            for (const a of this.state.teleportArrows) {
-                const s = this.toCanvasNew(a.sx, a.sy, a.sz);
-                const d = this.toCanvasNew(a.dx, a.dy, a.dz);
-                drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
-            }
-            ctx.restore();
-        }
-
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // Farther-from-camera first so nearer markers draw on top (degenerates
-        // to lower-decks-first at top-down).
-        const sorted = entities
-            .map(e => ({ e, pos: this.toCanvasNew(e.x, e.y, e.z) }))
-            .sort((a, b) => a.pos.depth - b.pos.depth);
-        for (const { e, pos } of sorted) {
-            if (!f[this.entityCategory(e)]) continue;
-            const style = e.type === 'item' ? LEARN_ITEM_STYLES[e.kind] : STRUCTURAL_STYLES[e.type];
-            if (style) this.drawEntityMarker(ctx, e, style, size, half, fontPx, pos);
-        }
-        ctx.restore();
-    }
-
-    drawEntityMarker(ctx, e, style, size, half, fontPx, pos) {
-        if (style.circle) {
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, half, 0, Math.PI * 2);
-            ctx.fillStyle = style.fill;
-            ctx.fill();
-            if (style.outline) { ctx.strokeStyle = style.outline; ctx.lineWidth = 1.5; ctx.stroke(); }
-        } else {
-            const x = Math.round(pos.x - half);
-            const y = Math.round(pos.y - half);
-            ctx.fillStyle = style.fill;
-            ctx.fillRect(x, y, size, size);
-            if (style.outline) {
-                ctx.strokeStyle = style.outline;
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-            }
-        }
-        if (style.label) {
-            ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
-            ctx.fillStyle = style.textColor || style.outline || '#fff';
-            ctx.fillText(style.label, pos.x, pos.y + 1);
-        }
-    }
 
     // buildTeleportArrows pairs each entrance (teleportSrc.target) with its exit
     // (teleportDst.targetName), storing world-coord endpoints for the arrows.
@@ -1665,61 +1294,7 @@ export class MvdMap {
         return e.type; // 'spawn' | 'button' | 'door'
     }
 
-    // drawPlayerArrows draws the enabled arrows for one player. Velocity uses the
-    // team colour (it's that player's motion); view uses a neutral light tone so
-    // the two are distinguishable when both are on.
-    drawPlayerArrows(ctx, data, symbolInfo) {
-        const ox = data.x, oy = data.y, oz = data.z;
-        if (this.state.showVelArrows && typeof data.vx === 'number') {
-            const speed = Math.hypot(data.vx, data.vy, data.vz);
-            if (speed > VEL_ARROW_MIN_SPEED) {
-                const s = 1 / VEL_UNITS_PER_MAP_UNIT;
-                const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
-                drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
-                                       hexToRgba(teamHex, 0.9), 3.5, this._toCanvasNew);
-            }
-        }
-        if (this.state.showViewArrows && typeof data.vya === 'number') {
-            const yaw = data.vya * ANGLE16_TO_RAD;
-            const pitch = (data.vp || 0) * ANGLE16_TO_RAD;
-            const cp = Math.cos(pitch);
-            // Quake forward vector: +pitch looks down, so z = -sin(pitch).
-            drawWorldArrow(ctx, ox, oy, oz,
-                                   cp * Math.cos(yaw) * VIEW_ARROW_LEN,
-                                   cp * Math.sin(yaw) * VIEW_ARROW_LEN,
-                                   -Math.sin(pitch) * VIEW_ARROW_LEN,
-                                   VIEW_ARROW_COLOR, 3, this._toCanvasNew);
-        }
-    }
 
-    drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
-        const z = data.z || 0;
-        // Prefer the per-sample computed floor height H (data.fh): the floor
-        // surface is z - 24 - H (H is measured from the bottom of the player's
-        // bounding box, which sits 24 below the origin). H is accurate on lifts
-        // (the floor pass stands players on movers) and makes the stem a direct
-        // visual readout of H. Fall back to scanning the static floor geometry
-        // when H is unavailable (no BSP) or NoFloor (over a void).
-        let bottomZ;
-        if (typeof data.fh === 'number') {
-            bottomZ = z - PLAYER_ORIGIN_ABOVE_FLOOR - data.fh;
-        } else {
-            const floorZ = this.playerFloorZ(name, data.x, data.y, z);
-            bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
-        }
-        const bot = this.toCanvasNew(data.x, data.y, bottomZ);
-        const teamHex = this.teamColors[symbolInfo.teamIdx] || this.teamColors[0];
-        ctx.strokeStyle = hexToRgba(teamHex, 0.55);
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        ctx.lineTo(bot.x, bot.y);
-        ctx.stroke();
-        ctx.fillStyle = hexToRgba(teamHex, 0.7);
-        ctx.beginPath();
-        ctx.arc(bot.x, bot.y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
 
     getActiveBadges(data) {
         const badges = [];
@@ -1890,48 +1465,7 @@ export class MvdMap {
         return out;
     }
 
-    // drawOccupiedLabels: the bold label pass — drawn over the dimmer
-    // prerendered label so the occupied region's name pops. Text stays on
-    // the 2D layer for now (the sprite/atlas step will absorb it).
-    drawOccupiedLabels(ctx, names) {
-        const groupsByName = this.state.locationGroupByName;
-        if (!groupsByName || !names || names.length === 0) return;
-        const boldPx = Math.round(12 * this.iconScale());
-        ctx.font = `bold ${boldPx}px monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        for (const name of names) {
-            const group = groupsByName[name];
-            if (!group) continue;
-            const pos = this.toCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-            // Soft shadow so the label stays legible against any underlying tint.
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-            ctx.fillText(group.name, pos.x + 1, pos.y + 1);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            ctx.fillText(group.name, pos.x, pos.y);
-        }
-    }
 
-    // Highlight loc regions that contain at least one player (2D fallback
-    // path; the GL path draws the fills and outlines inside the world pass).
-    drawOccupiedRegionsOverlay(ctx, playerData) {
-        const ov = this.computeOccupiedOverlay(playerData);
-        if (!ov) return;
-
-        // Colour-fill pass: tint each occupied region by the team(s) present
-        // so the active area stands out against the otherwise-neutral floor.
-        // One translucent path per region (single fill → no internal seams).
-        for (const { group, tint } of ov.groups) {
-            drawTriangleListFill(ctx, group.tris, tint, this._toCanvas);
-        }
-
-        // Brighter outline pass.
-        for (const { group } of ov.groups) {
-            drawRegionOutline(ctx, group, this._toCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
-        }
-
-        this.drawOccupiedLabels(ctx, ov.names);
-    }
 
     // computeControlFills: the region-control overlay as data — one entry
     // per group with geometry, in draw order. Shared by both backends.
@@ -1989,186 +1523,9 @@ export class MvdMap {
         return fills;
     }
 
-    // Draw control overlay for regions based on current control state (2D
-    // fallback path).
-    drawRegionControlOverlay(ctx, controlStates) {
-        const fills = this.computeControlFills(controlStates);
-        if (!fills) return;
-        for (const { group, tint } of fills) {
-            fillRegion(ctx, group, tint, this._toCanvasNew);
-        }
-    }
 
-    // drawVisLines draws a line between every player pair whose byPair intervals
-    // currently cover the playhead, styled per `style` (width + mutual/one-way
-    // colours). Endpoints sit at eye height (origin + 22) for visual honesty.
-    // White = mutual; red/blue = one-way.
-    drawVisLines(ctx, byPair, time, playerData, style) {
-        if (!byPair || !playerData) return;
-        const tMs = time * 1000;
-        const names = Object.keys(playerData);
-        ctx.save();
-        ctx.lineWidth = style.width;
-        for (let i = 0; i < names.length; i++) {
-            const a = names[i], pa = playerData[a];
-            if (!pa || typeof pa.x !== 'number') continue;
-            for (let j = i + 1; j < names.length; j++) {
-                const b = names[j], pb = playerData[b];
-                if (!pb || typeof pb.x !== 'number') continue;
-                const aSeesB = losCovers(byPair[a] && byPair[a][b], tMs);
-                const bSeesA = losCovers(byPair[b] && byPair[b][a], tMs);
-                if (!aSeesB && !bSeesA) continue;
-                const ea = this.toCanvasNew(pa.x, pa.y, pa.z + 22);
-                const eb = this.toCanvasNew(pb.x, pb.y, pb.z + 22);
-                ctx.strokeStyle = (aSeesB && bSeesA) ? style.mutual
-                    : aSeesB ? style.first : style.second;
-                ctx.beginPath();
-                ctx.moveTo(ea.x, ea.y);
-                ctx.lineTo(eb.x, eb.y);
-                ctx.stroke();
-            }
-        }
-        ctx.restore();
-    }
 
-    // drawLosLines renders the PVS overlay (thin, faint — potential visibility)
-    // underneath the LOS overlay (solid — actual sightline), each gated by its
-    // own toggle. PVS first so LOS lines draw on top. No-op unless data is
-    // present (BSP-backed maps only).
-    drawLosLines(ctx, time, playerData) {
-        const s = this.state;
-        if (s.showPvs) this.drawVisLines(ctx, s.pvsByPair, time, playerData, PVS_STYLE);
-        if (s.showLos) this.drawVisLines(ctx, s.losByPair, time, playerData, LOS_STYLE);
-    }
 
-    drawTracks(ctx, time) {
-        const s = this.state;
-        const trailDuration = s.trailDuration;
-
-        for (const [name, points] of Object.entries(s.fullTrails)) {
-            if (!s.enabledPlayers[name]) continue;
-            if (points.length < 2) continue;
-
-            // If current time is before trail start, pull start back so trail grows from here
-            if (time < (s.trailStartTimes[name] || 0)) {
-                s.trailStartTimes[name] = time;
-            }
-
-            // Find the end index: last point at or before current time
-            const endIdx = trailIndexAtTime(points, time);
-            if (endIdx < 1) continue;
-
-            // Find start: trail window starts at max(time - trailDuration, trailStartTime)
-            const trailStart = Math.max(time - trailDuration, s.trailStartTimes[name] || 0);
-            let startIdx = trailIndexAtTime(points, trailStart);
-            if (startIdx < 0) startIdx = 0;
-
-            if (endIdx - startIdx < 1) continue;
-
-            // Pre-convert the visible window of world-space points into canvas
-            // pixels at the current pan / zoom so the inner draw loop stays
-            // allocation-free and the scratch projection point isn't clobbered
-            // between consecutive reads.
-            const cpts = new Array(endIdx - startIdx + 1);
-            for (let i = startIdx; i <= endIdx; i++) {
-                const pt = points[i];
-                const c = this.toCanvasNew(pt.wx, pt.wy, pt.wz);
-                cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
-            }
-
-            const teamHex = this.teamColors[points[0].teamIdx] || this.teamColors[0];
-            const solidColor = hexToRgba(teamHex, 0.4);
-            const dashColor = hexToRgba(teamHex, 0.2);
-            const markerColor = hexToRgba(teamHex, 0.8);
-
-            // Collect death/spawn markers to draw after lines
-            const markers = [];
-
-            let inDash = false;
-            let afterDeath = false; // suppress line from death to next spawn
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = solidColor;
-            ctx.setLineDash([]);
-            ctx.beginPath();
-            ctx.moveTo(cpts[0].x, cpts[0].y);
-
-            if (cpts[0].spawn) markers.push({ x: cpts[0].x, y: cpts[0].y, type: 'spawn' });
-
-            for (let i = 1; i < cpts.length; i++) {
-                const pt = cpts[i];
-
-                if (pt.spawn) {
-                    // Spawn: start a new line segment (gap from death)
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.setLineDash([]);
-                    ctx.strokeStyle = solidColor;
-                    inDash = false;
-                    afterDeath = false;
-                    ctx.moveTo(pt.x, pt.y);
-                    markers.push({ x: pt.x, y: pt.y, type: 'spawn' });
-                    continue;
-                }
-
-                if (pt.death) {
-                    // Death: draw line to death point, then mark it
-                    ctx.lineTo(pt.x, pt.y);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    afterDeath = true;
-                    markers.push({ x: pt.x, y: pt.y, type: 'death' });
-                    continue;
-                }
-
-                if (afterDeath) {
-                    // Between death and spawn — don't draw
-                    ctx.moveTo(pt.x, pt.y);
-                    continue;
-                }
-
-                const needDash = !!pt.tp;
-                if (needDash !== inDash) {
-                    ctx.stroke();
-                    ctx.beginPath();
-                    const prev = cpts[i - 1];
-                    ctx.moveTo(prev.x, prev.y);
-                    if (needDash) {
-                        ctx.setLineDash([4, 6]);
-                        ctx.strokeStyle = dashColor;
-                    } else {
-                        ctx.setLineDash([]);
-                        ctx.strokeStyle = solidColor;
-                    }
-                    inDash = needDash;
-                }
-                ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Draw death (✕) and spawn (●) markers on top
-            ctx.fillStyle = markerColor;
-            ctx.strokeStyle = markerColor;
-            ctx.lineWidth = 2;
-            for (const m of markers) {
-                if (m.type === 'death') {
-                    // Draw ✕
-                    const sz = 5;
-                    ctx.beginPath();
-                    ctx.moveTo(m.x - sz, m.y - sz);
-                    ctx.lineTo(m.x + sz, m.y + sz);
-                    ctx.moveTo(m.x + sz, m.y - sz);
-                    ctx.lineTo(m.x - sz, m.y + sz);
-                    ctx.stroke();
-                } else {
-                    // Draw ●
-                    ctx.beginPath();
-                    ctx.arc(m.x, m.y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-    }
 
     // ─── Hit testing ────────────────────────────────────────────────────────
 
@@ -2577,79 +1934,16 @@ export class MvdMap {
         // Draw the location underlay (backdrop + per-loc regions + outlines +
         // labels). Fresh each frame so it follows pan / zoom precisely and stays
         // crisp at any zoom level.
-        const usedGL = this.drawWorld(ctx);
-
-        // Learn-map mode: static entity study view — keep the floor/loc base,
-        // draw the designed entity layout, and skip all player/time-based layers.
-        if (s.learnMode) {
-            if (!usedGL) this.drawMapEntities(ctx);
-            return;
-        }
-
-        if (!usedGL) {
-            // Draw region control overlay (colored by controlling team)
-            if (s.controlRegions && s.regionToGroups) {
-                const controlStates = this.regionControlAt(time);
-                if (controlStates) {
-                    this.drawRegionControlOverlay(ctx, controlStates);
-                }
-            }
-
-            // Highlight regions that currently contain at least one player so
-            // the viewer can tell which loc each symbol belongs to without
-            // squinting.
-            if (playerData) {
-                this.drawOccupiedRegionsOverlay(ctx, playerData);
-            }
-        }
-
-        // Trails and the LOS/PVS sightlines: the GL world pass drew them
-        // already (as quad-lines + marker sprites); the 2D versions run only
-        // on the fallback path.
-        if (!usedGL) {
-            this.drawTracks(ctx, time);
-            this.drawLosLines(ctx, time, playerData);
-        }
-
-        // The actor composition and the fading death/drop markers: the GL
-        // pass drew them already (see _glActors); the 2D versions run only
-        // on the fallback path.
-        if (usedGL) return;
-
-        // Z-depth pass for items + players: overlapping players occlude by z
-        // (higher deck on top), and an item whose z is clearly higher than a
-        // player also draws on top. Items carry a downward sort bias
-        // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
-        // them — the common case — but win when they sit a real floor above.
-        this.drawItemsAndPlayersZSorted(ctx, time, playerData);
-
-        // Recent-death markers — drawn last so the X sits on top of everything
-        // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
-        // Linear scan is fine: a long match has on the order of 100-200 deaths
-        // and this loop runs at most once per bucket tick.
-        const deaths = s.deathEvents;
-        if (deaths && deaths.length > 0) {
-            for (const e of deaths) {
-                const dt = time - e.t;
-                if (dt < 0 || dt > DEATH_X_DURATION) continue;
-                const alpha = 1 - dt / DEATH_X_DURATION;
-                const pos = this.toCanvasNew(e.wx, e.wy, e.wz);
-                drawDeathX(ctx, pos.x, pos.y, hexToRgb(this.teamColors[e.teamIdx] || '#ff5050'), alpha);
-            }
-        }
-
-        // Drop markers — superimposed on the death X at the same world
-        // position (KTX drops the backpack at the dying player's origin).
-        // Fades on the same timeline as the X.
-        const drops = s.dropEvents;
-        if (drops && drops.length > 0) {
-            for (const e of drops) {
-                const dt = time - e.t;
-                if (dt < 0 || dt > DEATH_X_DURATION) continue;
-                const alpha = 1 - dt / DEATH_X_DURATION;
-                const pos = this.toCanvasNew(e.wx, e.wy, e.wz);
-                drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
-            }
+        // drawWorld renders the entire scene through the WebGL backend —
+        // world, overlays, trails, actors, labels. False means WebGL is
+        // unavailable (no context, or lost): show the notice instead of a
+        // silently empty map.
+        if (!this.drawWorld(ctx)) {
+            ctx.fillStyle = '#8892b0';
+            ctx.font = '14px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('WebGL2 is required for the map view', cssW / 2, cssH / 2);
         }
     }
 

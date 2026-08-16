@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {
     parseColor, makeWorldTransform, entryDepth,
     buildEntryVertices, sortedIndices, buildLiquidFaces,
-    isSoftwareRenderer, GlWorld, DEPTH_SCALE,
+    GlWorld, DEPTH_SCALE,
 } from '../src/glworld.js';
 import { newCamera, refreshTrig, fit, project } from '../src/camera.js';
 
@@ -91,20 +91,11 @@ test('buildLiquidFaces quantises the shade exactly like drawLiquidVolume', () =>
     assert.equal(faces[1].fill, `rgba(${Math.round(255 * 0.5)}, ${Math.round(120 * 0.5)}, ${Math.round(40 * 0.5)}, 0.15)`);
 });
 
-test('a software rasteriser is refused unless explicitly allowed', () => {
-    assert.equal(isSoftwareRenderer('Google SwiftShader'), true);
-    assert.equal(isSoftwareRenderer('llvmpipe (LLVM 17.0.6, 256 bits)'), true);
-    assert.equal(isSoftwareRenderer('ANGLE (NVIDIA GeForce RTX 4070)'), false);
-    assert.equal(isSoftwareRenderer(''), false);
-    // create() consults the renderer string before building the program, so
-    // a stub context with only the identity APIs is enough to prove the gate.
-    const softGl = {
-        getExtension: (name) => name === 'WEBGL_debug_renderer_info'
-            ? { UNMASKED_RENDERER_WEBGL: 0x9246 } : null,
-        getParameter: () => 'Google SwiftShader',
-    };
-    const canvas = { getContext: (kind) => (kind === 'webgl2' ? softGl : null) };
-    assert.equal(GlWorld.create(canvas), null, 'software GL → 2D fallback');
-    assert.equal(GlWorld.create(canvas, { allowSoftware: true }) === null, true,
-        'allowSoftware proceeds past the gate (and then fails on the stub program build)');
+test('create() returns null on a missing or broken context, never throws', () => {
+    assert.equal(GlWorld.create({ getContext: () => null }), null, 'no webgl2');
+    // A junk context makes the program build throw; create() catches it.
+    const junk = { getExtension: () => null, getParameter: () => undefined,
+                   createShader: () => ({}), shaderSource: () => {}, compileShader: () => {},
+                   getShaderParameter: () => false, getShaderInfoLog: () => 'nope' };
+    assert.equal(GlWorld.create({ getContext: () => junk }), null, 'broken context');
 });

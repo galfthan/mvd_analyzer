@@ -137,20 +137,6 @@ def main():
         "fallback path used by maps with no pre-generated BSP geometry",
     )
     ap.add_argument(
-        "--no-webgl",
-        action="store_true",
-        help="force the canvas-2D world backend (?gl=0). The byte-exact "
-        "before/after comparison anchors on this path; WebGL output is only "
-        "byte-stable against a same-machine, same-driver baseline",
-    )
-    ap.add_argument(
-        "--force-webgl",
-        action="store_true",
-        help="force the WebGL backend even on a software rasteriser (?gl=1) "
-        "— on a GPU-less box the app otherwise auto-prefers the 2D painter, "
-        "so GL shots need this to actually exercise the GL path",
-    )
-    ap.add_argument(
         "--times",
         default="60,300,600",
         help="comma-separated match-relative SECONDS to park the clock at "
@@ -171,8 +157,7 @@ def main():
             page.on("console", lambda m: m.type == "error" and print("[console]", m.text))
             if args.no_geometry:
                 page.route("**/maps/*.json", lambda route: route.abort())
-            gl = "&gl=0" if args.no_webgl else ("&gl=1" if args.force_webgl else "")
-            page.goto(f"http://127.0.0.1:{port}/index.html?tab=map{gl}")
+            page.goto(f"http://127.0.0.1:{port}/index.html?tab=map")
             page.wait_for_selector("#file-input", state="attached")
             # The app rejects a file dropped before the WASM module is live
             # ("Analyzer is still loading"), so gate on the worker's ready flag.

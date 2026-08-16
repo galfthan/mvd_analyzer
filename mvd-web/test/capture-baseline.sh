@@ -13,9 +13,10 @@ cd "$(dirname "$0")/../.."
 
 OUT="${1:-/tmp/mapshots/$(date +%s)}"
 CACHE=mvd-analytics/testdata/cache
-# MAPSHOT_FLAGS passes extra mapshot.py flags through — most usefully
-# --no-webgl, which anchors the byte-exact comparison on the 2D backend
-# (WebGL shots are only comparable against a same-machine GL baseline).
+# MAPSHOT_FLAGS passes extra mapshot.py flags through. The map renders
+# through WebGL only; shots are byte-comparable against a baseline captured
+# on the same machine + driver (SwiftShader on GPU-less boxes is
+# deterministic too).
 SHOT="python3 mvd-web/test/mapshot.py ${MAPSHOT_FLAGS:-}"
 
 mkdir -p "$OUT"

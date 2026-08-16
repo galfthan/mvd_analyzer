@@ -150,25 +150,6 @@ export function sortedIndices(w, centroids) {
     return idx;
 }
 
-// rendererString: the context's renderer identity. Browsers expose the
-// unmasked GPU string through WEBGL_debug_renderer_info; fall back to the
-// plain RENDERER when the extension is absent.
-export function rendererString(gl) {
-    try {
-        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-        if (dbg) return String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '');
-        return String(gl.getParameter(gl.RENDERER) || '');
-    } catch (e) {
-        return '';
-    }
-}
-
-// isSoftwareRenderer: the known software-rasteriser identities Chrome and
-// Mesa report on machines without a usable GPU.
-export function isSoftwareRenderer(renderer) {
-    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer);
-}
-
 const VERT_SRC = `#version 300 es
 uniform vec4 uRowX;
 uniform vec4 uRowY;
@@ -380,10 +361,11 @@ class GlBatch {
 // camera with two uniform vec4s.
 export class GlWorld {
     // `canvas` is the offscreen backing canvas the caller created. Returns a
-    // working renderer or null when WebGL2 is unavailable, the context is a
-    // software rasteriser (unless `allowSoftware`), or the program fails to
-    // build — the caller falls back to the 2D path in every case.
-    static create(canvas, { allowSoftware = false } = {}) {
+    // working renderer or null when WebGL2 is unavailable or the program
+    // fails to build — the caller shows the WebGL-required notice then.
+    // Software rasterisers (SwiftShader/llvmpipe) are accepted: they are the
+    // fallback now that the 2D scene path is gone.
+    static create(canvas) {
         try {
             const gl = canvas.getContext('webgl2', {
                 alpha: true,
@@ -393,11 +375,6 @@ export class GlWorld {
                 preserveDrawingBuffer: false,
             });
             if (!gl) return null;
-            // A GPU-less machine gets SwiftShader/llvmpipe, and software GL
-            // is strictly slower than the canvas-2D painter it would replace
-            // (measured: ~45 ms vs ~32 ms per rotated dm3 frame). Prefer 2D
-            // there; `allowSoftware` is the tester's override.
-            if (!allowSoftware && isSoftwareRenderer(rendererString(gl))) return null;
             return new GlWorld(canvas, gl);
         } catch (e) {
             return null;
@@ -921,6 +898,14 @@ export class GlWorld {
         gl.uniform4fv(this.uRowZ, t.rz);
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
+
+        // Loc-blob underlay (maps with no floor model): translucent fills
+        // under everything, like the old flat view.
+        if (dyn.baseFills && dyn.baseFills.length > 0) {
+            gl.disable(gl.DEPTH_TEST);
+            gl.enable(gl.BLEND);
+            this._drawFills(dyn.baseFills);
+        }
 
         gl.enable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);

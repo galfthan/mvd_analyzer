@@ -5,6 +5,23 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (gl-map) — the map renders entirely through WebGL2
+
+No schema change; web UI only. Supersedes the hybrid described in the entry
+below: the canvas-2D scene painter is gone, and the whole map — floors
+(depth-buffered, no painter sort), liquids, movers, region tints/outlines,
+trails and sightlines (with shader-drawn teleport dashes), player symbols,
+badges, item markers, death/drop markers, the learn-mode entity view, and
+every label (atlas-baked billboards) — draws in one WebGL2 pass. Rotating,
+tilting, zooming and panning cost uniform updates instead of
+re-rasterising the world; liquids are now correctly occluded by floors
+above them, and movers read as solid depth-tested boxes instead of faint
+translucent silhouettes. The depth buffer this leaves behind is the
+foundation for the planned effects (fog, lighting, occlusion view mode, 3D
+player models, first-person camera). A machine without WebGL2 sees a
+"WebGL2 required" notice on the map tab; software rasterisers
+(SwiftShader/llvmpipe) still work, just slower. `?gl=0`/`?gl=1` are gone.
+
 ## unreleased (map-view-extract) — reusable map component + WebGL world
 
 No schema change; web UI only, in two parts.

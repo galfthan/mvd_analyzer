@@ -111,3 +111,14 @@ player models, fog, occlusion, better lighting, first-person view.
   ARROWHEAD_PX import threw inside the GL frame build and blacked every
   arrow/learn shot — now covered by a node test that exercises every actor
   sub-path headlessly.
+- **Step 6 landed — the 2D scene path is gone.** drawCachedWorld,
+  renderSolidEntries + the seam hack, drawLiquidVolume, the 2D
+  actor/overlay/trail/label draws, the software-renderer gate, ?gl=0/?gl=1
+  and the harness --no-webgl/--force-webgl flags are all deleted. draw.js
+  keeps only the DOM-icon rasterisers app.js bakes sidebar player icons
+  with. Loc-blob (no-geometry) maps render through the same GL passes.
+  No WebGL2 → a "WebGL2 required" notice on the map canvas. Verified: only
+  sub-pixel label diffs vs step 5 (atlas pack order shifted; 0.000% strong
+  pixels), nogeom look unchanged. NOTE: label positions can shift by a
+  texel when the atlas repacks across code changes — same-build captures
+  stay byte-deterministic, which is what the harness compares.
