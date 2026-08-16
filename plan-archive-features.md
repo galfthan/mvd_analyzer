@@ -106,8 +106,9 @@ building.
   looks like an omission (simplification-agent finding); eval-verify.
 - **`ktxver` feature-gating helper** — parse `ktxver` (+fork handling)
   once, use it where behavior is generation-dependent.
-- **REST endpoint for `streams.pointEffects`** — when a UI consumer
-  exists (map hit-marker overlay).
+- ~~REST endpoint for `streams.pointEffects`~~ — SHIPPED in PR #132
+  (`GET /v1/demos/{id}/streams/point-effects` + `getPointEffects` MCP
+  tool). The map hit-marker overlay consuming it is still unbuilt.
 - **"no match detected" marker** — 2% of the archive (TF/CTF/race
   content) yields empty streams with no way for a consumer to tell
   "no match here" from "parse failed"; add an explicit marker.
