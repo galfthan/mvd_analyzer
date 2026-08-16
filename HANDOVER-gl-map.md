@@ -5,134 +5,142 @@
 > builds on). Keep what outlives the branch in `mvd-map-view/README.md` or
 > commit messages.
 
-Branch: `gl-map`, stacked on `map-view-extract`. Goal, in the owner's words:
-remove the old 2D code and have pure GL — enabling advanced effects like 3D
-player models, fog, occlusion, better lighting, first-person view.
+Branch: `gl-map`, stacked on `map-view-extract`, both pushed to origin.
+Goal, in the owner's words: remove the old 2D code and have pure GL —
+enabling advanced effects like 3D player models, fog, occlusion, better
+lighting, first-person view. **The conversion is DONE** (steps 1–6 below);
+the effects phase is deliberately parked for joint design with the owner.
 
-## Ground rules for this phase (different from the extraction!)
+---
 
-- **Pixel-identical parity is NOT required** (owner's call). The extraction
-  branch's byte-exact gates proved the component move; this phase
-  deliberately changes rendering. Verification is: `make test` green, a
-  shot capture per step, a quantified diff against the previous step's
-  shots (to catch catastrophes — a wrong matrix reads as 100% strong-diff
-  pixels, an intended change as a few percent), and eyeballing
-  representative shots.
-- **Shots are GL-vs-GL on one machine.** This dev box has no GPU: SwiftShader
-  renders WebGL deterministically, but the app's software-renderer gate
-  prefers 2D here — capture with `MAPSHOT_FLAGS=--force-webgl` until the
-  gate is removed (step 6).
-- **"Pure GL" still bakes text/sprites through a 2D context** — as a texture
-  atlas rasteriser only, never as a render path. That is how engines do
-  text; the 2D *drawing* of the scene is what dies.
-- The loader invariant, the single-canvas contract and the push-only
-  resize/data API from the extraction phase all still hold.
+## Fresh session: read this first
 
-## The plan, in step order (one gated commit each)
+**State of the world.** The map scene renders entirely through WebGL2.
+`mvd-map-view/src/glworld.js` is the renderer (five programs: world
+triangles with fog, shaped point sprites, screen-extruded quad-lines with
+shader dashes, textured label billboards, screen-space arrowhead
+triangles); `MvdMap._glDynamic`/`_glActors` in `src/map.js` build the
+per-frame command data; `src/glatlas.js` bakes label strings to a texture
+page. The old canvas-2D scene painter is deleted (−1,297 lines in the
+step-6 commit). `draw.js` survives only as DOM-icon rasterisers for the
+host's sidebar. No WebGL2 → a notice on the map canvas; SwiftShader boxes
+run GL (slower, works). `make test` green: Go suite + 118 node tests.
 
-1. **Depth-buffered opaque world.** Floors render opaque with a real depth
-   buffer (the painter sort dies on the GL path); focus-faded regions and
-   liquids become blended passes with depth-test-read. This is the
-   foundation every listed effect stands on. Visual delta: the 5%
-   see-through floors had (alpha 0.95) goes away — invisible in practice.
-2. **Movers, projectiles, beams in GL.** Movers as opaque depth-tested
-   meshes (per-mover translation uniform — the silhouette/stencil trick the
-   blended version would need is unnecessary once they're opaque).
-   Projectiles as round point-quads; beams on the quad-line primitive
-   (screen-space extrusion in the vertex shader; dashes are a fract()
-   pattern when trails need them).
-3. **Region tints (occupied / control) + region outlines in GL.**
-4. **Trails + LOS/PVS lines in GL** (quad-lines; dashed teleport segments
-   via the shader pattern).
-5. **Sprites + text atlas**: item markers, player symbols, badges, death
-   X / drop D, loc labels as textured billboards from a canvas-baked atlas.
-6. **Delete the 2D scene path.** drawCachedWorld + renderSolidEntries (and
-   its seam hack) + drawLiquidVolume + the world half of draw.js go; the
-   software-renderer gate goes (SwiftShader is the fallback now — it IS
-   slower than the old 2D painter on GPU-less machines, accepted cost of
-   one render path); `?gl=0` goes; harness anchor flips to GL captures.
-   Loc-blob maps (no BSP geometry) render their translucent fills through
-   the same GL batches.
-7. **Effects phase** (each its own commit, mostly orthogonal):
-   - **Fog**: depth-based mix in the fragment shader, toggle + density knob.
-   - **Lighting**: per-face normals in the world vertex data + a directional
-     light uniform. Keep the default look close to today's flat tones (the
-     flat look was a deliberate design choice); lighting strength is a knob.
-   - **Occlusion view mode**: actors depth-tested against the world. OFF by
-     default — always-visible players are an analyzer feature, not a bug.
-     ON by default in first-person.
-   - **3D player models**: oriented low-poly models (team-coloured) driven
-     by the stream's position + vya/vp view angles, replacing/augmenting
-     the letter billboards in tilted views.
-   - **Perspective camera + first-person mode**: a projection-mode switch in
-     the camera (ortho stays for the map view), first-person following a
-     chosen player's eyes. **Owner's call: the world stays floors-only** —
-     first person moves through the existing floors/liquids/movers geometry,
-     no mapgen or corpus changes. (A full-mesh corpus could come later if
-     the floors-only view proves too sparse, but it is explicitly out of
-     scope now.)
+**Branch stack and merge order.** `main` → `map-view-extract` (component
+extraction, byte-parity-gated, PLUS the first hybrid GL backend) →
+`gl-map` (pure GL). Merge `map-view-extract` first or fold both into one
+PR; either way delete BOTH handover files at merge time. RELEASE_NOTES
+already carries entries for both branches ("unreleased (map-view-extract)"
+and "unreleased (gl-map)" — the latter supersedes the former's
+fallback/`?gl=0` description, which stopped being true on this branch).
 
-## Where things stand
+**This machine** (details in the session memory file
+`env-node-playwright-setup.md`): no sudo, no system node/pip, **no GPU**.
 
-- **Step 1 landed** — opaque depth-buffered floors (the GL floor sort is
-  gone); focus fade + liquids blend over with depth reads. Liquids are now
-  correctly occluded by floors above them (the painter version drew them
-  through). Verified: 0.00% strong-diff pixels vs the painter version in
-  sampled shots.
-- **Step 2 landed** — movers (opaque, depth-tested — reads clearly better
-  than the old translucent silhouette), projectile/nail dots as round point
-  sprites, LG beams on the screen-space quad-line primitive (which trails /
-  sightlines will reuse, dashes as a shader pattern). The 2D versions still
-  exist and run on the fallback path only. Worst strong-diff shot vs step 1:
-  0.031% of pixels (the dots/movers themselves).
-- **Step 3 landed** — region tints (control under occupancy) and all region
-  outlines render in the GL pass: per-group fill VBOs cached by tris
-  identity + restyled via a tint uniform, outlines as cached quad-line VBOs
-  (extrusion is in the shader, so the VBO is camera-free) restyled via
-  tint/width uniforms. The occupied bold labels are the only overlay piece
-  still 2D (text). Worst strong-diff vs step 2: 0.024%.
-- **Step 4 landed** — trails (with the death/spawn gap rules, teleport
-  dashes via the shader pattern, death-✕/spawn-dot marker sprites) and the
-  LOS/PVS sightlines collect into the GL line/point passes. The actor
-  z-order machinery for step 5 is in place: shaped point sprites
-  (disc/✕/ring/square/square-outline), a textured-billboard program fed by
-  a lazily-baked label atlas (glatlas.js), a screen-space triangle program
-  for arrowheads, and an ordered actor-batch dispatch in render(). Worst
-  strong-diff vs step 3: 0.024%.
-- **Step 5 landed** — the whole actor layer and every label render in GL:
-  the z-sorted items+players composition (squares/outlines/labels, circles/
-  letters/badges with screen-offset point sprites, floor stems, view/vel
-  arrows with screen-space triangle heads), the fading death-✕/drop-D
-  markers, loc labels + occupied bold labels (shadow via tint on one white
-  atlas entry), and the learn-mode entity view with teleport links. On the
-  GL path the 2D canvas now draws NOTHING per frame — the entire scene is
-  in the blit. Worst strong-diff vs step 4: 0.77% (the label-dense learn
-  view; atlas text vs per-frame canvas text). Found by the gate: a missing
-  ARROWHEAD_PX import threw inside the GL frame build and blacked every
-  arrow/learn shot — now covered by a node test that exercises every actor
-  sub-path headlessly.
-- **Step 6 landed — the 2D scene path is gone.** drawCachedWorld,
-  renderSolidEntries + the seam hack, drawLiquidVolume, the 2D
-  actor/overlay/trail/label draws, the software-renderer gate, ?gl=0/?gl=1
-  and the harness --no-webgl/--force-webgl flags are all deleted. draw.js
-  keeps only the DOM-icon rasterisers app.js bakes sidebar player icons
-  with. Loc-blob (no-geometry) maps render through the same GL passes.
-  No WebGL2 → a "WebGL2 required" notice on the map canvas. Verified: only
-  sub-pixel label diffs vs step 5 (atlas pack order shifted; 0.000% strong
-  pixels), nogeom look unchanged. NOTE: label positions can shift by a
-  texel when the atlas repacks across code changes — same-build captures
-  stay byte-deterministic, which is what the harness compares.
-- **Effects PoC (owner: review together before building on it).** Three
-  toggles landed as proof-of-concept, defaults all OFF (140/140 shots
-  identical to step 6 with them off): **Fog** (depth fog in the world
-  fragment shader, scaled to the map's world radius), **Light**
-  (directional Lambert baked into the floor vertex colours at strength
-  0.6 — 0 keeps the flat look exactly), **Occl** (overlays/actors
-  depth-test LEQUAL against the world, so floors hide what's behind them;
-  the analyzer default keeps everyone visible). Buttons sit after 3D in
-  the map toolbar. The remaining effects (3D player models, perspective /
-  first-person camera) are deliberately NOT started — next steps to be
-  designed together.
-- Harness hardening: mapshot.py now fails hard on any uncaught page error
-  — a thrown exception in the render path used to show up only as a
-  silently black screenshot.
+- Node 22: `export PATH=$HOME/.local/opt/node-v22.17.0-linux-x64/bin:$PATH`
+  (node 22.17 rejects `node --test <dir>/`; make test uses the glob form).
+- Playwright: `export PATH=$HOME/.local/opt/pwenv/bin:$PATH` so the
+  harness's `python3` resolves to the venv.
+- Chromium needs locally-extracted libs:
+  `apt-get download libnspr4 libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64
+  libxdamage1 libatspi2.0-0t64 libxres1 && dpkg -x` each into a dir, then
+  `export LD_LIBRARY_PATH=<dir>/usr/lib/x86_64-linux-gnu`. (The previous
+  session's extraction lived in its scratchpad — gone; re-extract.)
+- WebGL here is SwiftShader: deterministic, so shots byte-compare on this
+  box, but SLOWER than a GPU — never benchmark GL performance here and
+  conclude anything.
+
+**The verification loop** (post-step-6, one render path):
+
+```bash
+make test                                        # gofmt gate + Go + node
+make build
+mvd-web/test/capture-baseline.sh /tmp/shots/before   # BEFORE editing
+# ...edit...
+make build
+mvd-web/test/capture-baseline.sh /tmp/shots/after
+mvd-web/test/compare-shots.sh /tmp/shots/{before,after}
+```
+
+Byte-identical is only expected for refactors; for visual changes,
+quantify (percentage of pixels whose max channel delta exceeds ~60 — a
+wrong matrix reads as ~100%, an intended change as a few percent) and
+eyeball representative shots. Same machine + driver only.
+
+**Traps found the hard way on this branch:**
+
+- **A thrown exception anywhere in the GL frame build = a silently black
+  map** (the canvas is cleared before drawWorld). mapshot.py now exits
+  non-zero on any uncaught page error, and a node test
+  (`_glActors composes players, items, arrows...`) composes every actor
+  sub-path headlessly — extend that test when adding a sub-path, it has
+  already caught two real bugs (a missing import; mis-spliced uniforms).
+- **The label atlas shifts positions by a texel when its pack order
+  changes across code changes** (bake order = first-render order). Shots
+  stay byte-deterministic within a build; across builds expect a handful
+  of 0.000%-strong label diffs even for "no-op" changes.
+- Several harness shots (`*-i-orbit`, `211805-*-zoomed`, some
+  `i-wheelzoom`) are **legitimately near-black** — pre-existing camera
+  positions (edge-on orbit, zoom into empty space), identical since the
+  2D era. Don't chase them.
+- Python bulk-`str.replace` on the sources: check match counts. One
+  replace with two match sites put fog uniforms inside `_drawMovers` and
+  killed every frame (caught by the hardened harness).
+
+---
+
+## What landed (per-commit log)
+
+| Commit | Step |
+|---|---|
+| `2e88b4c` | **1+2** — opaque depth-buffered floors (GL floor sort deleted; z-buffer decides; liquids/focus-fade blend with depth reads — liquids now correctly occluded by floors, an intentional improvement) + movers (opaque, depth-tested, translation uniform), projectile/nail point sprites, LG beams on the quad-line program. Camera grew a clip-z row (`makeWorldTransform.rz`, pinned to `project().depth` by test) |
+| `26feb3e` | **3+4** — region tints (control under occupancy) as per-group VBOs cached by tris identity + tint uniform; all region outlines as cached camera-free quad-line VBOs; trails (death/spawn gaps, teleport dashes via fract() pattern, marker sprites) and LOS/PVS sightlines as GL data. Sprite/atlas/screen-tri machinery landed |
+| `1991be0` | **5** — the whole actor layer + every label in GL: z-sorted items+players as an ordered batch list (painter order preserved across primitive types), badges on screen-offset point sprites, stems, view/vel arrows with screen-space triangle heads, fading death-✕/drop-D, loc + occupied-bold labels (shadow = tint on one white atlas entry), learn-mode entity view with teleport links |
+| `29c0cbb` | **6** — 2D scene path deleted (bake, seam hack, all 2D layer draws, software gate, `?gl=0/1`, harness GL flags). Loc-blob maps go through the same GL passes (their groups carry no tris, so the labels-on-dark look is unchanged — that was always the nogeom appearance) |
+| `e209fc4` | **effects PoC** — see below |
+
+Worst intentional per-step visual delta: 0.77% strong-diff pixels (the
+label-dense learn view, atlas text vs canvas text); typical steps ~0.02%.
+
+## Effects PoC — REVIEW WITH OWNER BEFORE BUILDING ON IT
+
+Three toggles exist (buttons after "3D" in the map toolbar), all
+default-OFF; with them off the shot corpus is byte-identical to step 6:
+
+- **Fog** — depth fog in the world fragment shader (floors, movers,
+  liquids, tints), density scaled from the map's world radius
+  (`state.fog` 0..1).
+- **Light** — directional Lambert baked into floor vertex colours at
+  build time (`state.worldLight` 0..1; rebuilds the floor batch on
+  change; 0 reproduces the flat look bit-for-bit).
+- **Occl** — overlays/actors depth-test LEQUAL (read-only) against the
+  world (`state.occludeActors`); floors hide players/items/lines behind
+  them. Known nit: screen-space arrowhead triangles carry z=0, so they
+  can clip oddly in this mode — fix if the mode survives review.
+
+The owner said: *"Do not focus on adding new effects, that is part of
+next steps done together"* — so 3D player models and the perspective /
+first-person camera are NOT started. Design notes that must survive into
+that discussion:
+
+- **First/third person stays in the floors-only world** (owner's explicit
+  call, twice): no mapgen changes, no full-mesh corpus, no new geometry.
+- Perspective belongs in `camera.js` `project()` (plus a w-row in
+  `makeWorldTransform` and a real mat4 in the shaders): every layer
+  projects through that one seam, so a camera mode carries the whole
+  scene automatically.
+- Occlusion should default ON in first-person, OFF in the map view
+  (always-visible actors are an analyzer feature).
+
+## Also relevant
+
+- `HANDOVER-map-view.md` (on this stack) documents the extraction phase,
+  including two deliberately-deferred items that are NOT this branch's
+  business: the async/windowed FrameSource and formal data setters — both
+  wait for the MCP Apps viewer to drive their design.
+- The perf claim for GL on real GPUs is architectural (camera motion =
+  uniform update vs re-rasterising 2–25k triangles); it could not be
+  measured on this GPU-less box (SwiftShader GL benches ~45ms vs the old
+  2D ~32ms per rotated dm3 frame — that comparison is about THIS box,
+  nothing else). Owner should eyeball rotation smoothness on real
+  hardware.
