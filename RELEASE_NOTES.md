@@ -124,7 +124,12 @@ TE_EXPLOSION (the exact rocket/grenade detonation point, including
 point-blank rockets whose entity never broadcast) and TE_GUNSHOT (the
 wall-puff miss pattern). These are per-hit damage telemetry present on
 every demo generation back to original qwprogs — the wire evidence the
-damage reconstruction consumes next.
+damage reconstruction consumes next. mvd-api serves the stream at
+`GET /v1/demos/{id}/streams/point-effects` (fourth sibling of
+projectiles/beams/nails) with a code→name `types` legend and an optional
+`types=` name filter, mirrored as the `getPointEffects` MCP tool —
+detonation points for map effect overlays, blood telemetry for damage
+display.
 
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 

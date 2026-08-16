@@ -250,6 +250,17 @@ func addBoundedFamily(d *result.DamageResult) {
 // validated. The two records cover both shapes: an attributed player mark
 // (no spectator/label) and a labelled spectator mark. Assignment, not append,
 // so the two tests that share the cached golden can both call it.
+// addPointEffects installs a small point-effect stream: the golden demo was
+// pinned by the default (streams-off) registry, so the served Result never
+// carries one and the non-null half of the PointEffects schema — plus the
+// types legend and the types= filter — would go unvalidated.
+func addPointEffects(s *result.Streams) {
+	s.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100}, Type: []int32{3, 12}, Count: []int32{0, 4},
+		X: []float32{1, 2}, Y: []float32{3, 4}, Z: []float32{5, 6},
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -380,6 +391,12 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "projectiles", url: "/v1/demos/gameId:42/streams/projectiles", path: "/v1/demos/{id}/streams/projectiles", status: 200},
 		{name: "beams", url: "/v1/demos/gameId:42/streams/beams", path: "/v1/demos/{id}/streams/beams", status: 200},
 		{name: "nails", url: "/v1/demos/gameId:42/streams/nails", path: "/v1/demos/{id}/streams/nails", status: 200},
+		// mustContain pins the legend + columns; a null body would validate
+		// the schema without exercising the non-null half.
+		{name: "point-effects", url: "/v1/demos/gameId:42/streams/point-effects", path: "/v1/demos/{id}/streams/point-effects", status: 200,
+			mustContain: []string{`"3":"explosion"`, `"12":"blood"`, `"ty"`}},
+		{name: "point-effects-filtered", url: "/v1/demos/gameId:42/streams/point-effects?types=blood", path: "/v1/demos/{id}/streams/point-effects", status: 200,
+			mustContain: []string{`"3":"explosion"`, `"ty":[12]`}},
 		{name: "loc-trails", url: "/v1/demos/gameId:42/loc-trails?minDwellMs=500", path: "/v1/demos/{id}/loc-trails", status: 200},
 		{name: "loc-table", url: "/v1/demos/gameId:42/loc-table", path: "/v1/demos/{id}/loc-table", status: 200},
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
@@ -473,6 +490,8 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// Same reason for demo markers: no corpus demo has one, so the timeline
 	// artifact never exercised the demoMarkers half of its schema.
 	addDemoMarkers(res.TimelineAnalysis)
+	// Same reason for point effects: the golden was pinned streams-off.
+	addPointEffects(res.Streams)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the

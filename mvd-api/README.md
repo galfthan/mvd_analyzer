@@ -241,6 +241,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/streams/projectiles` | — | `{ "projectiles": ProjectileStreams\|null }` — rocket/grenade flights, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/beams` | — | `{ "beams": BeamStreams\|null }` — LG bolts, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/nails` | — | `{ "nails": ProjectileStreams\|null }` — ng/sng spike flights, from the always-full base parse |
+| GET | `/v1/demos/{id}/streams/point-effects` | `types` | `{ "types": legend, "pointEffects": PointEffectStreams\|null }` — temp-entity point effects (explosion / blood / lightningblood / …), from the always-full base parse |
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions` | `result.RegionControlResult` |

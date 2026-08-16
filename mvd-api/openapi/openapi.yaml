@@ -1233,6 +1233,51 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/streams/point-effects:
+    get:
+      operationId: getPointEffects
+      tags: [streams]
+      summary: Point-effect temp-entity stream
+      description: >
+        The point-effect temp-entity stream (schema v71): exact
+        rocket/grenade detonation points (`explosion`), hitscan damage
+        telemetry on players (`blood` — the wire evidence behind the
+        damage reconstruction), LG cell hits (`lightningblood`), wall
+        puffs (`gunshot`), teleporter sparkles (`teleport`) and the rest.
+        Body is `{"types": …, "pointEffects": …}` — `types` is the
+        code→name legend, `pointEffects` the columnar stream, null when
+        the demo carried none. The optional `types=` query narrows rows
+        to a CSV set of effect names (an unknown name is a 400 listing
+        the vocabulary). The count column's packaging varies per server
+        generation — see the PointEffectStreams schema note before
+        reading it as a damage magnitude.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
+        - name: types
+          in: query
+          required: false
+          schema: { type: string }
+          description: >
+            Comma-separated effect names to keep: spike, superspike,
+            gunshot, explosion, tarexplosion, wizspike, knightspike,
+            lavasplash, teleport, blood, lightningblood, or te<code> for
+            a code outside the named vocabulary. Case-insensitive.
+            Absent = every effect.
+      responses:
+        "200":
+          description: The stream.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PointEffects" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/loc-trails:
     get:
       operationId: getLocTrails
@@ -6082,6 +6127,74 @@ components:
         - ey
         - ez
       type: object
+    PointEffectStreams:
+      additionalProperties: false
+      description: >
+        Columnar point-effect temp-entity stream — parallel arrays indexed
+        together, one entry per svc_temp_entity broadcast. `ty` is the raw
+        TE code; decode via the response envelope's `types` legend. `c` is
+        the leading count byte carried only by the counted types
+        (gunshot/blood) and 0 elsewhere — its packaging varies per server
+        generation and mod (see mvd-reader/MVD_FORMAT.md svc_temp_entity),
+        so do not read it as a damage magnitude; /damage is the damage
+        answer.
+      properties:
+        t:
+          description: "Effect-time column, int32 ms — parallel array."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        ty:
+          description: "Raw TE type-code column (see the envelope `types` legend)."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        c:
+          description: "Count-byte column; 0 when the type carries none."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        x:
+          description: "Effect origin X column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+        y:
+          description: "Effect origin Y column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+        z:
+          description: "Effect origin Z column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+      required:
+        - t
+        - ty
+        - c
+        - x
+        - y
+        - z
+      type: object
     LosTrack:
       additionalProperties: false
       properties:
@@ -8815,6 +8928,29 @@ components:
           description: Nail flight stream; null when the demo has none.
           oneOf:
             - $ref: "#/components/schemas/ProjectileStreams"
+            - type: "null"
+    PointEffects:
+      type: object
+      required: [timeUnit, pointEffects]
+      additionalProperties: false
+      properties:
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
+        types:
+          description: >
+            Legend: TE code (as a string key) → effect name, covering the
+            codes present in the DEMO (pre-filter), so a `types=`-filtered
+            response still shows what else it could ask for. Omitted when
+            the demo carried no point effects. Codes without a name legend
+            as "te<code>".
+          type: object
+          additionalProperties: { type: string }
+        pointEffects:
+          description: >
+            Point-effect stream; null when the demo carried none. A
+            `types=` filter that matches nothing returns empty columns,
+            not null.
+          oneOf:
+            - $ref: "#/components/schemas/PointEffectStreams"
             - type: "null"
     LocTable:
       type: object

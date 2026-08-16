@@ -262,7 +262,9 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   as ~1% estimates and prefer aggregates over individual hits (accuracy
   tables: `mvd-analytics/damagerecon/ACCURACY.md`). Distinct from
   `boundedSource` above, which records the KTX-scoreboard substitution
-  WITHIN a KTX-sourced summary. Only `/damage` (and `/player-stats` via
+  WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
+  reconstruction (detonation points, blood telemetry) is itself
+  browsable at `/streams/point-effects`. Only `/damage` (and `/player-stats` via
   its `src` labels) echoes provenance in-band; the other damage-shaped
   endpoints (`/top-kills`, `/lives`, `/top-windows`, `/buckets`,
   `/events`) serve reconstructed figures WITHOUT a marker on old demos —

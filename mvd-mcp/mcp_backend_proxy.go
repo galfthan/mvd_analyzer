@@ -526,6 +526,16 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
+func (p *proxyBackend) GetPointEffects(ctx context.Context, in GetPointEffectsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/streams/point-effects")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("types", in.Types)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
 func (p *proxyBackend) GetStateAt(ctx context.Context, in GetStateAtInput) (any, error) {
 	path, err := demoPath(in.DemoID, "/state-at")
 	if err != nil {

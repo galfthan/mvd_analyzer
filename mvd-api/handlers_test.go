@@ -271,6 +271,10 @@ func TestShotStreamEndpoints(t *testing.T) {
 		Sx: []float32{1}, Sy: []float32{2}, Sz: []float32{3},
 		Ex: []float32{4}, Ey: []float32{5}, Ez: []float32{6},
 	}
+	r.Streams.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100}, Type: []int32{3, 12}, Count: []int32{0, 4},
+		X: []float32{1, 2}, Y: []float32{3, 4}, Z: []float32{5, 6},
+	}
 	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
 	defer srv.Close()
 
@@ -278,11 +282,54 @@ func TestShotStreamEndpoints(t *testing.T) {
 		{"/v1/demos/gameId:42/streams/projectiles", "projectiles"},
 		{"/v1/demos/gameId:42/streams/beams", "beams"},
 		{"/v1/demos/gameId:42/streams/nails", "nails"},
+		{"/v1/demos/gameId:42/streams/point-effects", "pointEffects"},
 	} {
 		resp := getJSON(t, srv.URL+c.path, 200)
 		if resp[c.key] == nil {
 			t.Errorf("%s: %q missing/null, body=%v", c.path, c.key, resp)
 		}
+	}
+}
+
+// TestPointEffects_LegendAndFilter pins the endpoint's two contracts: the
+// types legend covers the demo's codes even under a filter, and a filter
+// that matches something narrows the columns while one that matches
+// nothing returns empty columns (not null).
+func TestPointEffects_LegendAndFilter(t *testing.T) {
+	r := stubResult()
+	r.Streams.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100, 4200}, Type: []int32{3, 12, 12}, Count: []int32{0, 4, 2},
+		X: []float32{1, 2, 3}, Y: []float32{4, 5, 6}, Z: []float32{7, 8, 9},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=explosion", 200)
+	legend, _ := resp["types"].(map[string]any)
+	if legend["3"] != "explosion" || legend["12"] != "blood" {
+		t.Errorf("legend should cover pre-filter codes, got %v", resp["types"])
+	}
+	pe, _ := resp["pointEffects"].(map[string]any)
+	if got := pe["t"].([]any); len(got) != 1 {
+		t.Errorf("types=explosion: want 1 row, got %v", pe["t"])
+	}
+
+	// Filter matching nothing: empty columns, not null.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=teleport", 200)
+	pe, ok := resp["pointEffects"].(map[string]any)
+	if !ok || pe == nil {
+		t.Fatalf("no-match filter should return empty columns, got %v", resp["pointEffects"])
+	}
+	if got := pe["t"].([]any); len(got) != 0 {
+		t.Errorf("types=teleport: want 0 rows, got %v", pe["t"])
+	}
+
+	// Unknown type name: 400 invalid_param, not a silent no-match.
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=explsion")
+	if status != 400 {
+		t.Errorf("bad type: status = %d, want 400 (body=%s)", status, body)
+	} else if code := errBodyCode(t, body); code != "invalid_param" {
+		t.Errorf("bad type: code = %q, want invalid_param", code)
 	}
 }
 
@@ -294,6 +341,13 @@ func TestShotStreamEndpoints_Absent(t *testing.T) {
 	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/projectiles", 200)
 	if resp["projectiles"] != nil {
 		t.Errorf("expected null projectiles, got %v", resp["projectiles"])
+	}
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects", 200)
+	if resp["pointEffects"] != nil {
+		t.Errorf("expected null pointEffects, got %v", resp["pointEffects"])
+	}
+	if _, hasLegend := resp["types"]; hasLegend {
+		t.Errorf("expected types legend omitted on a demo with no point effects, got %v", resp["types"])
 	}
 }
 
@@ -613,7 +667,8 @@ func TestUnknownParam_Rejected(t *testing.T) {
 		"overview?extra=1", "metadata?extra=1", "demoinfo?extra=1",
 		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
 		"streams/projectiles?extra=1", "streams/beams?extra=1",
-		"streams/nails?extra=1", "airgibs?extra=1", "los?extra=1",
+		"streams/nails?extra=1", "streams/point-effects?extra=1",
+		"airgibs?extra=1", "los?extra=1",
 		"artifacts/frag?extra=1",
 	}
 	for _, u := range urls {

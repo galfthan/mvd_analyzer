@@ -85,6 +85,7 @@ description says so.
 | `getBuckets` | `mvd-api` `GET /v1/demos/{id}/buckets` |
 | `getEvents` | `mvd-api` `GET /v1/demos/{id}/events` |
 | `getStreamSlice` | `mvd-api` `GET /v1/demos/{id}/stream-slice` |
+| `getPointEffects` | `mvd-api` `GET /v1/demos/{id}/streams/point-effects` |
 | `getStateAt` | `mvd-api` `GET /v1/demos/{id}/state-at` |
 | `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
 | `getLocTable` | `mvd-api` `GET /v1/demos/{id}/loc-table` |
@@ -215,8 +216,9 @@ infers their JSON Schemas from struct tags and exposes them via
 
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
-getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails, getLocGraph, getTopWindows, getTopKills, getLives) and carries
+getBuckets, getRegionControl, getEvents, getStreamSlice, getPointEffects,
+getStateAt, getLocTrails, getLocGraph, getTopWindows, getTopKills,
+getLives) and carries
 match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
 int32 ms (pure-ms model). getLocGraph is on that list because
@@ -597,6 +599,25 @@ the canonical stored lives clamped to the window — read it instead of
 re-deriving liveness from the `sp`/`d` markers. It is not field-gated and
 has three states: `null` liveness not measurable, `[]` measured but never
 alive in this window, `[…]` the lives.
+
+#### `getPointEffects({demoId, types?})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId` | `string` (required) | — | — |
+| `types`  | `string[]` | all | Effect names to keep: `spike`, `superspike`, `gunshot`, `explosion`, `tarexplosion`, `wizspike`, `knightspike`, `lavasplash`, `teleport`, `blood`, `lightningblood`, or `te<code>` for an unnamed code. Blood usually dominates row count — filter to keep the payload small. |
+
+Output: the point-effect temp-entity stream (schema v71) as columnar
+parallel arrays `t`/`ty`/`c`/`x`/`y`/`z`, plus a `types` legend mapping
+the TE codes present in the demo to names (kept whole under a filter,
+so a filtered response still shows what else it could ask for).
+`explosion` is the exact rocket/grenade detonation point, `blood` is
+hitscan damage striking a player, `lightningblood` an LG cell
+connecting — the wire evidence the damage reconstruction consumes on
+pre-instrumentation demos. The `c` count byte's packaging varies per
+server generation; never read it as a damage magnitude (`getDamage` is
+the damage answer). `pointEffects: null` means the demo carried no
+point effects; a filter matching nothing returns empty columns.
 
 #### `getStateAt({demoId, time, ...})`
 

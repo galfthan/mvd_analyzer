@@ -1695,7 +1695,9 @@ Each index `i` is one point-effect temp entity at `(x,y,z)[i]`, `t[i]`
 match-relative ms. `ty[i]` is the raw TE type (0 spike, 1 superspike,
 2 gunshot, 3 explosion, 11 teleport, 12 blood, 13 lightningblood, …).
 `c[i]` is the leading count byte carried only by the counted types
-(`TE_GUNSHOT`/`TE_BLOOD`) and 0 elsewhere. `TE_BLOOD` and
+(`TE_GUNSHOT`/`TE_BLOOD`) and 0 elsewhere. mvd-api serves this block at
+`GET /v1/demos/{id}/streams/point-effects` with a code→name legend and a
+`types=` filter. `TE_BLOOD` and
 `TE_LIGHTNINGBLOOD` are per-hit damage telemetry (blood = hitscan damage
 striking a player, count = pellet hits per volley on modern KTX;
 lightningblood = an LG cell connecting); `TE_EXPLOSION` is the exact
