@@ -19,9 +19,11 @@ import (
 // orderCorpusEntry mirrors the fields of testdata/corpus.json this file
 // needs (the golden harness has its own copy in package analyzer_test).
 type orderCorpusEntry struct {
-	GameID int    `json:"gameId"`
-	Label  string `json:"label"`
-	Mode   string `json:"mode,omitempty"`
+	GameID      int    `json:"gameId,omitempty"`
+	Label       string `json:"label"`
+	Mode        string `json:"mode,omitempty"`
+	File        string `json:"file,omitempty"`
+	ShotStreams bool   `json:"shotStreams,omitempty"`
 }
 
 // loadOrderCorpus reads testdata/corpus.json. Missing/empty => nil (skip).
@@ -44,12 +46,17 @@ func loadOrderCorpus(t *testing.T) []orderCorpusEntry {
 // cachedDemoPath resolves the offline cache path for a corpus label,
 // returning "" when the demo is not cached. Steady-state runs are offline
 // (same contract as golden_test): no download here, we skip on cache miss.
+// Local-only `file` entries resolve under testdata/ directly (never
+// committed, never fetched — absent means skip, like a cache miss).
 func cachedDemoPath(corpus []orderCorpusEntry, label string) string {
 	for _, e := range corpus {
 		if e.Label != label {
 			continue
 		}
 		p := filepath.Join("..", "testdata", "cache", fmt.Sprintf("%d.mvd.gz", e.GameID))
+		if e.File != "" {
+			p = filepath.Join("..", "testdata", e.File)
+		}
 		if _, err := os.Stat(p); err == nil {
 			return p
 		}
@@ -102,6 +109,7 @@ func TestOrderIndependence(t *testing.T) {
 		"1on1_bananfalco_betowen_240426_dm2", // duel path
 		"2on2_nani_pora_210426_dm6",          // 2on2
 		"4on4_ahoy_bhb_240426_obsidian",      // 4on4 (smallest 4on4, keeps budget)
+		"2on2_archive_dm4_qw240_recon",       // pre-instrumentation: damage reconstruction in the schedule
 	}
 
 	// runOnce analyzes path on a FRESH default registry (analyzers are
@@ -111,8 +119,9 @@ func TestOrderIndependence(t *testing.T) {
 	// a sibling's — then marshals the Result. Full json.Marshal (not the
 	// sampled golden form) is the strongest byte comparison; filePath is
 	// identical across runs (same demo), so no canonicalisation is needed.
-	runOnce := func(t *testing.T, path string, seed *int64) []byte {
+	runOnce := func(t *testing.T, path string, streams bool, seed *int64) []byte {
 		r := NewDefaultRegistry()
+		r.BuildShotStreams = streams
 		if seed != nil {
 			r.orderOverride = shuffledTopoOrder(t, r.specs, *seed)
 		}
@@ -130,17 +139,26 @@ func TestOrderIndependence(t *testing.T) {
 	for _, label := range labels {
 		label := label
 		t.Run(label, func(t *testing.T) {
+			streams, localOnly := false, false
+			for _, e := range corpus {
+				if e.Label == label {
+					streams, localOnly = e.ShotStreams, e.File != ""
+				}
+			}
 			path := cachedDemoPath(corpus, label)
 			if path == "" {
+				if localOnly {
+					t.Skipf("local demo %q not present — per-machine coverage (see corpus.json for provenance)", label)
+				}
 				t.Skipf("demo %q not cached — run golden corpus online once to populate", label)
 			}
 
 			// Reference: the production (regIndex tie-break) order.
-			want := runOnce(t, path, nil)
+			want := runOnce(t, path, streams, nil)
 
 			for _, seed := range orderSeeds {
 				seed := seed
-				got := runOnce(t, path, &seed)
+				got := runOnce(t, path, streams, &seed)
 				if !bytesEqual(want, got) {
 					t.Fatalf("schedule-dependent output for seed %#x: JSON differs from default order (%s).\nThis means an undeclared cross-node dependency — add the missing DAG edge or fix the coupling; do NOT pin order to hide it.",
 						seed, jsonFirstDiff(want, got))

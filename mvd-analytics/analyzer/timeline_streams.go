@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"math"
 	"sort"
 	"strconv"
 	"sync"
@@ -81,6 +82,12 @@ func (b *streamBuilder) recordCells(tMs int32, v int16) {
 // PositionTrack column checklist site 2 (record-time append); see the
 // checklist in result/coord.go (PositionTrack.MarshalJSON).
 func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32, vp, vya int16) {
+	// Skip samples with a non-finite origin (seen in some
+	// pre-instrumentation demos): encoding/json refuses NaN/Inf, and a
+	// non-finite sample would poison the derived velocity columns too.
+	if !finiteVec3([3]float32{x, y, z}) {
+		return
+	}
 	b.posT = append(b.posT, tMs)
 	b.posX = append(b.posX, x)
 	b.posY = append(b.posY, y)
@@ -724,6 +731,8 @@ func (a *TimelineAnalyzer) buildMoverStreams() []result.MoverStream {
 		if mt == nil || len(mt.t) == 0 {
 			continue
 		}
+		// Non-finite origins are dropped at record time (moverTrack.append),
+		// so every sample here carries usable geometry.
 		ms := result.MoverStream{
 			EntNum:   ent,
 			SubModel: mt.subModel,
@@ -748,6 +757,21 @@ const (
 	minInt32 = int32(-1 << 31)
 	maxInt32 = int32(1<<31 - 1)
 )
+
+// finiteVec3 reports whether every component is a finite float (no
+// NaN/Inf). Some pre-instrumentation demos carry non-finite origins on
+// the wire; encoding/json refuses them, so ingestion sites drop such
+// samples (recordPosition, moverTrack.append, flightsToStream,
+// handleItemSpawn).
+func finiteVec3(v [3]float32) bool {
+	for _, c := range v {
+		f := float64(c)
+		if math.IsNaN(f) || math.IsInf(f, 0) {
+			return false
+		}
+	}
+	return true
+}
 
 // isEmpty reports whether the builder recorded no player activity at
 // all — no vitals, positions, intervals, spawns or deaths. Used to drop

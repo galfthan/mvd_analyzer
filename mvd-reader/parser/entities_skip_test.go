@@ -38,12 +38,16 @@ func skipConsumed(t *testing.T, p *Parser, cmd byte, body []byte) int {
 
 func TestSkipSpawnStatic_ByteCount(t *testing.T) {
 	// svc_spawnstatic is a bare baseline body (no entity-number prefix):
-	// model(1)+frame(1)+colormap(1)+skin(1) + 3×(coord + angle byte).
-	// Short coords → 4 + 3×3 = 13 bytes; float coords → 4 + 3×5 = 19.
+	// model(1)+frame(1)+colormap(1)+skin(1) + 3×(coord + angle). Coord
+	// width follows the combined float-coords negotiation; ANGLE width
+	// follows msgWide only (sv_bigcoords raises msg_anglesize = 2 with
+	// msg_coordsize = 4; MVD_PEXT1_FLOATCOORDS widens coords but leaves
+	// angles at 1 byte). Layouts: plain → 4 + 3×(2+1) = 13; bigcoords →
+	// 4 + 3×(4+2) = 22; MVD1-only float coords → 4 + 3×(4+1) = 19.
 	shortBody := []byte{5, 0, 0, 3} // model, frame, colormap, skin
 	for i := 0; i < 3; i++ {
 		shortBody = appendCoord(shortBody, float32(16*(i+1)))
-		shortBody = append(shortBody, byte(i)) // angle
+		shortBody = append(shortBody, byte(i)) // 1-byte angle
 	}
 	p := NewParser(nil)
 	p.floatCoords = false
@@ -51,15 +55,27 @@ func TestSkipSpawnStatic_ByteCount(t *testing.T) {
 		t.Errorf("short-coord svc_spawnstatic consumed %d bytes, want 13", got)
 	}
 
-	floatBody := []byte{5, 0, 0, 3}
+	bigBody := []byte{5, 0, 0, 3}
 	for i := 0; i < 3; i++ {
-		floatBody = binary.LittleEndian.AppendUint32(floatBody, 0x40000000) // 4-byte coord
-		floatBody = append(floatBody, byte(i))                              // angle
+		bigBody = binary.LittleEndian.AppendUint32(bigBody, 0x40000000)  // 4-byte coord
+		bigBody = binary.LittleEndian.AppendUint16(bigBody, uint16(i*8)) // 2-byte angle
 	}
 	pf := NewParser(nil)
 	pf.floatCoords = true
-	if got := skipConsumed(t, pf, mvd.SvcSpawnStatic, floatBody); got != 19 {
-		t.Errorf("float-coord svc_spawnstatic consumed %d bytes, want 19", got)
+	pf.msgWide = true
+	if got := skipConsumed(t, pf, mvd.SvcSpawnStatic, bigBody); got != 22 {
+		t.Errorf("bigcoords svc_spawnstatic consumed %d bytes, want 22", got)
+	}
+
+	mvd1Body := []byte{5, 0, 0, 3}
+	for i := 0; i < 3; i++ {
+		mvd1Body = binary.LittleEndian.AppendUint32(mvd1Body, 0x40000000) // 4-byte coord
+		mvd1Body = append(mvd1Body, byte(i))                              // 1-byte angle
+	}
+	pm := NewParser(nil)
+	pm.floatCoords = true // MVD1 bit only: coords widen, angles do not
+	if got := skipConsumed(t, pm, mvd.SvcSpawnStatic, mvd1Body); got != 19 {
+		t.Errorf("mvd1-float svc_spawnstatic consumed %d bytes, want 19", got)
 	}
 }
 
@@ -137,7 +153,7 @@ func TestBaselineBody_DecodeParity(t *testing.T) {
 		body = append(body, byte(i))
 	}
 
-	state, err := readBaselineBody(mvd.NewBufferReader(body), false)
+	state, err := readBaselineBody(mvd.NewBufferReader(body), false, false)
 	if err != nil {
 		t.Fatalf("readBaselineBody: %v", err)
 	}

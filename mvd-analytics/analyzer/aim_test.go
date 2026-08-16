@@ -37,6 +37,7 @@ func TestAimPostDuel(t *testing.T) {
 			ByPlayer: []result.PlayerShots{{Player: "A"}, {Player: "B"}},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 2000, Attacker: "A", Victim: "B", Weapon: "rl"}, // non-splash → direct
 			},
@@ -120,6 +121,7 @@ func TestAimPostRocketBlockWithoutProjectileStream(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 2000, Attacker: "A", Victim: "B", Weapon: "rl"}, // non-splash → direct
 			},
@@ -161,6 +163,7 @@ func TestAimPostDamageFromMatchGatedEvents(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			// Already in-match (the analyzer dropped any warmup / post-match
 			// hits before this point).
 			Events: []result.DamageEntry{
@@ -367,6 +370,7 @@ func TestAimPostTeamHitSplits(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 1000, Attacker: "A", Victim: "C", Weapon: "sg", Damage: 12, IsTeam: true},
 				{Time: 2000, Attacker: "B", Victim: "A", Weapon: "sg", Damage: 24},
@@ -501,6 +505,9 @@ func TestAimPostLGMissClasses(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			res := &result.Result{
+				// The whiff classes only classify measured misses — a wire
+				// damage stream must be present (see AimResult.HitsMeasured).
+				Damage: &result.DamageResult{Source: result.DamageSourceKTX},
 				Shots: &result.ShotsResult{
 					Shots:    []result.Shot{{Time: 1000, Player: "A", Weapon: "lg", Hit: false}},
 					ByPlayer: []result.PlayerShots{{Player: "A"}, {Player: "B"}},

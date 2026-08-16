@@ -11524,7 +11524,7 @@ const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
-    hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
+    hits: { h: 'Hits', t: 'Fires that connected (— when the demo carries no wire damage stream to measure hits against)', cell: w => w.hitsMeasured === false ? '—' : (w.hits || 0) },
     // Joined in from playerStats.damage's three per-weapon maps, which
     // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
     // the measuredness rules). The cell carries a {n, lower, note} object,
@@ -11535,7 +11535,7 @@ const AIM_COL = {
         cell: w => aimDamageText(w.dmg),
         sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
     },
-    hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
+    hitPct: { h: 'Hit %', t: 'Share of fires that connected (— when hits are not measured on this demo)', cell: w => w.hitsMeasured === false ? '—' : pctCell(w.shots ? (w.hits || 0) / w.shots * 100 : 0) },
     fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
     pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
     pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
@@ -11671,6 +11671,9 @@ function renderAimWeaponTables(result) {
     container.innerHTML = '';
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return;
+    // hitsMeasured=false: the demo carried no wire damage stream — the
+    // hit-derived columns are withheld server-side and the cells show "—".
+    const hitsMeasured = result.aim.hitsMeasured !== false;
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
@@ -11686,7 +11689,7 @@ function renderAimWeaponTables(result) {
             const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
+                w: w ? { ...w, hitsMeasured, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
@@ -11834,7 +11837,7 @@ function drawAimDensity(canvas, c, idx) {
         const hxi = aimClampIndex(Math.floor((x + AIM_X_HALF) / AIM_HOVER_BIN), hx);
         const hyi = aimClampIndex(Math.floor((AIM_Y_HALF - y) / AIM_HOVER_BIN), hy);
         hShots[hyi * hx + hxi]++;
-        if (c.hit[i]) hHits[hyi * hx + hxi]++;
+        if (c.hit && c.hit[i]) hHits[hyi * hx + hxi]++;
     }
 
     // Separable gaussian blur, kernel normalized to sum 1 so values keep the
@@ -11957,7 +11960,7 @@ function drawAimDensity(canvas, c, idx) {
     ctx.fillText('0', bx + CB + 4, MT + PH - 3);
 
     // Hover read-out: shot/hit counts in the coarse bin under the cursor.
-    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H };
+    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H, hitsKnown: !!c.hit };
     if (!canvas._aimWired) {
         canvas.addEventListener('mousemove', e => {
             const d = canvas._aimHover;
@@ -11981,7 +11984,8 @@ function drawAimDensity(canvas, c, idx) {
             const yhi = AIM_Y_HALF - yi * AIM_HOVER_BIN;
             const range = `x ${fmt(xlo)}…${fmt(xlo + AIM_HOVER_BIN)} qu, y ${fmt(yhi - AIM_HOVER_BIN)}…${fmt(yhi)} qu`;
             canvas.title = s
-                ? `${range}: ${s} shot${s === 1 ? '' : 's'}, ${h} hit (${Math.round(h / s * 100)}%)`
+                ? `${range}: ${s} shot${s === 1 ? '' : 's'}` +
+                    (d.hitsKnown ? `, ${h} hit (${Math.round(h / s * 100)}%)` : '')
                 : `${range}: no shots`;
         });
         canvas._aimWired = true;
@@ -12006,7 +12010,9 @@ function renderAimHistRow(prefix, c, idx, ramp) {
         AIM_X_HALF, AIM_HIST_BIN, i => aimOffX(c, i), c, idx, AIM_HULL_HALF_W));
     row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', 'qu',
         AIM_Y_HALF, AIM_HIST_BIN, i => aimOffY(c, i), c, idx, AIM_HULL_HALF_H));
-    if (ramp && ramp.since && ramp.since.length) row.appendChild(buildAimRampHist(ramp));
+    // The ramp panel is hit-% by construction — without a measured hit
+    // column (aim.hitsMeasured false) it would read a fabricated flat 0%.
+    if (ramp && ramp.since && ramp.since.length && ramp.hit) row.appendChild(buildAimRampHist(ramp));
 }
 
 function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
@@ -12021,7 +12027,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
     for (const i of idx) {
         const b = bins[binOf(val(i))];
         b.shots++;
-        if (c.hit[i]) b.hits++;
+        if (c.hit && c.hit[i]) b.hits++;
         if (b.shots > max) max = b.shots;
     }
 
@@ -12052,7 +12058,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
         const lo = (bi - mid) * w - w / 2;
         col.title = `${lo.toFixed(0)} … ${(lo + w).toFixed(0)} ${unit}: ` +
             `${b.shots} shot${b.shots === 1 ? '' : 's'}` +
-            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+            (b.shots && c.hit ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
         const fill = document.createElement('div');
         fill.className = 'aim-hist-fill';
         fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;

@@ -78,6 +78,7 @@ type (
 	ProjectileSpawnEvent    = parser.ProjectileSpawnEvent
 	ProjectileDespawnEvent  = parser.ProjectileDespawnEvent
 	BeamEvent               = parser.BeamEvent
+	PointEffectEvent        = parser.PointEffectEvent
 	NailsFrameEvent         = parser.NailsFrameEvent
 	Nail                    = parser.Nail
 )
@@ -96,6 +97,21 @@ const (
 	PrintMedium = mvd.PrintMedium
 	PrintHigh   = mvd.PrintHigh
 	PrintChat   = mvd.PrintChat
+)
+
+// Temp-entity point-effect types (PointEffectEvent.Type).
+const (
+	TeSpike          = parser.TeSpike
+	TeSuperSpike     = parser.TeSuperSpike
+	TeGunshot        = parser.TeGunshot
+	TeExplosion      = parser.TeExplosion
+	TeTarExplosion   = parser.TeTarExplosion
+	TeWizSpike       = parser.TeWizSpike
+	TeKnightSpike    = parser.TeKnightSpike
+	TeLavaSplash     = parser.TeLavaSplash
+	TeTeleport       = parser.TeTeleport
+	TeBlood          = parser.TeBlood
+	TeLightningBlood = parser.TeLightningBlood
 )
 
 // MatchStartPatterns re-exports the canonical Layer 1 match-start phrase

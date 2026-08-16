@@ -394,7 +394,7 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 	if err != nil {
 		return err
 	}
-	state, err := readBaselineBody(r, floatCoords)
+	state, err := readBaselineBody(r, floatCoords, p.msgWide)
 	if err != nil {
 		return err
 	}
@@ -408,7 +408,20 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 // implementation of the layout for both the parse and the
 // decode-and-discard (skipCommand) callers. Mirrors ezquake
 // CL_ParseBaseline (cl_parse.c:1817).
-func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, error) {
+// angleSize is the wire width of one entity angle: 1 byte normally, a
+// 2-byte short when sv_bigcoords raised msg_anglesize — advertised as
+// FTE_PEXT_FLOATCOORDS. Callers must pass the FTE-only msgWide flag, NOT
+// the combined floatCoords: MVD_PEXT1_FLOATCOORDS widens entity-delta
+// origins only, its angles stay 1 byte (mvdsv sv_ents.c writes them with
+// the plain MSG_WriteAngle).
+func angleSize(msgWide bool) int {
+	if msgWide {
+		return 2
+	}
+	return 1
+}
+
+func readBaselineBody(r *mvd.BufferReader, floatCoords, msgWide bool) (*EntityState, error) {
 	modelIdx, err := r.ReadByte()
 	if err != nil {
 		return nil, err
@@ -435,8 +448,13 @@ func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, erro
 		if err != nil {
 			return nil, err
 		}
-		// angle follows each coord — read and discard.
-		if _, err := r.ReadByte(); err != nil {
+		// angle follows each coord — discard. Its width follows the
+		// FTE_PEXT_FLOATCOORDS negotiation like the coords: sv_bigcoords
+		// servers set msg_anglesize = 2 alongside msg_coordsize = 4
+		// (mvdsv/src/sv_init.c:326-336; client mirror ezquake
+		// com_msg.c MSG_ReadAngle), so a fixed 1-byte read desyncs
+		// every entity on those demos.
+		if err := r.Skip(angleSize(msgWide)); err != nil {
 			return nil, err
 		}
 	}
@@ -753,7 +771,9 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		}
 		state.Effects = int(b)
 	}
-	// Origin + angles are paired per axis (origin N + angle N).
+	// Origin + angles are paired per axis (origin N + angle N). Angle
+	// width follows FTE_PEXT_FLOATCOORDS like the coord width — see
+	// readBaselineBody.
 	readCoord := func() (float32, error) {
 		if floatCoords {
 			return r.ReadFloatCoord()
@@ -768,7 +788,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[0] = v
 	}
 	if bits&uAngle1 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -780,7 +800,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[1] = v
 	}
 	if bits&uAngle2 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -792,7 +812,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[2] = v
 	}
 	if bits&uAngle3 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}

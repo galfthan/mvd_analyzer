@@ -619,11 +619,13 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 		out.Scoreboard = sb
 	}
 
-	// Carry the stored family echo, then apply the requested family transform.
-	// out currently holds the "both" shape (raw fields + bounded nests). The
-	// transforms recompute over out.Events, so it must be set first.
+	// Carry the stored family echo + provenance, then apply the requested
+	// family transform. out currently holds the "both" shape (raw fields +
+	// bounded nests). The transforms recompute over out.Events, so it must
+	// be set first.
 	out.Dmg = d.Dmg
 	out.BoundedMode = d.BoundedMode
+	out.Source = d.Source
 	out.Events = events
 	switch {
 	case fam == "bounded":

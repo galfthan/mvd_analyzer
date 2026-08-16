@@ -327,6 +327,12 @@ func (a *ItemAnalyzer) handleItemSpawn(e *events.ItemSpawnEvent) {
 	if e.Kind == "" || e.Kind == "backpack" {
 		return
 	}
+	// A non-finite origin (corrupt wire data in some pre-instrumentation
+	// demos) is zeroed: the phase timeline is still usable, and
+	// encoding/json refuses NaN/Inf.
+	if !finiteVec3(e.Origin) {
+		e.Origin = [3]float32{}
+	}
 	it := a.items[e.EntNum]
 	if it == nil {
 		it = &itemEntity{

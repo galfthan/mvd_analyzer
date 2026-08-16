@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "70"
+  version: "71"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -555,7 +555,8 @@ paths:
         with no KTX demoinfo block (a missing KTX block is never a reason to
         422 — see the 422 response below for the one case that is). Each stat
         family carries `src` ("derived" | "ktx" | "derived:unbounded" on
-        damage; "mixed" on a team row is the phantom-roster canary) naming its
+        damage; "reconstructed" on damage rebuilt for a pre-instrumentation
+        demo; "mixed" on a team row is the phantom-roster canary) naming its
         source, with a `sources` roll-up; `/demoinfo` stays the verbatim KTX
         pass-through to diff against.
 
@@ -659,8 +660,9 @@ paths:
 
         `boundedMode` reports whether that reconstruction ran (`standard`) or
         was skipped (`skipped:midair` / `skipped:instagib` /
-        `skipped:dmgfrags`, where the server mode rewrites the take in ways
-        the wire does not expose).
+        `skipped:dmgfrags` / `skipped:ca` / `skipped:wipeout` / `skipped:ra` /
+        `skipped:lgc` / `skipped:race`, where the server mode rewrites or
+        suppresses damage in ways the wire does not expose).
 
         An unset `dmg` defaults to `bounded` for both the summary and the full
         log; an unfiltered bounded/both SUMMARY sources its per-player bounded
@@ -681,10 +683,12 @@ paths:
         active (an explicit `from`/`to` window covering the whole match counts
         as unfiltered).
 
-        **Errors.** 422 `damage_unavailable` without the KTX
-        mvdhidden_dmgdone stream, or `bounded_unavailable` for an EXPLICIT
-        `dmg=bounded` on a skipped:* demo (a DEFAULTED bounded there falls
-        back to raw).
+        **Errors.** 422 `damage_unavailable` only when neither the wire KTX
+        mvdhidden_dmgdone stream nor a reconstructed section is available
+        (reconstruction covers most pre-instrumentation demos; `source`
+        tells which family you got), or `bounded_unavailable` for an
+        EXPLICIT `dmg=bounded` on a skipped:* demo (a DEFAULTED bounded
+        there falls back to raw).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -1222,6 +1226,51 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Nails" }
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/streams/point-effects:
+    get:
+      operationId: getPointEffects
+      tags: [streams]
+      summary: Point-effect temp-entity stream
+      description: >
+        The point-effect temp-entity stream (schema v71): exact
+        rocket/grenade detonation points (`explosion`), hitscan damage
+        telemetry on players (`blood` — the wire evidence behind the
+        damage reconstruction), LG cell hits (`lightningblood`), wall
+        puffs (`gunshot`), teleporter sparkles (`teleport`) and the rest.
+        Body is `{"types": …, "pointEffects": …}` — `types` is the
+        code→name legend, `pointEffects` the columnar stream, null when
+        the demo carried none. The optional `types=` query narrows rows
+        to a CSV set of effect names (an unknown name is a 400 listing
+        the vocabulary). The count column's packaging varies per server
+        generation — see the PointEffectStreams schema note before
+        reading it as a damage magnitude.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
+        - name: types
+          in: query
+          required: false
+          schema: { type: string }
+          description: >
+            Comma-separated effect names to keep: spike, superspike,
+            gunshot, explosion, tarexplosion, wizspike, knightspike,
+            lavasplash, teleport, blood, lightningblood, or te<code> for
+            a code outside the named vocabulary. Case-insensitive.
+            Absent = every effect.
+      responses:
+        "200":
+          description: The stream.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PointEffects" }
         "304": { $ref: "#/components/responses/NotModified" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -2261,7 +2310,7 @@ components:
         **`shots`/`hits` want a `weapons=` filter.** A "shot" is one discrete
         fire (an LG beam tick and a rocket each count 1), so the unfiltered
         sum is dominated by fast-cycling weapons; and hits are counted only
-        for weapons whose fires LINK to damage (sg/ssg/lg always, rl/gl via
+        for weapons whose fires LINK to damage (axe/sg/ssg/lg always, rl/gl via
         projectile tracking, ng/sng only when nail decoding ran), so the
         unfiltered figure mixes measured and unmeasured weapons. A rocket's
         SPLASH is a hit — including a rocket jump's self-splash (KTX-accuracy
@@ -2541,9 +2590,9 @@ components:
           boundedMode survives).
         - `bounded` — KTX-scoreboard semantics (armor absorbed + health capped
           to remaining) materialized into the same field names; an EXPLICIT
-          `dmg=bounded` is a 422 `bounded_unavailable` on midair / instagib /
-          dmgfrags demos, whose server mode makes the reconstruction
-          impossible.
+          `dmg=bounded` is a 422 `bounded_unavailable` on `skipped:*` demos
+          (midair / instagib / dmgfrags / the clan-arena family), whose
+          server mode makes the reconstruction impossible.
         - `both` — the raw fields plus per-player `bounded` nests and a
           per-event `bounded`.
 
@@ -3070,7 +3119,7 @@ components:
             demoInfo: { description: "KTX demoinfo block (non-KTX / pre-match-abort demos lack it).", type: boolean }
             metadata: { description: "Server cvars + KTX match settings (needs fullserverinfo / countdown centerprint).", type: boolean }
             frags: { description: "Obituary-derived frag log.", type: boolean }
-            damage: { description: "Per-hit damage (needs the KTX mvdhidden_dmgdone stream).", type: boolean }
+            damage: { description: "Per-hit damage (the wire KTX mvdhidden_dmgdone stream, or the reconstructed section on pre-instrumentation demos — check /damage `source`).", type: boolean }
             shots: { description: "Weapon-fire stream.", type: boolean }
             aim: { description: "Aim analysis (needs shots + position/view streams).", type: boolean }
             locGraph: { description: "Loc adjacency graph (needs a position track).", type: boolean }
@@ -3661,7 +3710,7 @@ components:
                 description: "Victim (killed player) name."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -3710,14 +3759,33 @@ components:
       additionalProperties: false
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        source:
+          description: >
+            Where the damage log itself came from — `ktx` when decoded from
+            the wire's KTX mvdhidden_dmgdone stream (every figure a direct
+            measurement), or `reconstructed` when the demo predates that
+            instrumentation and the log was rebuilt from the health/armor
+            change streams + spectator-visible evidence (LG beams, projectile
+            flights, fire sounds, position tracks, the frag log). On
+            reconstructed data magnitudes are near-exact but attribution is
+            best-effort inference; treat per-player figures as ~1-2%%
+            estimates. Absent only on pre-v71 cached results. Distinct from
+            `boundedSource`, which records a view-time substitution WITHIN a
+            KTX-sourced payload.
+          type: string
+          enum: [ktx, reconstructed]
         boundedMode:
           description: >
             Whether the bounded family was reconstructed — `standard`, or a
             `skipped:*` reason when the server mode rewrites the take in ways
             the wire does not expose (every bounded field is then absent).
-            Survives a raw view.
+            Survives a raw view. The clan-arena family (`ca`, `wipeout`,
+            `ra`), `lgc` and `race` joined the skip set with schema v71 —
+            detected from the composite serverinfo `mode` string, the only
+            place newer KTX exposes its submodes.
           type: string
-          enum: [standard, "skipped:midair", "skipped:instagib", "skipped:dmgfrags"]
+          enum: [standard, "skipped:midair", "skipped:instagib", "skipped:dmgfrags",
+                 "skipped:ca", "skipped:wipeout", "skipped:ra", "skipped:lgc", "skipped:race"]
         boundedSource:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —
@@ -3964,7 +4032,7 @@ components:
                 description: "Victim weapon class at hit time (sg|mid|lg|rl|both)."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -4221,7 +4289,7 @@ components:
                       description: "Fires with ≥1 teammate victim."
                       type: integer
                     weapon:
-                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                      description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -4270,7 +4338,7 @@ components:
                       description: "Detected discrete fires (this pipeline)."
                       type: integer
                     weapon:
-                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                      description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -4327,7 +4395,7 @@ components:
                   - "null"
                   - array
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -4525,7 +4593,7 @@ components:
                       description: "Fires where all pellets hit."
                       type: integer
                     hits:
-                      description: "Fires that connected."
+                      description: "Fires that connected. Omitted when the top-level hitsMeasured is false (no wire damage stream to link against); with hitsMeasured true, absent means a measured zero."
                       type: integer
                     miss:
                       description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
@@ -4610,7 +4678,6 @@ components:
                   required:
                     - weapon
                     - shots
-                    - hits
                   type: object
                 type:
                   - "null"
@@ -4622,12 +4689,21 @@ components:
           type:
             - "null"
             - array
+        hitsMeasured:
+          description: >-
+            Whether the hit-derived counters (hits, pellet full/partial/miss,
+            direct/splash, LG whiff classes) were measured against a wire KTX
+            damage stream. False on reconstructed/absent damage — those fields
+            are withheld there rather than fabricated as zeros; when true an
+            absent per-weapon `hits` means a measured zero.
+          type: boolean
       required:
         # timeUnit is flattened INTO the governed /aim response (always echoed)
         # but carried as an /artifacts envelope SIBLING of the `aim` key
         # (required on that branch, not inside this object), so within this
         # reused schema it stays optional-but-declared.
         - players
+        - hitsMeasured
       type: object
     LocGraph:
       additionalProperties: false
@@ -4946,7 +5022,7 @@ components:
           description: "Victim (killed player) name."
           type: string
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -4983,7 +5059,7 @@ components:
           minimum: -2.147483648e+09
           type: integer
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -5038,7 +5114,7 @@ components:
           minimum: -2.147483648e+09
           type: integer
         weapon:
-          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+          description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - time
@@ -6051,6 +6127,74 @@ components:
         - ey
         - ez
       type: object
+    PointEffectStreams:
+      additionalProperties: false
+      description: >
+        Columnar point-effect temp-entity stream — parallel arrays indexed
+        together, one entry per svc_temp_entity broadcast. `ty` is the raw
+        TE code; decode via the response envelope's `types` legend. `c` is
+        the leading count byte carried only by the counted types
+        (gunshot/blood) and 0 elsewhere — its packaging varies per server
+        generation and mod (see mvd-reader/MVD_FORMAT.md svc_temp_entity),
+        so do not read it as a damage magnitude; /damage is the damage
+        answer.
+      properties:
+        t:
+          description: "Effect-time column, int32 ms — parallel array."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        ty:
+          description: "Raw TE type-code column (see the envelope `types` legend)."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        c:
+          description: "Count-byte column; 0 when the type carries none."
+          items:
+            maximum: 2.147483647e+09
+            minimum: -2.147483648e+09
+            type: integer
+          type:
+            - "null"
+            - array
+        x:
+          description: "Effect origin X column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+        y:
+          description: "Effect origin Y column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+        z:
+          description: "Effect origin Z column, map units."
+          items:
+            type: number
+          type:
+            - "null"
+            - array
+      required:
+        - t
+        - ty
+        - c
+        - x
+        - y
+        - z
+      type: object
     LosTrack:
       additionalProperties: false
       properties:
@@ -6722,7 +6866,7 @@ components:
                 description: "Victim (killed player) name."
                 type: string
               weapon:
-                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
+                description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - time
@@ -6833,7 +6977,7 @@ components:
           additionalProperties: false
           properties:
             score: { description: "Provenance of the scoreboard family — a constant: the kill side is always the frag-log reconstruction.", type: string, enum: [derived] }
-            damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, mixed] }
+            damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, reconstructed, mixed] }
             accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
             hold: { description: "Provenance of the possession-time family — a constant: no other source carries it.", type: string, enum: [derived] }
@@ -7021,7 +7165,7 @@ components:
                     magnitude on instagib's flat 5000/hit, so do not compare
                     these figures with a bounded demo's.
                   type: string
-                  enum: [derived, "derived:unbounded", ktx, mixed]
+                  enum: [derived, "derived:unbounded", ktx, reconstructed, mixed]
                 given: { description: "Dealt to enemies.", type: integer }
                 givenTeam: { description: "Dealt to teammates.", type: integer }
                 givenSelf: { description: "Dealt to self.", type: integer }
@@ -7029,9 +7173,10 @@ components:
                 taken:
                   description: >
                     From ALL sources (enemy + team + self + env) — NOT the same
-                    quantity as KTX dmg.taken. Only the per-hit reconstruction
-                    measures it, so it is ABSENT (not zero) on a demo that
-                    carries a KTX block but no damage stream.
+                    quantity as KTX dmg.taken. Only the per-hit fold measures
+                    it, so it is ABSENT (not zero) when the demo has no damage
+                    section at all (since v71 the reconstruction fills one on
+                    most pre-instrumentation demos, src "reconstructed").
                   type: integer
                 teamWeapons:
                   description: "KTX-only: damage dealt to TEAMMATES holding RL and/or LG (KTX twep) — the friendly-fire mirror of enemyWeapons. The reconstruction does not bucket team damage by the victim's inventory, so this is absent without a demoinfo block."
@@ -7131,7 +7276,7 @@ components:
                     additionalProperties: false
                     properties:
                       attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
-                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no damage stream to link fires against — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no WIRE damage stream to link fires against (a reconstructed damage section does not count — the shot linker never saw those events) — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
                       real: { description: "Not aggregated on team rows (KTX omits the pair unless it recorded one). KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
                       virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
                     required: [attacks]
@@ -7349,7 +7494,7 @@ components:
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
                   duration: { type: integer, description: streak duration, int32 ms }
-                  weapon: { type: string, description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)." }
+                  weapon: { type: string, description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)." }
                   victim: { type: string, description: "Victim (killed player) name." }
                   damage: { type: integer, description: "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value)." }
                   isSplash: { type: boolean, description: "Indirect hit (e.g. rocket splash)." }
@@ -8783,6 +8928,29 @@ components:
           description: Nail flight stream; null when the demo has none.
           oneOf:
             - $ref: "#/components/schemas/ProjectileStreams"
+            - type: "null"
+    PointEffects:
+      type: object
+      required: [timeUnit, pointEffects]
+      additionalProperties: false
+      properties:
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
+        types:
+          description: >
+            Legend: TE code (as a string key) → effect name, covering the
+            codes present in the DEMO (pre-filter), so a `types=`-filtered
+            response still shows what else it could ask for. Omitted when
+            the demo carried no point effects. Codes without a name legend
+            as "te<code>".
+          type: object
+          additionalProperties: { type: string }
+        pointEffects:
+          description: >
+            Point-effect stream; null when the demo carried none. A
+            `types=` filter that matches nothing returns empty columns,
+            not null.
+          oneOf:
+            - $ref: "#/components/schemas/PointEffectStreams"
             - type: "null"
     LocTable:
       type: object

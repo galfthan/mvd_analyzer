@@ -26,13 +26,14 @@ func airgibTestResult() *result.Result {
 	}}
 	return &result.Result{
 		Streams: &result.Streams{Players: []result.PlayerStream{vic, att}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
-			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},               // airborne → airgib
-			{Time: 1100, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 90},                // grounded → no
-			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "lg", Damage: 30},                // not a rocket → no
-			{Time: 1000, Attacker: "vic", Victim: "vic", Weapon: "rl", Damage: 50, IsSelf: true},  // self → no
-			{Time: 1000, Attacker: "mate", Victim: "vic", Weapon: "rl", Damage: 40, IsTeam: true}, // team → no
-		}},
+		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+				{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},               // airborne → airgib
+				{Time: 1100, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 90},                // grounded → no
+				{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "lg", Damage: 30},                // not a rocket → no
+				{Time: 1000, Attacker: "vic", Victim: "vic", Weapon: "rl", Damage: 50, IsSelf: true},  // self → no
+				{Time: 1000, Attacker: "mate", Victim: "vic", Weapon: "rl", Damage: 40, IsTeam: true}, // team → no
+			}},
 		Frags: &result.FragResult{Frags: []result.FragEntry{
 			{Time: 1040, Killer: "att", Victim: "vic", Weapon: "rl"}, // lethal for the airborne hit
 		}},
@@ -89,7 +90,7 @@ func TestAirgibsPost_SortedByHeightUncapped(t *testing.T) {
 	}
 	res := &result.Result{
 		Streams:          &result.Streams{Players: []result.PlayerStream{{Name: "vic", Position: pos}}},
-		Damage:           &result.DamageResult{Events: dmg},
+		Damage:           &result.DamageResult{Source: result.DamageSourceKTX, Events: dmg},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},
 	}
 	airgibsPost(res, &CoreOutputs{})
@@ -137,10 +138,11 @@ func TestAirgibsPost_UserIDIsTheSessionAtTheHit(t *testing.T) {
 			{Name: "vic", Position: pos(20_000, 145_000)},
 			{Name: "att", Position: pos(20_000, 145_000)},
 		}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
-			{Time: 20_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
-			{Time: 145_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
-		}},
+		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+				{Time: 20_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
+				{Time: 145_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
+			}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{
 			// The demo-wide map answers 25 for both hits; only per-instant
 			// resolution can tell the two connections apart.
@@ -187,9 +189,10 @@ func TestAirgibsPost_NoHeightColumnNoAirgibs(t *testing.T) {
 			Name:     "vic",
 			Position: &result.PositionTrack{T: []int32{1000}, X: []float32{0}, Y: []float32{0}, Z: []float32{0}},
 		}}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
-			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},
-		}},
+		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+				{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},
+			}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},
 	}
 	airgibsPost(res, &CoreOutputs{})

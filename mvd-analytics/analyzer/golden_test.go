@@ -2,9 +2,11 @@ package analyzer_test
 
 // Golden test harness for the full analyzer pipeline. Reads
 // qwanalytics/testdata/corpus.json (a list of hub.quakeworld.nu game
-// IDs), pulls each demo into the local cache (downloading on first run,
-// reusing on subsequent runs), runs the default registry, and pins
-// the JSON-serialised Result against a checked-in golden file.
+// IDs, plus optional local-only `file` entries for demos the hub
+// doesn't have), pulls each hub demo into the local cache (downloading
+// on first run, reusing on subsequent runs), runs the default registry,
+// and pins the JSON-serialised Result against a checked-in golden file.
+// File entries skip when the demo is absent on this machine.
 //
 // Usage:
 //   make test                            # normal run; downloads on cache miss
@@ -49,10 +51,32 @@ var updateGolden = flag.Bool("update-golden", false, "regenerate golden files in
 //
 //	checked, just there so a reader of corpus.json can see
 //	coverage at a glance.
+//
+// file    → optional path (relative to testdata/) naming a local-only
+//
+//	demo instead of a hub gameId. Demos are never committed
+//	(testdata/demos/ is gitignored); the entry SKIPS when the
+//	file is absent — per-machine coverage, same contract as the
+//	special-cases corpus. Used for pre-instrumentation archive
+//	demos the hub doesn't have.
+//
+// sha256  → provenance of a file entry: the demo archive's key (hash of
+//
+//	the uncompressed .mvd), so the demo can be re-obtained on
+//	request. Informational; not verified here.
+//
+// shotStreams → analyze with Registry.BuildShotStreams so projectile /
+//
+//	beam / point-effect streams are built and damage
+//	reconstruction runs on pre-instrumentation demos instead
+//	of standing down.
 type corpusEntry struct {
-	GameID int    `json:"gameId"`
-	Label  string `json:"label"`
-	Mode   string `json:"mode,omitempty"`
+	GameID      int    `json:"gameId,omitempty"`
+	Label       string `json:"label"`
+	Mode        string `json:"mode,omitempty"`
+	File        string `json:"file,omitempty"`
+	Sha256      string `json:"sha256,omitempty"`
+	ShotStreams bool   `json:"shotStreams,omitempty"`
 }
 
 func TestGoldenCorpus(t *testing.T) {
@@ -74,7 +98,9 @@ func TestGoldenCorpus(t *testing.T) {
 		t.Run(entry.Label, func(t *testing.T) {
 			mvdPath := ensureCached(t, cacheDir, entry)
 
-			result, err := analyzer.NewDefaultRegistry().Analyze(mvdPath)
+			reg := analyzer.NewDefaultRegistry()
+			reg.BuildShotStreams = entry.ShotStreams
+			result, err := reg.Analyze(mvdPath)
 			if err != nil {
 				t.Fatalf("analyze %s: %v", entry.Label, err)
 			}
@@ -85,10 +111,9 @@ func TestGoldenCorpus(t *testing.T) {
 			// degrade or vanish, so a comparison fails for the wrong reason
 			// and an -update-golden would overwrite a good golden with
 			// gutted data. Skip the comparison and refuse to regenerate.
-			if result.DemoInfo != nil && result.DemoInfo.Map != "" &&
-				mapbsp.LoadBytes(result.DemoInfo.Map) == nil {
+			if m := result.EffectiveMap(); m != "" && mapbsp.LoadBytes(m) == nil {
 				msg := fmt.Sprintf("%s: BSP for map %q not resolvable — set MVDA_BSP_DIR to the full map set (lookup order: MVDA_BSP_DIR, ./bsps)",
-					entry.Label, result.DemoInfo.Map)
+					entry.Label, m)
 				if *updateGolden {
 					t.Fatalf("refusing to regenerate %s — %s; would write a golden missing height/liquid/loc", entry.Label, msg)
 				}
@@ -155,6 +180,14 @@ func loadCorpus(t *testing.T) []corpusEntry {
 // label without changing the underlying demo).
 func ensureCached(t *testing.T, cacheDir string, entry corpusEntry) string {
 	t.Helper()
+	if entry.File != "" {
+		p := filepath.Join("..", "testdata", entry.File)
+		if _, err := os.Stat(p); err != nil {
+			t.Skipf("local demo %s (%s) not present — per-machine coverage, skipping. Archive sha256 %s; ask a maintainer for the demo to enable it.",
+				entry.File, entry.Label, entry.Sha256)
+		}
+		return p
+	}
 	cachePath := filepath.Join(cacheDir, fmt.Sprintf("%d.mvd.gz", entry.GameID))
 	if _, err := os.Stat(cachePath); err == nil {
 		return cachePath

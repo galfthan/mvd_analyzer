@@ -63,5 +63,12 @@
     "gameId": 222649,
     "label": "4on4_blue_red_200626_e1m2_sameslot_rejoin",
     "mode": "4on4"
+  },
+  {
+    "label": "2on2_archive_dm4_qw240_recon",
+    "mode": "2on2",
+    "file": "demos/2on2_archive_dm4_qw240_recon.mvd.gz",
+    "sha256": "47182c2e54c514bd0a6d51171ef71e906d0aa596a20308d03069c73dfe312e36",
+    "shotStreams": true
   }
 ]

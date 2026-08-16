@@ -183,7 +183,7 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/top-windows` the
   vocabulary follows the chosen `metric`'s **own source** — the frag one for
   `frags`/`deaths`/`netFrags`, the damage one for the damage metrics, and
-  fire-derived `rl,lg,gl,ssg,sng,ng,sg` for `shots`/`hits` — so `weapons=lava`
+  fire-derived `rl,lg,gl,ssg,sng,ng,sg,axe` for `shots`/`hits` — so `weapons=lava`
   is meaningful on `metric=deaths` and a 400 on `metric=shots`. On
   `/top-kills` it filters the **killing** weapon (which is also the burst's
   own weapon) against the burst-capable subset only — `rl,lg,gl,ssg,sng,ng,
@@ -232,7 +232,8 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   additive `bounded` fields). The default is **`bounded`** for both
   summaries and the full log (effective damage is what the scoreboard
   means; raw overkill is the opt-in). A *defaulted* request on a demo
-  whose reconstruction was skipped (midair / instagib / dmgfrags modes)
+  whose reconstruction was skipped (`skipped:*` — midair / instagib /
+  dmgfrags / the clan-arena family ca / wipeout / ra / lgc / race)
   falls back to `raw`; an *explicit* `dmg=bounded` there is a
   `422 bounded_unavailable`. Unfiltered bounded summaries source the
   per-player figures from KTX's exact scoreboard (`boundedSource: "ktx"`).
@@ -249,6 +250,26 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   envelope `dmg` / `boundedMode`, exactly as `/damage` does; read `dmg`
   rather than assuming the default took. Both echoes are absent only on a
   demo with no damage stream at all (`measured.damage: false`).
+
+  **Damage provenance (`source`, schema v71).** `/damage` responses carry
+  `source: "ktx"` when the log was decoded from the wire's damage stream
+  (raw per-hit values measured; bounded is arithmetic over them) or
+  `source: "reconstructed"` when the demo
+  predates that instrumentation and the section was rebuilt from the
+  state streams (health/armor deltas + beams / projectile flights / fire
+  sounds / position tracks / the frag log). Reconstructed magnitudes are
+  near-exact; attribution is best-effort — treat per-player match totals
+  as ~1% estimates and prefer aggregates over individual hits (accuracy
+  tables: `mvd-analytics/damagerecon/ACCURACY.md`). Distinct from
+  `boundedSource` above, which records the KTX-scoreboard substitution
+  WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
+  reconstruction (detonation points, blood telemetry) is itself
+  browsable at `/streams/point-effects`. Only `/damage` (and `/player-stats` via
+  its `src` labels) echoes provenance in-band; the other damage-shaped
+  endpoints (`/top-kills`, `/lives`, `/top-windows`, `/buckets`,
+  `/events`) serve reconstructed figures WITHOUT a marker on old demos —
+  check `/damage`'s `source` (or `/player-stats` `src`) when the grade
+  matters.
 - **`time`** — match-relative **integer milliseconds**; **required** on
   `/state-at`. A non-integer value 400s `invalid_param` with an `(integer
   milliseconds)` hint.
@@ -386,8 +407,8 @@ Non-2xx responses use a stable envelope:
 | 422 | `playerstats_unavailable` | parse degraded to no player streams. **Not** raised for a missing KTX block — `/player-stats` serves those normally |
 | 422 | `metadata_unavailable` | no fullserverinfo / countdown centerprint |
 | 422 | `frags_unavailable` | no frag log |
-| 422 | `damage_unavailable` | no KTX `mvdhidden_dmgdone` damage stream |
-| 422 | `bounded_unavailable` | `dmg=bounded` on a demo whose bounded reconstruction was skipped (midair / instagib / dmgfrags mode) |
+| 422 | `damage_unavailable` | no damage section at all: no KTX `mvdhidden_dmgdone` stream AND the reconstruction stood down (no player streams, or a midair/instagib/dmgfrags mode). Since schema v71 pre-instrumentation demos normally serve a **reconstructed** section instead of this 422 — check the response's `source` field (see "Damage provenance" in §2) |
+| 422 | `bounded_unavailable` | `dmg=bounded` on a demo whose bounded reconstruction was skipped (`skipped:*` mode — midair / instagib / dmgfrags / ca / wipeout / ra / lgc / race) |
 | 422 | `shots_unavailable` | no shot data (no weapon fires decoded) |
 | 422 | `aim_unavailable` | no aim data (needs shots + position/view streams) |
 | 422 | `locgraph_unavailable` | no position track |
@@ -415,7 +436,9 @@ syntactic parsing or view-layer validation.)
 
 **Available vs unavailable — the `422` rule.** A `422 <section>_unavailable`
 means the demo **structurally lacks the signal** that section needs — a
-non-KTX server has no `demoinfo`/`damage`, a demo without a position track
+non-KTX server has no `demoinfo` (and only a `skipped:*`-mode or
+stream-less demo lacks `damage` — the reconstruction covers most
+pre-instrumentation ones), a demo without a position track
 has no `loc-graph`, a map without a region layout has no `region-control`.
 These are **expected** for some demos; treat them as "this panel is
 unavailable for this demo", not a hard failure. Better still, **don't

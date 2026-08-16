@@ -85,6 +85,7 @@ description says so.
 | `getBuckets` | `mvd-api` `GET /v1/demos/{id}/buckets` |
 | `getEvents` | `mvd-api` `GET /v1/demos/{id}/events` |
 | `getStreamSlice` | `mvd-api` `GET /v1/demos/{id}/stream-slice` |
+| `getPointEffects` | `mvd-api` `GET /v1/demos/{id}/streams/point-effects` |
 | `getStateAt` | `mvd-api` `GET /v1/demos/{id}/state-at` |
 | `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
 | `getLocTable` | `mvd-api` `GET /v1/demos/{id}/loc-table` |
@@ -215,8 +216,9 @@ infers their JSON Schemas from struct tags and exposes them via
 
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
-getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails, getLocGraph, getTopWindows, getTopKills, getLives) and carries
+getBuckets, getRegionControl, getEvents, getStreamSlice, getPointEffects,
+getStateAt, getLocTrails, getLocGraph, getTopWindows, getTopKills,
+getLives) and carries
 match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
 int32 ms (pure-ms model). getLocGraph is on that list because
@@ -316,15 +318,18 @@ frags/kills/deaths/suicides/teamKills + `efficiency`), `damage`,
 `powerups`), plus a `window` carrying the denominators
 (`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
 
-Every family carries `src` (`"derived"` | `"ktx"`), with a `sources`
-roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
+Every family carries `src` (`"derived"` | `"ktx"` |
+`"derived:unbounded"` on damage | `"reconstructed"` on damage rebuilt
+for a pre-instrumentation demo), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
 The response keeps the same shape regardless of demo age: on a demo with
 no KTX block, `accuracy` is reconstructed from the decoded fire stream
 (trigger pulls, not KTX's pellets — check `src` before comparing across
 demos), `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
 `login` from the `*auth` userinfo key. A value that cannot be measured
 stays ABSENT rather than becoming a zero — notably
-`accuracy.byWeapon[].hits` when the demo has no damage stream.
+`accuracy.byWeapon[].hits` when the demo has no WIRE damage stream (a
+reconstructed damage section does not count — the shot linker never saw
+those events).
 `efficiency`, `shareAlive` and `shareMatch` are RATIOS in [0,1], not
 percentages.
 
@@ -378,8 +383,11 @@ Output: `result.FragResult` —
 
 #### `getDamage({demoId, ...})`
 
-Per-hit damage aggregates + log, reconstructed from the KTX
-`mvdhidden_dmgdone` stream. Cheaper than aggregating
+Per-hit damage aggregates + log — decoded from the wire KTX
+`mvdhidden_dmgdone` stream (`source: "ktx"`), or rebuilt from
+spectator-visible state on pre-instrumentation demos
+(`source: "reconstructed"`; ~1% match-total estimates). Cheaper than
+aggregating
 `getEvents(types:["damage"])` client-side; use that for the raw
 time-ordered per-hit log.
 
@@ -421,9 +429,13 @@ scoreboard — see `scoreboard` for the cross-check.
 
 #### `getAim({demoId, players?, startTime?, endTime?, summary?})`
 
-Per-player aim analysis. Start with `players[].weapons` (per-weapon
-shots/hits, SG/SSG pellet stats + full/partial/miss fires, RL/GL
-direct/splash/missed, the LG miss/blocked/out-of-range whiff split); the
+Per-player aim analysis. Check the top-level `hitsMeasured` flag first:
+when false (reconstructed/absent damage — most old demos) every
+hit-derived counter is withheld rather than fabricated as zero, and
+only shots, crosshair error and ramp timing remain. Start with
+`players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
+full/partial/miss fires, RL/GL direct/splash/missed, the LG
+miss/blocked/out-of-range whiff split); the
 columnar `crosshair` (per-hitscan-fire angular error, normalized so ±1 =
 the hitbox edge, with hit + attributed target) and `lgRamp` (per-LG-cell
 hit vs ms since the shaft opened) blocks are large — reach for them only
@@ -587,6 +599,25 @@ the canonical stored lives clamped to the window — read it instead of
 re-deriving liveness from the `sp`/`d` markers. It is not field-gated and
 has three states: `null` liveness not measurable, `[]` measured but never
 alive in this window, `[…]` the lives.
+
+#### `getPointEffects({demoId, types?})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId` | `string` (required) | — | — |
+| `types`  | `string[]` | all | Effect names to keep: `spike`, `superspike`, `gunshot`, `explosion`, `tarexplosion`, `wizspike`, `knightspike`, `lavasplash`, `teleport`, `blood`, `lightningblood`, or `te<code>` for an unnamed code. Blood usually dominates row count — filter to keep the payload small. |
+
+Output: the point-effect temp-entity stream (schema v71) as columnar
+parallel arrays `t`/`ty`/`c`/`x`/`y`/`z`, plus a `types` legend mapping
+the TE codes present in the demo to names (kept whole under a filter,
+so a filtered response still shows what else it could ask for).
+`explosion` is the exact rocket/grenade detonation point, `blood` is
+hitscan damage striking a player, `lightningblood` an LG cell
+connecting — the wire evidence the damage reconstruction consumes on
+pre-instrumentation demos. The `c` count byte's packaging varies per
+server generation; never read it as a damage magnitude (`getDamage` is
+the damage answer). `pointEffects: null` means the demo carried no
+point effects; a filter matching nothing returns empty columns.
 
 #### `getStateAt({demoId, time, ...})`
 

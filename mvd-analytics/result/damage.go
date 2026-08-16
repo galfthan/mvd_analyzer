@@ -56,12 +56,28 @@ type DamageResult struct {
 	// bounded family into the raw field names, absent on a raw view.
 	Dmg string `json:"dmg,omitempty"`
 	// BoundedMode is "standard" when the bounded family was reconstructed,
-	// or "skipped:midair" / "skipped:instagib" / "skipped:dmgfrags" when the
-	// server mode rewrites T_Damage's take in ways the wire does not expose
-	// (midair height rule / flat 5000 / inverted pent+tele accounting) — a
-	// best-effort reconstruction there would be confidently wrong, so none
-	// is attempted and every Bounded field is absent.
+	// or "skipped:<mode>" when the server mode rewrites T_Damage's take in
+	// ways the wire does not expose — a best-effort reconstruction there
+	// would be confidently wrong, so none is attempted and every Bounded
+	// field is absent. Skip set: midair (height rule), instagib (flat
+	// 5000), dmgfrags (inverted pent+tele accounting), and since v71 the
+	// clan-arena family ca / wipeout / ra plus lgc and race (whole damage
+	// classes suppressed or rewritten between rounds; see
+	// damagerecon.SkipModeReason for the shared detection incl. the
+	// composite serverinfo mode string).
 	BoundedMode string `json:"boundedMode,omitempty"`
+
+	// Source records where the damage log itself came from:
+	// DamageSourceKTX when it was decoded from the wire's KTX
+	// mvdhidden_dmgdone stream (raw per-hit values are direct
+	// measurements; the bounded family is arithmetic over them), or
+	// DamageSourceReconstructed when the demo predates that instrumentation
+	// and the log was reconstructed from the health/armor change streams +
+	// spectator-visible evidence (package mvd-analytics/damagerecon —
+	// magnitudes are near-exact, attribution is best-effort inference).
+	// Absent only in pre-v71 stored results. Distinct from BoundedSource,
+	// which records a view-time substitution WITHIN a KTX-sourced payload.
+	Source string `json:"source,omitempty"`
 
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
@@ -80,6 +96,13 @@ type DamageResult struct {
 	// weapons[].damage sub-block.
 	BoundedSource string `json:"boundedSource,omitempty"`
 }
+
+// DamageResult.Source vocabulary. DamageSourceKTX also serves as the
+// BoundedSource "ktx" token (same meaning: KTX-measured figures).
+const (
+	DamageSourceKTX           = "ktx"
+	DamageSourceReconstructed = "reconstructed"
+)
 
 // PositionalKill is one telefrag (deathtype "tele") or stomp (deathtype
 // "stomp") — an instant kill from occupying a player's space rather than

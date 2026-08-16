@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -4845,9 +4846,12 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 66,
             "weapon": "ng"
+          },
+          {
+            "shots": 107,
+            "weapon": "axe"
           }
         ]
       },
@@ -9342,12 +9346,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 25,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
           }
@@ -13677,7 +13679,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "shots": 334,
             "weapon": "sng"
           }
@@ -18292,7 +18293,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 39,
             "weapon": "sng"
           }
@@ -22235,12 +22235,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 179,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 13,
             "weapon": "ng"
           }
@@ -26090,7 +26088,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "sng"
           }
@@ -32568,12 +32565,10 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 13,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 10,
             "weapon": "ng"
           }
@@ -36358,13 +36353,11 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 2,
             "shots": 2,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 6,
             "weapon": "sng"
           }
@@ -57076,6 +57069,7 @@
         }
       }
     },
+    "source": "ktx",
     "stomps": [
       {
         "attacker": "marksuzu",
@@ -90229,6 +90223,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 107,
+              "hits": 0
+            },
             "gl": {
               "attacks": 9,
               "hits": 2
@@ -92151,6 +92149,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 107,
+              "hits": 0
+            },
             "gl": {
               "attacks": 41,
               "hits": 6
@@ -92751,11 +92753,15 @@
       }
     ]
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
         "byWeapon": [
+          {
+            "shots": 107,
+            "weapon": "axe"
+          },
           {
             "accuracy": 0.46774193548387094,
             "enemyHits": 195,
@@ -92802,7 +92808,7 @@
         ],
         "player": "[cmd] witka",
         "team": ".ra.",
-        "total": 594
+        "total": 701
       },
       {
         "byWeapon": [
@@ -93160,6 +93166,13 @@
     "reconciliation": {
       "byPlayer": {
         "[cmd] witka": [
+          {
+            "ktxAttacks": 104,
+            "ktxHits": 0,
+            "streamAttacks": 107,
+            "streamShots": 107,
+            "weapon": "axe"
+          },
           {
             "ktxAttacks": 2604,
             "ktxHits": 880,
@@ -94662,6 +94675,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 24098,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -95769,8 +95789,22 @@
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
+        "time": 43514,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
         "time": 48228,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 49589,
+        "weapon": "axe"
       },
       {
         "player": "nlk",
@@ -97549,6 +97583,13 @@
         "weapon": "ssg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 87264,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -98887,6 +98928,13 @@
         "weapon": "sng"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 114330,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99004,6 +99052,13 @@
         "team": "oSaMs",
         "time": 123885,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 126072,
+        "weapon": "axe"
       },
       {
         "player": "clox",
@@ -99231,6 +99286,13 @@
           "marksuzu"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 129466,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -99655,6 +99717,13 @@
         "team": "oSaMs",
         "time": 137688,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 139005,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -100216,6 +100285,13 @@
         "weapon": "lg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 160203,
+        "weapon": "axe"
+      },
+      {
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -100758,6 +100834,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 176376,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -100875,6 +100958,13 @@
           "clox"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 177669,
+        "weapon": "axe"
       },
       {
         "player": "doberman",
@@ -101306,6 +101396,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 183339,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -101338,6 +101435,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 184332,
+        "weapon": "axe"
+      },
+      {
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -101365,6 +101469,13 @@
           "doberman"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 185210,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -101401,6 +101512,20 @@
         "team": ".ra.",
         "time": 185844,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 185872,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 186704,
+        "weapon": "axe"
       },
       {
         "player": "doberman",
@@ -101450,6 +101575,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 187652,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -101477,6 +101609,13 @@
         "team": ".ra.",
         "time": 188079,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 188182,
+        "weapon": "axe"
       },
       {
         "player": "doberman",
@@ -101615,6 +101754,13 @@
           "nlk"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 192196,
+        "weapon": "axe"
       },
       {
         "player": "marksuzu",
@@ -103311,6 +103457,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 239272,
+        "weapon": "axe"
+      },
+      {
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -103835,6 +103988,13 @@
         "team": "oSaMs",
         "time": 247986,
         "weapon": "lg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 248028,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -104491,6 +104651,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 274622,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -104849,6 +105016,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 292190,
+        "weapon": "axe"
+      },
+      {
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -105042,6 +105216,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 296468,
+        "weapon": "axe"
+      },
+      {
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -105058,6 +105239,13 @@
           "sCorp"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 297138,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -105078,6 +105266,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 297640,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -105096,6 +105291,13 @@
         "weapon": "gl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 298147,
+        "weapon": "axe"
+      },
+      {
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -105108,6 +105310,13 @@
         "team": "oSaMs",
         "time": 298533,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 298879,
+        "weapon": "axe"
       },
       {
         "player": "sCorp",
@@ -105169,6 +105378,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 299831,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -105200,6 +105416,13 @@
           "sCorp"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 300356,
+        "weapon": "axe"
       },
       {
         "player": "apa",
@@ -105261,6 +105484,13 @@
           "lakso"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 301415,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -105646,6 +105876,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 308576,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -105705,6 +105942,13 @@
           "apa"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 310195,
+        "weapon": "axe"
       },
       {
         "player": "apa",
@@ -108981,6 +109225,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 397729,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "sCorp",
         "source": "beam",
@@ -111045,6 +111296,13 @@
         "weapon": "sng"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 471669,
+        "weapon": "axe"
+      },
+      {
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -111331,6 +111589,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 480023,
+        "weapon": "axe"
+      },
+      {
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -111361,6 +111626,13 @@
           "[cmd] witka"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 481580,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -111535,6 +111807,13 @@
         "team": "oSaMs",
         "time": 485896,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 486134,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -112052,6 +112331,13 @@
         "weapon": "lg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 498278,
+        "weapon": "axe"
+      },
+      {
         "player": "sCorp",
         "source": "beam",
         "team": ".ra.",
@@ -112331,6 +112617,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 506290,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -112484,6 +112777,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 510978,
+        "weapon": "axe"
+      },
+      {
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -112510,6 +112810,13 @@
         "team": ".ra.",
         "time": 511709,
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 511845,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -112982,6 +113289,13 @@
         "team": "oSaMs",
         "time": 525888,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 527189,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -115623,6 +115937,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 591196,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -115740,6 +116061,13 @@
         "team": ".ra.",
         "time": 597962,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 598105,
+        "weapon": "axe"
       },
       {
         "player": "nlk",
@@ -116073,6 +116401,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 604019,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -116284,6 +116619,13 @@
         "team": ".ra.",
         "time": 610325,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 610408,
+        "weapon": "axe"
       },
       {
         "player": "clox",
@@ -118542,6 +118884,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 668203,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -118805,6 +119154,13 @@
           "doberman"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 672769,
+        "weapon": "axe"
       },
       {
         "player": "doberman",
@@ -119167,6 +119523,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 678431,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -119193,6 +119556,13 @@
         "team": "oSaMs",
         "time": 680510,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 680580,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -119655,6 +120025,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 704821,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -119923,6 +120300,20 @@
         "team": ".ra.",
         "time": 712786,
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 714951,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 715750,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -120226,6 +120617,13 @@
         "team": ".ra.",
         "time": 726057,
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 727706,
+        "weapon": "axe"
       },
       {
         "player": "marksuzu",
@@ -120865,6 +121263,13 @@
         "weapon": "gl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 751463,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -121177,6 +121582,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 760783,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -121335,6 +121747,13 @@
           "apa"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 764585,
+        "weapon": "axe"
       },
       {
         "player": "apa",
@@ -122600,6 +123019,13 @@
         "weapon": "ssg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 809567,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -123098,6 +123524,13 @@
         "team": "oSaMs",
         "time": 824074,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 824451,
+        "weapon": "axe"
       },
       {
         "player": "nlk",
@@ -123994,6 +124427,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 861954,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124015,6 +124455,20 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 865372,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 866071,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124029,6 +124483,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 867450,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124036,11 +124497,32 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 868179,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 868903,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 869296,
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 869838,
+        "weapon": "axe"
       },
       {
         "player": "doberman",
@@ -124156,6 +124638,13 @@
         "team": ".ra.",
         "time": 871622,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 871684,
+        "weapon": "axe"
       },
       {
         "player": "lakso",
@@ -124411,6 +124900,13 @@
         "weapon": "lg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 884071,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "beam",
         "team": ".ra.",
@@ -124448,6 +124944,13 @@
           "lakso"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 884882,
+        "weapon": "axe"
       },
       {
         "player": "clox",
@@ -124504,6 +125007,13 @@
         "team": "oSaMs",
         "time": 890609,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 891141,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -125249,6 +125759,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 902856,
+        "weapon": "axe"
+      },
+      {
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -125261,6 +125778,13 @@
         "team": "oSaMs",
         "time": 903524,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 903609,
+        "weapon": "axe"
       },
       {
         "player": "[cmd] witka",
@@ -126605,6 +127129,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 948078,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -126798,6 +127329,13 @@
         "weapon": "sng"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 952364,
+        "weapon": "axe"
+      },
+      {
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -126894,8 +127432,36 @@
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
+        "time": 954695,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 955336,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 955999,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
         "time": 957935,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 958723,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -126920,6 +127486,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 959281,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -126937,8 +127510,22 @@
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
+        "time": 960112,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
         "time": 961767,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 962308,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -126957,6 +127544,13 @@
         "team": "oSaMs",
         "time": 962546,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 962888,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -126986,6 +127580,13 @@
         "team": ".ra.",
         "time": 963427,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 963495,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -127459,6 +128060,13 @@
           "sCorp"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 974947,
+        "weapon": "axe"
       },
       {
         "player": "apa",
@@ -129262,6 +129870,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1013364,
+        "weapon": "axe"
+      },
+      {
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -129274,6 +129889,13 @@
         "team": ".ra.",
         "time": 1013548,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1013989,
+        "weapon": "axe"
       },
       {
         "player": "nlk",
@@ -129713,6 +130335,13 @@
           "lakso"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1027935,
+        "weapon": "axe"
       },
       {
         "player": "marksuzu",
@@ -130821,6 +131450,13 @@
         "weapon": "gl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1072187,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -131247,6 +131883,13 @@
           "doberman"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1084450,
+        "weapon": "axe"
       },
       {
         "player": "marksuzu",
@@ -131696,6 +132339,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1096277,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -131920,6 +132570,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1109139,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132082,6 +132739,13 @@
         "team": ".ra.",
         "time": 1114659,
         "weapon": "lg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1114937,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -132368,6 +133032,13 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1134698,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -132421,6 +133092,13 @@
         "weapon": "gl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1139817,
+        "weapon": "axe"
+      },
+      {
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -132428,11 +133106,60 @@
         "weapon": "rl"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1140421,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1141117,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1141782,
+        "weapon": "axe"
+      },
+      {
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1141956,
         "weapon": "rl"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1142421,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1143145,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1143738,
+        "weapon": "axe"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1144268,
+        "weapon": "axe"
       },
       {
         "player": "lakso",
@@ -132454,6 +133181,13 @@
         "team": "oSaMs",
         "time": 1144803,
         "weapon": "sng"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1144959,
+        "weapon": "axe"
       },
       {
         "player": "lakso",
@@ -132482,6 +133216,13 @@
         "team": "oSaMs",
         "time": 1145430,
         "weapon": "sng"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1145457,
+        "weapon": "axe"
       },
       {
         "player": "lakso",
@@ -133271,6 +134012,13 @@
         "weapon": "lg"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1174036,
+        "weapon": "axe"
+      },
+      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133634,6 +134382,13 @@
           "marksuzu"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1183687,
+        "weapon": "axe"
       },
       {
         "player": "clox",
@@ -134378,6 +135133,13 @@
         "team": "oSaMs",
         "time": 1199479,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 1199565,
+        "weapon": "axe"
       },
       {
         "hit": true,

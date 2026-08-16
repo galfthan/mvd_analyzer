@@ -25,6 +25,7 @@ type MCPBackend interface {
 	GetBuckets(ctx context.Context, in GetBucketsInput) (any, error)
 	GetEvents(ctx context.Context, in GetEventsInput) (any, error)
 	GetStreamSlice(ctx context.Context, in GetStreamSliceInput) (any, error)
+	GetPointEffects(ctx context.Context, in GetPointEffectsInput) (any, error)
 	GetStateAt(ctx context.Context, in GetStateAtInput) (any, error)
 	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
 	GetLocTable(ctx context.Context, in GetLocTableInput) (any, error)
@@ -270,6 +271,13 @@ type GetChatInput struct {
 	EndTime   int32    `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict to these speaker names"`
 	Types     []string `json:"types,omitempty" jsonschema:"chat-event types: 'chat' (public say), 'teamsay'. Empty = both."`
+}
+
+// GetPointEffectsInput filters /v1/demos/{id}/streams/point-effects by
+// effect type.
+type GetPointEffectsInput struct {
+	DemoID string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Types  []string `json:"types,omitempty" jsonschema:"restrict to these effect names: spike, superspike, gunshot, explosion, tarexplosion, wizspike, knightspike, lavasplash, teleport, blood, lightningblood, or te<code> for an unnamed code. Empty = every effect (blood usually dominates row count)."`
 }
 
 // GetBackpacksInput filters /v1/demos/{id}/backpacks.

@@ -289,7 +289,11 @@ Two consequences worth knowing:
   where the `K` cell beside it is also `-`. Both weapon tables now scroll
   inside their own box (`.items-table-wrap`) at 25 columns.
 - **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
-  friendly fire DEALT. It is measured whenever the damage family is present,
+  friendly fire DEALT. It is measured whenever the damage family is present
+  (on `src: "reconstructed"` demos — pre-instrumentation, rebuilt damage —
+  read every damage figure as a ~1% estimate rather than a measurement;
+  the Aim tab's Hits/Hit % cells render `—` there, since hit linkage
+  needs the wire damage stream),
   so `0` there is a real reading rather than a gap, and it is deliberately
   *not* folded into the victim's `Taken`-side story: this is what the player
   put into teammates, a different question from `TK` (which counts only the
