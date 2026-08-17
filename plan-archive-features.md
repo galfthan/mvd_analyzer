@@ -125,13 +125,35 @@ final scoreline where `demoInfo` doesn't exist.
 
 ## 4. Surface parser warnings from qw-analyze
 
-The sv_bigcoords desync degraded 5% of the archive for years with zero
-operator-visible signal — warnings exist only in diagnostic mode used
-by one test harness. Add a `-warn` flag (or a `parseWarnings` count in
-the Result) so the next protocol gap is visible. Related residual: the
-bigcoords demos still show ~213 `unknown_svc` events after the angle
-fix (cmd bytes 61/64/67/128/192/195/224, E3/E4 only) — a second,
-smaller desync in the bigcoords path still to find.
+**SHIPPED** on `archive-parsing` (folded into the unreleased schema v72):
+warning COLLECTION is now unconditional in the parser — a census, not a
+log (exact `total` + exact per-type counts, plus a 64-row sample table of
+distinct messages with counts and first occurrence; what the cap left out
+is reported in `droppedGroups` / `droppedWarnings`). `SetDiagnosticMode`
+now means only "also retain every individual instance", which is all the
+diagnostic harness ever wanted. The census reaches analytics through a
+new optional Source capability (`events.WarningReporter`) and rides every
+Result as `parseWarnings`, so the CLI JSON, `/overview` and the WASM
+result all carry it without opting in. It is deliberately NOT merged into
+`errors[]` — that is the analyzer layer, this is the reader layer.
+`qw-analyze` prints a one-line stderr summary whenever a demo raises any,
+and the new `-warn` prints the whole table (needed because `-format md`
+and `-view …` carry no `parseWarnings` of their own). `qw-corpus-survey`
+dropped its second diagnostic parse per demo and reads the same numbers
+off the analysis pass; CSV columns unchanged, and now filled on every run.
+
+Validated against the 51k census (526 demos, ~1.0%, carry warnings): 28
+warning demos across every category mix — including 6 `sv_bigcoords`
+cases at 1 900–10 200 warnings — matched the census `warns` and
+`unknownSvc` figures exactly; 10 clean demos stayed silent. All 13
+golden demos parse clean, so no golden moved.
+
+Related residual, still open: the bigcoords demos show `unknown_svc`
+warnings after the angle fix (cmd bytes 61/64/67/128/192/195/224, E3/E4
+only) — the worst archive demos run to ~6 900 of them in one file, so the
+second, smaller desync in the bigcoords path is still to find. It is now
+measurable from any normal run rather than only from a diagnostic
+harness.
 
 ## 5. Validate reconstruction on E0–E2 (the un-established 40%)
 
