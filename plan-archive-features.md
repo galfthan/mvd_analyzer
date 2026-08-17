@@ -98,14 +98,30 @@ it today while the mover path deliberately keeps it). Mode caveat:
 
 ## 3. Parse `//finalscores` (62% of archive, two eras before ktxstats)
 
-`//finalscores "<%b %d, %H:%M>" "<mode>" "<map>" "<team1>" <s1>
-"<team2>" <s2>` is stuffed at match end (`ktx/src/commands.c:
+**SHIPPED** on `archive-parsing` (folded into the unreleased schema v72):
+`parser/ktx_finalscores.go` decodes the directive into a typed
+`FinalScoresEvent`, `metadata` publishes it verbatim as
+`metadata.finalScores`, and `match` reads it back for the map, mode and
+team rows nothing else answered — new `match.mode` plus a `match.sources`
+provenance block, never displacing a demoinfo value. The year-less date
+joins lead 1's markers as a corroborator only (year + timezone borrowed
+from the anchoring marker, reported as `dateMarkers[].yearFrom`), and
+supplies `matchEndUnixMs` where no ktxstats block exists.
+
+Measured on 120 demoinfo-less archive demos: mode 0 → 120/120,
+`matchEndUnixMs` 0 → 120/120, anchor grades unchanged (119 exact / 1
+unverified). Scoreline vs the derived scoreboard: 105 exact, 7
+round-scored modes (CA/Wipeout score ROUNDS, `commands.c:6867-6886`), 3
+match-ending frags the scoreboard freeze excludes, 5 duel label
+differences. On 60 demos that also carry demoinfo, every resolved field
+still came from `ktx`. A 12 000-demo scan found exactly one directive per
+demo and no malformed copy — the parser's shape checks (which drop a
+garbled line with a `parse_error` warning) never fired.
+
+Original note: `//finalscores "<%b %d, %H:%M>" "<mode>" "<map>" "<team1>"
+<s1> "<team2>" <s2>` is stuffed at match end (`ktx/src/commands.c:
 6963-6975`) on 29% of E2 and ~100% of E3+ — authoritative mode, map and
-final scoreline where `demoInfo` doesn't exist. Parser-side: one prefix
-matcher beside the `//ktx ` directives (`parser/ktx_pickup.go:65`) and
-a typed event; analytics-side: feed metadata/match where demoinfo is
-absent (never override ktxstats). Also carries a date (format G) that
-corroborates lead 1.
+final scoreline where `demoInfo` doesn't exist.
 
 ## 4. Surface parser warnings from qw-analyze
 
