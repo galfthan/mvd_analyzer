@@ -78059,6 +78059,7 @@
     "gameDir": "qw",
     "map": "obsidian",
     "mapTitle": "Obsidian",
+    "mode": "team",
     "players": [
       {
         "deaths": 65,
@@ -78125,6 +78126,11 @@
         "team": "BhB"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 179,
@@ -93181,6 +93187,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  1\nMode  T e a m\nRespawns  KT2\nAntilag     1\nTeamplay    2\nTimelimit  20\nOvertime    5\nPowerups   on\nSOCDv2  stats\n\nmatchtag qwsl-draft\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 22:23",
+      "map": "obsidian",
+      "mode": "team",
+      "score1": 224,
+      "score2": 179,
+      "team1": "ahoy",
+      "team2": "BhB"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 1,
@@ -143780,6 +143795,14 @@
           "source": "ktxstats",
           "tz": "+0100",
           "unixMs": 1777065801000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 24, 22:23",
+          "source": "finalscores",
+          "unixMs": 1777069380000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10452,

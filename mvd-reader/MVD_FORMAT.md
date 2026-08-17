@@ -3130,7 +3130,7 @@ Offset  Size  Field
 1       var   command (null-terminated string)
 ```
 
-The server is pushing a console command into the client. There are four classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
+The server is pushing a console command into the client. There are five classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
 
 1. **`fullserverinfo "\key1\value1\key2\value2\..."`** — the bulk cvar dump sent at connection time. This is the **single richest source of server metadata** in the demo: every CVAR_SERVERINFO cvar that mvdsv exposes plus every key KTX has mirrored via `localcmd "serverinfo …"`. See [Demo Metadata Sources](#demo-metadata-sources) below for the full key list.
 2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Emitted via `stuffcmd_flags(..., STUFFCMD_DEMOONLY, ...)` so they only appear in the recorded MVD, not in live gameplay. The common ones:
@@ -3167,9 +3167,27 @@ The server is pushing a console command into the client. There are four classes 
     - **Hoonymode round markers**: at the start of every HoonyMode round KTX stuffs `//demomark 0 round-%2d\n` to one arbitrary player (`ktx/src/match.c:428`) — the only variant that carries arguments. ezquake's exact-match seek ignores it; a parser should capture the argument tail as a label.
     - **Frogbot rocket-jump marks**: with the frogbot option `FB_OPTION_DEMOMARK_ROCKETJUMPS` enabled, bots call `DemoMark()` on every rocket jump (`ktx/src/bot_botjump.c:358`), so bot demos can be dense with markers.
     - **End-of-match listing**: if any in-match markers were recorded, KTX broadcasts a "Demo markers" table (`ktx/src/match.c:234-258`) listing `Time: m:ss (name)` per marker. The heading and `Time` label are red-text (bit 7 set on every char), so naive ASCII grep misses it. The stufftexts are the authoritative signal; the listing is presentation (and is capped/debounced as above).
-4. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+4. **`//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>" <s2>`** — the end-of-match scoreline, stuffed once per match into the *first* connected client (`ktx/src/commands.c:6963-6977`, at the tail of `lastscore_add`, under a comment calling it "a HACK for QTV, ok EZTV"). Because it goes to one client it is recorded as a `dem_single` block, but nothing in it is per-client: the payload is the server's own result.
 
-A single-pass parser should emit all four as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
+    ```
+    //finalscores "Sep 29, 21:27" "duel" "aerowalk" "kip" 19 "grisling" 24
+    //finalscores "Mar 08, 21:16" "team" "dm2" "'tbg" 169 "PEX" 214
+    ```
+
+    Field by field:
+
+    - **date** — `QVMstrftime("%b %d, %H:%M")` of the server's LOCAL clock. **No year, no seconds, no timezone**, which is why it can corroborate a date but never establish one on its own.
+    - **mode** — `lastscores2str` (`commands.c:6755`): `duel`, `team`, `FFA`, `CTF`, `RA`, `Clan Arena`, `Wipeout`, `HoonyMode`, `race`, `unknown`. Forks add their own (`Extinction` occurs in the archive). Note this is a *third* mode vocabulary, distinct from both the ktxstats `mode` (`GetMode`, `ktx/src/stats.c:309` — `duel`, `team`, `ffa`, `clan-arena`, …) and the serverinfo `mode` key (`1on1`, `4on4-midair`, `world.c:1542`).
+    - **map** — `mapname`, the canonical short name.
+    - **team1/s1, team2/s2** — the two sides. On a duel the "team" is the player's own name (the branch at `commands.c:6836-6866` reads the two duelers' `frags` directly). **What the score counts is mode-dependent**: `get_scores1/2` sums the sides' frags (`g_utils.c:1868-1919`), *except* on Clan Arena and Wipeout, where `lastscore_add` substitutes `CA_get_score_1/2` — **rounds won** (`commands.c:6867-6886`). Scores can be negative (suicides outnumbering frags).
+
+    The names are player-authored userinfo values and arrive in the Quake charset (colour codes and all), so normalise them like any other name. The whole line is terminated with `\n` before the string's NUL.
+
+    **Why it matters**: it rides ~64% of the 51k-demo archive against the KTX demoinfo block's ~46%, and the two eras only partly overlap — on the pre-ktxstats half this is the only place the *server* states a mode, a map or a final result. A 12 000-demo archive scan found exactly one directive per demo and not a single malformed copy, but a parser should still shape-check (seven arguments, the five quoted ones quoted, both scores integers) and drop what fails: stuffed values do get corrupted on this archive, and a half-parsed scoreline is worse than none.
+
+5. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+
+A single-pass parser should emit all five as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
 
 ### svc_setangle (10)
 
@@ -3913,6 +3931,7 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter) to the `svc_print` section. KTX's `G_sprint(PRINT_LOW)` pickup messages ("You got the Red Armor", "You receive 25 health", "You get " backpack opener) carry pickup-attribution via the `dem_single` target slot and would cover categories `//ktx took` skips (ammo boxes, H15/H25), **but** `SV_ClientPrintf` filters by the picking client's `messagelevel` cvar before the MVD write — competitive players widely set `msg 2`, which strips PRINT_LOW from the recording entirely. Coverage is per-player and per-demo; `//ktx took` / `//ktx bp` are the only signals that bypass the filter.
 - Added [Derived events — death and spawn](#derived-events--death-and-spawn) — why every `StatHealth` crossing of zero should be surfaced as its own event at the parser layer rather than inferred by per-sample comparison, and the instant-respawn case that motivates it.
 - Added [Practical gap — non-RL/LG backpack pickups on competitive demos](#svc_stufftext-9) under the `//ktx` directives, combining the two pre-existing limits (`//ktx bp` is RL/LG-only, and KTX's `"You get "` backpack-opener print is stripped by `SV_ClientPrintf` when `messagelevel >= 1`) into the explicit conclusion that **non-RL/LG backpack pickups have no authoritative wire signal on a typical 4on4 / duel MVD**. Notes the residual indirect signal (STAT_ITEMS bit + STAT_SHELLS/NAILS/ROCKETS/CELLS deltas via `svc_updatestat`) that a future heuristic analyzer could correlate with nearby `BackpackDropHintEvent`s.
+- Added [`//finalscores`](#svc_stufftext-9) as its own stufftext class — the end-of-match scoreline KTX stuffs into the first client (`ktx/src/commands.c:6963-6977`). It rides ~64% of the 51k-demo archive against the demoinfo block's ~46%, making it the only server-stated mode / map / result on the pre-ktxstats half. Documents the three traps: the date has no year, the mode is a third vocabulary distinct from both ktxstats' and the serverinfo key's, and the score is **rounds won** rather than frags on Clan Arena / Wipeout.
 
 ### MVD_PEXT1 Hidden Message History
 

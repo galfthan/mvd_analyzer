@@ -10267,6 +10267,7 @@
     "gameDir": "qw",
     "map": "dm2",
     "mapTitle": "Claustrophobopolis",
+    "mode": "duel",
     "players": [
       {
         "deaths": 22,
@@ -10285,6 +10286,11 @@
         "team": "banan falco"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 7,
@@ -10682,6 +10688,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  D u e l\nRespawns  KT2\nAntilag     2\nTimelimit  10\nOvertime    3\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 18:27",
+      "map": "dm2",
+      "mode": "duel",
+      "score1": 7,
+      "score2": 16,
+      "team1": "betowen",
+      "team2": "banan falco"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -14931,6 +14946,13 @@
           "source": "ktxstats",
           "tz": "+0200",
           "unixMs": 1777048028000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "Apr 24, 18:27",
+          "source": "finalscores",
+          "unixMs": 1777048020000,
+          "yearFrom": "matchdate"
         }
       ],
       "demoOffset": 10286,

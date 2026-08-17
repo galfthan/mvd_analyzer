@@ -77639,6 +77639,7 @@
     "gameDir": "qw",
     "map": "dm3",
     "mapTitle": "The Abandoned Base",
+    "mode": "team",
     "players": [
       {
         "deaths": 52,
@@ -77705,6 +77706,11 @@
         "team": "oSaMs"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 178,
@@ -89764,6 +89770,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  1\nMode  T e a m\nRespawns  KT2\nAntilag     1\nTmOverlay  on\nTeamplay    2\nTimelimit  20\nOvertime    5\nPowerups   on\nSOCDv2  stats\n\nmatchtag TB4+1\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 01:37",
+      "map": "dm3",
+      "mode": "team",
+      "score1": 178,
+      "score2": 151,
+      "team1": ".ra.",
+      "team2": "oSaMs"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 1,
@@ -135178,6 +135193,14 @@
           "source": "ktxstats",
           "tz": "+0600",
           "unixMs": 1776973055000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 24, 01:37",
+          "source": "finalscores",
+          "unixMs": 1776994620000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10326,

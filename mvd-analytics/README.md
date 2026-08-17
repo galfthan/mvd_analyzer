@@ -371,11 +371,16 @@ section is never touched.
 
 `wallClockPost` is node `wall-clock`: it resolves the wire date markers
 the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
-`date` string, and the serverinfo version keys into the graded match-start
+`date` string, the year-less `//finalscores` stamp on the metadata
+section, and the serverinfo version keys into the graded match-start
 anchor on `streams.global` (`matchStartUnixMs` + `matchStartConfidence`,
 schema v72). It is a post-processor because its evidence is spread across
 three artifacts — `clock`, `demoinfo` and `metadata` — and it projects onto
-the match window `timeline` publishes.
+the match window `timeline` publishes. The `//finalscores` stamp is the one
+marker that can never anchor: it carries no year, so it is resolved last —
+year and timezone borrowed from the marker that *did* anchor (reported as
+`dateMarkers[].yearFrom`), then cross-checked on the month/day/hour/minute
+that are its own.
 
 One further node, `los`, is **lazy**: materialised on demand rather than in
 the eager parse (see "The dependency DAG").

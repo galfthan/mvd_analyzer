@@ -16,6 +16,14 @@
           "source": "ktxstats",
           "tz": "+0000",
           "unixMs": 1773004616000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Mar 08, 21:16",
+          "source": "finalscores",
+          "unixMs": 1773004560000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10253,

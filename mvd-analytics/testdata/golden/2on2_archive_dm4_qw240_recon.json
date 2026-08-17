@@ -39166,6 +39166,10 @@
         "team": "nme"
       }
     ],
+    "sources": {
+      "map": "serverinfo",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 49,

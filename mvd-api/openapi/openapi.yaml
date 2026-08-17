@@ -3162,7 +3162,13 @@ components:
           description: "Tournament / event tag."
           type: string
         mode:
-          description: "Match mode (e.g. Duel/Team/FFA)."
+          description: >
+            Match mode. Two vocabularies reach this field: the KTX countdown
+            table's display spelling ("Duel", "Team", "LGC") where the demo had
+            a countdown, else (schema v72) KTX's own mode name from the
+            demoinfo block or the `//finalscores` stuffcmd ("duel", "team",
+            "FFA", "Clan Arena"). Compare case-insensitively, and read
+            `/metadata` for the exact source.
           type: string
         playerUserIDs:
           description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
@@ -3390,6 +3396,42 @@ components:
             yawnmode:
               description: "Yawnmode (SSG) mode."
               type: boolean
+          type:
+            - "null"
+            - object
+        finalScores:
+          description: >
+            KTX's `//finalscores` end-of-match scoreline, verbatim (schema v72).
+            Present on 64% of the archive against demoinfo's 46%, so on the
+            pre-ktxstats half this is the only place the SERVER states a final
+            result. `date` is strftime "%b %d, %H:%M" with no year, no seconds
+            and no timezone — read `streams.global.dateMarkers` for the
+            resolved instant. `mode` is KTX's lastscores name ("duel", "team",
+            "FFA", "Clan Arena", ...), a different spelling from the demoinfo
+            `mode`; neither is rewritten. Scores can be negative (suicides).
+          additionalProperties: false
+          properties:
+            date:
+              description: "Server-local match-end stamp, \"%b %d, %H:%M\" — no year."
+              type: string
+            mode:
+              description: "KTX lastscores mode name (\"duel\", \"team\", \"FFA\", \"Clan Arena\", ...)."
+              type: string
+            map:
+              description: "Canonical short map name."
+              type: string
+            team1:
+              description: "First side's team name (the player's own name on a duel)."
+              type: string
+            score1:
+              description: "First side's final score; can be negative."
+              type: integer
+            team2:
+              description: "Second side's team name."
+              type: string
+            score2:
+              description: "Second side's final score; can be negative."
+              type: integer
           type:
             - "null"
             - object
@@ -6817,11 +6859,39 @@ components:
           description: "Game directory (mod)."
           type: string
         map:
-          description: "Canonical map identifier — always the SHORT name (e1m2, dm2, aerowalk). Resolved from the KTX demoinfo map, else the serverinfo `map` key, else the cleaned level title. Join on this against searchGames rows, metadata serverinfo and map geometry keys."
+          description: "Canonical map identifier — always the SHORT name (e1m2, dm2, aerowalk). Resolved from the KTX demoinfo map, else the serverinfo `map` key, else (schema v72) the `//finalscores` map, else the cleaned level title; `sources.map` says which. Join on this against searchGames rows, metadata serverinfo and map geometry keys."
           type: string
         mapTitle:
           description: "Level title announced in svc_serverdata (\"Castle of the Damned\" on e1m2), cleaned of a .bsp suffix and a trailing ` by <author>` hint. DISPLAY ONLY — never an identifier or file key. Omitted when svc_serverdata named no level."
           type: string
+        mode:
+          description: >
+            KTX's own game-mode name (schema v72): the demoinfo block's
+            (`duel`, `team`, `ffa`, `clan-arena`, …) or, where that block does
+            not exist, the `//finalscores` one (`duel`, `team`, `FFA`,
+            `Clan Arena`, …) — the two spellings are each source's own
+            vocabulary, reported verbatim, so compare case-insensitively and
+            read `sources.mode` for the source. Neither the serverinfo `mode`
+            key (`1on1`, `4on4-midair`) nor the countdown table's `Duel`.
+          type: string
+        sources:
+          description: >
+            Where the resolved identity fields came from (schema v72), so a
+            server-authoritative value is distinguishable from a
+            pipeline-derived one. `//finalscores` never displaces a demoinfo
+            value and never corrects a derived team row.
+          additionalProperties: false
+          properties:
+            map:
+              description: "`ktx` | `serverinfo` | `finalscores` | `levelTitle` (the degraded last resort — on a titled map that string is not a shortname)."
+              type: string
+            mode:
+              description: "`ktx` (demoinfo) | `finalscores`."
+              type: string
+            teams:
+              description: "`derived` (the per-player scoreboard summed by team, the normal case) | `finalscores` (the scoreboard produced no team rows, so the two sides come from KTX's end-of-match stuffcmd)."
+              type: string
+          type: object
         players:
           description: "Final scoreboard lines."
           items:
@@ -6879,6 +6949,7 @@ components:
         - gameDir
         - duration
         - players
+        - sources
       type: object
     Messages:
       additionalProperties: false

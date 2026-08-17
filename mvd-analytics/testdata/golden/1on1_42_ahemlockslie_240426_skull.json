@@ -13076,6 +13076,7 @@
     "gameDir": "qw",
     "map": "skull",
     "mapTitle": "Skull Hunt",
+    "mode": "duel",
     "players": [
       {
         "deaths": 22,
@@ -13094,6 +13095,11 @@
         "team": "42"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 9,
@@ -13559,6 +13565,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  D u e l\nRespawns  KT2\nAntilag     2\nTimelimit  10\nOvertime    3\n\nmatchtag CDC\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 16:26",
+      "map": "skull",
+      "mode": "duel",
+      "score1": 9,
+      "score2": 20,
+      "team1": "AHemlocksLie",
+      "team2": "42"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -19825,6 +19840,14 @@
           "source": "ktxstats",
           "tz": "+0000",
           "unixMs": 1777047973000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 24, 16:26",
+          "source": "finalscores",
+          "unixMs": 1777047960000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10104,

@@ -27385,6 +27385,7 @@
     "gameDir": "qw",
     "map": "dm6",
     "mapTitle": "The Dark Zone",
+    "mode": "team",
     "players": [
       {
         "deaths": 13,
@@ -27419,6 +27420,11 @@
         "team": "pora"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 64,
@@ -30397,6 +30403,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  T e a m\nRespawns  KT2\nAntilag     2\nTeamplay    2\nTimelimit  10\nOvertime    3\nPowerups   on\nSOCDv2  stats\n\nmatchtag hte\n\n\n",
+    "finalScores": {
+      "date": "Apr 21, 18:32",
+      "map": "dm6",
+      "mode": "team",
+      "score1": 64,
+      "score2": 34,
+      "team1": "nAnI",
+      "team2": "pora"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -47724,6 +47739,14 @@
           "source": "ktxstats",
           "tz": "+0000",
           "unixMs": 1776796330000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 21, 18:32",
+          "source": "finalscores",
+          "unixMs": 1776796320000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10090,

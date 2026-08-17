@@ -5,7 +5,45 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (archive-parsing) — a wall clock on nearly every demo, schema v72
+## unreleased (archive-parsing) — a wall clock and a scoreline on nearly every demo, schema v72
+
+### `//finalscores`: the server's own result on the pre-ktxstats half
+
+KTX stuffs its end-of-match scoreline into the demo as
+`//finalscores "Sep 29, 21:27" "duel" "aerowalk" "kip" 19 "grisling" 24`
+(`ktx/src/commands.c:6963-6977`). It rides **64% of the archive against
+demoinfo's 46%**, so on the pre-ktxstats half it is the only place the
+*server* states a mode, a map and a final result — and it was discarded.
+
+The parser now emits a typed `FinalScoresEvent` and the metadata section
+publishes it verbatim as `metadata.finalScores`. It is used, never
+preferred: `match` gains a `mode` (KTX's own vocabulary — the demoinfo
+`GetMode` name where that block exists, else the `//finalscores` one) and
+a `sources` block naming where its map, mode and team rows came from
+(`ktx` / `serverinfo` / `finalscores` / `levelTitle` / `derived`). A
+demoinfo value is never displaced, and a derived team row is never
+corrected — the two figures are not always the same quantity: on Clan
+Arena and Wipeout KTX's score is *rounds won*, not frags.
+
+The stamp it carries has no year (`%b %d, %H:%M`), so it can anchor
+nothing on its own. The wall-clock node completes its year — and borrows
+its timezone — from whichever marker did anchor the match, reports that
+as `dateMarkers[].yearFrom`, and cross-checks the anchor on the
+month/day/hour/minute that remain. With no other marker present the
+stamp is reported with `unixMs: 0` rather than dropped.
+
+Measured on 120 archive demos with no demoinfo block: an authoritative
+mode on 120/120 (0 before), `matchEndUnixMs` on 120/120 (0 before), and
+the anchor grades unchanged (119 `exact` / 1 `unverified`) — the new
+marker corroborated every one of them. Against the derived scoreboard the
+scoreline agreed exactly on 105, with 7 round-scored modes, 3 demos where
+KTX counted the match-ending frag the scoreboard freeze excludes, and 5
+duel team-label differences making up the rest. On 60 demos that DO carry
+demoinfo, every resolved field still came from `ktx`. Across 12 000
+archive demos carrying the directive, every copy parsed — the shape
+checks that drop a garbled line (with a diagnostic warning) never fired.
+
+### A wall clock on nearly every demo
 
 Only ~25% of the 51k-demo archive carried a wall-clock anchor: the
 mvdhidden 0x000B block and the serverinfo `epoch` cvar are both modern

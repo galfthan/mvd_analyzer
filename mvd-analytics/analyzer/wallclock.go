@@ -20,6 +20,12 @@ import (
 //     with no timezone at all.
 //   - the `date` field of the KTX demoinfo (ktxstats) block — written when
 //     the block is dumped at intermission, so it names match END.
+//   - `//finalscores "Sep 29, 21:27" …` — the end-of-match stuffcmd
+//     (ktx/src/commands.c:6969). Its strftime layout carries NO YEAR, no
+//     seconds and no zone, so it can never anchor a match on its own; it is
+//     collected as a corroborating marker whose year is completed from
+//     whichever marker did anchor it, and whose month/day/hour/minute then
+//     cross-check that anchor. Coverage 64.1% of the archive.
 //
 // matchdate and matchkey are near-perfectly complementary across the 51k-demo
 // archive (69% / 29%), which is what lifts wall-clock coverage from the ~25%
@@ -45,11 +51,12 @@ import (
 // Wall-clock marker sources (GlobalStream.MatchStartSource / DemoStartSource
 // and WallClockMarker.Source).
 const (
-	wallSourceHidden    = "mvdhidden"
-	wallSourceEpoch     = "epoch"
-	wallSourceMatchDate = "matchdate"
-	wallSourceMatchKey  = "matchkey"
-	wallSourceKTXStats  = "ktxstats"
+	wallSourceHidden      = "mvdhidden"
+	wallSourceEpoch       = "epoch"
+	wallSourceMatchDate   = "matchdate"
+	wallSourceMatchKey    = "matchkey"
+	wallSourceKTXStats    = "ktxstats"
+	wallSourceFinalScores = "finalscores"
 )
 
 // Marker kinds (WallClockMarker.Kind).
@@ -90,6 +97,14 @@ const (
 	// paused_duration block for (only current mvdsv does). Observed spreads run
 	// to ~3.5 min on demos whose two other markers agree to the second.
 	ktxStatsToleranceMs = 300 * 1000
+	// finalScoresToleranceMs is the slack for the `//finalscores` stamp: it is
+	// stuffed from the same end-of-match code path as the ktxstats block, so it
+	// inherits that spread, plus the whole minute its layout truncates to.
+	finalScoresToleranceMs = ktxStatsToleranceMs + 60*1000
+	// finalScoresAccuracyMs is the resolution of a `//finalscores` stamp whose
+	// zone was borrowed from the anchoring marker — one minute, the layout's
+	// granularity.
+	finalScoresAccuracyMs = 60 * 1000
 	// tzQuantumMs is the granularity every real timezone offset is a multiple
 	// of — two markers whose difference is a whole quantum agree up to an
 	// unknown zone, which is the only comparison available when one of them
@@ -285,6 +300,82 @@ func parseKTXStatsDate(raw string) (wallClockStamp, bool) {
 		return applyZone(civil, zone), true
 	}
 	return wallClockStamp{}, false
+}
+
+// finalScoresStamp is the year-less civil stamp `//finalscores` carries
+// (strftime "%b %d, %H:%M" of the server's local clock). It is deliberately
+// NOT a wallClockStamp: without a year there is no instant to hold, and the
+// whole point of keeping it in this shape is that nothing downstream can
+// mistake it for one.
+type finalScoresStamp struct {
+	month, day, hour, min int
+	raw                   string
+}
+
+// parseFinalScoresDate parses "Sep 29, 21:27". Anything that is not that
+// layout returns ok=false — the field is a fixed strftime output, so a
+// deviation is a corrupted line rather than a variant to accommodate.
+func parseFinalScoresDate(raw string) (finalScoresStamp, bool) {
+	monName, rest, ok := splitField(strings.TrimSpace(raw))
+	if !ok {
+		return finalScoresStamp{}, false
+	}
+	mo, ok := ctimeMonths[strings.ToLower(monName)]
+	if !ok {
+		return finalScoresStamp{}, false
+	}
+	dayField, rest, ok := splitField(rest)
+	if !ok {
+		return finalScoresStamp{}, false
+	}
+	d, err := strconv.Atoi(strings.TrimSuffix(dayField, ","))
+	if err != nil || d < 1 || d > 31 {
+		return finalScoresStamp{}, false
+	}
+	timePart, _, ok := splitField(rest)
+	if !ok {
+		return finalScoresStamp{}, false
+	}
+	hh, mm, found := strings.Cut(timePart, ":")
+	if !found {
+		return finalScoresStamp{}, false
+	}
+	h, err := strconv.Atoi(hh)
+	if err != nil || h < 0 || h > 23 {
+		return finalScoresStamp{}, false
+	}
+	mi, err := strconv.Atoi(mm)
+	if err != nil || mi < 0 || mi > 59 {
+		return finalScoresStamp{}, false
+	}
+	return finalScoresStamp{month: mo, day: d, hour: h, min: mi, raw: strings.TrimSpace(raw)}, true
+}
+
+// completeFinalScoresYear turns the year-less stamp into an instant by taking
+// the year from a reference instant that another marker established — the ONLY
+// way this stamp can name a moment at all.
+//
+// offsetSec is the zone the reference was printed in, which the stamp is read
+// as having too: both come from the same server's strftime(localtime), so
+// borrowing the offset compares like with like. The year is picked from the
+// three candidates around the reference so a match played across midnight on
+// 31 December lands in the right one instead of a year away.
+func completeFinalScoresYear(p finalScoresStamp, refUnixMs int64, offsetSec int) int64 {
+	refCivil := time.UnixMilli(refUnixMs).UTC().Add(time.Duration(offsetSec) * time.Second)
+	best := int64(0)
+	bestDist := int64(-1)
+	for y := refCivil.Year() - 1; y <= refCivil.Year()+1; y++ {
+		civil := time.Date(y, time.Month(p.month), p.day, p.hour, p.min, 0, 0, time.UTC)
+		unix := civil.UnixMilli() - int64(offsetSec)*1000
+		d := unix - refUnixMs
+		if d < 0 {
+			d = -d
+		}
+		if bestDist < 0 || d < bestDist {
+			best, bestDist = unix, d
+		}
+	}
+	return best
 }
 
 // applyZone turns a civil (zone-less) time plus a zone token into an instant.
@@ -640,6 +731,11 @@ type wallClockAnchor struct {
 	Confidence       string
 	Note             string
 	MatchEndUnixMs   int64
+	// FinalScoresMarker is the `//finalscores` stamp with its year completed
+	// from the chosen anchor (WallClockMarker.YearFrom names it). Nil when the
+	// demo carried no such stamp; UnixMs 0 when there was no other marker to
+	// take a year from — the stamp is still reported, it just names no instant.
+	FinalScoresMarker *dateMarker
 	// DemoStart is the demo-open anchor implied by MatchStartUnixMs, set only
 	// when the demo carried no server-clock anchor of its own and the verdict
 	// is not "contradicted".
@@ -658,6 +754,10 @@ type wallClockInputs struct {
 	DemoStartAcc  int32
 	DemoStartSrc  string
 	DemoOffsetMs  int32
+	// FinalScores is the year-less `//finalscores` stamp, when the demo carried
+	// one. It is held apart from Markers because it is not a marker yet: it
+	// only becomes one once another marker has supplied a year.
+	FinalScores *finalScoresStamp
 	// MatchLengthMs is the match's WALL-CLOCK length: the game-time window
 	// plus every pause, since the game clock freezes during a pause while the
 	// clock the ktxstats date is stamped from keeps running. Walking a match-end
@@ -673,6 +773,13 @@ type candidate struct {
 	matchStart int64
 	accuracyMs int32
 	assumedUTC bool
+	// zoneOffsetSec / zonePinned are the zone this candidate's stamp was
+	// printed in, when it named one. They exist for the year-less
+	// `//finalscores` stamp, which has to borrow a zone to be read at all —
+	// they are NOT the same statement as assumedUTC, which grades the chosen
+	// anchor's confidence and must keep meaning exactly what it meant before.
+	zoneOffsetSec int
+	zonePinned    bool
 }
 
 // resolveWallClock picks the match-start anchor and grades it. Priority is by
@@ -700,25 +807,22 @@ func resolveWallClock(in wallClockInputs) wallClockAnchor {
 			// start and the two shifts cancel, but this stays correct on a
 			// TimeBase=="demo" result (no detected match start, DemoOffset 0)
 			// and on a marker printed off the match-start frame.
-			cands = append(cands, candidate{
-				source:     m.Source,
-				matchStart: m.UnixMs - int64(m.AtMs) + int64(in.DemoOffsetMs),
-				accuracyMs: markerAccuracy(m),
-				assumedUTC: m.AssumedUTC,
-			})
+			cands = append(cands, newMarkerCandidate(m, m.UnixMs-int64(m.AtMs)+int64(in.DemoOffsetMs)))
 		case wallKindMatchEnd:
 			if matchEndUnix == 0 {
 				matchEndUnix = m.UnixMs
 			}
-			cands = append(cands, candidate{
-				source:     m.Source,
-				matchStart: m.UnixMs - int64(in.MatchLengthMs),
-				accuracyMs: markerAccuracy(m),
-				assumedUTC: m.AssumedUTC,
-			})
+			cands = append(cands, newMarkerCandidate(m, m.UnixMs-int64(in.MatchLengthMs)))
 		}
 	}
 	if len(cands) == 0 {
+		// Nothing to take a year from, so the `//finalscores` stamp names no
+		// instant — but it is still evidence, and this package never drops a
+		// marker it saw.
+		if in.FinalScores != nil {
+			m := unresolvedFinalScoresMarker(*in.FinalScores)
+			return wallClockAnchor{FinalScoresMarker: &m}
+		}
 		return wallClockAnchor{}
 	}
 
@@ -727,11 +831,22 @@ func resolveWallClock(in wallClockInputs) wallClockAnchor {
 	})
 	best := cands[0]
 
+	var fsMarker *dateMarker
+	if in.FinalScores != nil {
+		fsCand, m := resolveFinalScores(*in.FinalScores, best, in.MatchLengthMs)
+		cands = append(cands, fsCand)
+		fsMarker = &m
+		if matchEndUnix == 0 {
+			matchEndUnix = m.UnixMs
+		}
+	}
+
 	anchor := wallClockAnchor{
-		MatchStartUnixMs: best.matchStart,
-		AccuracyMs:       best.accuracyMs,
-		Source:           best.source,
-		MatchEndUnixMs:   matchEndUnix,
+		MatchStartUnixMs:  best.matchStart,
+		AccuracyMs:        best.accuracyMs,
+		Source:            best.source,
+		MatchEndUnixMs:    matchEndUnix,
+		FinalScoresMarker: fsMarker,
 	}
 
 	var notes []string
@@ -785,6 +900,70 @@ func resolveWallClock(in wallClockInputs) wallClockAnchor {
 	return anchor
 }
 
+// newMarkerCandidate builds the candidate for one collected marker, projected
+// onto match start by the caller. It carries the marker's zone along so a
+// year-less stamp can borrow it.
+func newMarkerCandidate(m dateMarker, matchStart int64) candidate {
+	c := candidate{
+		source:     m.Source,
+		matchStart: matchStart,
+		accuracyMs: markerAccuracy(m),
+		assumedUTC: m.AssumedUTC,
+	}
+	if !m.AssumedUTC {
+		if off, _, ok := resolveZoneOffset(m.TZ); ok {
+			c.zoneOffsetSec, c.zonePinned = off, true
+		}
+	}
+	return c
+}
+
+// resolveFinalScores completes the year-less `//finalscores` stamp against the
+// chosen anchor and returns it both as a cross-check candidate and as the
+// marker to report.
+//
+// The completed instant is NOT independent evidence of the year — it is the
+// anchor's own year — so the value of this candidate is entirely in its
+// month/day/hour/minute, which is exactly what a comparison against the anchor
+// tests. When the anchor named no zone (a server-clock anchor, or a zone-less
+// matchkey) the stamp is read as UTC and flagged assumed, which routes the
+// comparison through markersAgree's whole-timezone slack — the honest answer
+// when the two are separated by an unknown offset.
+func resolveFinalScores(p finalScoresStamp, best candidate, matchLengthMs int32) (candidate, dateMarker) {
+	offset, assumed := 0, true
+	if best.zonePinned {
+		offset, assumed = best.zoneOffsetSec, false
+	}
+	endUnix := completeFinalScoresYear(p, best.matchStart+int64(matchLengthMs), offset)
+
+	accuracy := int32(finalScoresAccuracyMs)
+	if assumed {
+		accuracy = tzUnknownAccuracyMs
+	}
+	cand := candidate{
+		source:     wallSourceFinalScores,
+		matchStart: endUnix - int64(matchLengthMs),
+		accuracyMs: accuracy,
+		assumedUTC: assumed,
+	}
+	m := unresolvedFinalScoresMarker(p)
+	m.UnixMs = endUnix
+	m.AssumedUTC = assumed
+	m.YearFrom = best.source
+	return cand, m
+}
+
+// unresolvedFinalScoresMarker is the `//finalscores` stamp as reported when no
+// year could be attached to it: the raw text and nothing invented around it.
+func unresolvedFinalScoresMarker(p finalScoresStamp) dateMarker {
+	return dateMarker{
+		Source:     wallSourceFinalScores,
+		Kind:       wallKindMatchEnd,
+		AssumedUTC: true,
+		Raw:        p.raw,
+	}
+}
+
 // markerAccuracy re-derives a marker's uncertainty from what it recorded about
 // its zone (the parsed stamp is not kept around past the event pass).
 func markerAccuracy(m dateMarker) int32 {
@@ -811,8 +990,13 @@ func sourcePriority(source string) int {
 		return 3
 	case wallSourceKTXStats:
 		return 4
+	case wallSourceFinalScores:
+		// Last, and never actually reached: the year-less stamp is added to the
+		// candidate list only AFTER the anchor has been chosen, precisely so it
+		// can never become one.
+		return 5
 	}
-	return 5
+	return 6
 }
 
 // disagreeingSources names the candidates that cannot be reconciled with the
@@ -842,6 +1026,9 @@ func markersAgree(a, b candidate) bool {
 	tol := int64(markerAgreeToleranceMs)
 	if a.source == wallSourceKTXStats || b.source == wallSourceKTXStats {
 		tol = ktxStatsToleranceMs
+	}
+	if a.source == wallSourceFinalScores || b.source == wallSourceFinalScores {
+		tol = finalScoresToleranceMs
 	}
 	if d <= tol {
 		return true
@@ -901,6 +1088,11 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 			})
 		}
 	}
+	if res.Metadata != nil && res.Metadata.FinalScores != nil && res.Metadata.FinalScores.Date != "" {
+		if st, ok := parseFinalScoresDate(res.Metadata.FinalScores.Date); ok {
+			in.FinalScores = &st
+		}
+	}
 	if len(in.Markers) > 0 {
 		g.DateMarkers = append([]WallClockMarker(nil), in.Markers...)
 	}
@@ -909,6 +1101,11 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 	}
 
 	anchor := resolveWallClock(in)
+	// The `//finalscores` marker is appended last because it is resolved last —
+	// its year comes out of the anchor the other markers produced.
+	if anchor.FinalScoresMarker != nil {
+		g.DateMarkers = append(g.DateMarkers, *anchor.FinalScoresMarker)
+	}
 	if anchor.MatchStartUnixMs == 0 {
 		return
 	}

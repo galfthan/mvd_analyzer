@@ -48860,6 +48860,7 @@
     "gameDir": "qw",
     "map": "dm4",
     "mapTitle": "The Bad Place",
+    "mode": "team",
     "players": [
       {
         "deaths": 50,
@@ -48894,6 +48895,11 @@
         "team": "1"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 125,
@@ -53681,6 +53687,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  T e a m\nRespawns  KT2\nAntilag     2\nTeamplay    2\nTimelimit  10\nOvertime    3\nSOCDv2  stats\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 25, 13:17",
+      "map": "dm4",
+      "mode": "team",
+      "score1": 125,
+      "score2": 87,
+      "team1": "1",
+      "team2": "n n"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -79500,6 +79515,14 @@
           "source": "ktxstats",
           "tz": "+0200",
           "unixMs": 1777115835000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 25, 13:17",
+          "source": "finalscores",
+          "unixMs": 1777123020000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10160,

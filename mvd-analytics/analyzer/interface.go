@@ -195,6 +195,8 @@ type (
 	DemoMarkerEvent        = result.DemoMarkerEvent
 	MetadataResult         = result.MetadataResult
 	MatchSettings          = result.MatchSettings
+	FinalScores            = result.FinalScores
+	MatchSources           = result.MatchSources
 	LocGraphResult         = result.LocGraphResult
 	LocNode                = result.LocNode
 	LocWeights             = result.LocWeights
@@ -237,4 +239,15 @@ type (
 	WallClockMarker        = result.WallClockMarker
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
+)
+
+// MatchResult.Sources provenance values, re-exported for the same reason as
+// the type aliases above — match.go's Finalize takes a parameter named
+// `result`, so the qualified form is not spellable there.
+const (
+	MatchSrcKTX         = result.MatchSrcKTX
+	MatchSrcServerInfo  = result.MatchSrcServerInfo
+	MatchSrcFinalScores = result.MatchSrcFinalScores
+	MatchSrcLevelTitle  = result.MatchSrcLevelTitle
+	MatchSrcDerived     = result.MatchSrcDerived
 )

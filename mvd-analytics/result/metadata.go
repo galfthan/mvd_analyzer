@@ -20,6 +20,60 @@ type MetadataResult struct {
 	// CountdownText is the raw, color-stripped multi-line text of the
 	// last countdown centerprint we observed before the match started.
 	CountdownText string `json:"countdownText,omitempty"`
+
+	// FinalScores is KTX's `//finalscores` end-of-match stuffcmd, verbatim
+	// (schema v72). Absent on the 36% of the archive whose server never sent
+	// it, and on a demo whose copy was garbled (the parser drops a line that
+	// fails the shape check rather than guessing at its fields).
+	FinalScores *FinalScores `json:"finalScores,omitempty"`
+}
+
+// FinalScores is the server's own end-of-match scoreline, as stuffed by KTX's
+// `//finalscores` directive (ktx/src/commands.c:6963-6977). Schema v72.
+//
+// It is reported VERBATIM — no normalisation, no cross-checking against the
+// derived scoreboard — because on the pre-ktxstats half of the archive it is
+// the only place the wire states a final result at all, and a consumer that
+// wants to compare it with Match.Teams needs both sides untouched. Where the
+// pipeline does consume it (Match.Map / Match.Mode / Match.Teams fallbacks) the
+// use is named in MatchResult.Sources; it never displaces a demoinfo value.
+type FinalScores struct {
+	// Date is the server's LOCAL wall clock at match end, strftime
+	// "%b %d, %H:%M" — no year, no seconds, no timezone ("Sep 29, 21:27").
+	// Streams.Global.DateMarkers carries the resolved form: the wall-clock
+	// node completes the year from another marker (`yearFrom`) and reports
+	// the stamp unresolved, with unixMs 0, when there was none.
+	Date string `json:"date,omitempty"`
+	// Mode is KTX's lastscores mode name: "duel", "team", "FFA", "CTF",
+	// "RA", "Clan Arena", "Wipeout", "HoonyMode", "race", "unknown" (forks
+	// add their own — "Extinction" appears in the archive). Same family as
+	// the demoinfo `mode` string but not the same spelling ("FFA" vs "ffa",
+	// "Clan Arena" vs "clan-arena"); neither is rewritten to match the other.
+	Mode string `json:"mode,omitempty"`
+	// Map is the canonical short map name, KTX's `mapname`.
+	Map string `json:"map,omitempty"`
+	// Team1 / Score1 and Team2 / Score2 are the two sides as the server
+	// scored them. On a duel the "team" is the player's own name — the same
+	// player-as-team layout Match.Teams uses. Scores can be negative
+	// (suicides), and an empty team name is observed.
+	//
+	// WHAT THE SCORE COUNTS IS MODE-DEPENDENT, and this is the field's one
+	// real trap. On duel / team / FFA / CTF it is frags — get_scores1/2 sums
+	// the sides' `frags` (ktx/src/g_utils.c:1868-1919). On Clan Arena and
+	// Wipeout it is ROUNDS WON — lastscore_add switches to CA_get_score_1/2
+	// (ktx/src/commands.c:6867-6886) — so a Wipeout demo reports "5" against a
+	// scoreboard showing 241 frags, and the two are both right. Read Mode
+	// before comparing this with Match.Teams.
+	//
+	// Even on a frag-scored mode the two can differ by one: KTX counts the
+	// frag that ENDS the match, while the scoreboard here freezes at the
+	// match-end latch and the svc_updatefrags for that last kill lands on or
+	// after it (observed on 3 of 120 archive demos; the frag LOG has the kill
+	// either way — Match.Players[].Kills shows it).
+	Team1  string `json:"team1,omitempty"`
+	Score1 int    `json:"score1"`
+	Team2  string `json:"team2,omitempty"`
+	Score2 int    `json:"score2"`
 }
 
 // MatchSettings is the structured view of the KTX countdown table.

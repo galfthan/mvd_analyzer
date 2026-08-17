@@ -35587,6 +35587,7 @@
     "gameDir": "qw",
     "map": "aerowalk",
     "mapTitle": "Aerowalk",
+    "mode": "team",
     "players": [
       {
         "deaths": 56,
@@ -35621,6 +35622,11 @@
         "team": "pys"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 71,
@@ -37690,6 +37696,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  T e a m\nRespawns  KT2\nAntilag     1\nTmOverlay  on\nTeamplay    2\nTimelimit  10\nOvertime    3\nPowerups   on\nSOCDv2  stats\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 25, 02:33",
+      "map": "aerowalk",
+      "mode": "team",
+      "score1": 112,
+      "score2": 71,
+      "team1": "wd",
+      "team2": "pys"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 3,
@@ -56354,6 +56369,14 @@
           "source": "ktxstats",
           "tz": "-0300",
           "unixMs": 1777095188000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 25, 02:33",
+          "source": "finalscores",
+          "unixMs": 1777084380000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10104,

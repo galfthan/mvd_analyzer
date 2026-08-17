@@ -356,7 +356,10 @@ Output: `result.MetadataResult` — `serverInfo` (map of cvar →
 value), `matchSettings` (mode, timelimit, fraglimit, antilag,
 spawnmodel/spawnK, midair, instagib, overtime, powerups, vwep,
 noweapon, matchtag, …), `countdownText` (raw KTX
-countdown centerprint).
+countdown centerprint) and `finalScores` (KTX's `//finalscores`
+end-of-match scoreline, verbatim: date without a year, mode, map and
+the two sides — present on 64% of demos against demoinfo's 46%, and
+counting ROUNDS rather than frags on Clan Arena / Wipeout).
 
 #### `getFrags({demoId, ...})`
 

@@ -82851,6 +82851,7 @@
     "gameDir": "qw",
     "map": "defer",
     "mapTitle": "Coup de Fer",
+    "mode": "team",
     "players": [
       {
         "deaths": 59,
@@ -82917,6 +82918,11 @@
         "team": "jah"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 188,
@@ -93693,6 +93699,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  1\nMode  T e a m\nRespawns  KT2\nAntilag     1\nTeamplay    2\nTimelimit  20\nOvertime    5\nPowerups   on\nSOCDv2  stats\n\nmatchtag qwsldraft\n\n\n",
+    "finalScores": {
+      "date": "May 17, 21:53",
+      "map": "defer",
+      "mode": "team",
+      "score1": 180,
+      "score2": 188,
+      "team1": "jah",
+      "team2": "ahoy"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 1,
@@ -143293,6 +143308,14 @@
           "source": "ktxstats",
           "tz": "+0100",
           "unixMs": 1779051193000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "May 17, 21:53",
+          "source": "finalscores",
+          "unixMs": 1779054780000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10248,

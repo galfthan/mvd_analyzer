@@ -48,12 +48,33 @@ Defined in `result/match.go`.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Map | `map` | string | **The canonical map identifier** — always the SHORT name (`e1m2`, `dm2`, `aerowalk`). Resolved exactly like `Result.EffectiveMap()`: the KTX demoinfo map, else the serverinfo `map` key; only when neither names a map does it fall back to the cleaned level title. Join on this against `searchGames` rows, `metadata.serverInfo.map` and every BSP / loc / geometry file key. |
+| Map | `map` | string | **The canonical map identifier** — always the SHORT name (`e1m2`, `dm2`, `aerowalk`). Resolved exactly like `Result.EffectiveMap()`: the KTX demoinfo map, else the serverinfo `map` key, else (v72) the `//finalscores` map; only when none of those names a map does it fall back to the cleaned level title. `sources.map` says which. Join on this against `searchGames` rows, `metadata.serverInfo.map` and every BSP / loc / geometry file key. |
 | MapTitle | `mapTitle` | string | The level TITLE announced in `svc_serverdata` (`"Castle of the Damned"` on e1m2, `"Claustrophobopolis"` on dm2), cleaned of a `.bsp` suffix and a trailing ` by <author>` hint. **Display only** — never an identifier, a join key or a file key: it is free-form mapper-chosen text, not unique, and absent on demos whose `svc_serverdata` named no level (then omitted). |
+| Mode | `mode` | string, omitempty | v72 — KTX's own game-mode name: `duel`, `team`, `FFA`/`ffa`, `CTF`/`ctf`, `Clan Arena`/`clan-arena`, `Wipeout`, `HoonyMode`/`hoonymode`, `RA`/`rocket-arena`, `race`, `midair`, `instagib`. The two spellings per mode are the two sources' own vocabularies (demoinfo's `GetMode`, `ktx/src/stats.c:309`, and `//finalscores`' `lastscores2str`, `commands.c:6755`) reported verbatim, with `sources.mode` naming which — **compare case-insensitively**. NOT the serverinfo `mode` key (`1on1`, `4on4-midair`, a third vocabulary, verbatim under `metadata.serverInfo`) nor the countdown table's display spelling (`Duel`, under `metadata.matchSettings.mode`). |
 | GameDir | `gameDir` | string | Game directory (`qw`, `fortress`, custom). |
 | Duration | `duration` | int32 | Match length in milliseconds (parser-derived). Read this for "how long was the match". |
 | Players | `players` | []PlayerStat | Lightweight scoreboard view. |
 | Teams | `teams` | []TeamStat | Team standings (omitted in FFA). |
+| Sources | `sources` | MatchSources | v72 — per-field provenance; see below. |
+
+### MatchSources
+
+v72. Says where the resolved identity fields above came from, so a
+consumer can tell a server-authoritative value from a pipeline-derived
+one without re-deriving the precedence:
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Map | `map` | string, omitempty | `ktx` (demoinfo) \| `serverinfo` \| `finalscores` \| `levelTitle` (the degraded last resort — on a titled map that string is not a shortname at all). |
+| Mode | `mode` | string, omitempty | `ktx` (demoinfo) \| `finalscores`. |
+| Teams | `teams` | string, omitempty | `derived` — the rows are the per-player scoreboard summed by team, the normal case — or `finalscores`, meaning the scoreboard produced no team rows at all and the two sides come from KTX's end-of-match stuffcmd instead. |
+
+`//finalscores` **never displaces a demoinfo value**, and never corrects a
+derived team row: it fills only what nothing else answered. Where both
+exist they are worth comparing, and `metadata.finalScores` keeps the wire
+record verbatim for exactly that — but read `mode` first, because on Clan
+Arena and Wipeout KTX's score is *rounds won*, not frags (see
+[MetadataResult](#metadataresult-metadata)).
 
 The `startTime` / `endTime` fields were **removed in schema v36** — after time
 normalisation `startTime` was always 0 and `endTime` always equalled
@@ -1731,7 +1752,7 @@ The match window plus the demo/wall-clock anchor (moved here from
 | MatchStartSource | `matchStartSource` | string, omitempty | v72 — same vocabulary as `demoStartSource`. |
 | MatchStartConfidence | `matchStartConfidence` | string, omitempty | v72 — `exact` \| `unverified` \| `contradicted`. |
 | MatchStartNote | `matchStartNote` | string, omitempty | v72 — names the check(s) behind a non-`exact` grade. Empty on `exact`. |
-| MatchEndUnixMs | `matchEndUnixMs` | int64, omitempty | v72 — wall clock at match end, from the ktxstats `date` string. |
+| MatchEndUnixMs | `matchEndUnixMs` | int64, omitempty | v72 — wall clock at match end, from the ktxstats `date` string, else the year-completed `//finalscores` stamp. |
 | DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried; see below. |
 | Pauses | `pauses` | []TimelinePause, omitempty | Per-pause wall-clock segments; see below. |
 
@@ -1765,8 +1786,10 @@ overloading `demoStartUnixMs` with a differently-defined value:
 | `demoStartUnixMs` | origin of the `wallClockMs` mapping above | ~95% (v72), ~25% before |
 | `matchStartUnixMs` | "when was this match played?" | ~95% |
 
-Five sources feed it — the two server clocks plus the three wire date
-markers — listed in the order they are trusted:
+Five sources can anchor it — the two server clocks plus the three wire
+date markers that state a year — listed in the order they are trusted. A
+sixth, `//finalscores`, states no year and therefore anchors nothing; it
+corroborates (see below):
 
 | `…Source` | Wire origin | Names |
 |---|---|---|
@@ -1775,6 +1798,22 @@ markers — listed in the order they are trusted:
 | `matchdate` | level-2 broadcast print at match start, `ktx/src/match.c:1291`. Two layouts: ISO `2008-01-05 20:05:38 CET` and ctime `Mon Jul 03, 01:01:14 2006` | match start |
 | `matchkey` | level-2 broadcast print, kmod/KTeam era, `matchkey: 8-2005-8-13:19-56-18` (`<matchid>-<y>-<m>-<d>:<h>-<mm>-<ss>`, never any timezone) | match start |
 | `ktxstats` | the `date` string of the KTX demoinfo block (`%Y-%m-%d %H:%M:%S %z`), also published verbatim as `demoInfo.date` | match **end** (also `matchEndUnixMs`) |
+| `finalscores` | the date field of KTX's `//finalscores` end-of-match stuffcmd (`%b %d, %H:%M` — **no year**, no seconds, no zone), also published verbatim as `metadata.finalScores.date` | match **end**, corroboration only |
+
+**The year-less marker.** `//finalscores` reaches 64% of the archive but
+its stamp cannot name an instant on its own. It is resolved last: the
+year comes from whichever marker did anchor the match (reported as the
+marker's `yearFrom`), and the zone is borrowed from that same marker,
+because both stamps come from one server's `strftime(localtime)`. What
+remains is genuine evidence — month, day, hour and minute — and it is
+cross-checked like any other marker, with a tolerance of the ktxstats
+intermission spread plus the minute the layout truncates to. It can never
+be selected as `matchStartSource`, and with no other marker present it is
+reported with `unixMs: 0` and no `yearFrom` rather than dropped. On a
+120-demo archive sample of demos with no demoinfo block it corroborated
+every anchor (119 `exact` / 1 `unverified`, unchanged from before it was
+parsed) and supplied `matchEndUnixMs` on all 120, where the ktxstats
+source reaches none of them.
 
 Where only a print marker exists, `demoStartUnixMs` is back-shifted from
 it by `demoOffset` (so the formula above keeps working) and
@@ -1812,10 +1851,11 @@ used or not, so a consumer can redo the cross-check itself:
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Source | `source` | string | `matchdate` \| `matchkey` \| `ktxstats` |
+| Source | `source` | string | `matchdate` \| `matchkey` \| `ktxstats` \| `finalscores` |
 | Kind | `kind` | string | `matchStart` \| `matchEnd` |
-| UnixMs | `unixMs` | int64 | parsed instant, timezone applied |
-| AtMs | `atMs` | int32, omitempty | demo-clock ms of the print that carried it (absent for `ktxstats`) |
+| UnixMs | `unixMs` | int64 | parsed instant, timezone applied; `0` on a `finalscores` stamp whose year could not be completed |
+| AtMs | `atMs` | int32, omitempty | demo-clock ms of the print that carried it (absent for the two markers that ride no print, `ktxstats` and `finalscores`) |
+| YearFrom | `yearFrom` | string, omitempty | v72 — `finalscores` only: the marker its year was taken from |
 | TZ | `tz` | string, omitempty | zone token exactly as printed (`CET`, `+0200`, `Vdsteuropa, sommartid` — the Swedish long name after `Q_normalizetext` folds its high-bit `ä` to `d`) |
 | AssumedUTC | `assumedUtc` | bool, omitempty | the zone was missing or unrecognised, so UTC was assumed |
 | Raw | `raw` | string, omitempty | the stamp text after the marker prefix |
@@ -3354,6 +3394,32 @@ Defined in `result/metadata.go`.
 | ServerInfo | `serverInfo` | map[string]string | Last-write-wins union of fullserverinfo stufftext + per-key svc_serverinfo updates. |
 | MatchSettings | `matchSettings` | *MatchSettings | Parsed KTX countdown centerprint. |
 | CountdownText | `countdownText` | string | Raw multi-line centerprint (color-stripped). |
+| FinalScores | `finalScores` | *FinalScores | v72 — KTX's `//finalscores` end-of-match stuffcmd, verbatim; see below. |
+
+### FinalScores
+
+v72. The scoreline KTX stuffs at match end (`ktx/src/commands.c:6963-6977`,
+wire form `//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>"
+<s2>`). It reaches **64% of the archive against demoinfo's 46%**, so on the
+pre-ktxstats half it is the only place the *server* states a final result.
+Reported verbatim — nothing here is reconciled against the derived
+scoreboard; `match.sources` names where the pipeline did consume it.
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Date | `date` | string, omitempty | Server-LOCAL match-end stamp, `%b %d, %H:%M` — **no year**, no seconds, no timezone (`Sep 29, 21:27`). The resolved instant is `streams.global.dateMarkers[]` with `source: "finalscores"`. |
+| Mode | `mode` | string, omitempty | KTX's lastscores mode name (`duel`, `team`, `FFA`, `CTF`, `RA`, `Clan Arena`, `Wipeout`, `HoonyMode`, `race`, `unknown`; forks add their own — `Extinction` appears in the archive). |
+| Map | `map` | string, omitempty | Canonical short map name. |
+| Team1 / Team2 | `team1` / `team2` | string, omitempty | The two sides. On a duel the "team" is the player's own name — the same player-as-team layout `match.teams` uses. Normalised out of the Quake charset like every other name; an empty side is observed. |
+| Score1 / Score2 | `score1` / `score2` | int | The server's own final figures. **Can be negative** (suicides), and **what they count depends on the mode**: summed frags normally, but ROUNDS WON on Clan Arena and Wipeout (`CA_get_score_1/2`, `commands.c:6867-6886`) — a Wipeout demo reports `5` against a 241-frag scoreboard and both are right. |
+
+Even on a frag-scored mode this can differ from `match.teams` by one:
+KTX counts the frag that *ends* the match, while the scoreboard here
+freezes at the match-end latch and the `svc_updatefrags` for that last
+kill lands on or after it. Measured on 120 demoinfo-less archive demos:
+105 exact agreement, 10 differences (7 of them round-scored modes — 6
+Wipeout, 1 the fork mode `Extinction` — and 3 the ±1 above), 5 not
+comparable (duel team labels).
 
 `MatchSettings` covers `mode`, `deathmatch`, `teamplay`, `timelimit`,
 `fraglimit`, `spawnmodel`, `spawnK`, `antilag`, `overtime`, `powerups`,

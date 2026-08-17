@@ -75751,6 +75751,7 @@
     "gameDir": "qw",
     "map": "schloss",
     "mapTitle": "Schloss Adler",
+    "mode": "team",
     "players": [
       {
         "deaths": 81,
@@ -75817,6 +75818,11 @@
         "team": "'tbg"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 129,
@@ -90719,6 +90725,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  1\nMode  T e a m\nRespawns  KT2\nAntilag     1\nTeamplay    2\nTimelimit  20\nOvertime    5\nPowerups   on\nSOCDv2  stats\n\nmatchtag tb4\n\n\n",
+    "finalScores": {
+      "date": "Apr 17, 20:13",
+      "map": "schloss",
+      "mode": "team",
+      "score1": 129,
+      "score2": 266,
+      "team1": "'\u003e\u003c\u003e",
+      "team2": "'tbg"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 1,
@@ -139488,6 +139503,14 @@
           "source": "ktxstats",
           "tz": "+0000",
           "unixMs": 1776456788000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 17, 20:13",
+          "source": "finalscores",
+          "unixMs": 1776456780000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10092,

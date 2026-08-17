@@ -185,6 +185,15 @@ func BuildOverview(r *result.Result) Overview {
 		ov.Mode = r.Metadata.MatchSettings.Mode
 		ov.Matchtag = r.Metadata.MatchSettings.Matchtag
 	}
+	if ov.Mode == "" && r.Match != nil {
+		// The countdown centerprint above is a KTX-era signal; Match.Mode
+		// resolves the demoinfo / //finalscores vocabulary instead, which is
+		// what the pre-ktxstats half of the archive has (schema v72). It is a
+		// different spelling of the same idea ("duel" vs "Duel") — hence the
+		// fallback rather than a merge; result.MatchResult.Sources.Mode names
+		// which one a demo got.
+		ov.Mode = r.Match.Mode
+	}
 	if r.TimelineAnalysis != nil {
 		ov.LocCount = len(r.TimelineAnalysis.LocTable)
 		if len(r.TimelineAnalysis.PlayerUserIDs) > 0 {

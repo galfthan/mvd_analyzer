@@ -104,9 +104,9 @@ var analyzerNodeMeta = map[string]nodeMeta{
 
 	// Derived consumers / independent peers.
 	"metadata": {name: "metadata", resultKey: "metadata",
-		desc: "Server cvars and parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...)."},
+		desc: "Server cvars, parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...) and KTX's //finalscores end-of-match scoreline."},
 	"match": {name: "match", requires: []string{"demoinfo", "identity", "metadata"}, resultKey: "match",
-		desc: "Match summary: map, mode, duration, and the per-player scoreboard. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
+		desc: "Match summary: map, mode, duration, the per-player scoreboard, and a `sources` block naming where the map / mode / team rows came from (demoinfo, serverinfo, //finalscores, derived). In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
 	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},
 	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster", "metadata"}, resultKey: "timelineAnalysis",
@@ -183,7 +183,7 @@ var postNodeMeta = map[string]nodeMeta{
 	"wallClockPost": {
 		name: "wall-clock", mutates: true,
 		requires: []string{"clock", "demoinfo", "metadata", "timeline"},
-		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
 	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,

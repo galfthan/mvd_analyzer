@@ -62,6 +62,7 @@ const (
 	EventPlayerDeparture
 	EventPlayerRejoin
 	EventPointEffect
+	EventFinalScores
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -454,6 +455,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				demoMarkSlot = msg.Header.PlayerNum
 			}
 			if err := p.tryEmitDemoMark(s, demoMarkSlot, msg.TimeMs); err != nil {
+				return err
+			}
+			// `//finalscores` is stuffed at match end and carries the
+			// server's own final scoreline (see ktx_finalscores.go).
+			if err := p.tryEmitFinalScores(s, msg.TimeMs); err != nil {
 				return err
 			}
 

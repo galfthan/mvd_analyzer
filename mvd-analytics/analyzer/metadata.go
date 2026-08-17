@@ -25,7 +25,14 @@ import (
 //     left" / "Standby" / "Forcestart"; `fpd` toggles when admins flip
 //     `fpd add` / `fpd del`; etc). Last-write-wins.
 //
-//  3. svc_centerprint (cmd 26) — KTX renders the full match-settings
+//  3. the `//finalscores` stufftext KTX stuffs at match end — the server's
+//     own final scoreline plus its mode and map (parser/ktx_finalscores.go).
+//     It lands here rather than in `match` because it is a metadata record
+//     first: it is reported verbatim on every demo that carries one, and the
+//     match node reads it back through CoreOutputs only where a value of its
+//     own is missing.
+//
+//  4. svc_centerprint (cmd 26) — KTX renders the full match-settings
 //     table here every second of the 10-second countdown (match.c
 //     PrintCountdown). The last centerprint we see before the
 //     "match has begun!" print is the canonical match settings dump:
@@ -39,6 +46,7 @@ import (
 type MetadataAnalyzer struct {
 	serverInfo   map[string]string
 	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
+	finalScores  *FinalScores
 	timing       MatchTimingDetector
 }
 
@@ -77,6 +85,21 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		text := events.NormalizeQuakeText([]byte(e.Message))
 		if strings.Contains(text, "Countdown:") {
 			a.countdownRaw = text
+		}
+	case *events.FinalScoresEvent:
+		// Last write wins, like the serverinfo keys above: a demo spanning
+		// two matches carries one directive per match, and the Result
+		// describes the last one it saw complete. (Across a 12 000-demo
+		// archive sample every demo carrying the directive carried exactly
+		// one.)
+		a.finalScores = &FinalScores{
+			Date:   e.Date,
+			Mode:   e.Mode,
+			Map:    e.Map,
+			Team1:  e.Team1,
+			Score1: e.Score1,
+			Team2:  e.Team2,
+			Score2: e.Score2,
 		}
 	case *events.PrintEvent:
 		// Latch the match start so we stop overwriting countdownRaw with
@@ -143,7 +166,9 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 		mr.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
 	}
 
-	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" {
+	mr.FinalScores = a.finalScores
+
+	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" && mr.FinalScores == nil {
 		return nil
 	}
 	result.Metadata = mr
@@ -152,9 +177,12 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 
 // PopulateCore publishes the serverinfo `map` key so downstream producers
 // (timeline: loc / floor-height / liquid / region control) can resolve the map
-// even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap.
+// even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap —
+// plus the `//finalscores` record, which the match node reads for the map,
+// mode and team scores it could not resolve itself.
 func (a *MetadataAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.ServerInfoMap = a.serverInfo["map"]
+	co.FinalScores = a.finalScores
 }
 
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table

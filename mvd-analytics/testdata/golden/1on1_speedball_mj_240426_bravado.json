@@ -16989,6 +16989,7 @@
     "gameDir": "qw",
     "map": "bravado",
     "mapTitle": "Bravado -",
+    "mode": "duel",
     "players": [
       {
         "deaths": 7,
@@ -17007,6 +17008,11 @@
         "team": "mj"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 58,
@@ -17641,6 +17647,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  D u e l\nRespawns  KT2\nAntilag     1\nTimelimit  10\nOvertime    3\nSOCDv2  stats\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 22:54",
+      "map": "bravado",
+      "mode": "duel",
+      "score1": 58,
+      "score2": 6,
+      "team1": "speedball",
+      "team2": "mj"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 3,
@@ -28254,6 +28269,14 @@
           "source": "ktxstats",
           "tz": "+0000",
           "unixMs": 1777071278000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 24, 22:54",
+          "source": "finalscores",
+          "unixMs": 1777071240000,
+          "yearFrom": "epoch"
         }
       ],
       "demoOffset": 10091,

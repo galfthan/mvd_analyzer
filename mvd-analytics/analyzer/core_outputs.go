@@ -102,6 +102,14 @@ type CoreOutputs struct {
 	// — read it through EffectiveMap, not directly. Empty when no serverinfo
 	// map was seen.
 	ServerInfoMap string
+
+	// FinalScores is KTX's `//finalscores` end-of-match record, published by
+	// the metadata node (PopulateCore). It is the only wire statement of a
+	// final scoreline on the pre-ktxstats half of the archive; the match node
+	// reads it for the map / mode / team rows it has no source of its own for,
+	// naming the use in MatchResult.Sources. Nil when the demo carried no
+	// (parseable) directive.
+	FinalScores *FinalScores
 }
 
 // EffectiveMap resolves which map (hence which BSP / loc corpus) the demo was

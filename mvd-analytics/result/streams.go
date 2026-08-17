@@ -516,9 +516,11 @@ type GlobalStream struct {
 	// `version-floor: ktx 1.42 postdates the stamp (1.42 >= 2021-01-01)` or
 	// `tz-unknown: no timezone on the marker, UTC assumed`. Empty on "exact".
 	MatchStartNote string `json:"matchStartNote,omitempty"`
-	// MatchEndUnixMs is the wall clock at match end, from the ktxstats
-	// `date` string (KTX writes the block at intermission). Absent when the
-	// demo carries no ktxstats block or its date does not parse.
+	// MatchEndUnixMs is the wall clock at match end: the ktxstats `date`
+	// string (KTX writes the block at intermission), else the `//finalscores`
+	// stamp once its year has been completed — which is minute-resolution and
+	// only as good as the marker its year came from. Absent when the demo
+	// carries neither, or neither parsed.
 	MatchEndUnixMs int64 `json:"matchEndUnixMs,omitempty"`
 	// DateMarkers lists every date stamp the wire carried, in the order
 	// they were seen, whether or not the anchor above used them. They are
@@ -537,17 +539,26 @@ type GlobalStream struct {
 // appears here; MatchStartConfidence carries the verdict.
 type WallClockMarker struct {
 	// Source is the wire marker: "matchdate" (KTX's match-start bprint,
-	// ktx/src/match.c:1291), "matchkey" (the kmod/KTeam-era bprint), or
-	// "ktxstats" (the `date` field of the KTX demoinfo block).
+	// ktx/src/match.c:1291), "matchkey" (the kmod/KTeam-era bprint),
+	// "ktxstats" (the `date` field of the KTX demoinfo block), or
+	// "finalscores" (the `//finalscores` end-of-match stuffcmd).
 	Source string `json:"source"`
 	// Kind is what instant the stamp names: "matchStart" or "matchEnd".
 	Kind string `json:"kind"`
-	// UnixMs is the parsed instant (Unix epoch ms), with TZ applied.
+	// UnixMs is the parsed instant (Unix epoch ms), with TZ applied. 0 on a
+	// "finalscores" marker whose year could not be completed — see YearFrom.
 	UnixMs int64 `json:"unixMs"`
 	// AtMs is the demo-clock ms the marker was printed at, for the
-	// print-borne markers. Absent (0) for the ktxstats block, which has no
-	// print of its own.
+	// print-borne markers. Absent (0) for the markers that ride no print: the
+	// ktxstats block and the `//finalscores` stuffcmd.
 	AtMs int32 `json:"atMs,omitempty"`
+	// YearFrom names the marker whose year completed this stamp. It is set
+	// only on "finalscores", whose strftime layout ("%b %d, %H:%M") carries
+	// no year: the wall-clock node takes the year from the marker it anchored
+	// the match on, so the stamp corroborates on month/day/hour/minute and
+	// never on the year, and it can state no instant at all when the demo
+	// carried no other marker (UnixMs 0, YearFrom empty).
+	YearFrom string `json:"yearFrom,omitempty"`
 	// TZ is the zone token exactly as printed ("CET", "+0200",
 	// "Vdsteuropa, sommartid" post-normalisation). Empty when the stamp
 	// carried none.
