@@ -11,7 +11,25 @@ Population shorthand: eras E0 (qwsv/KTPro, 27.5% of archive) … E5
 (boundaries: `//ktx drop` @1.38, dmgdone @1.40, ktxstats @1.41; forks
 lie about their version).
 
-## 1. Wall-clock anchors: parse `matchdate:` (coverage 24% → ~70%)
+## 1. Wall-clock anchors: parse `matchdate:` + `matchkey:` (coverage 24% → ~98%)
+
+UPDATE 2026-08-17 (51k readability sweep + community intel from the
+#mvd-analyzer Discord, niomic/vikpe): `matchdate:` alone only reaches
+~72% of the archive and misses HALF of the reconstructed-era demos —
+but old demos carry **`matchkey: <id>-<yyyy>-<m>-<d>:<h>-<mm>-<ss>`**
+instead (e.g. `matchkey: 8-2005-8-13:19-56-18` → 2005-08-13T19:56:18),
+and in a 300-demo raw scan matchkey (29%) and matchdate (69%) were
+PERFECTLY complementary: 98% of demos carry one or the other. Also on
+the wire: `sinfoset` (20%) and an `epoch` key on modern demos.
+Timezone reality from vikpe's collected cases: Euro abbreviations map
+cleanly (EEST +03, CEST +02, CET +01, UTC), numeric offsets (`+03`,
+`-05:00`), Swedish locale strings ("Västeuropa, sommartid" +02 /
+"normaltid" +01), missing tz → assume UTC. TRUST GATING is mandatory:
+unset server clocks produce bogus date clusters (a whole 2000-01-07
+night of demos observed), LAN matchkeys are off (qhlan), and stuffed
+values get corrupted ("timelimit" changed to "Final Score is 47 - 9")
+— sanity-gate against the serverinfo `*version` era and flag
+low-confidence anchors rather than dropping them.
 
 KTX broadcasts `matchdate: <stamp>` at match start on 70% of the
 archive (100% of E3–E5, 60% of E2) — currently discarded because
@@ -112,6 +130,44 @@ building.
 - **"no match detected" marker** — 2% of the archive (TF/CTF/race
   content) yields empty streams with no way for a consumer to tell
   "no match here" from "parse failed"; add an explicit marker.
+
+## 8. Mid-match recordings: salvage or mark (NEW from the 51k sweep)
+
+Of the 877 "no player streams" demos, ~260 are REAL matches whose
+recording starts mid-game — serverinfo `status` reads "1 min left" /
+"Game Ended" at demo open, the frag log parses (30-50 frags), 73 carry
+matchdate — but match-start detection never fires, streams come out
+empty and `errors[]` is EMPTY (the v52 `timeBase:"demo"` fallback does
+not engage; investigate why). Fix in two stages: (a) always emit an
+explicit marker (extends lead 7's "no match detected" idea — and
+distinguish "mid-match recording", detectable from the `status` key,
+from "foreign mod content"); (b) salvage: analyze the recorded portion
+on the demo clock. The rest of the 877 is genuinely foreign content
+(TF/custom-mod maps: genders2, blitzkrieg2, mvdsv-kg) — mark, don't
+parse.
+
+## 9. Derived demoinfo equivalents (NEW from the 51k sweep)
+
+54% of the archive has no KTX demoinfo block, and the census shows
+that ceiling is permanent (it's the pre-ktxstats half). But most of
+what the block carries is derivable from data we already have: weapon
+fires from the shot streams, hits via lead 6, sprees from the frag
+log, powerup/RA control time from the item/stream intervals. A
+`src:"derived"` stats section closing most of the demoinfo gap on old
+demos — sequence after leads 5/6 so the hit-side inputs exist.
+
+## Full-archive readability census (2026-08-17)
+
+`qw-corpus-survey -readability` over all 50,951 demos (CSV:
+`/mnt/HC_Volume_106625439/data/readability-51k.csv`, summary at the
+tail of `readability-51k.log` beside it). Headlines: ktx 46.8% /
+reconstructed 51.1% / none 1.7% (the 877 of lead 8) / skipped 0.4%;
+zero unexpected pipeline errors; parse warnings on 1.0% of demos,
+unknown_svc on just 12. Marker coverage: matchdate 71.9%, finalscores
+64.1%, //ktx drop 49.2%, demoinfo 45.6%, current wallclock 24.8%.
+Reconstructed-half ceilings before this plan's leads: 51.6% dateless
+(matchkey closes it — lead 1), 65.3% score-source-less, 83.9% without
+backpack GT.
 
 ## Validation assets (all in place)
 
