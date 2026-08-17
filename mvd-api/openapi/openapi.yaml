@@ -462,6 +462,14 @@ paths:
         pauses at or before g (±demoStartAccuracyMs). `timing` is omitted when
         the demo carries no wall-clock source; `pauses` when the match had
         none.
+
+        **When was it played?** Read `timing.matchStartUnixMs` (schema v72),
+        not `demoStartUnixMs`: it is what the wire date markers actually state
+        and is present on ~95% of demos against ~25% for the server-clock
+        anchor. Always check `matchStartConfidence` —
+        `contradicted` means the stamp fails a check (e.g. it predates the
+        server binary's release) and is reported rather than dropped, with
+        `matchStartNote` naming the check.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Label"
@@ -3231,6 +3239,49 @@ components:
               type: integer
             demoStartUnixMs:
               description: "Wall-clock time of demo start, Unix ms."
+              type: integer
+            demoStartSource:
+              description: >-
+                Where the demo-start anchor came from: `mvdhidden` / `epoch`
+                (server clock) or `matchdate` / `matchkey` / `ktxstats` (a wire
+                date marker back-shifted by demoOffset). Schema v72.
+              type: string
+            matchEndUnixMs:
+              description: "Wall-clock time of match end from the ktxstats date, Unix ms. Schema v72."
+              type: integer
+            matchStartAccuracyMs:
+              description: >-
+                Uncertainty of matchStartUnixMs, int32 ms: 1/1000 for a server
+                clock or a zoned marker, 3600000 for a zone name of unstated DST
+                status, 43200000 when the marker named no zone and UTC was
+                assumed. Schema v72.
+              maximum: 2.147483647e+09
+              minimum: -2.147483648e+09
+              type: integer
+            matchStartConfidence:
+              description: >-
+                Grade of matchStartUnixMs: `exact` (zone resolved, no check
+                failed), `unverified` (nothing contradicts it but something is
+                unpinned), `contradicted` (a check it provably fails — the
+                anchor is still reported). Schema v72.
+              enum:
+                - exact
+                - unverified
+                - contradicted
+              type: string
+            matchStartNote:
+              description: "Names the checks behind a non-`exact` matchStartConfidence. Schema v72."
+              type: string
+            matchStartSource:
+              description: >-
+                Which marker matchStartUnixMs was derived from: `mvdhidden`,
+                `epoch`, `matchdate`, `matchkey`, `ktxstats`. Schema v72.
+              type: string
+            matchStartUnixMs:
+              description: >-
+                Wall-clock time of MATCH start (the instant g=0 names), Unix ms.
+                Present on ~95% of demos against ~25% for demoStartUnixMs, since
+                the wire date markers describe the match. Schema v72.
               type: integer
             pauses:
               description: "Game pauses as flat game-time→wall-clock segments."

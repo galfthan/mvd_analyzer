@@ -79,19 +79,31 @@ type OverviewTeam struct {
 	Frags int    `json:"frags"`
 }
 
-// OverviewTiming exposes the demo-open wall-clock anchor (streams.global) so a
+// OverviewTiming exposes the wall-clock anchors (streams.global) so a
 // REST/MCP consumer can map a match-relative game time g (ms) to real time:
 //
 //	wallClockMs = demoStartUnixMs + demoOffset + g + Σ pauses[i].durationMs (atMs <= g)
 //	             (±demoStartAccuracyMs)
 //
+// matchStartUnixMs is the separate "when was this played" anchor (schema v72):
+// it is what the wire date markers state, and it is present on ~95% of demos
+// against ~25% for the server-clock sources behind demoStartUnixMs.
+// matchStartConfidence grades it — see RESULT_SCHEMA.md's GlobalStream section.
+//
 // All fields omitempty; the block itself is omitted when no wall-clock source
 // is present. Pauses reuses the result shape: {atMs, durationMs}.
 type OverviewTiming struct {
-	DemoOffset          int32                  `json:"demoOffset,omitempty"`
-	DemoStartUnixMs     int64                  `json:"demoStartUnixMs,omitempty"`
-	DemoStartAccuracyMs int32                  `json:"demoStartAccuracyMs,omitempty"`
-	Pauses              []result.TimelinePause `json:"pauses,omitempty"`
+	DemoOffset           int32                  `json:"demoOffset,omitempty"`
+	DemoStartUnixMs      int64                  `json:"demoStartUnixMs,omitempty"`
+	DemoStartAccuracyMs  int32                  `json:"demoStartAccuracyMs,omitempty"`
+	DemoStartSource      string                 `json:"demoStartSource,omitempty"`
+	MatchStartUnixMs     int64                  `json:"matchStartUnixMs,omitempty"`
+	MatchStartAccuracyMs int32                  `json:"matchStartAccuracyMs,omitempty"`
+	MatchStartSource     string                 `json:"matchStartSource,omitempty"`
+	MatchStartConfidence string                 `json:"matchStartConfidence,omitempty"`
+	MatchStartNote       string                 `json:"matchStartNote,omitempty"`
+	MatchEndUnixMs       int64                  `json:"matchEndUnixMs,omitempty"`
+	Pauses               []result.TimelinePause `json:"pauses,omitempty"`
 }
 
 // OverviewPlayer carries each player's identity + scoreboard line, taken
@@ -153,12 +165,19 @@ func BuildOverview(r *result.Result) Overview {
 		g := r.Streams.Global
 		ov.MatchStart = g.MatchStart
 		ov.MatchEnd = g.MatchEnd
-		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || len(g.Pauses) > 0 {
+		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || g.MatchStartUnixMs != 0 || len(g.Pauses) > 0 {
 			ov.Timing = &OverviewTiming{
-				DemoOffset:          g.DemoOffset,
-				DemoStartUnixMs:     g.DemoStartUnixMs,
-				DemoStartAccuracyMs: g.DemoStartAccuracyMs,
-				Pauses:              g.Pauses,
+				DemoOffset:           g.DemoOffset,
+				DemoStartUnixMs:      g.DemoStartUnixMs,
+				DemoStartAccuracyMs:  g.DemoStartAccuracyMs,
+				DemoStartSource:      g.DemoStartSource,
+				MatchStartUnixMs:     g.MatchStartUnixMs,
+				MatchStartAccuracyMs: g.MatchStartAccuracyMs,
+				MatchStartSource:     g.MatchStartSource,
+				MatchStartConfidence: g.MatchStartConfidence,
+				MatchStartNote:       g.MatchStartNote,
+				MatchEndUnixMs:       g.MatchEndUnixMs,
+				Pauses:               g.Pauses,
 			}
 		}
 	}

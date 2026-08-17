@@ -132,7 +132,17 @@ and `/metadata` — carry no echo because there is no time value to unit.
 
 `/overview`'s `timing` block is consistent with the rule: its wall-clock
 fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
-`demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
+`demoStartAccuracyMs`, `matchStartUnixMs`, `matchStartAccuracyMs`,
+`matchEndUnixMs`, `pauses[].atMs`/`.durationMs`).
+
+To answer *when a match was played*, read `timing.matchStartUnixMs`
+(schema v72) rather than `demoStartUnixMs`: it comes from the date
+markers the server printed on the wire, so it is present on ~95% of demos
+where the server-clock anchor reaches ~25%. It is graded, not filtered —
+check `matchStartConfidence` (`exact` / `unverified` / `contradicted`)
+and, when it is not `exact`, `matchStartNote`, which names the check that
+failed (typically an unset server clock stamping a date before its own
+binary was released).
 
 **Query inputs follow the same rule**: `from`/`to`/`time` on demo
 endpoints are **integer milliseconds**. A non-integer value (e.g.
