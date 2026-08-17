@@ -393,6 +393,10 @@ func NewDefaultRegistry() *Registry {
 	r.RegisterPostProcessor(airgibsPost)
 	r.RegisterPostProcessor(scoreboardStatsPost)
 	r.RegisterPostProcessor(locGraphPost)
+	// Wall clock reads the clock's date markers, demoinfo's ktxstats date and
+	// metadata's serverinfo version keys, and writes the graded match-start
+	// anchor onto the Streams.Global block the timeline created.
+	r.RegisterPostProcessor(wallClockPost)
 	r.RegisterPostProcessor(regionControlPost)
 	r.RegisterPostProcessor(openingPost)
 	// Player stats join the corrected scoreboard, damage, pickups and the

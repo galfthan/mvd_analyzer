@@ -637,6 +637,23 @@ carries no wall-clock source; implausible `0x000B` payloads fall back to
 `streams.global` and exposed via the REST `/overview` `timing` block in
 v23**, alongside `matchStart`/`matchEnd`.)
 
+Both of those sources are modern-mvdsv features, present on ~25% of the
+archive. Schema **v72** adds a second anchor beside them — `matchStartUnixMs`,
+the wall clock at *match* start — read from the date markers the wire has
+always carried: KTX's `matchdate:` broadcast print (ISO or ctime layout), the
+kmod-era `matchkey:` print, and the ktxstats `date` string (which names match
+*end*, also published as `matchEndUnixMs`). That reaches ~95% of the archive.
+Timezones are resolved from the printed token where there is one, and a stamp
+without one is read as UTC with `matchStartAccuracyMs` saying so
+(43 200 000). Because old servers ran with unset clocks, each anchor is graded
+`matchStartConfidence` = `exact` / `unverified` / `contradicted` — on
+CONTRADICTION only (a stamp predating the `*version` / `ktxver` binary's
+release), never on the date value — with `matchStartNote` naming the failed
+check and `dateMarkers[]` listing every stamp seen. Nothing is dropped. Where
+the demo has no server-clock source, `demoStartUnixMs` is back-shifted from an
+uncontradicted marker by `demoOffset` so the formula above keeps working, and
+`demoStartSource` records which source it came from.
+
 Schema v24–v28 enrich the position track with map-geometry-derived
 per-sample columns: height above the floor (`h`, v24 — traced through the
 map's BSP clip hull, later refined to a bounding-box footprint in v26 and
@@ -974,9 +991,15 @@ diff -r /tmp/before /tmp/after
    `demoStartUnixMs` is millisecond-accurate (`demoStartAccuracyMs = 1`)
    only when the demo carries the mvdhidden `0x000B` block; otherwise it
    degrades to the whole-second serverinfo `epoch` cvar
-   (`demoStartAccuracyMs = 1000`), and is absent entirely when neither is
-   present (e.g. non-KTX or pre-2026 demos). It anchors **demo open**, not
-   match start — consumers add `demoOffset` to reach the match. Some 2026
+   (`demoStartAccuracyMs = 1000`), and — on the ~73% of the archive that has
+   neither — is back-shifted from a wire date marker by `demoOffset` (schema
+   v72), which costs resolution: `demoStartAccuracyMs` becomes `43200000` when
+   the marker named no timezone. `demoStartSource` says which case a result is
+   in, and `matchStartConfidence` grades the marker; a *contradicted* marker is
+   deliberately not back-shifted, so `demoStartUnixMs` can still be absent. ~5%
+   of the archive carries no date signal at all. It anchors **demo open**, not
+   match start — consumers add `demoOffset` to reach the match, or read
+   `matchStartUnixMs`. Some 2026
    demos emit a `0x000B` block that is not a timestamp at all (a 1–2 byte
    non-wall-clock value); those are range-checked out and fall back to
    `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and

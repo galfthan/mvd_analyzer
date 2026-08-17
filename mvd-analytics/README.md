@@ -341,8 +341,9 @@ whole-Result rebase or duel rewrite.
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `regionControlPost`,
-`openingPost`, [`playerStatsPost`](analyzer/player_stats.md),
+`scoreboardStatsPost`, `locGraphPost`, `wallClockPost`,
+`regionControlPost`, `openingPost`,
+[`playerStatsPost`](analyzer/player_stats.md),
 `damageReconPost`. They come in
 three shapes. **One creates a section of its own**: `playerStatsPost` is
 node `player-stats`, publishing `playerStats` — it consumes twelve
@@ -367,6 +368,14 @@ from the state streams — package
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
 section is never touched.
+
+`wallClockPost` is node `wall-clock`: it resolves the wire date markers
+the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
+`date` string, and the serverinfo version keys into the graded match-start
+anchor on `streams.global` (`matchStartUnixMs` + `matchStartConfidence`,
+schema v72). It is a post-processor because its evidence is spread across
+three artifacts — `clock`, `demoinfo` and `metadata` — and it projects onto
+the match window `timeline` publishes.
 
 One further node, `los`, is **lazy**: materialised on demand rather than in
 the eager parse (see "The dependency DAG").
@@ -457,6 +466,7 @@ flowchart TB
     frags_final["frags-final"]
     airgibs["airgibs"]
     loc_graph["loc-graph"]
+    wall_clock["wall-clock"]
     region_control["region-control"]
     opening["opening"]
     los["los"]
@@ -479,6 +489,7 @@ flowchart TB
   clock -->|"clock"| player_stats
   clock -->|"clock"| shots
   clock -->|"clock"| timeline
+  clock -->|"clock"| wall_clock
   clock -->|"clock"| weapon_pickups
   damage -->|"damage"| aim
   damage -->|"damage"| airgibs
@@ -499,6 +510,7 @@ flowchart TB
   demoinfo -->|"demoinfo"| roster
   demoinfo -->|"demoinfo"| shots
   demoinfo -->|"demoinfo"| timeline
+  demoinfo -->|"demoinfo"| wall_clock
   frag -->|"frag"| airgibs
   frag -->|"frag"| frags_final
   frag -->|"frag"| timeline
@@ -525,6 +537,7 @@ flowchart TB
   metadata -->|"metadata"| match
   metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
+  metadata -->|"metadata"| wall_clock
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items
@@ -546,9 +559,10 @@ flowchart TB
   timeline -->|"timeline"| player_stats
   timeline -->|"timeline"| region_control
   timeline -->|"timeline"| shots
+  timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,region_control,opening,player_stats,damage_recon post;
+  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```

@@ -1115,8 +1115,26 @@ package result
 //     two by `source`. Validation against KTX ground truth on modern demos:
 //     see mvd-analytics/damagerecon/ACCURACY.md.
 //
+// v72 — match-start wall-clock anchor from the wire date markers.
+//   - ADDED on `streams.global`: `matchStartUnixMs`, `matchStartAccuracyMs`,
+//     `matchStartSource`, `matchStartConfidence`, `matchStartNote`,
+//     `matchEndUnixMs`, `dateMarkers[]`, and `demoStartSource`. The anchor is
+//     resolved by the new `wall-clock` DAG node from the `matchdate:` /
+//     `matchkey:` broadcast prints, the ktxstats `date` string, and the
+//     serverinfo version keys.
+//   - CHANGED: `demoStartUnixMs` / `demoStartAccuracyMs` are now also derived
+//     from a date marker (back-shifted by `demoOffset`) on demos that carry no
+//     mvdhidden 0x000B block and no `epoch` cvar — which lifts wall-clock
+//     coverage from ~25% of the archive to ~98%. `demoStartSource` says which
+//     source a given result used, and `demoStartAccuracyMs` states the cost:
+//     43 200 000 when the marker named no timezone.
+//   - Anchors are never dropped on a failed trust check: `matchStartConfidence`
+//     grades them ("exact" / "unverified" / "contradicted") and
+//     `matchStartNote` names the check. Only a "contradicted" stamp is kept out
+//     of `demoStartUnixMs`.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 71
+const CurrentSchemaVersion = 72
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

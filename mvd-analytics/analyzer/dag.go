@@ -20,7 +20,7 @@ import "fmt"
 // The out-of-band lazy pass ComputeLOS (los.go) is modelled as a lazy DAG node
 // since Stage 3 (materialize.go): a nodeSpec with Lazy:true, registered in
 // lazyArtifacts rather than in the eager analyzer / post-processor slices. It
-// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 21 eager
+// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 25 eager
 // nodes), so the eager bundle and the golden corpus are unchanged; it appears
 // in -graph output marked lazy and is materialised on demand through the
 // LazyArtifact hooks (mvd-api's per-artifact tier-3 cache). (The spatial
@@ -179,6 +179,11 @@ var postNodeMeta = map[string]nodeMeta{
 		requires:  []string{"timeline", "demoinfo"},
 		resultKey: "locGraph",
 		desc:      "Per-map loc adjacency graph with directed transition weights derived from player movement.",
+	},
+	"wallClockPost": {
+		name: "wall-clock", mutates: true,
+		requires: []string{"clock", "demoinfo", "metadata", "timeline"},
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
 	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,

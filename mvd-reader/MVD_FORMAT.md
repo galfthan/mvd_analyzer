@@ -1531,6 +1531,45 @@ exactly the false positive this guards against.
 - Axe + Shotgun (25 shells)
 - No powerups
 
+#### Match Date Markers (`matchdate:` / `matchkey:`)
+
+Two eras of server mod announce the **wall-clock date** on the same
+`svc_print` channel, at `PRINT_HIGH` (level 2), as a broadcast:
+
+| Marker | Emitted by | Layout |
+|---|---|---|
+| `matchdate: 2008-01-05 20:05:38 CET` | KTX, one frame before `"The match has begun!"` (`ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)`) | strftime `%Y-%m-%d %H:%M:%S %Z` |
+| `matchdate: Mon Jul 03, 01:01:14 2006` | older KTX builds, same call site | strftime `%a %b %d, %H:%M:%S %Y`, usually with no zone at all |
+| `matchkey: 8-2005-8-13:19-56-18` | kmod / KTeam era (pre-KTX), also at match start | `<matchid>-<yyyy>-<m>-<d>:<h>-<mm>-<ss>`, never zoned, fields not zero-padded |
+
+Both are line-assembled like any other print — the kmod one is commonly
+split across three `svc_print` fragments (`"matchkey: 9-"`, `"195923-"`,
+`"1626\n"`), so a per-message matcher sees none of them.
+
+Traps worth knowing:
+
+- `%Z` is whatever the server's C library calls the local zone. Besides
+  the usual abbreviations it can be a numeric offset, or a locale
+  sentence with spaces and a comma in it (`Västeuropa, sommartid`) —
+  which arrives *mangled* because `Q_normalizetext` folds the high-bit
+  `ä` down to `d`. Treat the whole remainder of the line as the zone
+  token, and match the Swedish forms on the ASCII tail (`sommartid` /
+  `normaltid`).
+- Not every `matchkey:` carries a date: some servers print an opaque
+  key (`matchkey: 9-195923-1626`) in the same slot.
+- `Build date:` is the **mvdsv binary's** build stamp, not a match date.
+- The `serverdemo` filename embeds a date that is genuinely ambiguous
+  (`%d%m%y` and `%y%m%d` are both observed in the archive) — do not parse
+  it without a print-derived cross-check.
+- Servers with unset clocks stamp real markers with wrong dates (whole
+  "nights" of 2000-01-0x appear across the archive). The date value alone
+  never proves this; see the trust model in
+  [RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md#globalstream).
+
+A third date lives in the KTX demoinfo (ktxstats) block's `date` field,
+`%Y-%m-%d %H:%M:%S %z`. That block is written at intermission, so it names
+match **end**, not match start.
+
 #### Match End Detection
 
 The match ends when one of these messages appears:

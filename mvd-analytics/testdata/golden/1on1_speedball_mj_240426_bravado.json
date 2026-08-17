@@ -18227,7 +18227,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 71,
+  "schemaVersion": 72,
   "shots": {
     "byPlayer": [
       {
@@ -28239,11 +28239,34 @@
   },
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10091,
+          "kind": "matchStart",
+          "raw": "2026-04-24 22:44:38 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1777070678000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-04-24 22:54:38 +0000",
+          "source": "ktxstats",
+          "tz": "+0000",
+          "unixMs": 1777071278000
+        }
+      ],
       "demoOffset": 10091,
       "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
       "demoStartUnixMs": 1777070668000,
       "matchEnd": 600001,
-      "matchStart": 0
+      "matchEndUnixMs": 1777071278000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1777070678091
     },
     "movers": [
       {

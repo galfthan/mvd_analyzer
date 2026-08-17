@@ -5,6 +5,55 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (archive-parsing) — a wall clock on nearly every demo, schema v72
+
+Only ~25% of the 51k-demo archive carried a wall-clock anchor: the
+mvdhidden 0x000B block and the serverinfo `epoch` cvar are both modern
+mvdsv features, so on three quarters of the archive there was no way to
+answer "when was this played?". The demos were never silent about it —
+they say it in a *print* instead, and the pipeline dropped the line.
+
+The new `wall-clock` DAG node reads the three date markers the wire
+actually carries and resolves them into a **match-start** anchor on
+`streams.global`:
+
+- `matchdate: 2008-01-05 20:05:38 CET` — KTX broadcasts this at match
+  start (`ktx/src/match.c:1291`), in an ISO or a ctime
+  (`Mon Jul 03, 01:01:14 2006`) layout. 72% of the archive.
+- `matchkey: 8-2005-8-13:19-56-18` — the kmod / KTeam-era predecessor,
+  carried by most demos that have no `matchdate` at all. The two are
+  near-perfectly complementary.
+- the ktxstats `date` string, which names match **end** and now also
+  lands in `matchEndUnixMs` instead of only being passed through as text.
+
+Timezones are resolved from the token the server printed — European and
+US abbreviations, numeric `%z` offsets (`+03`, `+0200`, `-05:00`), and
+the Swedish Windows locale strings, which arrive mangled because
+`Q_normalizetext` folds the high-bit `ä` of "Västeuropa" to `d`. A stamp
+with no zone is read as UTC and *says so*: `matchStartAccuracyMs` is
+43 200 000 there, against 1000 for a resolved zone.
+
+Old servers ran with unset clocks, so anchors are graded — but on
+CONTRADICTION, never on the date itself (2000 is a live QuakeWorld year,
+and a whole LAN night can legitimately sit in one January). The hard
+check is that a binary cannot predate its own release: `*version` /
+`ktxver` name the build, and a release-floor table derived from the
+archive's own version×date distribution turns a mid-2000s MVDSV stamping
+2000-01-07 into a provable unset clock — while the same stamp on QW 2.40
+stays an ordinary date. Softer signals (markers disagreeing within one
+demo, the 2000-01 boot-default window) only downgrade in combination.
+**No anchor is ever dropped**: `matchStartConfidence` is `exact` /
+`unverified` / `contradicted` and `matchStartNote` names the check, with
+every stamp seen listed in `dateMarkers[]`.
+
+Where a demo has no server-clock source, `demoStartUnixMs` is back-shifted
+from the marker by `demoOffset` so the documented `wallClockMs` formula
+keeps working, and the new `demoStartSource` says where it came from; a
+contradicted stamp is deliberately not back-shifted. Measured on a
+260-demo stratified archive sample: wall-clock coverage 24.8% → ~95%
+(100% of the `matchdate` demos, 82% of the dateless ones — the rest
+carry a non-date `matchkey` variant like `9-195923-1626`).
+
 ## unreleased (reconstruct-damage) — damage on every demo, schema v71
 
 ~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:

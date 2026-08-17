@@ -234,6 +234,7 @@ type (
 	Bounds                 = result.Bounds
 	Streams                = result.Streams
 	GlobalStream           = result.GlobalStream
+	WallClockMarker        = result.WallClockMarker
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
 )

@@ -13,6 +13,21 @@ lie about their version).
 
 ## 1. Wall-clock anchors: parse `matchdate:` + `matchkey:` (coverage 24% → ~98%)
 
+**SHIPPED** on `archive-parsing` (schema v72): the `wall-clock` DAG node
+(`mvd-analytics/analyzer/wallclock.go`) parses both `matchdate:` layouts,
+`matchkey:` and the ktxstats `date`, resolves timezones, and grades each
+anchor `exact` / `unverified` / `contradicted` on the contradiction rules
+below. Design decision taken: a new `streams.global.matchStartUnixMs`
+(plus source/accuracy/confidence/note and `dateMarkers[]`), with
+`demoStartUnixMs` back-shifted from an uncontradicted marker by
+`demoOffset` so the existing wall-clock formula keeps working —
+documented in RESULT_SCHEMA.md. Measured on a 260-demo stratified sample,
+archive-weighted: **24.8% → 94.9%** (matchkey covers 82% of the dateless
+demos; the rest carry a non-date matchkey variant, e.g. `9-195923-1626`).
+`matchkey` turned out to live on the same level-2 broadcast print channel
+as `matchdate`, often split across three svc_print fragments. The
+remaining follow-up from this lead is format C (`Date....:` stats block).
+
 UPDATE 2026-08-17 (51k readability sweep + community intel from the
 #mvd-analyzer Discord, niomic/vikpe): `matchdate:` alone only reaches
 ~72% of the archive and misses HALF of the reconstructed-era demos —

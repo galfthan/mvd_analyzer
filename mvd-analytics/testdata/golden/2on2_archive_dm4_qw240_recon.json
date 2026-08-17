@@ -43238,7 +43238,7 @@
       }
     ]
   },
-  "schemaVersion": 71,
+  "schemaVersion": 72,
   "shots": {
     "byPlayer": [
       {
@@ -77908,9 +77908,27 @@
       ]
     },
     "global": {
+      "dateMarkers": [
+        {
+          "assumedUtc": true,
+          "atMs": 13046,
+          "kind": "matchStart",
+          "raw": "41-2002-8-4:11-44-55",
+          "source": "matchkey",
+          "unixMs": 1028461495000
+        }
+      ],
       "demoOffset": 13046,
+      "demoStartAccuracyMs": 43200000,
+      "demoStartSource": "matchkey",
+      "demoStartUnixMs": 1028461481954,
       "matchEnd": 600053,
-      "matchStart": 0
+      "matchStart": 0,
+      "matchStartAccuracyMs": 43200000,
+      "matchStartConfidence": "unverified",
+      "matchStartNote": "tz-unknown: the marker named no timezone, UTC assumed",
+      "matchStartSource": "matchkey",
+      "matchStartUnixMs": 1028461495000
     },
     "players": [
       {
