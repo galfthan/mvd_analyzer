@@ -5,7 +5,53 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (archive-parsing) — a wall clock and a scoreline on nearly every demo, schema v72
+## unreleased (archive-parsing) — a wall clock, a scoreline, and a reader that says what it could not read, schema v72
+
+### Parse warnings reach the operator: `result.parseWarnings`
+
+The MVD reader has always raised a warning when it met something it could
+not decode — an unknown `svc_*` command byte, an unknown temp-entity or
+hidden-message type, a payload that failed to parse. It then **threw
+every one of them away** unless a caller had flipped
+`SetDiagnosticMode(true)`, which only the diagnostic test harness ever
+did. That silence has a price on record: the `sv_bigcoords` angle desync
+degraded ~5% of the archive for years with no operator-visible signal at
+all.
+
+Collection is now unconditional and the census rides the Result as
+**`parseWarnings`**: an exact `total`, exact per-category counts
+(`parse_error` / `unknown_svc` / `unknown_te` / `unknown_hidden`), and a
+table of distinct messages with each one's count and first occurrence.
+It reaches every consumer — the CLI JSON, `/overview`, the WASM result —
+without anyone opting in, and it is deliberately **not** merged into
+`errors[]`: that array reports analyzer failures over events that decoded
+fine, while this reports the layer below, bytes that never became events.
+A clean parse omits the section entirely rather than carrying an empty
+block, which is what the overwhelming majority of demos do.
+
+It is a summary, not a log — the archive's worst demos raise ~10 000
+warnings each. The counters are exact and uncapped; only the sample table
+is capped (64 distinct messages, first-encounter order), and what it left
+out is stated in `droppedGroups` / `droppedWarnings` rather than silently
+dropped. The unbounded per-instance list stays behind
+`SetDiagnosticMode`, unchanged for the diagnostic harness.
+
+`qw-analyze` prints a one-line summary to stderr whenever a demo raises
+any (`3 parse warnings (parse_error 3) — wire data this reader could not
+decode`) plus the loudest sample; the new **`-warn`** flag prints the
+whole table, which is what `-format md` and `-view …` runs need since
+only `-format json` carries the section itself. `qw-corpus-survey` drops
+the second, diagnostic-mode parse it used to make per demo and reads the
+same numbers off the analysis pass it already paid for; its CSV columns
+are unchanged and its warning columns are now filled on every run rather
+than only under `-readability`.
+
+Validated against the 51k-demo archive census (526 demos, ~1.0%, raise at
+least one warning): on 28 warning-carrying demos spanning every category
+mix, plus 6 of the worst `sv_bigcoords` cases at 1 900–10 200 warnings
+each, `total` and the `unknown_svc` count matched the census exactly on
+all 28; 10 clean demos stayed clean and printed nothing. All 13
+golden-corpus demos parse without a single warning, so no golden moved.
 
 ### `//finalscores`: the server's own result on the pre-ktxstats half
 

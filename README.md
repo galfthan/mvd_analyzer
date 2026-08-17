@@ -695,6 +695,19 @@ construction; the PVS-minus-LOS gap is an occlusion-tolerant
 proximity/awareness signal. Both are surfaced through the REST/MCP
 `/los` endpoint, the CLI, and the web map overlay.
 
+Two fields report that a result is degraded, and they are deliberately
+separate. `errors[]` carries ANALYZER-level failures over events that
+decoded fine (a `Finalize` returned an error, the event stream aborted
+mid-demo). `parseWarnings` (schema v72) carries the layer below — the
+reader's own census of bytes it could not decode at all: unknown `svc_*`
+commands, unknown temp-entity or hidden-message types, payloads that
+failed to parse, with exact totals, per-category counts and a capped
+sample table of distinct messages. It is collected on **every** run
+(previously only in the diagnostic test harness, which is how the
+`sv_bigcoords` desync degraded ~5% of the archive unnoticed) and omitted
+entirely on a clean parse. `qw-analyze` prints a one-line summary to
+stderr when a demo raises any, and `-warn` prints the whole table.
+
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
 observable change to the analysis output — additive ones included, and
 largely view-only ones such as v65, whose two interval segmentations add

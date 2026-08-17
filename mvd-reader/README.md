@@ -241,12 +241,43 @@ treats `io.EOF` as success and any other error as a partial/failed parse
 `svc_disconnect` carrying any text other than `"EndOfDemo"` is treated as a
 non-standard / inter-map disconnect and parsing continues past it.
 
+## Parse warnings
+
+Everything the reader cannot decode — an unknown `svc_*` command byte, an
+unknown temp-entity or MVD hidden-message type, a payload that fails to
+parse — raises a **warning** and abandons the rest of that payload.
+Warnings are sub-fatal by construction: parsing continues, and the
+consumer gets a result that is complete apart from what those bytes held.
+
+Collection is **unconditional**, on every parse (it used to happen only
+under `SetDiagnosticMode`, so production runs dropped every warning
+silently — which is how the `sv_bigcoords` angle desync degraded ~5% of
+the archive unnoticed for years). The parser never prints anything
+itself; it exposes a census:
+
+- `Parser.WarningSummary()` — exact `Total`, exact `ByType` counts, and a
+  capped table of distinct `(type, message)` groups with each one's count
+  and first occurrence. The cap (`parser.MaxWarningGroups`) bounds the
+  SAMPLE table only, and what it left out is reported in `DroppedGroups`
+  / `DroppedWarnings` — a count here is never silently truncated. Groups
+  are retained in first-encounter order, so on a very broken demo the
+  table is a sample of the distinct messages rather than the top-k.
+- `events.WarningReporter` — the optional `Source` capability
+  (`WarningSummary() events.WarningSummary`) that `source/mvd.Source`
+  implements. The analytics registry type-asserts for it after draining
+  the stream and publishes the census as `result.parseWarnings`, so every
+  downstream consumer sees a protocol gap without opting in.
+
+`SetDiagnosticMode(true)` now means only "also retain every INDIVIDUAL
+warning", for `DiagnosticWarnings()` — an unbounded list the diagnostic
+harness wants and production does not.
+
 ## Pure parser access (no Source wrapper)
 
-For tools that need to drive the parser directly — the diagnostic harness
-flips it into warning-collection mode — `mvd-reader/parser` exposes `Parser`,
-`NewParser(decoder)`, `OnEvent(handler)`, `Parse()`, `ParseOne()`, and
-`SetDiagnosticMode(true)`.
+For tools that need to drive the parser directly, `mvd-reader/parser`
+exposes `Parser`, `NewParser(decoder)`, `OnEvent(handler)`, `Parse()`,
+`ParseOne()`, `WarningSummary()`, and `SetDiagnosticMode(true)` +
+`DiagnosticWarnings()`.
 
 ## Running tests
 

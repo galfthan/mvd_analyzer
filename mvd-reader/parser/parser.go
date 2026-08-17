@@ -174,6 +174,16 @@ type Parser struct {
 	decodeNails    bool // opt-in: decode svc_nails/svc_nails2 into NailsFrameEvent (off by default; high volume)
 	warnings       []Warning
 
+	// Parse-warning census, always collected (see diagnostic.go). The
+	// counters are exact; warnGroups retains at most MaxWarningGroups
+	// distinct (type, message) rows and counts the rest into
+	// warnDroppedGroups / warnDropped.
+	warnTotal         int
+	warnByType        map[string]int
+	warnGroups        map[warnKey]*warnGroup
+	warnDroppedGroups int
+	warnDropped       int
+
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
 	// and svc_packetentities / svc_deltapacketentities so the parser
 	// itself can emit ItemSpawnEvent / ItemStateEvent for every pickup

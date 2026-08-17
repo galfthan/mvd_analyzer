@@ -1132,6 +1132,12 @@ package result
 //     grades them ("exact" / "unverified" / "contradicted") and
 //     `matchStartNote` names the check. Only a "contradicted" stamp is kept out
 //     of `demoStartUnixMs`.
+//   - ADDED at the top level: `parseWarnings` — the reader's own census of
+//     what it could not decode off the wire (unknown svc_* / temp-entity /
+//     hidden-message types, failed payloads). Collected on every run now,
+//     not just in the diagnostic harness, and omitted when the parse was
+//     clean. Distinct from `errors[]`, which reports analyzer-level failures
+//     over events we DID read. See ParseWarnings.
 //
 // See RELEASE_NOTES.md.
 const CurrentSchemaVersion = 72
@@ -1165,6 +1171,58 @@ type Result struct {
 	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
+	ParseWarnings    *ParseWarnings          `json:"parseWarnings,omitempty"`
+}
+
+// ParseWarnings is the census of what the WIRE carried but the reader
+// could not decode: unknown svc_* commands, unknown temp-entity or
+// hidden-message types, and payloads that failed to parse. It is a
+// distinct signal from Errors — those are analyzer-level failures over
+// events we did read — and it is sub-fatal by construction: the reader
+// abandons the rest of the offending payload and carries on, so the
+// result is complete apart from whatever that payload held.
+//
+// It exists because silence is not evidence of correctness. The
+// sv_bigcoords angle desync degraded ~5% of the archive for years with
+// no operator-visible signal, because parse warnings lived only in a
+// test harness. A non-zero total here means the reader has a gap on
+// this demo and the sections downstream of it may be thin.
+//
+// Omitted entirely when the parse was clean (Total == 0), which is the
+// case for the overwhelming majority of modern demos.
+type ParseWarnings struct {
+	// Total is the exact number of warnings raised, never capped.
+	Total int `json:"total"`
+	// ByType is the exact per-category count. Categories are a small
+	// fixed vocabulary: "parse_error", "unknown_svc", "unknown_te",
+	// "unknown_hidden".
+	ByType map[string]int `json:"byType,omitempty"`
+	// Groups is a capped table of distinct (type, message) rows, loudest
+	// first, each with its count and the demo time it first fired. It is
+	// the sample set — the counts above stay exact even when a group is
+	// dropped.
+	Groups []ParseWarningGroup `json:"groups,omitempty"`
+	// DroppedGroups / DroppedWarnings account for the retention cap
+	// (parser.MaxWarningGroups distinct messages): how many distinct
+	// groups, and how many warning instances in them, are missing from
+	// Groups. Both zero in every normal case. Never silently truncated —
+	// if the table is short, these say by how much.
+	DroppedGroups   int `json:"droppedGroups,omitempty"`
+	DroppedWarnings int `json:"droppedWarnings,omitempty"`
+}
+
+// ParseWarningGroup is one distinct warning message with its count and
+// first occurrence.
+type ParseWarningGroup struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+	Count   int    `json:"count"`
+	// FirstDemoTimeMs is RAW DEMO time (the wire clock), not the
+	// match-relative base every other ms field in this schema uses: the
+	// reader has no clock, and a warning can fire before the match
+	// starts (or on a demo with no match at all), where a rebased value
+	// would be meaningless.
+	FirstDemoTimeMs int32 `json:"firstDemoTimeMs"`
 }
 
 // EffectiveMap resolves which map (hence which BSP / loc corpus) this demo was

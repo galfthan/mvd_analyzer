@@ -448,7 +448,8 @@ paths:
       summary: Curated match summary
       description: |
         Map, teams, corrected scoreboard, top streaks, top powerup runs,
-        timing, data-quality `errors[]`.
+        timing, data-quality `errors[]` and the reader's `parseWarnings`
+        census (wire data the MVD decoder could not read at all).
 
         **Units seam.** Overview times are int32 MILLISECONDS (verbatim from
         the stored schema).
@@ -3100,6 +3101,61 @@ components:
           type:
             - "null"
             - array
+        parseWarnings:
+          description: >
+            READER-level census (schema v72): wire data the MVD decoder could not
+            read at all — unknown svc_* commands, unknown temp-entity or hidden-message
+            types, payloads that failed to parse. Distinct from `errors[]`, which
+            reports analyzer failures over events that DID decode. Omitted on a clean
+            parse, which is the normal case; a present block means this demo hit a
+            protocol gap and the views downstream of it may be thin.
+          type: object
+          additionalProperties: false
+          properties:
+            total:
+              description: "Exact number of parse warnings raised. Never capped."
+              type: integer
+            byType:
+              description: >
+                Exact per-category counts. Categories are a small fixed vocabulary:
+                parse_error, unknown_svc, unknown_te, unknown_hidden.
+              type: object
+              additionalProperties:
+                description: "Warnings raised in this category."
+                type: integer
+            groups:
+              description: >
+                Capped sample table of distinct (type, message) rows, loudest first.
+                The counts above stay exact even when a row is dropped from here.
+                Rows are RETAINED in first-encounter order, so on a badly broken demo
+                this is a sample of the distinct messages rather than the top-k.
+              type: array
+              items:
+                description: "One distinct warning message with its count and first occurrence."
+                type: object
+                additionalProperties: false
+                properties:
+                  type:
+                    description: "Warning category (parse_error | unknown_svc | unknown_te | unknown_hidden)."
+                    type: string
+                  message:
+                    description: "The reader's message, e.g. the svc name plus the bytes it abandoned."
+                    type: string
+                  count:
+                    description: "How often this exact message fired."
+                    type: integer
+                  firstDemoTimeMs:
+                    description: >
+                      RAW DEMO time of the first occurrence (the wire clock), NOT the
+                      match-relative base every other ms field uses — the reader has no
+                      match clock and a warning can fire before the match starts.
+                    type: integer
+            droppedGroups:
+              description: "Distinct messages beyond the retention cap, missing from `groups`. Normally absent."
+              type: integer
+            droppedWarnings:
+              description: "Warning instances in those dropped groups. Normally absent."
+              type: integer
         filePath:
           description: "Source demo path."
           type: string

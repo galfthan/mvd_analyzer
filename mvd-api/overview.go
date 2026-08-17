@@ -71,6 +71,14 @@ type Overview struct {
 	// be missing or partial. Surfaced here so a consumer sees it on the
 	// first call without parsing the full result. Omitted when empty.
 	Errors []string `json:"errors,omitempty"`
+	// ParseWarnings is the READER's census (result.parseWarnings): wire
+	// data the MVD decoder could not read at all — unknown svc_* /
+	// temp-entity / hidden-message types, payloads that failed to parse.
+	// Distinct from Errors, which reports analyzer failures over events
+	// that DID decode. Non-empty means this demo hit a protocol gap and
+	// the views downstream of it may be thin. Omitted on a clean parse,
+	// which is the normal case.
+	ParseWarnings *result.ParseWarnings `json:"parseWarnings,omitempty"`
 }
 
 // OverviewTeam mirrors result.TeamStat.
@@ -131,6 +139,7 @@ func BuildOverview(r *result.Result) Overview {
 	ov.SchemaVersion = r.SchemaVersion
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
+	ov.ParseWarnings = r.ParseWarnings
 
 	// map = the canonical shortname, mapTitle = the display-only level title.
 	// Match publishes both (result/match.go), but EffectiveMap stays the

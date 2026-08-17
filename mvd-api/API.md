@@ -457,8 +457,8 @@ each mirroring the very predicate behind that view's `422`, so a `false`
 there is exactly the `422` you would have received. It is the only way to
 learn the BSP-derived ones (`height`, `liquid`, `los`) — those turn on the
 server's map provisioning rather than on the demo, so the same demo answers
-differently on two deployments. Use it (with `errors`) to hide panels up
-front. Endpoints whose data
+differently on two deployments. Use it (with `errors` and, for
+reader-level gaps, `parseWarnings`) to hide panels up front. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.

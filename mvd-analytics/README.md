@@ -102,8 +102,10 @@ that downstream consumers render, summarise, or feed to an agent.
 - `mapclip/` — worldspawn player clip hull + downward floor trace that
   fills `PositionTrack.H`. See "Floor height" below.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
-  through the parser in warning-collection mode and runs data-quality
-  checks on the analysis result.
+  through the parser with per-instance warning retention on
+  (`SetDiagnosticMode`) and runs data-quality checks on the analysis
+  result. The warning CENSUS needs none of this any more — it rides
+  every `Result` as `parseWarnings`.
 - `corpus/` — special-cases invariant harness over
   `demo-test-data/mvd/special-cases/`; skips when that per-machine
   directory is absent.
@@ -749,9 +751,18 @@ type Result struct {
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric
     Streams          *Streams                 // canonical event-rate per-player state (v7); view API reads this
-    Errors           []string
+    Errors           []string                 // analyzer-level failures over events that DID decode
+    ParseWarnings    *ParseWarnings           // v72: the reader's census of wire data it could NOT decode
 }
 ```
+
+`Errors` and `ParseWarnings` are two different degradation signals and
+are never merged. `Errors` is analyzer-level (a `Finalize` failed, the
+event stream aborted mid-demo). `ParseWarnings` is parse-level: unknown
+`svc_*` commands, unknown temp-entity or hidden-message types, payloads
+that failed to decode — collected on every run by the reader
+(`events.WarningReporter`, read off the source in `registry.go` once the
+stream is drained) and omitted entirely when the parse was clean.
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer. `CurrentSchemaVersion`

@@ -31,8 +31,9 @@ import (
 )
 
 // doReadability adds the raw-wire readability census (second parse per
-// demo, diagnostic mode): date markers, //finalscores, //ktx drop,
-// parser warnings. Set from -readability.
+// demo): date-marker spellings, //finalscores, //ktx drop. Set from
+// -readability. Parse warnings are NOT part of it — they ride the
+// Result now and are censused on every run.
 var doReadability bool
 
 type row struct {
@@ -61,9 +62,11 @@ type row struct {
 	dateBlock   bool   // "Date....:" stats-block print present (format C)
 	finalscores bool   // //finalscores stufftext present (lead 3)
 	ktxdrop     bool   // //ktx drop hint present (backpack GT, lead 2)
-	warns       int    // diagnostic parse warnings, total
-	warnKinds   string // distinct warning types, sorted, ';'-joined
-	unknownSvc  int    // unknown_svc warnings specifically (protocol gaps)
+	// Parse-warning census, taken off the Result (schema v72
+	// parseWarnings) — always populated, no -readability needed.
+	warns      int    // parse warnings, total
+	warnKinds  string // distinct warning types, sorted, ';'-joined
+	unknownSvc int    // unknown_svc warnings specifically (protocol gaps)
 }
 
 func main() {
@@ -166,6 +169,7 @@ func surveyOne(path string) row {
 	if res.Streams != nil {
 		r.wallclock = res.Streams.Global.DemoStartUnixMs != 0
 	}
+	parseWarningCensus(res, &r)
 	if doReadability {
 		rawScan(path, &r)
 	}
@@ -216,18 +220,23 @@ func surveyOne(path string) row {
 	return r
 }
 
-// rawScan re-reads the demo at the event level with the parser in
-// diagnostic mode, collecting the wire markers the analysis pipeline does
-// not (yet) surface: the matchdate/date prints (lead 1), //finalscores
-// (lead 3), //ktx drop (backpack GT, lead 2), and the parser warning
-// census (lead 4). Costs a second parse per demo, no analysis.
+// rawScan re-reads the demo at the event level, collecting the wire
+// markers the analysis pipeline does not surface in the exact form this
+// census wants: which matchdate FORMAT a print used (iso vs ctime — the
+// resolved dateMarkers[] name the source, not the spelling), the
+// "Date....:" stats-block print, and the raw presence of the
+// //finalscores / //ktx drop directives independent of whether their
+// payload survived parsing. Costs a second parse per demo, no analysis.
+//
+// The parse-warning columns are NOT gathered here any more: the reader's
+// census rides every Result as parseWarnings (schema v72), so surveyOne
+// reads it off the analysis pass it already paid for.
 func rawScan(path string, r *row) {
 	src, err := mvdsource.Open(path)
 	if err != nil {
 		return
 	}
 	defer src.Close()
-	src.Parser().SetDiagnosticMode(true)
 	for {
 		ev, err := src.Next()
 		if err != nil || ev == nil {
@@ -255,16 +264,21 @@ func rawScan(path string, r *row) {
 			}
 		}
 	}
-	kinds := map[string]bool{}
-	for _, w := range src.Parser().DiagnosticWarnings() {
-		r.warns++
-		kinds[w.Type] = true
-		if w.Type == "unknown_svc" {
-			r.unknownSvc++
-		}
+}
+
+// parseWarningCensus fills the warns / warnKinds / unknownSvc columns
+// from the Result's own parse-warning census. Same numbers the second
+// diagnostic parse used to produce (the counters are exact, and only
+// the per-message sample table is capped), for no extra pass.
+func parseWarningCensus(res *analyzer.Result, r *row) {
+	pw := res.ParseWarnings
+	if pw == nil {
+		return
 	}
-	var ks []string
-	for k := range kinds {
+	r.warns = pw.Total
+	r.unknownSvc = pw.ByType["unknown_svc"]
+	ks := make([]string, 0, len(pw.ByType))
+	for k := range pw.ByType {
 		ks = append(ks, k)
 	}
 	sort.Strings(ks)
@@ -362,8 +376,28 @@ func summarize(rows []row) {
 		fmt.Printf("  any date on wire      %s\n", c(func(r row) bool { return r.matchdate != "" || r.dateBlock || r.demoinfo }))
 		fmt.Printf("  //finalscores         %s\n", c(func(r row) bool { return r.finalscores }))
 		fmt.Printf("  //ktx drop            %s\n", c(func(r row) bool { return r.ktxdrop }))
-		fmt.Printf("  parse warnings > 0    %s\n", c(func(r row) bool { return r.warns > 0 }))
-		fmt.Printf("  unknown_svc > 0       %s\n", c(func(r row) bool { return r.unknownSvc > 0 }))
+	}
+
+	// Parse warnings ride every Result (schema v72), so this census costs
+	// nothing and prints on every run — the point of surfacing them at all
+	// is that a protocol gap is visible without asking for it.
+	warnDemos, unknownSvcDemos, warnTotal := 0, 0, 0
+	for _, r := range rows {
+		warnTotal += r.warns
+		if r.warns > 0 {
+			warnDemos++
+		}
+		if r.unknownSvc > 0 {
+			unknownSvcDemos++
+		}
+	}
+	if warnDemos > 0 {
+		n := float64(len(rows))
+		fmt.Printf("\nparse warnings:\n")
+		fmt.Printf("  demos with warnings   %6d  (%.1f%%), %d warnings total\n",
+			warnDemos, 100*float64(warnDemos)/n, warnTotal)
+		fmt.Printf("  with unknown_svc      %6d  (%.1f%%)\n",
+			unknownSvcDemos, 100*float64(unknownSvcDemos)/n)
 	}
 
 	errs := map[string]int{}

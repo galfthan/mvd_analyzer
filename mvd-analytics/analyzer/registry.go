@@ -253,6 +253,13 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	if streamErr != nil {
 		result.Errors = append(result.Errors, "event stream aborted: "+streamErr.Error())
 	}
+	// The reader's own census of what it could not decode. Read once the
+	// stream is drained (the counts are complete only then) and carried
+	// verbatim onto the Result, so every consumer — CLI, REST, WASM —
+	// sees a protocol gap without opting into anything. Deliberately NOT
+	// folded into Errors: those are analyzer failures over events we did
+	// read, a different signal with different consequences.
+	result.ParseWarnings = parseWarningsOf(source)
 
 	co := &CoreOutputs{}
 
@@ -298,6 +305,46 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 
 	canonicalizeErrors(result.Errors)
 	return result, nil
+}
+
+// parseWarningsOf lifts a source's parse-warning census onto the Result
+// shape, or returns nil when the parse was clean (or when the source
+// cannot report — a synthetic or replay source implements no
+// events.WarningReporter, which is "nothing to say", not "clean").
+//
+// A clean parse yields nil rather than a zeroed block: `parseWarnings`
+// is omitempty precisely so the overwhelming majority of demos, which
+// read without a single gap, do not carry an empty section in every
+// response.
+func parseWarningsOf(source events.Source) *resultpkg.ParseWarnings {
+	wr, ok := source.(events.WarningReporter)
+	if !ok {
+		return nil
+	}
+	s := wr.WarningSummary()
+	if s.Total == 0 {
+		return nil
+	}
+	pw := &resultpkg.ParseWarnings{
+		Total:           s.Total,
+		DroppedGroups:   s.DroppedGroups,
+		DroppedWarnings: s.DroppedWarnings,
+	}
+	if len(s.ByType) > 0 {
+		pw.ByType = make(map[string]int, len(s.ByType))
+		for k, v := range s.ByType {
+			pw.ByType[k] = v
+		}
+	}
+	for _, g := range s.Groups {
+		pw.Groups = append(pw.Groups, resultpkg.ParseWarningGroup{
+			Type:            g.Type,
+			Message:         g.Message,
+			Count:           g.Count,
+			FirstDemoTimeMs: g.FirstTimeMs,
+		})
+	}
+	return pw
 }
 
 // canonicalizeErrors sorts Result.Errors into a schedule-independent

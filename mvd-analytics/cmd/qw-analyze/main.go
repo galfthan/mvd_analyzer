@@ -87,6 +87,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
+	"github.com/mvd-analyzer/mvd-reader/events"
 	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
 
@@ -290,12 +291,14 @@ func main() {
 	regionDetail := flag.String("region-detail", "", "region list detail for -view region-control: full (default) | summary (drop polygon points) | none")
 	graphFmt := flag.String("graph", "", "print the analyzer dependency graph (mermaid | json) and exit; no demo argument needed")
 	artifactsMD := flag.Bool("artifacts-md", false, "print the generated artifact catalog (ARTIFACTS.md) and exit; no demo argument needed")
+	warnFlag := flag.Bool("warn", false, "print the full parser-warning table to stderr (per distinct message: count + first occurrence). A one-line summary always prints when a demo raises any; -format json also carries the whole census in the result's parseWarnings")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: qw-analyze [options] <demo.mvd | demo.mvd.gz | directory>\n\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	warnDetail = *warnFlag
 
 	// -graph dumps the pipeline's dependency DAG and exits; it needs no demo.
 	if *graphFmt != "" {
@@ -761,6 +764,64 @@ func warnUnlinkedNails(res *result.Result, w io.Writer) {
 	}
 }
 
+// warnDetail is the -warn flag: print the whole parse-warning table
+// rather than the one-line summary. Package-level because every output
+// path funnels through analyzePath, including dumpMarkdown, which takes
+// no view options to hang it off.
+var warnDetail bool
+
+// reportParseWarnings prints the reader's parse-warning census to
+// stderr. The one-liner is unconditional — the whole point of the
+// Result-carried census is that the next protocol gap is visible on a
+// normal run, and an operator reading -format md or piping JSON to a
+// file would otherwise never see it. -warn adds the per-message table.
+//
+// The full detail is also in the JSON (`parseWarnings`) for -format
+// json, but NOT in -view output or -format md, which is why the flag
+// exists rather than "just read the JSON".
+func reportParseWarnings(path string, res *result.Result, w io.Writer) {
+	if res == nil || res.ParseWarnings == nil || res.ParseWarnings.Total == 0 {
+		return
+	}
+	pw := res.ParseWarnings
+
+	// Loudest category first, name as tie-break — the same rule the
+	// groups table uses, so the two read consistently.
+	types := make([]string, 0, len(pw.ByType))
+	for t := range pw.ByType {
+		types = append(types, t)
+	}
+	sort.Slice(types, func(i, j int) bool {
+		if pw.ByType[types[i]] != pw.ByType[types[j]] {
+			return pw.ByType[types[i]] > pw.ByType[types[j]]
+		}
+		return types[i] < types[j]
+	})
+	parts := make([]string, 0, len(types))
+	for _, t := range types {
+		parts = append(parts, fmt.Sprintf("%s %d", t, pw.ByType[t]))
+	}
+
+	fmt.Fprintf(w, "qw-analyze: %s: %d parse warnings (%s) — wire data this reader could not decode; sections below it may be thin\n",
+		filepath.Base(path), pw.Total, strings.Join(parts, ", "))
+	if !warnDetail {
+		if len(pw.Groups) > 0 {
+			g := pw.Groups[0]
+			fmt.Fprintf(w, "qw-analyze:   loudest: %s: %s (x%d, first at %.1fs) — pass -warn for the full table\n",
+				g.Type, g.Message, g.Count, float64(g.FirstDemoTimeMs)*0.001)
+		}
+		return
+	}
+	for _, g := range pw.Groups {
+		fmt.Fprintf(w, "qw-analyze:   x%-6d [first %7.1fs] %s: %s\n",
+			g.Count, float64(g.FirstDemoTimeMs)*0.001, g.Type, g.Message)
+	}
+	if pw.DroppedGroups > 0 {
+		fmt.Fprintf(w, "qw-analyze:   (+%d distinct messages / %d warnings past the %d-group retention cap; the counts above are still exact)\n",
+			pw.DroppedGroups, pw.DroppedWarnings, events.MaxWarningGroups)
+	}
+}
+
 // analyzePath opens the demo, runs the default registry with the region
 // override and any requested knobs, and returns the finalised Result.
 // Shared by dumpJSON, dumpView and dumpMarkdown.
@@ -789,6 +850,7 @@ func analyzePath(path string, regionsOverride []config.MapRegionOverride, opts a
 	if err != nil {
 		return nil, err
 	}
+	reportParseWarnings(path, res, os.Stderr)
 	// Line of sight is computed lazily (the heaviest position-derived pass);
 	// the same pass also fills the PVS tracks, so los and pvs appear together.
 	// A map with no usable visibility BSP yields ErrNoBSP — warn and continue

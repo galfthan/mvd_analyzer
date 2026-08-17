@@ -36,6 +36,7 @@ analyzer are also covered there.
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
 | Streams | `streams` | *Streams | Native-rate per-player + global state-change streams (position/view/health/armor/ammo/items tracks, movers, and the opt-in spatial weapon streams — see the Streams section). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
+| ParseWarnings | `parseWarnings` | *ParseWarnings, omitempty | v72 — the READER's census of wire data it could not decode (unknown `svc_*` / temp-entity / hidden-message types, payloads that failed to parse). A **distinct signal from `errors`**: sub-fatal, parse-level, and about events that never reached an analyzer at all. Omitted on a clean parse, which is the normal case. See [ParseWarnings](#parsewarnings-parsewarnings-schema-v72). |
 
 Sub-result fields are pointers or slices with `omitempty`, so a missing
 key means "the analyzer didn't produce this section for this demo"
@@ -3616,6 +3617,72 @@ one cheap fetch.
   spawner nobody took has no entry. `time` is match-relative ms.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
+
+## ParseWarnings (`parseWarnings`)
+
+Schema v72. The MVD reader's own census of what it could **not** read
+off the wire, carried on every result and omitted entirely when the
+parse was clean.
+
+**Why it exists.** The `sv_bigcoords` angle desync degraded ~5% of the
+archive for years without a single operator-visible signal, because
+parse warnings were collected only in the diagnostic test harness and
+dropped on every production run. Collection is now unconditional: the
+next protocol gap shows up on a normal analysis, in the JSON, over REST
+(`/overview`) and on `qw-analyze`'s stderr.
+
+**How it differs from `errors[]`.** `errors[]` reports ANALYZER-level
+failures over events that decoded fine (a `Finalize` returned an error,
+the region-control pass failed, the stream aborted mid-demo).
+`parseWarnings` reports the layer below: bytes the decoder could not
+interpret. Neither is fatal, and they are deliberately never merged — a
+consumer reacting to a degraded result needs to know which layer lost
+the data.
+
+| Field | JSON key | Type | Intent |
+|---|---|---|---|
+| Total | `total` | int | Exact number of warnings raised. **Never capped.** |
+| ByType | `byType` | map[string]int, omitempty | Exact per-category counts. Fixed vocabulary: `parse_error` (a payload we recognise but failed to decode), `unknown_svc` (an `svc_*` command byte we do not know — the rest of that payload is abandoned), `unknown_te` (an unknown temp-entity type), `unknown_hidden` (an unknown MVD hidden-message type). |
+| Groups | `groups` | []ParseWarningGroup, omitempty | Capped sample table of distinct (type, message) rows, **loudest first** (count desc, then type, then message — the order is deterministic so the same demo always serialises identically). |
+| DroppedGroups | `droppedGroups` | int, omitempty | Distinct messages beyond the retention cap that are missing from `groups`. |
+| DroppedWarnings | `droppedWarnings` | int, omitempty | Warning instances in those dropped groups. |
+
+`ParseWarningGroup`:
+
+| Field | JSON key | Type | Intent |
+|---|---|---|---|
+| Type | `type` | string | The category, as in `byType`. |
+| Message | `message` | string | The reader's message — typically the `svc_*` name, the decode error and the byte count it abandoned. |
+| Count | `count` | int | How often this exact message fired. |
+| FirstDemoTimeMs | `firstDemoTimeMs` | int32 | **RAW DEMO time** of the first occurrence (the wire clock, t=0 = demo open) — *not* the match-relative base every other ms field in this schema uses. The reader has no match clock, and a warning can fire before the match starts or on a demo with no match at all, where a rebased value would be meaningless. |
+
+**Summary, not a log.** A pathological demo can raise hundreds of
+thousands of warnings (the archive's worst carries ~10 000), so the
+Result carries a census rather than every instance: exact counters plus
+a first-occurrence sample per distinct message. The message text embeds
+the failing command and the abandoned byte count, so its cardinality is
+unbounded in principle; the sample table is therefore capped at
+`parser.MaxWarningGroups` (64) distinct rows. **The cap never touches a
+count** — `total` and `byType` stay exact, and what the table is missing
+is stated in `droppedGroups` / `droppedWarnings` rather than silently
+truncated. Groups are retained in FIRST-ENCOUNTER order, so on a badly
+broken demo `groups` is a sample of the distinct messages, not the top-k
+by count — read `byType` for the shape of the damage and `groups` for
+what it looks like. The full per-instance list remains available to the
+diagnostic harness (`parser.SetDiagnosticMode` +
+`Parser.DiagnosticWarnings`), which is the only consumer that needs it.
+
+**Reading it.** A present block means the reader hit a gap on this demo
+and the sections downstream of the affected bytes may be thin — which
+sections depends on what was lost, so treat it as a prompt to check the
+data rather than as a verdict on any one field. `unknown_svc` in
+particular means an entire payload was abandoned mid-message. On the
+51 000-demo archive census 526 demos (~1.0%) raise at least one warning.
+
+CLI: `qw-analyze` prints a one-line summary to stderr whenever a demo
+raises any, and `-warn` prints the whole `groups` table (useful for
+`-format md` and `-view …` runs, which carry no `parseWarnings` in their
+output). REST: `/overview` republishes the block verbatim.
 
 ## Cross-references / join keys
 
