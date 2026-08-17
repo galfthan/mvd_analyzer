@@ -24,12 +24,22 @@ the wire: `sinfoset` (20%) and an `epoch` key on modern demos.
 Timezone reality from vikpe's collected cases: Euro abbreviations map
 cleanly (EEST +03, CEST +02, CET +01, UTC), numeric offsets (`+03`,
 `-05:00`), Swedish locale strings ("Västeuropa, sommartid" +02 /
-"normaltid" +01), missing tz → assume UTC. TRUST GATING is mandatory:
-unset server clocks produce bogus date clusters (a whole 2000-01-07
-night of demos observed), LAN matchkeys are off (qhlan), and stuffed
-values get corrupted ("timelimit" changed to "Final Score is 47 - 9")
-— sanity-gate against the serverinfo `*version` era and flag
-low-confidence anchors rather than dropping them.
+"normaltid" +01), missing tz → assume UTC. TRUST GATING is mandatory but must gate on CONTRADICTION, never on
+the date value (2000 is a live QW year): the hard check is
+software-release lower bounds — a `*version`/`ktxver` binary cannot
+predate its release, so a mid-2000s MVDSV stamping 2000-01-07 is
+provably unset-clock while the same date on QW 2.30/2.40 is fine
+(needs a small release-date table for observed version strings).
+Softer signals only downgrade confidence in combination: the
+epoch-reset signature (a batch counting up from a boot default like
+2000-01-01 — observed as a whole 2000-01-07 "night"; alone it is
+indistinguishable from a real LAN night), cross-marker disagreement
+within a demo (matchdate vs matchkey vs ktxstats vs finalscores; file
+mtime as a weak upper bound), and known-off sources (qhlan
+matchkeys). Stuffed values also get corrupted outright ("timelimit"
+changed to "Final Score is 47 - 9"). Output design: never drop an
+anchor — emit it with a confidence grade (exact / unverified /
+contradicted) naming the failed check.
 
 KTX broadcasts `matchdate: <stamp>` at match start on 70% of the
 archive (100% of E3–E5, 60% of E2) — currently discarded because
