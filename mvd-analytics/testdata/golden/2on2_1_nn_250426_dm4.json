@@ -26292,6 +26292,7 @@
         -104
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 5234,
       "weapon": "lg"
@@ -26305,6 +26306,7 @@
         -31.25
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 9398,
       "weapon": "lg"
@@ -26318,6 +26320,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 10603,
       "weapon": "rl"
@@ -26331,6 +26334,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 12416,
       "weapon": "rl"
@@ -26344,6 +26348,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 13935,
       "weapon": "rl"
@@ -26357,6 +26362,7 @@
         -70.625
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 15167,
       "weapon": "lg"
@@ -26370,6 +26376,7 @@
         -295.25
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 19809,
       "weapon": "rl"
@@ -26383,6 +26390,7 @@
         13.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 19984,
       "weapon": "lg"
@@ -26396,6 +26404,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 25639,
       "weapon": "rl"
@@ -26409,6 +26418,7 @@
         7.875
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 29026,
       "weapon": "rl"
@@ -26422,6 +26432,7 @@
         25.25
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 35414,
       "weapon": "rl"
@@ -26435,6 +26446,7 @@
         -167.125
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 42927,
       "weapon": "rl"
@@ -26448,6 +26460,7 @@
         20.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 46371,
       "weapon": "rl"
@@ -26461,6 +26474,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 51234,
       "weapon": "rl"
@@ -26474,6 +26488,7 @@
         58.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 56496,
       "weapon": "rl"
@@ -26487,6 +26502,7 @@
         -359.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 64250,
       "weapon": "rl"
@@ -26500,6 +26516,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 69108,
       "weapon": "lg"
@@ -26513,6 +26530,7 @@
         -266.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 75055,
       "weapon": "rl"
@@ -26526,6 +26544,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 79678,
       "weapon": "lg"
@@ -26539,6 +26558,7 @@
         -187.125
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 84182,
       "weapon": "lg"
@@ -26552,6 +26572,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 88403,
       "weapon": "rl"
@@ -26565,6 +26586,7 @@
         -296
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 90189,
       "weapon": "rl"
@@ -26578,6 +26600,7 @@
         44
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 94431,
       "weapon": "lg"
@@ -26591,6 +26614,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 98849,
       "weapon": "rl"
@@ -26604,6 +26628,7 @@
         -306.25
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 99889,
       "weapon": "lg"
@@ -26617,6 +26642,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 99889,
       "weapon": "lg"
@@ -26630,6 +26656,7 @@
         -258.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 104085,
       "weapon": "rl"
@@ -26643,6 +26670,7 @@
         -31.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 110734,
       "weapon": "lg"
@@ -26656,6 +26684,7 @@
         -102.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 116588,
       "weapon": "lg"
@@ -26669,6 +26698,7 @@
         24
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 117390,
       "weapon": "rl"
@@ -26682,6 +26712,7 @@
         -45.5
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 119029,
       "weapon": "rl"
@@ -26695,6 +26726,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 123679,
       "weapon": "lg"
@@ -26708,6 +26740,7 @@
         -268.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 125417,
       "weapon": "rl"
@@ -26721,6 +26754,7 @@
         -53.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 132025,
       "weapon": "lg"
@@ -26734,6 +26768,7 @@
         -311
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 132743,
       "weapon": "rl"
@@ -26747,6 +26782,7 @@
         24
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 145715,
       "weapon": "lg"
@@ -26760,6 +26796,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 146353,
       "weapon": "rl"
@@ -26773,6 +26810,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 147066,
       "weapon": "lg"
@@ -26786,6 +26824,7 @@
         -104
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 151002,
       "weapon": "lg"
@@ -26799,6 +26838,7 @@
         39.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 153315,
       "weapon": "rl"
@@ -26812,6 +26852,7 @@
         -97.875
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 158404,
       "weapon": "rl"
@@ -26825,6 +26866,7 @@
         -93.5
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 159496,
       "weapon": "lg"
@@ -26838,6 +26880,7 @@
         -104
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 163027,
       "weapon": "rl"
@@ -26851,6 +26894,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 165886,
       "weapon": "rl"
@@ -26864,6 +26908,7 @@
         -104
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 166781,
       "weapon": "lg"
@@ -26877,6 +26922,7 @@
         -120.125
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 167803,
       "weapon": "lg"
@@ -26890,6 +26936,7 @@
         -310
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 168596,
       "weapon": "lg"
@@ -26903,6 +26950,7 @@
         -296
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 173092,
       "weapon": "rl"
@@ -26916,6 +26964,7 @@
         -61.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 180837,
       "weapon": "lg"
@@ -26929,6 +26978,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 189194,
       "weapon": "rl"
@@ -26942,6 +26992,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 189391,
       "weapon": "lg"
@@ -26955,6 +27006,7 @@
         -102.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 192071,
       "weapon": "lg"
@@ -26968,6 +27020,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 194107,
       "weapon": "lg"
@@ -26981,6 +27034,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 202581,
       "weapon": "lg"
@@ -26994,6 +27048,7 @@
         -74.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 208481,
       "weapon": "rl"
@@ -27007,6 +27062,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 211845,
       "weapon": "rl"
@@ -27020,6 +27076,7 @@
         -72
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 212210,
       "weapon": "rl"
@@ -27033,6 +27090,7 @@
         -72
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 217754,
       "weapon": "rl"
@@ -27046,6 +27104,7 @@
         24
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 223099,
       "weapon": "rl"
@@ -27059,6 +27118,7 @@
         -105.5
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 223458,
       "weapon": "lg"
@@ -27072,6 +27132,7 @@
         -103
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 227365,
       "weapon": "lg"
@@ -27085,6 +27146,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 232243,
       "weapon": "rl"
@@ -27098,6 +27160,7 @@
         24.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 235886,
       "weapon": "rl"
@@ -27111,6 +27174,7 @@
         -200
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 238649,
       "weapon": "rl"
@@ -27124,6 +27188,7 @@
         -296
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 251436,
       "weapon": "rl"
@@ -27137,6 +27202,7 @@
         8.125
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 251556,
       "weapon": "rl"
@@ -27150,6 +27216,7 @@
         -90.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 256456,
       "weapon": "lg"
@@ -27163,6 +27230,7 @@
         -103.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 260889,
       "weapon": "rl"
@@ -27176,6 +27244,7 @@
         -97.125
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 260964,
       "weapon": "lg"
@@ -27189,6 +27258,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 263651,
       "weapon": "lg"
@@ -27202,6 +27272,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 266547,
       "weapon": "lg"
@@ -27215,6 +27286,7 @@
         -277.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 269324,
       "weapon": "rl"
@@ -27228,6 +27300,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 269873,
       "weapon": "rl"
@@ -27241,6 +27314,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 276179,
       "weapon": "rl"
@@ -27254,6 +27328,7 @@
         -71.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 284736,
       "weapon": "rl"
@@ -27267,6 +27342,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 287036,
       "weapon": "rl"
@@ -27280,6 +27356,7 @@
         -66
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 290580,
       "weapon": "lg"
@@ -27293,6 +27370,7 @@
         -106.5
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 294473,
       "weapon": "lg"
@@ -27306,6 +27384,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 306821,
       "weapon": "lg"
@@ -27319,6 +27398,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 310448,
       "weapon": "rl"
@@ -27332,6 +27412,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 310729,
       "weapon": "lg"
@@ -27345,6 +27426,7 @@
         -296
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 318040,
       "weapon": "rl"
@@ -27358,6 +27440,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 323924,
       "weapon": "rl"
@@ -27371,6 +27454,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 326181,
       "weapon": "lg"
@@ -27384,6 +27468,7 @@
         -257
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 328423,
       "weapon": "rl"
@@ -27397,6 +27482,7 @@
         -294.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 332167,
       "weapon": "lg"
@@ -27410,6 +27496,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 337288,
       "weapon": "rl"
@@ -27423,6 +27510,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 344292,
       "weapon": "rl"
@@ -27436,6 +27524,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 349145,
       "weapon": "lg"
@@ -27449,6 +27538,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 350879,
       "weapon": "rl"
@@ -27462,6 +27552,7 @@
         -266.125
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 352664,
       "weapon": "rl"
@@ -27475,6 +27566,7 @@
         -232
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 353547,
       "weapon": "rl"
@@ -27488,6 +27580,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 355732,
       "weapon": "rl"
@@ -27501,6 +27594,7 @@
         65.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 356027,
       "weapon": "lg"
@@ -27514,6 +27608,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 359872,
       "weapon": "lg"
@@ -27527,6 +27622,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 362741,
       "weapon": "rl"
@@ -27540,6 +27636,7 @@
         -250.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 366651,
       "weapon": "rl"
@@ -27553,6 +27650,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 368528,
       "weapon": "rl"
@@ -27566,6 +27664,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 372068,
       "weapon": "lg"
@@ -27579,6 +27678,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 374860,
       "weapon": "lg"
@@ -27592,6 +27692,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 377831,
       "weapon": "rl"
@@ -27605,6 +27706,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 383703,
       "weapon": "rl"
@@ -27618,6 +27720,7 @@
         -434.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 384494,
       "weapon": "lg"
@@ -27631,6 +27734,7 @@
         -296
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 388665,
       "weapon": "rl"
@@ -27644,6 +27748,7 @@
         67.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 398291,
       "weapon": "rl"
@@ -27657,6 +27762,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 398650,
       "weapon": "rl"
@@ -27670,6 +27776,7 @@
         32
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 401327,
       "weapon": "rl"
@@ -27683,6 +27790,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 403288,
       "weapon": "rl"
@@ -27696,6 +27804,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 406579,
       "weapon": "rl"
@@ -27709,6 +27818,7 @@
         -104
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 407122,
       "weapon": "rl"
@@ -27722,6 +27832,7 @@
         -189.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 410548,
       "weapon": "lg"
@@ -27735,6 +27846,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 411591,
       "weapon": "lg"
@@ -27748,6 +27860,7 @@
         24
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 415989,
       "weapon": "lg"
@@ -27761,6 +27874,7 @@
         -56
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 416964,
       "weapon": "lg"
@@ -27774,6 +27888,7 @@
         27.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 424094,
       "weapon": "lg"
@@ -27787,6 +27902,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 425094,
       "weapon": "rl"
@@ -27800,6 +27916,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 429378,
       "weapon": "rl"
@@ -27813,6 +27930,7 @@
         -48.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 431624,
       "weapon": "lg"
@@ -27826,6 +27944,7 @@
         -298.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 439694,
       "weapon": "rl"
@@ -27839,6 +27958,7 @@
         -113.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 443102,
       "weapon": "lg"
@@ -27852,6 +27972,7 @@
         24
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 451119,
       "weapon": "lg"
@@ -27865,6 +27986,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 459849,
       "weapon": "lg"
@@ -27878,6 +28000,7 @@
         -101.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 470390,
       "weapon": "rl"
@@ -27891,6 +28014,7 @@
         -104
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 470892,
       "weapon": "lg"
@@ -27904,6 +28028,7 @@
         47.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 478459,
       "weapon": "rl"
@@ -27917,6 +28042,7 @@
         -131.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 480397,
       "weapon": "lg"
@@ -27930,6 +28056,7 @@
         -268.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 482483,
       "weapon": "lg"
@@ -27943,6 +28070,7 @@
         -1.25
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 483194,
       "weapon": "rl"
@@ -27956,6 +28084,7 @@
         24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 496229,
       "weapon": "rl"
@@ -27969,6 +28098,7 @@
         -265.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 499003,
       "weapon": "rl"
@@ -27982,6 +28112,7 @@
         -104
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 499591,
       "weapon": "rl"
@@ -27995,6 +28126,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 501624,
       "weapon": "rl"
@@ -28008,6 +28140,7 @@
         -253.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 503041,
       "weapon": "rl"
@@ -28021,6 +28154,7 @@
         -243
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 507229,
       "weapon": "rl"
@@ -28034,6 +28168,7 @@
         -50.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 508363,
       "weapon": "rl"
@@ -28047,6 +28182,7 @@
         -281.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 512016,
       "weapon": "rl"
@@ -28060,6 +28196,7 @@
         -296
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 514899,
       "weapon": "lg"
@@ -28073,6 +28210,7 @@
         -306.25
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 517533,
       "weapon": "lg"
@@ -28086,6 +28224,7 @@
         43
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 522696,
       "weapon": "rl"
@@ -28099,6 +28238,7 @@
         24
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 527029,
       "weapon": "rl"
@@ -28112,6 +28252,7 @@
         -40
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 538328,
       "weapon": "lg"
@@ -28125,6 +28266,7 @@
         -104
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 539946,
       "weapon": "rl"
@@ -28138,6 +28280,7 @@
         -296
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 540363,
       "weapon": "rl"
@@ -28151,6 +28294,7 @@
         67.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 547042,
       "weapon": "rl"
@@ -28164,6 +28308,7 @@
         -177
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 547530,
       "weapon": "lg"
@@ -28177,6 +28322,7 @@
         -277.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 552195,
       "weapon": "rl"
@@ -28190,6 +28336,7 @@
         -24
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 557041,
       "weapon": "lg"
@@ -28203,6 +28350,7 @@
         -311.125
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 561862,
       "weapon": "rl"
@@ -28216,6 +28364,7 @@
         -20.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 563162,
       "weapon": "lg"
@@ -28229,6 +28378,7 @@
         58.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 563584,
       "weapon": "rl"
@@ -28242,6 +28392,7 @@
         -104
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 564319,
       "weapon": "lg"
@@ -28255,6 +28406,7 @@
         -254.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 568653,
       "weapon": "rl"
@@ -28268,6 +28420,7 @@
         -72.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 579301,
       "weapon": "lg"
@@ -28281,6 +28434,7 @@
         57.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 580078,
       "weapon": "rl"
@@ -28294,6 +28448,7 @@
         29.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 580078,
       "weapon": "rl"
@@ -28307,6 +28462,7 @@
         -269.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 589780,
       "weapon": "rl"
@@ -28320,6 +28476,7 @@
         33.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 590259,
       "weapon": "rl"
@@ -28333,6 +28490,7 @@
         -255.625
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 594220,
       "weapon": "rl"
@@ -28346,6 +28504,7 @@
         -296
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 598103,
       "weapon": "rl"
@@ -28359,6 +28518,7 @@
         -296
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 598973,
       "weapon": "rl"
@@ -79601,6 +79761,632 @@
             "v": "ga"
           }
         ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 2286,
+            "v": 64
+          },
+          {
+            "t": 6236,
+            "v": 1
+          },
+          {
+            "t": 11561,
+            "v": 64
+          },
+          {
+            "t": 16107,
+            "v": 1
+          },
+          {
+            "t": 18554,
+            "v": 32
+          },
+          {
+            "t": 20761,
+            "v": 1
+          },
+          {
+            "t": 21922,
+            "v": 2
+          },
+          {
+            "t": 24649,
+            "v": 64
+          },
+          {
+            "t": 37271,
+            "v": 2
+          },
+          {
+            "t": 37922,
+            "v": 32
+          },
+          {
+            "t": 46792,
+            "v": 2
+          },
+          {
+            "t": 48751,
+            "v": 32
+          },
+          {
+            "t": 51319,
+            "v": 64
+          },
+          {
+            "t": 52137,
+            "v": 32
+          },
+          {
+            "t": 54562,
+            "v": 64
+          },
+          {
+            "t": 59151,
+            "v": 32
+          },
+          {
+            "t": 62598,
+            "v": 2
+          },
+          {
+            "t": 63873,
+            "v": 64
+          },
+          {
+            "t": 65883,
+            "v": 32
+          },
+          {
+            "t": 67720,
+            "v": 64
+          },
+          {
+            "t": 68111,
+            "v": 32
+          },
+          {
+            "t": 70802,
+            "v": 64
+          },
+          {
+            "t": 71049,
+            "v": 32
+          },
+          {
+            "t": 74172,
+            "v": 64
+          },
+          {
+            "t": 75983,
+            "v": 32
+          },
+          {
+            "t": 78910,
+            "v": 64
+          },
+          {
+            "t": 80600,
+            "v": 1
+          },
+          {
+            "t": 89438,
+            "v": 32
+          },
+          {
+            "t": 96731,
+            "v": 64
+          },
+          {
+            "t": 97498,
+            "v": 32
+          },
+          {
+            "t": 99708,
+            "v": 1
+          },
+          {
+            "t": 101083,
+            "v": 2
+          },
+          {
+            "t": 108153,
+            "v": 64
+          },
+          {
+            "t": 111075,
+            "v": 1
+          },
+          {
+            "t": 115235,
+            "v": 64
+          },
+          {
+            "t": 116782,
+            "v": 1
+          },
+          {
+            "t": 120312,
+            "v": 64
+          },
+          {
+            "t": 124595,
+            "v": 1
+          },
+          {
+            "t": 127210,
+            "v": 32
+          },
+          {
+            "t": 133136,
+            "v": 1
+          },
+          {
+            "t": 134549,
+            "v": 32
+          },
+          {
+            "t": 138819,
+            "v": 64
+          },
+          {
+            "t": 146305,
+            "v": 32
+          },
+          {
+            "t": 147197,
+            "v": 1
+          },
+          {
+            "t": 148328,
+            "v": 2
+          },
+          {
+            "t": 151431,
+            "v": 64
+          },
+          {
+            "t": 159871,
+            "v": 1
+          },
+          {
+            "t": 160915,
+            "v": 32
+          },
+          {
+            "t": 166106,
+            "v": 64
+          },
+          {
+            "t": 167611,
+            "v": 1
+          },
+          {
+            "t": 170110,
+            "v": 2
+          },
+          {
+            "t": 171825,
+            "v": 64
+          },
+          {
+            "t": 190288,
+            "v": 1
+          },
+          {
+            "t": 192540,
+            "v": 32
+          },
+          {
+            "t": 193949,
+            "v": 64
+          },
+          {
+            "t": 196850,
+            "v": 32
+          },
+          {
+            "t": 202434,
+            "v": 64
+          },
+          {
+            "t": 203534,
+            "v": 1
+          },
+          {
+            "t": 206689,
+            "v": 32
+          },
+          {
+            "t": 212677,
+            "v": 1
+          },
+          {
+            "t": 218274,
+            "v": 32
+          },
+          {
+            "t": 222769,
+            "v": 64
+          },
+          {
+            "t": 223786,
+            "v": 1
+          },
+          {
+            "t": 225290,
+            "v": 32
+          },
+          {
+            "t": 233092,
+            "v": 1
+          },
+          {
+            "t": 238024,
+            "v": 32
+          },
+          {
+            "t": 239580,
+            "v": 1
+          },
+          {
+            "t": 250832,
+            "v": 32
+          },
+          {
+            "t": 252389,
+            "v": 1
+          },
+          {
+            "t": 260833,
+            "v": 64
+          },
+          {
+            "t": 261986,
+            "v": 1
+          },
+          {
+            "t": 263081,
+            "v": 32
+          },
+          {
+            "t": 268977,
+            "v": 64
+          },
+          {
+            "t": 271831,
+            "v": 32
+          },
+          {
+            "t": 276179,
+            "v": 64
+          },
+          {
+            "t": 279443,
+            "v": 32
+          },
+          {
+            "t": 281391,
+            "v": 64
+          },
+          {
+            "t": 284133,
+            "v": 32
+          },
+          {
+            "t": 285277,
+            "v": 64
+          },
+          {
+            "t": 292014,
+            "v": 32
+          },
+          {
+            "t": 297832,
+            "v": 64
+          },
+          {
+            "t": 300942,
+            "v": 32
+          },
+          {
+            "t": 302904,
+            "v": 64
+          },
+          {
+            "t": 311598,
+            "v": 1
+          },
+          {
+            "t": 316663,
+            "v": 32
+          },
+          {
+            "t": 318975,
+            "v": 1
+          },
+          {
+            "t": 324482,
+            "v": 32
+          },
+          {
+            "t": 334415,
+            "v": 64
+          },
+          {
+            "t": 341588,
+            "v": 32
+          },
+          {
+            "t": 342180,
+            "v": 64
+          },
+          {
+            "t": 345716,
+            "v": 32
+          },
+          {
+            "t": 352210,
+            "v": 64
+          },
+          {
+            "t": 354352,
+            "v": 32
+          },
+          {
+            "t": 357338,
+            "v": 64
+          },
+          {
+            "t": 361517,
+            "v": 32
+          },
+          {
+            "t": 362430,
+            "v": 64
+          },
+          {
+            "t": 363899,
+            "v": 32
+          },
+          {
+            "t": 365574,
+            "v": 64
+          },
+          {
+            "t": 372793,
+            "v": 32
+          },
+          {
+            "t": 373786,
+            "v": 64
+          },
+          {
+            "t": 376604,
+            "v": 32
+          },
+          {
+            "t": 378468,
+            "v": 64
+          },
+          {
+            "t": 380466,
+            "v": 32
+          },
+          {
+            "t": 386065,
+            "v": 64
+          },
+          {
+            "t": 398070,
+            "v": 32
+          },
+          {
+            "t": 400488,
+            "v": 64
+          },
+          {
+            "t": 401976,
+            "v": 32
+          },
+          {
+            "t": 403171,
+            "v": 64
+          },
+          {
+            "t": 406307,
+            "v": 32
+          },
+          {
+            "t": 409544,
+            "v": 64
+          },
+          {
+            "t": 412455,
+            "v": 1
+          },
+          {
+            "t": 416763,
+            "v": 64
+          },
+          {
+            "t": 424481,
+            "v": 1
+          },
+          {
+            "t": 427222,
+            "v": 64
+          },
+          {
+            "t": 434458,
+            "v": 32
+          },
+          {
+            "t": 443288,
+            "v": 64
+          },
+          {
+            "t": 445114,
+            "v": 32
+          },
+          {
+            "t": 450904,
+            "v": 64
+          },
+          {
+            "t": 454085,
+            "v": 32
+          },
+          {
+            "t": 455841,
+            "v": 64
+          },
+          {
+            "t": 460724,
+            "v": 1
+          },
+          {
+            "t": 462509,
+            "v": 2
+          },
+          {
+            "t": 465260,
+            "v": 1
+          },
+          {
+            "t": 469584,
+            "v": 64
+          },
+          {
+            "t": 471828,
+            "v": 1
+          },
+          {
+            "t": 472871,
+            "v": 32
+          },
+          {
+            "t": 479751,
+            "v": 64
+          },
+          {
+            "t": 481315,
+            "v": 1
+          },
+          {
+            "t": 482645,
+            "v": 32
+          },
+          {
+            "t": 484039,
+            "v": 1
+          },
+          {
+            "t": 484594,
+            "v": 32
+          },
+          {
+            "t": 497068,
+            "v": 1
+          },
+          {
+            "t": 505730,
+            "v": 64
+          },
+          {
+            "t": 516951,
+            "v": 32
+          },
+          {
+            "t": 522885,
+            "v": 64
+          },
+          {
+            "t": 526536,
+            "v": 32
+          },
+          {
+            "t": 527995,
+            "v": 64
+          },
+          {
+            "t": 539171,
+            "v": 1
+          },
+          {
+            "t": 539961,
+            "v": 32
+          },
+          {
+            "t": 541262,
+            "v": 1
+          },
+          {
+            "t": 544029,
+            "v": 32
+          },
+          {
+            "t": 553302,
+            "v": 64
+          },
+          {
+            "t": 557405,
+            "v": 1
+          },
+          {
+            "t": 560822,
+            "v": 32
+          },
+          {
+            "t": 561935,
+            "v": 1
+          },
+          {
+            "t": 564150,
+            "v": 64
+          },
+          {
+            "t": 565275,
+            "v": 1
+          },
+          {
+            "t": 567783,
+            "v": 32
+          },
+          {
+            "t": 570806,
+            "v": 1
+          },
+          {
+            "t": 576753,
+            "v": 2
+          },
+          {
+            "t": 578223,
+            "v": 1
+          },
+          {
+            "t": 580701,
+            "v": 64
+          },
+          {
+            "t": 587640,
+            "v": 32
+          },
+          {
+            "t": 590328,
+            "v": 64
+          },
+          {
+            "t": 599769,
+            "v": 32
+          }
+        ],
         "cl": [
           {
             "t": 0,
@@ -84207,6 +84993,768 @@
           {
             "t": 0,
             "v": ""
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 8255,
+            "v": 64
+          },
+          {
+            "t": 10298,
+            "v": 1
+          },
+          {
+            "t": 12374,
+            "v": 32
+          },
+          {
+            "t": 13497,
+            "v": 1
+          },
+          {
+            "t": 19221,
+            "v": 64
+          },
+          {
+            "t": 22621,
+            "v": 32
+          },
+          {
+            "t": 33601,
+            "v": 64
+          },
+          {
+            "t": 34013,
+            "v": 32
+          },
+          {
+            "t": 35844,
+            "v": 64
+          },
+          {
+            "t": 36151,
+            "v": 32
+          },
+          {
+            "t": 42184,
+            "v": 64
+          },
+          {
+            "t": 42704,
+            "v": 32
+          },
+          {
+            "t": 43860,
+            "v": 1
+          },
+          {
+            "t": 50513,
+            "v": 32
+          },
+          {
+            "t": 52166,
+            "v": 1
+          },
+          {
+            "t": 54546,
+            "v": 32
+          },
+          {
+            "t": 57458,
+            "v": 1
+          },
+          {
+            "t": 60237,
+            "v": 2
+          },
+          {
+            "t": 60802,
+            "v": 1
+          },
+          {
+            "t": 65691,
+            "v": 64
+          },
+          {
+            "t": 84536,
+            "v": 1
+          },
+          {
+            "t": 88248,
+            "v": 32
+          },
+          {
+            "t": 89228,
+            "v": 1
+          },
+          {
+            "t": 93441,
+            "v": 64
+          },
+          {
+            "t": 95302,
+            "v": 1
+          },
+          {
+            "t": 98757,
+            "v": 64
+          },
+          {
+            "t": 100211,
+            "v": 1
+          },
+          {
+            "t": 103649,
+            "v": 32
+          },
+          {
+            "t": 105121,
+            "v": 1
+          },
+          {
+            "t": 113568,
+            "v": 32
+          },
+          {
+            "t": 118301,
+            "v": 1
+          },
+          {
+            "t": 122999,
+            "v": 32
+          },
+          {
+            "t": 125513,
+            "v": 64
+          },
+          {
+            "t": 126929,
+            "v": 32
+          },
+          {
+            "t": 132457,
+            "v": 64
+          },
+          {
+            "t": 137598,
+            "v": 32
+          },
+          {
+            "t": 143053,
+            "v": 64
+          },
+          {
+            "t": 146585,
+            "v": 1
+          },
+          {
+            "t": 150641,
+            "v": 32
+          },
+          {
+            "t": 154193,
+            "v": 1
+          },
+          {
+            "t": 157224,
+            "v": 32
+          },
+          {
+            "t": 166033,
+            "v": 1
+          },
+          {
+            "t": 167583,
+            "v": 64
+          },
+          {
+            "t": 169119,
+            "v": 1
+          },
+          {
+            "t": 177923,
+            "v": 64
+          },
+          {
+            "t": 181747,
+            "v": 1
+          },
+          {
+            "t": 185576,
+            "v": 32
+          },
+          {
+            "t": 188914,
+            "v": 64
+          },
+          {
+            "t": 192985,
+            "v": 1
+          },
+          {
+            "t": 197951,
+            "v": 32
+          },
+          {
+            "t": 210846,
+            "v": 1
+          },
+          {
+            "t": 211618,
+            "v": 32
+          },
+          {
+            "t": 213092,
+            "v": 1
+          },
+          {
+            "t": 215079,
+            "v": 32
+          },
+          {
+            "t": 217443,
+            "v": 64
+          },
+          {
+            "t": 221040,
+            "v": 32
+          },
+          {
+            "t": 221845,
+            "v": 64
+          },
+          {
+            "t": 222248,
+            "v": 32
+          },
+          {
+            "t": 223962,
+            "v": 1
+          },
+          {
+            "t": 226639,
+            "v": 32
+          },
+          {
+            "t": 238040,
+            "v": 64
+          },
+          {
+            "t": 238744,
+            "v": 32
+          },
+          {
+            "t": 241599,
+            "v": 64
+          },
+          {
+            "t": 241936,
+            "v": 32
+          },
+          {
+            "t": 242729,
+            "v": 64
+          },
+          {
+            "t": 244691,
+            "v": 32
+          },
+          {
+            "t": 253365,
+            "v": 64
+          },
+          {
+            "t": 255461,
+            "v": 32
+          },
+          {
+            "t": 256263,
+            "v": 64
+          },
+          {
+            "t": 256985,
+            "v": 32
+          },
+          {
+            "t": 257781,
+            "v": 64
+          },
+          {
+            "t": 258416,
+            "v": 32
+          },
+          {
+            "t": 259219,
+            "v": 64
+          },
+          {
+            "t": 259574,
+            "v": 32
+          },
+          {
+            "t": 260430,
+            "v": 64
+          },
+          {
+            "t": 260847,
+            "v": 32
+          },
+          {
+            "t": 261820,
+            "v": 1
+          },
+          {
+            "t": 266339,
+            "v": 64
+          },
+          {
+            "t": 267404,
+            "v": 1
+          },
+          {
+            "t": 269222,
+            "v": 32
+          },
+          {
+            "t": 270769,
+            "v": 1
+          },
+          {
+            "t": 276275,
+            "v": 32
+          },
+          {
+            "t": 288092,
+            "v": 64
+          },
+          {
+            "t": 289430,
+            "v": 32
+          },
+          {
+            "t": 290500,
+            "v": 64
+          },
+          {
+            "t": 291430,
+            "v": 1
+          },
+          {
+            "t": 294056,
+            "v": 32
+          },
+          {
+            "t": 303847,
+            "v": 64
+          },
+          {
+            "t": 304691,
+            "v": 32
+          },
+          {
+            "t": 305651,
+            "v": 16
+          },
+          {
+            "t": 306871,
+            "v": 32
+          },
+          {
+            "t": 307677,
+            "v": 64
+          },
+          {
+            "t": 308989,
+            "v": 32
+          },
+          {
+            "t": 311318,
+            "v": 1
+          },
+          {
+            "t": 317339,
+            "v": 64
+          },
+          {
+            "t": 318975,
+            "v": 32
+          },
+          {
+            "t": 324027,
+            "v": 1
+          },
+          {
+            "t": 327821,
+            "v": 64
+          },
+          {
+            "t": 332985,
+            "v": 1
+          },
+          {
+            "t": 338014,
+            "v": 32
+          },
+          {
+            "t": 345138,
+            "v": 1
+          },
+          {
+            "t": 347897,
+            "v": 32
+          },
+          {
+            "t": 351749,
+            "v": 1
+          },
+          {
+            "t": 352976,
+            "v": 32
+          },
+          {
+            "t": 354547,
+            "v": 1
+          },
+          {
+            "t": 358949,
+            "v": 64
+          },
+          {
+            "t": 360754,
+            "v": 1
+          },
+          {
+            "t": 362402,
+            "v": 2
+          },
+          {
+            "t": 364180,
+            "v": 1
+          },
+          {
+            "t": 365820,
+            "v": 32
+          },
+          {
+            "t": 369401,
+            "v": 1
+          },
+          {
+            "t": 374493,
+            "v": 64
+          },
+          {
+            "t": 375708,
+            "v": 1
+          },
+          {
+            "t": 376870,
+            "v": 32
+          },
+          {
+            "t": 397691,
+            "v": 64
+          },
+          {
+            "t": 399455,
+            "v": 32
+          },
+          {
+            "t": 402208,
+            "v": 1
+          },
+          {
+            "t": 405923,
+            "v": 64
+          },
+          {
+            "t": 408685,
+            "v": 32
+          },
+          {
+            "t": 409795,
+            "v": 64
+          },
+          {
+            "t": 411402,
+            "v": 1
+          },
+          {
+            "t": 416426,
+            "v": 64
+          },
+          {
+            "t": 417858,
+            "v": 1
+          },
+          {
+            "t": 422068,
+            "v": 2
+          },
+          {
+            "t": 423085,
+            "v": 1
+          },
+          {
+            "t": 426388,
+            "v": 32
+          },
+          {
+            "t": 429723,
+            "v": 1
+          },
+          {
+            "t": 431372,
+            "v": 64
+          },
+          {
+            "t": 432478,
+            "v": 1
+          },
+          {
+            "t": 438725,
+            "v": 32
+          },
+          {
+            "t": 439988,
+            "v": 1
+          },
+          {
+            "t": 442113,
+            "v": 2
+          },
+          {
+            "t": 443338,
+            "v": 1
+          },
+          {
+            "t": 447388,
+            "v": 32
+          },
+          {
+            "t": 453503,
+            "v": 64
+          },
+          {
+            "t": 455781,
+            "v": 32
+          },
+          {
+            "t": 457477,
+            "v": 64
+          },
+          {
+            "t": 457877,
+            "v": 32
+          },
+          {
+            "t": 461117,
+            "v": 16
+          },
+          {
+            "t": 462704,
+            "v": 32
+          },
+          {
+            "t": 463508,
+            "v": 64
+          },
+          {
+            "t": 463600,
+            "v": 1
+          },
+          {
+            "t": 464412,
+            "v": 32
+          },
+          {
+            "t": 471223,
+            "v": 1
+          },
+          {
+            "t": 473379,
+            "v": 64
+          },
+          {
+            "t": 474210,
+            "v": 1
+          },
+          {
+            "t": 477665,
+            "v": 64
+          },
+          {
+            "t": 478275,
+            "v": 32
+          },
+          {
+            "t": 479084,
+            "v": 64
+          },
+          {
+            "t": 479496,
+            "v": 32
+          },
+          {
+            "t": 480306,
+            "v": 64
+          },
+          {
+            "t": 483340,
+            "v": 1
+          },
+          {
+            "t": 485444,
+            "v": 64
+          },
+          {
+            "t": 488689,
+            "v": 32
+          },
+          {
+            "t": 497827,
+            "v": 64
+          },
+          {
+            "t": 498612,
+            "v": 32
+          },
+          {
+            "t": 500459,
+            "v": 1
+          },
+          {
+            "t": 502541,
+            "v": 32
+          },
+          {
+            "t": 503905,
+            "v": 1
+          },
+          {
+            "t": 506541,
+            "v": 32
+          },
+          {
+            "t": 507288,
+            "v": 1
+          },
+          {
+            "t": 509039,
+            "v": 32
+          },
+          {
+            "t": 513722,
+            "v": 4
+          },
+          {
+            "t": 514132,
+            "v": 1
+          },
+          {
+            "t": 517198,
+            "v": 32
+          },
+          {
+            "t": 523545,
+            "v": 64
+          },
+          {
+            "t": 531839,
+            "v": 4
+          },
+          {
+            "t": 532916,
+            "v": 1
+          },
+          {
+            "t": 538034,
+            "v": 64
+          },
+          {
+            "t": 540549,
+            "v": 2
+          },
+          {
+            "t": 541391,
+            "v": 32
+          },
+          {
+            "t": 547904,
+            "v": 1
+          },
+          {
+            "t": 552177,
+            "v": 32
+          },
+          {
+            "t": 558163,
+            "v": 64
+          },
+          {
+            "t": 558863,
+            "v": 32
+          },
+          {
+            "t": 562600,
+            "v": 64
+          },
+          {
+            "t": 564236,
+            "v": 32
+          },
+          {
+            "t": 565831,
+            "v": 64
+          },
+          {
+            "t": 567529,
+            "v": 32
+          },
+          {
+            "t": 578692,
+            "v": 64
+          },
+          {
+            "t": 579916,
+            "v": 32
+          },
+          {
+            "t": 580928,
+            "v": 1
+          },
+          {
+            "t": 583406,
+            "v": 2
+          },
+          {
+            "t": 584616,
+            "v": 1
+          },
+          {
+            "t": 587015,
+            "v": 32
+          },
+          {
+            "t": 590056,
+            "v": 1
+          },
+          {
+            "t": 591620,
+            "v": 32
+          },
+          {
+            "t": 595054,
+            "v": 1
+          },
+          {
+            "t": 598887,
+            "v": 32
           }
         ],
         "cl": [
@@ -88889,6 +90437,756 @@
           {
             "t": 597903,
             "v": ""
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 2665,
+            "v": 32
+          },
+          {
+            "t": 11456,
+            "v": 1
+          },
+          {
+            "t": 13361,
+            "v": 32
+          },
+          {
+            "t": 14804,
+            "v": 1
+          },
+          {
+            "t": 15898,
+            "v": 64
+          },
+          {
+            "t": 16359,
+            "v": 1
+          },
+          {
+            "t": 17963,
+            "v": 64
+          },
+          {
+            "t": 20400,
+            "v": 1
+          },
+          {
+            "t": 21401,
+            "v": 32
+          },
+          {
+            "t": 26483,
+            "v": 1
+          },
+          {
+            "t": 28439,
+            "v": 32
+          },
+          {
+            "t": 29913,
+            "v": 1
+          },
+          {
+            "t": 31457,
+            "v": 32
+          },
+          {
+            "t": 36286,
+            "v": 1
+          },
+          {
+            "t": 40535,
+            "v": 32
+          },
+          {
+            "t": 46819,
+            "v": 1
+          },
+          {
+            "t": 51997,
+            "v": 32
+          },
+          {
+            "t": 62078,
+            "v": 4
+          },
+          {
+            "t": 62146,
+            "v": 1
+          },
+          {
+            "t": 63730,
+            "v": 4
+          },
+          {
+            "t": 64023,
+            "v": 64
+          },
+          {
+            "t": 69455,
+            "v": 1
+          },
+          {
+            "t": 74282,
+            "v": 32
+          },
+          {
+            "t": 75886,
+            "v": 1
+          },
+          {
+            "t": 79185,
+            "v": 64
+          },
+          {
+            "t": 90386,
+            "v": 1
+          },
+          {
+            "t": 92423,
+            "v": 16
+          },
+          {
+            "t": 96691,
+            "v": 1
+          },
+          {
+            "t": 98433,
+            "v": 64
+          },
+          {
+            "t": 100838,
+            "v": 1
+          },
+          {
+            "t": 102273,
+            "v": 2
+          },
+          {
+            "t": 106617,
+            "v": 1
+          },
+          {
+            "t": 108328,
+            "v": 32
+          },
+          {
+            "t": 111357,
+            "v": 64
+          },
+          {
+            "t": 113020,
+            "v": 32
+          },
+          {
+            "t": 114341,
+            "v": 64
+          },
+          {
+            "t": 115205,
+            "v": 32
+          },
+          {
+            "t": 116119,
+            "v": 64
+          },
+          {
+            "t": 117449,
+            "v": 1
+          },
+          {
+            "t": 118138,
+            "v": 64
+          },
+          {
+            "t": 119708,
+            "v": 32
+          },
+          {
+            "t": 131313,
+            "v": 64
+          },
+          {
+            "t": 132442,
+            "v": 1
+          },
+          {
+            "t": 135150,
+            "v": 64
+          },
+          {
+            "t": 141054,
+            "v": 16
+          },
+          {
+            "t": 145613,
+            "v": 64
+          },
+          {
+            "t": 147951,
+            "v": 1
+          },
+          {
+            "t": 157587,
+            "v": 32
+          },
+          {
+            "t": 163704,
+            "v": 4
+          },
+          {
+            "t": 164936,
+            "v": 64
+          },
+          {
+            "t": 168166,
+            "v": 1
+          },
+          {
+            "t": 171704,
+            "v": 32
+          },
+          {
+            "t": 180262,
+            "v": 64
+          },
+          {
+            "t": 180496,
+            "v": 32
+          },
+          {
+            "t": 181663,
+            "v": 64
+          },
+          {
+            "t": 182029,
+            "v": 32
+          },
+          {
+            "t": 182871,
+            "v": 64
+          },
+          {
+            "t": 183264,
+            "v": 32
+          },
+          {
+            "t": 184474,
+            "v": 64
+          },
+          {
+            "t": 186137,
+            "v": 32
+          },
+          {
+            "t": 190105,
+            "v": 1
+          },
+          {
+            "t": 193568,
+            "v": 64
+          },
+          {
+            "t": 194989,
+            "v": 1
+          },
+          {
+            "t": 199237,
+            "v": 32
+          },
+          {
+            "t": 204603,
+            "v": 64
+          },
+          {
+            "t": 210183,
+            "v": 32
+          },
+          {
+            "t": 211081,
+            "v": 64
+          },
+          {
+            "t": 211367,
+            "v": 32
+          },
+          {
+            "t": 213639,
+            "v": 64
+          },
+          {
+            "t": 214859,
+            "v": 32
+          },
+          {
+            "t": 218125,
+            "v": 64
+          },
+          {
+            "t": 221097,
+            "v": 32
+          },
+          {
+            "t": 222704,
+            "v": 64
+          },
+          {
+            "t": 227918,
+            "v": 32
+          },
+          {
+            "t": 230859,
+            "v": 64
+          },
+          {
+            "t": 234521,
+            "v": 32
+          },
+          {
+            "t": 236183,
+            "v": 64
+          },
+          {
+            "t": 237198,
+            "v": 32
+          },
+          {
+            "t": 243456,
+            "v": 64
+          },
+          {
+            "t": 244404,
+            "v": 32
+          },
+          {
+            "t": 248886,
+            "v": 64
+          },
+          {
+            "t": 249587,
+            "v": 32
+          },
+          {
+            "t": 249886,
+            "v": 64
+          },
+          {
+            "t": 250027,
+            "v": 32
+          },
+          {
+            "t": 250875,
+            "v": 64
+          },
+          {
+            "t": 251392,
+            "v": 32
+          },
+          {
+            "t": 255674,
+            "v": 64
+          },
+          {
+            "t": 261327,
+            "v": 32
+          },
+          {
+            "t": 263185,
+            "v": 64
+          },
+          {
+            "t": 264483,
+            "v": 1
+          },
+          {
+            "t": 267275,
+            "v": 32
+          },
+          {
+            "t": 277036,
+            "v": 1
+          },
+          {
+            "t": 285743,
+            "v": 32
+          },
+          {
+            "t": 287924,
+            "v": 1
+          },
+          {
+            "t": 289817,
+            "v": 32
+          },
+          {
+            "t": 296424,
+            "v": 64
+          },
+          {
+            "t": 307664,
+            "v": 1
+          },
+          {
+            "t": 310430,
+            "v": 64
+          },
+          {
+            "t": 320261,
+            "v": 1
+          },
+          {
+            "t": 322626,
+            "v": 64
+          },
+          {
+            "t": 327014,
+            "v": 1
+          },
+          {
+            "t": 332133,
+            "v": 32
+          },
+          {
+            "t": 338195,
+            "v": 1
+          },
+          {
+            "t": 347350,
+            "v": 64
+          },
+          {
+            "t": 350013,
+            "v": 1
+          },
+          {
+            "t": 352423,
+            "v": 32
+          },
+          {
+            "t": 353574,
+            "v": 1
+          },
+          {
+            "t": 353635,
+            "v": 32
+          },
+          {
+            "t": 356709,
+            "v": 1
+          },
+          {
+            "t": 361376,
+            "v": 32
+          },
+          {
+            "t": 363600,
+            "v": 1
+          },
+          {
+            "t": 367118,
+            "v": 64
+          },
+          {
+            "t": 372922,
+            "v": 1
+          },
+          {
+            "t": 375780,
+            "v": 32
+          },
+          {
+            "t": 378882,
+            "v": 1
+          },
+          {
+            "t": 383234,
+            "v": 32
+          },
+          {
+            "t": 384611,
+            "v": 1
+          },
+          {
+            "t": 387229,
+            "v": 64
+          },
+          {
+            "t": 389208,
+            "v": 32
+          },
+          {
+            "t": 396621,
+            "v": 16
+          },
+          {
+            "t": 397236,
+            "v": 32
+          },
+          {
+            "t": 399533,
+            "v": 1
+          },
+          {
+            "t": 401285,
+            "v": 32
+          },
+          {
+            "t": 404110,
+            "v": 1
+          },
+          {
+            "t": 405877,
+            "v": 32
+          },
+          {
+            "t": 407443,
+            "v": 1
+          },
+          {
+            "t": 409938,
+            "v": 64
+          },
+          {
+            "t": 416860,
+            "v": 1
+          },
+          {
+            "t": 420349,
+            "v": 32
+          },
+          {
+            "t": 425501,
+            "v": 1
+          },
+          {
+            "t": 438338,
+            "v": 32
+          },
+          {
+            "t": 451793,
+            "v": 64
+          },
+          {
+            "t": 457561,
+            "v": 32
+          },
+          {
+            "t": 458972,
+            "v": 64
+          },
+          {
+            "t": 461204,
+            "v": 32
+          },
+          {
+            "t": 463304,
+            "v": 64
+          },
+          {
+            "t": 464873,
+            "v": 32
+          },
+          {
+            "t": 466659,
+            "v": 64
+          },
+          {
+            "t": 467146,
+            "v": 32
+          },
+          {
+            "t": 470327,
+            "v": 64
+          },
+          {
+            "t": 471485,
+            "v": 32
+          },
+          {
+            "t": 482862,
+            "v": 64
+          },
+          {
+            "t": 483091,
+            "v": 32
+          },
+          {
+            "t": 484140,
+            "v": 64
+          },
+          {
+            "t": 484561,
+            "v": 32
+          },
+          {
+            "t": 485444,
+            "v": 64
+          },
+          {
+            "t": 486444,
+            "v": 32
+          },
+          {
+            "t": 490740,
+            "v": 64
+          },
+          {
+            "t": 491789,
+            "v": 32
+          },
+          {
+            "t": 493806,
+            "v": 64
+          },
+          {
+            "t": 495624,
+            "v": 32
+          },
+          {
+            "t": 500064,
+            "v": 64
+          },
+          {
+            "t": 500953,
+            "v": 32
+          },
+          {
+            "t": 502483,
+            "v": 1
+          },
+          {
+            "t": 507054,
+            "v": 64
+          },
+          {
+            "t": 508554,
+            "v": 1
+          },
+          {
+            "t": 511957,
+            "v": 32
+          },
+          {
+            "t": 512878,
+            "v": 1
+          },
+          {
+            "t": 514106,
+            "v": 64
+          },
+          {
+            "t": 517834,
+            "v": 1
+          },
+          {
+            "t": 519541,
+            "v": 32
+          },
+          {
+            "t": 523590,
+            "v": 1
+          },
+          {
+            "t": 527792,
+            "v": 32
+          },
+          {
+            "t": 533657,
+            "v": 64
+          },
+          {
+            "t": 533953,
+            "v": 32
+          },
+          {
+            "t": 537626,
+            "v": 64
+          },
+          {
+            "t": 537922,
+            "v": 32
+          },
+          {
+            "t": 538730,
+            "v": 64
+          },
+          {
+            "t": 538862,
+            "v": 32
+          },
+          {
+            "t": 540963,
+            "v": 1
+          },
+          {
+            "t": 544588,
+            "v": 32
+          },
+          {
+            "t": 545548,
+            "v": 64
+          },
+          {
+            "t": 548444,
+            "v": 1
+          },
+          {
+            "t": 559548,
+            "v": 64
+          },
+          {
+            "t": 564009,
+            "v": 1
+          },
+          {
+            "t": 570519,
+            "v": 32
+          },
+          {
+            "t": 571561,
+            "v": 64
+          },
+          {
+            "t": 571574,
+            "v": 32
+          },
+          {
+            "t": 573302,
+            "v": 64
+          },
+          {
+            "t": 573319,
+            "v": 32
+          },
+          {
+            "t": 578588,
+            "v": 64
+          },
+          {
+            "t": 580182,
+            "v": 1
+          },
+          {
+            "t": 585545,
+            "v": 32
+          },
+          {
+            "t": 591096,
+            "v": 1
+          },
+          {
+            "t": 595214,
+            "v": 32
+          },
+          {
+            "t": 599056,
+            "v": 1
           }
         ],
         "cl": [
@@ -93881,6 +96179,564 @@
           {
             "t": 587905,
             "v": "ga"
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 7701,
+            "v": 32
+          },
+          {
+            "t": 9301,
+            "v": 64
+          },
+          {
+            "t": 11859,
+            "v": 32
+          },
+          {
+            "t": 13935,
+            "v": 64
+          },
+          {
+            "t": 15400,
+            "v": 32
+          },
+          {
+            "t": 19026,
+            "v": 64
+          },
+          {
+            "t": 19924,
+            "v": 32
+          },
+          {
+            "t": 28338,
+            "v": 64
+          },
+          {
+            "t": 33013,
+            "v": 32
+          },
+          {
+            "t": 42927,
+            "v": 64
+          },
+          {
+            "t": 46371,
+            "v": 32
+          },
+          {
+            "t": 49146,
+            "v": 64
+          },
+          {
+            "t": 49912,
+            "v": 32
+          },
+          {
+            "t": 59166,
+            "v": 1
+          },
+          {
+            "t": 59847,
+            "v": 32
+          },
+          {
+            "t": 61512,
+            "v": 64
+          },
+          {
+            "t": 63081,
+            "v": 32
+          },
+          {
+            "t": 65123,
+            "v": 1
+          },
+          {
+            "t": 69079,
+            "v": 32
+          },
+          {
+            "t": 88207,
+            "v": 64
+          },
+          {
+            "t": 89380,
+            "v": 32
+          },
+          {
+            "t": 91021,
+            "v": 1
+          },
+          {
+            "t": 96925,
+            "v": 32
+          },
+          {
+            "t": 112494,
+            "v": 64
+          },
+          {
+            "t": 112993,
+            "v": 32
+          },
+          {
+            "t": 117092,
+            "v": 64
+          },
+          {
+            "t": 118198,
+            "v": 32
+          },
+          {
+            "t": 119872,
+            "v": 1
+          },
+          {
+            "t": 120968,
+            "v": 32
+          },
+          {
+            "t": 126305,
+            "v": 1
+          },
+          {
+            "t": 131297,
+            "v": 16
+          },
+          {
+            "t": 133613,
+            "v": 1
+          },
+          {
+            "t": 146776,
+            "v": 64
+          },
+          {
+            "t": 151847,
+            "v": 1
+          },
+          {
+            "t": 152798,
+            "v": 32
+          },
+          {
+            "t": 159360,
+            "v": 1
+          },
+          {
+            "t": 160767,
+            "v": 64
+          },
+          {
+            "t": 161964,
+            "v": 32
+          },
+          {
+            "t": 163858,
+            "v": 1
+          },
+          {
+            "t": 165546,
+            "v": 32
+          },
+          {
+            "t": 169366,
+            "v": 64
+          },
+          {
+            "t": 170041,
+            "v": 32
+          },
+          {
+            "t": 173418,
+            "v": 1
+          },
+          {
+            "t": 176171,
+            "v": 64
+          },
+          {
+            "t": 181140,
+            "v": 1
+          },
+          {
+            "t": 181663,
+            "v": 64
+          },
+          {
+            "t": 182448,
+            "v": 1
+          },
+          {
+            "t": 190962,
+            "v": 64
+          },
+          {
+            "t": 199250,
+            "v": 1
+          },
+          {
+            "t": 202243,
+            "v": 32
+          },
+          {
+            "t": 209341,
+            "v": 1
+          },
+          {
+            "t": 211723,
+            "v": 64
+          },
+          {
+            "t": 214320,
+            "v": 1
+          },
+          {
+            "t": 217360,
+            "v": 32
+          },
+          {
+            "t": 218599,
+            "v": 1
+          },
+          {
+            "t": 221560,
+            "v": 64
+          },
+          {
+            "t": 223055,
+            "v": 1
+          },
+          {
+            "t": 227040,
+            "v": 64
+          },
+          {
+            "t": 228198,
+            "v": 1
+          },
+          {
+            "t": 232027,
+            "v": 32
+          },
+          {
+            "t": 236833,
+            "v": 1
+          },
+          {
+            "t": 247872,
+            "v": 32
+          },
+          {
+            "t": 251949,
+            "v": 1
+          },
+          {
+            "t": 255522,
+            "v": 64
+          },
+          {
+            "t": 257405,
+            "v": 1
+          },
+          {
+            "t": 263432,
+            "v": 32
+          },
+          {
+            "t": 265950,
+            "v": 64
+          },
+          {
+            "t": 267418,
+            "v": 32
+          },
+          {
+            "t": 269846,
+            "v": 1
+          },
+          {
+            "t": 271846,
+            "v": 64
+          },
+          {
+            "t": 280522,
+            "v": 32
+          },
+          {
+            "t": 285580,
+            "v": 1
+          },
+          {
+            "t": 294146,
+            "v": 64
+          },
+          {
+            "t": 295061,
+            "v": 1
+          },
+          {
+            "t": 306346,
+            "v": 32
+          },
+          {
+            "t": 311951,
+            "v": 1
+          },
+          {
+            "t": 315845,
+            "v": 32
+          },
+          {
+            "t": 325781,
+            "v": 64
+          },
+          {
+            "t": 327444,
+            "v": 32
+          },
+          {
+            "t": 329374,
+            "v": 1
+          },
+          {
+            "t": 332301,
+            "v": 32
+          },
+          {
+            "t": 339925,
+            "v": 1
+          },
+          {
+            "t": 339942,
+            "v": 64
+          },
+          {
+            "t": 346777,
+            "v": 1
+          },
+          {
+            "t": 348872,
+            "v": 32
+          },
+          {
+            "t": 355444,
+            "v": 64
+          },
+          {
+            "t": 356898,
+            "v": 1
+          },
+          {
+            "t": 359560,
+            "v": 64
+          },
+          {
+            "t": 365403,
+            "v": 32
+          },
+          {
+            "t": 367588,
+            "v": 1
+          },
+          {
+            "t": 371210,
+            "v": 32
+          },
+          {
+            "t": 378392,
+            "v": 1
+          },
+          {
+            "t": 378455,
+            "v": 64
+          },
+          {
+            "t": 385429,
+            "v": 1
+          },
+          {
+            "t": 387833,
+            "v": 32
+          },
+          {
+            "t": 389609,
+            "v": 1
+          },
+          {
+            "t": 391429,
+            "v": 32
+          },
+          {
+            "t": 399140,
+            "v": 1
+          },
+          {
+            "t": 402898,
+            "v": 32
+          },
+          {
+            "t": 408054,
+            "v": 1
+          },
+          {
+            "t": 410379,
+            "v": 32
+          },
+          {
+            "t": 415503,
+            "v": 64
+          },
+          {
+            "t": 418221,
+            "v": 32
+          },
+          {
+            "t": 421819,
+            "v": 64
+          },
+          {
+            "t": 424528,
+            "v": 1
+          },
+          {
+            "t": 424722,
+            "v": 32
+          },
+          {
+            "t": 430091,
+            "v": 64
+          },
+          {
+            "t": 434981,
+            "v": 32
+          },
+          {
+            "t": 438885,
+            "v": 64
+          },
+          {
+            "t": 439288,
+            "v": 32
+          },
+          {
+            "t": 442067,
+            "v": 64
+          },
+          {
+            "t": 443611,
+            "v": 1
+          },
+          {
+            "t": 447461,
+            "v": 64
+          },
+          {
+            "t": 452042,
+            "v": 1
+          },
+          {
+            "t": 461262,
+            "v": 32
+          },
+          {
+            "t": 478944,
+            "v": 1
+          },
+          {
+            "t": 481989,
+            "v": 64
+          },
+          {
+            "t": 485444,
+            "v": 2
+          },
+          {
+            "t": 486691,
+            "v": 1
+          },
+          {
+            "t": 498860,
+            "v": 32
+          },
+          {
+            "t": 499938,
+            "v": 1
+          },
+          {
+            "t": 501295,
+            "v": 32
+          },
+          {
+            "t": 509237,
+            "v": 1
+          },
+          {
+            "t": 511821,
+            "v": 64
+          },
+          {
+            "t": 515873,
+            "v": 1
+          },
+          {
+            "t": 519528,
+            "v": 32
+          },
+          {
+            "t": 522696,
+            "v": 64
+          },
+          {
+            "t": 523747,
+            "v": 32
+          },
+          {
+            "t": 527922,
+            "v": 1
+          },
+          {
+            "t": 531146,
+            "v": 32
+          },
+          {
+            "t": 536886,
+            "v": 1
+          },
+          {
+            "t": 540028,
+            "v": 32
+          },
+          {
+            "t": 552236,
+            "v": 1
+          },
+          {
+            "t": 554820,
+            "v": 32
+          },
+          {
+            "t": 564477,
+            "v": 1
+          },
+          {
+            "t": 569929,
+            "v": 32
+          },
+          {
+            "t": 580522,
+            "v": 1
+          },
+          {
+            "t": 582539,
+            "v": 32
           }
         ],
         "cl": [
