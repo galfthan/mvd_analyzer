@@ -1,8 +1,9 @@
 # backpacks analyser
 
 **Phase:** Derived
-**Inputs:** `BackpackDropHintEvent`, `PlayerPositionEvent`,
-            `StuffTextEvent`, `PrintEvent`, `IntermissionEvent`
+**Inputs:** `BackpackDropHintEvent`, `BackpackExpireHintEvent`,
+            `PlayerPositionEvent`, `StuffTextEvent`, `PrintEvent`,
+            `IntermissionEvent`
 **Writes to Result:** `result.Backpacks` (`[]BackpackDrop`)
 
 Paired with the `backpack-recon` post-processor
@@ -44,7 +45,18 @@ not announced and are therefore invisible to this analyser.
    joined against nothing).
 3. `MatchTimingDetector` gates the recording so warmup drops don't
    pollute the match output.
-4. At Finalize, drops are sorted by time and `Loc` is resolved
+4. `BackpackExpireHintEvent` — KTX's `//ktx expire <ent>`, written by
+   `SUB_Remove` for every RL/LG pack it deletes untaken
+   (`ktx/src/g_spawn.c:196-210`) — is joined at Finalize onto the drop it
+   closes and stamps that row `fate: "expired"`. The join is by edict AND
+   time (edicts are recycled): the newest drop at or before the hint, and
+   only when the gap is `DropBackpack`'s own 120 s deadline. It is the
+   only pickup-side field a hint row carries, because it is the one thing
+   the `WeaponPickup` join cannot state — a demo can carry `//ktx drop`
+   and no `//ktx bp` at all, so a missing pickup row is not an expiry.
+   An expiry naming a pack this analyser has no row for (a warmup drop) is
+   left on the floor.
+5. At Finalize, drops are sorted by time and `Loc` is resolved
    best-effort from the map's `.loc` corpus.
 
 ## Limitations / known issues
@@ -58,4 +70,5 @@ not announced and are therefore invisible to this analyser.
 ## Reference
 
 - KTX drop emitter: `ktx/src/items.c` (search "//ktx drop")
+- KTX expiry emitter: `ktx/src/g_spawn.c` `SUB_Remove`
 - Item bit layout: `ktx/include/g_local.h` (`IT_*` constants)
