@@ -479,9 +479,12 @@ func positionAtOrBefore(pt *result.PositionTrack, t int32) ([3]float32, bool) {
 //
 // A reconnect onto the SAME slot is not that case: the cache is continuous
 // across it, so the earlier sample is the same client's own last report and
-// is trusted. (This matters — the occupancy tracker opens a fresh session on
-// a userinfo change too, and a slot-agnostic bound cost 58 of 13 749
-// ground-truth drops to players who never moved.)
+// is trusted. The occupancy tracker opens a fresh session on a same-slot
+// userinfo change too, so a session-keyed bound would refuse samples the
+// mechanism it cites does not implicate. (Neither form costs anything on the
+// ground-truth sample — measured identical with the session bound and with
+// the slot bound — so this is the narrower rule chosen on the engine
+// behaviour, not on a number.)
 func activeWeaponAtDeath(p *result.PlayerStream, t int32) (int16, bool) {
 	col := p.ActiveWeapon
 	i := sort.Search(len(col), func(j int) bool { return col[j].T > t }) - 1
