@@ -1202,12 +1202,13 @@ type ParseWarnings struct {
 	// the sample set — the counts above stay exact even when a group is
 	// dropped.
 	Groups []ParseWarningGroup `json:"groups,omitempty"`
-	// DroppedGroups / DroppedWarnings account for the retention cap
-	// (parser.MaxWarningGroups distinct messages): how many distinct
-	// groups, and how many warning instances in them, are missing from
-	// Groups. Both zero in every normal case. Never silently truncated —
-	// if the table is short, these say by how much.
-	DroppedGroups   int `json:"droppedGroups,omitempty"`
+	// DroppedWarnings accounts for the retention cap
+	// (parser.MaxWarningGroups distinct messages): how many warnings fell
+	// outside the retained groups and are therefore missing from Groups.
+	// Zero in every normal case. It is an OCCURRENCE count, not a count of
+	// distinct messages — the reader deliberately does not track the
+	// distinct key set past the cap, since holding it is exactly the
+	// unbounded memory the cap exists to avoid.
 	DroppedWarnings int `json:"droppedWarnings,omitempty"`
 }
 

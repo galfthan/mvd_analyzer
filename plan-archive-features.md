@@ -129,7 +129,9 @@ final scoreline where `demoInfo` doesn't exist.
 warning COLLECTION is now unconditional in the parser — a census, not a
 log (exact `total` + exact per-type counts, plus a 64-row sample table of
 distinct messages with counts and first occurrence; what the cap left out
-is reported in `droppedGroups` / `droppedWarnings`). `SetDiagnosticMode`
+is reported in `droppedWarnings`, an occurrence count — the reader cannot
+report DISTINCT dropped messages without the unbounded key set the cap
+exists to avoid). `SetDiagnosticMode`
 now means only "also retain every individual instance", which is all the
 diagnostic harness ever wanted. The census reaches analytics through a
 new optional Source capability (`events.WarningReporter`) and rides every

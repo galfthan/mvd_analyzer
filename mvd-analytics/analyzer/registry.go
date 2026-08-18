@@ -327,7 +327,6 @@ func parseWarningsOf(source events.Source) *resultpkg.ParseWarnings {
 	}
 	pw := &resultpkg.ParseWarnings{
 		Total:           s.Total,
-		DroppedGroups:   s.DroppedGroups,
 		DroppedWarnings: s.DroppedWarnings,
 	}
 	if len(s.ByType) > 0 {

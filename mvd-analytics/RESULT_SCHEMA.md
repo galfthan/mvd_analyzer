@@ -3644,8 +3644,7 @@ the data.
 | Total | `total` | int | Exact number of warnings raised. **Never capped.** |
 | ByType | `byType` | map[string]int, omitempty | Exact per-category counts. Fixed vocabulary: `parse_error` (a payload we recognise but failed to decode), `unknown_svc` (an `svc_*` command byte we do not know — the rest of that payload is abandoned), `unknown_te` (an unknown temp-entity type), `unknown_hidden` (an unknown MVD hidden-message type). |
 | Groups | `groups` | []ParseWarningGroup, omitempty | Capped sample table of distinct (type, message) rows, **loudest first** (count desc, then type, then message — the order is deterministic so the same demo always serialises identically). |
-| DroppedGroups | `droppedGroups` | int, omitempty | Distinct messages beyond the retention cap that are missing from `groups`. |
-| DroppedWarnings | `droppedWarnings` | int, omitempty | Warning instances in those dropped groups. |
+| DroppedWarnings | `droppedWarnings` | int, omitempty | Warnings beyond the 64-group retention cap — every occurrence whose `(type, message)` pair was first met after the table was full, so it is missing from `groups`. An OCCURRENCE count, never a count of distinct messages: the reader does not retain the keys past the cap, since holding them is the unbounded memory the cap exists to avoid. |
 
 `ParseWarningGroup`:
 
@@ -3664,11 +3663,13 @@ the failing command and the abandoned byte count, so its cardinality is
 unbounded in principle; the sample table is therefore capped at
 `parser.MaxWarningGroups` (64) distinct rows. **The cap never touches a
 count** — `total` and `byType` stay exact, and what the table is missing
-is stated in `droppedGroups` / `droppedWarnings` rather than silently
-truncated. Groups are retained in FIRST-ENCOUNTER order, so on a badly
-broken demo `groups` is a sample of the distinct messages, not the top-k
-by count — read `byType` for the shape of the damage and `groups` for
-what it looks like. The full per-instance list remains available to the
+is stated in `droppedWarnings` (warnings beyond the 64-group retention
+cap) rather than silently truncated. That figure counts OCCURRENCES, not
+distinct messages: past the cap the reader stops retaining keys, which is
+the whole point of the cap. Groups are retained in FIRST-ENCOUNTER order,
+so on a badly broken demo `groups` is a sample of the distinct messages,
+not the top-k by count — read `byType` for the shape of the damage and
+`groups` for what it looks like. The full per-instance list remains available to the
 diagnostic harness (`parser.SetDiagnosticMode` +
 `Parser.DiagnosticWarnings`), which is the only consumer that needs it.
 

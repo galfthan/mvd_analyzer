@@ -23,13 +23,13 @@ type silentSource struct{ eventSource }
 
 func TestParseWarnings_CarriedOntoResult(t *testing.T) {
 	src := &warningSource{summary: events.WarningSummary{
-		Total:  7,
-		ByType: map[string]int{"unknown_svc": 5, "parse_error": 2},
+		Total:  16,
+		ByType: map[string]int{"unknown_svc": 14, "parse_error": 2},
 		Groups: []events.WarningGroup{
 			{Type: "unknown_svc", Message: "svc_unknown_61 (cmd 61)", Count: 5, FirstTimeMs: 12345},
 			{Type: "parse_error", Message: "svc_playerinfo: unexpected EOF", Count: 2, FirstTimeMs: 400},
 		},
-		DroppedGroups:   3,
+		// 16 total − the 7 in the two retained rows.
 		DroppedWarnings: 9,
 	}}
 	res, err := NewDefaultRegistry().AnalyzeSource(src, "warn.mvd")
@@ -40,10 +40,10 @@ func TestParseWarnings_CarriedOntoResult(t *testing.T) {
 	if pw == nil {
 		t.Fatal("ParseWarnings absent on a source that reported 7 warnings")
 	}
-	if pw.Total != 7 || pw.DroppedGroups != 3 || pw.DroppedWarnings != 9 {
-		t.Errorf("counters = %+v, want total 7 / dropped 3 groups / 9 warnings", pw)
+	if pw.Total != 16 || pw.DroppedWarnings != 9 {
+		t.Errorf("counters = %+v, want total 16 / 9 dropped warnings", pw)
 	}
-	if pw.ByType["unknown_svc"] != 5 || pw.ByType["parse_error"] != 2 {
+	if pw.ByType["unknown_svc"] != 14 || pw.ByType["parse_error"] != 2 {
 		t.Errorf("ByType = %v", pw.ByType)
 	}
 	if len(pw.Groups) != 2 {

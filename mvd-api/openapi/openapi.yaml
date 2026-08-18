@@ -3150,11 +3150,12 @@ components:
                       match-relative base every other ms field uses — the reader has no
                       match clock and a warning can fire before the match starts.
                     type: integer
-            droppedGroups:
-              description: "Distinct messages beyond the retention cap, missing from `groups`. Normally absent."
-              type: integer
             droppedWarnings:
-              description: "Warning instances in those dropped groups. Normally absent."
+              description: >
+                Warnings beyond the 64-group retention cap, i.e. missing from `groups`.
+                An OCCURRENCE count, never a count of distinct messages — past the cap
+                the reader stops retaining keys, which is why the cap exists.
+                Normally absent.
               type: integer
         filePath:
           description: "Source demo path."

@@ -32,8 +32,13 @@ block, which is what the overwhelming majority of demos do.
 It is a summary, not a log — the archive's worst demos raise ~10 000
 warnings each. The counters are exact and uncapped; only the sample table
 is capped (64 distinct messages, first-encounter order), and what it left
-out is stated in `droppedGroups` / `droppedWarnings` rather than silently
-dropped. The unbounded per-instance list stays behind
+out is stated in `droppedWarnings` — warnings beyond the 64-group
+retention cap — rather than silently dropped. That is an OCCURRENCE
+count: a `droppedGroups` companion was cut before release because the
+reader cannot know how many DISTINCT messages it left out without
+retaining the unbounded key set the cap exists to avoid, so the two would
+only ever have been the same number under two different names. The
+unbounded per-instance list stays behind
 `SetDiagnosticMode`, unchanged for the diagnostic harness.
 
 `qw-analyze` prints a one-line summary to stderr whenever a demo raises

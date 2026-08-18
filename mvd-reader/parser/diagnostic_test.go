@@ -31,8 +31,8 @@ func TestWarningSummary_CollectedWithoutDiagnosticMode(t *testing.T) {
 	if g := s.Groups[0]; g.Type != "unknown_svc" || g.Count != 2 || g.FirstTimeMs != 1000 {
 		t.Errorf("Groups[0] = %+v, want unknown_svc x2 first@1000ms", g)
 	}
-	if s.DroppedGroups != 0 || s.DroppedWarnings != 0 {
-		t.Errorf("dropped counters non-zero on a 2-group parse: %+v", s)
+	if s.DroppedWarnings != 0 {
+		t.Errorf("dropped counter non-zero on a 2-group parse: %+v", s)
 	}
 }
 
@@ -71,11 +71,12 @@ func TestWarningSummary_GroupCapCountsOverflow(t *testing.T) {
 	if len(s.Groups) != MaxWarningGroups {
 		t.Errorf("len(Groups) = %d, want the cap %d", len(s.Groups), MaxWarningGroups)
 	}
-	if s.DroppedGroups != 10+1 {
-		t.Errorf("DroppedGroups = %d, want 11 (10 distinct + the repeat of an uncapped one)", s.DroppedGroups)
-	}
-	if s.DroppedWarnings != 11 {
-		t.Errorf("DroppedWarnings = %d, want 11", s.DroppedWarnings)
+	// DroppedWarnings is an OCCURRENCE count: the 10 messages that never
+	// made the table, plus the second sighting of the last of them. It
+	// deliberately says nothing about how many DISTINCT messages were
+	// left out — the parser does not retain the keys to know.
+	if s.DroppedWarnings != 10+1 {
+		t.Errorf("DroppedWarnings = %d, want 11 (10 uncapped messages + one repeat of them)", s.DroppedWarnings)
 	}
 	// The retained rows still account for every warning they saw: the
 	// repeat of variant 0 landed in its row, not in the overflow.

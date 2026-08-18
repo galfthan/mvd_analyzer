@@ -816,9 +816,9 @@ func reportParseWarnings(path string, res *result.Result, w io.Writer) {
 		fmt.Fprintf(w, "qw-analyze:   x%-6d [first %7.1fs] %s: %s\n",
 			g.Count, float64(g.FirstDemoTimeMs)*0.001, g.Type, g.Message)
 	}
-	if pw.DroppedGroups > 0 {
-		fmt.Fprintf(w, "qw-analyze:   (+%d distinct messages / %d warnings past the %d-group retention cap; the counts above are still exact)\n",
-			pw.DroppedGroups, pw.DroppedWarnings, events.MaxWarningGroups)
+	if pw.DroppedWarnings > 0 {
+		fmt.Fprintf(w, "qw-analyze:   (+%d warnings beyond the %d-group retention cap; the counts above are still exact)\n",
+			pw.DroppedWarnings, events.MaxWarningGroups)
 	}
 }
 

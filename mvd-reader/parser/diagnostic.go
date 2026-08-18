@@ -20,10 +20,13 @@ func (w Warning) String() string {
 // always-on summary retains. The type vocabulary is a handful of
 // in-code constants, but a message embeds the failing svc name, the
 // error text and the abandoned byte count, so its cardinality is
-// bounded only by how creatively a demo is broken. Groups past the cap
-// are still COUNTED (into WarningSummary.DroppedGroups /
-// DroppedWarnings and into ByType, which is exact regardless) — the cap
-// bounds retention, never the census. Retention is first-encounter
+// bounded only by how creatively a demo is broken. Warnings past the cap
+// are still COUNTED (into WarningSummary.DroppedWarnings and into
+// ByType, which is exact regardless) — the cap bounds retention, never
+// the census. How many DISTINCT groups were left out is deliberately not
+// reported: tracking that needs the very unbounded key set the cap
+// exists to avoid, so the honest figure is the occurrence count.
+// Retention is first-encounter
 // order, so on a badly broken demo the table samples the distinct
 // messages rather than ranking them; ByType is where the shape of the
 // damage is read.
@@ -45,11 +48,14 @@ type WarningGroup struct {
 // (DiagnosticWarnings) — it is unbounded, and a summary answers every
 // operator question a list would ("what broke, how often, when first").
 type WarningSummary struct {
-	Total           int
-	ByType          map[string]int // exact, never capped
-	Groups          []WarningGroup // at most MaxWarningGroups, deterministically ordered
-	DroppedGroups   int            // distinct groups beyond the cap
-	DroppedWarnings int            // warning instances in those dropped groups
+	Total  int
+	ByType map[string]int // exact, never capped
+	Groups []WarningGroup // at most MaxWarningGroups, deterministically ordered
+	// DroppedWarnings counts the warnings that fell outside the retained
+	// groups — every occurrence of a (type, message) pair first seen after
+	// the cap was reached. It is an occurrence count, NOT a count of
+	// distinct messages: see MaxWarningGroups.
+	DroppedWarnings int
 }
 
 // SetDiagnosticMode opts into retaining every individual warning for
@@ -74,7 +80,6 @@ func (p *Parser) DiagnosticWarnings() []Warning {
 func (p *Parser) WarningSummary() WarningSummary {
 	s := WarningSummary{
 		Total:           p.warnTotal,
-		DroppedGroups:   p.warnDroppedGroups,
 		DroppedWarnings: p.warnDropped,
 	}
 	if p.warnTotal == 0 {
@@ -135,7 +140,6 @@ func (p *Parser) warn(timeMs int32, typ, format string, args ...interface{}) {
 	} else if len(p.warnGroups) < MaxWarningGroups {
 		p.warnGroups[k] = &warnGroup{count: 1, firstMs: timeMs}
 	} else {
-		p.warnDroppedGroups++
 		p.warnDropped++
 	}
 

@@ -258,10 +258,13 @@ itself; it exposes a census:
 - `Parser.WarningSummary()` — exact `Total`, exact `ByType` counts, and a
   capped table of distinct `(type, message)` groups with each one's count
   and first occurrence. The cap (`parser.MaxWarningGroups`) bounds the
-  SAMPLE table only, and what it left out is reported in `DroppedGroups`
-  / `DroppedWarnings` — a count here is never silently truncated. Groups
-  are retained in first-encounter order, so on a very broken demo the
-  table is a sample of the distinct messages rather than the top-k.
+  SAMPLE table only, and what it left out is reported in
+  `DroppedWarnings` — warnings beyond the 64-group retention cap, an
+  occurrence count rather than a distinct-message count, because past the
+  cap the reader stops retaining keys. A count here is never silently
+  truncated. Groups are retained in first-encounter order, so on a very
+  broken demo the table is a sample of the distinct messages rather than
+  the top-k.
 - `events.WarningReporter` — the optional `Source` capability
   (`WarningSummary() events.WarningSummary`) that `source/mvd.Source`
   implements. The analytics registry type-asserts for it after draining

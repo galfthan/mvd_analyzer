@@ -176,13 +176,12 @@ type Parser struct {
 
 	// Parse-warning census, always collected (see diagnostic.go). The
 	// counters are exact; warnGroups retains at most MaxWarningGroups
-	// distinct (type, message) rows and counts the rest into
-	// warnDroppedGroups / warnDropped.
-	warnTotal         int
-	warnByType        map[string]int
-	warnGroups        map[warnKey]*warnGroup
-	warnDroppedGroups int
-	warnDropped       int
+	// distinct (type, message) rows and counts every warning past that
+	// into warnDropped.
+	warnTotal   int
+	warnByType  map[string]int
+	warnGroups  map[warnKey]*warnGroup
+	warnDropped int
 
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
 	// and svc_packetentities / svc_deltapacketentities so the parser

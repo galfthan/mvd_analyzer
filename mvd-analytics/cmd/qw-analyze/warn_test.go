@@ -10,13 +10,14 @@ import (
 
 func warnResult() *result.Result {
 	return &result.Result{ParseWarnings: &result.ParseWarnings{
-		Total:  9,
-		ByType: map[string]int{"unknown_svc": 7, "parse_error": 2},
+		Total:  21,
+		ByType: map[string]int{"unknown_svc": 19, "parse_error": 2},
 		Groups: []result.ParseWarningGroup{
 			{Type: "unknown_svc", Message: "svc_unknown_61 (cmd 61)", Count: 7, FirstDemoTimeMs: 61200},
 			{Type: "parse_error", Message: "svc_playerinfo: unexpected EOF", Count: 2, FirstDemoTimeMs: 400},
 		},
-		DroppedGroups:   4,
+		// The 12 warnings the retained table does not account for
+		// (21 total − 9 in the two rows above).
 		DroppedWarnings: 12,
 	}}
 }
@@ -48,7 +49,7 @@ func TestReportParseWarnings_OneLineSummary(t *testing.T) {
 	if len(lines) != 2 {
 		t.Fatalf("want the summary + loudest line, got %d lines:\n%s", len(lines), out)
 	}
-	for _, want := range []string{"duel.mvd.gz", "9 parse warnings", "unknown_svc 7", "parse_error 2"} {
+	for _, want := range []string{"duel.mvd.gz", "21 parse warnings", "unknown_svc 19", "parse_error 2"} {
 		if !strings.Contains(lines[0], want) {
 			t.Errorf("summary line %q missing %q", lines[0], want)
 		}
@@ -81,8 +82,12 @@ func TestReportParseWarnings_DetailTableUnderWarnFlag(t *testing.T) {
 			t.Errorf("detail output missing %q:\n%s", want, out)
 		}
 	}
-	// The retention cap must never be a silent truncation.
-	if !strings.Contains(out, "+4 distinct messages") || !strings.Contains(out, "12 warnings") {
-		t.Errorf("detail output does not state the dropped groups:\n%s", out)
+	// The retention cap must never be a silent truncation — and the
+	// footer states an occurrence count, never a distinct-message count.
+	if !strings.Contains(out, "+12 warnings beyond the") {
+		t.Errorf("detail output does not state the warnings past the cap:\n%s", out)
+	}
+	if strings.Contains(out, "distinct messages") {
+		t.Errorf("detail output still claims a distinct-message count:\n%s", out)
 	}
 }

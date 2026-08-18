@@ -58,7 +58,7 @@ type (
 
 // MaxWarningGroups is the retention cap on WarningSummary.Groups — how
 // many distinct messages a summary samples before it starts counting
-// the rest into DroppedGroups / DroppedWarnings.
+// every further warning into DroppedWarnings.
 const MaxWarningGroups = parser.MaxWarningGroups
 
 // Event is the interface implemented by every concrete event type. Use
