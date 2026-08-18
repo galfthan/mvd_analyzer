@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -105,11 +106,21 @@ func TestParseDateMarkerPrintRejects(t *testing.T) {
 		"matchdate:",
 		"matchdate: not a date at all",
 		"matchdate: 2008-13-05 20:05:38 CET", // month 13
+		"matchdate: 2008-01-00 20:05:38 CET", // day 0
 		"matchdate: 2008-01-05 25:05:38 CET", // hour 25
 		"matchkey: 8-2005-8-13",              // no time half
 		"matchkey: x-2005-8-13:19-56-18",     // non-numeric match id
 		"matchkey: 8-2005-8:19-56-18",        // short date half
 		"the matchdate: 2008-01-05 20:05:38 CET is late",
+		// Dates whose fields are each in range but whose combination does
+		// not exist. time.Date silently NORMALISES these (2024-02-31 becomes
+		// 2024-03-02), so without a round-trip check a corrupted stamp is
+		// published as a confident date days off.
+		"matchdate: 2024-02-31 12:00:00 CET",
+		"matchdate: 2023-02-29 12:00:00 CET",
+		"matchdate: 2024-04-31 12:00:00 CET",
+		"matchdate: Sat Feb 31, 12:00:00 2024",
+		"matchkey: 8-2024-2-31:19-56-18",
 	}
 	for _, line := range lines {
 		if m, ok := parseDateMarkerPrint(line, 0); ok {
@@ -157,7 +168,7 @@ func TestResolveZoneOffset(t *testing.T) {
 	known := map[string]int{
 		"UTC": 0, "GMT": 0, "utc": 0,
 		"CET": 3600, "CEST": 7200, "EET": 7200, "EEST": 10800,
-		"MSK": 10800, "EST": -5 * 3600, "PST": -8 * 3600,
+		"EST": -5 * 3600, "PST": -8 * 3600,
 		"+03": 3 * 3600, "+0200": 2 * 3600, "-05:00": -5 * 3600,
 		"UTC+02:00": 2 * 3600, "GMT-5": -5 * 3600,
 		"Vdsteuropa, sommartid": 7200, "Vdsteuropa, normaltid": 3600,
@@ -179,6 +190,18 @@ func TestResolveZoneOffset(t *testing.T) {
 	off, uncertainty, ok := resolveZoneOffset("Central European Standard Time")
 	if !ok || off != 3600 || uncertainty != tzDSTAccuracyMs {
 		t.Errorf("Windows long name = (%d, %d, %v), want (3600, %d, true)", off, uncertainty, ok, tzDSTAccuracyMs)
+	}
+
+	// Russia's permanent summer time (2011-03-27..2014-10-26) moved MSK to
+	// +04 and YEKT to +06, so the single table offset cannot be exact for
+	// every stamp that printed them: they resolve with an hour of slack
+	// rather than claiming a precision they do not have.
+	for tok, want := range map[string]int{"MSK": 10800, "YEKT": 5 * 3600} {
+		off, uncertainty, ok := resolveZoneOffset(tok)
+		if !ok || off != want || uncertainty != tzDSTAccuracyMs {
+			t.Errorf("resolveZoneOffset(%q) = (%d, %d, %v), want (%d, %d, true)",
+				tok, off, uncertainty, ok, want, tzDSTAccuracyMs)
+		}
 	}
 
 	for _, tok := range []string{"", "XYZ", "Mars/Olympus", "+", "+99"} {
@@ -218,6 +241,66 @@ func TestServerReleaseFloor(t *testing.T) {
 				got.label, time.UnixMilli(got.unixMs).UTC(),
 				c.wantLabel, time.UnixMilli(c.wantFloor).UTC())
 		}
+	}
+}
+
+// TestReleaseFloorsAreMonotone pins the invariant a hand-edited floor table
+// must never break: a binary cannot have been released after the binary that
+// superseded it, so its floor cannot be later than any later family's. The
+// shipped literals are OBSERVATIONS (earliest archive sighting per family) and
+// were not monotone — mvdsv 1.00 sat a year above 1.01 — so init() folds them
+// down. This test fails on the raw table, which is the point: a future edit
+// that reintroduces the inversion must not pass silently.
+func TestReleaseFloorsAreMonotone(t *testing.T) {
+	for name, table := range map[string]map[string]int64{
+		"mvdsv": mvdsvReleaseFloors,
+		"ktx":   ktxReleaseFloors,
+	} {
+		fams := make([]string, 0, len(table))
+		for fam := range table {
+			fams = append(fams, fam)
+		}
+		sort.Slice(fams, func(i, j int) bool { return versionFamilyLess(fams[i], fams[j]) })
+		for i := 1; i < len(fams); i++ {
+			if table[fams[i]] < table[fams[i-1]] {
+				t.Errorf("%s floors non-monotone: %s = %s but its successor %s = %s",
+					name, fams[i-1], time.UnixMilli(table[fams[i-1]]).UTC().Format("2006-01-02"),
+					fams[i], time.UnixMilli(table[fams[i]]).UTC().Format("2006-01-02"))
+			}
+		}
+	}
+}
+
+// TestReleaseFloorMonotoneOrdering pins the comparator the fold walks in:
+// families are ordered numerically, so 1.01 precedes 1.10.
+func TestReleaseFloorMonotoneOrdering(t *testing.T) {
+	ordered := []string{"0.9", "0.19", "0.20", "1.00", "1.01", "1.10", "1.20", "2.40"}
+	for i := 1; i < len(ordered); i++ {
+		if !versionFamilyLess(ordered[i-1], ordered[i]) {
+			t.Errorf("versionFamilyLess(%q, %q) = false, want true", ordered[i-1], ordered[i])
+		}
+		if versionFamilyLess(ordered[i], ordered[i-1]) {
+			t.Errorf("versionFamilyLess(%q, %q) = true, want false", ordered[i], ordered[i-1])
+		}
+	}
+}
+
+// TestReleaseFloorMVDSV100Before2024 is the concrete case the fold exists for:
+// mvdsv 1.00's earliest ARCHIVE sighting is 2024, but 1.01 — the build that
+// replaced it — was already stamping 2023, so a genuine 2023 match on 1.00 must
+// not be called an unset clock.
+func TestReleaseFloorMVDSV100Before2024(t *testing.T) {
+	in := wallClockInputs{
+		Markers: []dateMarker{{
+			Source: wallSourceMatchDate, Kind: wallKindMatchStart,
+			UnixMs: utc(2023, time.September, 15, 20, 0, 0), TZ: "CET",
+		}},
+		ServerInfo: map[string]string{"*version": "MVDSV 1.00"},
+	}
+	got := resolveWallClock(in)
+	if got.Confidence != wallConfExact {
+		t.Errorf("Confidence = %q (%q), want %q — a 2023 match on mvdsv 1.00 is ordinary",
+			got.Confidence, got.Note, wallConfExact)
 	}
 }
 
@@ -521,6 +604,96 @@ func TestWallClockPostKTXStatsOverPause(t *testing.T) {
 	}
 }
 
+// TestResolveWallClockSameSourceMarkers pins that two markers from the SAME
+// source cross-check each other. Candidates are compared on the instant they
+// PROJECT to (stamp minus the print's own demo time), so a demo holding two
+// matches — two legitimate `matchdate` prints — still agrees, while a server
+// clock that jumped mid-demo does not and costs the anchor its "exact" grade.
+func TestResolveWallClockSameSourceMarkers(t *testing.T) {
+	const secondMatchAt = int32(1800000) // 30 min into the demo
+	first := utc(2024, time.January, 1, 20, 0, 0)
+	matchdate := func(unix int64, atMs int32) dateMarker {
+		return dateMarker{
+			Source: wallSourceMatchDate, Kind: wallKindMatchStart,
+			UnixMs: unix, AtMs: atMs, TZ: "UTC",
+		}
+	}
+
+	consistent := wallClockInputs{
+		Markers: []dateMarker{
+			matchdate(first, 10000),
+			// Same clock, 30 minutes later: the stamp advanced exactly as far
+			// as the demo clock did, so both project to the same demo open.
+			matchdate(first+int64(secondMatchAt)-10000, secondMatchAt),
+		},
+		DemoOffsetMs: 10000,
+	}
+	got := resolveWallClock(consistent)
+	if got.Confidence != wallConfExact {
+		t.Errorf("two-match demo: Confidence = %q (%q), want %q",
+			got.Confidence, got.Note, wallConfExact)
+	}
+	if got.MatchStartUnixMs != first {
+		t.Errorf("two-match demo: MatchStartUnixMs = %s, want the first print's %s",
+			time.UnixMilli(got.MatchStartUnixMs).UTC(), time.UnixMilli(first).UTC())
+	}
+
+	conflicting := wallClockInputs{
+		Markers: []dateMarker{
+			matchdate(first, 10000),
+			// A year later on the same demo clock: the server's clock moved,
+			// and picking the first stamp silently is exactly what must not
+			// grade "exact".
+			matchdate(utc(2025, time.January, 1, 20, 0, 0), secondMatchAt),
+		},
+		DemoOffsetMs: 10000,
+	}
+	got = resolveWallClock(conflicting)
+	if got.Confidence == wallConfExact {
+		t.Errorf("conflicting same-source stamps graded %q, want a downgrade", got.Confidence)
+	}
+	if !strings.Contains(got.Note, "marker-disagreement") {
+		t.Errorf("Note = %q, want it to name the disagreement", got.Note)
+	}
+	if got.MatchStartUnixMs != first {
+		t.Errorf("MatchStartUnixMs = %s, want the first stamp %s reported, never dropped",
+			time.UnixMilli(got.MatchStartUnixMs).UTC(), time.UnixMilli(first).UTC())
+	}
+}
+
+// TestWallClockPostCountdownPause: a pause taken during the countdown sits
+// BEFORE match start, so it is not inside the match-start → match-end wall
+// span the ktxstats walk-back crosses. Counting it there pushes the walked-back
+// anchor a whole pause early and invents a disagreement with the server clock.
+func TestWallClockPostCountdownPause(t *testing.T) {
+	const (
+		demoStart = int64(1779826000000)
+		offset    = int32(10000)
+		matchEnd  = int32(1200019)
+		countdown = int32(420000)
+	)
+	res := &Result{
+		Streams: &Streams{Global: GlobalStream{
+			MatchEnd:            matchEnd,
+			DemoOffset:          offset,
+			DemoStartUnixMs:     demoStart,
+			DemoStartAccuracyMs: 1,
+			Pauses:              []TimelinePause{{AtMs: -5000, DurationMs: countdown}},
+		}},
+		DemoInfo: &DemoInfoResult{
+			Date: time.UnixMilli(demoStart + int64(offset) + int64(matchEnd)).
+				UTC().Format("2006-01-02 15:04:05 +0000"),
+		},
+	}
+	wallClockPost(res, &CoreOutputs{Clock: &Clock{DemoStartSource: wallSourceHidden}})
+
+	g := res.Streams.Global
+	if g.MatchStartConfidence != wallConfExact {
+		t.Errorf("MatchStartConfidence = %q (%q), want %q — the countdown pause is outside the match window",
+			g.MatchStartConfidence, g.MatchStartNote, wallConfExact)
+	}
+}
+
 // TestClockCollectsDateMarkers checks the event-pass half: level-2 broadcast
 // prints reach the date parser, repeats of one stamp collapse, and obituary
 // lines at the same level are untouched by the collector.
@@ -528,17 +701,23 @@ func TestClockCollectsDateMarkers(t *testing.T) {
 	a := NewClockAnalyzer()
 	prints := []struct {
 		level  int
+		target int
 		msg    string
 		timeMs int32
 	}{
-		{2, "matchdate: 2008-01-05 20:05:38 CET\n", 10000},
-		{2, "matchdate: 2008-01-05 20:05:38 CET\n", 10000}, // duplicate copy
-		{2, "player was gibbed by rocket\n", 12000},
-		{2, "matchkey: 8-2005-8-13:19-56-18\n", 15000},
-		{3, "matchdate: 2019-01-01 00:00:00 CET\n", 16000}, // chat level, not a marker
+		{2, -1, "matchdate: 2008-01-05 20:05:38 CET\n", 10000},
+		{2, -1, "matchdate: 2008-01-05 20:05:38 CET\n", 10000}, // duplicate copy
+		{2, -1, "player was gibbed by rocket\n", 12000},
+		{2, -1, "matchkey: 8-2005-8-13:19-56-18\n", 15000},
+		{3, -1, "matchdate: 2019-01-01 00:00:00 CET\n", 16000}, // chat level, not a marker
+		// A dem_single print states one client's view, not the server's, so
+		// it must never anchor the global clock. Measured across 315 archive
+		// demos carrying a marker, every real one is a broadcast.
+		{2, 3, "matchdate: 1999-12-31 23:59:59 CET\n", 17000},
 	}
 	for _, p := range prints {
-		if err := a.OnEvent(&events.PrintEvent{Level: p.level, Message: p.msg, TimeMs: p.timeMs}); err != nil {
+		ev := &events.PrintEvent{Level: p.level, Message: p.msg, TimeMs: p.timeMs, TargetPlayerNum: p.target}
+		if err := a.OnEvent(ev); err != nil {
 			t.Fatalf("OnEvent: %v", err)
 		}
 	}

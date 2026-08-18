@@ -75,8 +75,11 @@ const (
 const (
 	// tzUnknownAccuracyMs is the uncertainty carried by a stamp with no
 	// timezone: real server offsets span UTC-12..UTC+14, so reading it as UTC
-	// is right to within half a day and no better.
-	tzUnknownAccuracyMs = 12 * 60 * 60 * 1000
+	// is right to within the widest of those, 14 hours, and no better. It is
+	// the same bound maxTZSpanMs states for the agreement comparison — an
+	// accuracy narrower than the span the comparison allows for would be
+	// claiming a precision the assumption does not have.
+	tzUnknownAccuracyMs = 14 * 60 * 60 * 1000
 	// tzDSTAccuracyMs is the uncertainty of a zone NAME that does not say
 	// whether daylight saving was in force (the Windows "… Standard Time"
 	// long names, which some builds print year-round).
@@ -207,7 +210,25 @@ func parseISODateStamp(raw string) (time.Time, string, bool) {
 	if !ok {
 		return time.Time{}, "", false
 	}
-	return time.Date(y, time.Month(mo), d, h, mi, s, 0, time.UTC), strings.TrimSpace(zone), true
+	civil, ok := civilDate(y, mo, d, h, mi, s)
+	if !ok {
+		return time.Time{}, "", false
+	}
+	return civil, strings.TrimSpace(zone), true
+}
+
+// civilDate builds a zone-less civil instant from already range-checked
+// components and rejects the dates that do not exist. time.Date NORMALISES an
+// out-of-range day instead of failing — "2024-02-31" comes back as 2024-03-02 —
+// so without this a corrupted stamp is published as a confident date two days
+// off. The field ranges alone cannot catch it: 31 is a legal day and 2 a legal
+// month, only the pair is impossible.
+func civilDate(y, mo, d, h, mi, s int) (time.Time, bool) {
+	t := time.Date(y, time.Month(mo), d, h, mi, s, 0, time.UTC)
+	if t.Year() != y || int(t.Month()) != mo || t.Day() != d {
+		return time.Time{}, false
+	}
+	return t, true
 }
 
 // ctimeMonths maps the abbreviated month names strftime's %b emits (C locale)
@@ -253,7 +274,11 @@ func parseCtimeDateStamp(raw string) (time.Time, string, bool) {
 	if err != nil {
 		return time.Time{}, "", false
 	}
-	return time.Date(y, time.Month(mo), d, h, mi, s, 0, time.UTC), strings.TrimSpace(zone), true
+	civil, ok := civilDate(y, mo, d, h, mi, s)
+	if !ok {
+		return time.Time{}, "", false
+	}
+	return civil, strings.TrimSpace(zone), true
 }
 
 // parseMatchKeyStamp parses `<matchid>-<yyyy>-<m>-<d>:<h>-<mm>-<ss>`
@@ -280,7 +305,10 @@ func parseMatchKeyStamp(raw string) (wallClockStamp, bool) {
 	if !ok {
 		return wallClockStamp{}, false
 	}
-	civil := time.Date(y, time.Month(mo), d, h, mi, s, 0, time.UTC)
+	civil, ok := civilDate(y, mo, d, h, mi, s)
+	if !ok {
+		return wallClockStamp{}, false
+	}
 	return applyZone(civil, ""), true
 }
 
@@ -365,7 +393,14 @@ func completeFinalScoresYear(p finalScoresStamp, refUnixMs int64, offsetSec int)
 	best := int64(0)
 	bestDist := int64(-1)
 	for y := refCivil.Year() - 1; y <= refCivil.Year()+1; y++ {
-		civil := time.Date(y, time.Month(p.month), p.day, p.hour, p.min, 0, 0, time.UTC)
+		// A 29 February stamp does not exist in two of any three consecutive
+		// years, and the layout carries no year to disambiguate with — skip
+		// the years where the date is impossible rather than let time.Date
+		// normalise them into 1 March.
+		civil, ok := civilDate(y, p.month, p.day, p.hour, p.min, 0)
+		if !ok {
+			continue
+		}
 		unix := civil.UnixMilli() - int64(offsetSec)*1000
 		d := unix - refUnixMs
 		if d < 0 {
@@ -421,6 +456,20 @@ var zoneOffsets = map[string]int{
 	"NZST": 12 * 3600, "NZDT": 13 * 3600,
 }
 
+// zoneOffsetUncertainty marks the abbreviations in zoneOffsets whose offset is
+// not constant across the years the archive spans, so the single number above
+// cannot be exact for every stamp that printed them. Russia ran permanent
+// summer time from 2011-03-27 to 2014-10-26: MSK was +04 and YEKT +06 in that
+// window, +03 / +05 on either side of it. The table stays on the modern value
+// and carries an hour of slack instead of becoming date-dependent — a
+// date-dependent offset would decide the date from the date, and the hour is
+// the honest width of the ambiguity either way. This is the same treatment the
+// Windows "… Standard Time" long names get below.
+var zoneOffsetUncertainty = map[string]int32{
+	"MSK":  tzDSTAccuracyMs,
+	"YEKT": tzDSTAccuracyMs,
+}
+
 // zoneLongNames maps the locale long names Windows servers print for %Z to an
 // offset. They are matched on a lower-cased substring because the Swedish ones
 // arrive mangled — the print goes through Q_normalizetext, which folds the
@@ -456,8 +505,9 @@ func resolveZoneOffset(tok string) (offsetSec int, uncertaintyMs int32, ok bool)
 	if tok == "" {
 		return 0, 0, false
 	}
-	if off, ok := zoneOffsets[strings.ToUpper(tok)]; ok {
-		return off, 0, true
+	up := strings.ToUpper(tok)
+	if off, ok := zoneOffsets[up]; ok {
+		return off, zoneOffsetUncertainty[up], true
 	}
 	if off, ok := parseNumericZone(tok); ok {
 		return off, 0, true
@@ -589,6 +639,13 @@ func utcDate(y int, m time.Month, d int) int64 {
 // distribution rather than from release notes — which is the conservative
 // direction: the archive can only show a family EARLIER than its release, never
 // later, so rounding a year below the observed minimum can only ever loosen it.
+//
+// Because the entries come from OBSERVATION they are not naturally monotone:
+// a family the archive barely used can show a later first sighting than its
+// successor (mvdsv 1.00 vs 1.01, 0.21 vs 0.25). A binary cannot have been
+// released after a version that supersedes it, so init() rewrites both tables
+// into monotone floors — see monotoneReleaseFloors. The literals below are the
+// raw observations; read the effective floor through serverReleaseFloor.
 var mvdsvReleaseFloors = map[string]int64{
 	"0.19": utcDate(2005, time.January, 1),
 	"0.20": utcDate(2005, time.January, 1),
@@ -627,6 +684,62 @@ var ktxReleaseFloors = map[string]int64{
 	"1.46": utcDate(2024, time.January, 1),
 	"1.47": utcDate(2025, time.January, 1),
 	"1.48": utcDate(2025, time.January, 1),
+}
+
+func init() {
+	monotoneReleaseFloors(mvdsvReleaseFloors)
+	monotoneReleaseFloors(ktxReleaseFloors)
+}
+
+// monotoneReleaseFloors rewrites a release-floor table in place so that no
+// family's floor sits above the floor of a LATER family: floor(v) becomes
+// min(floor(w)) over every w >= v in numeric <major>.<minor> order.
+//
+// The invariant it enforces is a fact about binaries, not about the archive: a
+// build cannot have been released after the build that superseded it, so its
+// lower bound cannot be later either. Left unenforced, an under-observed family
+// contradicts perfectly ordinary demos — mvdsv 1.00's observed floor of 2024
+// called every genuine 2023 match on that binary an unset clock, even though
+// 1.01, its successor, was already stamping 2023.
+//
+// The rewrite can only ever LOWER a floor, so it can only ever make the hard
+// check more permissive — the safe direction for a check whose false positives
+// are silent data loss.
+func monotoneReleaseFloors(table map[string]int64) {
+	fams := make([]string, 0, len(table))
+	for fam := range table {
+		fams = append(fams, fam)
+	}
+	sort.Slice(fams, func(i, j int) bool { return versionFamilyLess(fams[i], fams[j]) })
+	for i := len(fams) - 2; i >= 0; i-- {
+		if later := table[fams[i+1]]; later < table[fams[i]] {
+			table[fams[i]] = later
+		}
+	}
+}
+
+// versionFamilyLess orders "<major>.<minor>" families numerically, so 1.01
+// precedes 1.10 (a lexicographic sort would agree here but not on 0.9 vs 0.10,
+// and the tables are edited by hand).
+func versionFamilyLess(a, b string) bool {
+	amaj, amin := versionFamilyOrder(a)
+	bmaj, bmin := versionFamilyOrder(b)
+	if amaj != bmaj {
+		return amaj < bmaj
+	}
+	return amin < bmin
+}
+
+// versionFamilyOrder splits "0.36" into (0, 36). A malformed key sorts first;
+// the tables are in-code literals, so it cannot happen at run time.
+func versionFamilyOrder(fam string) (major, minor int) {
+	maj, min, found := strings.Cut(fam, ".")
+	if !found {
+		return 0, 0
+	}
+	major, _ = strconv.Atoi(maj)
+	minor, _ = strconv.Atoi(min)
+	return major, minor
 }
 
 // qwProtocolFloor is the release of QuakeWorld itself. It is the floor for a
@@ -863,7 +976,7 @@ func resolveWallClock(in wallClockInputs) wallClockAnchor {
 	}
 
 	soft := 0
-	if disagreeing := disagreeingSources(best, cands); len(disagreeing) > 0 {
+	if disagreeing := disagreeingSources(cands, 0); len(disagreeing) > 0 {
 		soft++
 		notes = append(notes, "marker-disagreement: "+best.source+" vs "+strings.Join(disagreeing, ", "))
 	}
@@ -1000,19 +1113,29 @@ func sourcePriority(source string) int {
 }
 
 // disagreeingSources names the candidates that cannot be reconciled with the
-// chosen one. Two stamps taken in different (or unknown) timezones differ by a
-// whole quarter-hour, so that residual is allowed for whenever either side's
-// zone is unpinned; a gap no timezone could explain, or one that is off-quantum
-// beyond the tolerance, is a real disagreement.
-func disagreeingSources(best candidate, cands []candidate) []string {
+// chosen one (cands[bestIdx]). Two stamps taken in different (or unknown)
+// timezones differ by a whole quarter-hour, so that residual is allowed for
+// whenever either side's zone is unpinned; a gap no timezone could explain, or
+// one that is off-quantum beyond the tolerance, is a real disagreement.
+//
+// Candidates from the SAME source count too — the skip is by position, not by
+// name. A demo holding two matches legitimately carries two `matchdate` prints,
+// but candidates are compared on the instant each one PROJECTS to (stamp minus
+// its own print time), and on a consistent clock both projections name the same
+// demo-open moment however far apart the matches were. Two projections that do
+// not agree therefore mean the server clock moved mid-demo, which is exactly
+// the signal cross-source disagreement reports — and the old name-based skip
+// let the worst case through silently, two stamps a year apart grading "exact"
+// on whichever printed first.
+func disagreeingSources(cands []candidate, bestIdx int) []string {
+	best := cands[bestIdx]
 	var out []string
-	for _, c := range cands {
-		if c.source == best.source {
+	seen := make(map[string]bool, len(cands))
+	for i, c := range cands {
+		if i == bestIdx || markersAgree(best, c) || seen[c.source] {
 			continue
 		}
-		if markersAgree(best, c) {
-			continue
-		}
+		seen[c.source] = true
 		out = append(out, c.source)
 	}
 	return out
@@ -1067,7 +1190,14 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 		MatchLengthMs: g.MatchEnd - g.MatchStart,
 	}
 	for _, p := range g.Pauses {
-		in.MatchLengthMs += p.DurationMs
+		// Only pauses INSIDE the match count. MatchLengthMs is the wall-clock
+		// width of the match-start → match-end window, and a countdown pause
+		// (AtMs < 0, the clock frozen before the match began) sits outside it —
+		// adding it walks a match-end stamp back past match start and can
+		// invent a marker disagreement on a demo whose stamps all agree.
+		if p.AtMs > 0 {
+			in.MatchLengthMs += p.DurationMs
+		}
 	}
 	if co != nil && co.Clock != nil {
 		in.Markers = append(in.Markers, co.Clock.DateMarkers...)

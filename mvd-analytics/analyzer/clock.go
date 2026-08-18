@@ -99,12 +99,19 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
-		// The date markers ride level-2 broadcast prints, the same level the
+		// The date markers ride level-2 BROADCAST prints, the same level the
 		// obituary log uses — collecting them here (rather than in the
 		// messages analyser, which routes level<=2 into the obituary parser
 		// only) keeps both readers on the raw print stream with neither
 		// filtering the other's lines.
-		if e.Level == events.PrintHigh {
+		//
+		// The broadcast gate matters: a dem_single print is addressed to one
+		// player's client, so it states that client's view, not the server's,
+		// and must never anchor the global clock. Measured on 315 archive
+		// demos carrying a marker (180 matchdate, 135 matchkey), every single
+		// one arrived as level 2 with TargetPlayerNum -1, so the gate costs no
+		// coverage — KTX and kmod both emit these through bprint.
+		if e.Level == events.PrintHigh && e.TargetPlayerNum < 0 {
 			a.collectDateMarker(e)
 		}
 	case *events.IntermissionEvent:
