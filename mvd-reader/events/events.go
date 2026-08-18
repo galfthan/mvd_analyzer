@@ -91,6 +91,7 @@ type (
 	SpawnEvent              = parser.SpawnEvent
 	ItemSpawnEvent          = parser.ItemSpawnEvent
 	ItemStateEvent          = parser.ItemStateEvent
+	ItemMoveEvent           = parser.ItemMoveEvent
 	BackpackDropHintEvent   = parser.BackpackDropHintEvent
 	ItemPickupHintEvent     = parser.ItemPickupHintEvent
 	BackpackPickupHintEvent = parser.BackpackPickupHintEvent

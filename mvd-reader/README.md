@@ -78,7 +78,8 @@ The concrete event list, in stable order:
 | `DeathEvent` | Player died — deduplicated across `StatHealth` edges, the `DF_DEAD` playerinfo bit, and obituary corroboration |
 | `SpawnEvent` | Player spawned — deduplicated across `StatHealth` edges and the `DF_DEAD` playerinfo bit clearing |
 | `ItemSpawnEvent` | Item entity observed — baseline known (kind, position) |
-| `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions |
+| `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions. Carries the entity origin at the transition (the new one when it appeared, the last visible one when it went away) |
+| `ItemMoveEvent` | A **visible** item entity's origin changed. Map items never move, so on a normal demo this fires only for dropped backpacks, which are tossed with MOVETYPE_TOSS and fall to wherever they land |
 | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
 | `ItemPickupHintEvent` | KTX `//ktx took` stuffcmd: `(ItemEnt, RespawnSec, PlayerEnt)` — authoritative pickup attribution for every MH / armor / weapon / powerup touch |
 | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
@@ -154,11 +155,28 @@ when the demo first makes it observable, carrying the classified kind
 (`ra`, `mh`, `rl`, ...) and world origin. `ItemStateEvent` fires on
 every visibility transition: `Taken=true` when the entity's
 modelindex drops to 0 (server set `self->model = ""` on pickup),
-`Taken=false` when it reappears (`SUB_regen` restored the model).
+`Taken=false` when it reappears (`SUB_regen` restored the model), each
+carrying the entity's origin at that moment. `ItemMoveEvent` fires on every
+origin change of a visible item, on the same hold-last convention as
+`MoverStateEvent`.
 Classification uses standard Quake 1 item model paths (armor.mdl +
 skin for GA/YA/RA; maps/b_bh*.bsp for health; progs/g_*.mdl for
 weapons; progs/{quaddama,invulner,invisibl}.mdl for powerups) —
 protocol-level, not KTX-specific.
+
+An item entity's classification is **cached only while the wire cannot speak
+for itself**. A taken item is on the wire with modelindex 0, so nothing but
+the cache can name it until it respawns; but whenever the entity is visible
+the model index is re-read, and a changed kind ends the old item and begins
+a new one (a fresh `ItemSpawnEvent`, and a `Taken=true` for the old kind at
+its own last origin). This matters for backpacks and nothing else: map-item
+edicts are allocated at map load and never freed, while KTX `spawn()`s and
+`ent_remove()`s packs, so a pack edict is handed on to a rocket, a gib or
+the next pack within seconds. A cache that outlived the pack reported every
+later tenant's appearance as that pack flickering — the "16.4 visibility
+flips per real pack" this repo used to measure. mvdsv refuses to reallocate
+an edict freed less than half a second ago (`pr_edict.c:123`), so the
+handover is always separated by the pack's own disappearance.
 
 `MoverSpawnEvent` and `MoverStateEvent` are synthesised from the same
 entity-state stream for inline brush-model entities — entities whose

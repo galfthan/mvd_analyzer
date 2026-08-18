@@ -45,6 +45,7 @@ const (
 	EventSpawn
 	EventItemSpawn
 	EventItemState
+	EventItemMove
 	EventBackpackDropHint
 	EventItemPickupHint
 	EventBackpackPickupHint
