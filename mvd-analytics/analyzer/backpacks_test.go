@@ -43,8 +43,28 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 	if d.EntNum != 142 || d.Time != 30000 {
 		t.Errorf("ent/time = %d/%d", d.EntNum, d.Time)
 	}
-	if d.Origin != [3]float32{200, 0, 0} {
-		t.Errorf("Origin = %v, want (200,0,0)", d.Origin)
+	// The pack's own origin: the dropper's last broadcast position with
+	// KTX's 24-unit drop offset applied (ktx/src/items.c:2703-2704).
+	if d.Origin != [3]float32{200, 0, -24} {
+		t.Errorf("Origin = %v, want (200,0,-24)", d.Origin)
+	}
+}
+
+// A hint for a slot the recorder never carried a position for keeps the zero
+// origin the loc resolver and every consumer read as "unknown" — a bare
+// (0,0,-24) would masquerade as a real point on the map.
+func TestBackpackAnalyzer_UnknownPositionKeepsTheZeroOrigin(t *testing.T) {
+	a, ctx := newTestBackpackAnalyzer()
+	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 142, ItemFlags: 32, PlayerEnt: 5, TimeMs: 30000})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if len(r.Backpacks) != 1 {
+		t.Fatalf("drops = %v, want 1 entry", r.Backpacks)
+	}
+	if got := r.Backpacks[0].Origin; got != [3]float32{} {
+		t.Errorf("Origin = %v, want the zero vector", got)
 	}
 }
 

@@ -13290,11 +13290,11 @@
   "backpacks": [
     {
       "entNum": 151,
-      "loc": "Quad.tele",
+      "loc": "air.ledge",
       "origin": [
         -505.875,
         -21,
-        391.75
+        367.75
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13308,7 +13308,7 @@
       "origin": [
         -576,
         -268.75,
-        315.25
+        291.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13322,7 +13322,7 @@
       "origin": [
         -687.875,
         340.875,
-        243
+        219
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13336,7 +13336,7 @@
       "origin": [
         -8.25,
         56.625,
-        248
+        224
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13350,7 +13350,7 @@
       "origin": [
         -306,
         -531.875,
-        264.75
+        240.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13364,7 +13364,7 @@
       "origin": [
         0,
         -263.625,
-        264
+        240
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13378,7 +13378,7 @@
       "origin": [
         -494.375,
         -261.5,
-        184.875
+        160.875
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13392,7 +13392,7 @@
       "origin": [
         -597.75,
         -32.75,
-        152
+        128
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13406,7 +13406,7 @@
       "origin": [
         -504.875,
         -779.875,
-        441.5
+        417.5
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13420,7 +13420,7 @@
       "origin": [
         165.5,
         463.5,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13434,7 +13434,7 @@
       "origin": [
         76.25,
         416.25,
-        408
+        384
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13448,7 +13448,7 @@
       "origin": [
         -586.125,
         438,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13462,7 +13462,7 @@
       "origin": [
         -674.5,
         491.75,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13476,7 +13476,7 @@
       "origin": [
         -736,
         216.875,
-        291.75
+        267.75
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13490,7 +13490,7 @@
       "origin": [
         120.5,
         348.625,
-        427.25
+        403.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13504,7 +13504,7 @@
       "origin": [
         -489.375,
         444.75,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13518,7 +13518,7 @@
       "origin": [
         -481.875,
         479.125,
-        248.75
+        224.75
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13532,7 +13532,7 @@
       "origin": [
         -652.75,
         7.625,
-        455.5
+        431.5
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13546,7 +13546,7 @@
       "origin": [
         -589.75,
         -656,
-        428.25
+        404.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13560,7 +13560,7 @@
       "origin": [
         -611.625,
         -687.375,
-        454.5
+        430.5
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13574,7 +13574,7 @@
       "origin": [
         -653.125,
         -133,
-        152.5
+        128.5
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13588,7 +13588,7 @@
       "origin": [
         -697,
         25.125,
-        143.75
+        119.75
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13602,7 +13602,7 @@
       "origin": [
         -282.375,
         -601.25,
-        443
+        419
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13616,7 +13616,7 @@
       "origin": [
         -23,
         419.5,
-        419.75
+        395.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13630,7 +13630,7 @@
       "origin": [
         -88.5,
         532.5,
-        328
+        304
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13644,7 +13644,7 @@
       "origin": [
         286.25,
         243.375,
-        425.25
+        401.25
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13658,7 +13658,7 @@
       "origin": [
         -60.375,
         544,
-        339.5
+        315.5
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13672,7 +13672,7 @@
       "origin": [
         161.625,
         411.875,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13686,7 +13686,7 @@
       "origin": [
         -40.75,
         425.875,
-        360
+        336
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13700,7 +13700,7 @@
       "origin": [
         80,
         56.75,
-        464.375
+        440.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13714,7 +13714,7 @@
       "origin": [
         -717.75,
         -145.75,
-        152
+        128
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13728,7 +13728,7 @@
       "origin": [
         -217.875,
         -362.5,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13742,7 +13742,7 @@
       "origin": [
         -446.75,
         -808.75,
-        449.75
+        425.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13756,7 +13756,7 @@
       "origin": [
         -926.625,
         -767.125,
-        368.875
+        344.875
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13770,7 +13770,7 @@
       "origin": [
         -912.125,
         -912,
-        262.625
+        238.625
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13784,7 +13784,7 @@
       "origin": [
         -537,
         -906.25,
-        275.5
+        251.5
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13798,7 +13798,7 @@
       "origin": [
         -208.875,
         -832.75,
-        235.75
+        211.75
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -13812,7 +13812,7 @@
       "origin": [
         200.875,
         404.125,
-        440
+        416
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13826,7 +13826,7 @@
       "origin": [
         -282,
         -247.125,
-        19.875
+        -4.125
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13840,7 +13840,7 @@
       "origin": [
         -16,
         -165.375,
-        24
+        0
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13854,7 +13854,7 @@
       "origin": [
         -56.5,
         123.375,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13868,7 +13868,7 @@
       "origin": [
         176,
         -78.375,
-        433.125
+        409.125
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13882,7 +13882,7 @@
       "origin": [
         155.5,
         -155.375,
-        465.125
+        441.125
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13896,7 +13896,7 @@
       "origin": [
         -97.875,
         423.125,
-        332.75
+        308.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13910,7 +13910,7 @@
       "origin": [
         356,
         -60.5,
-        440
+        416
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13924,7 +13924,7 @@
       "origin": [
         -227.125,
         -417.875,
-        440
+        416
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -13938,7 +13938,7 @@
       "origin": [
         -890.625,
         -790.25,
-        252
+        228
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13952,7 +13952,7 @@
       "origin": [
         -877.125,
         -827.625,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13966,7 +13966,7 @@
       "origin": [
         -506,
         -858.875,
-        471
+        447
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -13980,7 +13980,7 @@
       "origin": [
         -247,
         -398.25,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -13994,7 +13994,7 @@
       "origin": [
         -214.25,
         -729.75,
-        247
+        223
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14008,7 +14008,7 @@
       "origin": [
         -431.25,
         -24.875,
-        231.75
+        207.75
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14022,7 +14022,7 @@
       "origin": [
         -652.5,
         -270.625,
-        152
+        128
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14036,7 +14036,7 @@
       "origin": [
         -671.875,
         -341.625,
-        440
+        416
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14050,7 +14050,7 @@
       "origin": [
         145.625,
         544,
-        423.375
+        399.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14064,7 +14064,7 @@
       "origin": [
         -126.25,
         -333.25,
-        444.125
+        420.125
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14078,7 +14078,7 @@
       "origin": [
         228.75,
         299.875,
-        488.875
+        464.875
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14092,7 +14092,7 @@
       "origin": [
         -212.625,
         -422.625,
-        450.375
+        426.375
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14106,7 +14106,7 @@
       "origin": [
         275,
         -183.5,
-        483.5
+        459.5
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14120,7 +14120,7 @@
       "origin": [
         -656.125,
         -277.75,
-        152
+        128
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14134,7 +14134,7 @@
       "origin": [
         -542,
         -212,
-        143
+        119
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14148,7 +14148,7 @@
       "origin": [
         80,
         123.25,
-        412
+        388
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14162,7 +14162,7 @@
       "origin": [
         -506.875,
         -174.375,
-        168.75
+        144.75
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14176,7 +14176,7 @@
       "origin": [
         -370.125,
         -624.5,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14190,7 +14190,7 @@
       "origin": [
         -328.625,
         -822.125,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14204,7 +14204,7 @@
       "origin": [
         -240.625,
         -858.875,
-        291.25
+        267.25
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14218,7 +14218,7 @@
       "origin": [
         -208,
         -841,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14232,7 +14232,7 @@
       "origin": [
         -402.875,
         -666.875,
-        286.625
+        262.625
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14246,7 +14246,7 @@
       "origin": [
         -527.25,
         -71,
-        28.125
+        4.125
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14260,7 +14260,7 @@
       "origin": [
         -653.5,
         511.75,
-        279.75
+        255.75
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14274,7 +14274,7 @@
       "origin": [
         -39.75,
         496.625,
-        353.625
+        329.625
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14288,7 +14288,7 @@
       "origin": [
         250.75,
         100,
-        483.875
+        459.875
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14302,7 +14302,7 @@
       "origin": [
         235.375,
         364,
-        440
+        416
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14316,7 +14316,7 @@
       "origin": [
         367.5,
         201.5,
-        426.875
+        402.875
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14330,7 +14330,7 @@
       "origin": [
         154.875,
         321,
-        427.875
+        403.875
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14344,7 +14344,7 @@
       "origin": [
         -679.25,
         279.625,
-        291.375
+        267.375
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14358,7 +14358,7 @@
       "origin": [
         -592.25,
         426.375,
-        248
+        224
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14372,7 +14372,7 @@
       "origin": [
         204.875,
         500.875,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14386,7 +14386,7 @@
       "origin": [
         -723.875,
         507.5,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14396,11 +14396,11 @@
     },
     {
       "entNum": 144,
-      "loc": "high.RL",
+      "loc": "Quad.ledge",
       "origin": [
         -266.125,
         -269.375,
-        389.5
+        365.5
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14414,7 +14414,7 @@
       "origin": [
         -260.875,
         -193.875,
-        214
+        190
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14428,7 +14428,7 @@
       "origin": [
         -288.375,
         -205.5,
-        24
+        0
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14442,7 +14442,7 @@
       "origin": [
         -625.25,
         -216.625,
-        419.75
+        395.75
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14456,7 +14456,7 @@
       "origin": [
         -870.625,
         -898,
-        248
+        224
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14470,7 +14470,7 @@
       "origin": [
         -738,
         -864,
-        259.625
+        235.625
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14484,7 +14484,7 @@
       "origin": [
         -901.5,
         -829.625,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14498,7 +14498,7 @@
       "origin": [
         -358.625,
         69.875,
-        25.25
+        1.25
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14512,7 +14512,7 @@
       "origin": [
         90.25,
         -288,
-        483.375
+        459.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14526,7 +14526,7 @@
       "origin": [
         306.5,
         -317.5,
-        433.375
+        409.375
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14540,7 +14540,7 @@
       "origin": [
         -176,
         -454,
-        527.375
+        503.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14554,7 +14554,7 @@
       "origin": [
         -376.375,
         -171,
-        106.25
+        82.25
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14568,7 +14568,7 @@
       "origin": [
         113.125,
         -240.25,
-        440
+        416
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14582,7 +14582,7 @@
       "origin": [
         119,
         -264.375,
-        422.125
+        398.125
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14596,7 +14596,7 @@
       "origin": [
         -372.875,
         -6.625,
-        2.375
+        -21.625
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14610,7 +14610,7 @@
       "origin": [
         -735.125,
         49.5,
-        152
+        128
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14624,7 +14624,7 @@
       "origin": [
         -705.875,
         156.625,
-        186.375
+        162.375
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14638,7 +14638,7 @@
       "origin": [
         -205.625,
         -368.625,
-        458.25
+        434.25
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14652,7 +14652,7 @@
       "origin": [
         -538.875,
         13.5,
-        9.625
+        -14.375
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14666,7 +14666,7 @@
       "origin": [
         -482.625,
         437.5,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14680,7 +14680,7 @@
       "origin": [
         -236.125,
         -536.875,
-        452.75
+        428.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14694,7 +14694,7 @@
       "origin": [
         -282.75,
         -466.75,
-        453.375
+        429.375
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14708,7 +14708,7 @@
       "origin": [
         -309.75,
         456.625,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14722,7 +14722,7 @@
       "origin": [
         -381.5,
         -691.625,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14736,7 +14736,7 @@
       "origin": [
         -754.875,
         -784,
-        291.25
+        267.25
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14750,7 +14750,7 @@
       "origin": [
         -507.375,
         -912,
-        247.75
+        223.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14764,7 +14764,7 @@
       "origin": [
         -513.125,
         -878,
-        520.625
+        496.625
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14778,7 +14778,7 @@
       "origin": [
         -483.375,
         520.375,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14792,7 +14792,7 @@
       "origin": [
         174.5,
         189.125,
-        455.5
+        431.5
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14806,7 +14806,7 @@
       "origin": [
         170.125,
         275.75,
-        446.625
+        422.625
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14820,7 +14820,7 @@
       "origin": [
         275.375,
         -32.125,
-        491.25
+        467.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14834,7 +14834,7 @@
       "origin": [
         -725.75,
         421,
-        272
+        248
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14848,7 +14848,7 @@
       "origin": [
         -696.625,
         394.625,
-        248
+        224
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14862,7 +14862,7 @@
       "origin": [
         -341.125,
         -463.25,
-        528.375
+        504.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14876,7 +14876,7 @@
       "origin": [
         -732.5,
         -207.625,
-        152.875
+        128.875
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14890,7 +14890,7 @@
       "origin": [
         -677.75,
         -28.125,
-        152
+        128
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14904,7 +14904,7 @@
       "origin": [
         -643.75,
         -132.75,
-        139
+        115
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -14918,7 +14918,7 @@
       "origin": [
         -781.625,
         -907.25,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14932,7 +14932,7 @@
       "origin": [
         -865.625,
         -472.75,
-        464.125
+        440.125
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -14946,7 +14946,7 @@
       "origin": [
         -634.625,
         -149.375,
-        190.375
+        166.375
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14960,7 +14960,7 @@
       "origin": [
         -320.625,
         241.75,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -14974,7 +14974,7 @@
       "origin": [
         -423.25,
         426.25,
-        248
+        224
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -14988,7 +14988,7 @@
       "origin": [
         146.5,
         -287.25,
-        474.75
+        450.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15002,7 +15002,7 @@
       "origin": [
         -571.5,
         -73.5,
-        424
+        400
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -15016,7 +15016,7 @@
       "origin": [
         -590.75,
         40.625,
-        152
+        128
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15030,7 +15030,7 @@
       "origin": [
         297.625,
         288.25,
-        454.5
+        430.5
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15044,7 +15044,7 @@
       "origin": [
         -580.5,
         27.5,
-        162.75
+        138.75
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15058,7 +15058,7 @@
       "origin": [
         -704.25,
         -226.125,
-        142.75
+        118.75
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15072,7 +15072,7 @@
       "origin": [
         -187.5,
         -77.25,
-        8.375
+        -15.625
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15086,7 +15086,7 @@
       "origin": [
         -479.375,
         -242.625,
-        132.625
+        108.625
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15100,7 +15100,7 @@
       "origin": [
         -682.25,
         283.875,
-        243.5
+        219.5
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -15114,7 +15114,7 @@
       "origin": [
         -722.375,
         -330.25,
-        456.5
+        432.5
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -15128,7 +15128,7 @@
       "origin": [
         -900.5,
         -801.125,
-        243.75
+        219.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15142,7 +15142,7 @@
       "origin": [
         -161.125,
         -265.875,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15156,7 +15156,7 @@
       "origin": [
         -915.625,
         -897,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15170,7 +15170,7 @@
       "origin": [
         -608.875,
         -777.375,
-        495.25
+        471.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15184,7 +15184,7 @@
       "origin": [
         -301,
         -710.625,
-        493.375
+        469.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15198,7 +15198,7 @@
       "origin": [
         -249.75,
         -161.25,
-        187.625
+        163.625
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15212,7 +15212,7 @@
       "origin": [
         -560,
         -81.25,
-        24
+        0
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15226,7 +15226,7 @@
       "origin": [
         -649.875,
         490.625,
-        239.625
+        215.625
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15240,7 +15240,7 @@
       "origin": [
         -253.625,
         -490.125,
-        431.125
+        407.125
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15254,7 +15254,7 @@
       "origin": [
         -163.625,
         -355.375,
-        441.375
+        417.375
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15268,7 +15268,7 @@
       "origin": [
         -644.625,
         -284.25,
-        440
+        416
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15282,7 +15282,7 @@
       "origin": [
         136.625,
         413.375,
-        441.25
+        417.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15296,7 +15296,7 @@
       "origin": [
         338.125,
         90.5,
-        440
+        416
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15310,7 +15310,7 @@
       "origin": [
         347.375,
         25.25,
-        468.75
+        444.75
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15324,7 +15324,7 @@
       "origin": [
         -177.625,
         24.875,
-        272.875
+        248.875
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15338,7 +15338,7 @@
       "origin": [
         220.875,
         114.125,
-        443.375
+        419.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15352,7 +15352,7 @@
       "origin": [
         -664.25,
         -8.875,
-        144.125
+        120.125
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15366,7 +15366,7 @@
       "origin": [
         -405.875,
         -813.375,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15380,7 +15380,7 @@
       "origin": [
         -760.375,
         -573.375,
-        440
+        416
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -15394,7 +15394,7 @@
       "origin": [
         -763.625,
         -719.625,
-        470.875
+        446.875
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15408,7 +15408,7 @@
       "origin": [
         -778.625,
         -871.375,
-        266.625
+        242.625
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15422,7 +15422,7 @@
       "origin": [
         -900.625,
         -912,
-        311.5
+        287.5
       ],
       "player": "wd.char",
       "source": "ktx",
@@ -15436,7 +15436,7 @@
       "origin": [
         -744.625,
         -912,
-        245.5
+        221.5
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15450,7 +15450,7 @@
       "origin": [
         -928,
         -881.625,
-        248
+        224
       ],
       "player": "psy*overon",
       "source": "ktx",
@@ -15464,7 +15464,7 @@
       "origin": [
         -367.625,
         -825.75,
-        291.5
+        267.5
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15478,7 +15478,7 @@
       "origin": [
         -601.375,
         -150.5,
-        190
+        166
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15492,7 +15492,7 @@
       "origin": [
         -679.5,
         487.5,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15506,7 +15506,7 @@
       "origin": [
         100.75,
         -301,
-        438.25
+        414.25
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15520,7 +15520,7 @@
       "origin": [
         -461.5,
         550.5,
-        248
+        224
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15534,7 +15534,7 @@
       "origin": [
         -316.625,
         197.25,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15548,7 +15548,7 @@
       "origin": [
         -132,
         -357.625,
-        430.375
+        406.375
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15562,7 +15562,7 @@
       "origin": [
         228,
         32,
-        440
+        416
       ],
       "player": "wd.dilbert",
       "source": "ktx",
@@ -15576,7 +15576,7 @@
       "origin": [
         -227.125,
         -752.75,
-        248
+        224
       ],
       "player": "wd.cao",
       "source": "ktx",
@@ -15590,7 +15590,7 @@
       "origin": [
         -352,
         -416,
-        256.375
+        232.375
       ],
       "player": "wd.dilbert",
       "source": "ktx",

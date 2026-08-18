@@ -49,6 +49,18 @@ const (
 	itemFlagLG = 1 << 6 // IT_LIGHTNING
 )
 
+// backpackDropZOffset is how far below the victim's origin KTX spawns the
+// pack:
+//
+//	VectorCopy(self->s.v.origin, item->s.v.origin);
+//	item->s.v.origin[2] -= 24;                       // ktx/src/items.c:2703-2704
+//
+// The victim's origin is the player's MIDPOINT, so the pack sits at their
+// feet, not inside their chest. Applied on BOTH provenances — the hint path
+// here and the reconstruction — because the published origin is where a map
+// overlay draws the pack, and drawing it 24 units up is wrong on both.
+const backpackDropZOffset = 24
+
 func NewBackpackAnalyzer() *BackpackAnalyzer {
 	return &BackpackAnalyzer{
 		playerPos: make(map[int][3]float32),
@@ -102,10 +114,20 @@ func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	if slot < 0 || slot >= len(a.ctx.Players) || a.ctx.Players[slot] == nil {
 		return
 	}
+	// The pack's own origin, not the dropper's: KTX offsets it to the
+	// victim's feet (backpackDropZOffset). Left at the zero vector when the
+	// recorder never carried a position for this slot — the "unknown origin"
+	// value the loc resolver and every consumer already read as absent, which
+	// a bare -24 would masquerade as a real point on the map.
+	origin := [3]float32{}
+	if pos, ok := a.playerPos[slot]; ok {
+		origin = pos
+		origin[2] -= backpackDropZOffset
+	}
 	a.drops = append(a.drops, BackpackDrop{
 		Time:   e.TimeMs,
 		Weapon: weapon,
-		Origin: a.playerPos[slot],
+		Origin: origin,
 		EntNum: e.BackpackEnt,
 		Source: backpackSourceKTX,
 	})

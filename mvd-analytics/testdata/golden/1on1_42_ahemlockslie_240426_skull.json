@@ -4315,7 +4315,7 @@
       "origin": [
         726.75,
         -502,
-        -232
+        -256
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4329,7 +4329,7 @@
       "origin": [
         824.5,
         -343.875,
-        -172.375
+        -196.375
       ],
       "player": "42",
       "source": "ktx",
@@ -4343,7 +4343,7 @@
       "origin": [
         477.25,
         -40.375,
-        -174.375
+        -198.375
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4357,7 +4357,7 @@
       "origin": [
         499.875,
         18.25,
-        -168
+        -192
       ],
       "player": "42",
       "source": "ktx",
@@ -4371,7 +4371,7 @@
       "origin": [
         368,
         -301.25,
-        -363.75
+        -387.75
       ],
       "player": "42",
       "source": "ktx",
@@ -4385,7 +4385,7 @@
       "origin": [
         527.125,
         195,
-        -168
+        -192
       ],
       "player": "42",
       "source": "ktx",
@@ -4399,7 +4399,7 @@
       "origin": [
         48.75,
         359.625,
-        100.25
+        76.25
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4413,7 +4413,7 @@
       "origin": [
         381.75,
         201.5,
-        98.5
+        74.5
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4427,7 +4427,7 @@
       "origin": [
         368.125,
         -572.75,
-        -296
+        -320
       ],
       "player": "42",
       "source": "ktx",
@@ -4441,7 +4441,7 @@
       "origin": [
         530.125,
         -169.5,
-        -208.125
+        -232.125
       ],
       "player": "42",
       "source": "ktx",
@@ -4455,7 +4455,7 @@
       "origin": [
         757.375,
         278.625,
-        1
+        -23
       ],
       "player": "42",
       "source": "ktx",
@@ -4469,7 +4469,7 @@
       "origin": [
         354,
         -1.75,
-        30.25
+        6.25
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4479,11 +4479,11 @@
     },
     {
       "entNum": 96,
-      "loc": "YA.balks",
+      "loc": "middle",
       "origin": [
         398.125,
         -237.875,
-        -159.875
+        -183.875
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4497,7 +4497,7 @@
       "origin": [
         801.375,
         -208.875,
-        -205
+        -229
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4511,7 +4511,7 @@
       "origin": [
         -101.75,
         -356,
-        -296
+        -320
       ],
       "player": "42",
       "source": "ktx",
@@ -4525,7 +4525,7 @@
       "origin": [
         758.875,
         -162.25,
-        -248
+        -272
       ],
       "player": "42",
       "source": "ktx",
@@ -4539,7 +4539,7 @@
       "origin": [
         125.875,
         61.875,
-        130.75
+        106.75
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4553,7 +4553,7 @@
       "origin": [
         516.625,
         179,
-        -168
+        -192
       ],
       "player": "42",
       "source": "ktx",
@@ -4567,7 +4567,7 @@
       "origin": [
         173.75,
         -304,
-        -361.5
+        -385.5
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4577,11 +4577,11 @@
     },
     {
       "entNum": 96,
-      "loc": "YA.balks",
+      "loc": "YA.RL",
       "origin": [
         720.5,
         -366.125,
-        -232
+        -256
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4595,7 +4595,7 @@
       "origin": [
         438.75,
         252.125,
-        101
+        77
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4609,7 +4609,7 @@
       "origin": [
         348.5,
         423.375,
-        34.125
+        10.125
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4623,7 +4623,7 @@
       "origin": [
         48,
         -342,
-        -20.5
+        -44.5
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4637,7 +4637,7 @@
       "origin": [
         397.375,
         293.125,
-        80.375
+        56.375
       ],
       "player": "AHemlocksLie",
       "source": "ktx",
@@ -4651,7 +4651,7 @@
       "origin": [
         448.5,
         119.75,
-        47.5
+        23.5
       ],
       "player": "42",
       "source": "ktx",
@@ -4665,7 +4665,7 @@
       "origin": [
         164.375,
         306.375,
-        -249.125
+        -273.125
       ],
       "player": "AHemlocksLie",
       "source": "ktx",

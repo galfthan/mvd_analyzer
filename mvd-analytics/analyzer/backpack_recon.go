@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
@@ -132,6 +133,15 @@ func BackpackReconStandDown(res *Result) string {
 	// StatItems weapon bits (a player "holds" RL from 0:00 through every
 	// death), and a demo whose weapon state never moves cannot say what
 	// anyone was wielding when they died.
+	//
+	// The OR is load-bearing, not a weakened AND. A demo where NO aw column
+	// moves is not necessarily a frozen recording: in a single-weapon ruleset
+	// — `1on1-lgc`, `2on2-midair`, rocket arena — nobody's wielded weapon can
+	// change, and every player's column is one legitimate sample. The
+	// StatItems bits still cycle there (armor, ammo, powerups), which is what
+	// separates such a demo from a recorder that froze everything. Requiring
+	// both would stand those rulesets down; measured, that costs real packs
+	// the KTX hints confirm on every death (BACKPACKS.md).
 	if !activeWeaponLive(res.Streams.Players) && !damagerecon.WeaponBitsLive(res.Streams.Players) {
 		return "frozen weapon state"
 	}
@@ -141,6 +151,16 @@ func BackpackReconStandDown(res *Result) string {
 		si = res.Metadata.ServerInfo
 		ms = res.Metadata.MatchSettings
 	}
+	// Mode gates BEFORE the hinting-era gate. The pipeline only reads
+	// "is this empty", so the order is invisible to it — but the eval
+	// harness discounts exactly one reason ("hinting mod emitted no drops",
+	// the one that only exists because the hint is present) and scores every
+	// other. With the era check first, a hint-era demo that is ALSO yawnmode
+	// or fairpacks reported the discounted reason, so the mode gates were
+	// bypassed in scoring and never exercised against ground truth at all.
+	if r := backpackSkipModeReason(si, ms); r != "" {
+		return "mode:" + r
+	}
 	if hintingEra(si) {
 		// KTX >= 1.38 emits `//ktx drop` on every RL/LG pack. Reaching this
 		// pass on such a demo means the wire said "no packs" — a
@@ -148,9 +168,6 @@ func BackpackReconStandDown(res *Result) string {
 		// answer we already have (a `dp 0` server, an arena ruleset that
 		// clears packs, or a match with no RL/LG death at all).
 		return "hinting mod emitted no drops"
-	}
-	if r := backpackSkipModeReason(si, ms); r != "" {
-		return "mode:" + r
 	}
 	return ""
 }
@@ -162,18 +179,37 @@ func BackpackReconStandDown(res *Result) string {
 // withheld. Callers must consult BackpackReconStandDown first — this
 // function assumes the evidence has already been found measurable.
 func ReconstructBackpackDrops(res *Result) []result.BackpackDrop {
-	killCmd := suicideCommandDeaths(res.Frags.Frags)
+	players := res.Streams.Players
+	// The stream's own Name carries a "#<slot>" suffix when two identities
+	// render the same display name (disambiguatePlayerName) — a form that
+	// appears in no frag log, scoreboard or playerStats row, so a drop
+	// stamped with it would join to nothing. Undisambiguated, it is the same
+	// display name ResolveSlotAt gives the hint path, which is what keeps
+	// both provenances on one name vocabulary.
+	joinName := streamJoinNames(players)
+	killed := killCommandDeaths(res.Frags.Frags, players, joinName)
 	var out []result.BackpackDrop
-	for i := range res.Streams.Players {
-		p := &res.Streams.Players[i]
+	for i := range players {
+		p := &players[i]
 		if len(p.ActiveWeapon) == 0 || len(p.Deaths) == 0 {
 			continue
 		}
-		for _, td := range p.Deaths {
-			if killCmd.has(p.Name, td) {
+		// There is deliberately NO per-player "this column never moves"
+		// refusal here, and the demo-level gate above deliberately keeps its
+		// `|| WeaponBitsLive` arm. A single-valued aw column is not the
+		// frozen-stat signature it looks like: in a SINGLE-WEAPON ruleset the
+		// wielded weapon cannot move. Measured on the ground-truth sample —
+		// `1on1-lgc` and povdmm4 LG challenges, `2on2-midair`, rocket arena on
+		// end/endif — every affected player carries exactly one sample
+		// (`[{0,64}]` or `[{0,32}]`) and the KTX hints credit them with a pack
+		// on EVERY death, hint count equal to death count. Refusing them cost
+		// 58 of 13 749 ground-truth drops and prevented no fabrication
+		// (precision unchanged at 99.97% either way). See BACKPACKS.md.
+		for di, td := range p.Deaths {
+			if killed[i][di] {
 				continue
 			}
-			w, ok := changeI16AtOrBefore(p.ActiveWeapon, td)
+			w, ok := activeWeaponAtDeath(p, td)
 			if !ok {
 				continue
 			}
@@ -188,16 +224,10 @@ func ReconstructBackpackDrops(res *Result) []result.BackpackDrop {
 				// guessed location on the map. Withheld, not centred.
 				continue
 			}
+			origin[2] -= backpackDropZOffset
 			out = append(out, result.BackpackDrop{
-				Time: td,
-				// The stream's own Name carries a "#<slot>" suffix when two
-				// identities render the same display name
-				// (disambiguatePlayerName) — a form that appears in no frag
-				// log, scoreboard or playerStats row, so a drop stamped with
-				// it would join to nothing. Undisambiguated, it is the same
-				// display name ResolveSlotAt gives the hint path, which is
-				// what keeps both provenances on one name vocabulary.
-				Player: undisambiguatedName(p.Name),
+				Time:   td,
+				Player: joinName[i],
 				Team:   p.Team,
 				Weapon: weapon,
 				Origin: origin,
@@ -233,13 +263,33 @@ func backpackWeaponOfBit(bit int) string {
 // the demo-frame quantisation between the two carriers.
 const suicideDeathTolMs = 500
 
-// killCmdDeaths indexes the /kill deaths — the ONLY deathtype DropBackpack
-// refuses (dtSUICIDE, ktx/src/client.c:1008, obituary " suicides"). Every
-// other self-inflicted death still drops a pack.
-type killCmdDeaths map[string][]int32
-
-func suicideCommandDeaths(frags []result.FragEntry) killCmdDeaths {
-	out := killCmdDeaths{}
+// killCommandDeaths marks, per player stream, which of that stream's death
+// markers were the /kill command — the ONLY deathtype DropBackpack refuses
+// (dtSUICIDE, ktx/src/client.c:1008, obituary " suicides"). Every other
+// self-inflicted death still drops a pack.
+//
+// The frag log names its victim and nothing else — no slot, no userid — so
+// the join is on the display name and a ±suicideDeathTolMs window. What the
+// accounting adds is that each obituary is consumed AT MOST ONCE, by the
+// nearest death marker in its window. A membership test instead of an
+// assignment costs a real pack in two shapes that both occur:
+//
+//   - Two identities rendering the same display name (the "#<slot>" streams)
+//     dying within the window of one another. One /kill obituary suppressed
+//     BOTH deaths, including the other player's genuine RL death.
+//   - A /kill followed by an instant respawn (ktx/src/client.c:2594-2597) and
+//     a genuine death inside the same window. The /kill suppressed both its
+//     own death and the real one.
+//
+// Assignment is nearest-first over all (obituary, death) pairs in range, so
+// the /kill lands on the death it actually was and the other death keeps its
+// pack.
+func killCommandDeaths(frags []result.FragEntry, players []result.PlayerStream, joinName []string) [][]bool {
+	out := make([][]bool, len(players))
+	for i := range players {
+		out[i] = make([]bool, len(players[i].Deaths))
+	}
+	byVictim := map[string][]int32{}
 	for i := range frags {
 		f := &frags[i]
 		// "suicide" is the obituary vocabulary's token for " suicides"
@@ -249,41 +299,133 @@ func suicideCommandDeaths(frags []result.FragEntry) killCmdDeaths {
 		// branch; conflating dtSUICIDE with the rest would cost every real
 		// /kill.
 		if f.IsSuicide && f.Weapon == "suicide" {
-			out[f.Victim] = append(out[f.Victim], f.Time)
+			byVictim[f.Victim] = append(byVictim[f.Victim], f.Time)
 		}
 	}
-	for _, ts := range out {
+	if len(byVictim) == 0 {
+		return out
+	}
+	for _, ts := range byVictim {
 		sort.Slice(ts, func(i, j int) bool { return ts[i] < ts[j] })
+	}
+
+	type pairing struct {
+		victim       string
+		obit, pi, di int
+		dt           int32
+	}
+	var cands []pairing
+	for pi := range players {
+		victim := joinName[pi]
+		for obit, kt := range byVictim[victim] {
+			for di, td := range players[pi].Deaths {
+				if dt := abs32(kt - td); dt <= suicideDeathTolMs {
+					cands = append(cands, pairing{victim, obit, pi, di, dt})
+				}
+			}
+		}
+	}
+	// Nearest first; the rest of the key only makes the walk deterministic.
+	sort.Slice(cands, func(i, j int) bool {
+		a, b := cands[i], cands[j]
+		if a.dt != b.dt {
+			return a.dt < b.dt
+		}
+		if a.pi != b.pi {
+			return a.pi < b.pi
+		}
+		if a.di != b.di {
+			return a.di < b.di
+		}
+		if a.victim != b.victim {
+			return a.victim < b.victim
+		}
+		return a.obit < b.obit
+	})
+	used := map[string][]bool{}
+	for v, ts := range byVictim {
+		used[v] = make([]bool, len(ts))
+	}
+	for _, c := range cands {
+		if used[c.victim][c.obit] || out[c.pi][c.di] {
+			continue
+		}
+		used[c.victim][c.obit] = true
+		out[c.pi][c.di] = true
 	}
 	return out
 }
 
-// has reports whether the player /killed at t. It tries the stream's own
-// name and then its undisambiguated form: a stream row whose display name
-// collides with another identity's is suffixed "#<slot>"
-// (disambiguatePlayerName), and that suffixed form appears in no obituary,
-// so a strict lookup would silently stop suppressing /kill drops for exactly
-// the players whose streams got split.
-func (k killCmdDeaths) has(player string, t int32) bool {
-	if k.hit(player, t) {
-		return true
+func abs32(v int32) int32 {
+	if v < 0 {
+		return -v
 	}
-	if base := undisambiguatedName(player); base != player {
-		return k.hit(base, t)
+	return v
+}
+
+// streamJoinNames returns, per stream, the display name every other section
+// of the Result joins on: the stream's own Name with a "#<slot>"
+// disambiguation suffix removed, and left alone otherwise.
+//
+// The suffix is only stripped where it is demonstrably one of ours. Two
+// signals say so, and either is enough:
+//
+//   - another stream carries the same base name with its own "#<digits>"
+//     suffix — disambiguatePlayerName suffixes EVERY colliding identity, so
+//     they normally come in pairs; and
+//   - the suffix names a wire slot this stream actually occupied — the suffix
+//     disambiguatePlayerName appends is the identity's representative slot.
+//
+// Either alone covers a case the other misses (a colliding identity whose
+// stream was dropped as empty leaves its partner alone; an identity whose
+// representative slot published no session of its own carries a suffix that
+// is in no session list). A player genuinely named "foo#2" who matches
+// neither keeps their name, which is the point: stripping it unconditionally
+// renamed them to "foo" and joined them to nothing.
+func streamJoinNames(players []result.PlayerStream) []string {
+	suffixed := map[string]int{}
+	for i := range players {
+		if base := undisambiguatedName(players[i].Name); base != players[i].Name {
+			suffixed[base]++
+		}
+	}
+	out := make([]string, len(players))
+	for i := range players {
+		p := &players[i]
+		out[i] = p.Name
+		base := undisambiguatedName(p.Name)
+		if base == p.Name {
+			continue
+		}
+		if suffixed[base] > 1 || suffixNamesOwnSlot(p) {
+			out[i] = base
+		}
+	}
+	return out
+}
+
+// suffixNamesOwnSlot reports whether the stream's "#<digits>" suffix is a
+// wire slot the stream itself occupied.
+func suffixNamesOwnSlot(p *result.PlayerStream) bool {
+	i := strings.LastIndexByte(p.Name, '#')
+	if i < 0 {
+		return false
+	}
+	slot, err := strconv.Atoi(p.Name[i+1:])
+	if err != nil {
+		return false
+	}
+	for _, s := range p.Sessions {
+		if s.Slot == slot {
+			return true
+		}
 	}
 	return false
 }
 
-func (k killCmdDeaths) hit(player string, t int32) bool {
-	ts := k[player]
-	i := sort.Search(len(ts), func(j int) bool { return ts[j] >= t-suicideDeathTolMs })
-	return i < len(ts) && ts[i] <= t+suicideDeathTolMs
-}
-
 // undisambiguatedName strips a trailing "#<digits>" slot suffix, the only
-// form disambiguatePlayerName produces. A name that genuinely ends in
-// "#<digits>" is returned unchanged only by luck — which costs nothing here,
-// since the fallback is tried in ADDITION to the exact name.
+// form disambiguatePlayerName produces. Whether a given name's suffix IS one
+// of those is streamJoinNames's question, not this helper's.
 func undisambiguatedName(name string) string {
 	i := strings.LastIndexByte(name, '#')
 	if i <= 0 || i == len(name)-1 {
@@ -320,14 +462,54 @@ func positionAtOrBefore(pt *result.PositionTrack, t int32) ([3]float32, bool) {
 	return [3]float32{pt.X[i], pt.Y[i], pt.Z[i]}, true
 }
 
-// changeI16AtOrBefore returns the value in force at t (the last transition
-// at or before it). The column is ascending by construction.
-func changeI16AtOrBefore(col []result.ChangeI16, t int32) (int16, bool) {
+// activeWeaponAtDeath returns the wielded weapon in force at the death (the
+// last transition at or before it; the column is ascending by construction),
+// refusing a sample the player carried on a DIFFERENT wire slot.
+//
+// The bound is the slot, not a time window like positionAtOrBefore's,
+// because the slot is what the staleness mechanism is keyed on. mvdsv
+// delta-codes stats against a per-slot cache that no client change resets
+// (`demo.stats[i][j]`, sv_send.c:1279-1281), so a player who reconnects onto
+// a slot whose previous occupant held what they now hold gets no
+// svc_updatestat at all — and their merged stream, which stitches both
+// connections together, would otherwise answer the question with a weapon
+// they were holding minutes ago on the slot they left. No staleness
+// tolerance separates those: the earlier session's last sample can be
+// seconds old and still be the newest one there is.
+//
+// A reconnect onto the SAME slot is not that case: the cache is continuous
+// across it, so the earlier sample is the same client's own last report and
+// is trusted. (This matters — the occupancy tracker opens a fresh session on
+// a userinfo change too, and a slot-agnostic bound cost 58 of 13 749
+// ground-truth drops to players who never moved.)
+func activeWeaponAtDeath(p *result.PlayerStream, t int32) (int16, bool) {
+	col := p.ActiveWeapon
 	i := sort.Search(len(col), func(j int) bool { return col[j].T > t }) - 1
 	if i < 0 {
 		return 0, false
 	}
+	if len(p.Sessions) > 1 {
+		deathSlot, ok1 := sessionSlotAt(p.Sessions, t)
+		sampleSlot, ok2 := sessionSlotAt(p.Sessions, col[i].T)
+		if ok1 && ok2 && deathSlot != sampleSlot {
+			return 0, false
+		}
+	}
 	return col[i].V, true
+}
+
+// sessionSlotAt returns the wire slot of the latest published connection that
+// had begun by t, and whether there was one. A t before every published
+// connection reports none — the sample predates the occupancy record and
+// cannot be placed, which is not the same as being placed elsewhere.
+func sessionSlotAt(sessions []result.PlayerSession, t int32) (int, bool) {
+	best, slot, ok := int32(0), 0, false
+	for i := range sessions {
+		if s := sessions[i].StartMs; s <= t && (!ok || s > best) {
+			best, slot, ok = s, sessions[i].Slot, true
+		}
+	}
+	return slot, ok
 }
 
 // activeWeaponPresent reports whether any player carries the active-weapon

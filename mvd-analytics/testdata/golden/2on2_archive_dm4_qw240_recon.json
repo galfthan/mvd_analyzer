@@ -20559,7 +20559,7 @@
       "origin": [
         471.125,
         -335.75,
-        -94.25
+        -118.25
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20573,7 +20573,7 @@
       "origin": [
         319.5,
         -219.75,
-        -295.875
+        -319.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20587,7 +20587,7 @@
       "origin": [
         311.5,
         -770.125,
-        -92.75
+        -116.75
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20601,7 +20601,7 @@
       "origin": [
         359,
         -558.375,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20615,7 +20615,7 @@
       "origin": [
         80,
         -1022.5,
-        -103.875
+        -127.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20629,7 +20629,7 @@
       "origin": [
         303.875,
         -52.5,
-        -362.625
+        -386.625
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20643,7 +20643,7 @@
       "origin": [
         496.125,
         -481.125,
-        24
+        0
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20657,7 +20657,7 @@
       "origin": [
         303.875,
         -87.75,
-        -353.875
+        -377.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20671,7 +20671,7 @@
       "origin": [
         612.375,
         -205.375,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20685,7 +20685,7 @@
       "origin": [
         26.75,
         56.875,
-        -289.25
+        -313.25
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20699,7 +20699,7 @@
       "origin": [
         884.375,
         -570.75,
-        25.875
+        1.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20713,7 +20713,7 @@
       "origin": [
         112,
         -181,
-        -242.5
+        -266.5
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20727,7 +20727,7 @@
       "origin": [
         502.875,
         -75.625,
-        -99.625
+        -123.625
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20741,7 +20741,7 @@
       "origin": [
         741.75,
         -833.5,
-        -231.875
+        -255.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20755,7 +20755,7 @@
       "origin": [
         135,
         -497.625,
-        16.5
+        -7.5
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20769,7 +20769,7 @@
       "origin": [
         317.375,
         -410,
-        3.375
+        -20.625
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20783,7 +20783,7 @@
       "origin": [
         324.5,
         -380.625,
-        48
+        24
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20797,7 +20797,7 @@
       "origin": [
         496.625,
         -251.125,
-        -295.875
+        -319.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20811,7 +20811,7 @@
       "origin": [
         638.75,
         -251.5,
-        -288.875
+        -312.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20825,7 +20825,7 @@
       "origin": [
         267.75,
         -162.125,
-        -414.5
+        -438.5
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20839,7 +20839,7 @@
       "origin": [
         431.875,
         -149.625,
-        -253.875
+        -277.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -20853,7 +20853,7 @@
       "origin": [
         386.25,
         -752,
-        24
+        0
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20867,7 +20867,7 @@
       "origin": [
         547.75,
         -316.25,
-        -99.25
+        -123.25
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20881,7 +20881,7 @@
       "origin": [
         491.375,
         -318.125,
-        -72.625
+        -96.625
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20895,7 +20895,7 @@
       "origin": [
         598.375,
         -210.125,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20909,7 +20909,7 @@
       "origin": [
         148.125,
         -167.5,
-        -425.375
+        -449.375
       ],
       "player": "math",
       "source": "reconstructed",
@@ -20923,7 +20923,7 @@
       "origin": [
         90.125,
         -271.875,
-        -88.875
+        -112.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20937,7 +20937,7 @@
       "origin": [
         830.625,
         -422.875,
-        86.875
+        62.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -20951,7 +20951,7 @@
       "origin": [
         1150.125,
         -562.125,
-        68.375
+        44.375
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20965,7 +20965,7 @@
       "origin": [
         283,
         -516.875,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20979,7 +20979,7 @@
       "origin": [
         53.75,
         -208,
-        -295.875
+        -319.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -20993,7 +20993,7 @@
       "origin": [
         522,
         -199.875,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21007,7 +21007,7 @@
       "origin": [
         425.25,
         -457.75,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21021,7 +21021,7 @@
       "origin": [
         422.625,
         -426,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21035,7 +21035,7 @@
       "origin": [
         515.375,
         -184.25,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21049,7 +21049,7 @@
       "origin": [
         431.875,
         -101.75,
-        -295.875
+        -319.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21063,7 +21063,7 @@
       "origin": [
         192.625,
         -183.125,
-        -267.75
+        -291.75
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21077,7 +21077,7 @@
       "origin": [
         129.875,
         -349.125,
-        -439.875
+        -463.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21091,7 +21091,7 @@
       "origin": [
         601.75,
         -94.75,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21105,7 +21105,7 @@
       "origin": [
         448.875,
         -116.125,
-        -96.25
+        -120.25
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21119,7 +21119,7 @@
       "origin": [
         816.125,
         -182,
-        24
+        0
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21133,7 +21133,7 @@
       "origin": [
         585.25,
         -159.75,
-        -61.5
+        -85.5
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21147,7 +21147,7 @@
       "origin": [
         384.375,
         -308.75,
-        -428
+        -452
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21161,7 +21161,7 @@
       "origin": [
         580,
         -175.75,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21175,7 +21175,7 @@
       "origin": [
         590.625,
         -46.375,
-        -99.875
+        -123.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21189,7 +21189,7 @@
       "origin": [
         606.375,
         -211.375,
-        -107.125
+        -131.125
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21203,7 +21203,7 @@
       "origin": [
         563.25,
         -246,
-        -319.875
+        -343.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21217,7 +21217,7 @@
       "origin": [
         435.625,
         -371.875,
-        109.75
+        85.75
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21231,7 +21231,7 @@
       "origin": [
         235.375,
         -501,
-        36.75
+        12.75
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21245,7 +21245,7 @@
       "origin": [
         389.875,
         -403.5,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21259,7 +21259,7 @@
       "origin": [
         497.25,
         -310.625,
-        -68.125
+        -92.125
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21269,11 +21269,11 @@
     },
     {
       "entNum": 0,
-      "loc": "low",
+      "loc": "Quad.stairs",
       "origin": [
         112,
         -285.375,
-        -167.25
+        -191.25
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21287,7 +21287,7 @@
       "origin": [
         374.5,
         -1039.5,
-        24
+        0
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21301,7 +21301,7 @@
       "origin": [
         386.625,
         -934.375,
-        24
+        0
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21315,7 +21315,7 @@
       "origin": [
         234.25,
         -231.5,
-        -299.5
+        -323.5
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21329,7 +21329,7 @@
       "origin": [
         528.75,
         -425.125,
-        26.875
+        2.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21343,7 +21343,7 @@
       "origin": [
         564.125,
         -239.75,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21357,7 +21357,7 @@
       "origin": [
         173.375,
         -212.125,
-        -17.75
+        -41.75
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21371,7 +21371,7 @@
       "origin": [
         513,
         -271.875,
-        -295.875
+        -319.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21385,7 +21385,7 @@
       "origin": [
         478.5,
         -450.5,
-        24
+        0
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21399,7 +21399,7 @@
       "origin": [
         303.875,
         -60.75,
-        -439.875
+        -463.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21413,7 +21413,7 @@
       "origin": [
         284.5,
         -498,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21427,7 +21427,7 @@
       "origin": [
         143,
         -329.125,
-        -395.625
+        -419.625
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21441,7 +21441,7 @@
       "origin": [
         549.75,
         -229,
-        32.25
+        8.25
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21455,7 +21455,7 @@
       "origin": [
         517,
         -431.875,
-        -97
+        -121
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21469,7 +21469,7 @@
       "origin": [
         372,
         -492.25,
-        23.5
+        -0.5
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21483,7 +21483,7 @@
       "origin": [
         458,
         -333.875,
-        -107.125
+        -131.125
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21497,7 +21497,7 @@
       "origin": [
         604.5,
         -350.875,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21511,7 +21511,7 @@
       "origin": [
         655.875,
         -209.875,
-        -295.875
+        -319.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21525,7 +21525,7 @@
       "origin": [
         307.375,
         -609.75,
-        24
+        0
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21539,7 +21539,7 @@
       "origin": [
         539.625,
         -374.5,
-        -111
+        -135
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21553,7 +21553,7 @@
       "origin": [
         252.375,
         -499.25,
-        24
+        0
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21567,7 +21567,7 @@
       "origin": [
         326,
         -463.375,
-        9.375
+        -14.625
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21581,7 +21581,7 @@
       "origin": [
         125.5,
         -103,
-        -442.5
+        -466.5
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21595,7 +21595,7 @@
       "origin": [
         582.125,
         -229.25,
-        12.125
+        -11.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21609,7 +21609,7 @@
       "origin": [
         353.375,
         -99.5,
-        -295.875
+        -319.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21623,7 +21623,7 @@
       "origin": [
         70,
         -257.875,
-        -92.75
+        -116.75
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21637,7 +21637,7 @@
       "origin": [
         739.5,
         67.5,
-        -295.875
+        -319.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21651,7 +21651,7 @@
       "origin": [
         -73.375,
         -261,
-        -71.875
+        -95.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21665,7 +21665,7 @@
       "origin": [
         269.625,
         -509.25,
-        -99.375
+        -123.375
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21679,7 +21679,7 @@
       "origin": [
         612,
         -202.625,
-        37.375
+        13.375
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21693,7 +21693,7 @@
       "origin": [
         608.5,
         -405.75,
-        -84.375
+        -108.375
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21703,11 +21703,11 @@
     },
     {
       "entNum": 0,
-      "loc": "high",
+      "loc": "GL",
       "origin": [
         472.375,
         -509.375,
-        28.875
+        4.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21721,7 +21721,7 @@
       "origin": [
         779.875,
         -731.875,
-        -201
+        -225
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21735,7 +21735,7 @@
       "origin": [
         431.875,
         -304,
-        -399.625
+        -423.625
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21749,7 +21749,7 @@
       "origin": [
         1120.875,
         -623.875,
-        33
+        9
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21763,7 +21763,7 @@
       "origin": [
         342.875,
         -767.875,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21777,7 +21777,7 @@
       "origin": [
         557,
         -128.75,
-        -103.875
+        -127.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21791,7 +21791,7 @@
       "origin": [
         196.625,
         -482,
-        24
+        0
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21805,7 +21805,7 @@
       "origin": [
         670.875,
         -157.875,
-        24
+        0
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21819,7 +21819,7 @@
       "origin": [
         253.625,
         -228.375,
-        -295.875
+        -319.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21833,7 +21833,7 @@
       "origin": [
         450.5,
         -422.625,
-        -45.75
+        -69.75
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21847,7 +21847,7 @@
       "origin": [
         566.875,
         -270.875,
-        -76.625
+        -100.625
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21861,7 +21861,7 @@
       "origin": [
         599.125,
         -347.375,
-        -114.5
+        -138.5
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21875,7 +21875,7 @@
       "origin": [
         579.75,
         -254.625,
-        -92.25
+        -116.25
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21889,7 +21889,7 @@
       "origin": [
         430.5,
         -197.375,
-        -237
+        -261
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21903,7 +21903,7 @@
       "origin": [
         567.5,
         -229.625,
-        -103.875
+        -127.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21917,7 +21917,7 @@
       "origin": [
         576.5,
         -97.125,
-        -125.625
+        -149.625
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -21931,7 +21931,7 @@
       "origin": [
         495.625,
         -306.125,
-        6.125
+        -17.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -21945,7 +21945,7 @@
       "origin": [
         588.75,
         -171.125,
-        24
+        0
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21959,7 +21959,7 @@
       "origin": [
         499.25,
         -152.625,
-        -103.875
+        -127.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -21973,7 +21973,7 @@
       "origin": [
         305,
         -150.75,
-        -295.875
+        -319.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -21987,7 +21987,7 @@
       "origin": [
         305.5,
         -253.375,
-        -319.875
+        -343.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22001,7 +22001,7 @@
       "origin": [
         409,
         -196.125,
-        -302.125
+        -326.125
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22015,7 +22015,7 @@
       "origin": [
         -11.875,
         -271.875,
-        -71.875
+        -95.875
       ],
       "player": "math",
       "source": "reconstructed",
@@ -22029,7 +22029,7 @@
       "origin": [
         515.875,
         -497.375,
-        26.625
+        2.625
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22043,7 +22043,7 @@
       "origin": [
         1137.5,
         -562.25,
-        24
+        0
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22057,7 +22057,7 @@
       "origin": [
         774.875,
         -197.75,
-        0
+        -24
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22071,7 +22071,7 @@
       "origin": [
         183.375,
         -335.625,
-        -448.125
+        -472.125
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22085,7 +22085,7 @@
       "origin": [
         513.875,
         -69.875,
-        -114.5
+        -138.5
       ],
       "player": "math",
       "source": "reconstructed",
@@ -22099,7 +22099,7 @@
       "origin": [
         528.75,
         -342.25,
-        -86.125
+        -110.125
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22113,7 +22113,7 @@
       "origin": [
         627,
         -290.875,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22127,7 +22127,7 @@
       "origin": [
         480.875,
         -331.375,
-        -84.75
+        -108.75
       ],
       "player": "math",
       "source": "reconstructed",
@@ -22141,7 +22141,7 @@
       "origin": [
         -117.25,
         -331.75,
-        -57.125
+        -81.125
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22155,7 +22155,7 @@
       "origin": [
         815.875,
         -613.875,
-        -143
+        -167
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22169,7 +22169,7 @@
       "origin": [
         725.625,
         -768.125,
-        -230.625
+        -254.625
       ],
       "player": "math",
       "source": "reconstructed",
@@ -22183,7 +22183,7 @@
       "origin": [
         292.5,
         -481.75,
-        47.5
+        23.5
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22197,7 +22197,7 @@
       "origin": [
         503.625,
         -140.25,
-        -84.75
+        -108.75
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22211,7 +22211,7 @@
       "origin": [
         598.75,
         -61.5,
-        -103.875
+        -127.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22225,7 +22225,7 @@
       "origin": [
         511,
         -422.75,
-        24
+        0
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22239,7 +22239,7 @@
       "origin": [
         41.5,
         -220.125,
-        -295.875
+        -319.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22253,7 +22253,7 @@
       "origin": [
         355.125,
         -520.5,
-        51
+        27
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22267,7 +22267,7 @@
       "origin": [
         564.375,
         -77.5,
-        -96.25
+        -120.25
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22281,7 +22281,7 @@
       "origin": [
         334.5,
         -498.25,
-        24
+        0
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22295,7 +22295,7 @@
       "origin": [
         502.125,
         -308,
-        -103.875
+        -127.875
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22309,7 +22309,7 @@
       "origin": [
         559.75,
         -277.125,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22323,7 +22323,7 @@
       "origin": [
         474.375,
         -252.75,
-        -97.125
+        -121.125
       ],
       "player": "raket",
       "source": "reconstructed",
@@ -22337,7 +22337,7 @@
       "origin": [
         -30.875,
         -211.5,
-        -295.875
+        -319.875
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22351,7 +22351,7 @@
       "origin": [
         439.875,
         -878.75,
-        -103.875
+        -127.875
       ],
       "player": "ung",
       "source": "reconstructed",
@@ -22365,7 +22365,7 @@
       "origin": [
         814,
         -426.75,
-        24
+        0
       ],
       "player": "virus",
       "source": "reconstructed",
@@ -22375,11 +22375,11 @@
     },
     {
       "entNum": 0,
-      "loc": "high",
+      "loc": "GL",
       "origin": [
         472.75,
         -512,
-        24
+        0
       ],
       "player": "raket",
       "source": "reconstructed",

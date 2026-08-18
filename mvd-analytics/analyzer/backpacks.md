@@ -28,9 +28,15 @@ not announced and are therefore invisible to this analyser.
 1. `BackpackDropHintEvent` fires when KTX emits the hidden message.
    Its `ItemFlags` bitfield encodes which weapon was dropped:
    `IT_ROCKET_LAUNCHER` → "rl", `IT_LIGHTNING` → "lg".
-2. The dropper's most recent `PlayerPositionEvent.Origin` is captured
-   as the drop origin (KTX spawns the backpack at the dying player's
-   `s.v.origin`). Only the SLOT is recorded at event time; the name
+2. The dropper's most recent `PlayerPositionEvent.Origin`, less the 24
+   units KTX drops the pack by, is captured as the drop origin — KTX
+   copies the dying player's `s.v.origin` and then applies
+   `item->s.v.origin[2] -= 24` (`ktx/src/items.c:2703-2704`), which puts
+   the pack at their feet. The reconstruction applies the same offset, so
+   the two provenances publish one origin convention. A slot with no
+   position at all keeps the zero vector (the "unknown origin" value),
+   rather than a bare -24 that would read as a real point on the map.
+   Only the SLOT is recorded at event time; the name
    and team are resolved at Finalize through the shared
    `ResolveSlotAt` chain, so a drop carries the same display name
    every other section joins on (this also fixes the former
