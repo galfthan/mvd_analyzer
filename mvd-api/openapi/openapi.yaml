@@ -5204,10 +5204,48 @@ components:
       properties:
         entNum:
           description: >
-            Server entity/edict number — stable id within a match, joining to
-            WeaponPickup.backpackEnt. 0 on reconstructed rows: the edict
-            number lives only in the wire hint, so a reconstructed drop
-            cannot be joined to its pickup. Never treat 0 as an edict.
+            Server entity/edict number — stable id within a match. On a `ktx`
+            row it comes from the wire hint and joins to
+            WeaponPickup.backpackEnt. On a `reconstructed` row it is the
+            backpack-model entity the linkage bound to the drop and joins to
+            nothing (that row's pickup side is `fate`/`picker` below). 0
+            means no entity was identified; never treat 0 as an edict.
+          type: integer
+        fate:
+          description: >
+            What the wire showed happening to the pack (schema v72).
+            Reconstructed rows only — absent on a `ktx` row, whose fate is
+            the /weapon-pickups join. `picked` — the pack entity left the
+            wire with a live player's bounding box overlapping it, the same
+            test the server runs before BackpackTouch; `pickupTime` is when,
+            and `picker` is set only when the evidence named exactly one
+            player. `expired` — it left the wire at KTX's 120 s removal
+            timeout with nobody on it, the one disappearance that is
+            positively not a pickup. `unobserved` — no entity bound to the
+            drop, or it was still on the wire when the recording stopped, or
+            it left early with nobody on it; none of which is evidence that
+            nobody took the pack. Measured against the `//ktx bp` hints on
+            223 demos with both hints withheld: 100.00% precision and 96.13%
+            recall on picked-vs-not, 99.98% of named pickers correct.
+          enum: [picked, expired, unobserved]
+          type: string
+        picker:
+          description: >
+            Who took the pack (schema v72). Set only with `fate: picked`, and
+            only when the evidence named exactly ONE player — two players on
+            one pack with nothing to separate them leave this empty rather
+            than guess. Reconstructed rows only.
+          type: string
+        pickerTeam:
+          description: "Team of `picker`. Reconstructed rows only (schema v72)."
+          type: string
+        pickupTime:
+          description: >
+            When the pack left the wire, int32 ms since match start. Set with
+            `fate: picked` (with or without a `picker`). Reconstructed rows
+            only (schema v72).
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
           type: integer
         source:
           description: >

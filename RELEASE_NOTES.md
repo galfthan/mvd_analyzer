@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks on the old half, and a reader that says what it could not read, schema v72
+## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks (dropped and taken) on the old half, and a reader that says what it could not read, schema v72
 
 ### Backpack drops on the other half of the archive: `backpacks[].source`
 
@@ -96,9 +96,101 @@ defeating the `/kill` suppression for players whose streams got split.
 `playerStats[].pickups.byKind[].dropped` now counts reconstructed drops
 (the `player-stats` node binds the new `backpacks:final` artifact). Pack
 **transfers** (`xfer`/`xferSelf`) deliberately do not: they need the
-`//ktx bp` pickup hint, which ships with the same KTX generation as the
-drop hint, so on a reconstructed section they stay absent — an
-unobservable count, not an observed zero.
+picker's `hadBefore`, which no wire signal carries on a hint-less demo
+(see the next section) — an unobservable count, not an observed zero.
+
+### And what happened to the pack: `backpacks[].fate`
+
+The drop was half the story. A reconstructed row now also says what became
+of the pack: **`fate`** — `picked`, `expired` or `unobserved` — with
+**`picker`**, **`pickerTeam`** and **`pickupTime`**, plus an **`entNum`**
+naming the backpack entity it was bound to. `ktx` rows are untouched and
+leave all four empty: `//ktx bp` names their picker outright and reaches
+consumers as a `weaponPickups` row, and a second, weaker answer beside it
+could only disagree.
+
+The plan for this had recorded the entity stream as unusable — "16.4
+visibility flips per real pack". That number was an artefact of our own
+parser, which cached an edict's item kind forever. KTX `spawn()`s a pack
+and `ent_remove()`s it on pickup (`ktx/src/items.c:2701, 2489`), so a pack
+edict is handed on within seconds to another pack, a rocket or a gib, and
+every later tenant's appearance was being reported as the original pack
+flickering. **The cache no longer outranks a model index the wire is
+currently sending**: whenever an item entity is visible its model is
+re-read, and a changed kind ends the old item and begins a new one. With
+that, a pack's life is one appearance and one disappearance — measured over
+24 hint-carrying demos, 3 205 pack lives against 3 319 deaths, and **zero**
+lives re-opening where the previous one ended. There is no flutter left to
+stitch. (A speed gate against `sv_maxvelocity`, the stitch the plan asked
+for, was built, measured at **zero** hits over those 3 205 lives and
+removed: mvdsv will not reallocate an edict freed less than half a second
+ago, `pr_edict.c:118-127`, so a recycle can never masquerade as movement.)
+
+Two new reader signals feed it. `ItemStateEvent` now carries the entity
+**origin** at each visibility transition, and the new **`ItemMoveEvent`**
+reports a visible item entity's origin changes on the same hold-last
+convention as `MoverStateEvent`. Map items never move, so on a normal demo
+that fires only for backpacks — which is the point: KTX tosses a pack with
+`velocity[2] = 300` plus a random horizontal kick and `MOVETYPE_TOSS`
+(`items.c:2856-2861`), so it falls off ledges and down lift shafts before
+settling, a measured p50 of 58 units and a max of 583. Where a pack ended
+up is now tracked, never assumed.
+
+The chain is: bind the pack that appears at the drop's time and place
+(scored against the hint's own edict number — **947 of 961 bound, and every
+one of the 947 to the edict the hint named**, zero wrong, with the drop-time
+offset exactly 0 ms at p50, p99 and max); follow its origin track to where
+it settled; then read its disappearance with the test the SERVER runs before
+calling `BackpackTouch` — whether a live player's bounding box overlapped
+the pack's, including the 15-unit expansion mvdsv gives an `FL_ITEM` trigger
+"to make items easier to pick up" (`sv_world.c:373-379`; without it the
+predicate finds nobody on 90% of real pickups). No overlap and a life
+reaching KTX's 120 s `SUB_Remove` timeout is `expired`; anything else is
+`unobserved`.
+
+**A stat-flip tier was considered and is not needed.** `//ktx bp` fires on
+every RL/LG pack touch regardless of what the picker already held, and
+`other->s.v.items |= new` cannot change a bit they already had: only 237 of
+606 ground-truth pickups came with a weapon-bit gain, so a stat-flip
+requirement would have thrown away 61% of real pickups. The overlap is not
+a proxy for the touch, it IS the touch. The weapon-bit gain does one narrow
+job — separating two players standing on one pack — and a gain that could
+have come from a world spawner the player is standing on is disqualified.
+
+Measured against the `//ktx bp` hints on **223 demos spanning KTX
+1.38–1.48** (10 378 scored drops, both hints withheld): picked-vs-not
+**100.00% precision and 96.13% recall**; `expired` **100.00% precision** at
+50.26% recall; **99.77%** of correct pickups carry a named picker and
+**99.98%** of those names are right (2 wrong in 9 591); pickup-time error
+**0 ms** at p50 and p90. Precision is 100.00% in every one of the eleven
+`ktxver` buckets and every mode. On 674 hint-less demos the fate mix is
+86.7% `picked` / 10.5% `unobserved` / 2.8% `expired`, with a picker named
+on 99.7% of the picked — the shape the hinted population predicts. Pack
+entities are present on the target population: 9 928 lives against 10 078
+deaths across 86 pre-1.38 demos, every demo carrying a track.
+
+`unobserved` is the honest residual and must be read as "the wire did not
+answer", never as "nobody took it". Its largest cause is unfixable: a pack
+grabbed inside the demo frame it dropped in never reaches the wire at all
+(202 of 10 378 scored drops — an MVD is written at `sv_demofps`, default
+30). The rest is a picker 0-9 units outside the box on both broadcast
+samples bracketing the disappearance and on the path between them (167),
+a liveness-derivation edge (8), and the bind refusals (10). A `picked` row
+with no `picker` means two players were on the pack and nothing separated
+them — 22 rows, stated rather than guessed.
+
+What still cannot be said, and so is still absent: **`hadBefore`**, and
+therefore pack transfer credit and pack kill credit. This is why the
+linkage's output rides the `backpacks` row and is deliberately NOT written
+into `weaponPickups`, whose rows document themselves as authoritative KTX
+hints and feed exactly those wire-measured statistics.
+
+The web Pack Drops tab picks all of this up through one adapter
+(`packDropPickup()`), so one renderer, one filter row and one Picker column
+serve both provenances. Reconstructed rows read `picked` / `expired` /
+`unobserved` rather than `xfer`/`enemy`, and their `Kills` column renders
+`-` rather than `0` — both because `hadBefore` is not derivable, and
+printing a 0 would claim the picker scored nothing.
 
 ### Parse warnings reach the operator: `result.parseWarnings`
 

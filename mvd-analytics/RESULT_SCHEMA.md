@@ -30,7 +30,7 @@ analyzer are also covered there.
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
-| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. |
+| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. A reconstructed row also carries the pack's `fate` (`picked` / `expired` / `unobserved`) with `picker` / `pickerTeam` / `pickupTime`, read off the wire's backpack-entity track. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
@@ -1281,9 +1281,12 @@ alone answers the question people actually mean.
 no backpack hints, so transfers are unobservable", which is a different
 fact from an observed zero. A *reconstructed* backpacks section
 (`backpacks[].source == "reconstructed"`, v72) does not make them
-observable — it proves a pack existed but says nothing about who
-recovered it — so they stay absent there, while `dropped` does count the
-reconstructed drops. They are teamplay-only, exactly like KTX's
+observable. The v72 linkage does name a `picker` on most reconstructed
+rows, but a transfer is not "who took it" — KTX's counter is gated on the
+picker not already holding the weapon, and `hadBefore` is exactly what the
+entity track cannot see (the weapon bit is ORed in, so a redundant grab
+leaves no trace). They therefore stay absent there, while `dropped` does
+count the reconstructed drops. They are teamplay-only, exactly like KTX's
 gate — absent on duels and FFA. Note a pack holds the weapon the player
 was *wielding* (`DropBackpack`: `item->s.v.items = self->s.v.weapon`),
 one bit, which is why KTX's exact-equality test has no mixed-contents
@@ -3606,8 +3609,10 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum, source }`.
-`entNum` is the join key with `WeaponPickup.BackpackEnt`.
+`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum, source }`,
+plus `{ fate, picker, pickerTeam, pickupTime }` on a reconstructed row
+(v72). `entNum` is the join key with `WeaponPickup.BackpackEnt` on a `ktx`
+row.
 
 `origin` is the **pack's** position, not the victim's: KTX copies the
 victim's origin and then drops it 24 units
@@ -3624,7 +3629,7 @@ Two provenances, never mixed within one demo:
 | `source` | Meaning |
 |---|---|
 | `ktx` | Decoded from KTX's `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY directive (`ktx/src/items.c:2762-2766`). Exact: KTX emits it once per real pack, with the weapon and the dropper's slot baked in. Only KTX ≥ 1.38 emits it — 49.2% of the archive. |
-| `reconstructed` | Replayed from `DropBackpack`'s own rule on a demo whose mod never hinted. `entNum` is **0** there: the backpack's edict number lives only in the hint, so a reconstructed row cannot be joined to its pickup. Never treat 0 as an edict. |
+| `reconstructed` | Replayed from `DropBackpack`'s own rule on a demo whose mod never hinted. Its pickup side is `fate` / `picker` / `pickerTeam` / `pickupTime` on this same row, not a `weaponPickups` join; `entNum` is the backpack-model entity the linkage bound to the drop, and joins to nothing. `entNum` 0 means no entity was identified — never treat 0 as an edict. |
 
 **What the reconstruction reproduces.** With the shipped default
 `k_frp 0`, `DropBackpack` puts the victim's *currently wielded* weapon in
@@ -3637,6 +3642,56 @@ inference: death instant + wielded weapon + the victim's last broadcast
 position. It reproduces the one deathtype `DropBackpack` refuses, `/kill`
 (`dtSUICIDE`, `ktx/src/client.c:1008`, obituary `" suicides"`); rocket
 suicides, falls, drowning and lava all DO drop a pack.
+
+### `fate` / `picker` / `pickerTeam` / `pickupTime` — the pack's outcome (v72)
+
+Set on `reconstructed` rows only. A `ktx` row leaves all four empty: its
+fate is the `weaponPickups` join, which KTX states outright in `//ktx bp`,
+and a second answer beside it could only disagree. An EMPTY `fate` on a
+reconstructed row means the linkage did not run at all (no player streams);
+that is distinct from `unobserved`, which is a measurement.
+
+| `fate` | Meaning |
+|---|---|
+| `picked` | The pack entity left the wire with at least one live player's bounding box overlapping it — the same overlap the server tests before calling `BackpackTouch` (`ktx/src/items.c:2367`). `pickupTime` is the match-relative ms it left. `picker` / `pickerTeam` are set only when the evidence named exactly ONE player: one player on the pack, or several separated by which of them gained the weapon bit. Two players on a pack with nothing to separate them stay `picked` with no `picker` rather than a guess. |
+| `expired` | The pack entity left the wire at KTX's 120 s removal timeout (`item->s.v.nextthink = time + 120`, `think = SUB_Remove`, `items.c:2871-2872`) with nobody on it. The one disappearance that is positively not a pickup. |
+| `unobserved` | The honest residual: no backpack-model entity bound to the drop, or the entity was still on the wire when the recording stopped, or it left early with nobody on it. **None of these is evidence that nobody took the pack.** |
+
+**How the pack is found and followed.** The reconstruction names a time and
+a place (the victim's origin less 24). The pack that appears at that
+instant nearest that point is the drop's pack — scored against the `//ktx
+drop` hint's own edict number, 947 of 961 drops bound and every one of the
+947 to the edict the hint named. It is then followed through its origin
+updates to where it settled: KTX tosses a pack with `velocity[2] = 300`
+plus a random horizontal kick and `MOVETYPE_TOSS` (`items.c:2856-2861`), so
+it falls off ledges and down lift shafts — measured 58 units of travel at
+p50, 583 at max — and the pickup test runs where it landed, never where it
+was dropped.
+
+**Why the touch, and not a stat flip.** `//ktx bp` fires on every RL/LG
+pack pickup regardless of what the picker already held, and
+`other->s.v.items |= new` cannot change a bit they already had. Measured:
+only 237 of 606 unambiguous ground-truth pickups came with a weapon-bit
+gain, so requiring one would have discarded 61% of real pickups. The
+bounding-box overlap is not a proxy for the touch — it IS the touch — so it
+is the primary signal, and the bit gain only separates two players standing
+on one pack.
+
+**Accuracy** (223 hint-carrying demos, 10 378 scored drops, both hints
+withheld): picked-vs-not **100.00% precision, 96.13% recall**; of the
+pickups it found, **99.77% carried a named picker and 99.98% of those were
+correct**; pickup-time error 0 ms at p50 and p90. `expired` is 100.00%
+precise at 50.26% recall — the rest of the never-picked packs come out
+`unobserved` rather than being asserted. The largest residual (2% of all
+drops) is a pack taken inside the demo frame it dropped in: it never
+reaches the wire at all, so no entity exists to bind. Full tables,
+mismatch classes and the reproduce command:
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+
+**What is still absent on a reconstructed row.** `hadBefore` — KTX ORs the
+weapon bit in, so a redundant grab leaves no trace anywhere on the wire —
+and therefore kill credit and pack-transfer credit
+(`playerStats[].pickups.byKind[].xfer`), which both need it.
 
 **Stand-down conditions.** The section is left ABSENT — never
 half-filled, never guessed — when any of the following holds. Note the
@@ -3867,7 +3922,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v72 | **Archive-demo contracts: wall-clock anchors, match provenance, final scores, parse census, backpack reconstruction.** `streams.global` gains the wall-clock anchors (`demoStartUnixMs` and the match-start anchor echoed on `/overview` timing), derived from the wire date markers a recorder writes, with monotone floors and honest cross-checks — plus `timelineAnalysis.demoMarkers` for player-inserted bookmarks. `match` gains `mode` and `sources`, naming what each match-level value was decided from rather than presenting a merged answer. `metadata` gains `finalScores` (KTX's `//finalscores` end-of-match scoreline: date, mode, map, both team names and totals) and `matchSettings.fairpacks` (the `Fairpacks setting:` countdown broadcast, `ktx/src/match.c:2086-2107`). New top-level `parseWarnings` — the reader's per-run parse census, published on every run instead of being dropped. `streams.players[].aw` publishes `STAT_ACTIVEWEAPON`, the **wielded** weapon bit (opt-in field code `aw` on `/buckets`, `/stream-slice`, `/state-at`); a different question from the `rl`/`lg`/… inventory intervals. `backpacks[]` gains `source` (`ktx` \| `reconstructed`): the hint path stamps `ktx`, and a new post-processor fills the section on demos older than the `//ktx drop` hint by replaying `DropBackpack`'s own rule over `aw` at each in-match death. Reconstructed rows carry `entNum` 0 (the edict number exists only in the hint) and the two provenances are never mixed in one demo. Both provenances now publish the pack's own origin — the victim's position less KTX's 24-unit drop offset (`items.c:2703-2704`) — so backpack `origin` z values move by −24 against v71. |
+| v72 | **Archive-demo contracts: wall-clock anchors, match provenance, final scores, parse census, backpack reconstruction.** `streams.global` gains the wall-clock anchors (`demoStartUnixMs` and the match-start anchor echoed on `/overview` timing), derived from the wire date markers a recorder writes, with monotone floors and honest cross-checks — plus `timelineAnalysis.demoMarkers` for player-inserted bookmarks. `match` gains `mode` and `sources`, naming what each match-level value was decided from rather than presenting a merged answer. `metadata` gains `finalScores` (KTX's `//finalscores` end-of-match scoreline: date, mode, map, both team names and totals) and `matchSettings.fairpacks` (the `Fairpacks setting:` countdown broadcast, `ktx/src/match.c:2086-2107`). New top-level `parseWarnings` — the reader's per-run parse census, published on every run instead of being dropped. `streams.players[].aw` publishes `STAT_ACTIVEWEAPON`, the **wielded** weapon bit (opt-in field code `aw` on `/buckets`, `/stream-slice`, `/state-at`); a different question from the `rl`/`lg`/… inventory intervals. `backpacks[]` gains `source` (`ktx` \| `reconstructed`): the hint path stamps `ktx`, and a new post-processor fills the section on demos older than the `//ktx drop` hint by replaying `DropBackpack`'s own rule over `aw` at each in-match death. The two provenances are never mixed in one demo, and a reconstructed row's PICKUP side rides the drop row instead of `weaponPickups`: new `backpacks[].fate` (`picked` \| `expired` \| `unobserved`) with `picker`, `pickerTeam` and `pickupTime`, plus an `entNum` naming the bound backpack-model entity. The linkage node binds each reconstructed drop to the pack that appears at its time and place, follows that pack's origin updates to where it settled, and reads the disappearance as the server would — the bounding-box overlap that runs `BackpackTouch`. New parser events feed it: `ItemStateEvent` now carries the entity origin at each visibility transition, and `ItemMoveEvent` reports a visible item entity's origin changes (map items never move; a tossed backpack does). Measured with both hints withheld on 223 demos: 100.00% precision / 96.13% recall on picked-vs-not, 99.98% of named pickers correct. Both provenances now publish the pack's own origin — the victim's position less KTX's 24-unit drop offset (`items.c:2703-2704`) — so backpack `origin` z values move by −24 against v71. |
 | v71 | **Reconstructed damage for pre-instrumentation demos + damage provenance.** `damage` gains `source` (`ktx` \| `reconstructed`): the KTX analyzer stamps `ktx` on every wire-decoded section (a stored-Result change — goldens move), and the new `damage-recon` post-processor (package `mvd-analytics/damagerecon`) fills the section on demos whose wire never carried `mvdhidden_dmgdone` (~45% of the archive — `/damage` and the damage-shaped views 422'd there before). The reconstruction reads the health/armor change streams (the observed delta IS the bounded value), LG beams, projectile entity flights, fire sounds, position/velocity tracks and the frag log; both families, same shapes, same match window; per-player match totals validated at ~1% median error against KTX ground truth on modern demos (`damagerecon/ACCURACY.md`). Requires the spatial shot streams (mvd-api/WASM always; CLI `-include projectiles,beams`); never overwrites a measured section; stands down on `skipped:*` modes. `playerStats` binds the `damage:final` artifact, so its damage family now exists on old demos too, marked `src: "reconstructed"` (aim and airgibs deliberately keep wire-measured damage only). On reconstructed sections the victim-weapon fields are withheld when the recording froze its weapon bits (see the damage section notes). The `shots` stream gains the axe: `weapons/ax1.wav` (one swing sound per attack) maps to `weapon: "axe"`, with damage linking at the swing's real +200ms traceline delay — new rows in the shot stream, `byPlayer`, the reconciliation and the aim weapon counters. New `streams.pointEffects` (rides the shot-streams gate): every point-effect temp entity as columns t/ty/c/x/y/z — TE_BLOOD (per-volley hitscan hit telemetry with pellet count), TE_LIGHTNINGBLOOD (LG hit), TE_EXPLOSION (exact detonation point), TE_GUNSHOT (miss pattern) and the rest, the wire evidence the reconstruction consumes. `aim` gains a required top-level `hitsMeasured` flag and `weapons[].hits` becomes omitempty: on reconstructed/absent damage every hit-derived counter (hits, pellet full/partial/miss, direct/splash, the LG whiff classes, the sample `hit` columns) is withheld rather than fabricated as zero. `boundedMode` gains five skip reasons (`skipped:ca/wipeout/ra/lgc/race`). |
 | v70 | **`/overview` becomes a capability manifest instead of a highlights reel.** The stored `Result` gains **no field** — this is an mvd-api response-shape bump, and the first BREAKING one in a while: fields are REMOVED. Gone are `topKills`, `topStreaks` and `topPowerups`, measured across the corpus at 78-88% of the response (`topKills` alone 62-77%), every one of them a copy of a dedicated endpoint — `/top-kills` at its own defaults, and `/lives` + `/events?type=streak,powerup` field for field. Gone too is `hasRegionControl`, folded into the new block. Added is **`available`**, one flag per detailed view, each mirroring the predicate behind that view's 422, so a `false` is exactly the 422 the call would have returned: `demoInfo`, `metadata`, `frags`, `damage`, `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`, plus the three a consumer could not previously infer AT ALL — **`height`**, **`liquid`** and **`los`** — which turn on which map BSPs the SERVER was provisioned with rather than on what the demo recorded, so the same demo answers differently on two deployments. Like every other flag in the block these report **measured, not non-zero**: a gate that opens fills its column for every position sample, so a map with no water yields an all-zero `lq` and `liquid` stays **true** — a measured *dry*, distinguishable from the unprovisioned `false` where the question is simply unanswerable. `height` and `liquid` ride separate gates (collision hull vs vis BSP) and can disagree. There is deliberately no `pvs` flag: PVS and LOS come off one pass behind one BSP gate (PVS ⊇ LOS by construction), so two flags could never disagree. `los` is the one PREDICTION in the block — the pass is heavy and lazy, so it reports the cheap half of the gate (streams, 2+ players, a provisioned BSP) and a provisioned-but-unvised BSP still 422s. A drift test pins the manifest to the 422 table, which is exactly what the removed ad-hoc `has*` fields never had and why they went stale. |
 | v69 | **The victim-weapon axis: `byEnemyWeapon` on kills and damage.** Every per-weapon figure in `playerStats` was keyed on the ATTACKER's weapon; this bump adds the complement — the same kills and the same damage split by what the **victim** was holding when it landed, the weapon-denial question. `score.byEnemyWeapon` partitions `score.kills`, `damage.byEnemyWeapon` partitions `damage.given`, and both use one exclusive vocabulary: `both` / `rl` / `lg` / `mid` / `sg` (plus `unknown` on the kill side, for a victim with no stream). **`both` is the trap and the point**: "enemy RLs killed" is `rl + both`, never `rl` alone. Both are **DERIVED on every demo carrying streams**, never overlaid — KTX's own `ekills` counts the kill side inclusively (a victim holding RL+LG bumps both) and force-zeroes axe/sg plus every bucket on `deathmatch >= 4` / `k_instagib` (`ktx/src/stats_json.c:377-380`), while for damage the server keeps only the RL+LG-lumped `dmg_eweapon` scalar. Ours reproduces KTX exactly where KTX measures honestly — `rl + both == ekills.rl` on all 44 cached demos, every player, both weapons — and additionally covers telefrags/stomps and old demos with no demoinfo block. `damage.enemyWeapons` stays as the `lg + rl + both` summary it always was. Measuredness: the kill map rides the kill family (absent exactly when `kills` is), the damage map rides the damage STREAM (present exactly when `taken` is). The stored `Result` DOES change — this is computed in the analyzer, not folded in at read time — so the golden corpus moves. Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` / `eLG`, the metric that was nowhere, since kills made WITH each weapon are already in the Weapon Stats tab. See [The victim-weapon axis](#the-victim-weapon-axis-byenemyweapon-schema-v69). | Also adds **`score.byWeaponVsEnemyWeapon`**, the joint distribution the two kill maps are marginals of — killer weapon → victim bucket → kills — because marginals cannot answer "how many of my LG kills were against enemies carrying an RL". Summing it over inner keys reproduces `byWeapon` and over outer keys `byEnemyWeapon`, an identity guaranteed by construction (the marginal is summed FROM the cross-tab) and asserted on every golden demo.

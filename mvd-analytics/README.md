@@ -140,9 +140,10 @@ that downstream consumers render, summarise, or feed to an agent.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
-  in `analyzer/BACKPACKS.md`); `-volume` reports drops-per-death and an
-  inventory cross-check on the hint-less population, where no ground
-  truth exists.
+  in `analyzer/BACKPACKS.md`); `-linkage` does the same for the PICKUP
+  side against the `//ktx bp` hints, with both hints withheld; `-volume`
+  reports drops-per-death, the pack-fate mix and an inventory
+  cross-check on the hint-less population, where no ground truth exists.
 - `cmd/fetch-eval-corpus/` — pins a hub eval corpus to disk (demos +
   a manifest of gameIds, so eval runs are reproducible).
 - `cmd/qw-corpus-survey/` — sweeps a demo directory through the full
@@ -387,6 +388,16 @@ never touched. `player-stats` binds `backpacks:final`, so its per-weapon
 there, because those need the `//ktx bp` pickup hint that ships with the
 same KTX generation as the drop hint.
 
+`backpackLinkagePost` is node `backpack-linkage`: it binds each
+RECONSTRUCTED drop to the backpack-model entity that appeared at its time
+and place (`co.PackEntities`, published by the backpacks node), follows the
+pack's origin track to where it settled, and reads its disappearance as a
+pickup, an expiry at KTX's 120 s removal timeout, or an honest
+`unobserved`. It binds `backpacks:final` so it sees the finished section,
+plus `timeline` (positions, liveness, RL/LG possession) and `items` (the
+world spawner positions that disqualify a weapon-bit tie-break). A
+hint-carrying demo is never touched — `//ktx bp` already names the picker.
+
 `wallClockPost` is node `wall-clock`: it resolves the wire date markers
 the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
 `date` string, the year-less `//finalscores` stamp on the metadata
@@ -502,7 +513,9 @@ flowchart TB
   end
   subgraph d6["depth 6"]
     player_stats["player-stats"]
+    backpack_linkage["backpack-linkage"]
   end
+  backpack_recon -->|"backpacks:final"| backpack_linkage
   backpack_recon -->|"backpacks:final"| player_stats
   backpacks -->|"backpacks"| backpack_recon
   clock -->|"clock"| backpacks
@@ -554,6 +567,7 @@ flowchart TB
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
+  items -->|"items"| backpack_linkage
   items -->|"items"| opening
   items -->|"items"| player_stats
   match -->|"match"| match_final
@@ -580,6 +594,7 @@ flowchart TB
   shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
   timeline -->|"timeline"| airgibs
+  timeline -->|"timeline"| backpack_linkage
   timeline -->|"timeline"| backpack_recon
   timeline -->|"timeline"| damage_recon
   timeline -->|"timeline"| frags_final
@@ -592,7 +607,7 @@ flowchart TB
   timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon post;
+  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```
@@ -964,6 +979,16 @@ touches a hint-carrying demo. Measured against the hints on 316 archive
 demos: **precision 99.97%, recall 99.97%** — method, splits and
 stand-down conditions in [`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
 
+The PICKUP side of a reconstructed row is filled by the `backpack-linkage`
+post from the wire's backpack-ENTITY track: the pack that appears at the
+drop's time and place is bound to it, followed to where it lands (packs are
+tossed and fall), and its disappearance classified by whether any live
+player's bounding box overlapped it — the same test the server runs before
+calling `BackpackTouch`. That lands in `fate` / `picker` / `pickerTeam` /
+`pickupTime` on the same row (schema v72). Measured against the `//ktx bp`
+hints on 223 demos: **picked-vs-not 100% precision, 96.1% recall; 99.98% of
+named pickers correct**.
+
 Coverage caveats:
 
 - **RL and LG only — drops *and* pickups.** KTX only emits `//ktx
@@ -978,14 +1003,22 @@ Coverage caveats:
   for the full mechanics. Net effect: SSG/NG/SNG/GL/ammo-only
   packs do not appear in `result.Backpacks`, and corresponding
   pickups do not appear in `result.WeaponPickups`.
-- **Pickup side lives in `WeaponPickups`, not `Backpacks`.**
-  `BackpackAnalyzer` only records drops. The pickup side — who
-  grabbed the pack, whether they already owned the weapon, how many
-  frags they scored with it before dying — is emitted by
-  `WeaponPickupsAnalyzer` and exposed as `result.WeaponPickups`.
-  Frontends join the two lists by `BackpackDrop.EntNum` ==
-  `WeaponPickup.BackpackEnt` (paired with `dropTime` to disambiguate
-  recycled edict numbers).
+- **A `ktx` row's pickup side lives in `WeaponPickups`, not
+  `Backpacks`.** `BackpackAnalyzer` only records drops. The pickup side
+  — who grabbed the pack, whether they already owned the weapon, how
+  many frags they scored with it before dying — is emitted by
+  `WeaponPickupsAnalyzer` from `//ktx bp` and exposed as
+  `result.WeaponPickups`. Frontends join the two lists by
+  `BackpackDrop.EntNum` == `WeaponPickup.BackpackEnt` (paired with
+  `dropTime` to disambiguate recycled edict numbers).
+- **A `reconstructed` row's pickup side rides the drop row.** There is
+  no `//ktx bp` to join to, so `fate` / `picker` / `pickerTeam` /
+  `pickupTime` carry it instead. It is deliberately NOT written into
+  `WeaponPickups`: that section documents itself as authoritative KTX
+  hints and feeds kill credit and pack-transfer stats that stay
+  wire-measured. Two things the entity track cannot say and so are still
+  absent there: `hadBefore` (KTX ORs the weapon bit in, so a redundant
+  grab leaves no trace) and therefore kill credit.
 
 ```go
 type BackpackDrop struct {
@@ -995,8 +1028,16 @@ type BackpackDrop struct {
     Weapon string     // "rl" or "lg"
     Origin [3]float32 // dropper's position at hint time
     Loc    string     // nearest named loc
-    EntNum int        // server edict of the backpack entity; 0 when reconstructed
+    EntNum int        // server edict of the backpack entity; 0 when none was identified
     Source string     // "ktx" (wire hint) | "reconstructed"
+
+    // Reconstructed rows only (schema v72) — the pack's fate off the
+    // entity track. Empty on a `ktx` row, whose fate is the WeaponPickups
+    // join.
+    Fate       string // "picked" | "expired" | "unobserved"
+    Picker     string // set only when the evidence named exactly one player
+    PickerTeam string
+    PickupTime int32  // ms, with Fate == "picked"
 }
 ```
 

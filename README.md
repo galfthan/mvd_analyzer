@@ -406,7 +406,7 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 obituary as three), `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
-`ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
+`ItemSpawnEvent`, `ItemStateEvent`, `ItemMoveEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
 `ItemPickupPrintEvent`,
 `PlayerDepartureEvent` / `PlayerRejoinEvent` (the KTX/kmod roster
@@ -438,11 +438,13 @@ source-agnostic.
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
 death/spawn by comparing samples across the sampling boundary.
-`ItemSpawnEvent` / `ItemStateEvent` are derived from the entity-state
-stream (`svc_spawnbaseline` + `svc_packetentities` /
-`svc_deltapacketentities`): every item's identity and
-pickup/respawn transitions come out of the wire directly — no KTX
-prints, no BSP preprocessing. `ItemPickupHintEvent` /
+`ItemSpawnEvent` / `ItemStateEvent` / `ItemMoveEvent` are derived from the
+entity-state stream (`svc_spawnbaseline` + `svc_packetentities` /
+`svc_deltapacketentities`): every item's identity, its
+pickup/respawn transitions (each carrying the entity's origin) and, for the
+one item class that moves — a dropped backpack, tossed with
+`MOVETYPE_TOSS` — its fall to wherever it landed, come out of the wire
+directly, with no KTX prints and no BSP preprocessing. `ItemPickupHintEvent` /
 `BackpackPickupHintEvent` / `BackpackDropHintEvent` carry KTX's
 authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
 touch-level pickup attribution that entity-state alone can only
@@ -485,7 +487,11 @@ backpacks (RL/LG drops attributed to the dropping player, each row
 stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
 where the mod predates that hint — a replay of KTX's own `DropBackpack`
 rule from the death instant, the wielded-weapon stat and the death
-position, validated at 99.97% precision/recall against the hints),
+position, validated at 99.97% precision/recall against the hints; a
+reconstructed row also carries the pack's `fate` — `picked` with the
+`picker` named, `expired` at KTX's 120 s removal timeout, or
+`unobserved` — read off the wire's backpack-entity track, 100% precision
+and 96.1% recall against the `//ktx bp` hints),
 weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
@@ -916,11 +922,17 @@ diff -r /tmp/before /tmp/after
    by replaying `DropBackpack`'s own rule over the recorded
    wielded-weapon stat, stamped `source: "reconstructed"`. Validated at
    99.97% precision and recall against the hints on 316 archive demos, so
-   it is far stronger than the damage reconstruction — but it inherits
-   two hard gaps: a reconstructed row carries no `entNum`, so it cannot
-   be joined to its pickup or credited with a pack transfer, and the
-   server-side `dp 0` (drops disabled) setting is published nowhere on
-   the wire, so it cannot be ruled out on a pre-1.38 demo. Where the
+   it is far stronger than the damage reconstruction. Its PICKUP side is
+   read off the wire's backpack-entity track by the `backpack-linkage`
+   node and published on the same row (`fate` / `picker` / `pickerTeam` /
+   `pickupTime`, schema v72): 100% precision and 96.1% recall on
+   picked-vs-not, 99.98% correct pickers, measured against the `//ktx bp`
+   hints on 223 demos. What stays out of reach: a pack taken inside the
+   demo frame it dropped in never reaches the wire at all (2% of drops,
+   the largest residual); pack TRANSFER credit and kill credit still need
+   the hint, because `hadBefore` is not derivable; and the server-side
+   `dp 0` (drops disabled) setting is published nowhere on the wire, so it
+   cannot be ruled out on a pre-1.38 demo. Where the
    evidence is unmeasurable — frozen weapon state, no frag log, a
    fairpacks/yawnmode/bloodfest ruleset — the section is left absent
    rather than half-filled. Accuracy tables and stand-down conditions:

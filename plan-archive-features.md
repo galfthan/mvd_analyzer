@@ -109,11 +109,12 @@ non-default `k_frp` (read off KTX's `Fairpacks setting:` broadcast, now
 parsed into `metadata.matchSettings.fairpacks`). `dtSUICIDE` is likewise
 only the `/kill` command, not self-inflicted death in general.
 
-Residuals: a reconstructed row carries no `entNum`, so it cannot join to
-its pickup and earns no pack-transfer credit; `dp 0` has no wire signal on
-a pre-1.38 demo; pre-KTX (qwsv/KTPro) drop rules cannot be GT-validated by
-construction, though their rate and inventory consistency match the KTX
-population. Pickup side still stays with `weapon_pickups`.
+Residuals: `dp 0` has no wire signal on a pre-1.38 demo; pre-KTX
+(qwsv/KTPro) drop rules cannot be GT-validated by construction, though
+their rate and inventory consistency match the KTX population. The pickup
+side is no longer a residual — lead 10 below closed it off the entity
+track — but pack-TRANSFER credit still is, because it needs the picker's
+`hadBefore`, which no wire signal carries.
 
 Original note: The `//ktx drop` hint exists only ≥KTX 1.38; the wire entity
 stream cannot substitute as-is (bp edicts are recycled so `ItemSpawnEvent`
@@ -257,26 +258,80 @@ demos — sequence after leads 5/6 so the hit-side inputs exist.
 
 ## 10. Backpack pickup linkage on reconstructed drops (successor to lead 2)
 
-Lead 2 reconstructs the DROP; on hint-less demos the pack's fate stays
-`unobserved` — mushi's RL stat-flip 5 s after nexus's death is visible
-but unlinked. The raw entity signal alone is unusable (recycled bp
+**SHIPPED** on `archive-parsing` (folded into the unreleased schema v72):
+the `backpack-linkage` post (`mvd-analytics/analyzer/backpack_linkage.go`)
+reads each reconstructed drop's fate off the wire's backpack-ENTITY track
+and stamps it on the same row — `backpacks[].fate` (`picked` / `expired` /
+`unobserved`) with `picker`, `pickerTeam`, `pickupTime` and the bound
+`entNum`. Hint-carrying demos are untouched.
+
+**The premise below was wrong, and measurably so.** The "16.4 PVS-flutter
+visibility flips per real pack" was an artefact of our own parser caching an
+edict's item kind forever; KTX recycles pack edicts within seconds
+(`items.c:2701, 2489`), so every later tenant read as the original pack
+flickering. With the model index re-read on every visible frame
+(`mvd-reader/parser/entities.go`), a pack's life is one appearance and one
+disappearance: **3 205 pack lives against 3 319 deaths over 24 demos, and
+ZERO lives re-opening where the previous one ended.** No flutter left to
+stitch — the speed-gate stitch this lead asked for was built, measured at
+zero hits, and removed (mvdsv will not reuse an edict freed < 0.5 s ago,
+`pr_edict.c:118-127`). Parser enablers shipped: `ItemStateEvent.Origin` plus
+a new `ItemMoveEvent`.
+
+Feasibility probe (phase 0, 24 hinted demos): binding a drop to a pack by
+(t ± 200 ms, nearest to the drop position) hit **947 of 961 (98.5%) and got
+zero wrong**, with the drop→appearance offset exactly 0 ms at p50/p99/max
+and the position gap p99 23 units. Packs travel p50 58 / p99 422 / max 583
+units, so the resting position is tracked. **Stat-flip attribution was
+rejected on evidence**, not built as a lower-confidence tier: only 237 of
+606 ground-truth pickups came with a weapon-bit gain (KTX ORs the bit in),
+so requiring one discards 61% of real pickups. The primary signal is the
+server's own touch test — bounding-box overlap including the 15-unit
+`FL_ITEM` expansion (`sv_world.c:373-379`), without which the predicate
+misses 90% of pickups — and the bit gain only separates two players on one
+pack.
+
+Validated exactly like the drops, with BOTH hints withheld, on **223 demos
+spanning KTX 1.38–1.48** (10 378 scored drops; the harness additionally
+gates on the demo emitting `//ktx bp` at all — 107 of 335 sampled demos
+emit `//ktx drop` but not `//ktx bp`): picked-vs-not **100.00% precision /
+96.13% recall**, `expired` **100.00% precision** at 50.26% recall, **99.77%**
+of pickups carry a named picker and **99.98%** of those are correct,
+pickup-time error 0 ms at p50/p90. Precision is 100% in every ktxver bucket
+and every mode. Hint-less volume sanity over 674 demos: 86.7% `picked` /
+10.5% `unobserved` / 2.8% `expired`, picker named on 99.7% of the picked —
+the shape the hinted population (96.4% picked) predicts. Pack-entity
+coverage on the target population is 9 928 lives / 10 078 deaths over 86
+pre-1.38 demos.
+
+Residuals, all named: the largest is unfixable — a pack taken inside the
+demo frame it dropped in never reaches the wire (202 of 10 378); then a
+picker 0-9 units outside the touch box on both bracketing samples and the
+swept path between them (167); a liveness edge (8); bind refusals (10).
+`hadBefore` remains underivable, so pack TRANSFER credit and pack kill
+credit stay absent, which is why the linkage output rides the `backpacks`
+row instead of `weaponPickups`. Numbers, method and the
+`cmd/qw-backpack-eval -linkage` reproduction command live in
+`mvd-analytics/analyzer/BACKPACKS.md`.
+
+Original note: Lead 2 reconstructs the DROP; on hint-less demos the pack's
+fate stays `unobserved` — mushi's RL stat-flip 5 s after nexus's death is
+visible but unlinked. The raw entity signal alone is unusable (recycled bp
 edicts, origins currently discarded by `diffItemEnt`, measured 16.4
-PVS-flutter visibility flips per real pack), but a reconstructed drop
-is now a clean anchor to bind the dirty edict to: (a) surface
-backpack-entity origins in the parser (the enabler lead 2 evaluated
-and skipped); (b) near each reconstructed drop (t, pos−24Z) bind the
-appearing backpack-model entity; (c) follow its origin track — packs
-FALL (ledges, lift shafts), so the resting position is tracked, never
-assumed; (d) stitch over flutter (a flutter re-appearance carries the
-same origin; a pickup does not re-appear) and read the final
-disappearance: close-in-time+radius to a matching stat-flip (a player
-WITHOUT the weapon gaining its bit, world spawners excluded by
-position) → attributed pickup; at the KTX removal timeout with no flip
-→ expired. Validate exactly like the drops: modern demos carry
+PVS-flutter visibility flips per real pack), but a reconstructed drop is now
+a clean anchor to bind the dirty edict to: (a) surface backpack-entity
+origins in the parser (the enabler lead 2 evaluated and skipped); (b) near
+each reconstructed drop (t, pos−24Z) bind the appearing backpack-model
+entity; (c) follow its origin track — packs FALL (ledges, lift shafts), so
+the resting position is tracked, never assumed; (d) stitch over flutter (a
+flutter re-appearance carries the same origin; a pickup does not re-appear)
+and read the final disappearance: close-in-time+radius to a matching
+stat-flip (a player WITHOUT the weapon gaining its bit, world spawners
+excluded by position) → attributed pickup; at the KTX removal timeout with
+no flip → expired. Validate exactly like the drops: modern demos carry
 `//ktx bp` pickup hints — run with hints withheld, score attribution
-precision/recall (the drop eval's 99.97/99.97 protocol). Web: Pack
-Drops upgrades `unobserved` → `picked up by <name> (reconstructed)` /
-`expired`.
+precision/recall (the drop eval's 99.97/99.97 protocol). Web: Pack Drops
+upgrades `unobserved` → `picked up by <name> (reconstructed)` / `expired`.
 
 ## Full-archive readability census (2026-08-17)
 
