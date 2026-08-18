@@ -866,15 +866,25 @@ paths:
       description: >
         RL/LG backpack drops: time, dropper, weapon (rl/lg), origin XYZ
         (the pack's own position, 24 units below the victim's origin) and
-        resolved loc. Each row names its provenance in `source`: `ktx` rows
-        are decoded from KTX's `//ktx drop` hint and carry the real
-        `entNum`, which joins to /weapon-pickups; `reconstructed` rows are
-        replayed from the server's own drop rule on a demo whose mod never
-        hinted, and carry `entNum` 0 — the edict number exists only in the
-        hint, so those rows join to no pickup. The two provenances are never
-        mixed within one demo. Always 200 — empty when none, which means
-        either no pack dropped or the reconstruction stood down; the wire
-        shape does not distinguish the two.
+        resolved loc. Each row names its provenance in `source`, and the two
+        are never mixed within one demo:
+
+          * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the
+            hinted edict and joins to WeaponPickup.backpackEnt, which is
+            where that row's pickup lives; `fate`/`picker`/`pickerTeam`/
+            `pickupTime` are absent.
+          * `reconstructed` — replayed from the server's own drop rule on a
+            demo whose mod never hinted. There is no pickup hint to join to,
+            so the pickup side is carried on the row itself (schema v72):
+            `fate` (`picked`/`expired`/`unobserved`) plus `pickupTime` and
+            `picker`/`pickerTeam` when the wire named one, read off the
+            bound backpack entity — whose edict number `entNum` now carries
+            as well. A `reconstructed` `entNum` still joins to nothing;
+            it identifies the pack track, not a pickup row.
+
+        Always 200 — empty when none, which means either no pack dropped or
+        the reconstruction stood down; the wire shape does not distinguish
+        the two.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -5237,7 +5247,11 @@ components:
             than guess. Reconstructed rows only.
           type: string
         pickerTeam:
-          description: "Team of `picker`. Reconstructed rows only (schema v72)."
+          description: >
+            Team of `picker`. Omitted when the picker has no team — an FFA
+            or duel picker is named with no `pickerTeam`, so read its
+            absence as "teamless", not as "no picker". Reconstructed rows
+            only (schema v72).
           type: string
         pickupTime:
           description: >

@@ -56,10 +56,13 @@ type BackpackDrop struct {
 	// pack's fate was never asked about, which is a different statement from
 	// BackpackFateUnobserved ("asked, and the wire did not answer").
 	Fate string `json:"fate,omitempty"`
-	// Picker / PickerTeam name who took the pack. Set only when Fate is
+	// Picker names who took the pack. Set only when Fate is
 	// BackpackFatePicked AND the evidence named exactly one player; a pickup
 	// with two players on the pack and nothing separating them stays
-	// BackpackFatePicked with no Picker rather than guessing.
+	// BackpackFatePicked with no Picker rather than guessing. PickerTeam is
+	// that picker's team and is omitted when they have none, so an FFA or
+	// duel pickup carries a Picker and no PickerTeam — absence means
+	// "teamless", not "no picker".
 	Picker     string `json:"picker,omitempty"`
 	PickerTeam string `json:"pickerTeam,omitempty"`
 	// PickupTime is the match-relative millisecond the pack left the wire.

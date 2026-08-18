@@ -3653,7 +3653,7 @@ that is distinct from `unobserved`, which is a measurement.
 
 | `fate` | Meaning |
 |---|---|
-| `picked` | The pack entity left the wire with at least one live player's bounding box overlapping it — the same overlap the server tests before calling `BackpackTouch` (`ktx/src/items.c:2367`). `pickupTime` is the match-relative ms it left. `picker` / `pickerTeam` are set only when the evidence named exactly ONE player: one player on the pack, or several separated by which of them gained the weapon bit. Two players on a pack with nothing to separate them stay `picked` with no `picker` rather than a guess. |
+| `picked` | The pack entity left the wire with at least one live player's bounding box overlapping it — the same overlap the server tests before calling `BackpackTouch` (`ktx/src/items.c:2367`). `pickupTime` is the match-relative ms it left. `picker` is set only when the evidence named exactly ONE player: one player on the pack, or several separated by which of them gained the weapon bit. Two players on a pack with nothing to separate them stay `picked` with no `picker` rather than a guess. `pickerTeam` is that picker's team and is omitted when they have none — an FFA or duel picker is named with no `pickerTeam`, so read its absence as "teamless", never as "no picker". |
 | `expired` | The pack entity left the wire at KTX's 120 s removal timeout (`item->s.v.nextthink = time + 120`, `think = SUB_Remove`, `items.c:2871-2872`) with nobody on it. The one disappearance that is positively not a pickup. |
 | `unobserved` | The honest residual: no backpack-model entity bound to the drop, or the entity was still on the wire when the recording stopped, or it left early with nobody on it. **None of these is evidence that nobody took the pack.** |
 

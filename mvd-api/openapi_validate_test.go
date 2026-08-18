@@ -280,6 +280,45 @@ func addParseWarnings(r *result.Result) {
 	}
 }
 
+// addReconstructedBackpacks appends `reconstructed` drops carrying the v72
+// pickup-linkage fields to the served backpacks section. Every corpus demo is
+// a hint-carrying one, so its whole section is `source: "ktx"` and the fate /
+// picker / pickerTeam / pickupTime half of BackpackDrop — the half the linkage
+// exists to publish — was validated only against its own absence, the same
+// blind spot demoMarkers and parseWarnings had.
+//
+// A real demo never mixes the two provenances (backpacks.go states it as an
+// invariant); this fixture deliberately does, because the endpoint's schema
+// has to accept either kind of row and this is the only served body there is.
+// The three rows cover the shapes that differ: a named picker with a team, a
+// named picker with NONE (pickerTeam is omitempty, so a teamless FFA picker
+// omits it — RESULT_SCHEMA.md), and an `expired` pack, whose picker fields are
+// all absent.
+func addReconstructedBackpacks(r *result.Result) {
+	r.Backpacks = append(r.Backpacks,
+		result.BackpackDrop{
+			Time: 300000, Player: "nlk", Team: "bps", Weapon: "rl",
+			Origin: [3]float32{1597.75, -878.125, 24}, Loc: "YA",
+			EntNum: 211, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "lakso", PickerTeam: "oSaMs",
+			PickupTime: 302500,
+		},
+		result.BackpackDrop{
+			Time: 310000, Player: "sCorp", Weapon: "lg",
+			Origin: [3]float32{943.375, 257, -4.375}, Loc: "Quad",
+			EntNum: 214, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "marksuzu",
+			PickupTime: 311200,
+		},
+		result.BackpackDrop{
+			Time: 320000, Player: "lakso", Team: "oSaMs", Weapon: "rl",
+			Origin: [3]float32{1852.75, -441.5, -72}, Loc: "bridge.high",
+			EntNum: 219, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFateExpired,
+		},
+	)
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -382,7 +421,17 @@ func validationCases(t *testing.T) []validationCase {
 
 		{name: "loc-graph", url: "/v1/demos/gameId:42/loc-graph", path: "/v1/demos/{id}/loc-graph", status: 200},
 		{name: "chat", url: "/v1/demos/gameId:42/chat", path: "/v1/demos/{id}/chat", status: 200},
-		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200},
+		// mustContain pins the v72 linkage half of BackpackDrop. Every one of
+		// those fields is omitempty, so a regression that stopped emitting
+		// them would validate against the schema exactly as happily; the
+		// pins name a picked row with a pickerTeam, a picked row WITHOUT one
+		// (the teamless-picker shape), and an expired row.
+		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200,
+			mustContain: []string{
+				`"entNum":211,"source":"reconstructed","fate":"picked","picker":"lakso","pickerTeam":"oSaMs","pickupTime":302500`,
+				`"entNum":214,"source":"reconstructed","fate":"picked","picker":"marksuzu","pickupTime":311200`,
+				`"entNum":219,"source":"reconstructed","fate":"expired"`,
+			}},
 		{name: "items", url: "/v1/demos/gameId:42/items", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-summary", url: "/v1/demos/gameId:42/items?summary=1", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-windowed", url: "/v1/demos/gameId:42/items?from=0&to=60&kinds=armor,mega", path: "/v1/demos/{id}/items", status: 200},
@@ -533,6 +582,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	addPointEffects(res.Streams)
 	// Same reason for the reader's parse census: every golden demo is clean.
 	addParseWarnings(res)
+	// Same reason for the v72 pickup linkage: the corpus is hint-carrying, so
+	// no served row was ever `reconstructed` or carried a fate.
+	addReconstructedBackpacks(res)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the

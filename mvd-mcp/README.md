@@ -514,20 +514,36 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
-(resolved name), `entNum` (server edict — joins to
-`weapon-pickups[].backpackEnt`) and `source` (schema v72). (REST returns
-a `{timeUnit, backpacks}` envelope; the MCP tool passes it through.)
+(resolved name), `entNum` (server edict) and `source` (schema v72); a
+`reconstructed` row additionally carries `fate` and its companions below.
+(REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
+through.)
 
 `source` is `ktx` on demos that carried KTX's `//ktx drop` hint (KTX
 ≥ 1.38, 49% of the archive) and `reconstructed` on older demos, where the
 pipeline replays KTX's own `DropBackpack` rule instead — validated at
-99.97% precision and recall against the hints. A reconstructed row has
-`entNum` 0 and **cannot** be joined to its pickup. An absent section is
-AMBIGUOUS: it means either that no RL/LG pack dropped or that the pass
-stood down rather than guess, and the wire shape does not distinguish the
-two. `origin` is the pack's own position — the victim's origin less the
-24 units KTX drops it by (`ktx/src/items.c:2703-2704`) — on both
-provenances.
+99.97% precision and recall against the hints. **The two provenances carry
+the pickup side differently**:
+
+- A `ktx` row's `entNum` is the hinted edict and joins to
+  `weapon-pickups[].backpackEnt`, which is where its pickup lives. `fate`
+  and its companions are absent.
+- A `reconstructed` row has no pickup hint to join to, so the pickup side
+  is on the row itself (schema v72): `fate` (`picked` / `expired` /
+  `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the
+  wire named exactly one player, read off the bound backpack-entity track.
+  Its `entNum` is that bound entity — no longer 0, but still joining to no
+  pickup row. Measured against the `//ktx bp` hints with both hints
+  withheld: 100% precision, 96.1% recall on picked-vs-not, 99.98% of named
+  pickers correct. Read `unobserved` as "the wire did not answer", not as
+  "nobody took it"; a `picked` row with no `picker` means two players were
+  on the pack and nothing separated them.
+
+An absent section is AMBIGUOUS: it means either that no RL/LG pack dropped
+or that the pass stood down rather than guess, and the wire shape does not
+distinguish the two. `origin` is the pack's own position — the victim's
+origin less the 24 units KTX drops it by (`ktx/src/items.c:2703-2704`) —
+on both provenances.
 
 #### `getItems({demoId, ...})`
 
