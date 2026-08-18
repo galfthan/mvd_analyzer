@@ -188,6 +188,22 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 	b.occCuts = append(b.occCuts, tMs)
 }
 
+// cutActiveWeaponDedup raises the wielded-weapon column's dedup floor to the
+// current length — the one piece of endOccupancy a handover OUTSIDE the match
+// window still needs.
+//
+// Every other change stream is recorded only between match start and match
+// end, so a warmup handover cannot corrupt them; the wielded weapon is
+// recorded through the countdown as well (it is delta-coded, and the
+// match-start rebase needs the latest pre-match value). Without this cut the
+// first sample of a new occupant who happens to hold what the departing one
+// held is suppressed as a repeat, and the session slice then keeps the
+// departing occupant's entry out of the new occupant's stream — the same
+// "stream fragment opens blank" defect endOccupancy fixes for health/armor.
+func (b *streamBuilder) cutActiveWeaponDedup() {
+	b.dedupBase.activeWeapon = len(b.activeWeapon)
+}
+
 // recordItemFlags is a one-shot helper called from the analyzer's
 // stat-update path. It folds the parsed boolean state for every
 // inventory field into the corresponding interval streams.
