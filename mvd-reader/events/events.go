@@ -95,6 +95,7 @@ type (
 	BackpackDropHintEvent   = parser.BackpackDropHintEvent
 	ItemPickupHintEvent     = parser.ItemPickupHintEvent
 	BackpackPickupHintEvent = parser.BackpackPickupHintEvent
+	BackpackExpireHintEvent = parser.BackpackExpireHintEvent
 	DemoMarkEvent           = parser.DemoMarkEvent
 	FinalScoresEvent        = parser.FinalScoresEvent
 	ItemPickupPrintEvent    = parser.ItemPickupPrintEvent

@@ -83,6 +83,7 @@ The concrete event list, in stable order:
 | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
 | `ItemPickupHintEvent` | KTX `//ktx took` stuffcmd: `(ItemEnt, RespawnSec, PlayerEnt)` — authoritative pickup attribution for every MH / armor / weapon / powerup touch |
 | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
+| `BackpackExpireHintEvent` | KTX `//ktx expire` stuffcmd: `(BackpackEnt)` — `SUB_Remove` took an RL/LG pack off the map untaken, at `DropBackpack`'s 120 s timeout. Stuffed at `world`, so no player argument. The only positive wire evidence that a pack was *not* picked up |
 | `DemoMarkEvent` | KTX `//demomark[ <args>]` stufftext: `(PlayerSlot, Label)` — player-inserted bookmark. Slot is the dem_single block target (the only attribution channel), -1 if not slot-addressed; `Label` is the optional HoonyMode argument tail. Fires even out of match; not deduped |
 | `FinalScoresEvent` | KTX `//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>" <s2>` stufftext, stuffed once at match end (`ktx/src/commands.c:6969`) — the server's own mode, map and final scoreline. `Date` has no year (`%b %d, %H:%M`); the score is **rounds won**, not frags, on Clan Arena / Wipeout. Team names normalised; a line failing the shape check is dropped with a `parse_error` warning |
 | `ItemPickupPrintEvent` | Per-client `svc_print` "You got the X" / "You receive N health" — covers ammo boxes and H15/H25 that `//ktx took` misses. **Subject to per-client `msg` cvar filter; frequently absent in competitive demos.** |
@@ -209,6 +210,17 @@ symmetric to the existing `//ktx drop` hint. Both are
 **KTX-specific**: a non-KTX server (ktpro, CustomTF, or vanilla)
 will not emit them, in which case consumers fall back to
 `ItemStateEvent` + heuristics or to per-player stats deltas.
+
+`BackpackExpireHintEvent` closes that family. `//ktx expire`
+(`ktx/src/g_spawn.c:196-210`) fires from `SUB_Remove` for an RL/LG pack
+the server deletes untaken — which, for a dropped pack, is
+`DropBackpack`'s 120 s timeout (`items.c:2870-2872`). A pack therefore
+accounts for itself in exactly one of `//ktx bp` or `//ktx expire`, and
+this is the only signal on the wire that positively says a pack was
+*not* taken: a demo can carry `//ktx drop` and no `//ktx bp` at all
+(measured: 107 of 330 archive demos), so the absence of a pickup hint
+proves nothing. Backpack edicts are recycled within a match, so consumers
+must join it on `(BackpackEnt, time)` and not on the edict alone.
 
 `ItemPickupPrintEvent` complements the hints by parsing KTX's
 per-client pickup prints (`"You got the Red Armor"`,
