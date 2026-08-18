@@ -445,7 +445,33 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 	// 100 health and base shotgun. After match end, ignore stat updates too:
 	// the intermission camera otherwise freezes the last seen value (often a
 	// KTX damage-indicator sentinel like health=1000+dmg) into every bucket.
-	if !a.timing.Started || a.timing.Ended {
+	if a.timing.Ended {
+		return nil
+	}
+	// The wielded weapon is the one stat recorded THROUGH the countdown as
+	// well. It is delta-coded on the wire (mvdsv writes a stat only when it
+	// changes, sv_send.c:1280), so a player whose weapon last changed during
+	// warmup has no in-match sample at all — and the match-start rebase
+	// carries the latest pre-match value forward to t=0 precisely so a
+	// consumer can answer "what were they holding" from the first
+	// millisecond. Warmup's meaningless all-weapons inventory does not
+	// contaminate this: KTX strips weapons at match start, which is itself a
+	// change and lands as its own sample.
+	if e.StatIndex == events.StatActiveWeapon {
+		// Bounded to the IT_* weapon range so a mod sentinel can never reach
+		// the int16 column as a plausible weapon bit.
+		if e.Value >= 0 && e.Value <= events.ITAxe {
+			a.getOrCreatePlayerState(e.PlayerNum).streams.recordActiveWeapon(e.TimeMs, int16(e.Value))
+		}
+		return nil
+	}
+	// Ignore all other state during countdown/warmup - players have all
+	// weapons, infinite ammo, etc. which is meaningless. Match starts fresh
+	// with 100 health and base shotgun. After match end, ignore stat updates
+	// too: the intermission camera otherwise freezes the last seen value
+	// (often a KTX damage-indicator sentinel like health=1000+dmg) into every
+	// bucket.
+	if !a.timing.Started {
 		return nil
 	}
 

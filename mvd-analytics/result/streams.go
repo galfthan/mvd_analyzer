@@ -232,6 +232,19 @@ type PlayerStream struct {
 	Rockets []ChangeI16 `json:"rk,omitempty"`
 	Cells   []ChangeI16 `json:"cl,omitempty"`
 
+	// ActiveWeapon is the WIELDED weapon as a change stream: the IT_* bit
+	// of STAT_ACTIVEWEAPON, which mvdsv writes from ent->v->weapon for every
+	// spawned player (mvdsv/src/sv_send.c:1268). It is a DIFFERENT question
+	// from the RL/LG/GL/SSG/SNG interval streams above — those are inventory
+	// (STAT_ITEMS bits, "owns"), this is "is holding right now".
+	//
+	// Values are single IT_* bits: 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL,
+	// 64 LG, 4096 axe. Zero means "the wire never said" for that instant,
+	// not "unarmed" — old recorders that freeze the STAT_ITEMS weapon bits
+	// freeze this too, so a consumer must check the column exists and moves
+	// before trusting it (see analyzer.activeWeaponLive).
+	ActiveWeapon []ChangeI16 `json:"aw,omitempty"`
+
 	// Discrete event timestamps (no value). Integer milliseconds since
 	// the stream's time origin (the same epoch as match-relative seconds
 	// elsewhere; schema v8 changed the type and unit to give exact

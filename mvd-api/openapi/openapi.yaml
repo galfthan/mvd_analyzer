@@ -2284,6 +2284,7 @@ components:
             - nl
             - rk
             - cl
+            - aw
             - sp
             - d
             # field-code-enum:end
@@ -5194,8 +5195,24 @@ components:
       additionalProperties: false
       properties:
         entNum:
-          description: "Server entity/edict number — stable id within a match."
+          description: >
+            Server entity/edict number — stable id within a match, joining to
+            WeaponPickup.backpackEnt. 0 on reconstructed rows: the edict
+            number lives only in the wire hint, so a reconstructed drop
+            cannot be joined to its pickup. Never treat 0 as an edict.
           type: integer
+        source:
+          description: >
+            Where this row came from (schema v72). `ktx` — decoded from KTX's
+            `//ktx drop` hint, which fires exactly once per real pack and is
+            emitted only by KTX >= 1.38 (49% of the archive). `reconstructed`
+            — replayed from DropBackpack's own rule (the victim's wielded
+            weapon at the death instant, dropped at their last broadcast
+            position) on a demo whose mod never hinted. The two are never
+            mixed within one demo; a reconstructed section stands down
+            entirely rather than guess where the evidence is unmeasurable.
+          enum: [ktx, reconstructed]
+          type: string
         loc:
           description: "Nearest named location from the map .loc file."
           type: string

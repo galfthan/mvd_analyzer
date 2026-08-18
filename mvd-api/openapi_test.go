@@ -270,7 +270,7 @@ func TestOpenAPIArtifactEnumCurrent(t *testing.T) {
 // added to view/fields.go must be added both there and here.
 func TestOpenAPIFieldCodesCurrent(t *testing.T) {
 	want := append([]string{}, view.AllStandardFields...)
-	want = append(want, view.FieldView, view.FieldHeight, view.FieldLiquid, view.FieldVelocity)
+	want = append(want, view.FieldView, view.FieldHeight, view.FieldLiquid, view.FieldVelocity, view.FieldActiveWeapon)
 	got := markerBlock(t, "field-code-enum")
 	diffSets(t, "field-code enum", got, want)
 }

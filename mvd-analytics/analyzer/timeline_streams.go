@@ -71,6 +71,9 @@ func (b *streamBuilder) recordRockets(tMs int32, v int16) {
 func (b *streamBuilder) recordCells(tMs int32, v int16) {
 	appendChangeI16(&b.cells, b.dedupBase.cells, tMs, v)
 }
+func (b *streamBuilder) recordActiveWeapon(tMs int32, v int16) {
+	appendChangeI16(&b.activeWeapon, b.dedupBase.activeWeapon, tMs, v)
+}
 
 // recordPosition appends every native sample (no dedup; D11
 // asymmetry). Time is integer milliseconds — the canonical wire-native
@@ -179,6 +182,8 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 		nails:     len(b.nails),
 		rockets:   len(b.rockets),
 		cells:     len(b.cells),
+
+		activeWeapon: len(b.activeWeapon),
 	}
 	b.occCuts = append(b.occCuts, tMs)
 }
@@ -230,6 +235,7 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 	ps.Nails = toChangeI16s(b.nails)
 	ps.Rockets = toChangeI16s(b.rockets)
 	ps.Cells = toChangeI16s(b.cells)
+	ps.ActiveWeapon = toChangeI16s(b.activeWeapon)
 	// PositionTrack column checklist site 3 (builder → result.PlayerStream);
 	// see the checklist in result/coord.go (PositionTrack.MarshalJSON).
 	if len(b.posT) > 0 {
@@ -354,6 +360,7 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	appendI16(&b.nails, src.nails)
 	appendI16(&b.rockets, src.rockets)
 	appendI16(&b.cells, src.cells)
+	appendI16(&b.activeWeapon, src.activeWeapon)
 
 	for _, c := range src.armorType {
 		if !in(c.t) {

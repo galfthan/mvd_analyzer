@@ -74,6 +74,12 @@ type streamBuilder struct {
 
 	shells, nails, rockets, cells []changeI16
 
+	// activeWeapon: STAT_ACTIVEWEAPON, the IT_* bit of the weapon actually
+	// wielded (as opposed to the rl/lg/... interval streams, which are
+	// inventory). Backpack reconstruction reads it — DropBackpack copies
+	// exactly this field into the pack (ktx/src/items.c:2706).
+	activeWeapon []changeI16
+
 	// posT / spawns / deaths are integer milliseconds — the canonical,
 	// wire-native unit. Comparisons between pt.T and spawn/death boundaries
 	// stay exact int32 here and downstream; converting to float seconds
@@ -118,6 +124,7 @@ type streamBuilder struct {
 type changeDedupBase struct {
 	health, armor, armorType, loc int
 	shells, nails, rockets, cells int
+	activeWeapon                  int
 }
 
 // changeI16 / changeStr mirror result.ChangeI16 etc. Stored here in
