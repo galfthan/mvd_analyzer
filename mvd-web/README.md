@@ -510,6 +510,16 @@ no `entNum` at all, so no row can ever join to a pickup there. Those rows
 read `unobserved`, not `expired` — the pickup side is invisible on such
 demos, which is a different fact from "nobody took it".
 
+An EMPTY tab on such a demo is ambiguous and must not be captioned as a
+refusal: an absent `backpacks` section means either that no RL/LG pack
+dropped or that the reconstruction stood down (frozen weapon state, no
+frag log, a fairpacks / yawnmode / bloodfest ruleset), and the Result
+shape does not distinguish the two.
+
+Drop markers on the map overlay sit where the pack sat: `origin` is the
+victim's position less the 24 units KTX drops the pack by
+(`ktx/src/items.c:2703-2704`), on both provenances.
+
 The "RL / LG only" scope is a wire-protocol limit, not a UI
 decision: KTX's `//ktx drop` and `//ktx bp` directives fire only
 for RL/LG packs, and the print-based fallback for other pack

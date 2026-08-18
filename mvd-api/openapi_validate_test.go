@@ -289,7 +289,7 @@ func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 
 // allFieldCodes is every fields= selector, to exercise the widest
 // stream-slice / state-at / buckets shapes.
-const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,sp,d"
+const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,aw,sp,d"
 
 type validationCase struct {
 	name   string
@@ -413,6 +413,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at-position-track", url: "/v1/demos/gameId:45/state-at?time=1500&fields=pos,view,hgt,lq,vel",
 			path: "/v1/demos/{id}/state-at", status: 200,
 			mustContain: []string{`"posAgeMs":500`, `"pos"`, `"view"`, `"vel"`, `"hgt"`, `"lq"`}},
+		// aw is opt-in, so the default-field cases never reach it, and the
+		// corpus windows above are too narrow to promise a sample. These two
+		// make the schema's aw branch answer for a body that carries it.
+		{name: "stream-slice-active-weapon", url: "/v1/demos/gameId:45/stream-slice?from=0&to=3000&fields=aw",
+			path: "/v1/demos/{id}/stream-slice", status: 200,
+			mustContain: []string{`"aw":[{"t":0,"v":1},{"t":1200,"v":32}]`}},
+		{name: "state-at-active-weapon", url: "/v1/demos/gameId:45/state-at?time=1500&fields=aw",
+			path: "/v1/demos/{id}/state-at", status: 200,
+			mustContain: []string{`"aw":32`}},
 		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
 		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
 		// that still validates the Los schema (timeUnit + empty players array).
@@ -540,14 +549,17 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 		// position track, with the optional h/lq/velocity columns, so the
 		// positional half of the state-at schema (pos, view, hgt, lq, vel and
 		// the posAgeMs that dates them all) gets validated against a real
-		// response instead of an absent one.
+		// response instead of an absent one. It also carries the wielded-weapon
+		// column, whose window in the corpus cases is too narrow to guarantee
+		// a sample.
 		"gameId:45": {
 			SchemaVersion: result.CurrentSchemaVersion,
 			Streams: &result.Streams{
 				Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 				Players: []result.PlayerStream{{
-					Name:  "p1",
-					Alive: []result.Interval{{Start: 0, End: 10000}},
+					Name:         "p1",
+					Alive:        []result.Interval{{Start: 0, End: 10000}},
+					ActiveWeapon: []result.ChangeI16{{T: 0, V: 1}, {T: 1200, V: 32}},
 					Position: &result.PositionTrack{
 						T:   []int32{0, 1000, 2000},
 						X:   []float32{0, 100, 200},

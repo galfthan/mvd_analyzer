@@ -522,9 +522,12 @@ a `{timeUnit, backpacks}` envelope; the MCP tool passes it through.)
 ≥ 1.38, 49% of the archive) and `reconstructed` on older demos, where the
 pipeline replays KTX's own `DropBackpack` rule instead — validated at
 99.97% precision and recall against the hints. A reconstructed row has
-`entNum` 0 and **cannot** be joined to its pickup; an absent section on
-an old demo means the pass stood down rather than guess, not that no
-packs dropped.
+`entNum` 0 and **cannot** be joined to its pickup. An absent section is
+AMBIGUOUS: it means either that no RL/LG pack dropped or that the pass
+stood down rather than guess, and the wire shape does not distinguish the
+two. `origin` is the pack's own position — the victim's origin less the
+24 units KTX drops it by (`ktx/src/items.c:2703-2704`) — on both
+provenances.
 
 #### `getItems({demoId, ...})`
 

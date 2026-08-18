@@ -345,7 +345,11 @@ looking up). These `vp`/`vya` view angles (and `/state-at`'s `view`) are
 **raw angle16 wire shorts**; contrast `/aim`'s `dyaw`/`dpitch`, which are
 already **float degrees** off the target. Floor height is `hgt`; liquid state is `lq`;
 **velocity** (vx/vy/vz, Quake units/sec, schema v32) is `vel`.
-Height/liquid no longer ride along `pos` — request each by code.
+Height/liquid no longer ride along `pos` — request each by code. The
+**wielded weapon** (schema v72) is the opt-in `aw` field: the victim's
+`STAT_ACTIVEWEAPON` `IT_*` bit — 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL,
+64 LG, 4096 axe, 0 nothing held — which is a different question from the
+`rl`/`lg`/… inventory intervals.
 Note (schema v33+): the coordinate values `pos` x/y/z, `vel` vx/vy/vz,
 and `hgt` are **`float32`** Quake units (sub-unit precise — earlier
 versions rounded them to whole `int32` units), so expect fractional

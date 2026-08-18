@@ -24,20 +24,28 @@ the RL or the LG. mvdsv writes that same `ent->v->weapon` into the MVD for
 every spawned player as `STAT_ACTIVEWEAPON` (`sv_send.c:1268`), so the
 answer was on the wire all along; it just had nowhere to land. It does
 now: **`streams.players[].aw`**, a new change stream (opt-in field code
-`aw` on `/stream-slice`, `/buckets` and `/state-at`) carrying the wielded
-weapon as an `IT_*` bit — a different question from the `rl`/`lg`/…
-interval streams, which are inventory. A player owning the RL can be
+`aw` on `/stream-slice`, `/buckets` and `/state-at`, and now carried by
+the OpenAPI schemas for all three) carrying the wielded weapon as one of
+nine documented values — the eight `IT_*` weapon bits, or 0 for nothing
+held; anything else is protocol-impossible for the field and is refused
+rather than published. A different question from the `rl`/`lg`/… interval
+streams, which are inventory. A player owning the RL can be
 holding the LG, and only one of those decides the pack. It is recorded
 through the countdown, unlike every other stat, because the stat is
 delta-coded and a player whose weapon last changed in warmup would
-otherwise have no in-match sample at all.
+otherwise have no in-match sample at all. Being the one column recorded
+pre-match also makes it the one column a warmup roster shuffle can
+corrupt, so a pre-match slot handover now cuts its dedup floor the way a
+mid-match one already did for health/armour/ammo: an arriving player
+holding what the departing one held used to have their only sample
+deduped away, and reach match start blank.
 
 Measured against the hints on **316 archive demos spanning KTX 1.38–1.48**
 (13 749 ground-truth drops, hints withheld from the reconstruction):
 **precision 99.97%, recall 99.97%** — LG 100%/100%, RL 99.96%/99.96%.
 Drop-time error is exactly 0 ms at every quantile; position error is
-p50 9.7 / p90 22.3 / p99 33.9 units. Per era: nine of the eleven `ktxver`
-buckets score 100% on both. On 551 hint-less demos across 40 server
+p50 9.7 / p90 22.3 / p99 33.9 units. Per era: seven of the eleven `ktxver`
+buckets score 100% on both, and two more reach 100% recall. On 551 hint-less demos across 40 server
 versions the volume lands at 0.254 drops/death against the hinted
 population's 0.272, and an oracle independent of `STAT_ACTIVEWEAPON` —
 does the victim's `STAT_ITEMS` inventory agree they held that weapon? —
@@ -52,15 +60,33 @@ the damage reconstruction refuses), a `k_bloodfest` / `k_yawnmode` /
 non-default-`k_frp` ruleset, or — pointedly — when the mod is KTX ≥ 1.38
 and simply emitted no drops: there the wire has already answered, and
 overwriting that answer would be fabrication. Individual drops are
-withheld when the victim's position track has gone stale past 400 ms. One
-residual has no wire signal at all and is documented as such: `dp 0`
-(drops disabled server-side) is published nowhere, so on a pre-1.38 demo
-it cannot be ruled out.
+withheld when the victim's position track has gone stale past 400 ms, and
+when the newest `aw` sample was carried on a different wire slot (mvdsv's
+per-slot stat cache survives a reconnect, `sv_send.c:1279-1281`, so the
+merged stream would otherwise answer with a weapon from the slot the
+player left). Absence is **ambiguous by construction** and the docs now
+say so: a demo where no RL/LG pack dropped serializes identically to a
+stand-down, and the wire shape cannot distinguish them. One residual has
+no wire signal at all and is documented as such: `dp 0` (drops disabled
+server-side) is published nowhere, so on a pre-1.38 demo it cannot be
+ruled out.
+
+`origin` is the **pack's** position on both provenances: KTX copies the
+victim's origin and then applies `item->s.v.origin[2] -= 24`
+(`items.c:2703-2704`), putting the pack at their feet. Both paths used to
+publish the unadjusted player position, so a map overlay drew every pack
+24 units too high — and, because both shared the offset, the measured
+position error never showed it. Backpack `origin` z values move by −24
+against v71.
 
 Two related fixes ride along. KTX's `Fairpacks setting:` broadcast —
 printed only when `k_frp` is non-default (`ktx/src/match.c:2086`) — is now
 parsed into **`metadata.matchSettings.fairpacks`**, the wire signal the
-stand-down needs. And the hint path's long-standing auth-name bug is
+stand-down needs. Because that one row stands the whole reconstruction
+down, it is matched exactly as KTX emits it (`G_bprint(2, …)`):
+`PRINT_HIGH` only, pre-match only, and line-initial — a level-3 chat line
+reading `Fairpacks setting: best weapon` used to forge it. And the hint
+path's long-standing auth-name bug is
 fixed: it stamped the dropper's raw userinfo name, which joined against
 nothing, and now resolves through the same `ResolveSlotAt` chain every
 other section uses. That last one was not cosmetic — it was costing 26 of

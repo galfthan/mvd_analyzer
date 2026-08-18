@@ -864,9 +864,17 @@ paths:
       tags: [items]
       summary: RL/LG backpack drops
       description: >
-        Backpack drops from KTX's drop hint: time, dropper, weapon
-        (rl/lg), origin XYZ, resolved loc, and the server ent number that
-        joins to /weapon-pickups. Always 200 — empty when none.
+        RL/LG backpack drops: time, dropper, weapon (rl/lg), origin XYZ
+        (the pack's own position, 24 units below the victim's origin) and
+        resolved loc. Each row names its provenance in `source`: `ktx` rows
+        are decoded from KTX's `//ktx drop` hint and carry the real
+        `entNum`, which joins to /weapon-pickups; `reconstructed` rows are
+        replayed from the server's own drop rule on a demo whose mod never
+        hinted, and carry `entNum` 0 — the edict number exists only in the
+        hint, so those rows join to no pickup. The two provenances are never
+        mixed within one demo. Always 200 — empty when none, which means
+        either no pack dropped or the reconstruction stood down; the wire
+        shape does not distinguish the two.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -2252,7 +2260,7 @@ components:
       in: query
       description: >
         CSV of field selector codes. Omit for the default set (everything
-        except the opt-in view/hgt/lq/vel). NOTE: the selector code `li`
+        except the opt-in view/hgt/lq/vel/aw). NOTE: the selector code `li`
         renders as output key `loc` in name mode — `loc` is NOT a selector
         code. Unknown codes 400 with the full vocabulary enumerated.
       style: form
@@ -7936,6 +7944,33 @@ components:
                 type:
                   - "null"
                   - array
+              aw:
+                description: >
+                  Wielded-weapon change stream (t/v pairs), opt-in via
+                  `fields=aw`. v is the weapon's IT_* bit — 1 SG, 2 SSG, 4 NG,
+                  8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe, 0 nothing held — read
+                  straight from STAT_ACTIVEWEAPON. A different question from
+                  the rl/lg/gl/ssg/sng interval streams, which are inventory.
+                items:
+                  additionalProperties: false
+                  properties:
+                    t:
+                      description: "Event/sample time, int32 ms since match start."
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
+                    v:
+                      description: "Sample value at time t."
+                      maximum: 32767
+                      minimum: -32768
+                      type: integer
+                  required:
+                    - t
+                    - v
+                  type: object
+                type:
+                  - "null"
+                  - array
               cl:
                 description: "Cells-ammo change stream (t/v pairs)."
                 items:
@@ -8623,6 +8658,17 @@ components:
                 type:
                   - "null"
                   - string
+              aw:
+                description: >
+                  Wielded weapon at the instant as its IT_* bit — 1 SG, 2 SSG,
+                  4 NG, 8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe, 0 nothing held.
+                  Opt-in via `fields=aw`. A different question from the
+                  rl/lg/gl/ssg/sng booleans, which are inventory.
+                maximum: 32767
+                minimum: -32768
+                type:
+                  - "null"
+                  - integer
               cl:
                 description: "Cells ammo at the instant."
                 maximum: 32767
