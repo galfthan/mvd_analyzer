@@ -230,7 +230,7 @@ func TestMetadataFairpacksBroadcast(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			a := NewMetadataAnalyzer()
-			_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: tc.msg, TimeMs: 1000})
+			_ = a.OnEvent(&events.PrintEvent{Level: events.PrintHigh, Message: tc.msg, TimeMs: 1000})
 			r := &Result{}
 			_ = a.Finalize(r)
 			got := ""
@@ -239,6 +239,53 @@ func TestMetadataFairpacksBroadcast(t *testing.T) {
 			}
 			if got != tc.want {
 				t.Errorf("Fairpacks = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// The Fairpacks row stands the whole backpack reconstruction down
+// (backpackSkipModeReason), so nothing a player can type may forge it. KTX
+// emits it as G_bprint(2, "Fairpacks setting: %s\n", …) from
+// ShowMatchSettings during the countdown (match.c:2107) — PRINT_HIGH,
+// line-initial, pre-match. Everything else is refused.
+func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
+	const row = "Fairpacks setting: best weapon\n"
+	for _, tc := range []struct {
+		name    string
+		prints  []*events.PrintEvent
+		wantSet bool
+	}{
+		{"the real broadcast", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, true},
+		{"chat line quoting it", []*events.PrintEvent{
+			{Level: events.PrintChat, Message: row, TimeMs: 1000},
+		}, false},
+		{"chat line embedding it", []*events.PrintEvent{
+			{Level: events.PrintChat, Message: "gnu: lol Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"a bprint that merely mentions it", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: "gnu changed Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"after the match started", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: "The match has begun!\n", TimeMs: 500},
+			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMetadataAnalyzer()
+			for _, p := range tc.prints {
+				_ = a.OnEvent(p)
+			}
+			r := &Result{}
+			_ = a.Finalize(r)
+			got := ""
+			if r.Metadata != nil && r.Metadata.MatchSettings != nil {
+				got = r.Metadata.MatchSettings.Fairpacks
+			}
+			if (got != "") != tc.wantSet {
+				t.Errorf("Fairpacks = %q, wantSet = %v", got, tc.wantSet)
 			}
 		})
 	}

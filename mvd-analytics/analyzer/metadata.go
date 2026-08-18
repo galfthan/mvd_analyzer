@@ -111,25 +111,43 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-// fairpacksPrefix is the ShowMatchSettings row KTX broadcasts (level 2)
-// right after the countdown, and ONLY when k_frp is non-default
-// (ktx/src/match.c:2086-2107) — so seeing it at all is the signal.
+// fairpacksPrefix is the ShowMatchSettings row KTX broadcasts and ONLY when
+// k_frp is non-default (ktx/src/match.c:2086-2107) — so seeing it at all is
+// the signal. KTX writes it as
+//
+//	G_bprint(2, "Fairpacks setting: %s\n", redtext(txt));   // match.c:2107
+//
+// i.e. PRINT_HIGH, line-initial, from ShowMatchSettings during the
+// countdown.
 const fairpacksPrefix = "Fairpacks setting:"
 
 // captureBroadcastSetting picks the settings rows KTX prints beside the
 // countdown centerprint rather than inside it. The value is redtext (high-bit
 // characters), so it goes through the same normalisation the centerprint
 // path uses.
+//
+// The three gates all guard the same thing: this row stands the whole
+// backpack reconstruction down (backpackSkipModeReason), so anything a
+// player can type must not be able to forge it.
+//
+//   - Level 2 only. G_bprint's level is PRINT_HIGH; a level-3 chat line
+//     reading `say Fairpacks setting: best weapon` reaches this handler as a
+//     PrintEvent too, and a substring match on it fabricated the setting.
+//   - Pre-match only, like the sibling countdown capture — ShowMatchSettings
+//     runs from the countdown, so a mid-match line naming it is not it.
+//   - Line-initial, not "contains": KTX's format string starts the message,
+//     and requiring that removes the last way to smuggle the prefix into an
+//     otherwise legitimate broadcast (a player NAME, say, which the server
+//     interpolates ahead of the text in most of its bprints).
 func (a *MetadataAnalyzer) captureBroadcastSetting(e *events.PrintEvent) {
-	if a.fairpacks != "" {
+	if a.fairpacks != "" || a.timing.Started || e.Level != events.PrintHigh {
 		return
 	}
 	text := events.NormalizeQuakeText([]byte(e.Message))
-	i := strings.Index(text, fairpacksPrefix)
-	if i < 0 {
+	if !strings.HasPrefix(text, fairpacksPrefix) {
 		return
 	}
-	v := strings.TrimSpace(text[i+len(fairpacksPrefix):])
+	v := strings.TrimSpace(text[len(fairpacksPrefix):])
 	if i := strings.IndexByte(v, '\n'); i >= 0 {
 		v = strings.TrimSpace(v[:i])
 	}
