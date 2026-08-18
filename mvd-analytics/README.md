@@ -137,6 +137,12 @@ that downstream consumers render, summarise, or feed to an agent.
   the reconstruction blind on wire-instrumented demos and scores it
   against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
   prints misattribution flows.
+- `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
+  runs the reconstruction blind on demos that carry the `//ktx drop`
+  hints and scores precision/recall/position error against them (tables
+  in `analyzer/BACKPACKS.md`); `-volume` reports drops-per-death and an
+  inventory cross-check on the hint-less population, where no ground
+  truth exists.
 - `cmd/fetch-eval-corpus/` — pins a hub eval corpus to disk (demos +
   a manifest of gameIds, so eval runs are reproducible).
 - `cmd/qw-corpus-survey/` — sweeps a demo directory through the full
@@ -346,7 +352,7 @@ produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
 `scoreboardStatsPost`, `locGraphPost`, `wallClockPost`,
 `regionControlPost`, `openingPost`,
 [`playerStatsPost`](analyzer/player_stats.md),
-`damageReconPost`. They come in
+`damageReconPost`, `backpackReconPost`. They come in
 three shapes. **One creates a section of its own**: `playerStatsPost` is
 node `player-stats`, publishing `playerStats` — it consumes twelve
 artifacts and writes a top-level section no other node touches, so it
@@ -370,6 +376,16 @@ from the state streams — package
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
 section is never touched.
+
+`backpackReconPost` is node `backpack-recon`, publishing
+`backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
+fills the same `backpacks` section from `DropBackpack`'s own rule, stamped
+`source: "reconstructed"` (see the Backpacks section below and
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md)). A hint-carrying demo is
+never touched. `player-stats` binds `backpacks:final`, so its per-weapon
+`dropped` tallies gain the reconstructed drops; pack TRANSFERS stay absent
+there, because those need the `//ktx bp` pickup hint that ships with the
+same KTX generation as the drop hint.
 
 `wallClockPost` is node `wall-clock`: it resolves the wire date markers
 the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
@@ -482,11 +498,13 @@ flowchart TB
     aim["aim"]
     match_final["match-final"]
     damage_recon["damage-recon"]
+    backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
     player_stats["player-stats"]
   end
-  backpacks -->|"backpacks"| player_stats
+  backpack_recon -->|"backpacks:final"| player_stats
+  backpacks -->|"backpacks"| backpack_recon
   clock -->|"clock"| backpacks
   clock -->|"clock"| damage
   clock -->|"clock"| frag
@@ -503,6 +521,7 @@ flowchart TB
   damage -->|"damage"| damage_recon
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
+  demoinfo -->|"demoinfo"| backpacks
   demoinfo -->|"demoinfo"| damage
   demoinfo -->|"demoinfo"| damage_recon
   demoinfo -->|"demoinfo"| frag
@@ -522,9 +541,11 @@ flowchart TB
   frag -->|"frag"| frags_final
   frag -->|"frag"| timeline
   frag -->|"frag"| weapon_pickups
+  frags_final -->|"frags:final"| backpack_recon
   frags_final -->|"frags:final"| damage_recon
   frags_final -->|"frags:final"| match_final
   frags_final -->|"frags:final"| player_stats
+  identity -->|"identity"| backpacks
   identity -->|"identity"| damage
   identity -->|"identity"| frag
   identity -->|"identity"| items
@@ -538,6 +559,7 @@ flowchart TB
   match -->|"match"| match_final
   match -->|"match"| region_control
   match_final -->|"match:final"| player_stats
+  metadata -->|"metadata"| backpack_recon
   metadata -->|"metadata"| damage
   metadata -->|"metadata"| damage_recon
   metadata -->|"metadata"| los
@@ -558,6 +580,7 @@ flowchart TB
   shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
   timeline -->|"timeline"| airgibs
+  timeline -->|"timeline"| backpack_recon
   timeline -->|"timeline"| damage_recon
   timeline -->|"timeline"| frags_final
   timeline -->|"timeline"| loc_graph
@@ -569,7 +592,7 @@ flowchart TB
   timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon post;
+  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```
@@ -916,12 +939,30 @@ never practically available in that 60 s window).
 
 ### Backpacks
 
-`result.Backpacks` is a flat list of RL and LG backpack drops,
-driven by `BackpackAnalyzer`. Each entry is emitted when KTX fires
-its `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY
-directive (ktx/src/items.c:2740). The hint is the authoritative
-source — it fires exactly once per real drop, with weapon and
-dropper slot already attributed, so the analyzer doesn't guess.
+`result.Backpacks` is a flat list of RL and LG backpack drops with two
+possible provenances, named per row by `source` and never mixed within
+one demo.
+
+`source: "ktx"` — `BackpackAnalyzer` emits one entry per `//ktx drop
+<ent> <items> <player_ent>` STUFFCMD_DEMOONLY directive
+(ktx/src/items.c:2762). The hint is the authoritative source — it fires
+exactly once per real drop, with weapon and dropper slot already
+attributed, so the analyzer doesn't guess. Only KTX >= 1.38 emits it,
+which is 49% of the archive.
+
+`source: "reconstructed"` — on the other half, the `backpack-recon`
+post-processor replays `DropBackpack`'s own rule instead. Under the
+shipped default `k_frp 0` the pack holds the victim's *wielded* weapon
+verbatim (`item->s.v.items = self->s.v.weapon`, items.c:2706), and mvdsv
+writes that same field into the MVD as `STAT_ACTIVEWEAPON` for every
+spawned player — published as `streams.players[].aw` — so the pass is a
+replay over a recorded field, not an inference: death instant + wielded
+weapon + the victim's last broadcast position, with `/kill` deaths
+suppressed (the one deathtype `DropBackpack` refuses). It stands down
+entirely rather than guess where the evidence is unmeasurable, and never
+touches a hint-carrying demo. Measured against the hints on 316 archive
+demos: **precision 99.97%, recall 99.97%** — method, splits and
+stand-down conditions in [`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
 
 Coverage caveats:
 
@@ -954,7 +995,8 @@ type BackpackDrop struct {
     Weapon string     // "rl" or "lg"
     Origin [3]float32 // dropper's position at hint time
     Loc    string     // nearest named loc
-    EntNum int        // server edict of the backpack entity
+    EntNum int        // server edict of the backpack entity; 0 when reconstructed
+    Source string     // "ktx" (wire hint) | "reconstructed"
 }
 ```
 

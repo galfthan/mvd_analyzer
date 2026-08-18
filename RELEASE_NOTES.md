@@ -5,7 +5,74 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (archive-parsing) — a wall clock, a scoreline, and a reader that says what it could not read, schema v72
+## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks on the old half, and a reader that says what it could not read, schema v72
+
+### Backpack drops on the other half of the archive: `backpacks[].source`
+
+The `backpacks` section used to exist only where KTX emitted its
+`//ktx drop` hint — KTX 1.38 and newer, 49.2% of the 51k archive. It is
+now filled on the rest as well, by replaying KTX's own rule instead of
+reading its announcement, and every row states which of the two it is:
+**`source: "ktx"`** (wire hint) or **`source: "reconstructed"`**. The two
+are never mixed within a demo; a hint-carrying demo is never touched.
+
+The reconstruction is a replay, not an inference. `DropBackpack`
+(`ktx/src/items.c:2667`) runs on every death and, with the shipped default
+`k_frp 0`, puts the victim's **wielded** weapon in the pack verbatim
+(`item->s.v.items = self->s.v.weapon`) — hinting only when that is exactly
+the RL or the LG. mvdsv writes that same `ent->v->weapon` into the MVD for
+every spawned player as `STAT_ACTIVEWEAPON` (`sv_send.c:1268`), so the
+answer was on the wire all along; it just had nowhere to land. It does
+now: **`streams.players[].aw`**, a new change stream (opt-in field code
+`aw` on `/stream-slice`, `/buckets` and `/state-at`) carrying the wielded
+weapon as an `IT_*` bit — a different question from the `rl`/`lg`/…
+interval streams, which are inventory. A player owning the RL can be
+holding the LG, and only one of those decides the pack. It is recorded
+through the countdown, unlike every other stat, because the stat is
+delta-coded and a player whose weapon last changed in warmup would
+otherwise have no in-match sample at all.
+
+Measured against the hints on **316 archive demos spanning KTX 1.38–1.48**
+(13 749 ground-truth drops, hints withheld from the reconstruction):
+**precision 99.97%, recall 99.97%** — LG 100%/100%, RL 99.96%/99.96%.
+Drop-time error is exactly 0 ms at every quantile; position error is
+p50 9.7 / p90 22.3 / p99 33.9 units. Per era: nine of the eleven `ktxver`
+buckets score 100% on both. On 551 hint-less demos across 40 server
+versions the volume lands at 0.254 drops/death against the hinted
+population's 0.272, and an oracle independent of `STAT_ACTIVEWEAPON` —
+does the victim's `STAT_ITEMS` inventory agree they held that weapon? —
+agrees on **13 488 of 13 488** drops. Method, splits and residuals:
+[`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+
+It refuses rather than guesses. The section is left **absent** — not
+half-filled — when there is no frag log (the only record of which deaths
+were the `/kill` command, the one deathtype `DropBackpack` skips), no
+active-weapon stat, frozen weapon state (the same old-recorder signature
+the damage reconstruction refuses), a `k_bloodfest` / `k_yawnmode` /
+non-default-`k_frp` ruleset, or — pointedly — when the mod is KTX ≥ 1.38
+and simply emitted no drops: there the wire has already answered, and
+overwriting that answer would be fabrication. Individual drops are
+withheld when the victim's position track has gone stale past 400 ms. One
+residual has no wire signal at all and is documented as such: `dp 0`
+(drops disabled server-side) is published nowhere, so on a pre-1.38 demo
+it cannot be ruled out.
+
+Two related fixes ride along. KTX's `Fairpacks setting:` broadcast —
+printed only when `k_frp` is non-default (`ktx/src/match.c:2086`) — is now
+parsed into **`metadata.matchSettings.fairpacks`**, the wire signal the
+stand-down needs. And the hint path's long-standing auth-name bug is
+fixed: it stamped the dropper's raw userinfo name, which joined against
+nothing, and now resolves through the same `ResolveSlotAt` chain every
+other section uses. That last one was not cosmetic — it was costing 26 of
+the 13 749 ground-truth drops before the fix, and it had been silently
+defeating the `/kill` suppression for players whose streams got split.
+
+`playerStats[].pickups.byKind[].dropped` now counts reconstructed drops
+(the `player-stats` node binds the new `backpacks:final` artifact). Pack
+**transfers** (`xfer`/`xferSelf`) deliberately do not: they need the
+`//ktx bp` pickup hint, which ships with the same KTX generation as the
+drop hint, so on a reconstructed section they stay absent — an
+unobservable count, not an observed zero.
 
 ### Parse warnings reach the operator: `result.parseWarnings`
 

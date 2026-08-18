@@ -30,7 +30,7 @@ analyzer are also covered there.
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
-| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
+| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
@@ -1279,7 +1279,11 @@ alone answers the question people actually mean.
 
 `xfer` / `xferSelf` are **pointers**: absent means "this demo carries
 no backpack hints, so transfers are unobservable", which is a different
-fact from an observed zero. They are teamplay-only, exactly like KTX's
+fact from an observed zero. A *reconstructed* backpacks section
+(`backpacks[].source == "reconstructed"`, v72) does not make them
+observable — it proves a pack existed but says nothing about who
+recovered it — so they stay absent there, while `dropped` does count the
+reconstructed drops. They are teamplay-only, exactly like KTX's
 gate — absent on duels and FFA. Note a pack holds the weapon the player
 was *wielding* (`DropBackpack`: `item->s.v.items = self->s.v.weapon`),
 one bit, which is why KTX's exact-equality test has no mixed-contents
@@ -1909,6 +1913,7 @@ when the demo has no pauses or the server does not embed the block.
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
+| ActiveWeapon | `aw` | []ChangeI16 (omitempty) | v72 — the **wielded** weapon as an `IT_*` bit: 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe. A different question from the `rl`/`lg`/… interval streams above, which are *inventory*: a player owning the RL can be holding the LG. Straight from `STAT_ACTIVEWEAPON`, which mvdsv writes from `ent->v->weapon` for every spawned player (`mvdsv/src/sv_send.c:1268`) — the same field `DropBackpack` puts in the pack, which is what makes [backpack reconstruction](#backpacks-backpacks) a replay rather than an inference. Delta-coded on the wire, so this column is recorded **through the countdown** and the match-start rebase carries the latest pre-match value forward to `t=0`; a player whose weapon last changed in warmup would otherwise have no in-match sample. Absent when the recorder never wrote the stat, and **frozen** (one sample, never moving) on the same old recordings that freeze the `STAT_ITEMS` weapon bits — check it moves before trusting it. |
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. `sp` includes the match-start spawn: KTX respawns everyone when the countdown ends, but a player alive through the countdown produces no dead→alive wire transition, so the timeline synthesizes their spawn at `0` (schema v51). |
 | Alive | `alive` | []Interval (**never** omitempty) | The player's **lives**: one half-open `[s,e)` interval per spawn-to-death run, derived from the fused `sp`/`d` markers against the match window (schema v64). The canonical **stored** liveness — read it rather than re-deriving from `sp`/`d`. Since v65 an API consumer can: `/stream-slice` serves it per player clamped to the window and `/state-at` serves it as a `true`/`false`/`null` scalar at the instant, in both cases never field-gated (before that the advice was unfollowable over REST — the field reached no endpoint, and there is no `streams` artifact to fall back on). LOS, aim, loc-graph, region control and `/loc-trails` all read it; the two in-package predicates that used to re-derive their own (`analyzer.losAliveAt`, `aimcore.aimAliveAt`) are gone as such — `losAliveAt` is deleted and `aimAliveAt` now just reads this field. Their strict `lastSpawn > lastDeath` **latched** on a death and its triggered respawn sharing a millisecond, reporting the player dead for the rest of that life (measured: 100.7 s of one player's 1143.7 s match); this field reports alive there, which is correct, and the LOS/aim figures moved when they were migrated. One independent predicate remains on purpose: `view.playerActiveInWindow`, behind the `/buckets` columnar `alive` mask, which asks the different question "did this player appear anywhere in this bucket window" (a window-OVERLAP test with its own fallbacks) and already resolves the tie correctly. The two can disagree, and neither is wrong. Clipped at the **ends** to observed presence: the derivation starts everyone alive at `t=0` (deliberately — KTX emits a first spawn only on the first *respawn*), so without the clip a late joiner would claim life before connecting and an early quitter would claim life to match end. Presence is the position track (ending at `result.TrackHoldEnd`) **widened by marker evidence**: spawns and deaths are broadcast to every recorder, so a player whose track stops — on a POV recording everyone outside the recorder's PVS drops out of `svc_playerinfo` — is still known to exist at every later marker, and the high clip extends to it. The two ends are deliberately asymmetric: a *death* before the track start drops the low clip entirely (the player was in the game for the run-up to it), while a *spawn* before it is the join itself and widens nothing. Consequence worth knowing: every death always falls inside some life, so a truncated track can no longer make a player look as if they left the game. A death **splits** a life even when the respawn lands on the same millisecond — the two intervals *touch*, so no dead time is invented, but the boundary survives, because anything enumerating lives or attributing per-life stats must see it. A **hole** in the track does *not* split: an unobserved stretch is not a death, and on a POV recording (only players inside the recorder's PVS are written) tracks are full of multi-second holes. Refusing to credit unobserved *time* is a separate concern, handled by the occupancy walkers through `result.SampleStaleCapMs` (250 ms). A reconnect gap *inside* a merged stream is still not represented. Liveness is **not** inferable from the samples, because a dead player keeps streaming position at full rate and on a gib the player entity *is* the thrown head. Three distinct states: `null` = liveness was not measurable, `[]` = measured and never alive in the window, `[…]` = the lives. A player who never died is a single full-match interval, so absence can never be read as "alive throughout". A death with no following spawn (the KTX `dtTELE2` deflection) correctly leaves them dead to the end. |
 | LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals. BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
@@ -2355,17 +2360,19 @@ aggregation (`min`, `max`, `mean`, `dominant`, etc.).
 | `nl` | Nails | `[]ChangeI16` | `first` |
 | `rk` | Rockets | `[]ChangeI16` | `first` |
 | `cl` | Cells | `[]ChangeI16` | `first` |
+| `aw` | Wielded weapon bit (opt-in) | `[]ChangeI16` | `first` |
 | `sp` | Spawn timestamps | `[]int32` | `any` |
 | `d` | Death timestamps | `[]int32` | `any` |
 
 `sp` / `d` stay on `any` because they need a bool ("did this event
 happen during the bucket?"); `first` would return a timestamp.
 
-**`view` / `hgt` / `lq` / `vel` are opt-in** — they are *not* in the
-default field set (`AllStandardFields`), so a query that omits `fields`
-keeps the pre-v31 shape and a consumer only pays for view direction,
-floor height, liquid state, or velocity when it asks for the code
-explicitly. They all read from the player's `*PositionTrack` but project
+**`view` / `hgt` / `lq` / `vel` / `aw` are opt-in** — they are *not* in
+the default field set (`AllStandardFields`), so a query that omits
+`fields` keeps the pre-v31 shape and a consumer only pays for view
+direction, floor height, liquid state, velocity, or the wielded weapon
+when it asks for the code explicitly. `aw` (v72) is a change stream on
+`PlayerStream.ActiveWeapon`, not a position projection. They all read from the player's `*PositionTrack` but project
 disjoint columns: `view` → `vp`/`vya`, `hgt` → `h`, `lq` → `lq`,
 `vel` → `vx`/`vy`/`vz`. **Clean break (schema v31):** `pos` now returns
 **strictly** `x`/`y`/`z` (plus the per-sample loc label `li`); height and
@@ -3413,7 +3420,7 @@ Defined in `result/metadata.go`.
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | ServerInfo | `serverInfo` | map[string]string | Last-write-wins union of fullserverinfo stufftext + per-key svc_serverinfo updates. |
-| MatchSettings | `matchSettings` | *MatchSettings | Parsed KTX countdown centerprint. |
+| MatchSettings | `matchSettings` | *MatchSettings | Parsed KTX countdown centerprint, plus the settings rows KTX broadcasts beside it (v72: `fairpacks`). |
 | CountdownText | `countdownText` | string | Raw multi-line centerprint (color-stripped). |
 | FinalScores | `finalScores` | *FinalScores | v72 — KTX's `//finalscores` end-of-match stuffcmd, verbatim; see below. |
 
@@ -3445,8 +3452,17 @@ comparable (duel team labels).
 `MatchSettings` covers `mode`, `deathmatch`, `teamplay`, `timelimit`,
 `fraglimit`, `spawnmodel`, `spawnK`, `antilag`, `overtime`, `powerups`,
 `dmgfrags`, `noItems`, `midair`, `instagib`, `yawnmode`, `airstep`,
-`vwep`, `noweapon`, `matchtag`, `socdv2`. See `result/metadata.go` for
-the per-field intent.
+`vwep`, `noweapon`, `matchtag`, `fairpacks`, `socdv2`. See
+`result/metadata.go` for the per-field intent.
+
+`fairpacks` (v72) is the one row that does not come from the countdown
+centerprint: KTX broadcasts `Fairpacks setting: <ruleset>` as a level-2
+print beside it (`ShowMatchSettings`, `ktx/src/match.c:2086-2107`) and
+**only when `k_frp` is not the default 0**, so its absence is
+informative — it means a dropped backpack holds the weapon the victim was
+wielding. Values: `"best weapon"` (k_frp 1) / `"last weapon fired"`
+(k_frp 2). [Backpacks](#backpacks-backpacks) stands its reconstruction
+down when this is set.
 
 ## LocGraphResult (`locGraph`)
 
@@ -3590,8 +3606,67 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
+`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum, source }`.
 `entNum` is the join key with `WeaponPickup.BackpackEnt`.
+
+### `source` — provenance (v72)
+
+Two provenances, never mixed within one demo:
+
+| `source` | Meaning |
+|---|---|
+| `ktx` | Decoded from KTX's `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY directive (`ktx/src/items.c:2762-2766`). Exact: KTX emits it once per real pack, with the weapon and the dropper's slot baked in. Only KTX ≥ 1.38 emits it — 49.2% of the archive. |
+| `reconstructed` | Replayed from `DropBackpack`'s own rule on a demo whose mod never hinted. `entNum` is **0** there: the backpack's edict number lives only in the hint, so a reconstructed row cannot be joined to its pickup. Never treat 0 as an edict. |
+
+**What the reconstruction reproduces.** With the shipped default
+`k_frp 0`, `DropBackpack` puts the victim's *currently wielded* weapon in
+the pack verbatim (`item->s.v.items = self->s.v.weapon`,
+`ktx/src/items.c:2706`) and hints only when that is exactly the RL or the
+LG. mvdsv writes the same field into the MVD for every spawned player as
+`STAT_ACTIVEWEAPON` (`mvdsv/src/sv_send.c:1268`) — published here as
+`streams.players[].aw` — so the reconstruction is a replay, not an
+inference: death instant + wielded weapon + the victim's last broadcast
+position. It reproduces the one deathtype `DropBackpack` refuses, `/kill`
+(`dtSUICIDE`, `ktx/src/client.c:1008`, obituary `" suicides"`); rocket
+suicides, falls, drowning and lava all DO drop a pack.
+
+**Stand-down conditions.** The section is left ABSENT — never
+half-filled, never guessed — when:
+
+- there are no player streams, or no frag log (the only record of which
+  deaths were `/kill`);
+- no player carries the `aw` column (a recorder that never wrote
+  `STAT_ACTIVEWEAPON`);
+- the weapon state is frozen — `aw` never moves AND the `STAT_ITEMS`
+  weapon bits never cycle, the old-recorder signature the damage
+  reconstruction refuses for the same reason;
+- the mod is KTX ≥ 1.38, which hints for itself: an empty section there
+  is the wire's answer, not a gap;
+- the ruleset changes what a pack contains — `k_bloodfest` (no drop at
+  all), `k_yawnmode` (last-fired weapon, DMM1 shotgun override), or a
+  non-default `k_frp`, detected from KTX's `Fairpacks setting:` broadcast
+  (`ktx/src/match.c:2086-2107`, published as
+  `metadata.matchSettings.fairpacks`). Modes that only rewrite T_Damage —
+  midair, instagib, dmgfrags, CA, wipeout — deliberately do NOT stand the
+  pass down: `DropBackpack` has no such early return and the wire hints
+  confirm packs drop in them.
+
+Individual drops are also withheld (rather than placed on a guess) when
+the victim's position track has gone stale past 400 ms at the death.
+
+**Measured accuracy** against the `//ktx drop` hints on 316 archive demos
+spanning KTX 1.38–1.48: **precision 99.97%, recall 99.97%** (13 749 hints,
+LG 100%/100%, RL 99.96%/99.96%); drop-time error exactly 0 ms; position
+error p50 9.7 / p90 22.3 / p99 33.9 units. Full method, per-era and
+per-mode splits, residual classes and the reproduction command:
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+
+**Residual with no wire signal:** `dp 0` (drops switched off
+server-side) is published nowhere — no serverinfo key, no countdown row.
+On a hinting mod its absence settles the question; on a pre-1.38 demo it
+is unfalsifiable, and a `dp 0` server would make this section report packs
+that never dropped. No demo in the validation sample showed the
+signature.
 
 ## WeaponPickups (`weaponPickups`)
 

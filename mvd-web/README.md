@@ -504,6 +504,12 @@ the compound key is needed because QW servers recycle backpack
 edict numbers across drops, so `entNum` alone would collide. A drop
 with no matching pickup is shown as `expired`.
 
+On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
+hinted (`backpacks[].source == "reconstructed"`, schema v72) and carries
+no `entNum` at all, so no row can ever join to a pickup there. Those rows
+read `unobserved`, not `expired` — the pickup side is invisible on such
+demos, which is a different fact from "nobody took it".
+
 The "RL / LG only" scope is a wire-protocol limit, not a UI
 decision: KTX's `//ktx drop` and `//ktx bp` directives fire only
 for RL/LG packs, and the print-based fallback for other pack
@@ -524,6 +530,7 @@ Status column derivation:
 
 | condition                               | label        |
 |-----------------------------------------|--------------|
+| no matching pickup, drop `source == "reconstructed"` | `unobserved` |
 | no matching pickup                      | `expired`    |
 | same team as dropper, picker !hadBefore | `xfer`       |
 | same team as dropper, picker hadBefore  | `xfer RL/LG` |

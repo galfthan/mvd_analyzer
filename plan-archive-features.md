@@ -78,23 +78,47 @@ instant, and consider format C (`Date....:` stats block) for +28%.
 
 ## 2. Backpack reconstruction on pre-KTX-1.38 demos (backpacks 50% → ~95%)
 
-The `//ktx drop` hint exists only ≥KTX 1.38; the wire entity stream
-cannot substitute as-is (bp edicts are recycled so `ItemSpawnEvent` is
-sticky-suppressed, and `ItemStateEvent` carries no origin — measured
-16.4 visibility flips per real drop). The productive path is
-deterministic reconstruction: KTX `DropBackpack` (`ktx/src/items.c:
-2667-2766`) runs on every non-suicide mid-match death and picks the
-victim's best droppable weapon with ammo — and death instants, victim
-weapon bits, ammo counts and death position are all already in the
-Result on ~90% of demos. Reconstruct RL/LG drops from
-death + inventory + position, labelled like damage
-(`source:"reconstructed"`), validated against `//ktx drop` ground truth
-on the 50% of the archive that has it. Cheap enabler either way: add
-`Origin` to `ItemStateEvent` (parser change; `diffItemEntity` discards
-it today while the mover path deliberately keeps it). Mode caveat:
-`DropBackpack` returns early in midair/smashpack/extinction/wipeout/CA
-— gate on the same mode detection damage uses. Pickup side stays with
-`weapon_pickups`' stat-flip synthesis (the entity flutter is unusable).
+**SHIPPED** on `archive-parsing` (folded into the unreleased schema v72):
+the `backpack-recon` post (`mvd-analytics/analyzer/backpack_recon.go`)
+fills the same `backpacks` section on demos older than the `//ktx drop`
+hint, stamped `source:"reconstructed"`; hint rows now carry
+`source:"ktx"`. Measured against the hints on **316 archive demos spanning
+KTX 1.38-1.48** (13 749 GT drops, hints withheld): **precision 99.97%,
+recall 99.97%** (LG 100/100, RL 99.96/99.96), drop-time error exactly
+0 ms, position error p50 9.7 / p90 22.3 / p99 33.9 units. Hint-less
+volume sanity over 551 demos across 40 server versions: 0.254 drops/death
+vs the hinted population's 0.272, with an independent `STAT_ITEMS`
+inventory oracle agreeing on 13 488 / 13 488 drops. Numbers, method and
+the `cmd/qw-backpack-eval` reproduction command live in
+`mvd-analytics/analyzer/BACKPACKS.md`.
+
+What the original sketch below got wrong, from reading the KTX source:
+`DropBackpack` under the shipped default `k_frp 0` packs the victim's
+**wielded** weapon verbatim (`item->s.v.items = self->s.v.weapon`,
+`items.c:2706`) — the items-bits-plus-priority-order rule only applies
+under fairpacks 1 — and the wielded weapon is on the wire as
+`STAT_ACTIVEWEAPON` (`mvdsv/src/sv_send.c:1268`). That made the enabler
+a new `streams.players[].aw` change stream (opt-in field code `aw`),
+NOT `ItemStateEvent.Origin`, which turned out unnecessary: the drop
+origin is the victim's own position track. The mode caveat was also
+wrong — there is no midair/smashpack/extinction/wipeout/CA early return
+in `items.c` (no `smashpack` at all), and the GT run confirms packs drop
+in those modes, so `backpackSkipModeReason` is deliberately NARROWER than
+`damagerecon.SkipModeReason`: only `k_bloodfest`, `k_yawnmode` and a
+non-default `k_frp` (read off KTX's `Fairpacks setting:` broadcast, now
+parsed into `metadata.matchSettings.fairpacks`). `dtSUICIDE` is likewise
+only the `/kill` command, not self-inflicted death in general.
+
+Residuals: a reconstructed row carries no `entNum`, so it cannot join to
+its pickup and earns no pack-transfer credit; `dp 0` has no wire signal on
+a pre-1.38 demo; pre-KTX (qwsv/KTPro) drop rules cannot be GT-validated by
+construction, though their rate and inventory consistency match the KTX
+population. Pickup side still stays with `weapon_pickups`.
+
+Original note: The `//ktx drop` hint exists only ≥KTX 1.38; the wire entity
+stream cannot substitute as-is (bp edicts are recycled so `ItemSpawnEvent`
+is sticky-suppressed, and `ItemStateEvent` carries no origin — measured
+16.4 visibility flips per real drop).
 
 ## 3. Parse `//finalscores` (62% of archive, two eras before ktxstats)
 

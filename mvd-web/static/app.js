@@ -2513,13 +2513,23 @@ function getPowerupDisplay(type) {
 // //ktx drop) with the backpack-sourced entries in result.weaponPickups
 // (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop
 // with no matching pickup is shown as "expired" — the pack despawned
-// or fell into a lava pit before anyone touched it. The filter row
+// or fell into a lava pit before anyone touched it — EXCEPT on
+// reconstructed drops (backpacks[].source === 'reconstructed', demos
+// older than the //ktx drop hint), which carry no entNum and therefore
+// have no observable pickup side at all: those read "unobserved". The filter row
 // above the table narrows rows by dropper team, picker team, or
 // status label; filter state lives in the select elements themselves
 // so switching tabs and coming back preserves the view.
 const packDropsState = { rows: [], hubInfo: null, playerUserIDs: null };
 
 function packDropStatusFor(drop, pickup) {
+    // A RECONSTRUCTED drop (schema v72 — demos older than the //ktx drop
+    // hint) carries no entNum, so it can never join to a pickup row. That
+    // is "we cannot see the pickup side", not "nobody took it", and
+    // labelling it 'expired' would state a fact the wire never gave us.
+    if (!pickup && drop.source === 'reconstructed') {
+        return { label: 'unobserved', cls: 'status-unobserved' };
+    }
     if (!pickup) return { label: 'expired', cls: 'status-expired' };
     const sameTeam = pickup.team && drop.team && pickup.team === drop.team;
     const weaponUpper = drop.weapon.toUpperCase();
@@ -3606,7 +3616,7 @@ function displayTimelineAnalysis(result) {
     timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
     timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
     timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
-    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
+    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops (KTX hint or reconstructed — see d.source)
     timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
         ...ev,
         time: ev.time * 0.001,

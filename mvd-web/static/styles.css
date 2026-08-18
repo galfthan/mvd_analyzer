@@ -2634,6 +2634,9 @@ th.sortable.sort-desc::after {
 .pack-status.status-enemy    { color: #ff8080; background: rgba(255, 50, 50, 0.15); }
 .pack-status.status-enemy-had { color: #e5bfbf; background: rgba(255, 50, 50, 0.08); }
 .pack-status.status-expired  { color: #888; background: rgba(128, 128, 128, 0.12); }
+/* Reconstructed drops have no joinable pickup side — distinct from the
+   observed "nobody took it" that status-expired states. */
+.pack-status.status-unobserved { color: #7a7a9a; background: rgba(122, 122, 154, 0.12); font-style: italic; }
 
 /* ── Pickups tab ── */
 .pickups-toolbar {

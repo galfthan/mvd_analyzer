@@ -230,7 +230,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/aim` | — | `result.AimResult` (per-player per-weapon effectiveness + crosshair-error samples (hitscan) + LG ramp; from the always-full base parse, so RL/GL direct/splash + the LG whiff split are always present) |
 | GET | `/v1/demos/{id}/loc-graph` | — | `result.LocGraphResult` (per-map loc adjacency + edge weights) |
 | GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `{timeUnit, messages: []result.MatchEvent}` (chat + teamsay only; types defaults to both) |
-| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops via `//ktx drop`) |
+| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops; `source` is `ktx` from `//ktx drop`, or `reconstructed` on demos older than that hint) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapons`, `source`, `from`, `to` | `{timeUnit, pickups: []result.WeaponPickup}` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |

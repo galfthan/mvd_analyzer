@@ -515,8 +515,16 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
 (resolved name), `entNum` (server edict — joins to
-`weapon-pickups[].backpackEnt`). (REST returns a `{timeUnit, backpacks}`
-envelope; the MCP tool passes it through.)
+`weapon-pickups[].backpackEnt`) and `source` (schema v72). (REST returns
+a `{timeUnit, backpacks}` envelope; the MCP tool passes it through.)
+
+`source` is `ktx` on demos that carried KTX's `//ktx drop` hint (KTX
+≥ 1.38, 49% of the archive) and `reconstructed` on older demos, where the
+pipeline replays KTX's own `DropBackpack` rule instead — validated at
+99.97% precision and recall against the hints. A reconstructed row has
+`entNum` 0 and **cannot** be joined to its pickup; an absent section on
+an old demo means the pass stood down rather than guess, not that no
+packs dropped.
 
 #### `getItems({demoId, ...})`
 

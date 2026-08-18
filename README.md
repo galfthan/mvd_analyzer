@@ -481,8 +481,12 @@ normalized crosshair-error samples for hitscan, LG ramp-onto-target, rocket
 direct/splash, LG reach/whiff, and enemy/team/self hit-counter slices;
 exact target attribution in duels, a labeled nearest-crosshair heuristic
 in team games),
-backpacks (RL/LG drops attributed to the dropping player via KTX's
-`//ktx drop` hint), weaponPickups (every slot-weapon acquisition —
+backpacks (RL/LG drops attributed to the dropping player, each row
+stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
+where the mod predates that hint — a replay of KTX's own `DropBackpack`
+rule from the death instant, the wielded-weapon stat and the death
+position, validated at 99.97% precision/recall against the hints),
+weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`), opening (schema v51 — each player's
@@ -905,6 +909,22 @@ diff -r /tmp/before /tmp/after
    [`plan-damage-recon.md`](plan-damage-recon.md), and the follow-up
    backlog distilled from the archive survey in
    [`plan-archive-features.md`](plan-archive-features.md).
+
+0b. **Reconstructed backpack drops are a replay, not a measurement.** On
+   demos older than the KTX `//ktx drop` hint (KTX 1.38 — 51% of the
+   archive) the `backpack-recon` node fills the same `backpacks` section
+   by replaying `DropBackpack`'s own rule over the recorded
+   wielded-weapon stat, stamped `source: "reconstructed"`. Validated at
+   99.97% precision and recall against the hints on 316 archive demos, so
+   it is far stronger than the damage reconstruction — but it inherits
+   two hard gaps: a reconstructed row carries no `entNum`, so it cannot
+   be joined to its pickup or credited with a pack transfer, and the
+   server-side `dp 0` (drops disabled) setting is published nowhere on
+   the wire, so it cannot be ruled out on a pre-1.38 demo. Where the
+   evidence is unmeasurable — frozen weapon state, no frag log, a
+   fairpacks/yawnmode/bloodfest ruleset — the section is left absent
+   rather than half-filled. Accuracy tables and stand-down conditions:
+   [`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of
