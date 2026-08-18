@@ -871,8 +871,11 @@ paths:
 
           * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the
             hinted edict and joins to WeaponPickup.backpackEnt, which is
-            where that row's pickup lives; `fate`/`picker`/`pickerTeam`/
-            `pickupTime` are absent.
+            where that row's pickup lives; `picker`/`pickerTeam`/
+            `pickupTime` are absent. `fate` appears only as `expired`, and
+            only when KTX announced the 120 s removal in `//ktx expire` —
+            an absent `fate` here means "ask /weapon-pickups", NOT "nobody
+            took it".
           * `reconstructed` — replayed from the server's own drop rule on a
             demo whose mod never hinted. There is no pickup hint to join to,
             so the pickup side is carried on the row itself (schema v72):
@@ -5224,18 +5227,24 @@ components:
         fate:
           description: >
             What the wire showed happening to the pack (schema v72).
-            Reconstructed rows only — absent on a `ktx` row, whose fate is
-            the /weapon-pickups join. `picked` — the pack entity left the
-            wire with a live player's bounding box overlapping it, the same
-            test the server runs before BackpackTouch; `pickupTime` is when,
-            and `picker` is set only when the evidence named exactly one
-            player. `expired` — it left the wire at KTX's 120 s removal
-            timeout with nobody on it, the one disappearance that is
-            positively not a pickup. `unobserved` — no entity bound to the
-            drop, or it was still on the wire when the recording stopped, or
-            it left early with nobody on it; none of which is evidence that
-            nobody took the pack. Measured against the `//ktx bp` hints on
-            223 demos with both hints withheld: 100.00% precision and 96.13%
+            `picked` — the pack entity left the wire with a live player's
+            bounding box overlapping it, the same test the server runs
+            before BackpackTouch; `pickupTime` is when, and `picker` is set
+            only when the evidence named exactly one player. `expired` —
+            SUB_Remove took it at KTX's 120 s timeout, untaken: the one
+            outcome that is positively not a pickup. `unobserved` — no
+            entity bound to the drop, or it was still on the wire when the
+            recording stopped, or it left early with nobody on it; none of
+            which is evidence that nobody took the pack.
+
+            A `reconstructed` row can carry any of the three, read off the
+            backpack-entity track. A `ktx` row carries only `expired`, and
+            only because KTX said so in `//ktx expire <ent>` — its other
+            outcomes are the /weapon-pickups join, so an ABSENT `fate` on a
+            `ktx` row means "ask that endpoint", never "nobody took it".
+            Read `source` for a `fate`'s provenance, exactly as for the row.
+            Measured against the `//ktx bp` and `//ktx expire` hints on 223
+            demos with every hint withheld: 100.00% precision and 96.13%
             recall on picked-vs-not, 99.98% of named pickers correct.
           enum: [picked, expired, unobserved]
           type: string

@@ -18,9 +18,13 @@ package result
 //
 //   - A `ktx` row's pickup is a row of weaponPickups with Source
 //     "backpack", joined on (EntNum, Time) — KTX names the picker outright in
-//     `//ktx bp`. Fate / Picker / PickerTeam / PickupTime are empty there:
-//     nothing would be gained by restating the join, and a second answer
-//     could disagree with it.
+//     `//ktx bp`. Picker / PickerTeam / PickupTime are empty there: nothing
+//     would be gained by restating the join, and a second answer could
+//     disagree with it. Fate is the one exception, and only ever
+//     BackpackFateExpired: KTX's third directive `//ktx expire <ent>`
+//     (ktx/src/g_spawn.c:196-210) announces a pack removed UNTAKEN, which
+//     the join cannot say — the absence of a `//ktx bp` is not evidence,
+//     since a demo can carry the drop hint and no pickup hints at all.
 //   - A `reconstructed` row's pickup is read off the pack ENTITY, and lands
 //     in Fate / Picker / PickerTeam / PickupTime on this row. It is
 //     deliberately NOT written into weaponPickups: that section documents
@@ -51,10 +55,14 @@ type BackpackDrop struct {
 	// below. Always set on rows this pipeline produces.
 	Source string `json:"source,omitempty"`
 	// Fate is what the wire showed happening to the pack, from the
-	// BackpackFate* vocabulary below. Set only on `reconstructed` rows
-	// (schema v72), and only when the reconstruction ran — empty means the
-	// pack's fate was never asked about, which is a different statement from
-	// BackpackFateUnobserved ("asked, and the wire did not answer").
+	// BackpackFate* vocabulary below (schema v72). On a `reconstructed` row
+	// it is the linkage's reading of the pack-entity track and can take any
+	// of the three values; empty there means the pack's fate was never asked
+	// about, which is a different statement from BackpackFateUnobserved
+	// ("asked, and the wire did not answer"). On a `ktx` row it is only ever
+	// BackpackFateExpired, set from the `//ktx expire` hint; empty there
+	// means "ask weaponPickups", never "nobody took it". Source therefore
+	// carries the provenance of Fate as well as of the row.
 	Fate string `json:"fate,omitempty"`
 	// Picker names who took the pack. Set only when Fate is
 	// BackpackFatePicked AND the evidence named exactly one player; a pickup
@@ -87,9 +95,10 @@ const (
 	// BackpackTouch (ktx/src/items.c:2367). Picker names that player when
 	// exactly one was on it, or when the weapon-bit gain separated several.
 	BackpackFatePicked = "picked"
-	// BackpackFateExpired: the pack entity left the wire at KTX's 120 s
-	// removal timeout (items.c:2871-2872) with nobody on it — SUB_Remove,
-	// not a pickup.
+	// BackpackFateExpired: SUB_Remove took the pack at KTX's 120 s removal
+	// timeout (items.c:2871-2872), untaken. On a `ktx` row KTX said so in
+	// `//ktx expire <ent>`; on a `reconstructed` row the pack entity left
+	// the wire at that age with nobody on it.
 	BackpackFateExpired = "expired"
 	// BackpackFateUnobserved: the honest residual. Either no backpack-model
 	// entity bound to the drop, or the entity was still on the wire when the

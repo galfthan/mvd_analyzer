@@ -501,8 +501,13 @@ joined with its pickup outcome. The drop side comes from
 `result.backpacks`; the pickup side from `result.weaponPickups` entries
 with `source == "backpack"`, joined on `(backpackEnt, dropTime)` —
 the compound key is needed because QW servers recycle backpack
-edict numbers across drops, so `entNum` alone would collide. A drop
-with no matching pickup is shown as `expired`.
+edict numbers across drops, so `entNum` alone would collide. A drop with
+no matching pickup is shown as `expired` only when KTX announced the
+removal itself — `//ktx expire <ent>`, which reaches the frontend as the
+drop row's own `fate: "expired"` (schema v72). Otherwise it is
+`unobserved`: over the archive that hint accounts for barely half the
+pickup-less drops, the rest being packs the recording simply ended on top
+of, and the table used to call all of them expired.
 
 On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
 hinted (`backpacks[].source == "reconstructed"`, schema v72), and there is
@@ -554,7 +559,8 @@ Status column derivation:
 | drop `source == "reconstructed"`, `fate == "picked"` | `picked`     |
 | drop `source == "reconstructed"`, `fate == "expired"` | `expired`    |
 | drop `source == "reconstructed"`, any other `fate`    | `unobserved` |
-| no matching pickup                      | `expired`    |
+| no matching pickup, `fate == "expired"` (the `//ktx expire` hint) | `expired`    |
+| no matching pickup, no `fate`           | `unobserved` |
 | same team as dropper, picker !hadBefore | `xfer`       |
 | same team as dropper, picker hadBefore  | `xfer RL/LG` |
 | enemy team, picker !hadBefore           | `enemy`      |

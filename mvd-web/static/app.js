@@ -2511,9 +2511,11 @@ function getPowerupDisplay(type) {
 
 // Pack Drops table — joins result.backpacks (the drop side from
 // //ktx drop) with the backpack-sourced entries in result.weaponPickups
-// (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop
-// with no matching pickup is shown as "expired" — the pack despawned
-// or fell into a lava pit before anyone touched it.
+// (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop with
+// no matching pickup is shown as "expired" only when KTX said so in
+// //ktx expire (published as the drop row's own `fate`); otherwise it is
+// "unobserved", because a pack the recording ended on top of also has no
+// pickup row.
 //
 // RECONSTRUCTED drops (backpacks[].source === 'reconstructed', demos older
 // than the //ktx drop hint) have no `//ktx bp` to join to, so their pickup
@@ -2552,7 +2554,15 @@ function packDropStatusFor(drop, pickup) {
         if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
         return { label: 'unobserved', cls: 'status-unobserved' };
     }
-    if (!pickup) return { label: 'expired', cls: 'status-expired' };
+    // A KTX row with no pickup row is NOT automatically expired, and this
+    // used to say it was. KTX states an expiry outright in `//ktx expire`,
+    // which the pipeline stamps as `fate: "expired"`; over the archive that
+    // hint accounts for only half the pickup-less drops, the rest being packs
+    // the recording ended on top of. Those get `unobserved`.
+    if (!pickup) {
+        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
+        return { label: 'unobserved', cls: 'status-unobserved' };
+    }
     const sameTeam = pickup.team && drop.team && pickup.team === drop.team;
     const weaponUpper = drop.weapon.toUpperCase();
     if (sameTeam) {

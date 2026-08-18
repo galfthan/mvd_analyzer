@@ -13836,6 +13836,7 @@
     },
     {
       "entNum": 143,
+      "fate": "expired",
       "loc": "yard",
       "origin": [
         -16,
@@ -14242,6 +14243,7 @@
     },
     {
       "entNum": 152,
+      "fate": "expired",
       "loc": "yard",
       "origin": [
         -527.25,
@@ -14648,6 +14650,7 @@
     },
     {
       "entNum": 157,
+      "fate": "expired",
       "loc": "yard",
       "origin": [
         -538.875,

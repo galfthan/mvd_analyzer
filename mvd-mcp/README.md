@@ -515,7 +515,8 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
 (resolved name), `entNum` (server edict) and `source` (schema v72); a
-`reconstructed` row additionally carries `fate` and its companions below.
+`reconstructed` row additionally carries `fate` and its companions below,
+and a `ktx` row carries `fate: "expired"` when KTX announced the timeout.
 (REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
 through.)
 
@@ -526,8 +527,14 @@ pipeline replays KTX's own `DropBackpack` rule instead — validated at
 the pickup side differently**:
 
 - A `ktx` row's `entNum` is the hinted edict and joins to
-  `weapon-pickups[].backpackEnt`, which is where its pickup lives. `fate`
-  and its companions are absent.
+  `weapon-pickups[].backpackEnt`, which is where its pickup lives.
+  `picker` / `pickerTeam` / `pickupTime` are absent. `fate` appears only
+  as `expired`, and only when KTX announced the 120 s removal in its third
+  backpack directive `//ktx expire` — the one statement the pickup join
+  cannot make. An ABSENT `fate` on a `ktx` row means "ask
+  `getWeaponPickups`", never "nobody took it": across the archive only
+  half the drops with no pickup row carry the expiry hint, the rest being
+  packs the recording ended on top of.
 - A `reconstructed` row has no pickup hint to join to, so the pickup side
   is on the row itself (schema v72): `fate` (`picked` / `expired` /
   `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the

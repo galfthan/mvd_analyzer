@@ -120,7 +120,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",
 		desc: "The map's static designed entity layout (item spawns, spawnpoints, teleporters) resolved from the embedded BSP corpus."},
 	"backpacks": {name: "backpacks", requires: []string{"clock", "identity", "demoinfo", "roster"}, resultKey: "backpacks",
-		desc: "RL/LG backpack drops with dropper, weapon, origin and a `source` naming the provenance: `ktx` from the wire `//ktx drop` hint (which also carries the ent number joining to weapon pickups), or `reconstructed` from the backpack-recon node on demos older than that hint."},
+		desc: "RL/LG backpack drops with dropper, weapon, origin and a `source` naming the provenance: `ktx` from the wire `//ktx drop` hint (which also carries the ent number joining to weapon pickups), or `reconstructed` from the backpack-recon node on demos older than that hint. A `ktx` row also carries `fate: expired` when KTX's `//ktx expire` hint announced the pack's 120 s removal — the only wire statement that a pack was NOT taken, which the weapon-pickups join cannot make."},
 	"weaponPickups": {name: "weapon-pickups", requires: []string{"clock", "identity", "frag", "roster"}, resultKey: "weaponPickups",
 		desc: "Slot-weapon acquisitions (world spawners and backpacks) with kills-before-next-death effectiveness."},
 }

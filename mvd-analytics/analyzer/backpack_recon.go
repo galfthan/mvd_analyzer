@@ -10,12 +10,13 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
-// Package-scope aliases for the Source vocabulary: BackpackAnalyzer.Finalize
-// shadows the `result` qualifier with its parameter name (same reason
-// analyzer/damage_recon.go has damageSourceKTX).
+// Package-scope aliases for the BackpackDrop vocabularies:
+// BackpackAnalyzer.Finalize shadows the `result` qualifier with its parameter
+// name (same reason analyzer/damage_recon.go has damageSourceKTX).
 const (
 	backpackSourceKTX   = result.BackpackSourceKTX
 	backpackSourceRecon = result.BackpackSourceReconstructed
+	backpackFateExpired = result.BackpackFateExpired
 )
 
 // backpackReconPost fills the backpacks section on demos whose mod never

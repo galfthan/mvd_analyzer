@@ -26495,6 +26495,7 @@
     },
     {
       "entNum": 94,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         256.625,
@@ -26747,6 +26748,7 @@
     },
     {
       "entNum": 98,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         428.375,
@@ -26873,6 +26875,7 @@
     },
     {
       "entNum": 37,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         460.75,
@@ -27209,6 +27212,7 @@
     },
     {
       "entNum": 94,
+      "fate": "expired",
       "loc": "LG.GA",
       "origin": [
         356.375,
@@ -27349,6 +27353,7 @@
     },
     {
       "entNum": 98,
+      "fate": "expired",
       "loc": "Quad.stairs",
       "origin": [
         197,
@@ -27391,6 +27396,7 @@
     },
     {
       "entNum": 97,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         400.375,
@@ -27461,6 +27467,7 @@
     },
     {
       "entNum": 99,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         365.625,
@@ -27629,6 +27636,7 @@
     },
     {
       "entNum": 161,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         287,
@@ -27713,6 +27721,7 @@
     },
     {
       "entNum": 95,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         155.25,
@@ -28035,6 +28044,7 @@
     },
     {
       "entNum": 37,
+      "fate": "expired",
       "loc": "GL",
       "origin": [
         234.875,

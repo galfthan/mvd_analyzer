@@ -408,6 +408,9 @@ obituary as three), `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `ItemMoveEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
+`BackpackExpireHintEvent` (KTX `//ktx expire` — an RL/LG pack removed
+untaken at the 120 s timeout, the only wire statement that a pack was
+*not* picked up),
 `ItemPickupPrintEvent`,
 `PlayerDepartureEvent` / `PlayerRejoinEvent` (the KTX/kmod roster
 broadcasts — "left the game with N frags", "rejoins the game with N
@@ -445,10 +448,11 @@ pickup/respawn transitions (each carrying the entity's origin) and, for the
 one item class that moves — a dropped backpack, tossed with
 `MOVETYPE_TOSS` — its fall to wherever it landed, come out of the wire
 directly, with no KTX prints and no BSP preprocessing. `ItemPickupHintEvent` /
-`BackpackPickupHintEvent` / `BackpackDropHintEvent` carry KTX's
-authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
-touch-level pickup attribution that entity-state alone can only
-approximate. They only fire on KTX servers; non-KTX sources get
+`BackpackPickupHintEvent` / `BackpackDropHintEvent` /
+`BackpackExpireHintEvent` carry KTX's authoritative `//ktx took`,
+`//ktx bp`, `//ktx drop`, `//ktx expire` directives — the touch-level
+pickup attribution that entity-state alone can only approximate, plus the
+one directive that states a pack was never taken. They only fire on KTX servers; non-KTX sources get
 entity-state and stats deltas. `ItemPickupPrintEvent` parses the
 per-client "You got the X" / "You receive N health" prints that
 target the picking player via `dem_single`; it fills the gap where
@@ -491,7 +495,8 @@ position, validated at 99.97% precision/recall against the hints; a
 reconstructed row also carries the pack's `fate` — `picked` with the
 `picker` named, `expired` at KTX's 120 s removal timeout, or
 `unobserved` — read off the wire's backpack-entity track, 100% precision
-and 96.1% recall against the `//ktx bp` hints),
+and 96.1% recall against the `//ktx bp` hints and 100%/100% on `expired`
+against `//ktx expire`, which a `ktx` row carries as its own `fate`),
 weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
@@ -927,7 +932,10 @@ diff -r /tmp/before /tmp/after
    node and published on the same row (`fate` / `picker` / `pickerTeam` /
    `pickupTime`, schema v72): 100% precision and 96.1% recall on
    picked-vs-not, 99.98% correct pickers, measured against the `//ktx bp`
-   hints on 223 demos. What stays out of reach: a pack taken inside the
+   hints on 223 demos, and 100% precision and recall on `expired` against
+   KTX's third backpack directive `//ktx expire` — which a hint-carrying
+   row publishes as its own `fate`, the only wire statement that a pack
+   was NOT taken. What stays out of reach: a pack taken inside the
    demo frame it dropped in never reaches the wire at all (2% of drops,
    the largest residual); pack TRANSFER credit and kill credit still need
    the hint, because `hadBefore` is not derivable; and the server-side

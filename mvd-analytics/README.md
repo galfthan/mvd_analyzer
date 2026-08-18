@@ -141,7 +141,8 @@ that downstream consumers render, summarise, or feed to an agent.
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
   in `analyzer/BACKPACKS.md`); `-linkage` does the same for the PICKUP
-  side against the `//ktx bp` hints, with both hints withheld; `-volume`
+  side against the `//ktx bp` (picked) and `//ktx expire` (expired)
+  hints, with every hint withheld; `-volume`
   reports drops-per-death, the pack-fate mix and an inventory
   cross-check on the hint-less population, where no ground truth exists.
 - `cmd/fetch-eval-corpus/` — pins a hub eval corpus to disk (demos +
@@ -1011,6 +1012,16 @@ Coverage caveats:
   `result.WeaponPickups`. Frontends join the two lists by
   `BackpackDrop.EntNum` == `WeaponPickup.BackpackEnt` (paired with
   `dropTime` to disambiguate recycled edict numbers).
+- **…but its EXPIRY side rides the drop row, because nothing else can
+  carry it.** KTX's third backpack directive, `//ktx expire <ent>`
+  (`ktx/src/g_spawn.c:196-210`), fires when `SUB_Remove` takes an RL/LG
+  pack off the map untaken at `DropBackpack`'s 120 s timeout.
+  `BackpackAnalyzer` joins it to the drop it closes — by edict AND time,
+  since edicts are recycled — and stamps `Fate = "expired"`. Do not infer
+  it from a missing `WeaponPickups` row instead: over 223 archive demos
+  carrying all three directives, 10 384 drops split 10 006 `bp` + 190
+  `expire` + 188 claimed by neither, so half the packs with no pickup row
+  are simply packs the recording ended on top of.
 - **A `reconstructed` row's pickup side rides the drop row.** There is
   no `//ktx bp` to join to, so `fate` / `picker` / `pickerTeam` /
   `pickupTime` carry it instead. It is deliberately NOT written into
@@ -1031,10 +1042,14 @@ type BackpackDrop struct {
     EntNum int        // server edict of the backpack entity; 0 when none was identified
     Source string     // "ktx" (wire hint) | "reconstructed"
 
-    // Reconstructed rows only (schema v72) — the pack's fate off the
-    // entity track. Empty on a `ktx` row, whose fate is the WeaponPickups
+    // The pack's fate (schema v72). On a reconstructed row it is read off
+    // the entity track and takes any of the three values; on a `ktx` row it
+    // is only ever "expired", set from the `//ktx expire` hint — an empty
+    // fate there means "ask WeaponPickups", not "nobody took it".
+    Fate string // "picked" | "expired" | "unobserved"
+
+    // Reconstructed rows only — a `ktx` row's picker is the WeaponPickups
     // join.
-    Fate       string // "picked" | "expired" | "unobserved"
     Picker     string // set only when the evidence named exactly one player
     PickerTeam string
     PickupTime int32  // ms, with Fate == "picked"

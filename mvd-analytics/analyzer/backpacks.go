@@ -20,6 +20,11 @@ import (
 // weaponPickups row, built from KTX's `//ktx bp` by WeaponPickupsAnalyzer
 // and joined on (BackpackEnt, drop time).
 //
+// The EXPIRY side is, because it has nowhere else to go: KTX's third
+// backpack directive, `//ktx expire <ent>` (ktx/src/g_spawn.c:196-210),
+// names a pack the server removed untaken and no other section carries it.
+// It stamps Fate on the drop row it belongs to — see applyExpireHints.
+//
 // What this analyzer does also record is the raw backpack-ENTITY track
 // (packLives / PopulateCore), which is the pickup evidence on a demo with
 // no hints at all. It is collected unconditionally rather than only when
@@ -36,6 +41,7 @@ type BackpackAnalyzer struct {
 	playerPos map[int][3]float32 // slot -> last-known origin (for drop origin)
 	drops     []BackpackDrop
 	dropSlots []int // parallel to drops: the dropper's wire slot, resolved at Finalize
+	expires   []backpackExpireHint
 	mapName   string
 	locFinder *locvis.Finder
 	timing    MatchTimingDetector
@@ -125,6 +131,13 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 		a.playerPos[e.PlayerNum] = e.Origin
 	case *events.BackpackDropHintEvent:
 		a.handleHint(e)
+	case *events.BackpackExpireHintEvent:
+		// Kept unfiltered by the match window on purpose: the pack this
+		// names was created 120 s earlier, so the hint that closes the last
+		// drop of a match can legitimately land after the match did. The
+		// join in applyExpireHints is what decides whether it belongs to a
+		// recorded drop, and it is strictly stronger than a time gate here.
+		a.expires = append(a.expires, backpackExpireHint{EntNum: e.BackpackEnt, Time: e.TimeMs})
 	case *events.ItemSpawnEvent:
 		if e.Kind == packEntityKind {
 			a.openPackLife(e.EntNum, e.TimeMs, e.Origin)
@@ -237,6 +250,77 @@ func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	a.dropSlots = append(a.dropSlots, slot)
 }
 
+// backpackExpireHint is one `//ktx expire <ent>` directive, at the demo-clock
+// instant the server announced it.
+type backpackExpireHint struct {
+	EntNum int
+	Time   int32
+}
+
+// backpackExpireToleranceMs bounds how far a `//ktx expire` may sit from its
+// drop's own timeout deadline and still be that pack's removal.
+//
+// The deadline is exact. DropBackpack arms `nextthink = time + 120` with
+// `think = SUB_Remove` on every pack it spawns (ktx/src/items.c:2870-2872,
+// packExpiryTimeoutMs) and nothing re-arms it, and BOTH hints are timestamped
+// in demo time, which is `sv.time` — frozen while the server is paused
+// (mvdsv/src/sv_main.c:3296, and MVD_FORMAT.md's paused_duration note: the
+// demo time-delta bytes are 0 across a pause), so a pause cannot stretch the
+// interval either. What is left is the two demo frames the two directives
+// landed in plus the server tick `nextthink` fires on: measured over 330
+// archive demos, all 234 expire hints paired at 119 953-120 027 ms after
+// their drop, a 74 ms spread. One second is that spread with an order of
+// magnitude to spare, and still an order of magnitude tighter than any
+// plausible edict recycle.
+const backpackExpireToleranceMs = 1000
+
+// applyExpireHints stamps Fate = BackpackFateExpired on the drop whose pack
+// KTX announced it had removed untaken.
+//
+// `//ktx expire <ent>` (ktx/src/g_spawn.c:196-210) is the third and last of
+// KTX's RL/LG backpack directives, and the only positive evidence in the demo
+// that a pack was NOT taken: the absence of a `//ktx bp` cannot say it,
+// because a demo can carry the drop hint and no pickup hints at all (measured:
+// 107 of 330 hint-carrying archive demos emit no `//ktx bp` whatsoever).
+//
+// The join is by edict AND time, never by edict alone: a match recycles a
+// backpack edict through many packs, which is why the pickup side joins on
+// (BackpackEnt, drop time) too. The pack removed at instant t on edict E is
+// the one most recently dropped on E, so this walks back to the newest drop at
+// or before the hint and then checks the age against KTX's own timeout. An
+// unmatched hint — a warmup pack whose drop is outside the match window, or an
+// edict whose drop this analyzer refused — is left on the floor rather than
+// attached to whatever row came nearest.
+//
+// drops must be sorted ascending by Time and carry demo-clock times, i.e. this
+// runs after the sort in Finalize and before the match-start rebase.
+func (a *BackpackAnalyzer) applyExpireHints(drops []BackpackDrop) {
+	if len(a.expires) == 0 {
+		return
+	}
+	byEnt := make(map[int][]int, len(drops))
+	for i := range drops {
+		byEnt[drops[i].EntNum] = append(byEnt[drops[i].EntNum], i)
+	}
+	for _, ex := range a.expires {
+		newest := -1
+		for _, i := range byEnt[ex.EntNum] {
+			if drops[i].Time > ex.Time {
+				break
+			}
+			newest = i
+		}
+		if newest < 0 {
+			continue
+		}
+		age := ex.Time - drops[newest].Time
+		if age < packExpiryTimeoutMs-backpackExpireToleranceMs || age > packExpiryTimeoutMs+backpackExpireToleranceMs {
+			continue
+		}
+		drops[newest].Fate = backpackFateExpired
+	}
+}
+
 func weaponFromItemFlags(flags int) string {
 	hasRL := flags&itemFlagRL != 0
 	hasLG := flags&itemFlagLG != 0
@@ -308,6 +392,7 @@ func (a *BackpackAnalyzer) Finalize(result *Result) error {
 		a.drops[i].Team = info.Team
 	}
 	sort.SliceStable(a.drops, func(i, j int) bool { return a.drops[i].Time < a.drops[j].Time })
+	a.applyExpireHints(a.drops)
 	if a.locFinder != nil {
 		for i := range a.drops {
 			a.drops[i].Loc = a.locFinder.FindNearest(a.drops[i].Origin[0], a.drops[i].Origin[1], a.drops[i].Origin[2])
