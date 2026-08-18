@@ -255,6 +255,29 @@ log, powerup/RA control time from the item/stream intervals. A
 `src:"derived"` stats section closing most of the demoinfo gap on old
 demos — sequence after leads 5/6 so the hit-side inputs exist.
 
+## 10. Backpack pickup linkage on reconstructed drops (successor to lead 2)
+
+Lead 2 reconstructs the DROP; on hint-less demos the pack's fate stays
+`unobserved` — mushi's RL stat-flip 5 s after nexus's death is visible
+but unlinked. The raw entity signal alone is unusable (recycled bp
+edicts, origins currently discarded by `diffItemEnt`, measured 16.4
+PVS-flutter visibility flips per real pack), but a reconstructed drop
+is now a clean anchor to bind the dirty edict to: (a) surface
+backpack-entity origins in the parser (the enabler lead 2 evaluated
+and skipped); (b) near each reconstructed drop (t, pos−24Z) bind the
+appearing backpack-model entity; (c) follow its origin track — packs
+FALL (ledges, lift shafts), so the resting position is tracked, never
+assumed; (d) stitch over flutter (a flutter re-appearance carries the
+same origin; a pickup does not re-appear) and read the final
+disappearance: close-in-time+radius to a matching stat-flip (a player
+WITHOUT the weapon gaining its bit, world spawners excluded by
+position) → attributed pickup; at the KTX removal timeout with no flip
+→ expired. Validate exactly like the drops: modern demos carry
+`//ktx bp` pickup hints — run with hints withheld, score attribution
+precision/recall (the drop eval's 99.97/99.97 protocol). Web: Pack
+Drops upgrades `unobserved` → `picked up by <name> (reconstructed)` /
+`expired`.
+
 ## Full-archive readability census (2026-08-17)
 
 `qw-corpus-survey -readability` over all 50,951 demos (CSV:
