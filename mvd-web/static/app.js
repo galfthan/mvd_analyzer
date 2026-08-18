@@ -2513,21 +2513,43 @@ function getPowerupDisplay(type) {
 // //ktx drop) with the backpack-sourced entries in result.weaponPickups
 // (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop
 // with no matching pickup is shown as "expired" — the pack despawned
-// or fell into a lava pit before anyone touched it — EXCEPT on
-// reconstructed drops (backpacks[].source === 'reconstructed', demos
-// older than the //ktx drop hint), which carry no entNum and therefore
-// have no observable pickup side at all: those read "unobserved". The filter row
-// above the table narrows rows by dropper team, picker team, or
-// status label; filter state lives in the select elements themselves
+// or fell into a lava pit before anyone touched it.
+//
+// RECONSTRUCTED drops (backpacks[].source === 'reconstructed', demos older
+// than the //ktx drop hint) have no `//ktx bp` to join to, so their pickup
+// side rides the drop row itself: `fate` / `picker` / `pickerTeam` /
+// `pickupTime`, read off the wire's backpack-ENTITY track (schema v72).
+// packDropPickup below turns those fields into the same row shape the join
+// produces, so one renderer serves both provenances.
+//
+// The filter row above the table narrows rows by dropper team, picker team,
+// or status label; filter state lives in the select elements themselves
 // so switching tabs and coming back preserves the view.
 const packDropsState = { rows: [], hubInfo: null, playerUserIDs: null };
 
+// packDropPickup adapts a reconstructed drop's own fate fields to the pickup
+// row shape. `kills` is null rather than 0: kill credit needs the `//ktx bp`
+// hint's HadBefore, which no reconstructed row has, and printing 0 would
+// claim the picker scored nothing with it.
+function packDropPickup(drop) {
+    if (drop.source !== 'reconstructed' || drop.fate !== 'picked' || !drop.picker) return null;
+    return {
+        player: drop.picker,
+        team: drop.pickerTeam || '',
+        time: (drop.pickupTime || 0) * 0.001,
+        nextDeathTime: 0,
+        kills: null,
+    };
+}
+
 function packDropStatusFor(drop, pickup) {
-    // A RECONSTRUCTED drop (schema v72 — demos older than the //ktx drop
-    // hint) carries no entNum, so it can never join to a pickup row. That
-    // is "we cannot see the pickup side", not "nobody took it", and
-    // labelling it 'expired' would state a fact the wire never gave us.
-    if (!pickup && drop.source === 'reconstructed') {
+    // A RECONSTRUCTED drop's fate comes from the entity track, not from a
+    // pickup row. Three outcomes, and `unobserved` is deliberately not
+    // `expired`: "we could not see the pickup side" is a different fact from
+    // "nobody took it".
+    if (drop.source === 'reconstructed') {
+        if (drop.fate === 'picked') return { label: 'picked', cls: 'status-picked' };
+        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
         return { label: 'unobserved', cls: 'status-unobserved' };
     }
     if (!pickup) return { label: 'expired', cls: 'status-expired' };
@@ -3066,7 +3088,7 @@ function displayPackDrops(result) {
             time: rawPickup.time * 0.001,
             nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
             dropTime: (rawPickup.dropTime || 0) * 0.001,
-        } : null;
+        } : packDropPickup(rawDrop);
         return { drop, pickup, status: packDropStatusFor(drop, pickup) };
     });
 
@@ -3157,9 +3179,11 @@ function renderPackDropRows() {
             runHub = hubAnchor(pickup.time - 3, endTime, pickup.player);
             pickerLabel = escapeHtml(pickup.player || '?');
             pickTeamLabel = escapeHtml(pickup.team || '-');
-            killsCell = pickup.hadBefore
-                ? `<span class="kills-redundant">${pickup.kills}</span>`
-                : String(pickup.kills);
+            killsCell = pickup.kills === null
+                ? '-'
+                : (pickup.hadBefore
+                    ? `<span class="kills-redundant">${pickup.kills}</span>`
+                    : String(pickup.kills));
         }
 
         const statusCell = `<span class="pack-status ${r.status.cls}">${escapeHtml(r.status.label)}</span>`;
