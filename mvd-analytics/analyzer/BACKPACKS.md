@@ -33,6 +33,27 @@ demos per `ktxver` bucket among rows with `ktxdrop=1` for the ground-truth
 run, and up to 20 per `version` bucket among rows with `ktxdrop=0` for the
 volume run.
 
+**What the harness refuses to score.** Both modes discard demos that
+cannot be evidence about the reconstruction, rather than folding them in:
+
+- Ground-truth mode requires every row of the demo's `backpacks` section
+  to carry `source: "ktx"`. A list entry that turned out not to be
+  hint-carrying has a section the reconstruction filled itself, and
+  scoring it would compare the pass against its own output — a free
+  100/100. Such demos are skipped as `backpacks are reconstructed, not
+  ground truth`.
+- Volume mode excludes hint-carrying demos entirely (they are reported as
+  `excluded`, not merely flagged). Their drops used to reach the published
+  drops-per-death rate and the `STAT_ITEMS` cross-check even though both
+  are statements about reconstructed rows.
+- `BackpackReconStandDown` evaluates the mode gates BEFORE the
+  hinting-era gate. Ground-truth mode discounts exactly one reason — the
+  one that only exists because the hint is present — and with the era
+  check first, a hint-era demo that was ALSO yawnmode or fairpacks
+  reported that discounted reason, so the mode gates were bypassed in
+  scoring and never exercised against ground truth at all. The order is
+  invisible to the pipeline, which only reads whether the reason is empty.
+
 ## What is being reproduced
 
 `DropBackpack` (`ktx/src/items.c:2667-2885`) runs from `PlayerDie`
@@ -65,6 +86,46 @@ The early returns, and what the pass does about each:
 | `k_frp 1` / `2` fairpacks rewrite (items.c:2710-2750) | stood down on the `Fairpacks setting:` broadcast (`match.c:2086-2107`) |
 | `k_yawnmode` overrides (items.c:2686, 2754) | stood down (mode `-yw` / countdown `Yawnmode`) |
 
+Two refusals are narrower than the whole demo and cost only the rows they
+cover:
+
+| refusal | why |
+|---|---|
+| a DEATH whose newest `aw` sample was carried on a DIFFERENT wire slot (players with >1 published session only) | mvdsv delta-codes stats against a per-SLOT cache no client change resets (`sv_send.c:1279-1281`), so a player who reconnects onto a slot whose previous occupant held what they now hold gets no update of their own — and the merged stream would answer with a weapon they held on the slot they left. A time bound cannot separate those: the earlier session's last sample can be seconds old and still be the newest there is. A reconnect onto the SAME slot keeps the cache, and the sample with it |
+| a DEATH whose victim's position track is staler than 400 ms | KTX spawns the pack at the victim's origin; without one the drop would be a guessed point on the map |
+
+### The refusal that is deliberately NOT made
+
+A per-player "this `aw` column never moves" refusal looks obviously right —
+it is the frozen-stat signature, applied at the resolution the evidence
+has — and it is **wrong**. It was implemented, measured, and reverted.
+
+A single-valued `aw` column is what a **single-weapon ruleset** looks
+like. In `1on1-lgc` (and the povdmm4 LG challenges), `2on2-midair`, and
+rocket arena on `end` / `endif`, the wielded weapon cannot change: every
+player's whole column is `[{0,64}]` or `[{0,32}]`, and the KTX hints
+credit them with a pack on EVERY death — hint count exactly equal to death
+count, across 20-death and 36-death players. Refusing them cost **58 of
+13 749** ground-truth drops (recall 99.97% → 99.55%, all RL) and prevented
+**no** fabrication: precision was 99.97% with the refusal and 99.97%
+without, the same four fabrications either way.
+
+The same argument protects the `||` in the demo-level gate
+(`!activeWeaponLive && !damagerecon.WeaponBitsLive`). It reads like a
+weakened `&&`, but on a single-weapon demo NO player's `aw` moves, so the
+`STAT_ITEMS` arm is the only thing keeping the ruleset measurable. What
+separates such a demo from a frozen recording is exactly that its item
+bits still cycle.
+
+The published `origin` is the **pack's**, not the victim's: KTX copies the
+victim's origin and then applies `item->s.v.origin[2] -= 24`
+(`items.c:2703-2704`), putting the pack at their feet. Both provenances
+apply it, so the hint path and the reconstruction publish one convention
+and a map overlay draws every pack where it sat. (Before this, both paths
+published the unadjusted player position — which is why the position-error
+figures below, measured between two paths sharing the same offset, did not
+move when it was fixed.)
+
 The plan for this work assumed `DropBackpack` also returns early in
 midair / smashpack / extinction / wipeout / CA. **It does not** — there is
 no such early return in `items.c`, `smashpack` does not exist in this KTX
@@ -75,11 +136,23 @@ demonstrably makes, so `backpackSkipModeReason` is deliberately narrower;
 it reads the same serverinfo `mode` string and the same countdown-derived
 `MatchSettings`.
 
-## Headline numbers (2026-08-18)
+## Headline numbers (2026-08-18, re-run after the PR review fleet)
 
 **316 demos scored** (330 sampled, 14 stood down), spanning every KTX
 release that emits the hint, 1.38 through 1.48. 13 749 ground-truth
 drops.
+
+Re-measured after the review-fleet fixes (the pack origin offset, the
+per-obituary `/kill` accounting, the cross-slot `aw` bound, the
+conditional name undisambiguation, the `aw` value vocabulary, the
+pre-match dedup cut, the harness's own integrity guards): **every figure
+below is unchanged**. That is the expected result and not a null one —
+each of those fixes addresses a shape the ground-truth sample does not
+contain (it is 316 modern KTX demos), so the run's job here was to show
+they cost nothing. The position error is unchanged for a sharper reason:
+it is measured *between* the hint path and the reconstruction, and both
+apply the 24-unit drop offset, so a change made to both is invisible to
+it by construction.
 
 | metric | value |
 |---|---|
@@ -98,7 +171,8 @@ Per weapon:
 
 Per era (`ktxver`), 25–30 demos each: 1.38 100/100, 1.39 99.94/99.87,
 1.40 99.92/99.84, 1.41 100/100, 1.42 100/100, 1.43 100/100, 1.44 100/100,
-1.45 99.91/100, 1.46 99.93/100, 1.47 100/100, 1.48 100/100.
+1.45 99.91/100, 1.46 99.93/100, 1.47 100/100, 1.48 100/100 — **seven** of
+the eleven buckets at 100% on both, and two more at 100% recall.
 
 Per mode: 1on1 100/100 (108 demos), 2on2 100/100, 4on4 100/100, duel
 100/100, team 100/100, ffa 100/100, `tot` 96.23/100 (2 demos, 51 drops).
@@ -149,7 +223,11 @@ No ground truth exists there, so two checks:
 
 **551 demos** sampled across 40 `version` buckets with `ktxdrop=0`
 (mvdsv 0.19 through 1.20, qwsv 2.30/2.40, KTX 1.34–1.37 and the
-hint-carrying releases that happened to emit none):
+hint-carrying releases that happened to emit none). All 551 were
+*measured*, 0 excluded — the sample turned out to contain no
+hint-carrying demo, which the harness now checks for rather than assumes
+(a hint-carrying demo's rows would otherwise have reached both figures
+below as if the reconstruction had produced them):
 
 - 376 produced drops, 175 did not: 58 `no player streams`, 57 `hinting mod
   emitted no drops`, 52 `no frag log`, 8 `frozen weapon state`. The 57 are

@@ -178,12 +178,21 @@ func scoreOne(path string, m demoMeta, volume bool) demoResult {
 		out.mode = res.DemoInfo.Mode
 	}
 	if volume {
+		for _, b := range res.Backpacks {
+			if b.Source != result.BackpackSourceReconstructed {
+				// A hint-carrying demo landed in the hint-LESS sample. Its
+				// rows are ground truth, not reconstruction output, and
+				// reportVolume must not fold them into the rate it publishes
+				// as the reconstruction's — nor into the inventory
+				// cross-check, which exists to corroborate reconstructed
+				// rows specifically.
+				out.skipped = "wire-hinted, not reconstructed"
+				return out
+			}
+		}
 		out.rc = len(res.Backpacks)
 		for _, b := range res.Backpacks {
 			out.byWeaponRC[b.Weapon]++
-			if b.Source != result.BackpackSourceReconstructed {
-				out.skipped = "wire-hinted, not reconstructed"
-			}
 			if ownedAt(res, b) {
 				out.invOK++
 			}
@@ -201,6 +210,16 @@ func scoreOne(path string, m demoMeta, volume bool) demoResult {
 	if len(gt) == 0 {
 		out.skipped = "no //ktx drop ground truth"
 		return out
+	}
+	// Ground truth means the WIRE said it. A demo whose backpacks section was
+	// filled by the reconstruction itself — a list entry that turned out not
+	// to be hint-carrying — would otherwise be scored against its own output
+	// and report a flawless 100/100, silently inflating the headline.
+	for _, g := range gt {
+		if g.Source != result.BackpackSourceKTX {
+			out.skipped = "backpacks are reconstructed, not ground truth"
+			return out
+		}
 	}
 	// The one stand-down that only exists BECAUSE the hint is present is
 	// discounted here — withholding the hint is the point of the experiment.
@@ -498,12 +517,22 @@ func report(rows []demoResult, worst int) {
 }
 
 func reportVolume(rows []demoResult) {
-	var withDrops, without, deaths, drops, invOK int
+	var measured, withDrops, without, excluded, deaths, drops, invOK int
 	reasons := map[string]int{}
 	byWeapon := map[string]int{}
 	perEra := map[string]*demoResult{}
 	for i := range rows {
 		r := &rows[i]
+		// A demo whose section did not come from the reconstruction (a
+		// hint-carrying demo, an analyze failure) is not evidence about the
+		// reconstruction. It is counted and named, and contributes nothing to
+		// the rate or the cross-check.
+		if r.skipped == "wire-hinted, not reconstructed" || strings.HasPrefix(r.skipped, "analyze") || strings.HasPrefix(r.skipped, "panic") {
+			excluded++
+			reasons[classifySkip(r.skipped)]++
+			continue
+		}
+		measured++
 		deaths += r.deaths
 		drops += r.rc
 		invOK += r.invOK
@@ -518,7 +547,8 @@ func reportVolume(rows []demoResult) {
 		}
 		accumulate(perEra, r.era, r)
 	}
-	fmt.Printf("demos: %d   with reconstructed drops: %d   without: %d\n", len(rows), withDrops, without)
+	fmt.Printf("demos: %d sampled, %d measured, %d excluded\n", len(rows), measured, excluded)
+	fmt.Printf("measured demos: with reconstructed drops: %d   without: %d\n", withDrops, without)
 	fmt.Printf("deaths: %d   drops: %d   rate: %.3f drops/death (rl %d, lg %d)\n",
 		deaths, drops, ratio(drops, deaths), byWeapon["rl"], byWeapon["lg"])
 	fmt.Printf("inventory cross-check: %d/%d (%.2f%%) of drops had the weapon in STAT_ITEMS at the death\n",
