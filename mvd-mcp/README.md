@@ -285,6 +285,11 @@ every subsequent per-demo tool expects.
 
 Output: `Overview` —
 see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
+Carries the per-demo capability manifest (`available`), the
+`timing.matchStart*` anchor family that answers "when was this match
+played" (schema v72 — always read `matchStartConfidence` with the value),
+and the two separate degradation signals `errors` (analyzer level) and
+`parseWarnings` (reader level, omitted on a clean parse).
 
 #### `getDemoInfo({demoId})`
 
