@@ -61,6 +61,34 @@ cannot be evidence about the reconstruction, rather than folding them in:
   mode also scores only drops the RECONSTRUCTION reproduced and matched to
   a hint: a missed drop's linkage is not evidence about the linkage, and
   the drop-side table above already counts that miss.
+
+**Why the zero-`bp` skip is not an expiry bias.** The obvious objection to
+that last gate is that it also discards legitimate ALL-EXPIRED demos on
+bp-capable servers, which would depress `expired` recall. It does not, and
+the wire says so outright. KTX emits a THIRD directive nothing here decodes:
+`SUB_Remove` writes `//ktx expire <ent>` for every RL/LG pack it removes at
+the timeout (`ktx/src/g_spawn.c:202-210`). Counting all three over the
+archive sample:
+
+| | `//ktx drop` | `//ktx bp` | `//ktx expire` |
+|---|---|---|---|
+| a demo with no `bp` | 31–117 | 0 | 0–2 |
+| a demo with `bp` | 16, 33, 45, 50, 27 | 14, 29, 44, 50, 27 | 1, 3, 0, 0, 0 |
+
+A demo carrying 117 drop hints and **one** expire hint did not have 117
+packs expire; its packs were taken and the server never announced it. On the
+demos that do emit `bp`, drop ≈ bp + expire holds row by row — the hint set
+is complete there and absent here, which is a property of the recording, not
+of the match. Nor can it be predicted from `ktxver`: 1.38, 1.39, 1.40, 1.42
+and 1.43 all appear on both sides of the split, so a version table cannot
+separate capability from absence either. 34 of 160 drop-carrying demos are
+like this; folding them in would score every real pickup in a fifth of the
+population as a false positive.
+
+`//ktx expire` is the strongest unused signal in this area: it is positive,
+per-pack evidence of exactly the class `expired` recall is stuck at 50% on.
+Decoding it would turn the expiry side from an inference into a second
+ground truth. It is out of scope here and recorded as the next lead.
 - `BackpackReconStandDown` evaluates the mode gates BEFORE the
   hinting-era gate. Ground-truth mode discounts exactly one reason — the
   one that only exists because the hint is present — and with the era
@@ -302,10 +330,14 @@ was dropped — with a median of 48 origin updates per pack, this is a tracked
 quantity, not an assumption. The enabler is the new `ItemMoveEvent` plus an
 `Origin` on `ItemStateEvent`.
 
-**3. Read the disappearance.** A pack leaves the wire for exactly two
-reasons: `BackpackTouch` removed it (`items.c:2367`) or `SUB_Remove` did at
-the 120 s timeout (`items.c:2871-2872`). Which one is decided by the test
-the server itself runs first — whether any LIVE player's bounding box
+**3. Read the disappearance.** A pack leaves the wire for two reasons in a
+normal match: `BackpackTouch` removed it (`items.c:2367`) or `SUB_Remove` did
+at the 120 s timeout (`items.c:2871-2872`). (A third exists and is not one of
+the two: hoony mode wipes every pack on its per-point reset,
+`remove_items("backpack")` at `hoonymode.c:376`, through `ent_remove` rather
+than `SUB_Remove` — a pack that vanishes mid-life with nobody on it, which
+lands in `unobserved`.) Which of the two is decided by the test the server
+itself runs first — whether any LIVE, mode-ELIGIBLE player's bounding box
 overlapped the pack's:
 
 ```
@@ -323,6 +355,138 @@ written at `sv_demofps` while the server runs at its own tick, so the touch
 instant falls strictly between two broadcasts and a running player covers
 10-16 units in that gap. Endpoint-only testing cost 211 of 10 000 real
 pickups, every one of them overshooting a bound by 0-9 units.
+
+**The PACK is held at its last broadcast origin across that sweep, and this
+was measured, not assumed.** A pack is still travelling on the frames around
+a mid-air grab, so placing it at each player sample's own instant — sweeping
+two moving points against each other instead of a point against a box —
+looks like the more faithful test. Implemented and scored, it is **worse**:
+`picked` recall 96.13% → **93.64%**, 249 of 10 000 real pickups lost, with
+no precision to gain (100.00% either way). The reason only shows up in the
+numbers: the pack's last origin is broadcast in the very frame it left the
+wire, so it is a sample AT the touch instant, while its earlier origins are
+samples of where it no longer was. Walking the pack backwards tests the
+overlap at times the touch did not happen at. Reverted; the fields that
+tracked the pack's previous origin were removed with it rather than left in
+as unexercised machinery.
+
+The same measurement disposes of the related idea for the 0-9 unit near-miss
+class below. That class is dominated by "the pack is 33-41 units ABOVE the
+player" — a pack that fell further between broadcasts — and the pack's
+EARLIER origins are higher still, so the pack's own track cannot reach it in
+the direction needed. Only extrapolation PAST the final broadcast could, and
+that invents the position that decides the pickup.
+
+### Who is allowed to touch it — the mode guard
+
+`BackpackTouch` does not only reject dead touchers. It rejects a live,
+overlapping player whose mode-specific state the ruleset bars from taking a
+pack (`ktx/src/items.c:2393-2425`):
+
+```c
+if (deathmatch == 4) { if (other->invincible_finished) return; }   // pent
+if (isRA() && !isWinner(other) && !isLoser(other)) return;         // waiting area
+if (cvar("k_midair") && other->super_damage_finished) return;      // quad
+if (cvar("k_instagib") && other->invisible_finished) return;       // ring
+if ((deathmatch == 4) && lgc_enabled() && (other->s.v.health >= 300)) return;
+```
+
+Each one leaves the pack ON the wire, so a replay that ignores them credits a
+pickup to a player the server refused — and stops looking for whoever really
+took it. Four of the five are reproducible because the state they read is
+broadcast: `invincible_finished`, `super_damage_finished` and
+`invisible_finished` are set and cleared in lockstep with the
+`IT_INVULNERABILITY` / `IT_QUAD` / `IT_INVISIBILITY` bits
+(`ktx/src/client.c:2283-2289, 4062-4174`), which is exactly what the Pent /
+Quad / Ring possession intervals are derived from, and health is its own
+stream. The mode itself comes from the same two sources
+`backpackSkipModeReason` reads — the published cvar, then the composite
+serverinfo `mode` string, then the countdown-derived `MatchSettings`.
+
+**RA's waiting area is deliberately not guessed at.** `isWinner` / `isLoser`
+are arena bookkeeping with no wire representation anywhere: no stat, no
+serverinfo key, no print. Demoting every RA pack to `unobserved` was the
+alternative and is worse — it erases the mode's entire pickup signal to guard
+against a class the geometry mostly handles anyway, since the waiting area is
+a separate room from the arena floor where packs drop. It is a residual, and
+listed as one below.
+
+**What the guard costs: nothing measurable, and that is the expected
+result.** The ground-truth population is 223 modern KTX demos and contains no
+DMM4, midair, instagib, LGC or RA demo at all — every scored demo is 1on1 /
+2on2 / 4on4 / duel / team / ffa. Every headline figure below is byte-identical
+with and without the guard. Its job here was to show it costs nothing on the
+population that exists, the same null result the drop-side review fixes
+produced; the modes it protects are precisely the ones no ground truth
+reaches.
+
+**Spectators need no guard of their own**, even though `other->ct != ctPlayer`
+is `BackpackTouch`'s very first line. `Streams.Players` is not filtered on
+participation — it carries a row for any occupant with stream data — but
+mvdsv writes no `svc_playerinfo` and no stats for a spectator
+(`sv_ents.c:463`, `sv_demo.c:1540`, `:1618`), so a spectating stretch
+contributes no position samples. A pure spectator therefore never gets a row
+at all, and someone who plays part of a match and spectates the rest keeps
+one merged row whose track simply stops. The position-staleness bound is what
+excludes them: with no sample within 200 ms of the disappearance there is no
+position to test — which matters, because `Alive` DOES overhang a spectating
+stretch (`clipToPresence` trims only the ends of a track and never splits on
+an interior hole).
+
+### The expiry boundary, and why it is a cadence and not a constant
+
+`expired` is the one disappearance that is positively NOT a pickup, so what
+counts as "reached the timeout" decides it. KTX arms it once, unconditionally:
+
+```c
+// remove after 2 minutes, and after 30 seconds if backpack dropped by monster
+item->s.v.nextthink = g_globalvars.time + (self->ct == ctPlayer ? 120 : 30);
+item->think = (func_t) SUB_Remove;                       // items.c:2870-2872
+```
+
+Verified across the whole of `DropBackpack` (`items.c:2667-2885`): nothing
+re-arms `nextthink` afterwards. The 30 s arm is for a MONSTER-dropped pack and
+cannot apply — every reconstructed drop keys on a player death, and the one
+KTX mode with monsters, bloodfest, is stood down before the reconstruction
+runs. **Yawnmode does not change it**: it rewrites the pack's contents and its
+ammo caps (`items.c:2754, 2820-2827`) and is stood down anyway. Hoony mode is
+the one thing that removes a pack early, and it does so through `ent_remove`
+directly (`hoonymode.c:376`, per-point reset) rather than `SUB_Remove` — so a
+hoony pack simply vanishes mid-life with nobody on it, which lands in
+`unobserved`, correctly.
+
+The rule that reads it had two failure directions, and both are now closed:
+
+- A real pickup at 119 s whose picker's track has a hole used to come out
+  `expired`, because the old threshold was the timeout less a flat two
+  seconds. The threshold is now the timeout less **three broadcast
+  intervals of the demo's own cadence** (`broadcastCadenceMs`, the median
+  inter-sample gap of the longest position track). Three, because three
+  distinct quantisations stack: `Start` is the first frame the pack was
+  visible, `End` is a frame boundary too, and `nextthink` fires on the first
+  SERVER frame at or after the deadline. A flat constant cannot be right at
+  both 13 ms and 40 ms per frame.
+- A `SUB_Remove` at 120 s with a player who happened to be crossing the pack
+  used to come out `picked`. At the timeout the pack was leaving the wire in
+  that frame whatever stood on it, so the touch has to outrank `SUB_Remove`
+  to win — and a merely SWEPT path is also exactly what running past an
+  expiring pack looks like. Inside the timeout window only an overlap the
+  wire actually SAMPLED counts; everywhere else the swept path remains the
+  right test.
+
+The measurement that sets the boundary, over the 223-demo ground truth:
+
+| bound pack lifetime | p50 | p90 | p99 | max |
+|---|---|---|---|---|
+| GT says never picked (n=190) | 119 995 | 120 014 | 120 023 | 120 027 |
+| GT says picked (n=9 793) | 2 116 | 15 100 | 56 603 | **117 815** |
+
+The two classes do not overlap and are not close: **not one** of the 9 793
+real pickups reaches 118 000 ms, and 189 of the 190 real expiries sit at or
+above 119 900. Any threshold in that 2-second gap scores identically — 190
+`expired` at 100.00% precision — which is why the change is worth making for
+the right reason rather than the number: the cadence form holds on both
+recording rates, where a constant tuned to one of them does not.
 
 ### Why not a stat flip — the tier that was NOT needed
 
@@ -342,14 +506,22 @@ A gain that could have come from a world spawner the player is standing on
 is disqualified (`nearWeaponSpawner`, reading the spawner positions off the
 item timeline), because it separates nothing.
 
-### Headline numbers — the PICKUP side (2026-08-18)
+### Headline numbers — the PICKUP side (2026-08-18, re-run after the PR review fleet)
 
-**223 demos scored** (335 sampled; 107 skipped for carrying no `//ktx bp`,
-4 for a reconstructed section, 1 for no `//ktx drop`), spanning KTX 1.38
-through 1.48. **10 378 scored drops**, of which 10 171 (98.01%) bound to a
-pack entity. Ground truth: 10 000 picked, 378 never picked. Both hints
-withheld — the reconstruction and the linkage never read `res.Backpacks`
-or `res.WeaponPickups`.
+**223 demos scored** (330 sampled; 107 skipped for carrying no `//ktx bp`),
+spanning KTX 1.38 through 1.48. **10 378 scored drops**, of which 10 171
+(98.01%) bound to a pack entity. Ground truth: 10 000 picked, 378 never
+picked. Both hints withheld — the reconstruction and the linkage never read
+`res.Backpacks` or `res.WeaponPickups`.
+
+Re-measured after the review-fleet fixes to this side (the `BackpackTouch`
+mode guard, the cadence-derived expiry boundary and its sampled-touch
+tiebreak): **every figure below is unchanged**, including per era and per
+mode. That is the intended result. The mode guard protects rulesets this
+population does not contain, and the expiry boundary moved from a flat
+2-second slack to a derived one inside a 2-second gap where the two classes
+do not overlap — both were made for fidelity, and the run's job was to show
+they cost nothing.
 
 | metric | value |
 |---|---|
@@ -388,7 +560,7 @@ The 387 real pickups that came out `unobserved` break down as:
 | cause | n | fixable? |
 |---|---|---|
 | no pack entity on the wire at all; the wire says the pack was taken **within one demo frame** of the drop | 202 | **No.** An MVD is written at `sv_demofps` (default 30) and the pack was gone before the next frame — it never existed on the wire. This is 2% of all drops and the single largest residual. |
-| the picker was outside the touch box by 0-9 units on both bracketing samples and on the path between them | 167 | Only by extrapolating the pack's own motion past its last broadcast (it is still falling: the overshoot is almost always "pack is 33-41 above the player", the shape a pack that fell further between broadcasts makes). Rejected as inventing data. |
+| the picker was outside the touch box by 0-9 units on both bracketing samples and on the path between them | 167 | Only by extrapolating the pack's own motion past its last broadcast (it is still falling: the overshoot is almost always "pack is 33-41 above the player", the shape a pack that fell further between broadcasts makes). Rejected as inventing data — and the cheaper version of the idea, sweeping the pack along the track it DOES have, was implemented and measured to cost 249 real pickups (above). |
 | the picker was outside every derived life at the disappearance | 8 | A liveness-derivation edge, 0.08% of pickups. |
 | a nearer drop claimed every pack entity in the window | 5 | Two deaths in one frame at nearly the same spot. |
 | the nearest pack entity was beyond the 128-unit bind cap | 5 | The refusal working; the packs are 179-2 325 units away. |
@@ -407,6 +579,13 @@ the picker.
   authoritative KTX hints and feed exactly those wire-measured stats.
 - **Which of two players on one pack took it**, when neither gained the
   weapon.
+- **Whether an RA toucher was fighting or waiting.** `BackpackTouch` refuses
+  a pack to a rocket-arena player in the waiting area
+  (`isRA() && !isWinner(other) && !isLoser(other)`, `items.c:2404-2408`) and
+  that status has no wire representation, so the guard above implements the
+  other four mode rejections and not this one. A pack taken in an RA waiting
+  area would be attributed to the waiting player. No RA demo reaches the
+  ground-truth population, so the class is unmeasured as well as unhandled.
 
 ## Volume sanity on the hint-less population
 
@@ -439,6 +618,14 @@ volume sanity (again no ground truth exists here):
 | `unobserved` | 1 767 | 10.49% |
 | `expired` | 471 | 2.80% |
 | — of `picked`, a picker was named | 14 565 | 99.67% |
+
+Re-drawn and re-measured after the review-fleet fixes on a 531-demo sample
+(13 466 drops, 0.249 drops/death, inventory cross-check 13 466/13 466): the
+mix comes out 86.54% `picked` / 10.62% `unobserved` / 2.84% `expired` with a
+picker named on 99.73% of the picked — every share within 0.2 points of the
+table above, on an independently drawn sample. The hint-less population is
+where the `BackpackTouch` mode guard could bite, since it spans far more
+rulesets than the ground truth does, and it does not move the mix either.
 
 That is the shape the hinted population predicts. There, ground truth is
 96.4% picked / 3.6% never picked, and the linkage recovers 96.1% of the

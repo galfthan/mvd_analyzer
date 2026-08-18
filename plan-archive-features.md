@@ -294,7 +294,9 @@ pack.
 Validated exactly like the drops, with BOTH hints withheld, on **223 demos
 spanning KTX 1.38–1.48** (10 378 scored drops; the harness additionally
 gates on the demo emitting `//ktx bp` at all — 107 of 335 sampled demos
-emit `//ktx drop` but not `//ktx bp`): picked-vs-not **100.00% precision /
+emit `//ktx drop` but not `//ktx bp`, which the wire confirms is a recording
+property and not an all-expired match — those demos carry 31-117 drop hints
+against 0-2 `//ktx expire`): picked-vs-not **100.00% precision /
 96.13% recall**, `expired` **100.00% precision** at 50.26% recall, **99.77%**
 of pickups carry a named picker and **99.98%** of those are correct,
 pickup-time error 0 ms at p50/p90. Precision is 100% in every ktxver bucket
@@ -307,7 +309,11 @@ pre-1.38 demos.
 Residuals, all named: the largest is unfixable — a pack taken inside the
 demo frame it dropped in never reaches the wire (202 of 10 378); then a
 picker 0-9 units outside the touch box on both bracketing samples and the
-swept path between them (167); a liveness edge (8); bind refusals (10).
+swept path between them (167 — sweeping the PACK along its own track too was
+measured and costs 249 pickups, so it stays fixed at its last broadcast); a
+liveness edge (8); bind refusals (10). Every figure here survived the PR
+review fleet's re-run unchanged, including after the touch test grew
+`BackpackTouch`'s mode guard and the expiry boundary became cadence-derived.
 `hadBefore` remains underivable, so pack TRANSFER credit and pack kill
 credit stay absent, which is why the linkage output rides the `backpacks`
 row instead of `weaponPickups`. Numbers, method and the

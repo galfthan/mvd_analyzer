@@ -148,6 +148,30 @@ predicate finds nobody on 90% of real pickups). No overlap and a life
 reaching KTX's 120 s `SUB_Remove` timeout is `expired`; anything else is
 `unobserved`.
 
+**The touch replays `BackpackTouch`'s mode guard, not just its liveness
+check.** KTX also refuses a pack to a pent carrier in DMM4, a quad carrier
+in midair, a ring carrier in instagib and a player at 300+ health under LGC
+(`items.c:2393-2425`) — each of which leaves the pack lying there, so
+crediting the pickup to them would name the wrong player and stop the search
+for the right one. All four read state the wire broadcasts (the powerup
+possession intervals and the health stream) and are gated on the detected
+mode. The fifth, RA's waiting area, has no wire representation and is
+documented as a residual rather than guessed at. Spectators need no gate:
+mvdsv writes no playerinfo for one, so a spectating stretch has no positions
+to test.
+
+**The 120 s boundary is derived, not a constant.** `expired` used to mean
+"the timeout less two seconds"; it now means "the timeout less three
+broadcast intervals of the demo's own cadence" — one each for the frame
+quantisation of the pack's first and last visible frame, and one for
+`nextthink` firing on the first server frame past the deadline. A flat slack
+cannot be right at both 13 ms and 40 ms per frame. In the same window a
+touch now has to be WITNESSED at a broadcast sample to outrank `SUB_Remove`,
+because a swept path is also what running past an expiring pack looks like.
+The two classes are far apart and the change scores identically: over the
+ground truth, not one of 9 793 real pickups reaches a 118 000 ms lifetime,
+while 189 of 190 real expiries sit at or above 119 900.
+
 **A stat-flip tier was considered and is not needed.** `//ktx bp` fires on
 every RL/LG pack touch regardless of what the picker already held, and
 `other->s.v.items |= new` cannot change a bit they already had: only 237 of
@@ -178,6 +202,14 @@ samples bracketing the disappearance and on the path between them (167),
 a liveness-derivation edge (8), and the bind refusals (10). A `picked` row
 with no `picker` means two players were on the pack and nothing separated
 them — 22 rows, stated rather than guessed.
+
+Sweeping the PACK along its own origin track instead of holding it at its
+last broadcast — the obvious fix for that 167 — was implemented and
+measured: it costs 249 real pickups (recall 96.13% → 93.64%) for no
+precision gain, because the pack's last origin is a sample taken in the
+frame it left the wire while its earlier ones are samples of where it no
+longer was. Reverted, with the measurement recorded in `BACKPACKS.md` so it
+is not re-proposed.
 
 What still cannot be said, and so is still absent: **`hadBefore`**, and
 therefore pack transfer credit and pack kill credit. This is why the
