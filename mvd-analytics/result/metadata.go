@@ -76,12 +76,15 @@ type FinalScores struct {
 	Score2 int    `json:"score2"`
 }
 
-// MatchSettings is the structured view of the KTX countdown table.
-// All fields are optional — only those that appeared in the centerprint
-// for this particular demo are populated.
+// MatchSettings is the structured view of the settings KTX publishes at
+// match start: the countdown centerprint table, plus the extra rows
+// ShowMatchSettings broadcasts as level-2 prints beside it. All fields are
+// optional — only those that appeared for this particular demo are
+// populated.
 //
-// Source: ktx/src/match.c PrintCountdown() — search for `strlcat(text, ...)`
-// to see the format strings.
+// Sources: ktx/src/match.c PrintCountdown() — search for `strlcat(text, ...)`
+// to see the centerprint format strings — and ShowMatchSettings()
+// (match.c:2077-2141) for the broadcast rows.
 type MatchSettings struct {
 	Mode       string `json:"mode,omitempty"`       // "Duel" / "Team" / "FFA" / "LGC" / "CA" / "CTF" / etc.
 	Deathmatch int    `json:"deathmatch,omitempty"` // 0..5
@@ -102,5 +105,12 @@ type MatchSettings struct {
 	VWep       bool   `json:"vwep,omitempty"`
 	Noweapon   string `json:"noweapon,omitempty"` // disabled weapons, e.g. "gl" or "gl axe"
 	Matchtag   string `json:"matchtag,omitempty"` // tournament/event tag, e.g. "qwsldraft"
-	SOCDv2     string `json:"socdv2,omitempty"`   // "stats" / "warn" / "block"
+	// Fairpacks is the k_frp ruleset for what a dropped backpack contains:
+	// "best weapon" (k_frp 1) or "last weapon fired" (k_frp 2). Empty means
+	// the default, k_frp 0 — "the weapon the victim was holding" — because
+	// KTX broadcasts the row ONLY when the setting is non-default
+	// (ShowMatchSettings, ktx/src/match.c:2086-2107). Absence is therefore
+	// informative here, not unknown.
+	Fairpacks string `json:"fairpacks,omitempty"`
+	SOCDv2    string `json:"socdv2,omitempty"` // "stats" / "warn" / "block"
 }

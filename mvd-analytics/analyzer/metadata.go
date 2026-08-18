@@ -46,6 +46,7 @@ import (
 type MetadataAnalyzer struct {
 	serverInfo   map[string]string
 	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
+	fairpacks    string // "best weapon" / "last weapon fired", from the ShowMatchSettings broadcast
 	finalScores  *FinalScores
 	timing       MatchTimingDetector
 }
@@ -105,8 +106,37 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		// Latch the match start so we stop overwriting countdownRaw with
 		// any post-match centerprint that happens to mention "Countdown".
 		a.timing.OnPrint(e)
+		a.captureBroadcastSetting(e)
 	}
 	return nil
+}
+
+// fairpacksPrefix is the ShowMatchSettings row KTX broadcasts (level 2)
+// right after the countdown, and ONLY when k_frp is non-default
+// (ktx/src/match.c:2086-2107) — so seeing it at all is the signal.
+const fairpacksPrefix = "Fairpacks setting:"
+
+// captureBroadcastSetting picks the settings rows KTX prints beside the
+// countdown centerprint rather than inside it. The value is redtext (high-bit
+// characters), so it goes through the same normalisation the centerprint
+// path uses.
+func (a *MetadataAnalyzer) captureBroadcastSetting(e *events.PrintEvent) {
+	if a.fairpacks != "" {
+		return
+	}
+	text := events.NormalizeQuakeText([]byte(e.Message))
+	i := strings.Index(text, fairpacksPrefix)
+	if i < 0 {
+		return
+	}
+	v := strings.TrimSpace(text[i+len(fairpacksPrefix):])
+	if i := strings.IndexByte(v, '\n'); i >= 0 {
+		v = strings.TrimSpace(v[:i])
+	}
+	if v == "" || v == "off" {
+		return
+	}
+	a.fairpacks = v
 }
 
 // parseFullserverinfo extracts the quoted cvar string from a stufftext like
@@ -164,6 +194,14 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 	if a.countdownRaw != "" {
 		mr.CountdownText = a.countdownRaw
 		mr.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
+	}
+	// The fairpacks row rides beside the countdown, not inside it, so it can
+	// arrive on a demo whose centerprint never parsed into a table.
+	if a.fairpacks != "" {
+		if mr.MatchSettings == nil {
+			mr.MatchSettings = &MatchSettings{}
+		}
+		mr.MatchSettings.Fairpacks = a.fairpacks
 	}
 
 	mr.FinalScores = a.finalScores
