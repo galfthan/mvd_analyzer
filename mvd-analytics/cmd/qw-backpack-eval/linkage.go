@@ -60,8 +60,14 @@ type linkResult struct {
 	attributedOK int
 	unattributed int // we said picked, GT agrees, but named nobody
 
-	timeErr    []int32
-	wrongNames []string
+	timeErr []int32
+	// packLife is the bound pack's measured lifetime, split by what the wire
+	// says happened to it. The never-picked side is the evidence the expiry
+	// threshold is set from: KTX arms SUB_Remove for creation + 120 s, and
+	// this is what that looks like after both ends are quantised to demo
+	// frames. Without it the threshold is a guess.
+	lifeNotPicked, lifePicked []int32
+	wrongNames                []string
 	// unobsDiag explains each drop we left unobserved that the wire says was
 	// picked, in the vocabulary of the pass's own conditions.
 	unobsDiag []string
@@ -146,6 +152,23 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 		} else {
 			out.gtNotPicked++
 		}
+		if r.EntNum != 0 {
+			for pi := range reg.Core.PackEntities {
+				pk := &reg.Core.PackEntities[pi]
+				if pk.EntNum != r.EntNum || !pk.Ended {
+					continue
+				}
+				if dt := pk.Start - r.Time; dt < -1000 || dt > 1000 {
+					continue
+				}
+				if wasPicked {
+					out.lifePicked = append(out.lifePicked, pk.End-pk.Start)
+				} else {
+					out.lifeNotPicked = append(out.lifeNotPicked, pk.End-pk.Start)
+				}
+				break
+			}
+		}
 		switch r.Fate {
 		case result.BackpackFatePicked:
 			if !wasPicked {
@@ -187,6 +210,16 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 		}
 	}
 	return out
+}
+
+func countAtLeast(xs []int32, n int32) int {
+	c := 0
+	for _, x := range xs {
+		if x >= n {
+			c++
+		}
+	}
+	return c
 }
 
 // delayBucket collapses a drop-to-pickup delay into a readable class.
@@ -239,6 +272,8 @@ func reportLinkage(rows []linkResult) {
 		scored++
 		add(&tot, r)
 		tot.timeErr = append(tot.timeErr, r.timeErr...)
+		tot.lifeNotPicked = append(tot.lifeNotPicked, r.lifeNotPicked...)
+		tot.lifePicked = append(tot.lifePicked, r.lifePicked...)
 		for _, n := range r.wrongNames {
 			wrongNames[n]++
 		}
@@ -287,6 +322,19 @@ func reportLinkage(rows []linkResult) {
 	fmt.Printf("  named nobody  : %d (%.2f%%)\n", tot.unattributed, pct(tot.unattributed, tot.pickedRight))
 	fmt.Println("pickup time error (ms):")
 	printQuantilesI(tot.timeErr)
+
+	// The expiry threshold's evidence. KTX arms SUB_Remove for creation +
+	// 120 000 ms and nothing re-arms it, so the never-picked tail is where
+	// that lands once both ends are quantised to demo frames — and the
+	// picked side shows how close a real pickup ever gets to it.
+	fmt.Println("\nbound pack lifetime (ms), GT never picked:")
+	printQuantilesI(tot.lifeNotPicked)
+	fmt.Printf("  at/over 118000: %d   at/over 119900: %d   of %d\n",
+		countAtLeast(tot.lifeNotPicked, 118000), countAtLeast(tot.lifeNotPicked, 119900), len(tot.lifeNotPicked))
+	fmt.Println("bound pack lifetime (ms), GT picked:")
+	printQuantilesI(tot.lifePicked)
+	fmt.Printf("  at/over 118000: %d   at/over 119900: %d   of %d\n",
+		countAtLeast(tot.lifePicked, 118000), countAtLeast(tot.lifePicked, 119900), len(tot.lifePicked))
 
 	if len(wrongNames) > 0 {
 		fmt.Println("\nwrong attributions:")
