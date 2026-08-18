@@ -20,6 +20,10 @@
 // Volume mode (-volume) skips the GT scoring and instead reports the
 // drops-per-death rate of whatever the pipeline produced — the sanity check
 // for the hint-less population, where no ground truth exists.
+//
+// Linkage mode (-linkage) scores the PICKUP side — which pack was taken, by
+// whom, and when — against the `//ktx bp` hints, with both hints withheld.
+// See linkage.go.
 package main
 
 import (
@@ -72,6 +76,10 @@ type demoResult struct {
 	// the pass's own conditions.
 	missDiag  []string
 	extraDiag []string
+	// fates counts the reconstructed rows by BackpackDrop.Fate — the
+	// pickup-side volume sanity, since no ground truth exists here either.
+	fates      map[string]int
+	attributed int
 	// invOK counts drops whose weapon the victim also OWNED per the
 	// STAT_ITEMS interval streams — an oracle independent of
 	// STAT_ACTIVEWEAPON, and the only cross-check available where no hint
@@ -108,7 +116,12 @@ func main() {
 	jobs := flag.Int("jobs", 8, "parallel demo workers")
 	worst := flag.Int("worst", 10, "how many worst-precision demos to list")
 	volume := flag.Bool("volume", false, "no ground truth: report drops-per-death volume of the shipped pipeline")
+	linkage := flag.Bool("linkage", false, "score the PICKUP linkage against the `//ktx bp` hints (see linkage.go)")
 	flag.Parse()
+	if *volume && *linkage {
+		fmt.Fprintln(os.Stderr, "qw-backpack-eval: -volume and -linkage are different experiments; pick one")
+		os.Exit(1)
+	}
 
 	if *dir == "" {
 		fmt.Fprintln(os.Stderr, "qw-backpack-eval: -dir is required")
@@ -125,6 +138,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, "qw-backpack-eval:", err)
 			os.Exit(1)
 		}
+	}
+
+	if *linkage {
+		runLinkage(*dir, names, meta, *jobs)
+		return
 	}
 
 	results := make([]demoResult, len(names))
@@ -162,6 +180,7 @@ func scoreOne(path string, m demoMeta, volume bool) demoResult {
 		byWeaponGT: map[string]int{},
 		byWeaponOK: map[string]int{},
 		byWeaponRC: map[string]int{},
+		fates:      map[string]int{},
 	}
 	reg := analyzer.NewDefaultRegistry()
 	res, err := reg.Analyze(path)
@@ -195,6 +214,10 @@ func scoreOne(path string, m demoMeta, volume bool) demoResult {
 			out.byWeaponRC[b.Weapon]++
 			if ownedAt(res, b) {
 				out.invOK++
+			}
+			out.fates[b.Fate]++
+			if b.Picker != "" {
+				out.attributed++
 			}
 		}
 		if len(res.Backpacks) == 0 {
@@ -517,7 +540,8 @@ func report(rows []demoResult, worst int) {
 }
 
 func reportVolume(rows []demoResult) {
-	var measured, withDrops, without, excluded, deaths, drops, invOK int
+	var measured, withDrops, without, excluded, deaths, drops, invOK, attributed int
+	fates := map[string]int{}
 	reasons := map[string]int{}
 	byWeapon := map[string]int{}
 	perEra := map[string]*demoResult{}
@@ -536,6 +560,10 @@ func reportVolume(rows []demoResult) {
 		deaths += r.deaths
 		drops += r.rc
 		invOK += r.invOK
+		attributed += r.attributed
+		for f, n := range r.fates {
+			fates[f] += n
+		}
 		for w, n := range r.byWeaponRC {
 			byWeapon[w] += n
 		}
@@ -553,6 +581,17 @@ func reportVolume(rows []demoResult) {
 		deaths, drops, ratio(drops, deaths), byWeapon["rl"], byWeapon["lg"])
 	fmt.Printf("inventory cross-check: %d/%d (%.2f%%) of drops had the weapon in STAT_ITEMS at the death\n",
 		invOK, drops, pct(invOK, drops))
+	if drops > 0 {
+		fmt.Println("\npack fate (the linkage's own volume sanity):")
+		for _, k := range sortedKeys(fates) {
+			label := k
+			if label == "" {
+				label = "(not classified — no linkage ran)"
+			}
+			fmt.Printf("  %-46s %6d  %6.2f%%\n", label, fates[k], pct(fates[k], drops))
+		}
+		fmt.Printf("  %-46s %6d  %6.2f%% of picked\n", "of which a picker was named", attributed, pct(attributed, fates[result.BackpackFatePicked]))
+	}
 	if len(reasons) > 0 {
 		fmt.Println("\nwhy no drops:")
 		for _, k := range sortedKeys(reasons) {
