@@ -16,13 +16,16 @@ import (
 // real drop and carries the dropper's slot directly, so
 // attribution is authoritative — no closest-player snap.
 //
-// Pickup tracking is intentionally NOT implemented. The wire-level
-// ItemStateEvent stream for backpack edicts produces phantom
-// visibility cycles in the 200 ms class (same edict going
-// taken/untaken repeatedly without real pickups in between) that
-// we cannot currently distinguish from genuine fast pickups. Rather
-// than report unreliable data, pickups are deferred to a later
-// branch that diagnoses the flutter source first.
+// The pickup side of a hinted drop is NOT recorded here — it is a
+// weaponPickups row, built from KTX's `//ktx bp` by WeaponPickupsAnalyzer
+// and joined on (BackpackEnt, drop time).
+//
+// What this analyzer does also record is the raw backpack-ENTITY track
+// (packLives / PopulateCore), which is the pickup evidence on a demo with
+// no hints at all. It is collected unconditionally rather than only when
+// the reconstruction will need it: whether the reconstruction runs is a
+// question about the whole Result that is not answerable during the event
+// pass, and the track is a few hundred rows per demo.
 //
 // Non-RL/LG drops (SSG/NG/SNG/GL/empty) are not surfaced: KTX only
 // emits the //ktx drop hint for RL and LG, and the QW protocol
@@ -36,6 +39,39 @@ type BackpackAnalyzer struct {
 	mapName   string
 	locFinder *locvis.Finder
 	timing    MatchTimingDetector
+
+	packOpen  map[int]*PackEntityLife // ent -> the life currently on the wire
+	packLives []PackEntityLife
+}
+
+// PackEntityLife is one continuous appearance of a `progs/backpack.mdl`
+// entity on the wire: from the frame it became visible to the frame it
+// stopped being (a pickup, KTX's 120 s SUB_Remove, or the end of the
+// recording). Times are match-relative ms, like every other published
+// timestamp.
+//
+// A life is NOT the edict's whole history. KTX `spawn()`s and
+// `ent_remove()`s packs (ktx/src/items.c:2701, 2489), so one edict carries
+// many packs over a match, and the parser closes the old one whenever the
+// model index says the edict changed hands (mvd-reader/parser/entities.go
+// diffItemEntity).
+type PackEntityLife struct {
+	EntNum int
+	// Start is the first frame the entity was visible; Spawn is where it was
+	// then — for a dropped pack, the victim's origin less 24 (items.c:2703).
+	Start int32
+	Spawn [3]float32
+	// End / Rest are the last frame it was visible and where it was then.
+	// Ended is false for a pack still on the wire when the recording stopped
+	// — the pack outlived the evidence, which is not the same as expiring.
+	End   int32
+	Rest  [3]float32
+	Ended bool
+	// Moves counts the origin updates between Start and End. A pack is
+	// tossed (velocity[2] = 300 plus a random horizontal kick,
+	// items.c:2856-2858) and settles wherever it lands, so Rest is tracked,
+	// never assumed equal to Spawn.
+	Moves int
 }
 
 // UseCoreOutputs wires CoreOutputs so Finalize can read the clock (co.Clock)
@@ -64,6 +100,7 @@ const backpackDropZOffset = 24
 func NewBackpackAnalyzer() *BackpackAnalyzer {
 	return &BackpackAnalyzer{
 		playerPos: make(map[int][3]float32),
+		packOpen:  make(map[int]*PackEntityLife),
 	}
 }
 
@@ -88,8 +125,74 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 		a.playerPos[e.PlayerNum] = e.Origin
 	case *events.BackpackDropHintEvent:
 		a.handleHint(e)
+	case *events.ItemSpawnEvent:
+		if e.Kind == packEntityKind {
+			a.openPackLife(e.EntNum, e.TimeMs, e.Origin)
+		}
+	case *events.ItemStateEvent:
+		if e.Kind == packEntityKind {
+			if e.Taken {
+				a.closePackLife(e.EntNum, e.TimeMs, e.Origin)
+			} else {
+				a.openPackLife(e.EntNum, e.TimeMs, e.Origin)
+			}
+		}
+	case *events.ItemMoveEvent:
+		if e.Kind == packEntityKind {
+			a.movePackLife(e.EntNum, e.TimeMs, e.Origin)
+		}
 	}
 	return nil
+}
+
+// packEntityKind is the ItemSpawnEvent/ItemStateEvent kind for
+// `progs/backpack.mdl` (mvd-reader/parser/entities.go modelPathToKind).
+const packEntityKind = "backpack"
+
+// openPackLife starts a life unless one is already open on that edict. The
+// guard matters because the parser announces a freshly classified entity
+// twice in the same frame — ItemSpawnEvent for "this edict is now a
+// backpack", then ItemStateEvent{Taken:false} for "and it is visible" —
+// and the two are one appearance, not two.
+func (a *BackpackAnalyzer) openPackLife(ent int, t int32, origin [3]float32) {
+	if a.packOpen[ent] != nil {
+		return
+	}
+	a.packOpen[ent] = &PackEntityLife{EntNum: ent, Start: t, Spawn: origin, Rest: origin}
+}
+
+func (a *BackpackAnalyzer) closePackLife(ent int, t int32, origin [3]float32) {
+	l := a.packOpen[ent]
+	if l == nil {
+		return
+	}
+	l.End, l.Rest, l.Ended = t, origin, true
+	a.packLives = append(a.packLives, *l)
+	delete(a.packOpen, ent)
+}
+
+// movePackLife applies one origin update to the life on that edict.
+//
+// The update is taken at face value: on this wire an origin change is always
+// the SAME pack moving, never a recycled edict masquerading as one. mvdsv
+// refuses to reallocate an edict freed less than half a second ago —
+//
+//	if (e->e.free && (e->e.freetime < 2 || sv.time - e->e.freetime > 0.5))
+//	        // mvdsv/src/pr_edict.c:123, with the comment "can cause the
+//	        // client to think the entity morphed into something else"
+//
+// — which at sv_demofps 30 is at least fifteen demo frames with the edict
+// absent, so the pack's disappearance is always broadcast before its
+// successor appears. A speed gate against sv_maxvelocity was implemented to
+// catch the case anyway and measured ZERO hits over 3 205 pack lives, so it
+// was removed rather than left in as unexercised machinery.
+func (a *BackpackAnalyzer) movePackLife(ent int, t int32, origin [3]float32) {
+	l := a.packOpen[ent]
+	if l == nil {
+		return
+	}
+	l.Rest = origin
+	l.Moves++
 }
 
 // handleHint records one BackpackDrop. The hint's PlayerEnt is the
@@ -154,6 +257,34 @@ func (a *BackpackAnalyzer) extractMapName(cmd string) {
 	if v, ok := parseInfoString(cmd)["map"]; ok {
 		a.mapName = v
 	}
+}
+
+// PopulateCore publishes the backpack-entity track, rebased to the match
+// clock exactly as the drops are. Runs after Finalize (registry.go), and
+// unconditionally — Finalize returns early when the demo carried no hints,
+// which is precisely the population the track exists for.
+func (a *BackpackAnalyzer) PopulateCore(co *CoreOutputs) {
+	// A pack still on the wire when the recording stopped is published
+	// unended rather than dropped: "we stopped watching" is a fact the
+	// linkage needs in order to refuse to call it expired.
+	for _, l := range a.packOpen {
+		a.packLives = append(a.packLives, *l)
+	}
+	a.packOpen = map[int]*PackEntityLife{}
+	ms := a.core.MatchStartMs()
+	for i := range a.packLives {
+		a.packLives[i].Start -= ms
+		if a.packLives[i].Ended {
+			a.packLives[i].End -= ms
+		}
+	}
+	sort.SliceStable(a.packLives, func(i, j int) bool {
+		if a.packLives[i].Start != a.packLives[j].Start {
+			return a.packLives[i].Start < a.packLives[j].Start
+		}
+		return a.packLives[i].EntNum < a.packLives[j].EntNum
+	})
+	co.PackEntities = a.packLives
 }
 
 // Finalize returns the collected drops sorted by time, with Loc

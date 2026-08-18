@@ -81,6 +81,15 @@ type Registry struct {
 	// WASM entry for the browser-console timing breakdown. Not part of
 	// the Result schema.
 	PhaseTimings []PhaseTiming
+
+	// Core is the CoreOutputs of the most recent analyzeSource run — the
+	// cross-analyzer scratch space that deliberately does NOT ride the
+	// Result. Per-run state exactly like PhaseTimings, and published for the
+	// same kind of caller: the evaluation harnesses, which need the wire
+	// evidence a post-processor consumed in order to re-run that post with
+	// its wire hint withheld (cmd/qw-backpack-eval reads Core.PackEntities).
+	// Nil before the first run.
+	Core *CoreOutputs
 }
 
 // ResultPostProcessor is a non-event node: it runs in the finalize pass,
@@ -262,6 +271,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	result.ParseWarnings = parseWarningsOf(source)
 
 	co := &CoreOutputs{}
+	r.Core = co
 
 	// finalizeOne runs one analyser's Finalize with CoreOutputs plumbing:
 	// a CoreConsumer reads the running CoreOutputs before its Finalize, and
@@ -465,6 +475,12 @@ func NewDefaultRegistry() *Registry {
 	// active-weapon / position streams, the frag log and the match settings,
 	// so the DAG runs it after timeline, frags-final and metadata.
 	r.RegisterPostProcessor(backpackReconPost)
+	// Backpack linkage reads each reconstructed drop's fate off the wire's
+	// backpack-entity track (co.PackEntities). It must see the finished
+	// drops, so it binds `backpacks:final`; it reads the position, liveness
+	// and RL/LG possession streams, and the item timeline for the world
+	// spawner positions that disqualify a weapon-bit tie-break.
+	r.RegisterPostProcessor(backpackLinkagePost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

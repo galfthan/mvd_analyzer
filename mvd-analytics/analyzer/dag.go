@@ -208,6 +208,11 @@ var postNodeMeta = map[string]nodeMeta{
 		provides: []string{"backpacks:final"},
 		desc:     "Reconstructed RL/LG backpack drops for demos older than the KTX `//ktx drop` hint (KTX 1.38): replays DropBackpack's default rule — the victim's wielded weapon at the death instant, dropped at their last broadcast position — into the same `backpacks` section, stamped source=reconstructed and carrying no entNum. A hint-carrying demo is never touched, and the pass stands down (leaving the section absent) on frozen weapon state, a missing frag log or active-weapon stat, a fairpacks/yawnmode/bloodfest ruleset, or a mod new enough to have hinted.",
 	},
+	"backpackLinkagePost": {
+		name: "backpack-linkage", mutates: true,
+		requires: []string{"backpacks:final", "timeline", "items"},
+		desc:     "Fate of each RECONSTRUCTED backpack drop, read off the wire's backpack-entity track: the pack that appears at the drop's time and place is bound to it, followed to where it lands, and its disappearance classified as `picked` (a live player's bounding box overlapped it, the same test the server ran before BackpackTouch — attributed when the evidence names one player), `expired` (KTX's 120 s SUB_Remove with nobody on it) or `unobserved`. Stamps `backpacks[].fate/picker/pickerTeam/pickupTime/entNum`. A hint-carrying demo is never touched: `//ktx bp` already names the picker in `weaponPickups`.",
+	},
 	"damageReconPost": {
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
