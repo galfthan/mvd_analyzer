@@ -104,10 +104,11 @@ picker's `hadBefore`, which no wire signal carries on a hint-less demo
 The drop was half the story. A reconstructed row now also says what became
 of the pack: **`fate`** — `picked`, `expired` or `unobserved` — with
 **`picker`**, **`pickerTeam`** and **`pickupTime`**, plus an **`entNum`**
-naming the backpack entity it was bound to. `ktx` rows are untouched and
-leave all four empty: `//ktx bp` names their picker outright and reaches
-consumers as a `weaponPickups` row, and a second, weaker answer beside it
-could only disagree.
+naming the backpack entity it was bound to. A `ktx` row leaves `picker` /
+`pickerTeam` / `pickupTime` empty: `//ktx bp` names their picker outright
+and reaches consumers as a `weaponPickups` row, and a second, weaker answer
+beside it could only disagree. (It does carry `fate`, but only ever
+`expired`, and only from a hint of its own — see the next section.)
 
 The plan for this had recorded the entity stream as unusable — "16.4
 visibility flips per real pack". That number was an artefact of our own
@@ -181,10 +182,10 @@ a proxy for the touch, it IS the touch. The weapon-bit gain does one narrow
 job — separating two players standing on one pack — and a gain that could
 have come from a world spawner the player is standing on is disqualified.
 
-Measured against the `//ktx bp` hints on **223 demos spanning KTX
-1.38–1.48** (10 378 scored drops, both hints withheld): picked-vs-not
-**100.00% precision and 96.13% recall**; `expired` **100.00% precision** at
-50.26% recall; **99.77%** of correct pickups carry a named picker and
+Measured against the `//ktx bp` and `//ktx expire` hints on **223 demos
+spanning KTX 1.38–1.48** (10 378 scored drops, every hint withheld):
+picked-vs-not **100.00% precision and 96.13% recall**; `expired`
+**100.00% precision and 100.00% recall**; **99.77%** of correct pickups carry a named picker and
 **99.98%** of those names are right (2 wrong in 9 591); pickup-time error
 **0 ms** at p50 and p90. Precision is 100.00% in every one of the eleven
 `ktxver` buckets and every mode. On 674 hint-less demos the fate mix is
@@ -210,6 +211,48 @@ precision gain, because the pack's last origin is a sample taken in the
 frame it left the wire while its earlier ones are samples of where it no
 longer was. Reverted, with the measurement recorded in `BACKPACKS.md` so it
 is not re-proposed.
+
+### The third backpack directive: `//ktx expire`
+
+KTX has always announced the other end of a pack's life and nothing here
+decoded it. `SUB_Remove` writes **`//ktx expire <ent>`** for every RL/LG
+pack it takes off the map untaken (`ktx/src/g_spawn.c:196-210`) — the same
+RL/LG domain as `//ktx drop` and `//ktx bp`, so the three are one family
+and a pack accounts for itself in exactly one of the latter two. The reader
+decodes it as **`BackpackExpireHintEvent`**, and `backpacks` joins it to
+the drop it closes — by edict AND time, since a match runs many packs
+through one edict — and stamps that row **`fate: "expired"`**. It is the
+only pickup-side field a `ktx` row carries, because it is the one thing the
+`weaponPickups` join cannot state: the ABSENCE of a `//ktx bp` is not
+evidence of an expiry, and 107 of 330 archive demos emit the drop hint and
+no pickup hints at all.
+
+**This is a correctness fix, not just a new field.** The Pack Drops table
+in the web UI labelled every `ktx` drop with no pickup row `expired`. Over
+the archive that reading is wrong half the time: across the 223 demos that
+carry all three directives, 10 384 drops split **10 006 `bp` + 190 `expire`
++ 188 claimed by neither hint**, with **zero** rows claiming both. The 188
+are packs the recording ended on top of — none of them has a bound pack
+entity that ever left the wire — and they now read `unobserved`, which is
+what the wire supports. The invariant note in `BACKPACKS.md` that said
+"drop ≈ bp + expire holds row by row" was measured and corrected: the
+residual is 1.8% of drops, on 102 of the 223 demos.
+
+It also fixes the **denominator** the reconstruction's expiry side was
+being judged on. Scored against "every drop with no `//ktx bp`", `expired`
+recall was 50.26% (190 / 378); scored against the packs KTX actually
+announced, it is **100.00% (190 / 190)**, at unchanged 100.00% precision,
+in every `ktxver` bucket and every mode. Nothing in the linkage changed —
+the pass was already finding every announced expiry and correctly refusing
+to claim the rest. All `picked` and attribution figures are byte-identical,
+as is the drop-side eval (314 demos, 13 777 GT drops, 99.96 / 99.96).
+
+The hint does not reach the reconstruction: measured over 531 hint-less
+demos, `//ktx expire` appears **zero** times, since it is co-emitted with
+`//ktx drop` by the same KTX generation. On the demos the reconstruction
+runs on, the expiry side stays the entity-track inference the ground truth
+above validates — and the eval withholds the hint from it exactly as it
+withholds the other two.
 
 What still cannot be said, and so is still absent: **`hadBefore`**, and
 therefore pack transfer credit and pack kill credit. This is why the

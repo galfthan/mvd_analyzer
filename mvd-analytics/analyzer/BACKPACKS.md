@@ -4,7 +4,9 @@
 mod never emitted the `//ktx drop` hint — 50.8% of the 51k archive, and
 83.9% of the reconstructed-damage era. Rows it produces are stamped
 `source: "reconstructed"`; hint-derived rows keep `source: "ktx"`, and a
-demo that carried hints is never touched.
+demo that carried hints is never touched. (The one pickup-side field a hint
+row does carry is `fate: "expired"`, and it comes from a hint of its own —
+`//ktx expire`, below — not from any inference.)
 
 Accuracy is measured on the OTHER half of the archive: demos that DO carry
 `//ktx drop`. The reconstruction runs blind — it never reads
@@ -20,7 +22,8 @@ go run ./mvd-analytics/cmd/qw-backpack-eval \
     -list gt-sample.txt \
     -csv /mnt/HC_Volume_106625439/data/readability-51k.csv -jobs 10
 
-# PICKUP side: the same experiment one layer up, against the //ktx bp hints
+# PICKUP side: the same experiment one layer up, against the //ktx bp and
+# //ktx expire hints
 go run ./mvd-analytics/cmd/qw-backpack-eval -linkage \
     -dir /mnt/HC_Volume_106625439/data/mvd \
     -list gt-sample.txt \
@@ -52,6 +55,12 @@ cannot be evidence about the reconstruction, rather than folding them in:
   `excluded`, not merely flagged). Their drops used to reach the published
   drops-per-death rate and the `STAT_ITEMS` cross-check even though both
   are statements about reconstructed rows.
+- Linkage mode scores the `expired` class against `//ktx expire` — the
+  hint path stamps it on the ground-truth row as `fate`, and the
+  reconstruction and the linkage never see it, exactly as with the other
+  two. It is NOT a second gate: a bp-carrying demo with no expiry in it
+  simply contributes no expiry evidence, which is the normal case (121 of
+  the 223 scored demos).
 - Linkage mode additionally requires the demo to emit `//ktx bp` at all:
   it skips a demo whose `weaponPickups` carries no `source: "backpack"`
   row. Measured on the probe sample, **10 of 24** demos that emit
@@ -65,30 +74,28 @@ cannot be evidence about the reconstruction, rather than folding them in:
 **Why the zero-`bp` skip is not an expiry bias.** The obvious objection to
 that last gate is that it also discards legitimate ALL-EXPIRED demos on
 bp-capable servers, which would depress `expired` recall. It does not, and
-the wire says so outright. KTX emits a THIRD directive nothing here decodes:
-`SUB_Remove` writes `//ktx expire <ent>` for every RL/LG pack it removes at
-the timeout (`ktx/src/g_spawn.c:202-210`). Counting all three over the
-archive sample:
+the wire says so outright — in KTX's THIRD backpack directive,
+`//ktx expire <ent>`, which `SUB_Remove` writes for every RL/LG pack it
+removes untaken (`ktx/src/g_spawn.c:196-210`). Counting all three over the
+330-demo archive sample:
 
-| | `//ktx drop` | `//ktx bp` | `//ktx expire` |
-|---|---|---|---|
-| a demo with no `bp` | 31–117 | 0 | 0–2 |
-| a demo with `bp` | 16, 33, 45, 50, 27 | 14, 29, 44, 50, 27 | 1, 3, 0, 0, 0 |
+| | demos | `//ktx drop` | `//ktx bp` | `//ktx expire` |
+|---|---|---|---|---|
+| demos with no `bp` | 107 | 3 844 | 0 | 44 |
+| demos with `bp` | 223 | 10 384 | 10 006 | 190 |
 
 A demo carrying 117 drop hints and **one** expire hint did not have 117
-packs expire; its packs were taken and the server never announced it. On the
-demos that do emit `bp`, drop ≈ bp + expire holds row by row — the hint set
-is complete there and absent here, which is a property of the recording, not
-of the match. Nor can it be predicted from `ktxver`: 1.38, 1.39, 1.40, 1.42
-and 1.43 all appear on both sides of the split, so a version table cannot
-separate capability from absence either. 34 of 160 drop-carrying demos are
-like this; folding them in would score every real pickup in a fifth of the
-population as a false positive.
+packs expire; its packs were taken and the server never announced it. The
+zero-`bp` population accounts for 3 844 drops with 44 expiries — 1.1% — so
+skipping it removes almost no expiry evidence, while folding it in would
+score 3 800 real pickups as false positives. Nor can the split be predicted
+from `ktxver`: 1.38, 1.39, 1.40, 1.42 and 1.43 all appear on both sides, so
+a version table cannot separate capability from absence either.
 
-`//ktx expire` is the strongest unused signal in this area: it is positive,
-per-pack evidence of exactly the class `expired` recall is stuck at 50% on.
-Decoding it would turn the expiry side from an inference into a second
-ground truth. It is out of scope here and recorded as the next lead.
+`//ktx expire` is now decoded (`mvd-reader/parser/ktx_expire.go`,
+`BackpackExpireHintEvent`) and is the ground truth the `expired` class is
+scored against — see [The expiry side is wire ground
+truth](#the-expiry-side-is-wire-ground-truth-ktx-expire) below.
 - `BackpackReconStandDown` evaluates the mode gates BEFORE the
   hinting-era gate. Ground-truth mode discounts exactly one reason — the
   one that only exists because the hint is present — and with the era
@@ -245,7 +252,10 @@ Re-measured once more after the parser gained the item-entity origin track
 (the pickup linkage's enabler, below), on a 335-demo redraw of the same
 sample: 314 scored, 13 777 ground-truth drops, **precision 99.96%, recall
 99.96%**, drop-time error 0 ms at p50/p90/p99. The drop side does not read
-entity events at all, so this is the null result it should be.
+entity events at all, so this is the null result it should be. Re-run again
+after `//ktx expire` was decoded: byte-identical (314 scored, 13 777 GT,
+99.96 / 99.96, 6 misses, 6 fabrications), which it must be — the expire hint
+lands on the PICKUP side of a hint row and the drop side never reads it.
 
 Two earlier classes were **fixed** rather than tolerated, and the
 before/after is the reason the numbers moved from 99.88 to 99.97:
@@ -478,8 +488,9 @@ The measurement that sets the boundary, over the 223-demo ground truth:
 
 | bound pack lifetime | p50 | p90 | p99 | max |
 |---|---|---|---|---|
-| GT says never picked (n=190) | 119 995 | 120 014 | 120 023 | 120 027 |
-| GT says picked (n=9 793) | 2 116 | 15 100 | 56 603 | **117 815** |
+| `//ktx expire` says it timed out (n=190) | 119 995 | 120 014 | 120 023 | 120 027 |
+| `//ktx bp` says it was taken (n=9 793) | 2 116 | 15 100 | 56 603 | **117 815** |
+| claimed by neither hint (n=0) | — | — | — | — |
 
 The two classes do not overlap and are not close: **not one** of the 9 793
 real pickups reaches 118 000 ms, and 189 of the 190 real expiries sit at or
@@ -487,6 +498,72 @@ above 119 900. Any threshold in that 2-second gap scores identically — 190
 `expired` at 100.00% precision — which is why the change is worth making for
 the right reason rather than the number: the cadence form holds on both
 recording rates, where a constant tuned to one of them does not.
+
+The third row is empty and that is a result, not a gap in the table: the 188
+drops no hint claims contribute NO bound-pack lifetime at all, because their
+packs never left the wire. Nothing in this measurement is being asked to
+separate them, which is why they land in `unobserved`.
+
+### The expiry side is wire ground truth (`//ktx expire`)
+
+The threshold above was measured against a ground truth that could only say
+"no `//ktx bp` names this pack". That is not the same claim as "it expired",
+and the difference was the whole of the `expired` recall gap. KTX states the
+expiry outright, in the third and last of its backpack directives:
+
+```c
+void SUB_Remove(void)
+{
+        if (self && streq(self->classname, "backpack"))
+        {
+                if ((self->s.v.items == IT_ROCKET_LAUNCHER) || (self->s.v.items == IT_LIGHTNING))
+                        stuffcmd_flags(world, STUFFCMD_DEMOONLY, "//ktx expire %d\n", NUM_FOR_EDICT(self));
+        }
+        ent_remove(self);
+}                                              // ktx/src/g_spawn.c:196-210
+```
+
+Same RL/LG domain as `//ktx drop` and `//ktx bp`, so the three are one
+family and a pack accounts for itself in exactly one of the latter two. The
+parser decodes it as `BackpackExpireHintEvent`; `BackpackAnalyzer` joins it
+to the drop it closes and stamps that row `fate: "expired"` — the one
+pickup-side fact a hint row carries, because the `weaponPickups` join cannot
+state it and the ABSENCE of a `bp` row is not evidence of it.
+
+**The join is by edict AND time.** A match runs many packs through one
+edict, so the hint closes the newest drop on that edict at or before it, and
+only when the gap is KTX's own timeout: `DropBackpack` arms
+`nextthink = time + 120` (`items.c:2870-2872`) and nothing re-arms it, and
+both directives are timestamped in demo time, which is `sv.time` — frozen
+while the server is paused (`mvdsv/src/sv_main.c:3296`), so not even a pause
+stretches the interval. Measured across the 330-demo sample: **all 234
+expire hints paired, at 119 953–120 027 ms after their drop** — a 74 ms
+spread, and zero orphans. The tolerance is 1 000 ms, an order of magnitude
+either side of that.
+
+**The invariant, checked at scale.** Over the 223 demos that carry all three
+directives:
+
+| | |
+|---|---|
+| `//ktx drop` rows | 10 384 |
+| — claimed by `//ktx bp` | 10 006 |
+| — claimed by `//ktx expire` | 190 |
+| — claimed by neither | 188 |
+| rows claiming BOTH | **0** |
+| demos with a non-zero `neither` residual | 102 of 223 |
+
+So `drop = bp + expire` does NOT hold row by row, and the earlier note above
+that said it does was wrong: 1.8% of drops are claimed by neither hint, on
+just under half the demos. Those are not missing hints — they are packs
+whose removal never happened inside the recording. The harness shows it
+directly: of those 188 rows, **not one** has a bound pack entity that ever
+left the wire, while all 190 wire-confirmed expiries have one with a
+lifetime at 119 953–120 027 ms. The match ended on top of them.
+
+That distinction is exactly what `expired` recall was being penalised for.
+Against "every drop with no `bp`" the pass scored 190 / 378 = 50.26%;
+against the packs KTX actually announced it scores **190 / 190**.
 
 ### Why not a stat flip — the tier that was NOT needed
 
@@ -506,54 +583,59 @@ A gain that could have come from a world spawner the player is standing on
 is disqualified (`nearWeaponSpawner`, reading the spawner positions off the
 item timeline), because it separates nothing.
 
-### Headline numbers — the PICKUP side (2026-08-18, re-run after the PR review fleet)
+### Headline numbers — the PICKUP side (2026-08-18, re-run against `//ktx expire`)
 
 **223 demos scored** (330 sampled; 107 skipped for carrying no `//ktx bp`),
 spanning KTX 1.38 through 1.48. **10 378 scored drops**, of which 10 171
-(98.01%) bound to a pack entity. Ground truth: 10 000 picked, 378 never
-picked. Both hints withheld — the reconstruction and the linkage never read
-`res.Backpacks` or `res.WeaponPickups`.
+(98.01%) bound to a pack entity. Ground truth: 10 000 picked (`//ktx bp`),
+190 expired (`//ktx expire`), 188 claimed by neither hint. All three hints
+withheld — the reconstruction and the linkage never read `res.Backpacks` or
+`res.WeaponPickups`.
 
-Re-measured after the review-fleet fixes to this side (the `BackpackTouch`
-mode guard, the cadence-derived expiry boundary and its sampled-touch
-tiebreak): **every figure below is unchanged**, including per era and per
-mode. That is the intended result. The mode guard protects rulesets this
-population does not contain, and the expiry boundary moved from a flat
-2-second slack to a derived one inside a 2-second gap where the two classes
-do not overlap — both were made for fidelity, and the run's job was to show
-they cost nothing.
+The only figure that moved when `//ktx expire` became the `expired` ground
+truth is `expired` recall, and it moved because the DENOMINATOR was wrong
+before, not because the pass changed: nothing in `backpack_linkage.go` is
+different. Every `picked` and attribution figure is byte-identical to the
+run before it.
 
 | metric | value |
 |---|---|
 | `picked` precision | **100.00%** (9 613 / 9 613) |
 | `picked` recall | **96.13%** (9 613 / 10 000) |
 | `expired` precision | **100.00%** (190 / 190) |
-| `expired` recall | 50.26% (190 / 378) |
-| `unobserved` | 575 rows (5.54%) — 387 were picked, 188 were not |
+| `expired` recall | **100.00%** (190 / 190) — was 50.26% against "no `//ktx bp`" |
+| `unobserved` | 575 rows (5.54%) — 387 were picked, **0 expired**, 188 claimed by neither hint |
 | picker named, of correct pickups | **99.77%** (9 591 / 9 613) |
 | named picker correct | **99.98%** (9 589 / 9 591) |
 | pickup-time error | **0 ms** at p50 and p90; p99 250 ms, max 5 041 ms |
 
-Per era (`ktxver`), 13–30 demos each — precision is 100.00% in every
-bucket, so only recall and attribution vary:
+The `0 expired` in the `unobserved` row is the point: the pass does not miss
+expiries at all. What it declines to call expired is the 188 packs KTX never
+said expired either.
+
+Per era (`ktxver`), 13–30 demos each — both precisions are 100.00% in every
+bucket and `expired` recall is 100.00% in all eleven, so only `picked`
+recall and attribution vary:
 
 | ktxver | 1.38 | 1.39 | 1.40 | 1.41 | 1.42 | 1.43 | 1.44 | 1.45 | 1.46 | 1.47 | 1.48 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | `picked` recall | 94.67 | 96.19 | 95.08 | 96.44 | 96.52 | 97.80 | 97.97 | 95.23 | 96.61 | 96.94 | 96.03 |
 | picker correct | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 99.79 | 100 | 99.89 | 100 |
+| GT expiries | 29 | 58 | 18 | 8 | 53 | 5 | 5 | 1 | 5 | 4 | 4 |
 
-Per mode, all at 100.00% precision: 1on1 96.98% recall (60 demos), 4on4
-95.99% (60), 2on2 97.50% (17), duel 97.99% (9), team 95.59% (9), ffa 96.97%
-(2), demos with no mode string 95.33% (65).
+Per mode, all at 100.00% `picked` precision and 100.00% `expired` recall:
+1on1 96.98% recall (60 demos), 4on4 95.99% (60), 2on2 97.50% (17), duel
+97.99% (9), team 95.59% (9), ffa 96.97% (2), demos with no mode string
+95.33% (65).
 
 ### Residual classes
 
-`expired` at 50% recall is not a 50% error rate: the complement is
-`unobserved`, which asserts nothing. The 188 never-picked packs that came
-out `unobserved` are packs that left the wire early with nobody on them —
-the largest cause being the match ending while they lay there, which the
-entity track alone cannot separate from anything else, so it is not called
-`expired`.
+`expired` has no residual left: every pack KTX announced as expired came out
+`expired`, and nothing else did. The 188 rows that carry no pickup hint and
+no expiry hint come out `unobserved`, which is the correct answer — the wire
+says nothing about them, and the harness confirms why: not one of them has a
+bound pack entity that ever left the wire, so the recording ended while they
+lay there. That class was the entire former "recall gap".
 
 The 387 real pickups that came out `unobserved` break down as:
 
@@ -627,13 +709,29 @@ table above, on an independently drawn sample. The hint-less population is
 where the `BackpackTouch` mode guard could bite, since it spans far more
 rulesets than the ground truth does, and it does not move the mix either.
 
-That is the shape the hinted population predicts. There, ground truth is
-96.4% picked / 3.6% never picked, and the linkage recovers 96.1% of the
-pickups with the remainder falling into `unobserved`; 86.7% + most of a
-10.5% `unobserved` bucket lands in the same place, and `expired` 2.80%
-sits just under the hinted 3.6% never-picked rate, as it must, since
-`expired` is the strict subset of never-picked that the 120 s timeout
-proves.
+That is the shape the hinted population predicts. There the wire's own
+account is 96.4% picked / 1.83% expired / 1.81% claimed by neither hint, and
+the linkage recovers 96.1% of the pickups and 100% of the expiries with the
+remainder falling into `unobserved`; 86.7% + most of a 10.5% `unobserved`
+bucket lands in the same place as the picked share.
+
+The `expired` share is the one figure the two populations do NOT match on:
+2.80% here against 1.83% there. That is a property of the samples, not a
+defect — the pass is 100.00% precise AND 100.00% recalling on the hinted
+population, so 2.80% is its honest estimate of THIS population's expiry
+rate, and the two samples differ in map, mode and match-length mix (they are
+drawn from disjoint `ktxdrop` halves of the archive by construction). The
+older reading of this line — "2.80% must sit under the 3.6% never-picked
+rate" — compared against the wrong quantity: 3.6% was expiries plus packs
+the recording ended on top of, and the latter are `unobserved` on both
+sides.
+
+**`//ktx expire` does not reach this population.** Measured over the same
+531-demo hint-less sample: **zero** expire hints, on every demo. The
+directive is co-emitted with `//ktx drop` by the same KTX generation, so on
+the demos the reconstruction actually runs on the expiry side is entirely
+the entity-track inference — which is exactly the arrangement the ground
+truth above validates, and why the linkage is never handed the hint.
 
 **Pack-entity coverage on the target population.** The linkage is useless
 if pre-1.38 recorders carried no entity stream. Measured on 86 demos with

@@ -1,13 +1,24 @@
 package main
 
 // Linkage mode scores the PICKUP side of the reconstruction
-// (analyzer.LinkBackpackDrops) against the second KTX ground truth: the
-// `//ktx bp <backpack_ent> <player_ent>` hints KTX emits on every RL/LG pack
-// touch (ktx/src/items.c:2489-2494), which the pipeline publishes as
-// weaponPickups rows with Source "backpack".
+// (analyzer.LinkBackpackDrops) against KTX's two remaining backpack ground
+// truths:
+//
+//   - `//ktx bp <backpack_ent> <player_ent>`, emitted on every RL/LG pack
+//     touch (ktx/src/items.c:2489-2494) and published as weaponPickups rows
+//     with Source "backpack" — the `picked` class.
+//   - `//ktx expire <ent>`, emitted when SUB_Remove takes an untaken RL/LG
+//     pack off the map (ktx/src/g_spawn.c:196-210) and published as
+//     `backpacks[].fate == "expired"` on the hint row — the `expired` class.
+//
+// The second matters because it is the only POSITIVE evidence of a
+// non-pickup. Before it was decoded, `expired` recall was scored against
+// "every drop with no `//ktx bp`", which silently folded in every pack that
+// was still lying on the floor when the match ended — a class KTX never
+// claimed had expired, and one the pass correctly refuses to call expired.
 //
 // The experiment is the drop eval's, one layer up: keep the wire's answer,
-// re-run the reconstruction AND the linkage with both hints withheld, and
+// re-run the reconstruction AND the linkage with every hint withheld, and
 // score the classification (picked / expired / unobserved), the attributed
 // picker and the pickup time.
 //
@@ -47,27 +58,39 @@ type linkResult struct {
 	demos       int // group rows only: how many demos folded in
 	pairedDrops int // reconstructed drops that matched a GT drop; the scored denominator
 
-	gtPicked, gtNotPicked int
+	// GT classes over the SCORED rows. A drop with no `//ktx bp` is not one
+	// class but two: `expired`, where `//ktx expire` announced the removal,
+	// and `neither`, where the wire said nothing about the pack at all.
+	gtPicked, gtExpired, gtNeither int
 	// confusion: our class × GT class
-	pickedRight   int // we said picked, GT agrees
-	pickedWrong   int // we said picked, GT says nobody took it
-	expiredRight  int // we said expired, GT agrees nobody took it
-	expiredWrong  int // we said expired, GT says it was picked
-	unobsGTPicked int
-	unobsGTNot    int
+	pickedRight    int // we said picked, GT agrees
+	pickedWrong    int // we said picked, GT says nobody took it
+	expiredRight   int // we said expired, the wire announced the expiry
+	expiredWrong   int // we said expired, GT says it was picked
+	expiredNoHint  int // we said expired, GT says neither picked nor expired
+	unobsGTPicked  int
+	unobsGTExpired int
+	unobsGTNeither int
+	// Wire-level hint census over ALL of the demo's `//ktx drop` rows, not
+	// just the ones the reconstruction reproduced — the population the
+	// `drop == bp + expire + neither` invariant is a statement about.
+	wireDrops, wirePicked, wireExpired, wireNeither, wireConflict int
+	wireResidualDemos                                             int // demos with at least one `neither` row
 
 	attributed   int // we said picked AND named a picker, GT agrees it was picked
 	attributedOK int
 	unattributed int // we said picked, GT agrees, but named nobody
 
 	timeErr []int32
-	// packLife is the bound pack's measured lifetime, split by what the wire
-	// says happened to it. The never-picked side is the evidence the expiry
-	// threshold is set from: KTX arms SUB_Remove for creation + 120 s, and
-	// this is what that looks like after both ends are quantised to demo
-	// frames. Without it the threshold is a guess.
-	lifeNotPicked, lifePicked []int32
-	wrongNames                []string
+	// The bound pack's measured lifetime, split by what the wire says
+	// happened to it. The `expired` side is the evidence the expiry threshold
+	// is set from: KTX arms SUB_Remove for creation + 120 s, and this is what
+	// that looks like after both ends are quantised to demo frames. Without it
+	// the threshold is a guess. The `neither` side is what a pack the
+	// recording simply ended on top of looks like, and is the class the old
+	// "no `//ktx bp`" ground truth used to fold into the expiries.
+	lifeExpired, lifeNeither, lifePicked []int32
+	wrongNames                           []string
 	// unobsDiag explains each drop we left unobserved that the wire says was
 	// picked, in the vocabulary of the pass's own conditions.
 	unobsDiag []string
@@ -121,6 +144,30 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 		return out
 	}
 
+	// Wire census over the whole hint set, before any pairing: KTX makes one
+	// `//ktx drop` per pack, and every pack that leaves the map should account
+	// for itself in exactly one of `//ktx bp` (taken) or `//ktx expire`
+	// (timed out). The residual is the pack the recording ends on top of.
+	for gi := range gtDrops {
+		g := &gtDrops[gi]
+		_, picked := picks[[2]int32{int32(g.EntNum), g.Time}]
+		expired := g.Fate == result.BackpackFateExpired
+		out.wireDrops++
+		switch {
+		case picked && expired:
+			out.wireConflict++
+		case picked:
+			out.wirePicked++
+		case expired:
+			out.wireExpired++
+		default:
+			out.wireNeither++
+		}
+	}
+	if out.wireNeither > 0 {
+		out.wireResidualDemos = 1
+	}
+
 	rc := analyzer.ReconstructBackpackDrops(res)
 	analyzer.LinkBackpackDrops(res, reg.Core.PackEntities, rc)
 
@@ -147,10 +194,17 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 		}
 		g := &gtDrops[best]
 		gp, wasPicked := picks[[2]int32{int32(g.EntNum), g.Time}]
-		if wasPicked {
+		// `//ktx expire` names this pack: the wire says SUB_Remove took it,
+		// untaken. The hint path stamped it on the GT row itself; the
+		// reconstruction and the linkage never saw it.
+		wasExpired := !wasPicked && g.Fate == result.BackpackFateExpired
+		switch {
+		case wasPicked:
 			out.gtPicked++
-		} else {
-			out.gtNotPicked++
+		case wasExpired:
+			out.gtExpired++
+		default:
+			out.gtNeither++
 		}
 		if r.EntNum != 0 {
 			for pi := range reg.Core.PackEntities {
@@ -161,10 +215,13 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 				if dt := pk.Start - r.Time; dt < -1000 || dt > 1000 {
 					continue
 				}
-				if wasPicked {
+				switch {
+				case wasPicked:
 					out.lifePicked = append(out.lifePicked, pk.End-pk.Start)
-				} else {
-					out.lifeNotPicked = append(out.lifeNotPicked, pk.End-pk.Start)
+				case wasExpired:
+					out.lifeExpired = append(out.lifeExpired, pk.End-pk.Start)
+				default:
+					out.lifeNeither = append(out.lifeNeither, pk.End-pk.Start)
 				}
 				break
 			}
@@ -188,13 +245,17 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 				out.wrongNames = append(out.wrongNames, fmt.Sprintf("said %q, wire says %q", r.Picker, gp.player))
 			}
 		case result.BackpackFateExpired:
-			if wasPicked {
+			switch {
+			case wasPicked:
 				out.expiredWrong++
-			} else {
+			case wasExpired:
 				out.expiredRight++
+			default:
+				out.expiredNoHint++
 			}
 		default:
-			if wasPicked {
+			switch {
+			case wasPicked:
 				out.unobsGTPicked++
 				why := analyzer.DiagnoseBackpackFate(res, reg.Core.PackEntities, *r, gp.player)
 				if strings.HasPrefix(why, "no backpack entity") || strings.HasPrefix(why, "nearest backpack entity") {
@@ -204,8 +265,10 @@ func scoreLinkage(path string, m demoMeta) linkResult {
 					why = fmt.Sprintf("no pack entity on the wire; the wire says it was taken %s after the drop", delayBucket(gp.time-g.Time))
 				}
 				out.unobsDiag = append(out.unobsDiag, why)
-			} else {
-				out.unobsGTNot++
+			case wasExpired:
+				out.unobsGTExpired++
+			default:
+				out.unobsGTNeither++
 			}
 		}
 	}
@@ -251,13 +314,22 @@ func reportLinkage(rows []linkResult) {
 		dst.pairedDrops += r.pairedDrops
 		dst.bound += r.bound
 		dst.gtPicked += r.gtPicked
-		dst.gtNotPicked += r.gtNotPicked
+		dst.gtExpired += r.gtExpired
+		dst.gtNeither += r.gtNeither
 		dst.pickedRight += r.pickedRight
 		dst.pickedWrong += r.pickedWrong
 		dst.expiredRight += r.expiredRight
 		dst.expiredWrong += r.expiredWrong
+		dst.expiredNoHint += r.expiredNoHint
 		dst.unobsGTPicked += r.unobsGTPicked
-		dst.unobsGTNot += r.unobsGTNot
+		dst.unobsGTExpired += r.unobsGTExpired
+		dst.unobsGTNeither += r.unobsGTNeither
+		dst.wireDrops += r.wireDrops
+		dst.wirePicked += r.wirePicked
+		dst.wireExpired += r.wireExpired
+		dst.wireNeither += r.wireNeither
+		dst.wireConflict += r.wireConflict
+		dst.wireResidualDemos += r.wireResidualDemos
 		dst.attributed += r.attributed
 		dst.attributedOK += r.attributedOK
 		dst.unattributed += r.unattributed
@@ -272,7 +344,8 @@ func reportLinkage(rows []linkResult) {
 		scored++
 		add(&tot, r)
 		tot.timeErr = append(tot.timeErr, r.timeErr...)
-		tot.lifeNotPicked = append(tot.lifeNotPicked, r.lifeNotPicked...)
+		tot.lifeExpired = append(tot.lifeExpired, r.lifeExpired...)
+		tot.lifeNeither = append(tot.lifeNeither, r.lifeNeither...)
 		tot.lifePicked = append(tot.lifePicked, r.lifePicked...)
 		for _, n := range r.wrongNames {
 			wrongNames[n]++
@@ -302,19 +375,34 @@ func reportLinkage(rows []linkResult) {
 			fmt.Printf("  %-46s %d\n", k, skipReasons[k])
 		}
 	}
+	// The wire's own account of every hinted pack, independent of what the
+	// reconstruction reproduced. KTX emits one `//ktx drop` per pack and then
+	// exactly one of `//ktx bp` / `//ktx expire` when it leaves the map, so
+	// the residual measures how often a recording simply ends on top of a
+	// pack — the class that used to be counted as a missed expiry.
+	fmt.Printf("\nwire hint census over all %d `//ktx drop` rows: bp %d + expire %d + neither %d\n",
+		tot.wireDrops, tot.wirePicked, tot.wireExpired, tot.wireNeither)
+	fmt.Printf("  rows carrying BOTH a bp and an expire hint: %d\n", tot.wireConflict)
+	fmt.Printf("  demos with a non-zero `neither` residual: %d of %d\n", tot.wireResidualDemos, scored)
+
 	fmt.Printf("\nscored drops (reconstructed AND matched to a hint): %d, of which bound to a pack entity: %d (%.2f%%)\n",
 		tot.pairedDrops, tot.bound, pct(tot.bound, tot.pairedDrops))
-	fmt.Printf("ground truth: %d picked, %d never picked\n", tot.gtPicked, tot.gtNotPicked)
+	fmt.Printf("ground truth: %d picked (`//ktx bp`), %d expired (`//ktx expire`), %d unclaimed by either hint\n",
+		tot.gtPicked, tot.gtExpired, tot.gtNeither)
 
 	saidPicked := tot.pickedRight + tot.pickedWrong
-	saidExpired := tot.expiredRight + tot.expiredWrong
+	saidExpired := tot.expiredRight + tot.expiredWrong + tot.expiredNoHint
 	fmt.Println("\nclassification:")
 	fmt.Printf("  picked   : said %d, right %d  → precision %.2f%%  recall %.2f%%\n",
 		saidPicked, tot.pickedRight, pct(tot.pickedRight, saidPicked), pct(tot.pickedRight, tot.gtPicked))
 	fmt.Printf("  expired  : said %d, right %d  → precision %.2f%%  recall %.2f%%\n",
-		saidExpired, tot.expiredRight, pct(tot.expiredRight, saidExpired), pct(tot.expiredRight, tot.gtNotPicked))
-	fmt.Printf("  unobserved: %d (%.2f%%) — %d were picked, %d were not\n",
-		tot.unobsGTPicked+tot.unobsGTNot, pct(tot.unobsGTPicked+tot.unobsGTNot, tot.pairedDrops), tot.unobsGTPicked, tot.unobsGTNot)
+		saidExpired, tot.expiredRight, pct(tot.expiredRight, saidExpired), pct(tot.expiredRight, tot.gtExpired))
+	fmt.Printf("             of the %d we called expired: %d wire-confirmed, %d the wire says were PICKED, %d claimed by neither hint\n",
+		saidExpired, tot.expiredRight, tot.expiredWrong, tot.expiredNoHint)
+	fmt.Printf("  unobserved: %d (%.2f%%) — %d were picked, %d expired, %d claimed by neither hint\n",
+		tot.unobsGTPicked+tot.unobsGTExpired+tot.unobsGTNeither,
+		pct(tot.unobsGTPicked+tot.unobsGTExpired+tot.unobsGTNeither, tot.pairedDrops),
+		tot.unobsGTPicked, tot.unobsGTExpired, tot.unobsGTNeither)
 
 	fmt.Println("\nattribution (on correctly-classified pickups):")
 	fmt.Printf("  named a picker: %d (%.2f%% of them), correct %d → %.2f%%\n",
@@ -324,13 +412,18 @@ func reportLinkage(rows []linkResult) {
 	printQuantilesI(tot.timeErr)
 
 	// The expiry threshold's evidence. KTX arms SUB_Remove for creation +
-	// 120 000 ms and nothing re-arms it, so the never-picked tail is where
-	// that lands once both ends are quantised to demo frames — and the
-	// picked side shows how close a real pickup ever gets to it.
-	fmt.Println("\nbound pack lifetime (ms), GT never picked:")
-	printQuantilesI(tot.lifeNotPicked)
+	// 120 000 ms and nothing re-arms it, so the wire-confirmed expiries are
+	// where that lands once both ends are quantised to demo frames — the
+	// picked side shows how close a real pickup ever gets to it, and the
+	// `neither` side shows that the packs no hint claims are nowhere near it.
+	fmt.Println("\nbound pack lifetime (ms), GT expired (`//ktx expire`):")
+	printQuantilesI(tot.lifeExpired)
 	fmt.Printf("  at/over 118000: %d   at/over 119900: %d   of %d\n",
-		countAtLeast(tot.lifeNotPicked, 118000), countAtLeast(tot.lifeNotPicked, 119900), len(tot.lifeNotPicked))
+		countAtLeast(tot.lifeExpired, 118000), countAtLeast(tot.lifeExpired, 119900), len(tot.lifeExpired))
+	fmt.Println("bound pack lifetime (ms), GT claimed by neither hint:")
+	printQuantilesI(tot.lifeNeither)
+	fmt.Printf("  at/over 118000: %d   at/over 119900: %d   of %d\n",
+		countAtLeast(tot.lifeNeither, 118000), countAtLeast(tot.lifeNeither, 119900), len(tot.lifeNeither))
 	fmt.Println("bound pack lifetime (ms), GT picked:")
 	printQuantilesI(tot.lifePicked)
 	fmt.Printf("  at/over 118000: %d   at/over 119900: %d   of %d\n",
@@ -362,12 +455,13 @@ func printLinkGroup(title string, m map[string]*linkResult) {
 	}
 	sort.Strings(keys)
 	fmt.Printf("\n%s:\n", title)
-	fmt.Printf("  %-24s %6s %8s %10s %10s %12s\n", "", "demos", "drops", "pickPrec", "pickRec", "attrCorrect")
+	fmt.Printf("  %-24s %6s %8s %10s %10s %12s %8s %9s\n", "", "demos", "drops", "pickPrec", "pickRec", "attrCorrect", "expN", "expRec")
 	for _, k := range keys {
 		g := m[k]
 		saidPicked := g.pickedRight + g.pickedWrong
-		fmt.Printf("  %-24s %6d %8d %9.2f%% %9.2f%% %11.2f%%\n", k, g.demos, g.pairedDrops,
-			pct(g.pickedRight, saidPicked), pct(g.pickedRight, g.gtPicked), pct(g.attributedOK, g.attributed))
+		fmt.Printf("  %-24s %6d %8d %9.2f%% %9.2f%% %11.2f%% %8d %8.2f%%\n", k, g.demos, g.pairedDrops,
+			pct(g.pickedRight, saidPicked), pct(g.pickedRight, g.gtPicked), pct(g.attributedOK, g.attributed),
+			g.gtExpired, pct(g.expiredRight, g.gtExpired))
 	}
 }
 
