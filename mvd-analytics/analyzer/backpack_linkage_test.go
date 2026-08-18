@@ -107,6 +107,35 @@ func TestBackpackLinkage_TwoDropsInOneFrameTakeTheirOwnPacks(t *testing.T) {
 	}
 }
 
+// Two adjacent deaths must not CROSS-BIND: the binding is nearest-first over
+// all (drop, pack) pairs, not a per-drop walk in drop order, and this is the
+// shape where the two disagree. The earlier drop's nearest FREE pack is the
+// later drop's pack; a drop-order greedy would let it claim that one and
+// leave the later drop with the far pack, mis-assigning BOTH. The distances
+// are exaggerated well past the measured 28-unit tail (BACKPACKS.md) purely
+// so the ordering is what decides the outcome and not the 128-unit cap.
+func TestBackpackLinkage_AdjacentDropsDoNotCrossBind(t *testing.T) {
+	f := newLinkFixture()
+	f.packs = []PackEntityLife{
+		// 5 units from the SECOND drop, 50 from the first.
+		{EntNum: 301, Start: 10000, Spawn: [3]float32{50, 0, 0},
+			End: 15000, Rest: [3]float32{50, 0, 0}, Ended: true},
+		// 55 units from the first drop, 110 from the second.
+		{EntNum: 302, Start: 10000, Spawn: [3]float32{-55, 0, 0},
+			End: 15000, Rest: [3]float32{-55, 0, 0}, Ended: true},
+	}
+	f.drops[0].Origin = [3]float32{0, 0, 0}
+	f.drops = append(f.drops, result.BackpackDrop{
+		Time: 10150, Player: "other", Weapon: "lg",
+		Origin: [3]float32{55, 0, 0}, Source: result.BackpackSourceReconstructed,
+	})
+	got := f.link()
+	if got[0].EntNum != 302 || got[1].EntNum != 301 {
+		t.Errorf("entNums = %d, %d; want 302, 301 — the globally nearest pair (drop 1 ↔ 301, 5 units) has to be assigned first, or both drops cross-bind",
+			got[0].EntNum, got[1].EntNum)
+	}
+}
+
 // No pack near the drop is a refusal, not a nearest-anything snap.
 func TestBackpackLinkage_RefusesToBindWhenNoPackIsThere(t *testing.T) {
 	for _, tc := range []struct {
@@ -219,6 +248,23 @@ func TestBackpackLinkage_SweepsThePathBetweenBroadcasts(t *testing.T) {
 	}
 }
 
+// A player who goes to SPECTATE is excluded by the position-staleness bound,
+// not by a spectator flag: mvdsv writes no playerinfo for a spectator
+// (sv_ents.c:463), so the track simply stops, while Alive overhangs the gap
+// because clipToPresence never splits on an interior hole. The pack that
+// disappears during their spectating stretch must not be credited to them,
+// even though their last recorded position was right on top of it.
+func TestBackpackLinkage_SpectatingStretchCannotTakeAPack(t *testing.T) {
+	f := newLinkFixture()
+	f.onPack(0)
+	// Alive runs to the end of the match; the samples stop at 20033.
+	f.res.Streams.Players[0].Alive = []result.Interval{{Start: 0, End: 300000}}
+	f.packs[0].End = 60000
+	if got := f.link(); got[0].Fate != result.BackpackFateUnobserved {
+		t.Errorf("fate = %q, want unobserved — ace had stopped being a player 40 s earlier", got[0].Fate)
+	}
+}
+
 // A corpse keeps streaming position samples at full rate, and BackpackTouch
 // returns immediately on ISDEAD (ktx/src/items.c:2377).
 func TestBackpackLinkage_DeadPlayersCannotTakeAPack(t *testing.T) {
@@ -230,15 +276,22 @@ func TestBackpackLinkage_DeadPlayersCannotTakeAPack(t *testing.T) {
 	}
 }
 
-// KTX removes a player's pack 120 s after the drop (items.c:2871-2872).
+// KTX arms SUB_Remove for creation + 120 s and nothing re-arms it
+// (items.c:2871-2872), so `expired` means that age and nothing looser. The
+// tolerance is one broadcast interval, not a flat slack: a lifetime is the
+// difference of two frame-quantised instants.
 func TestBackpackLinkage_ExpiryNeedsTheFullTimeout(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		life int32
 		want string
 	}{
-		{"the KTX timeout", 120000, result.BackpackFateExpired},
-		{"one frame short of it, within tolerance", 118500, result.BackpackFateExpired},
+		{"the KTX timeout", packExpiryTimeoutMs, result.BackpackFateExpired},
+		{"the full frame slack short, still the timeout",
+			packExpiryTimeoutMs - packExpirySlackFrames*packCadenceDefaultMs, result.BackpackFateExpired},
+		{"one frame past the slack is NOT the timeout",
+			packExpiryTimeoutMs - (packExpirySlackFrames+1)*packCadenceDefaultMs, result.BackpackFateUnobserved},
+		{"two seconds short is NOT the timeout", packExpiryTimeoutMs - 2000, result.BackpackFateUnobserved},
 		{"vanished early with nobody on it", 8000, result.BackpackFateUnobserved},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -248,6 +301,125 @@ func TestBackpackLinkage_ExpiryNeedsTheFullTimeout(t *testing.T) {
 				t.Errorf("fate after %dms = %q, want %q", tc.life, got[0].Fate, tc.want)
 			}
 		})
+	}
+}
+
+// endAt retimes the fixture's pack to leave the wire at `life` ms of age with
+// the player samples bracketing that instant, so a test can put someone on a
+// pack at an arbitrary lifetime.
+func (f *linkFixture) endAt(life int32, playerX ...float32) {
+	end := f.packs[0].Start + life
+	f.packs[0].End = end
+	for i := range f.res.Streams.Players {
+		p := &f.res.Streams.Players[i]
+		p.Alive = []result.Interval{{Start: 0, End: end + 60000}}
+		if i >= len(playerX) {
+			continue
+		}
+		p.Position = &result.PositionTrack{
+			T: []int32{end - 33, end + 33},
+			X: []float32{playerX[i], playerX[i]},
+			Y: []float32{0, 0},
+			Z: []float32{24, 24},
+		}
+	}
+}
+
+// The false-EXPIRY direction. A pack really taken a second before the timeout
+// whose picker's track has a hole has no toucher — but its lifetime is not
+// the timeout, so calling it `expired` would be asserting the one thing the
+// wire did not show. It stays `unobserved`.
+func TestBackpackLinkage_NearTimeoutPickupIsNotExpired(t *testing.T) {
+	f := newLinkFixture()
+	f.endAt(119000) // no player positions anywhere near the disappearance
+	if got := f.link(); got[0].Fate != result.BackpackFateUnobserved {
+		t.Errorf("fate = %q, want unobserved — 119 s is not KTX's 120 s timeout", got[0].Fate)
+	}
+}
+
+// The false-PICKUP direction. At the timeout SUB_Remove was going to fire in
+// that frame whatever was standing there, so a player who merely SWEPT across
+// the pack between two broadcasts — the coincidental run-past — does not
+// outrank it.
+func TestBackpackLinkage_TimeoutOutranksAMerelySweptTouch(t *testing.T) {
+	f := newLinkFixture()
+	f.endAt(packExpiryTimeoutMs)
+	p := f.res.Streams.Players[0].Position
+	// Outside the box at both samples, crossing it in between.
+	p.X = []float32{-60, 60}
+	if got := f.link(); got[0].Fate != result.BackpackFateExpired {
+		t.Errorf("fate = %q, want expired — a swept path does not outrank the 120 s timeout", got[0].Fate)
+	}
+}
+
+// ...but an overlap the wire actually SAMPLED does outrank it: that is a
+// player standing on the pack at a broadcast, not an inference about the gap
+// between two.
+func TestBackpackLinkage_SampledTouchOutranksTheTimeout(t *testing.T) {
+	f := newLinkFixture()
+	f.endAt(packExpiryTimeoutMs, 0)
+	if got := f.link(); got[0].Fate != result.BackpackFatePicked || got[0].Picker != "ace" {
+		t.Errorf("fate/picker = %q/%q, want picked/ace — a sampled overlap is the stronger claim",
+			got[0].Fate, got[0].Picker)
+	}
+}
+
+// BackpackTouch rejects a LIVE, overlapping player whose mode-specific state
+// the ruleset bars from taking a pack (ktx/src/items.c:2393-2425). Each case
+// puts that player on the pack alone: the server would have left the pack
+// lying there, so the replay must not call it a pickup.
+func TestBackpackLinkage_ModeIneligibleTouchersAreRefused(t *testing.T) {
+	held := []result.Interval{{Start: 0, End: 60000}}
+	for _, tc := range []struct {
+		name string
+		si   map[string]string
+		set  func(p *result.PlayerStream)
+		want string
+	}{
+		{"dmm4 pent carrier", map[string]string{"deathmatch": "4"},
+			func(p *result.PlayerStream) { p.Pent = held }, result.BackpackFateUnobserved},
+		{"pent carrier outside dmm4 is fine", map[string]string{"deathmatch": "3"},
+			func(p *result.PlayerStream) { p.Pent = held }, result.BackpackFatePicked},
+		{"midair quad carrier", map[string]string{"k_midair": "1"},
+			func(p *result.PlayerStream) { p.Quad = held }, result.BackpackFateUnobserved},
+		{"midair via the mode string", map[string]string{"mode": "2on2-midair"},
+			func(p *result.PlayerStream) { p.Quad = held }, result.BackpackFateUnobserved},
+		{"quad carrier outside midair is fine", map[string]string{"deathmatch": "3"},
+			func(p *result.PlayerStream) { p.Quad = held }, result.BackpackFatePicked},
+		{"instagib ring carrier", map[string]string{"k_instagib": "1"},
+			func(p *result.PlayerStream) { p.Ring = held }, result.BackpackFateUnobserved},
+		{"dmm4 lgc at 300 health", map[string]string{"deathmatch": "4", "mode": "1on1-lgc"},
+			func(p *result.PlayerStream) { p.Health = []result.ChangeI16{{T: 0, V: 300}} }, result.BackpackFateUnobserved},
+		{"dmm4 lgc below 300 health", map[string]string{"deathmatch": "4", "mode": "1on1-lgc"},
+			func(p *result.PlayerStream) { p.Health = []result.ChangeI16{{T: 0, V: 299}} }, result.BackpackFatePicked},
+		{"lgc outside dmm4 does not gate health", map[string]string{"deathmatch": "3", "mode": "1on1-lgc"},
+			func(p *result.PlayerStream) { p.Health = []result.ChangeI16{{T: 0, V: 300}} }, result.BackpackFatePicked},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := newLinkFixture()
+			f.onPack(0)
+			tc.set(&f.res.Streams.Players[0])
+			f.res.Metadata = &result.MetadataResult{ServerInfo: tc.si}
+			if got := f.link(); got[0].Fate != tc.want {
+				t.Errorf("fate = %q, want %q", got[0].Fate, tc.want)
+			}
+		})
+	}
+}
+
+// The rejection removes that player from the CANDIDATE set rather than
+// deciding the pack: the teammate standing on it with them is still the
+// picker, which is exactly what the server would have done.
+func TestBackpackLinkage_IneligibleTouchersLeaveTheOtherCandidate(t *testing.T) {
+	f := newLinkFixture()
+	f.onPack(0)
+	f.onPack(1)
+	f.res.Streams.Players[0].Quad = []result.Interval{{Start: 0, End: 60000}}
+	f.res.Metadata = &result.MetadataResult{ServerInfo: map[string]string{"k_midair": "1"}}
+	got := f.link()
+	if got[0].Fate != result.BackpackFatePicked || got[0].Picker != "foe" {
+		t.Errorf("fate/picker = %q/%q, want picked/foe — the quad carrier is not a candidate in midair",
+			got[0].Fate, got[0].Picker)
 	}
 }
 
