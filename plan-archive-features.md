@@ -211,6 +211,16 @@ on the demo clock. The rest of the 877 is genuinely foreign content
 (TF/custom-mod maps: genders2, blitzkrieg2, mvdsv-kg) — mark, don't
 parse.
 
+Folded in from the v72 review: on these demos the WALL CLOCK is lost too.
+`wallClockPost` returns early when `res.Streams == nil`, so the 73 that
+carry a `matchdate` publish no `dateMarkers`, no `matchStartUnixMs` and no
+grade — the stamps are read off the wire and then dropped silently, while
+`metadata.finalScores` (which does not live under `streams`) survives.
+This is structural, not a bug in the resolver: the anchor fields are
+GlobalStream fields, so surfacing them here means deciding where a
+stream-less result carries a match window at all — which is exactly what
+(a) and (b) above settle. Fix it as part of this lead, not before it.
+
 ## 9. Derived demoinfo equivalents (NEW from the 51k sweep)
 
 54% of the archive has no KTX demoinfo block, and the census shows

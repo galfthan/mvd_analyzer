@@ -261,6 +261,25 @@ func addPointEffects(s *result.Streams) {
 	}
 }
 
+// addParseWarnings installs a reader-level parse census on the served Result.
+// Every golden-corpus demo parses without a single warning, so `parseWarnings`
+// was never present in a validated body and the whole sub-schema — its groups
+// table and its counters — went unexercised, the same blind spot demoMarkers
+// had. The rows cover both categories the archive actually raises and a
+// non-zero droppedWarnings, so the retention-cap counter is validated too.
+// Assignment, not append, so the tests sharing the cached golden can both call it.
+func addParseWarnings(r *result.Result) {
+	r.ParseWarnings = &result.ParseWarnings{
+		Total:  21,
+		ByType: map[string]int{"unknown_svc": 19, "parse_error": 2},
+		Groups: []result.ParseWarningGroup{
+			{Type: "unknown_svc", Message: "svc_unknown_61 (cmd 61)", Count: 7, FirstDemoTimeMs: 61200},
+			{Type: "parse_error", Message: "svc_playerinfo: unexpected EOF", Count: 2, FirstDemoTimeMs: 400},
+		},
+		DroppedWarnings: 12,
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -321,6 +340,17 @@ func validationCases(t *testing.T) []validationCase {
 		// in from the 422 predicates.
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
+		// parseWarnings is omitempty and every golden demo parses clean, so
+		// without a synthetic census (addParseWarnings) the sub-schema is
+		// validated only against its own absence. mustContain names each
+		// field, since an empty object would satisfy the schema just as well.
+		{name: "overview-parse-warnings", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{
+				`"parseWarnings":{"total":21`,
+				`"byType":{`, `"unknown_svc":19`,
+				`"groups":[{"type":"unknown_svc","message":"svc_unknown_61 (cmd 61)","count":7,"firstDemoTimeMs":61200}`,
+				`"droppedWarnings":12`,
+			}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are
@@ -492,6 +522,8 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	addDemoMarkers(res.TimelineAnalysis)
 	// Same reason for point effects: the golden was pinned streams-off.
 	addPointEffects(res.Streams)
+	// Same reason for the reader's parse census: every golden demo is clean.
+	addParseWarnings(res)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the

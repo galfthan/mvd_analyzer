@@ -648,7 +648,7 @@ kmod-era `matchkey:` print, and the ktxstats `date` string (which names match
 *end*, also published as `matchEndUnixMs`). That reaches ~95% of the archive.
 Timezones are resolved from the printed token where there is one, and a stamp
 without one is read as UTC with `matchStartAccuracyMs` saying so
-(43 200 000). Because old servers ran with unset clocks, each anchor is graded
+(50 400 000). Because old servers ran with unset clocks, each anchor is graded
 `matchStartConfidence` = `exact` / `unverified` / `contradicted` — on
 CONTRADICTION only (a stamp predating the `*version` / `ktxver` binary's
 release), never on the date value — with `matchStartNote` naming the failed
@@ -1009,7 +1009,7 @@ diff -r /tmp/before /tmp/after
    degrades to the whole-second serverinfo `epoch` cvar
    (`demoStartAccuracyMs = 1000`), and — on the ~73% of the archive that has
    neither — is back-shifted from a wire date marker by `demoOffset` (schema
-   v72), which costs resolution: `demoStartAccuracyMs` becomes `43200000` when
+   v72), which costs resolution: `demoStartAccuracyMs` becomes `50400000` when
    the marker named no timezone. `demoStartSource` says which case a result is
    in, and `matchStartConfidence` grades the marker; a *contradicted* marker is
    deliberately not back-shifted, so `demoStartUnixMs` can still be absent. ~5%

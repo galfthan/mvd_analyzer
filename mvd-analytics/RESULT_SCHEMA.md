@@ -1746,7 +1746,7 @@ The match window plus the demo/wall-clock anchor (moved here from
 | TimeBase | `timeBase` | string, omitempty | `"demo"` when **no match start was detected** (schema v52): the rebase never ran, so *every* timestamp in the whole Result is on the raw demo clock (t=0 = demo open, warmup included). Omitted on the normal match-relative result. A matching notice appears in `errors[]` (and therefore `/overview`). |
 | DemoOffset | `demoOffset` | int32, omitempty | Ms from demo open (≈ countdown start) to match start. |
 | DemoStartUnixMs | `demoStartUnixMs` | int64, omitempty | Server wall clock (Unix epoch ms) at demo open. |
-| DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty | ± uncertainty of `demoStartUnixMs`: `1`, `1000`, or (v72, marker-derived) `3600000` / `43200000`. |
+| DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty | ± uncertainty of `demoStartUnixMs`: `1`, `1000`, or (v72, marker-derived) `3600000` / `50400000`. |
 | DemoStartSource | `demoStartSource` | string, omitempty | v72 — which source produced the demo-open anchor: `mvdhidden`, `epoch`, `matchdate`, `matchkey`, `ktxstats`. |
 | MatchStartUnixMs | `matchStartUnixMs` | int64, omitempty | v72 — server wall clock at **match** start (the instant `g=0` names). |
 | MatchStartAccuracyMs | `matchStartAccuracyMs` | int32, omitempty | v72 — ± uncertainty of `matchStartUnixMs` (see the accuracy ladder below). |
@@ -1754,7 +1754,7 @@ The match window plus the demo/wall-clock anchor (moved here from
 | MatchStartConfidence | `matchStartConfidence` | string, omitempty | v72 — `exact` \| `unverified` \| `contradicted`. |
 | MatchStartNote | `matchStartNote` | string, omitempty | v72 — names the check(s) behind a non-`exact` grade. Empty on `exact`. |
 | MatchEndUnixMs | `matchEndUnixMs` | int64, omitempty | v72 — wall clock at match end, from the ktxstats `date` string, else the year-completed `//finalscores` stamp. |
-| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried; see below. |
+| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried, **on a result that has a `streams` block**; see below and the no-streams exception under the grades table. |
 | Pauses | `pauses` | []TimelinePause, omitempty | Per-pause wall-clock segments; see below. |
 
 **Wall-clock anchor.** All other times in the result are match-relative
@@ -1803,8 +1803,10 @@ corroborates (see below):
 
 **The year-less marker.** `//finalscores` reaches 64% of the archive but
 its stamp cannot name an instant on its own. It is resolved last: the
-year comes from whichever marker did anchor the match (reported as the
-marker's `yearFrom`), and the zone is borrowed from that same marker,
+year comes from whatever anchored the match (reported as the marker's
+`yearFrom`, which therefore names a server clock — `mvdhidden` /
+`epoch` — as often as it names another marker), and the zone is borrowed
+from that same anchor,
 because both stamps come from one server's `strftime(localtime)`. What
 remains is genuine evidence — month, day, hour and minute — and it is
 cross-checked like any other marker, with a tolerance of the ktxstats
@@ -1815,6 +1817,16 @@ reported with `unixMs: 0` and no `yearFrom` rather than dropped. On a
 every anchor (119 `exact` / 1 `unverified`, unchanged from before it was
 parsed) and supplied `matchEndUnixMs` on all 120, where the ktxstats
 source reaches none of them.
+
+**The no-streams exception.** The whole wall-clock family lives on
+`streams.global`, so a result with no `streams` block at all carries none
+of it — no `dateMarkers`, no `matchStartUnixMs`, no grade — even when the
+wire did print a `matchdate`. That is the ~877 archive demos whose
+recording starts mid-match, where match-start detection never fires (73 of
+them carry a stamp that is read and then not published). `metadata.finalScores`
+does not live under `streams` and survives on those demos. Surfacing the
+rest means first deciding what match window a stream-less result has, which
+is plan lead 8's job — see `plan-archive-features.md`.
 
 Where only a print marker exists, `demoStartUnixMs` is back-shifted from
 it by `demoOffset` (so the formula above keeps working) and
@@ -1828,7 +1840,7 @@ grade travels with it.
 |---|---|
 | `1` / `1000` | the server-clock anchors, and second-resolution markers with a resolved timezone |
 | `3600000` | a zone *name* that does not state whether DST was in force (the Windows "… Standard Time" long names) |
-| `43200000` | the marker named no timezone at all (every `matchkey`, and the ctime `matchdate` layout) — read as UTC, which is right to within half a day and no better |
+| `50400000` | the marker named no timezone at all (every `matchkey`, and the ctime `matchdate` layout) — read as UTC, which is right to within the widest real offset, 14 hours, and no better |
 
 **Confidence.** Old servers ran with unset clocks, but the value alone
 never proves it (2000 is a live QuakeWorld year), so the grade is decided
@@ -1844,8 +1856,16 @@ The soft signals are markers within one demo disagreeing beyond timezone
 slack, and the boot-default window (early 2000-01) an unset RTC comes up
 in. Either alone is indistinguishable from a real match. **An anchor is
 never dropped, coerced or hidden on a failed check** — the grade plus
-`matchStartNote` (e.g. `version-floor: mvdsv 0.28 postdates the stamp
-(mvdsv 0.28 not released before 2006-01-01)`) is the whole report.
+`matchStartNote` is the whole report. The note joins the failed checks
+with `; ` and its forms are exactly:
+
+| Note | Meaning |
+|---|---|
+| `version-floor: mvdsv 0.28 was not released before 2006-01-01` | HARD — the binary the serverinfo names postdates the stamp |
+| `impossible-date: the stamp lands after 2100` | HARD — the value is corrupt, not a date |
+| `marker-disagreement: matchdate vs ktxstats` | SOFT — the chosen source vs the sources it could not be reconciled with |
+| `epoch-reset-window: the stamp lands in the unset-clock boot default (2000-01)` | SOFT |
+| `tz-unknown: the marker named no timezone, UTC assumed` | why the grade is `unverified` with no other signal |
 
 Each `dateMarkers[]` entry is a **WallClockMarker** — every stamp seen,
 used or not, so a consumer can redo the cross-check itself:
@@ -1856,7 +1876,7 @@ used or not, so a consumer can redo the cross-check itself:
 | Kind | `kind` | string | `matchStart` \| `matchEnd` |
 | UnixMs | `unixMs` | int64 | parsed instant, timezone applied; `0` on a `finalscores` stamp whose year could not be completed |
 | AtMs | `atMs` | int32, omitempty | demo-clock ms of the print that carried it (absent for the two markers that ride no print, `ktxstats` and `finalscores`) |
-| YearFrom | `yearFrom` | string, omitempty | v72 — `finalscores` only: the marker its year was taken from |
+| YearFrom | `yearFrom` | string, omitempty | v72 — `finalscores` only: the ANCHOR source its year was taken from. Same vocabulary as `matchStartSource`, so it is often a server clock rather than a marker: `mvdhidden` \| `epoch` \| `matchdate` \| `matchkey` \| `ktxstats`. Absent when nothing anchored the match (then `unixMs` is `0` too) |
 | TZ | `tz` | string, omitempty | zone token exactly as printed (`CET`, `+0200`, `Vdsteuropa, sommartid` — the Swedish long name after `Q_normalizetext` folds its high-bit `ä` to `d`) |
 | AssumedUTC | `assumedUtc` | bool, omitempty | the zone was missing or unrecognised, so UTC was assumed |
 | Raw | `raw` | string, omitempty | the stamp text after the marker prefix |

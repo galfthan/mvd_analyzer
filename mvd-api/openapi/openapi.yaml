@@ -3310,14 +3310,21 @@ components:
                 date marker back-shifted by demoOffset). Schema v72.
               type: string
             matchEndUnixMs:
-              description: "Wall-clock time of match end from the ktxstats date, Unix ms. Schema v72."
+              description: >-
+                Wall-clock time of match end, Unix ms: the ktxstats `date` (KTX
+                writes that block at intermission), else the `//finalscores`
+                stamp once its year has been completed from the anchoring
+                marker — which is the common case on the pre-ktxstats half of
+                the archive, and is minute-resolution and only as good as the
+                marker its year came from. Absent when the demo carries
+                neither. Schema v72.
               type: integer
             matchStartAccuracyMs:
               description: >-
                 Uncertainty of matchStartUnixMs, int32 ms: 1/1000 for a server
                 clock or a zoned marker, 3600000 for a zone name of unstated DST
-                status, 43200000 when the marker named no zone and UTC was
-                assumed. Schema v72.
+                status, 50400000 when the marker named no zone and UTC was
+                assumed (real offsets span UTC-12..UTC+14). Schema v72.
               maximum: 2.147483647e+09
               minimum: -2.147483648e+09
               type: integer
@@ -3462,8 +3469,10 @@ components:
             Present on 64% of the archive against demoinfo's 46%, so on the
             pre-ktxstats half this is the only place the SERVER states a final
             result. `date` is strftime "%b %d, %H:%M" with no year, no seconds
-            and no timezone — read `streams.global.dateMarkers` for the
-            resolved instant. `mode` is KTX's lastscores name ("duel", "team",
+            and no timezone — read /overview's `timing` block
+            (`matchEndUnixMs`, plus `matchStartUnixMs` and its confidence
+            grade) for the resolved instant; this API does not serve the raw
+            marker list. `mode` is KTX's lastscores name ("duel", "team",
             "FFA", "Clan Arena", ...), a different spelling from the demoinfo
             `mode`; neither is rewritten. Scores can be negative (suicides).
           additionalProperties: false

@@ -120,7 +120,7 @@ US abbreviations, numeric `%z` offsets (`+03`, `+0200`, `-05:00`), and
 the Swedish Windows locale strings, which arrive mangled because
 `Q_normalizetext` folds the high-bit `ä` of "Västeuropa" to `d`. A stamp
 with no zone is read as UTC and *says so*: `matchStartAccuracyMs` is
-43 200 000 there, against 1000 for a resolved zone.
+50 400 000 there, against 1000 for a resolved zone.
 
 Old servers ran with unset clocks, so anchors are graded — but on
 CONTRADICTION, never on the date itself (2000 is a live QuakeWorld year,
@@ -134,6 +134,25 @@ demo, the 2000-01 boot-default window) only downgrade in combination.
 **No anchor is ever dropped**: `matchStartConfidence` is `exact` /
 `unverified` / `contradicted` and `matchStartNote` names the check, with
 every stamp seen listed in `dateMarkers[]`.
+
+The release-floor table is folded into MONOTONE floors at init: its
+entries are earliest-archive-SIGHTING observations per version family, so
+an under-used family could sit above its own successor (mvdsv 1.00 was
+observed from 2024 while 1.01, the build that replaced it, was already
+stamping 2023) and contradict perfectly ordinary matches. A binary cannot
+have been released after the binary that superseded it, so each floor is
+lowered to the minimum over every later family — the permissive direction,
+and a unit test now pins the invariant so a hand edit cannot reintroduce
+the inversion. Markers from the SAME source cross-check each other too,
+compared on the instant each PROJECTS to, so a demo whose server clock
+jumped between two `matchdate` prints no longer grades `exact` on
+whichever printed first (a demo legitimately holding two matches still
+does — consistent stamps project to the same demo open). `MSK` and `YEKT`
+carry an hour of accuracy slack rather than an exact offset, because
+Russia ran permanent summer time from 2011-03-27 to 2014-10-26 and a
+single table offset cannot be right for both eras. Impossible calendar
+dates (`2024-02-31`, which `time.Date` silently normalises to 2024-03-02)
+are rejected as not-a-date instead of published.
 
 Where a demo has no server-clock source, `demoStartUnixMs` is back-shifted
 from the marker by `demoOffset` so the documented `wallClockMs` formula

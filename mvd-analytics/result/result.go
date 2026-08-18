@@ -1127,7 +1127,7 @@ package result
 //     mvdhidden 0x000B block and no `epoch` cvar — which lifts wall-clock
 //     coverage from ~25% of the archive to ~98%. `demoStartSource` says which
 //     source a given result used, and `demoStartAccuracyMs` states the cost:
-//     43 200 000 when the marker named no timezone.
+//     50 400 000 when the marker named no timezone.
 //   - Anchors are never dropped on a failed trust check: `matchStartConfidence`
 //     grades them ("exact" / "unverified" / "contradicted") and
 //     `matchStartNote` names the check. Only a "contradicted" stamp is kept out
