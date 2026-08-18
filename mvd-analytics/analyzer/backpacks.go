@@ -32,6 +32,7 @@ type BackpackAnalyzer struct {
 	core      *CoreOutputs
 	playerPos map[int][3]float32 // slot -> last-known origin (for drop origin)
 	drops     []BackpackDrop
+	dropSlots []int // parallel to drops: the dropper's wire slot, resolved at Finalize
 	mapName   string
 	locFinder *locvis.Finder
 	timing    MatchTimingDetector
@@ -83,6 +84,12 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 // dropper's edict (player_slot + 1); their most recent position is
 // the drop origin (KTX spawns the backpack at the dying player's
 // s.v.origin). Defensive: skip on unrecognised flag combos.
+//
+// The dropper's SLOT is what is recorded here — the name and team are
+// resolved in Finalize through the shared ResolveSlotAt chain, so a drop
+// carries the same display name every other section uses (an auth-override
+// player used to land here under their bare userinfo name, which joined
+// against nothing).
 func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	if !a.timing.Started || a.timing.Ended {
 		return
@@ -95,15 +102,14 @@ func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	if slot < 0 || slot >= len(a.ctx.Players) || a.ctx.Players[slot] == nil {
 		return
 	}
-	pl := a.ctx.Players[slot]
 	a.drops = append(a.drops, BackpackDrop{
 		Time:   e.TimeMs,
-		Player: pl.Name,
-		Team:   pl.Team,
 		Weapon: weapon,
 		Origin: a.playerPos[slot],
 		EntNum: e.BackpackEnt,
+		Source: backpackSourceKTX,
 	})
+	a.dropSlots = append(a.dropSlots, slot)
 }
 
 func weaponFromItemFlags(flags int) string {
@@ -139,15 +145,23 @@ func (a *BackpackAnalyzer) Finalize(result *Result) error {
 			a.locFinder = f
 		}
 	}
-	sort.Slice(a.drops, func(i, j int) bool { return a.drops[i].Time < a.drops[j].Time })
+	// Resolve the dropper before sorting, while drops and dropSlots are
+	// still parallel. ResolveSlotAt is keyed on the DEMO-clock drop time
+	// (the rebase below is the last step), so a reconnect resolves to who
+	// held the slot at the drop, not to its final occupant.
+	for i := range a.drops {
+		info := ResolveSlotAt(a.core, a.ctx.Players, a.dropSlots[i], a.drops[i].Time)
+		a.drops[i].Player = info.Name
+		a.drops[i].Team = info.Team
+	}
+	sort.SliceStable(a.drops, func(i, j int) bool { return a.drops[i].Time < a.drops[j].Time })
 	if a.locFinder != nil {
 		for i := range a.drops {
 			a.drops[i].Loc = a.locFinder.FindNearest(a.drops[i].Origin[0], a.drops[i].Origin[1], a.drops[i].Origin[2])
 		}
 	}
 	// Born-correct team labels: the roster rewrites a duel participant's team
-	// to their own name (keyed on the dropper name stamped in handleHint).
-	// Formerly the normalizeDuelTeams backpacks block.
+	// to their own name. Formerly the normalizeDuelTeams backpacks block.
 	for i := range a.drops {
 		a.drops[i].Team = a.core.TeamFor(a.drops[i].Player, a.drops[i].Team)
 	}

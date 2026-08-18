@@ -460,6 +460,11 @@ func NewDefaultRegistry() *Registry {
 	// `damage:final` artifact and its damage family carries
 	// src=reconstructed on old demos.
 	r.RegisterPostProcessor(damageReconPost)
+	// Backpack reconstruction fills the same `backpacks` section the KTX
+	// drop hints fill, on demos whose mod never emitted one. It reads the
+	// active-weapon / position streams, the frag log and the match settings,
+	// so the DAG runs it after timeline, frags-final and metadata.
+	r.RegisterPostProcessor(backpackReconPost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

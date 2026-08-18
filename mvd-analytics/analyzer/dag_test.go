@@ -21,7 +21,7 @@ var registrationOrder = []string{
 	// post-processors
 	"frags-final", "aim", "airgibs",
 	"match-final", "loc-graph", "wall-clock", "region-control", "opening", "player-stats",
-	"damage-recon",
+	"damage-recon", "backpack-recon",
 }
 
 func nodeNames(specs []nodeSpec) []string {

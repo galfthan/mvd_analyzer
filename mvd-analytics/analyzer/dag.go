@@ -119,8 +119,8 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",
 		desc: "The map's static designed entity layout (item spawns, spawnpoints, teleporters) resolved from the embedded BSP corpus."},
-	"backpacks": {name: "backpacks", requires: []string{"clock", "roster"}, resultKey: "backpacks",
-		desc: "RL/LG backpack drops from KTX drop hints, with dropper, weapon, origin, and the ent number joining to weapon pickups."},
+	"backpacks": {name: "backpacks", requires: []string{"clock", "identity", "demoinfo", "roster"}, resultKey: "backpacks",
+		desc: "RL/LG backpack drops with dropper, weapon, origin and a `source` naming the provenance: `ktx` from the wire `//ktx drop` hint (which also carries the ent number joining to weapon pickups), or `reconstructed` from the backpack-recon node on demos older than that hint."},
 	"weaponPickups": {name: "weapon-pickups", requires: []string{"clock", "identity", "frag", "roster"}, resultKey: "weaponPickups",
 		desc: "Slot-weapon acquisitions (world spawners and backpacks) with kills-before-next-death effectiveness."},
 }
@@ -192,7 +192,7 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata"},
 		resultKey: "playerStats",
 		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
 	},
@@ -201,6 +201,12 @@ var postNodeMeta = map[string]nodeMeta{
 		requires:  []string{"timeline", "items"},
 		resultKey: "opening",
 		desc:      "Match opening: each player's match-start spawn location plus the first in-match take of every contested spawner (armors, mega, powerups, RL/LG). A pure projection of items + streams, kept small for one-call fetches.",
+	},
+	"backpackReconPost": {
+		name: "backpack-recon", mutates: true,
+		requires: []string{"backpacks", "timeline", "frags:final", "metadata"},
+		provides: []string{"backpacks:final"},
+		desc:     "Reconstructed RL/LG backpack drops for demos older than the KTX `//ktx drop` hint (KTX 1.38): replays DropBackpack's default rule — the victim's wielded weapon at the death instant, dropped at their last broadcast position — into the same `backpacks` section, stamped source=reconstructed and carrying no entNum. A hint-carrying demo is never touched, and the pass stands down (leaving the section absent) on frozen weapon state, a missing frag log or active-weapon stat, a fairpacks/yawnmode/bloodfest ruleset, or a mod new enough to have hinted.",
 	},
 	"damageReconPost": {
 		name: "damage-recon", mutates: true,
