@@ -83,7 +83,7 @@ const (
 // Counting impacts instead answers a different question than the measured
 // counter does (which counts fires whose flight LINKED, so a point-blank
 // rocket that never broadcast its entity is measured as a miss): on the wire
-// log itself the two differ by +6.8pp on rl, so shipping it would put a
+// log itself the two differ by +7.3pp on rl, so shipping it would put a
 // reconstructed rl accuracy 7 points above the measured convention. A weapon
 // outside this set gets no Recon block at all rather than a weak one — its
 // fires still publish Shots.

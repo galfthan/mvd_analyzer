@@ -258,12 +258,24 @@ in percentage points:
 | sg | 307 | 81 203 | 51.8% | 50.4% | 1.1pp | 1.3pp | −1.3pp | 78% | **exact** |
 | ssg | 86 | 4 339 | 71.9% | 70.1% | 0.0pp | 1.7pp | −1.7pp | 69% | **exact** |
 | axe | 38¹ | 1 417 | 8.0% | 7.8% | 0.0pp | 0.5pp | −0.5pp | 89% | 0.1pp |
-| rl | 303 | 35 135 | 47.9% | 54.8% | 5.3pp | 6.8pp | +6.8pp | 14% | +6.8pp — the SAME error |
-| gl | 109 | 4 948 | 15.0% | 15.7% | 0.0pp | 1.3pp | +0.7pp | 69% | +1.2pp |
+| rl | 303 | 35 135 | 47.9% | 55.4% | 5.8pp | 7.4pp | +7.4pp | 13% | +7.3pp — the SAME error |
+| gl | 109 | 4 948 | 15.0% | 16.0% | 0.0pp | 1.3pp | +1.0pp | 72% | +1.0pp |
 
 ¹ axe at the ≥ 10-swing threshold (nobody swings 20 times); every other
-row is ≥ 20 fires. The golden-corpus cache (13 demos) reproduces every
-line within 0.3pp.
+row is ≥ 20 fires. The golden-corpus cache (13 demos) reproduces the
+shipped rows within 0.7pp (lg 0.1pp, sg 1.5pp, ssg 1.0pp, axe 0.0pp) and
+the rl/gl verdict unchanged (rl +7.5pp control).
+
+The rl/gl/ng/sng rows are scored by the harness itself — no source edit
+needed — through `aimcore.ReconHitsForEval`, which runs the same join for
+every weapon rather than only the shipped ones: what a weapon's join
+costs is the measurement that DECIDES whether it ships. Their link window
+is the projectile's own lifetime in `ktx/src/weapons.c` (rocket +10 s
+:1076, grenade fuse +2.5 s :1430, spike +6 s :1471) — deliberately the
+loosest bound physically possible, so that the window is not what limits
+the answer to "what does counting impacts give". A tighter window shaves
+the rl gap by well under a point (an earlier hand-edited run with a
+narrow window read +6.8pp); it does not change the verdict.
 
 **Shipped: lg, sg, ssg, axe** — the weapons whose damage lands in the
 fire's own server frame (the axe at its fixed +200 ms traceline delay).
@@ -274,7 +286,7 @@ negative bias (a hit whose delta the reconstruction attributed elsewhere
 is a lost hit; there is no mechanism that invents one).
 
 **Withheld: rl, gl** — and the number says why. The rl gap is not
-reconstruction error at all: the control produces the identical +6.8pp,
+reconstruction error at all: the control produces the identical +7.3pp,
 i.e. the two counters ask different questions. The measured `hits`
 counts fires whose TRACKED FLIGHT linked to an impact (`analyzer/
 shots.go linkProjectiles`); a point-blank rocket whose entity never
@@ -283,13 +295,19 @@ counts reconstructed impacts and correctly calls it a hit. Neither
 number is wrong; they are not comparable, and a consumer putting an old
 demo's rl accuracy beside a modern one's would be misled by 7 points.
 gl escapes only because grenades live long enough to be broadcast, so
-its method gap reads 1.2pp instead of 6.8pp — the same weakness, not a
+its method gap reads 1.0pp instead of 7.3pp — the same weakness, not a
 different one. Recovering the projectile side honestly needs the
 fire→flight association the shots analyzer builds and discards; that is
 the follow-up, not a tuning knob.
 
-**Withheld: ng, sng.** Nails link through the same flight bracket as
-rockets, and only when nail tracking is enabled at all.
+**Withheld: ng, sng** — for a stronger reason than a gap: there is no
+ground truth to compare against. Nails link through the same flight
+bracket as rockets and only when nail tracking is enabled, so the
+measured counter is 0 on every row of this corpus (8 961 sng and 3 776
+ng fires, zero measured hits). The join meanwhile recovers 18.8% / 19.9%
+accuracy from the reconstructed log and 19.2% / 20.4% from the wire log
+— numbers with nothing to validate them, which is exactly what a shipped
+tier may not be.
 
 Everything except the hit COUNT is withheld on a reconstructed section —
 per-fire `hit` columns, the pellet split, direct/splash, the LG whiff

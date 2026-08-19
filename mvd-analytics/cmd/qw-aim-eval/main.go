@@ -15,6 +15,11 @@
 //	MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-aim-eval [-dir ...] [-workers 4]
 //	                                                           [-min-shots 20] [-diag] [-csv out.csv]
 //
+// Scoring covers EVERY weapon the join can run for, not only the ones the
+// shipped tier publishes (aimcore.ReconHitsForEval) — the rl/gl figures are the
+// evidence for withholding rl/gl, so they have to be reproducible from a clean
+// checkout. The `tier` column says which rows production actually publishes.
+//
 // Run from the repo root: the reconstruction wants ./bsps.
 package main
 
@@ -39,10 +44,10 @@ import (
 type row struct {
 	demo, mode, player, weapon string
 	shots                      int
-	gtHits                     int // measured: fires linked to the wire damage stream
-	rcHits                     int // reconstructed tier
-	joinHits                   int // the recon JOIN run against the WIRE damage log
-	rcPresent                  bool
+	gtHits                     int  // measured: fires linked to the wire damage stream
+	rcHits                     int  // the recon join run against the RECONSTRUCTED log
+	joinHits                   int  // the recon join run against the WIRE damage log
+	rcPresent                  bool // the SHIPPED tier published a block for this weapon
 }
 
 func (r row) gtAcc() float64 { return frac(r.gtHits, r.shots) }
@@ -146,10 +151,16 @@ func scoreDemo(path string, diag bool) ([]row, map[int32]int, error) {
 	// measured counters were linked from, relabelled so aim takes the recon
 	// path). It separates the join method's own error — impact clustering, the
 	// projectile budget — from the reconstruction's.
+	//
+	// Both sides go through aimcore.ReconHitsForEval, which runs the join for
+	// EVERY weapon rather than only the ones the shipped tier publishes: a
+	// harness that could only score what already ships could not have produced
+	// the rl/gl numbers that decided rl/gl do not ship. What ships is scored
+	// separately below, off the real pipeline output (rcPresent).
 	joinCtl := *gtDmg
 	joinCtl.Source = result.DamageSourceReconstructed
 	res.Damage = &joinCtl
-	joinAim := aimcore.Compute(res, aimcore.Query{})
+	joinHits := aimcore.ReconHitsForEval(res)
 
 	rc, err := damagerecon.Compute(res)
 	if err != nil {
@@ -157,6 +168,7 @@ func scoreDemo(path string, diag bool) ([]row, map[int32]int, error) {
 	}
 	res.Damage = rc
 	rcAim := aimcore.Compute(res, aimcore.Query{})
+	rcAllHits := aimcore.ReconHitsForEval(res)
 	if rcAim == nil {
 		return nil, nil, fmt.Errorf("recon aim: nil")
 	}
@@ -174,23 +186,13 @@ func scoreDemo(path string, diag bool) ([]row, map[int32]int, error) {
 	}
 
 	type key struct{ player, weapon string }
-	rcHits := map[key]*result.WeaponAimRecon{}
+	shipped := map[key]*result.WeaponAimRecon{}
 	rcShots := map[key]int{}
 	for _, pa := range rcAim.Players {
 		for i := range pa.Weapons {
 			w := &pa.Weapons[i]
-			rcHits[key{pa.Player, w.Weapon}] = w.Recon
+			shipped[key{pa.Player, w.Weapon}] = w.Recon
 			rcShots[key{pa.Player, w.Weapon}] = w.Shots
-		}
-	}
-	joinHits := map[key]int{}
-	if joinAim != nil {
-		for _, pa := range joinAim.Players {
-			for i := range pa.Weapons {
-				if w := &pa.Weapons[i]; w.Recon != nil {
-					joinHits[key{pa.Player, w.Weapon}] = w.Recon.Hits
-				}
-			}
 		}
 	}
 	var out []row
@@ -202,10 +204,18 @@ func scoreDemo(path string, diag bool) ([]row, map[int32]int, error) {
 			if s, ok := rcShots[k]; ok && s != w.Shots {
 				return nil, nil, fmt.Errorf("%s/%s: shots moved %d -> %d", pa.Player, w.Weapon, w.Shots, s)
 			}
-			if rec := rcHits[k]; rec != nil {
-				r.rcPresent, r.rcHits = true, rec.Hits
+			r.rcHits = rcAllHits[pa.Player][w.Weapon]
+			r.joinHits = joinHits[pa.Player][w.Weapon]
+			// The all-weapons eval join must reproduce the pipeline's own
+			// output on the weapons the pipeline publishes; if it ever does
+			// not, every number below is measuring something else.
+			if rec := shipped[k]; rec != nil {
+				r.rcPresent = true
+				if rec.Hits != r.rcHits {
+					return nil, nil, fmt.Errorf("%s/%s: shipped tier %d != eval join %d",
+						pa.Player, w.Weapon, rec.Hits, r.rcHits)
+				}
 			}
-			r.joinHits = joinHits[k]
 			out = append(out, r)
 		}
 	}
@@ -269,7 +279,9 @@ func printWeapons(rows []row, minShots int) {
 	}
 	sort.Slice(order, func(i, j int) bool { return aimRank(order[i]) < aimRank(order[j]) })
 
-	fmt.Printf("\n== per-weapon totals (all rows). join-acc = the recon join run on the WIRE log (method control)\n")
+	fmt.Printf("\n== per-weapon totals (all rows). rc-acc = the recon join on the RECONSTRUCTED log,\n")
+	fmt.Printf("   join-acc = the same join on the WIRE log (method control), tier = the share of rows\n")
+	fmt.Printf("   the SHIPPED tier publishes (rl/gl/ng/sng are scored here but deliberately not shipped)\n")
 	fmt.Printf("   %-5s %6s %9s %9s %9s %9s %9s %9s %8s\n", "wpn", "rows", "shots", "gt-hits", "rc-hits", "gt-acc", "rc-acc", "join-acc", "tier")
 	for _, w := range order {
 		var shots, gh, rh, jh, present int
@@ -299,7 +311,7 @@ func printErrors(order []string, byW map[string][]row, minShots int, recon bool,
 	for _, w := range order {
 		var errs, signed []float64
 		for _, r := range byW[w] {
-			if !r.rcPresent || r.shots < minShots {
+			if r.shots < minShots {
 				continue
 			}
 			d := frac(r.joinHits, r.shots) - r.gtAcc()
@@ -357,14 +369,14 @@ func writeCSV(path string, rows []row) error {
 	defer f.Close()
 	w := csv.NewWriter(f)
 	defer w.Flush()
-	if err := w.Write([]string{"demo", "mode", "player", "weapon", "shots", "gtHits", "rcHits", "tier"}); err != nil {
+	if err := w.Write([]string{"demo", "mode", "player", "weapon", "shots", "gtHits", "rcHits", "joinHits", "tier"}); err != nil {
 		return err
 	}
 	for _, r := range rows {
 		if err := w.Write([]string{
 			r.demo, r.mode, r.player, r.weapon,
 			strconv.Itoa(r.shots), strconv.Itoa(r.gtHits), strconv.Itoa(r.rcHits),
-			strconv.FormatBool(r.rcPresent),
+			strconv.Itoa(r.joinHits), strconv.FormatBool(r.rcPresent),
 		}); err != nil {
 			return err
 		}

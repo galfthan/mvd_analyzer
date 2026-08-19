@@ -251,8 +251,8 @@ which separates the join method's error from the reconstruction's:
 | sg | 1.3pp | exact | yes |
 | ssg | 1.7pp | exact | yes |
 | axe | 0.5pp | 0.1pp | yes |
-| rl | 6.8pp | **+6.8pp — the same error** | no |
-| gl | 1.3pp | +1.2pp | no |
+| rl | 7.4pp | **+7.3pp — the same error** | no |
+| gl | 1.3pp | +1.0pp | no |
 
 rl/gl/ng/sng are withheld because the gap is not reconstruction error:
 the control reproduces it exactly. Their fire→impact link needs the

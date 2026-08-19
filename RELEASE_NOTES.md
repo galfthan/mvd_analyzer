@@ -53,7 +53,7 @@ shots analyzer builds and discards; from a finished Result the join can
 only count impacts, which answers a different question than the
 measured counter (that one counts fires whose flight LINKED, so a
 point-blank rocket that never broadcast its entity is measured as a
-miss). On the wire log itself the two differ by 6.8 pp on rl. Shipping
+miss). On the wire log itself the two differ by 7.3 pp on rl. Shipping
 it would put a reconstructed rl accuracy seven points above the
 measured convention with nothing saying so, so those weapons carry no
 `recon` block at all — its absence means "not recovered for this
