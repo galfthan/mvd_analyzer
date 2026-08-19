@@ -152,7 +152,11 @@ that downstream consumers render, summarise, or feed to an agent.
   WIRE log as a control, which separates the join method's own error from
   the reconstruction's (tables in `damagerecon/ACCURACY.md` §aim hit
   recovery); `-diag` prints the wire-to-reconstructed event lag
-  histogram the link windows are sized from.
+  histogram the link windows are sized from. It scores EVERY weapon
+  (`aimcore.ReconHitsForEval`), not only the lg/sg/ssg/axe the tier
+  publishes — the rl/gl/ng/sng numbers are the evidence for withholding
+  rl/gl/ng/sng, so they have to be reproducible without a source edit;
+  the `tier` column says which rows production actually ships.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
