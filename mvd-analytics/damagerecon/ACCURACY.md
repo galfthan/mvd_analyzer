@@ -91,10 +91,11 @@ directory.
   credits every non-environmental event to exactly one attacker and one
   victim, so Σgiven ≡ Σtaken−takenEnv by construction. The harness checks
   it; it holds on every demo except where an attacker-less telefrag
-  (`world` telefrag: `isEnv`, so `aggregatePositional` charges the victim
-  but no one else, and `takenEnv` never sees it) leaves a 100-point gap —
-  ~1 demo in 600. The unattributed share therefore has to be read
-  directly, as the share of bounded damage left on `weapon: "unknown"`.
+  (`world` telefrag: `isEnv`, so `aggregatePositional` charges the
+  victim's capacity to `taken` but no one to `given`, and `takenEnv`
+  never sees it) opens a gap — 12 demos of 15 254, 1 in 1 270, gaps of
+  81–450. The unattributed share therefore has to be read directly, as
+  the share of bounded damage left on `weapon: "unknown"`.
 - **Frag anchoring is circular until the anchor is withheld.**
   `attributeOne` reads the obituary first and stamps its killer and
   weapon, so a production run agrees with the frag log at kill instants

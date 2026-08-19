@@ -206,8 +206,8 @@ ACCURACY.md records why: the h/a delta IS the reconstruction's bounded
 value (`deltas.go`), so it cannot validate magnitude; and given/taken
 symmetry is an identity `aggregate.go` enforces, not a test (it does
 expose one real gap — an attacker-less `world` telefrag charges the
-victim's `taken` with no `given` anywhere and no `takenEnv`, ~1 demo in
-600). The expected weak spot was absent too: sg attribution on E0 (0.27
+victim's `taken` with no `given` anywhere and no `takenEnv`: 12 demos of
+15 254). The expected weak spot was absent too: sg attribution on E0 (0.27
 TE_BLOOD/shot in 4on4) reads 96.2% against E5's 95.4% at 1.48. The
 "10–50× sparser" density gap is real but is a TEAM-GAME phenomenon —
 duels sit at 0.02 blood/shot in every era including E5.
