@@ -586,6 +586,7 @@ func (a *TimelineAnalyzer) rebaseToMatch(result *Result, matchStartMs int32) {
 		p.Nails = shiftAndFilterChangeI16(p.Nails, matchStartMs)
 		p.Rockets = shiftAndFilterChangeI16(p.Rockets, matchStartMs)
 		p.Cells = shiftAndFilterChangeI16(p.Cells, matchStartMs)
+		p.ActiveWeapon = shiftAndFilterChangeI16(p.ActiveWeapon, matchStartMs)
 
 		p.RL = shiftAndFilterIntervals(p.RL, matchStartMs)
 		p.LG = shiftAndFilterIntervals(p.LG, matchStartMs)

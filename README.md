@@ -406,8 +406,11 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 obituary as three), `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
-`ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
+`ItemSpawnEvent`, `ItemStateEvent`, `ItemMoveEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
+`BackpackExpireHintEvent` (KTX `//ktx expire` — an RL/LG pack removed
+untaken at the 120 s timeout, the only wire statement that a pack was
+*not* picked up),
 `ItemPickupPrintEvent`,
 `PlayerDepartureEvent` / `PlayerRejoinEvent` (the KTX/kmod roster
 broadcasts — "left the game with N frags", "rejoins the game with N
@@ -415,6 +418,9 @@ frags", "reenters the game without stats"; decoded once in the parser
 because the wire fragments them at arbitrary points, including inside
 the number),
 `DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
+`FinalScoresEvent` (KTX `//finalscores` end-of-match scoreline — the
+server's own mode, map and final result, on 64% of the archive against
+the demoinfo block's 46%),
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
 `SoundEvent` (`svc_sound` — emitting entity + channel + resolved sound
@@ -435,15 +441,18 @@ source-agnostic.
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
 death/spawn by comparing samples across the sampling boundary.
-`ItemSpawnEvent` / `ItemStateEvent` are derived from the entity-state
-stream (`svc_spawnbaseline` + `svc_packetentities` /
-`svc_deltapacketentities`): every item's identity and
-pickup/respawn transitions come out of the wire directly — no KTX
-prints, no BSP preprocessing. `ItemPickupHintEvent` /
-`BackpackPickupHintEvent` / `BackpackDropHintEvent` carry KTX's
-authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
-touch-level pickup attribution that entity-state alone can only
-approximate. They only fire on KTX servers; non-KTX sources get
+`ItemSpawnEvent` / `ItemStateEvent` / `ItemMoveEvent` are derived from the
+entity-state stream (`svc_spawnbaseline` + `svc_packetentities` /
+`svc_deltapacketentities`): every item's identity, its
+pickup/respawn transitions (each carrying the entity's origin) and, for the
+one item class that moves — a dropped backpack, tossed with
+`MOVETYPE_TOSS` — its fall to wherever it landed, come out of the wire
+directly, with no KTX prints and no BSP preprocessing. `ItemPickupHintEvent` /
+`BackpackPickupHintEvent` / `BackpackDropHintEvent` /
+`BackpackExpireHintEvent` carry KTX's authoritative `//ktx took`,
+`//ktx bp`, `//ktx drop`, `//ktx expire` directives — the touch-level
+pickup attribution that entity-state alone can only approximate, plus the
+one directive that states a pack was never taken. They only fire on KTX servers; non-KTX sources get
 entity-state and stats deltas. `ItemPickupPrintEvent` parses the
 per-client "You got the X" / "You receive N health" prints that
 target the picking player via `dem_single`; it fills the gap where
@@ -478,8 +487,17 @@ normalized crosshair-error samples for hitscan, LG ramp-onto-target, rocket
 direct/splash, LG reach/whiff, and enemy/team/self hit-counter slices;
 exact target attribution in duels, a labeled nearest-crosshair heuristic
 in team games),
-backpacks (RL/LG drops attributed to the dropping player via KTX's
-`//ktx drop` hint), weaponPickups (every slot-weapon acquisition —
+backpacks (RL/LG drops attributed to the dropping player, each row
+stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
+where the mod predates that hint — a replay of KTX's own `DropBackpack`
+rule from the death instant, the wielded-weapon stat and the death
+position, validated at 99.97% precision/recall against the hints; a
+reconstructed row also carries the pack's `fate` — `picked` with the
+`picker` named, `expired` at KTX's 120 s removal timeout, or
+`unobserved` — read off the wire's backpack-entity track, 100% precision
+and 96.1% recall against the `//ktx bp` hints and 100%/100% on `expired`
+against `//ktx expire`, which a `ktx` row carries as its own `fate`),
+weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`), opening (schema v51 — each player's
@@ -637,6 +655,23 @@ carries no wall-clock source; implausible `0x000B` payloads fall back to
 `streams.global` and exposed via the REST `/overview` `timing` block in
 v23**, alongside `matchStart`/`matchEnd`.)
 
+Both of those sources are modern-mvdsv features, present on ~25% of the
+archive. Schema **v72** adds a second anchor beside them — `matchStartUnixMs`,
+the wall clock at *match* start — read from the date markers the wire has
+always carried: KTX's `matchdate:` broadcast print (ISO or ctime layout), the
+kmod-era `matchkey:` print, and the ktxstats `date` string (which names match
+*end*, also published as `matchEndUnixMs`). That reaches ~95% of the archive.
+Timezones are resolved from the printed token where there is one, and a stamp
+without one is read as UTC with `matchStartAccuracyMs` saying so
+(50 400 000). Because old servers ran with unset clocks, each anchor is graded
+`matchStartConfidence` = `exact` / `unverified` / `contradicted` — on
+CONTRADICTION only (a stamp predating the `*version` / `ktxver` binary's
+release), never on the date value — with `matchStartNote` naming the failed
+check and `dateMarkers[]` listing every stamp seen. Nothing is dropped. Where
+the demo has no server-clock source, `demoStartUnixMs` is back-shifted from an
+uncontradicted marker by `demoOffset` so the formula above keeps working, and
+`demoStartSource` records which source it came from.
+
 Schema v24–v28 enrich the position track with map-geometry-derived
 per-sample columns: height above the floor (`h`, v24 — traced through the
 map's BSP clip hull, later refined to a bounding-box footprint in v26 and
@@ -674,6 +709,19 @@ wire-exact against mvdsv's `SV_PlayerVisibleToClient`. PVS ⊇ LOS by
 construction; the PVS-minus-LOS gap is an occlusion-tolerant
 proximity/awareness signal. Both are surfaced through the REST/MCP
 `/los` endpoint, the CLI, and the web map overlay.
+
+Two fields report that a result is degraded, and they are deliberately
+separate. `errors[]` carries ANALYZER-level failures over events that
+decoded fine (a `Finalize` returned an error, the event stream aborted
+mid-demo). `parseWarnings` (schema v72) carries the layer below — the
+reader's own census of bytes it could not decode at all: unknown `svc_*`
+commands, unknown temp-entity or hidden-message types, payloads that
+failed to parse, with exact totals, per-category counts and a capped
+sample table of distinct messages. It is collected on **every** run
+(previously only in the diagnostic test harness, which is how the
+`sv_bigcoords` desync degraded ~5% of the archive unnoticed) and omitted
+entirely on a clean parse. `qw-analyze` prints a one-line summary to
+stderr when a demo raises any, and `-warn` prints the whole table.
 
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
 observable change to the analysis output — additive ones included, and
@@ -873,6 +921,31 @@ diff -r /tmp/before /tmp/after
    backlog distilled from the archive survey in
    [`plan-archive-features.md`](plan-archive-features.md).
 
+0b. **Reconstructed backpack drops are a replay, not a measurement.** On
+   demos older than the KTX `//ktx drop` hint (KTX 1.38 — 51% of the
+   archive) the `backpack-recon` node fills the same `backpacks` section
+   by replaying `DropBackpack`'s own rule over the recorded
+   wielded-weapon stat, stamped `source: "reconstructed"`. Validated at
+   99.97% precision and recall against the hints on 316 archive demos, so
+   it is far stronger than the damage reconstruction. Its PICKUP side is
+   read off the wire's backpack-entity track by the `backpack-linkage`
+   node and published on the same row (`fate` / `picker` / `pickerTeam` /
+   `pickupTime`, schema v72): 100% precision and 96.1% recall on
+   picked-vs-not, 99.98% correct pickers, measured against the `//ktx bp`
+   hints on 223 demos, and 100% precision and recall on `expired` against
+   KTX's third backpack directive `//ktx expire` — which a hint-carrying
+   row publishes as its own `fate`, the only wire statement that a pack
+   was NOT taken. What stays out of reach: a pack taken inside the
+   demo frame it dropped in never reaches the wire at all (2% of drops,
+   the largest residual); pack TRANSFER credit and kill credit still need
+   the hint, because `hadBefore` is not derivable; and the server-side
+   `dp 0` (drops disabled) setting is published nowhere on the wire, so it
+   cannot be ruled out on a pre-1.38 demo. Where the
+   evidence is unmeasurable — frozen weapon state, no frag log, a
+   fairpacks/yawnmode/bloodfest ruleset — the section is left absent
+   rather than half-filled. Accuracy tables and stand-down conditions:
+   [`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of
    RL/GL usage undercounts. The `shots` analyzer sidesteps this by keying on
@@ -974,9 +1047,15 @@ diff -r /tmp/before /tmp/after
    `demoStartUnixMs` is millisecond-accurate (`demoStartAccuracyMs = 1`)
    only when the demo carries the mvdhidden `0x000B` block; otherwise it
    degrades to the whole-second serverinfo `epoch` cvar
-   (`demoStartAccuracyMs = 1000`), and is absent entirely when neither is
-   present (e.g. non-KTX or pre-2026 demos). It anchors **demo open**, not
-   match start — consumers add `demoOffset` to reach the match. Some 2026
+   (`demoStartAccuracyMs = 1000`), and — on the ~73% of the archive that has
+   neither — is back-shifted from a wire date marker by `demoOffset` (schema
+   v72), which costs resolution: `demoStartAccuracyMs` becomes `50400000` when
+   the marker named no timezone. `demoStartSource` says which case a result is
+   in, and `matchStartConfidence` grades the marker; a *contradicted* marker is
+   deliberately not back-shifted, so `demoStartUnixMs` can still be absent. ~5%
+   of the archive carries no date signal at all. It anchors **demo open**, not
+   match start — consumers add `demoOffset` to reach the match, or read
+   `matchStartUnixMs`. Some 2026
    demos emit a `0x000B` block that is not a timestamp at all (a 1–2 byte
    non-wall-clock value); those are range-checked out and fall back to
    `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and

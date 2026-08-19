@@ -480,19 +480,21 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// serverinfo `map` key). That is why this node requires `metadata`:
 	// co.ServerInfoMap is published by MetadataAnalyzer.PopulateCore.
 	// MapTitle is the svc_serverdata level title, display-only.
-	mr.Map = a.core.EffectiveMap()
+	mr.Map, mr.Sources.Map = a.resolveMap()
 	if a.ctx.ServerData != nil {
 		mr.MapTitle = cleanLevelTitle(a.ctx.ServerData.LevelName)
 		mr.GameDir = a.ctx.ServerData.GameDir
 	}
-	if mr.Map == "" {
-		// Last resort only: neither shortname source named a map (no KTX
-		// demoinfo block AND no serverinfo `map` key). The level title is
-		// the sole remaining signal, so a degraded demo still reports
-		// *something* rather than an empty identity — accepting that on a
-		// map with a distinct title it is a title, not a shortname.
-		mr.Map = mr.MapTitle
+	if mr.Map == "" && mr.MapTitle != "" {
+		// Last resort only: no shortname source named a map (no KTX demoinfo
+		// block, no serverinfo `map` key, no `//finalscores`). The level
+		// title is the sole remaining signal, so a degraded demo still
+		// reports *something* rather than an empty identity — accepting that
+		// on a map with a distinct title it is a title, not a shortname,
+		// which is what Sources.Map is there to say.
+		mr.Map, mr.Sources.Map = mr.MapTitle, MatchSrcLevelTitle
 	}
+	mr.Mode, mr.Sources.Mode = a.resolveMode()
 
 	// Collect team stats
 	teamFrags := make(map[string]int)
@@ -598,7 +600,85 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 			rebuildDuelMatch(mr, a.core.DemoInfo)
 		}
 	}
+
+	a.applyFinalScoresTeams(mr)
 	return nil
+}
+
+// resolveMap resolves the canonical map SHORTNAME and names its source. The
+// first two steps are CoreOutputs.EffectiveMap split in two so the provenance
+// is legible; the third is the `//finalscores` map, which reaches demos with
+// no demoinfo block at all. (In a 32 661-demo archive slice carrying the
+// directive, none lacked a serverinfo `map` key — so the third step is a
+// guard, not a load-bearing path. It exists because a demo whose fullserverinfo
+// was cut is exactly the demo that needs it.)
+func (a *MatchAnalyzer) resolveMap() (string, string) {
+	if a.core == nil {
+		return "", ""
+	}
+	if a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
+		return a.core.DemoInfo.Map, MatchSrcKTX
+	}
+	if a.core.ServerInfoMap != "" {
+		return a.core.ServerInfoMap, MatchSrcServerInfo
+	}
+	if fs := a.core.FinalScores; fs != nil && fs.Map != "" {
+		return fs.Map, MatchSrcFinalScores
+	}
+	return "", ""
+}
+
+// resolveMode resolves KTX's game-mode name. The demoinfo block wins wherever
+// it exists — it is the same server, one code path over
+// (ktx/src/stats.c:309 GetMode) — and `//finalscores` fills the pre-ktxstats
+// half of the archive, where nothing else states a mode in this vocabulary.
+// The serverinfo `mode` key and the countdown table are deliberately NOT in
+// this chain: they speak different vocabularies ("1on1", "Duel") and stay
+// verbatim on the metadata section.
+func (a *MatchAnalyzer) resolveMode() (string, string) {
+	if a.core == nil {
+		return "", ""
+	}
+	if a.core.DemoInfo != nil && a.core.DemoInfo.Mode != "" {
+		return a.core.DemoInfo.Mode, MatchSrcKTX
+	}
+	if fs := a.core.FinalScores; fs != nil && fs.Mode != "" {
+		return fs.Mode, MatchSrcFinalScores
+	}
+	return "", ""
+}
+
+// applyFinalScoresTeams stamps the team-row provenance and, only when the
+// scoreboard produced no team rows at all, adopts the two sides KTX stated in
+// `//finalscores`.
+//
+// It never corrects a derived row, because the two figures are not always the
+// same quantity: on Clan Arena and Wipeout KTX's score is ROUNDS WON, not
+// frags (ktx/src/commands.c:6867-6886 — measured on the archive as "5" against
+// a 241-frag scoreboard), and even on a frag-scored mode KTX counts the kill
+// that ends the match while this scoreboard freezes at the match-end latch, so
+// a legitimate ±1 shows up. Overwriting would turn both of those into silent
+// corruption; reporting both sides — the derived rows here, the wire record
+// verbatim on metadata.finalScores — is what lets a consumer see them.
+//
+// It runs after the duel rebuild so it sees the final rows.
+func (a *MatchAnalyzer) applyFinalScoresTeams(mr *MatchResult) {
+	if len(mr.Teams) > 0 {
+		mr.Sources.Teams = MatchSrcDerived
+		return
+	}
+	if a.core == nil || a.core.FinalScores == nil {
+		return
+	}
+	fs := a.core.FinalScores
+	if fs.Team1 == "" && fs.Team2 == "" {
+		return
+	}
+	mr.Teams = []TeamStat{
+		{Name: fs.Team1, Frags: fs.Score1},
+		{Name: fs.Team2, Frags: fs.Score2},
+	}
+	mr.Sources.Teams = MatchSrcFinalScores
 }
 
 // rebuildDuelMatch reconstructs MatchResult.Players and .Teams for a 1v1 around

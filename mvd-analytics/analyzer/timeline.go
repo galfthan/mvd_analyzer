@@ -327,6 +327,18 @@ func (a *TimelineAnalyzer) handleUserInfo(e *events.UserInfoEvent) {
 	// than inheriting the slot's stale item bits. Only inside the match
 	// window: before it no interval is ever opened, and after it the
 	// streams are frozen and finalize closes them at the match end.
+	//
+	// The wielded-weapon column is the exception, and gets its dedup floor
+	// cut on a PRE-match handover too. It is the one stat recorded through
+	// the countdown (handleStatUpdate), so it is the one column a warmup
+	// handover can corrupt: occupant B taking the slot while holding what
+	// occupant A last held has their sample deduped against A's, and the
+	// session slice then keeps A's entry out of B's stream — leaving B with
+	// no aw sample at all, and every death of B before their next weapon
+	// switch producing no reconstructed pack.
+	if state := a.playerState[slot]; state != nil && !a.timing.Started {
+		state.streams.cutActiveWeaponDedup()
+	}
 	if a.timing.Started && !a.timing.Ended {
 		if state := a.playerState[slot]; state != nil {
 			state.streams.endOccupancy(e.TimeMs)
@@ -439,13 +451,66 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	}
 }
 
+// isActiveWeaponValue reports whether a STAT_ACTIVEWEAPON value belongs to
+// the vocabulary the `aw` column documents: one IT_* weapon bit, or 0.
+//
+// mvdsv copies the field verbatim from `ent->v->weapon` (sv_send.c:1268), and
+// every QC assignment to a player's `weapon` is a single IT_* bit —
+// W_BestWeapon's return, an explicit IT_ROCKET_LAUNCHER, or the saved parm8.
+// 0 is the one non-bit value that IS real: a client edict whose weapon was
+// never set (connected, never spawned). It is kept rather than filtered
+// because it is the honest answer to "what were they holding" — and because
+// dropping it would let the previous, staler sample stand in its place, which
+// is how a backpack that never dropped would get reconstructed.
+//
+// Anything else — a multi-bit combination, a mod's out-of-band sentinel — is
+// protocol-impossible for this field and is refused at the door rather than
+// published as a plausible weapon.
+func isActiveWeaponValue(v int) bool {
+	switch v {
+	case 0,
+		events.ITShotgun, events.ITSuperShotgun,
+		events.ITNailgun, events.ITSuperNailgun,
+		events.ITGrenadeLauncher, events.ITRocketLauncher,
+		events.ITLightning, events.ITAxe:
+		return true
+	}
+	return false
+}
+
 func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 	// Ignore all state during countdown/warmup - players have all weapons,
 	// infinite ammo, etc. which is meaningless. Match starts fresh with
 	// 100 health and base shotgun. After match end, ignore stat updates too:
 	// the intermission camera otherwise freezes the last seen value (often a
 	// KTX damage-indicator sentinel like health=1000+dmg) into every bucket.
-	if !a.timing.Started || a.timing.Ended {
+	if a.timing.Ended {
+		return nil
+	}
+	// The wielded weapon is the one stat recorded THROUGH the countdown as
+	// well. It is delta-coded on the wire (mvdsv writes a stat only when it
+	// changes, sv_send.c:1280), so a player whose weapon last changed during
+	// warmup has no in-match sample at all — and the match-start rebase
+	// carries the latest pre-match value forward to t=0 precisely so a
+	// consumer can answer "what were they holding" from the first
+	// millisecond. Warmup's meaningless all-weapons inventory does not
+	// contaminate this: KTX strips weapons at match start, which is itself a
+	// change and lands as its own sample.
+	if e.StatIndex == events.StatActiveWeapon {
+		// Bounded to the documented vocabulary so a mod sentinel can never
+		// reach the int16 column as a plausible weapon bit.
+		if isActiveWeaponValue(e.Value) {
+			a.getOrCreatePlayerState(e.PlayerNum).streams.recordActiveWeapon(e.TimeMs, int16(e.Value))
+		}
+		return nil
+	}
+	// Ignore all other state during countdown/warmup - players have all
+	// weapons, infinite ammo, etc. which is meaningless. Match starts fresh
+	// with 100 health and base shotgun. After match end, ignore stat updates
+	// too: the intermission camera otherwise freezes the last seen value
+	// (often a KTX damage-indicator sentinel like health=1000+dmg) into every
+	// bucket.
+	if !a.timing.Started {
 		return nil
 	}
 

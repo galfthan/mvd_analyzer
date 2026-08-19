@@ -94,8 +94,8 @@ func parseKtxHintInts(cmd, prefix string, n int) ([]int, bool) {
 	return out, true
 }
 
-// tryEmitKtxHints fans a stufftext payload out to the KTX pickup/drop
-// hint matchers, but only when it carries a `//ktx ` directive — the
+// tryEmitKtxHints fans a stufftext payload out to the KTX pickup/drop/
+// expire hint matchers, but only when it carries a `//ktx ` directive — the
 // common case (weapon-stat tickers, download hints, fullserverinfo)
 // short-circuits after one prefix check.
 func (p *Parser) tryEmitKtxHints(cmd string, timeMs int32) error {
@@ -108,7 +108,10 @@ func (p *Parser) tryEmitKtxHints(cmd string, timeMs int32) error {
 	if err := p.tryEmitItemPickupHint(cmd, timeMs); err != nil {
 		return err
 	}
-	return p.tryEmitBackpackPickupHint(cmd, timeMs)
+	if err := p.tryEmitBackpackPickupHint(cmd, timeMs); err != nil {
+		return err
+	}
+	return p.tryEmitBackpackExpireHint(cmd, timeMs)
 }
 
 // tryEmitItemPickupHint scans a stuffcmd payload for `//ktx took`

@@ -45,9 +45,11 @@ const (
 	EventSpawn
 	EventItemSpawn
 	EventItemState
+	EventItemMove
 	EventBackpackDropHint
 	EventItemPickupHint
 	EventBackpackPickupHint
+	EventBackpackExpireHint
 	EventItemPickupPrint
 	EventDemoStartTimestamp
 	EventPausedDuration
@@ -62,6 +64,7 @@ const (
 	EventPlayerDeparture
 	EventPlayerRejoin
 	EventPointEffect
+	EventFinalScores
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -172,6 +175,15 @@ type Parser struct {
 	diagnosticMode bool
 	decodeNails    bool // opt-in: decode svc_nails/svc_nails2 into NailsFrameEvent (off by default; high volume)
 	warnings       []Warning
+
+	// Parse-warning census, always collected (see diagnostic.go). The
+	// counters are exact; warnGroups retains at most MaxWarningGroups
+	// distinct (type, message) rows and counts every warning past that
+	// into warnDropped.
+	warnTotal   int
+	warnByType  map[string]int
+	warnGroups  map[warnKey]*warnGroup
+	warnDropped int
 
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
 	// and svc_packetentities / svc_deltapacketentities so the parser
@@ -454,6 +466,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				demoMarkSlot = msg.Header.PlayerNum
 			}
 			if err := p.tryEmitDemoMark(s, demoMarkSlot, msg.TimeMs); err != nil {
+				return err
+			}
+			// `//finalscores` is stuffed at match end and carries the
+			// server's own final scoreline (see ktx_finalscores.go).
+			if err := p.tryEmitFinalScores(s, msg.TimeMs); err != nil {
 				return err
 			}
 

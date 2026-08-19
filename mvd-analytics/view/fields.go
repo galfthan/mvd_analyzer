@@ -45,6 +45,13 @@ const (
 	FieldRockets = "rk"
 	FieldCells   = "cl"
 
+	// FieldActiveWeapon projects PlayerStream.ActiveWeapon — the WIELDED
+	// weapon as an IT_* bit (1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL, 64 LG,
+	// 4096 axe), a different question from the rl/lg/... inventory
+	// intervals. Opt-in (not in AllStandardFields) so a default query keeps
+	// its existing shape.
+	FieldActiveWeapon = "aw"
+
 	FieldSpawns = "sp"
 	FieldDeaths = "d"
 )
@@ -93,10 +100,11 @@ var fieldKinds = map[string]FieldKind{
 	FieldPent: KindInterval,
 	FieldRing: KindInterval,
 
-	FieldShells:  KindChangeI16,
-	FieldNails:   KindChangeI16,
-	FieldRockets: KindChangeI16,
-	FieldCells:   KindChangeI16,
+	FieldShells:       KindChangeI16,
+	FieldNails:        KindChangeI16,
+	FieldRockets:      KindChangeI16,
+	FieldCells:        KindChangeI16,
+	FieldActiveWeapon: KindChangeI16,
 
 	FieldSpawns: KindEventList,
 	FieldDeaths: KindEventList,
@@ -106,9 +114,10 @@ var fieldKinds = map[string]FieldKind{
 // default Fields filter and by the legacy bucket shim. Order chosen so
 // downstream JSON has a stable key sequence (helpful for byte-level
 // diffs across runs). FieldView / FieldHeight / FieldLiquid /
-// FieldVelocity are deliberately absent: they are opt-in, so a default
-// query keeps the pre-v31 shape and a consumer only pays for view /
-// height / liquid / velocity when it asks for them by code.
+// FieldVelocity and FieldActiveWeapon are deliberately absent: they are
+// opt-in, so a default query keeps the pre-v31 shape and a consumer only
+// pays for view / height / liquid / velocity / active-weapon when it asks
+// for them by code.
 var AllStandardFields = []string{
 	FieldHealth, FieldArmor, FieldArmorType, FieldLoc, FieldPosition,
 	FieldRL, FieldLG, FieldGL, FieldSSG, FieldSNG,
@@ -159,10 +168,11 @@ var DefaultReducers = map[string]string{
 	FieldPent: "first",
 	FieldRing: "first",
 
-	FieldShells:  "first",
-	FieldNails:   "first",
-	FieldRockets: "first",
-	FieldCells:   "first",
+	FieldShells:       "first",
+	FieldNails:        "first",
+	FieldRockets:      "first",
+	FieldCells:        "first",
+	FieldActiveWeapon: "first",
 
 	FieldSpawns: "any",
 	FieldDeaths: "any",
@@ -218,6 +228,7 @@ var fieldGlosses = []struct{ code, gloss string }{
 	{FieldSSG, "has SSG"}, {FieldSNG, "has SNG"},
 	{FieldQuad, "quad"}, {FieldPent, "pent"}, {FieldRing, "ring"},
 	{FieldShells, "shells"}, {FieldNails, "nails"}, {FieldRockets, "rockets"}, {FieldCells, "cells"},
+	{FieldActiveWeapon, "wielded weapon bit"},
 	{FieldSpawns, "spawn events"}, {FieldDeaths, "death events"},
 }
 

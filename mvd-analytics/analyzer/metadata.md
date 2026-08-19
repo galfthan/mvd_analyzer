@@ -1,8 +1,9 @@
 # metadata analyser
 
 **Phase:** Derived
-**Inputs:** `StuffTextEvent`, `ServerInfoEvent`, `CenterPrintEvent`, `PrintEvent`
+**Inputs:** `StuffTextEvent`, `ServerInfoEvent`, `CenterPrintEvent`, `PrintEvent`, `FinalScoresEvent`
 **Writes to Result:** `result.Metadata` (`*MetadataResult`)
+**Publishes on CoreOutputs:** `ServerInfoMap`, `FinalScores`
 
 ## What it does
 
@@ -25,6 +26,14 @@ timelimit, antilag, etc.) without the frontend re-parsing prints.
 5. `parseCountdownCenterprint` walks the post-`Q_normalizetext`
    countdown table and pulls each known KTX setting row into a
    structured `MatchSettings`.
+6. `FinalScoresEvent` — KTX's `//finalscores` end-of-match stuffcmd —
+   is stored verbatim as `MetadataResult.FinalScores` and published on
+   `CoreOutputs` for the `match` node, which uses it for the map, mode
+   and team rows it has no source of its own for (never displacing a
+   demoinfo value; see `analyzer/match.md`). Last write wins, like the
+   serverinfo keys. It lands here rather than in `match` because it is a
+   metadata record first: it is reported on every demo that carries one,
+   whether or not anything consumes it.
 
 ## Limitations / known issues
 
@@ -37,4 +46,6 @@ timelimit, antilag, etc.) without the frontend re-parsing prints.
 ## Reference
 
 - KTX countdown source: `ktx/src/match.c` (`PrintCountdown`)
+- `//finalscores` emitter: `ktx/src/commands.c:6963-6977` (`lastscore_add`);
+  wire form documented in `mvd-reader/MVD_FORMAT.md#svc_stufftext-9`
 - Server cvars: `mvdsv/src/sv_main.c` (`SV_FullServerinfo_f`)

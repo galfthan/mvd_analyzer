@@ -71,6 +71,14 @@ type Overview struct {
 	// be missing or partial. Surfaced here so a consumer sees it on the
 	// first call without parsing the full result. Omitted when empty.
 	Errors []string `json:"errors,omitempty"`
+	// ParseWarnings is the READER's census (result.parseWarnings): wire
+	// data the MVD decoder could not read at all — unknown svc_* /
+	// temp-entity / hidden-message types, payloads that failed to parse.
+	// Distinct from Errors, which reports analyzer failures over events
+	// that DID decode. Non-empty means this demo hit a protocol gap and
+	// the views downstream of it may be thin. Omitted on a clean parse,
+	// which is the normal case.
+	ParseWarnings *result.ParseWarnings `json:"parseWarnings,omitempty"`
 }
 
 // OverviewTeam mirrors result.TeamStat.
@@ -79,19 +87,31 @@ type OverviewTeam struct {
 	Frags int    `json:"frags"`
 }
 
-// OverviewTiming exposes the demo-open wall-clock anchor (streams.global) so a
+// OverviewTiming exposes the wall-clock anchors (streams.global) so a
 // REST/MCP consumer can map a match-relative game time g (ms) to real time:
 //
 //	wallClockMs = demoStartUnixMs + demoOffset + g + Σ pauses[i].durationMs (atMs <= g)
 //	             (±demoStartAccuracyMs)
 //
+// matchStartUnixMs is the separate "when was this played" anchor (schema v72):
+// it is what the wire date markers state, and it is present on ~95% of demos
+// against ~25% for the server-clock sources behind demoStartUnixMs.
+// matchStartConfidence grades it — see RESULT_SCHEMA.md's GlobalStream section.
+//
 // All fields omitempty; the block itself is omitted when no wall-clock source
 // is present. Pauses reuses the result shape: {atMs, durationMs}.
 type OverviewTiming struct {
-	DemoOffset          int32                  `json:"demoOffset,omitempty"`
-	DemoStartUnixMs     int64                  `json:"demoStartUnixMs,omitempty"`
-	DemoStartAccuracyMs int32                  `json:"demoStartAccuracyMs,omitempty"`
-	Pauses              []result.TimelinePause `json:"pauses,omitempty"`
+	DemoOffset           int32                  `json:"demoOffset,omitempty"`
+	DemoStartUnixMs      int64                  `json:"demoStartUnixMs,omitempty"`
+	DemoStartAccuracyMs  int32                  `json:"demoStartAccuracyMs,omitempty"`
+	DemoStartSource      string                 `json:"demoStartSource,omitempty"`
+	MatchStartUnixMs     int64                  `json:"matchStartUnixMs,omitempty"`
+	MatchStartAccuracyMs int32                  `json:"matchStartAccuracyMs,omitempty"`
+	MatchStartSource     string                 `json:"matchStartSource,omitempty"`
+	MatchStartConfidence string                 `json:"matchStartConfidence,omitempty"`
+	MatchStartNote       string                 `json:"matchStartNote,omitempty"`
+	MatchEndUnixMs       int64                  `json:"matchEndUnixMs,omitempty"`
+	Pauses               []result.TimelinePause `json:"pauses,omitempty"`
 }
 
 // OverviewPlayer carries each player's identity + scoreboard line, taken
@@ -119,6 +139,7 @@ func BuildOverview(r *result.Result) Overview {
 	ov.SchemaVersion = r.SchemaVersion
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
+	ov.ParseWarnings = r.ParseWarnings
 
 	// map = the canonical shortname, mapTitle = the display-only level title.
 	// Match publishes both (result/match.go), but EffectiveMap stays the
@@ -153,18 +174,34 @@ func BuildOverview(r *result.Result) Overview {
 		g := r.Streams.Global
 		ov.MatchStart = g.MatchStart
 		ov.MatchEnd = g.MatchEnd
-		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || len(g.Pauses) > 0 {
+		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || g.MatchStartUnixMs != 0 || len(g.Pauses) > 0 {
 			ov.Timing = &OverviewTiming{
-				DemoOffset:          g.DemoOffset,
-				DemoStartUnixMs:     g.DemoStartUnixMs,
-				DemoStartAccuracyMs: g.DemoStartAccuracyMs,
-				Pauses:              g.Pauses,
+				DemoOffset:           g.DemoOffset,
+				DemoStartUnixMs:      g.DemoStartUnixMs,
+				DemoStartAccuracyMs:  g.DemoStartAccuracyMs,
+				DemoStartSource:      g.DemoStartSource,
+				MatchStartUnixMs:     g.MatchStartUnixMs,
+				MatchStartAccuracyMs: g.MatchStartAccuracyMs,
+				MatchStartSource:     g.MatchStartSource,
+				MatchStartConfidence: g.MatchStartConfidence,
+				MatchStartNote:       g.MatchStartNote,
+				MatchEndUnixMs:       g.MatchEndUnixMs,
+				Pauses:               g.Pauses,
 			}
 		}
 	}
 	if r.Metadata != nil && r.Metadata.MatchSettings != nil {
 		ov.Mode = r.Metadata.MatchSettings.Mode
 		ov.Matchtag = r.Metadata.MatchSettings.Matchtag
+	}
+	if ov.Mode == "" && r.Match != nil {
+		// The countdown centerprint above is a KTX-era signal; Match.Mode
+		// resolves the demoinfo / //finalscores vocabulary instead, which is
+		// what the pre-ktxstats half of the archive has (schema v72). It is a
+		// different spelling of the same idea ("duel" vs "Duel") — hence the
+		// fallback rather than a merge; result.MatchResult.Sources.Mode names
+		// which one a demo got.
+		ov.Mode = r.Match.Mode
 	}
 	if r.TimelineAnalysis != nil {
 		ov.LocCount = len(r.TimelineAnalysis.LocTable)

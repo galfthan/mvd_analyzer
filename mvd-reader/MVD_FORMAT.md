@@ -1531,6 +1531,45 @@ exactly the false positive this guards against.
 - Axe + Shotgun (25 shells)
 - No powerups
 
+#### Match Date Markers (`matchdate:` / `matchkey:`)
+
+Two eras of server mod announce the **wall-clock date** on the same
+`svc_print` channel, at `PRINT_HIGH` (level 2), as a broadcast:
+
+| Marker | Emitted by | Layout |
+|---|---|---|
+| `matchdate: 2008-01-05 20:05:38 CET` | KTX, one frame before `"The match has begun!"` (`ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)`) | strftime `%Y-%m-%d %H:%M:%S %Z` |
+| `matchdate: Mon Jul 03, 01:01:14 2006` | older KTX builds, same call site | strftime `%a %b %d, %H:%M:%S %Y`, usually with no zone at all |
+| `matchkey: 8-2005-8-13:19-56-18` | kmod / KTeam era (pre-KTX), also at match start | `<matchid>-<yyyy>-<m>-<d>:<h>-<mm>-<ss>`, never zoned, fields not zero-padded |
+
+Both are line-assembled like any other print — the kmod one is commonly
+split across three `svc_print` fragments (`"matchkey: 9-"`, `"195923-"`,
+`"1626\n"`), so a per-message matcher sees none of them.
+
+Traps worth knowing:
+
+- `%Z` is whatever the server's C library calls the local zone. Besides
+  the usual abbreviations it can be a numeric offset, or a locale
+  sentence with spaces and a comma in it (`Västeuropa, sommartid`) —
+  which arrives *mangled* because `Q_normalizetext` folds the high-bit
+  `ä` down to `d`. Treat the whole remainder of the line as the zone
+  token, and match the Swedish forms on the ASCII tail (`sommartid` /
+  `normaltid`).
+- Not every `matchkey:` carries a date: some servers print an opaque
+  key (`matchkey: 9-195923-1626`) in the same slot.
+- `Build date:` is the **mvdsv binary's** build stamp, not a match date.
+- The `serverdemo` filename embeds a date that is genuinely ambiguous
+  (`%d%m%y` and `%y%m%d` are both observed in the archive) — do not parse
+  it without a print-derived cross-check.
+- Servers with unset clocks stamp real markers with wrong dates (whole
+  "nights" of 2000-01-0x appear across the archive). The date value alone
+  never proves this; see the trust model in
+  [RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md#globalstream).
+
+A third date lives in the KTX demoinfo (ktxstats) block's `date` field,
+`%Y-%m-%d %H:%M:%S %z`. That block is written at intermission, so it names
+match **end**, not match start.
+
 #### Match End Detection
 
 The match ends when one of these messages appears:
@@ -2912,9 +2951,14 @@ Resolve `modelindex` → path via the `svc_modellist` table. Index 0 is reserved
 1. On `svc_modellist` / `svc_fte_modellistshort`: populate `modelList[modelindex] = path`.
 2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, TimeMs}`.
 3. On `svc_packetentities` (full) / `svc_deltapacketentities` (delta): maintain a rolling `currentEntities` map. Full packets replace it; deltas copy from previous and apply per-entity updates. `U_REMOVE` deletes; other flags update fields.
-4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
+4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, Origin, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa). `Origin` is the entity origin at the transition: the new one when it appeared, the last visible one when it went away.
+5. Emit `ItemMoveEvent{EntNum, Kind, Origin, TimeMs}` when a **visible** tracked item's origin changes, on the same hold-last convention as `MoverStateEvent` below. Map items never move, so on a normal demo this fires only for dropped backpacks.
 
 Baselines seed the "initial" state so items at match start are already "up". Non-item entities (players, lights) pass through the item classifier as empty kind and are silently filtered — except inline brush-model entities (which feed the mover events below) and slow projectiles (which feed the projectile events below).
+
+**Item edicts are not all stable.** Map items are allocated at map load and never freed, so their entnum names one object for the whole match — which is why the classification can be cached across the modelindex-0 stretch a taken item spends invisible. Backpacks are not like that: `DropBackpack` calls `spawn()` (`ktx/src/items.c:2701`) and `BackpackTouch` calls `ent_remove()` (`items.c:2489`), so a pack's edict is handed on within seconds to another pack, a rocket or a gib. A parser that keeps the cached kind while the wire is sending a different model reports every later tenant's appearance and disappearance as the original pack flickering (this repo measured 16.4 such "visibility flips per real pack" before fixing it). The rule that removes the artefact entirely: **the cache never outranks a model index the wire is currently sending** — whenever the entity is visible, re-read the model, and on a changed kind close the old item (`Taken=true` at its own last origin) and open the new one. mvdsv will not reallocate an edict freed less than half a second ago (`pr_edict.c:118-127`, comment: "can cause the client to think the entity morphed into something else"), so the handover is always separated by the old pack's own disappearance — an origin jump is never a disguised recycle.
+
+**Backpacks move.** `DropBackpack` gives the pack `velocity[2] = 300` plus a random ±100 horizontal kick and `MOVETYPE_TOSS` (`items.c:2856-2861`), so it arcs and falls off ledges and down lift shafts before settling: measured over 24 hint-carrying demos, 58 units of travel at p50, 422 at p99, 583 at max. The `ItemMoveEvent` track is the only wire record of where a pack actually ended up. It also removes the pack after 120 s (`item->s.v.nextthink = time + (self->ct == ctPlayer ? 120 : 30)` with `think = SUB_Remove`, `items.c:2871-2872`), which is the one disappearance that is positively not a pickup.
 
 ### Projectile tracking via entity state
 
@@ -3091,7 +3135,7 @@ Offset  Size  Field
 1       var   command (null-terminated string)
 ```
 
-The server is pushing a console command into the client. There are four classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
+The server is pushing a console command into the client. There are five classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
 
 1. **`fullserverinfo "\key1\value1\key2\value2\..."`** — the bulk cvar dump sent at connection time. This is the **single richest source of server metadata** in the demo: every CVAR_SERVERINFO cvar that mvdsv exposes plus every key KTX has mirrored via `localcmd "serverinfo …"`. See [Demo Metadata Sources](#demo-metadata-sources) below for the full key list.
 2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Emitted via `stuffcmd_flags(..., STUFFCMD_DEMOONLY, ...)` so they only appear in the recorded MVD, not in live gameplay. The common ones:
@@ -3103,11 +3147,13 @@ The server is pushing a console command into the client. There are four classes 
     | `//ktx timer <ent> <respawn_sec>` | `ktx/src/items.c:406` | MH rot finished — the delayed 20 s respawn timer is now armed |
     | `//ktx drop <ent> <item_flags> <player_ent>` | `ktx/src/items.c:2740` | Player dropped a weapon (backpack spawned). `item_flags` is the QW items bitfield — `32 = IT_ROCKET_LAUNCHER`, `64 = IT_LIGHTNING`. Only fires for RL/LG packs. |
     | `//ktx bp <backpack_ent> <player_ent>` | `ktx/src/items.c:2471` | Backpack picked up. Symmetric to `//ktx drop` — fires only when the pack contains RL or LG, so drop/pickup pairs share `backpack_ent`. This is the **only** reliable backpack-pickup attribution signal: the entity-state stream shows visibility flutter for backpack edicts that is indistinguishable from fast regrabs. |
-    | `//ktx expire <ent>` | `ktx/src/g_spawn.c:200` | Item entity is about to be removed (mode-specific despawn, e.g. powerup expires unattended) |
+    | `//ktx expire <ent>` | `ktx/src/g_spawn.c:196-210` | **Backpack removed untaken.** `SUB_Remove` emits it for every entity it deletes whose `classname` is `"backpack"` and whose `items` is exactly `IT_ROCKET_LAUNCHER` or `IT_LIGHTNING` — the same RL/LG domain as `//ktx drop` / `//ktx bp`, so the three form one family and a pack that leaves the map accounts for itself in exactly one of the latter two. `DropBackpack` arms `nextthink = time + 120; think = SUB_Remove` on every pack it spawns (`items.c:2870-2872`) and nothing re-arms it, so on a dropped pack this fires at the 120 s timeout. Unlike its two siblings it is stuffed at `world`, not at a client (the KTX comment says why: "get away with 'world' because mvdsv will exit before test with `STUFFCMD_DEMOONLY`"), so it carries no player argument and needs none. This is the **only positive evidence in the wire that a pack was not taken** — the absence of a `//ktx bp` cannot establish it, because a demo can carry the drop hint and no pickup hints at all. Not a powerup or world-item signal: `SUB_Remove` guards on the backpack classname before printing anything. |
     | `//ktx di <dmg> <armor> <take> <attacker> <victim> <weapon> <team>` | `ktx/src/combat.c:819` | Damage-info hint, targeted at the *attacker* (client-side HUD). Emitted with `STUFFCMD_IGNOREINDEMO`, so it's not in the recorded MVD — listed here for completeness. |
     | `//wps <slot> <weapon> <hits> <shots>` | `ktx/src/stats.c` | Per-player weapon-stats ticker for the spectator HUD |
 
     These are *not* server config — they're per-event HUD hooks for clients that understand the KTX HUD protocol. They are also **KTX-specific**: ktpro, CustomTF, and other progs don't emit them.
+
+    **Backpack lifecycle** — the three RL/LG backpack directives are one family and cover a pack's whole life: `//ktx drop` when `DropBackpack` spawns it, then exactly one of `//ktx bp` (a player touched it) or `//ktx expire` (`SUB_Remove` took it at the 120 s timeout). Measured over 223 archive demos that carry all three: 10 384 drops = 10 006 `bp` + 190 `expire` + 188 rows claimed by neither — the residual being packs the recording ended on top of, whose removal never happened inside the demo. **No row ever carried both**, and every `expire` paired with a drop on its own edict at 119 953-120 027 ms. The `<ent>` is recycled across packs within a match, so any join on it must use time as well.
 
     **Pickup attribution strategy** — the `//ktx took` + `//ktx bp` pair gives deterministic, same-tick pickup attribution without any heuristic. On KTX servers, analytics should prefer these over the [entity-state stream](#item-tracking-via-entity-state) for identifying *who took what*: the entity stream tells you *when* a pickup happened but not reliably by whom (nearest-player-origin is ambiguous in contests and unusable for backpack regrabs due to visibility flutter). For non-KTX servers (ktpro / CustomTF / vanilla), fall back to the entity-state stream or to per-player `svc_updatestat` deltas (STAT_ITEMS bitfield, STAT_HEALTH / STAT_ARMOR / STAT_* AMMO jumps — the MVD transports every player's stats, not just the POV's).
 
@@ -3128,9 +3174,27 @@ The server is pushing a console command into the client. There are four classes 
     - **Hoonymode round markers**: at the start of every HoonyMode round KTX stuffs `//demomark 0 round-%2d\n` to one arbitrary player (`ktx/src/match.c:428`) — the only variant that carries arguments. ezquake's exact-match seek ignores it; a parser should capture the argument tail as a label.
     - **Frogbot rocket-jump marks**: with the frogbot option `FB_OPTION_DEMOMARK_ROCKETJUMPS` enabled, bots call `DemoMark()` on every rocket jump (`ktx/src/bot_botjump.c:358`), so bot demos can be dense with markers.
     - **End-of-match listing**: if any in-match markers were recorded, KTX broadcasts a "Demo markers" table (`ktx/src/match.c:234-258`) listing `Time: m:ss (name)` per marker. The heading and `Time` label are red-text (bit 7 set on every char), so naive ASCII grep misses it. The stufftexts are the authoritative signal; the listing is presentation (and is capped/debounced as above).
-4. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+4. **`//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>" <s2>`** — the end-of-match scoreline, stuffed once per match into the *first* connected client (`ktx/src/commands.c:6963-6977`, at the tail of `lastscore_add`, under a comment calling it "a HACK for QTV, ok EZTV"). Because it goes to one client it is recorded as a `dem_single` block, but nothing in it is per-client: the payload is the server's own result.
 
-A single-pass parser should emit all four as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
+    ```
+    //finalscores "Sep 29, 21:27" "duel" "aerowalk" "kip" 19 "grisling" 24
+    //finalscores "Mar 08, 21:16" "team" "dm2" "'tbg" 169 "PEX" 214
+    ```
+
+    Field by field:
+
+    - **date** — `QVMstrftime("%b %d, %H:%M")` of the server's LOCAL clock. **No year, no seconds, no timezone**, which is why it can corroborate a date but never establish one on its own.
+    - **mode** — `lastscores2str` (`commands.c:6755`): `duel`, `team`, `FFA`, `CTF`, `RA`, `Clan Arena`, `Wipeout`, `HoonyMode`, `race`, `unknown`. Forks add their own (`Extinction` occurs in the archive). Note this is a *third* mode vocabulary, distinct from both the ktxstats `mode` (`GetMode`, `ktx/src/stats.c:309` — `duel`, `team`, `ffa`, `clan-arena`, …) and the serverinfo `mode` key (`1on1`, `4on4-midair`, `world.c:1542`).
+    - **map** — `mapname`, the canonical short name.
+    - **team1/s1, team2/s2** — the two sides. On a duel the "team" is the player's own name (the branch at `commands.c:6836-6866` reads the two duelers' `frags` directly). **What the score counts is mode-dependent**: `get_scores1/2` sums the sides' frags (`g_utils.c:1868-1919`), *except* on Clan Arena and Wipeout, where `lastscore_add` substitutes `CA_get_score_1/2` — **rounds won** (`commands.c:6867-6886`). Scores can be negative (suicides outnumbering frags).
+
+    The names are player-authored userinfo values and arrive in the Quake charset (colour codes and all), so normalise them like any other name. The whole line is terminated with `\n` before the string's NUL.
+
+    **Why it matters**: it rides ~64% of the 51k-demo archive against the KTX demoinfo block's ~46%, and the two eras only partly overlap — on the pre-ktxstats half this is the only place the *server* states a mode, a map or a final result. A 12 000-demo archive scan found exactly one directive per demo and not a single malformed copy, but a parser should still shape-check (seven arguments, the five quoted ones quoted, both scores integers) and drop what fails: stuffed values do get corrupted on this archive, and a half-parsed scoreline is worse than none.
+
+5. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+
+A single-pass parser should emit all five as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
 
 ### svc_setangle (10)
 
@@ -3874,6 +3938,8 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter) to the `svc_print` section. KTX's `G_sprint(PRINT_LOW)` pickup messages ("You got the Red Armor", "You receive 25 health", "You get " backpack opener) carry pickup-attribution via the `dem_single` target slot and would cover categories `//ktx took` skips (ammo boxes, H15/H25), **but** `SV_ClientPrintf` filters by the picking client's `messagelevel` cvar before the MVD write — competitive players widely set `msg 2`, which strips PRINT_LOW from the recording entirely. Coverage is per-player and per-demo; `//ktx took` / `//ktx bp` are the only signals that bypass the filter.
 - Added [Derived events — death and spawn](#derived-events--death-and-spawn) — why every `StatHealth` crossing of zero should be surfaced as its own event at the parser layer rather than inferred by per-sample comparison, and the instant-respawn case that motivates it.
 - Added [Practical gap — non-RL/LG backpack pickups on competitive demos](#svc_stufftext-9) under the `//ktx` directives, combining the two pre-existing limits (`//ktx bp` is RL/LG-only, and KTX's `"You get "` backpack-opener print is stripped by `SV_ClientPrintf` when `messagelevel >= 1`) into the explicit conclusion that **non-RL/LG backpack pickups have no authoritative wire signal on a typical 4on4 / duel MVD**. Notes the residual indirect signal (STAT_ITEMS bit + STAT_SHELLS/NAILS/ROCKETS/CELLS deltas via `svc_updatestat`) that a future heuristic analyzer could correlate with nearby `BackpackDropHintEvent`s.
+- **Corrected `//ktx expire <ent>`** in the [`//ktx` directives](#svc_stufftext-9) table. It was documented as a generic "item entity is about to be removed (mode-specific despawn, e.g. powerup expires unattended)" signal; it is nothing of the sort. `SUB_Remove` (`ktx/src/g_spawn.c:196-210`) guards on `classname == "backpack"` and `items == IT_ROCKET_LAUNCHER || IT_LIGHTNING` before printing, so it is the third member of the RL/LG backpack family and fires for a dropped pack at `DropBackpack`'s 120 s `nextthink` timeout. It is also the only signal on the wire that positively says a pack was **not** taken — the absence of a `//ktx bp` cannot, since 107 of 330 archive demos emit `//ktx drop` and no pickup hints at all. Added the [Backpack lifecycle](#svc_stufftext-9) note with the archive census that backs it (10 384 drops = 10 006 `bp` + 190 `expire` + 188 claimed by neither, zero rows claiming both), and the warning that the `<ent>` is recycled within a match so any join must use time as well.
+- Added [`//finalscores`](#svc_stufftext-9) as its own stufftext class — the end-of-match scoreline KTX stuffs into the first client (`ktx/src/commands.c:6963-6977`). It rides ~64% of the 51k-demo archive against the demoinfo block's ~46%, making it the only server-stated mode / map / result on the pre-ktxstats half. Documents the three traps: the date has no year, the mode is a third vocabulary distinct from both ktxstats' and the serverinfo key's, and the score is **rounds won** rather than frags on Clan Arena / Wipeout.
 
 ### MVD_PEXT1 Hidden Message History
 

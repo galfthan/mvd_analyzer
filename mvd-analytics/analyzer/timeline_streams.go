@@ -71,6 +71,9 @@ func (b *streamBuilder) recordRockets(tMs int32, v int16) {
 func (b *streamBuilder) recordCells(tMs int32, v int16) {
 	appendChangeI16(&b.cells, b.dedupBase.cells, tMs, v)
 }
+func (b *streamBuilder) recordActiveWeapon(tMs int32, v int16) {
+	appendChangeI16(&b.activeWeapon, b.dedupBase.activeWeapon, tMs, v)
+}
 
 // recordPosition appends every native sample (no dedup; D11
 // asymmetry). Time is integer milliseconds — the canonical wire-native
@@ -179,8 +182,26 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 		nails:     len(b.nails),
 		rockets:   len(b.rockets),
 		cells:     len(b.cells),
+
+		activeWeapon: len(b.activeWeapon),
 	}
 	b.occCuts = append(b.occCuts, tMs)
+}
+
+// cutActiveWeaponDedup raises the wielded-weapon column's dedup floor to the
+// current length — the one piece of endOccupancy a handover OUTSIDE the match
+// window still needs.
+//
+// Every other change stream is recorded only between match start and match
+// end, so a warmup handover cannot corrupt them; the wielded weapon is
+// recorded through the countdown as well (it is delta-coded, and the
+// match-start rebase needs the latest pre-match value). Without this cut the
+// first sample of a new occupant who happens to hold what the departing one
+// held is suppressed as a repeat, and the session slice then keeps the
+// departing occupant's entry out of the new occupant's stream — the same
+// "stream fragment opens blank" defect endOccupancy fixes for health/armor.
+func (b *streamBuilder) cutActiveWeaponDedup() {
+	b.dedupBase.activeWeapon = len(b.activeWeapon)
 }
 
 // recordItemFlags is a one-shot helper called from the analyzer's
@@ -230,6 +251,7 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 	ps.Nails = toChangeI16s(b.nails)
 	ps.Rockets = toChangeI16s(b.rockets)
 	ps.Cells = toChangeI16s(b.cells)
+	ps.ActiveWeapon = toChangeI16s(b.activeWeapon)
 	// PositionTrack column checklist site 3 (builder → result.PlayerStream);
 	// see the checklist in result/coord.go (PositionTrack.MarshalJSON).
 	if len(b.posT) > 0 {
@@ -354,6 +376,7 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	appendI16(&b.nails, src.nails)
 	appendI16(&b.rockets, src.rockets)
 	appendI16(&b.cells, src.cells)
+	appendI16(&b.activeWeapon, src.activeWeapon)
 
 	for _, c := range src.armorType {
 		if !in(c.t) {

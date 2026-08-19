@@ -3,6 +3,7 @@ package analyzer
 import (
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -267,5 +268,83 @@ func TestTimeline_FragResetOnFreshConnectEatsNoDelta(t *testing.T) {
 	if n != 17 || sum != 17 {
 		t.Errorf("slot 4: %d frag events summing %d, want 17/17 — the rebase must not swallow the first real kill, "+
 			"and a stale arm must not adopt the 272", n, sum)
+	}
+}
+
+// The wielded-weapon column is recorded THROUGH the countdown — it is
+// delta-coded, so the match-start rebase needs the latest pre-match value —
+// which makes it the one column a PRE-match handover can corrupt. Every
+// other change stream is gated on the match window and simply has nothing to
+// dedup against yet.
+//
+// Shape: a roster shuffle during warmup hands a slot from one player to
+// another while both happen to be holding the shotgun. Without a dedup cut
+// the arriving player's sample is suppressed as a repeat of the departing
+// player's, the session slice then keeps the departing player's entry out of
+// the arriving player's stream, and the arriving player reaches match start
+// with no aw sample at all — so every death of theirs before their next
+// weapon switch reconstructs no backpack.
+func TestStreams_ActiveWeaponDedupResetsAtPreMatchHandover(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 5, UserID: 11, Name: "leaver"}, TimeMs: 0,
+	})
+	// Warmup: the departing player is holding the shotgun.
+	_ = a.OnEvent(&events.StatUpdateEvent{
+		PlayerNum: 5, StatIndex: events.StatActiveWeapon,
+		Value: events.ITShotgun, TimeMs: 10_000,
+	})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 5, Origin: [3]float32{10, 0, 0}, TimeMs: 10_000})
+	// Still pre-match, the slot changes hands.
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 5, UserID: 11, Name: "leaver"}, TimeMs: 20_000, Vacated: true,
+	})
+	_ = a.OnEvent(&events.UserInfoEvent{
+		Player: &events.PlayerInfo{Slot: 5, UserID: 12, Name: "joiner"}, TimeMs: 21_000,
+	})
+	// The arriving player is holding the shotgun too.
+	_ = a.OnEvent(&events.StatUpdateEvent{
+		PlayerNum: 5, StatIndex: events.StatActiveWeapon,
+		Value: events.ITShotgun, TimeMs: 22_000,
+	})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 30_000})
+	// In-match they take the RL.
+	_ = a.OnEvent(&events.StatUpdateEvent{
+		PlayerNum: 5, StatIndex: events.StatActiveWeapon,
+		Value: events.ITRocketLauncher, TimeMs: 90_000,
+	})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 5, Origin: [3]float32{20, 0, 0}, TimeMs: 90_000})
+
+	col := a.playerState[5].streams.activeWeapon
+	if len(col) != 3 {
+		t.Fatalf("aw column = %v, want 3 samples — the handover makes the 22000 repeat unconditional", col)
+	}
+	if col[1].t != 22_000 || col[1].v != events.ITShotgun {
+		t.Errorf("aw[1] = %+v, want the arriving occupant's own sample at t=22000", col[1])
+	}
+
+	// And the arriving player's stream carries it: their fragment opens with
+	// a weapon, not blank.
+	a.UseCoreOutputs(&CoreOutputs{Sessions: map[int][]ResolvedSession{
+		5: {
+			{StartMs: minInt32, EndMs: 21_000, Name: "leaver", IdentityKey: "id:0"},
+			{StartMs: 21_000, EndMs: maxInt32, Name: "joiner", IdentityKey: "id:1"},
+		},
+	}})
+	streams := a.buildStreamsResult(nil, nil, 30_000, 200_000)
+	var joiner *result.PlayerStream
+	for i := range streams.Players {
+		if streams.Players[i].Name == "joiner" {
+			joiner = &streams.Players[i]
+		}
+	}
+	if joiner == nil {
+		t.Fatal("no stream for joiner")
+	}
+	if len(joiner.ActiveWeapon) == 0 || joiner.ActiveWeapon[0].T != 22_000 {
+		t.Errorf("joiner aw = %v, want it to open at t=22000 with their own sample", joiner.ActiveWeapon)
 	}
 }

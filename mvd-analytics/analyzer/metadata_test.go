@@ -2,6 +2,8 @@ package analyzer
 
 import (
 	"testing"
+
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 func TestParseFullserverinfo(t *testing.T) {
@@ -205,5 +207,86 @@ func TestCollapseSpaces(t *testing.T) {
 		if got := collapseSpaces(in); got != want {
 			t.Errorf("collapseSpaces(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+// KTX broadcasts "Fairpacks setting: <ruleset>" beside the countdown
+// centerprint and ONLY when k_frp is non-default (ktx/src/match.c:2086-2107),
+// so capturing the row is how the pipeline learns the pack rules changed.
+// The value is redtext, i.e. high-bit characters, exactly as on the wire.
+func TestMetadataFairpacksBroadcast(t *testing.T) {
+	redtext := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			b[i] |= 0x80
+		}
+		return string(b)
+	}
+	for _, tc := range []struct{ name, msg, want string }{
+		{"best weapon", "Fairpacks setting: " + redtext("best weapon") + "\n", "best weapon"},
+		{"last fired", "Fairpacks setting: " + redtext("last weapon fired") + "\n", "last weapon fired"},
+		{"plain text", "Fairpacks setting: best weapon\n", "best weapon"},
+		{"unrelated print", "gnu killed dad with a rocket\n", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMetadataAnalyzer()
+			_ = a.OnEvent(&events.PrintEvent{Level: events.PrintHigh, Message: tc.msg, TimeMs: 1000})
+			r := &Result{}
+			_ = a.Finalize(r)
+			got := ""
+			if r.Metadata != nil && r.Metadata.MatchSettings != nil {
+				got = r.Metadata.MatchSettings.Fairpacks
+			}
+			if got != tc.want {
+				t.Errorf("Fairpacks = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// The Fairpacks row stands the whole backpack reconstruction down
+// (backpackSkipModeReason), so nothing a player can type may forge it. KTX
+// emits it as G_bprint(2, "Fairpacks setting: %s\n", …) from
+// ShowMatchSettings during the countdown (match.c:2107) — PRINT_HIGH,
+// line-initial, pre-match. Everything else is refused.
+func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
+	const row = "Fairpacks setting: best weapon\n"
+	for _, tc := range []struct {
+		name    string
+		prints  []*events.PrintEvent
+		wantSet bool
+	}{
+		{"the real broadcast", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, true},
+		{"chat line quoting it", []*events.PrintEvent{
+			{Level: events.PrintChat, Message: row, TimeMs: 1000},
+		}, false},
+		{"chat line embedding it", []*events.PrintEvent{
+			{Level: events.PrintChat, Message: "gnu: lol Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"a bprint that merely mentions it", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: "gnu changed Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"after the match started", []*events.PrintEvent{
+			{Level: events.PrintHigh, Message: "The match has begun!\n", TimeMs: 500},
+			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMetadataAnalyzer()
+			for _, p := range tc.prints {
+				_ = a.OnEvent(p)
+			}
+			r := &Result{}
+			_ = a.Finalize(r)
+			got := ""
+			if r.Metadata != nil && r.Metadata.MatchSettings != nil {
+				got = r.Metadata.MatchSettings.Fairpacks
+			}
+			if (got != "") != tc.wantSet {
+				t.Errorf("Fairpacks = %q, wantSet = %v", got, tc.wantSet)
+			}
+		})
 	}
 }

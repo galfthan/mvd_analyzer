@@ -27,7 +27,14 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-reader/events"
+	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
+
+// doReadability adds the raw-wire readability census (second parse per
+// demo): date-marker spellings, //finalscores, //ktx drop. Set from
+// -readability. Parse warnings are NOT part of it — they ride the
+// Result now and are censused on every run.
+var doReadability bool
 
 type row struct {
 	file    string
@@ -44,6 +51,22 @@ type row struct {
 	expls   int
 	lgbl    int
 	err     string
+
+	// Readability census (-readability): what the wire carries vs what the
+	// pipeline currently reads, per plan-archive-features.md.
+	version     string // serverinfo *version (era marker)
+	ktxver      string // serverinfo ktxver (the sharp feature gate)
+	demoinfo    bool   // KTX demoinfo block present (authoritative scoreboard readable)
+	wallclock   bool   // DemoStartUnixMs currently readable
+	matchdate   string // "" | "iso" (format A) | "ctime" (format B) — raw print present
+	dateBlock   bool   // "Date....:" stats-block print present (format C)
+	finalscores bool   // //finalscores stufftext present (lead 3)
+	ktxdrop     bool   // //ktx drop hint present (backpack GT, lead 2)
+	// Parse-warning census, taken off the Result (schema v72
+	// parseWarnings) — always populated, no -readability needed.
+	warns      int    // parse warnings, total
+	warnKinds  string // distinct warning types, sorted, ';'-joined
+	unknownSvc int    // unknown_svc warnings specifically (protocol gaps)
 }
 
 func main() {
@@ -52,7 +75,9 @@ func main() {
 	seed := flag.Int64("seed", 1, "sample shuffle seed")
 	workers := flag.Int("workers", max(1, runtime.NumCPU()-1), "parallel analyzers")
 	csvPath := flag.String("csv", "", "per-demo CSV output path (optional)")
+	readability := flag.Bool("readability", false, "add the raw-wire readability census (second parse per demo)")
 	flag.Parse()
+	doReadability = *readability
 	if *dir == "" {
 		fmt.Fprintln(os.Stderr, "qw-corpus-survey: -dir is required")
 		os.Exit(2)
@@ -137,6 +162,16 @@ func surveyOne(path string) row {
 	if res.Metadata != nil && res.Metadata.ServerInfo != nil {
 		r.mapname = res.Metadata.ServerInfo["map"]
 		r.mode = res.Metadata.ServerInfo["mode"]
+		r.version = res.Metadata.ServerInfo["*version"]
+		r.ktxver = res.Metadata.ServerInfo["ktxver"]
+	}
+	r.demoinfo = res.DemoInfo != nil
+	if res.Streams != nil {
+		r.wallclock = res.Streams.Global.DemoStartUnixMs != 0
+	}
+	parseWarningCensus(res, &r)
+	if doReadability {
+		rawScan(path, &r)
 	}
 	if res.Streams != nil {
 		r.players = len(res.Streams.Players)
@@ -185,6 +220,78 @@ func surveyOne(path string) row {
 	return r
 }
 
+// rawScan re-reads the demo at the event level, collecting the wire
+// markers the analysis pipeline does not surface in the exact form this
+// census wants: which matchdate FORMAT a print used (iso vs ctime — the
+// resolved dateMarkers[] name the source, not the spelling), the
+// "Date....:" stats-block print, and the raw presence of the
+// //finalscores / //ktx drop directives independent of whether their
+// payload survived parsing. Costs a second parse per demo, no analysis.
+//
+// The parse-warning columns are NOT gathered here any more: the reader's
+// census rides every Result as parseWarnings (schema v72), so surveyOne
+// reads it off the analysis pass it already paid for.
+func rawScan(path string, r *row) {
+	src, err := mvdsource.Open(path)
+	if err != nil {
+		return
+	}
+	defer src.Close()
+	for {
+		ev, err := src.Next()
+		if err != nil || ev == nil {
+			break
+		}
+		switch e := ev.(type) {
+		case *events.PrintEvent:
+			if i := strings.Index(e.Message, "matchdate: "); i >= 0 {
+				// Format A is ISO (`2008-01-05 …`, yyyy then '-'); B is
+				// ctime (`Mon Jul 03, …`). Enough to tell them apart.
+				stamp := e.Message[i+len("matchdate: "):]
+				if len(stamp) > 4 && stamp[4] == '-' {
+					r.matchdate = "iso"
+				} else {
+					r.matchdate = "ctime"
+				}
+			} else if strings.Contains(e.Message, "Date....:") {
+				r.dateBlock = true
+			}
+		case *events.StuffTextEvent:
+			if strings.HasPrefix(e.Command, "//finalscores ") {
+				r.finalscores = true
+			} else if strings.HasPrefix(e.Command, "//ktx drop ") {
+				r.ktxdrop = true
+			}
+		}
+	}
+}
+
+// parseWarningCensus fills the warns / warnKinds / unknownSvc columns
+// from the Result's own parse-warning census. Same numbers the second
+// diagnostic parse used to produce (the counters are exact, and only
+// the per-message sample table is capped), for no extra pass.
+func parseWarningCensus(res *analyzer.Result, r *row) {
+	pw := res.ParseWarnings
+	if pw == nil {
+		return
+	}
+	r.warns = pw.Total
+	r.unknownSvc = pw.ByType["unknown_svc"]
+	ks := make([]string, 0, len(pw.ByType))
+	for k := range pw.ByType {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	r.warnKinds = strings.Join(ks, ";")
+}
+
+func b01(v bool) string {
+	if v {
+		return "1"
+	}
+	return "0"
+}
+
 func writeCSV(path string, rows []row) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -194,13 +301,17 @@ func writeCSV(path string, rows []row) error {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 	_ = w.Write([]string{"file", "map", "mode", "players", "frags", "matchMs",
-		"source", "events", "totalDmg", "unknownPct", "bloods", "explosions", "lgbloods", "err"})
+		"source", "events", "totalDmg", "unknownPct", "bloods", "explosions", "lgbloods", "err",
+		"version", "ktxver", "demoinfo", "wallclock", "matchdate", "dateBlock",
+		"finalscores", "ktxdrop", "warns", "warnKinds", "unknownSvc"})
 	for _, r := range rows {
 		_ = w.Write([]string{r.file, r.mapname, r.mode,
 			fmt.Sprint(r.players), fmt.Sprint(r.frags), fmt.Sprint(r.matchMs),
 			r.source, fmt.Sprint(r.events), fmt.Sprint(r.total),
 			fmt.Sprintf("%.1f", r.unkPct),
-			fmt.Sprint(r.bloods), fmt.Sprint(r.expls), fmt.Sprint(r.lgbl), r.err})
+			fmt.Sprint(r.bloods), fmt.Sprint(r.expls), fmt.Sprint(r.lgbl), r.err,
+			r.version, r.ktxver, b01(r.demoinfo), b01(r.wallclock), r.matchdate, b01(r.dateBlock),
+			b01(r.finalscores), b01(r.ktxdrop), fmt.Sprint(r.warns), r.warnKinds, fmt.Sprint(r.unknownSvc)})
 	}
 	return nil
 }
@@ -245,6 +356,50 @@ func summarize(rows []row) {
 			withBlood, 100*float64(withBlood)/float64(reconN),
 			withExpl, 100*float64(withExpl)/float64(reconN))
 	}
+	if doReadability {
+		n := float64(len(rows))
+		c := func(f func(row) bool) string {
+			k := 0
+			for _, r := range rows {
+				if f(r) {
+					k++
+				}
+			}
+			return fmt.Sprintf("%6d  (%.1f%%)", k, 100*float64(k)/n)
+		}
+		fmt.Printf("\nreadability census:\n")
+		fmt.Printf("  demoinfo (ktxstats)   %s\n", c(func(r row) bool { return r.demoinfo }))
+		fmt.Printf("  wallclock (current)   %s\n", c(func(r row) bool { return r.wallclock }))
+		fmt.Printf("  matchdate: iso        %s\n", c(func(r row) bool { return r.matchdate == "iso" }))
+		fmt.Printf("  matchdate: ctime      %s\n", c(func(r row) bool { return r.matchdate == "ctime" }))
+		fmt.Printf("  Date....: block       %s\n", c(func(r row) bool { return r.dateBlock }))
+		fmt.Printf("  any date on wire      %s\n", c(func(r row) bool { return r.matchdate != "" || r.dateBlock || r.demoinfo }))
+		fmt.Printf("  //finalscores         %s\n", c(func(r row) bool { return r.finalscores }))
+		fmt.Printf("  //ktx drop            %s\n", c(func(r row) bool { return r.ktxdrop }))
+	}
+
+	// Parse warnings ride every Result (schema v72), so this census costs
+	// nothing and prints on every run — the point of surfacing them at all
+	// is that a protocol gap is visible without asking for it.
+	warnDemos, unknownSvcDemos, warnTotal := 0, 0, 0
+	for _, r := range rows {
+		warnTotal += r.warns
+		if r.warns > 0 {
+			warnDemos++
+		}
+		if r.unknownSvc > 0 {
+			unknownSvcDemos++
+		}
+	}
+	if warnDemos > 0 {
+		n := float64(len(rows))
+		fmt.Printf("\nparse warnings:\n")
+		fmt.Printf("  demos with warnings   %6d  (%.1f%%), %d warnings total\n",
+			warnDemos, 100*float64(warnDemos)/n, warnTotal)
+		fmt.Printf("  with unknown_svc      %6d  (%.1f%%)\n",
+			unknownSvcDemos, 100*float64(unknownSvcDemos)/n)
+	}
+
 	errs := map[string]int{}
 	for _, r := range rows {
 		if r.err != "" {

@@ -501,8 +501,40 @@ joined with its pickup outcome. The drop side comes from
 `result.backpacks`; the pickup side from `result.weaponPickups` entries
 with `source == "backpack"`, joined on `(backpackEnt, dropTime)` —
 the compound key is needed because QW servers recycle backpack
-edict numbers across drops, so `entNum` alone would collide. A drop
-with no matching pickup is shown as `expired`.
+edict numbers across drops, so `entNum` alone would collide. A drop with
+no matching pickup is shown as `expired` only when KTX announced the
+removal itself — `//ktx expire <ent>`, which reaches the frontend as the
+drop row's own `fate: "expired"` (schema v72). Otherwise it is
+`unobserved`: over the archive that hint accounts for barely half the
+pickup-less drops, the rest being packs the recording simply ended on top
+of, and the table used to call all of them expired.
+
+On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
+hinted (`backpacks[].source == "reconstructed"`, schema v72), and there is
+no `//ktx bp` for it to join to. Those rows carry their pickup side on the
+drop row instead — `fate` / `picker` / `pickerTeam` / `pickupTime`, read
+off the wire's backpack-entity track — and `packDropPickup()` adapts those
+fields into the same row shape the join produces, so one renderer, one set
+of filters and one Picker column serve both provenances.
+
+Two things stay different on a reconstructed row, because the wire cannot
+say them: the status chip is a plain `picked` rather than
+`xfer`/`enemy`(`RL`/`LG`), since `hadBefore` is not derivable (KTX ORs the
+weapon bit in, so a redundant grab leaves no trace); and the `Kills`
+column renders `-` rather than `0`, since kill credit needs `hadBefore`
+too. `unobserved` survives as the honest residual — "the wire did not
+answer", which is a different fact from `expired`'s observed "nobody took
+it".
+
+An EMPTY tab on such a demo is ambiguous and must not be captioned as a
+refusal: an absent `backpacks` section means either that no RL/LG pack
+dropped or that the reconstruction stood down (frozen weapon state, no
+frag log, a fairpacks / yawnmode / bloodfest ruleset), and the Result
+shape does not distinguish the two.
+
+Drop markers on the map overlay sit where the pack sat: `origin` is the
+victim's position less the 24 units KTX drops the pack by
+(`ktx/src/items.c:2703-2704`), on both provenances.
 
 The "RL / LG only" scope is a wire-protocol limit, not a UI
 decision: KTX's `//ktx drop` and `//ktx bp` directives fire only
@@ -524,14 +556,23 @@ Status column derivation:
 
 | condition                               | label        |
 |-----------------------------------------|--------------|
-| no matching pickup                      | `expired`    |
+| drop `source == "reconstructed"`, `fate == "picked"` | `picked`     |
+| drop `source == "reconstructed"`, `fate == "expired"` | `expired`    |
+| drop `source == "reconstructed"`, any other `fate`    | `unobserved` |
+| no matching pickup, `fate == "expired"` (the `//ktx expire` hint) | `expired`    |
+| no matching pickup, no `fate`           | `unobserved` |
 | same team as dropper, picker !hadBefore | `xfer`       |
 | same team as dropper, picker hadBefore  | `xfer RL/LG` |
 | enemy team, picker !hadBefore           | `enemy`      |
 | enemy team, picker hadBefore            | `enemy RL/LG`|
 
+The reconstructed branch is decided by `source`, not by "did a pickup row
+join" — a reconstructed drop's `entNum` is a real edict now, and reading a
+join failure as `expired` there would restate a fact the wire never gave.
+
 The `Kills` column is `weaponPickups[i].kills` — frags the picker
-scored with the pack's weapon before their next death. Only
+scored with the pack's weapon before their next death (`-` on a
+reconstructed row, which has no kill credit). Only
 pickups that actually granted the weapon (the picker didn't have
 it yet) are eligible for kill credit; redundant grabs — where
 `hadBefore` is true and the pickup didn't give the picker anything

@@ -34,7 +34,13 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 	}
 
 	teamplay := isTeamplay(res, co)
-	xferOK := teamplay && len(res.Backpacks) > 0
+	// Pack TRANSFERS are observable only where the wire named the pack: the
+	// `//ktx bp` pickup hint carries the dropper, and it ships with the same
+	// KTX generation as the `//ktx drop` hint. A RECONSTRUCTED drops section
+	// proves a pack existed but says nothing about who recovered it, so the
+	// zero-fill below must not fire there — an unobservable transfer count
+	// would otherwise be published as an observed zero.
+	xferOK := teamplay && hasWireBackpacks(res)
 
 	ps := &result.PlayerStatsResult{
 		Sources: result.PlayerStatsSources{

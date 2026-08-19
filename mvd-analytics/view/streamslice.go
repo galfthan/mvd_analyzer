@@ -83,6 +83,8 @@ type PlayerSlice struct {
 	Nails   []result.ChangeI16 `json:"nl,omitempty"`
 	Rockets []result.ChangeI16 `json:"rk,omitempty"`
 	Cells   []result.ChangeI16 `json:"cl,omitempty"`
+	// ActiveWeapon is the wielded weapon's IT_* bit (opt-in field `aw`).
+	ActiveWeapon []result.ChangeI16 `json:"aw,omitempty"`
 
 	// Spawns / Deaths inherit the schema-v8 int32-ms representation
 	// from result.PlayerStream — same JSON keys, same unit.
@@ -170,6 +172,9 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 		}
 		if requested[FieldCells] {
 			ps.Cells = sliceI16(p.Cells, start, end)
+		}
+		if requested[FieldActiveWeapon] {
+			ps.ActiveWeapon = sliceI16(p.ActiveWeapon, start, end)
 		}
 
 		if requested[FieldRL] {

@@ -2634,6 +2634,15 @@ th.sortable.sort-desc::after {
 .pack-status.status-enemy    { color: #ff8080; background: rgba(255, 50, 50, 0.15); }
 .pack-status.status-enemy-had { color: #e5bfbf; background: rgba(255, 50, 50, 0.08); }
 .pack-status.status-expired  { color: #888; background: rgba(128, 128, 128, 0.12); }
+/* A RECONSTRUCTED drop the pack-entity track shows being taken. Deliberately
+   not coloured by team like status-xfer / status-enemy: the wire's
+   `hadBefore` is unknowable there, so the row states only that it was taken
+   and by whom (the Picker column). */
+.pack-status.status-picked   { color: #9fd4ff; background: rgba(80, 160, 255, 0.14); }
+/* Neither the observed "nobody took it" that status-expired states nor a
+   pickup: the pack entity was never bound, or it left the wire with nobody
+   on it before KTX's removal timeout. */
+.pack-status.status-unobserved { color: #7a7a9a; background: rgba(122, 122, 154, 0.12); font-style: italic; }
 
 /* ── Pickups tab ── */
 .pickups-toolbar {

@@ -232,6 +232,19 @@ type PlayerStream struct {
 	Rockets []ChangeI16 `json:"rk,omitempty"`
 	Cells   []ChangeI16 `json:"cl,omitempty"`
 
+	// ActiveWeapon is the WIELDED weapon as a change stream: the IT_* bit
+	// of STAT_ACTIVEWEAPON, which mvdsv writes from ent->v->weapon for every
+	// spawned player (mvdsv/src/sv_send.c:1268). It is a DIFFERENT question
+	// from the RL/LG/GL/SSG/SNG interval streams above — those are inventory
+	// (STAT_ITEMS bits, "owns"), this is "is holding right now".
+	//
+	// Values are single IT_* bits: 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL,
+	// 64 LG, 4096 axe. Zero means "the wire never said" for that instant,
+	// not "unarmed" — old recorders that freeze the STAT_ITEMS weapon bits
+	// freeze this too, so a consumer must check the column exists and moves
+	// before trusting it (see analyzer.activeWeaponLive).
+	ActiveWeapon []ChangeI16 `json:"aw,omitempty"`
+
 	// Discrete event timestamps (no value). Integer milliseconds since
 	// the stream's time origin (the same epoch as match-relative seconds
 	// elsewhere; schema v8 changed the type and unit to give exact
@@ -453,6 +466,15 @@ type LosTrack struct {
 // The game clock freezes during a pause while wall-clock time runs on, so
 // the P(g) term is what keeps the mapping correct on paused demos; it is 0
 // (and Pauses may be empty) otherwise.
+//
+// Schema v72 adds the MATCH-start anchor beside it (MatchStartUnixMs and
+// friends). The two answer different questions: DemoStartUnixMs is the
+// origin of the mapping above, MatchStartUnixMs is "when was this match
+// played" — which is what the wire date markers actually state, and what
+// most demos carry (the markers reach ~95% of the archive against ~25% for
+// the server-clock anchor). Where only a marker exists, DemoStartUnixMs is
+// back-shifted from it by DemoOffset so the formula keeps working, and
+// DemoStartSource says so.
 type GlobalStream struct {
 	MatchStart int32 `json:"matchStart"` // always 0 — the match-relative time origin
 	MatchEnd   int32 `json:"matchEnd"`   // match end (≈ duration) in match-relative ms
@@ -468,14 +490,114 @@ type GlobalStream struct {
 	// DemoStartUnixMs is the server's clock (Unix epoch ms) at demo open.
 	DemoStartUnixMs int64 `json:"demoStartUnixMs,omitempty"`
 	// DemoStartAccuracyMs is its resolution: 1 from the mvdhidden 0x000B
-	// millisecond block, 1000 from the whole-second serverinfo `epoch` cvar.
+	// millisecond block, 1000 from the whole-second serverinfo `epoch` cvar,
+	// and — when the anchor was recovered from a date marker (schema v72) —
+	// the marker's own uncertainty (1000, or 50 400 000 when the marker
+	// carried no timezone and UTC had to be assumed).
 	// Absent (0) when no wall-clock source is present.
 	DemoStartAccuracyMs int32 `json:"demoStartAccuracyMs,omitempty"`
+	// DemoStartSource names where DemoStartUnixMs came from (schema v72):
+	// "mvdhidden" (0x000B block), "epoch" (serverinfo cvar), or the date
+	// marker ("matchdate" / "matchkey" / "ktxstats") the anchor was
+	// back-shifted from by DemoOffset. Absent with the anchor.
+	DemoStartSource string `json:"demoStartSource,omitempty"`
+	// MatchStartUnixMs is the server wall clock (Unix epoch ms) at MATCH
+	// start — the instant match-relative g=0 names (schema v72). It is the
+	// field to answer "when was this played?" with: the wire date markers
+	// (matchdate / matchkey prints, ktxstats date) all describe the match,
+	// not the demo file, and reach ~95% of the archive where the demo-open
+	// anchor above reaches ~25%. On a TimeBase=="demo" result there is no
+	// detected match start, so it equals the demo-open anchor.
+	MatchStartUnixMs int64 `json:"matchStartUnixMs,omitempty"`
+	// MatchStartAccuracyMs is the ± uncertainty of MatchStartUnixMs: 1 or
+	// 1000 for the server-clock anchors and second-resolution markers with a
+	// resolved timezone, 3 600 000 for a zone name whose DST state is
+	// ambiguous, 50 400 000 when the marker named no zone at all and UTC was
+	// assumed.
+	MatchStartAccuracyMs int32 `json:"matchStartAccuracyMs,omitempty"`
+	// MatchStartSource names the marker MatchStartUnixMs was derived from:
+	// "mvdhidden" / "epoch" (the demo-open anchor plus DemoOffset),
+	// "matchdate", "matchkey", or "ktxstats" (match end minus match length).
+	MatchStartSource string `json:"matchStartSource,omitempty"`
+	// MatchStartConfidence grades the anchor: "exact" (zone resolved, no
+	// check failed), "unverified" (nothing contradicts it, but something is
+	// unpinned — an assumed timezone, or one soft signal), "contradicted" (a
+	// check the value provably fails). The value is NEVER dropped or coerced
+	// on a failed check — the grade plus MatchStartNote is the whole report.
+	MatchStartConfidence string `json:"matchStartConfidence,omitempty"`
+	// MatchStartNote names the checks behind a non-"exact" grade, joined
+	// with "; ". The emitted forms are
+	// `version-floor: ktx 1.42 was not released before 2021-01-01`,
+	// `impossible-date: the stamp lands after 2100`,
+	// `marker-disagreement: matchdate vs ktxstats`,
+	// `epoch-reset-window: the stamp lands in the unset-clock boot default
+	// (2000-01)` and
+	// `tz-unknown: the marker named no timezone, UTC assumed`.
+	// Empty on "exact".
+	MatchStartNote string `json:"matchStartNote,omitempty"`
+	// MatchEndUnixMs is the wall clock at match end: the ktxstats `date`
+	// string (KTX writes the block at intermission), else the `//finalscores`
+	// stamp once its year has been completed — which is minute-resolution and
+	// only as good as the marker its year came from. Absent when the demo
+	// carries neither, or neither parsed.
+	MatchEndUnixMs int64 `json:"matchEndUnixMs,omitempty"`
+	// DateMarkers lists every date stamp the wire carried, in the order
+	// they were seen, whether or not the anchor above used them. They are
+	// the evidence behind MatchStartConfidence and let a consumer redo the
+	// cross-check itself.
+	//
+	// "Every stamp" is bounded by this struct: the whole family lives on
+	// GlobalStream, so a Result with no Streams block carries none of it,
+	// even where the wire did print a matchdate — the mid-match recordings
+	// of plan lead 8. Metadata.FinalScores survives there; the markers do
+	// not.
+	DateMarkers []WallClockMarker `json:"dateMarkers,omitempty"`
 	// Pauses lists each game pause as a flat segment in the game→wall-clock
 	// mapping, in match-relative AtMs order. Derived from the mvdhidden
 	// 0x000A (paused_duration) blocks; absent on demos with no pauses or
 	// recorded by a server that does not embed the block.
 	Pauses []TimelinePause `json:"pauses,omitempty"`
+}
+
+// WallClockMarker is one date stamp observed on the wire (schema v72).
+// Markers are reported verbatim — a stamp that lost its trust checks still
+// appears here; MatchStartConfidence carries the verdict.
+type WallClockMarker struct {
+	// Source is the wire marker: "matchdate" (KTX's match-start bprint,
+	// ktx/src/match.c:1291), "matchkey" (the kmod/KTeam-era bprint),
+	// "ktxstats" (the `date` field of the KTX demoinfo block), or
+	// "finalscores" (the `//finalscores` end-of-match stuffcmd).
+	Source string `json:"source"`
+	// Kind is what instant the stamp names: "matchStart" or "matchEnd".
+	Kind string `json:"kind"`
+	// UnixMs is the parsed instant (Unix epoch ms), with TZ applied. 0 on a
+	// "finalscores" marker whose year could not be completed — see YearFrom.
+	UnixMs int64 `json:"unixMs"`
+	// AtMs is the demo-clock ms the marker was printed at, for the
+	// print-borne markers. Absent (0) for the markers that ride no print: the
+	// ktxstats block and the `//finalscores` stuffcmd.
+	AtMs int32 `json:"atMs,omitempty"`
+	// YearFrom names the ANCHOR source whose year completed this stamp. It
+	// is set only on "finalscores", whose strftime layout ("%b %d, %H:%M")
+	// carries no year: the wall-clock node takes the year from whatever
+	// anchored the match, so the stamp corroborates on month/day/hour/minute
+	// and never on the year, and it can state no instant at all when the
+	// demo carried nothing to anchor on (UnixMs 0, YearFrom empty).
+	//
+	// The vocabulary is therefore MatchStartSource's, not just the marker
+	// sources: "matchdate" / "matchkey" / "ktxstats", but also the
+	// server-clock anchors "epoch" and "mvdhidden", which outrank the
+	// prints and so supply the year on most modern demos.
+	YearFrom string `json:"yearFrom,omitempty"`
+	// TZ is the zone token exactly as printed ("CET", "+0200",
+	// "Vdsteuropa, sommartid" post-normalisation). Empty when the stamp
+	// carried none.
+	TZ string `json:"tz,omitempty"`
+	// AssumedUTC is set when TZ was missing or not in the offset table, so
+	// the instant was read as UTC (see MatchStartAccuracyMs).
+	AssumedUTC bool `json:"assumedUtc,omitempty"`
+	// Raw is the stamp text as it appeared after the marker prefix.
+	Raw string `json:"raw,omitempty"`
 }
 
 // PositionTrack is columnar to compress JSON. Indices align across the

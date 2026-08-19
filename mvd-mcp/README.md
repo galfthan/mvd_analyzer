@@ -285,6 +285,11 @@ every subsequent per-demo tool expects.
 
 Output: `Overview` —
 see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
+Carries the per-demo capability manifest (`available`), the
+`timing.matchStart*` anchor family that answers "when was this match
+played" (schema v72 — always read `matchStartConfidence` with the value),
+and the two separate degradation signals `errors` (analyzer level) and
+`parseWarnings` (reader level, omitted on a clean parse).
 
 #### `getDemoInfo({demoId})`
 
@@ -356,7 +361,10 @@ Output: `result.MetadataResult` — `serverInfo` (map of cvar →
 value), `matchSettings` (mode, timelimit, fraglimit, antilag,
 spawnmodel/spawnK, midair, instagib, overtime, powerups, vwep,
 noweapon, matchtag, …), `countdownText` (raw KTX
-countdown centerprint).
+countdown centerprint) and `finalScores` (KTX's `//finalscores`
+end-of-match scoreline, verbatim: date without a year, mode, map and
+the two sides — present on 64% of demos against demoinfo's 46%, and
+counting ROUNDS rather than frags on Clan Arena / Wipeout).
 
 #### `getFrags({demoId, ...})`
 
@@ -506,9 +514,43 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
-(resolved name), `entNum` (server edict — joins to
-`weapon-pickups[].backpackEnt`). (REST returns a `{timeUnit, backpacks}`
-envelope; the MCP tool passes it through.)
+(resolved name), `entNum` (server edict) and `source` (schema v72); a
+`reconstructed` row additionally carries `fate` and its companions below,
+and a `ktx` row carries `fate: "expired"` when KTX announced the timeout.
+(REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
+through.)
+
+`source` is `ktx` on demos that carried KTX's `//ktx drop` hint (KTX
+≥ 1.38, 49% of the archive) and `reconstructed` on older demos, where the
+pipeline replays KTX's own `DropBackpack` rule instead — validated at
+99.97% precision and recall against the hints. **The two provenances carry
+the pickup side differently**:
+
+- A `ktx` row's `entNum` is the hinted edict and joins to
+  `weapon-pickups[].backpackEnt`, which is where its pickup lives.
+  `picker` / `pickerTeam` / `pickupTime` are absent. `fate` appears only
+  as `expired`, and only when KTX announced the 120 s removal in its third
+  backpack directive `//ktx expire` — the one statement the pickup join
+  cannot make. An ABSENT `fate` on a `ktx` row means "ask
+  `getWeaponPickups`", never "nobody took it": across the archive only
+  half the drops with no pickup row carry the expiry hint, the rest being
+  packs the recording ended on top of.
+- A `reconstructed` row has no pickup hint to join to, so the pickup side
+  is on the row itself (schema v72): `fate` (`picked` / `expired` /
+  `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the
+  wire named exactly one player, read off the bound backpack-entity track.
+  Its `entNum` is that bound entity — no longer 0, but still joining to no
+  pickup row. Measured against the `//ktx bp` hints with both hints
+  withheld: 100% precision, 96.1% recall on picked-vs-not, 99.98% of named
+  pickers correct. Read `unobserved` as "the wire did not answer", not as
+  "nobody took it"; a `picked` row with no `picker` means two players were
+  on the pack and nothing separated them.
+
+An absent section is AMBIGUOUS: it means either that no RL/LG pack dropped
+or that the pass stood down rather than guess, and the wire shape does not
+distinguish the two. `origin` is the pack's own position — the victim's
+origin less the 24 units KTX drops it by (`ktx/src/items.c:2703-2704`) —
+on both provenances.
 
 #### `getItems({demoId, ...})`
 
