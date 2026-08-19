@@ -720,7 +720,11 @@ ABSENCE is what says "not recovered for this weapon".
 
 **Emission.** Only for weapons whose damage lands in the fire's own server
 frame — `lg`, `sg`, `ssg` and `axe` (the last at its fixed +200 ms traceline
-delay). `rl`/`gl`/`ng`/`sng` never carry the block: pinning which projectile
+delay) — and for every one of those the player FIRED, whether or not the
+reconstruction credits him with any damage: a shooter who appears nowhere in
+the reconstructed log gets `hits: 0` on each covered weapon he fired, never an
+absent block (presence is keyed on the section being reconstructed, not on this
+shooter being in it). `rl`/`gl`/`ng`/`sng` never carry the block: pinning which projectile
 caused which impact needs the entity-flight bracket the shots analyzer builds
 and discards, and counting impacts instead answers a different question than
 the measured counter does — measured against the wire log, an rl figure built

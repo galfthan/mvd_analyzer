@@ -222,6 +222,13 @@ type WeaponAim struct {
 // above the measured rl convention. An absent block is "not recovered for this
 // weapon", never "no hits".
 //
+// Presence is keyed on the damage SECTION being reconstructed and this player
+// having FIRED the weapon — never on him appearing in the reconstructed log. A
+// shooter the reconstruction credits with no damage at all gets Hits: 0 on
+// every covered weapon he fired, because "fired ten shells, linked nothing" is
+// a supported reading and must not be published as the same absence a withheld
+// weapon gets.
+//
 // Accuracy measured against the wire log on demos that carry both:
 // damagerecon/ACCURACY.md §"Aim hit recovery" (lg mean 0.3pp, sg 1.3pp,
 // ssg 1.7pp, axe 0.5pp of accuracy error vs the measured counter).

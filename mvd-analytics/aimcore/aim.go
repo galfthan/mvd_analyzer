@@ -193,19 +193,15 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// connected and is kept (the wire join counts those too), while an
 	// environmental row has no shooter to credit and is not.
 	hitsSource := ""
-	reconByPlayer := make(map[string][]*dmgRec)
+	reconTier := false
+	var reconByPlayer map[string][]*dmgRec
 	switch {
 	case hitsMeasured:
 		hitsSource = result.AimHitsSourceKTX
 	case res.Damage != nil && res.Damage.Source == result.DamageSourceReconstructed:
 		hitsSource = result.AimHitsSourceReconstructed
-		for _, d := range res.Damage.Events {
-			if d.Attacker == "" || d.IsEnv || !inWindow(d.Time) {
-				continue
-			}
-			reconByPlayer[d.Attacker] = append(reconByPlayer[d.Attacker],
-				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam})
-		}
+		reconTier = true
+		reconByPlayer = reconDamageByAttacker(res, inWindow)
 	}
 
 	// The RL/GL direct/splash split needs projectile linking to have filled
@@ -228,7 +224,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -289,7 +285,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -613,9 +609,13 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// Reconstructed tier: the fire→recon-damage join, in its own block (see
 	// recon.go). Emitted for every validated weapon the player fired, zero
 	// included — inside a present block a zero is a linked-nothing, and the
-	// block's absence is what says "not recovered for this weapon".
-	if len(reconDmg) > 0 {
-		for w, hits := range reconHitsByWeapon(shots, reconDmg) {
+	// block's absence is what says "not recovered for this weapon". The gate is
+	// therefore the SECTION being reconstructed, never this shooter having
+	// reconstructed damage: a player who fired ten shotgun shells and hit
+	// nobody has a supported zero, and gating on his damage would publish it as
+	// the same absence a withheld weapon gets.
+	if reconTier {
+		for w, hits := range reconHitsByWeapon(shots, reconDmg, reconTierWeapons) {
 			if wa := wagg[w]; wa != nil {
 				if hits > wa.Shots {
 					hits = wa.Shots // a claim per fire makes this unreachable; belt and braces

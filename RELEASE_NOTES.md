@@ -36,7 +36,10 @@ in the fire's own server frame (the axe at its fixed +200 ms traceline
 delay). Measured with the harness the change ships with
 (`cmd/qw-aim-eval`, 53 dm2/dm3 demos with the KTX log): keep the
 measured aim, replace the damage section with the blind reconstruction
-of the same match, recompute, compare per player and weapon. Mean
+of the same match, recompute, compare per player and weapon. The block
+is there for every covered weapon a player FIRED — a shooter the
+reconstruction credits with no damage at all reads `hits: 0`, so a
+supported zero never looks like a withheld weapon. Mean
 accuracy error vs the measured counter: **lg 0.3 pp, sg 1.3 pp, ssg
 1.7 pp, axe 0.5 pp**, with a small negative bias — a hit the
 reconstruction attributed elsewhere is a lost hit, and nothing invents

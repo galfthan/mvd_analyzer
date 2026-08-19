@@ -140,6 +140,70 @@ func TestReconTierNeedsAFireInWindow(t *testing.T) {
 	}
 }
 
+// One fire is claimable by at most ONE impact, however many separate impacts
+// its window covers: two damage instants further apart than the merge span but
+// both inside one shotgun fire's ±60 ms window are two impacts and still one
+// hit — a fire either connected or it did not, and there is no second fire for
+// the second impact to have come from.
+//
+// Pinned on the join itself rather than through Compute: the emission path caps
+// hits at the weapon's fire count, which would silently absorb a double-claim
+// here instead of failing.
+func TestReconTierOneFireIsClaimedOnce(t *testing.T) {
+	shots := []result.Shot{
+		{Time: 100, Player: "A", Weapon: "sg"},
+		{Time: 5000, Player: "A", Weapon: "sg"}, // far outside both impacts' windows
+	}
+	dmg := []*dmgRec{
+		{t: 50, weapon: "sg", dmg: 8},
+		{t: 150, weapon: "sg", dmg: 12}, // > reconImpactMergeMs later: a second impact
+	}
+	if got := reconHitsByWeapon(shots, dmg, reconTierWeapons)["sg"]; got != 1 {
+		t.Errorf("sg recon hits = %d, want 1 — two impacts cannot both claim the "+
+			"one fire whose window covers them", got)
+	}
+}
+
+// Overlapping windows still pair up one-to-one: lg fires 50 ms apart with an
+// impact each (±30 ms window, so the first impact's window covers BOTH fires)
+// must count 2. Taking the latest covering fire instead makes the early impact
+// claim the future fire and strands the late one on an expired one — 1 of 2.
+func TestReconTierOverlappingWindowsPairUp(t *testing.T) {
+	shots := []result.Shot{
+		{Time: 1000, Player: "A", Weapon: "lg", Source: "beam"},
+		{Time: 1050, Player: "A", Weapon: "lg", Source: "beam"},
+	}
+	events := []result.DamageEntry{
+		{Time: 1020, Attacker: "A", Victim: "B", Weapon: "lg", Damage: 7},
+		{Time: 1055, Attacker: "A", Victim: "B", Weapon: "lg", Damage: 7},
+	}
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
+	if lg := weaponOf(t, ar, "A", "lg"); lg.Recon == nil || lg.Recon.Hits != 2 {
+		t.Errorf("lg recon = %+v, want hits 2 — both fires connected", lg.Recon)
+	}
+}
+
+// A shooter the reconstruction credits with NO damage at all still gets the
+// block, with an honest zero: "fired ten shells, linked nothing" is a supported
+// reading, and withholding it would make it indistinguishable from a weapon the
+// tier does not cover.
+func TestReconTierZeroForAShooterWithNoReconDamage(t *testing.T) {
+	shots := []result.Shot{
+		{Time: 500, Player: "A", Weapon: "sg", Source: "sound"},
+		{Time: 1100, Player: "A", Weapon: "sg", Source: "sound"},
+		{Time: 1500, Player: "B", Weapon: "lg", Source: "beam"},
+	}
+	// Only B's damage is reconstructed; A appears nowhere in the log.
+	events := []result.DamageEntry{{Time: 1505, Attacker: "B", Victim: "A", Weapon: "lg", Damage: 7}}
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
+	if sg := weaponOf(t, ar, "A", "sg"); sg.Recon == nil || sg.Recon.Hits != 0 {
+		t.Errorf("A sg recon = %+v, want a present block with hits 0", sg.Recon)
+	}
+	if lg := weaponOf(t, ar, "B", "lg"); lg.Recon == nil || lg.Recon.Hits != 1 {
+		t.Errorf("B lg recon = %+v, want hits 1", lg.Recon)
+	}
+}
+
 // The tier covers only the validated (same-frame linkable) weapons: a
 // projectile fire publishes shots and no recon block at all, so a consumer can
 // never read a withheld weapon as a zero-accuracy one.

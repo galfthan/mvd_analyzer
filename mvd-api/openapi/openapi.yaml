@@ -4802,11 +4802,14 @@ components:
                         damage log was reconstructed — and never beside the
                         measured counters, which stay withheld there. Accuracy
                         is `recon.hits / shots`. Emitted only for the
-                        same-server-frame weapons lg/sg/ssg/axe; rl/gl/ng/sng
-                        carry no block at all (their fire→impact link needs the
-                        projectile-flight bracket, which is not recoverable
-                        here), so an absent block means "not recovered for this
-                        weapon", never "no hits".
+                        same-server-frame weapons lg/sg/ssg/axe, and for every
+                        one of those the player fired — a shooter the
+                        reconstruction credits with no damage gets `hits: 0`,
+                        not an absent block. rl/gl/ng/sng carry no block at all
+                        (their fire→impact link needs the projectile-flight
+                        bracket, which is not recoverable here), so an absent
+                        block means "not recovered for this weapon", never
+                        "no hits".
                       additionalProperties: false
                       properties:
                         hits:
