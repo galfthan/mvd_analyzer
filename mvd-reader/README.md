@@ -214,9 +214,12 @@ will not emit them, in which case consumers fall back to
 `BackpackExpireHintEvent` closes that family. `//ktx expire`
 (`ktx/src/g_spawn.c:196-210`) fires from `SUB_Remove` for an RL/LG pack
 the server deletes untaken — which, for a dropped pack, is
-`DropBackpack`'s 120 s timeout (`items.c:2870-2872`). A pack therefore
-accounts for itself in exactly one of `//ktx bp` or `//ktx expire`, and
-this is the only signal on the wire that positively says a pack was
+`DropBackpack`'s 120 s timeout (`items.c:2870-2872`). A pack that runs
+its course on the wire therefore accounts for itself in exactly one of
+`//ktx bp` or `//ktx expire` — but a pack the recording ends on top of
+emits neither (measured: 1.8% of drops across a 223-demo archive
+sample, see `mvd-analytics/analyzer/BACKPACKS.md`). `//ktx expire` is
+still the only signal on the wire that positively says a pack was
 *not* taken: a demo can carry `//ktx drop` and no `//ktx bp` at all
 (measured: 107 of 330 archive demos), so the absence of a pickup hint
 proves nothing. Backpack edicts are recycled within a match, so consumers

@@ -88,7 +88,10 @@ const (
 	BackpackSourceReconstructed = "reconstructed"
 )
 
-// BackpackDrop.Fate vocabulary (reconstructed rows only).
+// BackpackDrop.Fate vocabulary. Reconstructed rows can carry any of the
+// three; a `ktx` row carries only `expired` (from `//ktx expire`) — its
+// other outcomes live in the weapon-pickups join, so an absent Fate on a
+// `ktx` row means "unknown here", not "nobody took it".
 const (
 	// BackpackFatePicked: the pack entity left the wire with at least one
 	// live player's bounding box overlapping it — the touch that ran
