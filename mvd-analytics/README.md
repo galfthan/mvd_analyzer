@@ -457,7 +457,6 @@ flowchart TB
   subgraph d4["depth 4"]
     shots["shots"]
     frags_final["frags-final"]
-    airgibs["airgibs"]
     loc_graph["loc-graph"]
     region_control["region-control"]
     opening["opening"]
@@ -469,6 +468,7 @@ flowchart TB
     damage_recon["damage-recon"]
   end
   subgraph d6["depth 6"]
+    airgibs["airgibs"]
     player_stats["player-stats"]
   end
   backpacks -->|"backpacks"| player_stats
@@ -483,8 +483,8 @@ flowchart TB
   clock -->|"clock"| timeline
   clock -->|"clock"| weapon_pickups
   damage -->|"damage"| aim
-  damage -->|"damage"| airgibs
   damage -->|"damage"| damage_recon
+  damage_recon -->|"damage:final"| airgibs
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| damage

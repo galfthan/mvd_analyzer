@@ -43,6 +43,14 @@ and that non-event was published as the match's biggest airgib.
   against the *published* per-stream session table
   (`streams.players[].sessions`) instead of an analyzer-internal index: same
   answers, one clock.
+- **Reconstructed damage participates**: the airgibs DAG node binds
+  `damage:final`, so pre-instrumentation demos (damage rebuilt by
+  damagerecon, `source: "reconstructed"`) get a Key-Moments airgib list too —
+  recon's direct-vs-splash split is geometric (explosion endpoint within 48
+  units of the victim) and its timestamps frame-accurate, which is the
+  fidelity the verdict needs. This supersedes the wire-measured-only gate the
+  reconstruct-damage entry below describes for airgibs (aim keeps it);
+  `damage.source` says which evidence a demo's list rests on.
 - **Web UI rename** (cosmetic, no schema impact): the Key Moments panel
   "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
   direct rocket hits on airborne victims whether or not they killed, and the

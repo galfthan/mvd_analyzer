@@ -349,17 +349,17 @@ func TestValidateAirgibPreMs(t *testing.T) {
 	}
 }
 
-// Reconstructed damage (pre-instrumentation demos) never yields airgibs —
-// reconstructed hits carry none of the per-hit fidelity the verdict rests
-// on. The gate must hold on EVERY path, including the per-request
-// recompute with the pre-hit gate disabled.
-func TestComputeAirgibs_ReconstructedDamageYieldsNone(t *testing.T) {
+// Reconstructed damage (pre-instrumentation demos) participates on equal
+// terms with the wire stream: damagerecon's direct/splash split is
+// geometric and its timestamps frame-accurate, and the airgibsPost DAG
+// node binds `damage:final` so ordering cannot serve a pre-recon view.
+func TestComputeAirgibs_ReconstructedDamageParticipates(t *testing.T) {
 	res := airgibTestResult()
 	res.Damage.Source = result.DamageSourceReconstructed
-	for _, preMs := range []int32{0, -1} {
-		if got := ComputeAirgibs(res, AirgibsOptions{PreMs: preMs}); len(got) != 0 {
-			t.Errorf("preMs=%d: airgibs = %+v, want none on reconstructed damage", preMs, got)
-		}
+	got := ComputeAirgibs(res, AirgibsOptions{})
+	want := ComputeAirgibs(airgibTestResult(), AirgibsOptions{})
+	if len(got) != len(want) || len(got) != 1 {
+		t.Fatalf("airgibs on reconstructed = %d, on ktx = %d, want 1 == 1", len(got), len(want))
 	}
 }
 

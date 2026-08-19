@@ -1146,6 +1146,12 @@ package result
 //   - Per-hit userids now resolve against the PUBLISHED per-stream session
 //     table (`streams.players[].sessions`) rather than an analyzer-internal
 //     index; same answers, one clock.
+//   - Airgibs now consume reconstructed damage too (the DAG node binds
+//     `damage:final`), superseding v71's wire-measured-only gate for this
+//     view: recon's direct/splash split is geometric (explosion endpoint
+//     within 48 units of the victim) and frame-accurate, the fidelity the
+//     verdict needs. Aim keeps the ktx-only gate. `damage.source` says
+//     which evidence a demo's list rests on.
 //
 // See RELEASE_NOTES.md.
 const CurrentSchemaVersion = 72

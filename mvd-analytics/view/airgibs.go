@@ -110,16 +110,15 @@ func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent 
 	if r == nil || r.Damage == nil || r.Streams == nil || r.TimelineAnalysis == nil {
 		return nil
 	}
-	// Wire-measured damage only, checked by SOURCE, not presence: the
-	// damage-recon post fills r.Damage on pre-instrumentation demos, and
-	// reconstructed hits carry none of the per-hit fidelity (timing,
-	// direct-vs-splash) an airgib verdict rests on. Gating here rather
-	// than in the analyzer wrapper keeps every path honest — the stored
-	// list AND the per-request ?preMs= recompute both refuse to fabricate
-	// airgibs from reconstructed damage.
-	if r.Damage.Source != result.DamageSourceKTX {
-		return nil
-	}
+	// Reconstructed damage participates on equal terms with the wire
+	// stream (the airgibsPost DAG node binds `damage:final`, so the
+	// stored list always sees the recon-filled section): damagerecon's
+	// direct-vs-splash split is geometric — a hit is direct only when
+	// its TE_EXPLOSION / projectile endpoint lands within 48 units of
+	// the victim — its timestamps are frame-accurate, and the height
+	// gates below do the discriminating either way. The demo-wide
+	// r.Damage.Source ("ktx" | "reconstructed") tells a consumer which
+	// evidence the list rests on.
 	preMs := opts.PreMs
 	if preMs == 0 {
 		preMs = DefaultAirgibPreMs
