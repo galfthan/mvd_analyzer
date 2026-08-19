@@ -25,7 +25,7 @@ Every node in the analytics DAG, as declared in [`analyzer/dag.go`](analyzer/dag
 | `weapon-pickups` | light | no | `weaponPickups` | `clock`, `identity`, `frag`, `roster` | `weapon-pickups` | Slot-weapon acquisitions (world spawners and backpacks) with kills-before-next-death effectiveness. |
 | `frags-final` | light | no | — | `clock`, `demoinfo`, `frag`, `timeline` | `frags-final`, `frags:final` | Final frag log: appends recovered victim-named telefrag team-kills to the raw `frag` log; publishes `frags:final` for in-pipeline consumers. |
 | `aim` | light | no | `aim` | `shots`, `timeline`, `damage` | `aim` | Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build). |
-| `airgibs` | light | no | — | `demoinfo`, `frag`, `timeline`, `damage` | `airgibs` | Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on airborne victims above the height threshold). |
+| `airgibs` | light | no | — | `demoinfo`, `frag`, `timeline`, `damage` | `airgibs` | Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on victims above the height threshold both at the hit and 200 ms before it). |
 | `match-final` | light | no | — | `match`, `frags:final` | `match-final`, `match:final` | Final match scoreboard: folds frag-log-corrected kills/deaths/suicides into `match`; publishes `match:final` for in-pipeline consumers. |
 | `loc-graph` | light | no | `locGraph` | `timeline`, `demoinfo` | `loc-graph` | Per-map loc adjacency graph with directed transition weights derived from player movement. |
 | `region-control` | light | no | — | `timeline`, `match`, `demoinfo` | `region-control` | Folds the default-window region-control aggregation into the timeline (arbitrary windows are a view, not an artifact). |
@@ -33,4 +33,4 @@ Every node in the analytics DAG, as declared in [`analyzer/dag.go`](analyzer/dag
 | `player-stats` | light | no | `playerStats` | `clock`, `identity`, `roster`, `timeline`, `match:final`, `frags:final`, `damage`, `shots`, `items`, `weapon-pickups`, `backpacks`, `metadata` | `player-stats` | Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. |
 | `los` | heavy | yes | — | `timeline`, `demoinfo`, `metadata` | `los` | Per-player line-of-sight and potential-visibility interval sets — the heaviest position-derived pass, materialised on demand. |
 
-Generated at schema version 70.
+Generated at schema version 71.

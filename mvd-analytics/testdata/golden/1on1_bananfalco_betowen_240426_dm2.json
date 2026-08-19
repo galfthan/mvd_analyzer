@@ -11191,7 +11191,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -284099,19 +284099,6 @@
   },
   "timelineAnalysis": {
     "airgibs": [
-      {
-        "attacker": "banan falco",
-        "attackerTeam": "banan falco",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 376.96875,
-        "heightAboveAttacker": 309,
-        "loc": "floating",
-        "time": 156362,
-        "victim": "betowen",
-        "victimTeam": "betowen",
-        "victimUserID": 37
-      },
       {
         "attacker": "banan falco",
         "attackerTeam": "banan falco",

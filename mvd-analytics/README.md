@@ -40,7 +40,9 @@ that downstream consumers render, summarise, or feed to an agent.
   event stream (analyzers — 15 of them, five of which publish
   `CoreOutputs`) or only refine the assembled `Result` (eight
   post-processors: victim-named teamkill recovery → `frags:final`, **aim
-  analysis**, airgib detection, scoreboard kills/deaths/suicides
+  analysis**, airgib publication (detection itself is `view.ComputeAirgibs`,
+  a pure function of the assembled `Result`, so mvd-api can re-run it with a
+  caller-tuned pre-hit look-back), scoreboard kills/deaths/suicides
   correction → `match:final`, locgraph synthesis, region-control
   classification, the match-opening projection → `opening`, and the
   canonical per-player statistics join → `playerStats`), plus
@@ -150,7 +152,7 @@ that downstream consumers render, summarise, or feed to an agent.
   | `lives` | `view.Lives` | `-min-life`, `-dmg`, `-summary` |
   | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
   | `items` | `view.Items` | `-items`, `-kinds` (the full phase timeline) |
-  | `airgibs` | `view.Airgibs` | — |
+  | `airgibs` | `view.Airgibs` (stored list; detection is `view.ComputeAirgibs`) | — |
   | `frags` | `view.Frags` | `-weapons`, `-summary` |
   | `damage` | `view.Damage` | `-weapons`, `-summary`, `-dmg` |
   | `aim` | `view.Aim` | `-summary` (`-from`/`-to` *recompute* over the window) |

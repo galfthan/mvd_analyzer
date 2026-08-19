@@ -5,6 +5,49 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (airgib-pre-gate) — an airgib victim must be airborne BEFORE the hit too, schema v71
+
+**The airgib list was reporting standing players as airgibs.** KTX stamps a
+damage entry at (or one wire frame after) the physics frame in which the
+rocket's own knockback has *already moved the victim*, so the position sample
+nearest the damage time can describe someone who was on the ground at impact.
+Measured case (hub gameId `232925`, dm2 4on4, 2026-08-18): a player riding
+the dm2 moving platform (`func_train`, top at z=319) took a quad direct
+rocket that blasted him off it, the hit-time sample read **303 units of air**,
+and that non-event was published as the match's biggest airgib.
+
+- **Airborne is now measured twice**: the victim must be at or above the
+  96-unit floor-height threshold at the hit sample **and** at
+  *every* sample of the look-back window `[hit − preMs, hit]`, default
+  **200 ms**, anchored on a pre-impact sample (≥ 40 ms — the damage-stamp
+  lag — before the hit). No tail is excluded: knockback can only
+  *over*-report height, so contaminated samples can only reject — which
+  also catches a victim who fell and landed just before the rocket. A plain
+  jump peaks at ~45 units, so a genuine 96+ victim was carried there by
+  knockback or a fall and
+  has been above the threshold for hundreds of ms — the look-back cannot lose
+  a real event, it only drops the ones whose airborne-ness the rocket itself
+  created. Reported `height`, `loc` and `heightAboveAttacker` still come from
+  the **hit** sample; the pre-hit sample only gates.
+- **Entries disappear from `timelineAnalysis.airgibs`** (no field is added,
+  removed or retyped) — hence the schema bump; the golden corpus moves.
+- **Tunable per request**: `GET /v1/demos/{id}/airgibs?preMs=` accepts
+  `0..1000` (400 `invalid_param` outside it). `preMs=0` turns the pre-hit gate
+  off, reproducing the pre-v71 hit-time-only rule; the default serves the
+  stored list, any other value recomputes. Every response echoes the effective
+  value as **`preMs`** on the envelope, so a body says which detection it is.
+- **Detection moved to `view.ComputeAirgibs`**, a pure function of the
+  assembled `Result` — the same staging as `regionControlPost` /
+  `view.RegionControl`. The analyzer post-processor now just bakes the
+  default-options run into the stored `Result`. Per-hit userids resolve
+  against the *published* per-stream session table
+  (`streams.players[].sessions`) instead of an analyzer-internal index: same
+  answers, one clock.
+- **Web UI rename** (cosmetic, no schema impact): the Key Moments panel
+  "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
+  direct rocket hits on airborne victims whether or not they killed, and the
+  gibs are the subset the Lethal column already badges.
+
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 
 No schema change; web UI only. Team colors used to follow finishing order —

@@ -39249,7 +39249,7 @@
       }
     ]
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -80421,20 +80421,6 @@
         "victim": "psy*overon",
         "victimTeam": "pys",
         "victimUserID": 36
-      },
-      {
-        "attacker": "psy*overon",
-        "attackerTeam": "pys",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 282.46875,
-        "heightAboveAttacker": 211.75,
-        "lethal": true,
-        "loc": "Quad.tele",
-        "time": 450725,
-        "victim": "wd.char",
-        "victimTeam": "wd",
-        "victimUserID": 32
       },
       {
         "attacker": "wd.dilbert",

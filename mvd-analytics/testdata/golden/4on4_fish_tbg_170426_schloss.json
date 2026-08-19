@@ -93299,7 +93299,7 @@
       }
     ]
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -222513,47 +222513,6 @@
   },
   "timelineAnalysis": {
     "airgibs": [
-      {
-        "attacker": "anni",
-        "attackerTeam": "'\u003e\u003c\u003e",
-        "attackerUserID": 12,
-        "damage": 110,
-        "height": 212.71875,
-        "heightAboveAttacker": 87.75,
-        "lethal": true,
-        "loc": "RA",
-        "time": 828140,
-        "victim": "nexus",
-        "victimTeam": "'tbg",
-        "victimUserID": 10
-      },
-      {
-        "attacker": "anni",
-        "attackerTeam": "'\u003e\u003c\u003e",
-        "attackerUserID": 12,
-        "damage": 110,
-        "height": 182.96875,
-        "heightAboveAttacker": -9,
-        "loc": "cathedral.YA",
-        "time": 400368,
-        "victim": "nexus",
-        "victimTeam": "'tbg",
-        "victimUserID": 10
-      },
-      {
-        "attacker": "biggz",
-        "attackerTeam": "'tbg",
-        "attackerUserID": 16,
-        "damage": 110,
-        "height": 155.84375,
-        "heightAboveAttacker": 121.375,
-        "lethal": true,
-        "loc": "Quad.high",
-        "time": 430798,
-        "victim": "anni",
-        "victimTeam": "'\u003e\u003c\u003e",
-        "victimUserID": 12
-      },
       {
         "attacker": "anni",
         "attackerTeam": "'\u003e\u003c\u003e",

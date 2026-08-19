@@ -18226,7 +18226,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -35594,19 +35594,6 @@
         "lethal": true,
         "loc": "GL",
         "time": 81690,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 171.46875,
-        "heightAboveAttacker": -52,
-        "loc": "GL",
-        "time": 59715,
         "victim": "mj",
         "victimTeam": "mj",
         "victimUserID": 70

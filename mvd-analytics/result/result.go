@@ -1099,8 +1099,40 @@ package result
 //   - A drift test pins the manifest to the 422 table, which is what the
 //     removed ad-hoc has* fields never had and why they went stale.
 //
+// v71 — airgib detection gains a pre-hit airborne gate (a correctness
+// fix: entries disappear from `timelineAnalysis.airgibs`, no field is
+// added, removed or retyped) plus a `preMs` echo on the /airgibs
+// envelope.
+//   - The KTX damage entry is stamped at (or one wire frame after) the
+//     physics frame in which the rocket's own knockback already moved the
+//     victim, so the position sample nearest the damage time can describe
+//     a victim who was STANDING at impact. Measured case (hub 232925, dm2
+//     4on4): a player riding the dm2 func_train (top at z=319) took a quad
+//     direct rocket that blasted him off it and the hit-time sample read
+//     303 units of air — published as the match's biggest airgib.
+//   - The victim must now be at or above the 96-unit threshold BOTH at the
+//     hit sample AND at EVERY sample of the look-back window
+//     [hit - preMs, hit], anchored on a pre-impact sample (knockback can
+//     only OVER-report height, so possibly-contaminated samples in the
+//     window can only reject — a landing always leaves sub-threshold
+//     samples on the way down), default
+//     200 ms. A plain jump peaks at ~45 units, so a genuine 96+ victim was
+//     already airborne for hundreds of ms and the look-back cannot lose a
+//     real event. Reported `height`, `loc` and `heightAboveAttacker` still
+//     come from the HIT sample; the pre-hit sample only gates.
+//   - Detection moves from the analyzer post-processor into
+//     `view.ComputeAirgibs`, a pure function of the assembled Result (the
+//     regionControlPost / view.RegionControl staging). The post-processor
+//     bakes the default-options run into the stored Result; mvd-api's
+//     /airgibs re-runs it per request with `?preMs=` (0..1000, 0 = the
+//     pre-v71 hit-time-only rule) and echoes the effective value as
+//     `preMs` on the response envelope.
+//   - Per-hit userids now resolve against the PUBLISHED per-stream session
+//     table (`streams.players[].sessions`) rather than an analyzer-internal
+//     index; same answers, one clock.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 70
+const CurrentSchemaVersion = 71
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

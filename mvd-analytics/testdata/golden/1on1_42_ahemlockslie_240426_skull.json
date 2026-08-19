@@ -14090,7 +14090,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -35604,19 +35604,6 @@
   },
   "timelineAnalysis": {
     "airgibs": [
-      {
-        "attacker": "AHemlocksLie",
-        "attackerTeam": "AHemlocksLie",
-        "attackerUserID": 20,
-        "damage": 110,
-        "height": 114.84375,
-        "heightAboveAttacker": -56.125,
-        "loc": "RA",
-        "time": 403046,
-        "victim": "42",
-        "victimTeam": "42",
-        "victimUserID": 21
-      },
       {
         "attacker": "42",
         "attackerTeam": "42",

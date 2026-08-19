@@ -166,7 +166,7 @@ var postNodeMeta = map[string]nodeMeta{
 	"airgibsPost": {
 		name: "airgibs", mutates: true,
 		requires: []string{"demoinfo", "frag", "timeline", "damage"},
-		desc:     "Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on airborne victims above the height threshold).",
+		desc:     "Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on victims above the height threshold both at the hit and 200 ms before it).",
 	},
 	"scoreboardStatsPost": {
 		name: "match-final", mutates: true,

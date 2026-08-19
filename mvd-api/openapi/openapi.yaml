@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "70"
+  version: "71"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -1743,8 +1743,17 @@ paths:
         height threshold, sorted by height descending. Empty (not an
         error) when the map's BSP was not provisioned at parse time. 422
         `airgibs_unavailable` when the demo has no timeline analysis.
+
+
+        Airborne is measured at the hit AND at every position sample
+        of the `preMs` before it (default 200 ms) — because the damage
+        entry lands after the rocket's own knockback moved the victim,
+        so the hit-time sample alone reports standing players as
+        airborne. `preMs=0` drops the pre-hit gate; the response echoes
+        the effective value.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/AirgibPreMs"
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
@@ -2652,6 +2661,27 @@ components:
       schema:
         type: integer
         minimum: 0
+    AirgibPreMs:
+      name: preMs
+      in: query
+      description: >
+        Pre-hit look-back in MILLISECONDS: the victim must be above the
+        airborne height threshold both at the hit and at every position
+        sample of the look-back window, whose earliest sample must
+        predate the damage-stamp lag (~40 ms). Default 200. The gate exists because the KTX damage entry is stamped
+        at (or one frame after) the physics frame in which the rocket's own
+        knockback already moved the victim, so the sample nearest the damage
+        time reports players who were STANDING at impact as hundreds of units
+        airborne. `preMs=0` turns the pre-hit gate off (hit-time sample only,
+        the pre-v71 detection); values above 1000 are rejected with 400
+        `invalid_param`, since a look-back that long lands before the flight
+        that made the hit an airgib at all. The response echoes the effective
+        value in `preMs`.
+      schema:
+        type: integer
+        default: 200
+        minimum: 0
+        maximum: 1000
     TimeRequired:
       name: time
       in: query
@@ -8698,13 +8728,16 @@ components:
     Airgibs:
       type: object
       description: >
-        /airgibs body — `{timeUnit, airgibs}`; airgibs is sorted
+        /airgibs body — `{timeUnit, preMs, airgibs}`; airgibs is sorted
         by height descending and [] on BSP-less maps. `time` is int32 ms
         (timeUnit is the constant `ms` echo).
-      required: [timeUnit, airgibs]
+      required: [timeUnit, preMs, airgibs]
       additionalProperties: false
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
+        preMs:
+          description: "Effective pre-hit look-back in ms the list was detected with (default 200; 0 = the pre-hit airborne gate was off)."
+          type: integer
         airgibs:
           description: "Airborne rocket-hit highlights, sorted by height descending."
           type: array

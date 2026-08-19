@@ -631,7 +631,11 @@ map's BSP clip hull, later refined to a bounding-box footprint in v26 and
 to stand players on moving brush models in v27) and liquid state (`lq`,
 v28 — dry / water / slime / lava plus submersion level). v25 adds
 `timelineAnalysis.airgibs` — direct airborne rocket hits surfaced for Key
-Moments — and v29–v30 refine its ranking and uncap the list. Schema v58
+Moments — v29–v30 refine its ranking and uncap the list, and v71 requires
+the victim to be airborne both AT the hit and 200 ms before it (the damage
+entry is stamped after the rocket's own knockback moved them, so the
+hit-time sample alone reported standing players as airgibs; the look-back
+is tunable per request via `/airgibs?preMs=`). Schema v58
 adds `timelineAnalysis.demoMarkers` — the bookmarks players insert in-game
 with KTX `/demomark`, attributed to the marking player's slot with an
 optional label and a negative `time` for a warmup mark — and a matching

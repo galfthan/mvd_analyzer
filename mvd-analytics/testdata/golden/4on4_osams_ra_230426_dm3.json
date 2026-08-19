@@ -92751,7 +92751,7 @@
       }
     ]
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -249172,20 +249172,6 @@
   },
   "timelineAnalysis": {
     "airgibs": [
-      {
-        "attacker": "nlk",
-        "attackerTeam": ".ra.",
-        "attackerUserID": 1,
-        "damage": 110,
-        "height": 160.21875,
-        "heightAboveAttacker": 0.25,
-        "lethal": true,
-        "loc": "lifts",
-        "time": 682834,
-        "victim": "marksuzu",
-        "victimTeam": "oSaMs",
-        "victimUserID": 8
-      },
       {
         "attacker": "marksuzu",
         "attackerTeam": "oSaMs",

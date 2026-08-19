@@ -55302,7 +55302,7 @@
       }
     ]
   },
-  "schemaVersion": 70,
+  "schemaVersion": 71,
   "shots": {
     "byPlayer": [
       {
@@ -98750,19 +98750,6 @@
   },
   "timelineAnalysis": {
     "airgibs": [
-      {
-        "attacker": "squeeze",
-        "attackerTeam": "1",
-        "attackerUserID": 14,
-        "damage": 110,
-        "height": 117.09375,
-        "heightAboveAttacker": 270.25,
-        "loc": "high",
-        "time": 208481,
-        "victim": "shazam",
-        "victimTeam": "n n",
-        "victimUserID": 8
-      },
       {
         "attacker": "squeeze",
         "attackerTeam": "1",
