@@ -139,9 +139,11 @@ missing, never a silently partial total.
 The **Key Moments** tab has seven tables in a two-column grid — powerup
 runs beside the longest frag streaks, **Top Damage Windows (10 s)**
 beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
-full-width **Airborne Rocket Gibs** table — enemy rocket hits on airborne victims
-(`timelineAnalysis.airgibs`), sortable by any column and defaulting to
-height-above-shooter descending (the vertical gap the rocket climbed).
+full-width **Direct Rocket Air Hits** table — direct enemy rocket hits on
+airborne victims, lethal or not (`timelineAnalysis.airgibs`; the Lethal
+column's `gib` badge marks the ones that killed), sortable by any column
+and defaulting to height-above-shooter descending (the vertical gap the
+rocket climbed).
 Its rows are empty unless the map's BSP is provisioned (height needs the
 clip hull; see `PositionTrack.h`). The **Demo Markers** table lists the
 user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
