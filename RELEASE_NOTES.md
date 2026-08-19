@@ -422,6 +422,46 @@ contradicted stamp is deliberately not back-shifted. Measured on a
 (100% of the `matchdate` demos, 82% of the dateless ones — the rest
 carry a non-date `matchkey` variant like `9-195923-1626`).
 
+### Reconstructed damage on the oldest 40%: measured, not caveated
+
+No schema or behaviour change — a trust claim replaced by a measurement.
+`damage.source: "reconstructed"` used to carry an explicit warning that
+pre-MVDSV-0.30 recordings (eras E0–E2, ~40% of the archive) were
+"unvalidated estimates", because every accuracy corpus behind
+`damagerecon/ACCURACY.md` was a modern demo carrying a KTX damage log to
+score against. Those demos have no log — but they do broadcast an
+**obituary** for every kill, on a channel the reconstruction can be told
+to ignore. The new `cmd/qw-recon-oracle` reruns it with the frag log cut
+out of attribution (`damagerecon.Options.WithholdObituaries`; delta
+extraction keeps its anchors, so both runs see the same instants at the
+same magnitudes — verified at 11 431 334 shared instants against 13
+differing) and scores the evidence-only verdict at each kill instant
+against the killer and weapon the obituary names.
+
+Over **15 254 archive demos and 1 678 259 scored kills**, the old half is
+not the weak half: attacker accuracy **E0 97.6% / E1 98.0% / E2 98.2% /
+E3 98.3%** against **E4 96.8% / E5 96.3%** on the instrumented eras, and
+the ordering holds when team size is controlled (duels 98.4–99.2%; 4on4s
+E0 97.3% and E2 97.7% against E4 95.4% and E5 95.8%). Run side by side
+with the KTX log on 3 920 instrumented demos, the oracle reproduces the
+withheld run's true accuracy to 0.1 pp and understates the shipped
+pipeline by 2.3–2.5 pp, so those era figures are floors. The expected
+weak spot — shotguns on demos with almost no TE_BLOOD — is absent (E0 sg
+96.2% at 0.27 blood/shot vs E5 95.4% at 1.48). **There is therefore no
+per-era trust tier and no era gate**; `ACCURACY.md` now states the single
+claim with the numbers behind it, plus why two of the three obvious
+oracles certify nothing (the h/a delta IS the reconstruction's bounded
+value; given-vs-taken symmetry is an identity the aggregation enforces).
+
+What the oldest recordings do cost is per-demo, not per-era: **2.1% of
+qwsv demos** (concentrated on QWSV 2.30) barely broadcast the health stat
+channel, so the section carries ~83 bounded damage per kill where a
+healthy demo carries ~300 — honest as far as it goes, but nothing in the
+output says the section is a fraction of the match. And frozen weapon
+bits, which withhold `ewep`, turned out to be commoner on NEW demos than
+old (18% of E0, 39% of E3, 35% of E5) — `ACCURACY.md` said the opposite
+and now says the measurement.
+
 ## unreleased (reconstruct-damage) — damage on every demo, schema v71
 
 ~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:

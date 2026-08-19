@@ -57,6 +57,174 @@ denominator old-FFA rows. The un-instrumented half of the archive runs
 end-to-end with a 0.4% median / 1.9% mean unattributed-damage share
 (`cmd/qw-corpus-survey`).
 
+## Per-era validation on the un-instrumented archive (2026-08-19)
+
+Every corpus above is an instrumented recording — an MVDSV 0.34+ demo
+that carries a KTX damage log to score against. They say nothing about
+the older 40% of the archive (eras E0–E2 of the archive data survey:
+qwsv/KTPro, MVDSV 0.19–0.29), which carries no ground truth at all.
+`cmd/qw-recon-oracle` measures that half with the one statement about
+damage those recordings still put on the wire: the **obituary**.
+
+```
+# oracle only (no KTX log on these demos)
+go run ./mvd-analytics/cmd/qw-recon-oracle -dir /data/mvd -list list-E0-recon.txt -csv oracle-E0.csv
+# oracle + KTX-log baseline, which calibrates what the oracle number means
+go run ./mvd-analytics/cmd/qw-recon-oracle -dir /data/mvd -list list-E4-gt.txt -gt -csv oracle-E4.csv
+```
+
+Run from the repo root (the reconstruction wants `./bsps`). The demo
+lists, per-demo CSVs, the sampler and the aggregation live in
+`.reports/qw-recon-oracle-2026-08-19/`, an untracked per-machine report
+directory.
+
+### What each candidate oracle can certify — and two that cannot
+
+- **A survived hit's h/a delta is not an oracle.** The reconstruction's
+  bounded value IS the observed health+armor delta (`deltas.go`), so
+  comparing the two compares a number with itself. Magnitude on old
+  demos is neither validated by this work nor in doubt: it is the same
+  direct observation as on the corpora above. What the delta side *can*
+  report is COVERAGE — whether a hit that provably happened produced a
+  delta at all.
+- **Given-vs-taken symmetry is an identity, not a test.** `aggregate.go`
+  credits every non-environmental event to exactly one attacker and one
+  victim, so Σgiven ≡ Σtaken−takenEnv by construction. The harness checks
+  it; it holds on every demo except where an attacker-less telefrag
+  (`world` telefrag: `isEnv`, so `aggregatePositional` charges the victim
+  but no one else, and `takenEnv` never sees it) leaves a 100-point gap —
+  ~1 demo in 600. The unattributed share therefore has to be read
+  directly, as the share of bounded damage left on `weapon: "unknown"`.
+- **Frag anchoring is circular until the anchor is withheld.**
+  `attributeOne` reads the obituary first and stamps its killer and
+  weapon, so a production run agrees with the frag log at kill instants
+  100% of the time by construction — the `anchored` control below reads
+  exactly 100.0% in every era. With
+  `damagerecon.Options.WithholdObituaries` that branch and the telefrag /
+  environmental / teamkill anchors go blind, and a killing hit is
+  explained by the same geometry and damage-model scoring as the survived
+  hits around it. THAT verdict, scored against the obituary, is a real
+  measurement.
+
+### Why the withheld run is a fair test of the shipped one
+
+The obituary arrives on the `svc_print` channel; attribution reads
+health/armor stat updates, entity flights, temp entities, fire sounds and
+position tracks — no overlap. Delta EXTRACTION keeps its frag anchors
+(the masked-death recovery in `deltas.go`), so both runs observe the same
+instants at the same magnitudes: across 15 254 scored demos the harness
+found 11 431 334 shared instants, 2 present only in the production run, 4
+only in the withheld run and 7 with a differing bounded value — 13 in
+11.4 million, all inside 2 E0 demos, and the only feedback path from
+attribution back into a run is the second pass's rocket-regime detection
+(`detectRocketRegime` reads the first pass's events). The withheld run
+therefore differs from the shipped one in exactly one respect: it cannot
+read the answer.
+
+Three limits on the number that comes out, all pushing it DOWN:
+
+1. **The label carries 0.1 pp of noise** — on instrumented demos the KTX
+   log's own top-damage attacker at a kill instant equals the obituary
+   killer 99.9% of the time (same-instant multi-attacker merges are the
+   difference).
+2. **Kill instants are the hard sub-population** (point-blank rockets,
+   simultaneous fire), and they are precisely the instants the shipped
+   code anchors instead of inferring.
+3. **It certifies attribution, not magnitude**, and says nothing about
+   the parts no obituary touches: team/self splits, the raw-family
+   top-ups, `ewep` buckets.
+
+### Measured
+
+15 254 demos (54 min wall clock, 3 workers), 1 678 259 scored kills —
+random samples of the 51k archive per era, drawn from the readability
+census by `sample.py` (seed 20260819; a demo qualifies with ≥ 20 frags
+and ≥ 2 players). `attacker` is the withheld run's top-damage attacker
+at the kill instant vs the obituary's killer; `weapon` the same for the
+weapon token; `delta` the share of scored kills carrying reconstructed
+damage at all.
+
+| era | demos | scored kills | delta | attacker | weapon | unattributed dmg |
+|---|---|---|---|---|---|---|
+| E0 qwsv/KTPro | 4 000 | 439 070 | 97.2% | **97.6%** | 97.9% | 1.08% |
+| E1 mvdsv <0.25 | 132 | 19 097 | 100.0% | **98.0%** | 98.6% | 0.60% |
+| E2 mvdsv 0.25–0.29 | 4 000 | 425 001 | 99.9% | **98.2%** | 98.8% | 0.75% |
+| E3 mvdsv 0.30–0.33 | 2 000 | 196 155 | 100.0% | 98.3% | 99.0% | 0.85% |
+| E4 mvdsv 0.34–0.36, no log | 1 202 | 138 812 | 100.0% | 97.6% | 98.5% | 1.10% |
+| E4 mvdsv 0.34–0.36, GT | 1 950 | 176 697 | 100.0% | 96.8% | 97.5% | 0.75% |
+| E5 mvdsv 1.x, GT | 1 970 | 283 427 | 100.0% | 96.3% | 97.0% | 0.58% |
+
+**The un-established 40% is not the weak half.** E0–E2 score at or above
+the GT-instrumented eras on the same measurement, and the ordering
+survives the obvious confounder — team size, which is what actually moves
+attribution:
+
+| players | E0 | E2 | E3 | E4 (GT) | E5 (GT) |
+|---|---|---|---|---|---|
+| 2 (duel) | 98.8% | 99.2% | 99.1% | 98.8% | 98.4% |
+| 3–5 | 97.3% | 98.1% | 98.3% | 97.1% | 96.5% |
+| 6–8 (4on4) | 97.3% | 97.7% | 97.9% | 95.4% | 95.8% |
+
+The sparse-telemetry premise is real but does not transfer to accuracy:
+in 4on4s, E0 carries 0.27 TE_BLOOD per shot against E5's 1.48 — 5.5×
+less — and attributes 1.5 pp BETTER. (The density gap is a team-game
+phenomenon; duels sit at 0.02 blood/shot in every era, E5 included, so
+the survey's population-level "10–50× sparser" reads that way only
+because its stratified sample weighted modern 4on4s.)
+
+Per attacker weapon, kills with a delta / attacker-correct:
+
+| era | rl | lg | sg | ssg | gl | sng |
+|---|---|---|---|---|---|---|
+| E0 | 97.8% | 99.3% | 96.2% | 96.9% | 98.0% | 95.3% |
+| E2 | 98.3% | 99.5% | 96.7% | 97.1% | 98.8% | 96.0% |
+| E4 (GT) | 96.2% | 99.5% | 95.2% | 94.1% | 97.2% | 94.6% |
+| E5 (GT) | 96.0% | 99.5% | 95.4% | 94.6% | 97.8% | 95.4% |
+
+The expected weak spot — shotgun attribution on demos with almost no
+TE_BLOOD — is not there: E0's sg reads 96.2% against E5's 95.4%.
+
+### Calibration: what the oracle number means
+
+On the 3 920 instrumented demos the oracle and the KTX log can be run
+side by side:
+
+| | E4 (1 950 demos) | E5 (1 970 demos) |
+|---|---|---|
+| production vs GT, all enemy instants | 99.1% | 98.8% |
+| production vs GT, away from kills | 98.9% | 98.6% |
+| production vs GT, at kill instants (anchored) | 99.9% | 99.9% |
+| **withheld vs GT, at kill instants** | 96.8% | 96.3% |
+| obituary vs GT (the oracle's own label) | 99.9% | 99.9% |
+| **oracle metric (withheld vs obituary)** | 96.8% | 96.3% |
+
+Two things follow. The oracle reproduces the withheld run's true
+accuracy to within 0.1 pp, so it is a faithful measurement of what it
+measures; and it understates the SHIPPED pipeline's attribution by
+2.3–2.5 pp, because the shipped pipeline anchors those instants and
+because kill instants are harder than average. E0–E2's 97.6–98.2% is
+therefore a floor, not an estimate: on this scale the oldest eras are at
+least as accurate as the eras ACCURACY.md was written from.
+
+### The real per-demo risk: a silent stat channel
+
+The one measurable era deficit is E0's delta coverage (97.2% of kills vs
+99.9–100% everywhere else), and it is not a gradient — it is a small
+class of broken recordings. Per-demo coverage is 100% at the median and
+99.7% at the 5th percentile; 80 of 3 876 E0 demos (2.1%) sit under 50%,
+carrying 83 bounded damage per kill where a healthy demo carries ~300.
+They are qwsv recordings whose health/armor stat channel is barely
+broadcast at all — positions and the frag log are intact, the damage is
+simply not observable. **QWSV 2.30 is the concentrated case: 18 of the 23
+sampled 2.30 demos are in that class (101 such demos exist in the whole
+51k archive); on 2.40 it is 1.6%.**
+
+The reconstruction is not wrong on these demos — it reports the damage it
+could observe and nothing else — but the section is a fraction of the
+real match, with no field saying so. A per-demo coverage figure on the
+section is the obvious follow-up; it is deliberately NOT part of this
+measurement pass.
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the
@@ -139,8 +307,10 @@ detection rather than fabrication:
   `victimWep` is empty and the buckets stay zero (they would otherwise
   ALL land in the top bucket, confidently wrong). `ewep: 0` on a
   `source: "reconstructed"` section therefore means *unmeasurable*, not
-  "no damage to armed enemies" — the frozen-bits case is the norm for
-  old demos.
+  "no damage to armed enemies". It is common on every generation and is
+  NOT an old-demo speciality: measured over the per-era samples, the bits
+  are frozen on 18% of E0 demos, 5% of E1, 25% of E2, 39% of E3, 20–34%
+  of E4 and 35% of E5.
 - **LG discharges** need the cells stream; with frozen ammo they are not
   detected (their raw value stays at the clamp-limited observation).
 - **LG beams themselves can be under-recorded**: old servers (observed
@@ -161,11 +331,22 @@ measurement-grade; bounded **given** is a well-under-1%-median estimate
 for match totals; per-hit attribution is ~98% but individual hits can be
 misattributed
 (prefer aggregates to single events); team/self splits are indicative,
-not exact; **pre-MVDSV-0.30 recordings carry 10-50× sparser hitscan
-telemetry (TE_BLOOD/TE_GUNSHOT) than the corpora above, and no GT eval
-covers them yet — treat reconstructed sections on that oldest slice
-(~40% of the archive) as unvalidated estimates**; raw overkill beyond
-the -99 corpse clamp is model-derived on
-killing hits. Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
+not exact; raw overkill beyond the -99 corpse clamp is model-derived on
+killing hits.
+
+**These hold on every server generation, not only the instrumented
+half** (§per-era validation, 15 254 demos): the oldest eras measure at or
+above the eras this document's headline tables were written from, so
+there is no weaker per-era tier and no reason to gate the section by
+server version. The axis that moves attribution is the fight, not the
+era — duels 98.4–99.2%, 4on4s 95.4–97.9%, in every era. Two things ARE
+era-shaped, and both are already handled by withholding rather than
+guessing: recorders freeze the StatItems weapon bits, so `ewep` and the
+`enemyVs*` buckets are unmeasurable on 5–39% of demos — and MORE often
+on the newer ones (18% at E0, 39% at E3, 35% at E5; §old-recorder
+degradations) — and a small class of qwsv recordings
+(2.1% of E0, concentrated on QWSV 2.30) barely broadcasts the health
+stat channel at all, leaving a section that reports only the fraction of
+the match the wire showed. Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
 CTF were out of validation scope (study §trust tiers); midair/instagib/
 dmgfrags server modes are skipped entirely (no section).

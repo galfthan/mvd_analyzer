@@ -184,14 +184,46 @@ harness.
 
 ## 5. Validate reconstruction on E0–E2 (the un-established 40%)
 
-Blood/gunshot telemetry is 10–50× sparser on pre-MVDSV-0.30 demos and
-no GT eval covers them (archive GT demos are E4/E5). Method that needs
-no KTX log: the internal oracle — on survived hits the h/a delta IS the
-raw damage — plus frag-log anchoring and given/taken symmetry, run at
-scale over the E0–E2 slice of `data/mvd/` (extend `qw-corpus-survey`
-with oracle metrics or a sibling tool). Expect weaker sg attribution
-there; measure it, then decide whether E0–E2 needs its own trust tier
-in ACCURACY.md.
+**SHIPPED** on `archive-parsing` (measurement only — no behaviour, schema
+or output changed). `cmd/qw-recon-oracle` scores the reconstruction on
+demos with no KTX log by withholding the frag log from ATTRIBUTION
+(`damagerecon.Options.WithholdObituaries`, delta extraction untouched) and
+comparing the evidence-only verdict at each kill instant against the
+killer and weapon the obituary names. **15 254 demos, 1 678 259 scored
+kills, 54 min on 3 workers.** Verdict: **E0–E2 is not the weak half — it
+scores at or above the GT-instrumented eras**: attacker accuracy E0
+**97.6%** / E1 98.0% / E2 **98.2%** / E3 98.3% vs E4-GT 96.8% and E5-GT
+96.3%, and the ordering survives the real confounder (team size: duels
+98.4–99.2%, 4on4s E0 97.3% / E2 97.7% vs E4 95.4% / E5 95.8%). Calibrated
+on 3 920 instrumented demos, the oracle reproduces the withheld run's
+true accuracy to 0.1 pp and understates the SHIPPED pipeline by 2.3–2.5
+pp (it anchors those instants; obituary-vs-GT label noise is 0.1%), so
+those figures are floors. **No per-era trust tier and no era gating** —
+ACCURACY.md now says so with the numbers.
+
+Two of the three proposed oracles turned out to certify nothing, and
+ACCURACY.md records why: the h/a delta IS the reconstruction's bounded
+value (`deltas.go`), so it cannot validate magnitude; and given/taken
+symmetry is an identity `aggregate.go` enforces, not a test (it does
+expose one real gap — an attacker-less `world` telefrag charges the
+victim's `taken` with no `given` anywhere and no `takenEnv`, ~1 demo in
+600). The expected weak spot was absent too: sg attribution on E0 (0.27
+TE_BLOOD/shot in 4on4) reads 96.2% against E5's 95.4% at 1.48. The
+"10–50× sparser" density gap is real but is a TEAM-GAME phenomenon —
+duels sit at 0.02 blood/shot in every era including E5.
+
+What the old half does cost, measured: **2.1% of E0 demos (80 of 3 876,
+concentrated on QWSV 2.30 — 18 of 23 sampled; 101 such demos archive-wide)
+barely broadcast the health stat channel**, so the section reports 83
+bounded damage per kill where a healthy demo reports ~300. The
+reconstruction is not wrong there, but nothing in the output says the
+section is a fraction of the match — the named follow-up is a per-demo
+coverage figure on `damage`. Frozen weapon bits (`ewep` withheld) also
+turned out NOT to be an old-demo speciality: 18% of E0 against 39% of E3
+and 35% of E5. Method, tables, circularity analysis and the reproduction
+commands live in `damagerecon/ACCURACY.md` §per-era validation; the
+sampler, per-demo CSVs and aggregation in
+`.reports/qw-recon-oracle-2026-08-19/`.
 
 ## 6. Aim hit recovery on reconstructed demos (design-gated)
 

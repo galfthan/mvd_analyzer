@@ -912,8 +912,13 @@ diff -r /tmp/before /tmp/after
    delta IS the bounded value) but attribution is inference: per-player
    match totals run ~1% median error against ground truth, individual
    hits can be misattributed, and team/self splits are indicative only.
-   Pre-MVDSV-0.30 recordings additionally carry far sparser hit
-   telemetry and are not yet ground-truth-validated. Full accuracy
+   That holds across every server generation: pre-MVDSV-0.30 recordings
+   carry far sparser hit telemetry but were measured, on 15 254 demos
+   against the obituary with the frag log withheld from attribution, to
+   attribute at or above the instrumented eras. What those recordings do
+   cost is elsewhere — on 2.1% of qwsv demos the health stat channel is
+   barely broadcast, so the section reports only the fraction of the
+   match the wire showed, and nothing yet says so. Full accuracy
    tables and trust guidance:
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md);
    the feature's design/validation history lives in
