@@ -14,7 +14,12 @@ package result
 //     angular half-size (NYaw/NPitch — comparable across range; |n|<=1 is
 //     roughly on the hitbox). The frontend plots offsets in Quake units at
 //     the target, derived from DYaw/DPitch and Dist.
-//   - Hit/miss is Shot.Hit (the Go-linked truth), never re-derived here.
+//   - Hit/miss is Shot.Hit (the Go-linked truth), never re-derived here —
+//     for the MEASURED counters. The one exception is the reconstructed tier
+//     (WeaponAimRecon), which exists precisely because Shot.Hit is false by
+//     construction on a demo with no wire damage stream; it is a separate
+//     field carrying a separately-labelled evidence grade, never a fallback
+//     value for the measured one.
 //   - Target attribution is exact in duels (Mode "duel") and a labeled
 //     nearest-crosshair-enemy heuristic in team games (Mode "team"). A shot
 //     is only attributed to an enemy whose position track brackets the fire
@@ -32,7 +37,31 @@ type AimResult struct {
 	// Shots, crosshair error and LG ramp are shot/track-derived and stay
 	// valid either way.
 	HitsMeasured bool `json:"hitsMeasured"`
+
+	// HitsSource names the damage evidence the hit counters were linked
+	// against, from the same vocabulary as DamageResult.Source:
+	//
+	//   - AimHitsSourceKTX — the wire mvdhidden_dmgdone stream. HitsMeasured
+	//     is true and the MEASURED counters on WeaponAim (Hits, the pellet
+	//     split, direct/splash, the LG whiff classes) plus the per-fire Hit
+	//     columns are populated.
+	//   - AimHitsSourceReconstructed — the reconstructed damage log
+	//     (damage.source == "reconstructed"). HitsMeasured stays FALSE and
+	//     every measured counter stays withheld; the recovered hit counts
+	//     live in their own WeaponAim.Recon block and nowhere else, so a
+	//     reconstructed count can never be read as a measured one.
+	//
+	// Absent when the demo carried no damage section at all — which is the
+	// one state HitsMeasured alone could not distinguish from a
+	// reconstructed one.
+	HitsSource string `json:"hitsSource,omitempty"`
 }
+
+// AimResult.HitsSource vocabulary (mirrors DamageResult.Source).
+const (
+	AimHitsSourceKTX           = DamageSourceKTX
+	AimHitsSourceReconstructed = DamageSourceReconstructed
+)
 
 // PlayerAim holds one player's aim sub-blocks. Sub-blocks are nil when their
 // inputs are absent (e.g. the rl/gl direct/splash split inside Weapons needs
@@ -138,6 +167,11 @@ type WeaponAim struct {
 	Team  *WeaponAimSplit `json:"team,omitempty"`
 	Self  *WeaponAimSplit `json:"self,omitempty"`
 
+	// Recon is the RECONSTRUCTED hit tier — present only when
+	// AimResult.HitsSource is AimHitsSourceReconstructed, and never
+	// alongside the measured counters above. See WeaponAimRecon.
+	Recon *WeaponAimRecon `json:"recon,omitempty"`
+
 	Pellets    int `json:"pellets,omitempty"`
 	PelletHits int `json:"pelletHits,omitempty"`
 	Full       int `json:"full,omitempty"`
@@ -151,6 +185,52 @@ type WeaponAim struct {
 	Blocked    int `json:"blocked,omitempty"`
 	OutOfRange int `json:"outOfRange,omitempty"`
 	Unresolved int `json:"unresolved,omitempty"`
+}
+
+// WeaponAimRecon is one weapon's hit count recovered from the RECONSTRUCTED
+// damage log (damage.source == "reconstructed") by re-running the fire→damage
+// join against it. It is a separate, separately-named tier on purpose: the
+// underlying evidence is inference, not measurement, so it must never merge
+// into the measured counters a consumer reads off WeaponAim.
+//
+// What it carries: Hits — fires of this weapon that the reconstruction says
+// connected — beside the weapon's measurement-grade Shots, so accuracy is
+// hits/shots. Nothing else. The reconstruction anchors damage at the VICTIM's
+// health/armor stat instant and merges every hit landing on one instant into
+// a single delta, which is enough to count a fire as connected but not to
+// carry:
+//
+//   - per-fire Hit flags (CrosshairSamples.Hit / LGRampSamples.Hit) — one
+//     misjoined fire is a visible wrong dot on the heatmap, and a
+//     multi-attacker merge silently moves a hit between shooters;
+//   - the SG/SSG pellet split (PelletHits / Full / Partial / Miss) — a merged
+//     delta's magnitude is the sum over every hit on that instant, so Σ/4
+//     would credit one shooter with another's pellets;
+//   - RL/GL Direct vs Splash — the reconstruction's IsSplash is a
+//     damage-model verdict, not the server's own contact flag;
+//   - the LG whiff geometry (Blocked / OutOfRange / Unresolved) — it
+//     classifies MISSES, and a miss here can be a hit the join did not
+//     recover;
+//   - the enemy/team/self splits — team and self attribution is the weakest
+//     part of the reconstruction (damagerecon/ACCURACY.md).
+//
+// Emitted only for the weapons whose damage lands in the fire's own server
+// frame — lg, sg, ssg and the axe (at its fixed +200 ms traceline delay) —
+// where the join was validated exact against the wire log. rl/gl/ng/sng carry
+// NO block: their fire→impact association needs the projectile-flight bracket
+// the shots analyzer discards, and counting impacts instead reads ~7 points
+// above the measured rl convention. An absent block is "not recovered for this
+// weapon", never "no hits".
+//
+// Accuracy measured against the wire log on demos that carry both:
+// damagerecon/ACCURACY.md §"Aim hit recovery" (lg mean 0.3pp, sg 1.3pp,
+// ssg 1.7pp, axe 0.5pp of accuracy error vs the measured counter).
+type WeaponAimRecon struct {
+	// Hits is the reconstructed count of fires that connected. A zero inside
+	// a present block is a real "linked nothing", not an absence — the block
+	// itself is the presence signal, and it is emitted only for the weapons
+	// whose recovery was validated (see the ACCURACY.md table).
+	Hits int `json:"hits"`
 }
 
 // WeaponAimSplit is one victim-class slice (enemy / team / self) of a

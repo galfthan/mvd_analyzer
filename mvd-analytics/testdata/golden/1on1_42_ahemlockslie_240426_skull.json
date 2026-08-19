@@ -1,6 +1,7 @@
 {
   "aim": {
     "hitsMeasured": true,
+    "hitsSource": "ktx",
     "players": [
       {
         "crosshair": {
@@ -14132,7 +14133,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {

@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "72"
+  version: "73"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -4794,6 +4794,32 @@ components:
                     pellets:
                       description: "Pellets fired (shots × 6/14)."
                       type: integer
+                    recon:
+                      description: >-
+                        RECONSTRUCTED hit tier (schema v73). Present only when
+                        the top-level `hitsSource` is "reconstructed" — i.e. the
+                        demo predates the KTX damage instrumentation and its
+                        damage log was reconstructed — and never beside the
+                        measured counters, which stay withheld there. Accuracy
+                        is `recon.hits / shots`. Emitted only for the
+                        same-server-frame weapons lg/sg/ssg/axe; rl/gl/ng/sng
+                        carry no block at all (their fire→impact link needs the
+                        projectile-flight bracket, which is not recoverable
+                        here), so an absent block means "not recovered for this
+                        weapon", never "no hits".
+                      additionalProperties: false
+                      properties:
+                        hits:
+                          description: >-
+                            Fires that connected, per the reconstructed damage
+                            log. A zero inside a present block is a real
+                            "linked nothing".
+                          type: integer
+                      required:
+                        - hits
+                      type:
+                        - "null"
+                        - object
                     self:
                       description: "Self-victim slice of this weapon's hit counters (rl/gl self-splash)."
                       additionalProperties: false
@@ -4878,6 +4904,19 @@ components:
             are withheld there rather than fabricated as zeros; when true an
             absent per-weapon `hits` means a measured zero.
           type: boolean
+        hitsSource:
+          description: >-
+            Which damage evidence the hit counters were linked against, from
+            `damage.source`'s vocabulary (schema v73). "ktx" = the wire
+            mvdhidden_dmgdone stream (hitsMeasured true; the measured counters
+            and the per-fire `hit` columns are populated). "reconstructed" =
+            the reconstructed damage log (hitsMeasured stays FALSE, every
+            measured counter stays withheld, and the recovered counts appear
+            ONLY under `weapons[].recon`). Absent = the demo carried no damage
+            section at all, the state hitsMeasured alone could not tell from a
+            reconstructed one.
+          enum: ["ktx", "reconstructed"]
+          type: string
       required:
         # timeUnit is flattened INTO the governed /aim response (always echoed)
         # but carried as an /artifacts envelope SIBLING of the `aim` key

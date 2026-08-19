@@ -145,6 +145,14 @@ that downstream consumers render, summarise, or feed to an agent.
   names, per server era. `-gt` adds the KTX-log baseline on instrumented
   demos, which calibrates what the oracle number means (tables in
   `damagerecon/ACCURACY.md` §per-era validation).
+- `cmd/qw-aim-eval/` — aim hit-recovery harness: on demos that carry the
+  KTX log it keeps the measured aim, replaces the damage section with the
+  blind reconstruction of the same match, recomputes aim and pairs the
+  two per player and weapon. It also runs the recovery join against the
+  WIRE log as a control, which separates the join method's own error from
+  the reconstruction's (tables in `damagerecon/ACCURACY.md` §aim hit
+  recovery); `-diag` prints the wire-to-reconstructed event lag
+  histogram the link windows are sized from.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
@@ -515,12 +523,12 @@ flowchart TB
     los["los"]
   end
   subgraph d5["depth 5"]
-    aim["aim"]
     match_final["match-final"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
+    aim["aim"]
     player_stats["player-stats"]
     backpack_linkage["backpack-linkage"]
   end
@@ -538,9 +546,9 @@ flowchart TB
   clock -->|"clock"| timeline
   clock -->|"clock"| wall_clock
   clock -->|"clock"| weapon_pickups
-  damage -->|"damage"| aim
   damage -->|"damage"| airgibs
   damage -->|"damage"| damage_recon
+  damage_recon -->|"damage:final"| aim
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| backpacks

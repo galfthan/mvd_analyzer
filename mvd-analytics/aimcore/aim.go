@@ -185,6 +185,29 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		}
 	}
 
+	// Reconstructed damage feeds its own tier and never the counters above:
+	// the join runs against the recon log (recon.go) and its output lands in
+	// WeaponAim.Recon, leaving every measured field withheld. The collection
+	// differs from the measured one in what it drops, because it asks a
+	// different question — LINKAGE, not magnitude: a self hit is a fire that
+	// connected and is kept (the wire join counts those too), while an
+	// environmental row has no shooter to credit and is not.
+	hitsSource := ""
+	reconByPlayer := make(map[string][]*dmgRec)
+	switch {
+	case hitsMeasured:
+		hitsSource = result.AimHitsSourceKTX
+	case res.Damage != nil && res.Damage.Source == result.DamageSourceReconstructed:
+		hitsSource = result.AimHitsSourceReconstructed
+		for _, d := range res.Damage.Events {
+			if d.Attacker == "" || d.IsEnv || !inWindow(d.Time) {
+				continue
+			}
+			reconByPlayer[d.Attacker] = append(reconByPlayer[d.Attacker],
+				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam})
+		}
+	}
+
 	// The RL/GL direct/splash split needs projectile linking to have filled
 	// Shot.Hit. Linking runs on every parse (ShotsAnalyzer.Finalize) — gate
 	// on its evidence, a linked rl/gl fire, not on Streams.Projectiles,
@@ -200,12 +223,12 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		}
 	}
 
-	out := &result.AimResult{HitsMeasured: hitsMeasured}
+	out := &result.AimResult{HitsMeasured: hitsMeasured, HitsSource: hitsSource}
 	for _, player := range order {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -266,7 +289,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -583,6 +606,21 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 				default:
 					wa.Blocked++ // on target within range — geometry intercepted
 				}
+			}
+		}
+	}
+
+	// Reconstructed tier: the fire→recon-damage join, in its own block (see
+	// recon.go). Emitted for every validated weapon the player fired, zero
+	// included — inside a present block a zero is a linked-nothing, and the
+	// block's absence is what says "not recovered for this weapon".
+	if len(reconDmg) > 0 {
+		for w, hits := range reconHitsByWeapon(shots, reconDmg) {
+			if wa := wagg[w]; wa != nil {
+				if hits > wa.Shots {
+					hits = wa.Shots // a claim per fire makes this unreachable; belt and braces
+				}
+				wa.Recon = &result.WeaponAimRecon{Hits: hits}
 			}
 		}
 	}

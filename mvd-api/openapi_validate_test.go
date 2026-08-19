@@ -319,6 +319,25 @@ func addReconstructedBackpacks(r *result.Result) {
 	)
 }
 
+// addReconAimTier stamps the v73 reconstructed hit tier onto the served aim.
+// Same reason as the helpers above: every corpus demo carries the wire damage
+// stream, so `hitsSource` is always "ktx" there and the `recon` block — which
+// only ever appears on a reconstructed section — would never be validated.
+// The tier's own rules are asserted in aimcore; this only exercises the shape.
+func addReconAimTier(am *result.AimResult) {
+	if am == nil || len(am.Players) == 0 {
+		return
+	}
+	am.HitsSource = result.AimHitsSourceReconstructed
+	for i := range am.Players {
+		for j := range am.Players[i].Weapons {
+			if w := &am.Players[i].Weapons[j]; w.Weapon == "lg" || w.Weapon == "sg" {
+				w.Recon = &result.WeaponAimRecon{Hits: w.Shots / 3}
+			}
+		}
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -585,6 +604,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// Same reason for the v72 pickup linkage: the corpus is hint-carrying, so
 	// no served row was ever `reconstructed` or carried a fate.
 	addReconstructedBackpacks(res)
+	// Same reason for the v73 aim tier: the corpus demo carries wire damage,
+	// so its aim is measured and grows no `recon` block of its own.
+	addReconAimTier(res.Aim)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the

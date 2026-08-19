@@ -1140,7 +1140,7 @@ package result
 //     over events we DID read. See ParseWarnings.
 //
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 72
+const CurrentSchemaVersion = 73
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

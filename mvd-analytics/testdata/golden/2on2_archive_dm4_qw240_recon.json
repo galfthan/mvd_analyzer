@@ -1,6 +1,7 @@
 {
   "aim": {
     "hitsMeasured": false,
+    "hitsSource": "reconstructed",
     "players": [
       {
         "crosshair": {
@@ -4972,14 +4973,23 @@
         "team": "korv",
         "weapons": [
           {
+            "recon": {
+              "hits": 95
+            },
             "shots": 486,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 19
+            },
             "shots": 89,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 2
+            },
             "shots": 3,
             "weapon": "ssg"
           },
@@ -12403,14 +12413,23 @@
         "team": "korv",
         "weapons": [
           {
+            "recon": {
+              "hits": 165
+            },
             "shots": 746,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 15
+            },
             "shots": 81,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 12
+            },
             "shots": 17,
             "weapon": "ssg"
           },
@@ -16235,14 +16254,23 @@
         "team": "nme",
         "weapons": [
           {
+            "recon": {
+              "hits": 74
+            },
             "shots": 335,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 14
+            },
             "shots": 94,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 2
+            },
             "shots": 2,
             "weapon": "ssg"
           },
@@ -20529,14 +20557,23 @@
         "team": "nme",
         "weapons": [
           {
+            "recon": {
+              "hits": 101
+            },
             "shots": 393,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 15
+            },
             "shots": 93,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 1
+            },
             "shots": 1,
             "weapon": "ssg"
           },
@@ -45148,7 +45185,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {

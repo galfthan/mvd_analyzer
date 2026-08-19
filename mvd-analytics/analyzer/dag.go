@@ -159,9 +159,9 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"aimPost": {
 		name: "aim", mutates: true,
-		requires:  []string{"shots", "timeline", "damage"},
+		requires:  []string{"shots", "timeline", "damage:final"},
 		resultKey: "aim",
-		desc:      "Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build).",
+		desc:      "Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build). Binds `damage:final` so a reconstructed section is visible: the MEASURED counters still gate on damage.source == ktx, and reconstructed damage feeds only the separate `weapons[].recon` hit tier.",
 	},
 	"airgibsPost": {
 		name: "airgibs", mutates: true,
@@ -217,7 +217,7 @@ var postNodeMeta = map[string]nodeMeta{
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
 		provides: []string{"damage:final"},
-		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed); aim and airgibs stay wire-measured-only by gating on Damage.Source == ktx inside their own passes (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed), and so does aim, whose measured counters still gate on Damage.Source == ktx while the reconstruction feeds its separate `recon` hit tier. airgibs stays wire-measured-only, gating on Damage.Source == ktx inside its own pass (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
 	},
 }
 

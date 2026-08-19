@@ -226,6 +226,79 @@ real match, with no field saying so. A per-demo coverage figure on the
 section is the obvious follow-up; it is deliberately NOT part of this
 measurement pass.
 
+## Aim hit recovery (2026-08-19)
+
+A reconstructed damage log is also enough to answer "did this fire
+connect", which is what `aim` needs. `aimcore` re-runs the fire→damage
+join against it and publishes the result in its own block —
+`aim.players[].weapons[].recon.hits`, beside the wire-measured
+`hits` that stays withheld (`aim.hitsMeasured` is still false; the new
+`aim.hitsSource` names which evidence the tier came from). Scored with
+`cmd/qw-aim-eval`:
+
+```
+MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-aim-eval \
+    -dir /data/eval-corpus-dm2dm3 -workers 6
+```
+
+Withhold-and-compare on demos that carry the KTX log: parse once, keep
+the measured aim, replace the damage section with this package's blind
+reconstruction of the same match, recompute aim, and pair the two per
+player per weapon. Because the join is also run against the WIRE log
+(the `join-on-wire` control), the method's own error and the
+reconstruction's error are separated instead of summed.
+
+53 scored demos of the 60-demo dm2/dm3 corpus (7 are `skipped:*` modes),
+rows with ≥ 20 fires; Δacc is reconstructed accuracy − measured accuracy
+in percentage points:
+
+| weapon | rows | shots | measured acc | recon acc | med \|Δacc\| | mean \|Δacc\| | bias | ≤2pp | control (join on the wire log) |
+|---|---|---|---|---|---|---|---|---|---|
+| lg | 169 | 18 500 | 33.1% | 32.9% | 0.0pp | 0.3pp | −0.2pp | 96% | **exact** |
+| sg | 307 | 81 203 | 51.8% | 50.4% | 1.1pp | 1.3pp | −1.3pp | 78% | **exact** |
+| ssg | 86 | 4 339 | 71.9% | 70.1% | 0.0pp | 1.7pp | −1.7pp | 69% | **exact** |
+| axe | 38¹ | 1 417 | 8.0% | 7.8% | 0.0pp | 0.5pp | −0.5pp | 89% | 0.1pp |
+| rl | 303 | 35 135 | 47.9% | 54.8% | 5.3pp | 6.8pp | +6.8pp | 14% | +6.8pp — the SAME error |
+| gl | 109 | 4 948 | 15.0% | 15.7% | 0.0pp | 1.3pp | +0.7pp | 69% | +1.2pp |
+
+¹ axe at the ≥ 10-swing threshold (nobody swings 20 times); every other
+row is ≥ 20 fires. The golden-corpus cache (13 demos) reproduces every
+line within 0.3pp.
+
+**Shipped: lg, sg, ssg, axe** — the weapons whose damage lands in the
+fire's own server frame (the axe at its fixed +200 ms traceline delay).
+On those the control is exact to the last row — the join reproduces the
+measured counters from the wire log with zero error — so the whole
+residual is the reconstruction's, and it is ≤1.7pp mean with a small
+negative bias (a hit whose delta the reconstruction attributed elsewhere
+is a lost hit; there is no mechanism that invents one).
+
+**Withheld: rl, gl** — and the number says why. The rl gap is not
+reconstruction error at all: the control produces the identical +6.8pp,
+i.e. the two counters ask different questions. The measured `hits`
+counts fires whose TRACKED FLIGHT linked to an impact (`analyzer/
+shots.go linkProjectiles`); a point-blank rocket whose entity never
+broadcast has no flight, so it is measured as a miss — while this join
+counts reconstructed impacts and correctly calls it a hit. Neither
+number is wrong; they are not comparable, and a consumer putting an old
+demo's rl accuracy beside a modern one's would be misled by 7 points.
+gl escapes only because grenades live long enough to be broadcast, so
+its method gap reads 1.2pp instead of 6.8pp — the same weakness, not a
+different one. Recovering the projectile side honestly needs the
+fire→flight association the shots analyzer builds and discards; that is
+the follow-up, not a tuning knob.
+
+**Withheld: ng, sng.** Nails link through the same flight bracket as
+rockets, and only when nail tracking is enabled at all.
+
+Everything except the hit COUNT is withheld on a reconstructed section —
+per-fire `hit` columns, the pellet split, direct/splash, the LG whiff
+geometry, the enemy/team/self slices. The reasons are per-field and
+documented on `result.WeaponAimRecon`; they all come back to the same
+two properties of the log: it is anchored at the victim's stat instant,
+and several hits landing on one instant merge into one delta with one
+attacker and one summed magnitude.
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the

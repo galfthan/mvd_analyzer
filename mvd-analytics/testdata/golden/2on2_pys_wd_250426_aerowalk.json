@@ -1,6 +1,7 @@
 {
   "aim": {
     "hitsMeasured": true,
+    "hitsSource": "ktx",
     "players": [
       {
         "crosshair": {
@@ -39443,7 +39444,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {

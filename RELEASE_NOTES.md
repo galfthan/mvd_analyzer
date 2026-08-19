@@ -5,6 +5,75 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (aim-recovery) — accuracy on the un-instrumented half, in a field of its own, schema v73
+
+### `aim.hitsSource` + `weapons[].recon.hits`
+
+Since v71 the aim block tells the truth about old demos by staying
+silent: with no KTX damage stream there is no wire hit to link a fire
+to, so `hitsMeasured` is false and every hit-derived counter is
+withheld rather than fabricated as a zero. The silence was correct and
+also unnecessary — the demo's damage log now exists, reconstructed
+(v71), and it carries an attacker, a weapon and a time per hit. That is
+exactly what the fire→damage join needs.
+
+So `aimcore` re-runs that join against the reconstructed log and
+publishes what it recovers **in a new field**:
+`aim.players[].weapons[].recon.hits`, beside the weapon's
+measurement-grade `shots`. Accuracy on old demos is `recon.hits /
+shots`.
+
+`hitsMeasured` does not move — it is still `false` on a reconstructed
+section, and every measured counter is still withheld there. The new
+`aim.hitsSource` (`ktx` | `reconstructed`, absent when the demo carries
+no damage section at all) names which evidence produced the tier, and
+also splits apart the two states v71 could not distinguish: "damage was
+reconstructed" vs "there is no damage section". A consumer that has
+never heard of `recon` sees exactly the pre-v73 behaviour.
+
+**Covered: `lg`, `sg`, `ssg`, `axe`** — the weapons whose damage lands
+in the fire's own server frame (the axe at its fixed +200 ms traceline
+delay). Measured with the harness the change ships with
+(`cmd/qw-aim-eval`, 53 dm2/dm3 demos with the KTX log): keep the
+measured aim, replace the damage section with the blind reconstruction
+of the same match, recompute, compare per player and weapon. Mean
+accuracy error vs the measured counter: **lg 0.3 pp, sg 1.3 pp, ssg
+1.7 pp, axe 0.5 pp**, with a small negative bias — a hit the
+reconstruction attributed elsewhere is a lost hit, and nothing invents
+one. The harness also runs the join against the WIRE log as a control,
+where it reproduces the measured counters with **zero** error, so the
+residual above is the reconstruction's and not the join's.
+
+**Not covered: `rl`, `gl`, `ng`, `sng`** — and the control is why. What
+pins which rocket caused which impact is the entity-flight bracket the
+shots analyzer builds and discards; from a finished Result the join can
+only count impacts, which answers a different question than the
+measured counter (that one counts fires whose flight LINKED, so a
+point-blank rocket that never broadcast its entity is measured as a
+miss). On the wire log itself the two differ by 6.8 pp on rl. Shipping
+it would put a reconstructed rl accuracy seven points above the
+measured convention with nothing saying so, so those weapons carry no
+`recon` block at all — its absence means "not recovered for this
+weapon", never "no hits".
+
+Everything below the hit COUNT stays withheld on a reconstructed
+section, per field and for stated reasons: the per-fire `hit` columns
+on `crosshair`/`lgRamp` (a merged delta moves a hit between shooters
+silently, and one misjoin is a visibly wrong dot on the heatmap), the
+SG/SSG pellet split (Σ damage / 4 over a merged magnitude would credit
+one shooter with another's pellets), `direct`/`splash` (the
+reconstruction's `isSplash` is a damage-model verdict, not the server's
+contact flag), the LG whiff classes (they classify misses, and a miss
+here can be a hit the join did not recover) and the enemy/team/self
+slices (the weakest part of the reconstruction). Full method and
+tables: [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"Aim hit recovery".
+
+Pipeline note: the `aim` node now binds `damage:final` instead of the
+raw `damage` artifact, so it runs after `damage-recon` and can see a
+reconstructed section. Old-era goldens gain the two new fields and
+nothing else.
+
 ## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks (dropped and taken) on the old half, and a reader that says what it could not read, schema v72
 
 ### Backpack drops on the other half of the archive: `backpacks[].source`

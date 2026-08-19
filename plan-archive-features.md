@@ -225,15 +225,58 @@ commands live in `damagerecon/ACCURACY.md` §per-era validation; the
 sampler, per-demo CSVs and aggregation in
 `.reports/qw-recon-oracle-2026-08-19/`.
 
-## 6. Aim hit recovery on reconstructed demos (design-gated)
+## 6. Aim hit recovery on reconstructed demos
 
-The hits:0 fabrication is fixed (withheld + `aim.hitsMeasured`); the
-recovery half remains: link reconstructed damage events back to fires
-(the same join `ShotsAnalyzer` does) and emit hit counters labelled
-`src:"reconstructed"`. Survey says view angles are fine on 98% of the
-archive — hit linkage was the only gap. Per-era honesty: E0–E2 recovery
-will be much weaker (see lead 5); decide the labelling story before
-building.
+**SHIPPED** on `aim-recovery`, schema v73. `aimcore` re-runs the
+fire→damage join against the reconstructed damage log and publishes the
+recovered count as `aim.players[].weapons[].recon.hits`, with the new
+`aim.hitsSource` (`ktx` | `reconstructed` | absent) naming the evidence.
+`hitsMeasured` is untouched — still `false` on a reconstructed section,
+every measured counter still withheld — so the two tiers live in
+different fields and a reconstructed hit can never be read as a measured
+one. The `aim` node now binds `damage:final`.
+
+The design gate lead 5 was supposed to decide (per-era labelling) turned
+out to be a non-question: no era gating, one trust statement, per lead
+5's measurement. The real gate was per-WEAPON, and the harness the change
+ships with (`cmd/qw-aim-eval`) decided it. Withhold-and-compare on 53
+dm2/dm3 demos carrying the KTX log — keep the measured aim, swap in the
+blind reconstruction of the same match, recompute, pair per player and
+weapon — with the same join ALSO run against the wire log as a control,
+which separates the join method's error from the reconstruction's:
+
+| weapon | mean \|Δacc\| vs measured | control (join on the wire log) | shipped |
+|---|---|---|---|
+| lg | 0.3pp | exact | yes |
+| sg | 1.3pp | exact | yes |
+| ssg | 1.7pp | exact | yes |
+| axe | 0.5pp | 0.1pp | yes |
+| rl | 6.8pp | **+6.8pp — the same error** | no |
+| gl | 1.3pp | +1.2pp | no |
+
+rl/gl/ng/sng are withheld because the gap is not reconstruction error:
+the control reproduces it exactly. Their fire→impact link needs the
+entity-flight bracket `ShotsAnalyzer` builds and discards, so from a
+finished Result the join can only count impacts — a different question
+than the measured counter asks (it counts fires whose flight LINKED, so a
+point-blank rocket that never broadcast its entity is measured as a
+miss). **Follow-up if rl accuracy is wanted on old demos: carry the
+fire→flight association into the Result** (a per-shot flight id, or the
+linked impact time on `Shot`), and the projectile side joins on the
+measured definition.
+
+Also withheld on a reconstructed section, per field, in
+`result.WeaponAimRecon` and RESULT_SCHEMA: per-fire `hit` columns, the
+pellet split, direct/splash, the LG whiff classes, the enemy/team/self
+slices — all of them defeated by the same two properties, the
+victim-stat-instant anchor and same-instant delta merging. Tables and
+method: `damagerecon/ACCURACY.md` §"Aim hit recovery"; raw eval output in
+`.reports/qw-aim-eval-2026-08-19/`.
+
+Deliberately not done: the web Aim tab still renders "—" for hits on
+these demos (truthful, since `hitsMeasured` is false) — surfacing the
+`recon` tier in the frontend is a separate, purely presentational
+change.
 
 ## 7. Smaller / opportunistic
 
