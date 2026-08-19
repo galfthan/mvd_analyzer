@@ -137,6 +137,14 @@ that downstream consumers render, summarise, or feed to an agent.
   the reconstruction blind on wire-instrumented demos and scores it
   against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
   prints misattribution flows.
+- `cmd/qw-recon-oracle/` — the same accuracy question on demos that carry
+  NO KTX log (the pre-0.30 archive): it reruns the reconstruction with
+  the frag log withheld from attribution
+  (`damagerecon.Options.WithholdObituaries`) and scores the evidence-only
+  verdict at each kill instant against the killer and weapon the obituary
+  names, per server era. `-gt` adds the KTX-log baseline on instrumented
+  demos, which calibrates what the oracle number means (tables in
+  `damagerecon/ACCURACY.md` §per-era validation).
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
