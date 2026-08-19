@@ -652,7 +652,7 @@ outside.)
 | NYaw | `nyaw` | []float32 (normalized) |
 | NPitch | `npitch` | []float32 (normalized) |
 | Dist | `dist` | []float32 (qu) |
-| Hit | `hit` | []bool |
+| Hit | `hit` | []bool (omitempty) — **absent whenever `aim.hitsMeasured` is false** (reconstructed or absent damage): a per-fire `false` there would be a fabricated miss, so the whole column is omitted. Present ⇒ one flag per sample. |
 | Target | `tgt` | []string — the confirmed victim for hits (can be a teammate on team damage); the attributed live enemy for misses |
 | Team | `team` | []bool (omitempty) — the attributed target is a teammate. Only hits can be team-attributed (misses target enemies by construction) and hitscan cannot self-hit, so this is the full victim-class signal for samples. Omitted when no sample is team-attributed. |
 
@@ -664,21 +664,24 @@ the fire belongs to (fires < 150 ms apart are one shaft).
 | Field | JSON key | Type |
 |---|---|---|
 | Since | `since` | []int32 (ms since shaft start) |
-| Hit | `hit` | []bool |
+| Hit | `hit` | []bool (omitempty) — absent whenever `aim.hitsMeasured` is false, exactly as `crosshair.hit` |
 | Team | `team` | []bool (omitempty) — the fire connected but hit no enemy (teammate-only victims). Score enemy ramp hit% as `hit && !team`. Omitted when no fire is team-only. |
 
 ### WeaponAim
 
-One entry per weapon the player fired. `Shots` (fires) and `Hits` (fires that
-connected) are always present; the rest are weapon-specific and `omitempty`.
-`Pellets`/`PelletHits` match the server's authoritative SG/SSG per-pellet
-stats; `Direct` matches the server's RL/GL direct-hit count.
+One entry per weapon the player fired. `Shots` (fires) is always present; every
+other field is `omitempty`, including `Hits` — it and the rest of the
+hit-derived counters are WITHHELD, not zeroed, when `aim.hitsMeasured` is false
+(see [AimResult](#aimresult-aim) for the tier table). With `hitsMeasured` true an
+absent `hits` is a measured zero. `Pellets`/`PelletHits` match the server's
+authoritative SG/SSG per-pellet stats; `Direct` matches the server's RL/GL
+direct-hit count.
 
 | Field | JSON key | Type / meaning |
 |---|---|---|
 | Weapon | `weapon` | string (lg/sg/ssg/rl/gl) |
-| Shots | `shots` | int — fires |
-| Hits | `hits` | int — fires that connected |
+| Shots | `shots` | int — fires (always present; measurement-grade on every demo) |
+| Hits | `hits` | int (omitempty) — fires that connected. Absent when `hitsMeasured` is false (nothing to link against); absent with it true means a measured zero. The reconstructed count is never here — it is `recon.hits`. |
 | Enemy | `enemy` | *WeaponAimSplit (omitempty) — the enemy-victim slice of the hit counters |
 | Team | `team` | *WeaponAimSplit (omitempty) — the teammate-victim slice |
 | Self | `self` | *WeaponAimSplit (omitempty) — the self-victim slice (rl/gl splash) |
