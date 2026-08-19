@@ -9,9 +9,9 @@ import (
 
 // ShotsAnalyzer derives a per-shot weapon-fire stream from the raw wire
 // signals: svc_sound fire sounds (which carry the firing entity on
-// CHAN_WEAPON) for SG/SSG/RL/GL/NG/SNG, and TE_LIGHTNING2 beams for LG —
+// CHAN_WEAPON) for AXE/SG/SSG/RL/GL/NG/SNG, and TE_LIGHTNING2 beams for LG —
 // the one weapon with no per-shot fire sound. Instantaneous hitscan fires
-// (sg/ssg/lg) are linked to the damage they caused in the same server frame
+// (axe/sg/ssg/lg) are linked to the damage they caused in the same server frame
 // via the KTX damage stream; projectile fires are linked through their
 // tracked entity flight (linkProjectiles) — rl/gl on every parse, ng/sng
 // when nail decoding is enabled.
@@ -36,6 +36,12 @@ type ShotsAnalyzer struct {
 
 	// beams holds every LG bolt's geometry for the spatial beam stream.
 	beams []rawBeam
+
+	// pointEffects holds every point-effect temp entity (blood, explosion,
+	// gunshot, ...) for the spatial point-effect stream. Collected only when
+	// shot streams are requested (unlike beams it has no per-shot consumer
+	// inside this analyzer, and a 4on4 carries tens of thousands).
+	pointEffects []rawPointEffect
 
 	// Nail tracking (opt-in, ctx.Nails). svc_nails2 ids are stable while a
 	// nail lives, so openNail brackets each flight (spawn → despawn) the same
@@ -103,6 +109,15 @@ type rawBeam struct {
 	end   [3]float32
 }
 
+// rawPointEffect is one point-effect temp entity (TE type + count byte +
+// origin), kept for the spatial point-effect stream.
+type rawPointEffect struct {
+	tMs    int32
+	teType int
+	count  int
+	origin [3]float32
+}
+
 const (
 	chanWeapon = 1 // CHAN_WEAPON — the channel KTX fires weapons on
 
@@ -111,6 +126,17 @@ const (
 	// server frame as the fire; a couple of frames of slack covers wire
 	// jitter while staying far below any weapon's refire interval.
 	hitscanLinkWindowMs = 26
+
+	// The axe's damage does NOT land at its fire sound: W_Attack plays
+	// weapons/ax1.wav and starts the swing animation, and every one of the
+	// four swing chains calls W_FireAxe (the damage traceline) at its
+	// third 0.1s think frame — exactly 200ms after the sound
+	// (ktx/src/player.c player_axe3/axeb3/axec3/axed3). The window around
+	// that offset absorbs demo-frame quantization on both timestamps and
+	// stays well inside the 0.5s refire, so consecutive swings cannot
+	// cross-link.
+	axeLinkDelayMs  = 200
+	axeLinkJitterMs = 80
 
 	// beamLightningLG is the TE_LIGHTNING2 type — the player Lightning Gun
 	// bolt KTX emits once per fire tick (TE_LIGHTNING1/3 are non-player).
@@ -159,6 +185,12 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 		a.onSound(e)
 	case *events.BeamEvent:
 		a.onBeam(e)
+	case *events.PointEffectEvent:
+		if a.ctx.ShotStreams {
+			a.pointEffects = append(a.pointEffects, rawPointEffect{
+				tMs: e.TimeMs, teType: e.Type, count: e.Count, origin: e.Origin,
+			})
+		}
 	case *events.ProjectileSpawnEvent:
 		a.openProj[e.EntNum] = &rawProjectile{kind: e.Kind, spawnTMs: e.TimeMs, spawnOrigin: e.Origin}
 	case *events.ProjectileDespawnEvent:
@@ -264,6 +296,14 @@ func (a *ShotsAnalyzer) onBeam(e *events.BeamEvent) {
 
 func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	if len(a.shots) == 0 {
+		// No recognized fire sounds (modded servers with foreign weapon
+		// wavs): the requested spatial streams and their Computed latches
+		// must still build — projectile flights, beams and point effects
+		// were collected regardless, and damage reconstruction refuses to
+		// run on an unlatched Result even though those streams are exactly
+		// the evidence it needs on such demos.
+		a.buildSpatialStreams(result)
+		a.rebaseSpatialStreams(result)
 		return nil
 	}
 
@@ -405,24 +445,47 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 		for i := range out.Shots {
 			out.Shots[i].Time -= ms
 		}
-		if s := result.Streams; s != nil {
-			for _, pr := range []*ProjectileStreams{s.Projectiles, s.Nails} {
-				if pr == nil {
-					continue
-				}
-				for i := range pr.Spawn {
-					pr.Spawn[i] -= ms
-					pr.End[i] -= ms
-				}
-			}
-			if bm := s.Beams; bm != nil {
-				for i := range bm.T {
-					bm.T[i] -= ms
-				}
-			}
+	}
+	a.rebaseSpatialStreams(result)
+	return nil
+}
+
+// rebaseSpatialStreams shifts the spatial streams this node produced
+// (Projectiles/Nails/Beams/PointEffects) from the demo clock to
+// match-relative time. Split out of Finalize so the zero-shots path can
+// build and rebase them too. Nothing shifts when no match start was
+// detected.
+func (a *ShotsAnalyzer) rebaseSpatialStreams(result *Result) {
+	if a.core == nil {
+		return
+	}
+	ms := a.core.MatchStartMs()
+	if ms <= 0 {
+		return
+	}
+	s := result.Streams
+	if s == nil {
+		return
+	}
+	for _, pr := range []*ProjectileStreams{s.Projectiles, s.Nails} {
+		if pr == nil {
+			continue
+		}
+		for i := range pr.Spawn {
+			pr.Spawn[i] -= ms
+			pr.End[i] -= ms
 		}
 	}
-	return nil
+	if bm := s.Beams; bm != nil {
+		for i := range bm.T {
+			bm.T[i] -= ms
+		}
+	}
+	if pe := s.PointEffects; pe != nil {
+		for i := range pe.T {
+			pe.T[i] -= ms
+		}
+	}
 }
 
 // buildSpatialStreams attaches the projectile-flight and LG-beam streams to
@@ -453,6 +516,19 @@ func (a *ShotsAnalyzer) buildSpatialStreams(result *Result) {
 				bs.Ez = append(bs.Ez, b.end[2])
 			}
 			result.Streams.Beams = bs
+		}
+		if len(a.pointEffects) > 0 {
+			ps := &PointEffectStreams{}
+			for i := range a.pointEffects {
+				pe := &a.pointEffects[i]
+				ps.T = append(ps.T, pe.tMs)
+				ps.Type = append(ps.Type, int32(pe.teType))
+				ps.Count = append(ps.Count, int32(pe.count))
+				ps.X = append(ps.X, pe.origin[0])
+				ps.Y = append(ps.Y, pe.origin[1])
+				ps.Z = append(ps.Z, pe.origin[2])
+			}
+			result.Streams.PointEffects = ps
 		}
 		// Latch truthfully: the eager build ran with the shot-streams flag on,
 		// so the projectile/beam streams (possibly empty) are as complete as
@@ -530,10 +606,16 @@ func (a *ShotsAnalyzer) linkProjectiles(flights []rawProjectile, dmgBySlot map[i
 
 // flightsToStream packs a flight slice into the columnar ProjectileStreams
 // shape (one entry per flight). Shared by the rocket/grenade and nail streams.
+// Flights carrying a non-finite coordinate (seen in some
+// pre-instrumentation demos) are dropped: encoding/json refuses NaN, and a
+// NaN origin is unusable as spatial evidence anyway.
 func flightsToStream(flights []rawProjectile) *ProjectileStreams {
 	ps := &ProjectileStreams{}
 	for i := range flights {
 		p := &flights[i]
+		if !finiteVec3(p.spawnOrigin) || !finiteVec3(p.despawnOrigin) {
+			continue
+		}
 		ps.Weapon = append(ps.Weapon, p.kind)
 		ps.Spawn = append(ps.Spawn, p.spawnTMs)
 		ps.End = append(ps.End, p.despawnTMs)
@@ -567,7 +649,13 @@ func (a *ShotsAnalyzer) linkHitscan(dmgs []*rawShotDmg, s *rawShot, duel bool) (
 		if d.used || d.weapon != s.weapon {
 			continue
 		}
-		if absInt32(d.tMs-s.tMs) > hitscanLinkWindowMs {
+		// The axe's traceline runs 200ms after its fire sound (see
+		// axeLinkDelayMs); everything else lands in the fire's own frame.
+		if s.weapon == "axe" {
+			if absInt32(d.tMs-s.tMs-axeLinkDelayMs) > axeLinkJitterMs {
+				continue
+			}
+		} else if absInt32(d.tMs-s.tMs) > hitscanLinkWindowMs {
 			continue
 		}
 		d.used = true
@@ -611,8 +699,8 @@ func emitKinds(kinds []string) []string {
 
 // buildByPlayer flattens the match-time aggregates into the result shape,
 // sorted by player then by a stable weapon order. Hits/Accuracy are emitted
-// only for linkable weapons (hitscan sg/ssg/lg + projectile rl/gl) and only
-// when a damage stream was present.
+// only for linkable weapons (same-frame axe/sg/ssg/lg + projectile rl/gl)
+// and only when a damage stream was present.
 func (a *ShotsAnalyzer) buildByPlayer(aggByName map[string]*shotAgg, order []string) []PlayerShots {
 	sort.Strings(order)
 	out := make([]PlayerShots, 0, len(order))
@@ -706,7 +794,7 @@ type weaponAgg struct {
 
 // weaponOrder is the stable output order for per-weapon aggregates and
 // reconciliation rows (matches the KTX WpName ordering).
-var weaponOrder = []string{"sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
+var weaponOrder = []string{"axe", "sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
 
 // fireSoundWeapon maps a precached sound path to the weapon it fires, or
 // (",false) when the sound is not a weapon-fire sound. The Quake sound
@@ -714,9 +802,12 @@ var weaponOrder = []string{"sg", "ssg", "ng", "sng", "gl", "rl", "lg"}
 // the rocket launcher fires "weapons/sgun1.wav" and the nailgun fires
 // "weapons/rocket1i.wav" (ktx/src/weapons.c W_FireRocket / W_FireSpikes).
 // Non-fire weapon sounds (the grenade bounce, the LG hit/start, ricochets,
-// spike tinks, the axe) are deliberately excluded.
+// spike tinks, the axe wall-clank "player/axhit2.wav") are deliberately
+// excluded.
 func fireSoundWeapon(name string) (string, bool) {
 	switch name {
+	case "weapons/ax1.wav":
+		return "axe", true // axe swing, one per attack (W_Attack IT_AXE)
 	case "weapons/guncock.wav":
 		return "sg", true // shotgun (W_FireShotgun)
 	case "weapons/shotgn2.wav":
@@ -736,10 +827,11 @@ func fireSoundWeapon(name string) (string, bool) {
 }
 
 // isHitscanWeapon reports whether a weapon's shot and its damage land in the
-// same server frame (so they link via same-frame matching). Nail/rocket/
+// same server frame (so they link via same-frame matching). The axe is melee,
+// not hitscan, but its traceline damage is equally same-frame. Nail/rocket/
 // grenade fires are projectiles and are excluded.
 func isHitscanWeapon(w string) bool {
-	return w == "sg" || w == "ssg" || w == "lg"
+	return w == "axe" || w == "sg" || w == "ssg" || w == "lg"
 }
 
 // isProjectileWeapon reports whether a fire launches a tracked slow

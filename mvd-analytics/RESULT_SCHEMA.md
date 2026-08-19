@@ -26,7 +26,7 @@ analyzer are also covered there.
 | Metadata | `metadata` | *MetadataResult | Server cvars (fullserverinfo) + parsed match-settings centerprint. |
 | LocGraph | `locGraph` | *LocGraphResult | Loc-to-loc movement graph (nodes + transitions). |
 | Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline (per match). |
-| Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) from the KTX `mvdhidden_dmgdone` stream, with a KTX-scoreboard cross-check. |
+| Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) — decoded from the KTX `mvdhidden_dmgdone` stream (`source: "ktx"`) or rebuilt by the reconstruction on pre-instrumentation demos (`source: "reconstructed"`), with a KTX-scoreboard cross-check. |
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
@@ -34,9 +34,10 @@ analyzer are also covered there.
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
+| Streams | `streams` | *Streams | Native-rate per-player + global state-change streams (position/view/health/armor/ammo/items tracks, movers, and the opt-in spatial weapon streams — see the Streams section). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
 
-All sub-result fields are pointers and use `omitempty`, so a missing
+Sub-result fields are pointers or slices with `omitempty`, so a missing
 key means "the analyzer didn't produce this section for this demo"
 (usually because the source lacked the necessary signals — e.g. no
 KTX hints means no Items / Backpacks).
@@ -167,8 +168,33 @@ unambiguous; a few may stay unattributed (readable from
 ## DamageResult (`damage`)
 
 Defined in `result/damage.go`. Reconstructed from the KTX
-`mvdhidden_dmgdone` stream (see `mvd-reader/MVD_FORMAT.md`). Present only
-when the demo carries that stream (KTX with MVD-hidden extensions).
+`mvdhidden_dmgdone` stream (see `mvd-reader/MVD_FORMAT.md`) — or, since
+schema v71, **reconstructed** from the state streams when the demo
+predates that instrumentation.
+
+**Provenance (`source`, schema v71).** `source: "ktx"` marks a section
+decoded from the wire's damage stream — the raw per-hit values are
+direct measurements (the bounded family is still arithmetic
+reconstructed from them; summaries may substitute KTX scoreboard
+figures, see `boundedSource`). `source: "reconstructed"` marks a section rebuilt by the
+`damage-recon` node (package `mvd-analytics/damagerecon`) from the
+health/armor change streams + spectator-visible evidence (LG beams,
+projectile flights, fire sounds, position/velocity tracks, the frag
+log): magnitudes are near-exact (the observed h/a delta IS the bounded
+value), attribution is best-effort inference — treat per-player match
+totals as ~1% estimates and prefer aggregates over single events. Full
+accuracy tables + trust guidance: `damagerecon/ACCURACY.md`. A
+wire-measured section is never overwritten; reconstruction requires the
+spatial shot streams (always built by mvd-api and the web WASM;
+`-include projectiles,beams` on the CLI) and stands down on
+`skipped:*` server modes. `source` is absent only in pre-v71 stored
+results. Distinct from `boundedSource` below, which records a view-time
+substitution WITHIN a KTX-sourced payload. On reconstructed sections the
+victim-weapon fields (`victimWep`, `enemyVs*`, `ewep`) are withheld
+(empty / zero) when the recording froze its StatItems weapon bits — the
+norm for old recorders — because classifying against frozen inventory
+would be confidently wrong; `ewep: 0` there means unmeasurable
+(damagerecon/ACCURACY.md §old-recorder degradations).
 
 **Unbound vs bounded — two families (schema v55).** The **raw** family
 (`damage`, `given`, `taken`, …) is **unbound** — the full hit including
@@ -183,9 +209,9 @@ clamp, respawn-masked deaths, and same-frame multi-hit deaths (overkill
 cascaded from the last hit backward in wire order); pent/teamplay-
 nullified hits are bounded to their estimated armor share. `dmg` echoes
 which family a payload carries (`"both"` as stored); `boundedMode` is
-`"standard"`, or `"skipped:midair"`/`"skipped:instagib"`/
-`"skipped:dmgfrags"` when the server mode rewrites `T_Damage` in ways
-the wire does not expose — every bounded field is then absent, and the
+`"standard"`, or `"skipped:<mode>"` (midair / instagib / dmgfrags /
+ca / wipeout / ra / lgc / race) when the server mode rewrites or
+suppresses `T_Damage` in ways the wire does not expose — every bounded field is then absent, and the
 raw family is unaffected. The `scoreboard` sub-object surfaces both
 families against the KTX scoreboard; raw diverges by the overkill
 (expected), bounded should nearly match (its correctness signal).
@@ -251,8 +277,9 @@ a `frag` event.
 | Telefrags | `telefrags` | []PositionalKill (omitempty — instant kills, separate from damage) |
 | Stomps | `stomps` | []PositionalKill (omitempty — head-stomp kills, separate from damage) |
 | Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or a RESTRICTIVE time filter OMITS it entirely, since it cannot be recomputed against those filters; an explicit `from`/`to` window covering the whole match counts as unfiltered) |
+| Source | `source` | string (omitempty — `ktx` = decoded from the wire damage stream, `reconstructed` = rebuilt from state streams by damage-recon; absent only pre-v71) |
 | Dmg | `dmg` | string (omitempty — family echo: `both` as stored, `bounded` from the view, absent on a raw view) |
-| BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:midair`/`skipped:instagib`/`skipped:dmgfrags`) |
+| BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:<mode>` with mode ∈ midair/instagib/dmgfrags/ca/wipeout/ra/lgc/race; the clan-arena family joined in v71, detected from the composite serverinfo `mode` string) |
 | BoundedSource | `boundedSource` | string (omitempty — provenance of a SUMMARY response's per-player bounded figures: `ktx` when substituted with KTX's exact end-of-match scoreboard totals, else `reconstructed`; set by the view ONLY on an unfiltered summary serving the bounded family — `dmg=bounded`/`dmg=both`; the stored Result never carries it) |
 
 ### PositionalKill
@@ -394,12 +421,17 @@ velocity) by player + nearest pos-track `t`.
 
 ### Shot
 
-`weapon` is the lowercase KTX name (`sg`,`ssg`,`ng`,`sng`,`gl`,`rl`,`lg`).
+`weapon` is the lowercase KTX name (`axe`,`sg`,`ssg`,`ng`,`sng`,`gl`,`rl`,`lg`).
 `source` is `sound` (a CHAN_WEAPON fire sound) or `beam` (an LG
 TE_LIGHTNING2 bolt). `hit`/`victims` are set for linkable weapons via the
 KTX damage stream:
-- **Hitscan** (`sg`/`ssg`/`lg`) — the fire and its damage land in the same
-  server frame and link by attacker + weapon + frame.
+- **Hitscan** (`sg`/`ssg`/`lg`) — the fire and its damage land in the
+  same server frame and link by attacker + weapon + frame.
+- **Axe** — melee: the fire sound is the `weapons/ax1.wav` swing (one per
+  attack, so whiffed swings count as shots), but the damage traceline
+  runs exactly 200ms later (W_FireAxe at the third 0.1s animation
+  think), so it links through a swing+200ms window rather than
+  same-frame.
 - **Rocket/grenade** (`rl`/`gl`) — linked by entity flight tracking: the
   rocket/grenade entity brackets the flight (`spawn → despawn`), so the fire
   is matched to its launch frame (by muzzle) and the impact damage is the
@@ -529,6 +561,17 @@ any victim class without re-deriving it.
 | Field | JSON key | Type |
 |---|---|---|
 | Players | `players` | []PlayerAim |
+| HitsMeasured | `hitsMeasured` | bool |
+
+`hitsMeasured` reports whether the hit-derived counters (`hits`, the
+pellet full/partial/miss split, direct/splash, the LG whiff classes)
+were measured against a wire KTX damage stream (`damage.source ==
+"ktx"`). On reconstructed/absent damage the shot linker never saw a
+wire damage event, so those fields are **withheld** (schema v71) rather
+than fabricated as zeros — `weapons[].hits` is omitempty, and when
+`hitsMeasured` is true an absent `hits` means a measured zero. Shots,
+crosshair error and the LG ramp are shot/track-derived and remain valid
+either way.
 
 ### PlayerAim
 
@@ -726,13 +769,22 @@ path is the one nobody tests.
 
 The limit is honesty, not effort: a value that cannot be MEASURED stays
 absent rather than becoming a zero. Hence `accuracy.byWeapon[].hits` is
-omitted (not zeroed) when there is no damage stream to link fires
-against, and KTX's `taken-to-die` 99999 no-deaths sentinel is never
+omitted (not zeroed) when there is no WIRE damage stream to link fires
+against — mere presence of a `damage` section is not enough, since the
+reconstruction fills it on pre-instrumentation demos while the shot
+linker still never saw a wire damage event (`damage.source` must be
+`ktx`) — and KTX's `taken-to-die` 99999 no-deaths sentinel is never
 served as a number.
 
 Every stat FAMILY carries `src`: `"derived"` (this pipeline, from the
-wire) or `"ktx"` (the demoinfo block). The **damage** family has a third
-value, `"derived:unbounded"` — see below. The stored artifact is always
+wire) or `"ktx"` (the demoinfo block). The **damage** family has two more
+values: `"derived:unbounded"` (see below) and, since schema v71,
+`"reconstructed"` — the demo carried no wire damage stream at all and the
+family aggregates the `damage-recon` node's reconstruction
+(`damage.source: "reconstructed"`): per-player totals are ~1% estimates
+rather than measurements, `enemyWeapons`/`byEnemyWeapon` may read a
+withheld zero on frozen-weapon-bit recordings, and the full error tables
+live in `damagerecon/ACCURACY.md`. The stored artifact is always
 fully derived; `view.PlayerStats` applies the KTX overlay at read time,
 mirroring how `view.Damage` applies `boundedSource`.
 
@@ -752,7 +804,7 @@ never does.
 | Family | Winner | Why |
 |---|---|---|
 | `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. The kill side is optional — see "The kill side of `score` is optional" below. |
-| `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded reconstruction | server-side accounting; same rules as `damage.boundedSource`. |
+| `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded family of the damage section (wire-derived, or the damage-recon reconstruction on pre-instrumentation demos — `src: "reconstructed"`) | server-side accounting; same rules as `damage.boundedSource`. |
 | `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
 | `accuracy` | **ktx** when present, else **derived** from the fire stream | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
 | `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
@@ -821,7 +873,7 @@ stays consistent with the timeline's powerup runs.
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency`, `byWeapon`, `byEnemyWeapon` and `byWeaponVsEnemyWeapon` **optional together** — see below. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no damage stream to link fires against; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS (KTX, sg/ssg) or TRIGGER PULLS (derived, and KTX elsewhere); `hits` is **absent** — not zero — when the demo has no WIRE damage stream to link fires against (`damage.source` `reconstructed` counts as absent here: the linker never saw those events); `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
 
@@ -1359,7 +1411,7 @@ A hit qualifies when `weapon == "rl"` and it is a **direct
 hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
 world), and the victim's height is ≥ 96 units (≈ two player models) at
 **two** samples: the one nearest the hit **and** the one nearest
-`hit − preMs` (default 200 ms; schema v71). The pre-hit gate is not a
+`hit − preMs` (default 200 ms; schema v72). The pre-hit gate is not a
 smoothing filter — it removes a class of provably wrong entries. KTX stamps
 the damage entry at (or one wire frame after) the physics frame in which the
 rocket's own knockback has already moved the victim, so the hit-time sample
@@ -1377,7 +1429,7 @@ the ≥ 96 threshold already bounds the list), ordered by `height`
 descending; the web
 view re-sorts client-side. mvd-api's `/airgibs` serves this stored list at
 the default `preMs=200` and recomputes for any other value in `0..1000`
-(`preMs=0` = no pre-hit gate, the pre-v71 rule), echoing the effective value
+(`preMs=0` = no pre-hit gate, the pre-v72 rule), echoing the effective value
 as `preMs` on the response envelope. **Empty when the map has no clip hull** (no
 `PositionTrack.H` to read — same BSP provisioning as the
 visibility-aware loc filter). The `lethal` window can over-attribute on a
@@ -1614,17 +1666,19 @@ state, loc trails) are computed on demand from this storage by the
 | Projectiles | `projectiles` | *ProjectileStreams (rocket/grenade flights; `omitempty`) |
 | Beams | `beams` | *BeamStreams (LG bolts; `omitempty`) |
 | Nails | `nails` | *ProjectileStreams (ng/sng spike flights; `omitempty`) |
+| PointEffects | `pointEffects` | *PointEffectStreams (temp-entity point effects; `omitempty`, v71) |
 
-`projectiles`, `beams` and `nails` are the spatial weapon-fire streams for the
-map view (schema v40). They are sizeable (thousands of beams/nails in a team
-game), so whether they are built depends on the consumer: the **CLI** builds
-them only when requested (`qw-analyze -include projectiles,beams,nails`) to keep
-the default output and golden corpus lean; **mvd-api** builds all of them on
-every parse (the always-full cache — the +3–4% parse cost is worth deleting the
-old lazy re-parse); and the **WASM web build** builds all three
-(projectiles/beams/nails) so the map overlay and Aim tab are complete in the
-browser with no extra download. All are columnar (parallel arrays, one entry per
-flight / bolt), times match-relative ms.
+`projectiles`, `beams`, `nails` and `pointEffects` are the spatial
+weapon-fire streams for the map view (schema v40; `pointEffects` v71). They
+are sizeable (thousands of beams/nails in a team game), so whether they are
+built depends on the consumer: the **CLI** builds them only when requested
+(`qw-analyze -include projectiles,beams,nails`; `pointEffects` rides the
+projectiles/beams flag) to keep the default output and golden corpus lean;
+**mvd-api** builds all of them on every parse (the always-full cache — the
++3–4% parse cost is worth deleting the old lazy re-parse); and the **WASM
+web build** builds them all so the map overlay and Aim tab are complete in
+the browser with no extra download. All are columnar (parallel arrays, one
+entry per flight / bolt / effect), times match-relative ms.
 
 Building `nails` (via `-include nails` on the CLI, or automatically under
 mvd-api / the WASM build) also turns on ng/sng → damage linking (it decodes
@@ -1658,6 +1712,29 @@ Each index `i` is one LG bolt (`TE_LIGHTNING2`): the segment
 | T | `t` | []int32 (ms) |
 | Sx/Sy/Sz | `sx`/`sy`/`sz` | []float32 |
 | Ex/Ey/Ez | `ex`/`ey`/`ez` | []float32 |
+
+### PointEffectStreams (`streams.pointEffects`)
+
+Each index `i` is one point-effect temp entity at `(x,y,z)[i]`, `t[i]`
+match-relative ms. `ty[i]` is the raw TE type (0 spike, 1 superspike,
+2 gunshot, 3 explosion, 11 teleport, 12 blood, 13 lightningblood, …).
+`c[i]` is the leading count byte carried only by the counted types
+(`TE_GUNSHOT`/`TE_BLOOD`) and 0 elsewhere. mvd-api serves this block at
+`GET /v1/demos/{id}/streams/point-effects` with a code→name legend and a
+`types=` filter. `TE_BLOOD` and
+`TE_LIGHTNINGBLOOD` are per-hit damage telemetry (blood = hitscan damage
+striking a player, count = pellet hits per volley on modern KTX;
+lightningblood = an LG cell connecting); `TE_EXPLOSION` is the exact
+rocket/grenade detonation point. The count-byte packaging varies per
+server generation and mod — see `mvd-reader/MVD_FORMAT.md`
+(svc_temp_entity) before interpreting `c` as a damage magnitude.
+
+| Column | JSON key | Type |
+|---|---|---|
+| T | `t` | []int32 (ms) |
+| Type | `ty` | []int32 (raw TE type) |
+| Count | `c` | []int32 (count byte; 0 when the type carries none) |
+| X/Y/Z | `x`/`y`/`z` | []float32 |
 
 ### GlobalStream
 
@@ -3046,8 +3123,8 @@ the meaning `/damage` gives them: `dmg` is the family (`raw` |
 `bounded`) every `damageGiven` / `damageTaken` / `damageGivenTeam` /
 `damageGivenSelf` / `damageByWeapon` in the response was computed in,
 and `boundedMode` is whether this demo's bounded family was
-reconstructed (`standard`) or skipped (`skipped:midair` /
-`skipped:instagib` / `skipped:dmgfrags`).
+reconstructed (`standard`) or skipped (`skipped:<mode>` — the full
+reason vocabulary is in the damage section above).
 
 They belong on the **envelope of every segmentation response**, not
 only on `/top-windows`' damage metrics, because the stats block reports
@@ -3480,7 +3557,8 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v71 | **Airgib detection gains a pre-hit airborne gate** (a **correctness fix**: entries disappear from `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX stamps a damage entry at (or one wire frame after) the physics frame in which the rocket's own knockback has ALREADY moved the victim, so the position sample nearest the damage time can describe a victim who was STANDING at impact — measured on hub `232925` (dm2 4on4), where a player riding the `func_train` (top at z=319) was blasted off it by a quad direct rocket and the hit-time sample read **303 units of air**, publishing a non-event as the match's biggest airgib. The victim must now be ≥ 96 units above the floor at the hit sample **AND** at *every* sample of the look-back window `[hit − preMs, hit]` (default **200 ms**), whose earliest sample must additionally be *pre-impact* (≥ 40 ms — the damage-stamp lag — before the hit, so a sparse track cannot pass on the contaminated hit sample alone). The window runs all the way to the hit with no excluded tail: knockback can only *over*-report height, so contaminated samples can only reject, and a victim who fell and *landed* just before the rocket is caught by the sub-threshold samples their descent left in the window. A victim who left a ledge just inside the look-back still counts — only samples *inside* the window are judged; a plain jump peaks at ~45 units, so a genuine 96+ victim was already airborne for hundreds of ms and the look-back cannot lose a real event. Reported `height` / `loc` / `heightAboveAttacker` still come from the HIT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v71 hit-time-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. |
+| v72 | **Airgib detection gains a pre-hit airborne gate** (a **correctness fix**: entries disappear from `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX stamps a damage entry at (or one wire frame after) the physics frame in which the rocket's own knockback has ALREADY moved the victim, so the position sample nearest the damage time can describe a victim who was STANDING at impact — measured on hub `232925` (dm2 4on4), where a player riding the `func_train` (top at z=319) was blasted off it by a quad direct rocket and the hit-time sample read **303 units of air**, publishing a non-event as the match's biggest airgib. The victim must now be ≥ 96 units above the floor at the hit sample **AND** at *every* sample of the look-back window `[hit − preMs, hit]` (default **200 ms**), whose earliest sample must additionally be *pre-impact* (≥ 40 ms — the damage-stamp lag — before the hit, so a sparse track cannot pass on the contaminated hit sample alone). The window runs all the way to the hit with no excluded tail: knockback can only *over*-report height, so contaminated samples can only reject, and a victim who fell and *landed* just before the rocket is caught by the sub-threshold samples their descent left in the window. A victim who left a ledge just inside the look-back still counts — only samples *inside* the window are judged; a plain jump peaks at ~45 units, so a genuine 96+ victim was already airborne for hundreds of ms and the look-back cannot lose a real event. Reported `height` / `loc` / `heightAboveAttacker` still come from the HIT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v72 hit-time-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. |
+| v71 | **Reconstructed damage for pre-instrumentation demos + damage provenance.** `damage` gains `source` (`ktx` \| `reconstructed`): the KTX analyzer stamps `ktx` on every wire-decoded section (a stored-Result change — goldens move), and the new `damage-recon` post-processor (package `mvd-analytics/damagerecon`) fills the section on demos whose wire never carried `mvdhidden_dmgdone` (~45% of the archive — `/damage` and the damage-shaped views 422'd there before). The reconstruction reads the health/armor change streams (the observed delta IS the bounded value), LG beams, projectile entity flights, fire sounds, position/velocity tracks and the frag log; both families, same shapes, same match window; per-player match totals validated at ~1% median error against KTX ground truth on modern demos (`damagerecon/ACCURACY.md`). Requires the spatial shot streams (mvd-api/WASM always; CLI `-include projectiles,beams`); never overwrites a measured section; stands down on `skipped:*` modes. `playerStats` binds the `damage:final` artifact, so its damage family now exists on old demos too, marked `src: "reconstructed"` (aim and airgibs deliberately keep wire-measured damage only). On reconstructed sections the victim-weapon fields are withheld when the recording froze its weapon bits (see the damage section notes). The `shots` stream gains the axe: `weapons/ax1.wav` (one swing sound per attack) maps to `weapon: "axe"`, with damage linking at the swing's real +200ms traceline delay — new rows in the shot stream, `byPlayer`, the reconciliation and the aim weapon counters. New `streams.pointEffects` (rides the shot-streams gate): every point-effect temp entity as columns t/ty/c/x/y/z — TE_BLOOD (per-volley hitscan hit telemetry with pellet count), TE_LIGHTNINGBLOOD (LG hit), TE_EXPLOSION (exact detonation point), TE_GUNSHOT (miss pattern) and the rest, the wire evidence the reconstruction consumes. `aim` gains a required top-level `hitsMeasured` flag and `weapons[].hits` becomes omitempty: on reconstructed/absent damage every hit-derived counter (hits, pellet full/partial/miss, direct/splash, the LG whiff classes, the sample `hit` columns) is withheld rather than fabricated as zero. `boundedMode` gains five skip reasons (`skipped:ca/wipeout/ra/lgc/race`). |
 | v70 | **`/overview` becomes a capability manifest instead of a highlights reel.** The stored `Result` gains **no field** — this is an mvd-api response-shape bump, and the first BREAKING one in a while: fields are REMOVED. Gone are `topKills`, `topStreaks` and `topPowerups`, measured across the corpus at 78-88% of the response (`topKills` alone 62-77%), every one of them a copy of a dedicated endpoint — `/top-kills` at its own defaults, and `/lives` + `/events?type=streak,powerup` field for field. Gone too is `hasRegionControl`, folded into the new block. Added is **`available`**, one flag per detailed view, each mirroring the predicate behind that view's 422, so a `false` is exactly the 422 the call would have returned: `demoInfo`, `metadata`, `frags`, `damage`, `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`, plus the three a consumer could not previously infer AT ALL — **`height`**, **`liquid`** and **`los`** — which turn on which map BSPs the SERVER was provisioned with rather than on what the demo recorded, so the same demo answers differently on two deployments. Like every other flag in the block these report **measured, not non-zero**: a gate that opens fills its column for every position sample, so a map with no water yields an all-zero `lq` and `liquid` stays **true** — a measured *dry*, distinguishable from the unprovisioned `false` where the question is simply unanswerable. `height` and `liquid` ride separate gates (collision hull vs vis BSP) and can disagree. There is deliberately no `pvs` flag: PVS and LOS come off one pass behind one BSP gate (PVS ⊇ LOS by construction), so two flags could never disagree. `los` is the one PREDICTION in the block — the pass is heavy and lazy, so it reports the cheap half of the gate (streams, 2+ players, a provisioned BSP) and a provisioned-but-unvised BSP still 422s. A drift test pins the manifest to the 422 table, which is exactly what the removed ad-hoc `has*` fields never had and why they went stale. |
 | v69 | **The victim-weapon axis: `byEnemyWeapon` on kills and damage.** Every per-weapon figure in `playerStats` was keyed on the ATTACKER's weapon; this bump adds the complement — the same kills and the same damage split by what the **victim** was holding when it landed, the weapon-denial question. `score.byEnemyWeapon` partitions `score.kills`, `damage.byEnemyWeapon` partitions `damage.given`, and both use one exclusive vocabulary: `both` / `rl` / `lg` / `mid` / `sg` (plus `unknown` on the kill side, for a victim with no stream). **`both` is the trap and the point**: "enemy RLs killed" is `rl + both`, never `rl` alone. Both are **DERIVED on every demo carrying streams**, never overlaid — KTX's own `ekills` counts the kill side inclusively (a victim holding RL+LG bumps both) and force-zeroes axe/sg plus every bucket on `deathmatch >= 4` / `k_instagib` (`ktx/src/stats_json.c:377-380`), while for damage the server keeps only the RL+LG-lumped `dmg_eweapon` scalar. Ours reproduces KTX exactly where KTX measures honestly — `rl + both == ekills.rl` on all 44 cached demos, every player, both weapons — and additionally covers telefrags/stomps and old demos with no demoinfo block. `damage.enemyWeapons` stays as the `lg + rl + both` summary it always was. Measuredness: the kill map rides the kill family (absent exactly when `kills` is), the damage map rides the damage STREAM (present exactly when `taken` is). The stored `Result` DOES change — this is computed in the analyzer, not folded in at read time — so the golden corpus moves. Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` / `eLG`, the metric that was nowhere, since kills made WITH each weapon are already in the Weapon Stats tab. See [The victim-weapon axis](#the-victim-weapon-axis-byenemyweapon-schema-v69). | Also adds **`score.byWeaponVsEnemyWeapon`**, the joint distribution the two kill maps are marginals of — killer weapon → victim bucket → kills — because marginals cannot answer "how many of my LG kills were against enemies carrying an RL". Summing it over inner keys reproduces `byWeapon` and over outer keys `byEnemyWeapon`, an identity guaranteed by construction (the marginal is summed FROM the cross-tab) and asserted on every golden demo.
 | v68 | **Gap-delimited windows: `mode=gap` on `/top-windows`.** The stored `Result` gains **no field** — like v67 the bump is for the observable API surface alone. `/top-windows` gains a second SEGMENTATION behind `mode` (default `fixed`, so a pre-v68 request answers identically apart from the additive `mode: "fixed"` echo every response now carries): under `mode=gap` a window is a maximal run of scoring events in which consecutive events are no more than `gapMs` apart, and its score is their sum — the stretch lasts as long as the player kept doing it rather than as long as a stopwatch says. `gapMs` is **required** there and has **no default**: measured over the 44-demo cache, per-player inter-kill gaps run p50 ≈ 11–12 s while inter-damage-event gaps run p50 ≈ 1.0–1.1 s, so no one value serves both (documented starting points ~10000 for the frag metrics, ~3000 for the damage and shot metrics), and each mode REJECTS the other's knob with a 400 rather than ignoring it. Additive on the envelope: **`mode`** (always present, so the segmentation is never inferred from which knob is present) and **`gapMs`** (gap responses only); **`windowMs` becomes fixed-only**, since a fixed length on a gap response would be a lie. Rows need no new field — `start`/`end` already describe variable-length spans, and a gap row's `end` is its last scoring event rather than `start + windowMs`. Clusters are disjoint per player by construction (no overlap suppression), signed metrics cluster on ALL their events (a death both extends a `netFrags` run and lowers its score), `score` still equals the same-named stat absent a `weapons=` filter, and a cluster MAY SPAN the player's own death — `/lives` stays the per-life view. See [TopWindows](#topwindows-viewtopwindows-rest-top-windows). |

@@ -222,6 +222,7 @@ type (
 	ShotsDelta             = result.ShotsDelta
 	ProjectileStreams      = result.ProjectileStreams
 	BeamStreams            = result.BeamStreams
+	PointEffectStreams     = result.PointEffectStreams
 	AimResult              = result.AimResult
 	PlayerAim              = result.PlayerAim
 	CrosshairSamples       = result.CrosshairSamples

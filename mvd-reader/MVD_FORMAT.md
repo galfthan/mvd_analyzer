@@ -656,8 +656,35 @@ Offset  Size  Field
 ```
 
 The parser decodes the **lightning beams** into `BeamEvent` (firing entity +
-start/end) and consumes every other type for its known length; an unknown
-type bails rather than guessing a length and drifting the cursor.
+start/end) and every other known type into `PointEffectEvent` (type, count,
+origin); an unknown type bails rather than guessing a length and drifting
+the cursor.
+
+**Damage telemetry in the point effects.** Two QW-specific types are written
+from the server's damage code itself, so they are direct hit evidence on
+every demo back to original qwprogs (the aggregation lives in the progs, not
+the engine):
+
+- **`TE_BLOOD` (12)** — hitscan damage striking a player. KTX `TraceAttack`
+  increments `blood_count` once per pellet that strikes a player and
+  `Multi_Finish` multicasts ONE message per volley with `count` = pellet
+  hits and the impact origin (`ktx/src/weapons.c:226,313-327`); volley
+  damage = 4·count. Older generations (KTX 1.38, vanilla qwprogs) write one
+  message **per pellet** with `count` = 1 (volley damage = 4·messages). Axe
+  and nail hits write `count` = the damage itself (axe: 20). The packaging
+  convention varies per server generation and per mod (one RL-only mod
+  writes rocket directs with a constant count of 5), so consumers must
+  calibrate per demo — validate 4·count against observed health/armor
+  deltas — rather than assume a convention.
+- **`TE_LIGHTNINGBLOOD` (13)** — an LG cell's damage striking a player at
+  the beam's trace endpoint (`ktx/src/weapons.c` `LightningDamage`), one
+  per hit, no count. The beam fires on every attack; the blood only on a
+  hit — together they measure LG accuracy directly.
+
+`TE_GUNSHOT` (2) is the complementary miss signal (wall puff where pellets
+struck geometry, with the same count-byte packaging), and `TE_EXPLOSION`
+(3) is the exact rocket/grenade detonation point — including point-blank
+explosions whose projectile entity was never broadcast.
 
 **Player Lightning Gun.** `TE_LIGHTNING2` is the bolt KTX writes once per LG
 fire tick (`ktx/src/weapons.c` `W_FireLightning`), carrying the firing
@@ -2657,14 +2684,25 @@ Offset  Size     Field
 5       1        colormap
 6       1        skinnum
 7       2 or 4   origin[0] (coord or float if FLOATCOORDS)
-+       1        angles[0] (angle byte)
++       1 or 2   angles[0] (angle byte; short if FLOATCOORDS)
 +       2 or 4   origin[1]
-+       1        angles[1]
++       1 or 2   angles[1]
 +       2 or 4   origin[2]
-+       1        angles[2]
++       1 or 2   angles[2]
 ```
 
-**Total size**: 15 bytes (standard coords) or 21 bytes (float coords).
+**Total size**: 15 bytes (standard coords) or 24 bytes (float coords).
+
+**Angle width follows the coord negotiation.** `sv_bigcoords` raises
+BOTH `msg_coordsize` (2→4) and `msg_anglesize` (1→2) in one switch
+(`mvdsv/src/sv_init.c:326-336`), and the demo advertises it through the
+same `FTE_PEXT_FLOATCOORDS` bit (`mvdsv/src/sv_demo.c:1247-1253`);
+ezquake's `MSG_ReadAngle` reads a short in that mode
+(`com_msg.c:653-666`). Reading a fixed 1-byte angle on a bigcoords demo
+(~5% of the old archive, MVDSV 0.33/0.34 era) under-reads every
+angle-carrying entity and silently desyncs the rest of the packet —
+this applies to the baseline above AND the per-axis `U_ANGLE1/2/3`
+fields of `svc_packetentities` / `svc_deltapacketentities`.
 
 ### svc_fte_spawnbaseline2 (66) — FTE Extended Baseline
 

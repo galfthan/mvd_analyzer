@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (airgib-pre-gate) — an airgib victim must be airborne BEFORE the hit too, schema v71
+## unreleased (airgib-pre-gate) — an airgib victim must be airborne BEFORE the hit too, schema v72
 
 **The airgib list was reporting standing players as airgibs.** KTX stamps a
 damage entry at (or one wire frame after) the physics frame in which the
@@ -33,7 +33,7 @@ and that non-event was published as the match's biggest airgib.
   removed or retyped) — hence the schema bump; the golden corpus moves.
 - **Tunable per request**: `GET /v1/demos/{id}/airgibs?preMs=` accepts
   `0..1000` (400 `invalid_param` outside it). `preMs=0` turns the pre-hit gate
-  off, reproducing the pre-v71 hit-time-only rule; the default serves the
+  off, reproducing the pre-v72 hit-time-only rule; the default serves the
   stored list, any other value recomputes. Every response echoes the effective
   value as **`preMs`** on the envelope, so a body says which detection it is.
 - **Detection moved to `view.ComputeAirgibs`**, a pure function of the
@@ -47,6 +47,131 @@ and that non-event was published as the match's biggest airgib.
   "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
   direct rocket hits on airborne victims whether or not they killed, and the
   gibs are the subset the Lethal column already badges.
+## unreleased (reconstruct-damage) — damage on every demo, schema v71
+
+~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:
+those demos had no `damage` section, so `/damage` answered 422 and the
+damage-shaped figures on `/top-kills`, `/lives` and `/top-windows` were
+absent. The new `damage-recon`
+DAG node (package `mvd-analytics/damagerecon`) now reconstructs the
+section on exactly those demos from spectator-visible state: the
+health/armor change streams (change-driven per server frame, so the
+observed delta IS KTX's bounded value), LG beam segments, rocket/grenade
+entity flights, fire sounds, position/view/velocity tracks, the frag log,
+and the map BSP (splash/line-of-sight feasibility gates). Both damage
+families are produced — raw (overkill-inclusive; model-derived where the
+wire's −99 corpse clamp hides it) and bounded — in the exact stored
+shapes, so every damage-shaped endpoint starts working with no consumer
+changes.
+
+Provenance is explicit: `damage.source` is `"ktx"` on wire-measured
+sections (stamped by the existing analyzer — the one golden-visible
+change on modern demos) and `"reconstructed"` on rebuilt ones; the view
+passes it through filtered/family-transformed responses and the OpenAPI
+`Damage` schema documents it. Validated blind against KTX ground truth
+against KTX ground truth: golden corpus bounded given median 0.58%
+(taken 0.05%, raw given 1.15%); on the 60-demo blind dm2/dm3 corpus
+99.6% of ground-truth damage instants covered, 98.9% value-exact,
+98.5% attacker attribution — full tables, error anatomy and trust guidance in
+`mvd-analytics/damagerecon/ACCURACY.md`, with a regression harness at
+`mvd-analytics/cmd/qw-recon-eval` and a fast pinned subset in
+`damagerecon/eval_test.go`. Reconstruction requires the spatial shot
+streams (always built by mvd-api and the web WASM; `-include
+projectiles,beams` on the CLI), never overwrites a measured section, and
+stands down on `skipped:*` server modes (midair / instagib / dmgfrags /
+the clan-arena family ca/wipeout/ra/lgc/race).
+Non-finite wire origins (a pre-instrumentation-era corruption that made
+~6% of old demos abort JSON encoding with NaN) are now dropped at
+ingestion in positions, movers, projectiles and item spawns.
+
+The `skipped:*` mode detection got real teeth while validating on a
+fresh 60-demo dm2/dm3 corpus: newer KTX does not publish `k_midair` /
+`k_instagib` / `k_dmgfrags` in serverinfo at all — the submodes live
+only in the composite `mode` string (`wipeout-wo-df`) — so wipeout /
+clan-arena demos were previously served a confidently wrong bounded
+family (CA suppresses drowning/fall damage and ignores almost all
+damage between rounds while still multicasting raw values). Detection
+now parses the mode string, is shared between the KTX-side bounded pass
+and the reconstruction (`damagerecon.SkipModeReason`), and skips the
+whole clan-arena family: `skipped:ca` / `skipped:wipeout` /
+`skipped:ra` / `skipped:lgc` / `skipped:race` join the boundedMode
+vocabulary. A third detection layer covers old KTX (observed 1.41-beta
+on archive demos), which published NO mode signal in serverinfo at all —
+no `k_*` cvars, no composite `mode` string — while its countdown
+centerprint still printed "Midair on": the countdown-derived
+MatchSettings now feed the same shared gate
+(`damagerecon.SkipModeReasonFull`; the `damage` DAG node requires
+`metadata` for it), so archive-era midair/instagib/dmgfrags demos stop
+being served a confidently wrong bounded family.
+
+`playerStats` rides along: the node now binds the `damage:final`
+artifact, so its damage family exists on old demos too, with
+`src: "reconstructed"` (a new value beside `derived` / `ktx` /
+`derived:unbounded`) keeping the evidence grade legible per row and in
+the `sources` roll-up. Aim and airgibs deliberately keep binding
+wire-measured damage only — reconstructed per-hit attribution is not
+measurement-grade enough for shot-level analytics. Environmental damage is modeled
+too: reconstructed sections categorize world damage as lava / slime /
+drown / fall (BSP liquid contents + landing detection + typed env
+suicide obituaries, engine-exact tick values as all-or-nothing
+candidates — lava 97% / fall 95% category accuracy vs ground truth)
+instead of a flat "unknown". One honesty guard
+shipped with it: old recorders often FREEZE the StatItems weapon bits
+(a player "holds" RL from 0:00 through every death), which would have
+classified every reconstructed hit into the top EWep bucket — the
+reconstruction now detects frozen bits per demo and withholds the
+victim-weapon fields (`victimWep` empty, `enemyVs*`/`ewep` zero)
+instead of fabricating them.
+
+The axe joins the `shots` stream: `weapons/ax1.wav` (the per-attack swing
+sound, CHAN_WEAPON) now maps to a `weapon: "axe"` fire, linked to its
+damage at the swing's real timing — W_FireAxe runs the traceline exactly
+200ms after the sound (the third 0.1s animation think), so both the shot
+linker and the reconstruction search that delayed window. Axe swings
+appear in the per-shot stream, `byPlayer` accuracy, the KTX
+reconciliation and the aim weapon counters, and reconstructed axe
+attacker attribution went 21% → ~100% on the 60-demo validation corpus.
+
+A long-standing parser bug on `sv_bigcoords` demos (~5% of the old
+archive, MVDSV 0.33/0.34 era) is fixed: entity ANGLES are 2-byte shorts
+under the same `FTE_PEXT_FLOATCOORDS` negotiation that widens coords
+(`sv_bigcoords` raises `msg_anglesize` with `msg_coordsize`), but the
+parser always read 1 byte — under-reading every angle-carrying entity
+and silently desyncing the rest of the packet. Those demos lost over
+half their item entities and logged tens of thousands of
+`svc_deltapacketentities` warnings, visible only in diagnostic mode.
+Verified on the 24 affected demos of the archive survey sample: desync
+warnings 44,386 → 1,935 (−95.6%), zero entity-stream EOFs remain.
+
+A truthfulness regression the reconstruction itself introduced is
+fixed: `playerStats.accuracy` and `aim` used to treat mere PRESENCE of
+the damage section as "hits were measured" — correct while only wire
+demos had one, but the reconstruction now fills the section on
+pre-instrumentation demos where the shot linker never saw a wire damage
+event, so every weapon read a fabricated `hits: 0` (~52% of the
+archive). Both now gate on `damage.source == "ktx"`: accuracy `hits`
+stays absent, and `aim` withholds all hit-derived counters (hits,
+pellet full/partial/miss, direct/splash, the LG whiff classes) behind a
+new top-level `aim.hitsMeasured` flag — `weapons[].hits` becomes
+omitempty, so with `hitsMeasured: true` an absent value is a measured
+zero. Shots, crosshair error and the LG ramp are shot/track-derived and
+keep working on every demo.
+
+The parser now surfaces every point-effect temp entity
+(`PointEffectEvent`; previously length-skipped), and the analyzer exposes
+them as a new `streams.pointEffects` spatial stream behind the
+shot-streams gate: TE_BLOOD (hitscan damage striking a player, with the
+per-volley pellet count), TE_LIGHTNINGBLOOD (per-cell LG hit),
+TE_EXPLOSION (the exact rocket/grenade detonation point, including
+point-blank rockets whose entity never broadcast) and TE_GUNSHOT (the
+wall-puff miss pattern). These are per-hit damage telemetry present on
+every demo generation back to original qwprogs — the wire evidence the
+damage reconstruction consumes next. mvd-api serves the stream at
+`GET /v1/demos/{id}/streams/point-effects` (fourth sibling of
+projectiles/beams/nails) with a code→name `types` legend and an optional
+`types=` name filter, mirrored as the `getPointEffects` MCP tool —
+detonation points for map effect overlays, blood telemetry for damage
+display.
 
 ## unreleased (team-colors-by-name) — web UI team colors follow the team name
 

@@ -400,6 +400,16 @@ func NewDefaultRegistry() *Registry {
 	// match:final / frags:final, so the DAG runs it after the two fix-up
 	// nodes.
 	r.RegisterPostProcessor(playerStatsPost)
+	// Damage reconstruction registers after the per-shot damage consumers
+	// (aim, airgibs) deliberately: those keep binding the raw wire-measured
+	// `damage` artifact only — reconstructed per-hit attribution is not
+	// measurement-grade enough to drive shot-level analytics, so their
+	// behaviour on old demos (graceful degradation) is unchanged.
+	// player-stats is the exception: it aggregates per-player totals (the
+	// figures the reconstruction validates at ~1%), so it binds the
+	// `damage:final` artifact and its damage family carries
+	// src=reconstructed on old demos.
+	r.RegisterPostProcessor(damageReconPost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

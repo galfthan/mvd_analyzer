@@ -598,9 +598,9 @@ func validateTopWindowWeapons(metric string, weapons []string) error {
 }
 
 // shotWeaponVocab is what can actually be fired (mvd-analytics/analyzer/
-// shots.go). No environmental causes, no axe: the stream is built from
-// CHAN_WEAPON fire sounds and LG beams.
-var shotWeaponVocab = []string{"rl", "lg", "gl", "ssg", "sng", "ng", "sg"}
+// shots.go). No environmental causes: the stream is built from CHAN_WEAPON
+// fire sounds (the axe swing included) and LG beams.
+var shotWeaponVocab = []string{"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe"}
 
 // weaponMatcher is the predicate form of weaponFilterSet (sections.go) — the
 // same alias-expanded set every other weapons= filter uses, so the scoring

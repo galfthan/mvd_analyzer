@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -4996,14 +4997,16 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "shots": 81,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "ng"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
           }
         ]
       },
@@ -12309,14 +12312,16 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 24,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
           }
         ]
       },
@@ -16318,7 +16323,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           }
@@ -21025,18 +21029,15 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 15,
             "shots": 15,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 284,
             "weapon": "sng"
           },
           {
-            "hits": 0,
             "shots": 1,
             "weapon": "ng"
           }
@@ -25218,15 +25219,17 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 3,
             "shots": 3,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 20,
             "weapon": "sng"
+          },
+          {
+            "shots": 25,
+            "weapon": "axe"
           }
         ]
       },
@@ -32103,7 +32106,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 23,
             "weapon": "sng"
           }
@@ -37371,7 +37373,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 65,
             "weapon": "sng"
           }
@@ -41470,13 +41471,11 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 2,
             "shots": 2,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           }
@@ -64566,6 +64565,7 @@
         }
       }
     },
+    "source": "ktx",
     "telefrags": [
       {
         "attacker": "paniagua",
@@ -93875,6 +93875,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0
+            },
             "gl": {
               "attacks": 45,
               "hits": 9
@@ -94685,6 +94689,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0
+            },
             "lg": {
               "attacks": 7,
               "hits": 3
@@ -95479,6 +95487,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 25,
+              "hits": 0
+            },
             "gl": {
               "attacks": 3,
               "hits": 0
@@ -96034,6 +96046,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0
+            },
             "gl": {
               "attacks": 99,
               "hits": 19
@@ -96325,6 +96341,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 27,
+              "hits": 0
+            },
             "gl": {
               "attacks": 20,
               "hits": 0
@@ -96615,11 +96635,15 @@
       }
     ]
   },
-  "schemaVersion": 71,
+  "schemaVersion": 72,
   "shots": {
     "byPlayer": [
       {
         "byWeapon": [
+          {
+            "shots": 2,
+            "weapon": "axe"
+          },
           {
             "accuracy": 0.4722222222222222,
             "enemyHits": 215,
@@ -96660,10 +96684,14 @@
         ],
         "player": "[nW].Veggie",
         "team": "ahoy",
-        "total": 614
+        "total": 616
       },
       {
         "byWeapon": [
+          {
+            "shots": 2,
+            "weapon": "axe"
+          },
           {
             "accuracy": 0.6029684601113172,
             "enemyHits": 321,
@@ -96715,7 +96743,7 @@
         ],
         "player": "biggz",
         "team": "jah",
-        "total": 790
+        "total": 792
       },
       {
         "byWeapon": [
@@ -96821,6 +96849,10 @@
       {
         "byWeapon": [
           {
+            "shots": 25,
+            "weapon": "axe"
+          },
+          {
             "accuracy": 0.5232974910394266,
             "enemyHits": 143,
             "hits": 146,
@@ -96861,7 +96893,7 @@
         ],
         "player": "ocoini",
         "team": "ahoy",
-        "total": 497
+        "total": 522
       },
       {
         "byWeapon": [
@@ -97012,6 +97044,13 @@
       "byPlayer": {
         "[nW].Veggie": [
           {
+            "ktxAttacks": 2,
+            "ktxHits": 0,
+            "streamAttacks": 2,
+            "streamShots": 2,
+            "weapon": "axe"
+          },
+          {
             "ktxAttacks": 2808,
             "ktxHits": 911,
             "streamAttacks": 2808,
@@ -97055,6 +97094,13 @@
           }
         ],
         "biggz": [
+          {
+            "ktxAttacks": 2,
+            "ktxHits": 0,
+            "streamAttacks": 2,
+            "streamShots": 2,
+            "weapon": "axe"
+          },
           {
             "ktxAttacks": 3234,
             "ktxHits": 1264,
@@ -97201,6 +97247,13 @@
           }
         ],
         "ocoini": [
+          {
+            "ktxAttacks": 23,
+            "ktxHits": 0,
+            "streamAttacks": 25,
+            "streamShots": 25,
+            "weapon": "axe"
+          },
           {
             "ktxAttacks": 1674,
             "ktxHits": 631,
@@ -100185,6 +100238,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 80014,
+        "weapon": "axe"
+      },
+      {
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -100704,6 +100764,13 @@
         "weapon": "rl"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 99222,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100918,6 +100985,13 @@
           "[nW].Veggie"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 107489,
+        "weapon": "axe"
       },
       {
         "player": "biggz",
@@ -101632,6 +101706,13 @@
         "team": "jah",
         "time": 129986,
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 130300,
+        "weapon": "axe"
       },
       {
         "player": "gandi",
@@ -102493,6 +102574,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 154237,
+        "weapon": "axe"
+      },
+      {
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -102833,6 +102921,13 @@
         "weapon": "rl"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 159712,
+        "weapon": "axe"
+      },
+      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -102980,6 +103075,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 162552,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -103007,6 +103109,13 @@
         "team": "ahoy",
         "time": 163586,
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 163756,
+        "weapon": "axe"
       },
       {
         "player": "biggz",
@@ -103097,6 +103206,13 @@
         "team": "ahoy",
         "time": 166526,
         "weapon": "lg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 166560,
+        "weapon": "axe"
       },
       {
         "player": "nexus",
@@ -103990,6 +104106,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 188344,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -104453,6 +104576,13 @@
         "weapon": "sng"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 197462,
+        "weapon": "axe"
+      },
+      {
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -104653,6 +104783,13 @@
         "team": "jah",
         "time": 203478,
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 204449,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -111856,6 +111993,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 438618,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -113040,6 +113184,13 @@
         "team": "ahoy",
         "time": 473237,
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 474422,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -119770,6 +119921,13 @@
         "weapon": "rl"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 645574,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -120988,6 +121146,13 @@
         "weapon": "rl"
       },
       {
+        "player": "biggz",
+        "source": "sound",
+        "team": "jah",
+        "time": 670883,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -120998,6 +121163,13 @@
           "paniagua"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "biggz",
+        "source": "sound",
+        "team": "jah",
+        "time": 671404,
+        "weapon": "axe"
       },
       {
         "player": "paniagua",
@@ -124375,6 +124547,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 747935,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -126338,6 +126517,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 799340,
+        "weapon": "axe"
+      },
+      {
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -127725,6 +127911,13 @@
         "weapon": "rl"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 829637,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -128977,6 +129170,13 @@
         "team": "ahoy",
         "time": 863932,
         "weapon": "sg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 863966,
+        "weapon": "axe"
       },
       {
         "player": "gandi",
@@ -131540,6 +131740,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 935991,
+        "weapon": "axe"
+      },
+      {
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -132656,6 +132863,13 @@
         "team": "jah",
         "time": 962751,
         "weapon": "ssg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 962820,
+        "weapon": "axe"
       },
       {
         "player": "[nW].Veggie",
@@ -133914,6 +134128,13 @@
         "weapon": "sg"
       },
       {
+        "player": "[nW].Veggie",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 985055,
+        "weapon": "axe"
+      },
+      {
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -133921,11 +134142,25 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 985259,
+        "weapon": "axe"
+      },
+      {
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 985363,
         "weapon": "sg"
+      },
+      {
+        "player": "[nW].Veggie",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 985536,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -133948,6 +134183,13 @@
           "[nW].Veggie"
         ],
         "weapon": "ssg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 985918,
+        "weapon": "axe"
       },
       {
         "hit": true,
@@ -139540,6 +139782,13 @@
         "weapon": "sg"
       },
       {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 1106962,
+        "weapon": "axe"
+      },
+      {
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -142241,6 +142490,13 @@
         "team": "jah",
         "time": 1174849,
         "weapon": "lg"
+      },
+      {
+        "player": "ocoini",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 1174849,
+        "weapon": "axe"
       },
       {
         "player": "gandi",

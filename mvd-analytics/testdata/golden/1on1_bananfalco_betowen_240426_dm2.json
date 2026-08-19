@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -276,7 +277,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 8,
             "shots": 8,
             "weapon": "gl"
@@ -593,7 +593,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "ng"
           }
@@ -3579,6 +3578,7 @@
         }
       }
     },
+    "source": "ktx",
     "totalDamage": 14339
   },
   "demoInfo": {
@@ -11191,7 +11191,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 71,
+  "schemaVersion": 72,
   "shots": {
     "byPlayer": [
       {

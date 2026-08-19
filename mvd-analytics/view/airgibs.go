@@ -69,7 +69,7 @@ type AirgibsOptions struct {
 	// height threshold both at the hit AND at every sample of the window
 	// [hit - PreMs, hit], whose earliest sample must be pre-impact.
 	// 0 → DefaultAirgibPreMs. Negative disables the pre-hit gate
-	// entirely (hit-time sample only, the pre-v71 behaviour); positive
+	// entirely (hit-time sample only, the pre-v72 behaviour); positive
 	// values at or below airgibStampLagMs cannot anchor on a pre-impact
 	// sample and behave the same.
 	PreMs int32
@@ -108,6 +108,16 @@ func ValidateAirgibPreMs(preMs int) error {
 // BSP-less runs.
 func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent {
 	if r == nil || r.Damage == nil || r.Streams == nil || r.TimelineAnalysis == nil {
+		return nil
+	}
+	// Wire-measured damage only, checked by SOURCE, not presence: the
+	// damage-recon post fills r.Damage on pre-instrumentation demos, and
+	// reconstructed hits carry none of the per-hit fidelity (timing,
+	// direct-vs-splash) an airgib verdict rests on. Gating here rather
+	// than in the analyzer wrapper keeps every path honest — the stored
+	// list AND the per-request ?preMs= recompute both refuse to fabricate
+	// airgibs from reconstructed damage.
+	if r.Damage.Source != result.DamageSourceKTX {
 		return nil
 	}
 	preMs := opts.PreMs

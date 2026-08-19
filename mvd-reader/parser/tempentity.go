@@ -13,13 +13,25 @@ import (
 // (naming the TE type) for the latter; mirrors errUnknownSvc.
 var errUnknownTE = errors.New("unknown temp entity type")
 
-// Temp-entity types we care about. The lightning types are beams
-// (short entity + start + end coords); everything else is a point effect.
-// Values match ezquake cl_tent.c / qwprot protocol.h.
+// Temp-entity types. The lightning types are beams (short entity + start +
+// end coords); everything else is a point effect (3 coords, with a leading
+// count byte on gunshot/blood). Values match ezquake cl_tent.c /
+// qwprot protocol.h.
 const (
-	teLightning1 = 5 // bolt (shambler/enforcer — not player LG)
-	teLightning2 = 6 // player Lightning Gun bolt (ktx W_FireLightning)
-	teLightning3 = 9 // big bolt
+	TeSpike          = 0  // nail impact on a wall
+	TeSuperSpike     = 1  // super nail impact on a wall
+	TeGunshot        = 2  // hitscan wall puff; count byte = pellets on this point
+	TeExplosion      = 3  // rocket/grenade detonation point
+	TeTarExplosion   = 4  // tarbaby explosion
+	teLightning1     = 5  // bolt (shambler/enforcer — not player LG)
+	teLightning2     = 6  // player Lightning Gun bolt (ktx W_FireLightning)
+	TeWizSpike       = 7  // wizard spike impact
+	TeKnightSpike    = 8  // hellknight spike impact
+	teLightning3     = 9  // big bolt
+	TeLavaSplash     = 10 // chthon lava splash
+	TeTeleport       = 11 // teleporter sparkle
+	TeBlood          = 12 // QW: hitscan damage on a player; count byte semantics below
+	TeLightningBlood = 13 // QW: LG damage on a player (no count)
 )
 
 // BeamEvent is emitted for a TE_LIGHTNING1/2/3 temp entity — a lightning
@@ -42,9 +54,39 @@ func (e *BeamEvent) EventType() EventType { return EventBeam }
 func (e *BeamEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 func (e *BeamEvent) EventTimeMs() int32   { return e.TimeMs }
 
+// PointEffectEvent is emitted for every non-beam temp entity — a visual
+// effect at a single point. Two QW-specific types are direct damage
+// telemetry (the server multicasts them from T_Damage-adjacent code, so
+// they exist on every demo back to original qwprogs):
+//
+//   - TE_BLOOD: hitscan damage striking a player. KTX SpawnBlood
+//     (ktx/src/weapons.c) aggregates one message per shotgun volley with
+//     Count = pellets that hit (modern KTX 1.4x, damage = 4·Count); older
+//     generations (KTX 1.38, vanilla qwprogs) write one message per pellet
+//     with Count = 1 (damage = 4·messages). Axe and nail hits write
+//     Count = the damage itself. The packaging convention varies per
+//     server generation and per mod, so consumers must calibrate per demo
+//     (validate 4·Count against observed h/a deltas) rather than assume.
+//   - TE_LIGHTNINGBLOOD: an LG cell's damage striking a player at the
+//     beam's trace endpoint (one per hit, no count).
+//
+// TE_GUNSHOT is the complementary miss signal (wall puff, Count =
+// pellets); TE_EXPLOSION is the exact rocket/grenade detonation point.
+// Count is 0 for types that carry no count byte.
+type PointEffectEvent struct {
+	Type   int // raw TE type (see Te* constants)
+	Count  int // TE_GUNSHOT / TE_BLOOD count byte; 0 otherwise
+	Origin [3]float32
+	TimeMs int32
+}
+
+func (e *PointEffectEvent) EventType() EventType { return EventPointEffect }
+func (e *PointEffectEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *PointEffectEvent) EventTimeMs() int32   { return e.TimeMs }
+
 // parseTempEntity decodes a svc_temp_entity payload. Lightning beams are
-// surfaced as BeamEvent; every other (point-effect) type is consumed for
-// its known byte length. Returns the TE type so the caller can name it in
+// surfaced as BeamEvent; every other known type is surfaced as
+// PointEffectEvent. Returns the TE type so the caller can name it in
 // a diagnostic. Wire layout per type is handled in the switch below (ref:
 // ezquake cl_tent.c::CL_ParseTEnt); an unknown type returns errUnknownTE
 // since its length can't be guessed without drifting the parser.
@@ -52,10 +94,6 @@ func (p *Parser) parseTempEntity(r *mvd.BufferReader, timeMs int32, floatCoords 
 	teType, err := r.ReadByte()
 	if err != nil {
 		return 0, err
-	}
-	coordSize := 2
-	if floatCoords {
-		coordSize = 4
 	}
 	readCoord := func() (float32, error) {
 		if floatCoords {
@@ -92,10 +130,36 @@ func (p *Parser) parseTempEntity(r *mvd.BufferReader, timeMs int32, floatCoords 
 			End:    end,
 			TimeMs: timeMs,
 		})
-	case 0, 1, 3, 4, 7, 8, 10, 11, 13:
-		return teType, r.Skip(3 * coordSize)
-	case 2, 12:
-		return teType, r.Skip(1 + 3*coordSize)
+	case TeSpike, TeSuperSpike, TeExplosion, TeTarExplosion, TeWizSpike,
+		TeKnightSpike, TeLavaSplash, TeTeleport, TeLightningBlood:
+		var origin [3]float32
+		for i := 0; i < 3; i++ {
+			if origin[i], err = readCoord(); err != nil {
+				return teType, err
+			}
+		}
+		return teType, p.emit(&PointEffectEvent{
+			Type:   int(teType),
+			Origin: origin,
+			TimeMs: timeMs,
+		})
+	case TeGunshot, TeBlood:
+		count, err := r.ReadByte()
+		if err != nil {
+			return teType, err
+		}
+		var origin [3]float32
+		for i := 0; i < 3; i++ {
+			if origin[i], err = readCoord(); err != nil {
+				return teType, err
+			}
+		}
+		return teType, p.emit(&PointEffectEvent{
+			Type:   int(teType),
+			Count:  int(count),
+			Origin: origin,
+			TimeMs: timeMs,
+		})
 	default:
 		return teType, errUnknownTE
 	}

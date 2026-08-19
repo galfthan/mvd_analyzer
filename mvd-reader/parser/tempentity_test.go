@@ -92,29 +92,82 @@ func TestParseTempEntity_UnknownVsTruncated(t *testing.T) {
 	}
 }
 
-// A point-effect temp entity (TE_EXPLOSION = 3, three coords) is consumed
-// without emitting a beam, and the cursor lands exactly at the end.
+// A point-effect temp entity (TE_EXPLOSION = 3, three coords) emits a
+// PointEffectEvent (not a beam), and the cursor lands exactly at the end.
 func TestParseTempEntity_PointEffectNoBeam(t *testing.T) {
 	p := NewParser(nil)
-	fired := false
+	beamFired := false
+	var got *PointEffectEvent
 	p.OnEvent(func(e Event) error {
-		if _, ok := e.(*BeamEvent); ok {
-			fired = true
+		switch ev := e.(type) {
+		case *BeamEvent:
+			beamFired = true
+		case *PointEffectEvent:
+			got = ev
 		}
 		return nil
 	})
-	payload := []byte{3}
-	for _, v := range [3]float32{1, 2, 3} {
+	payload := []byte{TeExplosion}
+	origin := [3]float32{1, 2, 3}
+	for _, v := range origin {
 		payload = appendCoord(payload, v)
 	}
 	r := mvd.NewBufferReader(payload)
-	if teType, err := p.parseTempEntity(r, 1000, false); err != nil || teType != 3 {
+	if teType, err := p.parseTempEntity(r, 1000, false); err != nil || teType != TeExplosion {
 		t.Fatalf("parseTempEntity: type %d err %v", teType, err)
 	}
-	if fired {
+	if beamFired {
 		t.Errorf("explosion fired a BeamEvent")
+	}
+	if got == nil {
+		t.Fatal("no PointEffectEvent emitted")
+	}
+	if got.Type != TeExplosion || got.Count != 0 || got.Origin != origin || got.TimeMs != 1000 {
+		t.Errorf("point effect = %+v, want type %d count 0 origin %v t 1000", got, TeExplosion, origin)
 	}
 	if r.Remaining() != 0 {
 		t.Errorf("remaining = %d, want 0 (exact consume)", r.Remaining())
+	}
+}
+
+// The counted point effects (TE_BLOOD / TE_GUNSHOT) carry a leading count
+// byte before the coords — TE_BLOOD's count is KTX's per-volley pellet hit
+// count, the damage-reconstruction signal.
+func TestParseTempEntity_CountedPointEffect(t *testing.T) {
+	p := NewParser(nil)
+	var got []*PointEffectEvent
+	p.OnEvent(func(e Event) error {
+		if pe, ok := e.(*PointEffectEvent); ok {
+			got = append(got, pe)
+		}
+		return nil
+	})
+
+	build := func(teType, count byte, origin [3]float32) []byte {
+		b := []byte{teType, count}
+		for _, v := range origin {
+			b = appendCoord(b, v)
+		}
+		return b
+	}
+	bloodOrigin := [3]float32{100, -50, 24}
+	r := mvd.NewBufferReader(build(TeBlood, 5, bloodOrigin))
+	if teType, err := p.parseTempEntity(r, 2000, false); err != nil || teType != TeBlood {
+		t.Fatalf("blood: type %d err %v", teType, err)
+	}
+	if r.Remaining() != 0 {
+		t.Errorf("blood remaining = %d, want 0", r.Remaining())
+	}
+	if teType, err := p.parseTempEntity(mvd.NewBufferReader(build(TeGunshot, 3, [3]float32{7, 8, 9})), 2000, false); err != nil || teType != TeGunshot {
+		t.Fatalf("gunshot: type %d err %v", teType, err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("events = %d, want 2", len(got))
+	}
+	if got[0].Type != TeBlood || got[0].Count != 5 || got[0].Origin != bloodOrigin {
+		t.Errorf("blood = %+v, want type %d count 5 origin %v", got[0], TeBlood, bloodOrigin)
+	}
+	if got[1].Type != TeGunshot || got[1].Count != 3 {
+		t.Errorf("gunshot = %+v, want type %d count 3", got[1], TeGunshot)
 	}
 }

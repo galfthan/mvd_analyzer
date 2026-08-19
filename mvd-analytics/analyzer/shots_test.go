@@ -42,9 +42,11 @@ func TestShots_SoundMappingAndProjectileDisambiguation(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 400))  // sg
 	_ = a.OnEvent(weaponSound(4, "weapons/shotgn2.wav", 500))  // ssg
 	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 600))   // sng
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 650))      // axe swing
 	// Non-fire sounds and non-weapon channel: ignored.
 	_ = a.OnEvent(weaponSound(4, "weapons/bounce.wav", 700)) // grenade bounce
 	_ = a.OnEvent(weaponSound(4, "weapons/lhit.wav", 800))   // LG hit
+	_ = a.OnEvent(weaponSound(4, "player/axhit2.wav", 850))  // axe wall clank
 	_ = a.OnEvent(&events.SoundEvent{Ent: 4, Channel: 2, Name: "weapons/sgun1.wav", TimeMs: 900})
 
 	r := &Result{}
@@ -64,7 +66,7 @@ func TestShots_SoundMappingAndProjectileDisambiguation(t *testing.T) {
 			t.Errorf("shot %+v: player = %q, want shooter", s, s.Player)
 		}
 	}
-	want := []string{"rl", "ng", "gl", "sg", "ssg", "sng"}
+	want := []string{"rl", "ng", "gl", "sg", "ssg", "sng", "axe"}
 	if len(weapons) != len(want) {
 		t.Fatalf("weapons = %v, want %v", weapons, want)
 	}
@@ -91,16 +93,34 @@ func TestShots_HitscanLinking(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 2000))
 	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtRL, Damage: 80, TimeMs: 2000})
 
+	// Axe swing by slot 3 at 3000ms; W_FireAxe runs the damage traceline
+	// 200ms after the swing sound (player_axe3), so the damage lands at
+	// 3200ms and links through the axe's delayed window.
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 3000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 3200})
+
+	// A second swing at 4000ms with a same-frame axe damage event: the
+	// engine cannot produce that timing (the traceline is always two think
+	// frames late), so it must NOT link.
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 4000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 1, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 4000})
+
 	r := &Result{}
 	_ = a.Finalize(r)
 
-	var sg, rl *Shot
+	var sg, rl, axe, axe2 *Shot
 	for i := range r.Shots.Shots {
 		switch r.Shots.Shots[i].Weapon {
 		case "sg":
 			sg = &r.Shots.Shots[i]
 		case "rl":
 			rl = &r.Shots.Shots[i]
+		case "axe":
+			if r.Shots.Shots[i].Time == 3000 {
+				axe = &r.Shots.Shots[i]
+			} else {
+				axe2 = &r.Shots.Shots[i]
+			}
 		}
 	}
 	if sg == nil || !sg.Hit || len(sg.Victims) != 2 {
@@ -111,6 +131,12 @@ func TestShots_HitscanLinking(t *testing.T) {
 	}
 	if rl == nil || rl.Hit {
 		t.Errorf("rl shot = %+v, want unlinked (projectile)", rl)
+	}
+	if axe == nil || !axe.Hit || len(axe.Victims) != 1 || axe.Victims[0] != "victimA" {
+		t.Errorf("axe shot = %+v, want Hit with victim victimA", axe)
+	}
+	if axe2 == nil || axe2.Hit {
+		t.Errorf("axe shot@4000 = %+v, want unlinked (same-frame axe damage is engine-impossible)", axe2)
 	}
 
 	// Aggregate accuracy: 1 connecting SG shot of 1 SG shot = 1.0.

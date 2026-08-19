@@ -109,6 +109,9 @@ func (f *fakeBackend) GetEvents(_ context.Context, _ GetEventsInput) (any, error
 func (f *fakeBackend) GetStreamSlice(_ context.Context, _ GetStreamSliceInput) (any, error) {
 	return map[string]any{"players": []any{}}, nil
 }
+func (f *fakeBackend) GetPointEffects(_ context.Context, _ GetPointEffectsInput) (any, error) {
+	return map[string]any{"pointEffects": nil}, nil
+}
 func (f *fakeBackend) GetStateAt(_ context.Context, in GetStateAtInput) (any, error) {
 	return map[string]any{"time": in.Time, "players": map[string]any{}}, nil
 }
@@ -248,7 +251,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getOverview", "getDemoInfo", "getMetadata", "getPlayerStats", "getFrags", "getDamage",
 		"getAim", "getLocGraph", "getChat",
 		"getBackpacks", "getItems", "getMapEntitiesByMap", "getWeaponPickups",
-		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
+		"getBuckets", "getEvents", "getStreamSlice", "getPointEffects", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
 		"getTopWindows", "getTopKills", "getLives",
 		"listArtifacts", "getArtifact",

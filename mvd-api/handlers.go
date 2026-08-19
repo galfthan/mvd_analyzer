@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
@@ -454,7 +455,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.writeUnavailable(w, r, err, "damage_unavailable",
-			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
+			"this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)")
 		return
 	}
 	writeJSON(w, http.StatusOK, view.DamageEnvelope{TimeUnit: view.UnitMs, DamageResult: out})
@@ -1042,6 +1043,124 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 	}{view.UnitMs, nl})
 }
 
+// teNames maps the point-effect TE codes (result.PointEffectStreams `ty`,
+// vocabulary in mvd-reader/parser/tempentity.go) to the stable lowercase
+// names the `types` filter accepts and the response legend serves. The
+// lightning bolt types (5/6/9) are beams, never point effects, so they
+// cannot appear here. A code outside the map (a server extension) legends
+// as "te<code>" and is filterable by that same token, so the endpoint
+// never hides rows it cannot name.
+var teNames = map[int32]string{
+	0:  "spike",
+	1:  "superspike",
+	2:  "gunshot",
+	3:  "explosion",
+	4:  "tarexplosion",
+	7:  "wizspike",
+	8:  "knightspike",
+	10: "lavasplash",
+	11: "teleport",
+	12: "blood",
+	13: "lightningblood",
+}
+
+func teName(code int32) string {
+	if n, ok := teNames[code]; ok {
+		return n
+	}
+	return fmt.Sprintf("te%d", code)
+}
+
+// knownTEName reports whether a (lowercased) `types` token is in the
+// vocabulary: a named type or the te<code> escape for unnamed codes.
+func knownTEName(n string) bool {
+	for _, v := range teNames {
+		if v == n {
+			return true
+		}
+	}
+	if rest, ok := strings.CutPrefix(n, "te"); ok && rest != "" {
+		if _, err := strconv.Atoi(rest); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// handlePointEffects serves the point-effect temp-entity stream — exact
+// rocket/grenade detonation points (explosion), hitscan hit telemetry on
+// players (blood), LG cell hits (lightningblood), wall puffs (gunshot),
+// teleporter sparkles and the rest; from the always-full base parse. Body
+// is {"pointEffects": ...}, null when the demo carried none. `types`
+// narrows the rows to a CSV set of effect names; the `types` legend in the
+// response maps the codes present in the DEMO (pre-filter) to names, so a
+// filtered consumer still sees what else it could ask for. A filter that
+// matches nothing returns empty columns, not null — null is reserved for
+// "the demo carried no point effects at all".
+func (s *server) handlePointEffects(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	wantNames := p.CSV("types")
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// types is a closed vocabulary; a typo must 400, not silently match
+	// nothing. Case-insensitive like every other token filter.
+	want := map[string]bool{}
+	for _, n := range wantNames {
+		ln := strings.ToLower(n)
+		if !knownTEName(ln) {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("unknown point-effect type %q; valid: spike, superspike, gunshot, explosion, tarexplosion, wizspike, knightspike, lavasplash, teleport, blood, lightningblood, or te<code> for an unnamed code", n))
+			return
+		}
+		want[ln] = true
+	}
+
+	var pe *result.PointEffectStreams
+	if res.Streams != nil {
+		pe = res.Streams.PointEffects
+	}
+
+	var legend map[string]string
+	if pe != nil {
+		legend = map[string]string{}
+		for _, c := range pe.Type {
+			legend[fmt.Sprintf("%d", c)] = teName(c)
+		}
+	}
+	if pe != nil && len(want) > 0 {
+		f := &result.PointEffectStreams{
+			T: []int32{}, Type: []int32{}, Count: []int32{},
+			X: []float32{}, Y: []float32{}, Z: []float32{},
+		}
+		for i, c := range pe.Type {
+			if !want[teName(c)] {
+				continue
+			}
+			f.T = append(f.T, pe.T[i])
+			f.Type = append(f.Type, c)
+			f.Count = append(f.Count, pe.Count[i])
+			f.X = append(f.X, pe.X[i])
+			f.Y = append(f.Y, pe.Y[i])
+			f.Z = append(f.Z, pe.Z[i])
+		}
+		pe = f
+	}
+
+	writeJSON(w, http.StatusOK, struct {
+		TimeUnit     view.TimeUnit              `json:"timeUnit"`
+		Types        map[string]string          `json:"types,omitempty"`
+		PointEffects *result.PointEffectStreams `json:"pointEffects"`
+	}{view.UnitMs, legend, pe})
+}
+
 func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -1389,7 +1508,7 @@ func topWindowsUnavailableMsg(metric string) string {
 	case view.MetricShots, view.MetricHits:
 		return "this demo has no weapon-fire stream"
 	case view.MetricDamageGiven, view.MetricDamageTaken, view.MetricNetDamage:
-		return "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"
+		return "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"
 	default:
 		return "this demo has no frag log"
 	}

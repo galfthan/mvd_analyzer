@@ -27,7 +27,7 @@ func airgibTestResult() *result.Result {
 	}}
 	return &result.Result{
 		Streams: &result.Streams{Players: []result.PlayerStream{vic, att}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},               // airborne → airgib
 			{Time: 1100, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 90},                // grounded → no
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "lg", Damage: 30},                // not a rocket → no
@@ -98,7 +98,7 @@ func TestComputeAirgibs_SortedByHeightUncapped(t *testing.T) {
 	}
 	res := &result.Result{
 		Streams:          &result.Streams{Players: []result.PlayerStream{{Name: "vic", Position: pos}}},
-		Damage:           &result.DamageResult{Events: dmg},
+		Damage:           &result.DamageResult{Source: result.DamageSourceKTX, Events: dmg},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},
 	}
 	got := ComputeAirgibs(res, AirgibsOptions{})
@@ -155,7 +155,7 @@ func TestComputeAirgibs_UserIDIsTheSessionAtTheHit(t *testing.T) {
 				},
 			},
 		}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 20_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
 			{Time: 160_000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 100},
 		}},
@@ -206,7 +206,7 @@ func knockbackFixture(midMs int32) *result.Result {
 	}
 	return &result.Result{
 		Streams: &result.Streams{Players: []result.PlayerStream{{Name: "vic", Team: "red", Position: pos}}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 440},
 		}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},
@@ -349,6 +349,20 @@ func TestValidateAirgibPreMs(t *testing.T) {
 	}
 }
 
+// Reconstructed damage (pre-instrumentation demos) never yields airgibs —
+// reconstructed hits carry none of the per-hit fidelity the verdict rests
+// on. The gate must hold on EVERY path, including the per-request
+// recompute with the pre-hit gate disabled.
+func TestComputeAirgibs_ReconstructedDamageYieldsNone(t *testing.T) {
+	res := airgibTestResult()
+	res.Damage.Source = result.DamageSourceReconstructed
+	for _, preMs := range []int32{0, -1} {
+		if got := ComputeAirgibs(res, AirgibsOptions{PreMs: preMs}); len(got) != 0 {
+			t.Errorf("preMs=%d: airgibs = %+v, want none on reconstructed damage", preMs, got)
+		}
+	}
+}
+
 func TestComputeAirgibs_NoHeightColumnNoAirgibs(t *testing.T) {
 	// A victim with positions but no H column (BSP-less run): no airgibs.
 	res := &result.Result{
@@ -356,7 +370,7 @@ func TestComputeAirgibs_NoHeightColumnNoAirgibs(t *testing.T) {
 			Name:     "vic",
 			Position: &result.PositionTrack{T: []int32{1000}, X: []float32{0}, Y: []float32{0}, Z: []float32{0}},
 		}}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},
 		}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
@@ -271,7 +272,7 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// string carries the gt* verdict ("team"/"ctf" vs "duel"/"ffa"); with
 	// no demoinfo we fall back to the non-duel gate alone (team
 	// classification still requires matching non-empty team strings).
-	boundedSkip := a.boundedSkipReason()
+	boundedSkip := a.boundedSkipReason(result)
 	tp := 0
 	if !duel && a.tpModeApplies() {
 		tp, _ = strconv.Atoi(a.serverInfo["teamplay"])
@@ -546,6 +547,9 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 
 	out.Matrix = flattenMatrix(matrix)
 	out.Scoreboard = a.reconcile(out.ByPlayer, enemyTakenBounded, boundedSkip == "")
+	// This section came from the wire's KTX damage stream — every figure a
+	// measurement. The damage-recon post stamps "reconstructed" instead.
+	out.Source = damageSourceKTX
 	if boundedSkip == "" {
 		out.Dmg = "both"
 		out.BoundedMode = "standard"
@@ -930,18 +934,23 @@ func (a *DamageAnalyzer) tpModeApplies() bool {
 // reconstruction impossible, or "" when the standard arithmetic applies.
 // k_midair rewrites take from the victim's height above ground (combat.c:
 // 644-694), k_instagib flattens it to 5000 (698-709), k_dmgfrags inverts
-// the pent/telefrag accumulation (758-777) — none observable per hit.
-func (a *DamageAnalyzer) boundedSkipReason() string {
-	for _, m := range [...]struct{ cvar, mode string }{
-		{"k_midair", "midair"},
-		{"k_instagib", "instagib"},
-		{"k_dmgfrags", "dmgfrags"},
-	} {
-		if v := a.serverInfo[m.cvar]; v != "" && v != "0" {
-			return m.mode
-		}
+// the pent/telefrag accumulation (758-777), and the clan-arena family
+// (ca/wipeout/ra/lgc/race) suppresses or rewrites whole damage classes
+// while still multicasting raw values (combat.c:475-491) — none
+// observable per hit. Detection is shared with the damage-recon gate
+// (damagerecon.SkipModeReasonFull): legacy k_* cvar keys, the modern
+// composite serverinfo `mode` string (the ONLY place newer KTX exposes
+// the submodes — a wipeout demo reads mode=wipeout-wo-df with no
+// k_dmgfrags key at all), and the countdown-derived MatchSettings (the
+// ONLY signal on old KTX 1.41-era demos, whose serverinfo carries no
+// mode record whatsoever — the dag makes this node require metadata so
+// the settings are populated here).
+func (a *DamageAnalyzer) boundedSkipReason(result *Result) string {
+	var ms *MatchSettings
+	if result.Metadata != nil {
+		ms = result.Metadata.MatchSettings
 	}
-	return ""
+	return damagerecon.SkipModeReasonFull(a.serverInfo, ms)
 }
 
 func addToMatrix(m map[string]*DamagePair, attacker, victim, weapon string, dmg int) {

@@ -1,5 +1,6 @@
 {
   "aim": {
+    "hitsMeasured": true,
     "players": [
       {
         "crosshair": {
@@ -1859,7 +1860,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 5,
             "weapon": "sng"
           }
@@ -7045,9 +7045,12 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 76,
             "weapon": "sng"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
           }
         ]
       },
@@ -9978,7 +9981,6 @@
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 8,
             "weapon": "sng"
           }
@@ -19077,6 +19079,7 @@
         }
       }
     },
+    "source": "ktx",
     "totalDamage": 25295
   },
   "demoInfo": {
@@ -30529,6 +30532,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0
+            },
             "gl": {
               "attacks": 50,
               "hits": 4
@@ -31458,6 +31465,10 @@
       {
         "accuracy": {
           "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0
+            },
             "gl": {
               "attacks": 92,
               "hits": 6
@@ -31923,7 +31934,7 @@
       }
     ]
   },
-  "schemaVersion": 71,
+  "schemaVersion": 72,
   "shots": {
     "byPlayer": [
       {
@@ -31970,6 +31981,10 @@
       {
         "byWeapon": [
           {
+            "shots": 2,
+            "weapon": "axe"
+          },
+          {
             "accuracy": 0.35,
             "enemyHits": 13,
             "hits": 14,
@@ -32009,7 +32024,7 @@
         ],
         "player": "gLAd",
         "team": "nAnI",
-        "total": 674
+        "total": 676
       },
       {
         "byWeapon": [
@@ -32130,6 +32145,13 @@
           }
         ],
         "gLAd": [
+          {
+            "ktxAttacks": 2,
+            "ktxHits": 0,
+            "streamAttacks": 2,
+            "streamShots": 2,
+            "weapon": "axe"
+          },
           {
             "ktxAttacks": 240,
             "ktxHits": 63,
@@ -47507,6 +47529,13 @@
         "weapon": "rl"
       },
       {
+        "player": "gLAd",
+        "source": "sound",
+        "team": "nAnI",
+        "time": 593012,
+        "weapon": "axe"
+      },
+      {
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47544,6 +47573,13 @@
         "team": "pora",
         "time": 596352,
         "weapon": "rl"
+      },
+      {
+        "player": "gLAd",
+        "source": "sound",
+        "team": "nAnI",
+        "time": 596920,
+        "weapon": "axe"
       },
       {
         "player": "SS",

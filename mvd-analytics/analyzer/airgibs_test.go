@@ -20,7 +20,7 @@ func TestAirgibsPost_PublishesTheDefaultList(t *testing.T) {
 				T: []int32{1000}, X: []float32{0}, Y: []float32{0}, Z: []float32{40}, H: []float32{0},
 			}},
 		}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 110},
 		}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},
@@ -47,7 +47,7 @@ func TestAirgibsPost_SkipsKnockbackFalsePositive(t *testing.T) {
 				Z: []float32{319, 620}, H: []float32{0, 303}, // grounded, then blasted
 			}},
 		}},
-		Damage: &result.DamageResult{Events: []result.DamageEntry{
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
 			{Time: 1000, Attacker: "att", Victim: "vic", Weapon: "rl", Damage: 440},
 		}},
 		TimelineAnalysis: &result.TimelineAnalysisResult{},

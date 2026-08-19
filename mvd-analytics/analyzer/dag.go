@@ -113,8 +113,8 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, airgibs, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
 	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
-	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "damage",
-		desc: "Per-hit damage from the KTX stream: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check."},
+	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster", "metadata"}, resultKey: "damage",
+		desc: "Per-hit damage: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check. Decoded from the wire KTX stream when present (source=ktx); on pre-instrumentation demos the damage-recon post fills the same section (source=reconstructed), so the served artifact carries whichever the demo yielded."},
 	"shots": {name: "shots", requires: []string{"clock", "demoinfo", "identity", "timeline", "roster"}, resultKey: "shots",
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",
@@ -187,7 +187,7 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
 		resultKey: "playerStats",
 		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
 	},
@@ -196,6 +196,12 @@ var postNodeMeta = map[string]nodeMeta{
 		requires:  []string{"timeline", "items"},
 		resultKey: "opening",
 		desc:      "Match opening: each player's match-start spawn location plus the first in-match take of every contested spawner (armors, mega, powerups, RL/LG). A pure projection of items + streams, kept small for one-call fetches.",
+	},
+	"damageReconPost": {
+		name: "damage-recon", mutates: true,
+		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
+		provides: []string{"damage:final"},
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats binds `damage:final` (its damage family rides the reconstruction on old demos, src=reconstructed); aim and airgibs stay wire-measured-only by gating on Damage.Source == ktx inside their own passes (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
 	},
 }
 

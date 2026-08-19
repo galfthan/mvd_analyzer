@@ -68,6 +68,10 @@ var demoViewCoverage = map[string]mcpCoverage{
 	"/v1/demos/{id}/streams/beams":       {tool: "getStreamSlice"},
 	"/v1/demos/{id}/streams/nails":       {tool: "getStreamSlice"},
 
+	// Point effects are not per-player, so getStreamSlice cannot carry
+	// them — they get their own curated tool.
+	"/v1/demos/{id}/streams/point-effects": {tool: "getPointEffects"},
+
 	// Dense per-sample surfaces with no curated tool — reachable via
 	// getArtifact.
 	"/v1/demos/{id}/shots": {artifact: "shots"},

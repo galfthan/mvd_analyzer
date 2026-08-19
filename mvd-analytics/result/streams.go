@@ -33,6 +33,14 @@ type Streams struct {
 	// tracking is on AND shot streams are requested, since nails are far
 	// higher volume than rockets/grenades.
 	Nails *ProjectileStreams `json:"nails,omitempty"`
+	// PointEffects is every point-effect temp entity (schema v71): blood
+	// (hitscan damage on a player, with the per-volley pellet count),
+	// lightning blood (LG hit), explosion (rocket/grenade detonation
+	// point), gunshot (wall-puff miss pattern) and the rest. Damage
+	// telemetry present on every demo generation — the damage
+	// reconstruction's per-hit evidence. Rides the shot-streams gate like
+	// Projectiles/Beams; omitted when not built.
+	PointEffects *PointEffectStreams `json:"pointEffects,omitempty"`
 
 	// LOSComputed records whether the (lazy) line-of-sight pass has run to a
 	// result worth keeping on this in-memory Result, so a caller (web overlay,
@@ -100,6 +108,23 @@ type BeamStreams struct {
 	Ex []float32 `json:"ex"`
 	Ey []float32 `json:"ey"`
 	Ez []float32 `json:"ez"`
+}
+
+// PointEffectStreams is every point-effect temp entity as parallel columns.
+// Effect i is of raw TE type Type[i] (events.Te* vocabulary: 0 spike,
+// 1 superspike, 2 gunshot, 3 explosion, 11 teleport, 12 blood,
+// 13 lightningblood, ...) at (X,Y,Z)[i], T[i] match-relative ms.
+// Count[i] is the leading count byte on the two counted types
+// (TE_GUNSHOT / TE_BLOOD — pellet counts, see mvd-reader/MVD_FORMAT.md
+// for the per-server-generation packaging) and 0 elsewhere. Built only
+// when shot streams are requested (see Streams.PointEffects).
+type PointEffectStreams struct {
+	T     []int32   `json:"t"`
+	Type  []int32   `json:"ty"`
+	Count []int32   `json:"c"`
+	X     []float32 `json:"x"`
+	Y     []float32 `json:"y"`
+	Z     []float32 `json:"z"`
 }
 
 // MoverStream is one brush-model entity's pose timeline (a lift, door,
