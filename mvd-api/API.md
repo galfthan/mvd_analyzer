@@ -196,16 +196,16 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   no emitted token changed). The pre-16.2 singular
   spelling `weapon` remains an accepted legacy alias; `weapons` wins when
   both are present.
-- **`preMs`** (`/airgibs`) — the pre-hit look-back in ms (default 200,
-  range `0..1000`): an airgib victim must be above the airborne height
-  threshold both at the hit and at every position sample of the `preMs`
-  before it (anchored on a sample from before the damage-stamp lag,
-  ~40 ms), because the damage
-  entry is stamped after the rocket's own knockback moved the victim and
-  the hit-time sample alone reports standing players as airborne. `preMs=0`
-  turns the pre-hit gate off (the pre-v72 rule); the default serves the
-  stored list, any other value recomputes. Every response echoes the
-  effective value.
+- **`preMs`** (`/airgibs`) — the pre-hit look-back in ms (default 100,
+  range `0..1000`): an airgib victim must read clear air (at or above the
+  airborne height threshold) at every pre-impact sample of
+  `[hit − preMs, hit − 40ms]` — the tick preceding the window decides when
+  it holds no sample (old coarse-tick demos) — and no sample beside the
+  hit may read ground contact. Samples near the damage stamp can already
+  carry the rocket's own knockback, which over-reports height but cannot
+  fake a grounded reading. `preMs=0` turns the pre-hit gate off (the
+  pre-v72 rule); the default serves the stored list, any other value
+  recomputes. Every response echoes the effective value.
 - **`reducers`** (`/buckets`) — comma-separated `field=name` pairs, e.g.
   `reducers=h=min,a=last`. Names come from the reducer registry in
   RESULT_SCHEMA.md.

@@ -261808,13 +261808,27 @@
         "attackerTeam": "ahoy",
         "attackerUserID": 6,
         "damage": 110,
-        "height": 143.21875,
-        "heightAboveAttacker": -92,
+        "height": 197.84375,
+        "heightAboveAttacker": -37.125,
         "loc": "RA.door",
         "time": 146760,
         "victim": "rusti",
         "victimTeam": "jah",
         "victimUserID": 8
+      },
+      {
+        "attacker": "nexus",
+        "attackerTeam": "ahoy",
+        "attackerUserID": 5,
+        "damage": 110,
+        "height": 100.34375,
+        "heightAboveAttacker": 57.125,
+        "lethal": true,
+        "loc": "RL",
+        "time": 345770,
+        "victim": "biggz",
+        "victimTeam": "jah",
+        "victimUserID": 93
       }
     ],
     "deathEvents": [

@@ -1794,12 +1794,14 @@ paths:
         `airgibs_unavailable` when the demo has no timeline analysis.
 
 
-        Airborne is measured at the hit AND at every position sample
-        of the `preMs` before it (default 200 ms) — because the damage
-        entry lands after the rocket's own knockback moved the victim,
-        so the hit-time sample alone reports standing players as
-        airborne. `preMs=0` drops the pre-hit gate; the response echoes
-        the effective value.
+        Airborne is measured on pre-impact evidence: every position
+        sample in the `preMs` look-back window (default 100 ms) must
+        read clear air, the preceding tick deciding when the window
+        holds no sample (coarse-tick demos), and no sample beside the
+        hit may read ground contact — samples near the damage stamp can
+        already carry the rocket's own knockback, which over-reports
+        height but cannot fake a grounded reading. `preMs=0` drops the
+        pre-hit gate; the response echoes the effective value.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/AirgibPreMs"
@@ -2714,10 +2716,13 @@ components:
       name: preMs
       in: query
       description: >
-        Pre-hit look-back in MILLISECONDS: the victim must be above the
-        airborne height threshold both at the hit and at every position
-        sample of the look-back window, whose earliest sample must
-        predate the damage-stamp lag (~40 ms). Default 200. The gate exists because the KTX damage entry is stamped
+        Pre-hit look-back in MILLISECONDS: every position sample in the
+        window [hit-preMs, hit-40ms] must read at or above the airborne
+        height threshold; the tick preceding the window decides when the
+        window holds no sample near its start (old coarse-tick demos,
+        recording holes), and a grounded reading beside the hit vetoes.
+        Values at or below 40 collapse to a point check at the
+        pre-impact boundary. Default 100. The gate exists because the KTX damage entry is stamped
         at (or one frame after) the physics frame in which the rocket's own
         knockback already moved the victim, so the sample nearest the damage
         time reports players who were STANDING at impact as hundreds of units
@@ -2728,7 +2733,7 @@ components:
         value in `preMs`.
       schema:
         type: integer
-        default: 200
+        default: 100
         minimum: 0
         maximum: 1000
     TimeRequired:
@@ -8881,7 +8886,7 @@ components:
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         preMs:
-          description: "Effective pre-hit look-back in ms the list was detected with (default 200; 0 = the pre-hit airborne gate was off)."
+          description: "Effective pre-hit look-back in ms the list was detected with (default 100; 0 = the pre-hit airborne gate was off)."
           type: integer
         airgibs:
           description: "Airborne rocket-hit highlights, sorted by height descending."

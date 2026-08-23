@@ -29,49 +29,71 @@ const (
 	airgibLethalBackMs = 200
 	airgibLethalFwdMs  = 1000
 
-	// DefaultAirgibPreMs is the default pre-hit look-back: the victim must
-	// already be above the height threshold at EVERY sample of the last
-	// preMs before the hit (minus the stamp-lag margin below). The KTX
-	// damage entry is stamped one to two wire frames after the physics
-	// frame in which the rocket's own knockback moved the victim, so the
-	// sample nearest the damage time can show a victim who was STANDING
-	// at impact as airborne — e.g. a grounded player on the dm2 moving
-	// platform blasted off the edge reads 300+ units of air at the damage
-	// timestamp. A genuinely airborne victim got past 96 units via
-	// knockback or a fall (a plain jump peaks at ~45), so they are above
-	// the threshold for hundreds of ms before the rocket lands and a
-	// 200ms look-back cannot lose them.
-	DefaultAirgibPreMs = 200
+	// DefaultAirgibPreMs is the default pre-hit look-back: the victim
+	// must read at or above the height threshold at every sample of the
+	// look-back window — the "clear air" that makes an airgib look like
+	// one. 100ms keeps the spectacular ledge-drop hits (a victim who
+	// left a high ledge ~150ms before the rocket reads 96+ for the whole
+	// window) while still rejecting players clipped ~50-90ms after a
+	// ledge hop, standing victims, and victims who landed just before
+	// the rocket. Floor-relative height is a step function at ledge
+	// edges, so a longer window measures time-since-the-edge, not hang
+	// time — 200ms measurably dropped genuine 300+-unit events from the
+	// golden corpus.
+	DefaultAirgibPreMs = 100
 
 	// MaxAirgibPreMs bounds caller-supplied pre-times: past ~1s the
 	// look-back lands before the flight that made the hit an airgib at
 	// all, so larger values only reject real events.
 	MaxAirgibPreMs = 1000
 
-	// airgibStampLagMs bounds the damage-stamp lag: the damage entry is
-	// stamped one to two wire frames (14-29ms measured on hub 232925, at
-	// ~14ms per frame) after the impact physics, so samples nearer the
-	// hit than this may already carry the rocket's own knockback. It is
-	// NOT an exclusion window — knockback can only OVER-report height
-	// (a victim genuinely at the threshold cannot be driven to a
-	// grounded reading within two frames), so possibly-contaminated
-	// samples still participate in the all-airborne check, where they
-	// can only reject. Its one gating use is the evidence anchor: the
-	// look-back's earliest sample must be at or before (hit - this), so
-	// a sparse track whose only nearby reading IS the contaminated hit
-	// sample cannot pass vacuously.
+	// airgibStampLagMs bounds the damage-stamp jitter: KTX writes the
+	// damage message inline in T_Damage (ktx/src/combat.c:815), and
+	// measured over 410 direct rocket hits in four demos the stamp lands
+	// in the SAME wire frame as the first knockback-visible position
+	// sample 82% of the time, a frame EARLIER 12%, and up to two frames
+	// (+28ms) late 6% — nothing beyond +28ms. Samples at or before
+	// (hit - this) are therefore pre-impact; samples nearer the stamp
+	// may already carry the rocket's own knockback. Contamination is
+	// one-sided — knockback can over-report height but cannot fake a
+	// grounded reading — so possibly-contaminated samples are trusted
+	// when they read GROUNDED (see airgibGroundedMaxH) and ignored when
+	// they read high.
 	airgibStampLagMs = 40
+
+	// airgibWindowEvidenceGapMs decides when in-window samples reach the
+	// window's start: if the earliest sample inside the look-back window
+	// begins more than this after the window start (or the window is
+	// empty), the PRECEDING tick — the sample that was live at the
+	// window start — decides instead. That is what makes the gate work
+	// on old demos whose tick cadence exceeds the window (their state is
+	// the carried-forward preceding sample) and what closes the
+	// sparse-hole false pass (a track with a recording gap ending in a
+	// single boundary sample gets judged by the grounded tick before the
+	// gap, not by the hole).
+	airgibWindowEvidenceGapMs = 60
+
+	// airgibGroundedMaxH is the "grounded reading" bound: a sample this
+	// close to the floor is ground contact. Grounded readings are
+	// trustworthy even inside the stamp-jitter tail — knockback cannot
+	// fake one — so a grounded sample at the hit vetoes the event (a
+	// victim who fell and LANDED just before the rocket), while a
+	// merely-low tail reading does not (a genuine airgib knocked
+	// laterally over a higher floor reads low without ever touching
+	// ground, and must not be lost).
+	airgibGroundedMaxH = 8
 )
 
 // AirgibsOptions parameterizes ComputeAirgibs. All fields optional.
 type AirgibsOptions struct {
-	// PreMs is the pre-hit look-back in ms: the victim must be above the
-	// height threshold both at the hit AND at every sample of the window
-	// [hit - PreMs, hit], whose earliest sample must be pre-impact.
-	// 0 → DefaultAirgibPreMs. Negative disables the pre-hit gate
-	// entirely (hit-time sample only, the pre-v72 behaviour); positive
-	// values at or below airgibStampLagMs cannot anchor on a pre-impact
-	// sample and behave the same.
+	// PreMs is the pre-hit look-back in ms: every position sample in
+	// [hit - PreMs, hit - airgibStampLagMs] must read at or above the
+	// height threshold, with the preceding tick standing in when the
+	// window holds no sample near its start (old low-tickrate demos,
+	// recording holes). 0 → DefaultAirgibPreMs. Values at or below
+	// airgibStampLagMs collapse the window to a point check at the
+	// pre-impact boundary. Negative disables the pre-hit gate entirely
+	// (hit-time sample only, the pre-v72 behaviour).
 	PreMs int32
 }
 
@@ -94,14 +116,27 @@ func ValidateAirgibPreMs(preMs int) error {
 // TimelineAnalysis.Airgibs (default options) and per-request with a
 // caller-tuned PreMs.
 //
-// The victim must be above the height threshold at the hit sample AND at
-// every sample of the look-back window [hit - PreMs, hit], anchored on
-// pre-impact evidence (see preHitAirborne). The two-sided gate is what
-// keeps the list honest: the hit-time sample alone can be post-knockback
-// (see DefaultAirgibPreMs), while the whole-window check demands the
-// sustained hang time that makes an airgib an airgib — and rejects a
-// victim who fell and landed just before the rocket, whose descent
-// necessarily left sub-threshold samples in the window.
+// A hit qualifies when three things hold, each judged only on evidence
+// that can be trusted for what it claims:
+//
+//  1. Clear air before the hit: every sample in the look-back window
+//     [hit - PreMs, hit - airgibStampLagMs] reads >= the height
+//     threshold, with the preceding tick standing in when the window
+//     has no sample near its start (see preHitAirborne). Samples there
+//     are pre-impact by the measured stamp-jitter bound, so a grounded
+//     reading among them is the victim standing — the false positive
+//     this gate exists for.
+//  2. No grounded reading beside the hit: no sample in the stamp-jitter
+//     neighbourhood of the damage time reads ground contact (see
+//     groundedNearHit). Samples there may carry the rocket's own
+//     knockback, which can only OVER-report height — so high readings
+//     prove nothing and are ignored, while a grounded one is real (a
+//     victim who landed just before the rocket) and vetoes.
+//  3. Evidence exists: a sample within the gap tolerance of the hit.
+//
+// Reported height / loc / heightAboveAttacker come from the latest
+// PRE-IMPACT sample — the victim as the rocket found them — not from
+// the possibly knockback-contaminated hit-frame sample.
 //
 // Returns nil when the map has no clip hull (no PositionTrack.H to
 // read), so the airgibs list is simply absent rather than wrong on
@@ -191,29 +226,45 @@ func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent 
 		if vs == nil || vs.Position == nil || len(vs.Position.H) != len(vs.Position.T) {
 			continue
 		}
-		idx := airborneSampleIndex(vs.Position, d.Time)
-		if idx < 0 {
-			continue
+		hitIdx := nearestSampleIndex(vs.Position.T, d.Time)
+		if hitIdx < 0 || absDeltaMs(vs.Position.T[hitIdx], d.Time) > airgibPosMaxGapMs {
+			continue // no position evidence near the hit
 		}
-		if preMs > airgibStampLagMs && !preHitAirborne(vs.Position, d.Time, preMs) {
-			continue
+		// ri is the sample the event reports from: the latest pre-impact
+		// sample near the hit under the window gate, the hit-nearest
+		// sample under the legacy (PreMs < 0) rule.
+		ri := hitIdx
+		if preMs < 0 {
+			// Legacy hit-only rule (pre-v72): airborne at the sample
+			// nearest the damage time.
+			if airborneAt(vs.Position, hitIdx) < 0 {
+				continue
+			}
+		} else {
+			if groundedNearHit(vs.Position, d.Time) {
+				continue // trustworthy grounded reading beside the hit — landed
+			}
+			ri = preHitAirborne(vs.Position, d.Time, preMs)
+			if ri < 0 {
+				continue
+			}
 		}
-		h := vs.Position.H[idx]
+		h := vs.Position.H[ri]
 		loc := ""
-		if idx < len(vs.Position.Li) {
-			loc = locNameForIndex(locTable, vs.Position.Li[idx])
+		if ri < len(vs.Position.Li) {
+			loc = locNameForIndex(locTable, vs.Position.Li[ri])
 		}
 		// Vertical gap to the shooter: a rocket arriving from far below
 		// is often what makes an airgib spectacular, independent of the
-		// floor height. Origin-to-origin dz at the two players' nearest
-		// samples to the hit; 0 when the shooter has no sample close
-		// enough (and on a genuine dead-level hit — omitempty folds
-		// both, the neutral value either way).
+		// floor height. Origin-to-origin dz at the two players' samples
+		// nearest the reported instant; 0 when the shooter has no sample
+		// close enough (and on a genuine dead-level hit — omitempty
+		// folds both, the neutral value either way).
 		dz := float32(0)
 		if as := streamByName[d.Attacker]; as != nil && as.Position != nil && len(as.Position.T) > 0 {
-			ai := nearestSampleIndex(as.Position.T, d.Time)
-			if ai >= 0 && absDeltaMs(as.Position.T[ai], d.Time) <= airgibPosMaxGapMs {
-				dz = vs.Position.Z[idx] - as.Position.Z[ai]
+			ai := nearestSampleIndex(as.Position.T, vs.Position.T[ri])
+			if ai >= 0 && absDeltaMs(as.Position.T[ai], vs.Position.T[ri]) <= airgibPosMaxGapMs {
+				dz = vs.Position.Z[ri] - as.Position.Z[ai]
 			}
 		}
 		events = append(events, result.AirgibEvent{
@@ -246,53 +297,66 @@ func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent 
 	return events
 }
 
-// airborneSampleIndex returns the index of the position sample nearest
-// to tMs when that sample says the victim was measurably airborne —
-// within the sample-gap tolerance, with a measured floor, at or above
-// the height threshold — and -1 otherwise.
-func airborneSampleIndex(pt *result.PositionTrack, tMs int32) int {
-	idx := nearestSampleIndex(pt.T, tMs)
-	if idx < 0 || absDeltaMs(pt.T[idx], tMs) > airgibPosMaxGapMs {
+// preHitAirborne applies the clear-air window gate and returns the index
+// of the reporting sample — the latest pre-impact sample — or -1 when
+// the gate rejects.
+//
+// The window is [hit - preMs, hit - airgibStampLagMs]: every sample
+// inside it must read at or above the height threshold. When the window
+// holds no sample within airgibWindowEvidenceGapMs of its start — an
+// old demo whose tick cadence exceeds the window, or a recording hole —
+// the PRECEDING tick (the latest sample at or before the window start,
+// the value carried forward at that instant) must be airborne instead.
+// A sample just before the window is otherwise deliberately NOT
+// consulted: a victim who left a high ledge just after the window
+// opened reads 96+ at every in-window sample and is a genuine airgib,
+// even though the tick before the window still saw them on the ledge.
+func preHitAirborne(pt *result.PositionTrack, hitMs, preMs int32) int {
+	lo, hi := hitMs-preMs, hitMs-airgibStampLagMs
+	if lo > hi {
+		lo = hi // preMs <= the stamp-lag bound: a point check at the pre-impact boundary
+	}
+	first := sort.Search(len(pt.T), func(k int) bool { return pt.T[k] >= lo })
+	last := -1
+	for i := first; i < len(pt.T) && pt.T[i] <= hi; i++ {
+		if airborneAt(pt, i) < 0 {
+			return -1
+		}
+		last = i
+	}
+	if last >= 0 && pt.T[first]-lo <= airgibWindowEvidenceGapMs {
+		return last // in-window evidence reaches the window start
+	}
+	// No sample near the window start: the preceding tick was the live
+	// state there. It must exist, be recent enough to trust, and read
+	// airborne.
+	prev := first - 1
+	if prev < 0 || lo-pt.T[prev] > airgibPosMaxGapMs || airborneAt(pt, prev) < 0 {
 		return -1
 	}
-	return airborneAt(pt, idx)
+	if last >= 0 {
+		return last
+	}
+	return prev
 }
 
-// preHitAirborne reports whether the victim was measurably airborne for
-// the WHOLE look-back window [hit - preMs, hit]: every sample inside
-// the window must be at or above the height threshold, and the earliest
-// of them must be a pre-impact sample (at or before hit -
-// airgibStampLagMs) sitting within the gap tolerance of the window
-// start — so a track with no pre-impact evidence rejects instead of
-// passing vacuously on the post-knockback hit sample alone.
-//
-// The window deliberately runs all the way TO the hit, with no excluded
-// tail, because knockback contamination is one-sided: it can only
-// OVER-report height, so a possibly-contaminated sample participating
-// in the all-airborne check can only reject, never falsely pass. That
-// closes both failure modes at once — a victim who was standing at
-// impact has grounded samples earlier in the window, and a victim who
-// fell and LANDED just before the rocket left sub-threshold samples on
-// the way down (falling from the 96-unit line to the floor spans well
-// over any stamp lag), so neither survives.
-//
-// A sample just BEFORE the window is deliberately not consulted: a
-// victim who left a ledge right after (hit - preMs) — airborne at every
-// sample of the window, grounded an instant before it — is a genuine
-// airgib (measured on the 212498 bravado corpus demo: mj hit at a jump
-// apex 195ms after crossing the LG ledge edge, 315 units up).
-func preHitAirborne(pt *result.PositionTrack, hitMs, preMs int32) bool {
-	lo := hitMs - preMs
-	i := sort.Search(len(pt.T), func(k int) bool { return pt.T[k] >= lo })
-	if i >= len(pt.T) || pt.T[i] > hitMs-airgibStampLagMs || pt.T[i]-lo > airgibPosMaxGapMs {
-		return false // no pre-impact sample near the start of the look-back
-	}
-	for ; i < len(pt.T) && pt.T[i] <= hitMs; i++ {
-		if airborneAt(pt, i) < 0 {
-			return false
+// groundedNearHit reports a trustworthy grounded reading in the
+// stamp-jitter neighbourhood of the hit, (hit - airgibStampLagMs,
+// hit + airgibStampLagMs]: a victim who fell and LANDED just before the
+// rocket shows ground contact there even when the hit-frame sample
+// itself already carries the knockback and reads high again. Grounded
+// readings are trustworthy on both sides of the stamp — knockback can
+// over-report height but cannot fake ground contact — while a
+// merely-low reading (a genuine airgib knocked laterally over a higher
+// floor) does not veto.
+func groundedNearHit(pt *result.PositionTrack, hitMs int32) bool {
+	i := sort.Search(len(pt.T), func(k int) bool { return pt.T[k] > hitMs-airgibStampLagMs })
+	for ; i < len(pt.T) && pt.T[i] <= hitMs+airgibStampLagMs; i++ {
+		if h := pt.H[i]; h != result.NoFloor && h < airgibGroundedMaxH {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 // airborneAt returns idx when the sample there reads measurably airborne

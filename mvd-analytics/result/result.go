@@ -1115,33 +1115,36 @@ package result
 //     two by `source`. Validation against KTX ground truth on modern demos:
 //     see mvd-analytics/damagerecon/ACCURACY.md.
 //
-// v72 — airgib detection gains a pre-hit airborne gate (a correctness
-// fix: entries disappear from `timelineAnalysis.airgibs`, no field is
-// added, removed or retyped) plus a `preMs` echo on the /airgibs
+// v72 — airgib detection gates on pre-impact evidence (a correctness
+// fix: entries move in and out of `timelineAnalysis.airgibs`, no field
+// is added, removed or retyped) plus a `preMs` echo on the /airgibs
 // envelope.
-//   - The KTX damage entry is stamped at (or one wire frame after) the
-//     physics frame in which the rocket's own knockback already moved the
-//     victim, so the position sample nearest the damage time can describe
-//     a victim who was STANDING at impact. Measured case (hub 232925, dm2
+//   - KTX writes the damage message inline in T_Damage; measured over 410
+//     direct rocket hits, the stamp lands in the same wire frame as the
+//     first knockback-visible position sample 82% of the time and up to
+//     two frames (+28ms) late 6% — so samples near the stamp can already
+//     carry the rocket's own knockback. Measured case (hub 232925, dm2
 //     4on4): a player riding the dm2 func_train (top at z=319) took a quad
 //     direct rocket that blasted him off it and the hit-time sample read
 //     303 units of air — published as the match's biggest airgib.
-//   - The victim must now be at or above the 96-unit threshold BOTH at the
-//     hit sample AND at EVERY sample of the look-back window
-//     [hit - preMs, hit], anchored on a pre-impact sample (knockback can
-//     only OVER-report height, so possibly-contaminated samples in the
-//     window can only reject — a landing always leaves sub-threshold
-//     samples on the way down), default
-//     200 ms. A plain jump peaks at ~45 units, so a genuine 96+ victim was
-//     already airborne for hundreds of ms and the look-back cannot lose a
-//     real event. Reported `height`, `loc` and `heightAboveAttacker` still
-//     come from the HIT sample; the pre-hit sample only gates.
+//   - A hit now qualifies when every position sample in the look-back
+//     window [hit - preMs, hit - 40ms] (default 100ms) reads >= the
+//     96-unit threshold — the preceding tick deciding when the window
+//     holds no sample (old coarse-tick demos, recording holes) — and no
+//     sample beside the hit reads ground contact. Contamination is
+//     one-sided: knockback over-reports height but cannot fake a grounded
+//     reading, so a victim who landed just before the rocket rejects
+//     while one knocked laterally over a higher floor is kept. The 100ms
+//     default is aesthetic: floor-relative height is a step function at
+//     ledge edges, so longer windows measure time-since-the-edge and
+//     drop genuine 300+-unit ledge-drop events. Reported `height`, `loc`
+//     and `heightAboveAttacker` come from the latest PRE-IMPACT sample.
 //   - Detection moves from the analyzer post-processor into
 //     `view.ComputeAirgibs`, a pure function of the assembled Result (the
 //     regionControlPost / view.RegionControl staging). The post-processor
 //     bakes the default-options run into the stored Result; mvd-api's
 //     /airgibs re-runs it per request with `?preMs=` (0..1000, 0 = the
-//     pre-v72 hit-time-only rule) and echoes the effective value as
+//     pre-v72 hit-sample-only rule) and echoes the effective value as
 //     `preMs` on the response envelope.
 //   - Per-hit userids now resolve against the PUBLISHED per-stream session
 //     table (`streams.players[].sessions`) rather than an analyzer-internal

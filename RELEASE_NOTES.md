@@ -5,32 +5,43 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (airgib-pre-gate) — an airgib victim must be airborne BEFORE the hit too, schema v72
+## unreleased (airgib-pre-gate) — airgibs gate on pre-impact evidence, schema v72
 
-**The airgib list was reporting standing players as airgibs.** KTX stamps a
-damage entry at (or one wire frame after) the physics frame in which the
-rocket's own knockback has *already moved the victim*, so the position sample
-nearest the damage time can describe someone who was on the ground at impact.
-Measured case (hub gameId `232925`, dm2 4on4, 2026-08-18): a player riding
-the dm2 moving platform (`func_train`, top at z=319) took a quad direct
-rocket that blasted him off it, the hit-time sample read **303 units of air**,
-and that non-event was published as the match's biggest airgib.
+**The airgib list was reporting standing players as airgibs.** KTX writes
+the damage message inline in `T_Damage`, and measured over 410 direct
+rocket hits the stamp lands in the same wire frame as the first
+knockback-visible position sample 82% of the time and up to two frames
+(+28 ms) late 6% — so the samples nearest the damage time can already
+carry the rocket's own knockback. Measured case (hub gameId `232925`, dm2
+4on4, 2026-08-18): a player riding the dm2 moving platform (`func_train`,
+top at z=319) took a quad direct rocket that blasted him off it, the
+hit-time sample read **303 units of air**, and that non-event was
+published as the match's biggest airgib.
 
-- **Airborne is now measured twice**: the victim must be at or above the
-  96-unit floor-height threshold at the hit sample **and** at
-  *every* sample of the look-back window `[hit − preMs, hit]`, default
-  **200 ms**, anchored on a pre-impact sample (≥ 40 ms — the damage-stamp
-  lag — before the hit). No tail is excluded: knockback can only
-  *over*-report height, so contaminated samples can only reject — which
-  also catches a victim who fell and landed just before the rocket. A plain
-  jump peaks at ~45 units, so a genuine 96+ victim was carried there by
-  knockback or a fall and
-  has been above the threshold for hundreds of ms — the look-back cannot lose
-  a real event, it only drops the ones whose airborne-ness the rocket itself
-  created. Reported `height`, `loc` and `heightAboveAttacker` still come from
-  the **hit** sample; the pre-hit sample only gates.
-- **Entries disappear from `timelineAnalysis.airgibs`** (no field is added,
-  removed or retyped) — hence the schema bump; the golden corpus moves.
+- **The gate reads only evidence that can be trusted for what it claims.**
+  Every position sample in the look-back window `[hit − preMs, hit − 40 ms]`
+  (default **100 ms**) must read clear air — at or above the 96-unit
+  floor-height threshold — and no sample beside the hit may read ground
+  contact. Knockback contamination is one-sided: it can *over*-report
+  height but cannot fake a grounded reading, so high readings near the
+  stamp are ignored while a grounded one vetoes (a victim who fell and
+  *landed* just before the rocket), and a genuine airgib knocked laterally
+  over a higher floor — a low but not grounded reading — is kept. When the
+  window holds no sample near its start, the **preceding tick** decides,
+  so old demos with coarse tick cadence work and a recording hole cannot
+  pass vacuously.
+- **The 100 ms default is an aesthetic, not a physics bound.**
+  Floor-relative height is a step function at ledge edges, so a longer
+  window measures time-since-the-edge rather than hang time: the earlier
+  200 ms draft measurably dropped genuine 300+-unit ledge-drop events from
+  the golden corpus (dm2 `floating`, 377 units) while the brief
+  ~50–90 ms ledge-hop hits stay filtered at 100 ms.
+- **Reported `height`, `loc` and `heightAboveAttacker` come from the
+  latest pre-impact sample** — the victim as the rocket found them — not
+  from the possibly knockback-contaminated hit-frame sample.
+- **Entries move in and out of `timelineAnalysis.airgibs`** (no field is
+  added, removed or retyped) — hence the schema bump; the golden corpus
+  moves.
 - **Tunable per request**: `GET /v1/demos/{id}/airgibs?preMs=` accepts
   `0..1000` (400 `invalid_param` outside it). `preMs=0` turns the pre-hit gate
   off, reproducing the pre-v72 hit-time-only rule; the default serves the

@@ -1257,13 +1257,16 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 //
 // Query params:
 //
-//	preMs  int — pre-hit look-back in ms (default 200, range 0..1000): the
-//	             victim must be above the height threshold both at the hit
-//	             and preMs before it. The gate exists because the damage
-//	             entry is stamped after the rocket's own knockback moved the
-//	             victim, so the hit-time sample alone reports standing
-//	             players as airborne; 0 turns the pre-hit gate off. The
-//	             default serves the stored list; any other value recomputes.
+//	preMs  int — pre-hit look-back in ms (default 100, range 0..1000): the
+//	             victim must read clear air (>= the height threshold) at
+//	             every pre-impact sample of [hit-preMs, hit-40ms] — the
+//	             preceding tick decides when the window holds no sample
+//	             (coarse-tick demos) — with no grounded reading beside the
+//	             hit. Samples near the damage stamp can already carry the
+//	             rocket's own knockback, which over-reports height but
+//	             cannot fake ground contact; 0 turns the pre-hit gate off
+//	             (the hit-sample-only legacy rule). The default serves the
+//	             stored list; any other value recomputes.
 func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {

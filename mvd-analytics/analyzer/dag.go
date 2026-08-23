@@ -166,7 +166,7 @@ var postNodeMeta = map[string]nodeMeta{
 	"airgibsPost": {
 		name: "airgibs", mutates: true,
 		requires: []string{"demoinfo", "frag", "timeline", "damage:final"},
-		desc:     "Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on victims above the height threshold both at the hit and 200 ms before it). Binds `damage:final` so pre-instrumentation demos get airgibs from the reconstructed damage log — recon direct hits are geometric (explosion-to-victim under 48 units), which is the fidelity the verdict needs.",
+		desc:     "Folds the Key-Moments airgib list into the timeline: direct enemy rocket hits whose victim reads clear air (>= 96 units above floor) at every pre-impact sample of the look-back window (default 100 ms; the preceding tick decides on coarse-tick tracks) with no grounded reading beside the hit. Binds `damage:final` so pre-instrumentation demos get airgibs from the reconstructed damage log — recon direct hits are geometric (explosion-to-victim under 48 units), which is the fidelity the verdict needs.",
 	},
 	"scoreboardStatsPost": {
 		name: "match-final", mutates: true,

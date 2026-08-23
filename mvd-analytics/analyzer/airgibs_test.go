@@ -31,8 +31,8 @@ func TestAirgibsPost_PublishesTheDefaultList(t *testing.T) {
 	if len(got) != 1 {
 		t.Fatalf("airgibs = %d, want 1: %+v", len(got), got)
 	}
-	if got[0].Attacker != "att" || got[0].Victim != "vic" || got[0].Height != 150 {
-		t.Errorf("airgib = %+v, want att→vic at height 150", got[0])
+	if got[0].Attacker != "att" || got[0].Victim != "vic" || got[0].Height != 120 {
+		t.Errorf("airgib = %+v, want att→vic at height 120 (the pre-impact sample)", got[0])
 	}
 }
 
