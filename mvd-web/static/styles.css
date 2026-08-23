@@ -590,6 +590,19 @@ body.no-demo #unified-timeline {
     font-style: italic;
 }
 
+.search-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px 0 4px;
+}
+
+.search-pager-count {
+    color: #7a8ba8;
+    font-size: 0.85rem;
+}
+
 /* Tab Navigation */
 .tab-nav {
     display: flex;

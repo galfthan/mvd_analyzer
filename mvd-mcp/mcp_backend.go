@@ -344,7 +344,7 @@ type SearchGamesInput struct {
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
 	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
-	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 100, larger values rejected 400 invalid_param"`
+	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows per page. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 1000 (the hub's own page ceiling — page with offset against total for more), larger values rejected 400 invalid_param"`
 	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
 	Roster   bool     `json:"roster,omitempty"   jsonschema:"true = verbatim hub rows with full roster detail (per-player ping, color arrays, name_color). Default = compact rows: players projected to {name, team, frags}"`
 }

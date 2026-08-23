@@ -341,9 +341,11 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
   `limit`/`offset` pagination applies only to the game-discovery
   endpoint `GET /v1/games/search` (page until `offset + count >= total`).
-  There `limit` defaults to 20 (omit the param) and is capped at 100 — an
-  explicit `limit=0`, a `limit` above 100, or a negative `limit`/`offset`
-  is rejected with `400 invalid_param` (no longer silently clamped).
+  There `limit` defaults to 20 (omit the param) and is capped at 1000 —
+  the hub's own PostgREST page ceiling, so a bigger single page is
+  impossible upstream. An explicit `limit=0`, a `limit` above 1000, or a
+  negative `limit`/`offset` is rejected with `400 invalid_param` (no
+  longer silently clamped).
   `/top-windows` and `/top-kills` also take a `limit`, but as a **ranking
   cut-off, not a page**: there is no `offset` and no next page, because the
   response is already the top *n* of a total order. It defaults to 10 (20 on
@@ -398,21 +400,26 @@ so a value reads `-58.333`, not `-58.333332`. The point-in-time
 not rounded). Only the **time axes** stay int32 ms (above). The `hgt`
 no-floor sentinel is `-1000000000` (was `-2147483648`).
 
-### 2.3 Caching (use it — the data is immutable)
+### 2.3 Caching (store, but revalidate every use)
 
 Successful 2xx responses on the **per-demo** endpoints set:
 
 ```
-Cache-Control: public, max-age=86400, immutable
+Cache-Control: no-cache
 ETag: "<sha>-v<schemaVersion>"
 X-Schema-Version: <n>
 X-Cache: HIT | WARM | MISS
 ```
 
-A demo's analysis never changes for a given schema version, so frontends
-should cache aggressively and send `If-None-Match: "<etag>"` for a cheap
-`304`. A schema bump changes the ETag suffix and invalidates client
-caches automatically.
+`no-cache` does **not** mean "don't store" — it means a stored copy must
+be revalidated before every use. Keep the body cached and send
+`If-None-Match: "<etag>"` on each request: a demo's analysis never
+changes for a given schema version, so the normal answer is a cheap
+`304`. Because the ETag embeds the schema version, that mandatory
+revalidation is also a version check — a deploy that bumps the schema
+misses the ETag and the client re-downloads the new shape immediately,
+instead of serving a stale one out of cache (which the previous
+`max-age=86400, immutable` policy allowed for up to a day).
 
 Two families carry a **different ETag shape**:
 

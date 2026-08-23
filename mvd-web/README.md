@@ -622,8 +622,11 @@ The Search tab queries the same Supabase `v1_games` table that the
 hub-loader uses (so no backend of our own) and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
-wildcards, and the latest 20 matches sorted by date descending are
-listed. Clicking a row downloads the demo and runs the normal analysis
+wildcards, and matches are listed sorted by date descending in pages
+of 100. A footer under the list shows "N of M matches" (M is the exact
+total, from PostgREST's `count=exact` Content-Range) with a **Load
+more** button that appends the next offset page until every match is
+shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.
 
 Search state is reflected in the URL so links are shareable. Supported
