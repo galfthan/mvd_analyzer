@@ -360,6 +360,43 @@ func addReconAimTier(am *result.AimResult) {
 	}
 }
 
+// reconAccuracyResult is a player-stats body in the v74 RECONSTRUCTED shape —
+// the player-stats twin of addReconAimTier, and it has to be its own demo
+// rather than an augmentation of the golden: every corpus demo carries a KTX
+// demoinfo block, and view.PlayerStats replaces the accuracy family wholesale
+// from it at read time, so nothing written into the golden's stored section
+// can ever reach a served body.
+//
+// What only this shape carries: `src: "reconstructed"`, the per-weapon
+// withhold that leaves ng/sng with NO hits, and `hitsConvention: "anyDamage"`
+// beside the hits that do exist — all omitempty or optional, so without a
+// served body they would be validated against their own absence.
+func reconAccuracyResult() *result.Result {
+	hits := func(n int) *int { return &n }
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		PlayerStats: &result.PlayerStatsResult{
+			Players: []result.PlayerStatsRow{{
+				Name:   "old",
+				Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+				Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 12, Deaths: 9},
+				Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcReconstructed,
+					ByWeapon: map[string]result.PlayerStatsAcc{
+						"rl": {Attacks: 90, Hits: hits(31), HitsConvention: result.HitsAnyDamage},
+						"lg": {Attacks: 400, Hits: hits(122), HitsConvention: result.HitsAnyDamage},
+						// Outside the validated tier: the withhold inherits,
+						// so neither the count nor the marker appears.
+						"sng": {Attacks: 60},
+					}},
+				Hold: result.PlayerStatsHold{Src: result.SrcDerived},
+			}},
+			Sources: result.PlayerStatsSources{
+				Score: result.SrcDerived, Accuracy: result.SrcReconstructed, Hold: result.SrcDerived,
+			},
+		},
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -441,8 +478,22 @@ func validationCases(t *testing.T) []validationCase {
 		// mustContain names the v66 identity export: both fields are
 		// omitempty, so a regression that stopped emitting them would still
 		// validate against the schema (the demoMarkers lesson).
+		// mustContain names the v66 identity export and the v74 derived
+		// demoinfo fields: all of them are omitempty, so a regression that
+		// stopped emitting them would still validate against the schema (the
+		// demoMarkers lesson). The accuracy half is served from the
+		// addReconAccuracy fixture, which is the only shape carrying
+		// src:"reconstructed" and the per-weapon withhold; the sprees ride
+		// the corpus demo's own frag log.
 		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
-			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`}},
+			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`,
+				`"maxSpree":`, `"maxQuadSpree":`,
+				`"hitsConvention":"directImpact"`, `"hitsConvention":"pellets"`}},
+		// The pre-instrumentation half: no KTX block, so the accuracy family
+		// stays reconstructed and carries the per-weapon withhold.
+		{name: "player-stats-reconstructed", url: "/v1/demos/gameId:46/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
+			mustContain: []string{`"src":"reconstructed"`, `"hitsConvention":"anyDamage"`,
+				`"sng":{"attacks":60}`}},
 		{name: "player-stats-filtered", url: "/v1/demos/gameId:42/player-stats?players=nlk", path: "/v1/demos/{id}/player-stats", status: 200},
 
 		{name: "frags", url: "/v1/demos/gameId:42/frags", path: "/v1/demos/{id}/frags", status: 200},
@@ -652,6 +703,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	addReconAimTier(res.Aim)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
+		// gameId:46 is the pre-instrumentation player-stats shape: no KTX
+		// block to overlay, so the accuracy family stays reconstructed.
+		"gameId:46": reconAccuracyResult(),
 		// gameId:43 is a well-formed but capability-empty Result for the
 		// 422 error paths.
 		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion},

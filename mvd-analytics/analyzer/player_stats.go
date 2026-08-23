@@ -672,10 +672,15 @@ func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]in
 				continue
 			}
 			e := result.PlayerStatsAcc{Attacks: w.Shots}
+			// Both branches count the same thing — a fire that landed damage
+			// by any path — because both are the same join over two grades of
+			// damage log. KTX's own counter is NOT that for rl/gl/sg/ssg,
+			// which is why the convention is published rather than implied by
+			// src (result.PlayerStatsAcc.HitsConvention).
 			switch {
 			case linkable:
 				hits := w.Hits
-				e.Hits = &hits
+				e.Hits, e.HitsConvention = &hits, result.HitsAnyDamage
 			default:
 				// Only the weapons the aim tier validated carry a recovery;
 				// the rest (ng/sng) keep an ABSENT hits, inheriting the
@@ -683,7 +688,7 @@ func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]in
 				// section. See result.WeaponAimRecon.
 				if hits, ok := recon[w.Weapon]; ok {
 					h := hits
-					e.Hits = &h
+					e.Hits, e.HitsConvention = &h, result.HitsAnyDamage
 					reconUsed = true
 				}
 			}

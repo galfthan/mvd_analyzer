@@ -2355,8 +2355,11 @@ components:
         for weapons whose fires LINK to damage (axe/sg/ssg/lg always, rl/gl via
         projectile tracking, ng/sng only when nail decoding ran), so the
         unfiltered figure mixes measured and unmeasured weapons. A rocket's
-        SPLASH is a hit — including a rocket jump's self-splash (KTX-accuracy
-        parity; the stats split it out as selfHits) — so for RL windows
+        SPLASH is a hit here — including a rocket jump's self-splash, which the
+        stats split out as selfHits — and that is NOT KTX's rl/gl convention:
+        KTX counts only rockets that TOUCHED a player
+        (ktx/src/weapons.c:994, :1329) and reads ~4x lower, so never diff this
+        against a demoinfo `acc.rl.hits`. For RL windows
         `metric=damageGiven&weapons=rl` is the quality signal (enemy-only by
         definition), while `metric=hits&weapons=lg` is the LG tracking signal
         (each cell counts the same; raw damage ≈ 30×hits, bounded discounts
@@ -7325,8 +7328,10 @@ components:
     PlayerStats:
       description: >
         Canonical per-player and per-team statistics, computed for EVERY
-        demo. Each stat family carries `src` ("derived" | "ktx", plus "derived:unbounded" on damage and the "mixed" team-row canary) naming
-        where its numbers came from; `sources` is the roll-up. /demoinfo
+        demo. Each stat family carries `src` ("derived" | "ktx", plus "derived:unbounded" on damage, "reconstructed" on damage and accuracy, and the "mixed" team-row canary) naming
+        where its numbers came from; `sources` is the roll-up. `src` is the
+        evidence GRADE only — for accuracy, what the numbers COUNT is the
+        per-weapon `hitsConvention`. /demoinfo
         remains the verbatim KTX pass-through this is diffable against.
       additionalProperties: false
       properties:
@@ -7450,11 +7455,14 @@ components:
         score:
           description: >
             Scoreboard line. Always derived — the KTX stats over-count
-            telefrags and reset after a reconnect. The KILL SIDE (kills,
-            suicides, teamKills, byWeapon, efficiency) is OPTIONAL: it is
-            attributed from the obituary-derived frag log, and on a demo
-            whose obituaries never matched, all five are absent together
-            rather than served as zeros beside a real death count. `frags`
+            telefrags and reset after a reconnect. The KILL SIDE is OPTIONAL
+            and absent AS A WHOLE: `kills`, `suicides`, `teamKills`,
+            `efficiency`, `byWeapon`, `byEnemyWeapon`, `byWeaponVsEnemyWeapon`,
+            `maxSpree` and `maxQuadSpree` are every field attributed from the
+            obituary-derived frag log, and on a demo whose obituaries never
+            matched they go together rather than being served as zeros beside
+            a real death count. Test for `kills` and treat its absence as
+            covering all of them. `frags`
             (the wire net score) and `deaths` (protocol death events) are
             measured on every demo and always present.
           additionalProperties: false
@@ -7643,13 +7651,25 @@ components:
             either way, so a demo with no KTX block degrades to a rougher
             number rather than to a missing field.
 
-            Derived `hits` follow OUR convention — a fire that landed damage
-            by any path — not KTX's. Scored against the verbatim block on 188
+            `src` is the evidence GRADE and does not say what the numbers
+            count; the per-weapon `hitsConvention` does, and is the field to
+            gate a cross-demo comparison on. Derived and reconstructed `hits`
+            are always `anyDamage` — a fire that landed damage by any path.
+            KTX's are `anyDamage` for lg/axe/ng/sng, `directImpact` for rl/gl
+            and `pellets` for sg/ssg. Scored against the verbatim block on 188
             instrumented archive demos (cmd/qw-demoinfo-eval), lg agrees to
             0.9% in aggregate; rl and gl do NOT, because KTX's rl/gl `hits` is
             the DIRECT-impact count and reads ~4x lower (rl) and ~1.5x lower
             (gl); sg/ssg are pellet counts on both sides of KTX's ratio and
             trigger pulls on ours.
+
+            The direct-impact convention is NOT derivable on a demo with no
+            KTX block: the wire log's own splash flag reproduces KTX's rl
+            count exactly (638 of 638 rows) but is absent on the
+            pre-instrumentation half, where the reconstruction's geometric
+            direct/splash verdict answers it for gl (1.2% aggregate) and not
+            for rl (+80%) — a rocket detonating on the wall beside a player
+            looks like one that touched them. See damagerecon/ACCURACY.md.
 
             When KTX carries an acc block the family is replaced WHOLESALE,
             never merged per weapon: mixing pellet counts with trigger pulls
@@ -7666,8 +7686,34 @@ components:
                   additionalProperties:
                     additionalProperties: false
                     properties:
-                      attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
-                      hits: { description: "Hits landed. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, or a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise. Read `hitsConvention` rather than re-deriving that rule.", type: integer }
+                      hits: { description: "Hits landed — read `hitsConvention` for WHAT that counts before comparing two of these. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, or a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      hitsConvention:
+                        description: >
+                          What `hits` (and, for `pellets`, `attacks` too) COUNTS — the
+                          machine-readable form of the comparability rule, present whenever
+                          `hits` is. Two rows are comparable exactly when their weapon AND
+                          this value match; gate any cross-demo aggregation on it.
+
+                          `anyDamage` — one fire that landed damage by any path, splash
+                          included. Every weapon of a `derived` / `reconstructed` family, and
+                          KTX's own counter for the weapons with a single damage path
+                          (lg, axe, ng, sng).
+
+                          `directImpact` — the projectile TOUCHED a player. KTX's rl/gl
+                          counter only (ktx/src/weapons.c:994, :1329); a rocket that killed by
+                          splash alone is not a hit to it. Measured on 638 archive rows, the
+                          any-path count runs ~4x above this on rl and ~1.5x on gl, so mixing
+                          the two turns a definition change into a trend.
+
+                          `pellets` — BOTH counters advance per pellet, not per trigger pull:
+                          KTX's sg/ssg only, 6x and 14x a fire count.
+
+                          It is per WEAPON because a single `src: "ktx"` row uses all three at
+                          once. Absent, with `hits` present, only on a TEAM row whose members
+                          disagreed — the phantom-roster canary `src: "mixed"` already flags.
+                        type: string
+                        enum: [anyDamage, directImpact, pellets]
                       real: { description: "Not aggregated on team rows (KTX omits the pair unless it recorded one). KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
                       virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
                     required: [attacks]

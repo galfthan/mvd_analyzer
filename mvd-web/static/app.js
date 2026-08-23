@@ -1079,6 +1079,16 @@ function holdCell(stat, win) {
     return `<td data-sort-value="${stat.ms}" title="${title}">${Math.round(stat.ms / 1000)}s</td>`;
 }
 
+// What a hits count counts, keyed by playerStats `hitsConvention`. The same
+// weapon's percentage is on a different scale under each, which is why the
+// cell says so instead of leaving the reader to compare a KTX rl figure with
+// a derived one four times its size.
+const HITS_CONVENTION_TITLES = {
+    anyDamage: 'Hits = fires that landed damage by any path (splash included)',
+    directImpact: 'Hits = direct impacts only (KTX rl/gl) — reads far lower than an any-path count',
+    pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
+};
+
 // Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
 // zero) when the demo has no damage stream to link fires against, so an
 // entry with attacks but no hits renders the attack count alone rather
@@ -1087,7 +1097,9 @@ function formatAccuracyCell(entry) {
     if (!entry || !entry.attacks) return '-';
     if (entry.hits == null) return `<span class="stat-muted" title="No damage stream to link fires against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
-    return `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
+    const title = HITS_CONVENTION_TITLES[entry.hitsConvention];
+    const attr = title ? ` title="${escapeHtml(title)}"` : '';
+    return `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%</span>`;
 }
 
 // The kill side of a score row — kills, suicides, teamKills, efficiency and

@@ -201,7 +201,15 @@ func stubResult() *result.Result {
 				{
 					Name: "bps", Team: "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20, Efficiency: psShare(0.6154)},
+					Score: result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20,
+						Efficiency: psShare(0.6154), MaxSpree: intp(7), MaxQuadSpree: intp(3)},
+					// Derived, and the KTX block above carries an acc set for
+					// this player — so this row exercises the wholesale swap
+					// and the per-weapon conventions it stamps.
+					Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
+						ByWeapon: map[string]result.PlayerStatsAcc{
+							"rl": {Attacks: 61, Hits: intp(24), HitsConvention: result.HitsAnyDamage},
+						}},
 					Hold: result.PlayerStatsHold{Src: result.SrcDerived,
 						Weapons: map[string]result.HoldStat{"rl": {Ms: 200000, Runs: 4, LongestMs: 90000, ShareAlive: 0.4, ShareMatch: 0.3333}},
 						Armor:   map[string]result.HoldStat{"ra": {Ms: 129000, Runs: 3, LongestMs: 60000, ShareAlive: 0.258, ShareMatch: 0.215}, "none": {Ms: 371000, Runs: 9, LongestMs: 80000, ShareAlive: 0.742, ShareMatch: 0.6183}},
@@ -210,8 +218,9 @@ func stubResult() *result.Result {
 				{
 					Name: "valla", Team: "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30, Efficiency: psShare(0.4118)},
-					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+					Score: result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30,
+						Efficiency: psShare(0.4118), MaxSpree: intp(4), MaxQuadSpree: intp(0)},
+					Hold: result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
 			Teams: []result.PlayerStatsRow{
@@ -1495,6 +1504,64 @@ func TestPlayerStats(t *testing.T) {
 	sources, _ := resp["sources"].(map[string]any)
 	if sources["hold"] != "derived" {
 		t.Errorf("sources.hold = %v; want derived", sources["hold"])
+	}
+
+	// v74: the derived demoinfo fields have to reach the wire. All of them are
+	// omitempty, so nothing but an explicit assertion catches a projection
+	// that stopped serving them.
+	score, _ := bps["score"].(map[string]any)
+	if score["maxSpree"] != float64(7) || score["maxQuadSpree"] != float64(3) {
+		t.Errorf("score sprees = %v / %v; want 7 / 3", score["maxSpree"], score["maxQuadSpree"])
+	}
+	// bps's family is overlaid from the KTX block, so its conventions are
+	// KTX's — per weapon, which is the whole reason the marker exists.
+	bpsAcc, _ := bps["accuracy"].(map[string]any)
+	byWeapon, _ := bpsAcc["byWeapon"].(map[string]any)
+	rl, _ := byWeapon["rl"].(map[string]any)
+	if bpsAcc["src"] != "ktx" || rl["hitsConvention"] != "directImpact" {
+		t.Errorf("bps rl accuracy = src %v / %v; want ktx / directImpact", bpsAcc["src"], rl["hitsConvention"])
+	}
+}
+
+// The other half of the accuracy contract: the pre-instrumentation demo,
+// where there is no block to overlay and the family stays reconstructed. Its
+// hits answer a DIFFERENT question from the KTX row above — any damage path
+// rather than a direct impact — and `hitsConvention` is the only field that
+// says so, so it is pinned on the wire rather than only in the analyzer.
+func TestPlayerStats_ReconstructedAccuracyConvention(t *testing.T) {
+	r := stubResult()
+	r.DemoInfo = nil
+	for i := range r.PlayerStats.Players {
+		if r.PlayerStats.Players[i].Name != "bps" {
+			continue
+		}
+		r.PlayerStats.Players[i].Accuracy = &result.PlayerStatsAccuracy{
+			Src: result.SrcReconstructed,
+			ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 88, Hits: intp(30), HitsConvention: result.HitsAnyDamage},
+				// Outside the aim recon tier: the withhold inherits, so
+				// neither the count nor the marker appears.
+				"sng": {Attacks: 40},
+			},
+		}
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	players, _ := resp["players"].([]any)
+	bps, _ := players[0].(map[string]any)
+	acc, _ := bps["accuracy"].(map[string]any)
+	byWeapon, _ := acc["byWeapon"].(map[string]any)
+	rl, _ := byWeapon["rl"].(map[string]any)
+	sng, _ := byWeapon["sng"].(map[string]any)
+	if acc["src"] != "reconstructed" || rl["hitsConvention"] != "anyDamage" {
+		t.Errorf("rl accuracy = src %v / %v; want reconstructed / anyDamage", acc["src"], rl["hitsConvention"])
+	}
+	if _, ok := sng["hits"]; ok {
+		t.Error("sng carries hits — the recon tier withholds nails, and the withhold must inherit")
+	}
+	if _, ok := sng["hitsConvention"]; ok {
+		t.Error("sng carries a hitsConvention with no hits to describe")
 	}
 }
 

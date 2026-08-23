@@ -43775,19 +43775,23 @@
           "byWeapon": {
             "lg": {
               "attacks": 486,
-              "hits": 95
+              "hits": 95,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 237,
-              "hits": 77
+              "hits": 77,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 89,
-              "hits": 19
+              "hits": 19,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 3,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"
@@ -44022,22 +44026,26 @@
           "byWeapon": {
             "lg": {
               "attacks": 746,
-              "hits": 165
+              "hits": 165,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 10
             },
             "rl": {
               "attacks": 81,
-              "hits": 38
+              "hits": 38,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 81,
-              "hits": 15
+              "hits": 15,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 17,
-              "hits": 12
+              "hits": 12,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"
@@ -44264,23 +44272,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 9,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 393,
-              "hits": 101
+              "hits": 101,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 175,
-              "hits": 63
+              "hits": 63,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 93,
-              "hits": 15
+              "hits": 15,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 1,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"
@@ -44512,19 +44525,23 @@
           "byWeapon": {
             "lg": {
               "attacks": 335,
-              "hits": 74
+              "hits": 74,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 123,
-              "hits": 47
+              "hits": 47,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 94,
-              "hits": 14
+              "hits": 14,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 2,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"
@@ -44749,22 +44766,26 @@
           "byWeapon": {
             "lg": {
               "attacks": 1232,
-              "hits": 260
+              "hits": 260,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 10
             },
             "rl": {
               "attacks": 318,
-              "hits": 115
+              "hits": 115,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 170,
-              "hits": 34
+              "hits": 34,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 20,
-              "hits": 14
+              "hits": 14,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"
@@ -44996,23 +45017,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 9,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 728,
-              "hits": 175
+              "hits": 175,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 298,
-              "hits": 110
+              "hits": 110,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 187,
-              "hits": 29
+              "hits": 29,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 3,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "reconstructed"

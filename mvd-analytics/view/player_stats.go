@@ -408,7 +408,10 @@ func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 			continue
 		}
 		hits := wv.Acc.Hits
-		e := result.PlayerStatsAcc{Attacks: wv.Acc.Attacks, Hits: &hits}
+		e := result.PlayerStatsAcc{
+			Attacks: wv.Acc.Attacks, Hits: &hits,
+			HitsConvention: ktxHitsConvention(w),
+		}
 		// KTX omits the real/virtual split entirely unless it recorded one
 		// (`if (stats->rhits || stats->vhits)`, ktx/src/stats_json.c:146) —
 		// carry the distinction rather than zero-filling.
@@ -422,6 +425,27 @@ func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 		return nil
 	}
 	return &result.PlayerStatsAccuracy{Src: result.SrcKTX, ByWeapon: byWeapon}
+}
+
+// ktxHitsConvention names what KTX's OWN hits counter counts for one weapon.
+// The block is not uniform, which is the whole reason the marker is
+// per-weapon: sg/ssg advance per pellet on both sides of the ratio
+// (ktx/src/weapons.c:812 and :387), rl/gl only when the projectile touches a
+// player (:994, :1329), and everything else once per fire that damaged —
+// which for a weapon with one damage path is the same event as a direct hit.
+//
+// The default is deliberately the any-path value rather than "unknown": KTX
+// keeps one hits counter per weapon and the only two that count something
+// else are enumerated here, so a weapon this pipeline has not met yet is
+// still a per-fire counter until it is shown otherwise.
+func ktxHitsConvention(weapon string) string {
+	switch weapon {
+	case "sg", "ssg":
+		return result.HitsPellets
+	case "rl", "gl":
+		return result.HitsDirectImpact
+	}
+	return result.HitsAnyDamage
 }
 
 // overlayPickups folds KTX's pickup counters over the derived tallies,

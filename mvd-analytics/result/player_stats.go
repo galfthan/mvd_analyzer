@@ -532,10 +532,41 @@ type PlayerStatsDamage struct {
 // rougher number rather than to a missing field — but it is only as good
 // as the shot attribution underneath it (see the /shots section's own
 // caveats), which on some older demos mislabels a player's weapon.
+//
+// Src is the evidence GRADE, and grade is not the same question as what the
+// number counts — PlayerStatsAcc.HitsConvention answers that one, per weapon,
+// because within one KTX block the answer differs by weapon.
 type PlayerStatsAccuracy struct {
 	Src      string                    `json:"src"`
 	ByWeapon map[string]PlayerStatsAcc `json:"byWeapon"`
 }
+
+// The hit-counting conventions PlayerStatsAcc.HitsConvention names. They are
+// the reason two `hits` values can be honestly reported and still not be
+// comparable, and the marker exists because `src` cannot say it: a single
+// src:"ktx" block uses all three at once, one per weapon.
+const (
+	// HitsAnyDamage — one fire that landed damage by ANY path, splash
+	// included. Every weapon of a derived or reconstructed family, and KTX's
+	// own counter for the weapons with only one damage path (lg, axe,
+	// ng/sng), where "any path" and "direct" are the same event.
+	HitsAnyDamage = "anyDamage"
+	// HitsDirectImpact — the projectile TOUCHED a player. KTX's rl/gl
+	// counter, which increments in the touch handler and nowhere else
+	// (ktx/src/weapons.c:994 T_MissileTouch, :1329 GrenadeTouch), so a
+	// rocket that killed by splash alone is not a hit to it.
+	//
+	// Measured on 638 archive player rows: the wire damage log's non-splash
+	// rl records reproduce this counter EXACTLY (100.0% of rows), while the
+	// any-path count runs ~4x above it on rl and ~1.5x on gl. That gap is
+	// what makes an unmarked cross-era rl trendline fiction.
+	HitsDirectImpact = "directImpact"
+	// HitsPellets — PELLETS, not fires, on BOTH sides of the ratio: KTX's
+	// sg/ssg counters advance per pellet fired (`attacks += bullets`,
+	// ktx/src/weapons.c:812) and per pellet that connected (:387). Six and
+	// fourteen times a trigger-pull count respectively.
+	HitsPellets = "pellets"
+)
 
 // PlayerStatsAcc is one weapon's shot accounting for one player.
 type PlayerStatsAcc struct {
@@ -547,6 +578,20 @@ type PlayerStatsAcc struct {
 	// fires but can link none of them, and a zero there would read as "shot
 	// and never hit" instead of "not measurable".
 	Hits *int `json:"hits,omitempty"`
+	// HitsConvention names WHAT Hits counts — HitsAnyDamage, HitsDirectImpact
+	// or HitsPellets. Present whenever Hits is, so two rows are comparable
+	// exactly when their weapon and their convention both match; the only
+	// exception is a TEAM row whose members disagreed, which is the
+	// phantom-roster canary the family-level SrcMixed already flags.
+	//
+	// It is per-WEAPON because a KTX block is not uniform: within one
+	// src:"ktx" row lg is anyDamage, rl/gl directImpact and sg/ssg pellets.
+	// A family-level marker could not state that, and `src` alone does not
+	// warn about it at all — which is how a consumer rendering hits per demo
+	// gets 43.3% pooled rl accuracy out of the blockless half and 9.3% out of
+	// the half that serves KTX's own counter (measured, 188 demos), and draws
+	// a trendline out of a definition change.
+	HitsConvention string `json:"hitsConvention,omitempty"`
 	// Real and Virtual are KTX's rhits / vhits (ktx/src/combat.c:1085,1100),
 	// present on rl and gl only. They count VICTIMS DAMAGED BY A BLAST, not
 	// rockets that hit — one rocket splashing three players adds three — so
@@ -620,6 +665,17 @@ func AggregateAccuracy(members []*PlayerStatsAccuracy) *PlayerStatsAccuracy {
 				}
 				n += *e.Hits
 				agg.Hits = &n
+				// Members of one demo share a source and therefore a
+				// convention per weapon; the exception is the phantom-roster
+				// row Src already reports as SrcMixed, where a summed hit
+				// count spans two scales and no single convention describes
+				// it. Leave it unnamed there rather than pick one.
+				switch {
+				case hitsHave[w] == 1:
+					agg.HitsConvention = e.HitsConvention
+				case agg.HitsConvention != e.HitsConvention:
+					agg.HitsConvention = ""
+				}
 			}
 			byWeapon[w] = agg
 		}
@@ -629,7 +685,7 @@ func AggregateAccuracy(members []*PlayerStatsAccuracy) *PlayerStatsAccuracy {
 	}
 	for w, agg := range byWeapon {
 		if hitsHave[w] != hitsSeen[w] {
-			agg.Hits = nil
+			agg.Hits, agg.HitsConvention = nil, ""
 			byWeapon[w] = agg
 		}
 	}

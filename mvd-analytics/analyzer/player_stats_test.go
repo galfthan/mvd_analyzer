@@ -890,10 +890,20 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 		t.Error("real/virtual are KTX-only and must never appear on a derived block")
 	}
 
+	if rl.HitsConvention != "" {
+		t.Errorf("hitsConvention = %q with no hits, want empty — it describes a number that is not there", rl.HitsConvention)
+	}
+
 	// With a WIRE damage stream the link is meaningful, so hits appears.
 	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a", nil)
 	if h := withDmg.ByWeapon["rl"].Hits; h == nil || *h != 0 {
 		t.Errorf("hits with a damage stream = %v, want an observed 0", h)
+	}
+	// Our rl hits count a fire that landed damage by any path; KTX's count
+	// direct impacts only and run ~4x lower. The marker is what stops the two
+	// being averaged into one trendline (result.HitsDirectImpact).
+	if c := withDmg.ByWeapon["rl"].HitsConvention; c != result.HitsAnyDamage {
+		t.Errorf("hitsConvention = %q, want %q — a wire-linked hit is any damage path", c, result.HitsAnyDamage)
 	}
 
 	// A RECONSTRUCTED damage section is not linkage: the shot linker never
@@ -936,6 +946,15 @@ func TestDeriveAccuracyReconTierFillsHits(t *testing.T) {
 	}
 	if acc.ByWeapon["sng"].Attacks != 40 {
 		t.Error("a withheld hit count must not cost the weapon its fires")
+	}
+	// The recon tier reproduces the wire join, so it answers the same
+	// question — the convention is the evidence-independent half of the
+	// contract and must not move with `src`.
+	if c := acc.ByWeapon["lg"].HitsConvention; c != result.HitsAnyDamage {
+		t.Errorf("hitsConvention = %q, want %q", c, result.HitsAnyDamage)
+	}
+	if c := acc.ByWeapon["sng"].HitsConvention; c != "" {
+		t.Errorf("withheld sng carries hitsConvention %q, want empty", c)
 	}
 }
 
@@ -1050,10 +1069,29 @@ func TestTeamAggregationAccuracyMixedSrcIsRecorded(t *testing.T) {
 		{Name: "a", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcKTX,
 			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 10, Hits: intp(4)}}}},
 		{Name: "b", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
-			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1)}}}},
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1),
+				HitsConvention: result.HitsAnyDamage}}}},
 	}
-	if got := aggregateTeamRows(players, 600000)[0].Accuracy.Src; got != result.SrcMixed {
-		t.Errorf("team accuracy src = %q, want mixed", got)
+	// The KTX member's rl hits are direct impacts and the derived member's
+	// are any damage path, so the sum answers no single question — the
+	// per-weapon marker goes unnamed rather than claiming one of them.
+	acc := aggregateTeamRows(players, 600000)[0].Accuracy
+	if acc.Src != result.SrcMixed {
+		t.Errorf("team accuracy src = %q, want mixed", acc.Src)
+	}
+	if c := acc.ByWeapon["rl"].HitsConvention; c != "" {
+		t.Errorf("team rl hitsConvention = %q, want empty — the members counted different things", c)
+	}
+
+	// Members that DO agree carry theirs up.
+	for i := range players {
+		players[i].Accuracy.Src = result.SrcKTX
+		e := players[i].Accuracy.ByWeapon["rl"]
+		e.HitsConvention = result.HitsDirectImpact
+		players[i].Accuracy.ByWeapon["rl"] = e
+	}
+	if c := aggregateTeamRows(players, 600000)[0].Accuracy.ByWeapon["rl"].HitsConvention; c != result.HitsDirectImpact {
+		t.Errorf("team rl hitsConvention = %q, want %q", c, result.HitsDirectImpact)
 	}
 }
 
