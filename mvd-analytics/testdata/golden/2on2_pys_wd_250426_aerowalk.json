@@ -38238,6 +38238,8 @@
           "efficiency": 0.4667,
           "frags": 43,
           "kills": 49,
+          "maxQuadSpree": 4,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 5,
           "teamKills": 1
@@ -38479,6 +38481,8 @@
           "efficiency": 0.514,
           "frags": 50,
           "kills": 55,
+          "maxQuadSpree": 1,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 2,
           "teamKills": 3
@@ -38711,6 +38715,8 @@
           "efficiency": 0.6822,
           "frags": 69,
           "kills": 73,
+          "maxQuadSpree": 1,
+          "maxSpree": 8,
           "src": "derived",
           "suicides": 0,
           "teamKills": 4
@@ -38945,6 +38951,8 @@
           "efficiency": 0.2404,
           "frags": 21,
           "kills": 25,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 2,
           "teamKills": 2
@@ -39197,6 +39205,8 @@
           "efficiency": 0.5755,
           "frags": 112,
           "kills": 122,
+          "maxQuadSpree": 4,
+          "maxSpree": 8,
           "src": "derived",
           "suicides": 5,
           "teamKills": 5
@@ -39431,6 +39441,8 @@
           "efficiency": 0.3791,
           "frags": 71,
           "kills": 80,
+          "maxQuadSpree": 1,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 4,
           "teamKills": 5

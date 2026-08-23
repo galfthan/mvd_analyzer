@@ -541,7 +541,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 
 	t.Run("measured", func(t *testing.T) {
 		r := base()
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		if s.Frags != 62 || s.Deaths != 18 {
 			t.Errorf("frags/deaths = %d/%d, want 62/18", s.Frags, s.Deaths)
 		}
@@ -567,7 +567,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		r := base()
 		r.Frags.Frags = nil
 		r.Frags.KillsMeasured = killsMeasurable(r) // false: protocol deaths in ByPlayer
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		// Both measured sides survive — this is the whole point of not
 		// dropping the family wholesale.
 		if s.Frags != 62 || s.Deaths != 18 {
@@ -588,7 +588,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		// so a demo where nobody died has both at zero.
 		r.Frags.ByPlayer["a"].Kills, r.Frags.ByPlayer["a"].Deaths = 0, 0
 		r.Frags.KillsMeasured = killsMeasurable(r) // true: nothing to contradict
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		if s.Kills == nil || *s.Kills != 0 {
 			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
 		}
@@ -615,7 +615,7 @@ func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
 			},
 		},
 	}
-	s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+	s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 	if s.Kills == nil || *s.Kills != 11 || s.Deaths != 7 {
 		t.Fatalf("kills/deaths = %v/%d, want the frag log's 11/7", s.Kills, s.Deaths)
 	}
@@ -872,7 +872,7 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 		ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 63, Hits: 0}},
 	}}}
 
-	acc := deriveAccuracy(&Result{Shots: shots}, "a")
+	acc := deriveAccuracy(&Result{Shots: shots}, "a", nil)
 	if acc == nil {
 		t.Fatal("derived accuracy is nil — the family must survive a missing damage stream")
 	}
@@ -891,17 +891,73 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 	}
 
 	// With a WIRE damage stream the link is meaningful, so hits appears.
-	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a")
+	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a", nil)
 	if h := withDmg.ByWeapon["rl"].Hits; h == nil || *h != 0 {
 		t.Errorf("hits with a damage stream = %v, want an observed 0", h)
 	}
 
 	// A RECONSTRUCTED damage section is not linkage: the shot linker never
-	// saw a wire damage event there, so hits must stay absent — presence of
-	// the section alone must not re-fabricate the zero.
-	recon := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}, "a")
+	// saw a wire damage event there, so hits must stay absent unless the aim
+	// recon tier recovered one — presence of the section alone must not
+	// re-fabricate the zero.
+	recon := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}, "a", nil)
 	if h := recon.ByWeapon["rl"].Hits; h != nil {
 		t.Errorf("hits with reconstructed damage = %d, want ABSENT", *h)
+	}
+	if recon.Src != result.SrcDerived {
+		t.Errorf("src with no recovered hits = %q, want %q — attacks alone are shot-derived either way",
+			recon.Src, result.SrcDerived)
+	}
+}
+
+// The old-demo path (schema v74): the aim recon tier fills `hits`, the family
+// says which grade it is, and a weapon the tier withheld inherits the
+// withhold rather than reading as a measured zero.
+func TestDeriveAccuracyReconTierFillsHits(t *testing.T) {
+	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
+		Player: "a",
+		ByWeapon: []result.WeaponShots{
+			{Weapon: "lg", Shots: 200, Hits: 0},
+			{Weapon: "sng", Shots: 40, Hits: 0},
+		},
+	}}}
+	res := &Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}
+	// Only lg is in the validated tier, so only lg carries a Recon block.
+	acc := deriveAccuracy(res, "a", map[string]map[string]int{"a": {"lg": 61}})
+	if acc.Src != result.SrcReconstructed {
+		t.Errorf("src = %q, want %q — a recovered hit is not a wire measurement",
+			acc.Src, result.SrcReconstructed)
+	}
+	if h := acc.ByWeapon["lg"].Hits; h == nil || *h != 61 {
+		t.Errorf("lg hits = %v, want 61 from the recon tier", h)
+	}
+	if h := acc.ByWeapon["sng"].Hits; h != nil {
+		t.Errorf("sng hits = %d, want ABSENT — the tier validated no nail recovery", *h)
+	}
+	if acc.ByWeapon["sng"].Attacks != 40 {
+		t.Error("a withheld hit count must not cost the weapon its fires")
+	}
+}
+
+// deriveReconHits must read the PUBLISHED tier and only when the aim section
+// says its hits came from a reconstruction — on a wire-measured demo the
+// accuracy family links its own fires and this map must stay out of it.
+func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
+	aim := func(src string) *result.AimResult {
+		return &result.AimResult{
+			HitsSource: src,
+			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
+				{Weapon: "lg", Shots: 10, Recon: &result.WeaponAimRecon{Hits: 4}},
+				{Weapon: "ng", Shots: 10},
+			}}},
+		}
+	}
+	if got := deriveReconHits(&Result{Aim: aim(result.AimHitsSourceKTX)}); got != nil {
+		t.Errorf("recon hits on a wire-measured demo = %v, want nil", got)
+	}
+	got := deriveReconHits(&Result{Aim: aim(result.AimHitsSourceReconstructed)})
+	if len(got["a"]) != 1 || got["a"]["lg"] != 4 {
+		t.Errorf("recon hits = %v, want only the weapons carrying a Recon block", got)
 	}
 }
 
@@ -909,7 +965,7 @@ func TestDeriveAccuracyNilForUnknownPlayer(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a", ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 1}},
 	}}}
-	if got := deriveAccuracy(&Result{Shots: shots}, "nobody"); got != nil {
+	if got := deriveAccuracy(&Result{Shots: shots}, "nobody", nil); got != nil {
 		t.Errorf("deriveAccuracy for an unknown player = %v, want nil", got)
 	}
 }

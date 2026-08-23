@@ -192,9 +192,9 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata", "aim"},
 		resultKey: "playerStats",
-		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
+		desc:      "Canonical per-player and per-team statistics: corrected scoreboard (including the derived kill-spree maxima), damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. Binds `aim` for the reconstructed hit tier, which fills the accuracy family's `hits` on demos with no wire damage stream (src=reconstructed) — reading the published tier rather than re-running the join is what makes its weapon-level withholds inherit here.",
 	},
 	"openingPost": {
 		name: "opening", mutates: true,

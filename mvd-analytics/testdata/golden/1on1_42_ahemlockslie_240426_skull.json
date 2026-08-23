@@ -13898,6 +13898,8 @@
           "efficiency": 0.3125,
           "frags": 9,
           "kills": 10,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -14103,6 +14105,8 @@
           "efficiency": 0.6563,
           "frags": 20,
           "kills": 21,
+          "maxQuadSpree": 0,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0

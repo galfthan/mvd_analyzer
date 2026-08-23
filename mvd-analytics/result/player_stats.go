@@ -258,6 +258,29 @@ type PlayerStatsScore struct {
 	// percentage. 0 when the player neither killed nor died; absent
 	// exactly when Kills is, since it is computed from it.
 	Efficiency *Share `json:"efficiency,omitempty"`
+	// MaxSpree is the longest run of kills between deaths, and MaxQuadSpree
+	// the longest run of kills made while holding the quad — the derived
+	// equivalent of the KTX demoinfo block's `spree.max` / `spree.quad`,
+	// which 54% of the archive has no block to carry (analyzer/spree.go
+	// replays KTX's own state machine, ktx/src/client.c:4864-4876 +
+	// items.c:2180 + stats.c:1637).
+	//
+	// NOT overlaid from KTX, like everything else in this family, and the
+	// difference in definition is deliberate: KTX's increment gate is
+	// `strneq(attackerteam, targteam) || !tp_num()`, so wherever teamplay is
+	// off — every duel, every FFA — a player's own SUICIDE bumps their spree
+	// in the same call that latches it, because attacker and target are one
+	// edict. Ours counts exactly the kills Kills counts, so a duel with
+	// self-kills reads LOWER here than the server's own block. That is the
+	// correction, not a defect; cmd/qw-demoinfo-eval measures both
+	// conventions against the wire.
+	//
+	// A run that is still alive at match end counts (KTX latches there too),
+	// so the winning streak is never lost. POINTERS on the same rule as
+	// Kills: they come from the frag log and are absent exactly when it is,
+	// because 0 beside 30 kills would read as a measurement.
+	MaxSpree     *int `json:"maxSpree,omitempty"`
+	MaxQuadSpree *int `json:"maxQuadSpree,omitempty"`
 	// ByWeapon is enemy kills split by the weapon that dealt them, keyed
 	// like the rest of this section ("rl", "lg", "sg", ...). From the
 	// corrected frag log, so it is on the same footing as Kills above and

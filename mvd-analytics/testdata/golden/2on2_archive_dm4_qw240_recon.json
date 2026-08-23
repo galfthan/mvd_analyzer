@@ -43774,19 +43774,23 @@
         "accuracy": {
           "byWeapon": {
             "lg": {
-              "attacks": 486
+              "attacks": 486,
+              "hits": 95
             },
             "rl": {
-              "attacks": 237
+              "attacks": 237,
+              "hits": 77
             },
             "sg": {
-              "attacks": 89
+              "attacks": 89,
+              "hits": 19
             },
             "ssg": {
-              "attacks": 3
+              "attacks": 3,
+              "hits": 2
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -43990,6 +43994,8 @@
           "efficiency": 0.4719,
           "frags": 0,
           "kills": 42,
+          "maxQuadSpree": 0,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 4,
           "teamKills": 6
@@ -44015,22 +44021,26 @@
         "accuracy": {
           "byWeapon": {
             "lg": {
-              "attacks": 746
+              "attacks": 746,
+              "hits": 165
             },
             "ng": {
               "attacks": 10
             },
             "rl": {
-              "attacks": 81
+              "attacks": 81,
+              "hits": 38
             },
             "sg": {
-              "attacks": 81
+              "attacks": 81,
+              "hits": 15
             },
             "ssg": {
-              "attacks": 17
+              "attacks": 17,
+              "hits": 12
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -44226,6 +44236,8 @@
           "efficiency": 0.5192,
           "frags": 49,
           "kills": 54,
+          "maxQuadSpree": 0,
+          "maxSpree": 11,
           "src": "derived",
           "suicides": 4,
           "teamKills": 2
@@ -44251,22 +44263,27 @@
         "accuracy": {
           "byWeapon": {
             "gl": {
-              "attacks": 9
+              "attacks": 9,
+              "hits": 1
             },
             "lg": {
-              "attacks": 393
+              "attacks": 393,
+              "hits": 101
             },
             "rl": {
-              "attacks": 175
+              "attacks": 175,
+              "hits": 63
             },
             "sg": {
-              "attacks": 93
+              "attacks": 93,
+              "hits": 15
             },
             "ssg": {
-              "attacks": 1
+              "attacks": 1,
+              "hits": 1
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -44467,6 +44484,8 @@
           "efficiency": 0.4414,
           "frags": 38,
           "kills": 49,
+          "maxQuadSpree": 0,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 10,
           "teamKills": 3
@@ -44492,19 +44511,23 @@
         "accuracy": {
           "byWeapon": {
             "lg": {
-              "attacks": 335
+              "attacks": 335,
+              "hits": 74
             },
             "rl": {
-              "attacks": 123
+              "attacks": 123,
+              "hits": 47
             },
             "sg": {
-              "attacks": 94
+              "attacks": 94,
+              "hits": 14
             },
             "ssg": {
-              "attacks": 2
+              "attacks": 2,
+              "hits": 2
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -44689,6 +44712,8 @@
           "efficiency": 0.3516,
           "frags": 21,
           "kills": 32,
+          "maxQuadSpree": 0,
+          "maxSpree": 5,
           "src": "derived",
           "suicides": 9,
           "teamKills": 3
@@ -44723,22 +44748,26 @@
         "accuracy": {
           "byWeapon": {
             "lg": {
-              "attacks": 1232
+              "attacks": 1232,
+              "hits": 260
             },
             "ng": {
               "attacks": 10
             },
             "rl": {
-              "attacks": 318
+              "attacks": 318,
+              "hits": 115
             },
             "sg": {
-              "attacks": 170
+              "attacks": 170,
+              "hits": 34
             },
             "ssg": {
-              "attacks": 20
+              "attacks": 20,
+              "hits": 14
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -44949,6 +44978,8 @@
           "efficiency": 0.4974,
           "frags": 49,
           "kills": 96,
+          "maxQuadSpree": 0,
+          "maxSpree": 11,
           "src": "derived",
           "suicides": 8,
           "teamKills": 8
@@ -44964,22 +44995,27 @@
         "accuracy": {
           "byWeapon": {
             "gl": {
-              "attacks": 9
+              "attacks": 9,
+              "hits": 1
             },
             "lg": {
-              "attacks": 728
+              "attacks": 728,
+              "hits": 175
             },
             "rl": {
-              "attacks": 298
+              "attacks": 298,
+              "hits": 110
             },
             "sg": {
-              "attacks": 187
+              "attacks": 187,
+              "hits": 29
             },
             "ssg": {
-              "attacks": 3
+              "attacks": 3,
+              "hits": 3
             }
           },
-          "src": "derived"
+          "src": "reconstructed"
         },
         "damage": {
           "byEnemyWeapon": {
@@ -45187,6 +45223,8 @@
           "efficiency": 0.401,
           "frags": 59,
           "kills": 81,
+          "maxQuadSpree": 0,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 19,
           "teamKills": 6
