@@ -1444,11 +1444,21 @@ Four layers exercise different things:
    `TestMain` (`setup_test.go`) points `MVDA_BSP_DIR` at the repo-root
    `bsps/` directory, which feeds both the locvis visibility filter
    (loc names) and the mapclip floor-height column (`pos.h`,
-   `airgibs`). Run `make bsps` before regenerating. If a demo's BSP is
+   `airgibs`). Run `make bsps` before regenerating. A **relative**
+   `MVDA_BSP_DIR` is resolved against the repo root too — `mapbsp`
+   would otherwise resolve it against the package directory, which
+   holds no BSPs, so the repo's own documented `MVDA_BSP_DIR=./bsps`
+   invocation silently skipped every golden comparison while the suite
+   reported success. An absolute value is honoured verbatim.
+   If a demo's BSP is
    not resolvable the test no longer degrades silently — it **skips**
    that demo in compare mode and **hard-fails** an `-update-golden`
    run, so a machine without the BSP corpus can't overwrite a good
-   golden with V1/no-height data.
+   golden with V1/no-height data. Skips are reported once at suite
+   level (which demos, which dir), and a run that compared **nothing**
+   while the caller explicitly named a BSP dir is a hard failure — an
+   unpopulated repo-root `bsps/` stays a skip, since that is the
+   fresh-clone state.
 
    `filePath` is stripped before comparison (per-machine cache path).
    At schema v7 the parse-time `highResBuckets` is gone; the canonical
