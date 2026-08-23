@@ -163,13 +163,24 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   (`ktx/src/weapons.c:994`, `:1329`) while ours counts a fire that landed
   damage by any path, so ours reads ~4x higher on rl and ~1.5x on gl;
   sg/ssg are pellets on KTX's side and trigger pulls on ours. A
-  definition gap, not an error — but `src` alone does not warn about it.
+  definition gap, not an error — and since v74 the row carries the
+  warning itself: every weapon with `hits` also carries
+  `hitsConvention` (`anyDamage` | `directImpact` | `pellets`), per
+  weapon, because one `src: "ktx"` row uses all three at once. Closing
+  the gap instead was measured and rejected: the wire log's splash flag
+  reproduces KTX's rl count exactly (638/638 rows), but on a blockless
+  demo the only signal is the reconstruction's geometric direct/splash
+  verdict, which answers gl (1.2% aggregate) and not rl (+80%) — see
+  `damagerecon/ACCURACY.md` §"Can an old demo answer KTX's rl/gl
+  question?".
 - **`maxSpree` inherits the kill side's residual.** The streak replay is
   exact where the underlying kill attribution is (99.6% of rows whose
-  `kills` already agrees with KTX and whose player never suicided); every
-  large disagreement in the eval sat on a row the frag log had already
-  credited 0 kills against KTX's 8-47. Suicide rows read exactly 1 low
-  by design — see RESULT_SCHEMA "The derived spree".
+  `kills` already agrees with KTX and whose player never suicided); 16 of
+  the 17 large disagreements in the eval sat on a row the frag log had
+  already credited 0 kills against KTX's 8-47, which is the observable
+  signature to read it by — `kills: 0` beside a large positive `frags`
+  means inherited-unknown, not a measured zero. Suicide rows read exactly
+  1 low by design — see RESULT_SCHEMA "The derived spree".
 - **`ping`, `handicap` and `bot` stay KTX-only.** `handicap` and `bot`
   are server-side state with no wire signal. `ping` IS on the wire
   (`svc_updateping`) but the parser skips it

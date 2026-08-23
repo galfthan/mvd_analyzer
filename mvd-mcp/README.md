@@ -356,6 +356,22 @@ while ours counts a fire that landed damage by any path, so ours reads
 ~4x higher on `rl` and ~1.5x on `gl`. `attacks` matches KTX to the row
 on every single-projectile weapon (98–100% exact).
 
+**`hitsConvention` is the machine-readable form of that warning**, and
+the field to gate a cross-demo comparison on — `src` states the evidence
+GRADE and says nothing about what is counted. It sits on every weapon
+that carries `hits`: `anyDamage` (a fire that landed damage by any path;
+every derived / reconstructed weapon, plus KTX's own `lg` / `axe` /
+`ng` / `sng`), `directImpact` (KTX's `rl` / `gl` only) or `pellets`
+(KTX's `sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON,
+because one `src: "ktx"` row uses all three at once. Two rows are
+comparable exactly when weapon AND convention match; absent beside a
+present `hits` only on a `src: "mixed"` team row. Deriving KTX's own
+convention on an old demo does not work and was measured: the wire
+damage log's splash flag reproduces KTX's `rl` count on 638 of 638 rows,
+but the pre-instrumentation half carries no such flag and the
+reconstruction's geometric verdict answers `gl` (1.2% aggregate) and not
+`rl` (+80%).
+
 **Sprees.** `score.maxSpree` is the longest run of kills between deaths;
 `score.maxQuadSpree` the longest run of kills made while holding the
 quad (it resets on death *and* on a fresh quad pickup, mirroring KTX
@@ -364,7 +380,8 @@ block's `spree.max` / `spree.quad`, which 54% of the archive has no
 block to carry — always derived, never overlaid from KTX. They ride
 `score.kills`' `killsMeasured` gate, i.e. they are present and absent
 together with `kills` / `suicides` / `teamKills` / `efficiency` /
-`byWeapon`, so a `0` inside a present family is an observed zero. A team
+`byWeapon` / `byEnemyWeapon` / `byWeaponVsEnemyWeapon`, so a `0` inside a
+present family is an observed zero. A team
 row carries the BEST any member ran, never a sum. One deliberate
 divergence from KTX: its increment gate is `strneq(attackerteam,
 targteam) || !tp_num()` (`ktx/src/client.c:4865`), so wherever teamplay
@@ -373,9 +390,14 @@ streak in the same call that latches it. Ours counts only the kills
 `score.kills` counts, so a duel with self-kills reads exactly 1 lower
 per affected streak. Withheld-and-compared against the verbatim KTX
 block on 188 archive demos / 665 player rows: `maxQuadSpree` 99.8%
-exact, `maxSpree` 92.6% overall, 96.2% on rows whose `kills` already
+exact, `maxSpree` 92.9% overall, 96.5% on rows whose `kills` already
 agrees with KTX, and 99.6% on rows where kills agree and the player
-never suicided.
+never suicided. The large disagreements have an observable signature:
+`kills: 0` beside a large positive `frags` means the streak inherited
+the kill side's gap and is unknown, not zero. A reconnect does NOT reset
+the streak (KTX restores the whole stats struct from its ghost entity,
+`ktx/src/client.c:1515`), and a mid-match team switch cannot happen —
+KTX refuses one while a match is in progress.
 
 **Possession time is unique to this tool.** KTX never writes weapon hold
 time into the demoinfo block, and its armor hold time overcounts (the

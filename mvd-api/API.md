@@ -962,7 +962,13 @@ Common frontend features → the call that backs them.
   and matches KTX to the row on the single-projectile weapons. Do not
   diff `hits` against `/demoinfo` naively even on a derived family: KTX
   counts direct impacts for `rl` / `gl` and pellets for `sg` / `ssg`,
-  while this API counts a fire that landed damage by any path.
+  while this API counts a fire that landed damage by any path. Read
+  `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
+  — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
+  is, per WEAPON because one `src: "ktx"` row uses all three at once.
+  Two rows are comparable exactly when weapon and convention match, so
+  gate any cross-demo or cross-era aggregation on it; ignoring it turns
+  a ~4x definition change on `rl` into a trend.
 - **Analyze a local demo file (no hub gameId)** → upload it, then use the
   returned `demoId` with any per-demo GET:
 

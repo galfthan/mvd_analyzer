@@ -132,6 +132,44 @@ func TestDeriveSpreesSameInstantOrdering(t *testing.T) {
 	}
 }
 
+// The MUTUAL FRAG at one instant, which is the case the log's order decides
+// and a kind-based order gets wrong. b is on a 3-streak, a kills b, and b's
+// already-airborne rocket kills a in the same millisecond. KTX runs the whole
+// state machine inside ClientObituary, so the obituary that killed b runs
+// first and latches b at 3; b's posthumous rocket opens the NEXT run. Ranking
+// every kill at an instant ahead of every death instead credits that rocket to
+// the run that was already over and reports 4.
+//
+// Reachable, not hypothetical: 55 same-instant mutual frags over the first 500
+// archive demos, in 43 of them.
+func TestDeriveSpreesMutualFragAtOneInstant(t *testing.T) {
+	res := spreeRes(
+		[]result.FragEntry{
+			{Time: 1000, Killer: "b", Victim: "a", Weapon: "rl"},
+			{Time: 2000, Killer: "b", Victim: "a", Weapon: "rl"},
+			{Time: 3000, Killer: "b", Victim: "a", Weapon: "rl"},
+			// One frame, two obituaries, in the order the wire carried them.
+			{Time: 4000, Killer: "a", Victim: "b", Weapon: "lg"},
+			{Time: 4000, Killer: "b", Victim: "a", Weapon: "rl"},
+		},
+		[]result.PlayerStream{
+			{Name: "a", Deaths: []int32{1000, 2000, 3000, 4000}},
+			{Name: "b", Deaths: []int32{4000}},
+		},
+	)
+	got := deriveSprees(res)
+	if got["b"].max != 3 {
+		t.Errorf("b max spree = %d, want 3 — the obituary that killed b ran first, "+
+			"so the posthumous rocket belongs to b's next run", got["b"].max)
+	}
+	// Reversing the two same-instant obituaries reverses the verdict, which is
+	// the whole point of reading the log's order: now b's rocket landed first.
+	res.Frags.Frags[3], res.Frags.Frags[4] = res.Frags.Frags[4], res.Frags.Frags[3]
+	if got := deriveSprees(res); got["b"].max != 4 {
+		t.Errorf("b max spree = %d, want 4 — b's kill is logged before b's own death", got["b"].max)
+	}
+}
+
 // A scoreboard-only player — one the frag log names but who produced no
 // stream — still gets their streak reset by their own deaths, because the
 // log's victim side is unioned with the protocol death markers rather than

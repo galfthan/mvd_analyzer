@@ -946,7 +946,14 @@ diff -r /tmp/before /tmp/after
    credits a player's own suicide to their streak wherever teamplay is
    off; and derived `hits` are not comparable to KTX's for `rl`/`gl`
    (KTX counts direct impacts only, ours any path — ~4x apart on rl) or
-   for `sg`/`ssg` (pellets vs trigger pulls). Measured against the
+   for `sg`/`ssg` (pellets vs trigger pulls). That second one is stated
+   in the payload rather than only in prose: every weapon carrying
+   `hits` carries `hitsConvention` (`anyDamage` | `directImpact` |
+   `pellets`), so a consumer can gate a cross-era comparison instead of
+   re-deriving the rule. Recovering KTX's own convention on old demos
+   was measured and does not work — the wire splash flag reproduces it
+   exactly, the reconstruction's geometry does so for `gl` and not for
+   `rl`. Measured against the
    verbatim block on 188 instrumented demos by `cmd/qw-demoinfo-eval`;
    the full agreement table is in
    [`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md).

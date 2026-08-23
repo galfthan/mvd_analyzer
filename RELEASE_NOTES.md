@@ -7,7 +7,7 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
-### `score.maxSpree` / `score.maxQuadSpree` + `accuracy.src: "reconstructed"`
+### `score.maxSpree` / `score.maxQuadSpree` + `accuracy.src: "reconstructed"` + `accuracy.byWeapon[].hitsConvention`
 
 54% of the archive carries no KTX demoinfo block, and the census says
 that ceiling is permanent — it is the pre-`ktxstats` half, and
@@ -47,7 +47,7 @@ the server's own. Over **188 archive demos / 665 player rows**:
 |---|---|
 | `frags` / `deaths` / `teamKills` | 99.5% / 99.7% / 99.5% exact |
 | `maxQuadSpree` | **99.8% exact** |
-| `maxSpree` | 92.6% exact overall; **99.6%** on rows whose `kills` already agrees with KTX and whose player never suicided |
+| `maxSpree` | 92.9% exact overall; **99.6%** on rows whose `kills` already agrees with KTX and whose player never suicided |
 | quad / pent / ring `took` | **100.0% exact**, all three |
 | quad / pent / ring possession seconds | 82–96% exact to the second, 0.07–0.49% aggregate |
 | reconstructed `damage.given` / `taken` | 0.49% / 0.46% aggregate |
@@ -58,11 +58,14 @@ the server's own. Over **188 archive demos / 665 player rows**:
 KTX's increment gate is `strneq(attackerteam, targteam) || !tp_num()`
 (`ktx/src/client.c:4865`), so wherever teamplay is off — every duel,
 every FFA — a player's own SUICIDE bumps their streak in the very call
-that latches it. 23 of the 24 mismatches on rows where `kills` agrees
-belong to players with at least one suicide, every one off by exactly
-−1. The 17 rows at |Δ| ≥ 3 all sit where the frag log had already
-credited the player 0 kills against KTX's 8–47 — a pre-existing
-kill-attribution gap the streak inherits, not a defect of the replay.
+that latches it. 21 of the 22 mismatches on rows where `kills` agrees
+belong to players with at least one suicide, and all 22 are off by
+exactly −1; the harness's `spree.max/ktxConvention` column replays KTX's
+gate instead of ours and reproduces the block on every one of them. 16 of
+the 17 rows at |Δ| ≥ 3 sit where the frag log had already credited the
+player 0 kills against KTX's 8–47 — a pre-existing kill-attribution gap
+the streak inherits, not a defect of the replay, and one with an
+observable signature (`kills: 0` beside a large positive `frags`).
 
 **And one documentation correction the eval forced.** Derived `hits` were
 described as "broadly comparable" to KTX's for the single-projectile
@@ -75,8 +78,61 @@ you the evidence grade; RESULT_SCHEMA now carries the table that tells
 you which weapons the two sources are even asking the same question
 about.
 
+### `accuracy.byWeapon[].hitsConvention` — the correction, in the payload
+
+A table in a doc does not reach a hub rendering `hits/attacks` per demo.
+Since a demo WITH a KTX block serves the block's number and one without
+serves ours, an unmarked cross-era rl trendline is a cliff made entirely
+of the definition change above: pooled over the 188-demo eval
+population, rl reads **43.3%** counted our way and **9.3%** counted
+KTX's, and the per-row gap averages 35 pp of accuracy.
+
+So every weapon that carries `hits` now carries **`hitsConvention`**:
+`anyDamage` (a fire that landed damage by any path — every derived or
+reconstructed weapon, and KTX's own `lg`/`axe`/`ng`/`sng`),
+`directImpact` (KTX's `rl`/`gl`, which increment only in the projectile
+touch handler) or `pellets` (KTX's `sg`/`ssg`, where `attacks` counts
+pellets too). It is per WEAPON because one `src: "ktx"` row uses all
+three at once, which a family-level marker could not say. Two rows are
+comparable exactly when weapon and convention match. Absent beside a
+present `hits` only on the `src: "mixed"` team row, where the sum spans
+two scales.
+
+**Deriving KTX's convention instead was tried first and measured.** On a
+demo carrying the wire damage log the answer is exact — `dmg_is_splash`
+is raised only inside `T_RadiusDamage`, so counting non-splash `rl`
+records reproduces KTX's `acc.rl.hits` on **638 of 638 player rows**.
+The pre-instrumentation half has no such flag, leaving only
+`damagerecon`'s geometric direct/splash verdict, which answers the
+question for `gl` (71.7% row-exact, 1.22% aggregate — a grenade is
+contact-fused, so where it detonates is where it touched) and **not for
+`rl`** (10.0% exact, +80% aggregate — a rocket on the wall beside a
+player looks the same). Shipping it for `gl` alone would put the two
+projectile weapons in one map under two conventions, so neither ships
+and the marker states the difference instead.
+
+### Also in this release
+
+- **The spree replay orders same-millisecond events by the frag log**,
+  not by event kind. KTX runs the whole state machine inside
+  `ClientObituary`, so the log's order is its order; ranking every kill
+  at an instant ahead of every death credited a posthumous rocket — the
+  mutual frag where B dies and B's airborne rocket kills A in the same
+  frame — to the run it had already ended. 55 such pairs over the first
+  500 archive demos, in 43 of them; the fix moves `maxSpree` from 92.6%
+  to 92.9% on the eval population and one golden row.
+- `cmd/qw-demoinfo-eval`'s KTX-convention spree column now reads
+  `tp_num()` properly (the teamplay cvar gated on the mode, as
+  `ktx/src/g_utils.c:1586` gates it) instead of proxying it with the
+  roster shape, which misread every clan-tagged duel. The column goes
+  from 93.4% to 98.8% exact and the residual decomposition above rests
+  on it.
+
 Detail: [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) ("The derived
-spree", "Reconstructed accuracy hits", v74 history row).
+spree", "Reconstructed accuracy hits",
+"`accuracy.byWeapon[].hitsConvention`", v74 history row) and
+[damagerecon/ACCURACY.md](mvd-analytics/damagerecon/ACCURACY.md) ("Can an
+old demo answer KTX's rl/gl question?").
 
 ### `shots[].flightEnd` + `recon.hits` for `rl` / `gl`
 

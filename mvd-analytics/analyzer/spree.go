@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -38,16 +39,8 @@ type spreeCounts struct {
 	maxQuad int
 }
 
-// spreeEventKind orders the three event classes within one millisecond.
-// The ranks are the state machine's, not arbitrary:
-//
-//   - a quad PICKUP closes the quad streak that preceded it, so it must be
-//     applied before a kill made at the same instant — that kill belongs to
-//     the new quad run (KTX resets spree_current_q inside the touch handler,
-//     which runs before the obituary of anyone killed in the same frame);
-//   - a KILL lands before the killer's own death at the same instant: the
-//     rocket that was already in flight counts, which is also KTX's order
-//     (ClientObituary increments the attacker, then latches the target).
+// spreeEventKind is what an event DOES to the counters. Ordering is a
+// separate axis and lives in seq below, not here.
 type spreeEventKind int
 
 const (
@@ -56,8 +49,42 @@ const (
 	spreeDeath
 )
 
+// Same-instant ordering. Everything in this state machine runs inside
+// ClientObituary, so the frag log's OWN order is the state machine's order,
+// and it is what seq carries: the two events one obituary produces — increment
+// the attacker, then latch the target (ktx/src/client.c:4867-4876) — keep the
+// log's positions, adjacent and in sequence.
+//
+// That matters whenever two obituaries share a millisecond, which the archive
+// does 55 times over the first 500 demos (43 of them). B is killed by A while
+// on a 3-streak and B's already-airborne rocket kills A in the same frame:
+// KTX latches B at 3 and starts B's next run at 1, because the obituary that
+// killed B ran first. Ranking every kill ahead of every death instead — which
+// is what this did before — credits B's posthumous rocket to the run that was
+// already over and reports 4.
+//
+// The two events with no log position of their own bracket it:
+//
+//   - a quad PICKUP closes the quad streak that preceded it, so it goes FIRST
+//     — a kill made at that instant belongs to the new quad run (KTX resets
+//     spree_current_q inside the touch handler, which runs before the
+//     obituary of anyone killed in the same frame);
+//   - a stream DEATH marker goes LAST. It is the protocol death-event fusion,
+//     unioned with the log's victim side rather than chosen against it (see
+//     below), so at an instant the log also names, the latch that mattered has
+//     already happened at its logged position and this one finds a counter the
+//     obituary left. Putting it last is what keeps the kill a player made at
+//     the instant they died — the rocket in flight — inside the run that gets
+//     latched, on the demos where the log names no killer for that death.
+const (
+	spreeSeqQuadTaken   = 0
+	spreeSeqFirstFrag   = 1
+	spreeSeqStreamDeath = math.MaxInt32
+)
+
 type spreeEvent struct {
 	t      int32
+	seq    int32
 	kind   spreeEventKind
 	player string
 	// quad is set on a kill the killer made while holding the quad.
@@ -82,53 +109,53 @@ func deriveSprees(res *Result) map[string]*spreeCounts {
 	}
 
 	var evs []spreeEvent
-	// Increments: exactly the entries PlayerFrags.Kills counts — enemy kills
-	// with a named killer (the predicate deriveEnemyWeaponKills applies, and
-	// for the same reason: a streak that counted kills the scoreboard does
-	// not would not be a re-cut of Kills but a second, disagreeing tally).
+	// One pass over the frag log, in the log's order, emitting each obituary's
+	// two events at consecutive seq: the increment (exactly the entries
+	// PlayerFrags.Kills counts — enemy kills with a named killer, the
+	// predicate deriveEnemyWeaponKills applies, and for the same reason: a
+	// streak that counted kills the scoreboard does not would not be a re-cut
+	// of Kills but a second, disagreeing tally), then the victim's latch.
+	//
+	// The victim side is the only death record a SCOREBOARD-ONLY player (no
+	// stream at all) has, which is why it is emitted here and unioned with the
+	// stream markers below rather than chosen against them.
 	for i := range res.Frags.Frags {
 		f := &res.Frags.Frags[i]
-		if f.IsSuicide || f.IsTeamKill || isGenericPlayer(f.Killer) {
-			continue
+		seq := int32(spreeSeqFirstFrag + 2*i)
+		if !f.IsSuicide && !f.IsTeamKill && !isGenericPlayer(f.Killer) {
+			quad := false
+			if k := streams[f.Killer]; k != nil {
+				quad = heldAt(k.Quad, f.Time)
+			}
+			evs = append(evs, spreeEvent{t: f.Time, seq: seq, kind: spreeKill, player: f.Killer, quad: quad})
 		}
-		quad := false
-		if k := streams[f.Killer]; k != nil {
-			quad = heldAt(k.Quad, f.Time)
+		if !isGenericPlayer(f.Victim) {
+			evs = append(evs, spreeEvent{t: f.Time, seq: seq + 1, kind: spreeDeath, player: f.Victim})
 		}
-		evs = append(evs, spreeEvent{t: f.Time, kind: spreeKill, player: f.Killer, quad: quad})
 	}
 
-	// Resets. Two death sources, unioned rather than chosen between, because
-	// each covers what the other misses: PlayerStream.Deaths is the protocol
-	// death-event fusion and is complete for anyone who streamed, while the
-	// frag log's victim side is the only death record a SCOREBOARD-ONLY
-	// player (no stream at all) has. A death seen twice a frame apart is
-	// harmless — the second latch finds a counter already at zero.
+	// The other death source: PlayerStream.Deaths is the protocol death-event
+	// fusion and is complete for anyone who streamed, covering the deaths no
+	// obituary matched. A death seen twice is harmless — the second latch
+	// finds the counter the first one left.
 	for name, p := range streams {
 		for _, t := range p.Deaths {
-			evs = append(evs, spreeEvent{t: t, kind: spreeDeath, player: name})
+			evs = append(evs, spreeEvent{t: t, seq: spreeSeqStreamDeath, kind: spreeDeath, player: name})
 		}
 		// A quad pickup is read as the START of a possession run rather than
 		// from the item timeline: the run is derived from the player's own
 		// items bitfield, which is broadcast for every player on every demo,
 		// whereas an item phase needs the spawner to have been observed.
 		for _, iv := range p.Quad {
-			evs = append(evs, spreeEvent{t: iv.Start, kind: spreeQuadTaken, player: name})
+			evs = append(evs, spreeEvent{t: iv.Start, seq: spreeSeqQuadTaken, kind: spreeQuadTaken, player: name})
 		}
-	}
-	for i := range res.Frags.Frags {
-		f := &res.Frags.Frags[i]
-		if isGenericPlayer(f.Victim) {
-			continue
-		}
-		evs = append(evs, spreeEvent{t: f.Time, kind: spreeDeath, player: f.Victim})
 	}
 
 	sort.SliceStable(evs, func(i, j int) bool {
 		if evs[i].t != evs[j].t {
 			return evs[i].t < evs[j].t
 		}
-		return evs[i].kind < evs[j].kind
+		return evs[i].seq < evs[j].seq
 	})
 
 	out := map[string]*spreeCounts{}

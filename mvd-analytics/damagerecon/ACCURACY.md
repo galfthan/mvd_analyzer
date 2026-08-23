@@ -374,7 +374,7 @@ Over **188 archive demos, 665 player rows**:
 | `score.teamKills` | 665 | 99.5% | 0.40% |
 | `score.kills` | 665 | 95.5% | 2.26% |
 | `score.maxQuadSpree` | 665 | **99.8%** | 0.31% |
-| `score.maxSpree` | 665 | 92.6% | 3.08% |
+| `score.maxSpree` | 665 | 92.9% | 3.12% |
 | `damage.given` (reconstructed) | 665 | 6.9% | **0.49%** |
 | `damage.takenEnemy` (reconstructed) | 663 | 9.2% | **0.46%** |
 | `pickups.quad/pent/ring.took` | 273/80/78 | **100.0%** | 0.00% |
@@ -387,17 +387,51 @@ Over **188 archive demos, 665 player rows**:
 | `accuracy.lg.hits` (recon tier) | 436 | 65.8% | **0.89%** |
 | `accuracy.axe.hits` | 86 | 98.8% | 6.25% |
 
+The powerup-seconds rows are all **one-directional**: every mismatch on
+all three powerups is exactly −1 s, never +1. Both sides truncate to
+whole seconds (KTX casts its float in `json_item_detail`; the harness
+floors ours to match), and our interval is read off the demo-frame grid
+at both ends, so a run can measure up to one frame (~34 ms at
+`sv_demofps 30`) short — which costs a whole second exactly when the
+true length is an integer number of them. An expiry-ended run is
+precisely that. KTX's 96 pent takes on this population sum to 96 × 30 s
+*exactly*, i.e. not one pent run ended early, so every take is exposed
+and 14 lose the second (14.6%); quad runs average 20.0 s per take and
+lose it on 1.4%, ring 21.7 s and 4.1%. Pent is the worst row because
+pent holders do not die, not because possession is measured worse there.
+
 `maxSpree`'s residual decomposes completely. Conditioned on the row's
-`kills` already agreeing with KTX it is 96.2% exact; conditioned
-additionally on the player never suiciding, **99.6% (252/253)**. 23 of
-the 24 mismatches in the first subset belong to players with at least one
-suicide and are all off by exactly −1 — KTX's increment gate is
+`kills` already agreeing with KTX it is 96.5% exact; conditioned
+additionally on the player never suiciding, **99.6% (252/253)**. 21 of
+the 22 mismatches in the first subset belong to players with at least one
+suicide, and all 22 are off by exactly −1 — KTX's increment gate is
 `strneq(attackerteam, targteam) || !tp_num()` (`ktx/src/client.c:4865`),
 so wherever teamplay is off a suicide bumps the player's own streak in
 the very call that latches it, and this pipeline counts only the kills
-`score.kills` counts. The 17 rows at |Δ| ≥ 3 all sit where the frag log
-had already credited the player 0 kills against KTX's 8–47: the streak
-inherits the kill side's residual by construction.
+`score.kills` counts. The `spree.max/ktxConvention` column replays that
+gate instead of ours and reproduces the block on **all 22** of them
+(98.8% of all 665 rows), which is what makes the residual a definition
+rather than an argument. 16 of the 17 rows at |Δ| ≥ 3 sit where the frag
+log had already credited the player 0 kills against KTX's 8–47: the
+streak inherits the kill side's residual by construction.
+
+That column reads what it reads only because it reads `tp_num()`
+properly. KTX gates the teamplay cvar on the mode (`isTeam() || isCTF()
+|| coop`, `ktx/src/g_utils.c:1586`); proxying it with "more than one
+team name in the roster" put every clan-tagged duel on the wrong side of
+the gate and the column scored 93.4%. Against the mode string the block
+itself carries, it scores 98.8%, and the decomposition above is measured
+on that.
+
+Two same-instant mutual frags also lived in this residual until the
+replay started ordering same-millisecond events by the **frag log**
+rather than by event kind (`analyzer/spree.go`). The whole state machine
+runs inside `ClientObituary`, so the log's order is its order; ranking
+every kill at an instant ahead of every death credited a posthumous
+rocket to the run it had already ended. 55 such pairs over the first 500
+archive demos, in 43 of them; on this population the fix took
+`maxSpree` from 92.6% to 92.9% overall, removed both +1 outliers from
+the conditioned subset, and moved exactly one golden row.
 
 **Three fields are deliberately NOT scored as agreement**, because the
 two sources are not measuring the same quantity, and the eval reports
@@ -411,11 +445,57 @@ them only to pin the size of the gap:
   `hits` is the DIRECT-impact count (`ktx/src/weapons.c:994`, `:1329`);
   ours counts a fire that landed damage by any path, splash included. The
   recon tier reproduces OUR convention to 0.6 pp / 0.3 pp (above), which
-  is the number that decides whether it ships.
+  is the number that decides whether it ships. Since v74 the row says so
+  itself: `accuracy.byWeapon[].hitsConvention`. Why it says so rather
+  than closing the gap is the next section.
+
+### Can an old demo answer KTX's rl/gl question? (2026-08-23)
+
+Not for rl, and the harness measures both halves of that.
+
+**The convention is confirmed exactly.** `dmg_is_splash` is raised only
+inside `T_RadiusDamage`'s loop (`ktx/src/combat.c:1207-1227`), so the
+direct `T_Damage` in `T_MissileTouch` reaches the wire unflagged — and
+KTX's `hits++` sits in that same touch handler. Counting the wire log's
+non-splash `rl` rows therefore ought to BE the block's `acc.rl.hits`,
+and it is: **638 of 638 player rows exact, 0.00% aggregate**
+(`acc.rl.direct/wire`). Nothing about that count is inference.
+
+**But the wire flag is what the old half does not have**, and the only
+substitute is `damagerecon`'s geometric verdict — explosion endpoint
+within `rDirect` (48 units) of the victim. Joined through the same
+flight bracket the shipped tier uses (`aimcore.ReconDirectHitsForEval`):
+
+| column | rows | exact | aggregate | mean per-row accuracy error |
+|---|---|---|---|---|
+| `acc.gl.direct/recon` | 424 | 71.7% | **1.22%** | 2.24 pp |
+| `acc.gl.hits` (any path) | 424 | 43.2% | 54.5% | 6.29 pp |
+| `acc.rl.direct/recon` | 638 | 10.0% | **+80.1%** | 8.32 pp |
+| `acc.rl.hits` (any path) | 638 | 1.6% | 364% | 35.4 pp |
+| `acc.lg.hits` (the shipped benchmark) | 436 | 65.8% | 0.89% | 0.35 pp |
+
+A grenade is contact-fused, so where it detonates IS where it touched —
+the geometry answers the question. A rocket is not: one detonating on
+the wall beside a player is geometrically the same event as one that
+touched them, and the derivation over-counts by 80%.
+
+Shipping the KTX convention for gl alone would put the two projectile
+weapons in one `byWeapon` map under two conventions — the ambiguity the
+marker exists to end — so neither ships, and `hitsConvention` states the
+difference instead. The gl column stays in the harness because it is the
+measurement that decided, not a candidate.
+
+(`acc.gl.direct/wire` is in the table too, at 100% under-count. That is
+not a defect: `GrenadeTouch` counts the touch and then does ALL its
+damage through `GrenadeExplode` → `T_RadiusDamage`, so a direct grenade
+touch leaves no non-splash row on the wire either. The wire answers rl's
+question and not gl's; the reconstruction answers gl's and not rl's.)
 
 Rerun with `MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-demoinfo-eval
 -dir <demos> -limit 500` from the repo root; demos with no KTX block or no
-wire damage log are skipped (312 of the 500 sampled here).
+wire damage log are skipped (312 of the 500 sampled here). The population
+above is the first 500 names of the box-local archive mirror in sort order,
+which is deterministic — the same 188 demos score on every run.
 
 ## Why the errors are what they are
 

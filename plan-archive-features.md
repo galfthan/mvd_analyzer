@@ -371,7 +371,7 @@ reconstruction (`src: "reconstructed"` since v71), powerup control from
 the qw-aim-eval protocol) against the verbatim block on **188
 instrumented archive demos / 665 player rows**: `maxQuadSpree` **99.8%
 exact**, `maxSpree` **99.6%** on rows whose `kills` already agrees with
-KTX and whose player never suicided (92.6% unconditioned), powerup
+KTX and whose player never suicided (92.9% unconditioned), powerup
 `took` **100.0% exact** on all three, powerup possession seconds
 0.07–0.49% aggregate, `frags`/`deaths` 99.5%/99.7%, reconstructed
 `damage.given`/`taken` 0.49%/0.46%, `accuracy.attacks` 98–100% exact on
@@ -382,16 +382,25 @@ every single-projectile weapon, `lg` `hits` 0.89% aggregate. Full table:
 **Two residuals, both named rather than smoothed.** `maxSpree` diverges
 from KTX by design — KTX's gate is `strneq(attackerteam, targteam) ||
 !tp_num()`, so wherever teamplay is off a player's own suicide bumps
-their streak in the call that latches it; 23 of the 24 mismatches on
-kills-agreeing rows are exactly that, all at −1. The 17 rows at |Δ| ≥ 3
-sit where the frag log had already credited 0 kills against KTX's 8–47,
-a pre-existing kill-attribution gap the streak inherits.
+their streak in the call that latches it; 21 of the 22 mismatches on
+kills-agreeing rows belong to a suicider and all 22 are at −1, with the
+harness's KTX-convention replay reproducing the block on every one. 16 of
+the 17 rows at |Δ| ≥ 3 sit where the frag log had already credited 0
+kills against KTX's 8–47, a pre-existing kill-attribution gap the streak
+inherits — and one with an observable signature (`kills: 0` beside a
+large positive `frags`).
 
 **One doc correction the eval forced:** derived `hits` were described as
 "broadly comparable" to KTX's on the single-projectile weapons. True for
 `lg` (0.9%), false for `rl`/`gl` — KTX counts DIRECT impacts only
 (`weapons.c:994`, `:1329`) and ours counts any path, ~4x apart on rl.
-RESULT_SCHEMA now carries the per-weapon comparability table.
+RESULT_SCHEMA now carries the per-weapon comparability table, and the
+payload carries `accuracy.byWeapon[].hitsConvention` so a consumer does
+not have to read prose to know whether two numbers may be compared.
+Deriving KTX's own convention on an old demo was tried and does not
+work: the wire splash flag reproduces `acc.rl.hits` on 638 of 638 rows,
+but the reconstruction's geometric direct/splash verdict answers `gl`
+(1.2% aggregate) and not `rl` (+80%).
 
 **Not done, deliberately.** `speed` (max/avg units/s) stays KTX-only —
 the position streams could support it, but it is a different derivation
