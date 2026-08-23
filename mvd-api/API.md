@@ -501,17 +501,22 @@ differently on two deployments. Use it (with `errors` and, for
 reader-level gaps, `parseWarnings`) to hide panels up front.
 
 When almost every flag reads `false` at once, look at **`noMatch`**
-(schema v74) before concluding anything went wrong. It is present exactly
-when the demo yielded no player streams — 2% of the QuakeWorld archive —
-and it names the reason: `midMatchRecording` (the recording starts after
-the match began), `matchStartUnannounced` (the server ran a match but
-announced it in a form the pipeline does not recognise), `noMatchDeclared`
-(unmanaged play on a mod with no match state, see `gameDir`),
-`noPlayRecorded` (an idle or aborted server) or `demoUnreadable` (a
-truncated read — the only reason that ALSO means a failure, with the
-reader's message in `errors`). `detail` is the same verdict as a sentence
-you can show a user. Such a demo is not a failed parse and retrying it
-changes nothing. Endpoints whose data
+(schema v74) before concluding anything went wrong — and read it before
+`errors` / `parseWarnings` in general, since it decides whether those
+describe a partial match or nothing at all. It is present exactly when the
+`streams` block is absent — 2% of the QuakeWorld archive — and it names the
+reason: `midMatchRecording` (the recording starts after the match began),
+`matchStartUnannounced` (the server ran a match but announced it in a form
+the pipeline does not recognise), `noMatchDeclared` (no match declaration
+this pipeline can see, yet kills were parsed — usually unmanaged play on a
+mod with no match state, see `gameDir`, but possibly a managed match on a
+mod whose declarations we cannot read), `noPlayRecorded` (the same absent
+declaration and no kills parsed — usually an idle or aborted server) or
+`demoUnreadable` (a truncated read — the only reason that ALSO means a
+failure, with the reader's message in `errors`). `detail` is the same
+verdict as a sentence you can show a user; it is unstable display text, so
+never parse it — every fact in it is a structured field beside it. Such a
+demo is not a failed parse and retrying it changes nothing. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.

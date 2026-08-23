@@ -540,11 +540,17 @@ func validationCases(t *testing.T) []validationCase {
 			}},
 		// The no-match marker (v74) is omitempty and every golden demo holds
 		// a real match, so the sub-schema is validated only against its own
-		// absence without the gameId:43 fixture. mustContain names each
-		// field for the same reason parseWarnings does.
+		// absence without the gameId:43 fixture. mustContain names every
+		// NoMatch field, for the same reason parseWarnings does.
 		{name: "overview-no-match", url: "/v1/demos/gameId:43/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{
 				`"noMatch":{"reason":"midMatchRecording"`,
+				// detail is `required` in the schema, which an EMPTY string
+				// satisfies, so it is pinned here too. The substring is the
+				// fixture's own sentence (defined a few hundred lines down),
+				// not production wording — the marker's real detail text is
+				// unstable by contract and is pinned nowhere.
+				`"detail":"the recording starts mid-game`,
 				`"statusAtOpen":"1 min left"`, `"statusRunningSeen":true`,
 				`"gameDir":"qw"`, `"kills":42`,
 				`"dateMarkers":[{"source":"matchdate","kind":"matchStart"`,

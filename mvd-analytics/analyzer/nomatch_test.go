@@ -16,24 +16,40 @@ import (
 // "20 min left" is the regression case: the digit sits at the FRONT of the
 // reading, not against the " left" suffix, so a test that looks at the
 // character before the suffix reads KTX's own format as idle.
+//
+// The idle list carries the whole non-reading vocabulary the census found
+// (see statusNamesRunningGame for the counts) plus the near-misses a looser
+// "ends in ` left`" test would accept: mods DO write their own words into
+// this key ("Round 1/15", "Game Ended"), so a value that merely ends in
+// " left" is not evidence of a clock.
 func TestStatusNamesRunningGame(t *testing.T) {
 	running := []string{
 		"20 min left",  // ktx/src/match.c:596,723,1330 — the common case
 		"1 min left",   //
 		"0 min left",   // the last tick before the match ends
-		"19:35 left",   // an older mod's mm:ss reading
+		"19:35 left",   // the CTF mod's mm:ss reading
+		"00:01 left",   // its zero-padded low end
 		"14:59 left",   //
 		"120 min left", // no upper bound on the reading
 	}
 	idle := []string{
-		"",           // no status key at all (pre-KTX servers, foreign mods)
-		"Standby",    // ktx/src/world.c:543
-		"Countdown",  // ktx/src/match.c:2475 — about to start is not started
-		"Forcestart", // ktx/src/admin.c:693
-		"Normal",     // observed on a non-KTX mod in the archive
-		"left",       // suffix with nothing in front of it
-		" left",      //
-		"min left",   // a reading with no number is not a reading
+		"",              // no status key at all (pre-KTX servers, foreign mods)
+		"Standby",       // ktx/src/world.c:543
+		"Countdown",     // ktx/src/match.c:2475 — about to start is not started
+		"Forcestart",    // ktx/src/admin.c:693
+		"Normal",        // observed on gamedir fortress
+		"Game Ended",    // the CTF mod's terminal status
+		"Round 1/15",    // gamedir arena, a round counter — not a clock
+		"Round 11/15",   //
+		"left",          // suffix with nothing in front of it
+		" left",         //
+		"min left",      // a reading with no number is not a reading
+		"2 rounds left", // a countable that is not a remaining time
+		"3 players left",
+		"2 cool 4 u left", // free text that happens to end in the suffix
+		"20 min",          // a reading with no suffix
+		"19:5 left",       // seconds are always two digits
+		"1:02:30 left",    // no h:mm:ss spelling occurs
 	}
 	for _, v := range running {
 		if !statusNamesRunningGame(v) {
@@ -132,32 +148,39 @@ func TestNoMatchVerdict(t *testing.T) {
 	}
 }
 
-// TestNoMatchPostOnlyOnStreamlessResults is the false-positive guard: the
-// marker exists to explain an ABSENCE, so a result that has players must
-// never carry one. Every healthy demo in the archive goes down this path.
+// TestNoMatchPostOnlyOnStreamlessResults pins the contract every doc site
+// states: the marker is present exactly when `streams` is absent. That is
+// ONE predicate, `res.Streams != nil`, tested here in both directions —
+// which is also the false-positive guard (every healthy demo in the archive
+// goes down the first path).
+//
+// The empty-players shape is deliberately on the marker-free side. It is
+// not a state the pipeline can build (buildStreamsResult returns nil rather
+// than an empty block, timeline_streams.go:731, and is the only writer of
+// result.Streams), and treating it as stream-less would be a SECOND
+// spelling of the contract — one under which a result could carry a streams
+// block and a no-match marker at once, which wallClockPost's routing and
+// the schema docs both say is impossible.
 func TestNoMatchPostOnlyOnStreamlessResults(t *testing.T) {
 	co := &CoreOutputs{ServerStatus: ServerStatus{AtOpen: "Standby"}}
 
-	withPlayers := &Result{Streams: &Streams{Players: []PlayerStream{{Name: "xantom"}}}}
-	noMatchPost(withPlayers, co)
-	if withPlayers.NoMatch != nil {
-		t.Errorf("marker stamped on a result with players: %+v", withPlayers.NoMatch)
-	}
-
-	// The pipeline's own empty state is Streams == nil (buildStreamsResult
-	// returns nil rather than an empty block), but a hand-built registry can
-	// produce the empty-players shape and it means the same thing.
 	for name, res := range map[string]*Result{
-		"nil streams":   {},
+		"with players":  {Streams: &Streams{Players: []PlayerStream{{Name: "xantom"}}}},
 		"empty players": {Streams: &Streams{}},
 	} {
 		noMatchPost(res, co)
-		if res.NoMatch == nil {
-			t.Fatalf("%s: no marker stamped", name)
+		if res.NoMatch != nil {
+			t.Errorf("%s: marker stamped on a result that has a streams block: %+v", name, res.NoMatch)
 		}
-		if res.NoMatch.Reason != NoMatchNoPlayRecorded {
-			t.Errorf("%s: reason = %q", name, res.NoMatch.Reason)
-		}
+	}
+
+	res := &Result{}
+	noMatchPost(res, co)
+	if res.NoMatch == nil {
+		t.Fatal("nil streams: no marker stamped")
+	}
+	if res.NoMatch.Reason != NoMatchNoPlayRecorded {
+		t.Errorf("nil streams: reason = %q", res.NoMatch.Reason)
 	}
 }
 
@@ -227,6 +250,42 @@ func TestMetadataTracksStatusOverTime(t *testing.T) {
 	}
 	if !co.ServerStatus.RunningSeen {
 		t.Error("RunningSeen = false, want true")
+	}
+}
+
+// TestMetadataStatusAtOpenIsTheOpeningDumpOnly pins the field's promise
+// against the two ways a `status` value can arrive after demo open. Both
+// are reachable: 3 of the 1 032 stream-less demos open with no `status` and
+// gain one from a later svc_serverinfo, and 4 carry a second
+// `fullserverinfo` dump. Neither may restate demo open — a later reading is
+// a statement about an instant INSIDE the recording, which is what
+// RunningSeen carries.
+func TestMetadataStatusAtOpenIsTheOpeningDumpOnly(t *testing.T) {
+	for name, feed := range map[string][]events.Event{
+		"a later svc_serverinfo sets it": {
+			&events.StuffTextEvent{Command: `fullserverinfo "\*gamedir\ctf\map\dm3"`},
+			&events.ServerInfoEvent{Key: "status", Value: "Countdown"},
+			&events.ServerInfoEvent{Key: "status", Value: "9 min left"},
+		},
+		"a second fullserverinfo dump carries it": {
+			&events.StuffTextEvent{Command: `fullserverinfo "\*gamedir\ctf\map\dm3"`},
+			&events.StuffTextEvent{Command: `fullserverinfo "\*gamedir\ctf\map\dm3\status\9 min left"`},
+		},
+	} {
+		a := NewMetadataAnalyzer()
+		for _, e := range feed {
+			if err := a.OnEvent(e); err != nil {
+				t.Fatalf("%s: OnEvent: %v", name, err)
+			}
+		}
+		co := &CoreOutputs{}
+		a.PopulateCore(co)
+		if co.ServerStatus.AtOpen != "" {
+			t.Errorf("%s: AtOpen = %q, want empty — the opening dump had no status key", name, co.ServerStatus.AtOpen)
+		}
+		if !co.ServerStatus.RunningSeen {
+			t.Errorf("%s: RunningSeen = false — the later reading is still evidence", name)
+		}
 	}
 }
 

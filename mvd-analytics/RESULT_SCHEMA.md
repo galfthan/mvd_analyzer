@@ -4290,8 +4290,11 @@ one cheap fetch.
 ## NoMatchResult (`noMatch`) — schema v74
 
 The explicit marker on a result that carries **no analyzable match**.
-Present exactly when `streams` is absent, absent on every result with
-players.
+Present exactly when `streams` is absent — **one** predicate, not two:
+`streams` is written only when it holds at least one player stream
+(`buildStreamsResult` returns nil otherwise), so "no `streams` block" and
+"no player streams" name the same state, and a result carrying both
+`streams` and `noMatch` is not constructible.
 
 **Why it exists.** Streams are the spine of this pipeline — damage,
 `playerStats`, `locGraph`, `opening`, buckets, region control all hang off
@@ -4313,14 +4316,21 @@ demo. Keeping them apart is the point of the marker: a consumer can tell
 The one reason that IS a failure, `demoUnreadable`, says so by name and
 leaves the reader's message in `errors[]`.
 
+**Checking order.** Read `noMatch` FIRST, before `errors[]` and
+`parseWarnings`: it decides whether those two describe a partial match or
+nothing at all. On a result with no `noMatch`, they are damage reports
+against a match that exists; on a result with one, they are notes about a
+recording that holds no match either way. `demoUnreadable` is the single
+reason that means both, and it says so by pointing at `errors[]`.
+
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Reason | `reason` | string | Why there is no match; the vocabulary below. Always present. |
-| Detail | `detail` | string | The same verdict as one human-readable sentence, naming the evidence. Always present. |
-| StatusAtOpen | `statusAtOpen` | string, omitempty | The serverinfo `status` value at **demo open**, verbatim. |
+| Detail | `detail` | string | The same verdict as one human-readable sentence, naming the evidence. Always present. **Unstable, display only — do not parse it:** the wording changes without a schema bump, and every fact it states appears as a structured field beside it. |
+| StatusAtOpen | `statusAtOpen` | string, omitempty | The serverinfo `status` value in the **opening `fullserverinfo` dump**, verbatim. Absent when that dump carried no `status` key — including when a later `svc_serverinfo` update sets one (3 of the 1 032; `statusRunningSeen` is where those later readings land). |
 | StatusRunningSeen | `statusRunningSeen` | bool, omitempty | `status` named a running game at some point in the recording. |
 | GameDir | `gameDir` | string, omitempty | The serverinfo `*gamedir` key — the mod the server ran. Evidence, never a reason of its own. |
-| Kills | `kills` | int, omitempty | Length of the frag log: how much play the recorded window held. |
+| Kills | `kills` | int, omitempty | Length of the frag log — the kills whose obituaries **this pipeline recognises**, so a floor on how much play the window held rather than a census. The obituary table is id1/KTX vocabulary; a foreign mod's own death messages are invisible to it. Zero means "the frag log parsed nothing", not "nobody died". |
 | DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | Every date stamp the wire carried, verbatim — the same list `streams.global.dateMarkers` carries, given a home here because there is no `streams` block. See [the no-streams exception](#globalstream). |
 
 ### The `reason` vocabulary
@@ -4333,21 +4343,34 @@ sweep.
 | `reason` | Wire evidence | n | Notes |
 |---|---|---|---|
 | `demoUnreadable` | the event stream aborted (`errors[]` carries the reader's reason) | 20 | Checked FIRST, because a truncated read invalidates every other conclusion — the match-start announcement may simply sit past the truncation point. 19 of the 20 aborted at stream offset 16 with nothing decoded at all. |
-| `midMatchRecording` | `statusAtOpen` names a running game (`"13 min left"`) | 68 | The recording begins after the match-start announcement, so the pipeline has no origin to rebase onto. 67 of the 68 still parse a frag log (30–50 kills is typical). |
+| `midMatchRecording` | `statusAtOpen` names a running game (`"13 min left"`) | 68 | The recording begins after the match-start announcement, so the pipeline has no origin to rebase onto. 67 of the 68 still parse a frag log (30–50 kills is typical). **Weak corner:** the 1 remaining demo — running at open with `kills == 0` — is where this reason states the least. A stale `status` the server never reset, a recording that caught only the final tick of a match, and obituaries this pipeline cannot read are indistinguishable there; `statusAtOpen` + `kills == 0` is the combination to treat as unresolved rather than as "real play we could not rebase". |
 | `matchStartUnannounced` | `statusAtOpen` is not running, but `status` became running DURING the recording | 138 | The server started a match under our watch and announced it in a form outside the recognised set. Includes 32 demos carrying a full KTX demoinfo block, and 104 of the 138 carry a date marker. Salvaging these is plan lead 8 stage (b). |
-| `noMatchDeclared` | `status` never named a running game, `kills > 0` | 170 | Unmanaged play. 165 of the 170 ran a foreign gamedir (`fortress` 202 across the whole set, plus `jteams` / `ctf` / `runes` / `tdw` / `bball`) and 168 sent no `status` key at all — the mod has no KTX match state to report. |
-| `noPlayRecorded` | `status` never named a running game, `kills == 0` | 636 | The recording caught an idle or aborted server; most are a few seconds long with one connected player. |
+| `noMatchDeclared` | no match declaration this pipeline can see (`status` never named a running game), `kills > 0` | 170 | Usually unmanaged play, but read it as an **absence of evidence**: 168 of the 170 sent no `status` key at all, and the declaration vocabulary this pipeline reads is KTX's — a managed match on a mod that declares itself some other way lands here too. 165 of the 170 ran a foreign gamedir (`fortress` 202 across the whole set, plus `jteams` / `ctf` / `runes` / `tdw` / `bball`). |
+| `noPlayRecorded` | no match declaration this pipeline can see, `kills == 0` | 636 | Usually an idle or aborted server; most are a few seconds long with one connected player. Both halves are readings, not proofs — neither a foreign mod's declarations nor its obituaries are legible here, and 51 of the 636 ran a foreign gamedir. |
 
-**`status` spellings.** Running readings are KTX's `"%d min left"`
-(`ktx/src/match.c:596`, `:723`, `:1330`, `:1337`) and an older mod's
-`"%d:%02d left"`; the test is "ends in ` left` and starts with a digit",
-which is deliberately looser than the KTX format so mods that spell their
-clock differently are not silently reclassified. Idle / pre-match values
-are `Standby` (`ktx/src/world.c:543`), `Countdown` (`match.c:2475`),
-`Forcestart` (`admin.c:693`) and a mod-specific `Normal`. `statusAtOpen`
-is read from the FIRST `fullserverinfo` dump and is a different value from
-`metadata.serverInfo["status"]`, which is last-write-wins and so names the
-state at demo END.
+**`status` spellings.** A running reading is one of exactly two clock
+formats: KTX's `"%d min left"` (`ktx/src/match.c:596`, `:723`, `:1330`,
+`:1337`) and a CTF mod's `"%d:%02d left"`. The test pins that pair rather
+than something looser like "ends in ` left`", and the census is why. Over
+the 1 032 stream-less demos the key takes **1 198 distinct values**: 1 183
+remaining-time readings, every one matching one of the two forms, and 15
+that are not readings at all — `Standby` (`ktx/src/world.c:543`),
+`Countdown` (`match.c:2475`), `Forcestart` (`admin.c:693`), the foreign-mod
+`Normal`, `Game Ended` (the CTF mod's terminal status) and
+`Round 1/15`…`Round 11/15` (gamedir `arena`). The 1 500-demo healthy
+control adds 1 213 more values and no new spelling. Those last few prove
+mods write their own vocabulary into this key, which is what makes a
+looser test the riskier one: a mod's `"2 rounds left"` would read as a
+running clock and move a demo to `midMatchRecording` on no evidence,
+whereas a third clock spelling reads as idle and lands the demo in
+`noMatchDeclared` / `noPlayRecorded` with its verbatim `status` published
+beside it, where a reader can see it.
+
+`statusAtOpen` is read from the OPENING `fullserverinfo` dump only — a
+`status` that first appears in a later update leaves it absent, because it
+describes an instant inside the recording rather than demo open — and it
+is a different value from `metadata.serverInfo["status"]`, which is
+last-write-wins and so names the state at demo END.
 
 **Why the gamedir is not a reason.** `*gamedir` is the honest
 protocol-level statement of which mod ran (the map name is not — foreign

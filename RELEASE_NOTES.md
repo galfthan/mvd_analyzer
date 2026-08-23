@@ -16,8 +16,9 @@ EMPTY `errors[]`. A consumer facing that result could not tell three very
 different things apart: *this recording holds no match*, *the recording
 starts mid-game*, and *the parse failed*.
 
-The new top-level `noMatch` block is present on exactly those results and
-absent on every result with players:
+The new top-level `noMatch` block is present exactly when the `streams`
+block is absent — one predicate, not two, since `streams` is written only
+when it holds at least one player stream, so no result can carry both:
 
 ```json
 "noMatch": {
@@ -38,8 +39,8 @@ consumer can switch on it exhaustively:
 | `demoUnreadable` | the event stream aborted; `errors[]` has the reader's reason | 20 |
 | `midMatchRecording` | serverinfo `status` already named a running game at demo open | 68 |
 | `matchStartUnannounced` | `status` became running DURING the recording, but no recognised match-start broadcast | 138 |
-| `noMatchDeclared` | `status` never named a running game, yet the wire carried kills | 170 |
-| `noPlayRecorded` | no match declared and no kills — an idle or aborted server | 636 |
+| `noMatchDeclared` | no match declaration this pipeline can see (`status` never named a running game), yet the frag log parsed kills | 170 |
+| `noPlayRecorded` | the same absent declaration and no kills parsed — usually an idle or aborted server | 636 |
 
 `demoUnreadable` is checked first on purpose: after a truncated read,
 "nothing was declared" is not a conclusion the bytes support. And the
@@ -61,7 +62,28 @@ at demo `t=0`.
 population.** The signal is the serverinfo `status` key — KTX writes
 `"%d min left"` while a match runs (`ktx/src/match.c:596`) and `Standby` /
 `Countdown` otherwise — tracked as a timeline rather than last-write-wins,
-since `metadata.serverInfo["status"]` names the state at demo END. The
+since `metadata.serverInfo["status"]` names the state at demo END.
+`statusAtOpen` reports the OPENING `fullserverinfo` dump alone: a `status`
+that first appears in a later update leaves it absent (3 of the 1 032),
+because it describes an instant inside the recording, and
+`statusRunningSeen` is where such readings land. A running reading is one
+of exactly two clock formats — KTX's and a CTF mod's `"%d:%02d left"` —
+which is a census result, not a guess: the key takes 1 198 distinct values
+over the 1 032 marked demos and 1 213 over the 1 500-demo control, and
+every remaining-time reading in either set matches that pair, while the
+values that
+are NOT readings include mod vocabulary like `Game Ended` and
+`Round 1/15`. A looser "ends in ` left`" test would read a mod's
+`"2 rounds left"` as a running clock.
+
+Two verdicts state an ABSENCE of evidence and their prose says so:
+`noMatchDeclared` / `noPlayRecorded` mean "no match declaration this
+pipeline can see" — 168 of the 170 `noMatchDeclared` demos send no
+`status` key at all, so a managed match on a mod that declares itself some
+other way lands there too. `kills` likewise counts the obituaries this
+pipeline recognises (id1/KTX vocabulary), so on a foreign mod it is a
+floor rather than a census. And `detail` is unstable display text: show
+it, never parse it — every fact in it is a structured field beside it. The
 mod (`*gamedir`) is published as EVIDENCE and never used as a reason: 165
 of the 170 `noMatchDeclared` demos run a foreign gamedir (`fortress` 202
 across the whole set, plus `jteams` / `ctf` / `runes` / `tdw` / `bball`),
@@ -83,7 +105,10 @@ this result does not have. Resolving it is salvage, not marking — plan
 lead 8 stage (b).
 
 **Consumers.** `/overview` republishes the block beside `errors[]` and
-`parseWarnings`, so one call distinguishes all three states. The new
+`parseWarnings`, so one call distinguishes all three states — read
+`noMatch` FIRST of the three, since it decides whether the other two
+describe a partial match or nothing at all (`demoUnreadable` is the one
+reason that means both). The new
 `no-match` DAG node also serves at
 `GET /v1/demos/{id}/artifacts/no-match` (200 with a `null` body value on a
 demo that holds a match — that null is the answer).

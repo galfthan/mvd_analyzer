@@ -288,14 +288,17 @@ see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
 Carries the per-demo capability manifest (`available`), the
 `timing.matchStart*` anchor family that answers "when was this match
 played" (schema v72 — always read `matchStartConfidence` with the value),
-and the two separate degradation signals `errors` (analyzer level) and
-`parseWarnings` (reader level, omitted on a clean parse). Also carries
-`noMatch` (schema v74) on the 2% of the archive that yields no analyzable
-match: present exactly when there are no player streams, naming the reason
-(`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` /
-`noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it, so
-"no match here" is distinguishable from "the parse failed" without
-guessing.
+and THREE signals about the health of the result, deliberately separate:
+`errors` (analyzer level), `parseWarnings` (reader level, omitted on a
+clean parse) and `noMatch` (schema v74) on the 2% of the archive that
+yields no analyzable match. `noMatch` is present exactly when the `streams`
+block is absent, and names the reason (`midMatchRecording` /
+`matchStartUnannounced` / `noMatchDeclared` / `noPlayRecorded` /
+`demoUnreadable`) with the wire evidence behind it, so "no match here" is
+distinguishable from "the parse failed" without guessing. Read it FIRST —
+it decides whether the other two describe a partial match or nothing at
+all, and `demoUnreadable` is the one reason that means both. Such a demo
+is not a failed parse: do not report it as one and do not retry it.
 
 #### `getDemoInfo({demoId})`
 

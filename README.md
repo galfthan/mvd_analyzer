@@ -736,10 +736,13 @@ entirely on a clean parse. `qw-analyze` prints a one-line summary to
 stderr when a demo raises any, and `-warn` prints the whole table.
 `noMatch` (schema v74) is the third and answers a different question
 entirely — not "what went wrong" but "why is there nothing here": it is
-present exactly when the demo produced no player streams, and names the
+present exactly when the `streams` block is absent, and names the
 reason (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared`
 / `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it.
-2% of the archive carries it; see the known-limitations list below.
+2% of the archive carries it; see the known-limitations list below. Check
+it FIRST of the three: it decides whether `errors[]` and `parseWarnings`
+describe a partial match or nothing at all, and `demoUnreadable` is the
+one reason that means both.
 
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
 observable change to the analysis output — additive ones included, and
@@ -1017,11 +1020,15 @@ diff -r /tmp/before /tmp/after
    read "13 min left" at demo open), `matchStartUnannounced` (138 — the
    server started a match under our watch but announced it in a form we
    do not recognise; 32 of them carry a full KTX demoinfo block),
-   `noMatchDeclared` (170 — unmanaged play, 165 on a foreign `*gamedir`
-   like `fortress` / `jteams` / `ctf`), `noPlayRecorded` (636 — an idle or
-   aborted server) and `demoUnreadable` (20 — a truncated read, which
-   `errors[]` also reports). It is deliberately not an `errors[]` entry:
-   that list means the pipeline failed, and this is a fact about the demo.
+   `noMatchDeclared` (170 — no match declaration we can see, yet kills
+   were parsed; usually unmanaged play, 165 on a foreign `*gamedir` like
+   `fortress` / `jteams` / `ctf`, but 168 send no `status` key at all, so
+   a managed match on a mod we cannot read lands here too),
+   `noPlayRecorded` (636 — the same absent declaration and no kills
+   parsed; usually an idle or aborted server) and `demoUnreadable` (20 —
+   a truncated read, which `errors[]` also reports). It is deliberately
+   not an `errors[]` entry: that list means the pipeline failed, and this
+   is a fact about the demo.
    Zero markers on a 1 500-demo control drawn from the demos that DO
    produce streams. What is still NOT done is SALVAGE — the ~206
    recordings that demonstrably hold a real match are marked, not

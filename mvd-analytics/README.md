@@ -426,8 +426,11 @@ plus `timeline` (positions, liveness, RL/LG possession) and `items` (the
 world spawner positions that disqualify a weapon-bit tie-break). A
 hint-carrying demo is never touched — `//ktx bp` already names the picker.
 
-`noMatchPost` is node `no-match`: it stamps `noMatch` on a Result that came
-out with **no player streams**, naming why (schema v74). Streams are built
+`noMatchPost` is node `no-match`: it stamps `noMatch` on a Result whose
+**`streams` block is absent**, naming why (schema v74). That is the single
+predicate — `buildStreamsResult` returns nil rather than an empty block, so
+"no `streams`" and "no player streams" are one state and a result cannot
+carry both `streams` and `noMatch`. Streams are built
 only inside the detected match window — every recording path in the
 timeline analyzer is gated on a match-start broadcast having been seen —
 so a demo whose start was never announced produces nothing at all, and

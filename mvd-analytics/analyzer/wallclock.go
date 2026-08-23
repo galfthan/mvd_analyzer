@@ -1181,12 +1181,17 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 	if res == nil {
 		return
 	}
-	// A result with no player streams has no GlobalStream to write onto and
+	// A result with no `streams` block has no GlobalStream to write onto and
 	// no match window to project against, but the wire's date stamps were
 	// still read — they were simply dropped here until schema v74. The
 	// no-match marker is their home on such a result; the inputs below then
 	// describe a zero-width, zero-offset window, which resolveWallClock is
 	// already written for (see its wallKindMatchStart case).
+	//
+	// `res.Streams != nil` is the SAME predicate noMatchPost stamps on
+	// (nomatch.go), spelled the same way on purpose: the two branches here
+	// are exactly "has a GlobalStream" and "has a no-match marker", and no
+	// result can be in both.
 	var g *GlobalStream
 	if res.Streams != nil {
 		g = &res.Streams.Global

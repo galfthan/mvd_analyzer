@@ -10,8 +10,11 @@ import (
 // ever said a game was running. Published by the metadata node; read by
 // noMatchPost. See MetadataAnalyzer.observeStatus for the spellings.
 type ServerStatus struct {
-	// AtOpen is the `status` value in the `fullserverinfo` dump at demo
-	// open, verbatim. Empty when the demo carried no `status` key.
+	// AtOpen is the `status` value in the OPENING `fullserverinfo` dump,
+	// verbatim. Empty when that dump carried no `status` key — including
+	// when a later svc_serverinfo update sets one, which is a statement
+	// about an instant inside the recording, not about demo open.
+	// RunningSeen below is where those later readings land.
 	AtOpen string
 	// RunningSeen is set when `status` named a running game at any point —
 	// at open, or in a later svc_serverinfo update.
@@ -40,7 +43,16 @@ func noMatchPost(res *Result, co *CoreOutputs) {
 	if res == nil {
 		return
 	}
-	if res.Streams != nil && len(res.Streams.Players) > 0 {
+	// One spelling of the predicate, the same one wallClockPost routes on
+	// and the same one every doc site states: the marker is present exactly
+	// when `streams` is absent. "No player streams" and "no streams block"
+	// are the same state by construction — buildStreamsResult ends with
+	// `if len(streams.Players) == 0 { return nil }`
+	// (timeline_streams.go:731) and is the only writer of result.Streams
+	// (timeline_finalize.go:354) — so testing the players too would be a
+	// second, weaker spelling of the contract and would make a split-homed
+	// result (streams AND noMatch) constructible.
+	if res.Streams != nil {
 		return
 	}
 
@@ -79,14 +91,21 @@ func noMatchPost(res *Result, co *CoreOutputs) {
 //   - `status` reaching a running value later is the same statement about an
 //     instant inside the recording — the server did start a match, and the
 //     announcement it made was not one this pipeline recognises.
-//   - Otherwise the server never declared a match, and the only question
-//     left is whether anything was played.
+//   - Otherwise no match declaration reached this pipeline, and the only
+//     question left is what the frag log parsed.
 //
-// The last two cases are where the archive's foreign content (TeamFortress,
-// CTF, custom gamedirs) lands, but the gamedir is NOT what decides them: a
-// `fortress` server can run a managed match with its own countdown, and a
-// stock `qw` server can record ten seconds of nothing. The gamedir rides
-// along as evidence instead.
+// The last two cases state an ABSENCE OF EVIDENCE, and their sentences say
+// so: 168 of the 170 noMatchDeclared demos carry no `status` key at all, and
+// a mod that never writes one can still be running a managed match — the
+// vocabulary this pipeline reads is KTX's. So the verdict is "no declaration
+// we can see", hedged with "or a managed match on a mod whose declarations
+// this pipeline cannot read", never "unmanaged play" flat.
+//
+// The last two cases are also where the archive's foreign content
+// (TeamFortress, CTF, custom gamedirs) lands, but the gamedir is NOT what
+// decides them: a `fortress` server can run a managed match with its own
+// countdown, and a stock `qw` server can record ten seconds of nothing. The
+// gamedir rides along as evidence instead.
 func noMatchVerdict(errs []string, status ServerStatus, gameDir string, kills int) (reason, detail string) {
 	if hasStreamAbort(errs) {
 		return NoMatchDemoUnreadable, "the event stream aborted before the demo was read to the end, so whether it holds a match is unknown; see errors[] for the reader's reason"
@@ -103,11 +122,11 @@ func noMatchVerdict(errs []string, status ServerStatus, gameDir string, kills in
 	}
 	if kills > 0 {
 		return NoMatchNoMatchDeclared, fmt.Sprintf(
-			"the server never declared a match — its `status` key never named a running game — but the recorded window holds %d kill(s): unmanaged play%s",
+			"no match declaration this pipeline can see — the `status` key never named a running game — but the frag log parsed %d kill(s)%s: unmanaged play, or a managed match on a mod whose declarations this pipeline cannot read",
 			kills, gameDirClause(gameDir))
 	}
 	return NoMatchNoPlayRecorded, fmt.Sprintf(
-		"nothing was played in the recorded window: the server never declared a match and the wire carried no kills%s",
+		"no match declaration this pipeline can see — the `status` key never named a running game — and the frag log parsed no kills%s: an idle or aborted server, or a mod whose declarations and obituaries this pipeline cannot read",
 		gameDirClause(gameDir))
 }
 

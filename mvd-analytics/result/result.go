@@ -1266,7 +1266,9 @@ const (
 	// a running game when the recording opened ("13 min left"), i.e. the
 	// match-start announcement happened before the first demo frame. The
 	// recorded window is real play; this pipeline just has no match
-	// origin to rebase it onto.
+	// origin to rebase it onto. Weak corner: running-at-open with
+	// Kills == 0 (1 of the 68 in the archive sweep) — see the reason
+	// table in RESULT_SCHEMA.md.
 	NoMatchMidMatchRecording = "midMatchRecording"
 	// NoMatchStartUnannounced: `status` was not running at demo open but
 	// became running during the recording, and no match-start broadcast
@@ -1274,14 +1276,20 @@ const (
 	// under our watch and announced it in a form (or on a mod) outside
 	// events.MatchStartPatterns.
 	NoMatchStartUnannounced = "matchStartUnannounced"
-	// NoMatchNoMatchDeclared: the server never declared a running match,
-	// yet the wire carried kills. Unmanaged play — a mod with no match
-	// state (TeamFortress, CTF, custom gamedirs), or free play on an idle
-	// server. GameDir names the mod where the server stated one.
+	// NoMatchNoMatchDeclared: no match declaration this pipeline can see —
+	// the `status` key never named a running game — yet the frag log
+	// parsed kills. Usually unmanaged play (a mod with no match state, or
+	// free play on an idle server), but read it as an ABSENCE OF
+	// EVIDENCE, not as proof: 168 of the 170 demos here send no `status`
+	// key at all, and the running vocabulary this pipeline reads is KTX's,
+	// so a managed match on a mod that declares itself some other way
+	// lands here too. GameDir names the mod where the server stated one.
 	NoMatchNoMatchDeclared = "noMatchDeclared"
-	// NoMatchNoPlayRecorded: no running match was ever declared and the
-	// wire carried no kills. The recording caught an idle or aborted
-	// server — most of these are a few seconds long.
+	// NoMatchNoPlayRecorded: no match declaration this pipeline can see
+	// and no kills in the parsed frag log. Usually an idle or aborted
+	// server — most of these are a few seconds long — with the same
+	// caveat as noMatchDeclared on both halves: neither the declaration
+	// nor the obituaries of a foreign mod are readable here.
 	NoMatchNoPlayRecorded = "noPlayRecorded"
 )
 
@@ -1295,8 +1303,12 @@ const (
 // 1 032 of the 50 951-demo archive sweep (2.0%) produced empty streams
 // and an EMPTY errors[], because the v52 `timeBase:"demo"` fallback is
 // itself gated on `streams` existing (analyzer/timeline_finalize.go
-// flagDemoTimeBase) and so never fired. This section is present on
-// exactly those results and absent on every result with players.
+// flagDemoTimeBase) and so never fired. This section is present exactly
+// when the `streams` block is absent — ONE predicate, not two: `streams`
+// is written only when it holds at least one player stream
+// (analyzer/timeline_streams.go buildStreamsResult returns nil otherwise),
+// so "no streams block" and "no player streams" are the same state, and a
+// result carrying both `streams` and `noMatch` is not constructible.
 //
 // It is deliberately NOT an errors[] entry: errors[] means the pipeline
 // failed at something, and "this recording holds no match" is a fact
@@ -1309,6 +1321,11 @@ type NoMatchResult struct {
 	// the evidence (the verbatim status string, the gamedir, the kill
 	// count). It is what a text-oriented consumer — an /overview reader,
 	// an agent — should show beside the reason code.
+	//
+	// UNSTABLE, DISPLAY ONLY: do not parse it, match on it or key logic
+	// off it. The wording changes without a schema bump, and it needs no
+	// parsing — every fact it states appears as a structured field beside
+	// it (Reason, StatusAtOpen, StatusRunningSeen, GameDir, Kills).
 	Detail string `json:"detail"`
 	// StatusAtOpen is the serverinfo `status` value as it stood in the
 	// `fullserverinfo` dump at demo open, verbatim. It is the wire's own
@@ -1336,9 +1353,17 @@ type NoMatchResult struct {
 	// — a foreign gamedir can still run a managed match, and a "qw"
 	// server can still record nothing.
 	GameDir string `json:"gameDir,omitempty"`
-	// Kills is the length of the frag log (`frags.frags`): how much play
-	// the recorded window actually held. Non-zero with any reason except
-	// noPlayRecorded, which is defined by it being zero.
+	// Kills is the length of the frag log (`frags.frags`): the kills whose
+	// obituaries THIS PIPELINE RECOGNISES, which is how much play the
+	// recorded window is known to have held — a floor, not a census. The
+	// obituary table is id1/KTX vocabulary, so a foreign mod's own death
+	// messages (a TeamFortress sentry gun, a mod-specific environmental
+	// kill) are invisible to it, and 51 of the 636 noPlayRecorded demos in
+	// the archive sweep ran a foreign gamedir. Zero here means "the frag
+	// log parsed nothing", not "nobody died".
+	//
+	// Non-zero with any reason except noPlayRecorded, which is defined by
+	// it being zero.
 	Kills int `json:"kills,omitempty"`
 
 	// DateMarkers lists every date stamp the wire carried, verbatim and in

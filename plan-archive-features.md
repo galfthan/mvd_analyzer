@@ -379,7 +379,7 @@ maps, and 21 demos carrying a full KTX demoinfo block).
 | `reason` | evidence | n | notes |
 |---|---|---|---|
 | `noPlayRecorded` | no running `status` ever, no kills | 636 | idle / aborted servers, mostly a few seconds long |
-| `noMatchDeclared` | no running `status` ever, kills > 0 | 170 | unmanaged play; 165 on a foreign `*gamedir`, 168 sending no `status` key at all |
+| `noMatchDeclared` | no running `status` ever, kills > 0 | 170 | usually unmanaged play, but an ABSENCE of evidence: 168 send no `status` key at all, 165 on a foreign `*gamedir` |
 | `matchStartUnannounced` | `status` became running DURING the recording | 138 | 32 carry a KTX demoinfo block, 104 carry a date marker |
 | `midMatchRecording` | `status` already running at demo open | 68 | 67 parse a frag log |
 | `demoUnreadable` | the event stream aborted | 20 | 19 aborted at stream offset 16 with nothing decoded |
@@ -388,14 +388,31 @@ Every one of the 1 032 is marked, no leftovers. A 1 500-demo random
 control drawn from the 49 919 demos that DO produce streams carries
 **zero** markers, and no golden moved.
 
-Two corrections to the original note. The "~260 REAL matches" estimate
+One correction to the original note: the "~260 REAL matches" estimate
 lands as 68 + 138 = **206** demos where the server demonstrably declared
-a running match, plus 170 more with real play under no match state. And
-`status` never reads **"Game Ended"** anywhere in this population — that
-string is in neither ktx nor mvdsv; the running spellings are KTX's
-`"%d min left"` (`ktx/src/match.c:596,723,1330,1337`) and an older mod's
-`"%d:%02d left"`, against `Standby` / `Countdown` / `Forcestart` /
-`Normal` when idle.
+a running match, plus 170 more with real play under no match state.
+
+**The `status` vocabulary, measured.** Over the 1 032 the key takes 1 198
+distinct values; the 1 500-demo healthy control adds 1 213 more and no new
+spelling. Every remaining-time reading in either set matches one of exactly
+two clock formats — KTX's `"%d min left"`
+(`ktx/src/match.c:596,723,1330,1337`) and a CTF mod's `"%d:%02d left"` —
+and that pair is what `statusNamesRunningGame` tests, tightened from the
+original "ends in ` left` and starts with a digit" once the census showed
+zero values that the loose rule accepted and the strict pair did not. The
+non-reading values are `Standby` / `Countdown` / `Forcestart` / `Normal`,
+plus two the original note said were absent: **`Game Ended`** (the CTF
+mod's terminal status, 10 demos — it is in neither ktx nor mvdsv because
+it is that mod's own string) and **`Round 1/15`…`Round 11/15`** (gamedir
+`arena`). Those two are the argument for the tight test: mods do write
+their own vocabulary here, so a value merely ending in ` left` is not
+evidence of a clock.
+
+`statusAtOpen` is captured from the OPENING `fullserverinfo` dump alone. 3
+of the 1 032 open with no `status` key and gain one from a later
+`svc_serverinfo` (all three `Countdown`); those read as absent, since the
+field is named for demo open, and `statusRunningSeen` still carries the
+later readings. No reason moved when that was tightened.
 
 ### Why the v52 `timeBase:"demo"` fallback never engaged (the answer)
 
@@ -449,6 +466,31 @@ and the transition at t=292 ms). Note that 32 of the
 salvage pass on them can be validated against an authoritative
 scoreboard. A salvaged result would then also unlock the graded wall
 clock above.
+
+**Contract moves stage (b) must make, decided now.** `noMatch` is
+present exactly when `streams` is absent, so salvage does not "add data
+beside the marker" — it removes the marker. Four consequences, settled
+here so the implementer does not have to re-litigate them mid-pass:
+
+1. **A salvaged demo loses `noMatch` entirely.** It gains a `streams`
+   block, and the invariant is one predicate in both directions. There is
+   no "salvaged but still marked" state, and no reason value for one.
+2. **Front-truncation gets a NEW marker, on `streams.global`, beside
+   `timeBase`.** A salvaged result is a real match whose recorded window
+   starts after the match origin — that is a property of the STREAMS, not
+   an absence of them, so it belongs where `timeBase` already says "these
+   timestamps are not what you assume". Do not reuse a `noMatch` reason
+   name for it: `midMatchRecording` describes a result with no streams.
+3. **`dateMarkers` relocate with the streams.** They live on
+   `noMatch.dateMarkers` only because there is no `GlobalStream`; a
+   salvaged result carries them on `streams.global.dateMarkers` like any
+   other, and the graded `matchStartUnixMs` anchor becomes publishable
+   there for the first time (the match origin stage (b) establishes is
+   exactly the missing projection term).
+4. **`noMatch` never coexists with `streams`.** Every doc site states
+   this and `wallClockPost` routes on it; a stage-(b) shortcut that
+   stamped both would break the one thing consumers were told they can
+   switch on.
 
 ## 9. Derived demoinfo equivalents (NEW from the 51k sweep)
 
