@@ -194,10 +194,13 @@ All paths under the base URL (default `http://localhost:8080`). The
 - `sha:HEX` — 64-char SHA-256 of a demo already in the local cache
   (mostly for bookmarking warm cache entries)
 
-Successful 2xx responses set `Cache-Control: public, max-age=86400,
-immutable`, `X-Schema-Version: <n>`, `X-Cache: HIT|WARM|MISS`, and
-`ETag: "<sha>-v<n>"` (where `<n>` is the current `CurrentSchemaVersion`).
-Send `If-None-Match` to get a cheap 304. `POST /v1/demos/{id}` (the
+Successful 2xx responses set `Cache-Control: no-cache` (store, but
+revalidate on every use), `X-Schema-Version: <n>`, `X-Cache:
+HIT|WARM|MISS`, and `ETag: "<sha>-v<n>"` (where `<n>` is the current
+`CurrentSchemaVersion`). Send `If-None-Match` to get a cheap 304; the
+schema-versioned ETag makes that mandatory revalidation a version check,
+so a schema-bumping deploy is picked up immediately instead of clients
+serving stale shapes out of cache. `POST /v1/demos/{id}` (the
 warm-up call) is not a cacheable resource: it carries `X-Cache` /
 `X-Schema-Version` but no `Cache-Control` / `ETag`. Every response also
 carries `X-Request-Id` (a per-request id echoed in the access log; a 500
@@ -205,7 +208,7 @@ body cites it instead of internal error detail) and permissive CORS
 headers (see API.md §2.6). The stream endpoints (`/shots`,
 `/aim`, `/streams/*`) are plain reads off the always-full base parse (phase 12
 bakes the projectile/beam/nail streams into every cached Result), so they carry
-the same immutable headers as everything else — the old `X-Shot-Streams:
+the same cache headers as everything else — the old `X-Shot-Streams:
 unavailable` degrade header is gone. The generic artifact endpoint uses a finer
 ETag `"<sha>-<name>@v<n>"`, and the static `/v1/artifacts` and `/v1/graph`
 key their ETag on the schema version alone (`"artifacts-v<n>"` /

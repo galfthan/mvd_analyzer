@@ -5,6 +5,39 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
+
+No schema change. Two operational fixes:
+
+- **Search page cap raised 100 → 1000 everywhere.** The old 100-row cap
+  was self-imposed — the hub's PostgREST pages at 1000 (Supabase
+  `db-max-rows`, measured: `limit` above 1000 silently returns 1000 rows)
+  — so the API/MCP cap now matches the upstream ceiling
+  (`hubfetch.MaxSearchLimit`). `GET /v1/games/search` accepts
+  `limit=1..1000` (default still 20, reject-loudly posture unchanged);
+  the MCP `searchGames` tool schema and the OpenAPI spec say 1000; the
+  `total` + `limit`/`offset` paging contract is how a consumer walks
+  every match. The web Search tab now pages too: 100 rows per page, an
+  exact "N of M matches" footer (PostgREST `count=exact`), and a **Load
+  more** button that appends offset pages until all matches are shown
+  (was: a fixed, silent 20).
+- **Serving is now store-but-revalidate (`Cache-Control: no-cache`)
+  with version-carrying ETags, replacing `max-age=86400, immutable`.**
+  Per-demo responses' ETags embed the schema version, so the now-
+  mandatory revalidation is a version check: a schema-bumping deploy is
+  picked up immediately instead of clients serving day-old shapes out of
+  cache (immutable suppressed exactly the revalidation that would have
+  noticed). Same policy on the binary-static, per-map, and embedded-docs
+  endpoints; unchanged data still answers as a cheap 304. The web bundle
+  gets the same treatment: the production Caddyfile's `file_server` now
+  sends `Cache-Control: no-cache` (it previously sent no cache header at
+  all, leaving browsers to heuristic-cache `app.js`/`analyzer.wasm`
+  indefinitely), Netlify previews set the same header, and `make build`
+  stamps the git hash into `index.html` (`<meta name="build">`) so
+  `app.js` can compare it against the wasm's embedded hash and reload
+  once when a deploy lands mid-session leaves the browser running a
+  mixed bundle.
+
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
 ### The obituary table, audited row by row against the engine (schema v74)

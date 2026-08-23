@@ -41,6 +41,7 @@ build:
 	@cp "$$(go env GOROOT)/misc/wasm/wasm_exec.js" $(DIST_DIR)/ 2>/dev/null || cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/
 	@echo "Copying static files..."
 	@cp $(STATIC_DIR)/index.html $(DIST_DIR)/
+	@sed -i 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' $(DIST_DIR)/index.html
 	@cp $(STATIC_DIR)/styles.css $(DIST_DIR)/
 	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
 	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
