@@ -1520,7 +1520,12 @@ becomes **`"reconstructed"`** and `hits` is filled from
 tier, read rather than re-derived, so the tier's own withholds inherit
 here by construction — including its dependence on how much of the match
 the reconstruction saw, which is [`damage.coverage`](#damagecoverage)
-(v74) and is not copied onto the accuracy row. Only the weapons it
+(v74) and is not copied onto the accuracy row. **On a low-coverage demo
+these `hits` — and any accuracy derived from them — are a floor, not an
+estimate**: the tier can only count fires the reconstruction saw connect,
+so read `damage.coverage` before quoting one (same rule as the
+[`recon`](#weaponaimrecon) block they come from and the
+`src: "reconstructed"` damage family beside them). Only the weapons it
 validated carry a number
 (`lg`, `sg`, `ssg`, `axe`, `rl`, `gl`); **`ng`/`sng` keep `hits`
 absent**, and a family whose weapons all fall outside the tier stays

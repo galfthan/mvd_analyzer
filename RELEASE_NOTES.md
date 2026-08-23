@@ -874,7 +874,9 @@ What the oldest recordings do cost is per-demo, not per-era: **2.1% of
 qwsv demos** (concentrated on QWSV 2.30) barely broadcast the health stat
 channel, so the section carries ~83 bounded damage per kill where a
 healthy demo carries ~300 — honest as far as it goes, but nothing in the
-output says the section is a fraction of the match. And frozen weapon
+output says the section is a fraction of the match. [Since v74 it does:
+`damage.coverage` publishes that fraction per demo — see the v74 entry.]
+And frozen weapon
 bits, which withhold `ewep`, turned out to be commoner on NEW demos than
 old (18% of E0, 39% of E3, 35% of E5) — `ACCURACY.md` said the opposite
 and now says the measurement.
