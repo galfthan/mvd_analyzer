@@ -1138,6 +1138,7 @@ package result
 //     not just in the diagnostic harness, and omitted when the parse was
 //     clean. Distinct from `errors[]`, which reports analyzer-level failures
 //     over events we DID read. See ParseWarnings.
+//
 // v73 — airgib detection gates on pre-impact evidence (a correctness
 // fix: entries move in and out of `timelineAnalysis.airgibs`, no field
 // is added, removed or retyped) plus a `preMs` echo on the /airgibs
