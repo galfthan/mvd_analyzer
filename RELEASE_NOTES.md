@@ -5,6 +5,59 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (old-demo-summary) — rockets and grenades join the recovered accuracy tier, schema v74
+
+### `shots[].flightEnd` + `recon.hits` for `rl` / `gl`
+
+v73 recovered hit counts on pre-instrumentation demos for `lg`, `sg`,
+`ssg` and `axe` and deliberately stopped there. The reason was not
+reconstruction quality: the measured rocket counter counts fires whose
+**tracked flight** linked to an impact — a point-blank rocket whose
+entity the server never broadcast is a *miss* — while the recovery could
+only count reconstructed impacts, which calls that same rocket a hit.
+Measured against the wire log itself the two conventions differed by
+7.3 pp on rl, so an old demo's rl accuracy would have sat seven points
+above a modern one's for a reason no consumer could see.
+
+The association that settles it existed all along, inside the shots
+analyzer, and was thrown away after use. It is now published:
+
+- **`shots.shots[].flightEnd`** — the match-relative time at which the
+  tracked rocket / grenade (or nail) a fire launched died. Set whether or
+  not that impact hurt anyone; **absent** on hitscan fires and on a
+  projectile fire with no tracked flight, which is exactly the state the
+  hit counters read as a miss. It is the fire→flight half of the link
+  that decides `hit` for a projectile (`analyzer/shots.go
+  linkProjectiles`), so consumers no longer have to re-derive it from
+  `streams.projectiles` by guesswork.
+- **`aim.players[].weapons[].recon.hits` now covers `rl` and `gl`** on
+  reconstructed demos. The join anchors on the flight's impact instant
+  and matches it against the reconstructed damage of that
+  attacker + weapon, inside damagerecon's own projectile tolerance;
+  a fire with no flight links to nothing. Same definition, same
+  question, comparable numbers.
+
+Measured with `cmd/qw-aim-eval` on the same 53 dm2/dm3 demos that carry
+the KTX log (rows ≥ 20 fires): **rl mean accuracy error 7.4 pp → 0.6 pp**
+(bias +0.4, 91% of rows within 2 pp), **gl 1.3 pp → 0.3 pp** (bias 0.0) —
+inside the ≤1.7 pp band the hitscan tier ships at. `lg`/`sg`/`ssg`/`axe`
+are unchanged to the last row. The join-on-wire control lands at +0.4 pp
+(rl) / +0.1 pp (gl) rather than the hitscan set's exact zero: the
+reconstruction's damage rows include hits by rockets that were never
+tracked, and the window that admits the log's genuinely-late stat
+instants can let a nearby flight adopt one. Tightening it would flatter
+the control and misrepresent the reconstruction.
+
+`ng`/`sng` stay withheld, and for the same reason as in v73: nail
+linking is opt-in, so the measured counter a recovery would be validated
+against is zero on every demo of the corpus. An absent `recon` block
+still means "not recovered for this weapon", never "no hits".
+
+Detail: [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) (`Shot`,
+`WeaponAimRecon`, v74 history row) and
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"Aim hit recovery".
+
 ## unreleased (airgib-pre-gate) — airgibs gate on pre-impact evidence, schema v73
 
 **The airgib list was reporting standing players as airgibs.** KTX writes

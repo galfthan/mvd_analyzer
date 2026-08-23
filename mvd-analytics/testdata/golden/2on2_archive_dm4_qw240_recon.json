@@ -4994,6 +4994,9 @@
             "weapon": "ssg"
           },
           {
+            "recon": {
+              "hits": 77
+            },
             "shots": 237,
             "weapon": "rl"
           }
@@ -12434,6 +12437,9 @@
             "weapon": "ssg"
           },
           {
+            "recon": {
+              "hits": 38
+            },
             "shots": 81,
             "weapon": "rl"
           },
@@ -16275,6 +16281,9 @@
             "weapon": "ssg"
           },
           {
+            "recon": {
+              "hits": 47
+            },
             "shots": 123,
             "weapon": "rl"
           }
@@ -20578,10 +20587,16 @@
             "weapon": "ssg"
           },
           {
+            "recon": {
+              "hits": 63
+            },
             "shots": 175,
             "weapon": "rl"
           },
           {
+            "recon": {
+              "hits": 1
+            },
             "shots": 9,
             "weapon": "gl"
           }
@@ -45185,7 +45200,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -45326,6 +45341,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 4005,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45403,6 +45419,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 4639,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45473,6 +45490,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 6271,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45494,6 +45512,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 7639,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45501,6 +45520,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8638,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45508,6 +45528,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 9218,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45515,6 +45536,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 9482,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45522,6 +45544,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 10270,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45529,6 +45552,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 10324,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -45536,6 +45560,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 10005,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45543,6 +45568,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 11113,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -45557,6 +45583,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 12161,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -45564,6 +45591,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13003,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -45571,6 +45599,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 12951,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45578,6 +45607,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13162,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45599,6 +45629,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 14584,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45676,6 +45707,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 15374,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -45844,6 +45876,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 18009,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45900,6 +45933,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 21165,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45949,6 +45983,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 22266,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45956,6 +45991,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 23161,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -45970,6 +46006,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 23055,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46012,6 +46049,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 23895,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46019,6 +46057,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24268,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46026,6 +46065,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24426,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -46033,6 +46073,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24688,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46040,6 +46081,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24900,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46047,6 +46089,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25793,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46054,6 +46097,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25585,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46061,6 +46105,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 27586,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46075,6 +46120,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 28917,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46096,6 +46142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 29705,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46271,6 +46318,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 33338,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -46313,6 +46361,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 34179,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -46390,6 +46439,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 36125,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -46411,6 +46461,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 35970,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46439,6 +46490,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 36601,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -46880,6 +46932,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 43234,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46922,6 +46975,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 43812,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46936,6 +46990,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 44494,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -46943,6 +46998,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 44706,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -46999,6 +47055,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 52127,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47020,6 +47077,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 52702,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47069,6 +47127,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 51334,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47090,6 +47149,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 53904,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47097,6 +47157,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 52020,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47104,6 +47165,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 54590,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47139,6 +47201,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 53116,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47181,6 +47244,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 53746,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47258,6 +47322,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 57220,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47265,6 +47330,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 57800,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47272,6 +47338,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 58793,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47279,6 +47346,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59005,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -47286,6 +47354,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59319,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47293,6 +47362,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59426,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47342,6 +47412,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 59900,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47510,6 +47581,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 63496,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47622,6 +47694,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 66075,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47636,6 +47709,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 66498,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47650,6 +47724,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 67287,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47657,6 +47732,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 67814,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47671,6 +47747,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 67971,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47706,6 +47783,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 68393,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47713,6 +47791,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 68182,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47748,6 +47827,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 68814,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -47762,6 +47842,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 68970,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -47769,6 +47850,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 69182,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47776,6 +47858,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 68970,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -47790,6 +47873,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 70551,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47804,6 +47888,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 71340,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47825,6 +47910,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 72235,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47853,6 +47939,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 72761,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -47860,6 +47947,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 72761,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -48014,6 +48102,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 75393,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48084,6 +48173,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 76182,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48196,6 +48286,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 79131,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -48203,6 +48294,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 80499,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48210,6 +48302,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81289,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48217,6 +48310,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81866,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48224,6 +48318,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 82762,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48231,6 +48326,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 83236,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -48245,6 +48341,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 83236,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48273,6 +48370,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 84552,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -48427,6 +48525,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 86706,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -48497,6 +48596,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 89706,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -48588,6 +48688,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 90602,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -48707,6 +48808,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 91973,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48847,6 +48949,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 95026,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48854,6 +48957,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 97447,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -48868,6 +48972,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 98342,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -48875,6 +48980,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98816,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -48882,6 +48988,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99026,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -48889,6 +48996,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99026,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -48896,6 +49004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99390,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -48903,6 +49012,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99703,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -49050,6 +49160,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 101919,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49057,6 +49168,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 102343,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -49071,6 +49183,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 102659,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49134,6 +49247,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 103555,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49169,6 +49283,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 104450,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -49176,6 +49291,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 105607,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -49183,6 +49299,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 106559,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -49204,6 +49321,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 108614,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49218,6 +49336,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 108508,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -49239,6 +49358,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 109926,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49666,6 +49786,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 116410,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -49701,6 +49822,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 118358,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -49715,6 +49837,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 119726,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -49722,6 +49845,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119937,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49785,6 +49909,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 120882,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49792,6 +49917,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 122305,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -49799,6 +49925,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 122410,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -49820,6 +49947,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 122726,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -49848,6 +49976,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 124141,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -49967,6 +50096,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 128569,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -49988,6 +50118,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 128674,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -50023,6 +50154,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 129359,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -50121,6 +50253,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131885,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50177,6 +50310,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 135142,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50240,6 +50374,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 135724,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50436,6 +50571,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 138463,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50450,6 +50586,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 139464,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50457,6 +50594,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 140622,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50464,6 +50602,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 141412,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50492,6 +50631,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 142833,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -50506,6 +50646,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 143199,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50562,6 +50703,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 144570,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -50884,6 +51026,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 152516,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -50954,6 +51097,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 153781,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -50982,6 +51126,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 156728,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -50989,6 +51134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 157254,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -51059,6 +51205,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 158041,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -51157,6 +51304,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 158728,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -51255,6 +51403,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162991,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -51276,6 +51425,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 167886,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51682,6 +51832,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 171146,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -51801,6 +51952,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 179519,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -51808,6 +51960,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 179781,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51815,6 +51968,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 180572,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51822,6 +51976,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 180625,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -51829,6 +51984,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 181257,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51836,6 +51992,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 181672,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -51843,6 +52000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 182199,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51857,6 +52015,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 182782,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -51871,6 +52030,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 183309,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -51913,6 +52073,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 184151,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -51962,6 +52123,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 186043,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -51976,6 +52138,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 186359,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52018,6 +52181,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 186993,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -52025,6 +52189,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 186941,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52046,6 +52211,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 189099,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52053,6 +52219,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 189572,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -52067,6 +52234,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 189730,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52144,6 +52312,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 190726,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52151,6 +52320,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 190619,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -52158,6 +52328,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 191727,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52165,6 +52336,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 191674,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -52368,6 +52540,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 194203,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52382,6 +52555,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 195098,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52445,6 +52619,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 195414,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52641,6 +52816,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 197783,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -52970,6 +53146,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 202312,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53047,6 +53224,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 204897,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53068,6 +53246,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 205838,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53131,6 +53310,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 206793,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53145,6 +53325,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 207636,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53152,6 +53333,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 208267,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53159,6 +53341,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 208372,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53187,6 +53370,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 213955,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53194,6 +53378,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 214590,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -53201,6 +53386,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 214590,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53208,6 +53394,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 214748,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53215,6 +53402,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 215327,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -53236,6 +53424,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 215643,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53271,6 +53460,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 216222,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53439,6 +53629,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 220115,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53558,6 +53749,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 223586,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53565,6 +53757,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 224270,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53579,6 +53772,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 225222,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53600,6 +53794,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 227538,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53607,6 +53802,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 228960,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53614,6 +53810,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 229222,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53621,6 +53818,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 229799,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53628,6 +53826,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230010,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53635,6 +53834,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 229959,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -53642,6 +53842,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230430,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53649,6 +53850,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230906,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -53656,6 +53858,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 231170,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53663,6 +53866,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 231326,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -53670,6 +53874,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233493,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53677,6 +53882,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233646,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53740,6 +53946,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 234270,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53880,6 +54087,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 237009,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -53894,6 +54102,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 237270,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53957,6 +54166,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 238166,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -53964,6 +54174,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 238903,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54069,6 +54280,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 239747,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54097,6 +54309,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 240486,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54118,6 +54331,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 241434,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54125,6 +54339,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 241223,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54132,6 +54347,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 242013,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54174,6 +54390,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 246645,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -54181,6 +54398,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 247013,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54188,6 +54406,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 247381,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -54195,6 +54414,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 247640,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54202,6 +54422,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 247589,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54209,6 +54430,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 248435,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54216,6 +54438,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 248592,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54223,6 +54446,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 249172,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54230,6 +54454,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 249014,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54237,6 +54462,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 249382,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54244,6 +54470,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 249698,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -54251,6 +54478,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 249908,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54328,6 +54556,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 251592,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54335,6 +54564,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 252275,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54349,6 +54579,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 252801,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54384,6 +54615,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 255593,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54398,6 +54630,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 256803,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54405,6 +54638,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 258224,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54419,6 +54653,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 260537,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54440,6 +54675,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 263118,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54447,6 +54683,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 264593,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54454,6 +54691,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 264909,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54468,6 +54706,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 265014,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54531,6 +54770,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 265696,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -54608,6 +54848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 267804,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54629,6 +54870,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 268117,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54657,6 +54899,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 268540,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54734,6 +54977,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 268804,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54748,6 +54992,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 269440,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54755,6 +55000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 269914,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -54776,6 +55022,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 270599,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -54867,6 +55114,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 271018,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55021,6 +55269,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 273542,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55175,6 +55424,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 275908,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -55252,6 +55502,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 276804,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55259,6 +55510,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 277225,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55294,6 +55546,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 277436,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55322,6 +55575,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 277812,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55329,6 +55583,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279611,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55399,6 +55654,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 280451,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55455,6 +55711,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 281133,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55483,6 +55740,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 281716,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55595,6 +55853,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 285777,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -55602,6 +55861,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 285723,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55672,6 +55932,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 289888,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -55679,6 +55940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290205,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -55686,6 +55948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290784,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -55693,6 +55956,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290784,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55700,6 +55964,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290784,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -55721,6 +55986,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 291889,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -55728,6 +55994,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 292203,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55742,6 +56009,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 292782,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -55749,6 +56017,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 293416,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55756,6 +56025,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 293362,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55770,6 +56040,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 293784,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55791,6 +56062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 294679,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55798,6 +56070,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294940,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55805,6 +56078,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 295363,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55812,6 +56086,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 295626,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -55819,6 +56094,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 296780,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55833,6 +56109,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 298147,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55854,6 +56131,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 297832,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -55889,6 +56167,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 298255,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55952,6 +56231,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 299202,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -55987,6 +56267,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 300784,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56071,6 +56352,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 301729,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56120,6 +56402,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 303151,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56218,6 +56501,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 304994,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -56260,6 +56544,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 306032,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -56337,6 +56622,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 306667,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -56372,6 +56658,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 307456,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56386,6 +56673,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 308866,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56421,6 +56709,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 310020,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56428,6 +56717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 310390,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -56442,6 +56732,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 311074,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56470,6 +56761,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 311963,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -56554,6 +56846,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 312756,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -56575,6 +56868,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 313335,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -56680,6 +56974,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 314442,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -56694,6 +56989,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 315179,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -56701,6 +56997,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 315653,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -56953,6 +57250,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 318443,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -57156,6 +57454,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 322759,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -57226,6 +57525,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 323549,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -57478,6 +57778,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 326544,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57499,6 +57800,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 327335,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57569,6 +57871,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 329600,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57583,6 +57886,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 330547,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57590,6 +57894,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 330707,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -57625,6 +57930,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 333497,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -57632,6 +57938,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 333707,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57639,6 +57946,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 333971,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -57646,6 +57954,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 334707,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57653,6 +57962,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 334918,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -57674,6 +57984,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 335391,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -57737,6 +58048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337177,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57744,6 +58056,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337441,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -57751,6 +58064,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 338126,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -57772,6 +58086,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 338126,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -57807,6 +58122,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 338863,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57821,6 +58137,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 339758,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57863,6 +58180,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 340285,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57940,6 +58258,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 344181,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -57947,6 +58266,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 344181,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58087,6 +58407,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 347128,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58094,6 +58415,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 348504,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58101,6 +58423,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350135,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58108,6 +58431,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349980,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58115,6 +58439,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351507,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58122,6 +58447,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351349,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58129,6 +58455,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 353561,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58136,6 +58463,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 351981,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58143,6 +58471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354299,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58150,6 +58479,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 352349,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58157,6 +58487,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354931,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58171,6 +58502,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 355511,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58591,6 +58923,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 359775,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58626,6 +58959,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 360826,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58647,6 +58981,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 362141,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58675,6 +59010,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 363877,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58703,6 +59039,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 365497,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58745,6 +59082,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 366656,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -58759,6 +59097,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 368813,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58794,6 +59133,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 370131,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58801,6 +59141,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 370605,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58815,6 +59156,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 371078,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58822,6 +59164,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 371182,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58836,6 +59179,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373234,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58843,6 +59187,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 373184,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -58850,6 +59195,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 374289,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58857,6 +59203,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 373973,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -58871,6 +59218,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 377391,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58885,6 +59233,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378023,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58892,6 +59241,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378445,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58899,6 +59249,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378023,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -58906,6 +59257,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378761,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -58913,6 +59265,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378971,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -58927,6 +59280,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 381180,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58941,6 +59295,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 382024,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58948,6 +59303,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 382759,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -58955,6 +59311,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383289,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -58969,6 +59326,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 384184,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59032,6 +59390,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 385973,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59046,6 +59405,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 386868,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59053,6 +59413,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 387553,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59067,6 +59428,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 388658,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59074,6 +59436,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 389748,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59081,6 +59444,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 389960,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59088,6 +59452,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 390644,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59095,6 +59460,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 390958,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59137,6 +59503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 391829,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59144,6 +59511,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 392875,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59158,6 +59526,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 393709,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59165,6 +59534,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 394857,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59242,6 +59612,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 396606,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59256,6 +59627,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 397343,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59263,6 +59635,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 398282,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59326,6 +59699,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 400494,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59368,6 +59742,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 401470,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59382,6 +59757,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 402489,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59438,6 +59814,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 403591,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -59487,6 +59864,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 404899,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -59550,6 +59928,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 408014,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59557,6 +59936,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 408935,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59564,6 +59944,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 409651,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59655,6 +60036,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 410961,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59662,6 +60044,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 410488,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -59725,6 +60108,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 411748,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59746,6 +60130,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 413130,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59809,6 +60194,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 413866,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59865,6 +60251,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 414764,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59886,6 +60273,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 415341,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -59893,6 +60281,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 415501,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -59984,6 +60373,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 417712,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -59991,6 +60381,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 418607,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60096,6 +60487,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 421232,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60103,6 +60495,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 421283,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60131,6 +60524,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 422074,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60152,6 +60546,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 422395,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60208,6 +60603,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 422711,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60229,6 +60625,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 423238,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60257,6 +60654,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 423764,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60271,6 +60669,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 423341,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60278,6 +60677,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424079,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60299,6 +60699,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424709,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60306,6 +60707,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424657,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60313,6 +60715,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 425238,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60327,6 +60730,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 425763,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60334,6 +60738,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426449,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60341,6 +60746,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426659,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60362,6 +60768,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 427132,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60369,6 +60776,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427239,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60425,6 +60833,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 431079,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60439,6 +60848,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 431289,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60495,6 +60905,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 431921,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60551,6 +60962,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 432448,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60579,6 +60991,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 432762,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60649,6 +61062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 435028,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60656,6 +61070,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 435502,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60663,6 +61078,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 435712,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60677,6 +61093,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 436975,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60684,6 +61101,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 438185,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60691,6 +61109,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 438235,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -60698,6 +61117,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 438025,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60712,6 +61132,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 439078,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60719,6 +61140,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 439239,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60789,6 +61211,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 440446,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60831,6 +61254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 441394,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60838,6 +61262,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 441658,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -60866,6 +61291,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 445451,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -60887,6 +61313,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 445925,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -60992,6 +61419,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 448079,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61153,6 +61581,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 450450,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61265,6 +61694,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 454608,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61321,6 +61751,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 456394,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61328,6 +61759,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 457655,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61370,6 +61802,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 459447,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61377,6 +61810,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 459605,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61384,6 +61818,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 459765,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61412,6 +61847,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 460029,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61426,6 +61862,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 460712,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61440,6 +61877,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 462083,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61447,6 +61885,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 463084,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61475,6 +61914,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 465347,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61489,6 +61929,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 465295,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61587,6 +62028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468344,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61601,6 +62043,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469235,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61608,6 +62051,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470399,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61615,6 +62059,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470188,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61622,6 +62067,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470188,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61678,6 +62124,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 471505,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61685,6 +62132,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472032,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61699,6 +62147,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 473506,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61706,6 +62155,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 474348,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61713,6 +62163,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 475506,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61720,6 +62171,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476240,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61727,6 +62179,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476137,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -61734,6 +62187,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476611,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61783,6 +62237,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 477243,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61902,6 +62357,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 478242,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61937,6 +62393,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 480506,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -61944,6 +62401,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 481451,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -61958,6 +62416,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 481501,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62000,6 +62459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482291,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62056,6 +62516,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 482924,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62126,6 +62587,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 483658,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62154,6 +62616,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 484399,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62175,6 +62638,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 485609,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62245,6 +62709,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 486190,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62301,6 +62766,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 487085,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62322,6 +62788,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 487769,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62336,6 +62803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 488347,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62350,6 +62818,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 489033,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62357,6 +62826,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 489033,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -62364,6 +62834,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 489136,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62392,6 +62863,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 492604,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62399,6 +62871,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 495452,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -62413,6 +62886,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 495241,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62427,6 +62901,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 495662,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -62455,6 +62930,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 496401,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -62539,6 +63015,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 499921,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62553,6 +63030,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 500289,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -62588,6 +63066,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 500816,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62602,6 +63081,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 500870,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62630,6 +63110,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 501291,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -62665,6 +63146,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 501236,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62679,6 +63161,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 501765,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -62700,6 +63183,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 502028,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62784,6 +63268,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 504770,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -62847,6 +63332,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 505455,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63099,6 +63585,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 508823,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63127,6 +63614,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 512402,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63141,6 +63629,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 514559,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63148,6 +63637,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 515455,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63162,6 +63652,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 516560,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63169,6 +63660,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 517402,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63176,6 +63668,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 517559,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63183,6 +63676,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518298,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63190,6 +63684,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518612,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63197,6 +63692,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518719,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63204,6 +63700,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519033,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63211,6 +63708,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519087,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63218,6 +63716,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519190,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63225,6 +63724,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519451,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63232,6 +63732,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519927,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63246,6 +63747,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 520989,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63253,6 +63755,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 520936,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63260,6 +63763,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 521665,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63267,6 +63771,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 522295,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63274,6 +63779,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 522503,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63288,6 +63794,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 523451,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63302,6 +63809,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 524507,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63351,6 +63859,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 525560,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63421,6 +63930,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 526561,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63428,6 +63938,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 526719,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63435,6 +63946,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528246,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63442,6 +63954,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528088,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63449,6 +63962,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528402,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63491,6 +64005,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 529978,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63512,6 +64027,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 530609,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63526,6 +64042,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 531347,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63603,6 +64120,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 532611,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -63617,6 +64135,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 532927,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63631,6 +64150,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 536562,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63638,6 +64158,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 536562,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63645,6 +64166,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 537349,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63652,6 +64174,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 537456,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63659,6 +64182,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 538404,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63680,6 +64204,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 538875,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63743,6 +64268,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 540034,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63764,6 +64290,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 540608,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63771,6 +64298,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540873,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63778,6 +64306,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541504,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63785,6 +64314,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542400,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63792,6 +64322,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542716,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63799,6 +64330,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543348,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -63813,6 +64345,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 547141,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63820,6 +64353,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 547141,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63848,6 +64382,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 547773,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -63869,6 +64404,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 548457,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63883,6 +64419,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 550306,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63974,6 +64511,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 551727,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -63988,6 +64526,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 551727,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64002,6 +64541,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 553308,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64009,6 +64549,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 553784,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -64324,6 +64865,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 557102,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64338,6 +64880,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 559523,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64345,6 +64888,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 559786,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -64352,6 +64896,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 560312,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64387,6 +64932,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 561945,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64394,6 +64940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 562207,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64401,6 +64948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 562839,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64415,6 +64963,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 563416,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64527,6 +65076,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 564409,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -64534,6 +65084,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 564465,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64632,6 +65183,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 565203,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -64667,6 +65219,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 566099,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64695,6 +65248,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 566783,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64702,6 +65256,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 566994,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -64884,6 +65439,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 569681,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64891,6 +65447,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 570363,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64912,6 +65469,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 572892,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64933,6 +65491,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 573205,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -64954,6 +65513,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 573681,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64968,6 +65528,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 574734,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -64975,6 +65536,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 574681,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -64982,6 +65544,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 575050,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -64989,6 +65552,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 575997,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -64996,6 +65560,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 576787,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65003,6 +65568,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 577307,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -65080,6 +65646,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 578889,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65185,6 +65752,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 579415,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65248,6 +65816,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 580101,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65255,6 +65824,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580787,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -65290,6 +65860,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 581260,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65325,6 +65896,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 582153,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65332,6 +65904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582734,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -65339,6 +65912,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 583208,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65346,6 +65920,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 583997,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65353,6 +65928,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 584785,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65360,6 +65936,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 585629,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65381,6 +65958,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 586572,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65416,6 +65994,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 587151,
         "player": "ung",
         "source": "sound",
         "team": "nme",
@@ -65423,6 +66002,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 587521,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65444,6 +66024,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 588311,
         "player": "virus",
         "source": "sound",
         "team": "nme",
@@ -65514,6 +66095,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 589362,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65612,6 +66194,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 590418,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65654,6 +66237,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 591313,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65668,6 +66252,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 592049,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65780,6 +66365,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 592840,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65976,6 +66562,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 597156,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65983,6 +66570,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 597840,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -65990,6 +66578,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 597840,
         "player": "raket",
         "source": "sound",
         "team": "korv",
@@ -66039,6 +66628,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 598682,
         "player": "math",
         "source": "sound",
         "team": "korv",
@@ -66109,6 +66699,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 600053,
         "player": "math",
         "source": "sound",
         "team": "korv",

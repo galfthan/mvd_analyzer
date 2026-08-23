@@ -459,7 +459,8 @@ KTX damage stream:
   is matched to its launch frame (by muzzle) and the impact damage is the
   shooter's same-weapon damage at the despawn frame. This pins *which* fire
   caused *which* impact when several projectiles are in flight, which a
-  naive "next damage" link cannot.
+  naive "next damage" link cannot. Since v74 the flight half of that link is
+  published as `flightEnd` (below).
 
 - **Nails** (`ng`/`sng`) — linked the same way as rockets via the nail flight
   bracket, but **only when nail tracking is requested** (`-include nails`);
@@ -476,6 +477,17 @@ self-splash — a rocket jump is a `hit` with the shooter as its own victim),
 every victim is an enemy (the common case); when present it is parallel to
 `victims`.
 
+`flightEnd` (schema v74) is the **fire→flight** half of the projectile link,
+published so consumers stop having to re-derive it: the time the tracked
+projectile this fire launched died. It is set whether or not that impact
+damaged anyone, and it is absent exactly when there was no flight to link —
+a hitscan fire, an entity the server never broadcast (a rocket that detonates
+in its muzzle frame), a flight still open when the recording ended, or an
+ng/sng fire on a parse without nail decoding. That absence is meaningful: it
+is the same state the measured hit counter reads as a miss, and it is what
+lets the reconstructed hit tier count rl/gl on the measured definition (see
+[WeaponAimRecon](#weaponaimrecon)).
+
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Time | `time` | int32 | Match-relative ms. |
@@ -486,6 +498,7 @@ every victim is an enemy (the common case); when present it is parallel to
 | Hit | `hit` | bool (omitempty) | Fire that connected: hitscan via the same-frame damage link, rl/gl (and ng/sng with nails) via projectile linking. |
 | Victims | `victims` | []string (omitempty) | Hitscan victims hit by this fire. |
 | VictimKinds | `victimKinds` | []string (omitempty) | Per-victim class, parallel to `victims`: `enemy` \| `team` \| `self`. Omitted when all-enemy. |
+| FlightEnd | `flightEnd` | *int32 (omitempty) | Match-relative ms at which this fire's tracked projectile died (its impact). Projectile fires only, and only when the flight was tracked. |
 
 ### PlayerShots / WeaponShots
 
@@ -721,17 +734,28 @@ Accuracy is `recon.hits / shots` (`shots` is measurement-grade either way).
 A `hits: 0` inside a present block is a real "linked nothing"; the block's
 ABSENCE is what says "not recovered for this weapon".
 
-**Emission.** Only for weapons whose damage lands in the fire's own server
-frame — `lg`, `sg`, `ssg` and `axe` (the last at its fixed +200 ms traceline
-delay) — and for every one of those the player FIRED, whether or not the
-reconstruction credits him with any damage: a shooter who appears nowhere in
-the reconstructed log gets `hits: 0` on each covered weapon he fired, never an
-absent block (presence is keyed on the section being reconstructed, not on this
-shooter being in it). `rl`/`gl`/`ng`/`sng` never carry the block: pinning which projectile
-caused which impact needs the entity-flight bracket the shots analyzer builds
-and discards, and counting impacts instead answers a different question than
-the measured counter does — measured against the wire log, an rl figure built
-that way runs 7.3 pp above the measured one.
+**Emission.** For two weapon families, and for every covered weapon the player
+FIRED — whether or not the reconstruction credits him with any damage: a
+shooter who appears nowhere in the reconstructed log gets `hits: 0` on each
+covered weapon he fired, never an absent block (presence is keyed on the
+section being reconstructed, not on this shooter being in it).
+
+- **Same-frame** — `lg`, `sg`, `ssg` and `axe` (the last at its fixed +200 ms
+  traceline delay): the fire and its damage share a server frame, and the join
+  links them directly.
+- **Flight-joined** (schema v74) — `rl` and `gl`: the join anchors on the
+  fire's tracked projectile, not on the fire. `shots[].flightEnd` publishes
+  when that projectile died, and the reconstructed damage of that
+  attacker+weapon at the impact instant is what makes the fire a hit. This is
+  the MEASURED counter's own definition — a fire whose projectile the server
+  never broadcast is a miss on both sides — which is what makes the two
+  comparable. Before v74 exported the association, the join could only count
+  reconstructed impacts, a different question that ran 7.3 pp above the
+  measured rl figure.
+
+`ng`/`sng` never carry the block: nail flights are bracketed only when nail
+decoding is requested, so the measured counter they would be validated against
+is zero on every demo of the validation corpus.
 
 **What it does NOT carry, and why.** The reconstruction anchors damage at the
 VICTIM's health/armor stat instant and merges every hit landing on one instant
@@ -746,7 +770,7 @@ a damage-model verdict, not the server's contact flag); the LG whiff geometry
 be a hit the join did not recover); and the enemy/team/self splits (the
 weakest part of the reconstruction). Measured error of what IS carried, vs the
 wire-measured counter on demos that have both: lg 0.3 pp, sg 1.3 pp, ssg
-1.7 pp, axe 0.5 pp mean accuracy error — see
+1.7 pp, axe 0.5 pp, rl 0.6 pp, gl 0.3 pp mean accuracy error — see
 [damagerecon/ACCURACY.md](damagerecon/ACCURACY.md) §"Aim hit recovery" for the
 withhold-and-compare method and the per-weapon table, and
 `cmd/qw-aim-eval` for the harness.
@@ -4063,6 +4087,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v74 | **The fire→flight association reaches the Result, and with it rl/gl hit recovery on old demos.** `shots.shots[]` gains **`flightEnd`** — the match-relative time at which the tracked rocket/grenade (or nail) a fire launched died. The shots analyzer has always bracketed those flights, since that IS how a projectile fire's `hit` is decided (`analyzer/shots.go linkProjectiles`), and then discarded the association; it is now published. Absent on hitscan fires and on a projectile whose entity the server never broadcast — which is exactly the state the measured hit counter reads as a miss — and set whether or not the impact damaged anyone. On the back of it, the reconstructed hit tier now covers **`rl` and `gl`**: `aim.players[].weapons[].recon.hits` appears for them on demos whose damage section is reconstructed, joined flight-impact-instant → reconstructed damage instead of by counting impacts, which is what made the two conventions differ by ~7 pp on rl in v73. Measured over 53 dm2/dm3 demos carrying the KTX log (rows ≥ 20 fires): mean accuracy error **rl 0.6 pp** (bias +0.4) / **gl 0.3 pp** (bias 0.0) vs the measured counter, with the join-on-wire control at 0.4 pp / 0.1 pp; `lg`/`sg`/`ssg`/`axe` unchanged to the last row. `ng`/`sng` stay withheld — nail linking is opt-in, so their measured counter is zero everywhere and there is nothing to validate a recovery against. Goldens move by exactly the new fields. |
 | v73 | **Airgib detection gates on pre-impact evidence** (a **correctness fix**: entries move in and out of `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX writes the damage message inline in `T_Damage`, and measured over 410 direct rocket hits the stamp lands in the same wire frame as the first knockback-visible position sample 82% of the time and up to two frames (+28 ms) late 6% — so samples near the stamp can already carry the rocket's own knockback, and the hit-time sample alone reported players who were STANDING at impact as airborne (hub `232925`: a victim riding the dm2 `func_train` read **303 units of air** when a quad direct rocket blasted him off it, published as the match's biggest airgib). A hit now qualifies when every position sample in `[hit − preMs, hit − 40 ms]` (default **100 ms**) reads ≥ 96 units above floor — the preceding tick deciding when the window holds no sample (old coarse-tick demos, recording holes) — and no sample beside the hit reads ground contact (knockback over-reports height but cannot fake a grounded reading, so a victim who fell and landed just before the rocket rejects while one knocked laterally over a higher floor does not). The 100 ms default is aesthetic: floor-relative height is a step function at ledge edges, so longer windows measure time-since-the-edge and drop genuine 300+-unit ledge-drop events. Reported `height`/`loc`/`heightAboveAttacker` come from the latest PRE-IMPACT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v73 hit-sample-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. Airgibs also now consume **reconstructed** damage (the DAG node binds `damage:final`), so pre-instrumentation demos get a Key-Moments list too — recon's direct/splash split is geometric (explosion endpoint within 48 units) and its timestamps frame-accurate; `damage.source` says which evidence a list rests on (supersedes v71's wire-measured-only gate for airgibs; aim's MEASURED counters keep it — the reconstruction feeds only aim's separate `recon` tier, see the other v73 row). |
 | v73 | **Aim hit recovery on reconstructed demos.** `aim` gains `hitsSource` (`ktx` \| `reconstructed`, absent when the demo carries no damage section) and, on reconstructed demos only, `aim.players[].weapons[].recon.hits` — the fire→damage join re-run against `damagerecon`'s log, so accuracy exists on the ~45% of the archive that never carried `mvdhidden_dmgdone`. Additive and strictly separate: `hitsMeasured` keeps its v71 meaning (still **false** on a reconstructed section) and every measured counter stays withheld there, so a reconstructed hit count can never be read as a measured one — it only ever appears under `recon`. Emitted for the same-server-frame weapons `lg`/`sg`/`ssg`/`axe`, validated exact against the wire log (the join reproduces the measured counters from a wire log with zero error; against the reconstruction it costs 0.3–1.7 pp of accuracy, `damagerecon/ACCURACY.md` §"Aim hit recovery", harness `cmd/qw-aim-eval`). `rl`/`gl`/`ng`/`sng` carry NO block — their fire→impact link needs the projectile-flight bracket the shots analyzer discards, and the impact-counting alternative reads 7.3 pp above the measured rl convention. Withheld with them, per-field and for stated reasons: the per-fire `hit` columns, the pellet split, direct/splash, the LG whiff classes and the enemy/team/self slices (see [WeaponAimRecon](#weaponaimrecon)). Pipeline: the `aim` node now binds `damage:final` instead of the raw `damage` artifact. Old-era goldens move by exactly the new fields. |
 | v72 | **Archive-demo contracts: wall-clock anchors, match provenance, final scores, parse census, backpack reconstruction.** `streams.global` gains the wall-clock anchors (`demoStartUnixMs` and the match-start anchor echoed on `/overview` timing), derived from the wire date markers a recorder writes, with monotone floors and honest cross-checks — plus `timelineAnalysis.demoMarkers` for player-inserted bookmarks. `match` gains `mode` and `sources`, naming what each match-level value was decided from rather than presenting a merged answer. `metadata` gains `finalScores` (KTX's `//finalscores` end-of-match scoreline: date, mode, map, both team names and totals) and `matchSettings.fairpacks` (the `Fairpacks setting:` countdown broadcast, `ktx/src/match.c:2086-2107`). New top-level `parseWarnings` — the reader's per-run parse census, published on every run instead of being dropped. `streams.players[].aw` publishes `STAT_ACTIVEWEAPON`, the **wielded** weapon bit (opt-in field code `aw` on `/buckets`, `/stream-slice`, `/state-at`); a different question from the `rl`/`lg`/… inventory intervals. `backpacks[]` gains `source` (`ktx` \| `reconstructed`): the hint path stamps `ktx`, and a new post-processor fills the section on demos older than the `//ktx drop` hint by replaying `DropBackpack`'s own rule over `aw` at each in-match death. The two provenances are never mixed in one demo, and a reconstructed row's PICKUP side rides the drop row instead of `weaponPickups`: new `backpacks[].fate` (`picked` \| `expired` \| `unobserved`) with `picker`, `pickerTeam` and `pickupTime`, plus an `entNum` naming the bound backpack-model entity. The linkage node binds each reconstructed drop to the pack that appears at its time and place, follows that pack's origin updates to where it settled, and reads the disappearance as the server would — the bounding-box overlap that runs `BackpackTouch`. New parser events feed it: `ItemStateEvent` now carries the entity origin at each visibility transition, and `ItemMoveEvent` reports a visible item entity's origin changes (map items never move; a tossed backpack does). A `ktx` row carries `fate` too, but only ever `expired` and only from a wire hint of its own: KTX's third backpack directive `//ktx expire <ent>` (`ktx/src/g_spawn.c:196-210`, new `BackpackExpireHintEvent`) announces a pack `SUB_Remove` took untaken, which the `weaponPickups` join cannot state — an absent `fate` on a `ktx` row means "ask `weaponPickups`", never "nobody took it". Measured with every hint withheld on 223 demos: 100.00% precision / 96.13% recall on picked-vs-not, 99.98% of named pickers correct, and `expired` 100.00% precision / 100.00% recall against the packs `//ktx expire` names. Both provenances now publish the pack's own origin — the victim's position less KTX's 24-unit drop offset (`items.c:2703-2704`) — so backpack `origin` z values move by −24 against v71. |

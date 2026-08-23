@@ -43,6 +43,13 @@ import (
 //     already is one), and each impact claims at most one fire. Magnitude is
 //     never read, which is why the pellet split cannot be recovered (see
 //     result.WeaponAimRecon for the full withheld list).
+//
+// The projectile weapons (rl/gl) anchor differently, in reconFlightHits: not
+// on the fire but on the impact of the flight the fire launched, read off
+// Shot.FlightEnd. That is the measured counter's own definition rather than an
+// approximation of it — a fire whose projectile was never tracked is a miss on
+// both sides — and it is what makes rl/gl comparable to a modern demo's
+// numbers at all (see reconTierWeapons).
 const (
 	// reconHitscanWindowMs mirrors damagerecon's tolShotMs: the tolerance
 	// with which its attribution pairs a hitscan FIRE SOUND with a damage
@@ -68,32 +75,58 @@ const (
 	// victims at once (one fire) or the victims' stat updates straddled a
 	// frame boundary.
 	reconImpactMergeMs = 34
+
+	// Projectile flight-end → reconstructed-damage bounds, used by the
+	// FLIGHT join (reconFlightWeapons). They mirror damagerecon's own
+	// projectile tolerances (attribution.go tolProjAfterMs / tolProjBeforeMs,
+	// measured p5=−81 / p99=+261 of despawn-to-damage-frame lag): the
+	// reconstruction only ever explained a delta by a flight whose end sat
+	// inside that band, so a delta outside it is one this flight did not
+	// cause according to the very log being joined. Asymmetric because the
+	// tracked despawn usually PRECEDES the victim's stat instant.
+	reconFlightDmgBeforeMs = 81
+	reconFlightDmgAfterMs  = 261
 )
 
-// reconTierWeapons is the set of weapons the tier SHIPS: those whose damage
-// lands in the fire's own server frame (the axe at its fixed traceline delay),
-// where the join was validated EXACT against the wire log — see
-// damagerecon/ACCURACY.md §"Aim hit recovery" for the measurement and
-// cmd/qw-aim-eval for the harness.
+// reconTierWeapons is the set of weapons the tier SHIPS, in two families.
 //
-// rl/gl/ng/sng are deliberately absent. Their impact is a detonation an
-// unbounded flight after the fire, and what pins which projectile caused which
-// impact is the entity-flight bracket the shots analyzer builds from
-// ProjectileSpawn/Despawn and discards — not reachable from a finished Result.
-// Counting impacts instead answers a different question than the measured
-// counter does (which counts fires whose flight LINKED, so a point-blank
-// rocket that never broadcast its entity is measured as a miss): on the wire
-// log itself the two differ by +7.3pp on rl, so shipping it would put a
-// reconstructed rl accuracy 7 points above the measured convention. A weapon
-// outside this set gets no Recon block at all rather than a weak one — its
-// fires still publish Shots.
+// The SAME-FRAME family (lg/sg/ssg, and the axe at its fixed traceline delay)
+// links a fire to damage in the fire's own server frame, and the join was
+// validated EXACT against the wire log.
+//
+// The FLIGHT family (rl/gl, reconFlightWeapons) links a fire to the damage its
+// TRACKED PROJECTILE caused, on the measured counter's own definition: a fire
+// whose flight was never tracked is a miss, exactly as analyzer/shots.go
+// linkProjectiles counts it. That definition needs the fire→flight association
+// the shots analyzer used to discard; since v74 it is published as
+// Shot.FlightEnd, which is what makes the projectile side shippable at all.
+// Before it existed the join could only count reconstructed IMPACTS — a
+// different question (a point-blank rocket that never broadcast an entity is
+// measured as a miss but is an impact) that read +7.3pp above the measured rl
+// convention on the wire log itself.
+//
+// See damagerecon/ACCURACY.md §"Aim hit recovery" for both families'
+// measurements and cmd/qw-aim-eval for the harness. ng/sng stay out: their
+// measured counter is 0 on every eval row (nail linking is opt-in and was
+// never on), so there is no ground truth to validate a recovery against. A
+// weapon outside this set gets no Recon block at all rather than a weak one —
+// its fires still publish Shots.
 var reconTierWeapons = map[string]bool{
 	"lg": true, "sg": true, "ssg": true, "axe": true,
+	"rl": true, "gl": true,
 }
 
+// reconFlightWeapons is the subset of the join whose fires are matched to
+// damage through their tracked projectile flight (Shot.FlightEnd) rather than
+// through their own fire time. Nails are NOT here: their flights are only
+// bracketed when nail decoding is enabled, so FlightEnd is absent on a default
+// parse and a flight join would report an unconditional zero — they keep the
+// impact-count join, which the eval path is the only caller of.
+var reconFlightWeapons = map[string]bool{"rl": true, "gl": true}
+
 // reconEvalWeapons is every weapon the join CAN be run for — the shipped tier
-// plus the projectiles it withholds. Reachable only through ReconHitsForEval:
-// the measurement that decides what ships must not be gated on what shipped
+// plus the nails it withholds. Reachable only through ReconHitsForEval: the
+// measurement that decides what ships must not be gated on what shipped
 // (before this existed, reproducing the rl/gl numbers in ACCURACY.md needed a
 // hand-edit of reconTierWeapons).
 var reconEvalWeapons = map[string]bool{
@@ -101,22 +134,21 @@ var reconEvalWeapons = map[string]bool{
 	"rl": true, "gl": true, "ng": true, "sng": true,
 }
 
-// Projectile fire→impact bounds, used by the EVAL path only (reconEvalWeapons).
-// Each is the projectile's own lifetime in ktx/src/weapons.c — rocket
-// nextthink+10 (:1076), grenade fuse +2.5 (:1430), spike +6 (:1471) — i.e. the
-// widest a fire and its own impact can physically be apart. Deliberately the
-// loosest possible bound: the question the control asks is "what does counting
-// impacts give", so the window must not be what limits the answer.
+// Nail fire→impact bounds, used by the EVAL path only (ng/sng, which the
+// shipped tier withholds and which have no tracked flight on a default parse).
+// The bound is the spike's own lifetime in ktx/src/weapons.c (+6 s, :1471) —
+// the widest a fire and its own impact can physically be apart. Deliberately
+// the loosest possible bound: the question the eval asks is "what does
+// counting impacts give", so the window must not be what limits the answer.
 const (
-	reconRocketLifetimeMs  = 10000
-	reconGrenadeFuseMs     = 2500
 	reconNailLifetimeMs    = 6000
 	reconProjJitterMs      = 100 // stat-instant quantization at each end
 	reconProjBackwardSlack = 100 // an impact frame just before its own fire sound
 )
 
 // reconLinkWindow returns the [lo,hi] offsets from a fire's timestamp within
-// which an impact of that weapon may be claimed by it.
+// which an impact of that weapon may be claimed by it. rl/gl are absent: they
+// are joined through their flight (reconFlightWeapons), not their fire time.
 func reconLinkWindow(weapon string) (lo, hi int32, ok bool) {
 	switch weapon {
 	case "lg":
@@ -125,10 +157,6 @@ func reconLinkWindow(weapon string) (lo, hi int32, ok bool) {
 		return -reconHitscanWindowMs, reconHitscanWindowMs, true
 	case "axe":
 		return reconAxeDelayMs - reconAxeJitterMs, reconAxeDelayMs + reconAxeJitterMs, true
-	case "rl":
-		return -reconProjBackwardSlack, reconRocketLifetimeMs + reconProjJitterMs, true
-	case "gl":
-		return -reconProjBackwardSlack, reconGrenadeFuseMs + reconProjJitterMs, true
 	case "ng", "sng":
 		return -reconProjBackwardSlack, reconNailLifetimeMs + reconProjJitterMs, true
 	}
@@ -154,9 +182,9 @@ func reconDamageByAttacker(res *result.Result, inWindow func(int32) bool) map[st
 }
 
 // ReconHitsForEval runs the fire→reconstructed-damage join over the WHOLE match
-// for every weapon it can be run for (reconEvalWeapons) — including the
-// rl/gl/ng/sng the shipped tier withholds — and returns hits per player per
-// weapon. Nil unless res carries a reconstructed damage section.
+// for every weapon it can be run for (reconEvalWeapons) — including the ng/sng
+// the shipped tier withholds — and returns hits per player per weapon. Nil
+// unless res carries a reconstructed damage section.
 //
 // It exists for cmd/qw-aim-eval and nothing else: what a weapon's join costs in
 // accuracy is the measurement that DECIDES whether it ships, so it cannot be
@@ -191,6 +219,10 @@ func ReconHitsForEval(res *result.Result) map[string]map[string]int {
 // with an honest zero when nothing linked — the CALLER decides whether a block
 // is emitted, and it emits one for every fired tier weapon.
 //
+// Two joins live here, one per weapon family. rl/gl (reconFlightWeapons) go
+// through reconFlightHits, which anchors on the fire's tracked flight; every
+// other weapon anchors on the fire itself and is matched below.
+//
 // Impacts are claimed in time order, each taking the EARLIEST unclaimed fire
 // whose window covers it; no fire can be claimed twice (the wire join's `used`
 // flag, applied from the impact side because a reconstructed impact — unlike a
@@ -209,9 +241,13 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 	if len(shots) == 0 {
 		return nil
 	}
-	// Fires per weapon, time-ordered, with a claim flag.
+	// Fires per weapon, time-ordered, with a claim flag. end carries the
+	// fire's tracked-flight impact time (Shot.FlightEnd) for the flight
+	// family; nil there means the projectile was never tracked, which the
+	// measured counter reads as a miss.
 	type fire struct {
 		t       int32
+		end     *int32
 		claimed bool
 	}
 	fires := make(map[string][]*fire)
@@ -220,7 +256,7 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 		if !tier[w] {
 			continue
 		}
-		fires[w] = append(fires[w], &fire{t: shots[i].Time})
+		fires[w] = append(fires[w], &fire{t: shots[i].Time, end: shots[i].FlightEnd})
 	}
 	if len(fires) == 0 {
 		return nil
@@ -247,6 +283,17 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 			continue
 		}
 		sort.Slice(ts, func(i, j int) bool { return ts[i] < ts[j] })
+		if reconFlightWeapons[w] {
+			ends := make([]int32, 0, len(f))
+			for _, fi := range f {
+				if fi.end != nil {
+					ends = append(ends, *fi.end)
+				}
+			}
+			sort.Slice(ends, func(i, j int) bool { return ends[i] < ends[j] })
+			out[w] = reconFlightHits(ends, ts)
+			continue
+		}
 		lo, hi, ok := reconLinkWindow(w)
 		if !ok {
 			continue
@@ -279,4 +326,65 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 		}
 	}
 	return out
+}
+
+// reconFlightHits is the PROJECTILE join: it counts how many of one player's
+// rl (or gl) fires connected, given the ascending impact times of their tracked
+// flights (Shot.FlightEnd, one entry per fire that HAD a flight) and the
+// ascending times of that player's same-weapon reconstructed damage.
+//
+// It reproduces the measured counter's definition rather than approximating it
+// (analyzer/shots.go linkProjectiles):
+//
+//   - a fire whose projectile was never tracked contributes no `end` and is a
+//     miss — the same verdict the wire join reaches, because a flight is what
+//     pins a fire to an impact there too. This is the whole reason the
+//     projectile side can ship: counting reconstructed impacts instead credits
+//     those fires and reads ~7pp high on rl (see reconTierWeapons);
+//   - a flight claims ONE damage instant — the earliest unclaimed one its
+//     window covers, together with that instant's frame-mates — and counts one
+//     hit, so a rocket that hurt three players is one hit, the wire join's
+//     multi-victim behaviour;
+//   - a claimed damage instant is consumed, so two flights ending in the same
+//     frame cannot both count the same explosion. The wire join consumes the
+//     same way (its `used` flag), including the case where one flight swallows
+//     a second flight's frame-mate.
+//
+// Flights are processed in impact order, each taking the earliest unclaimed
+// instant its window covers — the same exchange-argument-optimal matching the
+// same-frame join uses, and for the same reason: both sequences are ordered
+// and the window is a fixed offset from the flight's end.
+func reconFlightHits(ends, damage []int32) int {
+	if len(ends) == 0 || len(damage) == 0 {
+		return 0
+	}
+	used := make([]bool, len(damage))
+	hits := 0
+	// start is the first damage instant a flight can still reach: ends are
+	// ordered, so an instant before this flight's window — or already claimed
+	// — is dead for every later flight too.
+	start := 0
+	for _, end := range ends {
+		for start < len(damage) && (damage[start] < end-reconFlightDmgBeforeMs || used[start]) {
+			start++
+		}
+		claimed := -1
+		for i := start; i < len(damage) && damage[i] <= end+reconFlightDmgAfterMs; i++ {
+			if !used[i] {
+				claimed = i
+				break
+			}
+		}
+		if claimed < 0 {
+			continue
+		}
+		hits++
+		// Consume the whole impact instant: one explosion damaging several
+		// victims writes one row per victim, all on the same stat frame (see
+		// reconImpactMergeMs), and none of them is another flight's evidence.
+		for i := claimed; i < len(damage) && damage[i]-damage[claimed] <= reconImpactMergeMs; i++ {
+			used[i] = true
+		}
+	}
+	return hits
 }

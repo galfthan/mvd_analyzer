@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "73"
+  version: "74"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -4579,6 +4579,18 @@ components:
           items:
             additionalProperties: false
             properties:
+              flightEnd:
+                description: >-
+                  Match-relative ms at which the tracked projectile this fire
+                  launched died — its impact (same clock as `time`). Present
+                  only for a projectile fire (rl/gl, and ng/sng when nail
+                  decoding ran) whose entity the server broadcast; absent on
+                  hitscan fires and on a projectile whose flight was never
+                  tracked, which is the state the hit counters read as a miss.
+                  Set whether or not the impact damaged anyone.
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               hit:
                 description: "Whether the fire connected (Go-linked hit truth)."
                 type: boolean
@@ -4842,15 +4854,18 @@ components:
                         demo predates the KTX damage instrumentation and its
                         damage log was reconstructed — and never beside the
                         measured counters, which stay withheld there. Accuracy
-                        is `recon.hits / shots`. Emitted only for the
-                        same-server-frame weapons lg/sg/ssg/axe, and for every
-                        one of those the player fired — a shooter the
-                        reconstruction credits with no damage gets `hits: 0`,
-                        not an absent block. rl/gl/ng/sng carry no block at all
-                        (their fire→impact link needs the projectile-flight
-                        bracket, which is not recoverable here), so an absent
-                        block means "not recovered for this weapon", never
-                        "no hits".
+                        is `recon.hits / shots`. Emitted for the same-server-
+                        frame weapons lg/sg/ssg/axe and (schema v74) for the
+                        projectiles rl/gl, which link through the fire's tracked
+                        flight (`shots[].flightEnd`) on the measured counter's
+                        own definition — an untracked projectile is a miss on
+                        both sides. A block appears for every covered weapon the
+                        player fired: a shooter the reconstruction credits with
+                        no damage gets `hits: 0`, not an absent block. ng/sng
+                        carry no block at all (nail linking is opt-in, so there
+                        is no measured baseline to validate a recovery against),
+                        so an absent block means "not recovered for this
+                        weapon", never "no hits".
                       additionalProperties: false
                       properties:
                         hits:

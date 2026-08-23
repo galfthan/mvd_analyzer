@@ -227,7 +227,8 @@ sampler, per-demo CSVs and aggregation in
 
 ## 6. Aim hit recovery on reconstructed demos
 
-**SHIPPED** on `aim-recovery`, schema v73. `aimcore` re-runs the
+**SHIPPED** on `aim-recovery`, schema v73; projectiles added on
+`old-demo-summary`, schema v74 (see the follow-up below). `aimcore` re-runs the
 fire→damage join against the reconstructed damage log and publishes the
 recovered count as `aim.players[].weapons[].recon.hits`, with the new
 `aim.hitsSource` (`ktx` | `reconstructed` | absent) naming the evidence.
@@ -251,19 +252,32 @@ which separates the join method's error from the reconstruction's:
 | sg | 1.3pp | exact | yes |
 | ssg | 1.7pp | exact | yes |
 | axe | 0.5pp | 0.1pp | yes |
-| rl | 7.4pp | **+7.3pp — the same error** | no |
-| gl | 1.3pp | +1.0pp | no |
+| rl | 7.4pp → **0.6pp** (v74) | +7.3pp → +0.4pp | yes, since v74 |
+| gl | 1.3pp → **0.3pp** (v74) | +1.0pp → +0.1pp | yes, since v74 |
 
-rl/gl/ng/sng are withheld because the gap is not reconstruction error:
-the control reproduces it exactly. Their fire→impact link needs the
+rl/gl were withheld in v73 because the gap was not reconstruction error:
+the control reproduced it exactly. Their fire→impact link needs the
 entity-flight bracket `ShotsAnalyzer` builds and discards, so from a
-finished Result the join can only count impacts — a different question
+finished Result the join could only count impacts — a different question
 than the measured counter asks (it counts fires whose flight LINKED, so a
 point-blank rocket that never broadcast its entity is measured as a
-miss). **Follow-up if rl accuracy is wanted on old demos: carry the
-fire→flight association into the Result** (a per-shot flight id, or the
-linked impact time on `Shot`), and the projectile side joins on the
-measured definition.
+miss).
+
+**Follow-up done, schema v74** (branch `old-demo-summary`): the
+association is published as `shots[].flightEnd` — the impact time of the
+flight a fire launched, absent when no flight was tracked — and the
+projectile join now anchors on it, inside damagerecon's own
+`tolProjBeforeMs`/`tolProjAfterMs` window, one damage instant claimed per
+flight. Same 53-demo corpus: rl 7.4pp → **0.6pp** mean error (bias +0.4,
+91% of rows within 2pp), gl 1.3pp → **0.3pp**, hitscan rows unchanged to
+the last row; the +0.4pp control residual is one-sided (recon damage
+from never-tracked rockets adopted by a nearby flight inside the log's
+own late-stat-instant tolerance). Numbers and method:
+`damagerecon/ACCURACY.md`; raw output in
+`.reports/aim-rlgl-2026-08-23/`.
+
+ng/sng stay withheld: nail linking is opt-in, so their measured counter
+is zero on every corpus row and there is nothing to validate against.
 
 Also withheld on a reconstructed section, per field, in
 `result.WeaponAimRecon` and RESULT_SCHEMA: per-fire `hit` columns, the

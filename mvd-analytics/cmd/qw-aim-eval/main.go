@@ -16,9 +16,11 @@
 //	                                                           [-min-shots 20] [-diag] [-csv out.csv]
 //
 // Scoring covers EVERY weapon the join can run for, not only the ones the
-// shipped tier publishes (aimcore.ReconHitsForEval) — the rl/gl figures are the
-// evidence for withholding rl/gl, so they have to be reproducible from a clean
-// checkout. The `tier` column says which rows production actually publishes.
+// shipped tier publishes (aimcore.ReconHitsForEval) — what a weapon's join
+// costs in accuracy is the evidence that decides whether it ships, so it has to
+// be reproducible from a clean checkout (the ng/sng figures, and the rl/gl ones
+// that decided those two DO ship in v74). The `tier` column says which rows
+// production actually publishes.
 //
 // Run from the repo root: the reconstruction wants ./bsps.
 package main
@@ -155,8 +157,9 @@ func scoreDemo(path string, diag bool) ([]row, map[int32]int, error) {
 	// Both sides go through aimcore.ReconHitsForEval, which runs the join for
 	// EVERY weapon rather than only the ones the shipped tier publishes: a
 	// harness that could only score what already ships could not have produced
-	// the rl/gl numbers that decided rl/gl do not ship. What ships is scored
-	// separately below, off the real pipeline output (rcPresent).
+	// the rl/gl numbers that first withheld rl/gl and then cleared them. What
+	// ships is scored separately below, off the real pipeline output
+	// (rcPresent).
 	joinCtl := *gtDmg
 	joinCtl.Source = result.DamageSourceReconstructed
 	res.Damage = &joinCtl
@@ -281,7 +284,7 @@ func printWeapons(rows []row, minShots int) {
 
 	fmt.Printf("\n== per-weapon totals (all rows). rc-acc = the recon join on the RECONSTRUCTED log,\n")
 	fmt.Printf("   join-acc = the same join on the WIRE log (method control), tier = the share of rows\n")
-	fmt.Printf("   the SHIPPED tier publishes (rl/gl/ng/sng are scored here but deliberately not shipped)\n")
+	fmt.Printf("   the SHIPPED tier publishes (ng/sng are scored here but deliberately not shipped)\n")
 	fmt.Printf("   %-5s %6s %9s %9s %9s %9s %9s %9s %8s\n", "wpn", "rows", "shots", "gt-hits", "rc-hits", "gt-acc", "rc-acc", "join-acc", "tier")
 	for _, w := range order {
 		var shots, gh, rh, jh, present int

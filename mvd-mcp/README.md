@@ -445,7 +445,8 @@ which evidence there was (`ktx` / `reconstructed` / absent): on a
 `reconstructed` demo the measured counters stay withheld, but a
 recovered hit count is published separately as
 `weapons[].recon.hits` — accuracy is `recon.hits / shots`, for
-`lg`/`sg`/`ssg`/`axe` only, and never merged into `hits`. Start with
+`lg`/`sg`/`ssg`/`axe` and (schema v74) `rl`/`gl`, never for `ng`/`sng`,
+and never merged into `hits`. Start with
 `players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
 full/partial/miss fires, RL/GL direct/splash/missed, the LG
 miss/blocked/out-of-range whiff split); the

@@ -209,6 +209,16 @@ func TestShots_ProjectileBracketDisambiguation(t *testing.T) {
 	if !b0.Hit || len(b0.Victims) != 1 || b0.Victims[0] != "victimA" {
 		t.Errorf("shot@1300 = %+v, want hit victimA", b0)
 	}
+	// Each fire publishes ITS OWN flight's end (schema v74) — the half of the
+	// bracket that decided the victims above. Reading them off the projectile
+	// stream instead cannot tell these two apart: their spawn frames are 300 ms
+	// apart but their impacts arrive in the opposite order.
+	if a0.FlightEnd == nil || *a0.FlightEnd != 1500 {
+		t.Errorf("shot@1000 flightEnd = %v, want 1500", a0.FlightEnd)
+	}
+	if b0.FlightEnd == nil || *b0.FlightEnd != 1400 {
+		t.Errorf("shot@1300 flightEnd = %v, want 1400", b0.FlightEnd)
+	}
 }
 
 // TestShots_ProjectileMiss leaves a rocket whose flight ends with no damage
@@ -235,6 +245,18 @@ func TestShots_ProjectileMiss(t *testing.T) {
 			hits++
 		}
 	}
+	// flightEnd reports the FLIGHT, not the damage: the rocket that connected
+	// and the one that hit a wall both tracked one and both say when it ended.
+	want := map[int32]int32{1000: 1500, 3000: 3600}
+	for _, s := range r.Shots.Shots {
+		w, ok := want[s.Time]
+		if !ok {
+			continue
+		}
+		if s.FlightEnd == nil || *s.FlightEnd != w {
+			t.Errorf("shot@%d flightEnd = %v, want %d", s.Time, s.FlightEnd, w)
+		}
+	}
 	if hits != 1 {
 		t.Errorf("rl hits = %d, want 1 (one of two rockets connected)", hits)
 	}
@@ -244,6 +266,32 @@ func TestShots_ProjectileMiss(t *testing.T) {
 				t.Errorf("rl accuracy = %v, want 0.5", w.Accuracy)
 			}
 		}
+	}
+}
+
+// TestShots_ProjectileWithoutFlight pins the absence half of the v74 contract:
+// a rocket the server never broadcast as an entity leaves the fire with no
+// flightEnd — and that absence is load-bearing, since it is the state both the
+// measured hit counter and the reconstructed tier read as a miss.
+func TestShots_ProjectileWithoutFlight(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+	a.hadDmg = true
+
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000))
+	_ = a.OnEvent(rlDamage(3, 0, 1030)) // damage, but no spawn/despawn pair
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	if len(r.Shots.Shots) != 1 {
+		t.Fatalf("shots = %+v, want 1", r.Shots.Shots)
+	}
+	s := r.Shots.Shots[0]
+	if s.FlightEnd != nil {
+		t.Errorf("flightEnd = %d, want absent — no flight was tracked", *s.FlightEnd)
+	}
+	if s.Hit {
+		t.Errorf("shot = %+v, want a miss — an untracked rocket links to nothing", s)
 	}
 }
 

@@ -204,23 +204,82 @@ func TestReconTierZeroForAShooterWithNoReconDamage(t *testing.T) {
 	}
 }
 
-// The tier covers only the validated (same-frame linkable) weapons: a
-// projectile fire publishes shots and no recon block at all, so a consumer can
-// never read a withheld weapon as a zero-accuracy one.
-func TestReconTierWithholdsProjectiles(t *testing.T) {
+// The tier covers no weapon whose recovery has no ground truth: ng/sng fires
+// publish shots and no recon block at all, so a consumer can never read a
+// withheld weapon as a zero-accuracy one.
+func TestReconTierWithholdsNails(t *testing.T) {
 	shots := []result.Shot{
-		{Time: 500, Player: "A", Weapon: "rl", Source: "sound"},
-		{Time: 1000, Player: "A", Weapon: "gl", Source: "sound"},
+		{Time: 500, Player: "A", Weapon: "ng", Source: "sound"},
+		{Time: 1000, Player: "A", Weapon: "sng", Source: "sound"},
+	}
+	events := []result.DamageEntry{
+		{Time: 900, Attacker: "A", Victim: "B", Weapon: "ng", Damage: 9},
+		{Time: 1400, Attacker: "A", Victim: "B", Weapon: "sng", Damage: 18},
+	}
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
+	for _, w := range []string{"ng", "sng"} {
+		if wa := weaponOf(t, ar, "A", w); wa.Recon != nil {
+			t.Errorf("%s recon = %+v, want withheld — nail linking is opt-in, so the "+
+				"measured counter it would be compared against is zero everywhere", w, wa.Recon)
+		}
+	}
+}
+
+// The projectile tier joins on the fire's TRACKED FLIGHT, not on the fire: a
+// rocket whose entity never broadcast has no flightEnd and is a miss even
+// though the reconstruction saw damage it could have caused — exactly what the
+// measured counter says about it (analyzer/shots.go linkProjectiles). The same
+// fire with its flight tracked is a hit.
+func TestReconTierProjectileNeedsATrackedFlight(t *testing.T) {
+	events := []result.DamageEntry{
+		{Time: 900, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 90, IsSplash: true},
+	}
+	untracked := []result.Shot{{Time: 500, Player: "A", Weapon: "rl", Source: "sound"}}
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, untracked, events), Query{})
+	if rl := weaponOf(t, ar, "A", "rl"); rl.Recon == nil || rl.Recon.Hits != 0 {
+		t.Errorf("rl recon = %+v, want a present block with hits 0 — no flight, no link", rl.Recon)
+	}
+
+	end := int32(880)
+	tracked := []result.Shot{{Time: 500, Player: "A", Weapon: "rl", Source: "sound", FlightEnd: &end}}
+	ar = Compute(reconFixture(result.DamageSourceReconstructed, tracked, events), Query{})
+	if rl := weaponOf(t, ar, "A", "rl"); rl.Recon == nil || rl.Recon.Hits != 1 {
+		t.Errorf("rl recon = %+v, want hits 1 — the flight ended 20 ms before the "+
+			"victim's stat instant", rl.Recon)
+	}
+}
+
+// A flight claims one whole impact instant: the rocket that hurt two players in
+// the same frame is ONE hit, and the frame-mate row is consumed so a second
+// flight ending alongside it cannot count the same explosion twice.
+func TestReconTierFlightClaimsOneImpactInstant(t *testing.T) {
+	e1, e2 := int32(880), int32(890)
+	shots := []result.Shot{
+		{Time: 500, Player: "A", Weapon: "rl", Source: "sound", FlightEnd: &e1},
+		{Time: 560, Player: "A", Weapon: "rl", Source: "sound", FlightEnd: &e2},
 	}
 	events := []result.DamageEntry{
 		{Time: 900, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 90, IsSplash: true},
-		{Time: 1400, Attacker: "A", Victim: "B", Weapon: "gl", Damage: 60, IsSplash: true},
+		{Time: 900, Attacker: "A", Victim: "C", Weapon: "rl", Damage: 40, IsSplash: true},
 	}
 	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
-	for _, w := range []string{"rl", "gl"} {
-		if wa := weaponOf(t, ar, "A", w); wa.Recon != nil {
-			t.Errorf("%s recon = %+v, want withheld — the fire→impact bracket the "+
-				"measured counter uses is not reachable from a finished Result", w, wa.Recon)
-		}
+	if rl := weaponOf(t, ar, "A", "rl"); rl.Recon == nil || rl.Recon.Hits != 1 {
+		t.Errorf("rl recon = %+v, want hits 1 — one explosion, two victim rows, and no "+
+			"evidence the second rocket hurt anyone", rl.Recon)
+	}
+}
+
+// Grenades that detonate long after the fire still link, because the anchor is
+// the flight's end and not the fire: a 2 s lob whose impact damage lands right
+// after the despawn is a hit, while the same damage with no flight is not.
+func TestReconTierGrenadeLinksOnFlightEnd(t *testing.T) {
+	end := int32(2400)
+	shots := []result.Shot{{Time: 300, Player: "A", Weapon: "gl", Source: "sound", FlightEnd: &end}}
+	events := []result.DamageEntry{
+		{Time: 2430, Attacker: "A", Victim: "B", Weapon: "gl", Damage: 60, IsSplash: true},
+	}
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
+	if gl := weaponOf(t, ar, "A", "gl"); gl.Recon == nil || gl.Recon.Hits != 1 {
+		t.Errorf("gl recon = %+v, want hits 1", gl.Recon)
 	}
 }

@@ -337,8 +337,9 @@ func addReconAimTier(am *result.AimResult) {
 	}
 	am.HitsMeasured = false
 	am.HitsSource = result.AimHitsSourceReconstructed
-	// The shipped tier (aimcore reconTierWeapons): same-server-frame weapons.
-	tier := map[string]bool{"lg": true, "sg": true, "ssg": true, "axe": true}
+	// The shipped tier (aimcore reconTierWeapons): the same-server-frame
+	// weapons plus the v74 flight-joined projectiles.
+	tier := map[string]bool{"lg": true, "sg": true, "ssg": true, "axe": true, "rl": true, "gl": true}
 	for i := range am.Players {
 		pa := &am.Players[i]
 		if pa.Crosshair != nil {
@@ -459,7 +460,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "damage-dmg-bounded", url: "/v1/demos/gameId:42/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 200},
 		{name: "damage-dmg-invalid", url: "/v1/demos/gameId:42/damage?dmg=nope", path: "/v1/demos/{id}/damage", status: 400},
 		{name: "err-bounded-unavailable", url: "/v1/demos/gameId:44/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 422},
-		{name: "shots", url: "/v1/demos/gameId:42/shots", path: "/v1/demos/{id}/shots", status: 200},
+		// mustContain pins the v74 fire→flight association: `flightEnd` is
+		// omitempty, so a projection that dropped it would validate exactly as
+		// happily — and the reconstructed rl/gl hit tier is built on it.
+		{name: "shots", url: "/v1/demos/gameId:42/shots", path: "/v1/demos/{id}/shots", status: 200,
+			mustContain: []string{`"flightEnd":`}},
 		// The unwindowed cases serve the stored aim, which addReconAimTier has
 		// turned into the v73 reconstructed tier — the only shape that
 		// exercises `recon` + the withholding contract, since every corpus demo

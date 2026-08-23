@@ -1147,10 +1147,13 @@ diff -r /tmp/before /tmp/after
    absent). The two tiers live in different fields and are never merged,
    so a reconstructed count cannot be mistaken for a measured one. It
    covers `lg`/`sg`/`ssg`/`axe` — the weapons whose damage lands in the
-   fire's own server frame, where the join measured 0.3–1.7 percentage
-   points of accuracy error against the wire-linked counter — and
-   deliberately NOT `rl`/`gl`/`ng`/`sng`, whose fire→impact link needs a
-   projectile-flight bracket that a finished Result does not carry.
+   fire's own server frame — and, since v74, `rl`/`gl`, which join
+   through the fire's own tracked projectile (`shots[].flightEnd`) on
+   the measured counter's definition rather than by counting impacts.
+   Measured against the wire-linked counter: 0.3–1.7 percentage points
+   of accuracy error for the hitscan set, 0.6 pp rl / 0.3 pp gl.
+   Deliberately NOT `ng`/`sng`: nail linking is opt-in, so the measured
+   counter a recovery would be validated against is zero everywhere.
    Everything below the hit COUNT stays withheld on those demos too: no
    per-fire hit flags, no pellet split, no direct/splash, no LG whiff
    classes, no enemy/team/self slices. Method and per-weapon tables:

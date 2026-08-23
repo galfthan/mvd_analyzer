@@ -32019,7 +32019,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -32358,6 +32358,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 5168,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -32376,6 +32377,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 5027,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -32387,6 +32389,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 5532,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -32398,6 +32401,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 5935,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32405,6 +32409,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 5809,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -32416,6 +32421,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6246,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -32427,6 +32433,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6342,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32438,6 +32445,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6454,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -32452,6 +32460,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6523,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -32468,6 +32477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 7273,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -32484,6 +32494,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 7368,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -32495,6 +32506,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8000,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32523,6 +32535,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11337,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32530,6 +32543,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 12352,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -32583,6 +32597,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 13237,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -32590,6 +32605,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13274,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32597,6 +32613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14856,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -32611,6 +32628,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 15050,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32629,6 +32647,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 19128,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -32636,6 +32655,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 22118,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32643,6 +32663,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 20587,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32650,6 +32671,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 20884,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -32657,6 +32679,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 20730,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32664,6 +32687,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 21063,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -32671,6 +32695,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 21933,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -32678,6 +32703,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25374,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32685,6 +32711,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 23886,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32696,6 +32723,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24751,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32717,6 +32745,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 25922,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32735,6 +32764,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 26752,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -32753,6 +32783,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 27974,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -32760,6 +32791,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 28145,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32771,6 +32803,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 28427,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32778,6 +32811,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 28208,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -32817,6 +32851,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 29065,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32842,6 +32877,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 28896,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32878,6 +32914,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 29362,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -32889,6 +32926,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 31028,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32896,6 +32934,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 32114,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32953,6 +32992,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 32453,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32971,6 +33011,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 33518,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -32978,6 +33019,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 33205,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -32989,6 +33031,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 33102,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -32996,6 +33039,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 34142,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -33010,6 +33054,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 34051,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33017,6 +33062,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 33872,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -33031,6 +33077,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 35763,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33038,6 +33085,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 36560,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33045,6 +33093,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 37557,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -33056,6 +33105,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38620,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33084,6 +33134,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 38583,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33091,6 +33142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38843,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33098,6 +33150,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 39690,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33105,6 +33158,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 41439,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33112,6 +33166,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 39908,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33119,6 +33174,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 40586,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33126,6 +33182,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 40840,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33133,6 +33190,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 41972,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33140,6 +33198,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 42871,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33154,6 +33213,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 43663,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -33229,6 +33289,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 44438,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -33283,6 +33344,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 45235,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33297,6 +33359,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 45311,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -33308,6 +33371,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 45606,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -33324,6 +33388,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 46532,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33331,6 +33396,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 50216,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33338,6 +33404,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 48840,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33345,6 +33412,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 48879,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33352,6 +33420,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51713,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33359,6 +33428,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 49943,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33366,6 +33436,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 50364,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33373,6 +33444,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 50956,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33380,6 +33452,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51377,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33387,6 +33460,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52438,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33394,6 +33468,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52334,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33401,6 +33476,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53113,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33408,6 +33484,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53012,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -33419,6 +33496,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53359,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -33426,6 +33504,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53814,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -33480,6 +33559,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 54698,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -33494,6 +33574,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 54530,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -33597,6 +33678,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 56494,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -33640,6 +33722,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 57309,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -33661,6 +33744,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 57675,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -33668,6 +33752,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 58230,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -33675,6 +33760,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 60839,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33703,6 +33789,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 61528,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33759,6 +33846,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 60156,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33873,6 +33961,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 61000,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -33980,6 +34069,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 61332,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -34063,6 +34153,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 63948,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -34079,6 +34170,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65506,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34093,6 +34185,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 67786,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -34112,6 +34205,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 68695,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34119,6 +34213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 68890,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34126,6 +34221,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 70838,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34133,6 +34229,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 69292,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34140,6 +34237,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 70324,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34147,6 +34245,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 71439,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34154,6 +34253,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 71843,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -34165,6 +34265,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 71932,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -34176,6 +34277,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 72669,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34183,6 +34285,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 73072,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34190,6 +34293,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 74915,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34197,6 +34301,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 73760,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34204,6 +34309,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 73970,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34211,6 +34317,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 74973,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34281,6 +34388,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 75579,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34302,6 +34410,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 76077,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34309,6 +34418,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 76748,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34323,6 +34433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 79086,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34344,6 +34455,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 79700,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34351,6 +34463,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 77941,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34358,6 +34471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 78593,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34365,6 +34479,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 79410,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -34376,6 +34491,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 79801,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -34387,6 +34503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81915,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -34398,6 +34515,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 80499,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34405,6 +34523,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81531,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34412,6 +34531,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 82544,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34419,6 +34539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 82881,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34426,6 +34547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 83499,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34433,6 +34555,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84148,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -34444,6 +34567,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84241,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -34458,6 +34582,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84538,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34472,6 +34597,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 88827,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34479,6 +34605,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 87022,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34486,6 +34613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 87540,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34500,6 +34628,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 91966,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34542,6 +34671,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 98173,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34549,6 +34679,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 98772,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34556,6 +34687,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 97786,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34563,6 +34695,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99277,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34570,6 +34703,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 103043,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34765,6 +34899,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 102718,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34786,6 +34921,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 103813,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34800,6 +34936,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 104110,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34814,6 +34951,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 107382,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34821,6 +34959,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 106510,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34828,6 +34967,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 109969,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34895,6 +35035,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 108542,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -34906,6 +35047,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 108770,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34913,6 +35055,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111150,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34920,6 +35063,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 109385,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34927,6 +35071,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 109562,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -34934,6 +35079,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111964,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -34948,6 +35094,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 110253,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -34959,6 +35106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112840,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -34966,6 +35114,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 110899,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -34973,6 +35122,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 110928,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -34984,6 +35134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111213,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -34991,6 +35142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112185,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35041,6 +35193,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 115176,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -35239,6 +35392,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 116435,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35296,6 +35450,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 118086,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35371,6 +35526,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 118825,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -35400,6 +35556,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 119042,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -35421,6 +35578,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 120589,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35443,6 +35601,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 120561,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -35454,6 +35613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 121031,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35477,6 +35637,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 122733,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35642,6 +35803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131563,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -35649,6 +35811,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 133526,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -35706,6 +35869,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 132279,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -35753,6 +35917,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 134108,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35802,6 +35967,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 134303,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35809,6 +35975,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 134514,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35845,6 +36012,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 135897,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35856,6 +36024,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 136144,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -35863,6 +36032,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 136806,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -35870,6 +36040,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 137150,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -35877,6 +36048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 138046,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -35884,6 +36056,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 138434,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -35902,6 +36075,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 139299,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -35924,6 +36098,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 139525,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -35931,6 +36106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 141014,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -35938,6 +36114,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 142550,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35945,6 +36122,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 141539,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -35956,6 +36134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 141292,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -35963,6 +36142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 143195,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35970,6 +36150,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 143909,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -35977,6 +36158,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 141759,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36002,6 +36184,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 143832,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36042,6 +36225,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 144481,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36058,6 +36242,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 146523,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -36065,6 +36250,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 146901,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36076,6 +36262,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 147172,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -36101,6 +36288,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 147459,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36115,6 +36303,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 148694,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36126,6 +36315,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 150990,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36147,6 +36337,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 149571,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36161,6 +36352,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 151588,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36175,6 +36367,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 149707,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36182,6 +36375,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 152194,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36189,6 +36383,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 150236,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36196,6 +36391,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 153563,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36203,6 +36399,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 155161,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36247,6 +36444,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 156843,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36318,6 +36516,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 160823,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36325,6 +36524,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161440,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36332,6 +36532,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161628,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36339,6 +36540,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 160453,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36346,6 +36548,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161161,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36360,6 +36563,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 162576,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36409,6 +36613,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 163354,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36416,6 +36621,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163535,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -36423,6 +36629,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163895,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -36434,6 +36641,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163895,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36450,6 +36658,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 168328,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36457,6 +36666,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 169326,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36513,6 +36723,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 172887,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36520,6 +36731,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 173508,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -36527,6 +36739,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 171699,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -36538,6 +36751,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 172703,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36545,6 +36759,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 174037,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -36578,6 +36793,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 174326,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36657,6 +36873,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 175245,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36714,6 +36931,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 176327,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36746,6 +36964,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 180152,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -36803,6 +37022,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 183327,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -36842,6 +37062,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 181465,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -36921,6 +37142,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 182523,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37017,6 +37239,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 185091,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -37031,6 +37254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 186763,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37053,6 +37277,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 188637,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -37060,6 +37285,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 193039,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37067,6 +37293,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 191853,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -37081,6 +37308,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 191944,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -37106,6 +37334,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 193649,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37127,6 +37356,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 191807,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37134,6 +37364,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 192558,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37148,6 +37379,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 195314,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37155,6 +37387,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 193632,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -37230,6 +37463,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 194209,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37251,6 +37485,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 195571,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -37262,6 +37497,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197208,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37269,6 +37505,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 195833,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37276,6 +37513,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 196846,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -37287,6 +37525,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 196814,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37294,6 +37533,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197677,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37301,6 +37541,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199702,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37308,6 +37549,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 200014,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37315,6 +37557,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 200623,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -37326,6 +37569,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 200041,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37386,6 +37630,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 205885,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37393,6 +37638,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 204442,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37404,6 +37650,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 204580,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -37422,6 +37669,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 205002,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -37466,6 +37714,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 206051,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37473,6 +37722,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 206625,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37480,6 +37730,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 207346,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -37487,6 +37738,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 207261,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37498,6 +37750,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 209363,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37505,6 +37758,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 207995,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37516,6 +37770,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 208726,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37523,6 +37778,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 210956,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37530,6 +37786,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 209143,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37541,6 +37798,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 209806,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37548,6 +37806,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 210014,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -37555,6 +37814,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 210436,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -37566,6 +37826,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 211813,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -37623,6 +37884,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 212414,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -37677,6 +37939,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 214468,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37684,6 +37947,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 214518,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -37702,6 +37966,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 215856,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37709,6 +37974,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 215579,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -37716,6 +37982,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 218180,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37758,6 +38025,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 220468,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37772,6 +38040,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 221747,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37779,6 +38048,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 220721,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37786,6 +38056,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 221686,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -37793,6 +38064,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 222416,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37800,6 +38072,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 224000,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -37891,6 +38164,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 225959,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -37986,6 +38260,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 226686,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -38025,6 +38300,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 230447,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38032,6 +38308,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 229149,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38039,6 +38316,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230006,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -38050,6 +38328,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230792,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38057,6 +38336,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230590,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -38068,6 +38348,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233478,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38075,6 +38356,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 233629,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -38082,6 +38364,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 233629,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38089,6 +38372,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233750,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -38096,6 +38380,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 234439,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38103,6 +38388,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 237012,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38110,6 +38396,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 236038,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38198,6 +38485,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 236984,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -38212,6 +38500,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 237881,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -38219,6 +38508,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 238064,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -38244,6 +38534,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 238545,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -38350,6 +38641,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 239231,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -38464,6 +38756,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 240075,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -38833,6 +39126,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 245023,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -38840,6 +39134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 245277,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -38854,6 +39149,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 246485,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -38934,6 +39230,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 247290,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -39055,6 +39352,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 251985,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39062,6 +39360,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 262750,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -39087,6 +39386,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 264756,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -39098,6 +39398,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 267049,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -39105,6 +39406,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 267828,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39175,6 +39477,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 269639,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39378,6 +39681,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 271774,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -39385,6 +39689,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273599,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -39425,6 +39730,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 271747,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -39464,6 +39770,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 275892,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39492,6 +39799,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 278293,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -39517,6 +39825,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 278997,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39524,6 +39833,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 278820,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -39535,6 +39845,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279131,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -39609,6 +39920,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 280053,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -39643,6 +39955,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 280378,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -39687,6 +40000,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 284437,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -39701,6 +40015,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 283079,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39797,6 +40112,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 286151,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39822,6 +40138,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 284396,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -39861,6 +40178,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 287112,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -39875,6 +40193,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 285150,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -39886,6 +40205,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 285280,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -39893,6 +40213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 285903,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -39900,6 +40221,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 286001,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -39907,6 +40229,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 288073,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -40000,6 +40323,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 291424,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40036,6 +40360,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 291644,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40107,6 +40432,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 292084,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -40143,6 +40469,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 295190,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40157,6 +40484,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 293721,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40164,6 +40492,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294203,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -40175,6 +40504,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294360,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -40193,6 +40523,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 295045,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -40204,6 +40535,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 296047,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40211,6 +40543,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 299857,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40218,6 +40551,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 300462,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40225,6 +40559,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 298733,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40232,6 +40567,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 301072,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40239,6 +40575,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 299761,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40246,6 +40583,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 299571,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40253,6 +40591,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 300371,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40260,6 +40599,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 300798,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40267,6 +40607,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 301473,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40274,6 +40615,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 301864,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -40285,6 +40627,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 303921,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40292,6 +40635,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 301981,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40306,6 +40650,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 302857,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40313,6 +40658,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 306096,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40334,6 +40680,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 309207,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40348,6 +40695,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 308046,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40362,6 +40710,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 310628,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40369,6 +40718,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 308500,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -40380,6 +40730,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 308532,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -40398,6 +40749,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 311229,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -40405,6 +40757,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 309307,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40419,6 +40772,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 310252,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -40430,6 +40784,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 310112,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -40441,6 +40796,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 310810,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -40457,6 +40813,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 311501,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -40493,6 +40850,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 312057,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -40554,6 +40912,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 313914,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -40572,6 +40931,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 316005,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -40594,6 +40954,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 318810,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40608,6 +40969,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 321108,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40615,6 +40977,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 319582,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40636,6 +40999,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 320876,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40650,6 +41014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 321669,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40657,6 +41022,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 323655,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40664,6 +41030,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 324383,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40671,6 +41038,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 322162,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40678,6 +41046,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 324965,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -40685,6 +41054,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 323629,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40813,6 +41183,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 327926,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40820,6 +41191,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 328408,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40827,6 +41199,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 328790,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -40956,6 +41329,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 331888,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40977,6 +41351,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 331283,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -40991,6 +41366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 332186,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -41005,6 +41381,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 332932,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -41019,6 +41396,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336679,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41026,6 +41404,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 335315,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41037,6 +41416,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336062,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41044,6 +41424,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336562,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41101,6 +41482,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 337029,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -41145,6 +41527,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 337627,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -41177,6 +41560,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 341043,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41184,6 +41568,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 339438,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41205,6 +41590,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 340005,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41216,6 +41602,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 340355,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41223,6 +41610,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 340308,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41237,6 +41625,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 340589,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41255,6 +41644,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 341678,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41262,6 +41652,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341341,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41273,6 +41664,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 342327,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41284,6 +41676,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 342133,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41291,6 +41684,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 343160,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41305,6 +41699,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 348147,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41312,6 +41707,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 348755,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41319,6 +41715,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 346658,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41354,6 +41751,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 349879,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41375,6 +41773,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 348237,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41382,6 +41781,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350486,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41396,6 +41796,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 351914,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41403,6 +41804,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 352523,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41417,6 +41819,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 353174,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41431,6 +41834,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 353885,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41438,6 +41842,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 353742,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41445,6 +41850,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354229,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -41452,6 +41858,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 356484,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41459,6 +41866,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 355592,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -41488,6 +41896,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 356172,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -41552,6 +41961,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 357145,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -41563,6 +41973,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 357125,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41623,6 +42034,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 358521,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -41637,6 +42049,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 359926,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41670,6 +42083,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 360835,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41681,6 +42095,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 363222,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -41688,6 +42103,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 361821,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41699,6 +42115,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 363938,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41724,6 +42141,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 362872,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41771,6 +42189,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 363145,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41782,6 +42201,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 363592,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -41826,6 +42246,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 366611,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41833,6 +42254,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 366352,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41870,6 +42292,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 367134,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -41881,6 +42304,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 368131,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -41923,6 +42347,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 371534,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41946,6 +42371,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 374494,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -41953,6 +42379,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 372482,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -41969,6 +42396,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 375523,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -41983,6 +42411,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 376084,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -41990,6 +42419,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 376746,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -41997,6 +42427,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 377364,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -42037,6 +42468,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 375884,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -42059,6 +42491,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 376551,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42073,6 +42506,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 376015,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42087,6 +42521,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 376872,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42094,6 +42529,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 377902,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42233,6 +42669,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 379819,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42240,6 +42677,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 382417,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42247,6 +42685,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383369,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42254,6 +42693,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383691,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42261,6 +42701,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 385197,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42268,6 +42709,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 383935,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -42325,6 +42767,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 386661,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42332,6 +42775,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 387273,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42339,6 +42783,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 385577,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -42346,6 +42791,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386416,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42353,6 +42799,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386390,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -42364,6 +42811,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386511,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -42375,6 +42823,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 387701,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42382,6 +42831,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 390428,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42389,6 +42839,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 390992,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42396,6 +42847,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 389909,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42403,6 +42855,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 389962,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42410,6 +42863,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 390120,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -42424,6 +42878,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 391130,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -42435,6 +42890,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 391013,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42442,6 +42898,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 392157,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42456,6 +42913,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 394999,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42492,6 +42950,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 393339,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -42506,6 +42965,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 395557,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42574,6 +43034,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 394869,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42588,6 +43049,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 397142,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42595,6 +43057,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 398025,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42602,6 +43065,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 398640,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42631,6 +43095,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 397207,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -42688,6 +43153,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 397316,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -42731,6 +43197,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 398614,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42745,6 +43212,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 400181,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42752,6 +43220,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 402092,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42759,6 +43228,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 401013,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42773,6 +43243,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 407972,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42809,6 +43280,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 406350,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -42867,6 +43339,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 407508,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -42892,6 +43365,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 408014,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42906,6 +43380,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 410117,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42913,6 +43388,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 410726,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42920,6 +43396,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 410753,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42934,6 +43411,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 411312,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42952,6 +43430,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 409751,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -42974,6 +43453,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 411921,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42981,6 +43461,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 410561,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -42988,6 +43469,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 412535,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -42995,6 +43477,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 413142,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43002,6 +43485,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 413712,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43009,6 +43493,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 414271,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43016,6 +43501,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 415015,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43023,6 +43509,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 416011,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43066,6 +43553,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 414115,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -43137,6 +43625,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 415622,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43258,6 +43747,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 415832,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -43344,6 +43834,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 419309,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43351,6 +43842,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 419987,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43358,6 +43850,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 420492,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43365,6 +43858,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 421063,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43379,6 +43873,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 422478,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43386,6 +43881,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 420729,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -43408,6 +43904,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 421881,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43433,6 +43930,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 422401,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43490,6 +43988,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 423453,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43497,6 +43996,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 423219,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43504,6 +44004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424076,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43511,6 +44012,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426244,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43518,6 +44020,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 426792,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43525,6 +44028,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 425259,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43532,6 +44036,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424881,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -43543,6 +44048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426737,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43557,6 +44063,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 427195,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -43618,6 +44125,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 427690,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -43662,6 +44170,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 429010,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43669,6 +44178,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 433559,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43676,6 +44186,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 432399,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43683,6 +44194,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 434919,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43690,6 +44202,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 435581,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43697,6 +44210,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 436204,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43704,6 +44218,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 435232,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43711,6 +44226,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 437971,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43718,6 +44234,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 438581,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43725,6 +44242,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 437531,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43732,6 +44250,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 438350,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43739,6 +44258,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 442217,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43746,6 +44266,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 441580,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43760,6 +44281,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 442503,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43767,6 +44289,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 443737,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43774,6 +44297,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 444182,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43788,6 +44312,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 446256,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43795,6 +44320,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 448736,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43802,6 +44328,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 448766,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -43809,6 +44336,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 447126,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43865,6 +44393,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 449385,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -43872,6 +44401,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 449048,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -43900,6 +44430,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 451113,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -43975,6 +44506,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 452515,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -43989,6 +44521,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 452736,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44003,6 +44536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455038,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -44010,6 +44544,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 455190,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44087,6 +44622,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 459076,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44176,6 +44712,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 459739,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44265,6 +44802,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 460424,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44351,6 +44889,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 460751,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44479,6 +45018,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 462151,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44628,6 +45168,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 463904,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -44657,6 +45198,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 465115,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -44664,6 +45206,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466202,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -44678,6 +45221,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 465865,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -44706,6 +45250,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468413,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -44774,6 +45319,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 472075,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -44781,6 +45327,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 472683,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -44788,6 +45335,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 470540,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -44795,6 +45343,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471384,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -44825,6 +45374,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 473088,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -44846,6 +45396,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 473725,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -44862,6 +45413,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 474088,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -44869,6 +45421,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476539,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -44880,6 +45433,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 477477,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44887,6 +45441,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 477776,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -44898,6 +45453,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 479932,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -44912,6 +45468,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 481825,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -44923,6 +45480,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482399,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -44937,6 +45495,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482487,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -44944,6 +45503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482565,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -44955,6 +45515,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483239,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -44962,6 +45523,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483396,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -44969,6 +45531,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483932,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -44976,6 +45539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 484604,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -44983,6 +45547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 484646,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -44990,6 +45555,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 485581,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -45001,6 +45567,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 485554,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45008,6 +45575,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 486334,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45015,6 +45583,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 486292,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45029,6 +45598,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 487902,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45043,6 +45613,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 488993,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45050,6 +45621,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 489112,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45062,6 +45634,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 490099,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45069,6 +45642,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 491694,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -45076,6 +45650,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 493434,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45122,6 +45697,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 494632,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45218,6 +45794,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 495473,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45293,6 +45870,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 497369,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -45362,6 +45940,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 498398,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -45373,6 +45952,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 498488,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -45380,6 +45960,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 499475,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45387,6 +45968,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 499602,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45401,6 +45983,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 502343,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45408,6 +45991,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 501489,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45415,6 +45999,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 501891,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45429,6 +46014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 504501,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45436,6 +46022,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 502981,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45447,6 +46034,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 505229,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45454,6 +46042,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 504135,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -45465,6 +46054,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 504148,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45476,6 +46066,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 505865,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45487,6 +46078,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 508007,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45505,6 +46097,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 508020,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45516,6 +46109,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 508696,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45534,6 +46128,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 508787,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45545,6 +46140,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 510290,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45559,6 +46155,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 510459,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45570,6 +46167,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 510875,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45577,6 +46175,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 511108,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45593,6 +46192,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 512797,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -45604,6 +46204,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 513277,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45627,6 +46228,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 516747,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45634,6 +46236,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 514812,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -45650,6 +46253,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 516458,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45657,6 +46261,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 516825,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -45668,6 +46273,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 517162,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -45675,6 +46281,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518033,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45689,6 +46296,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 521977,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45710,6 +46318,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 520757,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -45717,6 +46326,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 520812,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45724,6 +46334,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 523964,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45731,6 +46342,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 522432,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -45738,6 +46350,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 524575,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45745,6 +46358,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 524743,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45752,6 +46366,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 525185,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45759,6 +46374,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 524837,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45773,6 +46389,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 526058,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45791,6 +46408,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 526406,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45833,6 +46451,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 527460,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -45840,6 +46459,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 527016,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -45847,6 +46467,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 527380,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -45854,6 +46475,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528019,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45904,6 +46526,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 528743,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45954,6 +46577,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 529289,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -45965,6 +46589,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 529366,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -45983,6 +46608,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 530509,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -46004,6 +46630,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 534953,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46011,6 +46638,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 537158,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46018,6 +46646,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 535876,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46025,6 +46654,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 537755,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46032,6 +46662,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 538366,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46039,6 +46670,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 538979,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46046,6 +46678,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 539599,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46060,6 +46693,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 539534,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46067,6 +46701,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540797,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46074,6 +46709,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540511,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -46110,6 +46746,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 541537,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -46128,6 +46765,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 543937,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46142,6 +46780,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 544667,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46149,6 +46788,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 543080,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46156,6 +46796,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543316,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -46167,6 +46808,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 545043,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46199,6 +46841,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 545820,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46271,6 +46914,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 546079,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46317,6 +46961,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 550975,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46324,6 +46969,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 549523,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46338,6 +46984,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 550122,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46345,6 +46992,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 551291,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46352,6 +47000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 550521,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46359,6 +47008,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 551822,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46377,6 +47027,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 552534,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46391,6 +47042,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 554391,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46398,6 +47050,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 553172,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46412,6 +47065,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 554001,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46419,6 +47073,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 554419,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46426,6 +47081,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 555224,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46433,6 +47089,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 555105,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46440,6 +47097,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 556027,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46447,6 +47105,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 556845,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46454,6 +47113,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 557663,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46461,6 +47121,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558028,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46468,6 +47129,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558212,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46475,6 +47137,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558287,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46482,6 +47145,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558886,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46489,6 +47153,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558858,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46496,6 +47161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 559144,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46503,6 +47169,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 559834,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46510,6 +47177,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 561364,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46524,6 +47192,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 562052,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46531,6 +47200,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563001,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -46549,6 +47219,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 563611,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46616,6 +47287,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563897,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -46653,6 +47325,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 564871,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46667,6 +47340,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 565507,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46674,6 +47348,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 565470,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -46708,6 +47383,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 566312,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -46724,6 +47400,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 567509,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46731,6 +47408,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 567962,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -46745,6 +47423,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 568974,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46752,6 +47431,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 569015,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -46795,6 +47475,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 569807,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -46881,6 +47562,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 571340,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46888,6 +47570,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 572441,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -46895,6 +47578,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 572351,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -46927,6 +47611,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 573366,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -46934,6 +47619,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 573625,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -46962,6 +47648,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 574212,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -46984,6 +47671,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 574416,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47016,6 +47704,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 575311,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47023,6 +47712,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 575338,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -47063,6 +47753,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 576055,
         "hit": true,
         "player": "kippo",
         "source": "sound",
@@ -47159,6 +47850,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 577714,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -47170,6 +47862,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 578960,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47177,6 +47870,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 579884,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47184,6 +47878,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580895,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47191,6 +47886,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 581639,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47198,6 +47894,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582132,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47205,6 +47902,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582430,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -47248,6 +47946,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 583206,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47266,6 +47965,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 583742,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47330,6 +48030,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 584649,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47387,6 +48088,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 585041,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47401,6 +48103,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 585728,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47408,6 +48111,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 585872,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47415,6 +48119,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 585818,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -47433,6 +48138,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 588518,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47440,6 +48146,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 588817,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47461,6 +48168,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 591246,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47479,6 +48187,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 589156,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47533,6 +48242,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 589856,
         "hit": true,
         "player": "gLAd",
         "source": "sound",
@@ -47544,6 +48254,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590246,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47551,6 +48262,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590219,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47558,6 +48270,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591052,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47565,6 +48278,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591455,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47593,6 +48307,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 592638,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
@@ -47600,6 +48315,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 592388,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47607,6 +48323,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593207,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47621,6 +48338,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 593843,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47628,6 +48346,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595154,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47635,6 +48354,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595998,
         "hit": true,
         "player": "SS",
         "source": "sound",
@@ -47646,6 +48366,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 596491,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
@@ -47653,6 +48374,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 597284,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
@@ -47756,6 +48478,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 598959,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
@@ -47784,6 +48507,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 600000,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",

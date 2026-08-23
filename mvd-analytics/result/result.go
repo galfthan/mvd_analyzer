@@ -1180,8 +1180,31 @@ package result
 //     verdict needs. Aim keeps the ktx-only gate. `damage.source` says
 //     which evidence a demo's list rests on.
 //
+// v74 — the fire→flight association reaches the Result, and with it rl/gl
+// hit recovery on reconstructed demos.
+//   - ADDED on `shots.shots[]`: `flightEnd` — the match-relative time at
+//     which the tracked rocket/grenade/nail a fire launched died. The shots
+//     analyzer has always bracketed those flights (it is how `hit` is
+//     decided for a projectile), then discarded the association; it is now
+//     published. Absent on hitscan fires and on a projectile fire whose
+//     entity was never broadcast (or, for ng/sng, on a parse without nail
+//     decoding), which is exactly the state the measured counter reads as a
+//     miss.
+//   - CHANGED: the reconstructed aim tier covers `rl` and `gl` —
+//     `aim.players[].weapons[].recon.hits` now appears for them on demos
+//     whose damage section is reconstructed. The join follows the measured
+//     definition through `flightEnd` (flight impact instant → reconstructed
+//     damage of that attacker+weapon) instead of counting impacts, which is
+//     what made the two conventions differ by ~7pp on rl in v73. Measured
+//     over 53 dm2/dm3 demos carrying the KTX log: mean accuracy error
+//     rl 0.6pp / gl 0.3pp vs the measured counter, with the join-on-wire
+//     control at 0.4pp / 0.1pp; lg/sg/ssg/axe unchanged. ng/sng stay
+//     withheld — nail linking is opt-in, so there is no measured baseline to
+//     validate a recovery against. See damagerecon/ACCURACY.md §"Aim hit
+//     recovery".
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 73
+const CurrentSchemaVersion = 74
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

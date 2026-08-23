@@ -297,7 +297,8 @@ Two consequences worth knowing:
   the Aim tab's Hits/Hit % cells render `—` there, because those cells are
   the MEASURED counters and those stay withheld. Since schema v73 the
   Result does carry a recovered hit count for such demos in a field of its
-  own — `aim.players[].weapons[].recon.hits`, lg/sg/ssg/axe only — which
+  own — `aim.players[].weapons[].recon.hits`, lg/sg/ssg/axe plus rl/gl
+  since v74 — which
   this frontend does not render yet; `—` here means "not rendered", not
   "not recoverable"),
   so `0` there is a real reading rather than a gap, and it is deliberately

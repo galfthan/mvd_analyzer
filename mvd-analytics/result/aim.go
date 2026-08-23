@@ -214,13 +214,21 @@ type WeaponAim struct {
 //   - the enemy/team/self splits — team and self attribution is the weakest
 //     part of the reconstruction (damagerecon/ACCURACY.md).
 //
-// Emitted only for the weapons whose damage lands in the fire's own server
-// frame — lg, sg, ssg and the axe (at its fixed +200 ms traceline delay) —
-// where the join was validated exact against the wire log. rl/gl/ng/sng carry
-// NO block: their fire→impact association needs the projectile-flight bracket
-// the shots analyzer discards, and counting impacts instead reads ~7 points
-// above the measured rl convention. An absent block is "not recovered for this
-// weapon", never "no hits".
+// Emitted for two weapon families. The same-frame weapons — lg, sg, ssg and
+// the axe (at its fixed +200 ms traceline delay) — link a fire to damage in
+// the fire's own server frame, where the join was validated exact against the
+// wire log. rl and gl link through the fire's TRACKED FLIGHT (Shot.FlightEnd,
+// schema v74): the flight's impact instant is joined to the reconstructed
+// damage there, and a fire whose projectile was never tracked counts as a miss
+// — the measured counter's own definition, which is why the two are
+// comparable. Before v74 published that association the join could only count
+// impacts, a different question that read ~7 points above the measured rl
+// convention.
+//
+// ng/sng carry NO block: nail flights are bracketed only when nail decoding is
+// enabled, so their measured counter is zero on every validation row and there
+// is nothing to check a recovery against. An absent block is "not recovered for
+// this weapon", never "no hits".
 //
 // Presence is keyed on the damage SECTION being reconstructed and this player
 // having FIRED the weapon — never on him appearing in the reconstructed log. A
@@ -230,8 +238,9 @@ type WeaponAim struct {
 // weapon gets.
 //
 // Accuracy measured against the wire log on demos that carry both:
-// damagerecon/ACCURACY.md §"Aim hit recovery" (lg mean 0.3pp, sg 1.3pp,
-// ssg 1.7pp, axe 0.5pp of accuracy error vs the measured counter).
+// damagerecon/ACCURACY.md §"Aim hit recovery" (mean accuracy error vs the
+// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.7pp, axe 0.5pp, rl 0.6pp,
+// gl 0.3pp).
 type WeaponAimRecon struct {
 	// Hits is the reconstructed count of fires that connected. A zero inside
 	// a present block is a real "linked nothing", not an absence — the block

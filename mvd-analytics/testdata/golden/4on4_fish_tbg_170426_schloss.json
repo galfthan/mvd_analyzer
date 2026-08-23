@@ -93373,7 +93373,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -94082,6 +94082,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 2338,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -94093,6 +94094,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 2448,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -94205,6 +94207,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 7773,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -94212,6 +94215,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8257,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -94262,6 +94266,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 8972,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -94381,6 +94386,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 9784,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -94464,6 +94470,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 10533,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -94948,6 +94955,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 20359,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -94955,6 +94963,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 20956,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -94987,6 +94996,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 19652,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -95016,6 +95026,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 20819,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -95183,6 +95194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 25708,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -95230,6 +95242,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 26767,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -95510,6 +95523,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 32916,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -95591,6 +95605,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 31182,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -95658,6 +95673,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 34290,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -95679,6 +95695,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 32372,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -95726,6 +95743,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 33605,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -95994,6 +96012,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 39967,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -96031,6 +96050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 41307,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -96052,6 +96072,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 44884,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -96070,6 +96091,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 42946,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -96084,6 +96106,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 43180,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -96091,6 +96114,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 45609,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -96105,6 +96129,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 43682,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -96137,6 +96162,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 46276,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -96176,6 +96202,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 44658,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -96190,6 +96217,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 46932,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -96226,6 +96254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 45248,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -96491,6 +96520,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 50804,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -96800,6 +96830,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 60233,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -96893,6 +96924,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 60945,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -96918,6 +96950,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 61168,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -96994,6 +97027,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 61739,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -97005,6 +97039,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 61821,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -97032,6 +97067,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 61962,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -97073,6 +97109,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 62576,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -97095,6 +97132,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 63072,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -97109,6 +97147,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 63171,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -97120,6 +97159,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 63339,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -97150,6 +97190,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 66262,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -97161,6 +97202,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 66430,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -97179,6 +97221,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 67085,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -97193,6 +97236,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 67479,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -97444,6 +97488,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 72908,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -97531,6 +97576,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 73838,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -97621,6 +97667,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 76285,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -97667,6 +97714,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 81182,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -97713,6 +97761,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 81791,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -97788,6 +97837,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 80284,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -97841,6 +97891,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 83012,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -97855,6 +97906,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 83623,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -97897,6 +97949,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 84234,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -97904,6 +97957,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 82207,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -97933,6 +97987,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 83551,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -97963,6 +98018,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 84360,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -97988,6 +98044,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 85051,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -97995,6 +98052,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 85221,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98038,6 +98096,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 86163,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98067,6 +98126,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 86447,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -98078,6 +98138,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 86929,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98085,6 +98146,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 86947,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -98108,6 +98170,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 88092,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98151,6 +98214,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 89077,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98165,6 +98229,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 91711,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -98201,6 +98266,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 92379,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -98266,6 +98332,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 92993,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -98298,6 +98365,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 93603,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -98349,6 +98417,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 91986,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -98472,6 +98541,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 98310,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -98781,6 +98851,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 108143,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -98816,6 +98887,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 111076,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -98834,6 +98906,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 111618,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -98856,6 +98929,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 112481,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -98888,6 +98962,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 113171,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -98917,6 +98992,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 114213,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -98946,6 +99022,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 116670,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -98971,6 +99048,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 116475,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -98993,6 +99071,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 117188,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99000,6 +99079,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 117759,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -99029,6 +99109,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 117701,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99050,6 +99131,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 118414,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -99086,6 +99168,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 119589,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -99128,6 +99211,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 120007,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -99157,6 +99241,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 122505,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99164,6 +99249,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 120382,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99171,6 +99257,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 120760,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -99189,6 +99276,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 123122,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99196,6 +99284,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 121257,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -99236,6 +99325,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 121816,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -99258,6 +99348,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 122617,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -99298,6 +99389,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 123006,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -99332,6 +99424,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 123877,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -99369,6 +99462,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 125091,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99376,6 +99470,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 124868,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -99445,6 +99540,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 125558,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -99467,6 +99563,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 125545,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -99510,6 +99607,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 126436,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -99521,6 +99619,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 126338,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -99568,6 +99667,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 127492,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -99582,6 +99682,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 127252,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -99683,6 +99784,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 129387,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -99765,6 +99867,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 130531,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -100186,6 +100289,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 137727,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -100279,6 +100383,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 138810,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -100436,6 +100541,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 144585,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -100479,6 +100585,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 146047,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -100571,6 +100678,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 146982,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -100798,6 +100906,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 154844,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -100823,6 +100932,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 155648,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -100858,6 +100968,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 157012,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -100943,6 +101054,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 158116,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -100950,6 +101062,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 159115,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -100964,6 +101077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159852,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -100999,6 +101113,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 160648,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -101017,6 +101132,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 163004,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -101057,6 +101173,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162129,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101129,6 +101246,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162661,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101143,6 +101261,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 164987,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -101341,6 +101460,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 167751,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -101348,6 +101468,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 168287,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101359,6 +101480,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 169115,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -101366,6 +101488,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 168836,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101380,6 +101503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 169878,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101391,6 +101515,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 169908,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -101409,6 +101534,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 170004,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101427,6 +101553,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 171382,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -101434,6 +101561,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 170902,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101479,6 +101607,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 172193,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101495,6 +101624,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 172375,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -101525,6 +101655,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 173714,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101547,6 +101678,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 175122,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -101572,6 +101704,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 178298,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101590,6 +101723,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 179396,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101634,6 +101768,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 180160,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101650,6 +101785,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 180676,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -101671,6 +101807,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 183640,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101715,6 +101852,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 184216,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101815,6 +101953,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 186650,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101837,6 +101976,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 187294,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -101923,6 +102063,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 189411,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -101934,6 +102075,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 189636,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -101963,6 +102105,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 190209,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102003,6 +102146,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 191549,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102050,6 +102194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 192017,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102080,6 +102225,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 192534,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102145,6 +102291,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 196030,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102156,6 +102303,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 196910,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102167,6 +102315,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 198066,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102178,6 +102327,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197546,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -102189,6 +102339,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197641,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102200,6 +102351,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199060,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -102214,6 +102366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 199766,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -102232,6 +102385,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 199377,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102261,6 +102415,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 200234,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102272,6 +102427,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200766,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102313,6 +102469,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 201343,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102320,6 +102477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 201430,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102342,6 +102500,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 204173,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -102349,6 +102508,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 202190,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102360,6 +102520,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202848,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -102371,6 +102532,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 205390,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -102385,6 +102547,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 203469,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102396,6 +102559,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 204077,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -102461,6 +102625,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 206342,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -102518,6 +102683,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 209078,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102602,6 +102768,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 217123,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102664,6 +102831,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 217848,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102680,6 +102848,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 220422,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102716,6 +102885,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 221408,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102723,6 +102893,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 219260,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -102761,6 +102932,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 220468,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102775,6 +102947,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 221551,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102800,6 +102973,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 221845,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -102827,6 +103001,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 223182,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102841,6 +103016,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 222680,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102859,6 +103035,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 224104,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -102870,6 +103047,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 223696,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102884,6 +103062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 224766,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102891,6 +103070,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 225532,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102919,6 +103099,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 227740,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102944,6 +103125,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 229450,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102951,6 +103133,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230393,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102976,6 +103159,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 231052,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -102987,6 +103171,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 231272,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -102994,6 +103179,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233298,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -103008,6 +103194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 232117,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -103019,6 +103206,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 232004,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -103051,6 +103239,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 233005,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -103065,6 +103254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 233351,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -103076,6 +103266,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 233536,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -103083,6 +103274,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 234330,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -103090,6 +103282,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 234832,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -103097,6 +103290,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 235117,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -103104,6 +103298,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 235324,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -103162,6 +103357,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 236187,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103180,6 +103376,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 237376,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -103202,6 +103399,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 238104,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -103224,6 +103422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 238584,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -103231,6 +103430,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 238134,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -103242,6 +103442,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 239009,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -103260,6 +103461,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 241731,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103274,6 +103476,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 239805,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -103295,6 +103498,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 240237,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103329,6 +103533,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 240775,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -103343,6 +103548,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 240922,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -103366,6 +103572,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 243298,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103396,6 +103603,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 241818,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -103403,6 +103611,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 242288,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103419,6 +103628,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 242496,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103797,6 +104007,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 250289,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103882,6 +104093,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253176,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -103900,6 +104112,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253774,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -103916,6 +104129,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 254196,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -103948,6 +104162,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 255072,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -104109,6 +104324,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 257819,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -104274,6 +104490,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 260597,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -104314,6 +104531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 263176,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -104364,6 +104582,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 263191,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -104516,6 +104735,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 264886,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -104809,6 +105029,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 268424,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -104917,6 +105138,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 269639,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -104979,6 +105201,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 270354,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105227,6 +105450,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 273354,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105271,6 +105495,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 282309,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105278,6 +105503,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 281133,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -105430,6 +105656,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 284795,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -105476,6 +105703,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 284755,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -105564,6 +105792,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 287501,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105597,6 +105826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 288249,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105622,6 +105852,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 289499,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -105638,6 +105869,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290159,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -105649,6 +105881,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290610,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -105660,6 +105893,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290665,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -105674,6 +105908,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 291125,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105692,6 +105927,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 291723,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105717,6 +105953,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 291976,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105728,6 +105965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 292415,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -105744,6 +105982,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 292805,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105765,6 +106004,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 293250,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -105781,6 +106021,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 293588,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105813,6 +106054,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 294560,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105820,6 +106062,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294560,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105831,6 +106074,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 297042,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -105856,6 +106100,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 295363,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105867,6 +106112,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 297704,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105945,6 +106191,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 298371,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -105959,6 +106206,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 296137,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -105972,6 +106220,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 296208,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -106013,6 +106262,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 296776,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -106157,6 +106407,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 299919,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -106182,6 +106433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 300315,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106207,6 +106459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 300705,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -106214,6 +106467,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 300719,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -106235,6 +106489,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 301231,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106264,6 +106519,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 301497,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -106282,6 +106538,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 303263,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106311,6 +106568,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 304140,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106365,6 +106623,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 304880,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106482,6 +106741,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 309244,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -106525,6 +106785,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 310298,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -106561,6 +106822,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 310939,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -106697,6 +106959,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 312644,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -106725,6 +106988,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 314744,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -106739,6 +107003,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 315534,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -106746,6 +107011,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 315853,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -106753,6 +107019,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 316774,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -106764,6 +107031,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 316830,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -106775,6 +107043,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 317392,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -106786,6 +107055,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 317597,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -106808,6 +107078,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 318419,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -106819,6 +107090,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 319241,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -106833,6 +107105,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 321009,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -106847,6 +107120,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 319173,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -106858,6 +107132,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 321619,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -107340,6 +107615,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 333792,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -107427,6 +107703,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 335143,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -107510,6 +107787,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 336398,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -107696,6 +107974,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 340185,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107714,6 +107993,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 344158,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107725,6 +108005,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 345105,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107736,6 +108017,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346014,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107761,6 +108043,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 346573,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107943,6 +108226,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 351754,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -108028,6 +108312,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 352685,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -108131,6 +108416,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 353843,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -108138,6 +108424,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354056,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108195,6 +108482,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 355276,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108263,6 +108551,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 356899,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -108277,6 +108566,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 357054,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -108316,6 +108606,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 357513,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108357,6 +108648,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 358321,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108380,6 +108672,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 359186,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108459,6 +108752,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 360323,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -108497,6 +108791,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 361420,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -108515,6 +108810,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 361703,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -108544,6 +108840,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 362651,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -108562,6 +108859,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 363518,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -108576,6 +108874,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 364340,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -108724,6 +109023,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 367593,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -108949,6 +109249,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 372467,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -108985,6 +109286,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373504,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109043,6 +109345,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 374454,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109197,6 +109500,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 378791,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109312,6 +109616,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 381866,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109341,6 +109646,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 382133,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -109377,6 +109683,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 383142,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109496,6 +109803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 386178,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109507,6 +109815,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386276,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -109529,6 +109838,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 386983,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109558,6 +109868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 388120,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109583,6 +109894,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 388162,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -109663,6 +109975,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 391291,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109688,6 +110001,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 392383,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109702,6 +110016,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 392995,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -109735,6 +110050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 394472,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -109760,6 +110076,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 395395,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109799,6 +110116,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 396986,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109838,6 +110156,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 397934,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109916,6 +110235,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 400368,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -109945,6 +110265,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 401343,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -109963,6 +110284,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 403642,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -109970,6 +110292,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 401869,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -109984,6 +110307,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 401597,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -110023,6 +110347,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 402445,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110041,6 +110366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 402744,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110105,6 +110431,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 405332,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110130,6 +110457,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 403542,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -110141,6 +110469,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403698,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110170,6 +110499,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 405976,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110191,6 +110521,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 404529,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110205,6 +110536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 404185,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -110221,6 +110553,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 406653,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110246,6 +110579,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 405083,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -110257,6 +110591,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 405220,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110282,6 +110617,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 405404,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110344,6 +110680,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 406017,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -110390,6 +110727,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 406357,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110425,6 +110763,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 407074,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -110436,6 +110775,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 407129,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110447,6 +110787,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 407254,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -110479,6 +110820,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 408321,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110490,6 +110832,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 408238,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -110508,6 +110851,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 410908,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110529,6 +110873,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 414434,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110569,6 +110914,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 413696,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110591,6 +110937,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 414291,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110598,6 +110945,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 414881,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110605,6 +110953,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 415478,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110623,6 +110972,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 416711,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -110645,6 +110995,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 416629,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110681,6 +111032,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 417495,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110812,6 +111164,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 419066,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -110834,6 +111187,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 419097,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110870,6 +111224,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 419389,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -110892,6 +111247,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 419940,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110920,6 +111276,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 422604,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -110927,6 +111284,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 420967,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110934,6 +111292,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 420895,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -110970,6 +111329,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 421811,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -110977,6 +111337,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 423619,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -111013,6 +111374,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 423222,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111042,6 +111404,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 424729,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -111060,6 +111423,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 425427,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -111089,6 +111453,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 426804,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111100,6 +111465,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427492,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111111,6 +111477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427365,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -111152,6 +111519,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 430365,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111170,6 +111538,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 431447,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111188,6 +111557,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 432283,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111243,6 +111613,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 433363,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111265,6 +111636,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 433811,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111309,6 +111681,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 434668,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -111320,6 +111693,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 434957,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111396,6 +111770,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 437984,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -111462,6 +111837,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 440077,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111572,6 +111948,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 448648,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -111586,6 +111963,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 449103,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -111611,6 +111989,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 449103,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -111643,6 +112022,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 449879,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -111686,6 +112066,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 451929,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -111704,6 +112085,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 451997,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -111732,6 +112114,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455750,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -111739,6 +112122,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 453850,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -111750,6 +112134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 454763,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -111761,6 +112146,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 454889,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -111772,6 +112158,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 455204,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -111779,6 +112166,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 457097,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -111793,6 +112181,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 457793,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -111800,6 +112189,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 455513,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -111818,6 +112208,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 456349,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -111841,6 +112232,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 456377,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -111855,6 +112247,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 457181,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -111909,6 +112302,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 460892,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112119,6 +112513,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 471100,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -112137,6 +112532,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 471941,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112180,6 +112576,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 472101,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -112214,6 +112611,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 472752,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112264,6 +112662,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 475583,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112326,6 +112725,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 476049,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -112337,6 +112737,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476244,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -112387,6 +112788,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 477721,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -112398,6 +112800,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 479045,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -112423,6 +112826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 480113,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -112517,6 +112921,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 481539,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -112535,6 +112940,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 481647,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -112567,6 +112973,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482308,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -112578,6 +112985,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482516,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -112600,6 +113008,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482644,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -112607,6 +113016,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482740,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112655,6 +113065,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 483643,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -112691,6 +113102,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 484176,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -112747,6 +113159,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 485101,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -112768,6 +113181,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 485046,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -112801,6 +113215,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 485830,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112808,6 +113223,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 486019,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -112826,6 +113242,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 488841,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -112851,6 +113268,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 487540,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -112912,6 +113330,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 488869,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -113082,6 +113501,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 492114,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -113143,6 +113563,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 495570,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -113171,6 +113592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 496908,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -113192,6 +113614,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 496244,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -113264,6 +113687,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 503280,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -113660,6 +114084,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 505293,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -113687,6 +114112,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 506826,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114077,6 +114503,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 514790,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -114383,6 +114810,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 523662,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114482,6 +114910,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 525430,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -114554,6 +114983,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 526107,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -114575,6 +115005,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 526259,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -114598,6 +115029,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 526929,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114609,6 +115041,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 527154,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -114638,6 +115071,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 527072,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -114645,6 +115079,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 527878,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114656,6 +115091,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528078,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -114688,6 +115124,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 528241,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -114706,6 +115143,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 528364,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -114722,6 +115160,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528531,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114859,6 +115298,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 534362,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -114910,6 +115350,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 535688,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114933,6 +115374,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 536480,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -114960,6 +115402,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 538026,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -114985,6 +115428,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 539351,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115014,6 +115458,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 541348,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -115036,6 +115481,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 539865,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -115091,6 +115537,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 540612,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -115102,6 +115549,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542674,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115155,6 +115603,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 542150,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -115195,6 +115644,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 543098,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -115206,6 +115656,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542830,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -115222,6 +115673,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542904,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -115267,6 +115719,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 543605,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -115308,6 +115761,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 548995,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -115319,6 +115773,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 549593,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115326,6 +115781,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 548426,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115344,6 +115800,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 547840,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -115355,6 +115812,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 548092,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115362,6 +115820,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 549418,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -115380,6 +115839,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 549242,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -115391,6 +115851,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 550079,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -115405,6 +115866,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 550807,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115423,6 +115885,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 551090,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -115485,6 +115948,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 552987,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -115662,6 +116126,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 556622,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115754,6 +116219,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 557151,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -115829,6 +116295,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 559819,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115873,6 +116340,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 560482,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -115880,6 +116348,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 560338,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115887,6 +116356,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 560228,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -115952,6 +116422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 561168,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -115959,6 +116430,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 560986,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -115991,6 +116463,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 562053,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -116013,6 +116486,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 561945,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -116031,6 +116505,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 562450,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -116071,6 +116546,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 563324,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -116099,6 +116575,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 564112,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -116162,6 +116639,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 565306,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -116196,6 +116674,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 566307,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -116217,6 +116696,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 567090,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -116264,6 +116744,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 568089,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -116297,6 +116778,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 569088,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -116315,6 +116797,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 569570,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -116526,6 +117009,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 574580,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -116587,6 +117071,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 575595,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -116663,6 +117148,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 577237,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -116684,6 +117170,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 577840,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -116830,6 +117317,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 582618,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -116880,6 +117368,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 583372,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -116948,6 +117437,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 584061,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -116973,6 +117463,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 587362,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -117001,6 +117492,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 589437,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -117019,6 +117511,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 596139,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -117026,6 +117519,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 601334,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -117033,6 +117527,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 601933,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -117040,6 +117535,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 599920,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -117051,6 +117547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 600593,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117062,6 +117559,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 600271,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -117073,6 +117571,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 602653,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -117108,6 +117607,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 601064,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -117120,6 +117620,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 603350,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -117155,6 +117656,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 601431,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117199,6 +117701,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 602152,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -117210,6 +117713,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 601673,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -117259,6 +117763,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 602699,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -117287,6 +117792,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 602337,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117333,6 +117839,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 602640,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -117351,6 +117858,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 603115,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -117365,6 +117873,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 603217,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117376,6 +117885,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 603570,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -117441,6 +117951,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 604700,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -117493,6 +118004,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 604988,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -117547,6 +118059,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 608523,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117630,6 +118143,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 616272,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117662,6 +118176,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 617035,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117748,6 +118263,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 620948,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -117766,6 +118282,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 621147,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -117964,6 +118481,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 626257,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -118093,6 +118611,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 627856,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -118158,6 +118677,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 628918,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -118180,6 +118700,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 630835,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -118191,6 +118712,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 630920,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -118205,6 +118727,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 631286,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -118226,6 +118749,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 631700,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -118238,6 +118762,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 631660,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -118249,6 +118774,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 631740,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -118288,6 +118814,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 632011,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -118323,6 +118850,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 632642,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -118337,6 +118865,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 632407,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -118367,6 +118896,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 634180,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -118374,6 +118904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 634068,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -118403,6 +118934,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 634660,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -118439,6 +118971,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 635375,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -118544,6 +119077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 643446,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -118565,6 +119099,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 643724,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118594,6 +119129,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 644386,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118617,6 +119153,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 647783,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118636,6 +119173,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 649152,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118669,6 +119207,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 649401,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -118715,6 +119254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 649959,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -118731,6 +119271,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 650390,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118763,6 +119304,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 650881,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -118897,6 +119439,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 653492,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -118904,6 +119447,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 653412,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -118987,6 +119531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 655128,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -119049,6 +119594,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 655836,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119095,6 +119641,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 657452,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -119131,6 +119678,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 660848,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119145,6 +119693,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 659516,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -119152,6 +119701,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 660542,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -119166,6 +119716,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 661660,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119177,6 +119728,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 664095,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119184,6 +119736,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 662374,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -119191,6 +119744,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 665280,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119205,6 +119759,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 663628,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119216,6 +119771,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 665972,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119277,6 +119833,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 665309,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119320,6 +119877,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 665861,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -119360,6 +119918,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 666685,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -119385,6 +119944,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 669841,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -119417,6 +119977,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668104,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119444,6 +120005,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668284,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -119466,6 +120028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668231,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -119494,6 +120057,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668849,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119505,6 +120069,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 668972,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -119534,6 +120099,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 669575,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119604,6 +120170,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 671199,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -119669,6 +120236,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 672517,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -119729,6 +120297,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 674816,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119776,6 +120345,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 675543,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119798,6 +120368,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 676072,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119825,6 +120396,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 677031,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -119861,6 +120433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 678325,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -119883,6 +120456,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 677790,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119917,6 +120491,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 678676,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119928,6 +120503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 679544,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -119955,6 +120531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 679407,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -119998,6 +120575,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 681913,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -120033,6 +120611,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 682387,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -120071,6 +120650,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 684153,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -120082,6 +120662,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 686660,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -120125,6 +120706,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 687153,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -120264,6 +120846,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 689232,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -120333,6 +120916,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 690707,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -120369,6 +120953,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 691195,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -120380,6 +120965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 691387,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -120413,6 +120999,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 691361,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -120429,6 +121016,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 692033,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -120440,6 +121028,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 692387,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -120451,6 +121040,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 692543,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -120458,6 +121048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 694972,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -120490,6 +121081,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 693533,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -120497,6 +121089,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 695582,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -120515,6 +121108,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 696193,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -120522,6 +121116,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 694011,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -120547,6 +121142,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 694888,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -120561,6 +121157,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 694959,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -120608,6 +121205,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 695697,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -120644,6 +121242,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 696491,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -120673,6 +121272,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 696810,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -120915,6 +121515,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 702154,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -120945,6 +121546,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 704248,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -120999,6 +121601,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 705920,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -121017,6 +121620,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 706227,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -121077,6 +121681,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 709642,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -121188,6 +121793,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 711022,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -121263,6 +121869,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 711816,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -121321,6 +121928,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 712972,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -121422,6 +122030,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 713933,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -121524,6 +122133,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 715115,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -121549,6 +122159,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 716401,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -121592,6 +122203,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 718349,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -121642,6 +122254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 719180,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -121664,6 +122277,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 719479,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -121754,6 +122368,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 721810,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -121833,6 +122448,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 722049,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -121887,6 +122503,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 722901,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -121995,6 +122612,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 724046,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -122213,6 +122831,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 727182,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -122292,6 +122911,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 728932,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -122338,6 +122958,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 731506,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -122432,6 +123053,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 733336,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -122574,6 +123196,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 736219,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -122617,6 +123240,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 737375,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122732,6 +123356,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 738323,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -122793,6 +123418,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 739223,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -122844,6 +123470,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 739504,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123199,6 +123826,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 748758,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123240,6 +123868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 751129,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123273,6 +123902,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 752168,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123296,6 +123926,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 755786,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -123310,6 +123941,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 760400,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -123321,6 +123953,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 761076,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123332,6 +123965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 762233,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -123339,6 +123973,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 762180,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -123346,6 +123981,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 763396,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -123367,6 +124003,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 766748,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -123374,6 +124011,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 764500,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123390,6 +124028,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 764995,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -123401,6 +124040,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 765492,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123419,6 +124059,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 767633,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -123440,6 +124081,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 769049,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123451,6 +124093,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 769309,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123462,6 +124105,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 771567,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123473,6 +124117,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 772296,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123523,6 +124168,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 774128,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123555,6 +124201,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 774542,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -123599,6 +124246,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 775620,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -123606,6 +124254,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 775480,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123624,6 +124273,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 776111,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -123660,6 +124310,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 776503,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123672,6 +124323,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 776490,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -123701,6 +124353,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 777686,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -123769,6 +124422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 781376,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -123812,6 +124466,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 782188,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -123869,6 +124524,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 783958,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -123909,6 +124565,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 785379,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -123928,6 +124585,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 786163,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -123956,6 +124614,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 786917,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -123978,6 +124637,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 787077,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -124021,6 +124681,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 788571,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124028,6 +124689,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 788725,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124053,6 +124715,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 789852,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124103,6 +124766,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 791659,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -124114,6 +124778,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 792931,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124168,6 +124833,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 793818,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124182,6 +124848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 793865,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124216,6 +124883,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 799717,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -124252,6 +124920,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 797859,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -124270,6 +124939,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 800396,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -124321,6 +124991,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 801038,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -124328,6 +124999,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 798727,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -124400,6 +125072,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 800101,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -124618,6 +125291,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 804324,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124636,6 +125310,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 804763,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124661,6 +125336,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 805465,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -124683,6 +125359,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 806795,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -124708,6 +125385,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809321,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -124715,6 +125393,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 807840,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124726,6 +125405,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 810085,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -124773,6 +125453,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809194,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124798,6 +125479,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 810906,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -124993,6 +125675,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 820628,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -125126,6 +125809,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822423,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -125133,6 +125817,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 822557,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125176,6 +125861,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 823235,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125183,6 +125869,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 823597,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -125359,6 +126046,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 826245,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -125453,6 +126141,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 828140,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -125534,6 +126223,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 830390,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -125598,6 +126288,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 830853,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -125655,6 +126346,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 832156,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -125716,6 +126408,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 833452,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -125738,6 +126431,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 834610,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125759,6 +126453,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 836927,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125773,6 +126468,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 835413,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125798,6 +126494,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 837532,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125805,6 +126502,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 836112,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -125852,6 +126550,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 837104,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -125971,6 +126670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 839675,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125996,6 +126696,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 841507,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -126014,6 +126715,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 842312,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -126049,6 +126751,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 843415,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -126060,6 +126763,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 843524,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -126071,6 +126775,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 844294,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -126089,6 +126794,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 845440,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -126111,6 +126817,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 846125,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -126129,6 +126836,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 846870,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -126136,6 +126844,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 846784,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -126163,6 +126872,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 847197,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -126185,6 +126895,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 847489,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -126210,6 +126921,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 848183,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -126221,6 +126933,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 849218,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -126297,6 +127010,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 853802,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -126304,6 +127018,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 855387,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -126347,6 +127062,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 856658,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -126390,6 +127106,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 859454,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -126404,6 +127121,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 859832,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -126425,6 +127143,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 860571,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -126489,6 +127208,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 860738,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -126496,6 +127216,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 860753,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126535,6 +127256,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 861273,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -126551,6 +127273,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 861476,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126562,6 +127285,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 862088,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -126573,6 +127297,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 862274,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -126605,6 +127330,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 866912,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -126639,6 +127365,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 867244,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -126661,6 +127388,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 867790,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -126701,6 +127429,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 868737,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126748,6 +127477,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 869580,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -126784,6 +127514,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 870181,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126795,6 +127526,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 870262,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -126824,6 +127556,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 871455,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -126853,6 +127586,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 871413,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -126922,6 +127656,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 872205,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126933,6 +127668,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 872247,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -126983,6 +127719,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 872867,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127026,6 +127763,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 873909,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -127037,6 +127775,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 873923,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127095,6 +127834,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 875958,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127102,6 +127842,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 876956,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127123,6 +127864,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 880016,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -127141,6 +127883,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 878040,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127152,6 +127895,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 879612,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -127170,6 +127914,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 880614,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127177,6 +127922,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 880645,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -127184,6 +127930,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 880658,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127206,6 +127953,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 880987,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -127303,6 +128051,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 885919,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127328,6 +128077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 888504,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -127342,6 +128092,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 886896,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127356,6 +128107,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 889130,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127381,6 +128133,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 889606,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -127395,6 +128148,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 889296,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127406,6 +128160,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 889660,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -127417,6 +128172,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 889716,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127431,6 +128187,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 890300,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127438,6 +128195,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 890779,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127463,6 +128221,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 891542,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127470,6 +128229,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 891872,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127488,6 +128248,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 892599,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -127510,6 +128271,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 893389,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127524,6 +128286,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 894205,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -127546,6 +128309,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 894865,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127557,6 +128321,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 894880,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127568,6 +128333,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 894919,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127597,6 +128363,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 896400,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127611,6 +128378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 897080,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -127633,6 +128401,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 898088,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127640,6 +128409,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 899023,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127647,6 +128417,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 898595,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127669,6 +128440,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 899139,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127687,6 +128459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 899274,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127698,6 +128471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 901743,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -127709,6 +128483,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 900532,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -127723,6 +128498,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902359,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -127730,6 +128506,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 900104,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127753,6 +128530,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902975,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -127771,6 +128549,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 901053,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127793,6 +128572,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 903588,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -127818,6 +128598,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 901330,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127829,6 +128610,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 901590,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -127854,6 +128636,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902571,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -127865,6 +128648,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 902668,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -127883,6 +128667,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902975,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -127906,6 +128691,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 903490,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127936,6 +128722,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 904542,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -127997,6 +128784,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 906493,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128040,6 +128828,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 907387,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128097,6 +128886,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 910317,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128144,6 +128934,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 910905,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128233,6 +129024,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 913062,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -128258,6 +129050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 914709,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -128459,6 +129252,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 919436,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -128477,6 +129271,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 921452,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128527,6 +129322,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 925080,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -128559,6 +129355,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 925677,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -128577,6 +129374,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 927143,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128602,6 +129400,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 927272,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -128613,6 +129412,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 928228,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128631,6 +129431,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 928127,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -128671,6 +129472,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 930699,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -128689,6 +129491,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 933787,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -128696,6 +129499,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 933815,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -128707,6 +129511,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 934787,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -128718,6 +129523,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 935051,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -128725,6 +129531,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 935023,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128739,6 +129546,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 936353,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -128757,6 +129565,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 936312,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128778,6 +129587,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 936897,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -128785,6 +129595,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 938491,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128808,6 +129619,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 939361,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -128826,6 +129638,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 939403,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -128865,6 +129678,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 939208,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128963,6 +129777,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 941880,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -128986,6 +129801,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 942649,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129011,6 +129827,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 942469,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -129083,6 +129900,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 944124,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129099,6 +129917,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 944848,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129120,6 +129939,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 945821,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129149,6 +129969,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 946169,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129178,6 +129999,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 946751,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129246,6 +130068,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 947813,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -129278,6 +130101,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 949569,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -129296,6 +130120,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 950020,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129371,6 +130196,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 956287,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129454,6 +130280,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 961683,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -129461,6 +130288,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 961683,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -129472,6 +130300,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 962818,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129493,6 +130322,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 967561,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -129504,6 +130334,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 967506,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -129540,6 +130371,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 968637,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -129547,6 +130379,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 968845,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -129554,6 +130387,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 968737,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -129565,6 +130399,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 969348,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129588,6 +130423,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 970661,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -129606,6 +130442,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 971247,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -129639,6 +130476,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 972351,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -129660,6 +130498,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 973845,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -129676,6 +130515,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 974984,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -129687,6 +130527,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 975081,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -129712,6 +130553,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 975884,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -129791,6 +130633,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 977986,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -129802,6 +130645,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 977945,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129838,6 +130682,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 978687,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -129932,6 +130777,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 982481,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -130224,6 +131070,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 984471,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -130394,6 +131241,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 986046,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -130412,6 +131260,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 986394,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -130434,6 +131283,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 987126,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -130452,6 +131302,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 987349,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -130459,6 +131310,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 987169,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -130507,6 +131359,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 988156,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -130514,6 +131367,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 988004,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -130588,6 +131442,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 988789,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -130595,6 +131450,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 988981,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -130758,6 +131614,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 989578,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -130826,6 +131683,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 990487,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -130893,6 +131751,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 991312,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -130922,6 +131781,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 992069,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -130936,6 +131796,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 994926,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -130950,6 +131811,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 992747,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -130971,6 +131833,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 993217,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -131113,6 +131976,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 996739,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131170,6 +132034,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 994594,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -131186,6 +132051,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 997360,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131243,6 +132109,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 997977,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131556,6 +132423,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1006460,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131574,6 +132442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1006744,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -131592,6 +132461,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1007425,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131635,6 +132505,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1008292,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131642,6 +132513,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1008318,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -131660,6 +132532,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1008919,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -131678,6 +132551,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1009835,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -131718,6 +132592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1010991,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -131736,6 +132611,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1012170,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -131750,6 +132626,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1012871,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -131790,6 +132667,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1013848,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -131888,6 +132766,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1021835,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -131950,6 +132829,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1022789,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132026,6 +132906,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1024153,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132086,6 +132967,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1024494,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132160,6 +133042,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1025433,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -132279,6 +133162,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1026200,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -132315,6 +133199,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1026341,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -132400,6 +133285,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1027357,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -132439,6 +133325,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1027676,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -132468,6 +133355,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1028302,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132507,6 +133395,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1028741,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -132518,6 +133407,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1029078,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132525,6 +133415,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1029199,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -132571,6 +133462,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1030604,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -132639,6 +133531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1031840,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -132646,6 +133539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1031731,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -132694,6 +133588,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1031980,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -132712,6 +133607,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1032327,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -132786,6 +133682,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1034183,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -132872,6 +133769,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1035922,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -132916,6 +133814,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1038273,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -132969,6 +133868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1041965,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -133193,6 +134093,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1045949,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -133222,6 +134123,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1046672,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -133318,6 +134220,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1048108,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -133357,6 +134260,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1048633,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -133393,6 +134297,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1052218,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -133436,6 +134341,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1052901,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -133472,6 +134378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1053535,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -133533,6 +134440,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1053354,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -133551,6 +134459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1054121,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -133573,6 +134482,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1054537,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -133584,6 +134494,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1055394,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -133617,6 +134528,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1056087,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -133697,6 +134609,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1057629,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -133740,6 +134653,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1058929,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -133788,6 +134702,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1059879,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -133806,6 +134721,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1060176,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -133853,6 +134769,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1061058,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -133865,6 +134782,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1061606,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -133897,6 +134815,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1064905,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -134012,6 +134931,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1070487,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134059,6 +134979,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1071292,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -134102,6 +135023,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1071645,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -134141,6 +135063,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1072594,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134152,6 +135075,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1072988,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -134159,6 +135083,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1073491,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -134170,6 +135095,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1073551,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134203,6 +135129,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1073913,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -134253,6 +135180,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1075048,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134385,6 +135313,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1078642,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134410,6 +135339,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1078928,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -134446,6 +135376,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1079699,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -134568,6 +135499,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1084577,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134575,6 +135507,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1084252,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134618,6 +135551,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1085304,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -134658,6 +135592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1086837,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134672,6 +135607,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1086253,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -134719,6 +135655,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1087603,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134748,6 +135685,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1088075,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134828,6 +135766,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1088472,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -134909,6 +135848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1089110,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -134979,6 +135919,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1091265,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -135056,6 +135997,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1097697,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -135063,6 +136005,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1100283,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -135070,6 +136013,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1099149,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135081,6 +136025,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1101630,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -135088,6 +136033,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1099637,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135149,6 +136095,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1106291,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135181,6 +136128,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1107227,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -135272,6 +136220,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1109447,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -135304,6 +136253,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1109876,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135355,6 +136305,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1110834,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -135377,6 +136328,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1110850,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135417,6 +136369,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1111434,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -135433,6 +136386,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1111587,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135488,6 +136442,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1112470,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135629,6 +136584,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1117120,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -135645,6 +136601,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1117438,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -135763,6 +136720,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1121061,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135869,6 +136827,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1122152,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -135967,6 +136926,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1123730,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136034,6 +136994,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1124694,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136059,6 +137020,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1125782,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136066,6 +137028,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1126152,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136077,6 +137040,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1126419,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136084,6 +137048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1127223,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136091,6 +137056,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1127622,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -136102,6 +137068,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1127707,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -136120,6 +137087,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1127941,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136149,6 +137117,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1128336,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -136170,6 +137139,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1128828,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136181,6 +137151,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1128927,
         "hit": true,
         "player": "DobeZz",
         "source": "sound",
@@ -136204,6 +137175,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1129266,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -136222,6 +137194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1130157,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136280,6 +137253,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1130802,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -136305,6 +137279,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1130828,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136330,6 +137305,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1131473,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -136341,6 +137317,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1131590,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136408,6 +137385,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1138074,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136415,6 +137393,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1136879,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136426,6 +137405,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1139526,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136433,6 +137413,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1140137,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136451,6 +137432,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1140752,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136476,6 +137458,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1139087,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136483,6 +137466,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1141417,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136497,6 +137481,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1139142,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -136508,6 +137493,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1139451,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136515,6 +137501,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1142050,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -136562,6 +137549,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1140600,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -136569,6 +137557,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1140712,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136626,6 +137615,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1143445,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136658,6 +137648,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1144334,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -136733,6 +137724,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1147132,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -136761,6 +137753,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1148875,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -136786,6 +137779,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1149602,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -136816,6 +137810,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1149838,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -136841,6 +137836,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1150758,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -136866,6 +137862,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1151184,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -136903,6 +137900,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1152295,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -136928,6 +137926,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1154045,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -136953,6 +137952,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1156088,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -136964,6 +137964,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1156613,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137004,6 +138005,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1157217,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -137015,6 +138017,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1158027,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -137061,6 +138064,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1160114,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137090,6 +138094,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1160838,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -137115,6 +138120,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1161344,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -137122,6 +138128,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1161594,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137140,6 +138147,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1162228,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -137147,6 +138155,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1162452,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137165,6 +138174,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1162871,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -137205,6 +138215,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1162996,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137230,6 +138241,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1163834,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137259,6 +138271,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1164888,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -137277,6 +138290,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1165376,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137320,6 +138334,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1166550,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
@@ -137371,6 +138386,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1167114,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -137443,6 +138459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1169828,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137457,6 +138474,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1170867,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137475,6 +138493,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1171425,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -137486,6 +138505,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1171412,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137554,6 +138574,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1172568,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137561,6 +138582,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1172849,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -137605,6 +138627,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1173267,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -137619,6 +138642,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1173214,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -137637,6 +138661,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1173552,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -137667,6 +138692,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1174083,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -137683,6 +138709,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1174461,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -137690,6 +138717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1175305,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137697,6 +138725,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1174968,
         "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
@@ -137715,6 +138744,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1175318,
         "hit": true,
         "player": "anni",
         "source": "sound",
@@ -137848,6 +138878,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1176526,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -137907,6 +138938,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1177604,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -137961,6 +138993,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1178448,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -138046,6 +139079,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1179293,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -138096,6 +139130,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1179958,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -138117,6 +139152,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1179796,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -138466,6 +139502,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1183977,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -139114,6 +140151,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1191256,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139167,6 +140205,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1192065,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -139188,6 +140227,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1193981,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
@@ -139195,6 +140235,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1192078,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139259,6 +140300,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1192973,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139288,6 +140330,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1195117,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -139343,6 +140386,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1196371,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139350,6 +140394,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1196978,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139357,6 +140402,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1195087,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -139385,6 +140431,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1195649,
         "hit": true,
         "player": "gore",
         "source": "sound",
@@ -139399,6 +140446,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1196879,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -139410,6 +140458,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1199026,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139417,6 +140466,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1197697,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
@@ -139424,6 +140474,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1199649,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139431,6 +140482,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1197558,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -139438,6 +140490,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1200017,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139445,6 +140498,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1198178,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -139456,6 +140510,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1198812,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139477,6 +140532,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1199281,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
@@ -139484,6 +140540,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1199325,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
@@ -139509,6 +140566,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1199877,
         "hit": true,
         "player": "gore",
         "source": "sound",
