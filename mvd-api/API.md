@@ -281,7 +281,18 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   sounds / position tracks / the frag log). Reconstructed magnitudes are
   near-exact; attribution is best-effort — treat per-player match totals
   as ~1% estimates and prefer aggregates over individual hits (accuracy
-  tables: `mvd-analytics/damagerecon/ACCURACY.md`). Distinct from
+  tables: `mvd-analytics/damagerecon/ACCURACY.md`). That ~1% assumes the
+  recording carried the evidence, so a reconstructed section also carries
+  **`coverage`** (schema v74) — `{kills, covered, ratio}`, the share of
+  the frag log's weapon kills whose damage it accounts for. **Read it
+  before quoting a reconstructed figure as a match total**: a small class
+  of archive recordings barely broadcast the health/armor stat channel,
+  and `ratio` is what distinguishes a quiet match from a section that is
+  a fraction of the real one (healthy demos read 1.000 median and 0.950
+  worst of 1 127 measured; that class 0.177 median, 0.488 worst). Nothing
+  is gated on it. Absent on `source: "ktx"`, whose coverage would be the
+  constant 1, and whole-match like `source` itself — a filter carries it
+  through unrescoped. Distinct from
   `boundedSource` above, which records the KTX-scoreboard substitution
   WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
   reconstruction (detonation points, blood telemetry) is itself

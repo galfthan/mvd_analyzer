@@ -394,7 +394,14 @@ from the state streams — package
 [`damagerecon`](damagerecon/ACCURACY.md), stamped
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
-section is never touched.
+section is never touched. Every reconstructed section also carries
+`coverage` (schema v74): the share of the frag log's weapon kills whose
+lethal instant the reconstructed log accounts for, which is how a
+consumer tells a quiet match from a recording whose stat channel was
+barely broadcast. The riders (`playerStats`' damage family, its
+reconstructed accuracy hits, `aim`'s recon tier) inherit that one field
+rather than restating it — see
+[`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §per-demo coverage.
 
 `backpackReconPost` is node `backpack-recon`, publishing
 `backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
