@@ -7,6 +7,87 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### `noMatch` — demos that hold no analyzable match now say so
+
+2.03% of the QuakeWorld archive (1 032 of the 50 951-demo readability
+sweep) came out of this pipeline **silent**: no `streams`, and therefore
+no damage, no `playerStats`, no `locGraph`, no buckets — and an entirely
+EMPTY `errors[]`. A consumer facing that result could not tell three very
+different things apart: *this recording holds no match*, *the recording
+starts mid-game*, and *the parse failed*.
+
+The new top-level `noMatch` block is present on exactly those results and
+absent on every result with players:
+
+```json
+"noMatch": {
+  "reason": "midMatchRecording",
+  "detail": "the recording starts mid-game: the server already reported \"1 min left\" at demo open, so the match-start announcement this pipeline keys on happened before the first frame; the frag log still parsed 42 kill(s)",
+  "statusAtOpen": "1 min left",
+  "statusRunningSeen": true,
+  "gameDir": "qw",
+  "kills": 42
+}
+```
+
+`reason` is a five-value **total partition** of "no player streams", so a
+consumer can switch on it exhaustively:
+
+| `reason` | Evidence | n / 1 032 |
+|---|---|---|
+| `demoUnreadable` | the event stream aborted; `errors[]` has the reader's reason | 20 |
+| `midMatchRecording` | serverinfo `status` already named a running game at demo open | 68 |
+| `matchStartUnannounced` | `status` became running DURING the recording, but no recognised match-start broadcast | 138 |
+| `noMatchDeclared` | `status` never named a running game, yet the wire carried kills | 170 |
+| `noPlayRecorded` | no match declared and no kills — an idle or aborted server | 636 |
+
+`demoUnreadable` is checked first on purpose: after a truncated read,
+"nothing was declared" is not a conclusion the bytes support. And the
+marker is deliberately **not** an `errors[]` entry — `errors[]` means the
+pipeline failed, while "this recording holds no match" is a fact about the
+demo. That separation is the whole point: `demoUnreadable` is the one
+reason that means both, and it says so by name.
+
+**Why streams go missing at all.** Every recording path in the timeline
+analyzer is gated on a match-start broadcast having been seen, so a demo
+whose start was never announced records no samples, `buildStreamsResult`
+returns nil, and the rest of the pipeline has nothing to hang off. The v52
+`timeBase:"demo"` fallback reads like it should have covered this and does
+not: `flagDemoTimeBase` returns early on `result.Streams == nil`. It only
+ever fires for the narrow case where a match start WAS detected but landed
+at demo `t=0`.
+
+**Detection is grounded in the wire, and validated against the
+population.** The signal is the serverinfo `status` key — KTX writes
+`"%d min left"` while a match runs (`ktx/src/match.c:596`) and `Standby` /
+`Countdown` otherwise — tracked as a timeline rather than last-write-wins,
+since `metadata.serverInfo["status"]` names the state at demo END. The
+mod (`*gamedir`) is published as EVIDENCE and never used as a reason: 165
+of the 170 `noMatchDeclared` demos run a foreign gamedir (`fortress` 202
+across the whole set, plus `jteams` / `ctf` / `runes` / `tdw` / `bball`),
+but a `fortress` server can run a managed match with its own countdown —
+32 of the `matchStartUnannounced` demos are on foreign gamedirs — and a
+stock `qw` server records ten seconds of nothing 585 times in this set.
+Every one of the 1 032 is marked, with no leftovers, and a 1 500-demo
+random control drawn from the 49 919 demos that DO produce streams carries
+**zero** markers. Goldens do not move.
+
+**The wall clock stops being dropped.** The whole date-marker family lives
+on `streams.global`, so a stream-less result published none of it —
+`matchdate:` prints were read off the wire and thrown away on 104 of these
+demos. They now ride `noMatch.dateMarkers`, verbatim. The graded
+`matchStartUnixMs` anchor beside them is deliberately not published there:
+it is a projection through the match window (demo offset for the start
+prints, match length for the end stamps), and that window is exactly what
+this result does not have. Resolving it is salvage, not marking — plan
+lead 8 stage (b).
+
+**Consumers.** `/overview` republishes the block beside `errors[]` and
+`parseWarnings`, so one call distinguishes all three states. The new
+`no-match` DAG node also serves at
+`GET /v1/demos/{id}/artifacts/no-match` (200 with a `null` body value on a
+demo that holds a match — that null is the answer).
+
 ### `damage.coverage` — how much of the match the reconstruction saw
 
 The reconstruction reads the health/armor stat channel, and a small class

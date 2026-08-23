@@ -260,7 +260,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 		FilePath:      filename,
 	}
 	if streamErr != nil {
-		result.Errors = append(result.Errors, "event stream aborted: "+streamErr.Error())
+		result.Errors = append(result.Errors, streamAbortedPrefix+streamErr.Error())
 	}
 	// The reader's own census of what it could not decode. Read once the
 	// stream is drained (the counts are complete only then) and carried
@@ -356,6 +356,12 @@ func parseWarningsOf(source events.Source) *resultpkg.ParseWarnings {
 	return pw
 }
 
+// streamAbortedPrefix opens the Errors entry the event pass writes when the
+// source gave up mid-demo. It is a prefix two other places match on — the
+// canonical error sort below, and the no-match marker, which reports a
+// truncated read rather than concluding anything about the match from it.
+const streamAbortedPrefix = "event stream aborted: "
+
 // canonicalizeErrors sorts Result.Errors into a schedule-independent
 // order. The three sinks (event-pass stream abort, per-node Finalize
 // failures, the region-control post-processor) all *append* during
@@ -372,10 +378,9 @@ func canonicalizeErrors(errs []string) {
 	if len(errs) < 2 {
 		return
 	}
-	const abortPrefix = "event stream aborted: "
 	sort.SliceStable(errs, func(i, j int) bool {
-		ai := strings.HasPrefix(errs[i], abortPrefix)
-		aj := strings.HasPrefix(errs[j], abortPrefix)
+		ai := strings.HasPrefix(errs[i], streamAbortedPrefix)
+		aj := strings.HasPrefix(errs[j], streamAbortedPrefix)
 		if ai != aj {
 			return ai // abort entry first
 		}
@@ -449,6 +454,10 @@ func NewDefaultRegistry() *Registry {
 	r.RegisterPostProcessor(airgibsPost)
 	r.RegisterPostProcessor(scoreboardStatsPost)
 	r.RegisterPostProcessor(locGraphPost)
+	// The no-match marker stamps the results that came out with no player
+	// streams. Wall clock binds it: on such a result there is no
+	// Streams.Global to carry the date markers, so they land on the marker.
+	r.RegisterPostProcessor(noMatchPost)
 	// Wall clock reads the clock's date markers, demoinfo's ktxstats date and
 	// metadata's serverinfo version keys, and writes the graded match-start
 	// anchor onto the Streams.Global block the timeline created.

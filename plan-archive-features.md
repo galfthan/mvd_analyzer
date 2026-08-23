@@ -348,34 +348,107 @@ change.
 - ~~REST endpoint for `streams.pointEffects`~~ — SHIPPED in PR #132
   (`GET /v1/demos/{id}/streams/point-effects` + `getPointEffects` MCP
   tool). The map hit-marker overlay consuming it is still unbuilt.
-- **"no match detected" marker** — 2% of the archive (TF/CTF/race
-  content) yields empty streams with no way for a consumer to tell
-  "no match here" from "parse failed"; add an explicit marker.
+- ~~**"no match detected" marker**~~ — SHIPPED as lead 8 stage (a)
+  below (`result.noMatch`, schema v74).
 
 ## 8. Mid-match recordings: salvage or mark (NEW from the 51k sweep)
 
-Of the 877 "no player streams" demos, ~260 are REAL matches whose
-recording starts mid-game — serverinfo `status` reads "1 min left" /
-"Game Ended" at demo open, the frag log parses (30-50 frags), 73 carry
-matchdate — but match-start detection never fires, streams come out
-empty and `errors[]` is EMPTY (the v52 `timeBase:"demo"` fallback does
-not engage; investigate why). Fix in two stages: (a) always emit an
-explicit marker (extends lead 7's "no match detected" idea — and
-distinguish "mid-match recording", detectable from the `status` key,
-from "foreign mod content"); (b) salvage: analyze the recorded portion
-on the demo clock. The rest of the 877 is genuinely foreign content
-(TF/custom-mod maps: genders2, blitzkrieg2, mvdsv-kg) — mark, don't
-parse.
+**Stage (a) — MARK — SHIPPED** on `old-demo-summary` (folded into the
+unreleased schema v74). Stage (b) — SALVAGE — remains.
 
-Folded in from the v72 review: on these demos the WALL CLOCK is lost too.
-`wallClockPost` returns early when `res.Streams == nil`, so the 73 that
-carry a `matchdate` publish no `dateMarkers`, no `matchStartUnixMs` and no
-grade — the stamps are read off the wire and then dropped silently, while
-`metadata.finalScores` (which does not live under `streams`) survives.
-This is structural, not a bug in the resolver: the anchor fields are
-GlobalStream fields, so surfacing them here means deciding where a
-stream-less result carries a match window at all — which is exactly what
-(a) and (b) above settle. Fix it as part of this lead, not before it.
+### What shipped
+
+`result.noMatch`, present on exactly the results that carry no player
+streams and absent on every result with players. It names the reason from
+a five-value TOTAL PARTITION, and carries the wire evidence behind the
+verdict (`statusAtOpen`, `statusRunningSeen`, `gameDir`, `kills`) plus a
+human `detail` sentence. `/overview` republishes it beside `errors[]`;
+`GET /v1/demos/{id}/artifacts/no-match` serves it directly; the MCP
+`getOverview` description tells an agent not to read such a demo as a
+failed parse. Node `no-match` (`analyzer/nomatch.go`), evidence published
+on `CoreOutputs.ServerStatus` by the metadata node.
+
+### The population, re-measured
+
+The 877 in the original note was the `source:"none"` slice of the
+readability CSV. The true stream-less population is **1 032 of 50 951
+(2.03%)**: the 877 plus 155 rows the survey had labelled `ktx`/`skipped`
+because a `damage` section existed without any streams behind it (race
+maps, and 21 demos carrying a full KTX demoinfo block).
+
+| `reason` | evidence | n | notes |
+|---|---|---|---|
+| `noPlayRecorded` | no running `status` ever, no kills | 636 | idle / aborted servers, mostly a few seconds long |
+| `noMatchDeclared` | no running `status` ever, kills > 0 | 170 | unmanaged play; 165 on a foreign `*gamedir`, 168 sending no `status` key at all |
+| `matchStartUnannounced` | `status` became running DURING the recording | 138 | 32 carry a KTX demoinfo block, 104 carry a date marker |
+| `midMatchRecording` | `status` already running at demo open | 68 | 67 parse a frag log |
+| `demoUnreadable` | the event stream aborted | 20 | 19 aborted at stream offset 16 with nothing decoded |
+
+Every one of the 1 032 is marked, no leftovers. A 1 500-demo random
+control drawn from the 49 919 demos that DO produce streams carries
+**zero** markers, and no golden moved.
+
+Two corrections to the original note. The "~260 REAL matches" estimate
+lands as 68 + 138 = **206** demos where the server demonstrably declared
+a running match, plus 170 more with real play under no match state. And
+`status` never reads **"Game Ended"** anywhere in this population — that
+string is in neither ktx nor mvdsv; the running spellings are KTX's
+`"%d min left"` (`ktx/src/match.c:596,723,1330,1337`) and an older mod's
+`"%d:%02d left"`, against `Standby` / `Countdown` / `Forcestart` /
+`Normal` when idle.
+
+### Why the v52 `timeBase:"demo"` fallback never engaged (the answer)
+
+`flagDemoTimeBase` (`analyzer/timeline_finalize.go:628`) opens with
+`if result.Streams == nil { return }` — so on these demos it writes
+neither `timeBase:"demo"` nor its `errors[]` notice. `result.Streams` is
+nil because `buildStreamsResult` (`analyzer/timeline_streams.go:562`)
+ends with `if len(streams.Players) == 0 { return nil }`, and every
+per-player builder is empty because every recording path in `timeline.go`
+is gated on `a.timing.Started`, which only flips on a recognised
+match-start bprint. The fallback was written for a different case — "a
+match start WAS detected but at demo `t=0`, so `Clock.MatchStartMs` is 0"
+— which is reachable but rare. `wallClockPost` returned early on the same
+nil for the same reason. Both are now documented in place, and
+`flagDemoTimeBase`'s remaining case is untouched.
+
+### The wall clock: markers shipped, the graded anchor did not
+
+`noMatch.dateMarkers` now carries every stamp the wire printed, verbatim
+— 104 of the 1 032 have one, and all of them were previously read and
+dropped. `wallClockPost` binds the `no-match` node and writes there when
+there is no `streams` block.
+
+The graded `matchStartUnixMs` anchor beside them was deliberately NOT
+published, and this is the one design finding worth carrying into stage
+(b). The anchor is a PROJECTION through the match window: a match-start
+print resolves as `stamp − print's demo time + demoOffset`, a match-end
+stamp as `stamp − match length`. Both terms are the match window, which is
+exactly what a stream-less result lacks — running the resolver against a
+zero window produces "wall clock at demo `t=0`" for the print markers and
+"the raw end stamp" for the end markers, two different instants both
+labelled `matchStartUnixMs`. Measured on
+`01ca7880…` (a real KTX 1.40 demo): the matchdate stamp reads
+1627844964000 and the zero-window projection reads 1627844963745, off by
+the print's own 255 ms demo offset. Publishing that would be a wrong
+answer with a confidence grade attached. Establishing a match origin on
+the demo clock — which makes the projection well-defined — IS stage (b).
+No GlobalStream re-plumbing was attempted.
+
+### Stage (b) — salvage — remains
+
+Analyze the recorded portion of the 206 demos that demonstrably hold a
+match, on the demo clock. The two signals a salvage pass would key on are
+now both published as evidence: `statusAtOpen` naming a running game (the
+recording began mid-match, so the whole recorded window is in-match), and
+the `status` transition to a running value (`matchStartUnannounced` — the
+transition instant IS the match start on the demo clock, within one
+server frame; on `01ca7880…` the matchdate print lands at demo t=255 ms
+and the transition at t=292 ms). Note that 32 of the
+`matchStartUnannounced` demos carry a full KTX demoinfo block, so a
+salvage pass on them can be validated against an authoritative
+scoreboard. A salvaged result would then also unlock the graded wall
+clock above.
 
 ## 9. Derived demoinfo equivalents (NEW from the 51k sweep)
 
@@ -566,7 +639,8 @@ upgrades `unobserved` → `picked up by <name> (reconstructed)` / `expired`.
 `qw-corpus-survey -readability` over all 50,951 demos (CSV:
 `/mnt/HC_Volume_106625439/data/readability-51k.csv`, summary at the
 tail of `readability-51k.log` beside it). Headlines: ktx 46.8% /
-reconstructed 51.1% / none 1.7% (the 877 of lead 8) / skipped 0.4%;
+reconstructed 51.1% / none 1.7% (the 877 of lead 8 — 1 032 once the
+stream-less rows the survey filed under ktx/skipped are counted) / skipped 0.4%;
 zero unexpected pipeline errors; parse warnings on 1.0% of demos,
 unknown_svc on just 12. Marker coverage: matchdate 71.9%, finalscores
 64.1%, //ktx drop 49.2%, demoinfo 45.6%, current wallclock 24.8%.

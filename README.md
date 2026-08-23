@@ -722,8 +722,8 @@ construction; the PVS-minus-LOS gap is an occlusion-tolerant
 proximity/awareness signal. Both are surfaced through the REST/MCP
 `/los` endpoint, the CLI, and the web map overlay.
 
-Two fields report that a result is degraded, and they are deliberately
-separate. `errors[]` carries ANALYZER-level failures over events that
+Three fields report that a result is degraded or empty, and they are
+deliberately separate. `errors[]` carries ANALYZER-level failures over events that
 decoded fine (a `Finalize` returned an error, the event stream aborted
 mid-demo). `parseWarnings` (schema v72) carries the layer below — the
 reader's own census of bytes it could not decode at all: unknown `svc_*`
@@ -734,6 +734,12 @@ sample table of distinct messages. It is collected on **every** run
 `sv_bigcoords` desync degraded ~5% of the archive unnoticed) and omitted
 entirely on a clean parse. `qw-analyze` prints a one-line summary to
 stderr when a demo raises any, and `-warn` prints the whole table.
+`noMatch` (schema v74) is the third and answers a different question
+entirely — not "what went wrong" but "why is there nothing here": it is
+present exactly when the demo produced no player streams, and names the
+reason (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared`
+/ `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it.
+2% of the archive carries it; see the known-limitations list below.
 
 `CurrentSchemaVersion` (`mvd-analytics/result/result.go`) is bumped on every
 observable change to the analysis output — additive ones included, and
@@ -997,6 +1003,30 @@ diff -r /tmp/before /tmp/after
    fairpacks/yawnmode/bloodfest ruleset — the section is left absent
    rather than half-filled. Accuracy tables and stand-down conditions:
    [`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+
+0c. **2% of the archive holds no analyzable match — and now says so.**
+   Streams are built only inside the DETECTED match window, so a demo
+   whose match-start broadcast was never seen produces no player streams
+   and, with them, no damage / `playerStats` / `locGraph` / buckets. Over
+   the 50 951-demo readability sweep that is 1 032 demos (2.03%), and
+   until v74 every one of them came out silent — empty sections and an
+   empty `errors[]`, with no way to tell "this recording holds no match"
+   from "the recording starts mid-game" from "the parse failed". The v74
+   `noMatch` block is present on exactly those results and names the
+   reason: `midMatchRecording` (68 — the serverinfo `status` key already
+   read "13 min left" at demo open), `matchStartUnannounced` (138 — the
+   server started a match under our watch but announced it in a form we
+   do not recognise; 32 of them carry a full KTX demoinfo block),
+   `noMatchDeclared` (170 — unmanaged play, 165 on a foreign `*gamedir`
+   like `fortress` / `jteams` / `ctf`), `noPlayRecorded` (636 — an idle or
+   aborted server) and `demoUnreadable` (20 — a truncated read, which
+   `errors[]` also reports). It is deliberately not an `errors[]` entry:
+   that list means the pipeline failed, and this is a fact about the demo.
+   Zero markers on a 1 500-demo control drawn from the demos that DO
+   produce streams. What is still NOT done is SALVAGE — the ~206
+   recordings that demonstrably hold a real match are marked, not
+   analyzed; that is plan lead 8 stage (b) in
+   [`plan-archive-features.md`](plan-archive-features.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of

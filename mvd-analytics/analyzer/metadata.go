@@ -49,6 +49,15 @@ type MetadataAnalyzer struct {
 	fairpacks    string // "best weapon" / "last weapon fired", from the ShowMatchSettings broadcast
 	finalScores  *FinalScores
 	timing       MatchTimingDetector
+
+	// The `status` key tracked over time rather than last-write-wins, for
+	// the no-match marker (nomatch.go). serverInfo["status"] is the value
+	// at demo END; these two are "what the server said at demo open" and
+	// "did it ever say a game was running", which is what separates a
+	// recording that starts mid-game from one that caught an idle server.
+	statusSeen  bool
+	statusOpen  string
+	statusRunng bool
 }
 
 // NewMetadataAnalyzer creates a metadata analyzer.
@@ -73,6 +82,9 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		// Mid-game key/value updates — last write wins.
 		if e.Key != "" {
 			a.serverInfo[e.Key] = e.Value
+		}
+		if e.Key == "status" {
+			a.observeStatus(e.Value)
 		}
 	case *events.CenterPrintEvent:
 		// The KTX countdown centerprint is the only multi-line centerprint
@@ -161,9 +173,47 @@ func (a *MetadataAnalyzer) captureBroadcastSetting(e *events.PrintEvent) {
 // `fullserverinfo "\maxfps\77\timelimit\10\..."` and merges its key/value
 // pairs into MetadataAnalyzer.serverInfo (last write wins).
 func (a *MetadataAnalyzer) parseFullserverinfo(cmd string) {
-	for k, v := range parseInfoString(cmd) {
+	kv := parseInfoString(cmd)
+	for k, v := range kv {
 		a.serverInfo[k] = v
 	}
+	// A demo cut from a longer recording can carry a second dump; the FIRST
+	// one is the state at demo open, which is the whole point of the field.
+	if v, ok := kv["status"]; ok {
+		a.observeStatus(v)
+	}
+}
+
+// observeStatus records the serverinfo `status` transitions the no-match
+// marker reads: the value at demo open, and whether the key ever named a
+// running game.
+//
+// "Running" is spelled by the mod. KTX writes `"%d min left"`
+// (ktx/src/match.c:596, :723, :1330, :1337); an older mod in the archive
+// writes `"%d:%02d left"`. Both are a remaining-time reading: they end in
+// " left" and start with a digit. No idle or pre-match value the archive
+// carries looks like that ("Standby" ktx/src/world.c:543, "Countdown"
+// match.c:2475, "Forcestart" admin.c:693, and a mod-specific "Normal"), so
+// that pair is the test — pinning the exact KTX format instead would
+// silently reclassify every mod that spells the clock differently.
+func (a *MetadataAnalyzer) observeStatus(v string) {
+	if !a.statusSeen {
+		a.statusSeen = true
+		a.statusOpen = v
+	}
+	if statusNamesRunningGame(v) {
+		a.statusRunng = true
+	}
+}
+
+// statusNamesRunningGame reports whether a serverinfo `status` value says a
+// game is under way.
+func statusNamesRunningGame(v string) bool {
+	rest, ok := strings.CutSuffix(v, " left")
+	if !ok || rest == "" {
+		return false
+	}
+	return rest[0] >= '0' && rest[0] <= '9'
 }
 
 // parseInfoString parses a `fullserverinfo "\key\value\..."` stufftext into
@@ -239,6 +289,10 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 func (a *MetadataAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.ServerInfoMap = a.serverInfo["map"]
 	co.FinalScores = a.finalScores
+	co.ServerStatus = ServerStatus{
+		AtOpen:      a.statusOpen,
+		RunningSeen: a.statusRunng,
+	}
 }
 
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table

@@ -180,10 +180,16 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "locGraph",
 		desc:      "Per-map loc adjacency graph with directed transition weights derived from player movement.",
 	},
+	"noMatchPost": {
+		name:      "no-match",
+		requires:  []string{"timeline", "metadata", "frags:final"},
+		resultKey: "noMatch",
+		desc:      "Explicit marker on a result with no player streams, naming why there is no analyzable match (midMatchRecording / matchStartUnannounced / noMatchDeclared / noPlayRecorded / demoUnreadable) with the wire evidence behind the verdict. Absent on every result that has players.",
+	},
 	"wallClockPost": {
 		name: "wall-clock", mutates: true,
-		requires: []string{"clock", "demoinfo", "metadata", "timeline"},
-		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
+		requires: []string{"clock", "demoinfo", "metadata", "timeline", "no-match"},
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted). On a result with no streams the same anchor and markers land on `noMatch` instead, which is why it binds that node.",
 	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,

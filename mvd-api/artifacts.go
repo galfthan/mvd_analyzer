@@ -80,7 +80,12 @@ var eagerArtifacts = map[string]eagerArtifact{
 	// Always-computable / list-shaped sections: 200 with the raw section (which
 	// may be null/empty), never 422 — the same convention the curated endpoints
 	// use for these.
-	"match":          {extract: func(r *result.Result) (any, error) { return r.Match, nil }, echoMs: true},
+	"match": {extract: func(r *result.Result) (any, error) { return r.Match, nil }, echoMs: true},
+	// no-match is null on every demo that produced an analyzable match —
+	// which is 98% of them — and that null IS the answer, so it belongs with
+	// the always-computable sections rather than behind a 422. The overview
+	// republishes the same block, so a consumer normally never fetches this.
+	"no-match":       {extract: func(r *result.Result) (any, error) { return r.NoMatch, nil }, echoMs: true},
 	"messages":       {extract: func(r *result.Result) (any, error) { return r.Messages, nil }, echoMs: true},
 	"timeline":       {extract: func(r *result.Result) (any, error) { return r.TimelineAnalysis, nil }, echoMs: true},
 	"items":          {extract: func(r *result.Result) (any, error) { return r.Items, nil }, echoMs: true},

@@ -365,7 +365,7 @@ whole-Result rebase or duel rewrite.
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `wallClockPost`,
+`scoreboardStatsPost`, `locGraphPost`, `noMatchPost`, `wallClockPost`,
 `regionControlPost`, `openingPost`,
 [`playerStatsPost`](analyzer/player_stats.md),
 `damageReconPost`, `backpackReconPost`. They come in
@@ -426,6 +426,20 @@ plus `timeline` (positions, liveness, RL/LG possession) and `items` (the
 world spawner positions that disqualify a weapon-bit tie-break). A
 hint-carrying demo is never touched — `//ktx bp` already names the picker.
 
+`noMatchPost` is node `no-match`: it stamps `noMatch` on a Result that came
+out with **no player streams**, naming why (schema v74). Streams are built
+only inside the detected match window — every recording path in the
+timeline analyzer is gated on a match-start broadcast having been seen —
+so a demo whose start was never announced produces nothing at all, and
+before v74 it produced it silently: 2.03% of the archive with empty
+sections and an empty `errors[]`. The reason comes off the serverinfo
+`status` key tracked over time (published on `CoreOutputs.ServerStatus`,
+since `metadata.serverInfo` is last-write-wins and names the state at demo
+END), the frag log and the stream-abort entry in `errors[]`; `*gamedir`
+rides along as evidence and is deliberately never a reason of its own. It
+is not an `errors[]` entry because `errors[]` means the pipeline failed
+and this is a fact about the demo.
+
 `wallClockPost` is node `wall-clock`: it resolves the wire date markers
 the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
 `date` string, the year-less `//finalscores` stamp on the metadata
@@ -437,7 +451,10 @@ the match window `timeline` publishes. The `//finalscores` stamp is the one
 marker that can never anchor: it carries no year, so it is resolved last —
 year and timezone borrowed from the marker that *did* anchor (reported as
 `dateMarkers[].yearFrom`), then cross-checked on the month/day/hour/minute
-that are its own.
+that are its own. On a result with no `streams` block it writes the raw
+markers onto `noMatch.dateMarkers` instead — which is why it binds the
+`no-match` node — and stops there: the graded anchor is a projection
+through the match window, and there is none.
 
 One further node, `los`, is **lazy**: materialised on demand rather than in
 the eager parse (see "The dependency DAG").
@@ -527,19 +544,20 @@ flowchart TB
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
-    wall_clock["wall-clock"]
     region_control["region-control"]
     opening["opening"]
     los["los"]
   end
   subgraph d5["depth 5"]
     match_final["match-final"]
+    no_match["no-match"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
     aim["aim"]
     airgibs["airgibs"]
+    wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
   subgraph d7["depth 7"]
@@ -588,6 +606,7 @@ flowchart TB
   frags_final -->|"frags:final"| backpack_recon
   frags_final -->|"frags:final"| damage_recon
   frags_final -->|"frags:final"| match_final
+  frags_final -->|"frags:final"| no_match
   frags_final -->|"frags:final"| player_stats
   identity -->|"identity"| backpacks
   identity -->|"identity"| damage
@@ -609,9 +628,11 @@ flowchart TB
   metadata -->|"metadata"| damage_recon
   metadata -->|"metadata"| los
   metadata -->|"metadata"| match
+  metadata -->|"metadata"| no_match
   metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
   metadata -->|"metadata"| wall_clock
+  no_match -->|"no-match"| wall_clock
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items
@@ -631,6 +652,7 @@ flowchart TB
   timeline -->|"timeline"| frags_final
   timeline -->|"timeline"| loc_graph
   timeline -->|"timeline"| los
+  timeline -->|"timeline"| no_match
   timeline -->|"timeline"| opening
   timeline -->|"timeline"| player_stats
   timeline -->|"timeline"| region_control
@@ -638,7 +660,7 @@ flowchart TB
   timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
+  class frags_final,aim,airgibs,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```

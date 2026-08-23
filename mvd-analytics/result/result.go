@@ -1202,6 +1202,16 @@ package result
 //     withheld — nail linking is opt-in, so there is no measured baseline to
 //     validate a recovery against. See damagerecon/ACCURACY.md §"Aim hit
 //     recovery".
+//   - ADDED top-level `noMatch`: the explicit marker on a result that
+//     carries no analyzable match, replacing the silent empty result that
+//     2.0% of the archive (1 032 of 50 951) produced. It names WHY —
+//     `midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` /
+//     `noPlayRecorded` / `demoUnreadable` — with the wire evidence behind
+//     the verdict (`statusAtOpen`, `statusRunningSeen`, `gameDir`,
+//     `kills`), and carries the wall-clock anchor + `dateMarkers` that
+//     `streams.global` has no home for on such a result. Present exactly
+//     when `streams` is absent; `/overview` republishes it beside
+//     `errors[]`.
 //
 // See RELEASE_NOTES.md.
 const CurrentSchemaVersion = 74
@@ -1234,8 +1244,125 @@ type Result struct {
 	Opening          *OpeningResult          `json:"opening,omitempty"`
 	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
+	NoMatch          *NoMatchResult          `json:"noMatch,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 	ParseWarnings    *ParseWarnings          `json:"parseWarnings,omitempty"`
+}
+
+// NoMatch reason vocabulary. Exactly one is set on NoMatchResult.Reason;
+// the set is a total partition of "this demo produced no player streams",
+// so a consumer can switch on it exhaustively. Every value is grounded in
+// wire evidence carried alongside it in the same struct — see the field
+// docs on NoMatchResult and the derivation in
+// mvd-analytics/analyzer/nomatch.go.
+const (
+	// NoMatchDemoUnreadable: the event stream aborted, so the demo was
+	// never read to the end. errors[] carries the reader's reason. No
+	// conclusion about the match is possible — the match-start
+	// announcement may simply sit past the truncation point — so this
+	// reason reports the truncation instead of guessing.
+	NoMatchDemoUnreadable = "demoUnreadable"
+	// NoMatchMidMatchRecording: the serverinfo `status` key already named
+	// a running game when the recording opened ("13 min left"), i.e. the
+	// match-start announcement happened before the first demo frame. The
+	// recorded window is real play; this pipeline just has no match
+	// origin to rebase it onto.
+	NoMatchMidMatchRecording = "midMatchRecording"
+	// NoMatchStartUnannounced: `status` was not running at demo open but
+	// became running during the recording, and no match-start broadcast
+	// this pipeline recognises was ever seen. The server started a match
+	// under our watch and announced it in a form (or on a mod) outside
+	// events.MatchStartPatterns.
+	NoMatchStartUnannounced = "matchStartUnannounced"
+	// NoMatchNoMatchDeclared: the server never declared a running match,
+	// yet the wire carried kills. Unmanaged play — a mod with no match
+	// state (TeamFortress, CTF, custom gamedirs), or free play on an idle
+	// server. GameDir names the mod where the server stated one.
+	NoMatchNoMatchDeclared = "noMatchDeclared"
+	// NoMatchNoPlayRecorded: no running match was ever declared and the
+	// wire carried no kills. The recording caught an idle or aborted
+	// server — most of these are a few seconds long.
+	NoMatchNoPlayRecorded = "noPlayRecorded"
+)
+
+// NoMatchResult is the explicit marker on a Result that carries no
+// analyzable match: `streams` is absent, so every stream-derived section
+// (buckets, damage, playerStats, locGraph, …) is absent with it.
+//
+// It exists because absence alone is ambiguous. Before schema v74 a
+// consumer facing an empty result could not tell "this demo holds no
+// match" from "the recording starts mid-game" from "the parse failed" —
+// 1 032 of the 50 951-demo archive sweep (2.0%) produced empty streams
+// and an EMPTY errors[], because the v52 `timeBase:"demo"` fallback is
+// itself gated on `streams` existing (analyzer/timeline_finalize.go
+// flagDemoTimeBase) and so never fired. This section is present on
+// exactly those results and absent on every result with players.
+//
+// It is deliberately NOT an errors[] entry: errors[] means the pipeline
+// failed at something, and "this recording holds no match" is a fact
+// about the demo, not a failure. The one reason that IS a failure,
+// demoUnreadable, says so by name and leaves the detail in errors[].
+type NoMatchResult struct {
+	// Reason is one of the NoMatch* constants above.
+	Reason string `json:"reason"`
+	// Detail is the same verdict as one human-readable sentence, naming
+	// the evidence (the verbatim status string, the gamedir, the kill
+	// count). It is what a text-oriented consumer — an /overview reader,
+	// an agent — should show beside the reason code.
+	Detail string `json:"detail"`
+	// StatusAtOpen is the serverinfo `status` value as it stood in the
+	// `fullserverinfo` dump at demo open, verbatim. It is the wire's own
+	// statement of the game state at the first frame, and the evidence
+	// behind midMatchRecording. Distinct from ServerInfo["status"] in
+	// `metadata`, which is last-write-wins and so names the state at demo
+	// END. Empty when the server sent no `status` key at all (pre-KTX
+	// servers, and mods that never set it).
+	//
+	// The running-game spellings observed across the archive are KTX's
+	// "%d min left" (ktx/src/match.c:596,723,1330) and a "%d:%02d left"
+	// variant from an older mod; the idle/pre-match ones are "Standby"
+	// (world.c:543), "Countdown" (match.c:2475), "Forcestart"
+	// (admin.c:693) and a mod-specific "Normal".
+	StatusAtOpen string `json:"statusAtOpen,omitempty"`
+	// StatusRunningSeen is set when `status` named a running game at any
+	// point in the recording — at open or in a later svc_serverinfo
+	// update. It separates matchStartUnannounced (the server did start a
+	// match) from noMatchDeclared / noPlayRecorded (it never did).
+	StatusRunningSeen bool `json:"statusRunningSeen,omitempty"`
+	// GameDir is the serverinfo `*gamedir` key: the mod the server ran.
+	// "qw" is the stock deathmatch gamedir; anything else ("fortress",
+	// "ctf", "jteams", "runes", …) is a mod with rules this pipeline does
+	// not model. It is reported as evidence, never as a reason of its own
+	// — a foreign gamedir can still run a managed match, and a "qw"
+	// server can still record nothing.
+	GameDir string `json:"gameDir,omitempty"`
+	// Kills is the length of the frag log (`frags.frags`): how much play
+	// the recorded window actually held. Non-zero with any reason except
+	// noPlayRecorded, which is defined by it being zero.
+	Kills int `json:"kills,omitempty"`
+
+	// DateMarkers lists every date stamp the wire carried, verbatim and in
+	// the order seen — the same []WallClockMarker
+	// `streams.global.dateMarkers` carries, given a home here because
+	// there is no GlobalStream on this result (schema v74). Before v74
+	// these were read off the wire and then dropped on the floor: 73 of
+	// the 877 stream-less demos in the archive sweep printed a
+	// `matchdate:` and published nothing, while `metadata.finalScores`
+	// (which does not live under `streams`) survived.
+	//
+	// The markers are published RAW, and deliberately without the graded
+	// `matchStartUnixMs` anchor GlobalStream carries beside them. That
+	// anchor is a PROJECTION — a match-start print is projected as
+	// `stamp - print's demo time + DemoOffset`, a match-end stamp as
+	// `stamp - match length` — and both terms are the match window, which
+	// is exactly what this result does not have. Publishing the
+	// projection against a zero window would state an instant off by the
+	// recording's own offset and label it "match start". Resolving it
+	// properly means establishing a match origin on the demo clock, which
+	// is salvage: plan-archive-features.md §8 stage (b). Until then the
+	// stamps stand on their own — `kind` says which instant each one
+	// names, and `metadata.finalScores` still carries KTX's own record.
+	DateMarkers []WallClockMarker `json:"dateMarkers,omitempty"`
 }
 
 // ParseWarnings is the census of what the WIRE carried but the reader

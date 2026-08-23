@@ -237,8 +237,18 @@ type (
 	Streams                = result.Streams
 	GlobalStream           = result.GlobalStream
 	WallClockMarker        = result.WallClockMarker
+	NoMatchResult          = result.NoMatchResult
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
+)
+
+// NoMatchResult.Reason vocabulary, re-exported like the type aliases above.
+const (
+	NoMatchDemoUnreadable    = result.NoMatchDemoUnreadable
+	NoMatchMidMatchRecording = result.NoMatchMidMatchRecording
+	NoMatchStartUnannounced  = result.NoMatchStartUnannounced
+	NoMatchNoMatchDeclared   = result.NoMatchNoMatchDeclared
+	NoMatchNoPlayRecorded    = result.NoMatchNoPlayRecorded
 )
 
 // MatchResult.Sources provenance values, re-exported for the same reason as

@@ -498,7 +498,20 @@ there is exactly the `422` you would have received. It is the only way to
 learn the BSP-derived ones (`height`, `liquid`, `los`) — those turn on the
 server's map provisioning rather than on the demo, so the same demo answers
 differently on two deployments. Use it (with `errors` and, for
-reader-level gaps, `parseWarnings`) to hide panels up front. Endpoints whose data
+reader-level gaps, `parseWarnings`) to hide panels up front.
+
+When almost every flag reads `false` at once, look at **`noMatch`**
+(schema v74) before concluding anything went wrong. It is present exactly
+when the demo yielded no player streams — 2% of the QuakeWorld archive —
+and it names the reason: `midMatchRecording` (the recording starts after
+the match began), `matchStartUnannounced` (the server ran a match but
+announced it in a form the pipeline does not recognise), `noMatchDeclared`
+(unmanaged play on a mod with no match state, see `gameDir`),
+`noPlayRecorded` (an idle or aborted server) or `demoUnreadable` (a
+truncated read — the only reason that ALSO means a failure, with the
+reader's message in `errors`). `detail` is the same verdict as a sentence
+you can show a user. Such a demo is not a failed parse and retrying it
+changes nothing. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.

@@ -35,6 +35,7 @@ analyzer are also covered there.
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
 | Streams | `streams` | *Streams | Native-rate per-player + global state-change streams (position/view/health/armor/ammo/items tracks, movers, and the opt-in spatial weapon streams — see the Streams section). |
+| NoMatch | `noMatch` | *NoMatchResult, omitempty | v74 — the explicit marker on a result that carries **no analyzable match**: present exactly when `streams` is absent, naming why (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` / `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind the verdict. It is a fact about the DEMO, not a pipeline failure — the distinction from `errors` below. See [NoMatchResult](#nomatchresult-nomatch-schema-v74). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
 | ParseWarnings | `parseWarnings` | *ParseWarnings, omitempty | v72 — the READER's census of wire data it could not decode (unknown `svc_*` / temp-entity / hidden-message types, payloads that failed to parse). A **distinct signal from `errors`**: sub-fatal, parse-level, and about events that never reached an analyzer at all. Omitted on a clean parse, which is the normal case. See [ParseWarnings](#parsewarnings-parsewarnings-schema-v72). |
 
@@ -2205,7 +2206,7 @@ The match window plus the demo/wall-clock anchor (moved here from
 |---|---|---|---|
 | MatchStart | `matchStart` | int32 | Match window start in milliseconds (always 0 after post-process — it *is* the time origin). |
 | MatchEnd | `matchEnd` | int32 | Match window end in milliseconds. |
-| TimeBase | `timeBase` | string, omitempty | `"demo"` when **no match start was detected** (schema v52): the rebase never ran, so *every* timestamp in the whole Result is on the raw demo clock (t=0 = demo open, warmup included). Omitted on the normal match-relative result. A matching notice appears in `errors[]` (and therefore `/overview`). |
+| TimeBase | `timeBase` | string, omitempty | `"demo"` when **no match start was detected** (schema v52): the rebase never ran, so *every* timestamp in the whole Result is on the raw demo clock (t=0 = demo open, warmup included). Omitted on the normal match-relative result. A matching notice appears in `errors[]` (and therefore `/overview`). It covers only the case where a match start was detected at demo `t=0` — a demo with NO detected match start produces no `streams` block at all, and is marked by [`noMatch`](#nomatchresult-nomatch-schema-v74) instead. |
 | DemoOffset | `demoOffset` | int32, omitempty | Ms from demo open (≈ countdown start) to match start. |
 | DemoStartUnixMs | `demoStartUnixMs` | int64, omitempty | Server wall clock (Unix epoch ms) at demo open. |
 | DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty | ± uncertainty of `demoStartUnixMs`: `1`, `1000`, or (v72, marker-derived) `3600000` / `50400000`. |
@@ -2216,7 +2217,7 @@ The match window plus the demo/wall-clock anchor (moved here from
 | MatchStartConfidence | `matchStartConfidence` | string, omitempty | v72 — `exact` \| `unverified` \| `contradicted`. |
 | MatchStartNote | `matchStartNote` | string, omitempty | v72 — names the check(s) behind a non-`exact` grade. Empty on `exact`. |
 | MatchEndUnixMs | `matchEndUnixMs` | int64, omitempty | v72 — wall clock at match end, from the ktxstats `date` string, else the year-completed `//finalscores` stamp. |
-| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried, **on a result that has a `streams` block**; see below and the no-streams exception under the grades table. |
+| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried, **on a result that has a `streams` block**; a stream-less result carries the same list on `noMatch.dateMarkers` instead (v74). See below and the no-streams exception under the grades table. |
 | Pauses | `pauses` | []TimelinePause, omitempty | Per-pause wall-clock segments; see below. |
 
 **Wall-clock anchor.** All other times in the result are match-relative
@@ -2282,13 +2283,20 @@ source reaches none of them.
 
 **The no-streams exception.** The whole wall-clock family lives on
 `streams.global`, so a result with no `streams` block at all carries none
-of it — no `dateMarkers`, no `matchStartUnixMs`, no grade — even when the
-wire did print a `matchdate`. That is the ~877 archive demos whose
-recording starts mid-match, where match-start detection never fires (73 of
-them carry a stamp that is read and then not published). `metadata.finalScores`
-does not live under `streams` and survives on those demos. Surfacing the
-rest means first deciding what match window a stream-less result has, which
-is plan lead 8's job — see `plan-archive-features.md`.
+of it. Since v74 the RAW STAMPS are published anyway, on
+[`noMatch.dateMarkers`](#nomatchresult-nomatch-schema-v74) — 104 of the
+1 032 stream-less demos in the archive sweep carry at least one, and
+before v74 every one of them was read off the wire and then dropped.
+
+What is still NOT published there is the graded anchor beside them
+(`matchStartUnixMs` + `matchStartConfidence`). That anchor is a
+PROJECTION through the match window — a match-start print is projected as
+`stamp − print's demo time + demoOffset`, a match-end stamp as
+`stamp − match length` — and both terms are exactly what a stream-less
+result does not have. Resolving it means first establishing a match
+origin on the demo clock, which is salvage, not marking: plan lead 8
+stage (b) in `plan-archive-features.md`. `metadata.finalScores` does not
+live under `streams` and survives on those demos regardless.
 
 Where only a print marker exists, `demoStartUnixMs` is back-shifted from
 it by `demoOffset` (so the formula above keeps working) and
@@ -4279,6 +4287,85 @@ one cheap fetch.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
 
+## NoMatchResult (`noMatch`) — schema v74
+
+The explicit marker on a result that carries **no analyzable match**.
+Present exactly when `streams` is absent, absent on every result with
+players.
+
+**Why it exists.** Streams are the spine of this pipeline — damage,
+`playerStats`, `locGraph`, `opening`, buckets, region control all hang off
+them — and they are built only inside the DETECTED match window: every
+recording path in the timeline analyzer is gated on a match-start
+broadcast having been seen. A demo whose match start was never announced
+therefore produces `buildStreamsResult() == nil` and, transitively,
+nothing else. Over the full 50 951-demo archive sweep that is **1 032
+demos (2.03%)**, and until v74 every one of them came out silent: empty
+sections and an entirely EMPTY `errors[]`. The v52 `timeBase:"demo"`
+fallback that reads like it should cover this does not — `flagDemoTimeBase`
+returns early on `result.Streams == nil`, so it only ever fires for the
+narrow case where a match start WAS detected but landed at demo `t=0`.
+
+**Why it is not an `errors[]` entry.** `errors[]` means the pipeline
+failed at something. "This recording holds no match" is a fact about the
+demo. Keeping them apart is the point of the marker: a consumer can tell
+*no match here* from *parse failed* without heuristics on an error string.
+The one reason that IS a failure, `demoUnreadable`, says so by name and
+leaves the reader's message in `errors[]`.
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Reason | `reason` | string | Why there is no match; the vocabulary below. Always present. |
+| Detail | `detail` | string | The same verdict as one human-readable sentence, naming the evidence. Always present. |
+| StatusAtOpen | `statusAtOpen` | string, omitempty | The serverinfo `status` value at **demo open**, verbatim. |
+| StatusRunningSeen | `statusRunningSeen` | bool, omitempty | `status` named a running game at some point in the recording. |
+| GameDir | `gameDir` | string, omitempty | The serverinfo `*gamedir` key — the mod the server ran. Evidence, never a reason of its own. |
+| Kills | `kills` | int, omitempty | Length of the frag log: how much play the recorded window held. |
+| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | Every date stamp the wire carried, verbatim — the same list `streams.global.dateMarkers` carries, given a home here because there is no `streams` block. See [the no-streams exception](#globalstream). |
+
+### The `reason` vocabulary
+
+The five values are a **total partition** of "no player streams", so a
+consumer can switch on them exhaustively. They are decided in the order
+listed; the counts are over the 1 032 stream-less demos of the archive
+sweep.
+
+| `reason` | Wire evidence | n | Notes |
+|---|---|---|---|
+| `demoUnreadable` | the event stream aborted (`errors[]` carries the reader's reason) | 20 | Checked FIRST, because a truncated read invalidates every other conclusion — the match-start announcement may simply sit past the truncation point. 19 of the 20 aborted at stream offset 16 with nothing decoded at all. |
+| `midMatchRecording` | `statusAtOpen` names a running game (`"13 min left"`) | 68 | The recording begins after the match-start announcement, so the pipeline has no origin to rebase onto. 67 of the 68 still parse a frag log (30–50 kills is typical). |
+| `matchStartUnannounced` | `statusAtOpen` is not running, but `status` became running DURING the recording | 138 | The server started a match under our watch and announced it in a form outside the recognised set. Includes 32 demos carrying a full KTX demoinfo block, and 104 of the 138 carry a date marker. Salvaging these is plan lead 8 stage (b). |
+| `noMatchDeclared` | `status` never named a running game, `kills > 0` | 170 | Unmanaged play. 165 of the 170 ran a foreign gamedir (`fortress` 202 across the whole set, plus `jteams` / `ctf` / `runes` / `tdw` / `bball`) and 168 sent no `status` key at all — the mod has no KTX match state to report. |
+| `noPlayRecorded` | `status` never named a running game, `kills == 0` | 636 | The recording caught an idle or aborted server; most are a few seconds long with one connected player. |
+
+**`status` spellings.** Running readings are KTX's `"%d min left"`
+(`ktx/src/match.c:596`, `:723`, `:1330`, `:1337`) and an older mod's
+`"%d:%02d left"`; the test is "ends in ` left` and starts with a digit",
+which is deliberately looser than the KTX format so mods that spell their
+clock differently are not silently reclassified. Idle / pre-match values
+are `Standby` (`ktx/src/world.c:543`), `Countdown` (`match.c:2475`),
+`Forcestart` (`admin.c:693`) and a mod-specific `Normal`. `statusAtOpen`
+is read from the FIRST `fullserverinfo` dump and is a different value from
+`metadata.serverInfo["status"]`, which is last-write-wins and so names the
+state at demo END.
+
+**Why the gamedir is not a reason.** `*gamedir` is the honest
+protocol-level statement of which mod ran (the map name is not — foreign
+content shows up on `dm6` and stock duels show up on custom maps). But it
+does not explain the absence on its own: a `fortress` server can run a
+managed match with its own countdown (32 of the `matchStartUnannounced`
+demos are on foreign gamedirs), and a stock `qw` server records ten
+seconds of nothing 585 times in this set. It rides along as evidence.
+
+**Validated** over the 1 032 stream-less demos (every one marked, no
+leftovers) and a 1 500-demo random control drawn from the 49 919 demos
+that DO produce streams: **zero** controls carry a marker.
+
+**REST.** `/overview` republishes the block verbatim beside `errors[]` and
+`parseWarnings`; `GET /v1/demos/{id}/artifacts/no-match` serves it
+directly (200 with a `null` body value on a demo that holds a match —
+that null is the answer).
+
 ## ParseWarnings (`parseWarnings`)
 
 Schema v72. The MVD reader's own census of what it could **not** read
@@ -4401,6 +4488,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v74 | **Demos that hold no analyzable match are marked instead of coming out silent.** New top-level **`noMatch`**, present exactly when `streams` is absent: a `reason` from a five-value total partition (`midMatchRecording` \| `matchStartUnannounced` \| `noMatchDeclared` \| `noPlayRecorded` \| `demoUnreadable`), a human `detail` sentence, and the wire evidence behind the verdict — `statusAtOpen` (the serverinfo `status` key at demo OPEN, verbatim; distinct from `metadata.serverInfo.status`, which is last-write-wins and names the state at demo END), `statusRunningSeen`, `gameDir` and `kills`. It exists because absence was previously ambiguous AND silent: 1 032 of the 50 951-demo archive sweep (2.03%) produced empty streams with an entirely EMPTY `errors[]`, so a consumer could not tell "this recording holds no match" from "the recording starts mid-game" from "the parse failed". The v52 `timeBase:"demo"` fallback does not cover it — `flagDemoTimeBase` returns early on `result.Streams == nil`, and streams are nil precisely because every timeline recording path is gated on a match-start broadcast that was never seen; the fallback only ever fires when a start WAS detected but landed at demo `t=0`. Distribution over the 1 032: `noPlayRecorded` 636, `noMatchDeclared` 170 (165 of them on a foreign `*gamedir` — `fortress`, `jteams`, `ctf`, `runes`, `tdw`, `bball` — and 168 sending no `status` key at all), `matchStartUnannounced` 138 (32 carrying a full KTX demoinfo block), `midMatchRecording` 68 (67 with a parsed frag log), `demoUnreadable` 20; every demo marked, no leftovers, and **zero** markers on a 1 500-demo random control drawn from the 49 919 that do produce streams. The gamedir is published as evidence and never used as a reason — a `fortress` server can run a managed match and a stock `qw` server can record nothing. `noMatch` also gives the wall-clock **`dateMarkers`** a home on a stream-less result (104 of the 1 032 carry one): they were read off the wire and then dropped, since the whole family lives on `streams.global`. The graded `matchStartUnixMs` anchor beside them is deliberately NOT published there — it is a projection through the match window, which such a result does not have; that is salvage, plan lead 8 stage (b). Additive: `errors[]` is untouched, `/overview` gains `noMatch` beside it, and the new `no-match` DAG node serves at `/v1/demos/{id}/artifacts/no-match` (200 with a `null` body on a demo that holds a match). Goldens do not move — no healthy demo is affected. |
 | v74 | **Partial damage reconstruction becomes visible per demo.** `damage` gains **`coverage`** `{kills, covered, ratio}` on every `source: "reconstructed"` section — the share of the frag log's weapon kills whose lethal instant the reconstructed `events` log accounts for, i.e. `cmd/qw-recon-oracle`'s kill-delta coverage computed in the normal pass (`damagerecon/aggregate.go setCoverage`). It exists because a small class of archive recordings barely broadcasts the health/armor stat channel: positions and the frag log survive, the damage does not, and until now nothing distinguished "this player dealt little damage" from "the recording did not carry the evidence". Measured over the full 10 702-demo oracle sweep (rescored after v74 shipped from a 200/era subsample): **99.0% read ≥ 0.95** (median 1.000), **0.80% read < 0.50** (the silent-channel class, 0.182 median / 0.488 worst) and **0.18% fall between**, spanning 0.500–0.944 — a hard bimodal core with a thin gradient tail, so `ratio` is a magnitude to read rather than a two-valued flag, and it measures the FRAG-LOG-VISIBLE match (a loss that drops obituaries and damage together still reads 1.000); the same metric over a WIRE damage log reads exactly **1.000 on all 65** ground-truth demos, and thinning the stat channel to one sample in four drops a healthy demo to a 0.35 median while `kills` stays put (both controls pinned in `damagerecon/coverage_test.go`). Bounded damage per kill — the other candidate figure — was measured and rejected: the two populations overlap on it (healthy min 107, silent max 326). Absent on `source: "ktx"` (a wire log records every `T_Damage` call, so coverage is 1 by construction) and when the frag log names no scoreable kill. Whole-match: a `players`/`weapons`/time filter carries it through unchanged, like `source` and `boundedMode`. NOTHING is gated on it — the riders that inherit the signal (`playerStats` damage family, its reconstructed `accuracy.hits`, `aim.players[].weapons[].recon.hits`) point at this one field instead of copying or withholding. Goldens move on the reconstructed-damage demo only. |
 | v74 | **A derived demoinfo summary for the half of the archive with no KTX block.** `playerStats.players[].score` gains **`maxSpree`** and **`maxQuadSpree`** — the kill-streak maxima KTX writes as `spree.max` / `spree.quad`, replayed from the corrected frag log, the death markers and the quad possession runs on every demo (`analyzer/spree.go`). They ride `score.kills`' `killsMeasured` gate, so they are present and absent with it, and a team row carries the best any member ran rather than a sum. `playerStats.players[].accuracy` gains **`src: "reconstructed"`** and, with it, `hits` on pre-instrumentation demos: the values are read straight off the published `aim.players[].weapons[].recon` tier, so its weapon-level withholds (`ng`/`sng` carry none) inherit rather than being restated — the `player-stats` DAG node now binds `aim` for exactly this. `accuracy.byWeapon[]` additionally gains **`hitsConvention`** (`anyDamage` \| `directImpact` \| `pellets`), present whenever `hits` is: `src` is the evidence grade and says nothing about WHAT is counted, while one `src: "ktx"` row uses all three conventions at once (lg any-path, rl/gl direct impacts, sg/ssg pellets). Two rows are comparable exactly when weapon AND convention match. Validated withhold-and-compare against the verbatim KTX block on 188 instrumented archive demos / 665 player rows (`cmd/qw-demoinfo-eval`): `maxQuadSpree` 99.8% exact, `maxSpree` 99.6% on rows whose kill count already agrees and whose player never suicided (KTX credits a suicide to its own streak wherever teamplay is off — the one deliberate divergence), powerup `took` 100.0% exact and possession seconds 0.1–0.5% off on all three powerups, `frags`/`deaths` 99.5%/99.7%, reconstructed `damage.given`/`taken` 0.5% aggregate, `accuracy` `attacks` 98–100% exact on every single-projectile weapon and lg `hits` 0.9% aggregate. The KTX rl/gl convention is NOT derivable on a blockless demo and the harness says so with numbers: the wire log's own splash flag reproduces KTX's rl `hits` on 638 of 638 rows, but the reconstruction's geometric direct/splash verdict answers it for gl (1.2% aggregate) and not for rl (+80%), so the derived count stays `anyDamage` and is marked rather than coerced. Goldens move by the new fields, the `accuracy.src` flip on the reconstructed-damage demo, and one `maxSpree` (a same-instant mutual frag, now ordered by the frag log rather than by event kind). |
 | v74 | **The fire→flight association reaches the Result, and with it rl/gl hit recovery on old demos.** `shots.shots[]` gains **`flightEnd`** — the match-relative time at which the tracked rocket/grenade (or nail) a fire launched died. The shots analyzer has always bracketed those flights, since that IS how a projectile fire's `hit` is decided (`analyzer/shots.go linkProjectiles`), and then discarded the association; it is now published. Absent on hitscan fires and on a projectile whose entity the server never broadcast — which is exactly the state the measured hit counter reads as a miss — and set whether or not the impact damaged anyone. On the back of it, the reconstructed hit tier now covers **`rl` and `gl`**: `aim.players[].weapons[].recon.hits` appears for them on demos whose damage section is reconstructed, joined flight-impact-instant → reconstructed damage instead of by counting impacts, which is what made the two conventions differ by ~7 pp on rl in v73. Measured over 53 dm2/dm3 demos carrying the KTX log (rows ≥ 20 fires): mean accuracy error **rl 0.6 pp** (bias +0.4) / **gl 0.3 pp** (bias 0.0) vs the measured counter, with the join-on-wire control at 0.4 pp / 0.1 pp; `lg`/`sg`/`ssg`/`axe` unchanged to the last row. `ng`/`sng` stay withheld — nail linking is opt-in, so their measured counter is zero everywhere and there is nothing to validate a recovery against. Goldens move by exactly the new fields. |

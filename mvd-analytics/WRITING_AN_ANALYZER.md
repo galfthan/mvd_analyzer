@@ -59,6 +59,7 @@ handed to you via the `CoreConsumer` hook. The field → producing node map:
 | `Clock` | `clock` | The match time base — call `co.Clock.ToMatch(t)` (or `co.MatchStartMs()`) so your timestamps are **born match-relative**; nil-safe |
 | `Roster` | `roster` | Final team labels — call `co.TeamFor(name, rawTeam)` so duel demos get name-as-team labels **at birth**; nil-safe |
 | `ServerInfoMap` | `metadata` | The serverinfo `map` key — read via `co.EffectiveMap()` (demoinfo map, else this) so BSP-derived passes resolve the map on demoinfo-less demos; nil-safe |
+| `ServerStatus` | `metadata` | The serverinfo `status` key as a timeline (`AtOpen`, `RunningSeen`) rather than the last-write-wins value in `metadata.serverInfo` — what the server said the game state was at demo OPEN, and whether it ever said a game was running. Read by `no-match`; zero-valued when the demo carried no `status` key |
 
 The nil-safe helpers (`co.MatchStartMs()`, `co.TeamFor(...)`,
 `co.Clock.ToMatch(...)`) tolerate a missing producer, so unit tests can

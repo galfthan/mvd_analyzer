@@ -289,7 +289,13 @@ Carries the per-demo capability manifest (`available`), the
 `timing.matchStart*` anchor family that answers "when was this match
 played" (schema v72 — always read `matchStartConfidence` with the value),
 and the two separate degradation signals `errors` (analyzer level) and
-`parseWarnings` (reader level, omitted on a clean parse).
+`parseWarnings` (reader level, omitted on a clean parse). Also carries
+`noMatch` (schema v74) on the 2% of the archive that yields no analyzable
+match: present exactly when there are no player streams, naming the reason
+(`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` /
+`noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it, so
+"no match here" is distinguishable from "the parse failed" without
+guessing.
 
 #### `getDemoInfo({demoId})`
 

@@ -538,6 +538,19 @@ func validationCases(t *testing.T) []validationCase {
 				`"groups":[{"type":"unknown_svc","message":"svc_unknown_61 (cmd 61)","count":7,"firstDemoTimeMs":61200}`,
 				`"droppedWarnings":12`,
 			}},
+		// The no-match marker (v74) is omitempty and every golden demo holds
+		// a real match, so the sub-schema is validated only against its own
+		// absence without the gameId:43 fixture. mustContain names each
+		// field for the same reason parseWarnings does.
+		{name: "overview-no-match", url: "/v1/demos/gameId:43/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{
+				`"noMatch":{"reason":"midMatchRecording"`,
+				`"statusAtOpen":"1 min left"`, `"statusRunningSeen":true`,
+				`"gameDir":"qw"`, `"kills":42`,
+				`"dateMarkers":[{"source":"matchdate","kind":"matchStart"`,
+			}},
+		{name: "artifact-no-match-marked", url: "/v1/demos/gameId:43/artifacts/no-match", path: "/v1/demos/{id}/artifacts/{name}", status: 200,
+			mustContain: []string{`"noMatch":{"reason":"midMatchRecording"`}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are
@@ -792,8 +805,22 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 		// (a map with no BSP anywhere) instead of of the ambient MVDA_BSP_DIR.
 		"gameId:48": losBspLessResult(),
 		// gameId:43 is a well-formed but capability-empty Result for the
-		// 422 error paths.
-		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion},
+		// 422 error paths. It carries the v74 no-match marker, which is what
+		// such a Result looks like coming out of the real pipeline — and the
+		// only fixture that exercises the NoMatch schema.
+		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion, NoMatch: &result.NoMatchResult{
+			Reason:            result.NoMatchMidMatchRecording,
+			Detail:            "the recording starts mid-game: the server already reported \"1 min left\" at demo open",
+			StatusAtOpen:      "1 min left",
+			StatusRunningSeen: true,
+			GameDir:           "qw",
+			Kills:             42,
+			DateMarkers: []result.WallClockMarker{{
+				Source: "matchdate", Kind: "matchStart",
+				UnixMs: 1627844964000, AtMs: 255, TZ: "EDT",
+				Raw: "2021-08-01 15:09:24 EDT",
+			}},
+		}},
 		// gameId:44 carries damage whose bounded reconstruction was skipped —
 		// dmg=bounded there is a 422 bounded_unavailable.
 		"gameId:44": {SchemaVersion: result.CurrentSchemaVersion, Damage: &result.DamageResult{
