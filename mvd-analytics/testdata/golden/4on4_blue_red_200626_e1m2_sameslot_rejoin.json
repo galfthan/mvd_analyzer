@@ -235,6 +235,22 @@
     ]
   },
   "timelineAnalysis": {
+    "airgibs": [
+      {
+        "attacker": "Venator",
+        "attackerTeam": "blue",
+        "attackerUserID": 16,
+        "damage": 110,
+        "height": 102.71875,
+        "heightAboveAttacker": 110.75,
+        "lethal": true,
+        "loc": "Quad.stairs",
+        "time": 1156198,
+        "victim": "omicron",
+        "victimTeam": "red",
+        "victimUserID": 13
+      }
+    ],
     "fragStreaks": [
       {
         "duration": 264319,

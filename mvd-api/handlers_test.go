@@ -1580,6 +1580,100 @@ func TestAirgibs(t *testing.T) {
 	if len(arr) != 1 || arr[0]["attacker"] != "bps" {
 		t.Errorf("airgibs = %s; want one bps hit", body)
 	}
+	// The default serves the stored list and says which detection it is.
+	if got := envelopeInt(t, body, "preMs"); got != view.DefaultAirgibPreMs {
+		t.Errorf("preMs = %d; want the default %d (%s)", got, view.DefaultAirgibPreMs, body)
+	}
+}
+
+// A non-default preMs re-runs detection on the stored Result instead of
+// serving the baked list. The fixture is the knockback false positive the
+// pre-hit gate exists for: grounded at t-200, "airborne" at the hit.
+func TestAirgibs_PreMsRecomputes(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Streams: &result.Streams{Players: []result.PlayerStream{{
+			Name: "milton", Team: "red",
+			Position: &result.PositionTrack{
+				T: []int32{59_800, 60_000}, X: []float32{0, 0}, Y: []float32{0, 0},
+				Z: []float32{319, 620}, H: []float32{0, 303},
+			},
+		}}},
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+			{Time: 60_000, Attacker: "bps", Victim: "milton", Weapon: "rl", Damage: 110},
+		}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{}, // the default detection found nothing
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	// Default: the stored (empty) list, echoed as the default preMs.
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
+		t.Errorf("default airgibs = %s; want none (grounded 200ms before the hit)", body)
+	}
+
+	// preMs=0 turns the pre-hit gate off — the legacy hit-time-only rule,
+	// which admits the knockback-contaminated sample.
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?preMs=0")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	arr := unitsList(t, body, "airgibs", "ms")
+	if len(arr) != 1 || arr[0]["victim"] != "milton" {
+		t.Errorf("preMs=0 airgibs = %s; want the ungated hit", body)
+	}
+	if got := envelopeInt(t, body, "preMs"); got != 0 {
+		t.Errorf("preMs echo = %d; want 0 (%s)", got, body)
+	}
+
+	// A short look-back still lands on the grounded sample here.
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?preMs=150")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
+		t.Errorf("preMs=150 airgibs = %s; want none", body)
+	}
+	if got := envelopeInt(t, body, "preMs"); got != 150 {
+		t.Errorf("preMs echo = %d; want 150 (%s)", got, body)
+	}
+}
+
+func TestAirgibs_PreMsOutOfRange(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion:    result.CurrentSchemaVersion,
+		TimelineAnalysis: &result.TimelineAnalysisResult{},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	for _, q := range []string{"preMs=-1", "preMs=1001", "preMs=abc"} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?"+q)
+		if status != 400 {
+			t.Errorf("%s: status = %d; want 400 (%s)", q, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("%s: code = %q, want invalid_param", q, code)
+		}
+	}
+}
+
+// envelopeInt reads a top-level integer field off a JSON envelope.
+func envelopeInt(t *testing.T, body []byte, key string) int {
+	t.Helper()
+	var env map[string]json.RawMessage
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("unmarshal envelope: %v (%s)", err, body)
+	}
+	var n int
+	if err := json.Unmarshal(env[key], &n); err != nil {
+		t.Fatalf("unmarshal %q: %v (%s)", key, err, body)
+	}
+	return n
 }
 
 // unitsList decodes a v56 {timeUnit, <key>: [...]} list envelope, checking the

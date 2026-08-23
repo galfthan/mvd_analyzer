@@ -40,7 +40,9 @@ that downstream consumers render, summarise, or feed to an agent.
   event stream (analyzers — 15 of them, five of which publish
   `CoreOutputs`) or only refine the assembled `Result` (eight
   post-processors: victim-named teamkill recovery → `frags:final`, **aim
-  analysis**, airgib detection, scoreboard kills/deaths/suicides
+  analysis**, airgib publication (detection itself is `view.ComputeAirgibs`,
+  a pure function of the assembled `Result`, so mvd-api can re-run it with a
+  caller-tuned pre-hit look-back), scoreboard kills/deaths/suicides
   correction → `match:final`, locgraph synthesis, region-control
   classification, the match-opening projection → `opening`, and the
   canonical per-player statistics join → `playerStats`), plus
@@ -137,26 +139,6 @@ that downstream consumers render, summarise, or feed to an agent.
   the reconstruction blind on wire-instrumented demos and scores it
   against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
   prints misattribution flows.
-- `cmd/qw-recon-oracle/` — the same accuracy question on demos that carry
-  NO KTX log (the pre-0.30 archive): it reruns the reconstruction with
-  the frag log withheld from attribution
-  (`damagerecon.Options.WithholdObituaries`) and scores the evidence-only
-  verdict at each kill instant against the killer and weapon the obituary
-  names, per server era. `-gt` adds the KTX-log baseline on instrumented
-  demos, which calibrates what the oracle number means (tables in
-  `damagerecon/ACCURACY.md` §per-era validation).
-- `cmd/qw-aim-eval/` — aim hit-recovery harness: on demos that carry the
-  KTX log it keeps the measured aim, replaces the damage section with the
-  blind reconstruction of the same match, recomputes aim and pairs the
-  two per player and weapon. It also runs the recovery join against the
-  WIRE log as a control, which separates the join method's own error from
-  the reconstruction's (tables in `damagerecon/ACCURACY.md` §aim hit
-  recovery); `-diag` prints the wire-to-reconstructed event lag
-  histogram the link windows are sized from. It scores EVERY weapon
-  (`aimcore.ReconHitsForEval`), not only the lg/sg/ssg/axe the tier
-  publishes — the rl/gl/ng/sng numbers are the evidence for withholding
-  rl/gl/ng/sng, so they have to be reproducible without a source edit;
-  the `tier` column says which rows production actually ships.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
@@ -189,7 +171,7 @@ that downstream consumers render, summarise, or feed to an agent.
   | `lives` | `view.Lives` | `-min-life`, `-dmg`, `-summary` |
   | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
   | `items` | `view.Items` | `-items`, `-kinds` (the full phase timeline) |
-  | `airgibs` | `view.Airgibs` | — |
+  | `airgibs` | `view.Airgibs` (stored list; detection is `view.ComputeAirgibs`) | — |
   | `frags` | `view.Frags` | `-weapons`, `-summary` |
   | `damage` | `view.Damage` | `-weapons`, `-summary`, `-dmg` |
   | `aim` | `view.Aim` | `-summary` (`-from`/`-to` *recompute* over the window) |
@@ -519,7 +501,6 @@ flowchart TB
   subgraph d4["depth 4"]
     shots["shots"]
     frags_final["frags-final"]
-    airgibs["airgibs"]
     loc_graph["loc-graph"]
     wall_clock["wall-clock"]
     region_control["region-control"]
@@ -533,6 +514,7 @@ flowchart TB
   end
   subgraph d6["depth 6"]
     aim["aim"]
+    airgibs["airgibs"]
     player_stats["player-stats"]
     backpack_linkage["backpack-linkage"]
   end
@@ -550,9 +532,9 @@ flowchart TB
   clock -->|"clock"| timeline
   clock -->|"clock"| wall_clock
   clock -->|"clock"| weapon_pickups
-  damage -->|"damage"| airgibs
   damage -->|"damage"| damage_recon
   damage_recon -->|"damage:final"| aim
+  damage_recon -->|"damage:final"| airgibs
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| backpacks

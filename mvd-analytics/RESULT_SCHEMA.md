@@ -1497,15 +1497,62 @@ the connection that player held then, not their demo-wide id — falling back
 to `playerUserIDs` for a name the session table does not carry. See
 [Player userids](#player-userids-schema-v66).
 
-Derived by a post-processor from `Damage.Events` (the
-per-hit log), the streams' `PositionTrack.H` column, the frag log, and
-the loc table. A hit qualifies when `weapon == "rl"` and it is a **direct
+Detection is **`view.ComputeAirgibs`**, a pure function of the assembled
+`Result` — the per-hit damage log (`Damage.Events`), the streams'
+`PositionTrack.H` column, the frag log, the per-stream session tables and
+the loc table, all on one match-relative clock. A post-processor bakes the
+**default-options** run into the stored `Result`; because the inputs are all
+published, the same function re-runs per request with a caller-tuned
+look-back (`/airgibs?preMs=`, see below), which the stored list cannot
+express.
+
+A hit qualifies when `weapon == "rl"` and it is a **direct
 hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
-world), and the victim's height at the hit is ≥ 96 units (≈ two player
-models). Every qualifying hit is emitted (uncapped —
+world), and the victim reads **clear air** on pre-impact evidence
+(schema v73): every position sample in the look-back window
+`[hit − preMs, hit − 40 ms]` (default **100 ms**) is ≥ 96 units (≈ two
+player models) above the floor, and **no sample beside the hit reads
+ground contact**. The gate rests on which readings can be trusted for
+what: KTX writes the damage message inline in `T_Damage`, and measured
+over 410 direct rocket hits the stamp lands in the same wire frame as
+the first knockback-visible position sample 82% of the time, a frame
+early 12%, and up to two frames (+28 ms) late 6% — so samples within
+40 ms of the stamp may already carry the rocket's own knockback.
+Knockback contamination is one-sided: it can *over*-report height (a
+standing victim blasted off the dm2 `func_train` read 303 units of air
+at the stamp) but cannot fake a grounded reading — so high readings
+near the stamp are ignored, while a grounded one vetoes (a victim who
+fell and *landed* just before the rocket). When the window holds no
+sample within 60 ms of its start — an old demo whose tick cadence
+exceeds the window, or a recording hole — the **preceding tick** (the
+sample carried forward at the window start, up to 250 ms older) decides
+instead; a sample just before a populated window is deliberately NOT
+consulted, so a victim who left a high ledge right after the window
+opened still counts. The 100 ms default is an aesthetic choice, not a
+physics bound: floor-relative height is a step function at ledge edges,
+so a longer window measures time-since-the-edge rather than hang time
+and drops genuinely spectacular ledge-drop hits (a 200 ms window
+measurably lost 300+-unit events from the golden corpus). A `NoFloor`
+sample never counts as airborne. Reported `height`, `loc` and
+`heightAboveAttacker` come from the latest **pre-impact** sample — the
+victim as the rocket found them — not from the possibly
+knockback-contaminated hit-frame sample.
+
+Both damage sources participate (schema v73): the `airgibs` DAG node binds
+`damage:final`, so pre-instrumentation demos get airgibs from the
+**reconstructed** damage log — damagerecon's direct-vs-splash split is
+geometric (direct = the `TE_EXPLOSION` / projectile endpoint within 48
+units of the victim) and its timestamps frame-accurate, which is the
+fidelity this verdict needs. `damage.source` says which evidence a demo's
+list rests on.
+
+Every qualifying hit is emitted (uncapped —
 the ≥ 96 threshold already bounds the list), ordered by `height`
 descending; the web
-view re-sorts client-side. **Empty when the map has no clip hull** (no
+view re-sorts client-side. mvd-api's `/airgibs` serves this stored list at
+the default `preMs=100` and recomputes for any other value in `0..1000`
+(`preMs=0` = no pre-hit gate, the pre-v73 rule), echoing the effective value
+as `preMs` on the response envelope. **Empty when the map has no clip hull** (no
 `PositionTrack.H` to read — same BSP provisioning as the
 visibility-aware loc filter). The `lethal` window can over-attribute on a
 rare back-to-back double-rocket exchange (two rockets, same
@@ -4016,6 +4063,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v73 | **Airgib detection gates on pre-impact evidence** (a **correctness fix**: entries move in and out of `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX writes the damage message inline in `T_Damage`, and measured over 410 direct rocket hits the stamp lands in the same wire frame as the first knockback-visible position sample 82% of the time and up to two frames (+28 ms) late 6% — so samples near the stamp can already carry the rocket's own knockback, and the hit-time sample alone reported players who were STANDING at impact as airborne (hub `232925`: a victim riding the dm2 `func_train` read **303 units of air** when a quad direct rocket blasted him off it, published as the match's biggest airgib). A hit now qualifies when every position sample in `[hit − preMs, hit − 40 ms]` (default **100 ms**) reads ≥ 96 units above floor — the preceding tick deciding when the window holds no sample (old coarse-tick demos, recording holes) — and no sample beside the hit reads ground contact (knockback over-reports height but cannot fake a grounded reading, so a victim who fell and landed just before the rocket rejects while one knocked laterally over a higher floor does not). The 100 ms default is aesthetic: floor-relative height is a step function at ledge edges, so longer windows measure time-since-the-edge and drop genuine 300+-unit ledge-drop events. Reported `height`/`loc`/`heightAboveAttacker` come from the latest PRE-IMPACT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v73 hit-sample-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. Airgibs also now consume **reconstructed** damage (the DAG node binds `damage:final`), so pre-instrumentation demos get a Key-Moments list too — recon's direct/splash split is geometric (explosion endpoint within 48 units) and its timestamps frame-accurate; `damage.source` says which evidence a list rests on (supersedes v71's wire-measured-only gate for airgibs; aim's MEASURED counters keep it — the reconstruction feeds only aim's separate `recon` tier, see the other v73 row). |
 | v73 | **Aim hit recovery on reconstructed demos.** `aim` gains `hitsSource` (`ktx` \| `reconstructed`, absent when the demo carries no damage section) and, on reconstructed demos only, `aim.players[].weapons[].recon.hits` — the fire→damage join re-run against `damagerecon`'s log, so accuracy exists on the ~45% of the archive that never carried `mvdhidden_dmgdone`. Additive and strictly separate: `hitsMeasured` keeps its v71 meaning (still **false** on a reconstructed section) and every measured counter stays withheld there, so a reconstructed hit count can never be read as a measured one — it only ever appears under `recon`. Emitted for the same-server-frame weapons `lg`/`sg`/`ssg`/`axe`, validated exact against the wire log (the join reproduces the measured counters from a wire log with zero error; against the reconstruction it costs 0.3–1.7 pp of accuracy, `damagerecon/ACCURACY.md` §"Aim hit recovery", harness `cmd/qw-aim-eval`). `rl`/`gl`/`ng`/`sng` carry NO block — their fire→impact link needs the projectile-flight bracket the shots analyzer discards, and the impact-counting alternative reads 7.3 pp above the measured rl convention. Withheld with them, per-field and for stated reasons: the per-fire `hit` columns, the pellet split, direct/splash, the LG whiff classes and the enemy/team/self slices (see [WeaponAimRecon](#weaponaimrecon)). Pipeline: the `aim` node now binds `damage:final` instead of the raw `damage` artifact. Old-era goldens move by exactly the new fields. |
 | v72 | **Archive-demo contracts: wall-clock anchors, match provenance, final scores, parse census, backpack reconstruction.** `streams.global` gains the wall-clock anchors (`demoStartUnixMs` and the match-start anchor echoed on `/overview` timing), derived from the wire date markers a recorder writes, with monotone floors and honest cross-checks — plus `timelineAnalysis.demoMarkers` for player-inserted bookmarks. `match` gains `mode` and `sources`, naming what each match-level value was decided from rather than presenting a merged answer. `metadata` gains `finalScores` (KTX's `//finalscores` end-of-match scoreline: date, mode, map, both team names and totals) and `matchSettings.fairpacks` (the `Fairpacks setting:` countdown broadcast, `ktx/src/match.c:2086-2107`). New top-level `parseWarnings` — the reader's per-run parse census, published on every run instead of being dropped. `streams.players[].aw` publishes `STAT_ACTIVEWEAPON`, the **wielded** weapon bit (opt-in field code `aw` on `/buckets`, `/stream-slice`, `/state-at`); a different question from the `rl`/`lg`/… inventory intervals. `backpacks[]` gains `source` (`ktx` \| `reconstructed`): the hint path stamps `ktx`, and a new post-processor fills the section on demos older than the `//ktx drop` hint by replaying `DropBackpack`'s own rule over `aw` at each in-match death. The two provenances are never mixed in one demo, and a reconstructed row's PICKUP side rides the drop row instead of `weaponPickups`: new `backpacks[].fate` (`picked` \| `expired` \| `unobserved`) with `picker`, `pickerTeam` and `pickupTime`, plus an `entNum` naming the bound backpack-model entity. The linkage node binds each reconstructed drop to the pack that appears at its time and place, follows that pack's origin updates to where it settled, and reads the disappearance as the server would — the bounding-box overlap that runs `BackpackTouch`. New parser events feed it: `ItemStateEvent` now carries the entity origin at each visibility transition, and `ItemMoveEvent` reports a visible item entity's origin changes (map items never move; a tossed backpack does). A `ktx` row carries `fate` too, but only ever `expired` and only from a wire hint of its own: KTX's third backpack directive `//ktx expire <ent>` (`ktx/src/g_spawn.c:196-210`, new `BackpackExpireHintEvent`) announces a pack `SUB_Remove` took untaken, which the `weaponPickups` join cannot state — an absent `fate` on a `ktx` row means "ask `weaponPickups`", never "nobody took it". Measured with every hint withheld on 223 demos: 100.00% precision / 96.13% recall on picked-vs-not, 99.98% of named pickers correct, and `expired` 100.00% precision / 100.00% recall against the packs `//ktx expire` names. Both provenances now publish the pack's own origin — the victim's position less KTX's 24-unit drop offset (`items.c:2703-2704`) — so backpack `origin` z values move by −24 against v71. |
 | v71 | **Reconstructed damage for pre-instrumentation demos + damage provenance.** `damage` gains `source` (`ktx` \| `reconstructed`): the KTX analyzer stamps `ktx` on every wire-decoded section (a stored-Result change — goldens move), and the new `damage-recon` post-processor (package `mvd-analytics/damagerecon`) fills the section on demos whose wire never carried `mvdhidden_dmgdone` (~45% of the archive — `/damage` and the damage-shaped views 422'd there before). The reconstruction reads the health/armor change streams (the observed delta IS the bounded value), LG beams, projectile entity flights, fire sounds, position/velocity tracks and the frag log; both families, same shapes, same match window; per-player match totals validated at ~1% median error against KTX ground truth on modern demos (`damagerecon/ACCURACY.md`). Requires the spatial shot streams (mvd-api/WASM always; CLI `-include projectiles,beams`); never overwrites a measured section; stands down on `skipped:*` modes. `playerStats` binds the `damage:final` artifact, so its damage family now exists on old demos too, marked `src: "reconstructed"` (aim and airgibs deliberately keep wire-measured damage only). On reconstructed sections the victim-weapon fields are withheld when the recording froze its weapon bits (see the damage section notes). The `shots` stream gains the axe: `weapons/ax1.wav` (one swing sound per attack) maps to `weapon: "axe"`, with damage linking at the swing's real +200ms traceline delay — new rows in the shot stream, `byPlayer`, the reconciliation and the aim weapon counters. New `streams.pointEffects` (rides the shot-streams gate): every point-effect temp entity as columns t/ty/c/x/y/z — TE_BLOOD (per-volley hitscan hit telemetry with pellet count), TE_LIGHTNINGBLOOD (LG hit), TE_EXPLOSION (exact detonation point), TE_GUNSHOT (miss pattern) and the rest, the wire evidence the reconstruction consumes. `aim` gains a required top-level `hitsMeasured` flag and `weapons[].hits` becomes omitempty: on reconstructed/absent damage every hit-derived counter (hits, pellet full/partial/miss, direct/splash, the LG whiff classes, the sample `hit` columns) is withheld rather than fabricated as zero. `boundedMode` gains five skip reasons (`skipped:ca/wipeout/ra/lgc/race`). |

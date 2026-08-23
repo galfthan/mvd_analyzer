@@ -1139,6 +1139,47 @@ package result
 //     clean. Distinct from `errors[]`, which reports analyzer-level failures
 //     over events we DID read. See ParseWarnings.
 //
+// v73 — airgib detection gates on pre-impact evidence (a correctness
+// fix: entries move in and out of `timelineAnalysis.airgibs`, no field
+// is added, removed or retyped) plus a `preMs` echo on the /airgibs
+// envelope.
+//   - KTX writes the damage message inline in T_Damage; measured over 410
+//     direct rocket hits, the stamp lands in the same wire frame as the
+//     first knockback-visible position sample 82% of the time and up to
+//     two frames (+28ms) late 6% — so samples near the stamp can already
+//     carry the rocket's own knockback. Measured case (hub 232925, dm2
+//     4on4): a player riding the dm2 func_train (top at z=319) took a quad
+//     direct rocket that blasted him off it and the hit-time sample read
+//     303 units of air — published as the match's biggest airgib.
+//   - A hit now qualifies when every position sample in the look-back
+//     window [hit - preMs, hit - 40ms] (default 100ms) reads >= the
+//     96-unit threshold — the preceding tick deciding when the window
+//     holds no sample (old coarse-tick demos, recording holes) — and no
+//     sample beside the hit reads ground contact. Contamination is
+//     one-sided: knockback over-reports height but cannot fake a grounded
+//     reading, so a victim who landed just before the rocket rejects
+//     while one knocked laterally over a higher floor is kept. The 100ms
+//     default is aesthetic: floor-relative height is a step function at
+//     ledge edges, so longer windows measure time-since-the-edge and
+//     drop genuine 300+-unit ledge-drop events. Reported `height`, `loc`
+//     and `heightAboveAttacker` come from the latest PRE-IMPACT sample.
+//   - Detection moves from the analyzer post-processor into
+//     `view.ComputeAirgibs`, a pure function of the assembled Result (the
+//     regionControlPost / view.RegionControl staging). The post-processor
+//     bakes the default-options run into the stored Result; mvd-api's
+//     /airgibs re-runs it per request with `?preMs=` (0..1000, 0 = the
+//     pre-v73 hit-sample-only rule) and echoes the effective value as
+//     `preMs` on the response envelope.
+//   - Per-hit userids now resolve against the PUBLISHED per-stream session
+//     table (`streams.players[].sessions`) rather than an analyzer-internal
+//     index; same answers, one clock.
+//   - Airgibs now consume reconstructed damage too (the DAG node binds
+//     `damage:final`), superseding v71's wire-measured-only gate for this
+//     view: recon's direct/splash split is geometric (explosion endpoint
+//     within 48 units of the victim) and frame-accurate, the fidelity the
+//     verdict needs. Aim keeps the ktx-only gate. `damage.source` says
+//     which evidence a demo's list rests on.
+//
 // See RELEASE_NOTES.md.
 const CurrentSchemaVersion = 73
 

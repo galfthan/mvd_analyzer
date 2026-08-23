@@ -259561,26 +259561,12 @@
   "timelineAnalysis": {
     "airgibs": [
       {
-        "attacker": "nlk",
-        "attackerTeam": ".ra.",
-        "attackerUserID": 1,
-        "damage": 110,
-        "height": 160.21875,
-        "heightAboveAttacker": 0.25,
-        "lethal": true,
-        "loc": "lifts",
-        "time": 682834,
-        "victim": "marksuzu",
-        "victimTeam": "oSaMs",
-        "victimUserID": 8
-      },
-      {
         "attacker": "marksuzu",
         "attackerTeam": "oSaMs",
         "attackerUserID": 8,
         "damage": 110,
-        "height": 99.21875,
-        "heightAboveAttacker": 71.375,
+        "height": 107.34375,
+        "heightAboveAttacker": 100.375,
         "loc": "RA.entry",
         "time": 951468,
         "victim": "sCorp",

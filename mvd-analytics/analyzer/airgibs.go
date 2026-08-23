@@ -1,218 +1,28 @@
 package analyzer
 
 import (
-	"sort"
-
-	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/view"
 )
 
-// Airgib detection tuning.
-const (
-	// airgibMinHeightUnits is the floor-relative height (PositionTrack.H,
-	// feet above the floor) a victim must be at for a rocket hit to count
-	// as an airgib — ~two player models up. The player hull is 56 tall;
-	// 96 keeps the list to genuinely-airborne hits, not stair-steps or
-	// small hops. It is the only volume bound: every qualifying hit is
-	// emitted (schema v30), since the threshold already keeps the list
-	// to a handful per match.
-	airgibMinHeightUnits = 96
-
-	// airgibPosMaxGapMs rejects a hit whose nearest victim position
-	// sample is further away in time than this — without a position near
-	// the hit we can't say how high the victim was.
-	airgibPosMaxGapMs = 250
-
-	// Lethality window: a rocket frag (same attacker→victim) this close to
-	// the hit marks it lethal. Asymmetric — the obituary lands at or just
-	// after the damage.
-	airgibLethalBackMs = 200
-	airgibLethalFwdMs  = 1000
-)
-
-// airgibsPost finds enemy rocket hits landed on airborne victims and
-// publishes every qualifying hit (height-sorted) to
-// TimelineAnalysis.Airgibs for the Key Moments view. It is a
-// post-processor so it runs with the full Result — the per-hit damage
-// log (result.Damage), the streams' floor-height column
-// (PositionTrack.H), the frag log (for lethality), and the loc table /
-// name→userid map — all populated and in one match-relative time frame
-// (it runs after normalizeMatchRelativeTimes).
+// airgibsPost publishes the default airgib list — direct enemy rocket
+// hits on airborne victims, height-sorted — to TimelineAnalysis.Airgibs
+// for the Key Moments view. The detection itself lives in
+// view.ComputeAirgibs, a pure function of the assembled Result, so the
+// REST layer can re-run it per request with a caller-tuned pre-hit
+// look-back (preMs); this post-processor bakes the default-options run
+// into the stored Result — the same staging as regionControlPost. It
+// runs with the full Result — the per-hit damage log, the streams'
+// floor-height column (PositionTrack.H), the frag log, the per-stream
+// session tables and the loc table — all populated and in one
+// match-relative time frame (after normalizeMatchRelativeTimes).
 //
 // No-op when the map has no clip hull (no PositionTrack.H to read), so
 // the airgibs list is simply absent rather than wrong on BSP-less runs.
 func airgibsPost(res *Result, co *CoreOutputs) {
-	if res == nil || res.Damage == nil || res.Streams == nil || res.TimelineAnalysis == nil {
+	if res == nil || res.TimelineAnalysis == nil {
 		return
 	}
-	// Wire-measured damage only, checked by SOURCE, not presence: the
-	// damage-recon post fills res.Damage on pre-instrumentation demos, and
-	// the DAG declares no edge between these two nodes — gating on Source
-	// keeps this output identical under every valid topological order
-	// (dag.go's order-independence invariant) instead of depending on
-	// registration position.
-	if res.Damage.Source != result.DamageSourceKTX {
-		return
+	if events := view.ComputeAirgibs(res, view.AirgibsOptions{}); len(events) > 0 {
+		res.TimelineAnalysis.Airgibs = events
 	}
-
-	streamByName := make(map[string]*result.PlayerStream, len(res.Streams.Players))
-	anyHeight := false
-	for i := range res.Streams.Players {
-		p := &res.Streams.Players[i]
-		streamByName[p.Name] = p
-		if p.Position != nil && len(p.Position.H) == len(p.Position.T) && len(p.Position.H) > 0 {
-			anyHeight = true
-		}
-	}
-	if !anyHeight {
-		return // no floor-height data (no BSP for the map)
-	}
-
-	locTable := res.TimelineAnalysis.LocTable
-	// Per-hit userids: the connection each player held at the hit's own
-	// instant, not the demo-wide last-session-with-play id — an airgib
-	// inside a rejoiner's earlier stint belongs to the connection that
-	// threw / took it. TimelineAnalysis.PlayerUserIDs stays the fallback
-	// for names the session table does not carry.
-	//
-	// Times need converting: this post-processor reads match-relative
-	// timestamps (the damage producer is born correct at its Finalize)
-	// while the session table on CoreOutputs is on the demo clock, so shift
-	// back by the match start the clock published — the inverse of
-	// Clock.ToMatch, and the identity on a demo with no match start.
-	userIDs := newNameUserIDIndex(co, res.TimelineAnalysis.PlayerUserIDs)
-	demoMs := func(matchMs int32) int32 { return matchMs + co.MatchStartMs() }
-	// Prefer the player-stream team: the timeline stamps stream teams with the
-	// roster's synthetic name-per-player duel labels at birth (co.Names keeps
-	// the raw team). Outside duel mode the two sources agree; co.Names remains
-	// the fallback for players without a stream.
-	teamFor := func(name string) string {
-		if ps := streamByName[name]; ps != nil && ps.Team != "" {
-			return ps.Team
-		}
-		if co != nil && co.Names != nil {
-			return co.Names.TeamForName(name)
-		}
-		return ""
-	}
-
-	// Rocket kills, for lethality matching.
-	var rlFrags []result.FragEntry
-	if res.Frags != nil {
-		for _, f := range res.Frags.Frags {
-			if f.Weapon == "rl" && !f.IsSuicide {
-				rlFrags = append(rlFrags, f)
-			}
-		}
-	}
-
-	// Damage.Events is match-gated at the source (the damage analyzer drops
-	// out-of-match hits), so this loop never sees a warmup / post-match rocket
-	// — do not reintroduce a time or in-match gate here.
-	var events []result.AirgibEvent
-	for _, d := range res.Damage.Events {
-		// Direct enemy rockets only — a rocket model striking the player.
-		// Splash (radius) damage is excluded, as are self / teammate /
-		// environmental hits.
-		if d.Weapon != "rl" || d.IsSplash || d.IsSelf || d.IsTeam || d.IsEnv {
-			continue
-		}
-		vs := streamByName[d.Victim]
-		if vs == nil || vs.Position == nil || len(vs.Position.H) != len(vs.Position.T) {
-			continue
-		}
-		idx := nearestSampleIndex(vs.Position.T, d.Time)
-		if idx < 0 || absI32(vs.Position.T[idx]-d.Time) > airgibPosMaxGapMs {
-			continue
-		}
-		h := vs.Position.H[idx]
-		if h == result.NoFloor || h < airgibMinHeightUnits {
-			continue
-		}
-		loc := ""
-		if idx < len(vs.Position.Li) {
-			loc = locNameForIndex(locTable, vs.Position.Li[idx])
-		}
-		// Vertical gap to the shooter: a rocket arriving from far below
-		// is often what makes an airgib spectacular, independent of the
-		// floor height. Origin-to-origin dz at the two players' nearest
-		// samples to the hit; 0 when the shooter has no sample close
-		// enough (and on a genuine dead-level hit — omitempty folds
-		// both, the neutral value either way).
-		dz := float32(0)
-		if as := streamByName[d.Attacker]; as != nil && as.Position != nil && len(as.Position.T) > 0 {
-			ai := nearestSampleIndex(as.Position.T, d.Time)
-			if ai >= 0 && absI32(as.Position.T[ai]-d.Time) <= airgibPosMaxGapMs {
-				dz = vs.Position.Z[idx] - as.Position.Z[ai]
-			}
-		}
-		events = append(events, result.AirgibEvent{
-			Time:                d.Time,
-			Attacker:            d.Attacker,
-			AttackerTeam:        teamFor(d.Attacker),
-			AttackerUserID:      userIDs.at(d.Attacker, demoMs(d.Time)),
-			Victim:              d.Victim,
-			VictimTeam:          teamFor(d.Victim),
-			VictimUserID:        userIDs.at(d.Victim, demoMs(d.Time)),
-			Height:              h,
-			HeightAboveAttacker: dz,
-			Loc:                 loc,
-			Damage:              d.Damage,
-			Lethal:              airgibLethal(rlFrags, d),
-		})
-	}
-	if len(events) == 0 {
-		return
-	}
-
-	// Default order: highest first, ties broken by earliest time for a
-	// stable, deterministic list. The web view re-sorts client-side.
-	sort.SliceStable(events, func(i, j int) bool {
-		if events[i].Height != events[j].Height {
-			return events[i].Height > events[j].Height
-		}
-		return events[i].Time < events[j].Time
-	})
-	res.TimelineAnalysis.Airgibs = events
-}
-
-// airgibLethal reports whether a rocket frag (same attacker→victim)
-// landed within the lethality window of this hit.
-func airgibLethal(rlFrags []result.FragEntry, d result.DamageEntry) bool {
-	for _, f := range rlFrags {
-		if f.Victim != d.Victim || f.Killer != d.Attacker {
-			continue
-		}
-		if f.Time >= d.Time-airgibLethalBackMs && f.Time <= d.Time+airgibLethalFwdMs {
-			return true
-		}
-	}
-	return false
-}
-
-// nearestSampleIndex returns the index into the time-sorted slice ts
-// whose value is closest to t, or -1 when ts is empty.
-func nearestSampleIndex(ts []int32, t int32) int {
-	if len(ts) == 0 {
-		return -1
-	}
-	i := sort.Search(len(ts), func(k int) bool { return ts[k] >= t })
-	if i == 0 {
-		return 0
-	}
-	if i >= len(ts) {
-		return len(ts) - 1
-	}
-	if t-ts[i-1] <= ts[i]-t {
-		return i - 1
-	}
-	return i
-}
-
-// locNameForIndex resolves a PositionTrack.Li index into a loc name,
-// bounds-checked. Index 0 (and out-of-range) is the "no loc" sentinel.
-func locNameForIndex(locTable []string, li int16) string {
-	if li <= 0 || int(li) >= len(locTable) {
-		return ""
-	}
-	return locTable[li]
 }
