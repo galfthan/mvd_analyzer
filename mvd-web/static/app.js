@@ -2250,7 +2250,7 @@ function displayKeyMoments(result) {
         });
     }
 
-    // Airborne rocket gibs (sortable table, default by height).
+    // Direct rocket air hits (sortable table, default by height).
     displayAirgibs(result);
 
     // Top frag runs / top RL / top LG kills — view queries, so they fill in
@@ -2430,7 +2430,8 @@ function renderTopKills(key, v, hubInfo, playerUserIDs) {
     }
 }
 
-// Render the airborne-rocket-gib table. Default view is height-above-shooter
+// Render the direct-rocket-air-hit table (lethal or not; the Lethal column
+// badges the ones that gibbed). Default view is height-above-shooter
 // descending — the vertical gap the rocket climbed is what makes a hit look
 // spectacular (the analyzer ships the list ordered by floor height). The table
 // is re-sortable by any column through the shared makeSortable machinery: the

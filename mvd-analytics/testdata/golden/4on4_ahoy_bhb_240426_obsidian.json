@@ -95789,7 +95789,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {
@@ -433496,25 +433496,11 @@
         "attackerTeam": "ahoy",
         "attackerUserID": 29,
         "damage": 110,
-        "height": 143.84375,
-        "heightAboveAttacker": -56.125,
+        "height": 187.59375,
+        "heightAboveAttacker": -12.375,
         "lethal": true,
         "loc": "YA",
         "time": 101248,
-        "victim": "Doomie",
-        "victimTeam": "BhB",
-        "victimUserID": 32
-      },
-      {
-        "attacker": "sailorman",
-        "attackerTeam": "ahoy",
-        "attackerUserID": 27,
-        "damage": 110,
-        "height": 97.96875,
-        "heightAboveAttacker": -72,
-        "lethal": true,
-        "loc": "Quad",
-        "time": 785721,
         "victim": "Doomie",
         "victimTeam": "BhB",
         "victimUserID": 32

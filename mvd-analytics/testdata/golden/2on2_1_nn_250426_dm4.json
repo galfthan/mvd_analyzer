@@ -55488,7 +55488,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {
@@ -101668,23 +101668,10 @@
         "attackerTeam": "1",
         "attackerUserID": 14,
         "damage": 110,
-        "height": 117.09375,
-        "heightAboveAttacker": 270.25,
-        "loc": "high",
-        "time": 208481,
-        "victim": "shazam",
-        "victimTeam": "n n",
-        "victimUserID": 8
-      },
-      {
-        "attacker": "squeeze",
-        "attackerTeam": "1",
-        "attackerUserID": 14,
-        "damage": 110,
-        "height": 112.59375,
-        "heightAboveAttacker": 112.625,
+        "height": 128.09375,
+        "heightAboveAttacker": 128.125,
         "lethal": true,
-        "loc": "low",
+        "loc": "GL",
         "time": 547530,
         "victim": "stepcop",
         "victimTeam": "n n",
@@ -101695,10 +101682,10 @@
         "attackerTeam": "n n",
         "attackerUserID": 9,
         "damage": 110,
-        "height": 98.59375,
-        "heightAboveAttacker": -29.375,
+        "height": 113.09375,
+        "heightAboveAttacker": -14.875,
         "lethal": true,
-        "loc": "RA",
+        "loc": "YA",
         "time": 483194,
         "victim": "squeeze",
         "victimTeam": "1",

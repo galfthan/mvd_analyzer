@@ -1254,21 +1254,56 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 // victim above the height threshold, sorted by height descending. Height
 // needs the map's clip hull, so the list is empty (not an error) when the
 // map's BSP was not provisioned at parse time.
+//
+// Query params:
+//
+//	preMs  int — pre-hit look-back in ms (default 100, range 0..1000): the
+//	             victim must read clear air (>= the height threshold) at
+//	             every pre-impact sample of [hit-preMs, hit-40ms] — the
+//	             preceding tick decides when the window holds no sample
+//	             (coarse-tick demos) — with no grounded reading beside the
+//	             hit. Samples near the damage stamp can already carry the
+//	             rocket's own knockback, which over-reports height but
+//	             cannot fake ground contact; 0 turns the pre-hit gate off
+//	             (the hit-sample-only legacy rule). The default serves the
+//	             stored list; any other value recomputes.
 func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
 		return
 	}
-	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+	p := newQP(r.URL.Query())
+	preMs := p.Int("preMs", view.DefaultAirgibPreMs)
+	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if writeInvalidParam(w, view.ValidateAirgibPreMs(preMs)) {
+		return
+	}
+	// The availability gate stays on the stored timeline analysis either
+	// way: a recompute of a demo without one is not a different answer.
 	airgibs, err := view.Airgibs(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "airgibs_unavailable",
 			"this demo has no timeline analysis")
 		return
 	}
-	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
+	if preMs != view.DefaultAirgibPreMs {
+		// 0 means "no pre-hit gate" to the caller; ComputeAirgibs reads 0 as
+		// "default", so hand it a negative to disable.
+		opt := int32(preMs)
+		if preMs == 0 {
+			opt = -1
+		}
+		airgibs = view.ComputeAirgibs(res, view.AirgibsOptions{PreMs: opt})
+		if airgibs == nil {
+			airgibs = []result.AirgibEvent{}
+		}
+	}
+	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, PreMs: preMs, Airgibs: airgibs})
 }
 
 // handleTopWindows: GET /v1/demos/{id}/top-windows — each player's best

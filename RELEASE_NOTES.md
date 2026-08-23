@@ -5,6 +5,67 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (airgib-pre-gate) — airgibs gate on pre-impact evidence, schema v73
+
+**The airgib list was reporting standing players as airgibs.** KTX writes
+the damage message inline in `T_Damage`, and measured over 410 direct
+rocket hits the stamp lands in the same wire frame as the first
+knockback-visible position sample 82% of the time and up to two frames
+(+28 ms) late 6% — so the samples nearest the damage time can already
+carry the rocket's own knockback. Measured case (hub gameId `232925`, dm2
+4on4, 2026-08-18): a player riding the dm2 moving platform (`func_train`,
+top at z=319) took a quad direct rocket that blasted him off it, the
+hit-time sample read **303 units of air**, and that non-event was
+published as the match's biggest airgib.
+
+- **The gate reads only evidence that can be trusted for what it claims.**
+  Every position sample in the look-back window `[hit − preMs, hit − 40 ms]`
+  (default **100 ms**) must read clear air — at or above the 96-unit
+  floor-height threshold — and no sample beside the hit may read ground
+  contact. Knockback contamination is one-sided: it can *over*-report
+  height but cannot fake a grounded reading, so high readings near the
+  stamp are ignored while a grounded one vetoes (a victim who fell and
+  *landed* just before the rocket), and a genuine airgib knocked laterally
+  over a higher floor — a low but not grounded reading — is kept. When the
+  window holds no sample near its start, the **preceding tick** decides,
+  so old demos with coarse tick cadence work and a recording hole cannot
+  pass vacuously.
+- **The 100 ms default is an aesthetic, not a physics bound.**
+  Floor-relative height is a step function at ledge edges, so a longer
+  window measures time-since-the-edge rather than hang time: the earlier
+  200 ms draft measurably dropped genuine 300+-unit ledge-drop events from
+  the golden corpus (dm2 `floating`, 377 units) while the brief
+  ~50–90 ms ledge-hop hits stay filtered at 100 ms.
+- **Reported `height`, `loc` and `heightAboveAttacker` come from the
+  latest pre-impact sample** — the victim as the rocket found them — not
+  from the possibly knockback-contaminated hit-frame sample.
+- **Entries move in and out of `timelineAnalysis.airgibs`** (no field is
+  added, removed or retyped) — hence the schema bump; the golden corpus
+  moves.
+- **Tunable per request**: `GET /v1/demos/{id}/airgibs?preMs=` accepts
+  `0..1000` (400 `invalid_param` outside it). `preMs=0` turns the pre-hit gate
+  off, reproducing the pre-v72 hit-time-only rule; the default serves the
+  stored list, any other value recomputes. Every response echoes the effective
+  value as **`preMs`** on the envelope, so a body says which detection it is.
+- **Detection moved to `view.ComputeAirgibs`**, a pure function of the
+  assembled `Result` — the same staging as `regionControlPost` /
+  `view.RegionControl`. The analyzer post-processor now just bakes the
+  default-options run into the stored `Result`. Per-hit userids resolve
+  against the *published* per-stream session table
+  (`streams.players[].sessions`) instead of an analyzer-internal index: same
+  answers, one clock.
+- **Reconstructed damage participates**: the airgibs DAG node binds
+  `damage:final`, so pre-instrumentation demos (damage rebuilt by
+  damagerecon, `source: "reconstructed"`) get a Key-Moments airgib list too —
+  recon's direct-vs-splash split is geometric (explosion endpoint within 48
+  units of the victim) and its timestamps frame-accurate, which is the
+  fidelity the verdict needs. This supersedes the wire-measured-only gate the
+  reconstruct-damage entry below describes for airgibs (aim keeps it);
+  `damage.source` says which evidence a demo's list rests on.
+- **Web UI rename** (cosmetic, no schema impact): the Key Moments panel
+  "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
+  direct rocket hits on airborne victims whether or not they killed, and the
+  gibs are the subset the Lethal column already badges.
 ## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks (dropped and taken) on the old half, and a reader that says what it could not read, schema v72
 
 ### Backpack drops on the other half of the archive: `backpacks[].source`

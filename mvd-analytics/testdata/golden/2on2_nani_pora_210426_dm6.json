@@ -32018,7 +32018,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {
@@ -134650,17 +134650,44 @@
   "timelineAnalysis": {
     "airgibs": [
       {
+        "attacker": "SS",
+        "attackerTeam": "nAnI",
+        "attackerUserID": 73,
+        "damage": 110,
+        "height": 118.21875,
+        "heightAboveAttacker": -49.625,
+        "lethal": true,
+        "loc": "RA",
+        "time": 121031,
+        "victim": "kippo",
+        "victimTeam": "pora",
+        "victimUserID": 76
+      },
+      {
         "attacker": "rusti",
         "attackerTeam": "pora",
         "attackerUserID": 74,
         "damage": 110,
-        "height": 112.59375,
-        "heightAboveAttacker": 112.625,
+        "height": 111.46875,
+        "heightAboveAttacker": 111.5,
         "loc": "RA",
         "time": 171699,
         "victim": "SS",
         "victimTeam": "nAnI",
         "victimUserID": 73
+      },
+      {
+        "attacker": "SS",
+        "attackerTeam": "nAnI",
+        "attackerUserID": 73,
+        "damage": 110,
+        "height": 103.71875,
+        "heightAboveAttacker": 103.75,
+        "loc": "RA",
+        "time": 110928,
+        "victim": "rusti",
+        "victimTeam": "pora",
+        "victimUserID": 74
       }
     ],
     "deathEvents": [

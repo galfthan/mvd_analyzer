@@ -89,8 +89,9 @@ present, is a **constant `"ms"` self-description echo**:
 
 The four formerly bare-array endpoints wrap their array in an object so
 the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
-`{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
-`/weapon-pickups` → `{timeUnit, pickups:[…]}`.
+`{timeUnit, preMs, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
+`/weapon-pickups` → `{timeUnit, pickups:[…]}`. (`/airgibs` also echoes the
+`preMs` pre-hit look-back its list was detected with — see §2.2.)
 
 **Field-name conventions — the dense/sparse key rule.** The per-item
 time key follows what the data scales with; both spellings are int32 ms
@@ -205,6 +206,16 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   no emitted token changed). The pre-16.2 singular
   spelling `weapon` remains an accepted legacy alias; `weapons` wins when
   both are present.
+- **`preMs`** (`/airgibs`) — the pre-hit look-back in ms (default 100,
+  range `0..1000`): an airgib victim must read clear air (at or above the
+  airborne height threshold) at every pre-impact sample of
+  `[hit − preMs, hit − 40ms]` — the tick preceding the window decides when
+  it holds no sample (old coarse-tick demos) — and no sample beside the
+  hit may read ground contact. Samples near the damage stamp can already
+  carry the rocket's own knockback, which over-reports height but cannot
+  fake a grounded reading. `preMs=0` turns the pre-hit gate off (the
+  pre-v72 rule); the default serves the stored list, any other value
+  recomputes. Every response echoes the effective value.
 - **`reducers`** (`/buckets`) — comma-separated `field=name` pairs, e.g.
   `reducers=h=min,a=last`. Names come from the reducer registry in
   RESULT_SCHEMA.md.
