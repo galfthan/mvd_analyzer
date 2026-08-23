@@ -99,6 +99,67 @@ func TestCoverage(t *testing.T) {
 	}
 }
 
+// TestCoverageNoDenominator pins the ABSENCE half of the contract: with no
+// scoreable kill in the frag log there is no anchor to measure completeness
+// against, so the field is omitted rather than reporting a 0 ratio that would
+// read as "the reconstruction saw nothing".
+//
+// It also carries the load a `len(in.frags) == 0` early return used to
+// pretend to: an empty frag log is not a separate case, it is the kills == 0
+// case, and both spellings of "no denominator" have to reach the same answer.
+func TestCoverageNoDenominator(t *testing.T) {
+	build := func(frags []result.FragEntry) *result.Result {
+		res := &result.Result{
+			Streams: &result.Streams{
+				ShotStreamsComputed: true,
+				Global:              result.GlobalStream{MatchStart: 0, MatchEnd: 60000},
+				Players: []result.PlayerStream{
+					{Name: "a", Alive: []result.Interval{{Start: 0, End: 60000}}},
+					{Name: "b", Alive: []result.Interval{{Start: 0, End: 60000}}},
+				},
+			},
+		}
+		if frags != nil {
+			res.Frags = &result.FragResult{Frags: frags}
+		}
+		return res
+	}
+	for _, tc := range []struct {
+		name  string
+		frags []result.FragEntry
+	}{
+		{"no frag section", nil},
+		{"empty frag log", []result.FragEntry{}},
+		{"only unscoreable frags", []result.FragEntry{
+			{Time: 1000, Killer: "a", Victim: "a", Weapon: "rl", IsSuicide: true},
+			{Time: 2000, Killer: "a", Victim: "b", Weapon: "lg", IsTeamKill: true},
+			{Time: 3000, Killer: "a", Victim: "b", Weapon: "tele"},
+			{Time: 4000, Killer: "world", Victim: "b", Weapon: "drown"},
+			{Time: 5000, Killer: "a", Victim: "ghost", Weapon: "rl"}, // victim not on the roster
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := damagerecon.Compute(build(tc.frags))
+			if err != nil {
+				t.Fatalf("recon: %v", err)
+			}
+			if out.Coverage != nil {
+				t.Errorf("coverage %+v on a demo with no scoreable kill — absence is the only honest answer", out.Coverage)
+			}
+		})
+	}
+	// The control: one scoreable kill IS a denominator, so the field appears.
+	out, err := damagerecon.Compute(build([]result.FragEntry{
+		{Time: 3000, Killer: "a", Victim: "b", Weapon: "rl"},
+	}))
+	if err != nil {
+		t.Fatalf("recon: %v", err)
+	}
+	if out.Coverage == nil || out.Coverage.Kills != 1 {
+		t.Fatalf("coverage %+v — one enemy weapon kill on two rostered players is a denominator of 1", out.Coverage)
+	}
+}
+
 func keepEveryNth(in []result.ChangeI16, n int) []result.ChangeI16 {
 	var out []result.ChangeI16
 	for i := range in {

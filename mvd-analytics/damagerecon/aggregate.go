@@ -117,9 +117,6 @@ func aggregate(in *inputs, events []reconEvent) *result.DamageResult {
 // coverage is a property of delta EXTRACTION, which keeps its frag anchors
 // either way — so a withheld run reports the same figure as production.
 func setCoverage(in *inputs, out *result.DamageResult) {
-	if len(in.frags) == 0 {
-		return
-	}
 	hit := make(map[fragKey]bool, len(out.Events))
 	for i := range out.Events {
 		hit[fragKey{out.Events[i].Victim, out.Events[i].Time}] = true
@@ -142,7 +139,10 @@ func setCoverage(in *inputs, out *result.DamageResult) {
 		}
 	}
 	if kills == 0 {
-		return // no denominator: nothing to report, rather than a bogus 0
+		// No denominator — an empty frag log or one naming only suicides,
+		// team kills and telefrags. Report nothing rather than a bogus 0:
+		// coverage would be claiming an assessment it never made.
+		return
 	}
 	out.Coverage = &result.DamageCoverage{
 		Kills:   kills,
