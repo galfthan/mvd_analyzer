@@ -216,9 +216,24 @@ What the old half does cost, measured: **2.1% of E0 demos (80 of 3 876,
 concentrated on QWSV 2.30 — 18 of 23 sampled; 101 such demos archive-wide)
 barely broadcast the health stat channel**, so the section reports 83
 bounded damage per kill where a healthy demo reports ~300. The
-reconstruction is not wrong there, but nothing in the output says the
-section is a fraction of the match — the named follow-up is a per-demo
-coverage figure on `damage`. Frozen weapon bits (`ewep` withheld) also
+reconstruction is not wrong there, but nothing in the output said the
+section is a fraction of the match. **That follow-up is SHIPPED** on
+`old-demo-summary`, schema v74: `damage.coverage` `{kills, covered,
+ratio}` on every reconstructed section publishes the oracle's own
+kill-delta coverage from the normal pass (`damagerecon/aggregate.go
+setCoverage`). Healthy demos read **1.000 median / 1.000 at p5 / 0.950
+worst** (1 127 sampled across E0–E5), the silent-channel class **0.177
+median / 0.488 worst** (all 82) — the two populations do not overlap, so
+no calibration is needed to tell them apart. Honesty controls: the same
+metric over a WIRE damage log reads exactly 1.000 on all 65 GT demos
+(hence no `coverage` on `source: "ktx"` — it would be a constant), and
+thinning the stat channel to one sample in four drops a healthy demo to
+a 0.35 median with the denominator unmoved (`coverage_test.go`). Bounded
+damage per kill was measured and rejected as the metric: the populations
+overlap on it (healthy min 107, silent max 326). Nothing is gated on the
+figure — the riders (`playerStats` damage family, its reconstructed
+`accuracy.hits`, `aim.recon.hits`) inherit it by pointing at the one
+field. Frozen weapon bits (`ewep` withheld) also
 turned out NOT to be an old-demo speciality: 18% of E0 against 39% of E3
 and 35% of E5. Method, tables, circularity analysis and the reproduction
 commands live in `damagerecon/ACCURACY.md` §per-era validation; the

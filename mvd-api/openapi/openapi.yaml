@@ -4005,6 +4005,53 @@ components:
           type: string
           enum: [standard, "skipped:midair", "skipped:instagib", "skipped:dmgfrags",
                  "skipped:ca", "skipped:wipeout", "skipped:ra", "skipped:lgc", "skipped:race"]
+        coverage:
+          description: >
+            How much of the match a RECONSTRUCTED section could actually see
+            (schema v74). A reconstruction is only as complete as the
+            health/armor stat channel the recording broadcast, and a small
+            class of archive recordings barely broadcasts it: positions and
+            the frag log are intact, the damage is not observable, and the
+            section then describes a fraction of the real match. This is the
+            field that says so — the share of the frag log's weapon kills
+            whose lethal instant the `events` log accounts for. READ IT
+            BEFORE TREATING A RECONSTRUCTED FIGURE AS A MATCH TOTAL, and
+            note that everything riding this section inherits it
+            (playerStats' damage family and its reconstructed accuracy
+            hits, /aim's weapons[].recon.hits) rather than restating it.
+            1.000 is the norm, not the top of a noisy scale: 1 127 healthy
+            demos across every server era read 1.000 median, 1.000 at the
+            5th percentile, 0.950 worst, while the known silent-channel
+            class reads 0.177 median and 0.488 worst — two populations with
+            a gap between them. Take a cutoff from those percentiles if you
+            need one; the API gates nothing on it. Present only when
+            `source` is `reconstructed` AND the frag log names at least one
+            scoreable kill — a wire log records every T_Damage call, so a
+            `ktx` section's coverage would be the constant 1 (measured
+            exactly 1.000 on all 65 ground-truth demos) and is not emitted.
+            WHOLE-MATCH, like `source` and `boundedMode`: a players /
+            weapons / time filter carries it through unchanged rather than
+            rescoping it to the filtered hits.
+          additionalProperties: false
+          properties:
+            kills:
+              description: >
+                The denominator: frag-log kills carrying damage arithmetic —
+                an ENEMY kill (not a suicide, not a team kill, killer named
+                and not `world`, killer != victim) by a WEAPON (telefrags
+                and stomps are positional and aggregate outside `events`) on
+                two players the roster names.
+              type: integer
+            covered:
+              description: >
+                Of those, the kills with at least one `events` entry at the
+                victim's death instant.
+              type: integer
+            ratio:
+              description: "covered / kills, in [0,1]."
+              type: number
+          required: [kills, covered, ratio]
+          type: object
         boundedSource:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —

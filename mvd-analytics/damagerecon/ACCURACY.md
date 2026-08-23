@@ -222,9 +222,66 @@ sampled 2.30 demos are in that class (101 such demos exist in the whole
 
 The reconstruction is not wrong on these demos — it reports the damage it
 could observe and nothing else — but the section is a fraction of the
-real match, with no field saying so. A per-demo coverage figure on the
-section is the obvious follow-up; it is deliberately NOT part of this
-measurement pass.
+real match, with no field saying so. **Resolved in schema v74: it now
+says so, as `damage.coverage`** — see the next section.
+
+### Per-demo coverage: `damage.coverage` (schema v74)
+
+The oracle's kill-delta coverage is cheap enough to run in the normal
+pass, so it ships as a field. `result.DamageCoverage` on every
+RECONSTRUCTED section carries `{kills, covered, ratio}`: `kills` is the
+frag log's weapon kills that carry damage arithmetic (enemy kill, both
+players on the roster, telefrags and stomps excluded — they aggregate
+outside `events`), `covered` the ones whose lethal instant the
+reconstructed `events` log accounts for. Computed in
+`damagerecon/aggregate.go` (`setCoverage`) on the same denominator
+`cmd/qw-recon-oracle` scores, so the harness number and the shipped
+number are the same number; the obituary withhold does not reach it
+(coverage is a property of delta EXTRACTION, which keeps its frag
+anchors either way — pinned in `coverage_test.go`).
+
+Measured over 1 209 demos, `MVDA_BSP_DIR=./bsps` throughout:
+
+| population | n | min | p1 | p5 | median | worst |
+|---|---|---|---|---|---|---|
+| healthy reconstructions, E0–E5 (200/era, E1 all 127) | 1 127 | 0.950 | 0.973 | 1.000 | **1.000** | 0.950 |
+| the silent-channel class (80 E0 + 2 E2, §above) | 82 | 0.000 | 0.000 | 0.027 | **0.177** | 0.488 |
+
+**The two populations do not overlap**: the worst healthy demo reads
+0.950, the best silent-channel demo 0.488. Every era's healthy median is
+1.000 and no healthy demo of the 1 127 falls under 0.95 (per-era minima
+E0 0.966 / E1 0.997 / E2 0.950 / E3 0.952 / E4 0.976 / E5 0.962). No
+threshold is written into the code — a consumer that wants one has the
+percentiles above; the pipeline publishes the number and filters nothing.
+
+The rejected alternative was bounded damage per kill, the other figure
+the outlier study quoted (~83 vs ~300). It does NOT separate: the
+healthy sample runs down to 107 and the silent class up to 326. Coverage
+is the discriminating measurement, so it is the only one published — and
+per-kill damage stays derivable from the section anyway.
+
+**Is the figure honest?** Two controls on demos that carry the KTX log:
+
+- **Ceiling.** Scoring the same metric over the WIRE damage section reads
+  exactly **1.000 on all 65** GT demos (52 scoreable of the 60-demo
+  dm2/dm3 corpus — 7 are `skipped:*`, 1 has no scoreable kill — plus the
+  13 golden-cache demos), and the blind reconstruction of those same
+  demos also reads **1.000 on all 65**. So a complete section reads full
+  coverage from either evidence source, and the metric adds no floor of
+  its own. This is why a `source: "ktx"` section carries no `coverage`:
+  it would be a constant.
+- **Sensitivity.** Thinning the health/armor change streams to one sample
+  in four — the silent-channel failure, with every other input intact —
+  drops the figure to a 0.351 median (dm2/dm3 corpus; 0.337 on the golden
+  cache, min 0.282, max 0.532), i.e. into the silent class's own band,
+  while `kills` stays put. Coverage cannot hide a loss by shrinking its
+  own denominator. Both directions are pinned in `coverage_test.go`.
+
+Riders inherit rather than restate: the `playerStats` damage family
+(`src: "reconstructed"`), its reconstructed `accuracy.hits`, and
+`aim.players[].weapons[].recon.hits` are all built from this section, so
+their coverage IS `damage.coverage` and their docs point at it instead of
+carrying a copy.
 
 ## Aim hit recovery (2026-08-19, rl/gl added 2026-08-23)
 
@@ -619,6 +676,8 @@ on the newer ones (18% at E0, 39% at E3, 35% at E5; §old-recorder
 degradations) — and a small class of qwsv recordings
 (2.1% of E0, concentrated on QWSV 2.30) barely broadcasts the health
 stat channel at all, leaving a section that reports only the fraction of
-the match the wire showed. Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
+the match the wire showed — visible per demo since v74 as
+`damage.coverage` (§per-demo coverage: healthy demos 1.000 median, that
+class 0.177 median with no overlap between the two). Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
 CTF were out of validation scope (study §trust tiers); midair/instagib/
 dmgfrags server modes are skipped entirely (no section).

@@ -79,6 +79,10 @@ type DamageResult struct {
 	// which records a view-time substitution WITHIN a KTX-sourced payload.
 	Source string `json:"source,omitempty"`
 
+	// Coverage reports how much of the match a RECONSTRUCTED damage section
+	// could actually see (nil on a KTX-sourced section — see DamageCoverage).
+	Coverage *DamageCoverage `json:"coverage,omitempty"`
+
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
 	// end-of-match scoreboard totals (demoInfo.players[].dmg +
@@ -103,6 +107,44 @@ const (
 	DamageSourceKTX           = "ktx"
 	DamageSourceReconstructed = "reconstructed"
 )
+
+// DamageCoverage answers "how much of this match did the reconstruction
+// actually see?" for a Source == "reconstructed" section. It exists because
+// a small class of recordings barely broadcasts the health/armor stat
+// channel the reconstruction reads: positions and the frag log are intact,
+// the damage simply is not observable, and without this field the section
+// looks like a quiet match rather than a partial recording.
+//
+// The figure is the frag log's own cross-check. Every kill the log names is
+// a place where damage provably happened; Covered counts the ones whose
+// lethal instant the reconstructed Events log accounts for. Kills counts
+// only the kills that carry damage arithmetic to account for: an enemy kill
+// (not a suicide, team kill, world/nameless killer) by a weapon (telefrags
+// and stomps are positional and live outside Events) on two players the
+// roster names. Ratio is Covered/Kills in [0,1].
+//
+// Whole-match by construction: it describes the demo's reconstruction, like
+// Source and BoundedMode, and is never rescoped by a player / weapon / time
+// filter.
+//
+// Absent when the section is KTX-sourced (the wire log records every
+// T_Damage call, so coverage is 1 by construction — measured exactly 1.000
+// on all 65 GT demos) and when the frag log names no scoreable kill (no
+// denominator). Every consumer that rides the damage section inherits its
+// coverage: the playerStats damage family, derived accuracy hits, and the
+// aim recon tier all read this one field rather than restating it.
+//
+// Measured separation (damagerecon/ACCURACY.md §per-demo coverage): 1 127
+// healthy reconstructions across E0-E5 run 1.000 median, 1.000 at the 5th
+// percentile, 0.950 worst; the 82 known silent-channel demos run 0.177
+// median, 0.488 worst — two populations with a gap between them, not a
+// gradient. There is no threshold in the code: the number is published,
+// never used to gate or withhold.
+type DamageCoverage struct {
+	Kills   int     `json:"kills"`   // frag-log kills that carry damage arithmetic
+	Covered int     `json:"covered"` // ... whose lethal instant the Events log accounts for
+	Ratio   float64 `json:"ratio"`   // Covered/Kills, in [0,1]
+}
 
 // PositionalKill is one telefrag (deathtype "tele") or stomp (deathtype
 // "stomp") — an instant kill from occupying a player's space rather than

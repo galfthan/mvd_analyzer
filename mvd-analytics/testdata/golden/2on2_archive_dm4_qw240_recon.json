@@ -23151,6 +23151,11 @@
       "sg": 1128,
       "ssg": 344
     },
+    "coverage": {
+      "covered": 172,
+      "kills": 172,
+      "ratio": 1
+    },
     "dmg": "both",
     "events": [
       {

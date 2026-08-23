@@ -477,7 +477,9 @@ damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
 KTX `mvdhidden_dmgdone` stream with a scoreboard cross-check, or
 reconstructed from the state streams on pre-instrumentation demos;
-`damage.source` = `ktx` | `reconstructed` tells which),
+`damage.source` = `ktx` | `reconstructed` tells which, and a
+reconstructed section carries `damage.coverage` — how much of the match
+the recording let it see),
 shots (per-shot weapon-fire stream — who fired what at exactly what ms,
 from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams — with same-frame hitscan→damage
 links, entity-tracked rocket/grenade→impact links, per-victim
@@ -632,8 +634,11 @@ never carried the damage stream (~45% of the archive), the `damage-recon`
 node reconstructs it from the h/a change streams + beams / projectiles /
 fire sounds / position tracks / the frag log, at ~1% median per-player
 total error against KTX ground truth; `damage.source`
-(`ktx`&nbsp;|&nbsp;`reconstructed`) says which kind a consumer is holding
-(see [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)).
+(`ktx`&nbsp;|&nbsp;`reconstructed`) says which kind a consumer is holding,
+and since v74 a reconstructed section also carries `damage.coverage` —
+the share of the frag log's kills whose damage it accounts for, which is
+what separates a quiet match from a recording that never broadcast the
+evidence (see [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)).
 
 `streams.global` carries a wall-clock anchor so a consumer can project any
 match-relative game time onto real-world time (for syncing voice tracks /
@@ -925,7 +930,13 @@ diff -r /tmp/before /tmp/after
    attribute at or above the instrumented eras. What those recordings do
    cost is elsewhere — on 2.1% of qwsv demos the health stat channel is
    barely broadcast, so the section reports only the fraction of the
-   match the wire showed, and nothing yet says so. Full accuracy
+   match the wire showed. Since v74 it says so: `damage.coverage`
+   `{kills, covered, ratio}` publishes the share of the frag log's kills
+   whose damage the reconstruction accounts for, on every reconstructed
+   section. Healthy demos read 1.000 median (0.950 worst of 1 127
+   measured across all eras), that broken class 0.177 median / 0.488
+   worst — the two populations do not overlap, and nothing in the
+   pipeline gates on the number. Full accuracy
    tables and trust guidance:
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md);
    the feature's design/validation history lives in

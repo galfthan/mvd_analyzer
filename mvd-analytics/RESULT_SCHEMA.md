@@ -26,7 +26,7 @@ analyzer are also covered there.
 | Metadata | `metadata` | *MetadataResult | Server cvars (fullserverinfo) + parsed match-settings centerprint. |
 | LocGraph | `locGraph` | *LocGraphResult | Loc-to-loc movement graph (nodes + transitions). |
 | Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline (per match). |
-| Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) — decoded from the KTX `mvdhidden_dmgdone` stream (`source: "ktx"`) or rebuilt by the reconstruction on pre-instrumentation demos (`source: "reconstructed"`), with a KTX-scoreboard cross-check. |
+| Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) — decoded from the KTX `mvdhidden_dmgdone` stream (`source: "ktx"`) or rebuilt by the reconstruction on pre-instrumentation demos (`source: "reconstructed"`, which carries a per-demo `coverage` figure since v74), with a KTX-scoreboard cross-check. |
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
@@ -218,6 +218,30 @@ norm for old recorders — because classifying against frozen inventory
 would be confidently wrong; `ewep: 0` there means unmeasurable
 (damagerecon/ACCURACY.md §old-recorder degradations).
 
+**How much of the match the reconstruction saw (`coverage`, schema
+v74).** A reconstructed section is only as complete as the health/armor
+stat channel the recording broadcast, and a small class of archive
+recordings barely broadcasts it at all: positions and the frag log are
+intact, the damage simply is not observable, and the section then
+describes a fraction of the real match. `coverage` says so per demo —
+`{kills, covered, ratio}`, the share of the frag log's weapon kills whose
+lethal instant the `events` log accounts for. See
+[DamageCoverage](#damagecoverage) for the exact denominator. Measured:
+healthy reconstructions read **1.000 median / 1.000 at p5 / 0.950 worst**
+over 1 127 E0–E5 demos, the silent-channel class **0.177 median / 0.488
+worst** over its 82 — two populations with a gap between them. Nothing in
+the pipeline gates on it; read it as "how much of this match is in here",
+and prefer the percentiles above to an invented cutoff. Present only on
+`source: "reconstructed"` (a wire log records every `T_Damage` call, so
+its coverage is 1 by construction — measured 1.000 on all 65 GT demos)
+and only when the frag log names at least one scoreable kill. It is a
+WHOLE-MATCH stamp like `source` and `boundedMode`: a `players` / `weapons`
+/ time filter carries it through unchanged rather than rescoping it.
+**Every consumer that rides the damage section inherits it** — the
+`playerStats` damage family (`src: "reconstructed"`), its reconstructed
+`accuracy.hits`, and `aim.players[].weapons[].recon.hits` are built from
+this section, so their coverage is this field and they do not restate it.
+
 **Unbound vs bounded — two families (schema v55).** The **raw** family
 (`damage`, `given`, `taken`, …) is **unbound** — the full hit including
 overkill, capped only at 9999, exactly the wire value. The **bounded**
@@ -300,9 +324,41 @@ a `frag` event.
 | Stomps | `stomps` | []PositionalKill (omitempty — head-stomp kills, separate from damage) |
 | Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or a RESTRICTIVE time filter OMITS it entirely, since it cannot be recomputed against those filters; an explicit `from`/`to` window covering the whole match counts as unfiltered) |
 | Source | `source` | string (omitempty — `ktx` = decoded from the wire damage stream, `reconstructed` = rebuilt from state streams by damage-recon; absent only pre-v71) |
+| Coverage | `coverage` | *DamageCoverage (omitempty — v74; how much of the match a RECONSTRUCTED section saw. Absent on `source: "ktx"` and when the frag log names no scoreable kill; whole-match, never rescoped by a filter) |
 | Dmg | `dmg` | string (omitempty — family echo: `both` as stored, `bounded` from the view, absent on a raw view) |
 | BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:<mode>` with mode ∈ midair/instagib/dmgfrags/ca/wipeout/ra/lgc/race; the clan-arena family joined in v71, detected from the composite serverinfo `mode` string) |
 | BoundedSource | `boundedSource` | string (omitempty — provenance of a SUMMARY response's per-player bounded figures: `ktx` when substituted with KTX's exact end-of-match scoreboard totals, else `reconstructed`; set by the view ONLY on an unfiltered summary serving the bounded family — `dmg=bounded`/`dmg=both`; the stored Result never carries it) |
+
+### DamageCoverage
+
+`damage.coverage` (schema v74) — how much of the match a **reconstructed**
+damage section could actually see. The frag log is its own cross-check:
+every kill it names is a place where damage provably happened, so the
+share of those instants the reconstructed `events` log accounts for is a
+per-demo completeness figure that needs no ground truth.
+
+| Field | JSON key | Type / meaning |
+|---|---|---|
+| Kills | `kills` | int — the denominator: frag-log kills that carry damage arithmetic. An ENEMY kill (not a suicide, not a team kill, killer named and not `world`, killer ≠ victim) by a WEAPON (telefrags and stomps are positional and aggregate outside `events`) on two players the roster names. |
+| Covered | `covered` | int — of those, the kills with at least one reconstructed `events` entry at the victim's death instant. |
+| Ratio | `ratio` | float — `covered / kills`, in [0,1]. |
+
+Present only when `source: "reconstructed"` **and** `kills > 0` — a demo
+whose frag log names no scoreable kill has no denominator, so the object
+is absent rather than reading a misleading `0`.
+
+Reading it: **1.000 is the norm**, not the ceiling of a noisy scale.
+Measured over 1 127 healthy E0–E5 demos the median and 5th percentile are
+both 1.000 and the worst is 0.950; the known silent-stat-channel class
+(recordings that barely broadcast health/armor at all) runs 0.177 median,
+0.488 worst. The two populations do not overlap, and the same metric run
+over a WIRE damage log reads exactly 1.000 on all 65 ground-truth demos.
+Full tables, the sensitivity control and the rejected alternative
+(bounded damage per kill, which does not separate) are in
+`damagerecon/ACCURACY.md` §per-demo coverage.
+
+The pipeline never gates on it — surface, don't filter. A consumer that
+wants a cutoff should take one from those percentiles.
 
 ### PositionalKill
 
@@ -741,6 +797,12 @@ Accuracy is `recon.hits / shots` (`shots` is measurement-grade either way).
 A `hits: 0` inside a present block is a real "linked nothing"; the block's
 ABSENCE is what says "not recovered for this weapon".
 
+The tier can only count what the reconstruction saw, so its completeness
+is the damage section's: read [`damage.coverage`](#damagecoverage) (v74)
+alongside it. On a low-coverage demo a `hits` figure — and any accuracy
+derived from it — is a floor, not an estimate; the accuracy figures below
+were measured on demos that carried the full evidence.
+
 **Emission.** For two weapon families, and for every covered weapon the player
 FIRED — whether or not the reconstruction credits him with any damage: a
 shooter who appears nowhere in the reconstructed log gets `hits: 0` on each
@@ -917,7 +979,12 @@ family aggregates the `damage-recon` node's reconstruction
 (`damage.source: "reconstructed"`): per-player totals are ~1% estimates
 rather than measurements, `enemyWeapons`/`byEnemyWeapon` may read a
 withheld zero on frozen-weapon-bit recordings, and the full error tables
-live in `damagerecon/ACCURACY.md`. The stored artifact is always
+live in `damagerecon/ACCURACY.md`. That ~1% assumes the recording carried
+the evidence — **read [`damage.coverage`](#damagecoverage) (v74) before
+trusting a `reconstructed` damage row**: on the small class of demos whose
+stat channel was barely broadcast the family is a fraction of the real
+match, and this is the only field that says so. It is not restated here;
+the family rides the same section. The stored artifact is always
 fully derived; `view.PlayerStats` applies the KTX overlay at read time,
 mirroring how `view.Damage` applies `boundedSource`.
 
@@ -1430,7 +1497,10 @@ On a demo whose `damage.source` is `reconstructed`, `accuracy.src`
 becomes **`"reconstructed"`** and `hits` is filled from
 [`aim.players[].weapons[].recon.hits`](#weaponaimrecon) — the published
 tier, read rather than re-derived, so the tier's own withholds inherit
-here by construction. Only the weapons it validated carry a number
+here by construction — including its dependence on how much of the match
+the reconstruction saw, which is [`damage.coverage`](#damagecoverage)
+(v74) and is not copied onto the accuracy row. Only the weapons it
+validated carry a number
 (`lg`, `sg`, `ssg`, `axe`, `rl`, `gl`); **`ng`/`sng` keep `hits`
 absent**, and a family whose weapons all fall outside the tier stays
 `"derived"` — `attacks` alone is shot-derived either way and must not
@@ -4305,6 +4375,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v74 | **Partial damage reconstruction becomes visible per demo.** `damage` gains **`coverage`** `{kills, covered, ratio}` on every `source: "reconstructed"` section — the share of the frag log's weapon kills whose lethal instant the reconstructed `events` log accounts for, i.e. `cmd/qw-recon-oracle`'s kill-delta coverage computed in the normal pass (`damagerecon/aggregate.go setCoverage`). It exists because a small class of archive recordings barely broadcasts the health/armor stat channel: positions and the frag log survive, the damage does not, and until now nothing distinguished "this player dealt little damage" from "the recording did not carry the evidence". Measured separation with no overlap: 1 127 healthy E0–E5 demos read **1.000 median / 1.000 at p5 / 0.950 worst**, the 82 known silent-channel demos **0.177 median / 0.488 worst**; the same metric over a WIRE damage log reads exactly **1.000 on all 65** ground-truth demos, and thinning the stat channel to one sample in four drops a healthy demo to a 0.35 median while `kills` stays put (both controls pinned in `damagerecon/coverage_test.go`). Bounded damage per kill — the other candidate figure — was measured and rejected: the two populations overlap on it (healthy min 107, silent max 326). Absent on `source: "ktx"` (a wire log records every `T_Damage` call, so coverage is 1 by construction) and when the frag log names no scoreable kill. Whole-match: a `players`/`weapons`/time filter carries it through unchanged, like `source` and `boundedMode`. NOTHING is gated on it — the riders that inherit the signal (`playerStats` damage family, its reconstructed `accuracy.hits`, `aim.players[].weapons[].recon.hits`) point at this one field instead of copying or withholding. Goldens move on the reconstructed-damage demo only. |
 | v74 | **A derived demoinfo summary for the half of the archive with no KTX block.** `playerStats.players[].score` gains **`maxSpree`** and **`maxQuadSpree`** — the kill-streak maxima KTX writes as `spree.max` / `spree.quad`, replayed from the corrected frag log, the death markers and the quad possession runs on every demo (`analyzer/spree.go`). They ride `score.kills`' `killsMeasured` gate, so they are present and absent with it, and a team row carries the best any member ran rather than a sum. `playerStats.players[].accuracy` gains **`src: "reconstructed"`** and, with it, `hits` on pre-instrumentation demos: the values are read straight off the published `aim.players[].weapons[].recon` tier, so its weapon-level withholds (`ng`/`sng` carry none) inherit rather than being restated — the `player-stats` DAG node now binds `aim` for exactly this. `accuracy.byWeapon[]` additionally gains **`hitsConvention`** (`anyDamage` \| `directImpact` \| `pellets`), present whenever `hits` is: `src` is the evidence grade and says nothing about WHAT is counted, while one `src: "ktx"` row uses all three conventions at once (lg any-path, rl/gl direct impacts, sg/ssg pellets). Two rows are comparable exactly when weapon AND convention match. Validated withhold-and-compare against the verbatim KTX block on 188 instrumented archive demos / 665 player rows (`cmd/qw-demoinfo-eval`): `maxQuadSpree` 99.8% exact, `maxSpree` 99.6% on rows whose kill count already agrees and whose player never suicided (KTX credits a suicide to its own streak wherever teamplay is off — the one deliberate divergence), powerup `took` 100.0% exact and possession seconds 0.1–0.5% off on all three powerups, `frags`/`deaths` 99.5%/99.7%, reconstructed `damage.given`/`taken` 0.5% aggregate, `accuracy` `attacks` 98–100% exact on every single-projectile weapon and lg `hits` 0.9% aggregate. The KTX rl/gl convention is NOT derivable on a blockless demo and the harness says so with numbers: the wire log's own splash flag reproduces KTX's rl `hits` on 638 of 638 rows, but the reconstruction's geometric direct/splash verdict answers it for gl (1.2% aggregate) and not for rl (+80%), so the derived count stays `anyDamage` and is marked rather than coerced. Goldens move by the new fields, the `accuracy.src` flip on the reconstructed-damage demo, and one `maxSpree` (a same-instant mutual frag, now ordered by the frag log rather than by event kind). |
 | v74 | **The fire→flight association reaches the Result, and with it rl/gl hit recovery on old demos.** `shots.shots[]` gains **`flightEnd`** — the match-relative time at which the tracked rocket/grenade (or nail) a fire launched died. The shots analyzer has always bracketed those flights, since that IS how a projectile fire's `hit` is decided (`analyzer/shots.go linkProjectiles`), and then discarded the association; it is now published. Absent on hitscan fires and on a projectile whose entity the server never broadcast — which is exactly the state the measured hit counter reads as a miss — and set whether or not the impact damaged anyone. On the back of it, the reconstructed hit tier now covers **`rl` and `gl`**: `aim.players[].weapons[].recon.hits` appears for them on demos whose damage section is reconstructed, joined flight-impact-instant → reconstructed damage instead of by counting impacts, which is what made the two conventions differ by ~7 pp on rl in v73. Measured over 53 dm2/dm3 demos carrying the KTX log (rows ≥ 20 fires): mean accuracy error **rl 0.6 pp** (bias +0.4) / **gl 0.3 pp** (bias 0.0) vs the measured counter, with the join-on-wire control at 0.4 pp / 0.1 pp; `lg`/`sg`/`ssg`/`axe` unchanged to the last row. `ng`/`sng` stay withheld — nail linking is opt-in, so their measured counter is zero everywhere and there is nothing to validate a recovery against. Goldens move by exactly the new fields. |
 | v73 | **Airgib detection gates on pre-impact evidence** (a **correctness fix**: entries move in and out of `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX writes the damage message inline in `T_Damage`, and measured over 410 direct rocket hits the stamp lands in the same wire frame as the first knockback-visible position sample 82% of the time and up to two frames (+28 ms) late 6% — so samples near the stamp can already carry the rocket's own knockback, and the hit-time sample alone reported players who were STANDING at impact as airborne (hub `232925`: a victim riding the dm2 `func_train` read **303 units of air** when a quad direct rocket blasted him off it, published as the match's biggest airgib). A hit now qualifies when every position sample in `[hit − preMs, hit − 40 ms]` (default **100 ms**) reads ≥ 96 units above floor — the preceding tick deciding when the window holds no sample (old coarse-tick demos, recording holes) — and no sample beside the hit reads ground contact (knockback over-reports height but cannot fake a grounded reading, so a victim who fell and landed just before the rocket rejects while one knocked laterally over a higher floor does not). The 100 ms default is aesthetic: floor-relative height is a step function at ledge edges, so longer windows measure time-since-the-edge and drop genuine 300+-unit ledge-drop events. Reported `height`/`loc`/`heightAboveAttacker` come from the latest PRE-IMPACT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v73 hit-sample-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. Airgibs also now consume **reconstructed** damage (the DAG node binds `damage:final`), so pre-instrumentation demos get a Key-Moments list too — recon's direct/splash split is geometric (explosion endpoint within 48 units) and its timestamps frame-accurate; `damage.source` says which evidence a list rests on (supersedes v71's wire-measured-only gate for airgibs; aim's MEASURED counters keep it — the reconstruction feeds only aim's separate `recon` tier, see the other v73 row). |

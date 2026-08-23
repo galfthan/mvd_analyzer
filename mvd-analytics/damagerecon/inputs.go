@@ -58,6 +58,11 @@ type inputs struct {
 	teams   map[string]string
 	order   []string // deterministic player iteration order
 
+	// frags is the frag log as the flat list, read only by setCoverage.
+	// Deliberately outside the noObituary gate below: coverage scores delta
+	// EXTRACTION, which keeps its frag anchors in either run.
+	frags []result.FragEntry
+
 	fragAt map[fragKey]*result.FragEntry
 	// fragAnyAt also holds suicide/teamkill entries — the obituary for an
 	// enemy telefrag is a killer-less "was telefragged" that parses as a
@@ -198,6 +203,7 @@ func buildInputs(res *result.Result) *inputs {
 	}
 
 	if res.Frags != nil {
+		in.frags = res.Frags.Frags
 		for i := range res.Frags.Frags {
 			f := &res.Frags.Frags[i]
 			in.fragAnyAt[fragKey{f.Victim, f.Time}] = f

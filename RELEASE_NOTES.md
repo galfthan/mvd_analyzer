@@ -7,6 +7,64 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### `damage.coverage` — how much of the match the reconstruction saw
+
+The reconstruction reads the health/armor stat channel, and a small class
+of archive recordings barely broadcasts it: positions and the frag log
+are intact, the damage simply is not observable. The section is not wrong
+there — it reports what it could see — but it is a fraction of the real
+match, and nothing said so. A consumer could not tell "this player dealt
+little damage" from "the recording did not carry the evidence".
+
+`damage.coverage` says it, on every `source: "reconstructed"` section:
+
+```json
+"coverage": { "kills": 172, "covered": 172, "ratio": 1 }
+```
+
+`kills` is the frag log's weapon kills that carry damage arithmetic — an
+enemy kill on two rostered players, telefrags and stomps excluded since
+they aggregate outside `events` — and `covered` the ones whose lethal
+instant the reconstructed `events` log accounts for. It is
+`cmd/qw-recon-oracle`'s kill-delta coverage, the same metric that found
+the broken class, computed in the normal pass
+(`damagerecon/aggregate.go setCoverage`) rather than in a harness.
+
+**The separation is total.** 1 127 healthy demos sampled across E0–E5
+read **1.000 median, 1.000 at the 5th percentile, 0.950 worst**; the 82
+known silent-channel demos read **0.177 median, 0.488 worst**. Not a
+gradient with a tail — two populations with a gap between them, so a
+consumer reading `ratio` needs no calibration to see the difference.
+
+Two controls say the figure itself is honest. Run over a WIRE damage log
+it reads exactly **1.000 on all 65** ground-truth demos, and the blind
+reconstruction of those same demos also reads 1.000 — a complete section
+reads full coverage from either evidence source, so the metric adds no
+floor of its own. That is also why `source: "ktx"` carries no `coverage`:
+it would be a constant. And thinning the stat channel to one sample in
+four drops a healthy demo to a **0.35 median** while `kills` stays put —
+coverage cannot hide a loss by shrinking its own denominator. Both
+directions are pinned in `damagerecon/coverage_test.go`.
+
+Bounded damage per kill, the other figure the outlier study quoted (~83
+vs ~300), was measured and rejected: the populations overlap on it
+(healthy min 107, silent max 326).
+
+**Nothing is gated on it.** The number is published; no field is
+withheld, coerced or hidden below any threshold, and there is no
+threshold in the code — the percentiles above are in the docs so a
+consumer can pick its own. Everything riding the section inherits the
+signal from this one field rather than carrying a copy:
+`playerStats`' `damage` family (`src: "reconstructed"`), its
+reconstructed `accuracy.hits`, and `aim.players[].weapons[].recon.hits`.
+It is a whole-match stamp like `source` and `boundedMode`, so a
+`players` / `weapons` / time filter carries it through unchanged.
+
+Detail: [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md)
+("DamageCoverage", v74 history row) and
+[damagerecon/ACCURACY.md](mvd-analytics/damagerecon/ACCURACY.md)
+("Per-demo coverage").
+
 ### `score.maxSpree` / `score.maxQuadSpree` + `accuracy.src: "reconstructed"` + `accuracy.byWeapon[].hitsConvention`
 
 54% of the archive carries no KTX demoinfo block, and the census says
