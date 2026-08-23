@@ -5,7 +5,78 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (old-demo-summary) — rockets and grenades join the recovered accuracy tier, schema v74
+## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
+
+### `score.maxSpree` / `score.maxQuadSpree` + `accuracy.src: "reconstructed"`
+
+54% of the archive carries no KTX demoinfo block, and the census says
+that ceiling is permanent — it is the pre-`ktxstats` half, and
+`/demo-info` 422s there for good. But most of what the block carries is
+now derivable: fires from the shot streams, hits from the v73/v74 recon
+tier, damage from the reconstruction, pickups and possession from the
+item and stat streams. `playerStats` has been that summary since v63;
+this release closes its last two gaps against the block.
+
+- **`playerStats.players[].score.maxSpree` / `maxQuadSpree`** — the
+  kill-streak maxima KTX writes as `spree.max` / `spree.quad`, replayed
+  on every demo from the corrected frag log, the protocol death markers
+  and the quad possession runs (`analyzer/spree.go` follows KTX's own
+  state machine: latch and reset on death, the quad counter additionally
+  on a fresh quad pickup, both latched once more at match end). They ride
+  `score.kills`' `killsMeasured` gate, so they are present and absent
+  with the rest of the kill side and a `0` inside a present family is an
+  observed zero. A team row carries the best any member ran, never a sum.
+- **`playerStats.players[].accuracy.src` gains `"reconstructed"`**, and
+  with it `hits` on demos whose damage section is reconstructed. The
+  values are read off the published `aim.players[].weapons[].recon` tier
+  rather than re-joined here, so its weapon set is inherited by
+  construction: `lg`/`sg`/`ssg`/`axe`/`rl`/`gl` carry a number and
+  **`ng`/`sng` keep `hits` absent**. A family whose weapons all fall
+  outside the tier stays `"derived"` — `attacks` alone is shot-derived
+  either way and must not claim a grade it does not have. The
+  `player-stats` DAG node binds `aim` for exactly this.
+
+**Validated the way the recon tier was: withhold and compare.** New
+harness `cmd/qw-demoinfo-eval` parses an INSTRUMENTED demo once, keeps
+its verbatim KTX block as ground truth, swaps the wire damage log for
+`damagerecon`'s blind reconstruction, recomputes aim and re-derives the
+two families that ride it — then scores every derived quantity against
+the server's own. Over **188 archive demos / 665 player rows**:
+
+| field | result |
+|---|---|
+| `frags` / `deaths` / `teamKills` | 99.5% / 99.7% / 99.5% exact |
+| `maxQuadSpree` | **99.8% exact** |
+| `maxSpree` | 92.6% exact overall; **99.6%** on rows whose `kills` already agrees with KTX and whose player never suicided |
+| quad / pent / ring `took` | **100.0% exact**, all three |
+| quad / pent / ring possession seconds | 82–96% exact to the second, 0.07–0.49% aggregate |
+| reconstructed `damage.given` / `taken` | 0.49% / 0.46% aggregate |
+| `accuracy.attacks`, single-projectile weapons | 98–100% exact |
+| `accuracy.hits`, `lg` | 0.89% aggregate |
+
+**Two residuals, both named.** `maxSpree` diverges from KTX by design:
+KTX's increment gate is `strneq(attackerteam, targteam) || !tp_num()`
+(`ktx/src/client.c:4865`), so wherever teamplay is off — every duel,
+every FFA — a player's own SUICIDE bumps their streak in the very call
+that latches it. 23 of the 24 mismatches on rows where `kills` agrees
+belong to players with at least one suicide, every one off by exactly
+−1. The 17 rows at |Δ| ≥ 3 all sit where the frag log had already
+credited the player 0 kills against KTX's 8–47 — a pre-existing
+kill-attribution gap the streak inherits, not a defect of the replay.
+
+**And one documentation correction the eval forced.** Derived `hits` were
+described as "broadly comparable" to KTX's for the single-projectile
+weapons. Measured, that is true for `lg` (0.9%) and false for `rl` and
+`gl`: KTX's rl/gl `hits` is the DIRECT-impact count
+(`ktx/src/weapons.c:994`, `:1329`) while ours counts a fire that landed
+damage by any path, so ours reads ~4x higher on rl and ~1.5x on gl.
+`sg`/`ssg` were already known to be pellets-vs-trigger-pulls. `src` tells
+you the evidence grade; RESULT_SCHEMA now carries the table that tells
+you which weapons the two sources are even asking the same question
+about.
+
+Detail: [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) ("The derived
+spree", "Reconstructed accuracy hits", v74 history row).
 
 ### `shots[].flightEnd` + `recon.hits` for `rl` / `gl`
 

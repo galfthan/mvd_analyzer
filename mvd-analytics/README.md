@@ -358,9 +358,12 @@ produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
 [`playerStatsPost`](analyzer/player_stats.md),
 `damageReconPost`, `backpackReconPost`. They come in
 three shapes. **One creates a section of its own**: `playerStatsPost` is
-node `player-stats`, publishing `playerStats` — it consumes twelve
+node `player-stats`, publishing `playerStats` — it consumes thirteen
 artifacts and writes a top-level section no other node touches, so it
-carries no `mutates` flag. **Two publish a named final artifact** rather
+carries no `mutates` flag. (The thirteenth is `aim`, added in v74 so the
+accuracy family can read the published reconstructed hit tier instead of
+re-running its join, which is what makes that tier's per-weapon
+withholds inherit rather than be restated.) **Two publish a named final artifact** rather
 than anonymously patching an earlier node's output:
 `recoverTelefragTeamkills` is node `frags-final`, which
 appends recovered telefrag team-kills to the raw `frag` log and publishes
@@ -515,9 +518,12 @@ flowchart TB
   subgraph d6["depth 6"]
     aim["aim"]
     airgibs["airgibs"]
-    player_stats["player-stats"]
     backpack_linkage["backpack-linkage"]
   end
+  subgraph d7["depth 7"]
+    player_stats["player-stats"]
+  end
+  aim -->|"aim"| player_stats
   backpack_recon -->|"backpacks:final"| backpack_linkage
   backpack_recon -->|"backpacks:final"| player_stats
   backpacks -->|"backpacks"| backpack_recon

@@ -337,13 +337,70 @@ stream-less result carries a match window at all — which is exactly what
 
 ## 9. Derived demoinfo equivalents (NEW from the 51k sweep)
 
-54% of the archive has no KTX demoinfo block, and the census shows
-that ceiling is permanent (it's the pre-ktxstats half). But most of
-what the block carries is derivable from data we already have: weapon
-fires from the shot streams, hits via lead 6, sprees from the frag
-log, powerup/RA control time from the item/stream intervals. A
-`src:"derived"` stats section closing most of the demoinfo gap on old
-demos — sequence after leads 5/6 so the hit-side inputs exist.
+**SHIPPED** on `old-demo-summary` (folded into the unreleased schema
+v74). The premise held: 54% of the archive has no KTX demoinfo block and
+that ceiling is permanent, but nearly everything the block carries is
+derivable from artifacts every demo has.
+
+**The section is `playerStats`, not a new one.** It has been the derived
+per-player summary since v63, with a `src` on every family and the KTX
+overlay applied at READ time (`view.PlayerStats`) so the stored artifact
+is always what this pipeline computed. A parallel `src:"derived"` section
+would have duplicated ~90% of it and given consumers two answers to the
+same question; deferral on a ktxstats-carrying demo is then automatic and
+structural — the overlay replaces the family, so the derived numbers
+never surface beside the verbatim ones. Only two gaps were left against
+the block, and both are now closed:
+
+- **`score.maxSpree` / `score.maxQuadSpree`** (`analyzer/spree.go`) —
+  KTX's `spree.max` / `spree.quad`, replayed from the corrected frag log,
+  the protocol death markers and the quad possession runs, following
+  KTX's own state machine (`client.c:4864-4876`, `items.c:2180-2181`,
+  `stats.c:1637-1638`). They ride `score.kills`' `killsMeasured` gate.
+- **`accuracy.src: "reconstructed"` with `hits`** — read off the v73/v74
+  aim recon tier (lead 6) rather than re-joined, so its weapon-level
+  withholds inherit: `ng`/`sng` carry no `hits` at all. The `player-stats`
+  DAG node binds `aim` for this.
+
+Everything else the lead listed already existed and is now MEASURED
+rather than assumed: fires from the shot streams, damage from the
+reconstruction (`src: "reconstructed"` since v71), powerup control from
+`pickups.byKind` + `hold.powerups`.
+
+**Validated withhold-and-compare** (new harness `cmd/qw-demoinfo-eval`,
+the qw-aim-eval protocol) against the verbatim block on **188
+instrumented archive demos / 665 player rows**: `maxQuadSpree` **99.8%
+exact**, `maxSpree` **99.6%** on rows whose `kills` already agrees with
+KTX and whose player never suicided (92.6% unconditioned), powerup
+`took` **100.0% exact** on all three, powerup possession seconds
+0.07–0.49% aggregate, `frags`/`deaths` 99.5%/99.7%, reconstructed
+`damage.given`/`taken` 0.49%/0.46%, `accuracy.attacks` 98–100% exact on
+every single-projectile weapon, `lg` `hits` 0.89% aggregate. Full table:
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"The whole derived summary vs the verbatim KTX block".
+
+**Two residuals, both named rather than smoothed.** `maxSpree` diverges
+from KTX by design — KTX's gate is `strneq(attackerteam, targteam) ||
+!tp_num()`, so wherever teamplay is off a player's own suicide bumps
+their streak in the call that latches it; 23 of the 24 mismatches on
+kills-agreeing rows are exactly that, all at −1. The 17 rows at |Δ| ≥ 3
+sit where the frag log had already credited 0 kills against KTX's 8–47,
+a pre-existing kill-attribution gap the streak inherits.
+
+**One doc correction the eval forced:** derived `hits` were described as
+"broadly comparable" to KTX's on the single-projectile weapons. True for
+`lg` (0.9%), false for `rl`/`gl` — KTX counts DIRECT impacts only
+(`weapons.c:994`, `:1329`) and ours counts any path, ~4x apart on rl.
+RESULT_SCHEMA now carries the per-weapon comparability table.
+
+**Not done, deliberately.** `speed` (max/avg units/s) stays KTX-only —
+the position streams could support it, but it is a different derivation
+from anything here and belongs with a movement lead. `controlMs` stays
+KTX-only: our region-control view answers a different question, and
+faking KTX's duel-control heuristic would be a second, disagreeing
+number. `dmg.teamWeapons` stays KTX-only (the reconstruction does not
+bucket team damage by the victim's inventory). `ng`/`sng` accuracy hits
+stay withheld until nail linking has ground truth to validate against.
 
 ## 10. Backpack pickup linkage on reconstructed drops (successor to lead 2)
 

@@ -933,6 +933,24 @@ diff -r /tmp/before /tmp/after
    backlog distilled from the archive survey in
    [`plan-archive-features.md`](plan-archive-features.md).
 
+0a. **The derived demoinfo summary is not the KTX block.** 54% of the
+   archive predates `ktxstats`, so `/demo-info` 422s there permanently.
+   `playerStats` answers the same questions from the wire instead —
+   including, since v74, the kill-streak maxima (`score.maxSpree` /
+   `maxQuadSpree`) and `accuracy.byWeapon[].hits` recovered from the aim
+   recon tier (`accuracy.src: "reconstructed"`). Every family says where
+   its numbers came from, and the withholds are real: `ng`/`sng` carry no
+   recovered `hits` at all, and the whole kill side — sprees included —
+   is absent on a demo whose obituaries never matched. Two things it
+   does NOT claim. `maxSpree` deliberately diverges from KTX's, which
+   credits a player's own suicide to their streak wherever teamplay is
+   off; and derived `hits` are not comparable to KTX's for `rl`/`gl`
+   (KTX counts direct impacts only, ours any path — ~4x apart on rl) or
+   for `sg`/`ssg` (pellets vs trigger pulls). Measured against the
+   verbatim block on 188 instrumented demos by `cmd/qw-demoinfo-eval`;
+   the full agreement table is in
+   [`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md).
+
 0b. **Reconstructed backpack drops are a replay, not a measurement.** On
    demos older than the KTX `//ktx drop` hint (KTX 1.38 — 51% of the
    archive) the `backpack-recon` node fills the same `backpacks` section
@@ -967,7 +985,9 @@ diff -r /tmp/before /tmp/after
    (it has no per-shot fire sound), which can slip by a single cell at a
    death/discharge boundary. KTX demoinfo stats (when available) remain the
    authoritative reference, and `shots.reconciliation` cross-checks against
-   them.
+   them — re-measured in v74 on 188 instrumented archive demos, where
+   `playerStats` `accuracy.attacks` matches KTX to the row 98-100% of the
+   time on every single-projectile weapon.
 
 2. **Auth name override**: When players authenticate via mvdsv,
    `sv_forcenick` can set the userinfo name to the login. The analyzer

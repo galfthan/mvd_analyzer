@@ -352,6 +352,71 @@ two properties of the log: it is anchored at the victim's stat instant,
 and several hits landing on one instant merge into one delta with one
 attacker and one summed magnitude.
 
+## The whole derived summary vs the verbatim KTX block (2026-08-23)
+
+The recon tier above is scored against THIS pipeline's own measured
+counter. A second question is what the derived per-player summary
+(`playerStats`) is worth against the thing it stands in for — the KTX
+demoinfo block that 54% of the archive has no copy of. `cmd/qw-demoinfo-eval`
+answers it on the same withhold-and-compare protocol: parse an
+instrumented demo once, keep its verbatim block as ground truth, swap
+the wire damage log for the blind reconstruction, recompute aim, and
+re-derive the two families that ride damage
+(`analyzer.DerivedStatsForEval`). Score is untouched by the swap and is
+already the blind answer, so it is compared as stored.
+
+Over **188 archive demos, 665 player rows**:
+
+| field | rows | exact | aggregate error |
+|---|---|---|---|
+| `score.frags` | 665 | 99.5% | 0.02% |
+| `score.deaths` | 665 | 99.7% | 0.01% |
+| `score.teamKills` | 665 | 99.5% | 0.40% |
+| `score.kills` | 665 | 95.5% | 2.26% |
+| `score.maxQuadSpree` | 665 | **99.8%** | 0.31% |
+| `score.maxSpree` | 665 | 92.6% | 3.08% |
+| `damage.given` (reconstructed) | 665 | 6.9% | **0.49%** |
+| `damage.takenEnemy` (reconstructed) | 663 | 9.2% | **0.46%** |
+| `pickups.quad/pent/ring.took` | 273/80/78 | **100.0%** | 0.00% |
+| `hold.powerups.quad.ms` (to the second) | 273 | 96.0% | 0.07% |
+| `hold.powerups.pent.ms` | 80 | 82.5% | 0.49% |
+| `hold.powerups.ring.ms` | 78 | 94.9% | 0.09% |
+| `accuracy.lg.attacks` | 436 | 98.4% | 0.00% |
+| `accuracy.rl.attacks` | 638 | 99.8% | 0.00% |
+| `accuracy.gl/ng/sng.attacks` | 424/139/336 | 100.0% | 0.00% |
+| `accuracy.lg.hits` (recon tier) | 436 | 65.8% | **0.89%** |
+| `accuracy.axe.hits` | 86 | 98.8% | 6.25% |
+
+`maxSpree`'s residual decomposes completely. Conditioned on the row's
+`kills` already agreeing with KTX it is 96.2% exact; conditioned
+additionally on the player never suiciding, **99.6% (252/253)**. 23 of
+the 24 mismatches in the first subset belong to players with at least one
+suicide and are all off by exactly −1 — KTX's increment gate is
+`strneq(attackerteam, targteam) || !tp_num()` (`ktx/src/client.c:4865`),
+so wherever teamplay is off a suicide bumps the player's own streak in
+the very call that latches it, and this pipeline counts only the kills
+`score.kills` counts. The 17 rows at |Δ| ≥ 3 all sit where the frag log
+had already credited the player 0 kills against KTX's 8–47: the streak
+inherits the kill side's residual by construction.
+
+**Three fields are deliberately NOT scored as agreement**, because the
+two sources are not measuring the same quantity, and the eval reports
+them only to pin the size of the gap:
+
+- `accuracy.sg/ssg.attacks` and `.hits` — KTX counts PELLETS on both
+  sides of its ratio, this pipeline counts trigger pulls and fires that
+  connected. The observed ratios (83% / 93% aggregate) are exactly the
+  6-and-14-pellet spreads.
+- `accuracy.rl.hits` (~4x KTX) and `.gl.hits` (~1.5x) — KTX's rl/gl
+  `hits` is the DIRECT-impact count (`ktx/src/weapons.c:994`, `:1329`);
+  ours counts a fire that landed damage by any path, splash included. The
+  recon tier reproduces OUR convention to 0.6 pp / 0.3 pp (above), which
+  is the number that decides whether it ships.
+
+Rerun with `MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-demoinfo-eval
+-dir <demos> -limit 500` from the repo root; demos with no KTX block or no
+wire damage log are skipped (312 of the 500 sampled here).
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the

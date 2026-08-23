@@ -917,7 +917,15 @@ Common frontend features → the call that backs them.
   time in one row per player and per team, on **every** demo including
   ones with no KTX block. Prefer it over stitching `/demoinfo` +
   `/frags` + `/damage` yourself; read each family's `src` to see whether
-  a number came from KTX or was derived here.
+  a number came from KTX, was derived here, or was reconstructed.
+  `score.maxSpree` / `score.maxQuadSpree` (longest kill run between
+  deaths, and while holding the quad) are the derived equivalent of the
+  KTX block's `spree.max` / `spree.quad` — so they answer "best streak?"
+  on the pre-ktxstats half of the archive too. They are never overlaid
+  from KTX and are gated with `kills`; a team row carries the best any
+  member ran, not a sum. They deliberately exclude the self-kill that
+  KTX's own gate lets bump a streak wherever teamplay is off, so a duel
+  with suicides reads 1 lower per affected streak than the KTX block.
 - **"Are these two rows the same person?" / "which userid do I `track=`
   at time t?"** → `GET /player-stats`, read `identity` and `sessions[]`.
   A player who reconnects while their old connection is still spawned is
@@ -945,6 +953,16 @@ Common frontend features → the call that backs them.
 - **Weapon effectiveness** → `GET /player-stats` (accuracy + per-weapon
   pickups + hold time), `GET /demoinfo` (KTX's own verbatim numbers, the
   audit trail), or `/weapon-pickups` (kills-before-next-death).
+  Check `accuracy.src` before you trust the hit side: on a demo with no
+  wire damage stream `accuracy.byWeapon[].hits` is filled from the aim
+  reconstruction tier and the family reads `"reconstructed"` — a weaker
+  evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
+  `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
+  is not the same as no hits). `attacks` is shot-derived on every demo
+  and matches KTX to the row on the single-projectile weapons. Do not
+  diff `hits` against `/demoinfo` naively even on a derived family: KTX
+  counts direct impacts for `rl` / `gl` and pellets for `sg` / `ssg`,
+  while this API counts a fire that landed damage by any path.
 - **Analyze a local demo file (no hub gameId)** → upload it, then use the
   returned `demoId` with any per-demo GET:
 

@@ -2,12 +2,15 @@
 
 **Phase:** Post-processor (non-event)
 **Inputs (artifacts):** `clock`, `identity`, `roster`, `timeline` (for
-            `Streams`), `match:final`, `frags:final`, `damage`, `shots`,
-            `items`, `weapon-pickups`, `backpacks`, `metadata`
+            `Streams`), `match:final`, `frags:final`, `damage:final`,
+            `shots`, `items`, `weapon-pickups`, `backpacks:final`,
+            `metadata`, `aim`
             — `identity` supplies the `*auth` login, `shots` the fire
-            stream the derived accuracy is reconstructed from
+            stream the derived accuracy is reconstructed from, and `aim`
+            the reconstructed hit tier that fills `accuracy.hits` on
+            demos with no wire damage stream
 **Writes to Result:** `result.PlayerStats` (`*PlayerStatsResult`),
-            schema v62
+            schema v74
 
 ## What it does
 
@@ -61,7 +64,8 @@ golden corpus always say what this pipeline actually computed.
    into per-type intervals (`armorRuns`); `armor.none` is the
    alive-time complement.
 3. **Score / damage.** Read from `match:final` (frag-log-corrected
-   kills/deaths/suicides), `frags:final` (team-kills) and the damage
+   kills/deaths/suicides), `frags:final` (team-kills, and the kill
+   stream `spree.go` replays into `maxSpree` / `maxQuadSpree`) and the damage
    reconstruction's **bounded** family — bounded is KTX-scoreboard
    semantics, which is what the KTX overlay replaces it with.
    `takenEnemy` is re-summed from the per-hit log over enemy hits only
@@ -71,7 +75,11 @@ golden corpus always say what this pipeline actually computed.
    `takenToDie` is that divided by the corrected death count.
 4. **Accuracy / login.** Accuracy from the fire stream, login from the
    `*auth` userinfo key — both so a demo with no KTX block degrades to a
-   rougher number rather than to a missing field.
+   rougher number rather than to a missing field. On a demo whose damage
+   section is itself reconstructed, `hits` is lifted from the published
+   `aim` recon tier and the family says `src: "reconstructed"`; reading
+   the tier rather than re-running its join is what makes its
+   weapon-level withholds (`ng`/`sng`) inherit here by construction.
 5. **Pickups.** Non-weapon kinds from the item timeline; weapons from
    `weaponPickups` (a weapon can also arrive in a backpack, which the
    item timeline never sees); `dropped` from `backpacks`; transfers
@@ -144,8 +152,24 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   (`src: "derived"`), which counts trigger pulls rather than KTX's
   pellets and inherits `/shots`' own attribution limits — on gameId
   71035 one player's 552 fires are all labelled `sg`. `hits` is omitted
-  entirely when the demo has no damage stream to link fires against,
-  since a zero there would read as "shot and never hit".
+  entirely when nothing could count it — no wire damage stream AND no
+  recovery from the aim recon tier for that weapon — since a zero there
+  would read as "shot and never hit".
+- **Derived `hits` are not KTX's `hits` for rl/gl or sg/ssg.** Measured
+  against the verbatim block on 188 instrumented archive demos
+  (`cmd/qw-demoinfo-eval`): `attacks` matches KTX to the row on every
+  single-projectile weapon and lg `hits` agrees to 0.9% in aggregate,
+  but KTX's rl/gl `hits` is the DIRECT-impact count
+  (`ktx/src/weapons.c:994`, `:1329`) while ours counts a fire that landed
+  damage by any path, so ours reads ~4x higher on rl and ~1.5x on gl;
+  sg/ssg are pellets on KTX's side and trigger pulls on ours. A
+  definition gap, not an error — but `src` alone does not warn about it.
+- **`maxSpree` inherits the kill side's residual.** The streak replay is
+  exact where the underlying kill attribution is (99.6% of rows whose
+  `kills` already agrees with KTX and whose player never suicided); every
+  large disagreement in the eval sat on a row the frag log had already
+  credited 0 kills against KTX's 8-47. Suicide rows read exactly 1 low
+  by design — see RESULT_SCHEMA "The derived spree".
 - **`ping`, `handicap` and `bot` stay KTX-only.** `handicap` and `bot`
   are server-side state with no wire signal. `ping` IS on the wire
   (`svc_updateping`) but the parser skips it

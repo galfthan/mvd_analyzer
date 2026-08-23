@@ -7354,7 +7354,7 @@ components:
           properties:
             score: { description: "Provenance of the scoreboard family — a constant: the kill side is always the frag-log reconstruction.", type: string, enum: [derived] }
             damage: { description: "Provenance of the damage family. \"derived:unbounded\" means raw wire damage — see the per-row damage.src.", type: string, enum: [derived, "derived:unbounded", ktx, reconstructed, mixed] }
-            accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction. The two are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, mixed] }
+            accuracy: { description: "Provenance of the accuracy family: ktx when the demoinfo block carries it, else the fire-stream reconstruction — \"reconstructed\" when its hits came from the aim recon tier on a demo with no wire damage stream. The three are different measurements — see the per-row accuracy description.", type: string, enum: [derived, ktx, reconstructed, mixed] }
             pickups: { description: "Provenance of the pickup tallies.", type: string, enum: [derived, ktx, mixed] }
             hold: { description: "Provenance of the possession-time family — a constant: no other source carries it.", type: string, enum: [derived] }
           required: [score, hold]
@@ -7468,6 +7468,8 @@ components:
             efficiency:
               description: "kills / (kills + deaths) as a RATIO in [0,1], not a percentage. Absent with `kills`, since it is computed from it."
               type: number
+            maxSpree: { description: "Longest run of kills between deaths, derived from the frag log and the death markers — the equivalent of the KTX demoinfo block's spree.max, which 54% of the archive has no block to carry. A run still alive at match end counts. Absent with `kills`; a 0 inside a present family is an observed zero. NOT overlaid from KTX: KTX bumps a player's own streak on their SUICIDE wherever teamplay is off, so on a duel with self-kills this reads lower by design.", type: integer }
+            maxQuadSpree: { description: "Longest run of kills made while holding the quad, resetting on death AND on a fresh quad (KTX latches its counter in the pickup handler). Equivalent of the KTX block's spree.quad. Absent with `kills`.", type: integer }
             byWeapon:
               description: >
                 Enemy kills split by the weapon that dealt them, commonly rl/lg/gl/sg/ssg/sng/ng/axe.
@@ -7629,12 +7631,25 @@ components:
               sg/ssg, with a real/virtual split);
             - **src=derived** is reconstructed from the decoded fire stream
               (attacks = TRIGGER PULLS, no real/virtual, and hits absent when
-              the demo has no damage stream to link against).
+              the demo has no damage stream to link against);
+            - **src=reconstructed** is the same fire stream with `hits`
+              recovered from the aim recon tier on a demo whose damage section
+              is itself reconstructed — inference, not measurement. Only the
+              weapons that tier validated (lg, sg, ssg, axe, rl, gl) carry
+              `hits`; ng/sng keep it absent.
 
-            The two are NOT the same measurement, so check src before
+            The three are NOT the same measurement, so check src before
             comparing accuracies across demos — but the family is emitted
             either way, so a demo with no KTX block degrades to a rougher
             number rather than to a missing field.
+
+            Derived `hits` follow OUR convention — a fire that landed damage
+            by any path — not KTX's. Scored against the verbatim block on 188
+            instrumented archive demos (cmd/qw-demoinfo-eval), lg agrees to
+            0.9% in aggregate; rl and gl do NOT, because KTX's rl/gl `hits` is
+            the DIRECT-impact count and reads ~4x lower (rl) and ~1.5x lower
+            (gl); sg/ssg are pellet counts on both sides of KTX's ratio and
+            trigger pulls on ours.
 
             When KTX carries an acc block the family is replaced WHOLESALE,
             never merged per weapon: mixing pellet counts with trigger pulls
@@ -7645,14 +7660,14 @@ components:
           oneOf:
             - additionalProperties: false
               properties:
-                src: { description: "Provenance of this family: the members' shared source on a team row, or \"mixed\" — the phantom-roster canary — when they disagree. Player rows never carry \"mixed\".", type: string, enum: [derived, ktx, mixed] }
+                src: { description: "Provenance of this family: \"reconstructed\" when `hits` came from the aim recon tier rather than a wire damage link; the members' shared source on a team row, or \"mixed\" — the phantom-roster canary — when they disagree. Player rows never carry \"mixed\".", type: string, enum: [derived, ktx, reconstructed, mixed] }
                 byWeapon:
                   description: "Per weapon key (axe, sg, ssg, ng, sng, gl, rl, lg — KTX counts axe swings too). What the numbers mean depends on src — see the family description."
                   additionalProperties:
                     additionalProperties: false
                     properties:
                       attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise.", type: integer }
-                      hits: { description: "Hits landed. ABSENT (not zero) on a derived block when the demo has no WIRE damage stream to link fires against (a reconstructed damage section does not count — the shot linker never saw those events) — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      hits: { description: "Hits landed. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, or a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
                       real: { description: "Not aggregated on team rows (KTX omits the pair unless it recorded one). KTX-only, rl/gl only: victims who actually lost health or armor to a blast — one rocket splashing three players counts three. NOT a split of hits (which for rl/gl is the direct-impact count), and routinely larger than it.", type: integer }
                       virtual: { description: "KTX-only, rl/gl only: victims who WOULD have been damaged, measured before godmode / pentagram / teamplay damage-avoidance zeroed it out. Always >= real; the gap is damage prevented, not missed.", type: integer }
                     required: [attacks]
