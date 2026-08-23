@@ -288,11 +288,25 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   before quoting a reconstructed figure as a match total**: a small class
   of archive recordings barely broadcast the health/armor stat channel,
   and `ratio` is what distinguishes a quiet match from a section that is
-  a fraction of the real one (healthy demos read 1.000 median and 0.950
-  worst of 1 127 measured; that class 0.177 median, 0.488 worst). Nothing
-  is gated on it. Absent on `source: "ktx"`, whose coverage would be the
-  constant 1, and whole-match like `source` itself — a filter carries it
-  through unrescoped. Distinct from
+  a fraction of the frag-log-visible one. Measured over the full
+  10 702-demo sweep: 99.0% read ≥ 0.95 (median 1.000), 0.80% are that
+  broken class (0.182 median, 0.488 worst), 0.18% fall between them
+  spanning 0.500–0.944 — a hard bimodal core with a thin gradient tail,
+  so read `ratio` as a magnitude, not as a two-valued flag. **Its
+  denominator is the frag log**, which bounds what it can see: a loss
+  that removes obituaries and damage evidence TOGETHER — a recording that
+  starts late, a hole in the stream, a demo cut short — shrinks `kills`
+  and `covered` in step and reads a clean 1.000 over the surviving
+  fraction. Check the match clock and `/demoinfo` / `//finalscores`
+  against that; `coverage` answers how much of the frag-log-visible match
+  is in the section, not whether the recording was complete. It is also
+  one number for the whole demo: it does not localize to a player, so a
+  mid-band figure may be one unobserved victim beside a perfect one.
+  Nothing is gated on it. Absent on `source: "ktx"`, whose coverage would
+  be the constant 1, and on a reconstructed section whose frag log names
+  no scoreable kill — there the absence means completeness was never
+  assessed, not that it was zero. Whole-match like `source` itself — a
+  filter carries it through unrescoped. Distinct from
   `boundedSource` above, which records the KTX-scoreboard substitution
   WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
   reconstruction (detonation points, blood telemetry) is itself

@@ -4019,16 +4019,27 @@ components:
             note that everything riding this section inherits it
             (playerStats' damage family and its reconstructed accuracy
             hits, /aim's weapons[].recon.hits) rather than restating it.
-            1.000 is the norm, not the top of a noisy scale: 1 127 healthy
-            demos across every server era read 1.000 median, 1.000 at the
-            5th percentile, 0.950 worst, while the known silent-channel
-            class reads 0.177 median and 0.488 worst — two populations with
-            a gap between them. Take a cutoff from those percentiles if you
-            need one; the API gates nothing on it. Present only when
+            1.000 is the norm, not the top of a noisy scale. Measured over
+            the full 10 702-demo validation sweep: 99.0% of reconstructions
+            read 0.95 or better (median 1.000, 96% of them exactly 1.000),
+            0.80% are the silent-channel class at 0.182 median / 0.488
+            worst, and 0.18% fall BETWEEN the two, spanning 0.500 to 0.944.
+            A hard bimodal core with a thin gradient tail — read `ratio` as
+            a MAGNITUDE, not as a two-valued healthy/broken flag. Take a
+            cutoff from those percentiles if you need one; the API gates
+            nothing on it. Two limits: the denominator is the frag log
+            itself, so a loss that drops the obituaries WITH the damage
+            evidence (a late-started recording, a hole in the stream) reads
+            a clean 1.000 over the surviving fraction — this says how much
+            of the FRAG-LOG-VISIBLE match is here, not whether the
+            recording was complete; and it is one number for the whole
+            demo, so it does not localize to a player. Present only when
             `source` is `reconstructed` AND the frag log names at least one
             scoreable kill — a wire log records every T_Damage call, so a
             `ktx` section's coverage would be the constant 1 (measured
             exactly 1.000 on all 65 ground-truth demos) and is not emitted.
+            Absent on a reconstructed section therefore means "no anchor
+            existed, completeness unassessed", never "coverage was zero".
             WHOLE-MATCH, like `source` and `boundedMode`: a players /
             weapons / time filter carries it through unchanged rather than
             rescoping it to the filtered hits.

@@ -398,7 +398,10 @@ section is never touched. Every reconstructed section also carries
 `coverage` (schema v74): the share of the frag log's weapon kills whose
 lethal instant the reconstructed log accounts for, which is how a
 consumer tells a quiet match from a recording whose stat channel was
-barely broadcast. The riders (`playerStats`' damage family, its
+barely broadcast. It is a magnitude, not a flag — 99.0% of
+reconstructions read ≥ 0.95, 0.80% below 0.50, and 0.18% between — and it
+scores the FRAG-LOG-VISIBLE match, so a loss that drops obituaries and
+damage together still reads 1.000. The riders (`playerStats`' damage family, its
 reconstructed accuracy hits, `aim`'s recon tier) inherit that one field
 rather than restating it — see
 [`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §per-demo coverage.

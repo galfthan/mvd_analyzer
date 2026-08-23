@@ -933,9 +933,13 @@ diff -r /tmp/before /tmp/after
    match the wire showed. Since v74 it says so: `damage.coverage`
    `{kills, covered, ratio}` publishes the share of the frag log's kills
    whose damage the reconstruction accounts for, on every reconstructed
-   section. Healthy demos read 1.000 median (0.950 worst of 1 127
-   measured across all eras), that broken class 0.177 median / 0.488
-   worst — the two populations do not overlap, and nothing in the
+   section. Rescored over the full 10 702-demo oracle sweep: 99.0% read
+   ≥ 0.95 (median 1.000), 0.80% are that broken class (0.182 median,
+   0.488 worst), and 0.18% fall between the two, spanning 0.500–0.944 —
+   a hard bimodal core with a thin gradient tail, so `ratio` is a
+   magnitude to read rather than a two-valued flag. It measures the
+   frag-log-visible match, so a loss that drops obituaries and damage
+   together still reads 1.000, and nothing in the
    pipeline gates on the number. Full accuracy
    tables and trust guidance:
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md);

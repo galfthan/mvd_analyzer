@@ -210,15 +210,17 @@ least as accurate as the eras ACCURACY.md was written from.
 ### The real per-demo risk: a silent stat channel
 
 The one measurable era deficit is E0's delta coverage (97.2% of kills vs
-99.9–100% everywhere else), and it is not a gradient — it is a small
-class of broken recordings. Per-demo coverage is 100% at the median and
-99.7% at the 5th percentile; 80 of 3 876 E0 demos (2.1%) sit under 50%,
-carrying 83 bounded damage per kill where a healthy demo carries ~300.
-They are qwsv recordings whose health/armor stat channel is barely
-broadcast at all — positions and the frag log are intact, the damage is
-simply not observable. **QWSV 2.30 is the concentrated case: 18 of the 23
-sampled 2.30 demos are in that class (101 such demos exist in the whole
-51k archive); on 2.40 it is 1.6%.**
+99.9–100% everywhere else), and it is overwhelmingly a small class of
+broken recordings rather than an era-wide gradient. Per-demo coverage is
+100% at the median and 99.7% at the 5th percentile; 84 of 3 968 scoreable
+E0 demos (2.1%) sit under 50%, carrying 83 bounded damage per kill where
+a healthy demo carries ~300. They are qwsv recordings whose health/armor
+stat channel is barely broadcast at all — positions and the frag log are
+intact, the damage is simply not observable. **QWSV 2.30 is the
+concentrated case: 18 of the 23 sampled 2.30 demos are in that class (101
+such demos exist in the whole 51k archive); on 2.40 it is 1.6%.** A
+further 18 E0 demos (0.45%) are PARTIALLY broadcast rather than silent —
+see the band in §per-demo coverage below.
 
 The reconstruction is not wrong on these demos — it reports the damage it
 could observe and nothing else — but the section is a fraction of the
@@ -240,25 +242,78 @@ number are the same number; the obituary withhold does not reach it
 (coverage is a property of delta EXTRACTION, which keeps its frag
 anchors either way — pinned in `coverage_test.go`).
 
-Measured over 1 209 demos, `MVDA_BSP_DIR=./bsps` throughout:
+**Measured over the FULL oracle sweeps** — every scoreable demo of the
+E0–E4 reconstructed runs in `.reports/qw-recon-oracle-2026-08-19/`
+(`killsDelta / killsScored` per row of `oracle-E*-recon.csv`), 10 702
+demos, `MVDA_BSP_DIR=./bsps` throughout. Rescored 2026-08-23; the v74
+figures came from a 200-per-era subsample that missed the tail below.
 
-| population | n | min | p1 | p5 | median | worst |
+| population | n | share | min | p1 | median | max |
 |---|---|---|---|---|---|---|
-| healthy reconstructions, E0–E5 (200/era, E1 all 127) | 1 127 | 0.950 | 0.973 | 1.000 | **1.000** | 0.950 |
-| the silent-channel class (80 E0 + 2 E2, §above) | 82 | 0.000 | 0.000 | 0.027 | **0.177** | 0.488 |
+| **the core**, ratio ≥ 0.95 | 10 597 | 99.02% | 0.950 | 0.975 | **1.000** | 1.000 |
+| **the silent-channel class**, ratio < 0.50 | 86 | 0.80% | 0.000 | 0.000 | **0.182** | 0.488 |
+| **the band between them**, 0.50 ≤ ratio < 0.95 | 19 | **0.18%** | 0.500 | — | 0.657 | 0.944 |
 
-**The two populations do not overlap**: the worst healthy demo reads
-0.950, the best silent-channel demo 0.488. Every era's healthy median is
-1.000 and no healthy demo of the 1 127 falls under 0.95 (per-era minima
-E0 0.966 / E1 0.997 / E2 0.950 / E3 0.952 / E4 0.976 / E5 0.962). No
-threshold is written into the code — a consumer that wants one has the
-percentiles above; the pipeline publishes the number and filters nothing.
+Per sweep:
+
+| sweep | n | min | p0.5 | p1 | p5 | median | < 0.95 | in the band | < 0.50 |
+|---|---|---|---|---|---|---|---|---|---|
+| E0-recon | 3 968 | 0.000 | 0.097 | 0.176 | 0.997 | 1.000 | 102 (2.57%) | **18** | 84 |
+| E1-recon | 129 | 0.997 | 0.997 | 0.997 | 1.000 | 1.000 | 0 | 0 | 0 |
+| E2-recon | 3 672 | 0.243 | 0.970 | 0.974 | 1.000 | 1.000 | 3 (0.08%) | **1** | 2 |
+| E3-recon | 1 806 | 0.952 | 0.967 | 0.971 | 0.998 | 1.000 | 0 | 0 | 0 |
+| E4-recon | 1 127 | 0.963 | 0.973 | 0.977 | 1.000 | 1.000 | 0 | 0 | 0 |
+| E4-gt (recon on GT-carrying demos) | 1 806 | 0.955 | 0.967 | 0.971 | 1.000 | 1.000 | 0 | 0 | 0 |
+| E5-gt (recon on GT-carrying demos) | 1 828 | 0.958 | 0.967 | 0.971 | 1.000 | 1.000 | 0 | 0 | 0 |
+
+**The shape is a hard bimodal core plus a thin gradient tail.** 96.1% of
+the core reads exactly 1.000 and the modes are far apart — but they are
+not exhaustive, and the earlier "the two populations do not overlap"
+claim was an artefact of the subsample. 19 demos (0.18% of the sweep;
+0.454% of E0, where all but one of them live) sit in the band the claim
+called empty, at
+
+```
+0.500 0.524 0.526 0.545 0.548 0.556 0.571 0.588 0.643 0.657
+0.712 0.750 0.757 0.805 0.840 0.898 0.916 0.917 0.944
+```
+
+on denominators of 18–287 kills — not a handful of one-kill artefacts.
+16 of the 19 are duels; by version, 12 qwsv 2.40, 6 qwsv 2.30, 1 MVDSV
+0.28b (the 0.916, a 287-kill dm3 4on4). So a `ratio` of 0.7 is a real
+outcome a consumer will eventually meet, and it is neither "healthy" nor
+"the broken class": it is a partially-observed match, and the number is
+the fraction that was observed. **Read the ratio as a magnitude, not as a
+two-valued flag.** No threshold is written into the code — a consumer
+that wants one has the percentiles above; the pipeline publishes the
+number and filters nothing.
+
+**What the ratio cannot see.** The denominator is the frag log, so a loss
+that takes the obituaries WITH the damage evidence — a recording that
+starts late, an mvd stream with a hole in it, a demo cut short — removes
+kills from `kills` and from `covered` together and reads a clean 1.000
+over the fraction that survived. Coverage answers "how much of the
+frag-log-visible match is in this section", which is the silent-stat-
+channel question it was built for; it is not a completeness check on the
+recording itself. Cross-check that against the match clock and the
+scoreboard (`demoinfo`, `//finalscores`), not against this field.
+
+**It also does not localize.** One scalar covers the whole demo, and a
+mid-band duel is as consistent with "both players half-observed" as with
+"one dead victim channel beside one perfect one" — the reconstruction
+reads health/armor per VICTIM, so a single unbroadcast player can halve a
+duel's ratio on its own. Per-victim coverage is the natural follow-up and
+is recorded as a lead in `plan-archive-features.md`; until then, treat a
+mid-band figure as "somewhere in this match the evidence was missing",
+not as a uniform discount on every player's row.
 
 The rejected alternative was bounded damage per kill, the other figure
-the outlier study quoted (~83 vs ~300). It does NOT separate: the
-healthy sample runs down to 107 and the silent class up to 326. Coverage
-is the discriminating measurement, so it is the only one published — and
-per-kill damage stays derivable from the section anyway.
+the outlier study quoted (~83 vs ~300). It does NOT separate: on the
+1 209-demo v74 subsample the healthy side ran down to 107 and the silent
+class up to 326, i.e. the two overlap outright rather than meeting in a
+thin band. Coverage is the discriminating measurement, so it is the only
+one published — and per-kill damage stays derivable from the section
+anyway.
 
 **Is the figure honest?** Two controls on demos that carry the KTX log:
 
@@ -677,7 +732,8 @@ degradations) — and a small class of qwsv recordings
 (2.1% of E0, concentrated on QWSV 2.30) barely broadcasts the health
 stat channel at all, leaving a section that reports only the fraction of
 the match the wire showed — visible per demo since v74 as
-`damage.coverage` (§per-demo coverage: healthy demos 1.000 median, that
-class 0.177 median with no overlap between the two). Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
+`damage.coverage` (§per-demo coverage: 99.0% of reconstructions read
+≥ 0.95, that class 0.182 median, and 0.18% between the two — read the
+ratio as a magnitude). Arena-family maps (povdmm4/dmm4*/anarena/midair-style) and
 CTF were out of validation scope (study §trust tiers); midair/instagib/
 dmgfrags server modes are skipped entirely (no section).

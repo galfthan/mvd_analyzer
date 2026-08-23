@@ -129,17 +129,32 @@ const (
 //
 // Absent when the section is KTX-sourced (the wire log records every
 // T_Damage call, so coverage is 1 by construction — measured exactly 1.000
-// on all 65 GT demos) and when the frag log names no scoreable kill (no
-// denominator). Every consumer that rides the damage section inherits its
-// coverage: the playerStats damage family, derived accuracy hits, and the
-// aim recon tier all read this one field rather than restating it.
+// on all 65 GT demos) and when the frag log names no scoreable kill. That
+// second absence means "no anchor existed, completeness UNASSESSED" — not
+// zero coverage, and not full coverage. Every consumer that rides the damage
+// section inherits its coverage: the playerStats damage family, derived
+// accuracy hits, and the aim recon tier all read this one field rather than
+// restating it.
 //
-// Measured separation (damagerecon/ACCURACY.md §per-demo coverage): 1 127
-// healthy reconstructions across E0-E5 run 1.000 median, 1.000 at the 5th
-// percentile, 0.950 worst; the 82 known silent-channel demos run 0.177
-// median, 0.488 worst — two populations with a gap between them, not a
-// gradient. There is no threshold in the code: the number is published,
-// never used to gate or withhold.
+// Measured over the full 10 702-demo oracle sweep (damagerecon/ACCURACY.md
+// §per-demo coverage): 99.0% of reconstructions read >= 0.95 (median 1.000,
+// 96% of them exactly 1.000), 0.80% are the silent-channel class at 0.182
+// median / 0.488 worst, and 0.18% — 19 demos, 18 of them qwsv-era — fall
+// BETWEEN, spanning 0.500 to 0.944 on 18-287-kill denominators. A hard
+// bimodal core with a thin gradient tail, so Ratio is a magnitude to read,
+// not a two-valued flag. There is no threshold in the code: the number is
+// published, never used to gate or withhold.
+//
+// Two limits it does not state itself. The denominator IS the frag log, so a
+// loss correlated with it — a late-started recording, a hole in the stream —
+// drops obituaries and damage evidence together, shrinks Kills and Covered
+// in step, and reads a clean 1.000 over the fraction that survived. The
+// question answered is "how much of the FRAG-LOG-VISIBLE match is in this
+// section", not "was the recording complete". And one scalar covers the
+// whole demo: it does not localize, so a mid-band duel is equally consistent
+// with one unbroadcast victim beside one perfectly observed one (the
+// reconstruction reads health/armor per victim) as with both degraded.
+// Per-victim coverage is a recorded follow-up, not a shipped field.
 type DamageCoverage struct {
 	Kills   int     `json:"kills"`   // frag-log kills that carry damage arithmetic
 	Covered int     `json:"covered"` // ... whose lethal instant the Events log accounts for

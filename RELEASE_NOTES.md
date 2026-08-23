@@ -30,11 +30,36 @@ instant the reconstructed `events` log accounts for. It is
 the broken class, computed in the normal pass
 (`damagerecon/aggregate.go setCoverage`) rather than in a harness.
 
-**The separation is total.** 1 127 healthy demos sampled across E0–E5
-read **1.000 median, 1.000 at the 5th percentile, 0.950 worst**; the 82
-known silent-channel demos read **0.177 median, 0.488 worst**. Not a
-gradient with a tail — two populations with a gap between them, so a
-consumer reading `ratio` needs no calibration to see the difference.
+**A hard bimodal core with a thin gradient tail**, rescored over the FULL
+oracle sweeps (10 702 scoreable demos, E0–E4 reconstructed runs) rather
+than the 200-per-era subsample the field was first measured on:
+
+| ratio | demos | share | median |
+|---|---|---|---|
+| ≥ 0.95 | 10 597 | 99.02% | **1.000** (96% read exactly 1.000) |
+| 0.50 – 0.95 | 19 | **0.18%** | 0.657 |
+| < 0.50 (the silent-channel class) | 86 | 0.80% | **0.182** (max 0.488) |
+
+The two modes are far apart, but the band between them is NOT empty: 19
+demos — 18 of them E0, on denominators of 18 to 287 kills — read
+0.500, 0.524, 0.526, 0.545, 0.548, 0.556, 0.571, 0.588, 0.643, 0.657,
+0.712, 0.750, 0.757, 0.805, 0.840, 0.898, 0.916, 0.917, 0.944. So
+**read `ratio` as a magnitude, not as a two-valued flag**: a partially
+observed match is a real outcome, and the number is the fraction that was
+observed. (The v74 note here claimed the populations do not overlap; that
+was an artefact of the subsample and is corrected above.)
+
+**What it cannot see.** The denominator is the frag log itself, so a loss
+that takes the obituaries WITH the damage evidence — a late-started
+recording, a hole in the stream — shrinks `kills` and `covered` together
+and reads a clean 1.000 over the surviving fraction. `coverage` answers
+"how much of the frag-log-visible match is in this section", which is the
+silent-stat-channel question it was built for; it is not a completeness
+check on the recording. It also does not localize — one scalar for the
+whole demo, so a mid-band duel may be one unbroadcast victim beside one
+perfect one. And its ABSENCE on a reconstructed section (no scoreable
+kill in the frag log) means completeness was never assessed, not that it
+was zero.
 
 Two controls say the figure itself is honest. Run over a WIRE damage log
 it reads exactly **1.000 on all 65** ground-truth demos, and the blind

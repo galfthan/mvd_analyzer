@@ -221,10 +221,14 @@ section is a fraction of the match. **That follow-up is SHIPPED** on
 `old-demo-summary`, schema v74: `damage.coverage` `{kills, covered,
 ratio}` on every reconstructed section publishes the oracle's own
 kill-delta coverage from the normal pass (`damagerecon/aggregate.go
-setCoverage`). Healthy demos read **1.000 median / 1.000 at p5 / 0.950
-worst** (1 127 sampled across E0–E5), the silent-channel class **0.177
-median / 0.488 worst** (all 82) — the two populations do not overlap, so
-no calibration is needed to tell them apart. Honesty controls: the same
+setCoverage`). Rescored 2026-08-23 over the FULL oracle sweeps (10 702
+scoreable demos, not the 200/era subsample v74 shipped with): **99.0%
+read ≥ 0.95** (median 1.000), the silent-channel class **0.182 median /
+0.488 worst** is 0.80%, and **0.18% (19 demos, 18 of them E0) fall
+between, spanning 0.500–0.944** on 18–287-kill denominators. A hard
+bimodal core plus a thin gradient tail — the v74 "populations do not
+overlap / no calibration needed" claim was a subsample artefact and the
+docs now say magnitude, not flag. Honesty controls: the same
 metric over a WIRE damage log reads exactly 1.000 on all 65 GT demos
 (hence no `coverage` on `source: "ktx"` — it would be a constant), and
 thinning the stat channel to one sample in four drops a healthy demo to
@@ -239,6 +243,29 @@ and 35% of E5. Method, tables, circularity analysis and the reproduction
 commands live in `damagerecon/ACCURACY.md` §per-era validation; the
 sampler, per-demo CSVs and aggregation in
 `.reports/qw-recon-oracle-2026-08-19/`.
+
+**Open lead — per-victim coverage.** The shipped figure is one scalar for
+the whole demo, and it does not localize. The reconstruction reads
+health/armor per VICTIM, so a single unbroadcast player can halve a
+duel's ratio on its own; the 19 mid-band demos are exactly the population
+where "which player's evidence was missing" is the question a consumer
+would ask next, and the whole-demo number cannot answer it. `setCoverage`
+already walks the frag log victim by victim, so a `byVictim` map is a
+counter split rather than a new measurement — the open questions are the
+schema cost on every reconstructed section and whether the natural axis
+is the victim (whose stat channel was read) or the attacker (whose row
+the consumer is reading). Not scheduled; recorded so the mid-band
+finding does not have to be rediscovered.
+
+**Known blind spot — frag-correlated loss.** Coverage divides by the frag
+log, so a loss that removes obituaries and damage evidence TOGETHER (a
+late-started recording, a hole in the stream, a demo cut short) shrinks
+numerator and denominator in step and reads a clean 1.000 over the
+surviving fraction. That is a property of the anchor, not a bug: the only
+independent completeness signals are the match clock and the KTX
+scoreboard / `//finalscores`. The docs now scope the claim to "how much
+of the frag-log-visible match is in this section"; measuring recording
+completeness against those independent anchors would be its own feature.
 
 ## 6. Aim hit recovery on reconstructed demos
 
