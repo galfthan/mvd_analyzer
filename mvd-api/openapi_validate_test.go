@@ -397,6 +397,71 @@ func reconAccuracyResult() *result.Result {
 	}
 }
 
+// reconDamageResult is a served /damage body in the v74 RECONSTRUCTED shape:
+// `source: "reconstructed"` with the `coverage` object beside it. Like
+// reconAccuracyResult it has to be its own demo — every golden-corpus demo
+// carries the wire KTX damage stream, so its section is `source: "ktx"` and
+// coverage is absent BY CONTRACT there, which left the whole sub-schema
+// validated only against its own absence: deleting view.Damage's coverage
+// projection kept every openapi case green.
+//
+// The figures are a schema fixture, not a numeric one, but the ratio is the
+// exact quotient of the two integers beside it (30/40) — a body carrying a
+// ratio that does not match its own kills/covered is not a shape this
+// pipeline can emit.
+func reconDamageResult() *result.Result {
+	b := func(n int) *int { return &n }
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Damage: &result.DamageResult{
+			TotalDamage: 260,
+			Source:      result.DamageSourceReconstructed,
+			BoundedMode: "standard",
+			Dmg:         "both",
+			Coverage:    &result.DamageCoverage{Kills: 40, Covered: 30, Ratio: 0.75},
+			Events: []result.DamageEntry{
+				{Time: 30000, Attacker: "old", Victim: "older", Weapon: "rl", Damage: 100, Bounded: b(100)},
+				{Time: 120000, Attacker: "older", Victim: "old", Weapon: "lg", Damage: 60, Bounded: b(60)},
+				{Time: 240000, Attacker: "old", Victim: "older", Weapon: "sg", Damage: 100, Bounded: b(40)},
+			},
+			ByWeapon: map[string]int{"rl": 100, "lg": 60, "sg": 100},
+			ByPlayer: map[string]*result.PlayerDamage{
+				"old": {Given: 200, Taken: 60, ByWeapon: map[string]int{"rl": 100, "sg": 100},
+					Bounded: &result.PlayerDamage{Given: 140, Taken: 60, ByWeapon: map[string]int{"rl": 100, "sg": 40}}},
+				"older": {Given: 60, Taken: 200, ByWeapon: map[string]int{"lg": 60},
+					Bounded: &result.PlayerDamage{Given: 60, Taken: 140, ByWeapon: map[string]int{"lg": 60}}},
+			},
+			Matrix: []result.DamagePair{
+				{Attacker: "old", Victim: "older", Damage: 200, ByWeapon: map[string]int{"rl": 100, "sg": 100}},
+				{Attacker: "older", Victim: "old", Damage: 60, ByWeapon: map[string]int{"lg": 60}},
+			},
+		},
+	}
+}
+
+// losBspLessResult is a two-player Result on a map no BSP corpus will ever
+// hold, so analyzer.ComputeLOS returns ErrNoBSP and /los is a 422
+// los_unavailable BY CONSTRUCTION.
+//
+// The err-los-unavailable case used to point at the golden demo (dm3) and
+// depend on the AMBIENT environment for its status code: with MVDA_BSP_DIR
+// set to a full map set — which the repo's own eval commands do — dm3's BSP
+// resolves, /los answers a real 200, and the case failed. A validation
+// fixture must not read the developer's environment.
+func losBspLessResult() *result.Result {
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Metadata:      &result.MetadataResult{ServerInfo: map[string]string{"map": "no_such_map_openapi_fixture"}},
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+			Players: []result.PlayerStream{
+				{Name: "p1", Alive: []result.Interval{{Start: 0, End: 10000}}},
+				{Name: "p2", Alive: []result.Interval{{Start: 0, End: 10000}}},
+			},
+		},
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -511,6 +576,18 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "damage-dmg-bounded", url: "/v1/demos/gameId:42/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 200},
 		{name: "damage-dmg-invalid", url: "/v1/demos/gameId:42/damage?dmg=nope", path: "/v1/demos/{id}/damage", status: 400},
 		{name: "err-bounded-unavailable", url: "/v1/demos/gameId:44/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 422},
+		// The v74 coverage object rides only a RECONSTRUCTED section, and
+		// every corpus demo carries the wire damage stream — so without
+		// gameId:47 the sub-schema is validated against its own absence and
+		// dropping view.Damage's projection keeps this file green. The
+		// filtered twin pins the other half of the contract: coverage is a
+		// WHOLE-MATCH stamp, so a players/time filter carries it through
+		// unchanged rather than rescoping it to the shown hits.
+		{name: "damage-reconstructed", url: "/v1/demos/gameId:47/damage", path: "/v1/demos/{id}/damage", status: 200,
+			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`}},
+		{name: "damage-reconstructed-filtered", url: "/v1/demos/gameId:47/damage?players=old&from=60&to=300",
+			path: "/v1/demos/{id}/damage", status: 200,
+			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`}},
 		// mustContain pins the v74 fire→flight association: `flightEnd` is
 		// omitempty, so a projection that dropped it would validate exactly as
 		// happily — and the reconstructed rl/gl hit tier is built on it.
@@ -584,11 +661,13 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at-active-weapon", url: "/v1/demos/gameId:45/state-at?time=1500&fields=aw",
 			path: "/v1/demos/{id}/state-at", status: 200,
 			mustContain: []string{`"aw":32`}},
-		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
-		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
-		// that still validates the Los schema (timeUnit + empty players array).
+		// gameId:43 has no Streams, so /los is a legitimate 200-empty that
+		// still validates the Los schema (timeUnit + empty players array).
+		// gameId:48 is two players on a map name no BSP corpus holds, so the
+		// 422 is a property of the fixture rather than of whether the
+		// developer happened to export MVDA_BSP_DIR.
 		{name: "los", url: "/v1/demos/gameId:43/los", path: "/v1/demos/{id}/los", status: 200},
-		{name: "err-los-unavailable", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 422},
+		{name: "err-los-unavailable", url: "/v1/demos/gameId:48/los", path: "/v1/demos/{id}/los", status: 422},
 		{name: "projectiles", url: "/v1/demos/gameId:42/streams/projectiles", path: "/v1/demos/{id}/streams/projectiles", status: 200},
 		{name: "beams", url: "/v1/demos/gameId:42/streams/beams", path: "/v1/demos/{id}/streams/beams", status: 200},
 		{name: "nails", url: "/v1/demos/gameId:42/streams/nails", path: "/v1/demos/{id}/streams/nails", status: 200},
@@ -706,6 +785,12 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 		// gameId:46 is the pre-instrumentation player-stats shape: no KTX
 		// block to overlay, so the accuracy family stays reconstructed.
 		"gameId:46": reconAccuracyResult(),
+		// gameId:47 is the pre-instrumentation DAMAGE shape — the only one
+		// that carries source:"reconstructed" and the v74 coverage object.
+		"gameId:47": reconDamageResult(),
+		// gameId:48 makes the 422 los_unavailable a property of the fixture
+		// (a map with no BSP anywhere) instead of of the ambient MVDA_BSP_DIR.
+		"gameId:48": losBspLessResult(),
 		// gameId:43 is a well-formed but capability-empty Result for the
 		// 422 error paths.
 		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion},
