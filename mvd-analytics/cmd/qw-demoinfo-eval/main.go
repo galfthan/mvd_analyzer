@@ -33,6 +33,21 @@
 //     wherever teamplay is off (see result.PlayerStatsScore.MaxSpree). The
 //     `ktxSpree` column replays KTX's gate instead of ours, so the residual
 //     between the two conventions is measured rather than argued.
+//
+// Three DIAGNOSTIC columns sit beside those, each answering "could the
+// pipeline adopt KTX's definition instead of naming the gap?". They are
+// measurements, not candidates: what a convention costs is what decides
+// whether it ships, so the measurement cannot be gated on it having shipped
+// (same rule as aimcore.ReconHitsForEval).
+//
+//   - spree.max/ktxConvention — KTX's own gate, run on the frag log;
+//   - acc.{rl,gl}.direct/wire — the direct-impact count read off the WIRE
+//     damage log's splash flag, i.e. the control: what the server itself said;
+//   - acc.{rl,gl}.direct/recon — the same count derived the only way an old
+//     demo could, from the reconstruction's geometric direct/splash verdict.
+//
+// The verdicts are in damagerecon/ACCURACY.md; briefly, the wire answers rl
+// exactly and gl not at all, and the reconstruction the other way round.
 package main
 
 import (
@@ -156,6 +171,13 @@ func scoreDemo(path string) ([]row, error) {
 	// stored section carries, and it must run before anything is swapped —
 	// it reads the frag log only.
 	ktxSpree := replayKTXSprees(res)
+	// The rl/gl direct-impact counts, read off the WIRE log while it is still
+	// installed. This is the definitional control for the reconstructed
+	// derivation below: on the wire a non-splash rl row IS the direct touch
+	// (dmg_is_splash is set only inside T_RadiusDamage, ktx/src/combat.c:1207),
+	// so if the convention hypothesis is right this column must agree with the
+	// block exactly.
+	wireDirect := wireDirectHits(res)
 
 	rc, err := damagerecon.Compute(res)
 	if err != nil {
@@ -163,6 +185,7 @@ func scoreDemo(path string) ([]row, error) {
 	}
 	res.Damage = rc
 	res.Aim = aimcore.Compute(res, aimcore.Query{})
+	reconDirect := aimcore.ReconDirectHitsForEval(res)
 	blind := analyzer.DerivedStatsForEval(res)
 	if blind == nil {
 		return nil, fmt.Errorf("blind re-derivation returned nothing")
@@ -234,9 +257,79 @@ func scoreDemo(path string) ([]row, error) {
 			if acc.Hits != nil {
 				add("acc."+w+".hits", float64(wv.Acc.Hits), float64(*acc.Hits))
 			}
+			// The KTX-convention alternatives for the two weapons whose
+			// any-path count is not the block's quantity. `direct/wire` is
+			// the control (what the server itself flagged), `direct/recon`
+			// the derivation an old demo could actually publish.
+			if w != "rl" && w != "gl" {
+				continue
+			}
+			// Always scored, zero included: a player who landed no direct
+			// impact is a row where the two conventions agree at 0, and
+			// dropping it would grade the derivation only where it fired.
+			add("acc."+w+".direct/wire", float64(wv.Acc.Hits), float64(wireDirect[r.Name][w]))
+			if d, ok := reconDirect[r.Name][w]; ok {
+				add("acc."+w+".direct/recon", float64(wv.Acc.Hits), float64(d))
+			}
 		}
 	}
 	return out, nil
+}
+
+// ktxTPNum mirrors KTX's tp_num() (ktx/src/g_utils.c:1586): the teamplay cvar
+// counts ONLY in team/CTF/coop modes, and is 0 everywhere else. That is the
+// exact gate StatsHandler's spree increment reads (client.c:4865), so the
+// diagnostic has to read the same thing.
+//
+// Every demo this harness scores carries a KTX demoinfo block, so the mode
+// verdict is always available — no roster-shape fallback is reachable here.
+// The earlier proxy (`len(teams) > 1`) misread two populations in opposite
+// directions: a clan-tagged duel or an FFA whose players carry colour teams
+// looked like teamplay, and a team game whose block named one team did not.
+func ktxTPNum(res *analyzer.Result) int {
+	switch strings.ToLower(res.DemoInfo.Mode) {
+	case "team", "ctf", "coop":
+	default:
+		return 0
+	}
+	if res.Metadata == nil {
+		return 0
+	}
+	if ms := res.Metadata.MatchSettings; ms != nil && ms.Teamplay > 0 {
+		return ms.Teamplay
+	}
+	tp, _ := strconv.Atoi(res.Metadata.ServerInfo["teamplay"])
+	return tp
+}
+
+// wireDirectHits counts, per player, the rl/gl damage rows the WIRE log marked
+// as NON-splash — the server's own contact flag, since dmg_is_splash is raised
+// only inside T_RadiusDamage's loop (ktx/src/combat.c:1207-1227) and the direct
+// T_Damage in T_MissileTouch therefore arrives unflagged.
+//
+// KTX increments wpn[].hits in the touch handler itself (weapons.c:994, :1329),
+// so for rl this count should BE the block's `hits`. For gl it should not: a
+// grenade that touches a player detonates and does all its damage through
+// T_RadiusDamage, so a direct gl touch leaves no non-splash row at all — the
+// column measures how far that goes.
+func wireDirectHits(res *analyzer.Result) map[string]map[string]int {
+	out := map[string]map[string]int{}
+	if res.Damage == nil {
+		return out
+	}
+	for _, d := range res.Damage.Events {
+		if d.Attacker == "" || d.IsEnv || d.IsSelf || d.IsSplash {
+			continue
+		}
+		if d.Weapon != "rl" && d.Weapon != "gl" {
+			continue
+		}
+		if out[d.Attacker] == nil {
+			out[d.Attacker] = map[string]int{}
+		}
+		out[d.Attacker][d.Weapon]++
+	}
+	return out
 }
 
 // replayKTXSprees reproduces KTX's OWN spree_max gate — including the quirk
@@ -255,15 +348,11 @@ func replayKTXSprees(res *analyzer.Result) map[string]int {
 		return out
 	}
 	teamOf := map[string]string{}
-	teams := map[string]bool{}
 	for i := range res.PlayerStats.Players {
 		p := &res.PlayerStats.Players[i]
 		teamOf[p.Name] = p.Team
-		teams[p.Team] = true
 	}
-	// KTX's tp_num() is the teamplay cvar; the roster shape is the signal we
-	// have here, and it is the same one analyzer.isTeamplay falls back to.
-	teamplay := len(teams) > 1
+	teamplay := ktxTPNum(res) > 0
 	cur := map[string]int{}
 	latch := func(name string) {
 		if cur[name] > out[name] {

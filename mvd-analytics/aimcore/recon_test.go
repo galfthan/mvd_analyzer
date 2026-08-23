@@ -158,7 +158,8 @@ func TestReconTierOneFireIsClaimedOnce(t *testing.T) {
 		{t: 50, weapon: "sg", dmg: 8},
 		{t: 150, weapon: "sg", dmg: 12}, // > reconImpactMergeMs later: a second impact
 	}
-	if got := reconHitsByWeapon(shots, dmg, reconTierWeapons)["sg"]; got != 1 {
+	hits, _ := reconHitsByWeapon(shots, dmg, reconTierWeapons)
+	if got := hits["sg"]; got != 1 {
 		t.Errorf("sg recon hits = %d, want 1 — two impacts cannot both claim the "+
 			"one fire whose window covers them", got)
 	}

@@ -240,13 +240,15 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 // dmgRec is one damage event by the player (for sizing pellet hits and direct
 // contacts); used marks it consumed by a same-frame hitscan fire. team splits
 // the pellet/direct counters by victim class (self damage is excluded at
-// collection, so enemy is simply !team).
+// collection for the measured counters, so enemy is simply !team there; the
+// reconstructed pool in recon.go keeps self rows and carries the flag).
 type dmgRec struct {
 	t      int32
 	weapon string
 	dmg    int
 	splash bool
 	team   bool
+	self   bool
 	used   bool
 }
 
@@ -618,7 +620,8 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// nobody has a supported zero, and gating on his damage would publish it as
 	// the same absence a withheld weapon gets.
 	if reconTier {
-		for w, hits := range reconHitsByWeapon(shots, reconDmg, reconTierWeapons) {
+		reconHits, _ := reconHitsByWeapon(shots, reconDmg, reconTierWeapons)
+		for w, hits := range reconHits {
 			if wa := wagg[w]; wa != nil {
 				if hits > wa.Shots {
 					hits = wa.Shots // a claim per fire makes this unreachable; belt and braces
