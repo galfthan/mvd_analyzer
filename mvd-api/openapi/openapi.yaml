@@ -4587,7 +4587,11 @@ components:
                   decoding ran) whose entity the server broadcast; absent on
                   hitscan fires and on a projectile whose flight was never
                   tracked, which is the state the hit counters read as a miss.
-                  Set whether or not the impact damaged anyone.
+                  Set whether or not the impact damaged anyone. It is the
+                  observed despawn frame, not a flight duration: `time` and the
+                  entity update are quantized independently, so a point-blank
+                  impact may sit up to about one demo frame BEFORE its own fire
+                  (measured worst −29 ms) and is published unclamped.
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer

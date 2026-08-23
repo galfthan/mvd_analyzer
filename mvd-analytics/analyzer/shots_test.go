@@ -295,6 +295,44 @@ func TestShots_ProjectileWithoutFlight(t *testing.T) {
 	}
 }
 
+// TestShots_FlightEndMayPrecedeFireSound pins that flightEnd is the tracked
+// despawn frame and nothing else — including when that frame lands BEFORE the
+// fire sound it is published on. The two timestamps are quantized
+// independently (the sound and the entity update need not reach the demo in the
+// same frame), so a point-blank rocket whose spawn was seen a frame early and
+// whose despawn follows immediately can end "before" its own fire. Measured on
+// the 53-demo dm2/dm3 eval corpus: 6 of 37974 tracked rl/gl flights, worst
+// −29 ms — inside one sv_demofps 30 frame.
+//
+// Clamping or dropping those would fabricate a flight time the wire never
+// showed and hide the quantization from consumers, so the linker publishes the
+// despawn as observed; the reconstructed-tier join is unaffected because it
+// anchors on the flight end alone and never differences it against the fire.
+func TestShots_FlightEndMayPrecedeFireSound(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+	a.hadDmg = true
+
+	// Rocket entity seen at 1000, gone at 1040; the fire sound arrives at 1050,
+	// inside the ±50 ms spawn bracket but after the flight already ended.
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1050))
+	_ = a.OnEvent(projDespawn(50, "rl", 1040))
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	if len(r.Shots.Shots) != 1 {
+		t.Fatalf("shots = %+v, want 1", r.Shots.Shots)
+	}
+	s := r.Shots.Shots[0]
+	if s.FlightEnd == nil {
+		t.Fatalf("shot@%d has no flightEnd — the flight was tracked and linked", s.Time)
+	}
+	if *s.FlightEnd != 1040 {
+		t.Errorf("flightEnd = %d, want the observed despawn 1040 (fire at %d)", *s.FlightEnd, s.Time)
+	}
+}
+
 // lgBeam builds a TE_LIGHTNING2 beam from entity ent (slot ent-1).
 func lgBeam(ent int, tMs int32) *events.BeamEvent {
 	return &events.BeamEvent{

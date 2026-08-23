@@ -53,6 +53,26 @@ linking is opt-in, so the measured counter a recovery would be validated
 against is zero on every demo of the corpus. An absent `recon` block
 still means "not recovered for this weapon", never "no hits".
 
+**A windowed `/aim?from=&to=` now scopes the fires only.** The recon tier
+is recomputed for a window, and it used to clip the damage it judges
+those fires against to the same bounds — which cannot be right for a
+weapon whose damage lands a whole flight after the fire: a grenade
+thrown just before `to` detonates up to 2.5 s later and was scored as a
+miss purely because of where the window was cut. The damage pool is now
+match-wide (the fires are still windowed), the way the measured tier's
+`shots[].hit` has always been linked before any window exists. Over a
+60 s/30 s window sweep of the 13-demo golden cache, 45 of 402 windows
+change: 47 hits recovered, none lost. Unwindowed responses — every
+stored `aim` block, the whole golden corpus — are byte-identical.
+
+`shots[].flightEnd` is documented as what it is: the **observed despawn
+frame**, not a flight duration. Its timestamp and the fire's are
+quantized independently, so a point-blank impact can land up to about
+one demo frame *before* its own fire sound (6 of 37 974 tracked rl/gl
+flights on the eval corpus, worst −29 ms). It is published unclamped —
+the wire is the authority — so a consumer differencing
+`flightEnd - time` must tolerate a small negative.
+
 Detail: [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) (`Shot`,
 `WeaponAimRecon`, v74 history row) and
 [`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)

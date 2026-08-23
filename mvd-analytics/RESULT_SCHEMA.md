@@ -488,6 +488,13 @@ is the same state the measured hit counter reads as a miss, and it is what
 lets the reconstructed hit tier count rl/gl on the measured definition (see
 [WeaponAimRecon](#weaponaimrecon)).
 
+`flightEnd` is the observed despawn frame, **not** a flight duration. `time`
+and the entity update are quantized independently, so a point-blank impact can
+land up to about one demo frame *before* its own fire sound (measured: 6 of
+37974 tracked rl/gl flights on the 53-demo dm2/dm3 eval corpus, worst −29 ms).
+It is published unclamped — the despawn frame is what the wire showed — so a
+consumer computing `flightEnd - time` must tolerate a small negative value.
+
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Time | `time` | int32 | Match-relative ms. |
@@ -498,7 +505,7 @@ lets the reconstructed hit tier count rl/gl on the measured definition (see
 | Hit | `hit` | bool (omitempty) | Fire that connected: hitscan via the same-frame damage link, rl/gl (and ng/sng with nails) via projectile linking. |
 | Victims | `victims` | []string (omitempty) | Hitscan victims hit by this fire. |
 | VictimKinds | `victimKinds` | []string (omitempty) | Per-victim class, parallel to `victims`: `enemy` \| `team` \| `self`. Omitted when all-enemy. |
-| FlightEnd | `flightEnd` | *int32 (omitempty) | Match-relative ms at which this fire's tracked projectile died (its impact). Projectile fires only, and only when the flight was tracked. |
+| FlightEnd | `flightEnd` | *int32 (omitempty) | Match-relative ms at which this fire's tracked projectile died (its impact). Projectile fires only, and only when the flight was tracked. May sit up to ~1 demo frame before `time` (independent quantization). |
 
 ### PlayerShots / WeaponShots
 
@@ -756,6 +763,17 @@ section being reconstructed, not on this shooter being in it).
 `ng`/`sng` never carry the block: nail flights are bracketed only when nail
 decoding is requested, so the measured counter they would be validated against
 is zero on every demo of the validation corpus.
+
+**Under a time window** (`/aim?from=&to=`, which recomputes the tier) the
+window scopes the FIRES only; the damage the join weighs them against stays
+match-wide. It has to: a flight-joined fire's damage lands a whole flight after
+it — up to the 2.5 s grenade fuse plus the stat-instant lag — so clipping the
+evidence to the fire window would report a grenade thrown just before `to` as a
+miss purely because of where the window was cut. The measured tier has no such
+artefact (`shots[].hit` is linked before any window exists), and the two must
+stay comparable. Damage from a fire outside the window is still unreachable
+unless it falls inside an in-window fire's own join window, and each fire is
+claimed at most once, so `recon.hits` can never exceed the windowed `shots`.
 
 **What it does NOT carry, and why.** The reconstruction anchors damage at the
 VICTIM's health/armor stat instant and merges every hit landing on one instant

@@ -164,15 +164,29 @@ func reconLinkWindow(weapon string) (lo, hi int32, ok bool) {
 }
 
 // reconDamageByAttacker collects the reconstructed damage rows of res keyed by
-// the attacker to credit, scoped by inWindow. What it drops differs from the
-// measured collection in Compute because it asks a different question —
-// LINKAGE, not magnitude: a self hit is a fire that connected and is kept (the
-// wire join counts those too), while an environmental row has no shooter to
-// credit and is not.
-func reconDamageByAttacker(res *result.Result, inWindow func(int32) bool) map[string][]*dmgRec {
+// the attacker to credit. What it drops differs from the measured collection in
+// Compute because it asks a different question — LINKAGE, not magnitude: a self
+// hit is a fire that connected and is kept (the wire join counts those too),
+// while an environmental row has no shooter to credit and is not.
+//
+// The pool is MATCH-WIDE even under a windowed Compute query, which windows the
+// fires. A window scopes whose shots are counted, not what evidence they may be
+// judged on — and the two are not the same interval for a projectile, whose
+// damage trails its fire by the whole flight (a gl fuse is 2.5 s) plus the
+// stat-instant lag. Clipping the pool to the fire window would score a grenade
+// thrown just before `to` as a miss purely because the window was cut there,
+// while the measured tier it is compared against links Shot.Hit match-wide
+// before any window exists. Nothing leaks in the other direction: damage from a
+// pre-window fire is only reachable if it sits inside an in-window fire's own
+// join window, which is exactly the case where crediting it is right — and the
+// join claims each fire at most once, so a wider pool can never lift a weapon's
+// hits above its (windowed) fire count. Measured over a 60 s/30 s window sweep
+// of the 13-demo golden cache: 45 of 402 windows change, 47 hits recovered and
+// none lost — the one-sided move the argument predicts.
+func reconDamageByAttacker(res *result.Result) map[string][]*dmgRec {
 	out := make(map[string][]*dmgRec)
 	for _, d := range res.Damage.Events {
-		if d.Attacker == "" || d.IsEnv || !inWindow(d.Time) {
+		if d.Attacker == "" || d.IsEnv {
 			continue
 		}
 		out[d.Attacker] = append(out[d.Attacker],
@@ -202,7 +216,7 @@ func ReconHitsForEval(res *result.Result) map[string]map[string]int {
 	for _, s := range res.Shots.Shots {
 		byPlayer[s.Player] = append(byPlayer[s.Player], s)
 	}
-	dmg := reconDamageByAttacker(res, func(int32) bool { return true })
+	dmg := reconDamageByAttacker(res)
 	out := make(map[string]map[string]int, len(byPlayer))
 	for p, shots := range byPlayer {
 		if h := reconHitsByWeapon(shots, dmg[p], reconEvalWeapons); len(h) > 0 {
@@ -382,6 +396,17 @@ func reconFlightHits(ends, damage []int32) int {
 		// Consume the whole impact instant: one explosion damaging several
 		// victims writes one row per victim, all on the same stat frame (see
 		// reconImpactMergeMs), and none of them is another flight's evidence.
+		//
+		// One frame is enough for that in practice. Anchored on the WIRE link
+		// (which names an explosion's victims exactly), 5 of the 2436
+		// multi-victim rl/gl explosions on the 53-demo dm2/dm3 eval corpus put
+		// their victims' reconstructed rows more than one frame apart — 0.2% of
+		// multi-victim explosions, 0.03% of all 17581. Only those can strand a
+		// row for a later flight to adopt, capping the resulting over-count at
+		// ~0.01 pp of rl accuracy, two orders below the tier's measured 0.6 pp.
+		// Widening the span would instead merge genuinely distinct explosions
+		// (a second rocket landing a frame later is a second hit), so the span
+		// stays the one the granularity argument justifies.
 		for i := claimed; i < len(damage) && damage[i]-damage[claimed] <= reconImpactMergeMs; i++ {
 			used[i] = true
 		}

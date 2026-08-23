@@ -312,6 +312,26 @@ rather than on the wire join's ±34 ms frame — a tighter window would
 flatter the control and lie about the reconstruction, whose damage
 genuinely lands late.
 
+**Map scope of these figures.** The ground-truth corpus is 30 dm2 + 30
+dm3 demos and nothing else, so the rl/gl numbers are measured on two
+open maps. Both known routes into the +0.4pp adoption bias should run
+HIGHER elsewhere, i.e. treat +0.4pp as a floor rather than a bound:
+tight-quarters maps (dm4, aerowalk) produce more point-blank rockets,
+whose entity the server never broadcasts — the untracked flights whose
+damage rows are exactly the adoption fodder; and a SURVIVED lava tick
+(10–30, overlapping moderate rocket splash) is not obituary-anchored the
+way a lethal one is, so where the attribution prefers a rocket to the
+env candidate the row can be adopted by a missed flight nearby. The 9%
+of rl rows outside 2pp is plausibly this population, and it is one-sided
+(+): both mechanisms invent hits, neither destroys one.
+
+Bounded, not confirmed: the 13-demo golden cache spans dm4, dm6, e1m2,
+aerowalk, obsidian, schloss, skull and bravado besides dm2/dm3, and
+reproduces rl at bias +0.4pp / mean 0.6pp and gl at −0.0pp / 0.2pp —
+indistinguishable from the dm2/dm3 figures. At 73 rl rows that is too
+small to bound the effect, but it does say it is not large on those
+maps.
+
 **Withheld: ng, sng** — for a stronger reason than a gap: there is no
 ground truth to compare against. Nails link through the same flight
 bracket as rockets but only when nail tracking is enabled, so the

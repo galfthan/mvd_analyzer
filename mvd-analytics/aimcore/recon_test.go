@@ -269,6 +269,57 @@ func TestReconTierFlightClaimsOneImpactInstant(t *testing.T) {
 	}
 }
 
+// A WINDOWED query scopes the fires, never the evidence they are judged on. A
+// grenade fired inside [from,to] whose fuse runs out past `to` connected, and
+// the recon tier has to say so: its damage instant lies outside the window by
+// construction (up to the 2.5 s fuse plus the stat-instant lag), and clipping
+// the damage pool on the same bounds as the fires would report it as a miss —
+// an artefact of where the window was cut, not of the shooter's aim. The
+// measured tier has no such artefact: Shot.Hit is linked match-wide before any
+// window is applied.
+func TestReconTierWindowedQueryKeepsStraddlingFlight(t *testing.T) {
+	end := int32(1900)
+	shots := []result.Shot{{Time: 1000, Player: "A", Weapon: "gl", Source: "sound", FlightEnd: &end}}
+	events := []result.DamageEntry{
+		{Time: 1930, Attacker: "A", Victim: "B", Weapon: "gl", Damage: 60, IsSplash: true},
+	}
+	to := int32(1500)
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{ToMs: &to})
+	gl := weaponOf(t, ar, "A", "gl")
+	if gl.Shots != 1 {
+		t.Fatalf("gl shots = %d, want 1 — the fire is inside the window", gl.Shots)
+	}
+	if gl.Recon == nil || gl.Recon.Hits != 1 {
+		t.Errorf("gl recon = %+v, want hits 1 — the grenade was fired in the window "+
+			"and detonated after it", gl.Recon)
+	}
+}
+
+// The mirror of the above at the window's start: a fire before `from` is not in
+// the slice, and the damage it caused inside the window must not be handed to
+// an in-window fire that did not cause it. The pool is unclipped, so the
+// evidence is there — the join's own windows are what keep it out of reach.
+func TestReconTierWindowedQueryDoesNotAdoptPreWindowDamage(t *testing.T) {
+	early, late := int32(600), int32(1900)
+	shots := []result.Shot{
+		{Time: 300, Player: "A", Weapon: "rl", Source: "sound", FlightEnd: &early},
+		{Time: 1500, Player: "A", Weapon: "rl", Source: "sound", FlightEnd: &late},
+	}
+	events := []result.DamageEntry{
+		{Time: 640, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 90, IsSplash: true},
+	}
+	from := int32(1000)
+	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{FromMs: &from})
+	rl := weaponOf(t, ar, "A", "rl")
+	if rl.Shots != 1 {
+		t.Fatalf("rl shots = %d, want 1 — only the second fire is inside the window", rl.Shots)
+	}
+	if rl.Recon == nil || rl.Recon.Hits != 0 {
+		t.Errorf("rl recon = %+v, want hits 0 — the damage belongs to the pre-window "+
+			"fire and is nowhere near the in-window flight's end", rl.Recon)
+	}
+}
+
 // Grenades that detonate long after the fire still link, because the anchor is
 // the flight's end and not the fire: a 2 s lob whose impact damage lands right
 // after the despawn is a hit, while the same damage with no flight is not.

@@ -191,7 +191,10 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// differs from the measured one in what it drops, because it asks a
 	// different question — LINKAGE, not magnitude: a self hit is a fire that
 	// connected and is kept (the wire join counts those too), while an
-	// environmental row has no shooter to credit and is not.
+	// environmental row has no shooter to credit and is not. It is also NOT
+	// windowed, unlike the magnitude pool above: a projectile's damage lands a
+	// whole flight after its fire, so the window that scopes the fires cannot
+	// also scope their evidence (see reconDamageByAttacker).
 	hitsSource := ""
 	reconTier := false
 	var reconByPlayer map[string][]*dmgRec
@@ -201,7 +204,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	case res.Damage != nil && res.Damage.Source == result.DamageSourceReconstructed:
 		hitsSource = result.AimHitsSourceReconstructed
 		reconTier = true
-		reconByPlayer = reconDamageByAttacker(res, inWindow)
+		reconByPlayer = reconDamageByAttacker(res)
 	}
 
 	// The RL/GL direct/splash split needs projectile linking to have filled

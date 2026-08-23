@@ -68,6 +68,14 @@ type Shot struct {
 	// frame that ended this fire's tracked projectile flight — its impact.
 	// A pointer because 0 is a legal time; absence is "no flight tracked",
 	// never "impacted at t=0". See the type comment.
+	//
+	// It is the observed despawn frame, NOT a flight duration: Time and the
+	// entity update are quantized independently, so a point-blank impact can
+	// land up to about one demo frame BEFORE its own fire sound (measured: 6
+	// of 37974 tracked rl/gl flights over the 53-demo dm2/dm3 eval corpus,
+	// worst −29 ms). Consumers differencing FlightEnd−Time must tolerate a
+	// small negative rather than assume it is a positive time of flight.
+	// Nothing here is clamped: the despawn frame is what the wire showed.
 	FlightEnd *int32 `json:"flightEnd,omitempty"`
 }
 
