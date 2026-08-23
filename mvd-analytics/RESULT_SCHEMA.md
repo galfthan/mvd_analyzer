@@ -30,12 +30,13 @@ analyzer are also covered there.
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
-| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
+| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. A reconstructed row also carries the pack's `fate` (`picked` / `expired` / `unobserved`) with `picker` / `pickerTeam` / `pickupTime`, read off the wire's backpack-entity track; a `ktx` row carries `fate: "expired"` when KTX announced the timeout in `//ktx expire`. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
 | Streams | `streams` | *Streams | Native-rate per-player + global state-change streams (position/view/health/armor/ammo/items tracks, movers, and the opt-in spatial weapon streams — see the Streams section). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
+| ParseWarnings | `parseWarnings` | *ParseWarnings, omitempty | v72 — the READER's census of wire data it could not decode (unknown `svc_*` / temp-entity / hidden-message types, payloads that failed to parse). A **distinct signal from `errors`**: sub-fatal, parse-level, and about events that never reached an analyzer at all. Omitted on a clean parse, which is the normal case. See [ParseWarnings](#parsewarnings-parsewarnings-schema-v72). |
 
 Sub-result fields are pointers or slices with `omitempty`, so a missing
 key means "the analyzer didn't produce this section for this demo"
@@ -48,12 +49,33 @@ Defined in `result/match.go`.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Map | `map` | string | **The canonical map identifier** — always the SHORT name (`e1m2`, `dm2`, `aerowalk`). Resolved exactly like `Result.EffectiveMap()`: the KTX demoinfo map, else the serverinfo `map` key; only when neither names a map does it fall back to the cleaned level title. Join on this against `searchGames` rows, `metadata.serverInfo.map` and every BSP / loc / geometry file key. |
+| Map | `map` | string | **The canonical map identifier** — always the SHORT name (`e1m2`, `dm2`, `aerowalk`). Resolved exactly like `Result.EffectiveMap()`: the KTX demoinfo map, else the serverinfo `map` key, else (v72) the `//finalscores` map; only when none of those names a map does it fall back to the cleaned level title. `sources.map` says which. Join on this against `searchGames` rows, `metadata.serverInfo.map` and every BSP / loc / geometry file key. |
 | MapTitle | `mapTitle` | string | The level TITLE announced in `svc_serverdata` (`"Castle of the Damned"` on e1m2, `"Claustrophobopolis"` on dm2), cleaned of a `.bsp` suffix and a trailing ` by <author>` hint. **Display only** — never an identifier, a join key or a file key: it is free-form mapper-chosen text, not unique, and absent on demos whose `svc_serverdata` named no level (then omitted). |
+| Mode | `mode` | string, omitempty | v72 — KTX's own game-mode name: `duel`, `team`, `FFA`/`ffa`, `CTF`/`ctf`, `Clan Arena`/`clan-arena`, `Wipeout`, `HoonyMode`/`hoonymode`, `RA`/`rocket-arena`, `race`, `midair`, `instagib`. The two spellings per mode are the two sources' own vocabularies (demoinfo's `GetMode`, `ktx/src/stats.c:309`, and `//finalscores`' `lastscores2str`, `commands.c:6755`) reported verbatim, with `sources.mode` naming which — **compare case-insensitively**. NOT the serverinfo `mode` key (`1on1`, `4on4-midair`, a third vocabulary, verbatim under `metadata.serverInfo`) nor the countdown table's display spelling (`Duel`, under `metadata.matchSettings.mode`). |
 | GameDir | `gameDir` | string | Game directory (`qw`, `fortress`, custom). |
 | Duration | `duration` | int32 | Match length in milliseconds (parser-derived). Read this for "how long was the match". |
 | Players | `players` | []PlayerStat | Lightweight scoreboard view. |
 | Teams | `teams` | []TeamStat | Team standings (omitted in FFA). |
+| Sources | `sources` | MatchSources | v72 — per-field provenance; see below. |
+
+### MatchSources
+
+v72. Says where the resolved identity fields above came from, so a
+consumer can tell a server-authoritative value from a pipeline-derived
+one without re-deriving the precedence:
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Map | `map` | string, omitempty | `ktx` (demoinfo) \| `serverinfo` \| `finalscores` \| `levelTitle` (the degraded last resort — on a titled map that string is not a shortname at all). |
+| Mode | `mode` | string, omitempty | `ktx` (demoinfo) \| `finalscores`. |
+| Teams | `teams` | string, omitempty | `derived` — the rows are the per-player scoreboard summed by team, the normal case — or `finalscores`, meaning the scoreboard produced no team rows at all and the two sides come from KTX's end-of-match stuffcmd instead. |
+
+`//finalscores` **never displaces a demoinfo value**, and never corrects a
+derived team row: it fills only what nothing else answered. Where both
+exist they are worth comparing, and `metadata.finalScores` keeps the wire
+record verbatim for exactly that — but read `mode` first, because on Clan
+Arena and Wipeout KTX's score is *rounds won*, not frags (see
+[MetadataResult](#metadataresult-metadata)).
 
 The `startTime` / `endTime` fields were **removed in schema v36** — after time
 normalisation `startTime` was always 0 and `endTime` always equalled
@@ -1257,7 +1279,14 @@ alone answers the question people actually mean.
 
 `xfer` / `xferSelf` are **pointers**: absent means "this demo carries
 no backpack hints, so transfers are unobservable", which is a different
-fact from an observed zero. They are teamplay-only, exactly like KTX's
+fact from an observed zero. A *reconstructed* backpacks section
+(`backpacks[].source == "reconstructed"`, v72) does not make them
+observable. The v72 linkage does name a `picker` on most reconstructed
+rows, but a transfer is not "who took it" — KTX's counter is gated on the
+picker not already holding the weapon, and `hadBefore` is exactly what the
+entity track cannot see (the weapon bit is ORed in, so a redundant grab
+leaves no trace). They therefore stay absent there, while `dropped` does
+count the reconstructed drops. They are teamplay-only, exactly like KTX's
 gate — absent on duels and FFA. Note a pack holds the weapon the player
 was *wielding* (`DropBackpack`: `item->s.v.items = self->s.v.weapon`),
 one bit, which is why KTX's exact-equality test has no mixed-contents
@@ -1410,7 +1439,7 @@ express.
 A hit qualifies when `weapon == "rl"` and it is a **direct
 hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
 world), and the victim reads **clear air** on pre-impact evidence
-(schema v72): every position sample in the look-back window
+(schema v73): every position sample in the look-back window
 `[hit − preMs, hit − 40 ms]` (default **100 ms**) is ≥ 96 units (≈ two
 player models) above the floor, and **no sample beside the hit reads
 ground contact**. The gate rests on which readings can be trusted for
@@ -1439,7 +1468,7 @@ sample never counts as airborne. Reported `height`, `loc` and
 victim as the rocket found them — not from the possibly
 knockback-contaminated hit-frame sample.
 
-Both damage sources participate (schema v72): the `airgibs` DAG node binds
+Both damage sources participate (schema v73): the `airgibs` DAG node binds
 `damage:final`, so pre-instrumentation demos get airgibs from the
 **reconstructed** damage log — damagerecon's direct-vs-splash split is
 geometric (direct = the `TE_EXPLOSION` / projectile endpoint within 48
@@ -1452,7 +1481,7 @@ the ≥ 96 threshold already bounds the list), ordered by `height`
 descending; the web
 view re-sorts client-side. mvd-api's `/airgibs` serves this stored list at
 the default `preMs=100` and recomputes for any other value in `0..1000`
-(`preMs=0` = no pre-hit gate, the pre-v72 rule), echoing the effective value
+(`preMs=0` = no pre-hit gate, the pre-v73 rule), echoing the effective value
 as `preMs` on the response envelope. **Empty when the map has no clip hull** (no
 `PositionTrack.H` to read — same BSP provisioning as the
 visibility-aware loc filter). The `lethal` window can over-attribute on a
@@ -1771,7 +1800,15 @@ The match window plus the demo/wall-clock anchor (moved here from
 | TimeBase | `timeBase` | string, omitempty | `"demo"` when **no match start was detected** (schema v52): the rebase never ran, so *every* timestamp in the whole Result is on the raw demo clock (t=0 = demo open, warmup included). Omitted on the normal match-relative result. A matching notice appears in `errors[]` (and therefore `/overview`). |
 | DemoOffset | `demoOffset` | int32, omitempty | Ms from demo open (≈ countdown start) to match start. |
 | DemoStartUnixMs | `demoStartUnixMs` | int64, omitempty | Server wall clock (Unix epoch ms) at demo open. |
-| DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty | Resolution of `demoStartUnixMs`: `1` or `1000`. |
+| DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty | ± uncertainty of `demoStartUnixMs`: `1`, `1000`, or (v72, marker-derived) `3600000` / `50400000`. |
+| DemoStartSource | `demoStartSource` | string, omitempty | v72 — which source produced the demo-open anchor: `mvdhidden`, `epoch`, `matchdate`, `matchkey`, `ktxstats`. |
+| MatchStartUnixMs | `matchStartUnixMs` | int64, omitempty | v72 — server wall clock at **match** start (the instant `g=0` names). |
+| MatchStartAccuracyMs | `matchStartAccuracyMs` | int32, omitempty | v72 — ± uncertainty of `matchStartUnixMs` (see the accuracy ladder below). |
+| MatchStartSource | `matchStartSource` | string, omitempty | v72 — same vocabulary as `demoStartSource`. |
+| MatchStartConfidence | `matchStartConfidence` | string, omitempty | v72 — `exact` \| `unverified` \| `contradicted`. |
+| MatchStartNote | `matchStartNote` | string, omitempty | v72 — names the check(s) behind a non-`exact` grade. Empty on `exact`. |
+| MatchEndUnixMs | `matchEndUnixMs` | int64, omitempty | v72 — wall clock at match end, from the ktxstats `date` string, else the year-completed `//finalscores` stamp. |
+| DateMarkers | `dateMarkers` | []WallClockMarker, omitempty | v72 — every date stamp the wire carried, **on a result that has a `streams` block**; see below and the no-streams exception under the grades table. |
 | Pauses | `pauses` | []TimelinePause, omitempty | Per-pause wall-clock segments; see below. |
 
 **Wall-clock anchor.** All other times in the result are match-relative
@@ -1788,11 +1825,115 @@ P(g)        = Σ pauses[i].durationMs  for  pauses[i].atMs <= g
 countdown start — not match start; `demoOffset` bridges the two).
 `demoStartAccuracyMs` is its resolution: `1` from the millisecond
 [mvdhidden 0x000B block](../mvd-reader/MVD_FORMAT.md#hidden-message-types),
-`1000` from the whole-second serverinfo `epoch` cvar. The anchor fields
-are omitted when the demo carries no usable wall-clock source; implausible
+`1000` from the whole-second serverinfo `epoch` cvar. Implausible
 0x000B payloads (some demos emit a non-timestamp block here) fall back to
 `epoch`. The REST `/overview` endpoint mirrors this anchor in its `timing`
 block.
+
+**Match-start anchor (schema v72).** Only ~25% of the archive carries one
+of the two server-clock sources above. Nearly all of the rest states its
+date on the wire in a *print* instead, which describes the **match**, not
+the demo file — so v72 adds a second, honestly-named anchor rather than
+overloading `demoStartUnixMs` with a differently-defined value:
+
+| | question it answers | coverage |
+|---|---|---|
+| `demoStartUnixMs` | origin of the `wallClockMs` mapping above | ~95% (v72), ~25% before |
+| `matchStartUnixMs` | "when was this match played?" | ~95% |
+
+Five sources can anchor it — the two server clocks plus the three wire
+date markers that state a year — listed in the order they are trusted. A
+sixth, `//finalscores`, states no year and therefore anchors nothing; it
+corroborates (see below):
+
+| `…Source` | Wire origin | Names |
+|---|---|---|
+| `mvdhidden` | 0x000B block (ms) | demo open |
+| `epoch` | serverinfo cvar (s) | demo open |
+| `matchdate` | level-2 broadcast print at match start, `ktx/src/match.c:1291`. Two layouts: ISO `2008-01-05 20:05:38 CET` and ctime `Mon Jul 03, 01:01:14 2006` | match start |
+| `matchkey` | level-2 broadcast print, kmod/KTeam era, `matchkey: 8-2005-8-13:19-56-18` (`<matchid>-<y>-<m>-<d>:<h>-<mm>-<ss>`, never any timezone) | match start |
+| `ktxstats` | the `date` string of the KTX demoinfo block (`%Y-%m-%d %H:%M:%S %z`), also published verbatim as `demoInfo.date` | match **end** (also `matchEndUnixMs`) |
+| `finalscores` | the date field of KTX's `//finalscores` end-of-match stuffcmd (`%b %d, %H:%M` — **no year**, no seconds, no zone), also published verbatim as `metadata.finalScores.date` | match **end**, corroboration only |
+
+**The year-less marker.** `//finalscores` reaches 64% of the archive but
+its stamp cannot name an instant on its own. It is resolved last: the
+year comes from whatever anchored the match (reported as the marker's
+`yearFrom`, which therefore names a server clock — `mvdhidden` /
+`epoch` — as often as it names another marker), and the zone is borrowed
+from that same anchor,
+because both stamps come from one server's `strftime(localtime)`. What
+remains is genuine evidence — month, day, hour and minute — and it is
+cross-checked like any other marker, with a tolerance of the ktxstats
+intermission spread plus the minute the layout truncates to. It can never
+be selected as `matchStartSource`, and with no other marker present it is
+reported with `unixMs: 0` and no `yearFrom` rather than dropped. On a
+120-demo archive sample of demos with no demoinfo block it corroborated
+every anchor (119 `exact` / 1 `unverified`, unchanged from before it was
+parsed) and supplied `matchEndUnixMs` on all 120, where the ktxstats
+source reaches none of them.
+
+**The no-streams exception.** The whole wall-clock family lives on
+`streams.global`, so a result with no `streams` block at all carries none
+of it — no `dateMarkers`, no `matchStartUnixMs`, no grade — even when the
+wire did print a `matchdate`. That is the ~877 archive demos whose
+recording starts mid-match, where match-start detection never fires (73 of
+them carry a stamp that is read and then not published). `metadata.finalScores`
+does not live under `streams` and survives on those demos. Surfacing the
+rest means first deciding what match window a stream-less result has, which
+is plan lead 8's job — see `plan-archive-features.md`.
+
+Where only a print marker exists, `demoStartUnixMs` is back-shifted from
+it by `demoOffset` (so the formula above keeps working) and
+`demoStartSource` says so. A **contradicted** stamp is never back-shifted
+into `demoStartUnixMs` — it stays on the match-start fields where its
+grade travels with it.
+
+`matchStartAccuracyMs` states what the marker actually pins down:
+
+| Value | Meaning |
+|---|---|
+| `1` / `1000` | the server-clock anchors, and second-resolution markers with a resolved timezone |
+| `3600000` | a zone *name* that does not state whether DST was in force (the Windows "… Standard Time" long names) |
+| `50400000` | the marker named no timezone at all (every `matchkey`, and the ctime `matchdate` layout) — read as UTC, which is right to within the widest real offset, 14 hours, and no better |
+
+**Confidence.** Old servers ran with unset clocks, but the value alone
+never proves it (2000 is a live QuakeWorld year), so the grade is decided
+by contradiction, never by the date:
+
+| Grade | Meaning |
+|---|---|
+| `exact` | timezone resolved, no check failed |
+| `unverified` | nothing contradicts it, but something is unpinned: an assumed timezone, or one soft signal |
+| `contradicted` | a **hard** check failed (a binary cannot predate its own release: the `*version` / `ktxver` release floor), or two soft signals agreed |
+
+The soft signals are markers within one demo disagreeing beyond timezone
+slack, and the boot-default window (early 2000-01) an unset RTC comes up
+in. Either alone is indistinguishable from a real match. **An anchor is
+never dropped, coerced or hidden on a failed check** — the grade plus
+`matchStartNote` is the whole report. The note joins the failed checks
+with `; ` and its forms are exactly:
+
+| Note | Meaning |
+|---|---|
+| `version-floor: mvdsv 0.28 was not released before 2006-01-01` | HARD — the binary the serverinfo names postdates the stamp |
+| `impossible-date: the stamp lands after 2100` | HARD — the value is corrupt, not a date |
+| `marker-disagreement: matchdate vs ktxstats` | SOFT — the chosen source vs the sources it could not be reconciled with |
+| `epoch-reset-window: the stamp lands in the unset-clock boot default (2000-01)` | SOFT |
+| `tz-unknown: the marker named no timezone, UTC assumed` | why the grade is `unverified` with no other signal |
+
+Each `dateMarkers[]` entry is a **WallClockMarker** — every stamp seen,
+used or not, so a consumer can redo the cross-check itself:
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Source | `source` | string | `matchdate` \| `matchkey` \| `ktxstats` \| `finalscores` |
+| Kind | `kind` | string | `matchStart` \| `matchEnd` |
+| UnixMs | `unixMs` | int64 | parsed instant, timezone applied; `0` on a `finalscores` stamp whose year could not be completed |
+| AtMs | `atMs` | int32, omitempty | demo-clock ms of the print that carried it (absent for the two markers that ride no print, `ktxstats` and `finalscores`) |
+| YearFrom | `yearFrom` | string, omitempty | v72 — `finalscores` only: the ANCHOR source its year was taken from. Same vocabulary as `matchStartSource`, so it is often a server clock rather than a marker: `mvdhidden` \| `epoch` \| `matchdate` \| `matchkey` \| `ktxstats`. Absent when nothing anchored the match (then `unixMs` is `0` too) |
+| TZ | `tz` | string, omitempty | zone token exactly as printed (`CET`, `+0200`, `Vdsteuropa, sommartid` — the Swedish long name after `Q_normalizetext` folds its high-bit `ä` to `d`) |
+| AssumedUTC | `assumedUtc` | bool, omitempty | the zone was missing or unrecognised, so UTC was assumed |
+| Raw | `raw` | string, omitempty | the stamp text after the marker prefix |
 
 The `P(g)` term accounts for **pauses**: the game clock freezes during a
 pause while wall-clock time keeps running, so without it the mapping
@@ -1822,6 +1963,7 @@ when the demo has no pauses or the server does not embed the block.
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
+| ActiveWeapon | `aw` | []ChangeI16 (omitempty) | v72 — the **wielded** weapon as an `IT_*` bit: 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe, or 0 for nothing held (a client edict whose weapon was never set). Those nine values are the whole vocabulary: anything else is protocol-impossible for `ent->v->weapon` and is refused at the parser boundary rather than published as a plausible bit. A different question from the `rl`/`lg`/… interval streams above, which are *inventory*: a player owning the RL can be holding the LG. Straight from `STAT_ACTIVEWEAPON`, which mvdsv writes from `ent->v->weapon` for every spawned player (`mvdsv/src/sv_send.c:1268`) — the same field `DropBackpack` puts in the pack, which is what makes [backpack reconstruction](#backpacks-backpacks) a replay rather than an inference. Delta-coded on the wire, so this column is recorded **through the countdown** and the match-start rebase carries the latest pre-match value forward to `t=0`; a player whose weapon last changed in warmup would otherwise have no in-match sample. Absent when the recorder never wrote the stat, and **frozen** (one sample, never moving) on the same old recordings that freeze the `STAT_ITEMS` weapon bits — check it moves before trusting it. |
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. `sp` includes the match-start spawn: KTX respawns everyone when the countdown ends, but a player alive through the countdown produces no dead→alive wire transition, so the timeline synthesizes their spawn at `0` (schema v51). |
 | Alive | `alive` | []Interval (**never** omitempty) | The player's **lives**: one half-open `[s,e)` interval per spawn-to-death run, derived from the fused `sp`/`d` markers against the match window (schema v64). The canonical **stored** liveness — read it rather than re-deriving from `sp`/`d`. Since v65 an API consumer can: `/stream-slice` serves it per player clamped to the window and `/state-at` serves it as a `true`/`false`/`null` scalar at the instant, in both cases never field-gated (before that the advice was unfollowable over REST — the field reached no endpoint, and there is no `streams` artifact to fall back on). LOS, aim, loc-graph, region control and `/loc-trails` all read it; the two in-package predicates that used to re-derive their own (`analyzer.losAliveAt`, `aimcore.aimAliveAt`) are gone as such — `losAliveAt` is deleted and `aimAliveAt` now just reads this field. Their strict `lastSpawn > lastDeath` **latched** on a death and its triggered respawn sharing a millisecond, reporting the player dead for the rest of that life (measured: 100.7 s of one player's 1143.7 s match); this field reports alive there, which is correct, and the LOS/aim figures moved when they were migrated. One independent predicate remains on purpose: `view.playerActiveInWindow`, behind the `/buckets` columnar `alive` mask, which asks the different question "did this player appear anywhere in this bucket window" (a window-OVERLAP test with its own fallbacks) and already resolves the tie correctly. The two can disagree, and neither is wrong. Clipped at the **ends** to observed presence: the derivation starts everyone alive at `t=0` (deliberately — KTX emits a first spawn only on the first *respawn*), so without the clip a late joiner would claim life before connecting and an early quitter would claim life to match end. Presence is the position track (ending at `result.TrackHoldEnd`) **widened by marker evidence**: spawns and deaths are broadcast to every recorder, so a player whose track stops — on a POV recording everyone outside the recorder's PVS drops out of `svc_playerinfo` — is still known to exist at every later marker, and the high clip extends to it. The two ends are deliberately asymmetric: a *death* before the track start drops the low clip entirely (the player was in the game for the run-up to it), while a *spawn* before it is the join itself and widens nothing. Consequence worth knowing: every death always falls inside some life, so a truncated track can no longer make a player look as if they left the game. A death **splits** a life even when the respawn lands on the same millisecond — the two intervals *touch*, so no dead time is invented, but the boundary survives, because anything enumerating lives or attributing per-life stats must see it. A **hole** in the track does *not* split: an unobserved stretch is not a death, and on a POV recording (only players inside the recorder's PVS are written) tracks are full of multi-second holes. Refusing to credit unobserved *time* is a separate concern, handled by the occupancy walkers through `result.SampleStaleCapMs` (250 ms). A reconnect gap *inside* a merged stream is still not represented. Liveness is **not** inferable from the samples, because a dead player keeps streaming position at full rate and on a gib the player entity *is* the thrown head. Three distinct states: `null` = liveness was not measurable, `[]` = measured and never alive in the window, `[…]` = the lives. A player who never died is a single full-match interval, so absence can never be read as "alive throughout". A death with no following spawn (the KTX `dtTELE2` deflection) correctly leaves them dead to the end. |
 | LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals. BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
@@ -2268,17 +2410,19 @@ aggregation (`min`, `max`, `mean`, `dominant`, etc.).
 | `nl` | Nails | `[]ChangeI16` | `first` |
 | `rk` | Rockets | `[]ChangeI16` | `first` |
 | `cl` | Cells | `[]ChangeI16` | `first` |
+| `aw` | Wielded weapon bit (opt-in) | `[]ChangeI16` | `first` |
 | `sp` | Spawn timestamps | `[]int32` | `any` |
 | `d` | Death timestamps | `[]int32` | `any` |
 
 `sp` / `d` stay on `any` because they need a bool ("did this event
 happen during the bucket?"); `first` would return a timestamp.
 
-**`view` / `hgt` / `lq` / `vel` are opt-in** — they are *not* in the
-default field set (`AllStandardFields`), so a query that omits `fields`
-keeps the pre-v31 shape and a consumer only pays for view direction,
-floor height, liquid state, or velocity when it asks for the code
-explicitly. They all read from the player's `*PositionTrack` but project
+**`view` / `hgt` / `lq` / `vel` / `aw` are opt-in** — they are *not* in
+the default field set (`AllStandardFields`), so a query that omits
+`fields` keeps the pre-v31 shape and a consumer only pays for view
+direction, floor height, liquid state, velocity, or the wielded weapon
+when it asks for the code explicitly. `aw` (v72) is a change stream on
+`PlayerStream.ActiveWeapon`, not a position projection. They all read from the player's `*PositionTrack` but project
 disjoint columns: `view` → `vp`/`vya`, `hgt` → `h`, `lq` → `lq`,
 `vel` → `vx`/`vy`/`vz`. **Clean break (schema v31):** `pos` now returns
 **strictly** `x`/`y`/`z` (plus the per-sample loc label `li`); height and
@@ -3326,14 +3470,49 @@ Defined in `result/metadata.go`.
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | ServerInfo | `serverInfo` | map[string]string | Last-write-wins union of fullserverinfo stufftext + per-key svc_serverinfo updates. |
-| MatchSettings | `matchSettings` | *MatchSettings | Parsed KTX countdown centerprint. |
+| MatchSettings | `matchSettings` | *MatchSettings | Parsed KTX countdown centerprint, plus the settings rows KTX broadcasts beside it (v72: `fairpacks`). |
 | CountdownText | `countdownText` | string | Raw multi-line centerprint (color-stripped). |
+| FinalScores | `finalScores` | *FinalScores | v72 — KTX's `//finalscores` end-of-match stuffcmd, verbatim; see below. |
+
+### FinalScores
+
+v72. The scoreline KTX stuffs at match end (`ktx/src/commands.c:6963-6977`,
+wire form `//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>"
+<s2>`). It reaches **64% of the archive against demoinfo's 46%**, so on the
+pre-ktxstats half it is the only place the *server* states a final result.
+Reported verbatim — nothing here is reconciled against the derived
+scoreboard; `match.sources` names where the pipeline did consume it.
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Date | `date` | string, omitempty | Server-LOCAL match-end stamp, `%b %d, %H:%M` — **no year**, no seconds, no timezone (`Sep 29, 21:27`). The resolved instant is `streams.global.dateMarkers[]` with `source: "finalscores"`. |
+| Mode | `mode` | string, omitempty | KTX's lastscores mode name (`duel`, `team`, `FFA`, `CTF`, `RA`, `Clan Arena`, `Wipeout`, `HoonyMode`, `race`, `unknown`; forks add their own — `Extinction` appears in the archive). |
+| Map | `map` | string, omitempty | Canonical short map name. |
+| Team1 / Team2 | `team1` / `team2` | string, omitempty | The two sides. On a duel the "team" is the player's own name — the same player-as-team layout `match.teams` uses. Normalised out of the Quake charset like every other name; an empty side is observed. |
+| Score1 / Score2 | `score1` / `score2` | int | The server's own final figures. **Can be negative** (suicides), and **what they count depends on the mode**: summed frags normally, but ROUNDS WON on Clan Arena and Wipeout (`CA_get_score_1/2`, `commands.c:6867-6886`) — a Wipeout demo reports `5` against a 241-frag scoreboard and both are right. |
+
+Even on a frag-scored mode this can differ from `match.teams` by one:
+KTX counts the frag that *ends* the match, while the scoreboard here
+freezes at the match-end latch and the `svc_updatefrags` for that last
+kill lands on or after it. Measured on 120 demoinfo-less archive demos:
+105 exact agreement, 10 differences (7 of them round-scored modes — 6
+Wipeout, 1 the fork mode `Extinction` — and 3 the ±1 above), 5 not
+comparable (duel team labels).
 
 `MatchSettings` covers `mode`, `deathmatch`, `teamplay`, `timelimit`,
 `fraglimit`, `spawnmodel`, `spawnK`, `antilag`, `overtime`, `powerups`,
 `dmgfrags`, `noItems`, `midair`, `instagib`, `yawnmode`, `airstep`,
-`vwep`, `noweapon`, `matchtag`, `socdv2`. See `result/metadata.go` for
-the per-field intent.
+`vwep`, `noweapon`, `matchtag`, `fairpacks`, `socdv2`. See
+`result/metadata.go` for the per-field intent.
+
+`fairpacks` (v72) is the one row that does not come from the countdown
+centerprint: KTX broadcasts `Fairpacks setting: <ruleset>` as a level-2
+print beside it (`ShowMatchSettings`, `ktx/src/match.c:2086-2107`) and
+**only when `k_frp` is not the default 0**, so its absence is
+informative — it means a dropped backpack holds the weapon the victim was
+wielding. Values: `"best weapon"` (k_frp 1) / `"last weapon fired"`
+(k_frp 2). [Backpacks](#backpacks-backpacks) stands its reconstruction
+down when this is set.
 
 ## LocGraphResult (`locGraph`)
 
@@ -3477,8 +3656,175 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
-`entNum` is the join key with `WeaponPickup.BackpackEnt`.
+`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum, source }`,
+plus `{ fate, picker, pickerTeam, pickupTime }` on a reconstructed row
+(v72). A `ktx` row carries `fate` too, but only ever the single value
+`expired` and only when KTX said so outright — see below. `entNum` is the
+join key with `WeaponPickup.BackpackEnt` on a `ktx` row.
+
+`origin` is the **pack's** position, not the victim's: KTX copies the
+victim's origin and then drops it 24 units
+(`item->s.v.origin[2] -= 24`, `ktx/src/items.c:2703-2704`), which puts the
+pack at their feet rather than inside their chest. Both provenances apply
+it, so a map overlay draws every pack where it actually sat. The zero
+vector still means "no position known for the dropper" — it is not an
+origin 24 units under the world.
+
+### `source` — provenance (v72)
+
+Two provenances, never mixed within one demo:
+
+| `source` | Meaning |
+|---|---|
+| `ktx` | Decoded from KTX's `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY directive (`ktx/src/items.c:2762-2766`). Exact: KTX emits it once per real pack, with the weapon and the dropper's slot baked in. Only KTX ≥ 1.38 emits it — 49.2% of the archive. |
+| `reconstructed` | Replayed from `DropBackpack`'s own rule on a demo whose mod never hinted. Its pickup side is `fate` / `picker` / `pickerTeam` / `pickupTime` on this same row, not a `weaponPickups` join; `entNum` is the backpack-model entity the linkage bound to the drop, and joins to nothing. `entNum` 0 means no entity was identified — never treat 0 as an edict. |
+
+**What the reconstruction reproduces.** With the shipped default
+`k_frp 0`, `DropBackpack` puts the victim's *currently wielded* weapon in
+the pack verbatim (`item->s.v.items = self->s.v.weapon`,
+`ktx/src/items.c:2706`) and hints only when that is exactly the RL or the
+LG. mvdsv writes the same field into the MVD for every spawned player as
+`STAT_ACTIVEWEAPON` (`mvdsv/src/sv_send.c:1268`) — published here as
+`streams.players[].aw` — so the reconstruction is a replay, not an
+inference: death instant + wielded weapon + the victim's last broadcast
+position. It reproduces the one deathtype `DropBackpack` refuses, `/kill`
+(`dtSUICIDE`, `ktx/src/client.c:1008`, obituary `" suicides"`); rocket
+suicides, falls, drowning and lava all DO drop a pack.
+
+### `fate` / `picker` / `pickerTeam` / `pickupTime` — the pack's outcome (v72)
+
+`picker` / `pickerTeam` / `pickupTime` are set on `reconstructed` rows
+only. A `ktx` row leaves them empty: its pickup side is the
+`weaponPickups` join, which KTX states outright in `//ktx bp`, and a
+second answer beside it could only disagree. An EMPTY `fate` on a
+reconstructed row means the linkage did not run at all (no player streams);
+that is distinct from `unobserved`, which is a measurement.
+
+**`fate` on a `ktx` row is `expired` or nothing**, and it means KTX said so
+in a third directive: `//ktx expire <ent>`, which `SUB_Remove` emits for
+every RL/LG pack it deletes untaken (`ktx/src/g_spawn.c:196-210`). That is
+the one thing the `weaponPickups` join cannot state — the *absence* of a
+`//ktx bp` is not evidence, because a demo can carry the drop hint and no
+pickup hints at all (107 of 330 archive demos do). So on a `ktx` row read
+`fate: "expired"` as "the server announced this pack timed out", and an
+empty `fate` as "ask `weaponPickups`" — never as `picked` or `unobserved`,
+which are values only the reconstruction's linkage produces.
+
+Read `source` for the provenance of a `fate`, exactly as for the row: an
+`expired` on a `ktx` row is the wire's own statement, and on a
+`reconstructed` row it is the linkage's reading of the pack-entity track.
+No separate provenance field exists, because `source` already carries it.
+
+The wire population the `ktx` side rests on, over 223 archive demos
+carrying all three directives: 10 384 `//ktx drop` = 10 006 `//ktx bp` +
+190 `//ktx expire` + 188 rows claimed by neither, with **zero** rows
+carrying both. The 188 are packs the recording ended on top of, whose
+removal never happened inside the demo; they keep an empty `fate`, which
+is why "no pickup row" must not be read as "expired".
+
+| `fate` | Meaning |
+|---|---|
+| `picked` | The pack entity left the wire with at least one live player's bounding box overlapping it — the same overlap the server tests before calling `BackpackTouch` (`ktx/src/items.c:2367`). `pickupTime` is the match-relative ms it left. `picker` is set only when the evidence named exactly ONE player: one player on the pack, or several separated by which of them gained the weapon bit. Two players on a pack with nothing to separate them stay `picked` with no `picker` rather than a guess. `pickerTeam` is that picker's team and is omitted when they have none — an FFA or duel picker is named with no `pickerTeam`, so read its absence as "teamless", never as "no picker". |
+| `expired` | The pack was removed by KTX's 120 s timeout (`item->s.v.nextthink = time + 120`, `think = SUB_Remove`, `items.c:2871-2872`) untaken — the one outcome that is positively not a pickup. On a `ktx` row this is the wire saying it, in `//ktx expire <ent>`. On a `reconstructed` row it is the pack entity leaving the wire at that age with nobody on it. |
+| `unobserved` | The honest residual: no backpack-model entity bound to the drop, or the entity was still on the wire when the recording stopped, or it left early with nobody on it. **None of these is evidence that nobody took the pack.** |
+
+**How the pack is found and followed.** The reconstruction names a time and
+a place (the victim's origin less 24). The pack that appears at that
+instant nearest that point is the drop's pack — scored against the `//ktx
+drop` hint's own edict number, 947 of 961 drops bound and every one of the
+947 to the edict the hint named. It is then followed through its origin
+updates to where it settled: KTX tosses a pack with `velocity[2] = 300`
+plus a random horizontal kick and `MOVETYPE_TOSS` (`items.c:2856-2861`), so
+it falls off ledges and down lift shafts — measured 58 units of travel at
+p50, 583 at max — and the pickup test runs where it landed, never where it
+was dropped.
+
+**Why the touch, and not a stat flip.** `//ktx bp` fires on every RL/LG
+pack pickup regardless of what the picker already held, and
+`other->s.v.items |= new` cannot change a bit they already had. Measured:
+only 237 of 606 unambiguous ground-truth pickups came with a weapon-bit
+gain, so requiring one would have discarded 61% of real pickups. The
+bounding-box overlap is not a proxy for the touch — it IS the touch — so it
+is the primary signal, and the bit gain only separates two players standing
+on one pack.
+
+**Accuracy** (223 hint-carrying demos, 10 378 scored drops, every hint
+withheld): picked-vs-not **100.00% precision, 96.13% recall**; of the
+pickups it found, **99.77% carried a named picker and 99.98% of those were
+correct**; pickup-time error 0 ms at p50 and p90. `expired` is **100.00%
+precise at 100.00% recall** against the packs `//ktx expire` names — it
+finds every announced expiry and asserts nothing else. The largest residual
+(2% of all drops) is a pack taken inside the demo frame it dropped in: it
+never reaches the wire at all, so no entity exists to bind. Full tables,
+mismatch classes and the reproduce command:
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+
+**What is still absent on a reconstructed row.** `hadBefore` — KTX ORs the
+weapon bit in, so a redundant grab leaves no trace anywhere on the wire —
+and therefore kill credit and pack-transfer credit
+(`playerStats[].pickups.byKind[].xfer`), which both need it.
+
+**Stand-down conditions.** The section is left ABSENT — never
+half-filled, never guessed — when any of the following holds. Note the
+converse does NOT hold: an absent section means *either* a stand-down *or*
+a measured zero (a demo where no RL/LG pack dropped serializes the same
+way, `omitempty` over an empty list). The wire shape cannot tell the two
+apart, so do not read absence as "the pipeline refused".
+
+The conditions:
+
+- there are no player streams, or no frag log (the only record of which
+  deaths were `/kill`);
+- no player carries the `aw` column (a recorder that never wrote
+  `STAT_ACTIVEWEAPON`);
+- the weapon state is frozen — `aw` never moves AND the `STAT_ITEMS`
+  weapon bits never cycle, the old-recorder signature the damage
+  reconstruction refuses for the same reason;
+- the mod is KTX ≥ 1.38, which hints for itself: an empty section there
+  is the wire's answer, not a gap;
+- the ruleset changes what a pack contains — `k_bloodfest` (no drop at
+  all), `k_yawnmode` (last-fired weapon, DMM1 shotgun override), or a
+  non-default `k_frp`, detected from KTX's `Fairpacks setting:` broadcast
+  (`ktx/src/match.c:2086-2107`, published as
+  `metadata.matchSettings.fairpacks`). Modes that only rewrite T_Damage —
+  midair, instagib, dmgfrags, CA, wipeout — deliberately do NOT stand the
+  pass down: `DropBackpack` has no such early return and the wire hints
+  confirm packs drop in them.
+
+Two refusals are narrower than the whole section, and cost only the rows
+they cover:
+
+- a **death** whose newest `aw` sample was carried on a DIFFERENT wire
+  slot is refused (players with more than one published session only).
+  mvdsv delta-codes stats against a per-slot cache no client change
+  resets (`sv_send.c:1279-1281`), so a player who reconnects onto a slot
+  whose previous occupant held what they now hold gets no update of their
+  own — and the merged stream would otherwise answer with a weapon they
+  held on the slot they left. A reconnect onto the *same* slot keeps the
+  cache, and the earlier sample with it;
+- a **death** whose victim's position track has gone stale past 400 ms is
+  withheld rather than placed on a guess.
+
+There is deliberately **no** per-player "this `aw` column never moves"
+refusal, and the demo-level frozen check keeps its `STAT_ITEMS` arm for
+the same reason: a single-valued `aw` column is what a **single-weapon
+ruleset** looks like (`1on1-lgc`, `2on2-midair`, rocket arena), not what a
+frozen recorder looks like. Measured, refusing those columns cost 58 of
+13 749 hint-confirmed drops and prevented no fabrication.
+
+**Measured accuracy** against the `//ktx drop` hints on 316 archive demos
+spanning KTX 1.38–1.48: **precision 99.97%, recall 99.97%** (13 749 hints,
+LG 100%/100%, RL 99.96%/99.96%); drop-time error exactly 0 ms; position
+error p50 9.7 / p90 22.3 / p99 33.9 units. Full method, per-era and
+per-mode splits, residual classes and the reproduction command:
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+
+**Residual with no wire signal:** `dp 0` (drops switched off
+server-side) is published nowhere — no serverinfo key, no countdown row.
+On a hinting mod its absence settles the question; on a pre-1.38 demo it
+is unfalsifiable, and a `dp 0` server would make this section report packs
+that never dropped. No demo in the validation sample showed the
+signature.
 
 ## WeaponPickups (`weaponPickups`)
 
@@ -3524,6 +3870,73 @@ one cheap fetch.
   spawner nobody took has no entry. `time` is match-relative ms.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
+
+## ParseWarnings (`parseWarnings`)
+
+Schema v72. The MVD reader's own census of what it could **not** read
+off the wire, carried on every result and omitted entirely when the
+parse was clean.
+
+**Why it exists.** The `sv_bigcoords` angle desync degraded ~5% of the
+archive for years without a single operator-visible signal, because
+parse warnings were collected only in the diagnostic test harness and
+dropped on every production run. Collection is now unconditional: the
+next protocol gap shows up on a normal analysis, in the JSON, over REST
+(`/overview`) and on `qw-analyze`'s stderr.
+
+**How it differs from `errors[]`.** `errors[]` reports ANALYZER-level
+failures over events that decoded fine (a `Finalize` returned an error,
+the region-control pass failed, the stream aborted mid-demo).
+`parseWarnings` reports the layer below: bytes the decoder could not
+interpret. Neither is fatal, and they are deliberately never merged — a
+consumer reacting to a degraded result needs to know which layer lost
+the data.
+
+| Field | JSON key | Type | Intent |
+|---|---|---|---|
+| Total | `total` | int | Exact number of warnings raised. **Never capped.** |
+| ByType | `byType` | map[string]int, omitempty | Exact per-category counts. Fixed vocabulary: `parse_error` (a payload we recognise but failed to decode), `unknown_svc` (an `svc_*` command byte we do not know — the rest of that payload is abandoned), `unknown_te` (an unknown temp-entity type), `unknown_hidden` (an unknown MVD hidden-message type). |
+| Groups | `groups` | []ParseWarningGroup, omitempty | Capped sample table of distinct (type, message) rows, **loudest first** (count desc, then type, then message — the order is deterministic so the same demo always serialises identically). |
+| DroppedWarnings | `droppedWarnings` | int, omitempty | Warnings beyond the 64-group retention cap — every occurrence whose `(type, message)` pair was first met after the table was full, so it is missing from `groups`. An OCCURRENCE count, never a count of distinct messages: the reader does not retain the keys past the cap, since holding them is the unbounded memory the cap exists to avoid. |
+
+`ParseWarningGroup`:
+
+| Field | JSON key | Type | Intent |
+|---|---|---|---|
+| Type | `type` | string | The category, as in `byType`. |
+| Message | `message` | string | The reader's message — typically the `svc_*` name, the decode error and the byte count it abandoned. |
+| Count | `count` | int | How often this exact message fired. |
+| FirstDemoTimeMs | `firstDemoTimeMs` | int32 | **RAW DEMO time** of the first occurrence (the wire clock, t=0 = demo open) — *not* the match-relative base every other ms field in this schema uses. The reader has no match clock, and a warning can fire before the match starts or on a demo with no match at all, where a rebased value would be meaningless. |
+
+**Summary, not a log.** A pathological demo can raise hundreds of
+thousands of warnings (the archive's worst carries ~10 000), so the
+Result carries a census rather than every instance: exact counters plus
+a first-occurrence sample per distinct message. The message text embeds
+the failing command and the abandoned byte count, so its cardinality is
+unbounded in principle; the sample table is therefore capped at
+`parser.MaxWarningGroups` (64) distinct rows. **The cap never touches a
+count** — `total` and `byType` stay exact, and what the table is missing
+is stated in `droppedWarnings` (warnings beyond the 64-group retention
+cap) rather than silently truncated. That figure counts OCCURRENCES, not
+distinct messages: past the cap the reader stops retaining keys, which is
+the whole point of the cap. Groups are retained in FIRST-ENCOUNTER order,
+so on a badly broken demo `groups` is a sample of the distinct messages,
+not the top-k by count — read `byType` for the shape of the damage and
+`groups` for what it looks like. The full per-instance list remains available to the
+diagnostic harness (`parser.SetDiagnosticMode` +
+`Parser.DiagnosticWarnings`), which is the only consumer that needs it.
+
+**Reading it.** A present block means the reader hit a gap on this demo
+and the sections downstream of the affected bytes may be thin — which
+sections depends on what was lost, so treat it as a prompt to check the
+data rather than as a verdict on any one field. `unknown_svc` in
+particular means an entire payload was abandoned mid-message. On the
+51 000-demo archive census 526 demos (~1.0%) raise at least one warning.
+
+CLI: `qw-analyze` prints a one-line summary to stderr whenever a demo
+raises any, and `-warn` prints the whole `groups` table (useful for
+`-format md` and `-view …` runs, which carry no `parseWarnings` in their
+output). REST: `/overview` republishes the block verbatim.
 
 ## Cross-references / join keys
 
@@ -3580,7 +3993,8 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v72 | **Airgib detection gates on pre-impact evidence** (a **correctness fix**: entries move in and out of `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX writes the damage message inline in `T_Damage`, and measured over 410 direct rocket hits the stamp lands in the same wire frame as the first knockback-visible position sample 82% of the time and up to two frames (+28 ms) late 6% — so samples near the stamp can already carry the rocket's own knockback, and the hit-time sample alone reported players who were STANDING at impact as airborne (hub `232925`: a victim riding the dm2 `func_train` read **303 units of air** when a quad direct rocket blasted him off it, published as the match's biggest airgib). A hit now qualifies when every position sample in `[hit − preMs, hit − 40 ms]` (default **100 ms**) reads ≥ 96 units above floor — the preceding tick deciding when the window holds no sample (old coarse-tick demos, recording holes) — and no sample beside the hit reads ground contact (knockback over-reports height but cannot fake a grounded reading, so a victim who fell and landed just before the rocket rejects while one knocked laterally over a higher floor does not). The 100 ms default is aesthetic: floor-relative height is a step function at ledge edges, so longer windows measure time-since-the-edge and drop genuine 300+-unit ledge-drop events. Reported `height`/`loc`/`heightAboveAttacker` come from the latest PRE-IMPACT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v72 hit-sample-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. Airgibs also now consume **reconstructed** damage (the DAG node binds `damage:final`), so pre-instrumentation demos get a Key-Moments list too — recon's direct/splash split is geometric (explosion endpoint within 48 units) and its timestamps frame-accurate; `damage.source` says which evidence a list rests on (supersedes v71's wire-measured-only gate for airgibs; aim keeps it). |
+| v73 | **Airgib detection gates on pre-impact evidence** (a **correctness fix**: entries move in and out of `timelineAnalysis.airgibs`, no field is added, removed or retyped) plus a `preMs` echo on the `/airgibs` envelope. KTX writes the damage message inline in `T_Damage`, and measured over 410 direct rocket hits the stamp lands in the same wire frame as the first knockback-visible position sample 82% of the time and up to two frames (+28 ms) late 6% — so samples near the stamp can already carry the rocket's own knockback, and the hit-time sample alone reported players who were STANDING at impact as airborne (hub `232925`: a victim riding the dm2 `func_train` read **303 units of air** when a quad direct rocket blasted him off it, published as the match's biggest airgib). A hit now qualifies when every position sample in `[hit − preMs, hit − 40 ms]` (default **100 ms**) reads ≥ 96 units above floor — the preceding tick deciding when the window holds no sample (old coarse-tick demos, recording holes) — and no sample beside the hit reads ground contact (knockback over-reports height but cannot fake a grounded reading, so a victim who fell and landed just before the rocket rejects while one knocked laterally over a higher floor does not). The 100 ms default is aesthetic: floor-relative height is a step function at ledge edges, so longer windows measure time-since-the-edge and drop genuine 300+-unit ledge-drop events. Reported `height`/`loc`/`heightAboveAttacker` come from the latest PRE-IMPACT sample. Detection moved from the analyzer post-processor into [`view.ComputeAirgibs`](#airgibevent), a pure function of the assembled `Result` (the `regionControlPost` / `view.RegionControl` staging): the post-processor bakes the default-options run into the stored `Result`, and mvd-api's `/airgibs` re-runs it per request with `?preMs=` (`0..1000`, `0` = the pre-v73 hit-sample-only rule; outside the range is a 400 `invalid_param`), echoing the effective value as **`preMs`** on the response envelope. Per-hit userids now resolve against the PUBLISHED per-stream session table (`streams.players[].sessions`) rather than an analyzer-internal index — same answers, one clock. Airgibs also now consume **reconstructed** damage (the DAG node binds `damage:final`), so pre-instrumentation demos get a Key-Moments list too — recon's direct/splash split is geometric (explosion endpoint within 48 units) and its timestamps frame-accurate; `damage.source` says which evidence a list rests on (supersedes v71's wire-measured-only gate for airgibs; aim keeps it). |
+| v72 | **Archive-demo contracts: wall-clock anchors, match provenance, final scores, parse census, backpack reconstruction.** `streams.global` gains the wall-clock anchors (`demoStartUnixMs` and the match-start anchor echoed on `/overview` timing), derived from the wire date markers a recorder writes, with monotone floors and honest cross-checks — plus `timelineAnalysis.demoMarkers` for player-inserted bookmarks. `match` gains `mode` and `sources`, naming what each match-level value was decided from rather than presenting a merged answer. `metadata` gains `finalScores` (KTX's `//finalscores` end-of-match scoreline: date, mode, map, both team names and totals) and `matchSettings.fairpacks` (the `Fairpacks setting:` countdown broadcast, `ktx/src/match.c:2086-2107`). New top-level `parseWarnings` — the reader's per-run parse census, published on every run instead of being dropped. `streams.players[].aw` publishes `STAT_ACTIVEWEAPON`, the **wielded** weapon bit (opt-in field code `aw` on `/buckets`, `/stream-slice`, `/state-at`); a different question from the `rl`/`lg`/… inventory intervals. `backpacks[]` gains `source` (`ktx` \| `reconstructed`): the hint path stamps `ktx`, and a new post-processor fills the section on demos older than the `//ktx drop` hint by replaying `DropBackpack`'s own rule over `aw` at each in-match death. The two provenances are never mixed in one demo, and a reconstructed row's PICKUP side rides the drop row instead of `weaponPickups`: new `backpacks[].fate` (`picked` \| `expired` \| `unobserved`) with `picker`, `pickerTeam` and `pickupTime`, plus an `entNum` naming the bound backpack-model entity. The linkage node binds each reconstructed drop to the pack that appears at its time and place, follows that pack's origin updates to where it settled, and reads the disappearance as the server would — the bounding-box overlap that runs `BackpackTouch`. New parser events feed it: `ItemStateEvent` now carries the entity origin at each visibility transition, and `ItemMoveEvent` reports a visible item entity's origin changes (map items never move; a tossed backpack does). A `ktx` row carries `fate` too, but only ever `expired` and only from a wire hint of its own: KTX's third backpack directive `//ktx expire <ent>` (`ktx/src/g_spawn.c:196-210`, new `BackpackExpireHintEvent`) announces a pack `SUB_Remove` took untaken, which the `weaponPickups` join cannot state — an absent `fate` on a `ktx` row means "ask `weaponPickups`", never "nobody took it". Measured with every hint withheld on 223 demos: 100.00% precision / 96.13% recall on picked-vs-not, 99.98% of named pickers correct, and `expired` 100.00% precision / 100.00% recall against the packs `//ktx expire` names. Both provenances now publish the pack's own origin — the victim's position less KTX's 24-unit drop offset (`items.c:2703-2704`) — so backpack `origin` z values move by −24 against v71. |
 | v71 | **Reconstructed damage for pre-instrumentation demos + damage provenance.** `damage` gains `source` (`ktx` \| `reconstructed`): the KTX analyzer stamps `ktx` on every wire-decoded section (a stored-Result change — goldens move), and the new `damage-recon` post-processor (package `mvd-analytics/damagerecon`) fills the section on demos whose wire never carried `mvdhidden_dmgdone` (~45% of the archive — `/damage` and the damage-shaped views 422'd there before). The reconstruction reads the health/armor change streams (the observed delta IS the bounded value), LG beams, projectile entity flights, fire sounds, position/velocity tracks and the frag log; both families, same shapes, same match window; per-player match totals validated at ~1% median error against KTX ground truth on modern demos (`damagerecon/ACCURACY.md`). Requires the spatial shot streams (mvd-api/WASM always; CLI `-include projectiles,beams`); never overwrites a measured section; stands down on `skipped:*` modes. `playerStats` binds the `damage:final` artifact, so its damage family now exists on old demos too, marked `src: "reconstructed"` (aim and airgibs deliberately keep wire-measured damage only). On reconstructed sections the victim-weapon fields are withheld when the recording froze its weapon bits (see the damage section notes). The `shots` stream gains the axe: `weapons/ax1.wav` (one swing sound per attack) maps to `weapon: "axe"`, with damage linking at the swing's real +200ms traceline delay — new rows in the shot stream, `byPlayer`, the reconciliation and the aim weapon counters. New `streams.pointEffects` (rides the shot-streams gate): every point-effect temp entity as columns t/ty/c/x/y/z — TE_BLOOD (per-volley hitscan hit telemetry with pellet count), TE_LIGHTNINGBLOOD (LG hit), TE_EXPLOSION (exact detonation point), TE_GUNSHOT (miss pattern) and the rest, the wire evidence the reconstruction consumes. `aim` gains a required top-level `hitsMeasured` flag and `weapons[].hits` becomes omitempty: on reconstructed/absent damage every hit-derived counter (hits, pellet full/partial/miss, direct/splash, the LG whiff classes, the sample `hit` columns) is withheld rather than fabricated as zero. `boundedMode` gains five skip reasons (`skipped:ca/wipeout/ra/lgc/race`). |
 | v70 | **`/overview` becomes a capability manifest instead of a highlights reel.** The stored `Result` gains **no field** — this is an mvd-api response-shape bump, and the first BREAKING one in a while: fields are REMOVED. Gone are `topKills`, `topStreaks` and `topPowerups`, measured across the corpus at 78-88% of the response (`topKills` alone 62-77%), every one of them a copy of a dedicated endpoint — `/top-kills` at its own defaults, and `/lives` + `/events?type=streak,powerup` field for field. Gone too is `hasRegionControl`, folded into the new block. Added is **`available`**, one flag per detailed view, each mirroring the predicate behind that view's 422, so a `false` is exactly the 422 the call would have returned: `demoInfo`, `metadata`, `frags`, `damage`, `shots`, `aim`, `locGraph`, `opening`, `playerStats`, `regionControl`, plus the three a consumer could not previously infer AT ALL — **`height`**, **`liquid`** and **`los`** — which turn on which map BSPs the SERVER was provisioned with rather than on what the demo recorded, so the same demo answers differently on two deployments. Like every other flag in the block these report **measured, not non-zero**: a gate that opens fills its column for every position sample, so a map with no water yields an all-zero `lq` and `liquid` stays **true** — a measured *dry*, distinguishable from the unprovisioned `false` where the question is simply unanswerable. `height` and `liquid` ride separate gates (collision hull vs vis BSP) and can disagree. There is deliberately no `pvs` flag: PVS and LOS come off one pass behind one BSP gate (PVS ⊇ LOS by construction), so two flags could never disagree. `los` is the one PREDICTION in the block — the pass is heavy and lazy, so it reports the cheap half of the gate (streams, 2+ players, a provisioned BSP) and a provisioned-but-unvised BSP still 422s. A drift test pins the manifest to the 422 table, which is exactly what the removed ad-hoc `has*` fields never had and why they went stale. |
 | v69 | **The victim-weapon axis: `byEnemyWeapon` on kills and damage.** Every per-weapon figure in `playerStats` was keyed on the ATTACKER's weapon; this bump adds the complement — the same kills and the same damage split by what the **victim** was holding when it landed, the weapon-denial question. `score.byEnemyWeapon` partitions `score.kills`, `damage.byEnemyWeapon` partitions `damage.given`, and both use one exclusive vocabulary: `both` / `rl` / `lg` / `mid` / `sg` (plus `unknown` on the kill side, for a victim with no stream). **`both` is the trap and the point**: "enemy RLs killed" is `rl + both`, never `rl` alone. Both are **DERIVED on every demo carrying streams**, never overlaid — KTX's own `ekills` counts the kill side inclusively (a victim holding RL+LG bumps both) and force-zeroes axe/sg plus every bucket on `deathmatch >= 4` / `k_instagib` (`ktx/src/stats_json.c:377-380`), while for damage the server keeps only the RL+LG-lumped `dmg_eweapon` scalar. Ours reproduces KTX exactly where KTX measures honestly — `rl + both == ekills.rl` on all 44 cached demos, every player, both weapons — and additionally covers telefrags/stomps and old demos with no demoinfo block. `damage.enemyWeapons` stays as the `lg + rl + both` summary it always was. Measuredness: the kill map rides the kill family (absent exactly when `kills` is), the damage map rides the damage STREAM (present exactly when `taken` is). The stored `Result` DOES change — this is computed in the analyzer, not folded in at read time — so the golden corpus moves. Web: the Summary tab's Basic Stats swaps `RL K` / `LG K` for `eRL` / `eLG`, the metric that was nowhere, since kills made WITH each weapon are already in the Weapon Stats tab. See [The victim-weapon axis](#the-victim-weapon-axis-byenemyweapon-schema-v69). | Also adds **`score.byWeaponVsEnemyWeapon`**, the joint distribution the two kill maps are marginals of — killer weapon → victim bucket → kills — because marginals cannot answer "how many of my LG kills were against enemies carrying an RL". Summing it over inner keys reproduces `byWeapon` and over outer keys `byEnemyWeapon`, an identity guaranteed by construction (the marginal is summed FROM the cross-tab) and asserted on every golden demo.

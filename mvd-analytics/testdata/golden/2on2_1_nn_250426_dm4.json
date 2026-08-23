@@ -26289,9 +26289,10 @@
       "origin": [
         349.25,
         -404.5,
-        -104
+        -128
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 5234,
       "weapon": "lg"
@@ -26302,9 +26303,10 @@
       "origin": [
         128.25,
         -244.75,
-        -31.25
+        -55.25
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 9398,
       "weapon": "lg"
@@ -26315,9 +26317,10 @@
       "origin": [
         318,
         -518.625,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 10603,
       "weapon": "rl"
@@ -26328,9 +26331,10 @@
       "origin": [
         -62.5,
         -214.375,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 12416,
       "weapon": "rl"
@@ -26341,9 +26345,10 @@
       "origin": [
         339.875,
         -633.375,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 13935,
       "weapon": "rl"
@@ -26354,9 +26359,10 @@
       "origin": [
         44.5,
         -234.125,
-        -70.625
+        -94.625
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 15167,
       "weapon": "lg"
@@ -26367,9 +26373,10 @@
       "origin": [
         39.375,
         -253.875,
-        -295.25
+        -319.25
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 19809,
       "weapon": "rl"
@@ -26380,9 +26387,10 @@
       "origin": [
         878.375,
         -356.5,
-        13.5
+        -10.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 19984,
       "weapon": "lg"
@@ -26393,9 +26401,10 @@
       "origin": [
         232.5,
         -493.375,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 25639,
       "weapon": "rl"
@@ -26406,9 +26415,10 @@
       "origin": [
         112,
         -311.5,
-        7.875
+        -16.125
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 29026,
       "weapon": "rl"
@@ -26419,9 +26429,10 @@
       "origin": [
         830,
         -267.625,
-        25.25
+        1.25
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 35414,
       "weapon": "rl"
@@ -26432,9 +26443,10 @@
       "origin": [
         346.125,
         -168.25,
-        -167.125
+        -191.125
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 42927,
       "weapon": "rl"
@@ -26445,9 +26457,10 @@
       "origin": [
         382.625,
         -847.875,
-        20.375
+        -3.625
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 46371,
       "weapon": "rl"
@@ -26458,9 +26471,10 @@
       "origin": [
         484,
         -212.625,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 51234,
       "weapon": "rl"
@@ -26471,22 +26485,25 @@
       "origin": [
         260.25,
         -752,
-        58.875
+        34.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 56496,
       "weapon": "rl"
     },
     {
       "entNum": 94,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         256.625,
         -175.875,
-        -359.375
+        -383.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 64250,
       "weapon": "rl"
@@ -26497,9 +26514,10 @@
       "origin": [
         656,
         -190.25,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 69108,
       "weapon": "lg"
@@ -26510,9 +26528,10 @@
       "origin": [
         98.25,
         -247.5,
-        -266.375
+        -290.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 75055,
       "weapon": "rl"
@@ -26523,9 +26542,10 @@
       "origin": [
         235.75,
         -526.125,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 79678,
       "weapon": "lg"
@@ -26536,9 +26556,10 @@
       "origin": [
         767.375,
         -632.625,
-        -187.125
+        -211.125
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 84182,
       "weapon": "lg"
@@ -26549,9 +26570,10 @@
       "origin": [
         454.625,
         -271.875,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 88403,
       "weapon": "rl"
@@ -26562,9 +26584,10 @@
       "origin": [
         199,
         -189.5,
-        -296
+        -320
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 90189,
       "weapon": "rl"
@@ -26575,9 +26598,10 @@
       "origin": [
         426.875,
         -525.5,
-        44
+        20
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 94431,
       "weapon": "lg"
@@ -26588,9 +26612,10 @@
       "origin": [
         624,
         -123,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 98849,
       "weapon": "rl"
@@ -26601,9 +26626,10 @@
       "origin": [
         397,
         -213.125,
-        -306.25
+        -330.25
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 99889,
       "weapon": "lg"
@@ -26614,9 +26640,10 @@
       "origin": [
         257.625,
         -241.75,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 99889,
       "weapon": "lg"
@@ -26627,9 +26654,10 @@
       "origin": [
         433,
         -268.375,
-        -258.75
+        -282.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 104085,
       "weapon": "rl"
@@ -26640,9 +26668,10 @@
       "origin": [
         65,
         -229.875,
-        -31.875
+        -55.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 110734,
       "weapon": "lg"
@@ -26653,9 +26682,10 @@
       "origin": [
         304,
         -564.625,
-        -102.375
+        -126.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 116588,
       "weapon": "lg"
@@ -26666,9 +26696,10 @@
       "origin": [
         545,
         -30.875,
-        24
+        0
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 117390,
       "weapon": "rl"
@@ -26679,9 +26710,10 @@
       "origin": [
         261.875,
         -432,
-        -45.5
+        -69.5
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 119029,
       "weapon": "rl"
@@ -26692,9 +26724,10 @@
       "origin": [
         208,
         -752.5,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 123679,
       "weapon": "lg"
@@ -26705,22 +26738,25 @@
       "origin": [
         229.875,
         -251,
-        -268.25
+        -292.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 125417,
       "weapon": "rl"
     },
     {
       "entNum": 98,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         428.375,
         -338.25,
-        -53.5
+        -77.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 132025,
       "weapon": "lg"
@@ -26731,9 +26767,10 @@
       "origin": [
         600.625,
         -232.875,
-        -311
+        -335
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 132743,
       "weapon": "rl"
@@ -26744,9 +26781,10 @@
       "origin": [
         618,
         -100.125,
-        24
+        0
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 145715,
       "weapon": "lg"
@@ -26757,9 +26795,10 @@
       "origin": [
         113.25,
         -496.125,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 146353,
       "weapon": "rl"
@@ -26770,9 +26809,10 @@
       "origin": [
         318,
         -573.375,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 147066,
       "weapon": "lg"
@@ -26783,9 +26823,10 @@
       "origin": [
         212.625,
         -428.75,
-        -104
+        -128
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 151002,
       "weapon": "lg"
@@ -26796,9 +26837,10 @@
       "origin": [
         438.75,
         -520.125,
-        39.875
+        15.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 153315,
       "weapon": "rl"
@@ -26809,9 +26851,10 @@
       "origin": [
         461.25,
         -148.625,
-        -97.875
+        -121.875
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 158404,
       "weapon": "rl"
@@ -26822,22 +26865,25 @@
       "origin": [
         -24,
         -244.625,
-        -93.5
+        -117.5
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 159496,
       "weapon": "lg"
     },
     {
       "entNum": 37,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         460.75,
         -354.5,
-        -104
+        -128
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 163027,
       "weapon": "rl"
@@ -26848,9 +26894,10 @@
       "origin": [
         609.375,
         -349.625,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 165886,
       "weapon": "rl"
@@ -26861,9 +26908,10 @@
       "origin": [
         580.875,
         -374.75,
-        -104
+        -128
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 166781,
       "weapon": "lg"
@@ -26874,9 +26922,10 @@
       "origin": [
         625.5,
         -294.25,
-        -120.125
+        -144.125
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 167803,
       "weapon": "lg"
@@ -26887,9 +26936,10 @@
       "origin": [
         507.375,
         -261.25,
-        -310
+        -334
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 168596,
       "weapon": "lg"
@@ -26900,9 +26950,10 @@
       "origin": [
         641.125,
         -91.625,
-        -296
+        -320
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 173092,
       "weapon": "rl"
@@ -26913,22 +26964,24 @@
       "origin": [
         208.125,
         -273.625,
-        -61.375
+        -85.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 180837,
       "weapon": "lg"
     },
     {
       "entNum": 96,
-      "loc": "high",
+      "loc": "GL",
       "origin": [
         485.25,
         -511.875,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 189194,
       "weapon": "rl"
@@ -26939,9 +26992,10 @@
       "origin": [
         569,
         -2,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 189391,
       "weapon": "lg"
@@ -26952,9 +27006,10 @@
       "origin": [
         482.875,
         -64.375,
-        -102.375
+        -126.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 192071,
       "weapon": "lg"
@@ -26965,9 +27020,10 @@
       "origin": [
         621.875,
         -288.625,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 194107,
       "weapon": "lg"
@@ -26978,9 +27034,10 @@
       "origin": [
         1026.625,
         -584.875,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 202581,
       "weapon": "lg"
@@ -26991,9 +27048,10 @@
       "origin": [
         458.5,
         -219.75,
-        -74.75
+        -98.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 208481,
       "weapon": "rl"
@@ -27004,9 +27062,10 @@
       "origin": [
         368,
         -655.875,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 211845,
       "weapon": "rl"
@@ -27017,9 +27076,10 @@
       "origin": [
         0.125,
         -271.25,
-        -72
+        -96
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 212210,
       "weapon": "rl"
@@ -27030,9 +27090,10 @@
       "origin": [
         -143.75,
         -404.125,
-        -72
+        -96
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 217754,
       "weapon": "rl"
@@ -27043,9 +27104,10 @@
       "origin": [
         186.75,
         -441.125,
-        24
+        0
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 223099,
       "weapon": "rl"
@@ -27056,9 +27118,10 @@
       "origin": [
         565.375,
         -432,
-        -105.5
+        -129.5
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 223458,
       "weapon": "lg"
@@ -27069,9 +27132,10 @@
       "origin": [
         568.5,
         -108.5,
-        -103
+        -127
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 227365,
       "weapon": "lg"
@@ -27082,9 +27146,10 @@
       "origin": [
         544,
         -489.875,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 232243,
       "weapon": "rl"
@@ -27095,9 +27160,10 @@
       "origin": [
         368,
         -746,
-        24.25
+        0.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 235886,
       "weapon": "rl"
@@ -27108,9 +27174,10 @@
       "origin": [
         773.125,
         -715.125,
-        -200
+        -224
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 238649,
       "weapon": "rl"
@@ -27121,9 +27188,10 @@
       "origin": [
         381.875,
         -176.875,
-        -296
+        -320
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 251436,
       "weapon": "rl"
@@ -27134,22 +27202,25 @@
       "origin": [
         841.625,
         -400.25,
-        8.125
+        -15.875
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 251556,
       "weapon": "rl"
     },
     {
       "entNum": 94,
+      "fate": "expired",
       "loc": "LG.GA",
       "origin": [
         356.375,
         -107.875,
-        -90.25
+        -114.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 256456,
       "weapon": "lg"
@@ -27160,9 +27231,10 @@
       "origin": [
         513.5,
         -87.5,
-        -103.75
+        -127.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 260889,
       "weapon": "rl"
@@ -27173,9 +27245,10 @@
       "origin": [
         537.75,
         -275.125,
-        -97.125
+        -121.125
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 260964,
       "weapon": "lg"
@@ -27186,9 +27259,10 @@
       "origin": [
         675.375,
         -167.75,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 263651,
       "weapon": "lg"
@@ -27199,9 +27273,10 @@
       "origin": [
         591.25,
         -353.75,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 266547,
       "weapon": "lg"
@@ -27212,9 +27287,10 @@
       "origin": [
         233.25,
         -220.375,
-        -277.625
+        -301.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 269324,
       "weapon": "rl"
@@ -27225,9 +27301,10 @@
       "origin": [
         533,
         -208,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 269873,
       "weapon": "rl"
@@ -27238,9 +27315,10 @@
       "origin": [
         216,
         -505.25,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 276179,
       "weapon": "rl"
@@ -27251,9 +27329,10 @@
       "origin": [
         134.375,
         -246.25,
-        -71.75
+        -95.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 284736,
       "weapon": "rl"
@@ -27264,22 +27343,25 @@
       "origin": [
         88.25,
         -255.375,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 287036,
       "weapon": "rl"
     },
     {
       "entNum": 98,
+      "fate": "expired",
       "loc": "Quad.stairs",
       "origin": [
         197,
         -239.5,
-        -66
+        -90
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 290580,
       "weapon": "lg"
@@ -27290,9 +27372,10 @@
       "origin": [
         494.75,
         -322.25,
-        -106.5
+        -130.5
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 294473,
       "weapon": "lg"
@@ -27303,22 +27386,25 @@
       "origin": [
         239.75,
         -463.625,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 306821,
       "weapon": "lg"
     },
     {
       "entNum": 97,
+      "fate": "expired",
       "loc": "LG",
       "origin": [
         400.375,
         -336.5,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 310448,
       "weapon": "rl"
@@ -27329,9 +27415,10 @@
       "origin": [
         613.625,
         -144.625,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 310729,
       "weapon": "lg"
@@ -27342,9 +27429,10 @@
       "origin": [
         221.5,
         -226.5,
-        -296
+        -320
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 318040,
       "weapon": "rl"
@@ -27355,9 +27443,10 @@
       "origin": [
         268.5,
         -219,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 323924,
       "weapon": "rl"
@@ -27368,22 +27457,25 @@
       "origin": [
         543.375,
         -423.625,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 326181,
       "weapon": "lg"
     },
     {
       "entNum": 99,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         365.625,
         -122.25,
-        -257
+        -281
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 328423,
       "weapon": "rl"
@@ -27394,9 +27486,10 @@
       "origin": [
         370.75,
         -240.25,
-        -294.75
+        -318.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 332167,
       "weapon": "lg"
@@ -27407,9 +27500,10 @@
       "origin": [
         473,
         -218,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 337288,
       "weapon": "rl"
@@ -27420,9 +27514,10 @@
       "origin": [
         21.875,
         -272,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 344292,
       "weapon": "rl"
@@ -27433,9 +27528,10 @@
       "origin": [
         304,
         -664.125,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 349145,
       "weapon": "lg"
@@ -27446,9 +27542,10 @@
       "origin": [
         459.25,
         -238.625,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 350879,
       "weapon": "rl"
@@ -27459,9 +27556,10 @@
       "origin": [
         164.75,
         -245,
-        -266.125
+        -290.125
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 352664,
       "weapon": "rl"
@@ -27472,9 +27570,10 @@
       "origin": [
         786.375,
         -837.75,
-        -232
+        -256
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 353547,
       "weapon": "rl"
@@ -27485,9 +27584,10 @@
       "origin": [
         76.25,
         -231.5,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 355732,
       "weapon": "rl"
@@ -27498,9 +27598,10 @@
       "origin": [
         486.875,
         -197.875,
-        65.625
+        41.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 356027,
       "weapon": "lg"
@@ -27511,9 +27612,10 @@
       "origin": [
         567.25,
         -10.75,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 359872,
       "weapon": "lg"
@@ -27524,22 +27626,25 @@
       "origin": [
         116.125,
         -211,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 362741,
       "weapon": "rl"
     },
     {
       "entNum": 161,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         287,
         -99.75,
-        -250.75
+        -274.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 366651,
       "weapon": "rl"
@@ -27550,9 +27655,10 @@
       "origin": [
         269.5,
         -270.5,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 368528,
       "weapon": "rl"
@@ -27563,9 +27669,10 @@
       "origin": [
         371.875,
         -517.125,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 372068,
       "weapon": "lg"
@@ -27576,9 +27683,10 @@
       "origin": [
         522,
         -19.375,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 374860,
       "weapon": "lg"
@@ -27589,9 +27697,10 @@
       "origin": [
         220.25,
         -243.625,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 377831,
       "weapon": "rl"
@@ -27602,22 +27711,25 @@
       "origin": [
         152,
         -245.375,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 383703,
       "weapon": "rl"
     },
     {
       "entNum": 95,
+      "fate": "expired",
       "loc": "low",
       "origin": [
         155.25,
         -168.375,
-        -434.625
+        -458.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 384494,
       "weapon": "lg"
@@ -27628,9 +27740,10 @@
       "origin": [
         -87.625,
         -216.25,
-        -296
+        -320
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 388665,
       "weapon": "rl"
@@ -27641,9 +27754,10 @@
       "origin": [
         509.125,
         -188.25,
-        67.75
+        43.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 398291,
       "weapon": "rl"
@@ -27654,9 +27768,10 @@
       "origin": [
         286.5,
         -421.625,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 398650,
       "weapon": "rl"
@@ -27667,9 +27782,10 @@
       "origin": [
         562.875,
         -201.25,
-        32
+        8
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 401327,
       "weapon": "rl"
@@ -27680,9 +27796,10 @@
       "origin": [
         449.5,
         -271.625,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 403288,
       "weapon": "rl"
@@ -27693,9 +27810,10 @@
       "origin": [
         315.625,
         -209.625,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 406579,
       "weapon": "rl"
@@ -27706,9 +27824,10 @@
       "origin": [
         430.5,
         -522.375,
-        -104
+        -128
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 407122,
       "weapon": "rl"
@@ -27719,22 +27838,24 @@
       "origin": [
         367.5,
         -174,
-        -189.375
+        -213.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 410548,
       "weapon": "lg"
     },
     {
       "entNum": 37,
-      "loc": "high",
+      "loc": "GL",
       "origin": [
         496.25,
         -511.875,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 411591,
       "weapon": "lg"
@@ -27745,9 +27866,10 @@
       "origin": [
         624,
         -116.625,
-        24
+        0
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 415989,
       "weapon": "lg"
@@ -27758,9 +27880,10 @@
       "origin": [
         138.875,
         -284.75,
-        -56
+        -80
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 416964,
       "weapon": "lg"
@@ -27771,9 +27894,10 @@
       "origin": [
         612.125,
         -88.125,
-        27.875
+        3.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 424094,
       "weapon": "lg"
@@ -27784,9 +27908,10 @@
       "origin": [
         539.125,
         -67.875,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 425094,
       "weapon": "rl"
@@ -27797,9 +27922,10 @@
       "origin": [
         496.625,
         -225.125,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 429378,
       "weapon": "rl"
@@ -27810,9 +27936,10 @@
       "origin": [
         639.5,
         -284.25,
-        -48.5
+        -72.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 431624,
       "weapon": "lg"
@@ -27823,9 +27950,10 @@
       "origin": [
         25.5,
         -272,
-        -298.375
+        -322.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 439694,
       "weapon": "rl"
@@ -27836,9 +27964,10 @@
       "origin": [
         494.875,
         -247.25,
-        -113.625
+        -137.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 443102,
       "weapon": "lg"
@@ -27849,9 +27978,10 @@
       "origin": [
         588.625,
         -170.25,
-        24
+        0
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 451119,
       "weapon": "lg"
@@ -27862,9 +27992,10 @@
       "origin": [
         1087.125,
         -603.125,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 459849,
       "weapon": "lg"
@@ -27875,9 +28006,10 @@
       "origin": [
         263.625,
         -447,
-        -101.375
+        -125.375
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 470390,
       "weapon": "rl"
@@ -27888,9 +28020,10 @@
       "origin": [
         559.375,
         -349.25,
-        -104
+        -128
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 470892,
       "weapon": "lg"
@@ -27901,22 +28034,25 @@
       "origin": [
         863.125,
         -270.25,
-        47.25
+        23.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 478459,
       "weapon": "rl"
     },
     {
       "entNum": 37,
+      "fate": "expired",
       "loc": "GL",
       "origin": [
         234.875,
         -333.5,
-        -131.875
+        -155.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 480397,
       "weapon": "lg"
@@ -27927,9 +28063,10 @@
       "origin": [
         328.375,
         -237.625,
-        -268.5
+        -292.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 482483,
       "weapon": "lg"
@@ -27940,9 +28077,10 @@
       "origin": [
         912.375,
         -432,
-        -1.25
+        -25.25
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 483194,
       "weapon": "rl"
@@ -27953,9 +28091,10 @@
       "origin": [
         368,
         -661.5,
-        24
+        0
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 496229,
       "weapon": "rl"
@@ -27966,9 +28105,10 @@
       "origin": [
         44,
         -244.5,
-        -265.75
+        -289.75
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 499003,
       "weapon": "rl"
@@ -27979,9 +28119,10 @@
       "origin": [
         285,
         -393.75,
-        -104
+        -128
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 499591,
       "weapon": "rl"
@@ -27992,9 +28133,10 @@
       "origin": [
         789,
         -419.5,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 501624,
       "weapon": "rl"
@@ -28005,9 +28147,10 @@
       "origin": [
         227.875,
         -201.625,
-        -253.5
+        -277.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 503041,
       "weapon": "rl"
@@ -28018,22 +28161,24 @@
       "origin": [
         112,
         -289.125,
-        -243
+        -267
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 507229,
       "weapon": "rl"
     },
     {
       "entNum": 96,
-      "loc": "high",
+      "loc": "GL",
       "origin": [
         411.5,
         -430,
-        -50.25
+        -74.25
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 508363,
       "weapon": "rl"
@@ -28044,9 +28189,10 @@
       "origin": [
         17.375,
         -233.75,
-        -281.375
+        -305.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 512016,
       "weapon": "rl"
@@ -28057,9 +28203,10 @@
       "origin": [
         123.375,
         -231,
-        -296
+        -320
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 514899,
       "weapon": "lg"
@@ -28070,9 +28217,10 @@
       "origin": [
         -6.125,
         -260.25,
-        -306.25
+        -330.25
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 517533,
       "weapon": "lg"
@@ -28083,9 +28231,10 @@
       "origin": [
         455.125,
         -864,
-        43
+        19
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 522696,
       "weapon": "rl"
@@ -28096,9 +28245,10 @@
       "origin": [
         534,
         -501.875,
-        24
+        0
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 527029,
       "weapon": "rl"
@@ -28109,9 +28259,10 @@
       "origin": [
         112,
         -319,
-        -40
+        -64
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 538328,
       "weapon": "lg"
@@ -28122,9 +28273,10 @@
       "origin": [
         593.875,
         -362.75,
-        -104
+        -128
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 539946,
       "weapon": "rl"
@@ -28135,9 +28287,10 @@
       "origin": [
         397.125,
         -181.75,
-        -296
+        -320
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 540363,
       "weapon": "rl"
@@ -28148,9 +28301,10 @@
       "origin": [
         287.75,
         -435.75,
-        67.875
+        43.875
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 547042,
       "weapon": "rl"
@@ -28161,9 +28315,10 @@
       "origin": [
         337.75,
         -258.875,
-        -177
+        -201
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 547530,
       "weapon": "lg"
@@ -28174,9 +28329,10 @@
       "origin": [
         389.125,
         -124.5,
-        -277.625
+        -301.625
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 552195,
       "weapon": "rl"
@@ -28187,9 +28343,10 @@
       "origin": [
         368,
         -1208.125,
-        -24
+        -48
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 557041,
       "weapon": "lg"
@@ -28200,9 +28357,10 @@
       "origin": [
         433.375,
         -215.5,
-        -311.125
+        -335.125
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 561862,
       "weapon": "rl"
@@ -28213,9 +28371,10 @@
       "origin": [
         112,
         -331.625,
-        -20.375
+        -44.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 563162,
       "weapon": "lg"
@@ -28226,9 +28385,10 @@
       "origin": [
         609.25,
         -107,
-        58.375
+        34.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 563584,
       "weapon": "rl"
@@ -28239,9 +28399,10 @@
       "origin": [
         522.75,
         -211.875,
-        -104
+        -128
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 564319,
       "weapon": "lg"
@@ -28252,9 +28413,10 @@
       "origin": [
         91.375,
         -260.25,
-        -254.875
+        -278.875
       ],
       "player": "squeeze",
+      "source": "ktx",
       "team": "1",
       "time": 568653,
       "weapon": "rl"
@@ -28265,9 +28427,10 @@
       "origin": [
         447.75,
         -73.625,
-        -72.375
+        -96.375
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 579301,
       "weapon": "lg"
@@ -28278,9 +28441,10 @@
       "origin": [
         507,
         -437.875,
-        57.75
+        33.75
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 580078,
       "weapon": "rl"
@@ -28291,9 +28455,10 @@
       "origin": [
         490.75,
         -322.875,
-        29.375
+        5.375
       ],
       "player": "Milton",
+      "source": "ktx",
       "team": "1",
       "time": 580078,
       "weapon": "rl"
@@ -28304,9 +28469,10 @@
       "origin": [
         -27.375,
         -215.375,
-        -269.5
+        -293.5
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 589780,
       "weapon": "rl"
@@ -28317,9 +28483,10 @@
       "origin": [
         411.875,
         -869.25,
-        33.5
+        9.5
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 590259,
       "weapon": "rl"
@@ -28330,9 +28497,10 @@
       "origin": [
         265.875,
         -267.375,
-        -255.625
+        -279.625
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 594220,
       "weapon": "rl"
@@ -28343,9 +28511,10 @@
       "origin": [
         -1.875,
         -271.75,
-        -296
+        -320
       ],
       "player": "stepcop",
+      "source": "ktx",
       "team": "n n",
       "time": 598103,
       "weapon": "rl"
@@ -28356,9 +28525,10 @@
       "origin": [
         363.5,
         -217.375,
-        -296
+        -320
       ],
       "player": "shazam",
+      "source": "ktx",
       "team": "n n",
       "time": 598973,
       "weapon": "rl"
@@ -48860,6 +49030,7 @@
     "gameDir": "qw",
     "map": "dm4",
     "mapTitle": "The Bad Place",
+    "mode": "team",
     "players": [
       {
         "deaths": 50,
@@ -48894,6 +49065,11 @@
         "team": "1"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "derived"
+    },
     "teams": [
       {
         "frags": 125,
@@ -53681,6 +53857,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  T e a m\nRespawns  KT2\nAntilag     2\nTeamplay    2\nTimelimit  10\nOvertime    3\nSOCDv2  stats\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 25, 13:17",
+      "map": "dm4",
+      "mode": "team",
+      "score1": 125,
+      "score2": 87,
+      "team1": "1",
+      "team2": "n n"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -55303,7 +55488,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {
@@ -79485,11 +79670,42 @@
   },
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10160,
+          "kind": "matchStart",
+          "raw": "2026-04-25 13:07:15 CEST",
+          "source": "matchdate",
+          "tz": "CEST",
+          "unixMs": 1777115235000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-04-25 13:17:15 +0200",
+          "source": "ktxstats",
+          "tz": "+0200",
+          "unixMs": 1777115835000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 25, 13:17",
+          "source": "finalscores",
+          "unixMs": 1777123020000,
+          "yearFrom": "epoch"
+        }
+      ],
       "demoOffset": 10160,
       "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
       "demoStartUnixMs": 1777115225000,
       "matchEnd": 600050,
-      "matchStart": 0
+      "matchEndUnixMs": 1777115835000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1777115235160
     },
     "players": [
       {
@@ -79553,6 +79769,632 @@
           {
             "t": 596999,
             "v": "ga"
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 2286,
+            "v": 64
+          },
+          {
+            "t": 6236,
+            "v": 1
+          },
+          {
+            "t": 11561,
+            "v": 64
+          },
+          {
+            "t": 16107,
+            "v": 1
+          },
+          {
+            "t": 18554,
+            "v": 32
+          },
+          {
+            "t": 20761,
+            "v": 1
+          },
+          {
+            "t": 21922,
+            "v": 2
+          },
+          {
+            "t": 24649,
+            "v": 64
+          },
+          {
+            "t": 37271,
+            "v": 2
+          },
+          {
+            "t": 37922,
+            "v": 32
+          },
+          {
+            "t": 46792,
+            "v": 2
+          },
+          {
+            "t": 48751,
+            "v": 32
+          },
+          {
+            "t": 51319,
+            "v": 64
+          },
+          {
+            "t": 52137,
+            "v": 32
+          },
+          {
+            "t": 54562,
+            "v": 64
+          },
+          {
+            "t": 59151,
+            "v": 32
+          },
+          {
+            "t": 62598,
+            "v": 2
+          },
+          {
+            "t": 63873,
+            "v": 64
+          },
+          {
+            "t": 65883,
+            "v": 32
+          },
+          {
+            "t": 67720,
+            "v": 64
+          },
+          {
+            "t": 68111,
+            "v": 32
+          },
+          {
+            "t": 70802,
+            "v": 64
+          },
+          {
+            "t": 71049,
+            "v": 32
+          },
+          {
+            "t": 74172,
+            "v": 64
+          },
+          {
+            "t": 75983,
+            "v": 32
+          },
+          {
+            "t": 78910,
+            "v": 64
+          },
+          {
+            "t": 80600,
+            "v": 1
+          },
+          {
+            "t": 89438,
+            "v": 32
+          },
+          {
+            "t": 96731,
+            "v": 64
+          },
+          {
+            "t": 97498,
+            "v": 32
+          },
+          {
+            "t": 99708,
+            "v": 1
+          },
+          {
+            "t": 101083,
+            "v": 2
+          },
+          {
+            "t": 108153,
+            "v": 64
+          },
+          {
+            "t": 111075,
+            "v": 1
+          },
+          {
+            "t": 115235,
+            "v": 64
+          },
+          {
+            "t": 116782,
+            "v": 1
+          },
+          {
+            "t": 120312,
+            "v": 64
+          },
+          {
+            "t": 124595,
+            "v": 1
+          },
+          {
+            "t": 127210,
+            "v": 32
+          },
+          {
+            "t": 133136,
+            "v": 1
+          },
+          {
+            "t": 134549,
+            "v": 32
+          },
+          {
+            "t": 138819,
+            "v": 64
+          },
+          {
+            "t": 146305,
+            "v": 32
+          },
+          {
+            "t": 147197,
+            "v": 1
+          },
+          {
+            "t": 148328,
+            "v": 2
+          },
+          {
+            "t": 151431,
+            "v": 64
+          },
+          {
+            "t": 159871,
+            "v": 1
+          },
+          {
+            "t": 160915,
+            "v": 32
+          },
+          {
+            "t": 166106,
+            "v": 64
+          },
+          {
+            "t": 167611,
+            "v": 1
+          },
+          {
+            "t": 170110,
+            "v": 2
+          },
+          {
+            "t": 171825,
+            "v": 64
+          },
+          {
+            "t": 190288,
+            "v": 1
+          },
+          {
+            "t": 192540,
+            "v": 32
+          },
+          {
+            "t": 193949,
+            "v": 64
+          },
+          {
+            "t": 196850,
+            "v": 32
+          },
+          {
+            "t": 202434,
+            "v": 64
+          },
+          {
+            "t": 203534,
+            "v": 1
+          },
+          {
+            "t": 206689,
+            "v": 32
+          },
+          {
+            "t": 212677,
+            "v": 1
+          },
+          {
+            "t": 218274,
+            "v": 32
+          },
+          {
+            "t": 222769,
+            "v": 64
+          },
+          {
+            "t": 223786,
+            "v": 1
+          },
+          {
+            "t": 225290,
+            "v": 32
+          },
+          {
+            "t": 233092,
+            "v": 1
+          },
+          {
+            "t": 238024,
+            "v": 32
+          },
+          {
+            "t": 239580,
+            "v": 1
+          },
+          {
+            "t": 250832,
+            "v": 32
+          },
+          {
+            "t": 252389,
+            "v": 1
+          },
+          {
+            "t": 260833,
+            "v": 64
+          },
+          {
+            "t": 261986,
+            "v": 1
+          },
+          {
+            "t": 263081,
+            "v": 32
+          },
+          {
+            "t": 268977,
+            "v": 64
+          },
+          {
+            "t": 271831,
+            "v": 32
+          },
+          {
+            "t": 276179,
+            "v": 64
+          },
+          {
+            "t": 279443,
+            "v": 32
+          },
+          {
+            "t": 281391,
+            "v": 64
+          },
+          {
+            "t": 284133,
+            "v": 32
+          },
+          {
+            "t": 285277,
+            "v": 64
+          },
+          {
+            "t": 292014,
+            "v": 32
+          },
+          {
+            "t": 297832,
+            "v": 64
+          },
+          {
+            "t": 300942,
+            "v": 32
+          },
+          {
+            "t": 302904,
+            "v": 64
+          },
+          {
+            "t": 311598,
+            "v": 1
+          },
+          {
+            "t": 316663,
+            "v": 32
+          },
+          {
+            "t": 318975,
+            "v": 1
+          },
+          {
+            "t": 324482,
+            "v": 32
+          },
+          {
+            "t": 334415,
+            "v": 64
+          },
+          {
+            "t": 341588,
+            "v": 32
+          },
+          {
+            "t": 342180,
+            "v": 64
+          },
+          {
+            "t": 345716,
+            "v": 32
+          },
+          {
+            "t": 352210,
+            "v": 64
+          },
+          {
+            "t": 354352,
+            "v": 32
+          },
+          {
+            "t": 357338,
+            "v": 64
+          },
+          {
+            "t": 361517,
+            "v": 32
+          },
+          {
+            "t": 362430,
+            "v": 64
+          },
+          {
+            "t": 363899,
+            "v": 32
+          },
+          {
+            "t": 365574,
+            "v": 64
+          },
+          {
+            "t": 372793,
+            "v": 32
+          },
+          {
+            "t": 373786,
+            "v": 64
+          },
+          {
+            "t": 376604,
+            "v": 32
+          },
+          {
+            "t": 378468,
+            "v": 64
+          },
+          {
+            "t": 380466,
+            "v": 32
+          },
+          {
+            "t": 386065,
+            "v": 64
+          },
+          {
+            "t": 398070,
+            "v": 32
+          },
+          {
+            "t": 400488,
+            "v": 64
+          },
+          {
+            "t": 401976,
+            "v": 32
+          },
+          {
+            "t": 403171,
+            "v": 64
+          },
+          {
+            "t": 406307,
+            "v": 32
+          },
+          {
+            "t": 409544,
+            "v": 64
+          },
+          {
+            "t": 412455,
+            "v": 1
+          },
+          {
+            "t": 416763,
+            "v": 64
+          },
+          {
+            "t": 424481,
+            "v": 1
+          },
+          {
+            "t": 427222,
+            "v": 64
+          },
+          {
+            "t": 434458,
+            "v": 32
+          },
+          {
+            "t": 443288,
+            "v": 64
+          },
+          {
+            "t": 445114,
+            "v": 32
+          },
+          {
+            "t": 450904,
+            "v": 64
+          },
+          {
+            "t": 454085,
+            "v": 32
+          },
+          {
+            "t": 455841,
+            "v": 64
+          },
+          {
+            "t": 460724,
+            "v": 1
+          },
+          {
+            "t": 462509,
+            "v": 2
+          },
+          {
+            "t": 465260,
+            "v": 1
+          },
+          {
+            "t": 469584,
+            "v": 64
+          },
+          {
+            "t": 471828,
+            "v": 1
+          },
+          {
+            "t": 472871,
+            "v": 32
+          },
+          {
+            "t": 479751,
+            "v": 64
+          },
+          {
+            "t": 481315,
+            "v": 1
+          },
+          {
+            "t": 482645,
+            "v": 32
+          },
+          {
+            "t": 484039,
+            "v": 1
+          },
+          {
+            "t": 484594,
+            "v": 32
+          },
+          {
+            "t": 497068,
+            "v": 1
+          },
+          {
+            "t": 505730,
+            "v": 64
+          },
+          {
+            "t": 516951,
+            "v": 32
+          },
+          {
+            "t": 522885,
+            "v": 64
+          },
+          {
+            "t": 526536,
+            "v": 32
+          },
+          {
+            "t": 527995,
+            "v": 64
+          },
+          {
+            "t": 539171,
+            "v": 1
+          },
+          {
+            "t": 539961,
+            "v": 32
+          },
+          {
+            "t": 541262,
+            "v": 1
+          },
+          {
+            "t": 544029,
+            "v": 32
+          },
+          {
+            "t": 553302,
+            "v": 64
+          },
+          {
+            "t": 557405,
+            "v": 1
+          },
+          {
+            "t": 560822,
+            "v": 32
+          },
+          {
+            "t": 561935,
+            "v": 1
+          },
+          {
+            "t": 564150,
+            "v": 64
+          },
+          {
+            "t": 565275,
+            "v": 1
+          },
+          {
+            "t": 567783,
+            "v": 32
+          },
+          {
+            "t": 570806,
+            "v": 1
+          },
+          {
+            "t": 576753,
+            "v": 2
+          },
+          {
+            "t": 578223,
+            "v": 1
+          },
+          {
+            "t": 580701,
+            "v": 64
+          },
+          {
+            "t": 587640,
+            "v": 32
+          },
+          {
+            "t": 590328,
+            "v": 64
+          },
+          {
+            "t": 599769,
+            "v": 32
           }
         ],
         "cl": [
@@ -84161,6 +85003,768 @@
           {
             "t": 0,
             "v": ""
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 8255,
+            "v": 64
+          },
+          {
+            "t": 10298,
+            "v": 1
+          },
+          {
+            "t": 12374,
+            "v": 32
+          },
+          {
+            "t": 13497,
+            "v": 1
+          },
+          {
+            "t": 19221,
+            "v": 64
+          },
+          {
+            "t": 22621,
+            "v": 32
+          },
+          {
+            "t": 33601,
+            "v": 64
+          },
+          {
+            "t": 34013,
+            "v": 32
+          },
+          {
+            "t": 35844,
+            "v": 64
+          },
+          {
+            "t": 36151,
+            "v": 32
+          },
+          {
+            "t": 42184,
+            "v": 64
+          },
+          {
+            "t": 42704,
+            "v": 32
+          },
+          {
+            "t": 43860,
+            "v": 1
+          },
+          {
+            "t": 50513,
+            "v": 32
+          },
+          {
+            "t": 52166,
+            "v": 1
+          },
+          {
+            "t": 54546,
+            "v": 32
+          },
+          {
+            "t": 57458,
+            "v": 1
+          },
+          {
+            "t": 60237,
+            "v": 2
+          },
+          {
+            "t": 60802,
+            "v": 1
+          },
+          {
+            "t": 65691,
+            "v": 64
+          },
+          {
+            "t": 84536,
+            "v": 1
+          },
+          {
+            "t": 88248,
+            "v": 32
+          },
+          {
+            "t": 89228,
+            "v": 1
+          },
+          {
+            "t": 93441,
+            "v": 64
+          },
+          {
+            "t": 95302,
+            "v": 1
+          },
+          {
+            "t": 98757,
+            "v": 64
+          },
+          {
+            "t": 100211,
+            "v": 1
+          },
+          {
+            "t": 103649,
+            "v": 32
+          },
+          {
+            "t": 105121,
+            "v": 1
+          },
+          {
+            "t": 113568,
+            "v": 32
+          },
+          {
+            "t": 118301,
+            "v": 1
+          },
+          {
+            "t": 122999,
+            "v": 32
+          },
+          {
+            "t": 125513,
+            "v": 64
+          },
+          {
+            "t": 126929,
+            "v": 32
+          },
+          {
+            "t": 132457,
+            "v": 64
+          },
+          {
+            "t": 137598,
+            "v": 32
+          },
+          {
+            "t": 143053,
+            "v": 64
+          },
+          {
+            "t": 146585,
+            "v": 1
+          },
+          {
+            "t": 150641,
+            "v": 32
+          },
+          {
+            "t": 154193,
+            "v": 1
+          },
+          {
+            "t": 157224,
+            "v": 32
+          },
+          {
+            "t": 166033,
+            "v": 1
+          },
+          {
+            "t": 167583,
+            "v": 64
+          },
+          {
+            "t": 169119,
+            "v": 1
+          },
+          {
+            "t": 177923,
+            "v": 64
+          },
+          {
+            "t": 181747,
+            "v": 1
+          },
+          {
+            "t": 185576,
+            "v": 32
+          },
+          {
+            "t": 188914,
+            "v": 64
+          },
+          {
+            "t": 192985,
+            "v": 1
+          },
+          {
+            "t": 197951,
+            "v": 32
+          },
+          {
+            "t": 210846,
+            "v": 1
+          },
+          {
+            "t": 211618,
+            "v": 32
+          },
+          {
+            "t": 213092,
+            "v": 1
+          },
+          {
+            "t": 215079,
+            "v": 32
+          },
+          {
+            "t": 217443,
+            "v": 64
+          },
+          {
+            "t": 221040,
+            "v": 32
+          },
+          {
+            "t": 221845,
+            "v": 64
+          },
+          {
+            "t": 222248,
+            "v": 32
+          },
+          {
+            "t": 223962,
+            "v": 1
+          },
+          {
+            "t": 226639,
+            "v": 32
+          },
+          {
+            "t": 238040,
+            "v": 64
+          },
+          {
+            "t": 238744,
+            "v": 32
+          },
+          {
+            "t": 241599,
+            "v": 64
+          },
+          {
+            "t": 241936,
+            "v": 32
+          },
+          {
+            "t": 242729,
+            "v": 64
+          },
+          {
+            "t": 244691,
+            "v": 32
+          },
+          {
+            "t": 253365,
+            "v": 64
+          },
+          {
+            "t": 255461,
+            "v": 32
+          },
+          {
+            "t": 256263,
+            "v": 64
+          },
+          {
+            "t": 256985,
+            "v": 32
+          },
+          {
+            "t": 257781,
+            "v": 64
+          },
+          {
+            "t": 258416,
+            "v": 32
+          },
+          {
+            "t": 259219,
+            "v": 64
+          },
+          {
+            "t": 259574,
+            "v": 32
+          },
+          {
+            "t": 260430,
+            "v": 64
+          },
+          {
+            "t": 260847,
+            "v": 32
+          },
+          {
+            "t": 261820,
+            "v": 1
+          },
+          {
+            "t": 266339,
+            "v": 64
+          },
+          {
+            "t": 267404,
+            "v": 1
+          },
+          {
+            "t": 269222,
+            "v": 32
+          },
+          {
+            "t": 270769,
+            "v": 1
+          },
+          {
+            "t": 276275,
+            "v": 32
+          },
+          {
+            "t": 288092,
+            "v": 64
+          },
+          {
+            "t": 289430,
+            "v": 32
+          },
+          {
+            "t": 290500,
+            "v": 64
+          },
+          {
+            "t": 291430,
+            "v": 1
+          },
+          {
+            "t": 294056,
+            "v": 32
+          },
+          {
+            "t": 303847,
+            "v": 64
+          },
+          {
+            "t": 304691,
+            "v": 32
+          },
+          {
+            "t": 305651,
+            "v": 16
+          },
+          {
+            "t": 306871,
+            "v": 32
+          },
+          {
+            "t": 307677,
+            "v": 64
+          },
+          {
+            "t": 308989,
+            "v": 32
+          },
+          {
+            "t": 311318,
+            "v": 1
+          },
+          {
+            "t": 317339,
+            "v": 64
+          },
+          {
+            "t": 318975,
+            "v": 32
+          },
+          {
+            "t": 324027,
+            "v": 1
+          },
+          {
+            "t": 327821,
+            "v": 64
+          },
+          {
+            "t": 332985,
+            "v": 1
+          },
+          {
+            "t": 338014,
+            "v": 32
+          },
+          {
+            "t": 345138,
+            "v": 1
+          },
+          {
+            "t": 347897,
+            "v": 32
+          },
+          {
+            "t": 351749,
+            "v": 1
+          },
+          {
+            "t": 352976,
+            "v": 32
+          },
+          {
+            "t": 354547,
+            "v": 1
+          },
+          {
+            "t": 358949,
+            "v": 64
+          },
+          {
+            "t": 360754,
+            "v": 1
+          },
+          {
+            "t": 362402,
+            "v": 2
+          },
+          {
+            "t": 364180,
+            "v": 1
+          },
+          {
+            "t": 365820,
+            "v": 32
+          },
+          {
+            "t": 369401,
+            "v": 1
+          },
+          {
+            "t": 374493,
+            "v": 64
+          },
+          {
+            "t": 375708,
+            "v": 1
+          },
+          {
+            "t": 376870,
+            "v": 32
+          },
+          {
+            "t": 397691,
+            "v": 64
+          },
+          {
+            "t": 399455,
+            "v": 32
+          },
+          {
+            "t": 402208,
+            "v": 1
+          },
+          {
+            "t": 405923,
+            "v": 64
+          },
+          {
+            "t": 408685,
+            "v": 32
+          },
+          {
+            "t": 409795,
+            "v": 64
+          },
+          {
+            "t": 411402,
+            "v": 1
+          },
+          {
+            "t": 416426,
+            "v": 64
+          },
+          {
+            "t": 417858,
+            "v": 1
+          },
+          {
+            "t": 422068,
+            "v": 2
+          },
+          {
+            "t": 423085,
+            "v": 1
+          },
+          {
+            "t": 426388,
+            "v": 32
+          },
+          {
+            "t": 429723,
+            "v": 1
+          },
+          {
+            "t": 431372,
+            "v": 64
+          },
+          {
+            "t": 432478,
+            "v": 1
+          },
+          {
+            "t": 438725,
+            "v": 32
+          },
+          {
+            "t": 439988,
+            "v": 1
+          },
+          {
+            "t": 442113,
+            "v": 2
+          },
+          {
+            "t": 443338,
+            "v": 1
+          },
+          {
+            "t": 447388,
+            "v": 32
+          },
+          {
+            "t": 453503,
+            "v": 64
+          },
+          {
+            "t": 455781,
+            "v": 32
+          },
+          {
+            "t": 457477,
+            "v": 64
+          },
+          {
+            "t": 457877,
+            "v": 32
+          },
+          {
+            "t": 461117,
+            "v": 16
+          },
+          {
+            "t": 462704,
+            "v": 32
+          },
+          {
+            "t": 463508,
+            "v": 64
+          },
+          {
+            "t": 463600,
+            "v": 1
+          },
+          {
+            "t": 464412,
+            "v": 32
+          },
+          {
+            "t": 471223,
+            "v": 1
+          },
+          {
+            "t": 473379,
+            "v": 64
+          },
+          {
+            "t": 474210,
+            "v": 1
+          },
+          {
+            "t": 477665,
+            "v": 64
+          },
+          {
+            "t": 478275,
+            "v": 32
+          },
+          {
+            "t": 479084,
+            "v": 64
+          },
+          {
+            "t": 479496,
+            "v": 32
+          },
+          {
+            "t": 480306,
+            "v": 64
+          },
+          {
+            "t": 483340,
+            "v": 1
+          },
+          {
+            "t": 485444,
+            "v": 64
+          },
+          {
+            "t": 488689,
+            "v": 32
+          },
+          {
+            "t": 497827,
+            "v": 64
+          },
+          {
+            "t": 498612,
+            "v": 32
+          },
+          {
+            "t": 500459,
+            "v": 1
+          },
+          {
+            "t": 502541,
+            "v": 32
+          },
+          {
+            "t": 503905,
+            "v": 1
+          },
+          {
+            "t": 506541,
+            "v": 32
+          },
+          {
+            "t": 507288,
+            "v": 1
+          },
+          {
+            "t": 509039,
+            "v": 32
+          },
+          {
+            "t": 513722,
+            "v": 4
+          },
+          {
+            "t": 514132,
+            "v": 1
+          },
+          {
+            "t": 517198,
+            "v": 32
+          },
+          {
+            "t": 523545,
+            "v": 64
+          },
+          {
+            "t": 531839,
+            "v": 4
+          },
+          {
+            "t": 532916,
+            "v": 1
+          },
+          {
+            "t": 538034,
+            "v": 64
+          },
+          {
+            "t": 540549,
+            "v": 2
+          },
+          {
+            "t": 541391,
+            "v": 32
+          },
+          {
+            "t": 547904,
+            "v": 1
+          },
+          {
+            "t": 552177,
+            "v": 32
+          },
+          {
+            "t": 558163,
+            "v": 64
+          },
+          {
+            "t": 558863,
+            "v": 32
+          },
+          {
+            "t": 562600,
+            "v": 64
+          },
+          {
+            "t": 564236,
+            "v": 32
+          },
+          {
+            "t": 565831,
+            "v": 64
+          },
+          {
+            "t": 567529,
+            "v": 32
+          },
+          {
+            "t": 578692,
+            "v": 64
+          },
+          {
+            "t": 579916,
+            "v": 32
+          },
+          {
+            "t": 580928,
+            "v": 1
+          },
+          {
+            "t": 583406,
+            "v": 2
+          },
+          {
+            "t": 584616,
+            "v": 1
+          },
+          {
+            "t": 587015,
+            "v": 32
+          },
+          {
+            "t": 590056,
+            "v": 1
+          },
+          {
+            "t": 591620,
+            "v": 32
+          },
+          {
+            "t": 595054,
+            "v": 1
+          },
+          {
+            "t": 598887,
+            "v": 32
           }
         ],
         "cl": [
@@ -88843,6 +90447,756 @@
           {
             "t": 597903,
             "v": ""
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 2665,
+            "v": 32
+          },
+          {
+            "t": 11456,
+            "v": 1
+          },
+          {
+            "t": 13361,
+            "v": 32
+          },
+          {
+            "t": 14804,
+            "v": 1
+          },
+          {
+            "t": 15898,
+            "v": 64
+          },
+          {
+            "t": 16359,
+            "v": 1
+          },
+          {
+            "t": 17963,
+            "v": 64
+          },
+          {
+            "t": 20400,
+            "v": 1
+          },
+          {
+            "t": 21401,
+            "v": 32
+          },
+          {
+            "t": 26483,
+            "v": 1
+          },
+          {
+            "t": 28439,
+            "v": 32
+          },
+          {
+            "t": 29913,
+            "v": 1
+          },
+          {
+            "t": 31457,
+            "v": 32
+          },
+          {
+            "t": 36286,
+            "v": 1
+          },
+          {
+            "t": 40535,
+            "v": 32
+          },
+          {
+            "t": 46819,
+            "v": 1
+          },
+          {
+            "t": 51997,
+            "v": 32
+          },
+          {
+            "t": 62078,
+            "v": 4
+          },
+          {
+            "t": 62146,
+            "v": 1
+          },
+          {
+            "t": 63730,
+            "v": 4
+          },
+          {
+            "t": 64023,
+            "v": 64
+          },
+          {
+            "t": 69455,
+            "v": 1
+          },
+          {
+            "t": 74282,
+            "v": 32
+          },
+          {
+            "t": 75886,
+            "v": 1
+          },
+          {
+            "t": 79185,
+            "v": 64
+          },
+          {
+            "t": 90386,
+            "v": 1
+          },
+          {
+            "t": 92423,
+            "v": 16
+          },
+          {
+            "t": 96691,
+            "v": 1
+          },
+          {
+            "t": 98433,
+            "v": 64
+          },
+          {
+            "t": 100838,
+            "v": 1
+          },
+          {
+            "t": 102273,
+            "v": 2
+          },
+          {
+            "t": 106617,
+            "v": 1
+          },
+          {
+            "t": 108328,
+            "v": 32
+          },
+          {
+            "t": 111357,
+            "v": 64
+          },
+          {
+            "t": 113020,
+            "v": 32
+          },
+          {
+            "t": 114341,
+            "v": 64
+          },
+          {
+            "t": 115205,
+            "v": 32
+          },
+          {
+            "t": 116119,
+            "v": 64
+          },
+          {
+            "t": 117449,
+            "v": 1
+          },
+          {
+            "t": 118138,
+            "v": 64
+          },
+          {
+            "t": 119708,
+            "v": 32
+          },
+          {
+            "t": 131313,
+            "v": 64
+          },
+          {
+            "t": 132442,
+            "v": 1
+          },
+          {
+            "t": 135150,
+            "v": 64
+          },
+          {
+            "t": 141054,
+            "v": 16
+          },
+          {
+            "t": 145613,
+            "v": 64
+          },
+          {
+            "t": 147951,
+            "v": 1
+          },
+          {
+            "t": 157587,
+            "v": 32
+          },
+          {
+            "t": 163704,
+            "v": 4
+          },
+          {
+            "t": 164936,
+            "v": 64
+          },
+          {
+            "t": 168166,
+            "v": 1
+          },
+          {
+            "t": 171704,
+            "v": 32
+          },
+          {
+            "t": 180262,
+            "v": 64
+          },
+          {
+            "t": 180496,
+            "v": 32
+          },
+          {
+            "t": 181663,
+            "v": 64
+          },
+          {
+            "t": 182029,
+            "v": 32
+          },
+          {
+            "t": 182871,
+            "v": 64
+          },
+          {
+            "t": 183264,
+            "v": 32
+          },
+          {
+            "t": 184474,
+            "v": 64
+          },
+          {
+            "t": 186137,
+            "v": 32
+          },
+          {
+            "t": 190105,
+            "v": 1
+          },
+          {
+            "t": 193568,
+            "v": 64
+          },
+          {
+            "t": 194989,
+            "v": 1
+          },
+          {
+            "t": 199237,
+            "v": 32
+          },
+          {
+            "t": 204603,
+            "v": 64
+          },
+          {
+            "t": 210183,
+            "v": 32
+          },
+          {
+            "t": 211081,
+            "v": 64
+          },
+          {
+            "t": 211367,
+            "v": 32
+          },
+          {
+            "t": 213639,
+            "v": 64
+          },
+          {
+            "t": 214859,
+            "v": 32
+          },
+          {
+            "t": 218125,
+            "v": 64
+          },
+          {
+            "t": 221097,
+            "v": 32
+          },
+          {
+            "t": 222704,
+            "v": 64
+          },
+          {
+            "t": 227918,
+            "v": 32
+          },
+          {
+            "t": 230859,
+            "v": 64
+          },
+          {
+            "t": 234521,
+            "v": 32
+          },
+          {
+            "t": 236183,
+            "v": 64
+          },
+          {
+            "t": 237198,
+            "v": 32
+          },
+          {
+            "t": 243456,
+            "v": 64
+          },
+          {
+            "t": 244404,
+            "v": 32
+          },
+          {
+            "t": 248886,
+            "v": 64
+          },
+          {
+            "t": 249587,
+            "v": 32
+          },
+          {
+            "t": 249886,
+            "v": 64
+          },
+          {
+            "t": 250027,
+            "v": 32
+          },
+          {
+            "t": 250875,
+            "v": 64
+          },
+          {
+            "t": 251392,
+            "v": 32
+          },
+          {
+            "t": 255674,
+            "v": 64
+          },
+          {
+            "t": 261327,
+            "v": 32
+          },
+          {
+            "t": 263185,
+            "v": 64
+          },
+          {
+            "t": 264483,
+            "v": 1
+          },
+          {
+            "t": 267275,
+            "v": 32
+          },
+          {
+            "t": 277036,
+            "v": 1
+          },
+          {
+            "t": 285743,
+            "v": 32
+          },
+          {
+            "t": 287924,
+            "v": 1
+          },
+          {
+            "t": 289817,
+            "v": 32
+          },
+          {
+            "t": 296424,
+            "v": 64
+          },
+          {
+            "t": 307664,
+            "v": 1
+          },
+          {
+            "t": 310430,
+            "v": 64
+          },
+          {
+            "t": 320261,
+            "v": 1
+          },
+          {
+            "t": 322626,
+            "v": 64
+          },
+          {
+            "t": 327014,
+            "v": 1
+          },
+          {
+            "t": 332133,
+            "v": 32
+          },
+          {
+            "t": 338195,
+            "v": 1
+          },
+          {
+            "t": 347350,
+            "v": 64
+          },
+          {
+            "t": 350013,
+            "v": 1
+          },
+          {
+            "t": 352423,
+            "v": 32
+          },
+          {
+            "t": 353574,
+            "v": 1
+          },
+          {
+            "t": 353635,
+            "v": 32
+          },
+          {
+            "t": 356709,
+            "v": 1
+          },
+          {
+            "t": 361376,
+            "v": 32
+          },
+          {
+            "t": 363600,
+            "v": 1
+          },
+          {
+            "t": 367118,
+            "v": 64
+          },
+          {
+            "t": 372922,
+            "v": 1
+          },
+          {
+            "t": 375780,
+            "v": 32
+          },
+          {
+            "t": 378882,
+            "v": 1
+          },
+          {
+            "t": 383234,
+            "v": 32
+          },
+          {
+            "t": 384611,
+            "v": 1
+          },
+          {
+            "t": 387229,
+            "v": 64
+          },
+          {
+            "t": 389208,
+            "v": 32
+          },
+          {
+            "t": 396621,
+            "v": 16
+          },
+          {
+            "t": 397236,
+            "v": 32
+          },
+          {
+            "t": 399533,
+            "v": 1
+          },
+          {
+            "t": 401285,
+            "v": 32
+          },
+          {
+            "t": 404110,
+            "v": 1
+          },
+          {
+            "t": 405877,
+            "v": 32
+          },
+          {
+            "t": 407443,
+            "v": 1
+          },
+          {
+            "t": 409938,
+            "v": 64
+          },
+          {
+            "t": 416860,
+            "v": 1
+          },
+          {
+            "t": 420349,
+            "v": 32
+          },
+          {
+            "t": 425501,
+            "v": 1
+          },
+          {
+            "t": 438338,
+            "v": 32
+          },
+          {
+            "t": 451793,
+            "v": 64
+          },
+          {
+            "t": 457561,
+            "v": 32
+          },
+          {
+            "t": 458972,
+            "v": 64
+          },
+          {
+            "t": 461204,
+            "v": 32
+          },
+          {
+            "t": 463304,
+            "v": 64
+          },
+          {
+            "t": 464873,
+            "v": 32
+          },
+          {
+            "t": 466659,
+            "v": 64
+          },
+          {
+            "t": 467146,
+            "v": 32
+          },
+          {
+            "t": 470327,
+            "v": 64
+          },
+          {
+            "t": 471485,
+            "v": 32
+          },
+          {
+            "t": 482862,
+            "v": 64
+          },
+          {
+            "t": 483091,
+            "v": 32
+          },
+          {
+            "t": 484140,
+            "v": 64
+          },
+          {
+            "t": 484561,
+            "v": 32
+          },
+          {
+            "t": 485444,
+            "v": 64
+          },
+          {
+            "t": 486444,
+            "v": 32
+          },
+          {
+            "t": 490740,
+            "v": 64
+          },
+          {
+            "t": 491789,
+            "v": 32
+          },
+          {
+            "t": 493806,
+            "v": 64
+          },
+          {
+            "t": 495624,
+            "v": 32
+          },
+          {
+            "t": 500064,
+            "v": 64
+          },
+          {
+            "t": 500953,
+            "v": 32
+          },
+          {
+            "t": 502483,
+            "v": 1
+          },
+          {
+            "t": 507054,
+            "v": 64
+          },
+          {
+            "t": 508554,
+            "v": 1
+          },
+          {
+            "t": 511957,
+            "v": 32
+          },
+          {
+            "t": 512878,
+            "v": 1
+          },
+          {
+            "t": 514106,
+            "v": 64
+          },
+          {
+            "t": 517834,
+            "v": 1
+          },
+          {
+            "t": 519541,
+            "v": 32
+          },
+          {
+            "t": 523590,
+            "v": 1
+          },
+          {
+            "t": 527792,
+            "v": 32
+          },
+          {
+            "t": 533657,
+            "v": 64
+          },
+          {
+            "t": 533953,
+            "v": 32
+          },
+          {
+            "t": 537626,
+            "v": 64
+          },
+          {
+            "t": 537922,
+            "v": 32
+          },
+          {
+            "t": 538730,
+            "v": 64
+          },
+          {
+            "t": 538862,
+            "v": 32
+          },
+          {
+            "t": 540963,
+            "v": 1
+          },
+          {
+            "t": 544588,
+            "v": 32
+          },
+          {
+            "t": 545548,
+            "v": 64
+          },
+          {
+            "t": 548444,
+            "v": 1
+          },
+          {
+            "t": 559548,
+            "v": 64
+          },
+          {
+            "t": 564009,
+            "v": 1
+          },
+          {
+            "t": 570519,
+            "v": 32
+          },
+          {
+            "t": 571561,
+            "v": 64
+          },
+          {
+            "t": 571574,
+            "v": 32
+          },
+          {
+            "t": 573302,
+            "v": 64
+          },
+          {
+            "t": 573319,
+            "v": 32
+          },
+          {
+            "t": 578588,
+            "v": 64
+          },
+          {
+            "t": 580182,
+            "v": 1
+          },
+          {
+            "t": 585545,
+            "v": 32
+          },
+          {
+            "t": 591096,
+            "v": 1
+          },
+          {
+            "t": 595214,
+            "v": 32
+          },
+          {
+            "t": 599056,
+            "v": 1
           }
         ],
         "cl": [
@@ -93835,6 +96189,564 @@
           {
             "t": 587905,
             "v": "ga"
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 7701,
+            "v": 32
+          },
+          {
+            "t": 9301,
+            "v": 64
+          },
+          {
+            "t": 11859,
+            "v": 32
+          },
+          {
+            "t": 13935,
+            "v": 64
+          },
+          {
+            "t": 15400,
+            "v": 32
+          },
+          {
+            "t": 19026,
+            "v": 64
+          },
+          {
+            "t": 19924,
+            "v": 32
+          },
+          {
+            "t": 28338,
+            "v": 64
+          },
+          {
+            "t": 33013,
+            "v": 32
+          },
+          {
+            "t": 42927,
+            "v": 64
+          },
+          {
+            "t": 46371,
+            "v": 32
+          },
+          {
+            "t": 49146,
+            "v": 64
+          },
+          {
+            "t": 49912,
+            "v": 32
+          },
+          {
+            "t": 59166,
+            "v": 1
+          },
+          {
+            "t": 59847,
+            "v": 32
+          },
+          {
+            "t": 61512,
+            "v": 64
+          },
+          {
+            "t": 63081,
+            "v": 32
+          },
+          {
+            "t": 65123,
+            "v": 1
+          },
+          {
+            "t": 69079,
+            "v": 32
+          },
+          {
+            "t": 88207,
+            "v": 64
+          },
+          {
+            "t": 89380,
+            "v": 32
+          },
+          {
+            "t": 91021,
+            "v": 1
+          },
+          {
+            "t": 96925,
+            "v": 32
+          },
+          {
+            "t": 112494,
+            "v": 64
+          },
+          {
+            "t": 112993,
+            "v": 32
+          },
+          {
+            "t": 117092,
+            "v": 64
+          },
+          {
+            "t": 118198,
+            "v": 32
+          },
+          {
+            "t": 119872,
+            "v": 1
+          },
+          {
+            "t": 120968,
+            "v": 32
+          },
+          {
+            "t": 126305,
+            "v": 1
+          },
+          {
+            "t": 131297,
+            "v": 16
+          },
+          {
+            "t": 133613,
+            "v": 1
+          },
+          {
+            "t": 146776,
+            "v": 64
+          },
+          {
+            "t": 151847,
+            "v": 1
+          },
+          {
+            "t": 152798,
+            "v": 32
+          },
+          {
+            "t": 159360,
+            "v": 1
+          },
+          {
+            "t": 160767,
+            "v": 64
+          },
+          {
+            "t": 161964,
+            "v": 32
+          },
+          {
+            "t": 163858,
+            "v": 1
+          },
+          {
+            "t": 165546,
+            "v": 32
+          },
+          {
+            "t": 169366,
+            "v": 64
+          },
+          {
+            "t": 170041,
+            "v": 32
+          },
+          {
+            "t": 173418,
+            "v": 1
+          },
+          {
+            "t": 176171,
+            "v": 64
+          },
+          {
+            "t": 181140,
+            "v": 1
+          },
+          {
+            "t": 181663,
+            "v": 64
+          },
+          {
+            "t": 182448,
+            "v": 1
+          },
+          {
+            "t": 190962,
+            "v": 64
+          },
+          {
+            "t": 199250,
+            "v": 1
+          },
+          {
+            "t": 202243,
+            "v": 32
+          },
+          {
+            "t": 209341,
+            "v": 1
+          },
+          {
+            "t": 211723,
+            "v": 64
+          },
+          {
+            "t": 214320,
+            "v": 1
+          },
+          {
+            "t": 217360,
+            "v": 32
+          },
+          {
+            "t": 218599,
+            "v": 1
+          },
+          {
+            "t": 221560,
+            "v": 64
+          },
+          {
+            "t": 223055,
+            "v": 1
+          },
+          {
+            "t": 227040,
+            "v": 64
+          },
+          {
+            "t": 228198,
+            "v": 1
+          },
+          {
+            "t": 232027,
+            "v": 32
+          },
+          {
+            "t": 236833,
+            "v": 1
+          },
+          {
+            "t": 247872,
+            "v": 32
+          },
+          {
+            "t": 251949,
+            "v": 1
+          },
+          {
+            "t": 255522,
+            "v": 64
+          },
+          {
+            "t": 257405,
+            "v": 1
+          },
+          {
+            "t": 263432,
+            "v": 32
+          },
+          {
+            "t": 265950,
+            "v": 64
+          },
+          {
+            "t": 267418,
+            "v": 32
+          },
+          {
+            "t": 269846,
+            "v": 1
+          },
+          {
+            "t": 271846,
+            "v": 64
+          },
+          {
+            "t": 280522,
+            "v": 32
+          },
+          {
+            "t": 285580,
+            "v": 1
+          },
+          {
+            "t": 294146,
+            "v": 64
+          },
+          {
+            "t": 295061,
+            "v": 1
+          },
+          {
+            "t": 306346,
+            "v": 32
+          },
+          {
+            "t": 311951,
+            "v": 1
+          },
+          {
+            "t": 315845,
+            "v": 32
+          },
+          {
+            "t": 325781,
+            "v": 64
+          },
+          {
+            "t": 327444,
+            "v": 32
+          },
+          {
+            "t": 329374,
+            "v": 1
+          },
+          {
+            "t": 332301,
+            "v": 32
+          },
+          {
+            "t": 339925,
+            "v": 1
+          },
+          {
+            "t": 339942,
+            "v": 64
+          },
+          {
+            "t": 346777,
+            "v": 1
+          },
+          {
+            "t": 348872,
+            "v": 32
+          },
+          {
+            "t": 355444,
+            "v": 64
+          },
+          {
+            "t": 356898,
+            "v": 1
+          },
+          {
+            "t": 359560,
+            "v": 64
+          },
+          {
+            "t": 365403,
+            "v": 32
+          },
+          {
+            "t": 367588,
+            "v": 1
+          },
+          {
+            "t": 371210,
+            "v": 32
+          },
+          {
+            "t": 378392,
+            "v": 1
+          },
+          {
+            "t": 378455,
+            "v": 64
+          },
+          {
+            "t": 385429,
+            "v": 1
+          },
+          {
+            "t": 387833,
+            "v": 32
+          },
+          {
+            "t": 389609,
+            "v": 1
+          },
+          {
+            "t": 391429,
+            "v": 32
+          },
+          {
+            "t": 399140,
+            "v": 1
+          },
+          {
+            "t": 402898,
+            "v": 32
+          },
+          {
+            "t": 408054,
+            "v": 1
+          },
+          {
+            "t": 410379,
+            "v": 32
+          },
+          {
+            "t": 415503,
+            "v": 64
+          },
+          {
+            "t": 418221,
+            "v": 32
+          },
+          {
+            "t": 421819,
+            "v": 64
+          },
+          {
+            "t": 424528,
+            "v": 1
+          },
+          {
+            "t": 424722,
+            "v": 32
+          },
+          {
+            "t": 430091,
+            "v": 64
+          },
+          {
+            "t": 434981,
+            "v": 32
+          },
+          {
+            "t": 438885,
+            "v": 64
+          },
+          {
+            "t": 439288,
+            "v": 32
+          },
+          {
+            "t": 442067,
+            "v": 64
+          },
+          {
+            "t": 443611,
+            "v": 1
+          },
+          {
+            "t": 447461,
+            "v": 64
+          },
+          {
+            "t": 452042,
+            "v": 1
+          },
+          {
+            "t": 461262,
+            "v": 32
+          },
+          {
+            "t": 478944,
+            "v": 1
+          },
+          {
+            "t": 481989,
+            "v": 64
+          },
+          {
+            "t": 485444,
+            "v": 2
+          },
+          {
+            "t": 486691,
+            "v": 1
+          },
+          {
+            "t": 498860,
+            "v": 32
+          },
+          {
+            "t": 499938,
+            "v": 1
+          },
+          {
+            "t": 501295,
+            "v": 32
+          },
+          {
+            "t": 509237,
+            "v": 1
+          },
+          {
+            "t": 511821,
+            "v": 64
+          },
+          {
+            "t": 515873,
+            "v": 1
+          },
+          {
+            "t": 519528,
+            "v": 32
+          },
+          {
+            "t": 522696,
+            "v": 64
+          },
+          {
+            "t": 523747,
+            "v": 32
+          },
+          {
+            "t": 527922,
+            "v": 1
+          },
+          {
+            "t": 531146,
+            "v": 32
+          },
+          {
+            "t": 536886,
+            "v": 1
+          },
+          {
+            "t": 540028,
+            "v": 32
+          },
+          {
+            "t": 552236,
+            "v": 1
+          },
+          {
+            "t": 554820,
+            "v": 32
+          },
+          {
+            "t": 564477,
+            "v": 1
+          },
+          {
+            "t": 569929,
+            "v": 32
+          },
+          {
+            "t": 580522,
+            "v": 1
+          },
+          {
+            "t": 582539,
+            "v": 32
           }
         ],
         "cl": [

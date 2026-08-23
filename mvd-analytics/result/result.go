@@ -1115,7 +1115,30 @@ package result
 //     two by `source`. Validation against KTX ground truth on modern demos:
 //     see mvd-analytics/damagerecon/ACCURACY.md.
 //
-// v72 — airgib detection gates on pre-impact evidence (a correctness
+// v72 — match-start wall-clock anchor from the wire date markers.
+//   - ADDED on `streams.global`: `matchStartUnixMs`, `matchStartAccuracyMs`,
+//     `matchStartSource`, `matchStartConfidence`, `matchStartNote`,
+//     `matchEndUnixMs`, `dateMarkers[]`, and `demoStartSource`. The anchor is
+//     resolved by the new `wall-clock` DAG node from the `matchdate:` /
+//     `matchkey:` broadcast prints, the ktxstats `date` string, and the
+//     serverinfo version keys.
+//   - CHANGED: `demoStartUnixMs` / `demoStartAccuracyMs` are now also derived
+//     from a date marker (back-shifted by `demoOffset`) on demos that carry no
+//     mvdhidden 0x000B block and no `epoch` cvar — which lifts wall-clock
+//     coverage from ~25% of the archive to ~98%. `demoStartSource` says which
+//     source a given result used, and `demoStartAccuracyMs` states the cost:
+//     50 400 000 when the marker named no timezone.
+//   - Anchors are never dropped on a failed trust check: `matchStartConfidence`
+//     grades them ("exact" / "unverified" / "contradicted") and
+//     `matchStartNote` names the check. Only a "contradicted" stamp is kept out
+//     of `demoStartUnixMs`.
+//   - ADDED at the top level: `parseWarnings` — the reader's own census of
+//     what it could not decode off the wire (unknown svc_* / temp-entity /
+//     hidden-message types, failed payloads). Collected on every run now,
+//     not just in the diagnostic harness, and omitted when the parse was
+//     clean. Distinct from `errors[]`, which reports analyzer-level failures
+//     over events we DID read. See ParseWarnings.
+// v73 — airgib detection gates on pre-impact evidence (a correctness
 // fix: entries move in and out of `timelineAnalysis.airgibs`, no field
 // is added, removed or retyped) plus a `preMs` echo on the /airgibs
 // envelope.
@@ -1144,7 +1167,7 @@ package result
 //     regionControlPost / view.RegionControl staging). The post-processor
 //     bakes the default-options run into the stored Result; mvd-api's
 //     /airgibs re-runs it per request with `?preMs=` (0..1000, 0 = the
-//     pre-v72 hit-sample-only rule) and echoes the effective value as
+//     pre-v73 hit-sample-only rule) and echoes the effective value as
 //     `preMs` on the response envelope.
 //   - Per-hit userids now resolve against the PUBLISHED per-stream session
 //     table (`streams.players[].sessions`) rather than an analyzer-internal
@@ -1157,7 +1180,7 @@ package result
 //     which evidence a demo's list rests on.
 //
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 72
+const CurrentSchemaVersion = 73
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -1188,6 +1211,59 @@ type Result struct {
 	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
+	ParseWarnings    *ParseWarnings          `json:"parseWarnings,omitempty"`
+}
+
+// ParseWarnings is the census of what the WIRE carried but the reader
+// could not decode: unknown svc_* commands, unknown temp-entity or
+// hidden-message types, and payloads that failed to parse. It is a
+// distinct signal from Errors — those are analyzer-level failures over
+// events we did read — and it is sub-fatal by construction: the reader
+// abandons the rest of the offending payload and carries on, so the
+// result is complete apart from whatever that payload held.
+//
+// It exists because silence is not evidence of correctness. The
+// sv_bigcoords angle desync degraded ~5% of the archive for years with
+// no operator-visible signal, because parse warnings lived only in a
+// test harness. A non-zero total here means the reader has a gap on
+// this demo and the sections downstream of it may be thin.
+//
+// Omitted entirely when the parse was clean (Total == 0), which is the
+// case for the overwhelming majority of modern demos.
+type ParseWarnings struct {
+	// Total is the exact number of warnings raised, never capped.
+	Total int `json:"total"`
+	// ByType is the exact per-category count. Categories are a small
+	// fixed vocabulary: "parse_error", "unknown_svc", "unknown_te",
+	// "unknown_hidden".
+	ByType map[string]int `json:"byType,omitempty"`
+	// Groups is a capped table of distinct (type, message) rows, loudest
+	// first, each with its count and the demo time it first fired. It is
+	// the sample set — the counts above stay exact even when a group is
+	// dropped.
+	Groups []ParseWarningGroup `json:"groups,omitempty"`
+	// DroppedWarnings accounts for the retention cap
+	// (parser.MaxWarningGroups distinct messages): how many warnings fell
+	// outside the retained groups and are therefore missing from Groups.
+	// Zero in every normal case. It is an OCCURRENCE count, not a count of
+	// distinct messages — the reader deliberately does not track the
+	// distinct key set past the cap, since holding it is exactly the
+	// unbounded memory the cap exists to avoid.
+	DroppedWarnings int `json:"droppedWarnings,omitempty"`
+}
+
+// ParseWarningGroup is one distinct warning message with its count and
+// first occurrence.
+type ParseWarningGroup struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+	Count   int    `json:"count"`
+	// FirstDemoTimeMs is RAW DEMO time (the wire clock), not the
+	// match-relative base every other ms field in this schema uses: the
+	// reader has no clock, and a warning can fire before the match
+	// starts (or on a demo with no match at all), where a rebased value
+	// would be meaningless.
+	FirstDemoTimeMs int32 `json:"firstDemoTimeMs"`
 }
 
 // EffectiveMap resolves which map (hence which BSP / loc corpus) this demo was

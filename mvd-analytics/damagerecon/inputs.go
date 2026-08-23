@@ -240,7 +240,7 @@ func buildInputs(res *result.Result) *inputs {
 	in.resolveProjectiles(res.Streams.Projectiles)
 	in.detectDischarges()
 	in.detectLGAmmoFires()
-	in.weaponBitsLive = weaponBitsCycle(res.Streams.Players)
+	in.weaponBitsLive = WeaponBitsLive(res.Streams.Players)
 	return in
 }
 
@@ -272,11 +272,15 @@ func (in *inputs) detectLGAmmoFires() {
 	in.lgBeamSparse = totalDrops > 20 && float64(len(in.beams)) < 0.9*float64(totalDrops)
 }
 
-// weaponBitsCycle reports whether any weapon-inventory interval opens
+// WeaponBitsLive reports whether any weapon-inventory interval opens
 // after the match start — the signature of live StatItems weapon bits
 // (a weapon is picked up seconds into a life). A frozen-bits recording
 // shows exactly one [0, end) interval per held weapon and nothing else.
-func weaponBitsCycle(players []result.PlayerStream) bool {
+//
+// Exported because the backpack reconstruction needs the same refusal:
+// a demo whose weapon state never moves cannot say what a victim was
+// wielding when they died (analyzer/backpack_recon.go).
+func WeaponBitsLive(players []result.PlayerStream) bool {
 	for i := range players {
 		p := &players[i]
 		for _, ivs := range [][]result.Interval{p.RL, p.LG, p.GL, p.SSG, p.SNG} {

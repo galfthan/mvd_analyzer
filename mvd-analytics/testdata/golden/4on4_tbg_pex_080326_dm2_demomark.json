@@ -1,11 +1,42 @@
 {
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10253,
+          "kind": "matchStart",
+          "raw": "2026-03-08 20:56:55 GMT",
+          "source": "matchdate",
+          "tz": "GMT",
+          "unixMs": 1773003415000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-03-08 21:16:56 +0000",
+          "source": "ktxstats",
+          "tz": "+0000",
+          "unixMs": 1773004616000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Mar 08, 21:16",
+          "source": "finalscores",
+          "unixMs": 1773004560000,
+          "yearFrom": "epoch"
+        }
+      ],
       "demoOffset": 10253,
       "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
       "demoStartUnixMs": 1773003405000,
       "matchEnd": 1200079,
-      "matchStart": 0
+      "matchEndUnixMs": 1773004616000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1773003415253
     }
   },
   "timelineAnalysis": {

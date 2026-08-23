@@ -93,7 +93,7 @@ type AirgibsOptions struct {
 	// recording holes). 0 → DefaultAirgibPreMs. Values at or below
 	// airgibStampLagMs collapse the window to a point check at the
 	// pre-impact boundary. Negative disables the pre-hit gate entirely
-	// (hit-time sample only, the pre-v72 behaviour).
+	// (hit-time sample only, the pre-v73 behaviour).
 	PreMs int32
 }
 
@@ -235,7 +235,7 @@ func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent 
 		// sample under the legacy (PreMs < 0) rule.
 		ri := hitIdx
 		if preMs < 0 {
-			// Legacy hit-only rule (pre-v72): airborne at the sample
+			// Legacy hit-only rule (pre-v73): airborne at the sample
 			// nearest the damage time.
 			if airborneAt(vs.Position, hitIdx) < 0 {
 				continue

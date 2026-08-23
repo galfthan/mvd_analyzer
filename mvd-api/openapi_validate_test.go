@@ -261,6 +261,64 @@ func addPointEffects(s *result.Streams) {
 	}
 }
 
+// addParseWarnings installs a reader-level parse census on the served Result.
+// Every golden-corpus demo parses without a single warning, so `parseWarnings`
+// was never present in a validated body and the whole sub-schema — its groups
+// table and its counters — went unexercised, the same blind spot demoMarkers
+// had. The rows cover both categories the archive actually raises and a
+// non-zero droppedWarnings, so the retention-cap counter is validated too.
+// Assignment, not append, so the tests sharing the cached golden can both call it.
+func addParseWarnings(r *result.Result) {
+	r.ParseWarnings = &result.ParseWarnings{
+		Total:  21,
+		ByType: map[string]int{"unknown_svc": 19, "parse_error": 2},
+		Groups: []result.ParseWarningGroup{
+			{Type: "unknown_svc", Message: "svc_unknown_61 (cmd 61)", Count: 7, FirstDemoTimeMs: 61200},
+			{Type: "parse_error", Message: "svc_playerinfo: unexpected EOF", Count: 2, FirstDemoTimeMs: 400},
+		},
+		DroppedWarnings: 12,
+	}
+}
+
+// addReconstructedBackpacks appends `reconstructed` drops carrying the v72
+// pickup-linkage fields to the served backpacks section. Every corpus demo is
+// a hint-carrying one, so its whole section is `source: "ktx"` and the fate /
+// picker / pickerTeam / pickupTime half of BackpackDrop — the half the linkage
+// exists to publish — was validated only against its own absence, the same
+// blind spot demoMarkers and parseWarnings had.
+//
+// A real demo never mixes the two provenances (backpacks.go states it as an
+// invariant); this fixture deliberately does, because the endpoint's schema
+// has to accept either kind of row and this is the only served body there is.
+// The three rows cover the shapes that differ: a named picker with a team, a
+// named picker with NONE (pickerTeam is omitempty, so a teamless FFA picker
+// omits it — RESULT_SCHEMA.md), and an `expired` pack, whose picker fields are
+// all absent.
+func addReconstructedBackpacks(r *result.Result) {
+	r.Backpacks = append(r.Backpacks,
+		result.BackpackDrop{
+			Time: 300000, Player: "nlk", Team: "bps", Weapon: "rl",
+			Origin: [3]float32{1597.75, -878.125, 24}, Loc: "YA",
+			EntNum: 211, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "lakso", PickerTeam: "oSaMs",
+			PickupTime: 302500,
+		},
+		result.BackpackDrop{
+			Time: 310000, Player: "sCorp", Weapon: "lg",
+			Origin: [3]float32{943.375, 257, -4.375}, Loc: "Quad",
+			EntNum: 214, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "marksuzu",
+			PickupTime: 311200,
+		},
+		result.BackpackDrop{
+			Time: 320000, Player: "lakso", Team: "oSaMs", Weapon: "rl",
+			Origin: [3]float32{1852.75, -441.5, -72}, Loc: "bridge.high",
+			EntNum: 219, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFateExpired,
+		},
+	)
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -270,7 +328,7 @@ func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 
 // allFieldCodes is every fields= selector, to exercise the widest
 // stream-slice / state-at / buckets shapes.
-const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,sp,d"
+const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,aw,sp,d"
 
 type validationCase struct {
 	name   string
@@ -321,6 +379,17 @@ func validationCases(t *testing.T) []validationCase {
 		// in from the 422 predicates.
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
+		// parseWarnings is omitempty and every golden demo parses clean, so
+		// without a synthetic census (addParseWarnings) the sub-schema is
+		// validated only against its own absence. mustContain names each
+		// field, since an empty object would satisfy the schema just as well.
+		{name: "overview-parse-warnings", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{
+				`"parseWarnings":{"total":21`,
+				`"byType":{`, `"unknown_svc":19`,
+				`"groups":[{"type":"unknown_svc","message":"svc_unknown_61 (cmd 61)","count":7,"firstDemoTimeMs":61200}`,
+				`"droppedWarnings":12`,
+			}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are
@@ -352,7 +421,17 @@ func validationCases(t *testing.T) []validationCase {
 
 		{name: "loc-graph", url: "/v1/demos/gameId:42/loc-graph", path: "/v1/demos/{id}/loc-graph", status: 200},
 		{name: "chat", url: "/v1/demos/gameId:42/chat", path: "/v1/demos/{id}/chat", status: 200},
-		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200},
+		// mustContain pins the v72 linkage half of BackpackDrop. Every one of
+		// those fields is omitempty, so a regression that stopped emitting
+		// them would validate against the schema exactly as happily; the
+		// pins name a picked row with a pickerTeam, a picked row WITHOUT one
+		// (the teamless-picker shape), and an expired row.
+		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200,
+			mustContain: []string{
+				`"entNum":211,"source":"reconstructed","fate":"picked","picker":"lakso","pickerTeam":"oSaMs","pickupTime":302500`,
+				`"entNum":214,"source":"reconstructed","fate":"picked","picker":"marksuzu","pickupTime":311200`,
+				`"entNum":219,"source":"reconstructed","fate":"expired"`,
+			}},
 		{name: "items", url: "/v1/demos/gameId:42/items", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-summary", url: "/v1/demos/gameId:42/items?summary=1", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-windowed", url: "/v1/demos/gameId:42/items?from=0&to=60&kinds=armor,mega", path: "/v1/demos/{id}/items", status: 200},
@@ -383,6 +462,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at-position-track", url: "/v1/demos/gameId:45/state-at?time=1500&fields=pos,view,hgt,lq,vel",
 			path: "/v1/demos/{id}/state-at", status: 200,
 			mustContain: []string{`"posAgeMs":500`, `"pos"`, `"view"`, `"vel"`, `"hgt"`, `"lq"`}},
+		// aw is opt-in, so the default-field cases never reach it, and the
+		// corpus windows above are too narrow to promise a sample. These two
+		// make the schema's aw branch answer for a body that carries it.
+		{name: "stream-slice-active-weapon", url: "/v1/demos/gameId:45/stream-slice?from=0&to=3000&fields=aw",
+			path: "/v1/demos/{id}/stream-slice", status: 200,
+			mustContain: []string{`"aw":[{"t":0,"v":1},{"t":1200,"v":32}]`}},
+		{name: "state-at-active-weapon", url: "/v1/demos/gameId:45/state-at?time=1500&fields=aw",
+			path: "/v1/demos/{id}/state-at", status: 200,
+			mustContain: []string{`"aw":32`}},
 		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
 		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
 		// that still validates the Los schema (timeUnit + empty players array).
@@ -492,6 +580,11 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	addDemoMarkers(res.TimelineAnalysis)
 	// Same reason for point effects: the golden was pinned streams-off.
 	addPointEffects(res.Streams)
+	// Same reason for the reader's parse census: every golden demo is clean.
+	addParseWarnings(res)
+	// Same reason for the v72 pickup linkage: the corpus is hint-carrying, so
+	// no served row was ever `reconstructed` or carried a fate.
+	addReconstructedBackpacks(res)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the
@@ -508,14 +601,17 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 		// position track, with the optional h/lq/velocity columns, so the
 		// positional half of the state-at schema (pos, view, hgt, lq, vel and
 		// the posAgeMs that dates them all) gets validated against a real
-		// response instead of an absent one.
+		// response instead of an absent one. It also carries the wielded-weapon
+		// column, whose window in the corpus cases is too narrow to guarantee
+		// a sample.
 		"gameId:45": {
 			SchemaVersion: result.CurrentSchemaVersion,
 			Streams: &result.Streams{
 				Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 				Players: []result.PlayerStream{{
-					Name:  "p1",
-					Alive: []result.Interval{{Start: 0, End: 10000}},
+					Name:         "p1",
+					Alive:        []result.Interval{{Start: 0, End: 10000}},
+					ActiveWeapon: []result.ChangeI16{{T: 0, V: 1}, {T: 1200, V: 32}},
 					Position: &result.PositionTrack{
 						T:   []int32{0, 1000, 2000},
 						X:   []float32{0, 100, 200},

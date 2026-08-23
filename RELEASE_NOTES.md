@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (airgib-pre-gate) — airgibs gate on pre-impact evidence, schema v72
+## unreleased (airgib-pre-gate) — airgibs gate on pre-impact evidence, schema v73
 
 **The airgib list was reporting standing players as airgibs.** KTX writes
 the damage message inline in `T_Damage`, and measured over 410 direct
@@ -66,6 +66,423 @@ published as the match's biggest airgib.
   "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
   direct rocket hits on airborne victims whether or not they killed, and the
   gibs are the subset the Lethal column already badges.
+## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks (dropped and taken) on the old half, and a reader that says what it could not read, schema v72
+
+### Backpack drops on the other half of the archive: `backpacks[].source`
+
+The `backpacks` section used to exist only where KTX emitted its
+`//ktx drop` hint — KTX 1.38 and newer, 49.2% of the 51k archive. It is
+now filled on the rest as well, by replaying KTX's own rule instead of
+reading its announcement, and every row states which of the two it is:
+**`source: "ktx"`** (wire hint) or **`source: "reconstructed"`**. The two
+are never mixed within a demo; a hint-carrying demo is never touched.
+
+The reconstruction is a replay, not an inference. `DropBackpack`
+(`ktx/src/items.c:2667`) runs on every death and, with the shipped default
+`k_frp 0`, puts the victim's **wielded** weapon in the pack verbatim
+(`item->s.v.items = self->s.v.weapon`) — hinting only when that is exactly
+the RL or the LG. mvdsv writes that same `ent->v->weapon` into the MVD for
+every spawned player as `STAT_ACTIVEWEAPON` (`sv_send.c:1268`), so the
+answer was on the wire all along; it just had nowhere to land. It does
+now: **`streams.players[].aw`**, a new change stream (opt-in field code
+`aw` on `/stream-slice`, `/buckets` and `/state-at`, and now carried by
+the OpenAPI schemas for all three) carrying the wielded weapon as one of
+nine documented values — the eight `IT_*` weapon bits, or 0 for nothing
+held; anything else is protocol-impossible for the field and is refused
+rather than published. A different question from the `rl`/`lg`/… interval
+streams, which are inventory. A player owning the RL can be
+holding the LG, and only one of those decides the pack. It is recorded
+through the countdown, unlike every other stat, because the stat is
+delta-coded and a player whose weapon last changed in warmup would
+otherwise have no in-match sample at all. Being the one column recorded
+pre-match also makes it the one column a warmup roster shuffle can
+corrupt, so a pre-match slot handover now cuts its dedup floor the way a
+mid-match one already did for health/armour/ammo: an arriving player
+holding what the departing one held used to have their only sample
+deduped away, and reach match start blank.
+
+Measured against the hints on **316 archive demos spanning KTX 1.38–1.48**
+(13 749 ground-truth drops, hints withheld from the reconstruction):
+**precision 99.97%, recall 99.97%** — LG 100%/100%, RL 99.96%/99.96%.
+Drop-time error is exactly 0 ms at every quantile; position error is
+p50 9.7 / p90 22.3 / p99 33.9 units. Per era: seven of the eleven `ktxver`
+buckets score 100% on both, and two more reach 100% recall. On 551 hint-less demos across 40 server
+versions the volume lands at 0.254 drops/death against the hinted
+population's 0.272, and an oracle independent of `STAT_ACTIVEWEAPON` —
+does the victim's `STAT_ITEMS` inventory agree they held that weapon? —
+agrees on **13 488 of 13 488** drops. Method, splits and residuals:
+[`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+
+It refuses rather than guesses. The section is left **absent** — not
+half-filled — when there is no frag log (the only record of which deaths
+were the `/kill` command, the one deathtype `DropBackpack` skips), no
+active-weapon stat, frozen weapon state (the same old-recorder signature
+the damage reconstruction refuses), a `k_bloodfest` / `k_yawnmode` /
+non-default-`k_frp` ruleset, or — pointedly — when the mod is KTX ≥ 1.38
+and simply emitted no drops: there the wire has already answered, and
+overwriting that answer would be fabrication. Individual drops are
+withheld when the victim's position track has gone stale past 400 ms, and
+when the newest `aw` sample was carried on a different wire slot (mvdsv's
+per-slot stat cache survives a reconnect, `sv_send.c:1279-1281`, so the
+merged stream would otherwise answer with a weapon from the slot the
+player left). Absence is **ambiguous by construction** and the docs now
+say so: a demo where no RL/LG pack dropped serializes identically to a
+stand-down, and the wire shape cannot distinguish them. One residual has
+no wire signal at all and is documented as such: `dp 0` (drops disabled
+server-side) is published nowhere, so on a pre-1.38 demo it cannot be
+ruled out.
+
+`origin` is the **pack's** position on both provenances: KTX copies the
+victim's origin and then applies `item->s.v.origin[2] -= 24`
+(`items.c:2703-2704`), putting the pack at their feet. Both paths used to
+publish the unadjusted player position, so a map overlay drew every pack
+24 units too high — and, because both shared the offset, the measured
+position error never showed it. Backpack `origin` z values move by −24
+against v71.
+
+Two related fixes ride along. KTX's `Fairpacks setting:` broadcast —
+printed only when `k_frp` is non-default (`ktx/src/match.c:2086`) — is now
+parsed into **`metadata.matchSettings.fairpacks`**, the wire signal the
+stand-down needs. Because that one row stands the whole reconstruction
+down, it is matched exactly as KTX emits it (`G_bprint(2, …)`):
+`PRINT_HIGH` only, pre-match only, and line-initial — a level-3 chat line
+reading `Fairpacks setting: best weapon` used to forge it. And the hint
+path's long-standing auth-name bug is
+fixed: it stamped the dropper's raw userinfo name, which joined against
+nothing, and now resolves through the same `ResolveSlotAt` chain every
+other section uses. That last one was not cosmetic — it was costing 26 of
+the 13 749 ground-truth drops before the fix, and it had been silently
+defeating the `/kill` suppression for players whose streams got split.
+
+`playerStats[].pickups.byKind[].dropped` now counts reconstructed drops
+(the `player-stats` node binds the new `backpacks:final` artifact). Pack
+**transfers** (`xfer`/`xferSelf`) deliberately do not: they need the
+picker's `hadBefore`, which no wire signal carries on a hint-less demo
+(see the next section) — an unobservable count, not an observed zero.
+
+### And what happened to the pack: `backpacks[].fate`
+
+The drop was half the story. A reconstructed row now also says what became
+of the pack: **`fate`** — `picked`, `expired` or `unobserved` — with
+**`picker`**, **`pickerTeam`** and **`pickupTime`**, plus an **`entNum`**
+naming the backpack entity it was bound to. A `ktx` row leaves `picker` /
+`pickerTeam` / `pickupTime` empty: `//ktx bp` names their picker outright
+and reaches consumers as a `weaponPickups` row, and a second, weaker answer
+beside it could only disagree. (It does carry `fate`, but only ever
+`expired`, and only from a hint of its own — see the next section.)
+
+The plan for this had recorded the entity stream as unusable — "16.4
+visibility flips per real pack". That number was an artefact of our own
+parser, which cached an edict's item kind forever. KTX `spawn()`s a pack
+and `ent_remove()`s it on pickup (`ktx/src/items.c:2701, 2489`), so a pack
+edict is handed on within seconds to another pack, a rocket or a gib, and
+every later tenant's appearance was being reported as the original pack
+flickering. **The cache no longer outranks a model index the wire is
+currently sending**: whenever an item entity is visible its model is
+re-read, and a changed kind ends the old item and begins a new one. With
+that, a pack's life is one appearance and one disappearance — measured over
+24 hint-carrying demos, 3 205 pack lives against 3 319 deaths, and **zero**
+lives re-opening where the previous one ended. There is no flutter left to
+stitch. (A speed gate against `sv_maxvelocity`, the stitch the plan asked
+for, was built, measured at **zero** hits over those 3 205 lives and
+removed: mvdsv will not reallocate an edict freed less than half a second
+ago, `pr_edict.c:118-127`, so a recycle can never masquerade as movement.)
+
+Two new reader signals feed it. `ItemStateEvent` now carries the entity
+**origin** at each visibility transition, and the new **`ItemMoveEvent`**
+reports a visible item entity's origin changes on the same hold-last
+convention as `MoverStateEvent`. Map items never move, so on a normal demo
+that fires only for backpacks — which is the point: KTX tosses a pack with
+`velocity[2] = 300` plus a random horizontal kick and `MOVETYPE_TOSS`
+(`items.c:2856-2861`), so it falls off ledges and down lift shafts before
+settling, a measured p50 of 58 units and a max of 583. Where a pack ended
+up is now tracked, never assumed.
+
+The chain is: bind the pack that appears at the drop's time and place
+(scored against the hint's own edict number — **947 of 961 bound, and every
+one of the 947 to the edict the hint named**, zero wrong, with the drop-time
+offset exactly 0 ms at p50, p99 and max); follow its origin track to where
+it settled; then read its disappearance with the test the SERVER runs before
+calling `BackpackTouch` — whether a live player's bounding box overlapped
+the pack's, including the 15-unit expansion mvdsv gives an `FL_ITEM` trigger
+"to make items easier to pick up" (`sv_world.c:373-379`; without it the
+predicate finds nobody on 90% of real pickups). No overlap and a life
+reaching KTX's 120 s `SUB_Remove` timeout is `expired`; anything else is
+`unobserved`.
+
+**The touch replays `BackpackTouch`'s mode guard, not just its liveness
+check.** KTX also refuses a pack to a pent carrier in DMM4, a quad carrier
+in midair, a ring carrier in instagib and a player at 300+ health under LGC
+(`items.c:2393-2425`) — each of which leaves the pack lying there, so
+crediting the pickup to them would name the wrong player and stop the search
+for the right one. All four read state the wire broadcasts (the powerup
+possession intervals and the health stream) and are gated on the detected
+mode. The fifth, RA's waiting area, has no wire representation and is
+documented as a residual rather than guessed at. Spectators need no gate:
+mvdsv writes no playerinfo for one, so a spectating stretch has no positions
+to test.
+
+**The 120 s boundary is derived, not a constant.** `expired` used to mean
+"the timeout less two seconds"; it now means "the timeout less three
+broadcast intervals of the demo's own cadence" — one each for the frame
+quantisation of the pack's first and last visible frame, and one for
+`nextthink` firing on the first server frame past the deadline. A flat slack
+cannot be right at both 13 ms and 40 ms per frame. In the same window a
+touch now has to be WITNESSED at a broadcast sample to outrank `SUB_Remove`,
+because a swept path is also what running past an expiring pack looks like.
+The two classes are far apart and the change scores identically: over the
+ground truth, not one of 9 793 real pickups reaches a 118 000 ms lifetime,
+while 189 of 190 real expiries sit at or above 119 900.
+
+**A stat-flip tier was considered and is not needed.** `//ktx bp` fires on
+every RL/LG pack touch regardless of what the picker already held, and
+`other->s.v.items |= new` cannot change a bit they already had: only 237 of
+606 ground-truth pickups came with a weapon-bit gain, so a stat-flip
+requirement would have thrown away 61% of real pickups. The overlap is not
+a proxy for the touch, it IS the touch. The weapon-bit gain does one narrow
+job — separating two players standing on one pack — and a gain that could
+have come from a world spawner the player is standing on is disqualified.
+
+Measured against the `//ktx bp` and `//ktx expire` hints on **223 demos
+spanning KTX 1.38–1.48** (10 378 scored drops, every hint withheld):
+picked-vs-not **100.00% precision and 96.13% recall**; `expired`
+**100.00% precision and 100.00% recall**; **99.77%** of correct pickups carry a named picker and
+**99.98%** of those names are right (2 wrong in 9 591); pickup-time error
+**0 ms** at p50 and p90. Precision is 100.00% in every one of the eleven
+`ktxver` buckets and every mode. On 674 hint-less demos the fate mix is
+86.7% `picked` / 10.5% `unobserved` / 2.8% `expired`, with a picker named
+on 99.7% of the picked — the shape the hinted population predicts. Pack
+entities are present on the target population: 9 928 lives against 10 078
+deaths across 86 pre-1.38 demos, every demo carrying a track.
+
+`unobserved` is the honest residual and must be read as "the wire did not
+answer", never as "nobody took it". Its largest cause is unfixable: a pack
+grabbed inside the demo frame it dropped in never reaches the wire at all
+(202 of 10 378 scored drops — an MVD is written at `sv_demofps`, default
+30). The rest is a picker 0-9 units outside the box on both broadcast
+samples bracketing the disappearance and on the path between them (167),
+a liveness-derivation edge (8), and the bind refusals (10). A `picked` row
+with no `picker` means two players were on the pack and nothing separated
+them — 22 rows, stated rather than guessed.
+
+Sweeping the PACK along its own origin track instead of holding it at its
+last broadcast — the obvious fix for that 167 — was implemented and
+measured: it costs 249 real pickups (recall 96.13% → 93.64%) for no
+precision gain, because the pack's last origin is a sample taken in the
+frame it left the wire while its earlier ones are samples of where it no
+longer was. Reverted, with the measurement recorded in `BACKPACKS.md` so it
+is not re-proposed.
+
+### The third backpack directive: `//ktx expire`
+
+KTX has always announced the other end of a pack's life and nothing here
+decoded it. `SUB_Remove` writes **`//ktx expire <ent>`** for every RL/LG
+pack it takes off the map untaken (`ktx/src/g_spawn.c:196-210`) — the same
+RL/LG domain as `//ktx drop` and `//ktx bp`, so the three are one family
+and a pack accounts for itself in exactly one of the latter two. The reader
+decodes it as **`BackpackExpireHintEvent`**, and `backpacks` joins it to
+the drop it closes — by edict AND time, since a match runs many packs
+through one edict — and stamps that row **`fate: "expired"`**. It is the
+only pickup-side field a `ktx` row carries, because it is the one thing the
+`weaponPickups` join cannot state: the ABSENCE of a `//ktx bp` is not
+evidence of an expiry, and 107 of 330 archive demos emit the drop hint and
+no pickup hints at all.
+
+**This is a correctness fix, not just a new field.** The Pack Drops table
+in the web UI labelled every `ktx` drop with no pickup row `expired`. Over
+the archive that reading is wrong half the time: across the 223 demos that
+carry all three directives, 10 384 drops split **10 006 `bp` + 190 `expire`
++ 188 claimed by neither hint**, with **zero** rows claiming both. The 188
+are packs the recording ended on top of — none of them has a bound pack
+entity that ever left the wire — and they now read `unobserved`, which is
+what the wire supports. The invariant note in `BACKPACKS.md` that said
+"drop ≈ bp + expire holds row by row" was measured and corrected: the
+residual is 1.8% of drops, on 102 of the 223 demos.
+
+It also fixes the **denominator** the reconstruction's expiry side was
+being judged on. Scored against "every drop with no `//ktx bp`", `expired`
+recall was 50.26% (190 / 378); scored against the packs KTX actually
+announced, it is **100.00% (190 / 190)**, at unchanged 100.00% precision,
+in every `ktxver` bucket and every mode. Nothing in the linkage changed —
+the pass was already finding every announced expiry and correctly refusing
+to claim the rest. All `picked` and attribution figures are byte-identical,
+as is the drop-side eval (314 demos, 13 777 GT drops, 99.96 / 99.96).
+
+The hint does not reach the reconstruction: measured over 531 hint-less
+demos, `//ktx expire` appears **zero** times, since it is co-emitted with
+`//ktx drop` by the same KTX generation. On the demos the reconstruction
+runs on, the expiry side stays the entity-track inference the ground truth
+above validates — and the eval withholds the hint from it exactly as it
+withholds the other two.
+
+What still cannot be said, and so is still absent: **`hadBefore`**, and
+therefore pack transfer credit and pack kill credit. This is why the
+linkage's output rides the `backpacks` row and is deliberately NOT written
+into `weaponPickups`, whose rows document themselves as authoritative KTX
+hints and feed exactly those wire-measured statistics.
+
+The web Pack Drops tab picks all of this up through one adapter
+(`packDropPickup()`), so one renderer, one filter row and one Picker column
+serve both provenances. Reconstructed rows read `picked` / `expired` /
+`unobserved` rather than `xfer`/`enemy`, and their `Kills` column renders
+`-` rather than `0` — both because `hadBefore` is not derivable, and
+printing a 0 would claim the picker scored nothing.
+
+### Parse warnings reach the operator: `result.parseWarnings`
+
+The MVD reader has always raised a warning when it met something it could
+not decode — an unknown `svc_*` command byte, an unknown temp-entity or
+hidden-message type, a payload that failed to parse. It then **threw
+every one of them away** unless a caller had flipped
+`SetDiagnosticMode(true)`, which only the diagnostic test harness ever
+did. That silence has a price on record: the `sv_bigcoords` angle desync
+degraded ~5% of the archive for years with no operator-visible signal at
+all.
+
+Collection is now unconditional and the census rides the Result as
+**`parseWarnings`**: an exact `total`, exact per-category counts
+(`parse_error` / `unknown_svc` / `unknown_te` / `unknown_hidden`), and a
+table of distinct messages with each one's count and first occurrence.
+It reaches every consumer — the CLI JSON, `/overview`, the WASM result —
+without anyone opting in, and it is deliberately **not** merged into
+`errors[]`: that array reports analyzer failures over events that decoded
+fine, while this reports the layer below, bytes that never became events.
+A clean parse omits the section entirely rather than carrying an empty
+block, which is what the overwhelming majority of demos do.
+
+It is a summary, not a log — the archive's worst demos raise ~10 000
+warnings each. The counters are exact and uncapped; only the sample table
+is capped (64 distinct messages, first-encounter order), and what it left
+out is stated in `droppedWarnings` — warnings beyond the 64-group
+retention cap — rather than silently dropped. That is an OCCURRENCE
+count: a `droppedGroups` companion was cut before release because the
+reader cannot know how many DISTINCT messages it left out without
+retaining the unbounded key set the cap exists to avoid, so the two would
+only ever have been the same number under two different names. The
+unbounded per-instance list stays behind
+`SetDiagnosticMode`, unchanged for the diagnostic harness.
+
+`qw-analyze` prints a one-line summary to stderr whenever a demo raises
+any (`3 parse warnings (parse_error 3) — wire data this reader could not
+decode`) plus the loudest sample; the new **`-warn`** flag prints the
+whole table, which is what `-format md` and `-view …` runs need since
+only `-format json` carries the section itself. `qw-corpus-survey` drops
+the second, diagnostic-mode parse it used to make per demo and reads the
+same numbers off the analysis pass it already paid for; its CSV columns
+are unchanged and its warning columns are now filled on every run rather
+than only under `-readability`.
+
+Validated against the 51k-demo archive census (526 demos, ~1.0%, raise at
+least one warning): on 28 warning-carrying demos spanning every category
+mix, plus 6 of the worst `sv_bigcoords` cases at 1 900–10 200 warnings
+each, `total` and the `unknown_svc` count matched the census exactly on
+all 28; 10 clean demos stayed clean and printed nothing. All 13
+golden-corpus demos parse without a single warning, so no golden moved.
+
+### `//finalscores`: the server's own result on the pre-ktxstats half
+
+KTX stuffs its end-of-match scoreline into the demo as
+`//finalscores "Sep 29, 21:27" "duel" "aerowalk" "kip" 19 "grisling" 24`
+(`ktx/src/commands.c:6963-6977`). It rides **64% of the archive against
+demoinfo's 46%**, so on the pre-ktxstats half it is the only place the
+*server* states a mode, a map and a final result — and it was discarded.
+
+The parser now emits a typed `FinalScoresEvent` and the metadata section
+publishes it verbatim as `metadata.finalScores`. It is used, never
+preferred: `match` gains a `mode` (KTX's own vocabulary — the demoinfo
+`GetMode` name where that block exists, else the `//finalscores` one) and
+a `sources` block naming where its map, mode and team rows came from
+(`ktx` / `serverinfo` / `finalscores` / `levelTitle` / `derived`). A
+demoinfo value is never displaced, and a derived team row is never
+corrected — the two figures are not always the same quantity: on Clan
+Arena and Wipeout KTX's score is *rounds won*, not frags.
+
+The stamp it carries has no year (`%b %d, %H:%M`), so it can anchor
+nothing on its own. The wall-clock node completes its year — and borrows
+its timezone — from whichever marker did anchor the match, reports that
+as `dateMarkers[].yearFrom`, and cross-checks the anchor on the
+month/day/hour/minute that remain. With no other marker present the
+stamp is reported with `unixMs: 0` rather than dropped.
+
+Measured on 120 archive demos with no demoinfo block: an authoritative
+mode on 120/120 (0 before), `matchEndUnixMs` on 120/120 (0 before), and
+the anchor grades unchanged (119 `exact` / 1 `unverified`) — the new
+marker corroborated every one of them. Against the derived scoreboard the
+scoreline agreed exactly on 105, with 7 round-scored modes, 3 demos where
+KTX counted the match-ending frag the scoreboard freeze excludes, and 5
+duel team-label differences making up the rest. On 60 demos that DO carry
+demoinfo, every resolved field still came from `ktx`. Across 12 000
+archive demos carrying the directive, every copy parsed — the shape
+checks that drop a garbled line (with a diagnostic warning) never fired.
+
+### A wall clock on nearly every demo
+
+Only ~25% of the 51k-demo archive carried a wall-clock anchor: the
+mvdhidden 0x000B block and the serverinfo `epoch` cvar are both modern
+mvdsv features, so on three quarters of the archive there was no way to
+answer "when was this played?". The demos were never silent about it —
+they say it in a *print* instead, and the pipeline dropped the line.
+
+The new `wall-clock` DAG node reads the three date markers the wire
+actually carries and resolves them into a **match-start** anchor on
+`streams.global`:
+
+- `matchdate: 2008-01-05 20:05:38 CET` — KTX broadcasts this at match
+  start (`ktx/src/match.c:1291`), in an ISO or a ctime
+  (`Mon Jul 03, 01:01:14 2006`) layout. 72% of the archive.
+- `matchkey: 8-2005-8-13:19-56-18` — the kmod / KTeam-era predecessor,
+  carried by most demos that have no `matchdate` at all. The two are
+  near-perfectly complementary.
+- the ktxstats `date` string, which names match **end** and now also
+  lands in `matchEndUnixMs` instead of only being passed through as text.
+
+Timezones are resolved from the token the server printed — European and
+US abbreviations, numeric `%z` offsets (`+03`, `+0200`, `-05:00`), and
+the Swedish Windows locale strings, which arrive mangled because
+`Q_normalizetext` folds the high-bit `ä` of "Västeuropa" to `d`. A stamp
+with no zone is read as UTC and *says so*: `matchStartAccuracyMs` is
+50 400 000 there, against 1000 for a resolved zone.
+
+Old servers ran with unset clocks, so anchors are graded — but on
+CONTRADICTION, never on the date itself (2000 is a live QuakeWorld year,
+and a whole LAN night can legitimately sit in one January). The hard
+check is that a binary cannot predate its own release: `*version` /
+`ktxver` name the build, and a release-floor table derived from the
+archive's own version×date distribution turns a mid-2000s MVDSV stamping
+2000-01-07 into a provable unset clock — while the same stamp on QW 2.40
+stays an ordinary date. Softer signals (markers disagreeing within one
+demo, the 2000-01 boot-default window) only downgrade in combination.
+**No anchor is ever dropped**: `matchStartConfidence` is `exact` /
+`unverified` / `contradicted` and `matchStartNote` names the check, with
+every stamp seen listed in `dateMarkers[]`.
+
+The release-floor table is folded into MONOTONE floors at init: its
+entries are earliest-archive-SIGHTING observations per version family, so
+an under-used family could sit above its own successor (mvdsv 1.00 was
+observed from 2024 while 1.01, the build that replaced it, was already
+stamping 2023) and contradict perfectly ordinary matches. A binary cannot
+have been released after the binary that superseded it, so each floor is
+lowered to the minimum over every later family — the permissive direction,
+and a unit test now pins the invariant so a hand edit cannot reintroduce
+the inversion. Markers from the SAME source cross-check each other too,
+compared on the instant each PROJECTS to, so a demo whose server clock
+jumped between two `matchdate` prints no longer grades `exact` on
+whichever printed first (a demo legitimately holding two matches still
+does — consistent stamps project to the same demo open). `MSK` and `YEKT`
+carry an hour of accuracy slack rather than an exact offset, because
+Russia ran permanent summer time from 2011-03-27 to 2014-10-26 and a
+single table offset cannot be right for both eras. Impossible calendar
+dates (`2024-02-31`, which `time.Date` silently normalises to 2024-03-02)
+are rejected as not-a-date instead of published.
+
+Where a demo has no server-clock source, `demoStartUnixMs` is back-shifted
+from the marker by `demoOffset` so the documented `wallClockMs` formula
+keeps working, and the new `demoStartSource` says where it came from; a
+contradicted stamp is deliberately not back-shifted. Measured on a
+260-demo stratified archive sample: wall-clock coverage 24.8% → ~95%
+(100% of the `matchdate` demos, 82% of the dateless ones — the rest
+carry a non-date `matchkey` variant like `9-195923-1626`).
+
 ## unreleased (reconstruct-damage) — damage on every demo, schema v71
 
 ~45% of the archive predates the KTX `mvdhidden_dmgdone` instrumentation:

@@ -25,7 +25,14 @@ import (
 //     left" / "Standby" / "Forcestart"; `fpd` toggles when admins flip
 //     `fpd add` / `fpd del`; etc). Last-write-wins.
 //
-//  3. svc_centerprint (cmd 26) — KTX renders the full match-settings
+//  3. the `//finalscores` stufftext KTX stuffs at match end — the server's
+//     own final scoreline plus its mode and map (parser/ktx_finalscores.go).
+//     It lands here rather than in `match` because it is a metadata record
+//     first: it is reported verbatim on every demo that carries one, and the
+//     match node reads it back through CoreOutputs only where a value of its
+//     own is missing.
+//
+//  4. svc_centerprint (cmd 26) — KTX renders the full match-settings
 //     table here every second of the 10-second countdown (match.c
 //     PrintCountdown). The last centerprint we see before the
 //     "match has begun!" print is the canonical match settings dump:
@@ -39,6 +46,8 @@ import (
 type MetadataAnalyzer struct {
 	serverInfo   map[string]string
 	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
+	fairpacks    string // "best weapon" / "last weapon fired", from the ShowMatchSettings broadcast
+	finalScores  *FinalScores
 	timing       MatchTimingDetector
 }
 
@@ -78,12 +87,74 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		if strings.Contains(text, "Countdown:") {
 			a.countdownRaw = text
 		}
+	case *events.FinalScoresEvent:
+		// Last write wins, like the serverinfo keys above: a demo spanning
+		// two matches carries one directive per match, and the Result
+		// describes the last one it saw complete. (Across a 12 000-demo
+		// archive sample every demo carrying the directive carried exactly
+		// one.)
+		a.finalScores = &FinalScores{
+			Date:   e.Date,
+			Mode:   e.Mode,
+			Map:    e.Map,
+			Team1:  e.Team1,
+			Score1: e.Score1,
+			Team2:  e.Team2,
+			Score2: e.Score2,
+		}
 	case *events.PrintEvent:
 		// Latch the match start so we stop overwriting countdownRaw with
 		// any post-match centerprint that happens to mention "Countdown".
 		a.timing.OnPrint(e)
+		a.captureBroadcastSetting(e)
 	}
 	return nil
+}
+
+// fairpacksPrefix is the ShowMatchSettings row KTX broadcasts and ONLY when
+// k_frp is non-default (ktx/src/match.c:2086-2107) — so seeing it at all is
+// the signal. KTX writes it as
+//
+//	G_bprint(2, "Fairpacks setting: %s\n", redtext(txt));   // match.c:2107
+//
+// i.e. PRINT_HIGH, line-initial, from ShowMatchSettings during the
+// countdown.
+const fairpacksPrefix = "Fairpacks setting:"
+
+// captureBroadcastSetting picks the settings rows KTX prints beside the
+// countdown centerprint rather than inside it. The value is redtext (high-bit
+// characters), so it goes through the same normalisation the centerprint
+// path uses.
+//
+// The three gates all guard the same thing: this row stands the whole
+// backpack reconstruction down (backpackSkipModeReason), so anything a
+// player can type must not be able to forge it.
+//
+//   - Level 2 only. G_bprint's level is PRINT_HIGH; a level-3 chat line
+//     reading `say Fairpacks setting: best weapon` reaches this handler as a
+//     PrintEvent too, and a substring match on it fabricated the setting.
+//   - Pre-match only, like the sibling countdown capture — ShowMatchSettings
+//     runs from the countdown, so a mid-match line naming it is not it.
+//   - Line-initial, not "contains": KTX's format string starts the message,
+//     and requiring that removes the last way to smuggle the prefix into an
+//     otherwise legitimate broadcast (a player NAME, say, which the server
+//     interpolates ahead of the text in most of its bprints).
+func (a *MetadataAnalyzer) captureBroadcastSetting(e *events.PrintEvent) {
+	if a.fairpacks != "" || a.timing.Started || e.Level != events.PrintHigh {
+		return
+	}
+	text := events.NormalizeQuakeText([]byte(e.Message))
+	if !strings.HasPrefix(text, fairpacksPrefix) {
+		return
+	}
+	v := strings.TrimSpace(text[len(fairpacksPrefix):])
+	if i := strings.IndexByte(v, '\n'); i >= 0 {
+		v = strings.TrimSpace(v[:i])
+	}
+	if v == "" || v == "off" {
+		return
+	}
+	a.fairpacks = v
 }
 
 // parseFullserverinfo extracts the quoted cvar string from a stufftext like
@@ -142,8 +213,18 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 		mr.CountdownText = a.countdownRaw
 		mr.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
 	}
+	// The fairpacks row rides beside the countdown, not inside it, so it can
+	// arrive on a demo whose centerprint never parsed into a table.
+	if a.fairpacks != "" {
+		if mr.MatchSettings == nil {
+			mr.MatchSettings = &MatchSettings{}
+		}
+		mr.MatchSettings.Fairpacks = a.fairpacks
+	}
 
-	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" {
+	mr.FinalScores = a.finalScores
+
+	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" && mr.FinalScores == nil {
 		return nil
 	}
 	result.Metadata = mr
@@ -152,9 +233,12 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 
 // PopulateCore publishes the serverinfo `map` key so downstream producers
 // (timeline: loc / floor-height / liquid / region control) can resolve the map
-// even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap.
+// even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap —
+// plus the `//finalscores` record, which the match node reads for the map,
+// mode and team scores it could not resolve itself.
 func (a *MetadataAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.ServerInfoMap = a.serverInfo["map"]
+	co.FinalScores = a.finalScores
 }
 
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table

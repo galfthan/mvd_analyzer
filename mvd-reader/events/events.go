@@ -33,6 +33,34 @@ type Source interface {
 	Close() error
 }
 
+// WarningReporter is an OPTIONAL capability of a Source: the census of
+// things the source could not read off its wire. A consumer type-asserts
+// for it after draining the stream (the counts are complete only then)
+// and surfaces the summary rather than dropping it — a protocol gap the
+// pipeline silently tolerates is exactly how the sv_bigcoords desync
+// degraded years of archived demos unnoticed.
+//
+// A source that cannot fail to decode anything (a JSON replay, a
+// synthetic test source) simply does not implement it.
+type WarningReporter interface {
+	WarningSummary() WarningSummary
+}
+
+// Parse-warning types, re-exported from the parser like every other
+// wire-level type here. WarningSummary is the always-collected census;
+// Warning is one instance (retained only in the parser's diagnostic
+// mode).
+type (
+	Warning        = parser.Warning
+	WarningSummary = parser.WarningSummary
+	WarningGroup   = parser.WarningGroup
+)
+
+// MaxWarningGroups is the retention cap on WarningSummary.Groups — how
+// many distinct messages a summary samples before it starts counting
+// every further warning into DroppedWarnings.
+const MaxWarningGroups = parser.MaxWarningGroups
+
 // Event is the interface implemented by every concrete event type. Use
 // a type switch on Event to dispatch on the specific event kind.
 type Event = parser.Event
@@ -63,10 +91,13 @@ type (
 	SpawnEvent              = parser.SpawnEvent
 	ItemSpawnEvent          = parser.ItemSpawnEvent
 	ItemStateEvent          = parser.ItemStateEvent
+	ItemMoveEvent           = parser.ItemMoveEvent
 	BackpackDropHintEvent   = parser.BackpackDropHintEvent
 	ItemPickupHintEvent     = parser.ItemPickupHintEvent
 	BackpackPickupHintEvent = parser.BackpackPickupHintEvent
+	BackpackExpireHintEvent = parser.BackpackExpireHintEvent
 	DemoMarkEvent           = parser.DemoMarkEvent
+	FinalScoresEvent        = parser.FinalScoresEvent
 	ItemPickupPrintEvent    = parser.ItemPickupPrintEvent
 	PlayerDepartureEvent    = parser.PlayerDepartureEvent
 	PlayerRejoinEvent       = parser.PlayerRejoinEvent

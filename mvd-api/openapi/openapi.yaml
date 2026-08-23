@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "72"
+  version: "73"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -448,7 +448,8 @@ paths:
       summary: Curated match summary
       description: |
         Map, teams, corrected scoreboard, top streaks, top powerup runs,
-        timing, data-quality `errors[]`.
+        timing, data-quality `errors[]` and the reader's `parseWarnings`
+        census (wire data the MVD decoder could not read at all).
 
         **Units seam.** Overview times are int32 MILLISECONDS (verbatim from
         the stored schema).
@@ -462,6 +463,14 @@ paths:
         pauses at or before g (±demoStartAccuracyMs). `timing` is omitted when
         the demo carries no wall-clock source; `pauses` when the match had
         none.
+
+        **When was it played?** Read `timing.matchStartUnixMs` (schema v72),
+        not `demoStartUnixMs`: it is what the wire date markers actually state
+        and is present on ~95% of demos against ~25% for the server-clock
+        anchor. Always check `matchStartConfidence` —
+        `contradicted` means the stamp fails a check (e.g. it predates the
+        server binary's release) and is reported rather than dropped, with
+        `matchStartNote` naming the check.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Label"
@@ -855,9 +864,30 @@ paths:
       tags: [items]
       summary: RL/LG backpack drops
       description: >
-        Backpack drops from KTX's drop hint: time, dropper, weapon
-        (rl/lg), origin XYZ, resolved loc, and the server ent number that
-        joins to /weapon-pickups. Always 200 — empty when none.
+        RL/LG backpack drops: time, dropper, weapon (rl/lg), origin XYZ
+        (the pack's own position, 24 units below the victim's origin) and
+        resolved loc. Each row names its provenance in `source`, and the two
+        are never mixed within one demo:
+
+          * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the
+            hinted edict and joins to WeaponPickup.backpackEnt, which is
+            where that row's pickup lives; `picker`/`pickerTeam`/
+            `pickupTime` are absent. `fate` appears only as `expired`, and
+            only when KTX announced the 120 s removal in `//ktx expire` —
+            an absent `fate` here means "ask /weapon-pickups", NOT "nobody
+            took it".
+          * `reconstructed` — replayed from the server's own drop rule on a
+            demo whose mod never hinted. There is no pickup hint to join to,
+            so the pickup side is carried on the row itself (schema v72):
+            `fate` (`picked`/`expired`/`unobserved`) plus `pickupTime` and
+            `picker`/`pickerTeam` when the wire named one, read off the
+            bound backpack entity — whose edict number `entNum` now carries
+            as well. A `reconstructed` `entNum` still joins to nothing;
+            it identifies the pack track, not a pickup row.
+
+        Always 200 — empty when none, which means either no pack dropped or
+        the reconstruction stood down; the wire shape does not distinguish
+        the two.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Players"
@@ -2254,7 +2284,7 @@ components:
       in: query
       description: >
         CSV of field selector codes. Omit for the default set (everything
-        except the opt-in view/hgt/lq/vel). NOTE: the selector code `li`
+        except the opt-in view/hgt/lq/vel/aw). NOTE: the selector code `li`
         renders as output key `loc` in name mode — `loc` is NOT a selector
         code. Unknown codes 400 with the full vocabulary enumerated.
       style: form
@@ -2286,6 +2316,7 @@ components:
             - nl
             - rk
             - cl
+            - aw
             - sp
             - d
             # field-code-enum:end
@@ -2727,7 +2758,7 @@ components:
         knockback already moved the victim, so the sample nearest the damage
         time reports players who were STANDING at impact as hundreds of units
         airborne. `preMs=0` turns the pre-hit gate off (hit-time sample only,
-        the pre-v72 detection); values above 1000 are rejected with 400
+        the pre-v73 detection); values above 1000 are rejected with 400
         `invalid_param`, since a look-back that long lands before the flight
         that made the hit an airgib at all. The response echoes the effective
         value in `preMs`.
@@ -3127,6 +3158,62 @@ components:
           type:
             - "null"
             - array
+        parseWarnings:
+          description: >
+            READER-level census (schema v72): wire data the MVD decoder could not
+            read at all — unknown svc_* commands, unknown temp-entity or hidden-message
+            types, payloads that failed to parse. Distinct from `errors[]`, which
+            reports analyzer failures over events that DID decode. Omitted on a clean
+            parse, which is the normal case; a present block means this demo hit a
+            protocol gap and the views downstream of it may be thin.
+          type: object
+          additionalProperties: false
+          properties:
+            total:
+              description: "Exact number of parse warnings raised. Never capped."
+              type: integer
+            byType:
+              description: >
+                Exact per-category counts. Categories are a small fixed vocabulary:
+                parse_error, unknown_svc, unknown_te, unknown_hidden.
+              type: object
+              additionalProperties:
+                description: "Warnings raised in this category."
+                type: integer
+            groups:
+              description: >
+                Capped sample table of distinct (type, message) rows, loudest first.
+                The counts above stay exact even when a row is dropped from here.
+                Rows are RETAINED in first-encounter order, so on a badly broken demo
+                this is a sample of the distinct messages rather than the top-k.
+              type: array
+              items:
+                description: "One distinct warning message with its count and first occurrence."
+                type: object
+                additionalProperties: false
+                properties:
+                  type:
+                    description: "Warning category (parse_error | unknown_svc | unknown_te | unknown_hidden)."
+                    type: string
+                  message:
+                    description: "The reader's message, e.g. the svc name plus the bytes it abandoned."
+                    type: string
+                  count:
+                    description: "How often this exact message fired."
+                    type: integer
+                  firstDemoTimeMs:
+                    description: >
+                      RAW DEMO time of the first occurrence (the wire clock), NOT the
+                      match-relative base every other ms field uses — the reader has no
+                      match clock and a warning can fire before the match starts.
+                    type: integer
+            droppedWarnings:
+              description: >
+                Warnings beyond the 64-group retention cap, i.e. missing from `groups`.
+                An OCCURRENCE count, never a count of distinct messages — past the cap
+                the reader stops retaining keys, which is why the cap exists.
+                Normally absent.
+              type: integer
         filePath:
           description: "Source demo path."
           type: string
@@ -3189,7 +3276,13 @@ components:
           description: "Tournament / event tag."
           type: string
         mode:
-          description: "Match mode (e.g. Duel/Team/FFA)."
+          description: >
+            Match mode. Two vocabularies reach this field: the KTX countdown
+            table's display spelling ("Duel", "Team", "LGC") where the demo had
+            a countdown, else (schema v72) KTX's own mode name from the
+            demoinfo block or the `//finalscores` stuffcmd ("duel", "team",
+            "FFA", "Clan Arena"). Compare case-insensitively, and read
+            `/metadata` for the exact source.
           type: string
         playerUserIDs:
           description: "Player name → UserID map (Hub viewer links). Per connection SESSION, not per wire slot: for a player who reconnected this is the last session of theirs that had play — normally the id live at the end of the demo, though the ranking is by last play evidence, so an exact tie resolves to the lower slot rather than to the surviving connection (schema v66)."
@@ -3266,6 +3359,56 @@ components:
               type: integer
             demoStartUnixMs:
               description: "Wall-clock time of demo start, Unix ms."
+              type: integer
+            demoStartSource:
+              description: >-
+                Where the demo-start anchor came from: `mvdhidden` / `epoch`
+                (server clock) or `matchdate` / `matchkey` / `ktxstats` (a wire
+                date marker back-shifted by demoOffset). Schema v72.
+              type: string
+            matchEndUnixMs:
+              description: >-
+                Wall-clock time of match end, Unix ms: the ktxstats `date` (KTX
+                writes that block at intermission), else the `//finalscores`
+                stamp once its year has been completed from the anchoring
+                marker — which is the common case on the pre-ktxstats half of
+                the archive, and is minute-resolution and only as good as the
+                marker its year came from. Absent when the demo carries
+                neither. Schema v72.
+              type: integer
+            matchStartAccuracyMs:
+              description: >-
+                Uncertainty of matchStartUnixMs, int32 ms: 1/1000 for a server
+                clock or a zoned marker, 3600000 for a zone name of unstated DST
+                status, 50400000 when the marker named no zone and UTC was
+                assumed (real offsets span UTC-12..UTC+14). Schema v72.
+              maximum: 2.147483647e+09
+              minimum: -2.147483648e+09
+              type: integer
+            matchStartConfidence:
+              description: >-
+                Grade of matchStartUnixMs: `exact` (zone resolved, no check
+                failed), `unverified` (nothing contradicts it but something is
+                unpinned), `contradicted` (a check it provably fails — the
+                anchor is still reported). Schema v72.
+              enum:
+                - exact
+                - unverified
+                - contradicted
+              type: string
+            matchStartNote:
+              description: "Names the checks behind a non-`exact` matchStartConfidence. Schema v72."
+              type: string
+            matchStartSource:
+              description: >-
+                Which marker matchStartUnixMs was derived from: `mvdhidden`,
+                `epoch`, `matchdate`, `matchkey`, `ktxstats`. Schema v72.
+              type: string
+            matchStartUnixMs:
+              description: >-
+                Wall-clock time of MATCH start (the instant g=0 names), Unix ms.
+                Present on ~95% of demos against ~25% for demoStartUnixMs, since
+                the wire date markers describe the match. Schema v72.
               type: integer
             pauses:
               description: "Game pauses as flat game-time→wall-clock segments."
@@ -3374,6 +3517,44 @@ components:
             yawnmode:
               description: "Yawnmode (SSG) mode."
               type: boolean
+          type:
+            - "null"
+            - object
+        finalScores:
+          description: >
+            KTX's `//finalscores` end-of-match scoreline, verbatim (schema v72).
+            Present on 64% of the archive against demoinfo's 46%, so on the
+            pre-ktxstats half this is the only place the SERVER states a final
+            result. `date` is strftime "%b %d, %H:%M" with no year, no seconds
+            and no timezone — read /overview's `timing` block
+            (`matchEndUnixMs`, plus `matchStartUnixMs` and its confidence
+            grade) for the resolved instant; this API does not serve the raw
+            marker list. `mode` is KTX's lastscores name ("duel", "team",
+            "FFA", "Clan Arena", ...), a different spelling from the demoinfo
+            `mode`; neither is rewritten. Scores can be negative (suicides).
+          additionalProperties: false
+          properties:
+            date:
+              description: "Server-local match-end stamp, \"%b %d, %H:%M\" — no year."
+              type: string
+            mode:
+              description: "KTX lastscores mode name (\"duel\", \"team\", \"FFA\", \"Clan Arena\", ...)."
+              type: string
+            map:
+              description: "Canonical short map name."
+              type: string
+            team1:
+              description: "First side's team name (the player's own name on a duel)."
+              type: string
+            score1:
+              description: "First side's final score; can be negative."
+              type: integer
+            team2:
+              description: "Second side's team name."
+              type: string
+            score2:
+              description: "Second side's final score; can be negative."
+              type: integer
           type:
             - "null"
             - object
@@ -5070,8 +5251,72 @@ components:
       additionalProperties: false
       properties:
         entNum:
-          description: "Server entity/edict number — stable id within a match."
+          description: >
+            Server entity/edict number — stable id within a match. On a `ktx`
+            row it comes from the wire hint and joins to
+            WeaponPickup.backpackEnt. On a `reconstructed` row it is the
+            backpack-model entity the linkage bound to the drop and joins to
+            nothing (that row's pickup side is `fate`/`picker` below). 0
+            means no entity was identified; never treat 0 as an edict.
           type: integer
+        fate:
+          description: >
+            What the wire showed happening to the pack (schema v72).
+            `picked` — the pack entity left the wire with a live player's
+            bounding box overlapping it, the same test the server runs
+            before BackpackTouch; `pickupTime` is when, and `picker` is set
+            only when the evidence named exactly one player. `expired` —
+            SUB_Remove took it at KTX's 120 s timeout, untaken: the one
+            outcome that is positively not a pickup. `unobserved` — no
+            entity bound to the drop, or it was still on the wire when the
+            recording stopped, or it left early with nobody on it; none of
+            which is evidence that nobody took the pack.
+
+            A `reconstructed` row can carry any of the three, read off the
+            backpack-entity track. A `ktx` row carries only `expired`, and
+            only because KTX said so in `//ktx expire <ent>` — its other
+            outcomes are the /weapon-pickups join, so an ABSENT `fate` on a
+            `ktx` row means "ask that endpoint", never "nobody took it".
+            Read `source` for a `fate`'s provenance, exactly as for the row.
+            Measured against the `//ktx bp` and `//ktx expire` hints on 223
+            demos with every hint withheld: 100.00% precision and 96.13%
+            recall on picked-vs-not, 99.98% of named pickers correct.
+          enum: [picked, expired, unobserved]
+          type: string
+        picker:
+          description: >
+            Who took the pack (schema v72). Set only with `fate: picked`, and
+            only when the evidence named exactly ONE player — two players on
+            one pack with nothing to separate them leave this empty rather
+            than guess. Reconstructed rows only.
+          type: string
+        pickerTeam:
+          description: >
+            Team of `picker`. Omitted when the picker has no team — an FFA
+            or duel picker is named with no `pickerTeam`, so read its
+            absence as "teamless", not as "no picker". Reconstructed rows
+            only (schema v72).
+          type: string
+        pickupTime:
+          description: >
+            When the pack left the wire, int32 ms since match start. Set with
+            `fate: picked` (with or without a `picker`). Reconstructed rows
+            only (schema v72).
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        source:
+          description: >
+            Where this row came from (schema v72). `ktx` — decoded from KTX's
+            `//ktx drop` hint, which fires exactly once per real pack and is
+            emitted only by KTX >= 1.38 (49% of the archive). `reconstructed`
+            — replayed from DropBackpack's own rule (the victim's wielded
+            weapon at the death instant, dropped at their last broadcast
+            position) on a demo whose mod never hinted. The two are never
+            mixed within one demo; a reconstructed section stands down
+            entirely rather than guess where the evidence is unmeasurable.
+          enum: [ktx, reconstructed]
+          type: string
         loc:
           description: "Nearest named location from the map .loc file."
           type: string
@@ -6801,11 +7046,39 @@ components:
           description: "Game directory (mod)."
           type: string
         map:
-          description: "Canonical map identifier — always the SHORT name (e1m2, dm2, aerowalk). Resolved from the KTX demoinfo map, else the serverinfo `map` key, else the cleaned level title. Join on this against searchGames rows, metadata serverinfo and map geometry keys."
+          description: "Canonical map identifier — always the SHORT name (e1m2, dm2, aerowalk). Resolved from the KTX demoinfo map, else the serverinfo `map` key, else (schema v72) the `//finalscores` map, else the cleaned level title; `sources.map` says which. Join on this against searchGames rows, metadata serverinfo and map geometry keys."
           type: string
         mapTitle:
           description: "Level title announced in svc_serverdata (\"Castle of the Damned\" on e1m2), cleaned of a .bsp suffix and a trailing ` by <author>` hint. DISPLAY ONLY — never an identifier or file key. Omitted when svc_serverdata named no level."
           type: string
+        mode:
+          description: >
+            KTX's own game-mode name (schema v72): the demoinfo block's
+            (`duel`, `team`, `ffa`, `clan-arena`, …) or, where that block does
+            not exist, the `//finalscores` one (`duel`, `team`, `FFA`,
+            `Clan Arena`, …) — the two spellings are each source's own
+            vocabulary, reported verbatim, so compare case-insensitively and
+            read `sources.mode` for the source. Neither the serverinfo `mode`
+            key (`1on1`, `4on4-midair`) nor the countdown table's `Duel`.
+          type: string
+        sources:
+          description: >
+            Where the resolved identity fields came from (schema v72), so a
+            server-authoritative value is distinguishable from a
+            pipeline-derived one. `//finalscores` never displaces a demoinfo
+            value and never corrects a derived team row.
+          additionalProperties: false
+          properties:
+            map:
+              description: "`ktx` | `serverinfo` | `finalscores` | `levelTitle` (the degraded last resort — on a titled map that string is not a shortname)."
+              type: string
+            mode:
+              description: "`ktx` (demoinfo) | `finalscores`."
+              type: string
+            teams:
+              description: "`derived` (the per-player scoreboard summed by team, the normal case) | `finalscores` (the scoreboard produced no team rows, so the two sides come from KTX's end-of-match stuffcmd)."
+              type: string
+          type: object
         players:
           description: "Final scoreboard lines."
           items:
@@ -6863,6 +7136,7 @@ components:
         - gameDir
         - duration
         - players
+        - sources
       type: object
     Messages:
       additionalProperties: false
@@ -7766,6 +8040,33 @@ components:
                 type:
                   - "null"
                   - array
+              aw:
+                description: >
+                  Wielded-weapon change stream (t/v pairs), opt-in via
+                  `fields=aw`. v is the weapon's IT_* bit — 1 SG, 2 SSG, 4 NG,
+                  8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe, 0 nothing held — read
+                  straight from STAT_ACTIVEWEAPON. A different question from
+                  the rl/lg/gl/ssg/sng interval streams, which are inventory.
+                items:
+                  additionalProperties: false
+                  properties:
+                    t:
+                      description: "Event/sample time, int32 ms since match start."
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
+                    v:
+                      description: "Sample value at time t."
+                      maximum: 32767
+                      minimum: -32768
+                      type: integer
+                  required:
+                    - t
+                    - v
+                  type: object
+                type:
+                  - "null"
+                  - array
               cl:
                 description: "Cells-ammo change stream (t/v pairs)."
                 items:
@@ -8453,6 +8754,17 @@ components:
                 type:
                   - "null"
                   - string
+              aw:
+                description: >
+                  Wielded weapon at the instant as its IT_* bit — 1 SG, 2 SSG,
+                  4 NG, 8 SNG, 16 GL, 32 RL, 64 LG, 4096 axe, 0 nothing held.
+                  Opt-in via `fields=aw`. A different question from the
+                  rl/lg/gl/ssg/sng booleans, which are inventory.
+                maximum: 32767
+                minimum: -32768
+                type:
+                  - "null"
+                  - integer
               cl:
                 description: "Cells ammo at the instant."
                 maximum: 32767

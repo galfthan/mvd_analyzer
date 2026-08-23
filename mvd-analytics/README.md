@@ -104,8 +104,10 @@ that downstream consumers render, summarise, or feed to an agent.
 - `mapclip/` — worldspawn player clip hull + downward floor trace that
   fills `PositionTrack.H`. See "Floor height" below.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
-  through the parser in warning-collection mode and runs data-quality
-  checks on the analysis result.
+  through the parser with per-instance warning retention on
+  (`SetDiagnosticMode`) and runs data-quality checks on the analysis
+  result. The warning CENSUS needs none of this any more — it rides
+  every `Result` as `parseWarnings`.
 - `corpus/` — special-cases invariant harness over
   `demo-test-data/mvd/special-cases/`; skips when that per-machine
   directory is absent.
@@ -137,6 +139,14 @@ that downstream consumers render, summarise, or feed to an agent.
   the reconstruction blind on wire-instrumented demos and scores it
   against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
   prints misattribution flows.
+- `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
+  runs the reconstruction blind on demos that carry the `//ktx drop`
+  hints and scores precision/recall/position error against them (tables
+  in `analyzer/BACKPACKS.md`); `-linkage` does the same for the PICKUP
+  side against the `//ktx bp` (picked) and `//ktx expire` (expired)
+  hints, with every hint withheld; `-volume`
+  reports drops-per-death, the pack-fate mix and an inventory
+  cross-check on the hint-less population, where no ground truth exists.
 - `cmd/fetch-eval-corpus/` — pins a hub eval corpus to disk (demos +
   a manifest of gameIds, so eval runs are reproducible).
 - `cmd/qw-corpus-survey/` — sweeps a demo directory through the full
@@ -343,9 +353,10 @@ whole-Result rebase or duel rewrite.
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `regionControlPost`,
-`openingPost`, [`playerStatsPost`](analyzer/player_stats.md),
-`damageReconPost`. They come in
+`scoreboardStatsPost`, `locGraphPost`, `wallClockPost`,
+`regionControlPost`, `openingPost`,
+[`playerStatsPost`](analyzer/player_stats.md),
+`damageReconPost`, `backpackReconPost`. They come in
 three shapes. **One creates a section of its own**: `playerStatsPost` is
 node `player-stats`, publishing `playerStats` — it consumes twelve
 artifacts and writes a top-level section no other node touches, so it
@@ -369,6 +380,39 @@ from the state streams — package
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
 section is never touched.
+
+`backpackReconPost` is node `backpack-recon`, publishing
+`backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
+fills the same `backpacks` section from `DropBackpack`'s own rule, stamped
+`source: "reconstructed"` (see the Backpacks section below and
+[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md)). A hint-carrying demo is
+never touched. `player-stats` binds `backpacks:final`, so its per-weapon
+`dropped` tallies gain the reconstructed drops; pack TRANSFERS stay absent
+there, because those need the `//ktx bp` pickup hint that ships with the
+same KTX generation as the drop hint.
+
+`backpackLinkagePost` is node `backpack-linkage`: it binds each
+RECONSTRUCTED drop to the backpack-model entity that appeared at its time
+and place (`co.PackEntities`, published by the backpacks node), follows the
+pack's origin track to where it settled, and reads its disappearance as a
+pickup, an expiry at KTX's 120 s removal timeout, or an honest
+`unobserved`. It binds `backpacks:final` so it sees the finished section,
+plus `timeline` (positions, liveness, RL/LG possession) and `items` (the
+world spawner positions that disqualify a weapon-bit tie-break). A
+hint-carrying demo is never touched — `//ktx bp` already names the picker.
+
+`wallClockPost` is node `wall-clock`: it resolves the wire date markers
+the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
+`date` string, the year-less `//finalscores` stamp on the metadata
+section, and the serverinfo version keys into the graded match-start
+anchor on `streams.global` (`matchStartUnixMs` + `matchStartConfidence`,
+schema v72). It is a post-processor because its evidence is spread across
+three artifacts — `clock`, `demoinfo` and `metadata` — and it projects onto
+the match window `timeline` publishes. The `//finalscores` stamp is the one
+marker that can never anchor: it carries no year, so it is resolved last —
+year and timezone borrowed from the marker that *did* anchor (reported as
+`dateMarkers[].yearFrom`), then cross-checked on the month/day/hour/minute
+that are its own.
 
 One further node, `los`, is **lazy**: materialised on demand rather than in
 the eager parse (see "The dependency DAG").
@@ -458,6 +502,7 @@ flowchart TB
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
+    wall_clock["wall-clock"]
     region_control["region-control"]
     opening["opening"]
     los["los"]
@@ -466,12 +511,16 @@ flowchart TB
     aim["aim"]
     match_final["match-final"]
     damage_recon["damage-recon"]
+    backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
     airgibs["airgibs"]
     player_stats["player-stats"]
+    backpack_linkage["backpack-linkage"]
   end
-  backpacks -->|"backpacks"| player_stats
+  backpack_recon -->|"backpacks:final"| backpack_linkage
+  backpack_recon -->|"backpacks:final"| player_stats
+  backpacks -->|"backpacks"| backpack_recon
   clock -->|"clock"| backpacks
   clock -->|"clock"| damage
   clock -->|"clock"| frag
@@ -481,12 +530,14 @@ flowchart TB
   clock -->|"clock"| player_stats
   clock -->|"clock"| shots
   clock -->|"clock"| timeline
+  clock -->|"clock"| wall_clock
   clock -->|"clock"| weapon_pickups
   damage -->|"damage"| aim
   damage -->|"damage"| damage_recon
   damage_recon -->|"damage:final"| airgibs
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs
+  demoinfo -->|"demoinfo"| backpacks
   demoinfo -->|"demoinfo"| damage
   demoinfo -->|"demoinfo"| damage_recon
   demoinfo -->|"demoinfo"| frag
@@ -501,13 +552,16 @@ flowchart TB
   demoinfo -->|"demoinfo"| roster
   demoinfo -->|"demoinfo"| shots
   demoinfo -->|"demoinfo"| timeline
+  demoinfo -->|"demoinfo"| wall_clock
   frag -->|"frag"| airgibs
   frag -->|"frag"| frags_final
   frag -->|"frag"| timeline
   frag -->|"frag"| weapon_pickups
+  frags_final -->|"frags:final"| backpack_recon
   frags_final -->|"frags:final"| damage_recon
   frags_final -->|"frags:final"| match_final
   frags_final -->|"frags:final"| player_stats
+  identity -->|"identity"| backpacks
   identity -->|"identity"| damage
   identity -->|"identity"| frag
   identity -->|"identity"| items
@@ -516,17 +570,20 @@ flowchart TB
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
+  items -->|"items"| backpack_linkage
   items -->|"items"| opening
   items -->|"items"| player_stats
   match -->|"match"| match_final
   match -->|"match"| region_control
   match_final -->|"match:final"| player_stats
+  metadata -->|"metadata"| backpack_recon
   metadata -->|"metadata"| damage
   metadata -->|"metadata"| damage_recon
   metadata -->|"metadata"| los
   metadata -->|"metadata"| match
   metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
+  metadata -->|"metadata"| wall_clock
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items
@@ -540,6 +597,8 @@ flowchart TB
   shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
   timeline -->|"timeline"| airgibs
+  timeline -->|"timeline"| backpack_linkage
+  timeline -->|"timeline"| backpack_recon
   timeline -->|"timeline"| damage_recon
   timeline -->|"timeline"| frags_final
   timeline -->|"timeline"| loc_graph
@@ -548,9 +607,10 @@ flowchart TB
   timeline -->|"timeline"| player_stats
   timeline -->|"timeline"| region_control
   timeline -->|"timeline"| shots
+  timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,region_control,opening,player_stats,damage_recon post;
+  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```
@@ -732,9 +792,18 @@ type Result struct {
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric
     Streams          *Streams                 // canonical event-rate per-player state (v7); view API reads this
-    Errors           []string
+    Errors           []string                 // analyzer-level failures over events that DID decode
+    ParseWarnings    *ParseWarnings           // v72: the reader's census of wire data it could NOT decode
 }
 ```
+
+`Errors` and `ParseWarnings` are two different degradation signals and
+are never merged. `Errors` is analyzer-level (a `Finalize` failed, the
+event stream aborted mid-demo). `ParseWarnings` is parse-level: unknown
+`svc_*` commands, unknown temp-entity or hidden-message types, payloads
+that failed to decode — collected on every run by the reader
+(`events.WarningReporter`, read off the source in `registry.go` once the
+stream is drained) and omitted entirely when the parse was clean.
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer. `CurrentSchemaVersion`
@@ -888,12 +957,40 @@ never practically available in that 60 s window).
 
 ### Backpacks
 
-`result.Backpacks` is a flat list of RL and LG backpack drops,
-driven by `BackpackAnalyzer`. Each entry is emitted when KTX fires
-its `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY
-directive (ktx/src/items.c:2740). The hint is the authoritative
-source — it fires exactly once per real drop, with weapon and
-dropper slot already attributed, so the analyzer doesn't guess.
+`result.Backpacks` is a flat list of RL and LG backpack drops with two
+possible provenances, named per row by `source` and never mixed within
+one demo.
+
+`source: "ktx"` — `BackpackAnalyzer` emits one entry per `//ktx drop
+<ent> <items> <player_ent>` STUFFCMD_DEMOONLY directive
+(ktx/src/items.c:2762). The hint is the authoritative source — it fires
+exactly once per real drop, with weapon and dropper slot already
+attributed, so the analyzer doesn't guess. Only KTX >= 1.38 emits it,
+which is 49% of the archive.
+
+`source: "reconstructed"` — on the other half, the `backpack-recon`
+post-processor replays `DropBackpack`'s own rule instead. Under the
+shipped default `k_frp 0` the pack holds the victim's *wielded* weapon
+verbatim (`item->s.v.items = self->s.v.weapon`, items.c:2706), and mvdsv
+writes that same field into the MVD as `STAT_ACTIVEWEAPON` for every
+spawned player — published as `streams.players[].aw` — so the pass is a
+replay over a recorded field, not an inference: death instant + wielded
+weapon + the victim's last broadcast position, with `/kill` deaths
+suppressed (the one deathtype `DropBackpack` refuses). It stands down
+entirely rather than guess where the evidence is unmeasurable, and never
+touches a hint-carrying demo. Measured against the hints on 316 archive
+demos: **precision 99.97%, recall 99.97%** — method, splits and
+stand-down conditions in [`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+
+The PICKUP side of a reconstructed row is filled by the `backpack-linkage`
+post from the wire's backpack-ENTITY track: the pack that appears at the
+drop's time and place is bound to it, followed to where it lands (packs are
+tossed and fall), and its disappearance classified by whether any live
+player's bounding box overlapped it — the same test the server runs before
+calling `BackpackTouch`. That lands in `fate` / `picker` / `pickerTeam` /
+`pickupTime` on the same row (schema v72). Measured against the `//ktx bp`
+hints on 223 demos: **picked-vs-not 100% precision, 96.1% recall; 99.98% of
+named pickers correct**.
 
 Coverage caveats:
 
@@ -909,14 +1006,32 @@ Coverage caveats:
   for the full mechanics. Net effect: SSG/NG/SNG/GL/ammo-only
   packs do not appear in `result.Backpacks`, and corresponding
   pickups do not appear in `result.WeaponPickups`.
-- **Pickup side lives in `WeaponPickups`, not `Backpacks`.**
-  `BackpackAnalyzer` only records drops. The pickup side — who
-  grabbed the pack, whether they already owned the weapon, how many
-  frags they scored with it before dying — is emitted by
-  `WeaponPickupsAnalyzer` and exposed as `result.WeaponPickups`.
-  Frontends join the two lists by `BackpackDrop.EntNum` ==
-  `WeaponPickup.BackpackEnt` (paired with `dropTime` to disambiguate
-  recycled edict numbers).
+- **A `ktx` row's pickup side lives in `WeaponPickups`, not
+  `Backpacks`.** `BackpackAnalyzer` only records drops. The pickup side
+  — who grabbed the pack, whether they already owned the weapon, how
+  many frags they scored with it before dying — is emitted by
+  `WeaponPickupsAnalyzer` from `//ktx bp` and exposed as
+  `result.WeaponPickups`. Frontends join the two lists by
+  `BackpackDrop.EntNum` == `WeaponPickup.BackpackEnt` (paired with
+  `dropTime` to disambiguate recycled edict numbers).
+- **…but its EXPIRY side rides the drop row, because nothing else can
+  carry it.** KTX's third backpack directive, `//ktx expire <ent>`
+  (`ktx/src/g_spawn.c:196-210`), fires when `SUB_Remove` takes an RL/LG
+  pack off the map untaken at `DropBackpack`'s 120 s timeout.
+  `BackpackAnalyzer` joins it to the drop it closes — by edict AND time,
+  since edicts are recycled — and stamps `Fate = "expired"`. Do not infer
+  it from a missing `WeaponPickups` row instead: over 223 archive demos
+  carrying all three directives, 10 384 drops split 10 006 `bp` + 190
+  `expire` + 188 claimed by neither, so half the packs with no pickup row
+  are simply packs the recording ended on top of.
+- **A `reconstructed` row's pickup side rides the drop row.** There is
+  no `//ktx bp` to join to, so `fate` / `picker` / `pickerTeam` /
+  `pickupTime` carry it instead. It is deliberately NOT written into
+  `WeaponPickups`: that section documents itself as authoritative KTX
+  hints and feeds kill credit and pack-transfer stats that stay
+  wire-measured. Two things the entity track cannot say and so are still
+  absent there: `hadBefore` (KTX ORs the weapon bit in, so a redundant
+  grab leaves no trace) and therefore kill credit.
 
 ```go
 type BackpackDrop struct {
@@ -926,7 +1041,20 @@ type BackpackDrop struct {
     Weapon string     // "rl" or "lg"
     Origin [3]float32 // dropper's position at hint time
     Loc    string     // nearest named loc
-    EntNum int        // server edict of the backpack entity
+    EntNum int        // server edict of the backpack entity; 0 when none was identified
+    Source string     // "ktx" (wire hint) | "reconstructed"
+
+    // The pack's fate (schema v72). On a reconstructed row it is read off
+    // the entity track and takes any of the three values; on a `ktx` row it
+    // is only ever "expired", set from the `//ktx expire` hint — an empty
+    // fate there means "ask WeaponPickups", not "nobody took it".
+    Fate string // "picked" | "expired" | "unobserved"
+
+    // Reconstructed rows only — a `ktx` row's picker is the WeaponPickups
+    // join.
+    Picker     string // set only when the evidence named exactly one player
+    PickerTeam string
+    PickupTime int32  // ms, with Fate == "picked"
 }
 ```
 

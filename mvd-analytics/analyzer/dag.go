@@ -20,7 +20,7 @@ import "fmt"
 // The out-of-band lazy pass ComputeLOS (los.go) is modelled as a lazy DAG node
 // since Stage 3 (materialize.go): a nodeSpec with Lazy:true, registered in
 // lazyArtifacts rather than in the eager analyzer / post-processor slices. It
-// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 21 eager
+// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 25 eager
 // nodes), so the eager bundle and the golden corpus are unchanged; it appears
 // in -graph output marked lazy and is materialised on demand through the
 // LazyArtifact hooks (mvd-api's per-artifact tier-3 cache). (The spatial
@@ -104,9 +104,9 @@ var analyzerNodeMeta = map[string]nodeMeta{
 
 	// Derived consumers / independent peers.
 	"metadata": {name: "metadata", resultKey: "metadata",
-		desc: "Server cvars and parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...)."},
+		desc: "Server cvars, parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...) and KTX's //finalscores end-of-match scoreline."},
 	"match": {name: "match", requires: []string{"demoinfo", "identity", "metadata"}, resultKey: "match",
-		desc: "Match summary: map, mode, duration, and the per-player scoreboard. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
+		desc: "Match summary: map, mode, duration, the per-player scoreboard, and a `sources` block naming where the map / mode / team rows came from (demoinfo, serverinfo, //finalscores, derived). In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
 	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},
 	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster", "metadata"}, resultKey: "timelineAnalysis",
@@ -119,8 +119,8 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",
 		desc: "The map's static designed entity layout (item spawns, spawnpoints, teleporters) resolved from the embedded BSP corpus."},
-	"backpacks": {name: "backpacks", requires: []string{"clock", "roster"}, resultKey: "backpacks",
-		desc: "RL/LG backpack drops from KTX drop hints, with dropper, weapon, origin, and the ent number joining to weapon pickups."},
+	"backpacks": {name: "backpacks", requires: []string{"clock", "identity", "demoinfo", "roster"}, resultKey: "backpacks",
+		desc: "RL/LG backpack drops with dropper, weapon, origin and a `source` naming the provenance: `ktx` from the wire `//ktx drop` hint (which also carries the ent number joining to weapon pickups), or `reconstructed` from the backpack-recon node on demos older than that hint. A `ktx` row also carries `fate: expired` when KTX's `//ktx expire` hint announced the pack's 120 s removal — the only wire statement that a pack was NOT taken, which the weapon-pickups join cannot make."},
 	"weaponPickups": {name: "weapon-pickups", requires: []string{"clock", "identity", "frag", "roster"}, resultKey: "weaponPickups",
 		desc: "Slot-weapon acquisitions (world spawners and backpacks) with kills-before-next-death effectiveness."},
 }
@@ -180,6 +180,11 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "locGraph",
 		desc:      "Per-map loc adjacency graph with directed transition weights derived from player movement.",
 	},
+	"wallClockPost": {
+		name: "wall-clock", mutates: true,
+		requires: []string{"clock", "demoinfo", "metadata", "timeline"},
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
+	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,
 		requires: []string{"timeline", "match", "demoinfo"},
@@ -187,7 +192,7 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata"},
 		resultKey: "playerStats",
 		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
 	},
@@ -196,6 +201,17 @@ var postNodeMeta = map[string]nodeMeta{
 		requires:  []string{"timeline", "items"},
 		resultKey: "opening",
 		desc:      "Match opening: each player's match-start spawn location plus the first in-match take of every contested spawner (armors, mega, powerups, RL/LG). A pure projection of items + streams, kept small for one-call fetches.",
+	},
+	"backpackReconPost": {
+		name: "backpack-recon", mutates: true,
+		requires: []string{"backpacks", "timeline", "frags:final", "metadata"},
+		provides: []string{"backpacks:final"},
+		desc:     "Reconstructed RL/LG backpack drops for demos older than the KTX `//ktx drop` hint (KTX 1.38): replays DropBackpack's default rule — the victim's wielded weapon at the death instant, dropped at their last broadcast position — into the same `backpacks` section, stamped source=reconstructed and carrying no entNum. A hint-carrying demo is never touched, and the pass stands down (leaving the section absent) on frozen weapon state, a missing frag log or active-weapon stat, a fairpacks/yawnmode/bloodfest ruleset, or a mod new enough to have hinted.",
+	},
+	"backpackLinkagePost": {
+		name: "backpack-linkage", mutates: true,
+		requires: []string{"backpacks:final", "timeline", "items"},
+		desc:     "Fate of each RECONSTRUCTED backpack drop, read off the wire's backpack-entity track: the pack that appears at the drop's time and place is bound to it, followed to where it lands, and its disappearance classified as `picked` (a live player's bounding box overlapped it, the same test the server ran before BackpackTouch — attributed when the evidence names one player), `expired` (KTX's 120 s SUB_Remove with nobody on it) or `unobserved`. Stamps `backpacks[].fate/picker/pickerTeam/pickupTime/entNum`. A hint-carrying demo is never touched: `//ktx bp` already names the picker in `weaponPickups`.",
 	},
 	"damageReconPost": {
 		name: "damage-recon", mutates: true,

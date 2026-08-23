@@ -42,9 +42,18 @@ type Clock struct {
 	// DemoStartUnixMs / DemoStartAccuracyMs are the demo-open wall-clock
 	// anchor: 1 ms from the mvdhidden 0x000B block, else 1000 ms from the
 	// whole-second serverinfo `epoch` cvar, else 0/0. This folds in the old
-	// deriveDemoStartAnchor post-processor's fallback.
+	// deriveDemoStartAnchor post-processor's fallback. DemoStartSource names
+	// which of the two it came from.
 	DemoStartUnixMs     int64
 	DemoStartAccuracyMs int32
+	DemoStartSource     string
+
+	// DateMarkers are the date stamps the wire's broadcast prints carried
+	// (`matchdate:` / `matchkey:`), in the order seen, each with the demo-clock
+	// time of its print. The wall-clock node (wallclock.go) resolves them —
+	// together with the ktxstats date and the serverinfo version keys — into
+	// the graded match-start anchor; the clock only collects.
+	DateMarkers []WallClockMarker
 
 	// Pauses are the coalesced game pauses with demo-relative AtMs. The
 	// timeline shifts them to match time when it writes Streams.Global.Pauses.
@@ -75,6 +84,8 @@ type ClockAnalyzer struct {
 	epoch               string // last-seen serverinfo `epoch` value
 	rawPauses           []pauseSample
 	maxInMatchPosMs     int32 // latest in-match position sample (match-end fallback)
+	dateMarkers         []WallClockMarker
+	seenMarkers         map[string]struct{} // (source, raw) dedup for repeated prints
 }
 
 // NewClockAnalyzer creates the clock analyzer.
@@ -88,6 +99,21 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
+		// The date markers ride level-2 BROADCAST prints, the same level the
+		// obituary log uses — collecting them here (rather than in the
+		// messages analyser, which routes level<=2 into the obituary parser
+		// only) keeps both readers on the raw print stream with neither
+		// filtering the other's lines.
+		//
+		// The broadcast gate matters: a dem_single print is addressed to one
+		// player's client, so it states that client's view, not the server's,
+		// and must never anchor the global clock. Measured on 315 archive
+		// demos carrying a marker (180 matchdate, 135 matchkey), every single
+		// one arrived as level 2 with TargetPlayerNum -1, so the gate costs no
+		// coverage — KTX and kmod both emit these through bprint.
+		if e.Level == events.PrintHigh && e.TargetPlayerNum < 0 {
+			a.collectDateMarker(e)
+		}
 	case *events.IntermissionEvent:
 		a.timing.OnIntermission(e.TimeMs)
 	case *events.PlayerPositionEvent:
@@ -127,6 +153,28 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
+// collectDateMarker records a `matchdate:` / `matchkey:` print. Identical
+// (source, stamp) pairs are recorded once: a bprint reaches every client as one
+// broadcast copy, but a demo cut from a longer recording can replay the same
+// line, and a repeat carries no information the first copy did not. Distinct
+// stamps are all kept — a demo holding two matches legitimately holds two
+// matchdate prints.
+func (a *ClockAnalyzer) collectDateMarker(e *events.PrintEvent) {
+	m, ok := parseDateMarkerPrint(e.Message, e.TimeMs)
+	if !ok {
+		return
+	}
+	key := m.Source + "\x00" + m.Raw
+	if _, seen := a.seenMarkers[key]; seen {
+		return
+	}
+	if a.seenMarkers == nil {
+		a.seenMarkers = make(map[string]struct{}, 2)
+	}
+	a.seenMarkers[key] = struct{}{}
+	a.dateMarkers = append(a.dateMarkers, m)
+}
+
 // Finalize is a no-op: the clock writes nothing to Result. The demo-start
 // anchor, match window, and pauses are written by the timeline (which owns
 // Streams.Global) from the published Clock.
@@ -146,6 +194,7 @@ func (a *ClockAnalyzer) PopulateCore(co *CoreOutputs) {
 		MatchStartMs: matchStartMs,
 		MatchEndMs:   a.timing.EffectiveEndMs(a.maxInMatchPosMs),
 		Pauses:       coalescePauses(a.rawPauses),
+		DateMarkers:  a.dateMarkers,
 	}
 	if matchStartMs > 0 {
 		clk.DemoOffsetMs = matchStartMs
@@ -157,10 +206,12 @@ func (a *ClockAnalyzer) PopulateCore(co *CoreOutputs) {
 	if a.demoStartFromHidden {
 		clk.DemoStartUnixMs = a.demoStartUnixMs
 		clk.DemoStartAccuracyMs = 1
+		clk.DemoStartSource = wallSourceHidden
 	} else if a.epoch != "" {
 		if secs, err := strconv.ParseInt(strings.TrimSpace(a.epoch), 10, 64); err == nil && plausibleDemoStartUnixMs(secs*1000) {
 			clk.DemoStartUnixMs = secs * 1000
 			clk.DemoStartAccuracyMs = 1000
+			clk.DemoStartSource = wallSourceEpoch
 		}
 	}
 

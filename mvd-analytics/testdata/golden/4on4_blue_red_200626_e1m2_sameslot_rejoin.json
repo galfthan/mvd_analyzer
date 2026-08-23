@@ -77,11 +77,42 @@
   },
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10092,
+          "kind": "matchStart",
+          "raw": "2026-06-20 05:12:15 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1781932335000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-06-20 05:32:48 +0000",
+          "source": "ktxstats",
+          "tz": "+0000",
+          "unixMs": 1781933568000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Jun 20, 05:32",
+          "source": "finalscores",
+          "unixMs": 1781933520000,
+          "yearFrom": "mvdhidden"
+        }
+      ],
       "demoOffset": 10092,
       "demoStartAccuracyMs": 1,
+      "demoStartSource": "mvdhidden",
       "demoStartUnixMs": 1781932325740,
       "matchEnd": 1199953,
+      "matchEndUnixMs": 1781933568000,
       "matchStart": 0,
+      "matchStartAccuracyMs": 1,
+      "matchStartConfidence": "exact",
+      "matchStartSource": "mvdhidden",
+      "matchStartUnixMs": 1781932335832,
       "pauses": [
         {
           "atMs": 140177,
