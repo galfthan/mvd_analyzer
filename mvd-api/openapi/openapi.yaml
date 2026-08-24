@@ -4240,7 +4240,7 @@ components:
             field's absence, for why it is missing. It is published as an era
             signal with consequences: the direct/splash classifier behind
             `/aim`'s `weapons[].recon.directHits` leans on that constant for
-            its sharper signal, and the derived rl touch count runs 1.2%
+            its sharper signal, and the derived rl touch count runs 1.25%
             aggregate error against the verbatim KTX block where it is
             present against 13.9% with the prior disabled. Nothing is gated
             on it.
@@ -4252,7 +4252,7 @@ components:
             section, absent on `source: "ktx"` where the wire's own splash
             flag makes the question moot. `fixed`: the demo's near-direct
             rocket hits clustered on 110, `rocketDirectDamage` carries it and
-            the classifier's magnitude prior is in force (0.62% aggregate
+            the classifier's magnitude prior is in force (0.65% aggregate
             error on the rl touch count). `spread`: there were enough
             near-direct hits to test the hypothesis and they did NOT cluster
             — what a pre-1.36 `100 + g_random()*20` server looks like, and
@@ -4260,7 +4260,7 @@ components:
             the weakest population (13.0% aggregate, 31.2% of rows exact).
             `unestablished`: fewer than six such hits, so nothing was
             established either way — the low-rocket case, and the strongest
-            population (61.8% of rows exact).
+            population (59.2% of rows exact).
           enum: [fixed, spread, unestablished]
           type: string
         boundedSource:
@@ -7940,10 +7940,11 @@ components:
             carry `directImpact` since schema v74. KTX's are `anyDamage` for
             lg/axe/ng/sng, `directImpact` for rl/gl and `pellets` for sg/ssg.
 
-            Scored against the verbatim block on 188 instrumented archive
+            Scored against the verbatim block on 186 instrumented archive
             demos (cmd/qw-demoinfo-eval, withhold-and-compare): reconstructed
-            rl agrees to **1.2%** in aggregate (46.9% of 638 rows exact,
-            p90 error 2), gl to **0.6%** (84.7% of 424 exact), lg to 0.9%.
+            rl agrees to **1.25%** in aggregate (46.5% of 632 rows exact,
+            p90 error 2), gl to **3.55%** in aggregate at 89.6% of 424 rows
+            exact (one-sided by design), lg to 0.9%.
             A `derived` rl/gl row does NOT agree — it counts any damage path
             and reads ~4x above the block on rl, ~1.5x on gl — and sg/ssg
             never do, being pellet counts on both sides of KTX's ratio and
@@ -7992,8 +7993,9 @@ components:
                           `directImpact` — the projectile TOUCHED a player. KTX's rl/gl
                           counter (ktx/src/weapons.c:994, :1329) — a rocket that killed by
                           splash alone is not a hit to it — and, since schema v74, the rl/gl
-                          rows of a `reconstructed` family, which reproduce it to 1.2% / 0.6%
-                          aggregate on 638 / 424 archive rows. Measured on the same rows, the
+                          rows of a `reconstructed` family, which reproduce it to 1.25% / 3.55%
+                          aggregate (46.5% / 89.6% of rows exact) on 632 / 424 archive rows.
+                          Measured on the same rows, the
                           any-path count runs ~4x above this on rl and ~1.5x on gl, so mixing
                           the two turns a definition change into a trend.
 

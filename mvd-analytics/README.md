@@ -397,7 +397,17 @@ from the state streams — package
 [`damagerecon`](damagerecon/ACCURACY.md), stamped
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
-section is never touched. Every reconstructed section also carries
+section is never touched.
+
+It stands down (leaving no section at all, exactly as before the node
+existed) on the `skipped:*` server modes `SkipModeReason` shares with the
+KTX-side bounded pass, and — since schema v74 — on one gate that is this
+package's alone: a `deathmatch 4` recording that contains a quad, because
+KTX makes the quad an OCTA there (`ktx/src/combat.c:541`) and the damage
+model follows a flat ×4. It is deliberately narrow (quad-less dmm4 still
+reconstructs; 4 demos in a random 2 000-demo archive sample) and interim —
+see [`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §"deathmatch 4
+with a quad stands down". Every reconstructed section also carries
 `coverage` (schema v74): the share of the frag log's weapon kills whose
 lethal instant the reconstructed log accounts for, which is how a
 consumer tells a quiet match from a recording whose stat channel was

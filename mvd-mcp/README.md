@@ -360,8 +360,9 @@ for this weapon", never as "no hits". A family whose weapons all fall
 outside the tier stays `src: "derived"`, `attacks` being shot-derived
 either way. Grade the numbers before diffing against KTX: on a
 `reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
-(1.2%) and `gl` (0.6%), because since schema v74 those two publish KTX's
-OWN direct-impact count. On a `derived` family they do not — there
+(1.25%, 46.5% of rows exact) and `gl` (3.55% aggregate but 89.6% of rows
+exact, one-sided by design), because since schema v74 those two publish
+KTX's OWN direct-impact count. On a `derived` family they do not — there
 `hits` counts a fire that landed damage by any path and reads ~4x higher
 on `rl`, ~1.5x on `gl`, against KTX's touch counter
 (`ktx/src/weapons.c:994`, `:1329`). `attacks` matches KTX to the row on
@@ -380,11 +381,12 @@ one `src: "ktx"` row uses all three at once. Two rows are comparable
 exactly when weapon AND convention match; absent beside a present `hits`
 only on a `src: "mixed"` team row. Deriving KTX's own convention on an
 old demo took two attempts: the wire damage log's splash flag reproduces
-KTX's `rl` count on 638 of 638 rows, the pre-instrumentation half
-carries no such flag, and the first substitute — an explosion endpoint
-within 48 units — answered `gl` (1.2% aggregate) and not `rl` (+80%).
-v74 replaces it with the flight's trajectory against the player hull
-plus the flat-110 direct-damage constant, at 1.2% / 0.6%.
+KTX's `rl` count on every row, the pre-instrumentation half carries no
+such flag, and the first substitute — an explosion endpoint within 48
+units — answered `gl` and not `rl` (+80%). v74 replaces it with the
+flight's trajectory against the player hull plus the flat-110
+direct-damage constant, at 1.25% / 3.55% aggregate (46.5% / 89.6% of
+rows exact).
 
 **Sprees.** `score.maxSpree` is the longest run of kills between deaths;
 `score.maxQuadSpree` the longest run of kills made while holding the

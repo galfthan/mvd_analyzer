@@ -25,24 +25,24 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 0.56% | 0.80% | 2.02% | 71% | 89% |
+| bounded given | 0.58% | 0.82% | 1.95% | 72% | 91% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 0.58% | 1.09% | 2.36% | 65% | 84% |
-| raw taken | 0.49% | 0.87% | 2.10% | 75% | 89% |
-| bounded ewep | 1.08% | 1.48% | 3.13% | 47% | 75% |
-| bounded givenTeam | 2.3% | 5.4% | — | small denominators (200–700) |
-| bounded givenSelf | 2.1% | 4.4% | — | small denominators |
+| raw given | 0.65% | 1.06% | 2.34% | 68% | 88% |
+| raw taken | 0.51% | 0.85% | 1.64% | 73% | 93% |
+| bounded ewep | 0.84% | 1.39% | 3.08% | 55% | 75% |
+| bounded givenTeam | 2.3% | 5.1% | — | small denominators (200–700) |
+| bounded givenSelf | 1.6% | 4.0% | — | small denominators |
 
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
 per-machine report directory; fetched with `cmd/fetch-eval-corpus`)
-scores comparably: bounded given median **0.57%** (mean 0.80%, p90
-1.76%, ≤2% 93%), bounded taken 0.04%, raw given 0.74%, raw taken 0.62%.
+scores comparably: bounded given median **0.58%** (mean 0.79%, p90
+1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.71%, raw taken 0.66%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.5% on unambiguous enemy
-instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.3%, gl 99.7%, axe 98%).
+instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.1%, gl 99.7%, axe 98%).
 The same run also scores the direct/splash verdict per rl explosion
 against the wire's own flag — see §"Can an old demo answer KTX's rl/gl
 question?".
@@ -950,69 +950,112 @@ slacks (24 snapped / 60 not) were swept over 12–36 and measured flat, so
 they keep their derived values.
 
 Before / after on the 60-demo dm2/dm3 ground truth, per-player relative
-error (median / mean):
+error (median / mean). The third column is the review-fix batch that
+followed (verdict-split kill top-ups + the geometry prior's own
+normalizer, both below); it is shown separately because the middle
+column is what the isolation runs in the rest of this section were
+measured against:
 
-| family | before | after |
-|---|---|---|
-| bounded given | 0.58% / 0.76% | 0.57% / 0.80% |
-| bounded taken | 0.04% / 0.14% | 0.04% / 0.14% |
-| bounded ewep | 0.87% / 1.49% | 0.90% / 1.54% |
-| bounded givenTeam | 1.86% / 5.24% | **1.39%** / 5.13% |
-| bounded givenSelf | 1.43% / 3.90% | 1.66% / 4.38% |
-| **raw given** | 1.24% / 2.04% | **0.74% / 1.24%** |
-| **raw taken** | 1.74% / 2.29% | **0.62% / 1.11%** |
-| raw ewep | 1.58% / 2.90% | **1.14% / 2.35%** |
-| raw givenTeam | 9.67% / 16.35% | **7.39% / 14.56%** |
-| raw givenSelf | 2.28% / 8.16% | 2.28% / **5.81%** |
-
-and per attacker weapon, attacker-correct on unambiguous enemy instants:
-`ng` 96.4% → **97.2%**, `sng` 97.5% → **98.0%**, `ssg` 98.1% → **98.3%**,
-`rl` 99.7% → 99.6%, everything else unchanged; the pooled figure stays
-98.5%.
-
-**The two families move in opposite directions, and the reason is A vs
-B.** Re-running with admission held at 380 isolates them: with only the
-quad fix the bounded family is IDENTICAL to before (given 0.58% / 0.76%,
-ewep 0.87% / 1.49%) while raw already carries the whole gain. So every
-bounded-family regression above belongs to the admission cap, and it is
-one effect: 3 rl splash rows per 14 140 whose measured geometry lands
-past the engine's reach lose their only candidate and fall to
-`env:unknown` (misattribution flow `enemy:rl → env:unknown`, 821 damage
-over 11 instants → 1 161 over 13). What the same cap buys is on the other
-side of the same table — `enemy:sg → self` 800 → 504, `self → enemy:rl`
-1 288 → 1 137, bounded `givenTeam` median 1.86% → 1.39%, and the nail and
-ssg attribution above, all of which are candidates the engine could not
-have produced losing to ones it could. The trade is a recall loss of 0.02
-pp against a precision gain, taken deliberately.
-
-Per explosion, the direct/splash verdict is unmoved and marginally
-better: 18 026 paired rl instants (was 18 039), 97.9% classification
-accuracy, precision 94.6%, recall 95.8% (was 95.9%), direct-count error
-+1.4% → **+1.3%**.
-
-On the 188-demo derived-summary protocol (`cmd/qw-demoinfo-eval`),
-four columns improve and one regresses:
-
-| column | before | after | which lead |
+| family | before | A+B as first shipped | + review fixes |
 |---|---|---|---|
-| `dmg.given` | 0.47% | **0.45%** | B |
-| `dmg.taken` | 0.44% | **0.42%** | B |
-| `acc.gl.hits` | 3.91% (88.9% exact) | **3.55%** (89.6%) | B |
-| `acc.lg.hits` | 0.91% | **0.87%** | B |
-| `acc.rl.hits` | 1.23% | 1.34% | A +0.02, B +0.09 |
+| bounded given | 0.58% / 0.76% | 0.57% / 0.80% | 0.58% / 0.79% |
+| bounded taken | 0.04% / 0.14% | 0.04% / 0.14% | 0.04% / 0.14% |
+| bounded ewep | 0.87% / 1.49% | 0.90% / 1.54% | 0.87% / 1.50% |
+| bounded givenTeam | 1.86% / 5.24% | **1.39%** / 5.13% | **1.39% / 5.08%** |
+| bounded givenSelf | 1.43% / 3.90% | 1.66% / 4.38% | **1.28%** / 3.99% |
+| **raw given** | 1.24% / 2.04% | 0.74% / 1.24% | **0.71% / 1.21%** |
+| **raw taken** | 1.74% / 2.29% | **0.62%** / 1.11% | 0.66% / 1.13% |
+| raw ewep | 1.58% / 2.90% | **1.14%** / 2.35% | 1.18% / **2.28%** |
+| raw givenTeam | 9.67% / 16.35% | **7.39% / 14.56%** | 7.39% / 14.62% |
+| raw givenSelf | 2.28% / 8.16% | 2.28% / 5.81% | **1.98% / 5.49%** |
 
-The `rl` regression is the same three-rows-in-fourteen-thousand effect
-seen from the other end: the row-exact share (46.9%) and the p90 error (2
-hits) are unchanged and the bias moves from −0.13 to −0.14 hits per row,
-i.e. a handful of directs over 188 demos join the under-count that the
-grenade-fuse rule already established as the honest direction. On the
-dm2/dm3 corpus the same cap moves the rl direct-count error the other way
-(+1.4% → +1.3%), which is what a handful of rows looks like on two
-different denominators.
+and per attacker weapon, attacker-correct on unambiguous enemy instants,
+before → now: `ng` 96.4% → **97.2%**, `sng` 97.5% → **97.9%**, `ssg`
+98.1% → 98.1%, `rl` 99.7% → 99.6%, everything else unchanged; the pooled
+figure stays 98.5%. (`ssg` and `sng` peaked at 98.3% / 98.0% in the
+middle column and gave 0.2 / 0.1 pp back to the normalizer change — see
+§"The geometry prior's own normalizer".)
 
-The aim recon tier (`cmd/qw-aim-eval`) improves or holds everywhere:
-rl mean 0.7pp → **0.5pp** (bias +0.4 → +0.2, ≤2pp 90% → 94%), ssg 1.8pp
-→ **1.6pp**, gl 0.4pp, lg 0.3pp, sg 1.3pp, axe 0.6pp unchanged.
+**The bounded and raw families moved in opposite directions in the
+middle column, and the reason is A vs B.** Re-running with admission
+held at 380 isolates them: with only the quad fix the bounded family is
+IDENTICAL to before (given 0.58% / 0.76%, ewep 0.87% / 1.49%) while raw
+already carries the whole gain. So the middle column's bounded-family
+regression belongs entirely to the admission change — but "the cap" is
+not all of it, and the original account of this paragraph over-attributed.
+The isolation run held `splashAdmit` at 380, and `splashAdmit` was at
+that time ALSO the divisor of the projectile geometry prior, so the run
+reverted a cap and a scoring weight together. Splitting them (below)
+shows the recall part is the 3 rows, and the `givenSelf` part was mostly
+the rescale: giving the prior its own normalizer returns `givenSelf` to
+1.28% / 3.99% with the 160-unit cap still in force.
+
+The cap's own effect is those 3 rl splash rows per 14 140 whose MEASURED
+GEOMETRY lands past the engine's reach: they lose their only candidate
+and fall to `env:unknown` (misattribution flow `enemy:rl → env:unknown`,
+821 damage over 11 instants → 1 161 over 13). What the cap buys is on
+the other side of the same table — `enemy:sg → self` 800 → 628,
+`self → enemy:rl` 1 288 → 1 094, bounded `givenTeam` median 1.86% →
+1.39%, and the nail and ssg attribution above. The trade is a recall
+loss of 0.02 pp against a precision gain, taken deliberately.
+
+**Where the cap sits, and why it did not move.** Of those 3 rows, 1 is
+recoverable and 2 are not: the caps table
+(`.reports/quad-splash-2026-08-24/splash-geometry-caps.txt`) is flat from
+190 to 240 at 14 107 / 14 140 kept, so a cap at reach + p99.5 (≈196)
+re-admits exactly one of them, and the other two need 320 and 380. That
+one row was measured rather than argued: decoupling the ADMISSION slack
+from the band slack and running the whole corpus at 196 does recover it
+(`enemy:rl → env:unknown` 13 → 12 instants), improves bounded given mean
+0.79% → 0.76% and rl attacker-correct 99.6% → 99.7% — and pays for it
+with bounded `givenTeam` 1.39% → 1.52% (golden cache raw `givenTeam`
+4.24% → 4.49%), raw taken 0.66% → 0.68%, and gl attacker-correct 99.7% →
+99.5%. No dominance in either direction. Since moving the cap requires a
+SECOND slack constant whose only justification would be "a higher
+quantile of the same error distribution", and the measured trade does not
+pay for that parameter, 184 stays: one number, `splashSlack`, doing both
+jobs with one derivation. The golden cache's fatter error tail (p99 35.2
+against dm2/dm3's 27.4) means the recall loss runs higher off the tuning
+maps, and that is the honest caveat on the 0.02 pp figure.
+
+Per explosion, the direct/splash verdict is unmoved: 18 034 paired rl
+instants (was 18 039 before the leads, 18 026 with them as first
+shipped), 97.9% classification accuracy, precision 94.6%, recall 95.9%,
+direct-count error +1.4%.
+
+On the archive derived-summary protocol (`cmd/qw-demoinfo-eval`, first
+500 demos of the 51k archive), four columns improve and one regresses.
+The dmm4 gate below removes 2 of the 188 demos that scored, so the last
+two columns are both computed over the 186 the runs share — like for
+like. (`before` is the published 188-demo figure; the 2-demo difference
+is under its rounding.)
+
+| column | before | A+B as first shipped | + review fixes |
+|---|---|---|---|
+| `dmg.given` | 0.47% | **0.44%** | 0.48% |
+| `dmg.taken` | 0.44% | **0.41%** | 0.45% |
+| `acc.gl.hits` | 3.91% (88.9% exact) | **3.55%** (89.6%) | **3.55%** (89.6%) |
+| `acc.lg.hits` | 0.91% | **0.87%** (63.6% exact) | 0.89% (**64.7%**) |
+| `acc.rl.hits` | 1.23% | 1.33% | **1.25%** |
+| `acc.rl.hits/fixed` | — | 0.73% | **0.65%** |
+
+The `rl` regression against `before` is the same
+three-rows-in-fourteen-thousand effect seen from the other end: the
+row-exact share (46.5%) and the p90 error (2 hits) do not move and the
+bias runs −0.13 hits per row, i.e. a handful of directs over 186 demos
+joining the under-count that the grenade-fuse rule already established as
+the honest direction. The review fixes take back two thirds of it —
+pricing a direct kill as a direct is exactly an `rl` touch-count
+question — and the `fixed` population, the one the classifier's magnitude
+prior actually serves, lands at 0.65%. `dmg.given` / `dmg.taken` pay 0.04
+pp for it. The `spread` (13.04%) and `unestablished` (22.52%) populations
+are byte-identical across all three columns.
+
+The aim recon tier (`cmd/qw-aim-eval`) improves or holds: rl mean 0.7pp
+→ **0.5pp** (bias +0.4 → +0.3, ≤2pp 90% → 93%), gl 0.4pp, lg 0.3pp, sg
+1.3pp, axe 0.6pp unchanged. `ssg` reached 1.6pp with the leads as first
+shipped and is back at its old **1.8pp** after the review fixes — the
+same 0.2 pp the ssg attacker-correct row gave back.
 
 **Where the cap costs most: the un-instrumented archive.** The obituary
 oracle (`cmd/qw-recon-oracle`, 285 scored demos of a 300-demo archive
@@ -1033,8 +1076,22 @@ the radius weapons and the gains on the hitscan and nail ones: E0 rl
 94.6% → **95.4%** (E5: rl 96.9% → 96.7%, sg 95.4% → **95.8%**, sng 94.2%
 → **95.3%**). The damage the cap refuses is not misattributed, it is
 published as `unknown` — the section says it does not know rather than
-naming an attacker the engine could not have reached — which is the
-direction this pipeline prefers to be wrong in.
+naming an attacker whose only evidence sits, as WE measured it, past the
+distance the engine visits — which is the direction this pipeline prefers
+to be wrong in.
+
+**The review fixes re-priced on the same oracle** (`cmd/qw-recon-oracle`,
+same 300-demo sample; the dmm4 gate removes 3 of it, so the eras move by
+one or two demos and the comparison is between whole-era figures rather
+than a matched set). Attacker-correct: E0 97.7% → 97.7%, E2 98.2% →
+**98.3%**, E3 98.0% → 98.0%, E4 97.0% → **97.1%**, E5 96.8% → 96.8%.
+Unattributed bounded damage: E0 1.43% → 1.44%, E5 0.70% → 0.70%, the rest
+unmoved. So the whole batch is oracle-neutral, which is the result to
+report — the `givenSelf` and rl-touch gains it buys on the instrumented
+corpora do not reach for anything on the un-instrumented one. Per weapon
+the one real move is `sng`, E0 95.4% → 95.0% and E5 95.3% → 94.6%: the
+same sign as the 0.1 pp `sng` cost the normalizer sweep showed on the GT
+corpus, larger here, and the one figure in this batch worth watching.
 
 **And that cost is entirely the SNAPPED half.** The admission radius for
 an un-snapped flight endpoint (220) was measured against leaving it at
@@ -1044,6 +1101,102 @@ projectile candidate that decides anything carries an exact detonation
 point, and there the cap is a statement about the ENGINE rather than
 about our measurement. The un-snapped radius is derived from the same
 slack for consistency rather than because anything measured it.
+
+### The kill top-ups price a DIRECT rocket as a direct (2026-08-24)
+
+Both kill top-ups — the scored-candidate one and the obituary-anchored
+one — priced every rocket kill on the 120 radius curve, including the
+ones they had just classified as a TOUCH. That is the wrong curve:
+`T_MissileTouch` deals a flat 110 and hands the touched entity to
+`T_RadiusDamage` as its `ignore` (`ktx/src/weapons.c:986`, `:998-1006`),
+so a point-blank quad direct is 440 and the radius curve would raise it
+to 480. The obituary-anchored path is where this bites — on the 60-demo
+corpus 5 597 kill rows reach it with a direct verdict against 58 on the
+scored path — and it is now one shared `killModelFloor`, split on the
+verdict, taking the direct range's LOW end because a raise-only floor may
+not over-claim on a pre-1.36 rolling server. A grenade keeps the radius
+curve either way: `GrenadeTouch` deals nothing on contact (`:1327-1333`).
+
+The same helper carries `T_RadiusDamageApply`'s self-halving, which the
+obituary-anchored path was passing as 1.0. That path's self population is
+EMPTY and the fix is a contract rather than a measurement: `fragAt`
+excludes suicides and teamkills (`inputs.go:213`), so the frag-anchored
+branch that calls `topUpKillRaw` can never see `attacker == victim` — 0
+occurrences over the 60-demo corpus, confirmed by instrumentation, and
+`raw givenSelf` did not move on the fix. Every other path already carried
+it correctly (`pentSyntheticEvents`, the scored top-up, `modelBounds`,
+`dischargeCandidates`, the discharge top-up).
+
+Measured alone, on the 60-demo corpus: raw given 0.74% / 1.24% → 0.69% /
+1.22% and raw ewep p90 5.74% → 5.54%, against raw taken 0.62% → 0.66%
+median; on the golden cache the medians shuffle and the tails improve
+across the board (raw given p90 2.36% → 2.13%, ≤2% 84% → 88%; raw taken
+p90 2.10% → 1.68%). The direction is not tunable — the engine deals
+exactly one of the two numbers — so the mixed medians are reported, not
+resolved.
+
+### The geometry prior's own normalizer (2026-08-24)
+
+Lead B's admission change had a second, undocumented effect. The
+projectile candidates' geometry prior read `dEnd / splashAdmit(epExact)`,
+so narrowing admission from 380 to 184/220 DOUBLED the prior's distance
+slope and re-weighted every projectile candidate against the fixed-geom
+kinds (env 0.12, discharge 0.1, beam 0.3+) that did not move. The divisor
+also varied with `epExact`, which scored an un-snapped endpoint better
+than an exact one at the same distance — an artifact, never an intent.
+`geomNorm` now names the scoring weight and `splashAdmit` is admission
+only.
+
+`geomNorm` has no engine referent: it is a free scoring parameter, and
+the honest thing is to say so and give the sweep. Swept on the 30-demo
+dm3 half and confirmed on the held-out dm2 half over {184, 220, 260, 320,
+380} — the two ends being the two values the coupling would have handed
+it. The families do not agree on a single optimum: `bounded givenSelf`
+falls monotonically with a flatter slope on BOTH halves (dm3 mean 4.95% →
+4.46%, dm2 3.75% → 3.21% from 184 to 380), while 380 costs the held-out
+half's `bounded givenTeam` (median 0.69% → 1.52%, mean 4.38% → 4.54%) and
+dm3's `raw given` median (0.70% → 0.85%). The rule applied was: not a
+swept boundary, and no family worse than the value it replaces on the
+held-out half. **260** is the interior value that satisfies it — it beats
+184 on every MEAN on both halves and on `bounded givenSelf`'s median,
+with the raw-given median (dm3 0.70% → 0.78%, dm2 0.64% → 0.67%) the only
+regression; 380 is refused by the held-out `givenTeam` row.
+
+Full-corpus effect at 260: `bounded givenSelf` 1.66% / 4.38% → **1.28% /
+3.99%** and `raw givenSelf` 2.28% / 5.81% → **1.98% / 5.49%** — most of
+the `givenSelf` regression the middle column above showed was this
+rescale, not the cap — plus `bounded ewep` 0.90% → 0.87% and `bounded
+givenTeam` p90 15.52% → 14.04%. It is paid for in `ssg` attacker-correct
+98.3% → 98.1% and `sng` 98.0% → 97.9%, both back at their pre-lead
+values.
+
+### deathmatch 4 with a quad stands down (2026-08-24)
+
+KTX makes the quad an OCTA in `deathmatch 4` — `damage *= (deathmatch !=
+4 ? 4 : tot_mode_enabled() ? FrogbotQuadMultiplier() : 8)`,
+`ktx/src/combat.c:541` — and this package models a flat ×4. `dmm4` is not
+one of the skipped modes, so every modeled quad hit in such a recording
+was published at about half its true value under `source:
+"reconstructed"` with nothing marking it. `ReconSkipReason` now stands
+the reconstruction down on `deathmatch == 4` ∧ any player held a quad.
+
+It is an interim gate, not the model (`plan-damage-recon.md` §8 lead C),
+and it is deliberately narrow: the quad condition keeps quad-less dmm4
+analyzable, which is nearly all of it — 8 755 of the 51k archive demos
+are on a `*dmm4*` map and 23 of the 24 such maps in the entity corpus
+carry no `item_artifact_super_damage` at all (only `emddmm4` does). The
+population it costs is measured: on a random 2 000-demo archive sample
+(`cmd/qw-corpus-survey`) **4 demos, 0.20% of the corpus and 0.40% of the
+994 that reconstruct**, against 952 that carry a KTX log and need none of
+this. On the 300-demo oracle sample it moves 3 demos, and only 1 of those
+reaches the production pipeline (the other two carry a KTX damage log, so
+`damageReconPost` never calls this package for them). Two of the three
+are `mode: tot` on dm4 — the `tot_mode_enabled()` branch, where the
+multiplier is a server-configured constant that is not on the wire at
+all, so the gate lands exactly on the case the engine says is
+unmodelable. It is NOT part of `SkipModeReason`: that one also gates the
+KTX-side bounded pass, which reads the server's own values and does not
+care which multiplier produced them.
 
 ## Why the errors are what they are
 
@@ -1058,6 +1211,26 @@ slack for consistency rather than because anything measured it.
 - **givenTeam / givenSelf** run on totals ~10× smaller, so the same
   absolute flips read as big percentages. Their absolute errors are on
   the order of one rocket.
+- **`raw givenTeam` (median 7.39%, mean 14.56%) is NOT just that
+  denominator, and the diag flows say which part is.** The arithmetic
+  gets you most of the way — raw given's 0.71% median over a denominator
+  ~10× smaller lands at ≈7%, and the worst GT team totals on the corpus
+  run 218–731 against ~10 000 for `given` — but a pure denominator
+  effect would need the errors to be symmetric, and they are not. Summing
+  the `-diag` confusion by bounded damage: **13 738 damage over 235
+  instants flows INTO the team class** against **1 554 over 68 flowing
+  out** — 8.8:1, so team errors add rather than cancel. The dominant
+  single channel is `PHANTOM → team`, 10 775 damage over 104 instants:
+  reconstructed hits on a teammate at a (victim, ms) where the wire log
+  records nothing at all, and only 18 instants of `team → MISSING` exist
+  to absorb them as frame-offset pairings of real hits. `self` is the
+  control that makes this a team finding rather than a small-denominator
+  one: it has a comparable denominator and near-balanced flows (3 784 in
+  over 149 instants, 4 045 out over 161, 0.94:1), and its relative error
+  is correspondingly a third of `givenTeam`'s. What the asymmetry does
+  NOT tell us is the mechanism — a teammate standing in a rocket's
+  splash radius is the obvious candidate for an invented hit, and no
+  measurement here separates that from a missing wire row.
 
 ## What the reconstruction models beyond the prototype
 

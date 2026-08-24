@@ -1200,8 +1200,9 @@ package result
 //     what made the two conventions differ by ~7pp on rl in v73. Measured
 //     over 53 dm2/dm3 demos carrying the KTX log: mean accuracy error
 //     rl 0.6pp / gl 0.3pp vs the measured counter, with the join-on-wire
-//     control at 0.4pp / 0.1pp — rl 0.7pp / gl 0.4pp once the direct-impact
-//     entry below moved the damage model; lg/sg/ssg/axe unchanged. ng/sng stay
+//     control at 0.4pp / 0.1pp — rl 0.5pp / gl 0.4pp once the direct-impact
+//     and radius-damage entries below moved the damage model;
+//     lg/sg/ssg/axe unchanged. ng/sng stay
 //     withheld — nail linking is opt-in, so there is no measured baseline to
 //     validate a recovery against. See damagerecon/ACCURACY.md §"Aim hit
 //     recovery".

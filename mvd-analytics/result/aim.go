@@ -240,7 +240,7 @@ type WeaponAim struct {
 //
 // Accuracy measured against the wire log on demos that carry both:
 // damagerecon/ACCURACY.md §"Aim hit recovery" (mean accuracy error vs the
-// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.8pp, axe 0.6pp, rl 0.7pp,
+// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.8pp, axe 0.6pp, rl 0.5pp,
 // gl 0.4pp).
 type WeaponAimRecon struct {
 	// Hits is the reconstructed count of fires that connected. A zero inside

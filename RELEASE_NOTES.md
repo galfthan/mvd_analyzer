@@ -42,23 +42,59 @@ monotonically as they approach the engine's own numbers (swept on 30 dm3
 demos, confirmed on the held-out 30 dm2 ones), so the top-up is now the
 engine formula at the measured distance.
 
-**Measured** on the 60-demo dm2/dm3 ground truth: raw given median /
-mean per-player error 1.24% / 2.04% → **0.74% / 1.24%**, raw taken 1.74%
-/ 2.29% → **0.62% / 1.11%**, raw ewep 1.58% → 1.14%, bounded taken
-unchanged at 0.04%, bounded given 0.58% → 0.57% median (mean 0.76% →
-0.80%). On the 188-demo derived-summary protocol `dmg.given` 0.47% →
-**0.45%**, `dmg.taken` 0.44% → **0.42%**, `acc.gl.hits` 3.91% →
-**3.55%**, `acc.lg.hits` 0.91% → **0.87%**, `acc.rl.hits` 1.23% → 1.34%.
-The aim recon tier improves (rl 0.7pp → 0.5pp mean, ssg 1.8pp → 1.6pp,
-the rest unchanged). The one regression is decomposed rather than
-averaged away: the reach cap drops 3 of 14 140 wire splash rows whose
-measured geometry lands past what the engine could reach, and buys back
-self/team confusion and nail/ssg attribution. On the un-instrumented
-archive the obituary oracle prices the same trade at −0.0 to −0.2 pp of
-attacker-correctness for +0.02 to +0.14 pp of damage published as
-`unknown` — the section saying it does not know, rather than naming an
-attacker the engine could not have reached. Full before/after tables
-and the isolation run in
+Three follow-on corrections ship with them, from the review of the first
+cut:
+
+- **A direct rocket kill is priced as a direct.** Both kill top-ups
+  raised every rocket kill on the 120 radius curve, including ones they
+  had just classified as a TOUCH — but `T_MissileTouch` deals a flat 110
+  and the radius pass `ignore`s the victim it touched
+  (`ktx/src/weapons.c:986`, `:998-1006`), so a point-blank quad direct is
+  440 and the curve would have made it 480.
+- **The geometry prior has its own normalizer.** The reach cap above also
+  divided the projectile candidates' distance prior, so narrowing
+  admission silently doubled that prior's slope and re-weighted
+  attribution among candidates it still admitted. The prior is now a
+  named, separately measured constant and the cap is admission only.
+- **`deathmatch 4` with a quad on the wire stands down.** KTX makes the
+  quad an OCTA there (`combat.c:541`), which this model does not follow,
+  so such a demo would publish every quad hit at half value marked
+  `source: "reconstructed"`. Narrow by design — quad-less dmm4 still
+  reconstructs, and the gate costs 4 demos in a random 2 000-demo archive
+  sample (0.20%). Modelling the octa instead of refusing is a separate,
+  larger question.
+
+**Measured** on the 60-demo dm2/dm3 ground truth, before → after
+everything above: raw given median / mean per-player error 1.24% / 2.04%
+→ **0.71% / 1.21%**, raw taken 1.74% / 2.29% → **0.66% / 1.13%**, raw
+ewep 1.58% / 2.90% → **1.18% / 2.28%**, bounded taken unchanged at 0.04%,
+bounded given 0.58% / 0.76% → 0.58% / 0.79%, bounded `givenSelf` 1.43% /
+3.90% → **1.28%** / 3.99%, bounded `givenTeam` 1.86% / 5.24% → **1.39% /
+5.08%**. On the archive derived-summary protocol (186 shared demos)
+`acc.gl.hits` 3.91% → **3.55%**, `acc.lg.hits` 0.91% → 0.89% (row-exact
+63.6% → **64.7%**), `acc.rl.hits` 1.23% → 1.25% (its `fixed` population,
+the one the classifier's prior serves, **0.65%**), against `dmg.given`
+0.47% → 0.48% and `dmg.taken` 0.44% → 0.45%. The aim recon tier: rl 0.7pp
+→ **0.5pp** mean, ssg / gl / lg / sg / axe unchanged.
+
+The regressions are reported beside the wins rather than averaged away.
+The reach cap drops 3 of 14 140 wire splash rows whose measured geometry
+lands past the distance the engine visits; 1 of the 3 is recoverable by
+moving the cap to ≈196, and that was measured and declined, because it
+costs `givenTeam` and gl attribution and needs a second slack constant to
+buy (`ACCURACY.md` has the table). **On the un-instrumented archive the
+whole batch is a wash and the numbers say so**: over a 300-demo obituary
+oracle sample, attacker-correctness runs E0 97.7% → 97.7%, E2 98.2% →
+98.3%, E3 98.0% → 98.0%, E4 97.0% → 97.1%, E5 96.8% → 96.8%, and
+unattributed bounded damage E0 1.43% → 1.44% with the other eras
+unmoved — so the gains measured on instrumented demos do not reach for
+anything there, and one weapon moves the wrong way (`sng` E0 95.4% →
+95.0%, E5 95.3% → 94.6%). Against the pre-lead baseline the cap's own
+trade on that oracle was −0.0 to −0.2 pp of attacker-correctness for
++0.02 to +0.14 pp of damage published as `unknown` — the section saying
+it does not know, rather than naming an attacker whose only evidence
+sits, as we measured it, past the distance the engine visits. Full
+before/after tables, the sweep, and the isolation runs are in
 [`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
 §"The quad multiplies AFTER the falloff".
 
@@ -113,10 +149,10 @@ the spectator's PVS ends its bracket early, and reading an early end as a
 touch (tried, measured, refused) reads every PVS exit as a hit.
 
 **Measured.** Per explosion against the wire splash flag (53 dm2/dm3
-demos, 18 026 rl instants): classification accuracy 73.5% → **97.9%**,
-precision 45.1% → **94.6%**, direct-count error +114% → **+1.3%**. Per
-player against the verbatim KTX block (188 archive demos):
-`acc.rl.hits` **1.34%** aggregate (was +80%) at −0.14 hits per row;
+demos, 18 034 rl instants): classification accuracy 73.5% → **97.9%**,
+precision 45.1% → **94.6%**, direct-count error +114% → **+1.4%**. Per
+player against the verbatim KTX block (186 archive demos):
+`acc.rl.hits` **1.25%** aggregate (was +80%) at −0.13 hits per row;
 `acc.gl.hits` **89.6%** of rows exact (was 1.22% aggregate and +2.24 pp
 of accuracy error before the classifier existed) at −0.07 per row, both
 well under the already-shipped `lg` row's −0.91, which is the bar this
@@ -135,8 +171,8 @@ face — `fixed` (the hits clustered on 110), `spread` (there were enough
 of them to test and they did NOT cluster, which is what a pre-1.36 server
 looks like) and `unestablished` (too few to put the question). The three
 populations score differently, which is the load the field carries: rl
-runs 0.62% aggregate / 45.9% exact on the 567 `fixed` rows, 13.0% /
-31.2% exact on the 16 `spread` ones and 22.2% / 61.8% exact on the 55
+runs 0.65% aggregate / 45.9% exact on the 567 `fixed` rows, 13.0% /
+31.2% exact on the 16 `spread` ones and 22.5% / 59.2% exact on the 49
 `unestablished` ones — the `spread` rows being by some way the weakest
 and the `unestablished` ones the strongest, their aggregate large only
 because their denominators are small. Nothing is gated on any of it:

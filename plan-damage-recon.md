@@ -280,8 +280,10 @@ Same line: `trap_findradius(world, inflictor->origin, damage + 40)`
 so a 120-base explosion cannot damage anything past 160 units — and the
 cap does not scale with quad, since the quad is applied downstream in
 `T_Damage`. `attribution.go`'s `rSplash = 380` admits projectile
-candidates out to 380, so every candidate between 160 and 380 is one the
-engine could not have produced.
+candidates out to 380, so every candidate between 160 and 380 is one
+whose MEASURED GEOMETRY lands past the distance the engine visits. (That
+is a statement about our measurement meeting the engine's bound, not
+about the engine: `splashSlack` is what covers the gap between the two.)
 
 **Disposition: SHIPPED 2026-08-24, with the trade measured in both
 directions.** Admission is now `splashAdmit(epExact)` = the engine reach
@@ -310,7 +312,8 @@ attacker-correct `ng` 96.4% → **97.2%** / `sng` 97.5% → **98.0%** / `ssg`
 98.1% → **98.3%**, and on the 188-demo protocol `dmg.given` 0.47% →
 **0.45%**, `dmg.taken` 0.44% → **0.42%**, `acc.gl.hits` 3.91% →
 **3.55%**, `acc.lg.hits` 0.91% → **0.87%**. Taken deliberately: the
-candidates it removes are ones the engine could not have produced.
+candidates it removes are ones whose measured geometry lands past the
+engine's reach.
 
 On the un-instrumented archive, where the obituary oracle is the only
 measurement available (285 demos of a 300-demo sample, obituaries
@@ -332,12 +335,25 @@ Opened by the multiplier audit above. `T_Damage` multiplies by
 reconstructed with every quad hit modelled at half its true value.
 `quadFactor` says so in a comment and does nothing about it.
 
-Not implemented because the population is unmeasured: neither ground-truth
-corpus contains a dmm4 recording, so there is nothing to validate a fix
-against, and the archive's `deathmatch` serverinfo key has not been
-censused. The order of work is that census first (the arena-family maps
-povdmm4/dmm4* are the obvious place to look), then a decision between
-modelling the ×8 and adding dmm4 to the skip gate — the same choice the
-other unobservable multipliers already made, since the CTF strength rune
-and the KTX handicap are also applied inside `T_Damage` and neither is on
-the wire at all.
+**Disposition: INTERIM GATE SHIPPED 2026-08-24, the model still open.**
+Publishing every quad hit of such a demo at half value under
+`source: "reconstructed"` with no marker failed this pipeline's own
+standard, so `damagerecon.ReconSkipReason` now stands the reconstruction
+down on `deathmatch == 4` ∧ a quad held anywhere in the recording. The
+quad condition is what keeps it narrow: 8 755 of the 51k archive demos
+are on a `*dmm4*` map and 23 of the 24 such maps in `mapents/data` carry
+no `item_artifact_super_damage` at all (only `emddmm4`), so povdmm4-style
+duels stay analyzable. Measured cost on a random 2 000-demo archive
+sample: 4 demos (0.20% of the corpus, 0.40% of the 994 that reconstruct).
+Two of the three it moves on the 300-demo oracle sample are `mode: tot`
+on dm4 — the `tot_mode_enabled()` branch, whose multiplier is a
+server-configured constant that never reaches the wire, so the gate lands
+squarely on the unmodelable case. It is NOT in `SkipModeReason`, which
+also gates the KTX-side bounded pass: that one reads the server's own
+values and does not care which multiplier produced them.
+
+Still open: whether to MODEL the ×8 instead of refusing. That needs a
+census of `deathmatch == 4` ∧ quad demos big enough to hold out a
+validation set, and it can never cover `tot_mode_enabled()`, whose
+multiplier is off-wire like the CTF strength rune and the KTX handicap —
+the same unobservable-multiplier class those two already sit in.
