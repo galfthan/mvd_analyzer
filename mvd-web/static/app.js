@@ -1102,6 +1102,44 @@ const HITS_CONVENTION_TITLES = {
     pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
 };
 
+// What KTX's OWN hits counter counts for one weapon. The mirror of
+// view.ktxHitsConvention (mvd-analytics/view/player_stats.go), the function
+// that stamps `hitsConvention` on the KTX-overlaid rows this UI renders — the
+// WASM entry point applies that overlay (cmd/wasm/main.go), so both scales
+// reach this table, one demo at a time.
+//
+// The block is not uniform, which is why the marker below is per-weapon:
+// sg/ssg advance per PELLET on both sides of the ratio, rl/gl only when the
+// projectile touches a player, and everything else once per fire that
+// damaged — the same event as a direct hit for a weapon with one damage path.
+function ktxHitsConvention(weapon) {
+    if (weapon === 'sg' || weapon === 'ssg') return 'pellets';
+    if (weapon === 'rl' || weapon === 'gl') return 'directImpact';
+    return 'anyDamage';
+}
+
+// The mark an Acc cell wears when its convention is not the one the server's
+// own counter uses for that weapon — so a reader who has seen this weapon's
+// number on a scoreboard, on the hub or in a screenshot of another demo is
+// looking at a different quantity here, not a better or worse player. It is
+// in the TEXT rather than only in the tooltip for the reason the "~" on a
+// hedged date is: this is a figure people screenshot.
+//
+// A KTX-overlaid family (every demo with a demoinfo block) matches by
+// construction and wears nothing. A derived or reconstructed one counts any
+// damage path on every weapon, so its rl/gl (~4x KTX's direct-impact count)
+// and its sg/ssg (trigger pulls, not pellets) are marked and its lg/ng/sng/axe
+// — where KTX counts the same event — are not.
+const ACC_OFF_SCALE_MARK = '≠';
+const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
+    'a hit here is any fire that landed damage, where KTX counts direct impacts only (rl/gl) or pellets (sg/ssg). ' +
+    'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+// The same statement as the table's footnote, which is where a reader who
+// cannot hover — anyone looking at a screenshot of this panel — meets it.
+const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
+    'a hit here is any fire that landed damage, where KTX counts direct impacts only (RL/GL) or pellets (SG/SSG). ' +
+    'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
+
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
 // a reconstructed hit count is, and the one caveat that comes with it.
 const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no wire damage log, ' +
@@ -1128,11 +1166,34 @@ function formatAccuracyCell(accuracy, wn) {
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
     const notes = [];
     if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
+    const offScale = accOffKtxScale(entry, wn);
+    if (offScale) notes.push(ACC_OFF_SCALE_NOTE);
     const recon = accuracy.src === 'reconstructed';
     if (recon) notes.push(RECON_ACCURACY_NOTE);
     const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
-    const cell = `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%</span>`;
+    const mark = offScale ? `<sup class="acc-off-scale">${ACC_OFF_SCALE_MARK}</sup>` : '';
+    const cell = `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%${mark}</span>`;
     return recon ? `<span class="stat-recon">${cell}</span>` : cell;
+}
+
+// One Acc entry against the server's own scale for its weapon. A row with no
+// published convention is not marked: the field is present whenever `hits` is
+// (RESULT_SCHEMA, PlayerStatsAcc), so its absence means there is no number to
+// put on a scale, not that the scale agrees.
+function accOffKtxScale(entry, wn) {
+    return !!entry.hitsConvention && entry.hitsConvention !== ktxHitsConvention(wn);
+}
+
+// Whether any RENDERED cell wears the mark, which decides whether the
+// footnote explaining it appears. Same rows, same weapon list and same
+// has-a-number test the cells use, so the note cannot appear over an unmarked
+// table (an axe or nailgun entry the table does not show) or go missing under
+// a marked one.
+function anyAccOffKtxScale(rows) {
+    return rows.some(r => HOLD_WEAPON_NAMES.some(wn => {
+        const e = r.accuracy?.byWeapon?.[wn];
+        return !!e && !!e.attacks && e.hits != null && accOffKtxScale(e, wn);
+    }));
 }
 
 // The kill side of a score row — kills, suicides, teamKills, efficiency, the
@@ -1177,9 +1238,17 @@ function enemyWeaponKillCell(score, weapon) {
 // VIEWER's zone would therefore invent a precision the anchor does not have
 // and would move the date under a reader in Auckland, so this UI renders
 // **UTC** and says so in the text. See RESULT_SCHEMA.md, GlobalStream.
-function formatUtcStamp(unixMs) {
+// `accuracyMs` (the anchor's ±, absent where the caller has none) sets the
+// PRECISION PRINTED, by magnitude rather than by grade name — the same rule
+// formatAccuracyMs formats by. An hour-scale anchor does not name a minute:
+// the ±14 h `assumedUtc` grade puts the true instant anywhere in a 28-hour
+// window, so printing "11:44" claims a minute the stamp does not have. Those
+// print the day plus the ± in the TEXT; everything second-scale or tighter
+// keeps the minute.
+function formatUtcStamp(unixMs, accuracyMs) {
     // toISOString is UTC by definition: "2002-08-04T11:44:55.000Z".
     const iso = new Date(unixMs).toISOString();
+    if (accuracyMs >= 3600000) return `${iso.slice(0, 10)} UTC ±${formatAccuracyMs(accuracyMs)}`;
     return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
 }
 
@@ -1204,7 +1273,7 @@ function formatAccuracyMs(ms) {
 function matchWallClock(result) {
     const g = result?.streams?.global;
     if (!g || !g.matchStartUnixMs) return null;
-    const text = formatUtcStamp(g.matchStartUnixMs);
+    const text = formatUtcStamp(g.matchStartUnixMs, g.matchStartAccuracyMs);
     const bits = [`Match start, read off the demo's own wall-clock marker (${g.matchStartSource || 'unknown source'})`];
     if (g.matchStartAccuracyMs) bits.push(`accurate to ±${formatAccuracyMs(g.matchStartAccuracyMs)}`);
     if (g.matchStartConfidence) bits.push(`confidence: ${g.matchStartConfidence}`);
@@ -1215,9 +1284,14 @@ function matchWallClock(result) {
     }
     // `unverified` (something unpinned) and `contradicted` (a hard check
     // failed) are both hedged; the second is coloured as a warning because it
-    // is the grade that says another signal disagrees with this stamp.
-    const cls = g.matchStartConfidence === 'contradicted' ? 'date-contradicted' : 'date-unverified';
-    return { html: `<span class="${cls}" title="${title}">~${text}</span>`, text: `~${text}` };
+    // is the grade that says another signal disagrees with this stamp — and
+    // it says "(disputed)" in the TEXT too, for the same reason the "~" is in
+    // the text: the two grades must not differ by colour alone, which neither
+    // a screenshot in a channel nor a colour-blind reader can tell apart.
+    const disputed = g.matchStartConfidence === 'contradicted';
+    const cls = disputed ? 'date-contradicted' : 'date-unverified';
+    const shown = disputed ? `~${text} (disputed)` : `~${text}`;
+    return { html: `<span class="${cls}" title="${title}">${shown}</span>`, text: shown };
 }
 
 // displayMatchDate fills the Summary "Date" cell. KTX's own demoinfo `date`
@@ -1255,6 +1329,35 @@ const NO_MATCH_TITLES = {
     noMatchDeclared: 'No match was declared in this recording',
     noPlayRecorded: 'This recording holds no match',
 };
+
+// `detail` states the finding in the pipeline's vocabulary (`status` keys,
+// match-start announcements). These say what it MEANS for the person holding
+// the file, and name an action where one honestly exists — which is only for
+// `demoUnreadable`: of the 20 such demos in the archive sweep, 16 abort
+// within the first 16 bytes on a "block size" that is plainly ASCII text
+// (`us\0C`, `rdem`), 2 on a `dem_cmd` no MVD carries and 2 on an unexpected
+// EOF — so the file is either not an MVD or a truncated one, and a fresh copy
+// is a real fix. Nothing the reader can do makes a recording that started
+// mid-match contain its own start, so the other four translate and stop.
+//
+// The pipeline's own detail strings are untouched — they are the finding, and
+// display-only by contract either way.
+const NO_MATCH_ACTIONS = {
+    demoUnreadable: 'The file may be truncated, or not an MVD at all — try downloading it again.',
+    midMatchRecording: 'Nothing is wrong with the file; it simply began after the match did. Per-match stats need a recording that covers the match start.',
+    matchStartUnannounced: 'The match was played, but its start was announced in a form this tool does not read — usually a server mod other than KTX.',
+    noMatchDeclared: 'People were playing, but no managed match was declared — there is no start, no end and no scoreboard to measure between.',
+    noPlayRecorded: 'There is nothing to measure here: no match declared and no kills in the frag log. Usually an idle server or an aborted recording.',
+};
+
+// The gamedir reading, which rides the demo rather than the reason: 165 of
+// the 170 `noMatchDeclared` demos in the sweep are a foreign gamedir
+// (`fortress` alone is 148), and the same mods turn up under three of the
+// other reasons. "qw" is the stock deathmatch dir and says nothing.
+function noMatchGameDirNote(nm) {
+    if (!nm.gameDir || nm.gameDir === 'qw') return '';
+    return `This looks like a ${nm.gameDir} demo; this tool analyzes KTX-style QuakeWorld matches.`;
+}
 
 // The evidence beside the prose. Every fact `detail` states is a structured
 // field, and these are those fields — `detail` is display-only by contract
@@ -1295,9 +1398,15 @@ function displayNoMatch(result) {
     document.getElementById('no-match-title').textContent =
         NO_MATCH_TITLES[nm.reason] || 'This recording holds no analyzable match';
     document.getElementById('no-match-detail').textContent = nm.detail || '';
+    // The plain reading under the finding: the reason's translation, then the
+    // gamedir's where the demo has one to give.
+    const reading = document.getElementById('no-match-reading');
+    const lines = [NO_MATCH_ACTIONS[nm.reason] || '', noMatchGameDirNote(nm)].filter(Boolean);
+    reading.style.display = lines.length ? '' : 'none';
+    reading.textContent = lines.join(' ');
     document.getElementById('no-match-evidence').innerHTML = noMatchEvidence(nm).map(([label, value, title]) =>
         `<div class="summary-item"><label>${escapeHtml(label)}</label>` +
-        `<span class="no-match-value"${title ? ` title="${escapeHtml(title)}"` : ''}>${escapeHtml(value)}</span></div>`
+        `<span${title ? ` title="${escapeHtml(title)}"` : ''}>${escapeHtml(value)}</span></div>`
     ).join('');
 
     // errors[] means the pipeline failed at something; the marker means the
@@ -1332,18 +1441,30 @@ function damageProvenanceHtml(result) {
     if (!cov) {
         return { html: `${lead} The frag log named no scoreable kill, so how much of the match the evidence covers was not assessed.`, warn: false };
     }
-    // Rounding only — one decimal below 10% so a 5.1% reading does not
-    // collapse to "5%". Not a gate: nothing branches on the value but the
-    // complete/incomplete split below.
-    const pct = (cov.ratio * 100).toFixed(cov.ratio < 0.1 ? 1 : 0);
     if (cov.ratio >= 1) {
         return { html: `${lead} The evidence accounts for all ${cov.kills} of the match's scoreable kills.`, warn: false };
     }
     return {
-        html: `${lead} <strong>Damage evidence covers ${pct}% of this match's kills</strong> ` +
+        html: `${lead} <strong>Damage evidence covers ${coveragePct(cov.ratio)}% of this match's kills</strong> ` +
             `(${cov.covered} of ${cov.kills} scoreable kills) — the figures below are floors, not measurements.`,
         warn: true,
     };
+}
+
+// The coverage percentage for the INCOMPLETE banner. Rounding only — one
+// decimal below 10% so a 5.1% reading does not collapse to "5%" — with one
+// hard rule: the printed figure must never reach 100 while the ratio is below
+// it. A ratio in [0.995, 1) rounds up to a bold "100%" inside the sentence
+// that exists to say the section is incomplete. That window opens on the big
+// team games — one uncovered kill out of 200+ — and those are real: 10 of the
+// 60 reconstructed demos in a 120-demo archive sample carry 200 or more
+// scoreable kills, the largest 843. There it truncates to two decimals
+// instead, which cannot reach 100 from below.
+function coveragePct(ratio) {
+    const pct = ratio * 100;
+    const rounded = pct.toFixed(ratio < 0.1 ? 1 : 0);
+    if (parseFloat(rounded) < 100) return rounded;
+    return (Math.floor(pct * 100) / 100).toFixed(2);
 }
 
 // setPanelProvenance writes (or hides) one panel's evidence banner.
@@ -1601,6 +1722,14 @@ function displayResults(result) {
         setPanelProvenance('weapons-provenance', dmgNote);
         const rows = playerStatsRows(result);
         const teamRows = playerStatsTeamRows(result);
+        // The Acc marker's footnote. It appears exactly when a cell below
+        // wears the mark, so it never explains something that is not there.
+        const convNote = document.getElementById('weapons-convention-note');
+        if (convNote) {
+            const marked = anyAccOffKtxScale(rows) || anyAccOffKtxScale(teamRows);
+            convNote.style.display = marked ? '' : 'none';
+            convNote.textContent = marked ? ACC_OFF_SCALE_FOOTNOTE : '';
+        }
         displayPlayerStatsTeams(teamRows);
         displayPlayerStats(rows);
         displayWeaponStatsTeamsTable(teamRows);
@@ -2400,6 +2529,16 @@ function renderPowerupRuns(result) {
 
 function displayKeyMoments(result) {
     renderPowerupRuns(result);
+
+    // The three tables on this tab that rank on damage read the same
+    // reconstructed section the Summary and Aim tabs do — the bounded damage
+    // of a window, a kill burst's Dmg / Hits / Return — so they carry the
+    // same banner, from the same renderer. Powerup runs and frag streaks are
+    // frag-log-only and carry none.
+    const dmgNote = damageProvenanceHtml(result);
+    for (const id of ['topdmg-provenance', 'toprl-provenance', 'toplg-provenance']) {
+        setPanelProvenance(id, dmgNote);
+    }
 
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
@@ -11928,6 +12067,10 @@ const AIM_TABLE_COLS = {
     // no direct/splash/pellet split, which nails don't carry.
     ng: ['shots', 'hits', 'dmg', 'hitPct'],
     sng: ['shots', 'hits', 'dmg', 'hitPct'],
+    // The axe carries the same four: one swing sound per attack (schema v71),
+    // linked to damage at the traceline's real +200 ms delay, and no spread,
+    // splash or beam to classify a miss by.
+    axe: ['shots', 'hits', 'dmg', 'hitPct'],
 };
 // Two-row header: [label, span] pairs in column order, spans summing to the
 // weapon's AIM_TABLE_COLS length. Not a counts-vs-% split — sg/ssg interleave
@@ -11941,7 +12084,12 @@ const AIM_TABLE_GROUPS = {
     rl: [['Shots', 6], ['%', 4]],
     gl: [['Shots', 6], ['%', 4]],
 };
-const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng'];
+// Weapon tables, in the order they appear. The axe is last because it is the
+// least of them, not because it is optional: the shot stream has carried axe
+// swings since schema v71 and the recon tier recovers its hits, and its
+// absence from this list was silently dropping every one of them — 107 swings
+// on one player in the committed corpus, with no table anywhere to show them.
+const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng', 'axe'];
 
 // aimWeaponView projects a WeaponAim onto the active victim filter so the
 // AIM_COL cell functions stay bucket-agnostic. The analyzer emits the enemy
@@ -11955,7 +12103,13 @@ const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng'];
 // the pellet projection below).
 function aimWeaponView(w) {
     if (!w || aimVictimFilter === 'all') return w;
-    if (aimVictimFilter === 'enemy' && !w.enemy) return w;
+    // "No enemy split" means enemy == all for the MEASURED counters, which is
+    // why they ride through untouched — but it says nothing about the recon
+    // tier, which never carries a split at all (so on a reconstructed demo
+    // this branch is the one every weapon takes). Dropping `recon` here is
+    // what stops a whole-match count — team and self hits included — from
+    // being served under the Enemy heading; the Hits cell then says so.
+    if (aimVictimFilter === 'enemy' && !w.enemy) return { ...w, recon: null };
     const s = (aimVictimFilter === 'enemy' ? w.enemy
         : aimVictimFilter === 'team' ? w.team : w.self) || {};
     const hits = s.hits || 0, direct = s.direct || 0;

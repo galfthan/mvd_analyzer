@@ -759,6 +759,21 @@ body.no-team-rows #tab-summary .per-player-heading {
     color: #e0c08a;
 }
 
+/* The "≠" an Acc cell wears when its hit convention is not the one the
+ * server's own counter uses for that weapon (see ktxHitsConvention). Marked
+ * in the TEXT, not by colour: the comparison it guards against is made from a
+ * screenshot, which carries the glyph and not the tooltip. Its footnote sits
+ * under the table and appears only while some cell wears the mark. */
+.acc-off-scale {
+    color: #ffb347;
+    font-size: 0.75em;
+    margin-left: 1px;
+}
+
+.acc-scale-note {
+    margin: 0.5rem 0 0;
+}
+
 /* A figure the reconstruction recovered rather than the wire measured — the
  * v73/v74 aim recon tier's hits, and any accuracy built on them. Legible
  * (these are real numbers, unlike .stat-muted's half-measurements) but
@@ -785,6 +800,19 @@ body.no-team-rows #tab-summary .per-player-heading {
     margin: 0 0 1rem;
     max-width: 78ch;
     color: #a9b8cf;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* The plain reading of the finding above it — what the marker means for the
+ * person holding the file, and the one action that honestly exists. Sits a
+ * shade brighter than .no-match-detail (the pipeline's own sentence), since
+ * this is the line a reader acts on; same size, same measure, no second
+ * accent colour — it is not a warning, it is the answer. */
+.no-match-reading {
+    margin: 0 0 1rem;
+    max-width: 78ch;
+    color: #c8d4e6;
     font-size: 0.9rem;
     line-height: 1.5;
 }

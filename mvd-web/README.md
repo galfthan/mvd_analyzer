@@ -118,6 +118,14 @@ in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target
 attribution: hits use the server-confirmed victim (exact in duels and team
 games alike); misses are exact in duels and a labeled nearest-crosshair
 heuristic in team games, only among enemies alive at the fire time.
+There is **one accuracy table per weapon**, in the order `lg`, `sg`, `ssg`,
+`rl`, `gl`, `ng`, `sng`, `axe`, skipping any weapon nobody fired. The axe
+takes the four generic columns the nailguns take (shots / hits / dmg /
+hit %): one swing sound per attack is all it carries (schema v71), with no
+spread, splash or beam to classify a miss by. It was missing from that list
+until now, which silently dropped every axe swing on the tab — 107 of them
+on one player in the committed corpus — even though the shot stream has
+carried them since v71 and the recon tier recovers their hits.
 A **Victims** filter (All / Enemy / Team / Self) slices every panel by who
 the shots hit — the tables read the Go-computed per-bucket counter slices
 (`WeaponAim.enemy/team/self`), the heatmaps/marginals filter samples by the
@@ -312,8 +320,11 @@ Two consequences worth knowing:
 - **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
   friendly fire DEALT. It is measured whenever the damage family is present
   (on `src: "reconstructed"` demos — pre-instrumentation, rebuilt damage —
-  read every damage figure as a ~1% estimate rather than a measurement; the
-  panel says so, see "Reconstructed damage" below),
+  read every damage figure as an estimate rather than a measurement: ~1%
+  median error **at full coverage**, and a FLOOR below it, since a
+  `damage.coverage.ratio` under 1 means the evidence never saw part of the
+  match at all. The panel banner prints that ratio — see "Reconstructed
+  damage" below),
   so `0` there is a real reading rather than a gap, and it is deliberately
   *not* folded into the victim's `Taken`-side story: this is what the player
   put into teammates, a different question from `TK` (which counts only the
@@ -362,11 +373,16 @@ this is a normal state in the browser, not an edge case.
 
 Everything downstream inherits its evidence grade from that one field
 rather than carrying a copy: the Basic Stats damage columns, Weapon Stats'
-`Dmg` and `Acc`, and the Aim tab's `Dmg` and recovered `Hits`. So one
-renderer (`damageProvenanceHtml`) states it once above each of those three
+`Dmg` and `Acc`, the Aim tab's `Dmg` and recovered `Hits`, and the three
+damage-ranked tables on Key Moments (**Top Damage Windows**, **Top RL
+Kills**, **Top LG Kills** — their `Dmg`, `Hits` and `Return` figures are the
+same bounded family, read through `view.TopWindows` / `view.TopKills`). So
+one renderer (`damageProvenanceHtml`) states it once above each of those six
 panels, in a `.panel-provenance` banner — always visible, unlike the
 `More info` disclosures, because a reconstructed damage figure read as a
-measured one is the mistake the banner exists to prevent.
+measured one is the mistake the banner exists to prevent. Powerup Runs, the
+frag streaks and Demo Markers carry no banner: they are frag-log-only and
+show no damage-derived figure.
 
 The second line of the banner is `damage.coverage` (schema v74): how much
 of the frag-log-visible match the reconstruction's evidence actually
@@ -379,16 +395,43 @@ the amber `.warn` variant and reads "Damage evidence covers 23% of this
 match's kills (22 of 96 scoreable kills) — the figures below are floors,
 not measurements". Absent coverage on a reconstructed section is its own
 sentence ("the frag log named no scoreable kill, so … was not assessed"),
-because silence there would read as "complete".
+because silence there would read as "complete". The printed percentage
+never reaches 100 while the ratio is below it: a near-complete section
+(one uncovered kill out of 200+, which is a normal 4on4) would otherwise
+round up to a bold "100%" inside the sentence saying it is incomplete, so
+`coveragePct` truncates to two decimals in that window instead.
 
 Per-weapon accuracy carries the same grade at cell level: a
 `playerStats.accuracy` family with `src: "reconstructed"` renders its `Acc`
 cells inside `.stat-recon`. `derived` and `ktx` do not — both are measured
 off the wire, and marking half the corpus would make the mark meaningless.
-The `hitsConvention` tooltip (v74) rides every cell that has one: two
-accuracies are comparable exactly when weapon **and** convention match,
-which is why a KTX `rl` figure (direct impacts only) and a derived one
-(any damage path, ~4× higher) must never be read against each other.
+
+### The `≠` on an Acc cell: two scales, one column
+
+The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
+`withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
+family the demo has — and the two are counted differently. KTX's own
+counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`; the
+derived and reconstructed families count any fire that landed damage, on
+every weapon. On `rl` that is ~4× the KTX number. Same column, same `%`,
+different question — and the comparison people actually make is between two
+screenshots, where a tooltip does not exist.
+
+So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
+weapon wears a **`≠`** in the text, with a footnote under the table that
+appears exactly when some cell wears it. The rule is per weapon, not per
+family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`): a
+KTX-overlaid family matches on every weapon and is never marked, while a
+derived/reconstructed one is marked on `rl`/`gl`/`sg`/`ssg` and left plain
+on `lg`/`ng`/`sng`/`axe`, where KTX counts the same event we do. Two `Acc`
+figures are comparable exactly when weapon **and** convention match; the
+full convention text stays in the tooltip.
+
+Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
+inert on these cells — the only rule for those classes is scoped to
+`#accuracy-table`, an id no longer in the DOM — so the colour thresholds
+are not, today, a second cross-convention trap. Anyone re-pointing that
+rule must scope the thresholds by convention first.
 
 ### The match wall clock
 
@@ -408,12 +451,23 @@ the anchor does not have and would move the date under a reader in
 Auckland.
 
 The grade is visible, not just hoverable. `matchStartConfidence: "exact"`
-renders plainly; every other grade gets a leading **`~`** plus a colour
-(`.date-unverified` muted, `.date-contradicted` amber — the grade where a
-hard check failed). The `~` is in the text rather than only in the colour
-because this is a date somebody may write down. The anchor is never dropped
-or coerced on a bad grade — the schema grades rather than withholds, and so
-does the UI; source, `±accuracy` and `matchStartNote` all ride the tooltip.
+renders plainly; every other grade gets a leading **`~`**, and
+`contradicted` — the grade where a hard check failed — adds
+**`(disputed)`** after the stamp. Both are in the TEXT: the two hedged
+grades are also coloured (`.date-unverified` muted, `.date-contradicted`
+amber), but a colour alone is exactly what a screenshot in a channel and a
+colour-blind reader cannot tell apart, and this is a date somebody may
+write down. The anchor is never dropped or coerced on a bad grade — the
+schema grades rather than withholds, and so does the UI; source,
+`±accuracy` and `matchStartNote` all ride the tooltip.
+
+**Precision follows `matchStartAccuracyMs`, by magnitude.** A stamp printed
+to the minute claims a minute. The ±14 h `assumedUtc` grade puts the true
+instant anywhere in a 28-hour window, so an anchor accurate to an hour or
+worse prints the DAY plus its ± instead — `~2002-08-04 UTC ±14 h`, not
+`~2002-08-04 11:44 UTC`. Second-scale and tighter anchors keep the minute.
+`formatUtcStamp` switches on the number, like `formatAccuracyMs` beside it,
+so a new rung on the accuracy ladder needs no change here.
 
 ### A recording with no match in it
 
@@ -434,6 +488,22 @@ clock was ever seen running, the game dir, the frag-log kill count (`0` is
 the reading that *defines* `noPlayRecorded`, so it always prints) and the
 first usable `dateMarkers` entry, since the whole date family rides here
 instead of `streams.global` on such a result.
+
+Under that sentence sits the **plain reading**: what the finding means for
+the person holding the file, and an action where one honestly exists. Only
+`demoUnreadable` has one — of the 20 such demos in the archive sweep, 16
+abort within the first 16 bytes on a "block size" that is plainly ASCII text
+(`us\0C`, `rdem`, `le n`), 2 on a `dem_cmd` no MVD carries and 2 on an
+unexpected EOF, so the file is either not an MVD or a truncated one and a
+fresh download is a real fix. Nothing a reader can do makes a recording that
+started mid-match contain its own start, so the other four reasons
+translate and stop there. A second line rides the **gamedir** rather than
+the reason ("This looks like a fortress demo; this tool analyzes KTX-style
+QuakeWorld matches"), because that is where the foreign content sits: 165
+of the 170 `noMatchDeclared` demos in the sweep name a non-`qw` gamedir,
+`fortress` alone 148 of them, and the same mods turn up under three of the
+other reasons. The pipeline's own `detail` strings are untouched — they are
+the finding, and display-only by contract either way.
 
 It is deliberately **not** styled as an error. `errors[]` means the
 pipeline failed; the marker means the demo holds no match. They coincide on

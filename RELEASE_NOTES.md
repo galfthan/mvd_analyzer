@@ -11,7 +11,8 @@ detail.
 
 Everything above had reached the Result, the REST API and the MCP tools
 without reaching a human looking at a demo. mvd-web now renders it. There
-is no schema change in this pass — it is `mvd-web/static/` only.
+is no schema change and no pipeline change in this pass: the code all sits
+in `mvd-web/static/`, and the rest is documentation kept in lock-step.
 
 - **The Aim tab stops saying `—` on half the archive.** Hits / Hit % fall
   back to `aim.players[].weapons[].recon.hits` where the measured counters
@@ -19,8 +20,16 @@ is no schema change in this pass — it is `mvd-web/static/` only.
   reconstructed count is. The tier's two limits are stated rather than
   papered over: a weapon outside `lg/sg/ssg/axe/rl/gl` keeps `—`, and since
   `recon` carries no victim split the cells drop back to `—` under the
-  Victims filter instead of serving an all-victims number under an
-  Enemy/Team/Self heading.
+  Victims filter rather than serving an all-victims number under an
+  Enemy/Team/Self heading — **Enemy included**, where a weapon with no enemy
+  split (which on a reconstructed demo is every weapon) used to serve its
+  whole-match count, team and self hits in it, under the Enemy heading.
+- **The axe gets an aim table.** It was missing from the tab's weapon list,
+  so every axe swing the shot stream has carried since schema v71 — 107 of
+  them on one player in the committed corpus — had nowhere to show. It takes
+  the four generic columns the nailguns take (shots / hits / dmg / hit %):
+  one swing sound per attack is all it carries, with no spread, splash or
+  beam to classify a miss by.
 - **The rest of that table stops printing fabricated zeros.** The pellet
   block, full/partial/miss, direct/splash/missed, the LG miss types and
   every % twin are withheld by the analyzer on a demo with no wire damage
@@ -29,34 +38,57 @@ is no schema change in this pass — it is `mvd-web/static/` only.
   render `—` now: the reconstruction recovers hit COUNTS, never the
   breakdown of how a fire hit or missed.
 - **`damage.coverage` is the caption on every panel that shows
-  reconstructed damage** — Basic Stats, Weapon Stats, and the Aim tab's
-  accuracy panel. The ratio is printed as a magnitude, never thresholded
+  reconstructed damage** — Basic Stats, Weapon Stats, the Aim tab's accuracy
+  panel, and the three damage-ranked Key Moments tables (Top Damage Windows,
+  Top RL Kills, Top LG Kills), whose `Dmg` / `Hits` / `Return` figures ride
+  the same family. The ratio is printed as a magnitude, never thresholded
   (the only comparison in the UI is against `1`, the definition of a
   complete section): a complete one reads "the evidence accounts for all
   172 of the match's scoreable kills", an incomplete one takes the amber
   variant and reads "Damage evidence covers 23% of this match's kills (22
-  of 96) — the figures below are floors, not measurements".
+  of 96) — the figures below are floors, not measurements". The printed
+  percentage never reaches 100 while the ratio is below it: one uncovered
+  kill out of 200+ (a normal 4on4) would otherwise round up to a bold
+  "100%" inside the sentence that says the section is incomplete.
 - **The match wall clock is shown.** The Summary Date cell and the topbar
   fall back from KTX's `demoInfo.date` to `streams.global.matchStartUnixMs`
   where no demoinfo block exists — the half of the archive that used to
   render `-`. Rendered in **UTC**, and it says "UTC": the anchor is a UTC
   epoch with no local-time field, and on the old half it carries no zone at
   all (±14 h). `matchStartConfidence: "exact"` prints plainly; every other
-  grade gets a leading `~` plus a colour, in the text rather than only in
-  the tooltip, because this is a date somebody may write down.
+  grade gets a leading `~`, and `contradicted` also says `(disputed)` — in
+  the text rather than only in a colour, because this is a date somebody may
+  write down and a colour survives neither a screenshot nor a colour-blind
+  reader. The **precision follows the ±**: an anchor accurate to an hour or
+  worse prints the day and its ± (`~2002-08-04 UTC ±14 h`) rather than a
+  minute it does not have.
 - **`score.maxSpree` / `maxQuadSpree` get columns** in both Basic Stats
   tables, riding the kill family's measuredness (`-`, never `0`, where
   `Kills` is `-`) and carrying the max-over-members rule on team rows.
 - **`accuracy.src: "reconstructed"` marks its Weapon Stats cells**;
   `derived` and `ktx` do not, since both are measured off the wire. The v74
   `hitsConvention` tooltip rides every cell that has one.
+- **An `Acc` cell counted on a different scale from the server's own says so
+  in the text.** The WASM entry applies the KTX overlay, so the column
+  serves both families: KTX counts direct impacts on `rl`/`gl` and PELLETS
+  on `sg`/`ssg`, while the derived and reconstructed families count any fire
+  that landed damage — ~4× the KTX number on `rl`. Those cells now carry a
+  **`≠`** and a footnote under the table that appears exactly when one does.
+  The rule is per weapon, not per family, so a KTX-overlaid demo is never
+  marked and a derived one is marked on `rl`/`gl`/`sg`/`ssg` only.
 - **A `noMatch` demo tells its story instead of showing empty tables.** The
   marker's reason becomes a heading, its `detail` is printed verbatim
   (display-only by contract — nothing is parsed back out of it) and its
   structured evidence becomes a grid; the four stream-fed Summary panels
   hide. It is styled as a finding, not as a failure — `errors[]` is printed
   only for `demoUnreadable`, the one reason that means both — and the load
-  status line drops from the red error class to a neutral one.
+  status line drops from the red error class to a neutral one. Under the
+  finding sits its **plain reading**, plus an action where one honestly
+  exists: `demoUnreadable` says the file may be truncated or not an MVD and
+  to download it again (16 of the 20 such demos in the sweep abort within
+  the first 16 bytes on a "block size" that is ASCII text), and a demo whose
+  gamedir is not `qw` says so in words — 165 of the 170 `noMatchDeclared`
+  demos are a mod, `fortress` alone 148 of them.
 
 **One pre-existing crash fixed on the way.** `renderLocHeatmap` called
 `setHTML`, a local of `resetUIToCleanState` that was never in scope there,
