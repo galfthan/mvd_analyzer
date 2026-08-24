@@ -433,6 +433,12 @@ The Aim tab's `Hits` column is deliberately the OTHER number on those two
 weapons: it stands in for the withheld measured counter, which is an
 any-path count, so a reconstructed `RL` figure there reads higher than the
 Summary's `Acc`. Both are labelled; neither is a correction of the other.
+A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
+only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
+convention and the Summary number it differs from, with the size of the
+gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE`, appended to
+`RECON_ACCURACY_NOTE` for those two weapons only, since everywhere else
+the two conventions coincide and the sentence would invent a difference).
 
 Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
 inert on these cells — the only rule for those classes is scoped to

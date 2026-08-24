@@ -1147,6 +1147,15 @@ const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different
 const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no wire damage log, ' +
     'so the hits were recovered from the rebuilt one. As complete as the damage evidence (see the note above the table).';
 
+// A reconstructed demo publishes TWO rl/gl hit counts on purpose — this tab's
+// any-path one (it stands in for the withheld MEASURED counter, which counts
+// that way) and the Summary's direct-impact one (KTX's own question). They
+// differ by a lot, so the reader who has both on screen gets the
+// reconciliation in the cell rather than only in the source.
+const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, splash included — ' +
+    'the convention of the measured counter this cell stands in for. The Summary tab\'s Acc column answers ' +
+    'KTX\'s question instead — projectiles that TOUCHED a player — which runs about 4x smaller on RL and 1.5x on GL.';
+
 // Accuracy cell from a playerStats accuracy family. `hits` is ABSENT (not
 // zero) when neither the wire nor the reconstruction could link fires to
 // damage, so an entry with attacks but no hits renders the attack count alone
@@ -12172,7 +12181,12 @@ function aimHitsCell(w, fmt) {
     const v = aimHitsValue(w);
     if (!v) return `<span class="aim-na" title="${escapeHtml(aimHitsNote(w))}">—</span>`;
     if (!v.recon) return fmt(v.n);
-    return `<span class="stat-recon" title="${escapeHtml(RECON_ACCURACY_NOTE)}">${fmt(v.n)}</span>`;
+    const notes = [RECON_ACCURACY_NOTE];
+    // rl/gl are the two weapons whose recovered count has a published rival on
+    // the Summary tab (recon.directHits, the KTX convention); everywhere else
+    // the two conventions coincide and the sentence would invent a difference.
+    if (w.weapon === 'rl' || w.weapon === 'gl') notes.push(RECON_ANYDAMAGE_NOTE);
+    return `<span class="stat-recon" title="${escapeHtml(notes.join(' · '))}">${fmt(v.n)}</span>`;
 }
 
 // aimDamageCell resolves the Dmg cell for one player + weapon under the
