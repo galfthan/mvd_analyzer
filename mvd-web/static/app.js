@@ -807,6 +807,21 @@ function setupTabs() {
 
 // ─── File Upload (via WASM Worker) ──────────────────────────────────────────
 
+// The load-status line after a successful analyse. A demo the marker calls
+// match-less analysed fine, so it is not an error (the red `status error` is
+// reserved for a load or parse that failed) — but "Analysis complete!" over a
+// Summary tab with no scoreboard reads as a bug, so it says what happened and
+// points at the panel that explains it.
+function setAnalysisStatus(status, result) {
+    if (result.noMatch) {
+        status.textContent = 'Analysed — this recording holds no match (see Summary).';
+        status.className = 'status';
+        return;
+    }
+    status.textContent = 'Analysis complete!';
+    status.className = 'status success';
+}
+
 async function uploadFile(file) {
     const status = document.getElementById('upload-status');
     status.textContent = 'Analyzing...';
@@ -821,8 +836,7 @@ async function uploadFile(file) {
         const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
-        status.textContent = 'Analysis complete!';
-        status.className = 'status success';
+        setAnalysisStatus(status, result);
         currentResult = result;
         displayResults(result);
     } catch (error) {
@@ -894,8 +908,7 @@ async function loadGameFromHub(game) {
     const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
-    status.textContent = 'Analysis complete!';
-    status.className = 'status success';
+    setAnalysisStatus(status, result);
     currentResult = result;
 
     currentResult.hubInfo = {
@@ -1089,22 +1102,43 @@ const HITS_CONVENTION_TITLES = {
     pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
 };
 
-// Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
-// zero) when the demo has no damage stream to link fires against, so an
-// entry with attacks but no hits renders the attack count alone rather
-// than a fabricated 0%.
-function formatAccuracyCell(entry) {
+// Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
+// a reconstructed hit count is, and the one caveat that comes with it.
+const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no wire damage log, ' +
+    'so the hits were recovered from the rebuilt one. As complete as the damage evidence (see the note above the table).';
+
+// Accuracy cell from a playerStats accuracy family. `hits` is ABSENT (not
+// zero) when neither the wire nor the reconstruction could link fires to
+// damage, so an entry with attacks but no hits renders the attack count alone
+// rather than a fabricated 0%.
+//
+// `src` is the family's evidence grade and is taken from the family, not the
+// weapon row: `ktx` is the server's own block, `derived` our own count off a
+// wire damage stream, and `reconstructed` (schema v74) a figure recovered
+// from the rebuilt damage log on a demo that carries no such stream. The last
+// is MARKED — a recon accuracy is only as complete as damage.coverage, which
+// the panel banner above the table states — while the first two, both
+// measured off the wire, render plainly. The convention rides the tooltip
+// either way: two accuracies are comparable exactly when weapon and
+// hitsConvention match.
+function formatAccuracyCell(accuracy, wn) {
+    const entry = accuracy?.byWeapon?.[wn];
     if (!entry || !entry.attacks) return '-';
-    if (entry.hits == null) return `<span class="stat-muted" title="No damage stream to link fires against — attacks only">${entry.attacks} atk</span>`;
+    if (entry.hits == null) return `<span class="stat-muted" title="No damage to link fires against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
-    const title = HITS_CONVENTION_TITLES[entry.hitsConvention];
-    const attr = title ? ` title="${escapeHtml(title)}"` : '';
-    return `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%</span>`;
+    const notes = [];
+    if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
+    const recon = accuracy.src === 'reconstructed';
+    if (recon) notes.push(RECON_ACCURACY_NOTE);
+    const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
+    const cell = `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%</span>`;
+    return recon ? `<span class="stat-recon">${cell}</span>` : cell;
 }
 
-// The kill side of a score row — kills, suicides, teamKills, efficiency and
-// the by-weapon split — is ABSENT (not zero) on a demo whose obituary log
-// yielded nothing while deaths were still counted from the death stream:
+// The kill side of a score row — kills, suicides, teamKills, efficiency, the
+// by-weapon split and the two spree maxima (schema v74) — is ABSENT (not
+// zero) on a demo whose obituary log yielded nothing while deaths were still
+// counted from the death stream:
 // old kmod/qwe servers print obituaries in a shape the frag log never
 // matches. Deaths and frags are measured there and stay; printing 0 for the
 // rest made a 230-frag team read as one that never killed anybody. Zero is
@@ -1134,6 +1168,193 @@ function enemyWeaponKillCell(score, weapon) {
     return (m[weapon] || 0) + (m.both || 0);
 }
 
+// ─── Match wall clock (streams.global, schema v72) ─────────────────────────
+//
+// The anchors are Unix epoch MILLISECONDS. The schema publishes no local-time
+// field on purpose: the stamp a demo carries was written in whatever zone the
+// server ran in, and on the pre-2005 half it carries no zone at all (the
+// marker is read as UTC, `assumedUtc`, accuracy ±14 h). Rendering it in the
+// VIEWER's zone would therefore invent a precision the anchor does not have
+// and would move the date under a reader in Auckland, so this UI renders
+// **UTC** and says so in the text. See RESULT_SCHEMA.md, GlobalStream.
+function formatUtcStamp(unixMs) {
+    // toISOString is UTC by definition: "2002-08-04T11:44:55.000Z".
+    const iso = new Date(unixMs).toISOString();
+    return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
+}
+
+// The accuracy ladder is 1 ms / 1 s / 1 h / 14 h, but this formats the number
+// rather than switching on those four values, so a new rung reads correctly
+// without a change here.
+function formatAccuracyMs(ms) {
+    if (ms >= 3600000) return `${Math.round(ms / 3600000)} h`;
+    if (ms >= 1000) return `${Math.round(ms / 1000)} s`;
+    return `${ms} ms`;
+}
+
+// matchWallClock projects the graded match-start anchor onto {html, text} for
+// a cell, or null when the demo carries none (then the caller shows whatever
+// it showed before — never a placeholder).
+//
+// `exact` is served plainly. Every other grade is HEDGED IN THE TEXT with a
+// leading "~", not only in a tooltip: a ±14 h tz-unknown stamp rendered as a
+// plain date is the one way this field misleads. The anchor is never dropped
+// or coerced — the schema grades it rather than withholding it, and so does
+// this; the grade, the source, the ± and the note all ride the tooltip.
+function matchWallClock(result) {
+    const g = result?.streams?.global;
+    if (!g || !g.matchStartUnixMs) return null;
+    const text = formatUtcStamp(g.matchStartUnixMs);
+    const bits = [`Match start, read off the demo's own wall-clock marker (${g.matchStartSource || 'unknown source'})`];
+    if (g.matchStartAccuracyMs) bits.push(`accurate to ±${formatAccuracyMs(g.matchStartAccuracyMs)}`);
+    if (g.matchStartConfidence) bits.push(`confidence: ${g.matchStartConfidence}`);
+    if (g.matchStartNote) bits.push(g.matchStartNote);
+    const title = escapeHtml(bits.join(' · '));
+    if (g.matchStartConfidence === 'exact') {
+        return { html: `<span title="${title}">${text}</span>`, text };
+    }
+    // `unverified` (something unpinned) and `contradicted` (a hard check
+    // failed) are both hedged; the second is coloured as a warning because it
+    // is the grade that says another signal disagrees with this stamp.
+    const cls = g.matchStartConfidence === 'contradicted' ? 'date-contradicted' : 'date-unverified';
+    return { html: `<span class="${cls}" title="${title}">~${text}</span>`, text: `~${text}` };
+}
+
+// displayMatchDate fills the Summary "Date" cell. KTX's own demoinfo `date`
+// wins where the block exists — it is the server's stamp, to the second, with
+// its zone printed. The graded anchor fills the half of the archive that has
+// no block at all, which used to render "-".
+function displayMatchDate(result) {
+    const el = document.getElementById('match-date');
+    if (!el) return;
+    const ktxDate = result?.demoInfo?.date;
+    if (ktxDate) {
+        el.textContent = ktxDate;
+        return;
+    }
+    const wc = matchWallClock(result);
+    el.innerHTML = wc ? wc.html : '-';
+}
+
+// ─── result.noMatch (schema v74) ───────────────────────────────────────────
+//
+// A recording that holds no analyzable match used to arrive here as a result
+// with no `streams` and an EMPTY `errors[]`, and the UI showed the same thing
+// it shows for a race demo: tables with headers and nothing under them. The
+// marker is present exactly when `streams` is absent, and its five reasons
+// are a total partition, so this switch is exhaustive by contract.
+//
+// Read it BEFORE `errors[]`: it decides whether a reader error describes a
+// partial match or nothing at all, and `demoUnreadable` is the one reason
+// that means both — which is why that reason (and only that one) also prints
+// the reader's own message.
+const NO_MATCH_TITLES = {
+    demoUnreadable: 'This recording could not be read to the end',
+    midMatchRecording: 'This recording starts mid-match',
+    matchStartUnannounced: 'No match start was announced in this recording',
+    noMatchDeclared: 'No match was declared in this recording',
+    noPlayRecorded: 'This recording holds no match',
+};
+
+// The evidence beside the prose. Every fact `detail` states is a structured
+// field, and these are those fields — `detail` is display-only by contract
+// (unstable wording, never parsed), so it is rendered verbatim and nothing is
+// read back out of it.
+function noMatchEvidence(nm) {
+    const items = [];
+    // Absent when the opening fullserverinfo dump carried no `status` key at
+    // all, which is a different reading from any value it could have had.
+    items.push(['Status at demo open', nm.statusAtOpen || 'not sent']);
+    items.push(['Match clock ever seen running', nm.statusRunningSeen ? 'yes' : 'no']);
+    if (nm.gameDir) items.push(['Game dir', nm.gameDir]);
+    // 0 is the reading that defines noPlayRecorded, so it always prints.
+    items.push(['Kills in the frag log', String(nm.kills || 0)]);
+    // The date markers ride here rather than on streams.global, which this
+    // result does not have. A finalscores stamp whose year could not be
+    // completed carries unixMs 0 and is skipped — it names no instant.
+    const marker = (nm.dateMarkers || []).find(m => m.unixMs);
+    if (marker) items.push(['Date marker on the wire', `${formatUtcStamp(marker.unixMs)} (${marker.source})`, marker.raw]);
+    return items;
+}
+
+function displayNoMatch(result) {
+    const panel = document.getElementById('no-match-panel');
+    if (!panel) return;
+    const nm = result.noMatch;
+    document.body.classList.toggle('no-match', !!nm);
+    panel.style.display = nm ? '' : 'none';
+    // The Teams box is fed from the frag log, which some match-less
+    // recordings still carry (a mid-match recording has a scoreline) and
+    // others do not — hidden only in the second case, since the .no-match
+    // CSS cannot tell them apart. Clearing the inline value hands the panel
+    // back to the duel-mode / no-team-rows rules.
+    const teams = document.getElementById('teams-panel');
+    if (teams) teams.style.display = (nm && !(result.match?.teams || []).length) ? 'none' : '';
+    if (!nm) return;
+
+    document.getElementById('no-match-title').textContent =
+        NO_MATCH_TITLES[nm.reason] || 'This recording holds no analyzable match';
+    document.getElementById('no-match-detail').textContent = nm.detail || '';
+    document.getElementById('no-match-evidence').innerHTML = noMatchEvidence(nm).map(([label, value, title]) =>
+        `<div class="summary-item"><label>${escapeHtml(label)}</label>` +
+        `<span class="no-match-value"${title ? ` title="${escapeHtml(title)}"` : ''}>${escapeHtml(value)}</span></div>`
+    ).join('');
+
+    // errors[] means the pipeline failed at something; the marker means the
+    // demo holds no match. They coincide on exactly one reason, and there the
+    // reader's own message is the evidence.
+    const errEl = document.getElementById('no-match-errors');
+    const errs = result.errors || [];
+    const show = nm.reason === 'demoUnreadable' && errs.length > 0;
+    errEl.style.display = show ? '' : 'none';
+    errEl.textContent = show ? `Reader: ${errs.join(' · ')}` : '';
+}
+
+// ─── Damage-evidence provenance (damage.source / damage.coverage, v74) ─────
+//
+// Everything that rides the reconstructed damage section — the Basic Stats
+// damage columns, Weapon Stats' Dmg and Acc, the Aim tab's Dmg and its recon
+// hits — inherits its evidence grade from this one field rather than carrying
+// a copy, so one renderer states it above each of those tables.
+//
+// `coverage.ratio` is published as a MAGNITUDE, not a flag: the pipeline has
+// no threshold and neither does this. The number is printed as it comes; the
+// only comparison here is against 1, which is the definition of a complete
+// section rather than a cutoff picked by the UI.
+function damageProvenanceHtml(result) {
+    if (result?.damage?.source !== 'reconstructed') return null;
+    const lead = 'Damage on this demo is <strong>reconstructed</strong>: it predates the server\'s damage log, ' +
+        'so every damage figure below is rebuilt from the health/armor streams rather than measured.';
+    const cov = result.damage.coverage;
+    // Absent coverage on a reconstructed section means the frag log named no
+    // scoreable kill, so completeness was never assessed — a different
+    // statement from "complete", and silence would read as the latter.
+    if (!cov) {
+        return { html: `${lead} The frag log named no scoreable kill, so how much of the match the evidence covers was not assessed.`, warn: false };
+    }
+    // Rounding only — one decimal below 10% so a 5.1% reading does not
+    // collapse to "5%". Not a gate: nothing branches on the value but the
+    // complete/incomplete split below.
+    const pct = (cov.ratio * 100).toFixed(cov.ratio < 0.1 ? 1 : 0);
+    if (cov.ratio >= 1) {
+        return { html: `${lead} The evidence accounts for all ${cov.kills} of the match's scoreable kills.`, warn: false };
+    }
+    return {
+        html: `${lead} <strong>Damage evidence covers ${pct}% of this match's kills</strong> ` +
+            `(${cov.covered} of ${cov.kills} scoreable kills) — the figures below are floors, not measurements.`,
+        warn: true,
+    };
+}
+
+// setPanelProvenance writes (or hides) one panel's evidence banner.
+function setPanelProvenance(id, note) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = note ? '' : 'none';
+    el.className = note && note.warn ? 'panel-provenance warn' : 'panel-provenance';
+    el.innerHTML = note ? note.html : '';
+}
+
 function updateTopbarDemoInfo(result) {
     const el = document.getElementById('topbar-demo-info');
     if (!el) return;
@@ -1143,6 +1364,10 @@ function updateTopbarDemoInfo(result) {
     // maps. `match.mapTitle` is available for surfaces that want the long
     // level title; the topbar is not one of them. Never a key.
     const map = demoInfo?.map || result?.match?.map || '';
+    // Same precedence as the Summary "Date" cell (displayMatchDate): KTX's
+    // own stamp where the demoinfo block exists, the graded wall-clock anchor
+    // where it does not.
+    const wallClock = demoInfo?.date ? null : matchWallClock(result);
     const date = demoInfo?.date || '';
 
     let teams = (timelineState.teams && timelineState.teams.length >= 2)
@@ -1183,6 +1408,7 @@ function updateTopbarDemoInfo(result) {
     }
     if (map) parts.push(`<span class="topbar-map">${escapeHtml(map)}</span>`);
     if (date) parts.push(`<span class="topbar-date">${escapeHtml(date)}</span>`);
+    else if (wallClock) parts.push(`<span class="topbar-date">${wallClock.html}</span>`);
 
     el.innerHTML = parts.join('<span class="topbar-sep">·</span>');
 
@@ -1270,6 +1496,11 @@ function displayResults(result) {
 
     const demoInfo = result.demoInfo;
 
+    // Before anything that reads `streams`: the marker decides whether the
+    // panels below describe a match at all. Unconditional so the body class
+    // and the panel clear on the next demo.
+    displayNoMatch(result);
+
     // Match info from demoInfo. demoInfo.duration is verbatim from the
     // KTX JSON (integer seconds, untransformed by design); result.match
     // .duration flipped to int32 ms in schema v8 — convert to seconds for
@@ -1285,7 +1516,6 @@ function displayResults(result) {
         document.getElementById('duration').textContent = formatDuration(demoInfo.duration || ((result.match?.duration || 0) * 0.001));
         document.getElementById('mode').textContent = demoInfo.mode || '-';
         document.getElementById('hostname').textContent = demoInfo.hostname || '-';
-        document.getElementById('match-date').textContent = demoInfo.date || '-';
     } else if (result.match) {
         const mapCell = document.getElementById('map-name');
         mapCell.textContent = result.match.map || '-';
@@ -1294,6 +1524,12 @@ function displayResults(result) {
     }
 
     // Match settings + server info from the new metadata analyzer.
+    // Date: KTX's own stamp where the demoinfo block exists, otherwise the
+    // graded wall-clock anchor (schema v72) that fills the half of the
+    // archive without one. Outside the demoInfo branch above because the
+    // anchor is exactly what that branch does NOT have.
+    displayMatchDate(result);
+
     displayMatchSettings(result.metadata?.matchSettings);
     displayServerInfo(result.metadata?.serverInfo);
 
@@ -1357,6 +1593,12 @@ function displayResults(result) {
     // section at all is a parse that produced no player streams (a race
     // demo has no match), and that renders as empty tables.
     {
+        // The damage-evidence banner goes above every Summary table whose
+        // figures ride the damage section — the Basic Stats damage columns,
+        // and Weapon Stats' Dmg and (on a reconstructed demo) its Acc.
+        const dmgNote = damageProvenanceHtml(result);
+        setPanelProvenance('players-provenance', dmgNote);
+        setPanelProvenance('weapons-provenance', dmgNote);
         const rows = playerStatsRows(result);
         const teamRows = playerStatsTeamRows(result);
         displayPlayerStatsTeams(teamRows);
@@ -1627,6 +1869,8 @@ function displayPlayerStats(rows) {
             <td>${s.deaths || 0}</td>
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
+            <td>${s.maxSpree ?? '-'}</td>
+            <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
             <td>${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
@@ -1832,7 +2076,7 @@ function displayWeaponStatsTable(rows) {
 // damage from `damage.byWeapon`, and eK from `score.byWeaponVsEnemyWeapon`.
 // A weapon the player never touched shows '-' in all four rather than zeros.
 function formatWeaponCells(player, wn) {
-    const acc = formatAccuracyCell(player.accuracy?.byWeapon?.[wn]);
+    const acc = formatAccuracyCell(player.accuracy, wn);
     const kills = player.score?.byWeapon?.[wn] || 0;
     const dmg = player.damage?.byWeapon?.[wn] || 0;
     return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>${enemyKillCell(player, wn)}`;
@@ -1988,6 +2232,8 @@ function displayPlayerStatsTeams(teamRows) {
             <td>${s.deaths || 0}</td>
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
+            <td>${s.maxSpree ?? '-'}</td>
+            <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
             <td>${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
@@ -3427,6 +3673,13 @@ function resetUIToCleanState() {
     // Teams
     setHTML('teams-list', '');
 
+    // noMatch marker + the damage-evidence banners
+    hide('no-match-panel');
+    setHTML('no-match-evidence', '');
+    hide('players-provenance');
+    hide('weapons-provenance');
+    hide('aim-provenance');
+
     // Player / weapon / item tables (per-team + per-player)
     for (const id of [
         'player-stats-team-body', 'scoreboard-body',
@@ -3530,11 +3783,12 @@ function resetUIToCleanState() {
     hide('pickups-empty');
     // pickups-items-panel is shown by displayPickupsTab when item data exists
 
-    // Body classes — duel-mode / no-team-rows collapse some panels via CSS;
-    // clear them so a teamplay demo loaded after a duel or an FFA doesn't
-    // inherit the layout.
+    // Body classes — duel-mode / no-team-rows / no-match collapse some panels
+    // via CSS; clear them so a teamplay demo loaded after a duel, an FFA or a
+    // match-less recording doesn't inherit the layout.
     document.body.classList.remove('duel-mode');
     document.body.classList.remove('no-team-rows');
+    document.body.classList.remove('no-match');
 
     // JS-side state objects that hold per-demo data
     mapState.locations = [];
@@ -11360,9 +11614,16 @@ function renderLocHeatmap() {
     const noData = document.getElementById('locheatmap-no-data');
     if (!data) {
         // Clear any stale table from a previous metric so the empty-state
-        // isn't shown alongside an outdated grid.
-        setHTML('locheatmap-thead-row', '');
-        setHTML('locheatmap-body', '');
+        // isn't shown alongside an outdated grid. (setHTML is a local of
+        // resetUIToCleanState and was never in scope here — reaching this
+        // branch threw a ReferenceError out of displayResults, which then
+        // skipped the Aim tab, applyUrlState and hideLoadingOverlay. Any
+        // demo with no loc-heatmap data hits it, a match-less recording
+        // always does.)
+        for (const id of ['locheatmap-thead-row', 'locheatmap-body']) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        }
         const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
         panel.style.display = hasGraph ? '' : 'none';
         if (noData) noData.style.display = hasGraph ? 'block' : 'none';
@@ -11470,6 +11731,9 @@ let aimVictimFilter = 'all';
 function initAimStatsView(result) {
     aimPlayer = null;
     aimVictimFilter = 'all';
+    // Unconditional: the setter hides the banner on a demo with a wire damage
+    // log, so a reconstructed demo's note cannot survive into the next load.
+    setPanelProvenance('aim-provenance', damageProvenanceHtml(result));
     buildAimChips(result);
     buildAimVictimToggle(result);
     renderAimWeaponTables(result);
@@ -11581,7 +11845,12 @@ const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
-    hits: { h: 'Hits', t: 'Fires that connected (— when the demo carries no wire damage stream to measure hits against)', cell: w => w.hitsMeasured === false ? '—' : (w.hits || 0) },
+    hits: {
+        h: 'Hits',
+        t: 'Fires that connected. Measured off the wire damage stream where the demo carries one; recovered from the reconstructed damage log (marked) where it does not; — where neither could answer',
+        cell: w => aimHitsCell(w, n => String(n)),
+        sort: w => { const v = aimHitsValue(w); return v ? v.n : -1; },
+    },
     // Joined in from playerStats.damage's three per-weapon maps, which
     // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
     // the measuredness rules). The cell carries a {n, lower, note} object,
@@ -11592,30 +11861,59 @@ const AIM_COL = {
         cell: w => aimDamageText(w.dmg),
         sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
     },
-    hitPct: { h: 'Hit %', t: 'Share of fires that connected (— when hits are not measured on this demo)', cell: w => w.hitsMeasured === false ? '—' : pctCell(w.shots ? (w.hits || 0) / w.shots * 100 : 0) },
-    fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
-    pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
-    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
-    full: { h: 'Full', t: 'Fires where every pellet hit', cell: w => w.full || 0 },
-    partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', cell: w => w.partial || 0 },
-    miss: { h: 'Miss', t: 'Fires where no pellet hit', cell: w => w.miss || 0 },
-    fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', cell: w => shotShare(w.full, w) },
-    partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', cell: w => shotShare(w.partial, w) },
-    missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', cell: w => w.direct || 0 },
-    splash: { h: 'Splash', t: 'Hits from splash only', cell: w => w.splash || 0 },
-    missed: { h: 'Missed', t: 'Fires that hit nothing', cell: w => w.missed || 0 },
-    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', cell: w => shotShare(w.direct, w) },
-    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', cell: w => shotShare(w.splash, w) },
-    missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', cell: w => shotShare(w.missed, w) },
-    blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', cell: w => w.blocked || 0 },
-    lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', cell: w => w.miss || 0 },
-    far: { h: 'Far', t: 'Miss — the enemy was on the beam\'s line but beyond its ~600u reach', cell: w => w.outOfRange || 0 },
-    unres: { h: 'Unresolved', t: 'Miss that could not be classified — no beam matched this fire (needs the beam stream / shooter position at fire time)', cell: w => w.unresolved || 0 },
-    blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', cell: w => shotShare(w.blocked, w) },
-    lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', cell: w => shotShare(w.miss, w) },
-    farPct: { h: 'Far %', t: 'Share of fires denied by beam range', cell: w => shotShare(w.outOfRange, w) },
+    hitPct: {
+        h: 'Hit %',
+        t: 'Share of fires that connected, over the same hit count as the Hits column beside it — measured, reconstructed (marked) or —',
+        cell: w => aimHitsCell(w, n => pctCell(w.shots ? n / w.shots * 100 : 0)),
+        sort: w => { const v = aimHitsValue(w); return (v && w.shots) ? v.n / w.shots : -1; },
+    },
+    // `measured: true` marks a column that exists only where the wire damage
+    // log linked fires to damage. The analyzer WITHHOLDS those fields on a
+    // demo without one (see the shapes above: a reconstructed weapon carries
+    // shots + recon and nothing else), so their `|| 0` fallbacks would print
+    // a fabricated zero — and beside a recovered Hit % of 22% a "0.0% miss"
+    // reads as a measurement that contradicts it. aimCol swaps them for "—".
+    fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', measured: true, cell: w => w.pellets || 0 },
+    pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', measured: true, cell: w => w.pelletHits || 0 },
+    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', measured: true, cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
+    full: { h: 'Full', t: 'Fires where every pellet hit', measured: true, cell: w => w.full || 0 },
+    partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', measured: true, cell: w => w.partial || 0 },
+    miss: { h: 'Miss', t: 'Fires where no pellet hit', measured: true, cell: w => w.miss || 0 },
+    fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
+    partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
+    missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
+    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', measured: true, cell: w => w.direct || 0 },
+    splash: { h: 'Splash', t: 'Hits from splash only', measured: true, cell: w => w.splash || 0 },
+    missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
+    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', measured: true, cell: w => shotShare(w.direct, w) },
+    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', measured: true, cell: w => shotShare(w.splash, w) },
+    missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', measured: true, cell: w => shotShare(w.missed, w) },
+    blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', measured: true, cell: w => w.blocked || 0 },
+    lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', measured: true, cell: w => w.miss || 0 },
+    far: { h: 'Far', t: 'Miss — the enemy was on the beam\'s line but beyond its ~600u reach', measured: true, cell: w => w.outOfRange || 0 },
+    unres: { h: 'Unresolved', t: 'Miss that could not be classified — no beam matched this fire (needs the beam stream / shooter position at fire time)', measured: true, cell: w => w.unresolved || 0 },
+    blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', measured: true, cell: w => shotShare(w.blocked, w) },
+    lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', measured: true, cell: w => shotShare(w.miss, w) },
+    farPct: { h: 'Far %', t: 'Share of fires denied by beam range', measured: true, cell: w => shotShare(w.outOfRange, w) },
 };
+
+// What a withheld measured-only column says when hovered. The hit COUNT may
+// still be recoverable (that is what the Hits column does); the breakdown of
+// how a fire hit or missed is not — nothing in the reconstruction classifies
+// a pellet spread or an LG whiff.
+const AIM_MEASURED_ONLY_NOTE = 'Not measured on this demo: it carries no wire damage log, ' +
+    'and the reconstruction recovers hit COUNTS only — never the pellet, direct/splash or miss-type breakdown.';
+
+// aimCol resolves one column descriptor against the demo's hit measuredness,
+// so the cell functions themselves stay demo-agnostic.
+function aimCol(c, hitsMeasured) {
+    if (hitsMeasured || !c.measured) return c;
+    return {
+        ...c,
+        cell: () => `<span class="aim-na" title="${escapeHtml(AIM_MEASURED_ONLY_NOTE)}">—</span>`,
+        sort: () => -1,
+    };
+}
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
@@ -11662,13 +11960,55 @@ function aimWeaponView(w) {
         : aimVictimFilter === 'team' ? w.team : w.self) || {};
     const hits = s.hits || 0, direct = s.direct || 0;
     return {
-        ...w, hits, direct,
+        // The recon tier is a single whole-match hit count with no victim
+        // splits (RESULT_SCHEMA, WeaponAimRecon), so it cannot ride a
+        // projection — dropping it here is what makes the Hits cell say
+        // "no victim split" instead of serving an all-victims number under
+        // an Enemy/Team/Self heading.
+        ...w, hits, direct, recon: null,
         pelletHits: s.pelletHits || 0,
         full: s.full || 0, partial: s.partial || 0,
         miss: w.weapon === 'lg' ? (w.miss || 0) : (s.miss || 0),
         splash: Math.max(0, hits - direct),
         missed: (w.shots || 0) - hits,
     };
+}
+
+// The Hits / Hit % pair serves three states, and the third is the v73/v74
+// recon tier. `hits` is the MEASURED counter, withheld (never zeroed) on a
+// demo with no wire damage log; `recon.hits` is the reconstruction's
+// recovered count over that same fire set — same definition, same question,
+// so it divides by the same `shots`. A block's ABSENCE means the weapon was
+// not recovered (ng/sng never are), while `hits: 0` inside a present block is
+// a real "linked nothing" and prints as 0.
+//
+// Returns {n, recon} or null for "no answer on this demo".
+function aimHitsValue(w) {
+    if (w.hitsMeasured !== false) return { n: w.hits || 0, recon: false };
+    if (w.recon) return { n: w.recon.hits, recon: true };
+    return null;
+}
+
+// Why a cell has no number, in the reader's terms. Both branches are
+// reachable on a reconstructed demo: the tier covers lg/sg/ssg/axe/rl/gl and
+// stops there, and it carries no victim split for the toggle above to slice.
+function aimHitsNote(w) {
+    if (!w.reconTier) {
+        return 'This demo carries no damage log to measure hits against, and none could be reconstructed from it.';
+    }
+    return aimVictimFilter === 'all'
+        ? 'Hits were not recovered for this weapon — the reconstruction covers LG, SG, SSG, axe, RL and GL only.'
+        : 'The reconstructed hit count is a whole-match figure with no victim split — set Victims to All to see it.';
+}
+
+// aimHitsCell renders one hit-derived cell. `fmt` turns the count into the
+// column's own text (a bare number, or a coloured percentage), so both
+// columns share one measured/reconstructed/absent decision.
+function aimHitsCell(w, fmt) {
+    const v = aimHitsValue(w);
+    if (!v) return `<span class="aim-na" title="${escapeHtml(aimHitsNote(w))}">—</span>`;
+    if (!v.recon) return fmt(v.n);
+    return `<span class="stat-recon" title="${escapeHtml(RECON_ACCURACY_NOTE)}">${fmt(v.n)}</span>`;
 }
 
 // aimDamageCell resolves the Dmg cell for one player + weapon under the
@@ -11728,9 +12068,12 @@ function renderAimWeaponTables(result) {
     container.innerHTML = '';
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return;
-    // hitsMeasured=false: the demo carried no wire damage stream — the
-    // hit-derived columns are withheld server-side and the cells show "—".
+    // hitsMeasured=false: the demo carried no wire damage stream, so the
+    // measured hit counters are withheld server-side. hitsSource then says
+    // whether the reconstruction could recover them anyway (schema v73/v74) —
+    // the per-weapon `recon` blocks the Hits / Hit % cells fall back to.
     const hitsMeasured = result.aim.hitsMeasured !== false;
+    const reconTier = result.aim.hitsSource === 'reconstructed';
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
@@ -11741,12 +12084,12 @@ function renderAimWeaponTables(result) {
 
     for (const wn of AIM_WEAPON_ORDER) {
         const colKeys = AIM_TABLE_COLS[wn] || [];
-        const cols = colKeys.map(k => AIM_COL[k]);
+        const cols = colKeys.map(k => aimCol(AIM_COL[k], hitsMeasured));
         const rows = players.map(pa => {
             const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, hitsMeasured, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
+                w: w ? { ...w, hitsMeasured, reconTier, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table

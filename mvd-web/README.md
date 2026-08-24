@@ -136,6 +136,25 @@ measured zero renders `0` and only an unmeasured split renders `-`.
 measured; where the self split is not (a KTX-block-without-stream demo)
 the cell shows a `≥`-prefixed lower bound whose tooltip names what is
 missing, never a silently partial total.
+**Hits / Hit % serve three states**, keyed off `aim.hitsMeasured` +
+`aim.hitsSource` (schema v73/v74). Measured (`hitsSource: "ktx"`) renders
+plainly. On a demo with no wire damage log the measured counters are
+withheld and the columns fall back to `weapons[].recon.hits` — the
+reconstruction's recovered count over the same fires, so it divides by the
+same `Shots` — rendered with the `.stat-recon` dotted underline and a
+tooltip naming what it is. Where neither answers, the cell is `—` and its
+tooltip says which of the two reasons applies: the tier covers
+lg/sg/ssg/axe/rl/gl and stops there (ng/sng are never recovered), and it
+carries **no victim split**, so the Victims filter drops back to `—`
+outside `All` rather than serving an all-victims number under an
+Enemy/Team/Self heading. `hits: 0` inside a present block is a real
+"linked nothing" and prints `0`.
+Every OTHER hit-derived column — the pellet block, full/partial/miss,
+direct/splash/missed, the LG miss types and all their % twins — is withheld
+by the analyzer on such a demo and now renders `—` too. It used to print a
+fabricated `0`, which beside a recovered 22% hit rate read as a measurement
+that contradicted it; the reconstruction recovers hit COUNTS only, never
+the breakdown of how a fire hit or missed.
 The **Key Moments** tab has seven tables in a two-column grid — powerup
 runs beside the longest frag streaks, **Top Damage Windows (10 s)**
 beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
@@ -293,18 +312,20 @@ Two consequences worth knowing:
 - **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
   friendly fire DEALT. It is measured whenever the damage family is present
   (on `src: "reconstructed"` demos — pre-instrumentation, rebuilt damage —
-  read every damage figure as a ~1% estimate rather than a measurement;
-  the Aim tab's Hits/Hit % cells render `—` there, because those cells are
-  the MEASURED counters and those stay withheld. Since schema v73 the
-  Result does carry a recovered hit count for such demos in a field of its
-  own — `aim.players[].weapons[].recon.hits`, lg/sg/ssg/axe plus rl/gl
-  since v74 — which
-  this frontend does not render yet; `—` here means "not rendered", not
-  "not recoverable"),
+  read every damage figure as a ~1% estimate rather than a measurement; the
+  panel says so, see "Reconstructed damage" below),
   so `0` there is a real reading rather than a gap, and it is deliberately
   *not* folded into the victim's `Taken`-side story: this is what the player
   put into teammates, a different question from `TK` (which counts only the
   friendly damage that finished someone off). Always 0 in a duel.
+- **Basic Stats ends the kill block with `Spree` / `QSpree`** —
+  `score.maxSpree` / `score.maxQuadSpree` (schema v74), the longest kill run
+  between deaths and the longest run held under quad. They ride the kill
+  family's measuredness with everything else in it, so they render `-`
+  exactly where `Kills` does, and a team row carries the **best any member
+  ran, never a sum**. Our gate does not count a suicide as a kill where KTX's
+  does (teamplay off), so a duel or FFA row can read one lower than the
+  server's own `spree.max`; the `<th title>` says so.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /
@@ -329,6 +350,102 @@ Two consequences worth knowing:
 - **The three "Per Team" tables hide when `playerStats.teams` is empty**
   (body class `no-team-rows`), which is FFA and duels — otherwise FFA
   rendered three headers over an empty tbody.
+
+### Reconstructed damage says so, above every table that rides it
+
+Roughly half the archive predates the server's `mvdhidden_dmgdone` log, and
+on those demos the damage section is **rebuilt** rather than measured
+(`damage.source: "reconstructed"`, schema v71). The WASM build reaches that
+path on every eligible demo — `registry.BuildShotStreams = true` in
+`cmd/wasm/main.go` is the precondition, and it is set unconditionally — so
+this is a normal state in the browser, not an edge case.
+
+Everything downstream inherits its evidence grade from that one field
+rather than carrying a copy: the Basic Stats damage columns, Weapon Stats'
+`Dmg` and `Acc`, and the Aim tab's `Dmg` and recovered `Hits`. So one
+renderer (`damageProvenanceHtml`) states it once above each of those three
+panels, in a `.panel-provenance` banner — always visible, unlike the
+`More info` disclosures, because a reconstructed damage figure read as a
+measured one is the mistake the banner exists to prevent.
+
+The second line of the banner is `damage.coverage` (schema v74): how much
+of the frag-log-visible match the reconstruction's evidence actually
+accounts for. **`ratio` is printed as a magnitude, never thresholded** —
+the pipeline has no cutoff and neither does this; the only comparison in
+the code is against `1`, which is the definition of a complete section
+rather than a number the UI picked. A complete section reads "the evidence
+accounts for all N of the match's scoreable kills"; an incomplete one takes
+the amber `.warn` variant and reads "Damage evidence covers 23% of this
+match's kills (22 of 96 scoreable kills) — the figures below are floors,
+not measurements". Absent coverage on a reconstructed section is its own
+sentence ("the frag log named no scoreable kill, so … was not assessed"),
+because silence there would read as "complete".
+
+Per-weapon accuracy carries the same grade at cell level: a
+`playerStats.accuracy` family with `src: "reconstructed"` renders its `Acc`
+cells inside `.stat-recon`. `derived` and `ktx` do not — both are measured
+off the wire, and marking half the corpus would make the mark meaningless.
+The `hitsConvention` tooltip (v74) rides every cell that has one: two
+accuracies are comparable exactly when weapon **and** convention match,
+which is why a KTX `rl` figure (direct impacts only) and a derived one
+(any damage path, ~4× higher) must never be read against each other.
+
+### The match wall clock
+
+The Summary **Date** cell and the topbar date prefer KTX's own
+`demoInfo.date` — the server's stamp, to the second, with its zone
+printed. Where the demoinfo block does not exist (the pre-`ktxstats` half
+of the archive, which used to render `-`) they fall back to
+`streams.global.matchStartUnixMs`, the graded wall-clock anchor added in
+schema v72.
+
+**It is rendered in UTC and says "UTC" in the text.** The anchors are Unix
+epoch milliseconds and the schema publishes no local-time field on purpose:
+the stamp a demo carries was written in whatever zone the server ran in,
+and on the old half it carries no zone at all (read as UTC, `assumedUtc`,
+accuracy ±14 h). Rendering it in the viewer's zone would invent a precision
+the anchor does not have and would move the date under a reader in
+Auckland.
+
+The grade is visible, not just hoverable. `matchStartConfidence: "exact"`
+renders plainly; every other grade gets a leading **`~`** plus a colour
+(`.date-unverified` muted, `.date-contradicted` amber — the grade where a
+hard check failed). The `~` is in the text rather than only in the colour
+because this is a date somebody may write down. The anchor is never dropped
+or coerced on a bad grade — the schema grades rather than withholds, and so
+does the UI; source, `±accuracy` and `matchStartNote` all ride the tooltip.
+
+### A recording with no match in it
+
+`result.noMatch` (schema v74) is present exactly when `streams` is absent —
+2.03% of the archive. Every stream-fed panel is empty on such a demo, and
+the tab used to render headers over nothing with an "Analysis complete!"
+status, indistinguishable from a bug.
+
+`displayNoMatch()` now renders the marker's own story at the top of the
+Summary tab: a reason-appropriate heading (the five `reason` values are a
+total partition, so the title map is exhaustive by contract), the marker's
+`detail` sentence verbatim — it is **display-only** by contract, unstable
+wording that is never parsed, and every fact in it is a structured field
+beside it — and those fields as an evidence grid: status at demo open
+(`not sent` where the opening dump carried no `status` key at all, which is
+a different reading from any value it could have had), whether the match
+clock was ever seen running, the game dir, the frag-log kill count (`0` is
+the reading that *defines* `noPlayRecorded`, so it always prints) and the
+first usable `dateMarkers` entry, since the whole date family rides here
+instead of `streams.global` on such a result.
+
+It is deliberately **not** styled as an error. `errors[]` means the
+pipeline failed; the marker means the demo holds no match. They coincide on
+exactly one reason, and there — `demoUnreadable` — the panel also prints
+the reader's own message. The load status line likewise drops to the
+neutral `status` class rather than the red `status error`.
+
+The body class `no-match` hides the four Summary panels fed by `streams`
+(Basic Stats, Weapon Stats, Item Pickups, Kills by Weapon); Match Info,
+Match Settings and Server Info stay, because they have something to say.
+The Teams box is hidden only when the frag log named no teams either — a
+mid-match recording often carries a real scoreline.
 
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,

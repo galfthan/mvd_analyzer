@@ -329,10 +329,11 @@ victim-stat-instant anchor and same-instant delta merging. Tables and
 method: `damagerecon/ACCURACY.md` §"Aim hit recovery"; raw eval output in
 `.reports/qw-aim-eval-2026-08-19/`.
 
-Deliberately not done: the web Aim tab still renders "—" for hits on
-these demos (truthful, since `hitsMeasured` is false) — surfacing the
-`recon` tier in the frontend is a separate, purely presentational
-change.
+~~Deliberately not done: the web Aim tab still renders "—" for hits on
+these demos~~ — SHIPPED as the frontend pass on this branch: the Aim tab's
+Hits / Hit % fall back to `recon.hits` where the measured counters are
+withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
+[`mvd-web/README.md`](mvd-web/README.md) §"Reconstructed damage says so".
 
 ## 7. Smaller / opportunistic
 

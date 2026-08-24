@@ -735,6 +735,87 @@ body.no-team-rows #tab-summary .per-player-heading {
     line-height: 1.45;
 }
 
+/* Evidence-grade banner under a panel heading: what the numbers below were
+ * measured from, when that is not the wire. One line, always visible (unlike
+ * .panel-info, which the reader has to open) — a reconstructed damage figure
+ * read as a measured one is the mistake this exists to prevent. `.warn` is
+ * the incomplete-evidence variant, not a severity: it fires where
+ * damage.coverage.ratio < 1, i.e. where the figures below are floors. */
+.panel-provenance {
+    margin: 0 0 0.75rem;
+    max-width: 78ch;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border-left: 3px solid #7a8ba8;
+    background: rgba(122, 139, 168, 0.1);
+    color: #a9b8cf;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.panel-provenance.warn {
+    border-left-color: #ffb347;
+    background: rgba(255, 165, 0, 0.1);
+    color: #e0c08a;
+}
+
+/* A figure the reconstruction recovered rather than the wire measured — the
+ * v73/v74 aim recon tier's hits, and any accuracy built on them. Legible
+ * (these are real numbers, unlike .stat-muted's half-measurements) but
+ * visibly marked, so a recon hit count can never be mistaken for the
+ * server's own. Hover carries the definition and the coverage caveat. */
+.stat-recon {
+    border-bottom: 1px dotted #7a8ba8;
+    cursor: help;
+}
+
+/* result.noMatch (schema v74): the recording holds no analyzable match.
+ * Deliberately NOT the red of .status.error — a parse failure and "this
+ * demo has no match in it" are different findings, and the marker exists
+ * precisely so a consumer can tell them apart. */
+.no-match-panel {
+    border-left: 3px solid #ffb347;
+}
+
+.no-match-panel h3 {
+    color: #ffb347;
+}
+
+.no-match-detail {
+    margin: 0 0 1rem;
+    max-width: 78ch;
+    color: #a9b8cf;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* The evidence cells reuse .summary-item, whose span is sized for a map name
+ * or a duration. These carry sentences ("1 min left", "not sent", a date
+ * marker), so they take a readable size instead. */
+.no-match-panel .summary-item span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.no-match-errors {
+    margin: 1rem 0 0;
+    max-width: 78ch;
+    color: #ff8a8a;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+/* The Summary tables below the marker are all fed from `streams`, which is
+ * absent exactly when `noMatch` is present — they would render as headers
+ * over empty bodies. The panels that DO have something to say on such a demo
+ * (Match Info, Match Settings, Server Info) stay. */
+body.no-match #players-panel,
+body.no-match #weapons-summary-panel,
+body.no-match #items-panel,
+body.no-match #weapons-panel {
+    display: none;
+}
+
 /* The one disclosure idiom for methodology prose under a panel heading.
  * Every panel that used to open with a paragraph of explanation now
  * carries it here instead, collapsed, so the numbers start at the top of
@@ -772,6 +853,21 @@ body.no-team-rows #tab-summary .per-player-heading {
 .stat-muted {
     color: #6b7d99;
     font-style: italic;
+}
+
+/* The match wall clock (streams.global, schema v72) when its anchor is not
+ * graded `exact`. `unverified` is muted; `contradicted` means a hard check
+ * failed and takes the warning colour. Both keep the "~" the JS puts in the
+ * text — a colour alone does not survive a screenshot or a colour-blind
+ * reader, and this is a date somebody may write down. */
+.date-unverified {
+    color: #8a9bb8;
+    cursor: help;
+}
+
+.date-contradicted {
+    color: #ffb347;
+    cursor: help;
 }
 
 /* --- Match Settings: modifier pills (Dmgfrags / Midair / etc.) --- */

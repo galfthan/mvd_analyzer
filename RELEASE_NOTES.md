@@ -7,6 +7,68 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### The web frontend adopts the v72–v74 signals (no schema change)
+
+Everything above had reached the Result, the REST API and the MCP tools
+without reaching a human looking at a demo. mvd-web now renders it. There
+is no schema change in this pass — it is `mvd-web/static/` only.
+
+- **The Aim tab stops saying `—` on half the archive.** Hits / Hit % fall
+  back to `aim.players[].weapons[].recon.hits` where the measured counters
+  are withheld, marked with a dotted underline and a tooltip naming what a
+  reconstructed count is. The tier's two limits are stated rather than
+  papered over: a weapon outside `lg/sg/ssg/axe/rl/gl` keeps `—`, and since
+  `recon` carries no victim split the cells drop back to `—` under the
+  Victims filter instead of serving an all-victims number under an
+  Enemy/Team/Self heading.
+- **The rest of that table stops printing fabricated zeros.** The pellet
+  block, full/partial/miss, direct/splash/missed, the LG miss types and
+  every % twin are withheld by the analyzer on a demo with no wire damage
+  log — they were rendering `0` through their `|| 0` fallbacks, which beside
+  a recovered 22% hit rate read as a measurement that contradicted it. They
+  render `—` now: the reconstruction recovers hit COUNTS, never the
+  breakdown of how a fire hit or missed.
+- **`damage.coverage` is the caption on every panel that shows
+  reconstructed damage** — Basic Stats, Weapon Stats, and the Aim tab's
+  accuracy panel. The ratio is printed as a magnitude, never thresholded
+  (the only comparison in the UI is against `1`, the definition of a
+  complete section): a complete one reads "the evidence accounts for all
+  172 of the match's scoreable kills", an incomplete one takes the amber
+  variant and reads "Damage evidence covers 23% of this match's kills (22
+  of 96) — the figures below are floors, not measurements".
+- **The match wall clock is shown.** The Summary Date cell and the topbar
+  fall back from KTX's `demoInfo.date` to `streams.global.matchStartUnixMs`
+  where no demoinfo block exists — the half of the archive that used to
+  render `-`. Rendered in **UTC**, and it says "UTC": the anchor is a UTC
+  epoch with no local-time field, and on the old half it carries no zone at
+  all (±14 h). `matchStartConfidence: "exact"` prints plainly; every other
+  grade gets a leading `~` plus a colour, in the text rather than only in
+  the tooltip, because this is a date somebody may write down.
+- **`score.maxSpree` / `maxQuadSpree` get columns** in both Basic Stats
+  tables, riding the kill family's measuredness (`-`, never `0`, where
+  `Kills` is `-`) and carrying the max-over-members rule on team rows.
+- **`accuracy.src: "reconstructed"` marks its Weapon Stats cells**;
+  `derived` and `ktx` do not, since both are measured off the wire. The v74
+  `hitsConvention` tooltip rides every cell that has one.
+- **A `noMatch` demo tells its story instead of showing empty tables.** The
+  marker's reason becomes a heading, its `detail` is printed verbatim
+  (display-only by contract — nothing is parsed back out of it) and its
+  structured evidence becomes a grid; the four stream-fed Summary panels
+  hide. It is styled as a finding, not as a failure — `errors[]` is printed
+  only for `demoUnreadable`, the one reason that means both — and the load
+  status line drops from the red error class to a neutral one.
+
+**One pre-existing crash fixed on the way.** `renderLocHeatmap` called
+`setHTML`, a local of `resetUIToCleanState` that was never in scope there,
+so its no-data branch threw a `ReferenceError` out of `displayResults` —
+taking the Aim tab, `applyUrlState` and `hideLoadingOverlay` with it and
+leaving the loading overlay stuck. Any demo with no loc-heatmap data hit
+it; a match-less recording hits it every time, which is how it surfaced.
+
+Detail: [`mvd-web/README.md`](mvd-web/README.md) ("Reconstructed damage
+says so", "The match wall clock", "A recording with no match in it", and
+the Aim Stats + Summary tab notes).
+
 ### `noMatch` — demos that hold no analyzable match now say so
 
 2.03% of the QuakeWorld archive (1 032 of the 50 951-demo readability

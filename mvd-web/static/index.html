@@ -164,6 +164,18 @@
             <!-- Summary Tab -->
             <div id="tab-summary" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
+
+                <!-- result.noMatch (schema v74): this recording holds no
+                     analyzable match. Filled by displayNoMatch(); the
+                     .no-match body class hides the stream-fed tables below,
+                     which have nothing in them on such a demo. -->
+                <div id="no-match-panel" class="panel no-match-panel" style="display: none;">
+                    <h3 id="no-match-title"></h3>
+                    <p id="no-match-detail" class="no-match-detail"></p>
+                    <div class="summary-grid" id="no-match-evidence"></div>
+                    <p id="no-match-errors" class="no-match-errors" style="display: none;"></p>
+                </div>
+
                 <div id="match-summary" class="panel">
                     <h3>Match Info</h3>
                     <div class="summary-grid" id="match-info-grid">
@@ -218,6 +230,7 @@
 
                 <div id="players-panel" class="panel">
                     <h3>Basic Stats</h3>
+                    <div id="players-provenance" class="panel-provenance" style="display: none;"></div>
                     <h4 class="team-aggregate-heading">Per Team</h4>
                     <table id="player-stats-team-table" class="stats-table team-aggregate-table">
                         <thead>
@@ -231,6 +244,8 @@
                                 <th title="Total deaths">Deaths</th>
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
+                                <th title="Longest kill streak between deaths, replayed from the frag log. A team row carries the best any member ran, never a sum.">Spree</th>
+                                <th title="Longest kill streak run while holding quad, reset by a death or a fresh quad pickup. A team row carries the best any member ran, never a sum.">QSpree</th>
                                 <th title="Damage given to enemies">Dmg</th>
                                 <th title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Meaningless in a duel, where it is always 0.">TDmg</th>
                                 <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
@@ -256,6 +271,8 @@
                                 <th title="Total deaths">Deaths</th>
                                 <th title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
+                                <th title="Longest kill streak between deaths, replayed from the frag log. Our gate does not count a suicide as a kill, so this can read one lower than the server's own spree.max on a duel or FFA demo.">Spree</th>
+                                <th title="Longest kill streak run while holding quad, reset by a death or a fresh quad pickup.">QSpree</th>
                                 <th title="Damage given to enemies">Dmg</th>
                                 <th title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Meaningless in a duel, where it is always 0.">TDmg</th>
                                 <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
@@ -270,6 +287,7 @@
 
                 <div id="weapons-summary-panel" class="panel">
                     <h3>Weapon Stats</h3>
+                    <div id="weapons-provenance" class="panel-provenance" style="display: none;"></div>
                     <h4 class="team-aggregate-heading">Per Team</h4>
                     <div class="items-table-wrap team-aggregate-table">
                     <table id="weapon-stats-team-table" class="stats-table weapon-stats-split team-aggregate-table">
@@ -1080,6 +1098,7 @@
 
                 <div class="panel" id="aim-accuracy-panel">
                     <h3>Accuracy &amp; effectiveness</h3>
+                    <div id="aim-provenance" class="panel-provenance" style="display: none;"></div>
                     <details class="panel-info">
                         <summary>More info</summary>
                         <div class="aim-desc">
