@@ -4235,20 +4235,34 @@ components:
           description: >
             The server's DIRECT rocket damage constant, measured from this
             demo's own hits (schema v74): 110 on every KTX since 1.36, which
-            replaced id1's `100 + g_random()*20` in 2008. RECONSTRUCTED
-            sections only, and only where the demo's rocket hits clustered
-            tightly enough to establish it — an older server spreads them
-            across 100..120 and a demo with few rockets cannot tell, so
-            absence means "this recording did not establish a constant",
-            never "the constant is not 110". It is published as an era
+            replaced id1's `100 + g_random()*20` in 2008. Present exactly
+            when `rocketDirectRegime` is `fixed` — read the regime, not this
+            field's absence, for why it is missing. It is published as an era
             signal with consequences: the direct/splash classifier behind
             `/aim`'s `weapons[].recon.directHits` leans on that constant for
             its sharper signal, and the derived rl touch count runs 1.2%
             aggregate error against the verbatim KTX block where it is
             present against 13.9% with the prior disabled. Nothing is gated
-            on it — the rows where it is absent are the low-rocket ones,
-            where the count is off by a hit or two at most.
+            on it.
           type: integer
+        rocketDirectRegime:
+          description: >
+            WHICH verdict the measurement above reached (schema v74) — a
+            three-value total partition of every RECONSTRUCTED damage
+            section, absent on `source: "ktx"` where the wire's own splash
+            flag makes the question moot. `fixed`: the demo's near-direct
+            rocket hits clustered on 110, `rocketDirectDamage` carries it and
+            the classifier's magnitude prior is in force (0.62% aggregate
+            error on the rl touch count). `spread`: there were enough
+            near-direct hits to test the hypothesis and they did NOT cluster
+            — what a pre-1.36 `100 + g_random()*20` server looks like, and
+            evidence against the constant rather than absence of evidence;
+            the weakest population (13.0% aggregate, 31.2% of rows exact).
+            `unestablished`: fewer than six such hits, so nothing was
+            established either way — the low-rocket case, and the strongest
+            population (61.8% of rows exact).
+          enum: [fixed, spread, unestablished]
+          type: string
         boundedSource:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —

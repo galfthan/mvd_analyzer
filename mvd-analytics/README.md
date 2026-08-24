@@ -409,6 +409,17 @@ reconstructed accuracy hits, `aim`'s recon tier) inherit that one field
 rather than restating it — see
 [`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §per-demo coverage.
 
+A reconstructed section also carries `rocketDirectRegime` (schema v74) —
+`fixed` | `spread` | `unestablished`, a total partition of what the
+demo's own rocket hits established about the server's DIRECT rocket
+damage constant, with `rocketDirectDamage` beside it on `fixed`. It is
+the era signal the rl touch count (`aim`'s `recon.directHits`) leans on:
+the classifier's magnitude prior only exists where the constant is fixed,
+and `spread` — a demo whose hits argue AGAINST the constant — is a
+materially weaker population than `unestablished`, which is merely a demo
+with too few rockets to tell. Nothing is gated on it.
+
+
 `backpackReconPost` is node `backpack-recon`, publishing
 `backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
 fills the same `backpacks` section from `DropBackpack`'s own rule, stamped

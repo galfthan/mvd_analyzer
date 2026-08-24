@@ -1178,7 +1178,9 @@ package result
 //     view: recon's direct/splash split is geometric (explosion endpoint
 //     within 48 units of the victim) and frame-accurate, the fidelity the
 //     verdict needs. Aim keeps the ktx-only gate. `damage.source` says
-//     which evidence a demo's list rests on.
+//     which evidence a demo's list rests on. (The 48-unit endpoint rule
+//     named here was replaced in v74 by the trajectory classifier — see
+//     that block below; airgibs consume whatever the split says.)
 //
 // v74 — the fire→flight association reaches the Result, and with it rl/gl
 // hit recovery on reconstructed demos.
@@ -1198,10 +1200,37 @@ package result
 //     what made the two conventions differ by ~7pp on rl in v73. Measured
 //     over 53 dm2/dm3 demos carrying the KTX log: mean accuracy error
 //     rl 0.6pp / gl 0.3pp vs the measured counter, with the join-on-wire
-//     control at 0.4pp / 0.1pp; lg/sg/ssg/axe unchanged. ng/sng stay
+//     control at 0.4pp / 0.1pp — rl 0.7pp / gl 0.4pp once the direct-impact
+//     entry below moved the damage model; lg/sg/ssg/axe unchanged. ng/sng stay
 //     withheld — nail linking is opt-in, so there is no measured baseline to
 //     validate a recovery against. See damagerecon/ACCURACY.md §"Aim hit
 //     recovery".
+//   - ADDED on `aim.players[].weapons[].recon`: `directHits` (rl/gl only)
+//     — the projectiles the reconstruction says TOUCHED a player, which is
+//     the only thing KTX's own `acc.rl.hits` / `acc.gl.hits` increments on
+//     (ktx/src/weapons.c:994, :1329), and therefore what
+//     `playerStats.accuracy.byWeapon[rl|gl].hits` publishes on a
+//     `reconstructed` row (`hitsConvention: "directImpact"`). NOT a subset
+//     of `hits` and not the same join: it counts damage ROWS, since one
+//     projectile touches at most one player. Scoped to a windowed query
+//     like every other figure in the block.
+//   - ADDED on `damage`: `rocketDirectDamage` (the server's direct rocket
+//     constant where this demo's own hits established it — 110 on every
+//     KTX since 1.36) and `rocketDirectRegime`, a three-value total
+//     partition of every reconstructed section saying WHICH verdict was
+//     reached: `fixed` | `spread` (enough near-direct hits to test, and
+//     they did not cluster — evidence against the constant) |
+//     `unestablished`. The classifier behind `directHits` leans on the
+//     constant, and the three populations score differently against a
+//     verbatim KTX block, so the verdict is published rather than implied
+//     by the constant's absence.
+//   - CHANGED on `damage.events[]`: `isSplash` for rl/gl now comes from
+//     the flight's trajectory against the victim's 32x32x56 hull plus the
+//     magnitude prior (and, for gl, the spent 2.5s fuse), replacing an
+//     explosion-endpoint-within-48-units rule that over-counted rl touches
+//     by 80%; an obituary-anchored rocket kill takes the same verdict
+//     instead of keeping its zero value. Rocket SPLASH is modelled on the
+//     engine's 120 base rather than on the direct constant.
 //   - ADDED top-level `noMatch`: the explicit marker on a result that
 //     carries no analyzable match, replacing the silent empty result that
 //     2.0% of the archive (1 032 of 50 951) produced. It names WHY —

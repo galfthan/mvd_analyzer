@@ -638,7 +638,11 @@ total error against KTX ground truth; `damage.source`
 and since v74 a reconstructed section also carries `damage.coverage` —
 the share of the frag log's kills whose damage it accounts for, which is
 what separates a quiet match from a recording that never broadcast the
-evidence (see [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)).
+evidence — and `damage.rocketDirectRegime`
+(`fixed`&nbsp;|&nbsp;`spread`&nbsp;|&nbsp;`unestablished`), what the
+demo's own rocket hits established about the server's direct-damage
+constant, which is the era signal the reconstructed RL touch count leans
+on (see [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)).
 
 `streams.global` carries a wall-clock anchor so a consumer can project any
 match-relative game time onto real-world time (for syncing voice tracks /
@@ -977,8 +981,12 @@ diff -r /tmp/before /tmp/after
    re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
    KTX's question (schema v74): the reconstruction classifies each
    explosion direct-vs-splash from the flight's trajectory against the
-   player hull plus the flat-110 direct-damage constant, and the
-   resulting counts agree with the block to 1.2% / 0.6% in aggregate.
+   player hull, the flat-110 direct-damage constant where the demo
+   established it (`damage.rocketDirectRegime` says whether it did, and
+   whether the demo's own hits argue against it), and — for grenades —
+   the spent 2.5 s fuse, which makes a full-fuse flight a certain
+   non-touch. The resulting counts land within 0.13 hits per player row
+   on rl and 0.08 on gl, where the already-shipped `lg` row sits at 0.95.
    Measured against the
    verbatim block on 188 instrumented demos by `cmd/qw-demoinfo-eval`;
    the full agreement table is in
@@ -1231,8 +1239,8 @@ diff -r /tmp/before /tmp/after
    fire's own server frame — and, since v74, `rl`/`gl`, which join
    through the fire's own tracked projectile (`shots[].flightEnd`) on
    the measured counter's definition rather than by counting impacts.
-   Measured against the wire-linked counter: 0.3–1.7 percentage points
-   of accuracy error for the hitscan set, 0.6 pp rl / 0.3 pp gl.
+   Measured against the wire-linked counter: 0.3–1.8 percentage points
+   of accuracy error for the hitscan set, 0.7 pp rl / 0.4 pp gl.
    Deliberately NOT `ng`/`sng`: nail linking is opt-in, so the measured
    counter a recovery would be validated against is zero everywhere.
    Everything below the hit COUNT stays withheld on those demos too: no

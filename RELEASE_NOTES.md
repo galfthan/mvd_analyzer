@@ -49,51 +49,98 @@ The 110 is era-dependent — KTX fixed it in commit `c7263e8f`
 era is detected from the demo's own hit distribution, not from a version
 string.
 
+A grenade adds a third fact: the **spent fuse**. `GrenadeExplode` runs on
+a 2.5 s think, so a grenade whose broadcast flight spans the whole fuse
+and ends in a matched `TE_EXPLOSION` died of the fuse and `GrenadeTouch`
+never ran — a certain non-touch. Only this direction of the fuse signal
+is usable: our flight bracket is entity VISIBILITY, so a grenade leaving
+the spectator's PVS ends its bracket early, and reading an early end as a
+touch (tried, measured, refused) reads every PVS exit as a hit.
+
 **Measured.** Per explosion against the wire splash flag (53 dm2/dm3
 demos, 18 039 rl instants): classification accuracy 73.5% → **97.9%**,
 precision 45.1% → **94.6%**, direct-count error +114% → **+1.4%**. Per
 player against the verbatim KTX block (188 archive demos):
-`acc.rl.hits` **1.23%** aggregate (was +80%), `acc.gl.hits` **0.61%**
-(was 1.22%) — both inside the band the already-shipped `lg` row occupies
-(0.91%), which is the bar this family ships at. Tables and method:
-[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+`acc.rl.hits` **1.23%** aggregate (was +80%) at −0.13 hits per row;
+`acc.gl.hits` **88.9%** of rows exact (was 1.22% aggregate and +2.24 pp
+of accuracy error before the classifier existed) at −0.08 per row, both
+well under the already-shipped `lg` row's −0.95, which is the bar this
+family ships at. The gl AGGREGATE reads 3.91% and is the honest number:
+the fuse rule removes 20 of 28 over-counting rows for 2 new
+under-counting ones, which improves every per-row measure and stops a
+false-positive channel from cancelling a false-negative one. Tables and
+method: [`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
 §"Can an old demo answer KTX's rl/gl question?".
 
-**The era signal is published too**, as `damage.rocketDirectDamage` —
-the constant the demo's own hits established, absent where they could
-not. It says which half of that measurement a row is in: rl runs 0.62%
-aggregate on the 567 rows that established the constant and 17.7% on the
-71 that did not. Nothing is gated on it, because those 71 are the
-LOW-ROCKET rows — more often exact than the rest, with the same p90 error
-of 2 — and withholding there would substitute the any-path count, four
-times KTX's. A genuinely pre-1.36 recording has no ground truth anywhere
-(every instrumented demo post-dates the constant by years); forcing the
-prior off as a proxy costs rl 0.8% → 13.9%, which is the bound to read
-for that era.
+**The era signal is published too**, and it is three-valued.
+`damage.rocketDirectDamage` carries the constant the demo's own hits
+established; `damage.rocketDirectRegime` says which of three verdicts
+was reached, because "no constant" was two different claims wearing one
+face — `fixed` (the hits clustered on 110), `spread` (there were enough
+of them to test and they did NOT cluster, which is what a pre-1.36 server
+looks like) and `unestablished` (too few to put the question). The three
+populations score differently, which is the load the field carries: rl
+runs 0.62% aggregate / 45.9% exact on the 567 `fixed` rows, 13.0% /
+31.2% exact on the 16 `spread` ones and 22.2% / 61.8% exact on the 55
+`unestablished` ones — the `spread` rows being by some way the weakest
+and the `unestablished` ones the strongest, their aggregate large only
+because their denominators are small. Nothing is gated on any of it:
+withholding would substitute the any-path count, four times KTX's. A
+genuinely pre-1.36 recording has no ground truth anywhere (every
+instrumented demo post-dates the constant by years); forcing the prior
+off as a proxy costs rl 0.8% → 13.9%, and that figure is a FLOOR rather
+than a bound — the proxy population has the signal removed but still
+deals a flat 110, while a real vanilla server rolls `100 + random·20`
+and can put a direct hit BELOW the splash envelope, which the proxy never
+exercises.
 
 A `derived` row (wire damage log, no KTX block) keeps `anyDamage` on
 rl/gl: its `hits` is also the aim section's measured counter, a validated
 any-path number that nothing asked to redefine. The web's `≠` marker
 follows the payload, so a reconstructed demo's RL accuracy loses the mark
-and a derived one keeps it.
+and a derived one keeps it — and the Aim tab's `Hits` tooltip, which is
+the OTHER number on those two weapons, now names its own convention and
+the size of the gap to the Summary's (~4x on RL) instead of leaving the
+reconciliation in a source comment.
 
 **Two damage-model corrections fell out of the same work**, both
 engine-sourced and both moving the numbers:
 
-- **Rocket splash is based on 120, not 110.** `T_MissileTouch` passes 120
-  to `T_RadiusDamage` (`weapons.c:1006`) — the 110 is the touch value and
-  belongs to a victim the radius pass explicitly skips. Modelling splash
-  at 110 understated every rocket splash by 10; measured on the ground
-  truth, `value + 0.5·dist` over 2 530 wire splash rows has median 122.4.
-  Correcting it improved bounded damage (given 0.81% → 0.76% mean over 321
-  player rows) and the derived summary against KTX (`dmg.given` 0.49% →
-  0.47%, `dmg.taken` 0.46% → 0.44%).
+- **Rocket splash is based on 120, not on the direct constant.**
+  `T_MissileTouch` passes 120 to `T_RadiusDamage` (`weapons.c:1006`) — the
+  110 is the touch value and belongs to a victim the radius pass
+  explicitly skips. This package modelled rocket splash on the DIRECT
+  constant's range instead, so the error depended on the demo: where the
+  fixed constant had been established the band collapsed to `110..110`
+  and every rocket splash was understated by exactly 10, and where it had
+  not the band was the vanilla `100..120` — twice as wide as the engine's
+  single value and mis-centred, its top end reaching 120 only because
+  that is the direct roll's ceiling. Grenades were already right (a flat
+  120). Measured on the ground truth, `value + 0.5·dist` over 2 530 wire
+  splash rows has median 122.4. Correcting it improved bounded damage
+  (given 0.81% → 0.76% mean over 321 player rows) and the derived summary
+  against KTX (`dmg.given` 0.49% → 0.47%, `dmg.taken` 0.46% → 0.44%). The
+  pentagram synthesiser — which invents the value of a hit a pent holder
+  absorbed invisibly — follows the same fact in both directions now: it
+  prices a direct-classified rocket at the touch constant instead of off
+  the radius curve, while a grenade stays on the curve whether or not it
+  touched.
 - **Obituary-anchored rocket kills stop being published as direct hits.**
   A kill named by the frag log never went through the candidate scorer, so
   its `isSplash` kept its zero value and every rocket kill in the
   reconstructed log read as a touch. They now take the same geometric
   verdict as every other rocket row, and a kill with no tracked explosion
-  to judge stays splash — not seeing a touch is not seeing one.
+  to judge stays splash — not seeing a touch is not seeing one. The splash
+  default is stamped before any early return, so the trackless-victim case
+  (a victim whose stream carries no positions at all — 4 of 4 227 players
+  over 2 433 archive demos) cannot leak the zero value either.
+
+`aim.players[].weapons[].recon.directHits` is scoped to a windowed
+`/aim?startTime&endTime` query like every other figure in the block. It
+counts damage ROWS rather than joining fires to flights, so — unlike the
+any-path pool behind `recon.hits`, which stays match-wide because the join
+is what scopes it — nothing else would have scoped it, and a windowed
+request could read the whole match's touches against the window's fires.
 
 ### The web frontend adopts the v72–v74 signals (no schema change)
 
@@ -537,7 +584,9 @@ analyzer, and was thrown away after use. It is now published:
 
 Measured with `cmd/qw-aim-eval` on the same 53 dm2/dm3 demos that carry
 the KTX log (rows ≥ 20 fires): **rl mean accuracy error 7.4 pp → 0.6 pp**
-(bias +0.4, 91% of rows within 2 pp), **gl 1.3 pp → 0.3 pp** (bias 0.0) —
+(bias +0.4, 91% of rows within 2 pp), **gl 1.3 pp → 0.3 pp** (bias 0.0);
+re-measured at rl 0.7 pp / gl 0.4 pp after the direct-impact entry above
+moved the damage model —
 inside the ≤1.7 pp band the hitscan tier ships at. `lg`/`sg`/`ssg`/`axe`
 are unchanged to the last row. The join-on-wire control lands at +0.4 pp
 (rl) / +0.1 pp (gl) rather than the hitscan set's exact zero: the

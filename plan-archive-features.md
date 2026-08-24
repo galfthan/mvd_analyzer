@@ -292,10 +292,10 @@ which separates the join method's error from the reconstruction's:
 |---|---|---|---|
 | lg | 0.3pp | exact | yes |
 | sg | 1.3pp | exact | yes |
-| ssg | 1.7pp | exact | yes |
-| axe | 0.5pp | 0.1pp | yes |
-| rl | 7.4pp → **0.6pp** (v74) | +7.3pp → +0.4pp | yes, since v74 |
-| gl | 1.3pp → **0.3pp** (v74) | +1.0pp → +0.1pp | yes, since v74 |
+| ssg | 1.8pp | exact | yes |
+| axe | 0.6pp | 0.1pp | yes |
+| rl | 7.4pp → **0.7pp** (v74) | +7.3pp → +0.4pp | yes, since v74 |
+| gl | 1.3pp → **0.4pp** (v74) | +1.0pp → +0.1pp | yes, since v74 |
 
 rl/gl were withheld in v73 because the gap was not reconstruction error:
 the control reproduced it exactly. Their fire→impact link needs the
@@ -310,8 +310,8 @@ association is published as `shots[].flightEnd` — the impact time of the
 flight a fire launched, absent when no flight was tracked — and the
 projectile join now anchors on it, inside damagerecon's own
 `tolProjBeforeMs`/`tolProjAfterMs` window, one damage instant claimed per
-flight. Same 53-demo corpus: rl 7.4pp → **0.6pp** mean error (bias +0.4,
-91% of rows within 2pp), gl 1.3pp → **0.3pp**, hitscan rows unchanged to
+flight. Same 53-demo corpus: rl 7.4pp → **0.7pp** mean error (bias +0.4,
+90% of rows within 2pp), gl 1.3pp → **0.4pp**, hitscan rows unchanged to
 the last row; the +0.4pp control residual is one-sided (recon damage
 from never-tracked rockets adopted by a nearby flight inside the log's
 own late-stat-instant tolerance). Numbers and method:
