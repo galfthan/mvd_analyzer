@@ -252,14 +252,32 @@ type WeaponAimRecon struct {
 	// HitsAnyDamage in the PlayerStatsAcc.HitsConvention vocabulary.
 	Hits int `json:"hits"`
 
-	// DirectHits (schema v74) is the subset of Hits whose projectile TOUCHED
-	// a player — HitsDirectImpact, the convention KTX's own `acc.rl.hits` /
+	// DirectHits (schema v74) is the count of this player's rl (or gl)
+	// projectiles the reconstruction says TOUCHED somebody —
+	// HitsDirectImpact, the convention KTX's own `acc.rl.hits` /
 	// `acc.gl.hits` counts, because KTX increments that counter in the touch
 	// handler and nowhere else (ktx/src/weapons.c:990-996, :1327-1333).
 	// Publishing it is what lets a pre-instrumentation demo answer the same
 	// question a KTX demoinfo block answers, so the two eras can be compared
 	// at all; `playerStats.accuracy.byWeapon[rl|gl].hits` on a reconstructed
 	// row IS this number.
+	//
+	// NOT a subset of Hits, and NOT the same join. Hits asks whether a FIRE
+	// connected and answers it through the fire's tracked flight, so a
+	// point-blank rocket whose entity the server never broadcast is a miss
+	// there — the measured counter's own definition. A touch has no such
+	// notion: one projectile touches at most one player, so a touch simply IS
+	// a non-splash damage row, and DirectHits counts those rows
+	// (aimcore.ReconDirectHits). DirectHits > Hits is therefore possible and
+	// meaningful — it is exactly the untracked-flight population — and
+	// routing this count through the flight join instead measured 9.5%
+	// aggregate error against the verbatim block where the row count runs
+	// 0.65% (damagerecon/ACCURACY.md).
+	//
+	// What a consumer CAN rely on: DirectHits <= Shots (the publisher clamps
+	// it, since a fire cannot touch twice), both numbers scope to the same
+	// query window, and both are absent together with the block. Nothing
+	// orders it against Hits.
 	//
 	// PRESENT ONLY FOR rl AND gl. For every other weapon the two conventions
 	// coincide (KTX counts any connecting lg/axe/ng/sng fire) and a separate
@@ -268,10 +286,10 @@ type WeaponAimRecon struct {
 	//
 	// The evidence is damagerecon's per-explosion direct/splash verdict
 	// (damagerecon/direct.go: the flight's trajectory against the victim's
-	// hull, plus the flat-110 magnitude prior on a modern server), joined
-	// through the same flight bracket as Hits. Validated against the verbatim
-	// KTX block in damagerecon/ACCURACY.md §"Can an old demo answer KTX's
-	// rl/gl question?".
+	// hull, the flat-110 magnitude prior on a server whose constant the demo
+	// established, and the spent grenade fuse as a certain non-touch).
+	// Validated against the verbatim KTX block in damagerecon/ACCURACY.md
+	// §"Can an old demo answer KTX's rl/gl question?".
 	DirectHits *int `json:"directHits,omitempty"`
 }
 

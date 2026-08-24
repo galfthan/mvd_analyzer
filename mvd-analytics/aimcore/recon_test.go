@@ -367,7 +367,7 @@ func TestReconDirectHitsCountsRowsNotFires(t *testing.T) {
 			{Time: 4000, Player: "c", Weapon: "rl"},
 		}},
 	}
-	got := ReconDirectHits(res)
+	got := ReconDirectHits(res, Query{})
 	if got["a"]["rl"] != 1 {
 		t.Errorf("a rl = %d, want 1 — the splash row and the self row are not touches", got["a"]["rl"])
 	}
@@ -386,7 +386,74 @@ func TestReconDirectHitsCountsRowsNotFires(t *testing.T) {
 	}
 	// A wire-measured section has its own counters; this must stay out of it.
 	res.Damage.Source = result.DamageSourceKTX
-	if ReconDirectHits(res) != nil {
+	if ReconDirectHits(res, Query{}) != nil {
 		t.Error("direct hits must be nil on a wire-measured section")
 	}
 }
+
+// A windowed Compute publishes a window-scoped block, so the touch count
+// inside it must be the window's touches. It is not a join — the rows ARE
+// the count — so nothing else scopes it, and a match-wide count would report
+// the whole match's touches against the window's fires (a 60-second window
+// over a 20-minute demo reading 100% direct accuracy).
+//
+// The straddling fire pins the documented edge: the fires are scoped by fire
+// time and the rows by damage instant, so a rocket launched just inside `to`
+// lands its touch just outside and is counted as a fire without its row —
+// bounded by one flight per edge, where a match-wide count is unbounded.
+func TestReconDirectHitsScopesToTheQueryWindow(t *testing.T) {
+	long := func(x float32) *result.PositionTrack {
+		ts := []int32{0, 60000, 120000}
+		return &result.PositionTrack{
+			T: ts, X: []float32{x, x, x}, Y: []float32{0, 0, 0}, Z: []float32{0, 0, 0},
+			VP: []int16{0, 0, 0}, VYa: []int16{0, 0, 0},
+		}
+	}
+	res := &result.Result{
+		Shots: &result.ShotsResult{Shots: []result.Shot{
+			{Time: 1000, Player: "A", Weapon: "rl", FlightEnd: i32p(1200)},
+			{Time: 59900, Player: "A", Weapon: "rl", FlightEnd: i32p(60100)},
+			{Time: 90000, Player: "A", Weapon: "rl", FlightEnd: i32p(90200)},
+		}},
+		Damage: &result.DamageResult{
+			Source: result.DamageSourceReconstructed,
+			Events: []result.DamageEntry{
+				{Time: 1200, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 110},
+				{Time: 60100, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 110},
+				{Time: 90200, Attacker: "A", Victim: "B", Weapon: "rl", Damage: 110},
+			},
+		},
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "A", Position: long(0), Alive: []result.Interval{{Start: 0, End: 120000}}},
+			{Name: "B", Position: long(200), Alive: []result.Interval{{Start: 0, End: 120000}}},
+		}},
+	}
+	directOf := func(q Query) (shots, direct int) {
+		t.Helper()
+		wa := weaponOf(t, Compute(res, q), "A", "rl")
+		if wa.Recon == nil || wa.Recon.DirectHits == nil {
+			t.Fatalf("no recon direct count on %+v", wa.Recon)
+		}
+		return wa.Shots, *wa.Recon.DirectHits
+	}
+	if s, d := directOf(Query{}); s != 3 || d != 3 {
+		t.Errorf("match-wide = %d shots / %d direct, want 3/3", s, d)
+	}
+	from, to := int32(0), int32(60000)
+	if s, d := directOf(Query{FromMs: &from, ToMs: &to}); s != 2 || d != 1 {
+		t.Errorf("first minute = %d shots / %d direct, want 2/1 — the 90 s touch is out of window", s, d)
+	}
+	// The second window owns one fire and TWO rows — the straddling flight's
+	// touch landed here while its fire was counted in the first window — so
+	// the raw count exceeds the fires and the caller's clamp is what keeps
+	// the published accuracy at most 100%.
+	from2, to2 := int32(60000), int32(120000)
+	if n := ReconDirectHits(res, Query{FromMs: &from2, ToMs: &to2})["A"]["rl"]; n != 2 {
+		t.Errorf("second window raw count = %d, want 2", n)
+	}
+	if s, d := directOf(Query{FromMs: &from2, ToMs: &to2}); s != 1 || d != 1 {
+		t.Errorf("second window = %d shots / %d direct, want 1/1 after the shots clamp", s, d)
+	}
+}
+
+func i32p(v int32) *int32 { return &v }

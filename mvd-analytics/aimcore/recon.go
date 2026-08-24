@@ -252,10 +252,33 @@ func ReconHitsForEval(res *result.Result) map[string]map[string]int {
 // touched nobody" is a supported zero rather than an absence. Self rows are
 // excluded: a missile never touches its owner (weapons.c:951, :1315), so a
 // direct self row would be a contradiction, not a hit.
-func ReconDirectHits(res *result.Result) map[string]map[string]int {
+//
+// WINDOWED, unlike the damage pool feeding the fire→damage join. That pool is
+// match-wide because it is EVIDENCE a windowed fire may be judged on, and the
+// join is what scopes it; this count has no join to scope it — the rows ARE
+// the number — so a match-wide count published inside a window-scoped block
+// would report the whole match's touches against the window's fires
+// (`/aim?from=0&to=60000` could read 100% direct accuracy). The rows are
+// therefore filtered on their own damage instant, exactly as the shots are
+// filtered on their fire time. The two edges do not line up to the
+// millisecond — a rocket fired at `to−0.2 s` lands its touch after `to` and
+// is a fire without its row, one fired just before `from` can land inside —
+// but that mismatch is bounded by a single flight at each edge and by the
+// caller's clamp to the weapon's in-window fire count, where a match-wide
+// count is unbounded.
+func ReconDirectHits(res *result.Result, q Query) map[string]map[string]int {
 	if res == nil || res.Shots == nil || res.Damage == nil ||
 		res.Damage.Source != result.DamageSourceReconstructed {
 		return nil
+	}
+	inWindow := func(t int32) bool {
+		if q.FromMs != nil && t < *q.FromMs {
+			return false
+		}
+		if q.ToMs != nil && t > *q.ToMs {
+			return false
+		}
+		return true
 	}
 	out := make(map[string]map[string]int)
 	seed := func(player, weapon string) {
@@ -267,7 +290,7 @@ func ReconDirectHits(res *result.Result) map[string]map[string]int {
 		}
 	}
 	for _, s := range res.Shots.Shots {
-		if reconFlightWeapons[s.Weapon] {
+		if reconFlightWeapons[s.Weapon] && inWindow(s.Time) {
 			seed(s.Player, s.Weapon)
 		}
 	}
@@ -275,7 +298,7 @@ func ReconDirectHits(res *result.Result) map[string]map[string]int {
 		if d.Attacker == "" || d.IsEnv || d.IsSelf || d.IsSplash {
 			continue
 		}
-		if !reconFlightWeapons[d.Weapon] {
+		if !reconFlightWeapons[d.Weapon] || !inWindow(d.Time) {
 			continue
 		}
 		seed(d.Attacker, d.Weapon)
@@ -309,13 +332,13 @@ func ReconDirectHits(res *result.Result) map[string]map[string]int {
 // 20/55 ms (±30 ms window) the 20 ms impact would claim the FUTURE 50 ms fire
 // and the 55 ms impact would then find nothing, counting 1 of 2 (pinned by
 // TestReconTierOverlappingWindowsPairUp).
-// The second return value is the KTX-CONVENTION count for the flight family
-// (rl/gl only, empty otherwise): the subset of connecting fires whose claimed
-// impact carries a non-splash row, i.e. whose projectile touched a player.
-// KTX's own `hits` counter increments in the touch handler and nowhere else
-// (ktx/src/weapons.c:994 T_MissileTouch, :1329 GrenadeTouch), so it is that
-// count, not the any-path one, that a KTX demoinfo block reports. See
-// cmd/qw-demoinfo-eval for what the two are worth against a verbatim block.
+//
+// It returns the ANY-PATH count alone. The KTX-convention touch count for
+// rl/gl was tried as a second return here — the subset of connecting fires
+// whose claimed impact carried a non-splash row — and measured 9.5% aggregate
+// error against the verbatim block, because a flight join throws away every
+// touch whose projectile the server never broadcast. It lives in
+// ReconDirectHits instead, as a row count with no join at all.
 func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool) map[string]int {
 	if len(shots) == 0 {
 		return nil
@@ -437,9 +460,6 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 // instant its window covers — the same exchange-argument-optimal matching the
 // same-frame join uses, and for the same reason: both sequences are ordered
 // and the window is a fixed offset from the flight's end.
-// The second return value is the KTX-convention subset: a claimed impact whose
-// rows include a non-splash, non-self one is a projectile that TOUCHED a
-// player, which is the only thing KTX's own hits counter increments on.
 func reconFlightHits(ends []int32, damage []*dmgRec) int {
 	if len(ends) == 0 || len(damage) == 0 {
 		return 0
@@ -475,7 +495,7 @@ func reconFlightHits(ends []int32, damage []*dmgRec) int {
 		// their victims' reconstructed rows more than one frame apart — 0.2% of
 		// multi-victim explosions, 0.03% of all 17581. Only those can strand a
 		// row for a later flight to adopt, capping the resulting over-count at
-		// ~0.01 pp of rl accuracy, two orders below the tier's measured 0.6 pp.
+		// ~0.01 pp of rl accuracy, two orders below the tier's measured 0.7 pp.
 		// Widening the span would instead merge genuinely distinct explosions
 		// (a second rocket landing a frame later is a second hit), so the span
 		// stays the one the granularity argument justifies.

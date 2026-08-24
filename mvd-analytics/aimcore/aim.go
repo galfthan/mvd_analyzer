@@ -206,10 +206,12 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		hitsSource = result.AimHitsSourceReconstructed
 		reconTier = true
 		reconByPlayer = reconDamageByAttacker(res)
-		// Match-wide like the damage pool, and for the same reason: the
-		// touch count is a property of the whole match's log, not of the
-		// queried window's fires.
-		reconDirectByPlayer = ReconDirectHits(res)
+		// WINDOWED, unlike the pool above. The pool is match-wide because a
+		// window scopes whose FIRES are counted, not what evidence a join may
+		// judge them on; this is not a join — the rows are the count itself —
+		// so leaving it match-wide would publish the whole match's touches
+		// inside a window-scoped block. See ReconDirectHits.
+		reconDirectByPlayer = ReconDirectHits(res, q)
 	}
 
 	// The RL/GL direct/splash split needs projectile linking to have filled
