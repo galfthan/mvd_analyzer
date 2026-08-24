@@ -294,7 +294,7 @@ which separates the join method's error from the reconstruction's:
 | sg | 1.3pp | exact | yes |
 | ssg | 1.8pp | exact | yes |
 | axe | 0.6pp | 0.1pp | yes |
-| rl | 7.4pp → **0.7pp** (v74) | +7.3pp → +0.4pp | yes, since v74 |
+| rl | 7.4pp → **0.5pp** (v74) | +7.3pp → +0.3pp | yes, since v74 |
 | gl | 1.3pp → **0.4pp** (v74) | +1.0pp → +0.1pp | yes, since v74 |
 
 rl/gl were withheld in v73 because the gap was not reconstruction error:
@@ -310,8 +310,8 @@ association is published as `shots[].flightEnd` — the impact time of the
 flight a fire launched, absent when no flight was tracked — and the
 projectile join now anchors on it, inside damagerecon's own
 `tolProjBeforeMs`/`tolProjAfterMs` window, one damage instant claimed per
-flight. Same 53-demo corpus: rl 7.4pp → **0.7pp** mean error (bias +0.4,
-90% of rows within 2pp), gl 1.3pp → **0.4pp**, hitscan rows unchanged to
+flight. Same 53-demo corpus: rl 7.4pp → **0.5pp** mean error (bias +0.3,
+93% of rows within 2pp), gl 1.3pp → **0.4pp**, hitscan rows unchanged to
 the last row; the +0.4pp control residual is one-sided (recon damage
 from never-tracked rockets adopted by a nearby flight inside the log's
 own late-stat-instant tolerance). Numbers and method:
@@ -582,16 +582,16 @@ replaced id1's `100 + g_random()*20`) and the era is detected from the
 demo, not from a version string.
 
 Measured: per explosion against the wire flag, classification accuracy
-73.5% → **97.9%** and direct-count error +114% → **+1.3%** over 18 026
+73.5% → **97.9%** and direct-count error +114% → **+1.4%** over 18 034
 rl instants; per player against the verbatim block, `acc.rl.hits`
-**1.34%** aggregate (46.9% of 638 rows exact) and `acc.gl.hits` **3.55%**
+**1.25%** aggregate (46.5% of 632 rows exact) and `acc.gl.hits` **3.55%**
 (89.6% of 424, one-sided by design after the grenade-fuse rule) — both at
 or under a hit-and-a-bit of per-row error, against the shipped `lg` row's
 −0.91; raw eval output in `.reports/direct-impact-2026-08-24/` and
 `.reports/quad-splash-2026-08-24/`. The measured era rides along as
-`damage.rocketDirectRegime`, which splits that rl figure into 0.73% on
-the 567 rows whose demo established the constant and 13.0% / 22.2% on the
-16 `spread` and 55 `unestablished` ones; nothing is gated on it (the
+`damage.rocketDirectRegime`, which splits that rl figure into 0.65% on
+the 567 rows whose demo established the constant and 13.0% / 22.5% on the
+16 `spread` and 49 `unestablished` ones; nothing is gated on it (the
 unestablished rows are *more* often exact, and the alternative there is
 the 4x any-path count). So a reconstructed row now publishes
 `hitsConvention: "directImpact"` on rl/gl, riding the new

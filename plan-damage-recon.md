@@ -271,7 +271,9 @@ Measured on the full 60-demo corpus: raw given median/mean 1.24%/2.04% →
 → 1.14%, raw givenSelf mean 8.16% → 5.81%; the bounded family is
 untouched by this half (isolation run with admission held at 380
 reproduces the old bounded numbers exactly). Aim's recon tier: rl 0.7pp →
-0.5pp, ssg 1.8pp → 1.6pp.
+0.5pp, ssg 1.8pp → 1.6pp. (These are lead A's own figures; the review
+batch that followed moved several of them again — `damagerecon/ACCURACY.md`
+is the current account, and `ssg` is back at 1.8pp there.)
 
 ### Lead B — splash reach is 160 units, not `rSplash` 380
 
