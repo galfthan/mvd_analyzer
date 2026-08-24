@@ -19,7 +19,8 @@ rewritten below:
   were NOT needed — bounded taken hit 0.05% median without them. What WAS
   needed instead (found against ground truth): masked death+respawn and
   corpse-cycle spawn-telefrag recovery, corpse-hit raw accounting,
-  engine-true self-splash halving + quad-before-falloff, pent-window
+  engine-true radius damage (self-halving inside the falloff, quad
+  after it — the ordering was wrong until §8 lead A), pent-window
   synthesis, nullified-hit raw recovery, LG discharge modeling, and
   model-based overkill top-up on kills.
 - **§4 burst-level metrics** are not in the Go eval yet; burst parity
@@ -213,8 +214,12 @@ command lines that reproduce them.
 ## 8. Open leads with evidence (2026-08-24, from the direct-impact review)
 
 Two engine facts found while reviewing the direct/splash classifier.
-Both are measured, neither is implemented, and both are recorded here
-rather than half-done so the next reader starts from the evidence.
+**Both SHIPPED 2026-08-24 in one calibration pass** — see the disposition
+under each and the tables in `damagerecon/ACCURACY.md` §"The quad
+multiplies AFTER the falloff, and splash stops at 160 units". The
+evidence they were recorded with is kept verbatim below so the fix can be
+read against what motivated it. A third lead the pass opened is at the
+bottom.
 
 ### Lead A — the quad multiplier is applied AFTER the radius falloff
 
@@ -246,17 +251,27 @@ almost exactly, and not the code's `[400, 480)`. (The 20 rows under 160
 are quad-interval boundary noise: `120 − 0.5·d` on an unquadded hit
 lands in exactly that band.)
 
-**Disposition: not fixed in the direct-impact review batch.** The wrong
-form costs no published MAGNITUDE — every value the section publishes is
-the observed health/armor delta, and the model only scores CANDIDATES
-and floors the kill top-ups — which is why the eval never caught it. But
-it means a quad splash candidate is scored against a band it can never
-fall in (at 100 units the model expects 455–485 and the engine deals
-280), and the kill top-up's floor over-raises quad splash kills, which
-is the family with the worst residual (`raw given`). Fixing it needs the
-`slack`/`topUpBase` pair re-tuned against the eval in the same pass, and
-goldens will move; do it as its own change with a before/after of both
-evals.
+**Disposition: SHIPPED 2026-08-24.** `modelBounds`, both kill top-ups,
+`pentSyntheticEvents` and the LG discharge model now put every
+composing multiplier on the engine's side of the falloff
+(`splashModel`), and the KNOWN-WRONG comment is gone.
+
+The re-tune the lead asked for inverted its own precedent: `topUpBase`
+110 / `topUpSlack` 60 existed only to absorb this error, and with the
+order corrected the raw error falls MONOTONICALLY as the pair approaches
+the engine's own numbers — swept on the 30-demo dm3 half and confirmed on
+the held-out dm2 half, raw given mean per-player error 2.87% → 1.16%
+(dm3) and 3.44% → 1.38% (dm2) going from (110, 60) to (120, 0). Both
+constants are deleted; the top-up is the engine formula at the measured
+distance. The band slacks (24 snapped / 60 not) swept flat over 12–36 and
+keep their derived values.
+
+Measured on the full 60-demo corpus: raw given median/mean 1.24%/2.04% →
+**0.74%/1.24%**, raw taken 1.74%/2.29% → **0.62%/1.11%**, raw ewep 1.58%
+→ 1.14%, raw givenSelf mean 8.16% → 5.81%; the bounded family is
+untouched by this half (isolation run with admission held at 380
+reproduces the old bounded numbers exactly). Aim's recon tier: rl 0.7pp →
+0.5pp, ssg 1.8pp → 1.6pp.
 
 ### Lead B — splash reach is 160 units, not `rSplash` 380
 
@@ -268,15 +283,61 @@ cap does not scale with quad, since the quad is applied downstream in
 candidates out to 380, so every candidate between 160 and 380 is one the
 engine could not have produced.
 
-**Disposition: not changed, and not obviously free.** `rSplash` is a
-CANDIDATE-ADMISSION radius, not a damage model, and it is measured to
-sit well above the observed distribution already (`p95 = 199` per the
-constant's own comment) — the population between 160 and 380 is mostly
-explosions our endpoint places further from the victim than the engine
-did, since our distance runs from the pulled-back `TE_EXPLOSION` point
-to the interpolated track ORIGIN while the engine measures to the bbox
-centre at the true detonation point (the same ~2.4-unit bias the splash
-base measurement found). Tightening to 160 + the interpolation slack is
-a real candidate, but it is a recall/precision trade that has to be
-measured, and it interacts with Lead A: the model bounds that would
-reject those candidates on VALUE are the ones Lead A has wrong.
+**Disposition: SHIPPED 2026-08-24, with the trade measured in both
+directions.** Admission is now `splashAdmit(epExact)` = the engine reach
+plus the same slack the damage-model band uses for that endpoint kind:
+**184** units from an explosion-snapped detonation point, **220** from a
+tracked flight's last broadcast position (which can sit a server frame —
+34 units at 1000 ups — short of the real one). The LG water discharge
+had the identical defect and now carries `dischargeReach` = `35·cells +
+40` + the same slack.
+
+The slack was derived by measurement, not chosen: for a lone wire splash
+row the value IS the engine distance (`unbound_dmg_dealt = ceil(q·(120 −
+0.5·d))`), and over 14 140 wire-flagged enemy rl splash rows our distance
+runs median **+4.8** off it — exactly the bbox-centre (+4) and
+pull-back (+8) pair the lead predicted — with p95 18.1 and p99 27.4
+(golden cache 5.0 / 22.2 / 35.2). 184 keeps 99.76% of those rows against
+380's 99.78%.
+
+The trade came out as the lead expected, small and two-sided. Cost: 3
+rows in 14 140 lose their only candidate (`enemy:rl → env:unknown` 11 →
+13 instants), which reads as bounded given mean 0.76% → 0.80%,
+`givenSelf` 3.90% → 4.38%, and `acc.rl.hits` 1.25% → 1.34% on the
+188-demo protocol. Gain: `enemy:sg → self` 800 → 504 damage, `self →
+enemy:rl` 1 288 → 1 137, bounded `givenTeam` median 1.86% → **1.39%**,
+attacker-correct `ng` 96.4% → **97.2%** / `sng` 97.5% → **98.0%** / `ssg`
+98.1% → **98.3%**, and on the 188-demo protocol `dmg.given` 0.47% →
+**0.45%**, `dmg.taken` 0.44% → **0.42%**, `acc.gl.hits` 3.91% →
+**3.55%**, `acc.lg.hits` 0.91% → **0.87%**. Taken deliberately: the
+candidates it removes are ones the engine could not have produced.
+
+On the un-instrumented archive, where the obituary oracle is the only
+measurement available (285 demos of a 300-demo sample, obituaries
+withheld), the same trade prices a little higher: attacker-correct
+−0.0 to −0.2 pp per era and the unattributed bounded-damage share 1.29%
+→ 1.43% at E0, 0.64% → 0.70% at E5 — with the losses on rl/gl and the
+gains on sg/sng, and the refused damage published as `unknown` rather
+than misattributed. The un-snapped-endpoint radius (220) turns out to be
+inert: holding it at the old 380 reproduces the oracle and the 188-demo
+protocol byte for byte, because ~99% of demos carry TE_EXPLOSION and
+essentially every deciding candidate has an exact detonation point.
+
+### Lead C — the quad is an OCTA in deathmatch 4, and dmm4 is not skipped
+
+Opened by the multiplier audit above. `T_Damage` multiplies by
+`(deathmatch != 4 ? 4 : tot_mode_enabled() ? FrogbotQuadMultiplier() : 8)`
+(`ktx/src/combat.c:541`), so on a `deathmatch 4` server a quad hit is
+×8 — and dmm4 is not one of `SkipModeReason`'s modes, so such a demo is
+reconstructed with every quad hit modelled at half its true value.
+`quadFactor` says so in a comment and does nothing about it.
+
+Not implemented because the population is unmeasured: neither ground-truth
+corpus contains a dmm4 recording, so there is nothing to validate a fix
+against, and the archive's `deathmatch` serverinfo key has not been
+censused. The order of work is that census first (the arena-family maps
+povdmm4/dmm4* are the obvious place to look), then a decision between
+modelling the ×8 and adding dmm4 to the skip gate — the same choice the
+other unobservable multipliers already made, since the CTF strength rune
+and the KTX handicap are also applied inside `T_Damage` and neither is on
+the wire at all.

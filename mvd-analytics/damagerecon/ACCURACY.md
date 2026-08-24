@@ -18,32 +18,31 @@ over the golden-corpus cache (`mvd-analytics/testdata/cache/`, 13 demos:
 run). A fast regression subset is pinned in `eval_test.go` (runs in
 `make test`, skips without the cache).
 
-## Headline numbers (2026-08-15, after temp-entity evidence)
+## Headline numbers (2026-08-24, after the engine-order corrections)
 
 Per-player match totals, relative error vs the KTX log. Golden cache
 (13 demos, 75 player rows with GT ≥ 200):
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 0.58% | 0.81% | 1.98% | 75% | 91% |
+| bounded given | 0.56% | 0.80% | 2.02% | 71% | 89% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 1.15% | 1.57% | 3.91% | 41% | 71% |
-| raw taken | 0.90% | 1.51% | 4.07% | 52% | 73% |
-| bounded ewep | 1.04% | 1.50% | 3.05% | 49% | 68% |
-| bounded givenTeam | 2.4% | 5.7% | — | small denominators (200–700) |
-| bounded givenSelf | 3.7% | 5.1% | — | small denominators |
+| raw given | 0.58% | 1.09% | 2.36% | 65% | 84% |
+| raw taken | 0.49% | 0.87% | 2.10% | 75% | 89% |
+| bounded ewep | 1.08% | 1.48% | 3.13% | 47% | 75% |
+| bounded givenTeam | 2.3% | 5.4% | — | small denominators (200–700) |
+| bounded givenSelf | 2.1% | 4.4% | — | small denominators |
 
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
-eval outputs in `.reports/qw-recon-eval-dm2dm3-2026-08-15/`, an
-untracked per-machine report directory; fetched with
-`cmd/fetch-eval-corpus`) scores comparably: bounded given median
-**0.58%** (mean 0.76%, p90 1.68%, ≤2% 94%), bounded taken 0.04%, raw
-given 1.24%, raw taken 1.74%.
+eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
+per-machine report directory; fetched with `cmd/fetch-eval-corpus`)
+scores comparably: bounded given median **0.57%** (mean 0.80%, p90
+1.76%, ≤2% 93%), bounded taken 0.04%, raw given 0.74%, raw taken 0.62%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.5% on unambiguous enemy
-instants (rl 99.7%, lg 99.5%, sg 97.9%, ssg 98.1%, gl 99.7%, axe 98%).
+instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.3%, gl 99.7%, axe 98%).
 The same run also scores the direct/splash verdict per rl explosion
 against the wire's own flag — see §"Can an old demo answer KTX's rl/gl
 question?".
@@ -371,15 +370,15 @@ in percentage points:
 |---|---|---|---|---|---|---|---|---|---|
 | lg | 169 | 18 500 | 33.1% | 32.9% | 0.0pp | 0.3pp | −0.2pp | 96% | **exact** |
 | sg | 307 | 81 203 | 51.8% | 50.4% | 1.1pp | 1.3pp | −1.3pp | 79% | **exact** |
-| ssg | 86 | 4 339 | 71.9% | 70.1% | 0.0pp | 1.8pp | −1.8pp | 67% | **exact** |
+| ssg | 86 | 4 339 | 71.9% | 70.2% | 0.0pp | 1.6pp | −1.6pp | 69% | **exact** |
 | axe | 18¹ | 1 417 | 8.0% | 7.8% | 0.0pp | 0.6pp | −0.6pp | 83% | 0.1pp |
-| rl | 303 | 35 135 | 47.9% | 48.4% | 0.0pp | 0.7pp | +0.4pp | 90% | +0.4pp |
-| gl | 109 | 4 948 | 15.0% | 15.1% | 0.0pp | 0.4pp | +0.0pp | 92% | +0.1pp |
+| rl | 303 | 35 135 | 47.9% | 48.3% | 0.0pp | 0.5pp | +0.2pp | 94% | +0.4pp |
+| gl | 109 | 4 948 | 15.0% | 15.0% | 0.0pp | 0.4pp | −0.0pp | 93% | +0.1pp |
 
 ¹ axe at the ≥ 20-swing threshold like every other row; the wider ≥
 10-swing view (38 rows) reads the same to a tenth of a point. The golden-corpus cache (13 demos) reproduces the
-shipped rows within 0.7pp (lg 0.1pp, sg 1.5pp, ssg 1.0pp, axe 0.0pp,
-rl 0.6pp, gl 0.2pp).
+shipped rows within 0.4pp (lg 0.1pp, sg 1.4pp, ssg 1.0pp, axe 0.0pp,
+rl 0.5pp, gl 0.1pp).
 
 The ng/sng rows are scored by the harness itself — no source edit needed
 — through `aimcore.ReconHitsForEval`, which runs the join for every
@@ -390,7 +389,7 @@ the measurement that DECIDES whether it ships.
 fire's own server frame (the axe at its fixed +200 ms traceline delay).
 On those the control is exact to the last row — the join reproduces the
 measured counters from the wire log with zero error — so the whole
-residual is the reconstruction's, and it is ≤1.8pp mean with a small
+residual is the reconstruction's, and it is ≤1.6pp mean with a small
 negative bias (a hit whose delta the reconstruction attributed elsewhere
 is a lost hit; there is no mechanism that invents one).
 
@@ -413,11 +412,12 @@ attacker+weapon, within damagerecon's own projectile tolerance
 despawn-to-stat-instant lag), one instant claimed per flight and each
 claimed instant consumed. A fire with no tracked flight links to
 nothing, exactly as the wire join treats it. The result: rl mean error
-7.4pp → **0.7pp** (bias +0.4, 90% of rows within 2pp), gl 1.3pp →
-**0.4pp**, both inside the ≤1.8pp band the hitscan tier ships at.
+7.4pp → **0.5pp** (bias +0.2, 94% of rows within 2pp), gl 1.3pp →
+**0.4pp**, both inside the ≤1.6pp band the hitscan tier ships at.
 (v73 measured rl at 0.6pp and gl at 0.3pp; the v74 direct-impact work
-moved the damage model — see §"The rocket splash base is 120" — and
-these are the numbers after it.)
+moved the damage model — see §"The rocket splash base is 120" — and the
+engine-order corrections below moved it again, from rl 0.7pp / bias
++0.4pp to these.)
 
 The **control residual** is +0.4pp on rl (+0.1 gl) rather than the
 hitscan set's exact 0.0, and it is one-sided by construction: the
@@ -431,20 +431,20 @@ genuinely lands late.
 
 **Map scope of these figures.** The ground-truth corpus is 30 dm2 + 30
 dm3 demos and nothing else, so the rl/gl numbers are measured on two
-open maps. Both known routes into the +0.4pp adoption bias should run
-HIGHER elsewhere, i.e. treat +0.4pp as a floor rather than a bound:
+open maps. Both known routes into the +0.2pp adoption bias should run
+HIGHER elsewhere, i.e. treat +0.2pp as a floor rather than a bound:
 tight-quarters maps (dm4, aerowalk) produce more point-blank rockets,
 whose entity the server never broadcasts — the untracked flights whose
 damage rows are exactly the adoption fodder; and a SURVIVED lava tick
 (10–30, overlapping moderate rocket splash) is not obituary-anchored the
 way a lethal one is, so where the attribution prefers a rocket to the
-env candidate the row can be adopted by a missed flight nearby. The 9%
+env candidate the row can be adopted by a missed flight nearby. The 6%
 of rl rows outside 2pp is plausibly this population, and it is one-sided
 (+): both mechanisms invent hits, neither destroys one.
 
 Bounded, not confirmed: the 13-demo golden cache spans dm4, dm6, e1m2,
 aerowalk, obsidian, schloss, skull and bravado besides dm2/dm3, and
-reproduces rl at bias +0.4pp / mean 0.6pp and gl at −0.0pp / 0.2pp —
+reproduces rl at bias +0.2pp / mean 0.5pp and gl at −0.1pp / 0.1pp —
 indistinguishable from the dm2/dm3 figures. At 73 rl rows that is too
 small to bound the effect, but it does say it is not large on those
 maps.
@@ -495,8 +495,8 @@ Over **188 archive demos, 665 player rows**:
 | `score.kills` | 665 | 95.5% | 2.26% |
 | `score.maxQuadSpree` | 665 | **99.8%** | 0.31% |
 | `score.maxSpree` | 665 | 92.9% | 3.12% |
-| `damage.given` (reconstructed) | 665 | 6.2% | **0.47%** |
-| `damage.takenEnemy` (reconstructed) | 663 | 9.4% | **0.44%** |
+| `damage.given` (reconstructed) | 665 | 5.9% | **0.45%** |
+| `damage.takenEnemy` (reconstructed) | 663 | 9.2% | **0.42%** |
 | `pickups.quad/pent/ring.took` | 273/80/78 | **100.0%** | 0.00% |
 | `hold.powerups.quad.ms` (to the second) | 273 | 96.0% | 0.07% |
 | `hold.powerups.pent.ms` | 80 | 82.5% | 0.49% |
@@ -504,9 +504,9 @@ Over **188 archive demos, 665 player rows**:
 | `accuracy.lg.attacks` | 436 | 98.4% | 0.00% |
 | `accuracy.rl.attacks` | 638 | 99.8% | 0.00% |
 | `accuracy.gl/ng/sng.attacks` | 424/139/336 | 100.0% | 0.00% |
-| `accuracy.lg.hits` (recon tier) | 436 | 65.8% | **0.91%** |
-| `accuracy.rl.hits` (recon tier, directImpact — v74) | 638 | 46.9% | **1.23%** |
-| `accuracy.gl.hits` (recon tier, directImpact — v74) | 424 | 84.7% | **0.61%** |
+| `accuracy.lg.hits` (recon tier) | 436 | 63.8% | **0.87%** |
+| `accuracy.rl.hits` (recon tier, directImpact — v74) | 638 | 46.9% | **1.34%** |
+| `accuracy.gl.hits` (recon tier, directImpact — v74) | 424 | 89.6% | **3.55%** |
 | `accuracy.axe.hits` | 86 | 97.7% | 12.50% |
 
 The powerup-seconds rows are all **one-directional**: every mismatch on
@@ -677,7 +677,7 @@ the grenade touched anybody.
 | | paired instants | classification accuracy | precision | recall | direct-count error |
 |---|---|---|---|---|---|
 | endpoint within 48 u | 18 032 | 73.5% | 45.1% | 96.7% | +114% |
-| trajectory + magnitude | 18 039 | **97.9%** | **94.6%** | **95.9%** | **+1.4%** |
+| trajectory + magnitude | 18 026 | **97.9%** | **94.6%** | **95.8%** | **+1.3%** |
 
 **Per-player accuracy**, against the verbatim KTX block on the 188
 instrumented archive demos (`cmd/qw-demoinfo-eval`, withhold-and-compare).
@@ -688,15 +688,15 @@ carry, kept in the harness so the gap stays measured.
 
 | column | rows | exact | aggregate | bias / row | p90 error |
 |---|---|---|---|---|---|
-| `acc.rl.hits` (directImpact, shipped) | 638 | **46.9%** | **1.23%** | −0.13 | 2 |
-| — `rocketDirectRegime: "fixed"` | 567 | 45.9% | **0.62%** | −0.07 | 2 |
+| `acc.rl.hits` (directImpact, shipped) | 638 | **46.9%** | **1.34%** | −0.14 | 2 |
+| — `rocketDirectRegime: "fixed"` | 567 | 45.9% | **0.73%** | −0.08 | 2 |
 | — `rocketDirectRegime: "spread"` | 16 | 31.2% | 13.0% | −0.94 | 3 |
 | — `rocketDirectRegime: "unestablished"` | 55 | 61.8% | 22.2% | −0.47 | 1 |
 | `acc.rl.direct/wire` (control) | 638 | 100.0% | 0.00% | 0.00 | 0 |
-| `acc.rl.anyDamage/recon` (not published) | 638 | 1.7% | 365% | +37.2 | 69 |
-| `acc.gl.hits` (directImpact, shipped) | 424 | **88.9%** | 3.91% | −0.08 | 1 |
-| `acc.gl.anyDamage/recon` (not published) | 424 | 43.2% | 55% | +1.06 | 4 |
-| `acc.lg.hits` (the shipped benchmark) | 436 | 65.8% | 0.91% | −0.95 | 3 |
+| `acc.rl.anyDamage/recon` (not published) | 638 | 1.9% | 361% | +36.8 | 69 |
+| `acc.gl.hits` (directImpact, shipped) | 424 | **89.6%** | 3.55% | −0.07 | 1 |
+| `acc.gl.anyDamage/recon` (not published) | 424 | 43.2% | 54% | +1.04 | 3 |
+| `acc.lg.hits` (the shipped benchmark) | 436 | 63.8% | 0.87% | −0.91 | 3 |
 
 The `gl` row's two figures point in opposite directions and both are
 real; the fuse section below is where that is unpacked. The three
@@ -710,7 +710,7 @@ averaged a population that behaves twice as badly into one that behaves
 better than the pooled row.
 
 Both weapons stay at or under a hit-and-a-bit of per-row error — `rl`
-at −0.13, `gl` at −0.08, against the `lg` benchmark's −0.95 — which is
+at −0.14, `gl` at −0.07, against the `lg` benchmark's −0.91 — which is
 the bar this family ships at, so both projectile weapons publish
 `hitsConvention: "directImpact"` on a reconstructed row and the
 `byWeapon` map holds one convention per weapon, exactly as a KTX row
@@ -798,6 +798,12 @@ the sweep lands on exactly that knee — false positives are all gone by
 | 2 300 | 88.0% | 8 | 43 | 0.123 | 4.40% |
 | 2 000 | 86.8% | 8 | 48 | 0.134 | 5.01% |
 
+(The sweep is as measured when the rule shipped; the whole column has
+since moved with the engine-order corrections below, the shipped row from
+88.9% / 3.91% to **89.6% / 3.55%**. The knee is a property of the fuse
+and the demo-frame grid, so it was not re-swept — only the row the
+pipeline stands on was re-measured.)
+
 **The aggregate got worse and the classifier got better**, and both
 statements are literal. The rule removes 20 of the 28 over-counting
 player rows and creates 2 new under-counting ones; mean absolute error
@@ -867,12 +873,14 @@ bbox centre. Correcting the model improved the bounded family on the
 givenSelf 4.19% → 3.90%) and the derived summary against the KTX block
 (`dmg.given` 0.49% → 0.47%, `dmg.taken` 0.46% → 0.44%).
 
-The KILL raw top-ups deliberately did NOT follow it (`topUpBase`,
-`attribution.go`). A top-up only ever RAISES a value, so its floor must
-under-estimate; feeding it the true base multiplied the 10-point gap by
-the quad on exactly the quad-rocket kills it exists for and cost raw
-accuracy measurably (raw given 2.01% → 2.65% mean per player). The floor
-stays at the pair the eval corpus calibrated it at, and says so.
+The KILL raw top-ups deliberately did NOT follow it at the time
+(`topUpBase`, `attribution.go`): a top-up only ever RAISES a value, so
+its floor must under-estimate, and feeding it the true base cost raw
+accuracy measurably (raw given 2.01% → 2.65% mean per player). **That
+finding was an artefact of the quad-ordering bug and is refuted below** —
+with the multiplier moved to the engine's side of the falloff the same
+measurement inverts, the two constants are gone, and the top-up is the
+engine's own formula.
 
 The **pent synthesiser** did follow it, and then needed the other half of
 the same fact. `pentSyntheticEvents` invents the raw value of a hit a
@@ -887,6 +895,155 @@ no touch value at all (`GrenadeTouch` deals nothing itself), so a touched
 grenade victim stays on the falloff curve. Worth `raw ewep` 1.59% →
 1.58% median on the 53-demo corpus — the population is small, but every
 row in it was priced by a formula the engine does not use.
+
+### The quad multiplies AFTER the falloff, and splash stops at 160 units (2026-08-24)
+
+Two engine facts, recorded with their evidence in
+`plan-damage-recon.md` §8 when the direct-impact work found them and
+shipped here together, because the second is only safe once the first is
+right.
+
+**A. `4·(120 − 0.5·d)`, not `4·120 − 0.5·d`.** `T_RadiusDamage` hands a
+flat base to `T_RadiusDamageApply`, which subtracts the falloff
+(`points = damage − 0.5·dist`, `ktx/src/combat.c:1189`) and only then
+calls `T_Damage`, where the ×4 is applied (`:537-543`). Every multiplier
+that composes with a radius hit sits on that same downstream side —
+quad, the dmm4 octa, the CTF strength rune, the handicap — while the two
+that do not (self-halving, shambler-halving) are inside
+`T_RadiusDamageApply` itself. The package had the quad on the wrong
+side, which puts a quad splash in `[400, 480)` where the engine's own
+range is `(0, 480]`. The wire settles it: of 898 quad rl splash rows on
+the dm2/dm3 ground truth, 96% read between 160 and 400 — values the old
+form cannot produce anywhere inside the engine's reach.
+
+**B. The reach is `findradius(damage + 40)` = 160 units**
+(`combat.c:1252`), measured origin-to-bbox-centre exactly as the falloff
+is (`mvdsv pr_cmds.c:1233`), and the quad does not widen it because the
+multiplier is applied downstream. Candidate admission ran to 380. It now
+runs to the reach plus the same slack the damage-model band uses for that
+endpoint — 184 for an explosion-snapped detonation point, 220 for a
+tracked flight's last broadcast position, which can sit a server frame
+(34 units at 1000 ups) short of the real one. The LG water discharge is
+the third radius source and had the same defect (`35·cells + 40` is its
+reach, while `35·cells − 0.5·d > 0` admits twice that); its gate cuts 9
+of 275 candidates on the GT corpus and moves no scored row, so it ships
+as the engine bound and not as an accuracy claim.
+
+**How the slack was derived, and it was measured rather than picked.**
+For a lone wire splash row the value IS the engine distance:
+`unbound_dmg_dealt = ceil(q·(120 − 0.5·d))`, so `d = 2·(120 − v/q)`.
+Comparing that with the distance this package measures, over 14 140
+wire-flagged enemy rl splash rows: median error **4.8** — which is the
+two systematic terms, the victim bbox centre (+4) and the 8-unit
+`TE_EXPLOSION` pull-back applied after the radius pass — p95 18.1, p99
+27.4 (golden cache: 5.0 / 22.2 / 35.2). The 184 admission keeps
+**99.76%** of those rows where 380 kept 99.78%.
+
+**The re-tune, and what it deleted.** The kill top-ups' `topUpBase = 110`
+/ `topUpSlack = 60` were calibrated against the broken order. Swept on
+the 30-demo dm3 half and confirmed on the held-out dm2 half, raw given
+mean per-player error falls **monotonically** as the pair approaches the
+engine's own numbers — dm3 2.87% → 1.16%, dm2 3.44% → 1.38% going from
+(110, 60) to (120, 0) — so both constants are gone and the top-up is
+`splashModel`, the engine's formula at the measured distance. The band
+slacks (24 snapped / 60 not) were swept over 12–36 and measured flat, so
+they keep their derived values.
+
+Before / after on the 60-demo dm2/dm3 ground truth, per-player relative
+error (median / mean):
+
+| family | before | after |
+|---|---|---|
+| bounded given | 0.58% / 0.76% | 0.57% / 0.80% |
+| bounded taken | 0.04% / 0.14% | 0.04% / 0.14% |
+| bounded ewep | 0.87% / 1.49% | 0.90% / 1.54% |
+| bounded givenTeam | 1.86% / 5.24% | **1.39%** / 5.13% |
+| bounded givenSelf | 1.43% / 3.90% | 1.66% / 4.38% |
+| **raw given** | 1.24% / 2.04% | **0.74% / 1.24%** |
+| **raw taken** | 1.74% / 2.29% | **0.62% / 1.11%** |
+| raw ewep | 1.58% / 2.90% | **1.14% / 2.35%** |
+| raw givenTeam | 9.67% / 16.35% | **7.39% / 14.56%** |
+| raw givenSelf | 2.28% / 8.16% | 2.28% / **5.81%** |
+
+and per attacker weapon, attacker-correct on unambiguous enemy instants:
+`ng` 96.4% → **97.2%**, `sng` 97.5% → **98.0%**, `ssg` 98.1% → **98.3%**,
+`rl` 99.7% → 99.6%, everything else unchanged; the pooled figure stays
+98.5%.
+
+**The two families move in opposite directions, and the reason is A vs
+B.** Re-running with admission held at 380 isolates them: with only the
+quad fix the bounded family is IDENTICAL to before (given 0.58% / 0.76%,
+ewep 0.87% / 1.49%) while raw already carries the whole gain. So every
+bounded-family regression above belongs to the admission cap, and it is
+one effect: 3 rl splash rows per 14 140 whose measured geometry lands
+past the engine's reach lose their only candidate and fall to
+`env:unknown` (misattribution flow `enemy:rl → env:unknown`, 821 damage
+over 11 instants → 1 161 over 13). What the same cap buys is on the other
+side of the same table — `enemy:sg → self` 800 → 504, `self → enemy:rl`
+1 288 → 1 137, bounded `givenTeam` median 1.86% → 1.39%, and the nail and
+ssg attribution above, all of which are candidates the engine could not
+have produced losing to ones it could. The trade is a recall loss of 0.02
+pp against a precision gain, taken deliberately.
+
+Per explosion, the direct/splash verdict is unmoved and marginally
+better: 18 026 paired rl instants (was 18 039), 97.9% classification
+accuracy, precision 94.6%, recall 95.8% (was 95.9%), direct-count error
++1.4% → **+1.3%**.
+
+On the 188-demo derived-summary protocol (`cmd/qw-demoinfo-eval`),
+four columns improve and one regresses:
+
+| column | before | after | which lead |
+|---|---|---|---|
+| `dmg.given` | 0.47% | **0.45%** | B |
+| `dmg.taken` | 0.44% | **0.42%** | B |
+| `acc.gl.hits` | 3.91% (88.9% exact) | **3.55%** (89.6%) | B |
+| `acc.lg.hits` | 0.91% | **0.87%** | B |
+| `acc.rl.hits` | 1.23% | 1.34% | A +0.02, B +0.09 |
+
+The `rl` regression is the same three-rows-in-fourteen-thousand effect
+seen from the other end: the row-exact share (46.9%) and the p90 error (2
+hits) are unchanged and the bias moves from −0.13 to −0.14 hits per row,
+i.e. a handful of directs over 188 demos join the under-count that the
+grenade-fuse rule already established as the honest direction. On the
+dm2/dm3 corpus the same cap moves the rl direct-count error the other way
+(+1.4% → +1.3%), which is what a handful of rows looks like on two
+different denominators.
+
+The aim recon tier (`cmd/qw-aim-eval`) improves or holds everywhere:
+rl mean 0.7pp → **0.5pp** (bias +0.4 → +0.2, ≤2pp 90% → 94%), ssg 1.8pp
+→ **1.6pp**, gl 0.4pp, lg 0.3pp, sg 1.3pp, axe 0.6pp unchanged.
+
+**Where the cap costs most: the un-instrumented archive.** The obituary
+oracle (`cmd/qw-recon-oracle`, 285 scored demos of a 300-demo archive
+sample, obituaries withheld) is the only measurement that reaches the
+eras with no KTX log, and it prices the same trade a little higher there:
+
+| era | attacker-correct | unattributed bounded damage |
+|---|---|---|
+| E0 qwsv/KTPro | 97.8% → 97.7% | 1.29% → 1.43% |
+| E2 mvdsv 0.25–0.29 | 98.4% → 98.2% | 0.75% → 0.87% |
+| E3 mvdsv 0.30–0.33 | 98.1% → 98.0% | 0.73% → 0.78% |
+| E4 mvdsv 0.34–0.36 | 97.1% → 97.0% | 0.59% → 0.61% |
+| E5 mvdsv 1.x | 96.8% → 96.8% | 0.64% → 0.70% |
+
+Per weapon it is the same shape as on the GT corpus, with the losses on
+the radius weapons and the gains on the hitscan and nail ones: E0 rl
+98.2% → 97.9% and gl 99.0% → 98.8%, against sg 95.7% → 95.8% and sng
+94.6% → **95.4%** (E5: rl 96.9% → 96.7%, sg 95.4% → **95.8%**, sng 94.2%
+→ **95.3%**). The damage the cap refuses is not misattributed, it is
+published as `unknown` — the section says it does not know rather than
+naming an attacker the engine could not have reached — which is the
+direction this pipeline prefers to be wrong in.
+
+**And that cost is entirely the SNAPPED half.** The admission radius for
+an un-snapped flight endpoint (220) was measured against leaving it at
+the old 380: byte-identical oracle output, byte-identical 188-demo
+protocol. TE_EXPLOSION coverage is ~99% of demos, so essentially every
+projectile candidate that decides anything carries an exact detonation
+point, and there the cap is a statement about the ENGINE rather than
+about our measurement. The un-snapped radius is derived from the same
+slack for consistency rather than because anything measured it.
 
 ## Why the errors are what they are
 
@@ -912,13 +1069,11 @@ port adds, each verified against ground truth in the eval:
   corpse-cycle spawn-telefrags, with attacker inference from teleport
   arrivals / occupied-pad proximity;
 - corpse (gib) hits kept in the raw family only, as KTX does;
-- engine-exact self-splash halving (the quad ORDERING beside it is
-  wrong and known to be: the engine applies the multiplier after the
-  falloff, `4·(120 − 0.5·d)`, measured on 898 wire quad rl splash rows
-  — plan-damage-recon.md §8 lead A, which also says why no published
-  magnitude moves because of it)
-  (ktx/src/combat.c T_RadiusDamage) — the sharp self-vs-enemy
-  discriminator in close rocket fights;
+- engine-exact radius damage: the falloff first, the self-halving on its
+  result, the quad multiplier after both — `q·0.5·(120 − 0.5·d)`
+  (ktx/src/combat.c T_RadiusDamage → T_Damage) — the sharp self-vs-enemy
+  discriminator in close rocket fights, with candidate admission capped
+  at the engine's own `findradius(damage + 40)` reach;
 - per-demo rocket-damage regime detection (fixed 110 vs vanilla
   100+random·20) with a second scoring pass;
 - BSP tier (bspvis ray-trace): CanDamage-style splash gate, hitscan /

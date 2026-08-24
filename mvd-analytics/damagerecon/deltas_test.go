@@ -163,19 +163,50 @@ func TestDamageModelScoreSelfRocketCeiling(t *testing.T) {
 	}
 }
 
-func TestDamageModelScoreQuadBeforeFalloff(t *testing.T) {
+func TestDamageModelScoreQuadAfterFalloff(t *testing.T) {
 	in := &inputs{rlLo: 110, rlHi: 110}
-	// Quad splash at 200u: the engine computes 4×120 - 100 = 380 (base×4
-	// first). The wrong order 4×(120-100) = 80 would reject 380.
+	// Quad splash at 100u: the engine subtracts the falloff first and
+	// multiplies afterwards — T_RadiusDamageApply computes 120 − 0.5·100 = 70
+	// (ktx/src/combat.c:1189) and T_Damage applies the ×4 (:537-543), so the
+	// hit reads 280. The wrong order (4×120 − 50 = 430) cannot produce a
+	// value under 400 anywhere inside the engine's 160-unit reach, which is
+	// where 96% of the wire's own quad rl splash rows sit.
 	//
 	// The base is the T_RadiusDamage argument — 120 for a rocket as for a
 	// grenade (ktx/src/weapons.c:1006) — NOT the 110 the touch deals; and
 	// isSplash is what selects the falloff branch at all now that the
 	// direct/splash verdict is a trajectory question rather than a distance
-	// one (direct.go). A rocket 200 units away has plainly touched nobody.
-	c := &candidate{weapon: "rl", kind: "proj", dEnd: 200, isSplash: true}
-	if pen, ok := in.damageModelScore(380, false, c, false, true); !ok || pen != 0 {
-		t.Fatalf("quad splash 380 at 200u must fit exactly, got pen=%v ok=%v", pen, ok)
+	// one (direct.go). A rocket 100 units away has plainly touched nobody.
+	c := &candidate{weapon: "rl", kind: "proj", dEnd: 100, isSplash: true}
+	if pen, ok := in.damageModelScore(280, false, c, false, true); !ok || pen != 0 {
+		t.Fatalf("quad splash 280 at 100u must fit exactly, got pen=%v ok=%v", pen, ok)
+	}
+	if pen, _ := in.damageModelScore(430, false, c, false, true); pen == 0 {
+		t.Fatal("the old base-first form's 430 must no longer be a perfect fit")
+	}
+}
+
+// TestSplashBandPositiveInsideAdmission pins the tie between the admission
+// radius and the damage model: splashAdmit is the engine's reach plus the
+// same slack the band widens by, so no admitted candidate can reach the
+// distance at which the falloff would zero the band's high end (240 units).
+// modelBounds therefore carries no non-positive-band rejection — this is the
+// invariant that would have to fail first for one to be needed.
+func TestSplashBandPositiveInsideAdmission(t *testing.T) {
+	in := &inputs{rlLo: 110, rlHi: 110}
+	for _, exact := range []bool{false, true} {
+		for _, self := range []bool{false, true} {
+			for _, quad := range []bool{false, true} {
+				for d := 0.0; d <= splashAdmit(exact); d += 0.5 {
+					c := &candidate{weapon: "rl", kind: "proj", dEnd: d, isSplash: true, epExact: exact}
+					lo, hi, ok := in.modelBounds(c, self, quad)
+					if !ok || hi <= 0 || lo <= 0 || lo > hi {
+						t.Fatalf("d=%.1f exact=%v self=%v quad=%v: band [%v,%v] ok=%v",
+							d, exact, self, quad, lo, hi, ok)
+					}
+				}
+			}
+		}
 	}
 }
 

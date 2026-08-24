@@ -7,6 +7,61 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### Radius damage now follows the engine's own order and reach (schema v74)
+
+No new field, no shape change — a **correctness fix** to the
+reconstruction's damage model, so reconstructed `damage` values (and the
+`playerStats` / `aim` figures that ride them) move on demos with quad
+rocket play.
+
+Two engine facts the direct-impact work found and recorded, now
+implemented:
+
+- **The quad multiplies the falloff's RESULT.** `T_RadiusDamageApply`
+  computes `points = 120 − 0.5·dist` (`ktx/src/combat.c:1189`) and only
+  then calls `T_Damage`, where the ×4 is applied (`:537-543`). The
+  package multiplied the BASE, which puts a quad splash in `[400, 480)`
+  where the engine's range is `(0, 480]` — and 96% of the wire's own 898
+  quad rl splash rows on the dm2/dm3 ground truth read between 160 and
+  400. Every multiplier that composes this way (quad, the dmm4 octa, the
+  CTF strength rune, the handicap) is on that same downstream side; the
+  self-halving and the shambler halving are not, and stay inside the
+  falloff.
+- **Splash reaches 160 units and no further.** `T_RadiusDamage` visits
+  exactly `trap_findradius(origin, damage + 40)` (`:1252`), measured
+  origin-to-bbox-centre like the falloff itself, and the quad does not
+  widen it. Candidate admission ran to 380 units; it now runs to the
+  reach plus the measured slack of our own distance — 184 units from an
+  explosion-snapped detonation point, 220 from a tracked flight's last
+  broadcast position. The LG water discharge, the third radius source,
+  gets the same treatment at `35·cells + 40`.
+
+The kill top-ups' two calibration constants are **gone**: they existed to
+absorb the quad-ordering error, and with it fixed the raw error falls
+monotonically as they approach the engine's own numbers (swept on 30 dm3
+demos, confirmed on the held-out 30 dm2 ones), so the top-up is now the
+engine formula at the measured distance.
+
+**Measured** on the 60-demo dm2/dm3 ground truth: raw given median /
+mean per-player error 1.24% / 2.04% → **0.74% / 1.24%**, raw taken 1.74%
+/ 2.29% → **0.62% / 1.11%**, raw ewep 1.58% → 1.14%, bounded taken
+unchanged at 0.04%, bounded given 0.58% → 0.57% median (mean 0.76% →
+0.80%). On the 188-demo derived-summary protocol `dmg.given` 0.47% →
+**0.45%**, `dmg.taken` 0.44% → **0.42%**, `acc.gl.hits` 3.91% →
+**3.55%**, `acc.lg.hits` 0.91% → **0.87%**, `acc.rl.hits` 1.23% → 1.34%.
+The aim recon tier improves (rl 0.7pp → 0.5pp mean, ssg 1.8pp → 1.6pp,
+the rest unchanged). The one regression is decomposed rather than
+averaged away: the reach cap drops 3 of 14 140 wire splash rows whose
+measured geometry lands past what the engine could reach, and buys back
+self/team confusion and nail/ssg attribution. On the un-instrumented
+archive the obituary oracle prices the same trade at −0.0 to −0.2 pp of
+attacker-correctness for +0.02 to +0.14 pp of damage published as
+`unknown` — the section saying it does not know, rather than naming an
+attacker the engine could not have reached. Full before/after tables
+and the isolation run in
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"The quad multiplies AFTER the falloff".
+
 ### Old demos can answer KTX's rl/gl question (schema v74)
 
 `playerStats.accuracy.byWeapon[rl|gl].hits` on a **reconstructed** row is
@@ -58,14 +113,14 @@ the spectator's PVS ends its bracket early, and reading an early end as a
 touch (tried, measured, refused) reads every PVS exit as a hit.
 
 **Measured.** Per explosion against the wire splash flag (53 dm2/dm3
-demos, 18 039 rl instants): classification accuracy 73.5% → **97.9%**,
-precision 45.1% → **94.6%**, direct-count error +114% → **+1.4%**. Per
+demos, 18 026 rl instants): classification accuracy 73.5% → **97.9%**,
+precision 45.1% → **94.6%**, direct-count error +114% → **+1.3%**. Per
 player against the verbatim KTX block (188 archive demos):
-`acc.rl.hits` **1.23%** aggregate (was +80%) at −0.13 hits per row;
-`acc.gl.hits` **88.9%** of rows exact (was 1.22% aggregate and +2.24 pp
-of accuracy error before the classifier existed) at −0.08 per row, both
-well under the already-shipped `lg` row's −0.95, which is the bar this
-family ships at. The gl AGGREGATE reads 3.91% and is the honest number:
+`acc.rl.hits` **1.34%** aggregate (was +80%) at −0.14 hits per row;
+`acc.gl.hits` **89.6%** of rows exact (was 1.22% aggregate and +2.24 pp
+of accuracy error before the classifier existed) at −0.07 per row, both
+well under the already-shipped `lg` row's −0.91, which is the bar this
+family ships at. The gl AGGREGATE reads 3.55% and is the honest number:
 the fuse rule removes 20 of 28 over-counting rows for 2 new
 under-counting ones, which improves every per-row measure and stops a
 false-positive channel from cancelling a false-negative one. Tables and

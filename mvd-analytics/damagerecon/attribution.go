@@ -25,7 +25,6 @@ const (
 	axeSwingJitterMs    = 80     // demo-frame quantization on both timestamps
 	rBeamSeg            = 90.0   // units victim to beam segment (p99 measured 60, max 79)
 	rBeamSrc            = 160.0  // units beam start to attacker eye
-	rSplash             = 380.0  // units projectile end to victim (p95=199; the engine's own reach is findradius(damage+40)=160 — plan-damage-recon.md §8 lead B)
 	nailSpeed           = 1000.0 // nails AND rockets fly 1000 ups
 	rocketSpeed         = 1000.0
 	tolFlightMs         = 180.0 // flight-time consistency for the trackless-rocket fallback
@@ -39,18 +38,17 @@ const (
 	sgAimGateDeg        = 50.0  // real sg hits are within ~25° (p95); hard gate at 2×
 	rlSoundAimGateDeg   = 60.0
 
-	// The KILL raw top-ups compute their floor from these rather than from
-	// splashBase()'s engine-true 120 and the attribution model's own slack.
-	// A top-up only ever RAISES a value, so it has to UNDER-estimate, and
-	// this pair is what the eval corpus calibrated it at; the wide slack is
-	// deliberate on top of that, because a top-up fires on kills, where the
-	// victim is moving fastest and the position interpolation is worst.
-	// Feeding it the true base instead cost raw accuracy measurably — 2.01%
-	// → 2.65% mean per-player error on the 53-demo dm2/dm3 corpus — because
-	// the 10-point gap is multiplied by the quad, exactly on the quad-rocket
-	// kills the top-up exists for.
-	topUpBase  = 110.0
-	topUpSlack = 60.0
+	// splashReach is the engine's own splash reach: T_RadiusDamage visits
+	// exactly trap_findradius(inflictor->origin, damage + 40) — 160 units
+	// for both projectiles' 120 base (ktx/src/combat.c:1252; weapons.c:1006
+	// and :1300) — and findradius measures the same quantity
+	// T_RadiusDamageApply then prices, the explosion origin to the victim's
+	// BBOX CENTRE (mvdsv pr_cmds.c:1233, pr2_cmds.c:886). A player 161 units
+	// away takes nothing at all, and the quad does not extend that: the
+	// multiplier is applied downstream in T_Damage (combat.c:537-543), not
+	// to findradius' argument. See splashSlack for the distance our
+	// measurement of it can be off by, and splashAdmit for the two together.
+	splashReach = 160.0
 
 	// regimeMinSamples: how many near-direct rocket observations a demo must
 	// carry before detectRocketRegime's clustering test says anything at all.
@@ -179,13 +177,12 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		}
 		vpos := vtrack.posAt(pr.endT)
 		dEnd := pr.ep.distTo(vpos)
-		if dEnd > rSplash || deltaNear(pr.endT) {
+		if dEnd > splashAdmit(pr.epExact) || deltaNear(pr.endT) {
 			continue
 		}
 		if !in.bsp.splashReaches(pr.ep, vpos) {
 			continue
 		}
-		dLo, _ := splashBase()
 		q := in.quadFactor(pr.shooter, pr.endT)
 		selfF := 1.0
 		if pr.shooter == victim {
@@ -203,7 +200,7 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		// so it rides the radius curve whether or not it touched. A direct
 		// self row cannot exist (directImpact short-circuits on isSelf), so
 		// the halving below never applies to the direct branch.
-		raw := int((dLo*q - 0.5*dEnd) * selfF)
+		raw := int(splashModel(dEnd, q, selfF))
 		if direct && pr.weapon == "rl" {
 			dirLo, dirHi := in.directBase()
 			raw = int(0.5 * (dirLo + dirHi) * q)
@@ -234,8 +231,7 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 			continue
 		}
 		q := in.quadFactor(victim, s.t)
-		sLo, _ := splashBase()
-		raw := int((sLo*q - 0.5*pentJumpNominalDist) * 0.5)
+		raw := int(splashModel(pentJumpNominalDist, q, 0.5))
 		if raw <= 0 {
 			continue
 		}
@@ -526,17 +522,16 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// The -99 corpse clamp hides overkill deeper than 99 HP on a
 		// killing hit; the damage model still knows the floor the wire
 		// value cannot have been under (quad rockets are the big case:
-		// 440-ish raw vs ~200 observable). Only ever raises raw.
+		// 440-ish raw vs ~200 observable). Only ever raises raw, and it is
+		// the engine's own radius formula at the measured distance — see
+		// splashModel for why the pair of fudge constants it used to carry
+		// went away with the quad-ordering fix.
 		q := in.quadFactor(best.attacker, d.t)
 		selfF := 1.0
 		if e.isSelf {
 			selfF = 0.5
 		}
-		// The top-up floor keeps the full ±60 slack even on explosion-snapped
-		// geometry: it fires on KILLS, where the victim is typically moving
-		// fast and the victim-side interpolation error dominates — the tight
-		// exact-point slack over-raised raw measurably (eval corpus).
-		modelMin := (topUpBase*q - 0.5*(best.dEnd+topUpSlack)) * selfF
+		modelMin := splashModel(best.dEnd, q, selfF)
 		if m := int(modelMin); m > e.raw {
 			e.raw = m
 		}
@@ -596,7 +591,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			if pr.shooter != "" && pr.shooter != e.attacker {
 				continue
 			}
-			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
+			if d := pr.ep.distTo(vpos); d <= splashAdmit(pr.epExact) && (bestD < 0 || d < bestD) {
 				bestD = d
 				bestDirect = directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == e.victim) &&
 					!grenadeFuseExpired(&pr)
@@ -620,7 +615,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 				if ex.claimed {
 					continue
 				}
-				if d := ex.p.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
+				if d := ex.p.distTo(vpos); d <= splashAdmit(true) && (bestD < 0 || d < bestD) {
 					bestD = d
 					bestDirect = hasMuzzle && directImpact(e.weapon, muzzle, ex.p, vpos, e.attacker == e.victim)
 					bestNear = hullDist(ex.p, vpos) <= directHullNear
@@ -637,8 +632,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			e.isSplash = !in.rocketTouched(bestDirect, bestNear,
 				delta{t: e.t, raw: e.raw, bounded: e.bounded, died: e.died}, q)
 		}
-		// Full slack even on exact geometry — see the attributeOne top-up.
-		model = topUpBase*q - 0.5*(bestD+topUpSlack)
+		model = splashModel(bestD, q, 1.0)
 	case "lg":
 		// A discharge kill (35*cells radius blast) hides almost all of its
 		// raw value behind the clamp; the discharger's cells count knows it.
@@ -651,8 +645,17 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 				continue
 			}
 			d := tr.posAt(dc.t).distTo(vtrack.posAt(e.t))
-			base := 35.0 * float64(dc.cells) * q
-			expected := base - 0.5*d
+			if d > dischargeReach(dc.cells) {
+				// Out of the blast's reach — this kill was the attacker's
+				// ordinary shaft, not their discharge, and must fall through
+				// to the beam count below rather than be priced as a blast.
+				continue
+			}
+			// Same radius-damage form as the projectiles: 35·cells is what
+			// W_FireLightning hands T_RadiusDamage (ktx/src/weapons.c:1208,
+			// :1225), the falloff comes off it there, and the quad is applied
+			// afterwards in T_Damage.
+			expected := (35.0*float64(dc.cells) - 0.5*d) * q
 			if e.isSelf {
 				expected *= 0.5
 			}
@@ -808,32 +811,28 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		if isSelf {
 			selfF = 0.5
 		}
-		// KNOWN-WRONG ORDER, deliberately left standing for now: this
-		// computes 4D - 0.5d, and the engine deals 4(D - 0.5d). The quad
-		// multiplier is applied inside T_Damage (combat.c:537-543), which
-		// T_RadiusDamageApply reaches only AFTER subtracting the falloff
-		// (:1189). Measured on 898 wire quad rl splash rows: 96% land in
-		// [160,400), where this form cannot go below 400. It costs no
-		// published magnitude — every value the section publishes is the
-		// observed delta, and this band only SCORES candidates — but it
-		// mis-scores quad splash and over-floors the quad kill top-up.
-		// Fixing it needs the slack/topUpBase pair re-tuned in the same
-		// pass: plan-damage-recon.md §8 lead A has the evidence and the
-		// method. Self splash halves the post-falloff points.
-		// Splash-distance slack: the tracked-flight endpoint is the last
-		// broadcast entity position (up to a frame short of the detonation)
-		// and the victim position is interpolated — ±60 covers both. An
-		// explosion-snapped endpoint is the true detonation point, so only
-		// the victim-side interpolation slack remains.
-		slack := 60.0
-		if c.epExact {
-			slack = 24.0
-		}
+		// The quad multiplies the falloff's RESULT, not the base: the
+		// engine subtracts 0.5·dist in T_RadiusDamageApply (combat.c:1189)
+		// and only then calls T_Damage, where the ×4 is applied
+		// (combat.c:537-543). A quad splash is therefore 4·(120 − 0.5·d),
+		// range (0, 480], and not 4·120 − 0.5·d, which cannot go below 400
+		// inside the engine's 160-unit reach — where 96% of the wire's own
+		// quad rl splash rows live (plan-damage-recon.md §8 lead A). Every
+		// multiplier that composes with a radius hit sits on the same side:
+		// quad/octa, the ctf strength rune and the handicap are all applied
+		// inside T_Damage, while the self-halving and the shambler halving
+		// are inside T_RadiusDamageApply, before it. Hence q outside the
+		// falloff, selfF (either side — both are plain factors) with it.
+		slack := splashSlack(c.epExact)
 		switch {
 		case kind == "rl-sound" || dEnd < 0:
 			// Unknown explosion point: full damage possible for an enemy,
 			// splash-only ceiling for self. Splash values are allowed, but a
-			// tiny delta is far likelier another cause.
+			// tiny delta is far likelier another cause. (The engine's own
+			// floor is higher — a splash at the 160-unit reach still deals
+			// 40·q — but a distance-less candidate also has to cover the
+			// merged and partly-masked instants a distance-carrying one is
+			// scored out of, and tightening to it measured neutral.)
 			lo, hi = 25.0*q*selfF, dHi*q*selfF
 		default:
 			// Radius damage — including a grenade that DID touch the victim:
@@ -841,11 +840,14 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 			// GrenadeExplode → T_RadiusDamage with ignore = world
 			// (ktx/src/weapons.c:1300, :1335), so a touched grenade victim is
 			// still on the falloff curve.
-			lo = (dLo*q - 0.5*(dEnd+slack)) * selfF
-			hi = (dHi*q - 0.5*math.Max(0, dEnd-slack)) * selfF
-			if hi <= 0 {
-				return 0, 0, false
-			}
+			//
+			// hi stays positive for every admissible candidate: dEnd is
+			// capped at splashAdmit = splashReach + this same slack, which is
+			// 220 at the widest, so the subtracted term never reaches the 240
+			// that would zero it. The tie is pinned in
+			// TestSplashBandPositiveInsideAdmission.
+			lo = (dLo - 0.5*(dEnd+slack)) * q * selfF
+			hi = (dHi - 0.5*math.Max(0, dEnd-slack)) * q * selfF
 			lo = math.Max(1.0, lo)
 		}
 	case "hitscan":
@@ -998,7 +1000,7 @@ func (in *inputs) projCandidates(victim string, t int32, vpos vec3) []candidate 
 			continue
 		}
 		dEnd := pr.ep.distTo(vpos)
-		if dEnd > rSplash {
+		if dEnd > splashAdmit(pr.epExact) {
 			continue
 		}
 		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim) &&
@@ -1009,7 +1011,7 @@ func (in *inputs) projCandidates(victim string, t int32, vpos vec3) []candidate 
 			continue
 		}
 		out = append(out, candidate{
-			geom: dEnd / rSplash * 0.5, attacker: pr.shooter, weapon: pr.weapon,
+			geom: dEnd / splashAdmit(pr.epExact) * 0.5, attacker: pr.shooter, weapon: pr.weapon,
 			kind: "proj", dEnd: dEnd, ep: pr.ep, hasEP: true, epExact: pr.epExact,
 			isSplash: !direct, hullNear: hullDist(pr.ep, vpos) <= directHullNear,
 		})
@@ -1035,7 +1037,7 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 			continue // a tracked flight owns this detonation (projCandidates)
 		}
 		dEnd := ex.p.distTo(vpos)
-		if dEnd > rSplash {
+		if dEnd > splashAdmit(true) {
 			continue
 		}
 		slo := sort.Search(len(in.shots), func(k int) bool { return in.shots[k].t >= ex.t-2000 })
@@ -1090,7 +1092,7 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 				}
 			}
 			out = append(out, candidate{
-				geom:     0.1 + dEnd/rSplash*0.4 + ferr/tolFlightMs*0.15 + apen,
+				geom:     0.1 + dEnd/splashAdmit(true)*0.4 + ferr/tolFlightMs*0.15 + apen,
 				attacker: s.player, weapon: s.weapon, kind: "proj",
 				dEnd: dEnd, ep: ex.p, hasEP: true, epExact: true,
 				isSplash: !direct, hullNear: hullDist(ex.p, vpos) <= directHullNear,
@@ -1387,8 +1389,13 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		}
 		spos := tr.posAt(dc.t)
 		d := spos.distTo(vpos)
-		base := 35.0 * float64(dc.cells) * in.quadFactor(dc.player, dc.t)
-		expected := base - 0.5*d
+		if d > dischargeReach(dc.cells) {
+			continue
+		}
+		// Radius damage, engine order: the falloff comes off 35·cells inside
+		// T_RadiusDamageApply and the quad multiplies the result in T_Damage
+		// (ktx/src/weapons.c:1208, :1225; combat.c:1189, :537-543).
+		expected := (35.0*float64(dc.cells) - 0.5*d) * in.quadFactor(dc.player, dc.t)
 		if dc.player == victim {
 			expected *= 0.5
 		}
@@ -1407,6 +1414,27 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 	return out
 }
 
+// dischargeReach is the admission radius for an LG water discharge, the
+// third radius-damage source in the model. Its base is 35·cells
+// (ktx/src/weapons.c:1208, :1225) and T_RadiusDamage visits the same
+// findradius(damage + 40) set as a rocket's, so the blast reaches
+// 35·cells + 40 and no further — a bound the falloff alone does not give,
+// since 35·cells − 0.5·dist stays positive out to twice that.
+//
+// Both endpoints here are interpolated position-track samples (the engine
+// measures from the discharger's own origin to the victim's bbox centre), so
+// the slack is the un-snapped one. The population it removes is real but
+// currently inert: over the 60-demo dm2/dm3 ground truth, 111 discharges
+// generate 275 candidates, 11 outside the engine's reach and 9 outside it
+// even with the slack — and cutting them moves no scored row, because the
+// per-candidate value band happened to refuse all nine anyway. It is kept as
+// the engine bound rather than credited with an accuracy gain: that band is a
+// ±25% window around a long-range blast's small expected value, which a small
+// delta can sit inside, so the coincidence is not a rule.
+func dischargeReach(cells int) float64 {
+	return 35.0*float64(cells) + 40.0 + splashSlack(false)
+}
+
 // splashBase is the base damage a radius weapon hands T_RadiusDamage before
 // the falloff: 120 for BOTH the rocket and the grenade
 // (ktx/src/weapons.c:1006 and :1300, and id1 before them).
@@ -1420,6 +1448,71 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 // 10: measured on the dm2/dm3 ground truth, `value + 0.5·dist` over 2 530
 // wire-flagged splash rows has median 122.4, not 112.
 func splashBase() (lo, hi float64) { return 120.0, 120.0 }
+
+// splashModel is what T_RadiusDamage deals at distance d: the falloff comes
+// off the base first (points = damage − 0.5·dist, ktx/src/combat.c:1189),
+// the self-halving is applied to those points inside the same function
+// (:1190-1193), and only then does T_Damage multiply by the quad
+// (:537-543). Kept as one function because the RAW kill top-ups need the
+// value rather than a band.
+//
+// The top-ups used to price themselves off a base of 110 with 60 units of
+// distance slack instead of this, and the wide, low pair was measured
+// necessary at the time: they only ever RAISE a value, so they must
+// under-estimate, and the quad multiplier standing on the wrong side of the
+// falloff (4·120 − 0.5·d rather than 4·(120 − 0.5·d)) over-raised every quad
+// splash kill by hundreds. With the order corrected the fudge is not merely
+// unnecessary but harmful — swept over the 30-demo dm3 half and confirmed on
+// the held-out dm2 half, raw given mean per-player error falls monotonically
+// as the pair approaches the engine's own numbers: dm3 2.87% → 1.16% and dm2
+// 3.44% → 1.38% going from (110, 60) to (120, 0). So there is no pair left
+// to calibrate; the model is the engine's.
+func splashModel(dist, quad, selfF float64) float64 {
+	lo, _ := splashBase()
+	return (lo - 0.5*dist) * quad * selfF
+}
+
+// splashSlack is how far our explosion→victim distance can sit from the one
+// the engine measured, for the two kinds of endpoint the tracking produces.
+// It is the single statement of that error: the damage-model band widens by
+// it and splashAdmit extends the engine's reach by it.
+//
+// An explosion-snapped endpoint (epExact) is the true detonation point, so
+// three offsets remain: the victim's BBOX CENTRE, which the engine measures
+// to and we do not (up to 4 units, the fixed hull's (mins+maxs)*0.5 = '0 0
+// 4'); the 8-unit pull-back TE_EXPLOSION is written with, applied AFTER
+// T_RadiusDamage has run at the true origin (ktx/src/weapons.c:1008-1010);
+// and the victim position, interpolated between samples on the ~13-40 ms
+// broadcast grid. Measured against the engine distance each wire value
+// implies (unbound_dmg_dealt = ceil(q·(120 − 0.5·d)), so d = 2·(120 − v/q))
+// over 14 140 wire-flagged enemy rl splash rows of the dm2/dm3 ground truth,
+// the error runs median 4.8 — the two systematic terms — p95 18.1 and p99
+// 27.4; on the 8-map golden cache, 5.0 / 22.2 / 35.2.
+//
+// A tracked flight that was NOT snapped ends at the last broadcast entity
+// position instead, up to one server frame short of the detonation — 34
+// units at the rocket's 1000 ups — which is what the wider figure covers.
+// That case is unmeasurable on either ground-truth corpus (every GT splash
+// row there carries a snapped endpoint), so it keeps the slack the damage
+// model already carried for it rather than being invented afresh.
+func splashSlack(epExact bool) float64 {
+	if epExact {
+		return 24.0
+	}
+	return 60.0
+}
+
+// splashAdmit is the greatest measured distance at which the engine's own
+// reach can still have covered the victim — the candidate-admission radius,
+// and the reason a candidate 300 units from the explosion is no longer
+// entertained at all (it was, out to 380, until plan-damage-recon.md §8 lead
+// B). Measured on the dm2/dm3 rl splash rows: the 184 an exact endpoint
+// admits keeps 99.76% of them where the old 380 kept 99.78%. The 220 an
+// un-snapped one admits is inert — holding it at 380 instead reproduces
+// both the obituary-oracle sweep and the 188-demo derived-summary
+// protocol byte for byte, because ~99% of demos carry TE_EXPLOSION and
+// essentially every deciding candidate has an exact detonation point.
+func splashAdmit(epExact bool) float64 { return splashReach + splashSlack(epExact) }
 
 // directBase is what T_MissileTouch deals to the player the rocket touched:
 // a flat 110 since KTX 1.36 (ktx/src/weapons.c:986; commit c7263e8f,
@@ -1437,6 +1530,11 @@ func (in *inputs) hasQuad(name string, t int32) bool {
 	return ap != nil && inIntervals(ap.Quad, t)
 }
 
+// (The ×4 is the deathmatch-1/3 multiplier. KTX makes the quad an OCTA in
+// deathmatch 4 — `damage *= (deathmatch != 4 ? 4 : ... 8)`, combat.c:541 —
+// and dmm4 is not one of the skipped modes, so a dmm4 recording's quad hits
+// are modelled at half their true value. Unmeasured: no ground-truth corpus
+// here contains one. plan-damage-recon.md §8 lead C.)
 func (in *inputs) quadFactor(name string, t int32) float64 {
 	if in.hasQuad(name, t) {
 		return 4.0

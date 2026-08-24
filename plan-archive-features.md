@@ -582,25 +582,29 @@ replaced id1's `100 + g_random()*20`) and the era is detected from the
 demo, not from a version string.
 
 Measured: per explosion against the wire flag, classification accuracy
-73.5% → **97.9%** and direct-count error +114% → **+1.4%** over 18 039
+73.5% → **97.9%** and direct-count error +114% → **+1.3%** over 18 026
 rl instants; per player against the verbatim block, `acc.rl.hits`
-**1.23%** aggregate (46.9% of 638 rows exact) and `acc.gl.hits`
-**0.61%** (84.7% of 424) — both inside the band the shipped `lg` row
-occupies (0.91%); raw eval output in
-`.reports/direct-impact-2026-08-24/`. The measured era rides along as
-`damage.rocketDirectDamage`, which splits that rl figure into 0.62% on
-the 567 rows whose demo established the constant and 17.7% on the 71
-low-rocket rows that did not; nothing is gated on it (those rows are
-*more* often exact, and the alternative there is the 4x any-path count).
-So a reconstructed row now publishes
+**1.34%** aggregate (46.9% of 638 rows exact) and `acc.gl.hits` **3.55%**
+(89.6% of 424, one-sided by design after the grenade-fuse rule) — both at
+or under a hit-and-a-bit of per-row error, against the shipped `lg` row's
+−0.91; raw eval output in `.reports/direct-impact-2026-08-24/` and
+`.reports/quad-splash-2026-08-24/`. The measured era rides along as
+`damage.rocketDirectRegime`, which splits that rl figure into 0.73% on
+the 567 rows whose demo established the constant and 13.0% / 22.2% on the
+16 `spread` and 55 `unestablished` ones; nothing is gated on it (the
+unestablished rows are *more* often exact, and the alternative there is
+the 4x any-path count). So a reconstructed row now publishes
 `hitsConvention: "directImpact"` on rl/gl, riding the new
 `aim...recon.directHits`, and the two archive halves are on one scale.
 A `derived` row keeps `anyDamage` there: its `hits` is also the aim
-section's MEASURED counter. Two model corrections fell out of the same
+section's MEASURED counter. Three model corrections fell out of the same
 work — rocket splash is based on 120, not the direct 110
-(`weapons.c:1006`), worth 0.81% → 0.76% on bounded given; and
+(`weapons.c:1006`), worth 0.81% → 0.76% on bounded given;
 obituary-anchored rocket kills, which never went through the candidate
-scorer, stopped being published as direct hits. Tables:
+scorer, stopped being published as direct hits; and, in the follow-up
+pass that these figures are measured after, radius damage moved onto the
+engine's own multiplication order and reach (plan-damage-recon.md §8
+leads A and B), worth raw given 2.04% → 1.24% mean per player. Tables:
 [`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
 §"Can an old demo answer KTX's rl/gl question?".
 
