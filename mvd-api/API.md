@@ -1002,10 +1002,13 @@ Common frontend features → the call that backs them.
   evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
   `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
   is not the same as no hits). `attacks` is shot-derived on every demo
-  and matches KTX to the row on the single-projectile weapons. Do not
-  diff `hits` against `/demoinfo` naively even on a derived family: KTX
-  counts direct impacts for `rl` / `gl` and pellets for `sg` / `ssg`,
-  while this API counts a fire that landed damage by any path. Read
+  and matches KTX to the row on the single-projectile weapons. On a
+  `reconstructed` family `rl` / `gl` publish KTX's OWN direct-impact
+  count (schema v74) and agree with `/demoinfo` to 1.2% / 0.6% in
+  aggregate; on a `derived` one they count any damage path and read
+  ~4x higher on `rl`. Either way, do not diff `hits` against
+  `/demoinfo` naively — `sg` / `ssg` are pellets on KTX's side and
+  trigger pulls on ours on every family. Read
   `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
   — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
   is, per WEAPON because one `src: "ktx"` row uses all three at once.

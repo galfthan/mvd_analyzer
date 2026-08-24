@@ -137,8 +137,9 @@ that downstream consumers render, summarise, or feed to an agent.
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs
   the reconstruction blind on wire-instrumented demos and scores it
-  against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
-  prints misattribution flows.
+  against the KTX log (tables in `damagerecon/ACCURACY.md`), including
+  the per-explosion direct/splash verdict against the wire's own splash
+  flag; `-diag` prints misattribution flows.
 - `cmd/qw-aim-eval/` — aim hit-recovery harness: scores the reconstructed
   hit tier (`aim.players[].weapons[].recon`) against this pipeline's own
   wire-measured counter on demos carrying both, per weapon (tables in
@@ -149,8 +150,10 @@ that downstream consumers render, summarise, or feed to an agent.
   blind reconstruction (tables in `damagerecon/ACCURACY.md` §"The whole
   derived summary vs the verbatim KTX block"). It also carries the
   DIAGNOSTIC columns that decide definition questions — the
-  KTX-convention spree replay and the rl/gl direct-impact derivations —
-  which is why the measurement is not gated on what shipped.
+  KTX-convention spree replay, the wire-flag control for the rl/gl
+  direct-impact counters, and the any-path alternative a reconstructed
+  row no longer publishes for them — which is why the measurement is not
+  gated on what shipped.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables

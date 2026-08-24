@@ -2027,7 +2027,18 @@ Offset  Size  Field
 **Important Notes**:
 - Entity numbers are 1-indexed (entity 0 is world). Convert to player number: `player_num = entity - 1`
 - The `damage_amount` is **raw/unbound damage** including overkill (see [Damage Tracking](#damage-tracking-details))
-- Splash damage flag indicates indirect damage (e.g., rocket splash, not direct hit)
+- Splash damage flag indicates indirect damage (e.g., rocket splash, not direct hit).
+  KTX raises it only inside `T_RadiusDamage` (`ktx/src/combat.c:1207-1227`), so a
+  rocket's DIRECT touch damage — a flat **110** since KTX 1.36 (`weapons.c:986`;
+  commit `c7263e8f`, 2008-09-29, replacing id1's `100 + g_random()*20`) — reaches
+  the wire unflagged, while the 120-base radius pass that follows it skips that
+  same victim (`weapons.c:1006` passes them as `ignore`). A GRENADE never deals
+  touch damage at all (`GrenadeTouch` → `GrenadeExplode` → `T_RadiusDamage` with
+  `ignore = world`, `:1300`), so every grenade record is splash-flagged whether or
+  not the grenade touched a player. Counting unflagged rl records per attacker
+  reproduces KTX's own `acc.rl.hits`, which increments in the touch handler and
+  nowhere else (`weapons.c:990-996`), exactly — 638 of 638 player rows on the
+  archive validation set.
 - KTX emits the record when **either** the attacker or the victim is a player
   (`ktx/src/combat.c:810`). The parser emits a `DamageEvent` whenever the
   **victim** is a player and `damage > 0`. World/environmental damage-taken

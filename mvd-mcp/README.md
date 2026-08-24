@@ -358,28 +358,33 @@ weapons that tier validated carry a number: `lg`, `sg`, `ssg`, `axe`,
 recovery, so the withhold inherits; read that absence as "not recovered
 for this weapon", never as "no hits". A family whose weapons all fall
 outside the tier stays `src: "derived"`, `attacks` being shot-derived
-either way. Grade the numbers before diffing against KTX: derived `lg`
-hits agree to 0.9% in aggregate, but `rl` / `gl` do NOT — KTX's `hits`
-there is the DIRECT-impact count (`ktx/src/weapons.c:994`, `:1329`)
-while ours counts a fire that landed damage by any path, so ours reads
-~4x higher on `rl` and ~1.5x on `gl`. `attacks` matches KTX to the row
-on every single-projectile weapon (98–100% exact).
+either way. Grade the numbers before diffing against KTX: on a
+`reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
+(1.2%) and `gl` (0.6%), because since schema v74 those two publish KTX's
+OWN direct-impact count. On a `derived` family they do not — there
+`hits` counts a fire that landed damage by any path and reads ~4x higher
+on `rl`, ~1.5x on `gl`, against KTX's touch counter
+(`ktx/src/weapons.c:994`, `:1329`). `attacks` matches KTX to the row on
+every single-projectile weapon (98–100% exact).
 
 **`hitsConvention` is the machine-readable form of that warning**, and
 the field to gate a cross-demo comparison on — `src` states the evidence
 GRADE and says nothing about what is counted. It sits on every weapon
 that carries `hits`: `anyDamage` (a fire that landed damage by any path;
-every derived / reconstructed weapon, plus KTX's own `lg` / `axe` /
-`ng` / `sng`), `directImpact` (KTX's `rl` / `gl` only) or `pellets`
-(KTX's `sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON,
-because one `src: "ktx"` row uses all three at once. Two rows are
-comparable exactly when weapon AND convention match; absent beside a
-present `hits` only on a `src: "mixed"` team row. Deriving KTX's own
-convention on an old demo does not work and was measured: the wire
-damage log's splash flag reproduces KTX's `rl` count on 638 of 638 rows,
-but the pre-instrumentation half carries no such flag and the
-reconstruction's geometric verdict answers `gl` (1.2% aggregate) and not
-`rl` (+80%).
+every `derived` weapon, `lg` / `sg` / `ssg` / `axe` of a
+`reconstructed` one, plus KTX's own `lg` / `axe` / `ng` / `sng`),
+`directImpact` (the projectile TOUCHED a player: KTX's `rl` / `gl`, and
+a `reconstructed` family's `rl` / `gl` since v74) or `pellets` (KTX's
+`sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON, because
+one `src: "ktx"` row uses all three at once. Two rows are comparable
+exactly when weapon AND convention match; absent beside a present `hits`
+only on a `src: "mixed"` team row. Deriving KTX's own convention on an
+old demo took two attempts: the wire damage log's splash flag reproduces
+KTX's `rl` count on 638 of 638 rows, the pre-instrumentation half
+carries no such flag, and the first substitute — an explosion endpoint
+within 48 units — answered `gl` (1.2% aggregate) and not `rl` (+80%).
+v74 replaces it with the flight's trajectory against the player hull
+plus the flat-110 direct-damage constant, at 1.2% / 0.6%.
 
 **Sprees.** `score.maxSpree` is the longest run of kills between deaths;
 `score.maxQuadSpree` the longest run of kills made while holding the

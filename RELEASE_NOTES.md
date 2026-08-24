@@ -7,6 +7,94 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### Old demos can answer KTX's rl/gl question (schema v74)
+
+`playerStats.accuracy.byWeapon[rl|gl].hits` on a **reconstructed** row is
+now the DIRECT-IMPACT count — the same thing KTX's own `acc.rl.hits` /
+`acc.gl.hits` counts, marked `hitsConvention: "directImpact"` — instead
+of the any-path count it used to publish. The pre-instrumentation half of
+the archive and the demoinfo-carrying half are therefore on one scale for
+those two weapons, which is what the whole `hitsConvention` marker exists
+to make possible.
+
+The number rides `aim.players[].weapons[].recon.directHits` (new,
+rl/gl only), beside the unchanged `recon.hits` — those two answer
+different questions and the Aim tab still shows the any-path one, since
+it stands in for the withheld MEASURED counter, which is an any-path
+count.
+
+**What made it derivable.** KTX increments its rl/gl `hits` in the touch
+handler and nowhere else (`ktx/src/weapons.c:990-996`, `:1327-1333`), so
+the question is "did the projectile touch a player". On an instrumented
+demo the wire says so exactly — counting non-splash rl rows reproduces
+the block on 638 of 638 player rows — but the old half carries no splash
+flag, and the previous substitute (explosion endpoint within 48 units of
+the victim) over-counted rl by **80%**: a rocket detonating on the wall
+BESIDE a player is endpoint-near without having touched them.
+`damagerecon/direct.go` replaces it with two engine facts that
+disambiguate each other:
+
+- the flight's **trajectory**, followed forward past the detonation,
+  against the victim's 32×32×56 hull — the projectile is a zero-size
+  point entity, so a touch is exactly a point entering that box, and a
+  rocket flies a straight line so its two broadcast endpoints determine
+  the whole path;
+- the **magnitude**: a direct rocket deals a flat 110 and takes no splash
+  on top (the victim is `T_RadiusDamage`'s `ignore` entity), while splash
+  is `120 − 0.5·dist`. Over 3 275 wire rl rows, 623 of 623 direct rows
+  read exactly 110 (or 440 quadded) and exactly one splash row did.
+
+The 110 is era-dependent — KTX fixed it in commit `c7263e8f`
+(2008-09-29), before which it was id1's `100 + g_random()*20` — and the
+era is detected from the demo's own hit distribution, not from a version
+string.
+
+**Measured.** Per explosion against the wire splash flag (53 dm2/dm3
+demos, 18 039 rl instants): classification accuracy 73.5% → **97.9%**,
+precision 45.1% → **94.6%**, direct-count error +114% → **+1.4%**. Per
+player against the verbatim KTX block (188 archive demos):
+`acc.rl.hits` **1.23%** aggregate (was +80%), `acc.gl.hits` **0.61%**
+(was 1.22%) — both inside the band the already-shipped `lg` row occupies
+(0.91%), which is the bar this family ships at. Tables and method:
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"Can an old demo answer KTX's rl/gl question?".
+
+**The era signal is published too**, as `damage.rocketDirectDamage` —
+the constant the demo's own hits established, absent where they could
+not. It says which half of that measurement a row is in: rl runs 0.62%
+aggregate on the 567 rows that established the constant and 17.7% on the
+71 that did not. Nothing is gated on it, because those 71 are the
+LOW-ROCKET rows — more often exact than the rest, with the same p90 error
+of 2 — and withholding there would substitute the any-path count, four
+times KTX's. A genuinely pre-1.36 recording has no ground truth anywhere
+(every instrumented demo post-dates the constant by years); forcing the
+prior off as a proxy costs rl 0.8% → 13.9%, which is the bound to read
+for that era.
+
+A `derived` row (wire damage log, no KTX block) keeps `anyDamage` on
+rl/gl: its `hits` is also the aim section's measured counter, a validated
+any-path number that nothing asked to redefine. The web's `≠` marker
+follows the payload, so a reconstructed demo's RL accuracy loses the mark
+and a derived one keeps it.
+
+**Two damage-model corrections fell out of the same work**, both
+engine-sourced and both moving the numbers:
+
+- **Rocket splash is based on 120, not 110.** `T_MissileTouch` passes 120
+  to `T_RadiusDamage` (`weapons.c:1006`) — the 110 is the touch value and
+  belongs to a victim the radius pass explicitly skips. Modelling splash
+  at 110 understated every rocket splash by 10; measured on the ground
+  truth, `value + 0.5·dist` over 2 530 wire splash rows has median 122.4.
+  Correcting it improved bounded damage (given 0.81% → 0.76% mean over 321
+  player rows) and the derived summary against KTX (`dmg.given` 0.49% →
+  0.47%, `dmg.taken` 0.46% → 0.44%).
+- **Obituary-anchored rocket kills stop being published as direct hits.**
+  A kill named by the frag log never went through the candidate scorer, so
+  its `isSplash` kept its zero value and every rocket kill in the
+  reconstructed log read as a touch. They now take the same geometric
+  verdict as every other rocket row, and a kill with no tracked explosion
+  to judge stays splash — not seeing a touch is not seeing one.
+
 ### The web frontend adopts the v72–v74 signals (no schema change)
 
 Everything above had reached the Result, the REST API and the MCP tools

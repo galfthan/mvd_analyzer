@@ -4185,7 +4185,8 @@ components:
             BEFORE TREATING A RECONSTRUCTED FIGURE AS A MATCH TOTAL, and
             note that everything riding this section inherits it
             (playerStats' damage family and its reconstructed accuracy
-            hits, /aim's weapons[].recon.hits) rather than restating it.
+            hits, /aim's weapons[].recon.hits and .directHits) rather than
+            restating it.
             1.000 is the norm, not the top of a noisy scale. Measured over
             the full 10 702-demo validation sweep: 99.0% of reconstructions
             read 0.95 or better (median 1.000, 96% of them exactly 1.000),
@@ -4230,6 +4231,24 @@ components:
               type: number
           required: [kills, covered, ratio]
           type: object
+        rocketDirectDamage:
+          description: >
+            The server's DIRECT rocket damage constant, measured from this
+            demo's own hits (schema v74): 110 on every KTX since 1.36, which
+            replaced id1's `100 + g_random()*20` in 2008. RECONSTRUCTED
+            sections only, and only where the demo's rocket hits clustered
+            tightly enough to establish it — an older server spreads them
+            across 100..120 and a demo with few rockets cannot tell, so
+            absence means "this recording did not establish a constant",
+            never "the constant is not 110". It is published as an era
+            signal with consequences: the direct/splash classifier behind
+            `/aim`'s `weapons[].recon.directHits` leans on that constant for
+            its sharper signal, and the derived rl touch count runs 1.2%
+            aggregate error against the verbatim KTX block where it is
+            present against 13.9% with the prior disabled. Nothing is gated
+            on it — the rows where it is absent are the low-rocket ones,
+            where the count is off by a hit or two at most.
+          type: integer
         boundedSource:
           description: >
             Where a SUMMARY response's per-player bounded figures came from —
@@ -5103,8 +5122,28 @@ components:
                         hits:
                           description: >-
                             Fires that connected, per the reconstructed damage
-                            log. A zero inside a present block is a real
-                            "linked nothing".
+                            log — a fire that landed damage by ANY path, splash
+                            included (`anyDamage` in the playerStats
+                            `hitsConvention` vocabulary). A zero inside a
+                            present block is a real "linked nothing".
+                          type: integer
+                        directHits:
+                          description: >-
+                            RL/GL ONLY (schema v74): projectiles that TOUCHED a
+                            player — `directImpact`, the convention KTX's own
+                            `acc.rl.hits` / `acc.gl.hits` counts, since KTX
+                            increments that counter in the touch handler and
+                            nowhere else. This is the number
+                            `playerStats.accuracy.byWeapon[rl|gl].hits` carries
+                            on a reconstructed row, which is what makes an old
+                            demo comparable with a demoinfo-carrying one. NOT a
+                            subset of `hits` — it counts direct damage rows
+                            rather than joining through the fire's flight, so a
+                            point-blank rocket whose entity was never broadcast
+                            counts here and not there. Absent on every other
+                            weapon, where the two conventions coincide; absent
+                            means "the question does not arise", never "no
+                            direct hits".
                           type: integer
                       required:
                         - hits
@@ -7869,7 +7908,10 @@ components:
               recovered from the aim recon tier on a demo whose damage section
               is itself reconstructed — inference, not measurement. Only the
               weapons that tier validated (lg, sg, ssg, axe, rl, gl) carry
-              `hits`; ng/sng keep it absent.
+              `hits`; ng/sng keep it absent. rl/gl carry the DIRECT-impact
+              count there (schema v74), i.e. KTX's own convention for those
+              two, so an old demo's row and a block-carrying demo's row answer
+              the same question.
 
             The three are NOT the same measurement, so check src before
             comparing accuracies across demos — but the family is emitted
@@ -7878,23 +7920,31 @@ components:
 
             `src` is the evidence GRADE and does not say what the numbers
             count; the per-weapon `hitsConvention` does, and is the field to
-            gate a cross-demo comparison on. Derived and reconstructed `hits`
-            are always `anyDamage` — a fire that landed damage by any path.
-            KTX's are `anyDamage` for lg/axe/ng/sng, `directImpact` for rl/gl
-            and `pellets` for sg/ssg. Scored against the verbatim block on 188
-            instrumented archive demos (cmd/qw-demoinfo-eval), lg agrees to
-            0.9% in aggregate; rl and gl do NOT, because KTX's rl/gl `hits` is
-            the DIRECT-impact count and reads ~4x lower (rl) and ~1.5x lower
-            (gl); sg/ssg are pellet counts on both sides of KTX's ratio and
+            gate a cross-demo comparison on. `derived` `hits` are always
+            `anyDamage` — a fire that landed damage by any path.
+            `reconstructed` `hits` are `anyDamage` too, EXCEPT on rl/gl, which
+            carry `directImpact` since schema v74. KTX's are `anyDamage` for
+            lg/axe/ng/sng, `directImpact` for rl/gl and `pellets` for sg/ssg.
+
+            Scored against the verbatim block on 188 instrumented archive
+            demos (cmd/qw-demoinfo-eval, withhold-and-compare): reconstructed
+            rl agrees to **1.2%** in aggregate (46.9% of 638 rows exact,
+            p90 error 2), gl to **0.6%** (84.7% of 424 exact), lg to 0.9%.
+            A `derived` rl/gl row does NOT agree — it counts any damage path
+            and reads ~4x above the block on rl, ~1.5x on gl — and sg/ssg
+            never do, being pellet counts on both sides of KTX's ratio and
             trigger pulls on ours.
 
-            The direct-impact convention is NOT derivable on a demo with no
-            KTX block: the wire log's own splash flag reproduces KTX's rl
+            Deriving the direct-impact convention on a demo with no KTX block
+            took two goes. The wire log's own splash flag reproduces KTX's rl
             count exactly (638 of 638 rows) but is absent on the
-            pre-instrumentation half, where the reconstruction's geometric
-            direct/splash verdict answers it for gl (1.2% aggregate) and not
-            for rl (+80%) — a rocket detonating on the wall beside a player
-            looks like one that touched them. See damagerecon/ACCURACY.md.
+            pre-instrumentation half, and the first substitute — an explosion
+            endpoint within 48 units of the victim — over-counted rl by 80%,
+            since a rocket detonating on the wall BESIDE a player is
+            endpoint-near without ever having touched them. v74 replaces it
+            with the flight's trajectory against the player hull plus the
+            flat-110 direct-damage magnitude, which is what the numbers above
+            measure. See damagerecon/ACCURACY.md.
 
             When KTX carries an acc block the family is replaced WHOLESALE,
             never merged per weapon: mixing pellet counts with trigger pulls
@@ -7921,13 +7971,15 @@ components:
                           this value match; gate any cross-demo aggregation on it.
 
                           `anyDamage` — one fire that landed damage by any path, splash
-                          included. Every weapon of a `derived` / `reconstructed` family, and
-                          KTX's own counter for the weapons with a single damage path
-                          (lg, axe, ng, sng).
+                          included. Every weapon of a `derived` family, lg/sg/ssg/axe of a
+                          `reconstructed` one, and KTX's own counter for the weapons with a
+                          single damage path (lg, axe, ng, sng).
 
                           `directImpact` — the projectile TOUCHED a player. KTX's rl/gl
-                          counter only (ktx/src/weapons.c:994, :1329); a rocket that killed by
-                          splash alone is not a hit to it. Measured on 638 archive rows, the
+                          counter (ktx/src/weapons.c:994, :1329) — a rocket that killed by
+                          splash alone is not a hit to it — and, since schema v74, the rl/gl
+                          rows of a `reconstructed` family, which reproduce it to 1.2% / 0.6%
+                          aggregate on 638 / 424 archive rows. Measured on the same rows, the
                           any-path count runs ~4x above this on rl and ~1.5x on gl, so mixing
                           the two turns a definition change into a trend.
 

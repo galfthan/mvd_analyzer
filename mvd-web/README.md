@@ -410,22 +410,29 @@ off the wire, and marking half the corpus would make the mark meaningless.
 
 The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
 `withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
-family the demo has — and the two are counted differently. KTX's own
-counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`; the
-derived and reconstructed families count any fire that landed damage, on
-every weapon. On `rl` that is ~4× the KTX number. Same column, same `%`,
-different question — and the comparison people actually make is between two
+family the demo has — and they are not all counted the same way. KTX's
+own counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`;
+the `derived` family counts any fire that landed damage, on every weapon,
+which on `rl` is ~4× the KTX number. Same column, same `%`, different
+question — and the comparison people actually make is between two
 screenshots, where a tooltip does not exist.
 
 So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
 weapon wears a **`≠`** in the text, with a footnote under the table that
 appears exactly when some cell wears it. The rule is per weapon, not per
 family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`): a
-KTX-overlaid family matches on every weapon and is never marked, while a
-derived/reconstructed one is marked on `rl`/`gl`/`sg`/`ssg` and left plain
-on `lg`/`ng`/`sng`/`axe`, where KTX counts the same event we do. Two `Acc`
-figures are comparable exactly when weapon **and** convention match; the
-full convention text stays in the tooltip.
+KTX-overlaid family matches on every weapon and is never marked; a
+`derived` one is marked on `rl`/`gl`/`sg`/`ssg`; a `reconstructed` one is
+marked on `sg`/`ssg` ONLY, because since v74 its `rl`/`gl` publish KTX's
+own direct-impact count (`recon.directHits`) and are on the server's
+scale. `lg`/`ng`/`sng`/`axe` are never marked — KTX counts the same event
+we do. Two `Acc` figures are comparable exactly when weapon **and**
+convention match; the full convention text stays in the tooltip.
+
+The Aim tab's `Hits` column is deliberately the OTHER number on those two
+weapons: it stands in for the withheld measured counter, which is an
+any-path count, so a reconstructed `RL` figure there reads higher than the
+Summary's `Acc`. Both are labelled; neither is a correction of the other.
 
 Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
 inert on these cells — the only rule for those classes is scoped to

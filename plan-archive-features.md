@@ -320,6 +320,12 @@ own late-stat-instant tolerance). Numbers and method:
 
 ng/sng stay withheld: nail linking is opt-in, so their measured counter
 is zero on every corpus row and there is nothing to validate against.
+(Pointer for whoever picks that up: the line-extrapolation machinery the
+v74 direct-impact classifier uses — `damagerecon/direct.go`'s
+segment-versus-player-hull test on a flight's two broadcast endpoints —
+applies to nails unchanged, since a spike flies straight at 1000 ups with
+no deviation, so a nail's touch is the same geometric question a rocket's
+is.)
 
 Also withheld on a reconstructed section, per field, in
 `result.WeaponAimRecon` and RESULT_SCHEMA: per-fire `hit` columns, the
@@ -555,10 +561,48 @@ large positive `frags`).
 RESULT_SCHEMA now carries the per-weapon comparability table, and the
 payload carries `accuracy.byWeapon[].hitsConvention` so a consumer does
 not have to read prose to know whether two numbers may be compared.
-Deriving KTX's own convention on an old demo was tried and does not
-work: the wire splash flag reproduces `acc.rl.hits` on 638 of 638 rows,
-but the reconstruction's geometric direct/splash verdict answers `gl`
-(1.2% aggregate) and not `rl` (+80%).
+
+**Follow-up done, still v74: the rl/gl gap is closed, not just named.**
+Deriving KTX's own convention was tried once and refuted — the wire
+splash flag reproduces `acc.rl.hits` on 638 of 638 rows, but the
+endpoint-proximity substitute (explosion within 48 units of the victim)
+answered `gl` at 1.2% aggregate and over-counted `rl` by **+80%**,
+because a rocket detonating on the wall BESIDE a player is endpoint-near
+without having touched them. `damagerecon/direct.go` replaces the
+proximity test with two engine facts that disambiguate each other: the
+flight's TRAJECTORY, followed forward past the detonation, against the
+victim's 32×32×56 hull (the projectile is a zero-size point entity, so a
+touch is exactly a point entering the box, and a rocket flies straight so
+its two broadcast endpoints determine the whole path); and the
+MAGNITUDE, since a direct rocket deals a flat 110 and takes no splash on
+top of it while splash is `120 − 0.5·dist` — over 3 275 wire rl rows, 623
+of 623 direct rows read exactly 110 or 440 and exactly one splash row
+did. The 110 is era-dependent (KTX commit `c7263e8f`, 2008-09-29,
+replaced id1's `100 + g_random()*20`) and the era is detected from the
+demo, not from a version string.
+
+Measured: per explosion against the wire flag, classification accuracy
+73.5% → **97.9%** and direct-count error +114% → **+1.4%** over 18 039
+rl instants; per player against the verbatim block, `acc.rl.hits`
+**1.23%** aggregate (46.9% of 638 rows exact) and `acc.gl.hits`
+**0.61%** (84.7% of 424) — both inside the band the shipped `lg` row
+occupies (0.91%); raw eval output in
+`.reports/direct-impact-2026-08-24/`. The measured era rides along as
+`damage.rocketDirectDamage`, which splits that rl figure into 0.62% on
+the 567 rows whose demo established the constant and 17.7% on the 71
+low-rocket rows that did not; nothing is gated on it (those rows are
+*more* often exact, and the alternative there is the 4x any-path count).
+So a reconstructed row now publishes
+`hitsConvention: "directImpact"` on rl/gl, riding the new
+`aim...recon.directHits`, and the two archive halves are on one scale.
+A `derived` row keeps `anyDamage` there: its `hits` is also the aim
+section's MEASURED counter. Two model corrections fell out of the same
+work — rocket splash is based on 120, not the direct 110
+(`weapons.c:1006`), worth 0.81% → 0.76% on bounded given; and
+obituary-anchored rocket kills, which never went through the candidate
+scorer, stopped being published as direct hits. Tables:
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"Can an old demo answer KTX's rl/gl question?".
 
 **Not done, deliberately.** `speed` (max/avg units/s) stays KTX-only —
 the position streams could support it, but it is a different derivation
@@ -567,7 +611,9 @@ KTX-only: our region-control view answers a different question, and
 faking KTX's duel-control heuristic would be a second, disagreeing
 number. `dmg.teamWeapons` stays KTX-only (the reconstruction does not
 bucket team damage by the victim's inventory). `ng`/`sng` accuracy hits
-stay withheld until nail linking has ground truth to validate against.
+stay withheld until nail linking has ground truth to validate against —
+see the note under lead 6 on reusing the v74 hull-intersection test for
+nail flights.
 
 ## 10. Backpack pickup linkage on reconstructed drops (successor to lead 2)
 

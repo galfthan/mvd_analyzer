@@ -37,13 +37,16 @@ The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/qw-recon-eval-dm2dm3-2026-08-15/`, an
 untracked per-machine report directory; fetched with
 `cmd/fetch-eval-corpus`) scores comparably: bounded given median
-**0.60%** (mean 0.81%, p90 1.85%, ≤2% 92%), bounded taken 0.04%, raw
-given 1.23%, raw taken 1.71%.
+**0.58%** (mean 0.76%, p90 1.68%, ≤2% 94%), bounded taken 0.04%, raw
+given 1.24%, raw taken 1.74%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.5% on unambiguous enemy
-instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.2%, gl 99.5%, axe 98%).
+instants (rl 99.7%, lg 99.5%, sg 97.9%, ssg 98.1%, gl 99.7%, axe 98%).
+The same run also scores the direct/splash verdict per rl explosion
+against the wire's own flag — see §"Can an old demo answer KTX's rl/gl
+question?".
 
 A third corpus generalizes the result across server generations: 216
 **archive-era instrumented demos** (a random sample of the 51k-demo
@@ -367,14 +370,14 @@ in percentage points:
 | weapon | rows | shots | measured acc | recon acc | med \|Δacc\| | mean \|Δacc\| | bias | ≤2pp | control (join on the wire log) |
 |---|---|---|---|---|---|---|---|---|---|
 | lg | 169 | 18 500 | 33.1% | 32.9% | 0.0pp | 0.3pp | −0.2pp | 96% | **exact** |
-| sg | 307 | 81 203 | 51.8% | 50.4% | 1.1pp | 1.3pp | −1.3pp | 78% | **exact** |
-| ssg | 86 | 4 339 | 71.9% | 70.1% | 0.0pp | 1.7pp | −1.7pp | 69% | **exact** |
-| axe | 38¹ | 1 417 | 8.0% | 7.8% | 0.0pp | 0.5pp | −0.5pp | 89% | 0.1pp |
-| rl | 303 | 35 135 | 47.9% | 48.4% | 0.0pp | 0.6pp | +0.4pp | 91% | +0.4pp |
-| gl | 109 | 4 948 | 15.0% | 15.1% | 0.0pp | 0.3pp | +0.0pp | 93% | +0.1pp |
+| sg | 307 | 81 203 | 51.8% | 50.4% | 1.1pp | 1.3pp | −1.3pp | 79% | **exact** |
+| ssg | 86 | 4 339 | 71.9% | 70.1% | 0.0pp | 1.8pp | −1.8pp | 67% | **exact** |
+| axe | 18¹ | 1 417 | 8.0% | 7.8% | 0.0pp | 0.6pp | −0.6pp | 83% | 0.1pp |
+| rl | 303 | 35 135 | 47.9% | 48.4% | 0.0pp | 0.7pp | +0.4pp | 90% | +0.4pp |
+| gl | 109 | 4 948 | 15.0% | 15.1% | 0.0pp | 0.4pp | +0.0pp | 92% | +0.1pp |
 
-¹ axe at the ≥ 10-swing threshold (nobody swings 20 times); every other
-row is ≥ 20 fires. The golden-corpus cache (13 demos) reproduces the
+¹ axe at the ≥ 20-swing threshold like every other row; the wider ≥
+10-swing view (38 rows) reads the same to a tenth of a point. The golden-corpus cache (13 demos) reproduces the
 shipped rows within 0.7pp (lg 0.1pp, sg 1.5pp, ssg 1.0pp, axe 0.0pp,
 rl 0.6pp, gl 0.2pp).
 
@@ -410,9 +413,11 @@ attacker+weapon, within damagerecon's own projectile tolerance
 despawn-to-stat-instant lag), one instant claimed per flight and each
 claimed instant consumed. A fire with no tracked flight links to
 nothing, exactly as the wire join treats it. The result: rl mean error
-7.4pp → **0.6pp** (bias +0.4, 91% of rows within 2pp), gl 1.3pp →
-**0.3pp**, both inside the ≤1.7pp band the hitscan tier ships at, and
-the hitscan rows are byte-identical before and after.
+7.4pp → **0.7pp** (bias +0.4, 90% of rows within 2pp), gl 1.3pp →
+**0.4pp**, both inside the ≤1.8pp band the hitscan tier ships at.
+(v73 measured rl at 0.6pp and gl at 0.3pp; the v74 direct-impact work
+moved the damage model — see §"The rocket splash base is 120" — and
+these are the numbers after it.)
 
 The **control residual** is +0.4pp on rl (+0.1 gl) rather than the
 hitscan set's exact 0.0, and it is one-sided by construction: the
@@ -456,9 +461,12 @@ default parse. The impact-counting join the harness still runs for them
 from the wire log — numbers with nothing to validate them, which is
 exactly what a shipped tier may not be.
 
-Everything except the hit COUNT is withheld on a reconstructed section —
-per-fire `hit` columns, the pellet split, direct/splash, the LG whiff
-geometry, the enemy/team/self slices. The reasons are per-field and
+Everything except the hit COUNTS is withheld on a reconstructed section —
+per-fire `hit` columns, the pellet split, the per-fire
+direct/splash/missed split, the LG whiff geometry, the enemy/team/self
+slices. (The aggregate direct-impact COUNT is carried, as
+`recon.directHits` for rl/gl — a different and separately validated
+claim; see §"Can an old demo answer KTX's rl/gl question?".) The reasons are per-field and
 documented on `result.WeaponAimRecon`; they all come back to the same
 two properties of the log: it is anchored at the victim's stat instant,
 and several hits landing on one instant merge into one delta with one
@@ -487,8 +495,8 @@ Over **188 archive demos, 665 player rows**:
 | `score.kills` | 665 | 95.5% | 2.26% |
 | `score.maxQuadSpree` | 665 | **99.8%** | 0.31% |
 | `score.maxSpree` | 665 | 92.9% | 3.12% |
-| `damage.given` (reconstructed) | 665 | 6.9% | **0.49%** |
-| `damage.takenEnemy` (reconstructed) | 663 | 9.2% | **0.46%** |
+| `damage.given` (reconstructed) | 665 | 6.2% | **0.47%** |
+| `damage.takenEnemy` (reconstructed) | 663 | 9.4% | **0.44%** |
 | `pickups.quad/pent/ring.took` | 273/80/78 | **100.0%** | 0.00% |
 | `hold.powerups.quad.ms` (to the second) | 273 | 96.0% | 0.07% |
 | `hold.powerups.pent.ms` | 80 | 82.5% | 0.49% |
@@ -496,8 +504,10 @@ Over **188 archive demos, 665 player rows**:
 | `accuracy.lg.attacks` | 436 | 98.4% | 0.00% |
 | `accuracy.rl.attacks` | 638 | 99.8% | 0.00% |
 | `accuracy.gl/ng/sng.attacks` | 424/139/336 | 100.0% | 0.00% |
-| `accuracy.lg.hits` (recon tier) | 436 | 65.8% | **0.89%** |
-| `accuracy.axe.hits` | 86 | 98.8% | 6.25% |
+| `accuracy.lg.hits` (recon tier) | 436 | 65.8% | **0.91%** |
+| `accuracy.rl.hits` (recon tier, directImpact — v74) | 638 | 46.9% | **1.23%** |
+| `accuracy.gl.hits` (recon tier, directImpact — v74) | 424 | 84.7% | **0.61%** |
+| `accuracy.axe.hits` | 86 | 97.7% | 12.50% |
 
 The powerup-seconds rows are all **one-directional**: every mismatch on
 all three powerups is exactly −1 s, never +1. Both sides truncate to
@@ -545,69 +555,203 @@ archive demos, in 43 of them; on this population the fix took
 `maxSpree` from 92.6% to 92.9% overall, removed both +1 outliers from
 the conditioned subset, and moved exactly one golden row.
 
-**Three fields are deliberately NOT scored as agreement**, because the
-two sources are not measuring the same quantity, and the eval reports
-them only to pin the size of the gap:
+(The `axe.hits` row is 86 rows and a bias of +0.02 per row — one row
+moved between the v73 and v74 measurements, on a denominator small
+enough that its aggregate swings by 6 points when it does.)
+
+**Two fields are deliberately NOT scored as agreement**, because the two
+sources are not measuring the same quantity, and the eval reports them
+only to pin the size of the gap:
 
 - `accuracy.sg/ssg.attacks` and `.hits` — KTX counts PELLETS on both
   sides of its ratio, this pipeline counts trigger pulls and fires that
   connected. The observed ratios (83% / 93% aggregate) are exactly the
   6-and-14-pellet spreads.
-- `accuracy.rl.hits` (~4x KTX) and `.gl.hits` (~1.5x) — KTX's rl/gl
-  `hits` is the DIRECT-impact count (`ktx/src/weapons.c:994`, `:1329`);
-  ours counts a fire that landed damage by any path, splash included. The
-  recon tier reproduces OUR convention to 0.6 pp / 0.3 pp (above), which
-  is the number that decides whether it ships. Since v74 the row says so
-  itself: `accuracy.byWeapon[].hitsConvention`. Why it says so rather
-  than closing the gap is the next section.
+- `accuracy.rl/gl.anyDamage/recon` — the convention a reconstructed row
+  no longer publishes for those two, kept as a diagnostic: a fire that
+  landed damage by ANY path, which reads ~4x above KTX on rl (365%
+  aggregate) and ~1.5x on gl (55%). Until v74 that WAS the published
+  number and the gap was named rather than closed; the next section is
+  how it was closed.
 
-### Can an old demo answer KTX's rl/gl question? (2026-08-23)
+### Can an old demo answer KTX's rl/gl question? (2026-08-24)
 
-Not for rl, and the harness measures both halves of that.
+Yes, since v74 — after one refutation and one rebuild. The harness
+measures every step.
 
 **The convention is confirmed exactly.** `dmg_is_splash` is raised only
 inside `T_RadiusDamage`'s loop (`ktx/src/combat.c:1207-1227`), so the
 direct `T_Damage` in `T_MissileTouch` reaches the wire unflagged — and
-KTX's `hits++` sits in that same touch handler. Counting the wire log's
-non-splash `rl` rows therefore ought to BE the block's `acc.rl.hits`,
-and it is: **638 of 638 player rows exact, 0.00% aggregate**
-(`acc.rl.direct/wire`). Nothing about that count is inference.
+KTX's `hits++` sits in that same touch handler
+(`ktx/src/weapons.c:990-996`). Counting the wire log's non-splash `rl`
+rows therefore ought to BE the block's `acc.rl.hits`, and it is: **638
+of 638 player rows exact, 0.00% aggregate** (`acc.rl.direct/wire`).
+Nothing about that count is inference.
 
-**But the wire flag is what the old half does not have**, and the only
-substitute is `damagerecon`'s geometric verdict — explosion endpoint
-within `rDirect` (48 units) of the victim. Joined through the same
-flight bracket the shipped tier uses (`aimcore.ReconDirectHitsForEval`):
+**The wire flag is what the old half does not have**, so the flag itself
+has to be reconstructed — after which the same row count applies.
+
+**Refuted (2026-08-23): explosion endpoint within 48 units.** The first
+substitute was the endpoint proximity `damagerecon` already used to pick
+its damage-model branch, joined through the shipped tier's flight
+bracket. It answered `gl` and not `rl`:
 
 | column | rows | exact | aggregate | mean per-row accuracy error |
 |---|---|---|---|---|
 | `acc.gl.direct/recon` | 424 | 71.7% | **1.22%** | 2.24 pp |
-| `acc.gl.hits` (any path) | 424 | 43.2% | 54.5% | 6.29 pp |
 | `acc.rl.direct/recon` | 638 | 10.0% | **+80.1%** | 8.32 pp |
-| `acc.rl.hits` (any path) | 638 | 1.6% | 364% | 35.4 pp |
-| `acc.lg.hits` (the shipped benchmark) | 436 | 65.8% | 0.89% | 0.35 pp |
 
-A grenade is contact-fused, so where it detonates IS where it touched —
-the geometry answers the question. A rocket is not: one detonating on
-the wall beside a player is geometrically the same event as one that
-touched them, and the derivation over-counts by 80%.
+A grenade is contact-fused, so where it detonates IS where it touched. A
+rocket is not: one detonating on the wall BESIDE a player is
+endpoint-near without ever having touched them.
 
-Shipping the KTX convention for gl alone would put the two projectile
-weapons in one `byWeapon` map under two conventions — the ambiguity the
-marker exists to end — so neither ships, and `hitsConvention` states the
-difference instead. The gl column stays in the harness because it is the
-measurement that decided, not a candidate.
+**Shipped (2026-08-24, schema v74): trajectory + magnitude**
+(`direct.go`). Two engine facts replace the proximity test, and they
+disambiguate each other:
 
-(`acc.gl.direct/wire` is in the table too, at 100% under-count. That is
+1. **Trajectory against the hull.** The projectile is a zero-size point
+   entity and the player hull a fixed 32×32×56 box
+   (`ktx/src/weapons.c:1083`, `client.c:34-37`), so a touch is exactly a
+   point entering that box. A rocket flies a straight line at 1000 ups,
+   so the tracked flight's spawn and despawn origins determine the whole
+   trajectory — including the stretch past the last broadcast position,
+   which is where the touch happened. The line is followed FORWARD from
+   the detonation point by 44 units (the engine's 8-unit explosion
+   pull-back, `weapons.c:1008`, plus one server frame of travel) and not
+   backward at all: a touch detonates the rocket where it touched, so the
+   hull is always ahead of the reported point.
+2. **Magnitude.** A direct rocket deals a flat constant and takes NO
+   splash on top of it — `T_MissileTouch` hands the victim to
+   `T_RadiusDamage` as the `ignore` entity (`weapons.c:998-1006`) —
+   while splash is `120 − 0.5·dist`. On a fixed-constant server the two
+   curves cross at one distance, and the observation is decisive: over
+   3 275 wire `rl` rows on the dm2/dm3 corpus, **623 of 623 direct rows
+   read exactly 110 (or 440 quadded) and exactly one splash row did**.
+   The reconstruction reads the delta's RAW value, which for a survived
+   hit IS the wire value (health drop + armor drop = `take` + `save`,
+   exact for an integer damage, `combat.c:634-655`), so a survived hit
+   whose raw is not the constant cannot have been a lone touch. On a
+   killing hit the −99 corpse clamp breaks that guarantee and the
+   trajectory keeps the last word.
+
+**The direct-damage constant is era-dependent, and the era is measured
+rather than assumed.** KTX has dealt a flat **110** since commit
+`c7263e8f` (2008-09-29, qqshka, "this way it better (tm)"), which
+replaced id1's `100 + g_random()*20`; v1.35 and earlier still roll it,
+v1.36 (2009-09-24) and later do not. `detectRocketRegime` decides per
+demo from the demo's own hit distribution, so no version string is
+consulted and a pre-1.36 recording simply falls back to the trajectory
+alone, where the prior says nothing.
+
+**Two things the trajectory does NOT need**, both refuted by
+measurement rather than by argument, and both documented at their
+constants in `direct.go`: an EXCLUSIVITY pass across an explosion's
+victim set (the invariant is real — one explosion touches at most one
+player — but the wire violates it 0 times and this classifier 2 times in
+3 525 explosion groups), and the GRENADE FUSE (a flight ending before
+the 2.5 s fuse ended on a player; sound, but it moved the derived gl
+counter from 0.36% to 3.57% aggregate error, because our flight bracket
+is entity visibility rather than the fuse).
+
+**Per-explosion accuracy**, against the wire splash flag, over the
+53-demo dm2/dm3 ground-truth corpus (`cmd/qw-recon-eval`, the
+direct/splash block). `rl` only: the wire has no gl ground truth to
+score against, since `GrenadeTouch` does all its damage through
+`T_RadiusDamage` and every wire gl row is splash-flagged whether or not
+the grenade touched anybody.
+
+| | paired instants | classification accuracy | precision | recall | direct-count error |
+|---|---|---|---|---|---|
+| endpoint within 48 u | 18 032 | 73.5% | 45.1% | 96.7% | +114% |
+| trajectory + magnitude | 18 039 | **97.9%** | **94.6%** | **95.9%** | **+1.4%** |
+
+**Per-player accuracy**, against the verbatim KTX block on the 188
+instrumented archive demos (`cmd/qw-demoinfo-eval`, withhold-and-compare).
+Since v74 a reconstructed row PUBLISHES the direct-impact count for
+rl/gl, so the shipped comparison is `acc.rl.hits` / `acc.gl.hits`
+themselves; `anyDamage/recon` is the convention those rows no longer
+carry, kept in the harness so the gap stays measured.
+
+| column | rows | exact | aggregate | bias / row | p90 error |
+|---|---|---|---|---|---|
+| `acc.rl.hits` (directImpact, shipped) | 638 | **46.9%** | **1.23%** | −0.13 | 2 |
+| — where the demo established the 110 constant | 567 | 45.9% | **0.62%** | −0.07 | 2 |
+| — where it did not | 71 | 54.9% | 17.7% | −0.58 | 2 |
+| `acc.rl.direct/wire` (control) | 638 | 100.0% | 0.00% | 0.00 | 0 |
+| `acc.rl.anyDamage/recon` (not published) | 638 | 1.7% | 365% | +37.2 | 69 |
+| `acc.gl.hits` (directImpact, shipped) | 424 | **84.7%** | **0.61%** | −0.01 | 1 |
+| `acc.gl.anyDamage/recon` (not published) | 424 | 43.2% | 55% | +1.06 | 4 |
+| `acc.lg.hits` (the shipped benchmark) | 436 | 65.8% | 0.91% | −0.95 | 3 |
+
+Both land inside the band the already-shipped `lg` row occupies, which
+is the bar this family ships at — so both projectile weapons publish
+`hitsConvention: "directImpact"` on a reconstructed row and the
+`byWeapon` map holds one convention per weapon, exactly as a KTX row
+does. A `derived` row (wire damage log, no KTX block) keeps `anyDamage`
+on rl/gl: its `hits` is also the aim section's MEASURED counter, a
+validated any-path number that nothing asked to redefine.
+
+**How much the magnitude prior carries, and what happens without it.**
+`detectRocketRegime` establishes the constant on 567 of the 638 rows
+here, and the reconstruction publishes what it found as
+`damage.rocketDirectDamage` so a consumer can see which half a row is
+in. The split above is the reason nothing is GATED on it: the 71 rows
+where the regime is unestablished are the LOW-ROCKET ones — a demo needs
+several near-direct hits before the constant is measurable — and they are
+*more* often exact (54.9%) with the same p90 error of 2, the 17.7%
+aggregate being small absolute errors over small counts. Withholding
+there would substitute the any-path count, which is four times KTX's.
+
+That is not the same population as a genuinely PRE-1.36 server, which
+this corpus cannot contain: every demo carrying a wire damage log
+post-dates the fixed constant by years, so the vanilla `100 +
+g_random()*20` era has no ground truth anywhere and the honest statement
+is a bound, not a measurement. Forcing the prior off — the closest
+available proxy — moves rl from 0.82% to **13.9%** aggregate on a
+59-demo subset of this population. Read the trajectory-only figure as
+what a pre-1.36 recording gets, and `rocketDirectDamage`'s absence as
+the flag for it.
+
+**The derivation is a row count, not a join.** One projectile touches at
+most one player, so a touch IS a direct damage row: `aimcore.ReconDirectHits`
+counts the reconstructed log's non-splash rl/gl rows per attacker — the
+same arithmetic `acc.rl.direct/wire` runs on the wire log, which is what
+makes the eras comparable. Routing it through the fire→flight join that
+produces `recon.hits` instead measured **9.5%** aggregate error against
+the block, because that join treats a rocket whose entity the server never
+broadcast as a miss and KTX's touch counter does not. `directHits` is
+therefore not a subset of `hits` and may exceed it.
+
+(`acc.gl.direct/wire` is in the table above at 100% under-count. That is
 not a defect: `GrenadeTouch` counts the touch and then does ALL its
 damage through `GrenadeExplode` → `T_RadiusDamage`, so a direct grenade
 touch leaves no non-splash row on the wire either. The wire answers rl's
-question and not gl's; the reconstruction answers gl's and not rl's.)
+question and not gl's; the reconstruction answers both.)
 
-Rerun with `MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-demoinfo-eval
--dir <demos> -limit 500` from the repo root; demos with no KTX block or no
-wire damage log are skipped (312 of the 500 sampled here). The population
-above is the first 500 names of the box-local archive mirror in sort order,
-which is deterministic — the same 188 demos score on every run.
+### The rocket splash base is 120, not the direct 110 (2026-08-24)
+
+Found while building the classifier above, and worth stating separately
+because it moved the damage numbers. `T_MissileTouch` passes **120** to
+`T_RadiusDamage` (`ktx/src/weapons.c:1006`), the same base as a grenade;
+the 110 is the touch value and belongs to a disjoint victim (the touched
+player is the radius pass's `ignore`). This package modelled rocket
+splash at the direct constant, understating every rocket splash by 10.
+
+Measured on the dm2/dm3 ground truth: `value + 0.5·dist` over 2 530
+wire-flagged splash rows has median **122.4**, not 112 — the residual
+2.4 being our distance measured from the pulled-back TE_EXPLOSION point
+to the track origin rather than from the pre-pull-back origin to the
+bbox centre. Correcting the model improved the bounded family on the
+53-demo corpus (given mean 0.81% → 0.76%, ewep 1.57% → 1.49%,
+givenSelf 4.19% → 3.90%) and the derived summary against the KTX block
+(`dmg.given` 0.49% → 0.47%, `dmg.taken` 0.46% → 0.44%).
+
+The KILL raw top-ups deliberately did NOT follow it (`topUpBase`,
+`attribution.go`). A top-up only ever RAISES a value, so its floor must
+under-estimate; feeding it the true base multiplied the 10-point gap by
+the quad on exactly the quad-rocket kills it exists for and cost raw
+accuracy measurably (raw given 2.01% → 2.65% mean per player). The floor
+stays at the pair the eval corpus calibrated it at, and says so.
 
 ## Why the errors are what they are
 

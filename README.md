@@ -968,16 +968,18 @@ diff -r /tmp/before /tmp/after
    is absent on a demo whose obituaries never matched. Two things it
    does NOT claim. `maxSpree` deliberately diverges from KTX's, which
    credits a player's own suicide to their streak wherever teamplay is
-   off; and derived `hits` are not comparable to KTX's for `rl`/`gl`
-   (KTX counts direct impacts only, ours any path — ~4x apart on rl) or
-   for `sg`/`ssg` (pellets vs trigger pulls). That second one is stated
+   off; and `sg`/`ssg` `hits` are never comparable to KTX's (pellets vs
+   trigger pulls), nor are `rl`/`gl` on a `derived` family (KTX counts
+   direct impacts only, ours any path — ~4x apart on rl). That is stated
    in the payload rather than only in prose: every weapon carrying
    `hits` carries `hitsConvention` (`anyDamage` | `directImpact` |
    `pellets`), so a consumer can gate a cross-era comparison instead of
-   re-deriving the rule. Recovering KTX's own convention on old demos
-   was measured and does not work — the wire splash flag reproduces it
-   exactly, the reconstruction's geometry does so for `gl` and not for
-   `rl`. Measured against the
+   re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
+   KTX's question (schema v74): the reconstruction classifies each
+   explosion direct-vs-splash from the flight's trajectory against the
+   player hull plus the flat-110 direct-damage constant, and the
+   resulting counts agree with the block to 1.2% / 0.6% in aggregate.
+   Measured against the
    verbatim block on 188 instrumented demos by `cmd/qw-demoinfo-eval`;
    the full agreement table is in
    [`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md).

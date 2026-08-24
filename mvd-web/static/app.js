@@ -1098,7 +1098,7 @@ function holdCell(stat, win) {
 // a derived one four times its size.
 const HITS_CONVENTION_TITLES = {
     anyDamage: 'Hits = fires that landed damage by any path (splash included)',
-    directImpact: 'Hits = direct impacts only (KTX rl/gl) — reads far lower than an any-path count',
+    directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
     pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
 };
 
@@ -1126,18 +1126,20 @@ function ktxHitsConvention(weapon) {
 // hedged date is: this is a figure people screenshot.
 //
 // A KTX-overlaid family (every demo with a demoinfo block) matches by
-// construction and wears nothing. A derived or reconstructed one counts any
-// damage path on every weapon, so its rl/gl (~4x KTX's direct-impact count)
-// and its sg/ssg (trigger pulls, not pellets) are marked and its lg/ng/sng/axe
-// — where KTX counts the same event — are not.
+// construction and wears nothing. A DERIVED one counts any damage path on
+// every weapon, so its rl/gl (~4x KTX's direct-impact count) and its sg/ssg
+// (trigger pulls, not pellets) are marked. A RECONSTRUCTED one publishes
+// KTX's own direct-impact count on rl/gl (schema v74), so only its sg/ssg is
+// marked — the whole point of that change is that an old demo's rocket
+// accuracy is on the server's scale.
 const ACC_OFF_SCALE_MARK = '≠';
 const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
-    'a hit here is any fire that landed damage, where KTX counts direct impacts only (rl/gl) or pellets (sg/ssg). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (sg/ssg) or direct impacts only (rl/gl, on a demo whose damage came off the wire). ' +
     'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
 // The same statement as the table's footnote, which is where a reader who
 // cannot hover — anyone looking at a screenshot of this panel — meets it.
 const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
-    'a hit here is any fire that landed damage, where KTX counts direct impacts only (RL/GL) or pellets (SG/SSG). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or direct impacts only (RL/GL). ' +
     'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
 
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
@@ -12135,6 +12137,14 @@ function aimWeaponView(w) {
 // so it divides by the same `shots`. A block's ABSENCE means the weapon was
 // not recovered (ng/sng never are), while `hits: 0` inside a present block is
 // a real "linked nothing" and prints as 0.
+//
+// Deliberately NOT `recon.directHits`, the v74 companion for rl/gl. That one
+// answers KTX's question — projectiles that touched a player — and is what
+// the Summary's Acc column publishes on a reconstructed demo, which is why an
+// RL figure here reads higher than the one there. This tab is the aim tier
+// and stands in for the MEASURED counter beside it, which is an any-path
+// count; swapping the definition under it would make the two states of this
+// same cell incomparable.
 //
 // Returns {n, recon} or null for "no answer on this demo".
 function aimHitsValue(w) {
