@@ -210,6 +210,173 @@ func TestSplashBandPositiveInsideAdmission(t *testing.T) {
 	}
 }
 
+// TestSelfHalvingBeforeMultiplication pins the ORDER of the three factors a
+// self splash goes through, which is the whole of what lead A corrected.
+// T_RadiusDamageApply subtracts the falloff from the base, halves THOSE
+// points when the damaged entity is the attacker (ktx/src/combat.c:1189-1193),
+// and only then does T_Damage multiply by the quad (:537-543).
+//
+// At 100 units under quad that is (120 − 50)·0.5·4 = 140. The two orderings
+// this package has actually shipped or had proposed produce different
+// numbers, so each is pinned as a NON-fit rather than left to a comment:
+// halving the base first (60 − 50)·4 = 40, and the "self splash = D −
+// 0.25·dist" form damageModelScore's comment used to describe,
+// (120 − 25)·4 = 380.
+func TestSelfHalvingBeforeMultiplication(t *testing.T) {
+	if got := splashModel(100, 4, 0.5); got != 140 {
+		t.Fatalf("quad self splash at 100u must be (120-50)*0.5*4 = 140, got %v", got)
+	}
+	// The quad and the halving commute with each other but NOT with the
+	// falloff: dropping the falloff to the far side changes the value.
+	if splashModel(100, 4, 0.5) == (120*4-0.5*100)*0.5 {
+		t.Fatal("the base-first ordering must not reproduce the engine's value")
+	}
+	in := &inputs{rlLo: 110, rlHi: 110}
+	c := &candidate{weapon: "rl", kind: "proj", dEnd: 100, isSplash: true}
+	if pen, ok := in.damageModelScore(140, false, c, true, true); !ok || pen != 0 {
+		t.Fatalf("140 must fit the quad self band exactly, got pen=%v ok=%v", pen, ok)
+	}
+	for _, wrong := range []int{40, 380} {
+		if pen, _ := in.damageModelScore(wrong, false, c, true, true); pen == 0 {
+			t.Fatalf("%d comes from a different factor ordering and must not fit", wrong)
+		}
+	}
+}
+
+// TestSplashAdmissionBoundary pins the engine reach + slack admission cut on
+// both endpoint kinds, through projCandidates rather than through
+// splashAdmit alone — the boundary only means something where it is applied.
+// 184 for a TE_EXPLOSION-snapped detonation point, 220 for a tracked flight's
+// last broadcast position (splashSlack).
+func TestSplashAdmissionBoundary(t *testing.T) {
+	vpos := vec3{0, 0, 0}
+	for _, tc := range []struct {
+		exact  bool
+		accept float64
+		reject float64
+	}{
+		{true, 183, 185},
+		{false, 219, 221},
+	} {
+		for _, d := range []float64{tc.accept, tc.reject} {
+			in := &inputs{projs: []projectile{{
+				weapon: "rl", shooter: "a", endT: 1000,
+				sp: vec3{d + 500, 0, 0}, ep: vec3{d, 0, 0}, epExact: tc.exact,
+			}}}
+			got := len(in.projCandidates("b", 1000, vpos))
+			want := 1
+			if d == tc.reject {
+				want = 0
+			}
+			if got != want {
+				t.Errorf("exact=%v d=%.0f: %d candidates, want %d (splashAdmit=%.0f)",
+					tc.exact, d, got, want, splashAdmit(tc.exact))
+			}
+		}
+	}
+}
+
+// TestDischargeReachGate pins the LG water discharge's own admission bound:
+// T_RadiusDamage visits findradius(damage + 40) for the blast exactly as it
+// does for a rocket, so a 100-cell discharge reaches 35·100 + 40 and no
+// further. The falloff alone does not give that bound — 35·cells − 0.5·dist
+// stays positive out to nearly twice it, which is the population this gate
+// removes.
+func TestDischargeReachGate(t *testing.T) {
+	const cells = 100
+	if got, want := dischargeReach(cells), 35.0*cells+40.0+splashSlack(false); got != want {
+		t.Fatalf("dischargeReach(%d) = %v, want %v", cells, got, want)
+	}
+	mk := func(d float64) *inputs {
+		return &inputs{
+			discharges: []discharge{{t: 1000, player: "a", cells: cells}},
+			tracks: map[string]*track{"a": {pt: &result.PositionTrack{
+				T: []int32{0, 2000}, X: []float32{float32(d), float32(d)},
+				Y: []float32{0, 0}, Z: []float32{0, 0},
+			}}},
+			players: map[string]*result.PlayerStream{},
+		}
+	}
+	inside := dischargeReach(cells) - 1
+	if got := len(mk(inside).dischargeCandidates("b", 1000, vec3{})); got != 1 {
+		t.Errorf("a discharge %.0fu away is inside the blast: %d candidates, want 1", inside, got)
+	}
+	outside := dischargeReach(cells) + 1
+	if got := len(mk(outside).dischargeCandidates("b", 1000, vec3{})); got != 0 {
+		t.Errorf("a discharge %.0fu away is past findradius: %d candidates, want 0", outside, got)
+	}
+	// ...and the falloff would still have called it damaging: 35*100 - 0.5*d
+	// is comfortably positive there, which is why the gate has to be explicit.
+	if 35.0*cells-0.5*outside <= 0 {
+		t.Fatal("the falloff must still be positive past the reach for this pin to mean anything")
+	}
+}
+
+// TestKillFloorSplitsOnVerdict pins that both kill top-ups price a DIRECT
+// rocket at T_MissileTouch's flat constant and everything else on the radius
+// curve. The engine hands the touched entity to T_RadiusDamage as its
+// `ignore` (ktx/src/weapons.c:998-1006), so a point-blank quad direct is 440,
+// never the 480 the radius curve would top it up to.
+func TestKillFloorSplitsOnVerdict(t *testing.T) {
+	in := &inputs{rlLo: 110, rlHi: 110}
+	if got := in.killModelFloor("rl", false, false, 0, 4); got != 440 {
+		t.Errorf("point-blank quad DIRECT rocket floor = %v, want 440", got)
+	}
+	if got := in.killModelFloor("rl", true, false, 0, 4); got != 480 {
+		t.Errorf("point-blank quad SPLASH rocket floor = %v, want 480", got)
+	}
+	// A grenade has no touch value at all — GrenadeTouch damages only through
+	// T_RadiusDamage (:1327-1333) — so its verdict must not move the curve.
+	if in.killModelFloor("gl", false, false, 60, 1) != in.killModelFloor("gl", true, false, 60, 1) {
+		t.Error("a grenade rides the radius curve whether or not it touched")
+	}
+	// The self-halving reaches the top-ups too, on the same side of the quad
+	// as everywhere else.
+	if got := in.killModelFloor("rl", true, true, 100, 4); got != 140 {
+		t.Errorf("quad self splash floor at 100u = %v, want 140", got)
+	}
+	// A floor may only claim the direct range's LOW end: on a pre-1.36 server
+	// the constant is a roll, and over-raising is the one thing a raise-only
+	// top-up cannot undo.
+	vanilla := &inputs{rlLo: 100, rlHi: 120}
+	if got := vanilla.killModelFloor("rl", false, false, 0, 1); got != 100 {
+		t.Errorf("spread-regime direct floor = %v, want the low end 100", got)
+	}
+}
+
+// TestGeomPriorIsNotAdmission pins the decoupling: the geometry PRIOR scores
+// on its own normalizer, so changing the admission radius re-admits or
+// refuses candidates without silently re-weighting the ones that stay. It
+// also pins that the prior no longer depends on epExact — scoring an
+// un-snapped endpoint BETTER than an exact one at the same distance was an
+// artifact of sharing splashAdmit, never a stated intent.
+func TestGeomPriorIsNotAdmission(t *testing.T) {
+	vpos := vec3{0, 0, 0}
+	mk := func(d float64, exact bool) candidate {
+		in := &inputs{projs: []projectile{{
+			weapon: "rl", shooter: "a", endT: 1000,
+			sp: vec3{d + 500, 0, 0}, ep: vec3{d, 0, 0}, epExact: exact,
+		}}}
+		c := in.projCandidates("b", 1000, vpos)
+		if len(c) != 1 {
+			t.Fatalf("d=%.0f exact=%v: want one candidate, got %d", d, exact, len(c))
+		}
+		return c[0]
+	}
+	if a, b := mk(100, true), mk(100, false); a.geom != b.geom {
+		t.Errorf("endpoint kind must not change the geometry prior: %v vs %v", a.geom, b.geom)
+	}
+	if got, want := mk(100, true).geom, 100.0/geomNorm*0.5; got != want {
+		t.Errorf("geom prior = %v, want %v", got, want)
+	}
+	// Monotone in distance and bounded well under the fixed-geom kinds' own
+	// priors (beam 0.3+, discharge 0.1, env 0.12) at the reach — the balance
+	// the normalizer is measured against.
+	if mk(20, true).geom >= mk(150, true).geom {
+		t.Error("the prior must grow with distance")
+	}
+}
+
 func TestDamageModelScoreEnvExactFitOnly(t *testing.T) {
 	in := &inputs{}
 	// Environmental tick values are engine-exact: a landing is 5, and any
@@ -239,5 +406,42 @@ func TestVictimWeaponClassBoundaries(t *testing.T) {
 	}
 	if got := victimWeaponClass(p, 3000); got != "rl" {
 		t.Fatalf("mid-interval must be rl, got %q", got)
+	}
+}
+
+// TestQuadRegimeGateIsNarrow pins the deathmatch-4 stand-down. KTX makes the
+// quad an OCTA there (ktx/src/combat.c:541) and this package models a flat
+// ×4, so a dmm4 recording that contains a quad would publish every quad hit
+// at about half value under source:"reconstructed" with no marker. It fires
+// on that pair alone: quad-less dmm4 (the povdmm4 duels are the population)
+// stays analyzable, and it never touches a non-dmm4 demo.
+func TestQuadRegimeGateIsNarrow(t *testing.T) {
+	mk := func(dm string, quad bool) *result.Result {
+		p := result.PlayerStream{Name: "a"}
+		if quad {
+			p.Quad = []result.Interval{{Start: 1000, End: 3000}}
+		}
+		return &result.Result{
+			Metadata: &result.MetadataResult{ServerInfo: map[string]string{"deathmatch": dm}},
+			Streams:  &result.Streams{Players: []result.PlayerStream{p}},
+		}
+	}
+	if got := ReconSkipReason(mk("4", true)); got != "dmm4-quad" {
+		t.Errorf("dmm4 with a quad on the wire must stand down, got %q", got)
+	}
+	if got := ReconSkipReason(mk("4", false)); got != "" {
+		t.Errorf("quad-less dmm4 stays analyzable, got %q", got)
+	}
+	if got := ReconSkipReason(mk("3", true)); got != "" {
+		t.Errorf("the ×4 is right outside dmm4, got %q", got)
+	}
+	if got := ReconSkipReason(mk("", true)); got != "" {
+		t.Errorf("no deathmatch key is not dmm4, got %q", got)
+	}
+	// The gate is damagerecon's alone: SkipModeReason also gates the KTX-side
+	// bounded pass, which reads the server's own values and does not care
+	// which multiplier produced them.
+	if got := SkipModeReason(map[string]string{"deathmatch": "4"}); got != "" {
+		t.Errorf("the shared server-mode detection must not learn about dmm4, got %q", got)
 	}
 }

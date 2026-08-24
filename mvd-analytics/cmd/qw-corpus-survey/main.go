@@ -209,7 +209,7 @@ func surveyOne(path string) row {
 		}
 	default:
 		// No section at all — ask the reconstruction why.
-		if reason := damagerecon.SkipModeReasonFromResult(res); reason != "" {
+		if reason := damagerecon.ReconSkipReason(res); reason != "" {
 			r.source = "skipped:" + reason
 		} else if _, err := damagerecon.Compute(res); err != nil {
 			r.source, r.err = "none", err.Error()

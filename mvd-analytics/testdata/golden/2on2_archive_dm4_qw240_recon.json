@@ -4996,7 +4996,7 @@
           {
             "recon": {
               "directHits": 8,
-              "hits": 76
+              "hits": 77
             },
             "shots": 237,
             "weapon": "rl"
@@ -16285,7 +16285,7 @@
           {
             "recon": {
               "directHits": 6,
-              "hits": 48
+              "hits": 47
             },
             "shots": 123,
             "weapon": "rl"
@@ -22923,7 +22923,7 @@
         "bounded": {
           "byWeapon": {
             "lg": 2631,
-            "rl": 4369,
+            "rl": 4412,
             "sg": 259,
             "ssg": 40
           },
@@ -22938,10 +22938,10 @@
           "enemyVsBoth": 1705,
           "enemyVsLg": 835,
           "enemyVsMid": 200,
-          "enemyVsRl": 3074,
+          "enemyVsRl": 3117,
           "enemyVsSg": 1485,
-          "ewep": 5614,
-          "given": 7299,
+          "ewep": 5657,
+          "given": 7342,
           "givenSelf": 553,
           "givenTeam": 759,
           "taken": 7436,
@@ -22949,7 +22949,7 @@
         },
         "byWeapon": {
           "lg": 2876,
-          "rl": 5280,
+          "rl": 5323,
           "sg": 284,
           "ssg": 40
         },
@@ -22964,13 +22964,13 @@
         "enemyVsBoth": 1848,
         "enemyVsLg": 1074,
         "enemyVsMid": 269,
-        "enemyVsRl": 3545,
+        "enemyVsRl": 3588,
         "enemyVsSg": 1744,
-        "ewep": 6467,
-        "given": 8480,
+        "ewep": 6510,
+        "given": 8523,
         "givenSelf": 580,
         "givenTeam": 1053,
-        "taken": 10332,
+        "taken": 10324,
         "takenEnv": 120
       },
       "raket": {
@@ -23006,7 +23006,7 @@
         },
         "byWeapon": {
           "lg": 4903,
-          "rl": 3090,
+          "rl": 3084,
           "sg": 367,
           "ssg": 224
         },
@@ -23022,12 +23022,12 @@
           "unknown": 291
         },
         "enemyVsBoth": 2644,
-        "enemyVsLg": 1295,
+        "enemyVsLg": 1289,
         "enemyVsMid": 129,
         "enemyVsRl": 2865,
         "enemyVsSg": 1856,
-        "ewep": 6804,
-        "given": 8789,
+        "ewep": 6798,
+        "given": 8783,
         "givenSelf": 515,
         "givenTeam": 740,
         "taken": 9754,
@@ -23044,7 +23044,7 @@
           },
           "byWeaponSelf": {
             "lg": 20,
-            "rl": 1015
+            "rl": 972
           },
           "byWeaponTeam": {
             "lg": 321,
@@ -23059,20 +23059,20 @@
           "enemyVsSg": 622,
           "ewep": 4786,
           "given": 5538,
-          "givenSelf": 1035,
+          "givenSelf": 992,
           "givenTeam": 734,
           "taken": 9296,
           "takenEnv": 557
         },
         "byWeapon": {
           "lg": 4193,
-          "rl": 3348,
+          "rl": 3346,
           "sg": 197,
           "ssg": 64
         },
         "byWeaponSelf": {
           "lg": 1120,
-          "rl": 1056
+          "rl": 1013
         },
         "byWeaponTeam": {
           "lg": 2001,
@@ -23080,16 +23080,16 @@
           "sg": 24,
           "unknown": 199
         },
-        "enemyVsBoth": 2257,
+        "enemyVsBoth": 2255,
         "enemyVsLg": 1646,
         "enemyVsMid": 150,
         "enemyVsRl": 3250,
         "enemyVsSg": 699,
-        "ewep": 7153,
-        "given": 8002,
-        "givenSelf": 2176,
+        "ewep": 7151,
+        "given": 8000,
+        "givenSelf": 2133,
         "givenTeam": 2518,
-        "taken": 11780,
+        "taken": 11777,
         "takenEnv": 582,
         "telefrags": 1
       },
@@ -23124,7 +23124,7 @@
         "byWeapon": {
           "gl": 112,
           "lg": 3008,
-          "rl": 5276,
+          "rl": 5270,
           "sg": 280,
           "ssg": 16
         },
@@ -23136,15 +23136,15 @@
           "rl": 249
         },
         "enemyVsBoth": 3329,
-        "enemyVsLg": 2423,
+        "enemyVsLg": 2417,
         "enemyVsMid": 390,
         "enemyVsRl": 1544,
         "enemyVsSg": 1178,
-        "ewep": 7296,
-        "given": 8864,
+        "ewep": 7290,
+        "given": 8858,
         "givenSelf": 888,
         "givenTeam": 399,
-        "taken": 12503,
+        "taken": 12500,
         "takenEnv": 451,
         "telefrags": 1
       }
@@ -23152,7 +23152,7 @@
     "byWeapon": {
       "gl": 112,
       "lg": 14980,
-      "rl": 16994,
+      "rl": 17023,
       "sg": 1128,
       "ssg": 344
     },
@@ -27977,12 +27977,12 @@
         "weapon": "rl"
       },
       {
-        "attacker": "ung",
+        "attacker": "math",
         "damage": 43,
-        "isSelf": true,
         "isSplash": true,
         "time": 350135,
         "victim": "ung",
+        "victimWep": "rl",
         "weapon": "rl"
       },
       {
@@ -29005,7 +29005,7 @@
       {
         "attacker": "raket",
         "bounded": 54,
-        "damage": 109,
+        "damage": 106,
         "time": 431921,
         "victim": "virus",
         "victimWep": "lg",
@@ -29741,7 +29741,7 @@
       {
         "attacker": "virus",
         "bounded": 38,
-        "damage": 107,
+        "damage": 101,
         "time": 483658,
         "victim": "math",
         "victimWep": "lg",
@@ -29911,7 +29911,7 @@
       {
         "attacker": "raket",
         "bounded": 100,
-        "damage": 104,
+        "damage": 101,
         "time": 495452,
         "victim": "ung",
         "victimWep": "lg",
@@ -29996,7 +29996,7 @@
       {
         "attacker": "ung",
         "bounded": 40,
-        "damage": 103,
+        "damage": 101,
         "time": 502028,
         "victim": "math",
         "victimWep": "both",
@@ -30987,11 +30987,11 @@
         "attacker": "math",
         "byWeapon": {
           "lg": 1595,
-          "rl": 2663,
+          "rl": 2706,
           "sg": 124,
           "ssg": 24
         },
-        "damage": 4406,
+        "damage": 4449,
         "victim": "ung"
       },
       {
@@ -31009,32 +31009,32 @@
         "attacker": "raket",
         "byWeapon": {
           "lg": 2286,
-          "rl": 1612,
+          "rl": 1609,
           "sg": 247,
           "ssg": 72
         },
-        "damage": 4217,
+        "damage": 4214,
         "victim": "ung"
       },
       {
         "attacker": "raket",
         "byWeapon": {
           "lg": 2617,
-          "rl": 1478,
+          "rl": 1475,
           "sg": 120,
           "ssg": 152
         },
-        "damage": 4367,
+        "damage": 4364,
         "victim": "virus"
       },
       {
         "attacker": "ung",
         "byWeapon": {
           "lg": 2933,
-          "rl": 1678,
+          "rl": 1676,
           "sg": 116
         },
-        "damage": 4727,
+        "damage": 4725,
         "victim": "math"
       },
       {
@@ -31053,11 +31053,11 @@
         "byWeapon": {
           "gl": 112,
           "lg": 1410,
-          "rl": 2163,
+          "rl": 2157,
           "sg": 92,
           "ssg": 16
         },
-        "damage": 3793,
+        "damage": 3787,
         "victim": "math"
       },
       {
@@ -31110,7 +31110,7 @@
         "victimWep": "both"
       }
     ],
-    "totalDamage": 43792
+    "totalDamage": 43778
   },
   "frags": {
     "byPlayer": {
@@ -43896,12 +43896,12 @@
             "both": 1705,
             "lg": 835,
             "mid": 200,
-            "rl": 3074,
+            "rl": 3117,
             "sg": 1485
           },
           "byWeapon": {
             "lg": 2631,
-            "rl": 4369,
+            "rl": 4412,
             "sg": 259,
             "ssg": 40
           },
@@ -43913,8 +43913,8 @@
             "rl": 556,
             "sg": 188
           },
-          "enemyWeapons": 5614,
-          "given": 7299,
+          "enemyWeapons": 5657,
+          "given": 7342,
           "givenSelf": 553,
           "givenTeam": 759,
           "src": "reconstructed",
@@ -44657,7 +44657,7 @@
           },
           "byWeaponSelf": {
             "lg": 20,
-            "rl": 1015
+            "rl": 972
           },
           "byWeaponTeam": {
             "lg": 321,
@@ -44667,12 +44667,12 @@
           },
           "enemyWeapons": 4786,
           "given": 5538,
-          "givenSelf": 1035,
+          "givenSelf": 992,
           "givenTeam": 734,
           "src": "reconstructed",
           "taken": 9296,
-          "takenEnemy": 7343,
-          "takenToDie": 124
+          "takenEnemy": 7386,
+          "takenToDie": 125
         },
         "hold": {
           "armor": {
@@ -44890,12 +44890,12 @@
             "both": 3960,
             "lg": 1882,
             "mid": 300,
-            "rl": 5636,
+            "rl": 5679,
             "sg": 3065
           },
           "byWeapon": {
             "lg": 6974,
-            "rl": 6873,
+            "rl": 6916,
             "sg": 527,
             "ssg": 264
           },
@@ -44910,8 +44910,8 @@
             "ssg": 12,
             "unknown": 192
           },
-          "enemyWeapons": 11478,
-          "given": 14843,
+          "enemyWeapons": 11521,
+          "given": 14886,
           "givenSelf": 1021,
           "givenTeam": 1372,
           "src": "reconstructed",
@@ -45155,7 +45155,7 @@
           },
           "byWeaponSelf": {
             "lg": 20,
-            "rl": 1834
+            "rl": 1791
           },
           "byWeaponTeam": {
             "lg": 471,
@@ -45165,11 +45165,11 @@
           },
           "enemyWeapons": 11102,
           "given": 13285,
-          "givenSelf": 1854,
+          "givenSelf": 1811,
           "givenTeam": 1095,
           "src": "reconstructed",
           "taken": 18722,
-          "takenEnemy": 14843
+          "takenEnemy": 14886
         },
         "hold": {
           "armor": {

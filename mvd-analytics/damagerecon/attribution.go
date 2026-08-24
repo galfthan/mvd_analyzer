@@ -50,6 +50,26 @@ const (
 	// measurement of it can be off by, and splashAdmit for the two together.
 	splashReach = 160.0
 
+	// geomNorm is what the projectile candidates' geometry PRIOR divides
+	// their explosion-to-victim distance by: a pure SCORING weight, saying
+	// how fast confidence should fall off with distance when several
+	// admitted candidates compete for the same delta.
+	//
+	// It is deliberately NOT splashAdmit. The prior read `dEnd/splashAdmit(..)`
+	// until this constant existed, which made two unrelated things one number:
+	// narrowing admission from 380 to 184/220 (plan-damage-recon.md §8 lead B)
+	// silently DOUBLED the distance slope of every projectile candidate and
+	// re-weighted them against the fixed-geom kinds (env 0.12, beam 0.3+,
+	// discharge 0.1) that did not move — so an admission change nobody
+	// described as a scoring change moved attribution. Worse, the divisor
+	// varied with epExact, which scored an un-snapped endpoint BETTER than an
+	// exact one at the same distance for no reason anyone had stated.
+	//
+	// The value is measured, not inherited: swept on the 30-demo dm3 half and
+	// confirmed on the held-out dm2 half — see ACCURACY.md §"The geometry
+	// prior's own normalizer".
+	geomNorm = 260.0
+
 	// regimeMinSamples: how many near-direct rocket observations a demo must
 	// carry before detectRocketRegime's clustering test says anything at all.
 	// Below it the demo is UNESTABLISHED (the question was never put); at or
@@ -523,15 +543,12 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// killing hit; the damage model still knows the floor the wire
 		// value cannot have been under (quad rockets are the big case:
 		// 440-ish raw vs ~200 observable). Only ever raises raw, and it is
-		// the engine's own radius formula at the measured distance — see
+		// the engine's own formula for the verdict stampRocketVerdict just
+		// stamped, at the measured distance — see killModelFloor, and
 		// splashModel for why the pair of fudge constants it used to carry
 		// went away with the quad-ordering fix.
-		q := in.quadFactor(best.attacker, d.t)
-		selfF := 1.0
-		if e.isSelf {
-			selfF = 0.5
-		}
-		modelMin := splashModel(best.dEnd, q, selfF)
+		modelMin := in.killModelFloor(best.weapon, e.isSplash, e.isSelf,
+			best.dEnd, in.quadFactor(best.attacker, d.t))
 		if m := int(modelMin); m > e.raw {
 			e.raw = m
 		}
@@ -632,7 +649,7 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			e.isSplash = !in.rocketTouched(bestDirect, bestNear,
 				delta{t: e.t, raw: e.raw, bounded: e.bounded, died: e.died}, q)
 		}
-		model = splashModel(bestD, q, 1.0)
+		model = in.killModelFloor(e.weapon, e.isSplash, e.isSelf, bestD, q)
 	case "lg":
 		// A discharge kill (35*cells radius blast) hides almost all of its
 		// raw value behind the clamp; the discharger's cells count knows it.
@@ -746,8 +763,10 @@ func (in *inputs) scoreCandidates(victim string, vtrack *track, d delta, cands [
 // (lower is better); feasible == false marks a physically impossible
 // candidate.
 //
-// QW radius damage: received = D − 0.5·dist(center, explosion); the
-// attacker's own splash = D − 0.25·dist. Rocket D = 100..120, grenade 120.
+// QW radius damage: received = D − 0.5·dist(center, explosion), and the
+// attacker's own splash halves THAT — 0.5·(D − 0.5·dist), not D − 0.25·dist,
+// because T_RadiusDamageApply halves the post-falloff points
+// (ktx/src/combat.c:1189-1193). Rocket D = 100..120, grenade 120.
 // LG = 30/cell, sg pellet 4×6, ssg ×14, ng spike 9, sng 18, axe 20.
 // Quad multiplies ×4.
 func (in *inputs) damageModelScore(obs int, died bool, c *candidate, isSelf, quad bool) (float64, bool) {
@@ -1011,7 +1030,7 @@ func (in *inputs) projCandidates(victim string, t int32, vpos vec3) []candidate 
 			continue
 		}
 		out = append(out, candidate{
-			geom: dEnd / splashAdmit(pr.epExact) * 0.5, attacker: pr.shooter, weapon: pr.weapon,
+			geom: dEnd / geomNorm * 0.5, attacker: pr.shooter, weapon: pr.weapon,
 			kind: "proj", dEnd: dEnd, ep: pr.ep, hasEP: true, epExact: pr.epExact,
 			isSplash: !direct, hullNear: hullDist(pr.ep, vpos) <= directHullNear,
 		})
@@ -1092,7 +1111,7 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 				}
 			}
 			out = append(out, candidate{
-				geom:     0.1 + dEnd/splashAdmit(true)*0.4 + ferr/tolFlightMs*0.15 + apen,
+				geom:     0.1 + dEnd/geomNorm*0.4 + ferr/tolFlightMs*0.15 + apen,
 				attacker: s.player, weapon: s.weapon, kind: "proj",
 				dEnd: dEnd, ep: ex.p, hasEP: true, epExact: true,
 				isSplash: !direct, hullNear: hullDist(ex.p, vpos) <= directHullNear,
@@ -1467,9 +1486,55 @@ func splashBase() (lo, hi float64) { return 120.0, 120.0 }
 // as the pair approaches the engine's own numbers: dm3 2.87% → 1.16% and dm2
 // 3.44% → 1.38% going from (110, 60) to (120, 0). So there is no pair left
 // to calibrate; the model is the engine's.
+//
+// Two honesty notes on that sweep. (120, 0) is the swept grid's CORNER, and
+// NEGATIVE slack was deliberately never swept: the corner is the engine's own
+// formula, and a pair beyond it would be a compensator fitted to this corpus'
+// residual error rather than a model of what the server did. The stopping
+// rule is engine truth, not the minimum of the curve. And the curve the sweep
+// minimized is the per-player MEAN; on dm3 the raw-given MEDIAN prefers a
+// base of 118 by a hair, which is the size of the residual the model does not
+// claim to explain.
 func splashModel(dist, quad, selfF float64) float64 {
 	lo, _ := splashBase()
 	return (lo - 0.5*dist) * quad * selfF
+}
+
+// killModelFloor is the value a killing hit's RAW cannot have been under,
+// given the direct/splash verdict already stamped on the event. Both kill
+// top-ups price themselves through it so they can never disagree.
+//
+// The verdict decides the CURVE, not just a label. A direct rocket is
+// T_MissileTouch's flat constant with no falloff and no radius damage on top:
+// the touched entity is handed to T_RadiusDamage as its `ignore`
+// (ktx/src/weapons.c:998-1006), so the two numbers belong to disjoint
+// victims. Pricing a direct off the 120 radius curve tops a point-blank quad
+// direct up to 480 where the engine dealt 440. Only the rocket has a touch
+// value — GrenadeTouch damages exclusively through GrenadeExplode →
+// T_RadiusDamage (:1327-1333) — so a direct grenade rides the radius curve
+// like any other.
+//
+// A floor may only assume the direct range's LOW end: a pre-1.36 server rolls
+// 100 + random()*20 (weapons.c:986), and detectRocketRegime narrows the pair
+// to 110..110 only on evidence. (pentSyntheticEvents takes the midpoint of
+// the same range instead because it SYNTHESIZES a value rather than raising
+// one — an under-estimate there is a lost hit, not a safe floor.)
+//
+// selfF carries T_RadiusDamageApply's `if (head == attacker) points *= 0.5`
+// (ktx/src/combat.c:1190-1193), which lands on the post-falloff points and
+// therefore inside splashModel, before T_Damage's quad. It has no direct
+// branch because a rocket never touches its own owner (directImpact
+// short-circuits on isSelf).
+func (in *inputs) killModelFloor(weapon string, isSplash, isSelf bool, dist, quad float64) float64 {
+	if weapon == "rl" && !isSplash {
+		lo, _ := in.directBase()
+		return lo * quad
+	}
+	selfF := 1.0
+	if isSelf {
+		selfF = 0.5
+	}
+	return splashModel(dist, quad, selfF)
 }
 
 // splashSlack is how far our explosion→victim distance can sit from the one
