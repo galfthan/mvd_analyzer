@@ -209,3 +209,74 @@ command lines that reproduce them.
 - The mvdsv/KTX puppet re-simulation endgame (REPORT.md lead #5).
 - Hub index build over the 23k-demo archive (consumes this, lives
   outside the repo).
+
+## 8. Open leads with evidence (2026-08-24, from the direct-impact review)
+
+Two engine facts found while reviewing the direct/splash classifier.
+Both are measured, neither is implemented, and both are recorded here
+rather than half-done so the next reader starts from the evidence.
+
+### Lead A — the quad multiplier is applied AFTER the radius falloff
+
+`T_RadiusDamage` calls `T_RadiusDamageApply` with a flat base (120 for
+both projectiles, `ktx/src/weapons.c:1006`, `:1300`), which computes
+`points = damage − 0.5·dist` (`combat.c:1189`) and only then hands
+`points` to `T_Damage`, where the quad multiplier is applied
+(`combat.c:537-543`). A quad splash is therefore **4·(120 − 0.5·d)**,
+not `4·120 − 0.5·d`.
+
+`modelBounds`, `topUpKillRaw` and `pentSyntheticEvents` all use the
+second form, and `attribution.go` states the first as an engine fact in
+a comment. It is not one.
+
+**Measured** on the 53-demo dm2/dm3 ground truth: 898 wire `rl` rows
+flagged splash whose attacker held the quad. `trap_findradius` caps
+splash reach at `damage + 40` = 160 units (`combat.c:1252`), so under
+the model in the code every one of those rows would have to read
+≥ 400 (`480 − 0.5·160`). The histogram:
+
+| value | rows | share |
+|---|---|---|
+| 40–119 | 20 | 2.2% |
+| 160–399 | 861 | 95.9% |
+| 400–439 | 17 | 1.9% |
+
+which is the engine form's range `[4·(120−80), 4·120) = [160, 480)`
+almost exactly, and not the code's `[400, 480)`. (The 20 rows under 160
+are quad-interval boundary noise: `120 − 0.5·d` on an unquadded hit
+lands in exactly that band.)
+
+**Disposition: not fixed in the direct-impact review batch.** The wrong
+form costs no published MAGNITUDE — every value the section publishes is
+the observed health/armor delta, and the model only scores CANDIDATES
+and floors the kill top-ups — which is why the eval never caught it. But
+it means a quad splash candidate is scored against a band it can never
+fall in (at 100 units the model expects 455–485 and the engine deals
+280), and the kill top-up's floor over-raises quad splash kills, which
+is the family with the worst residual (`raw given`). Fixing it needs the
+`slack`/`topUpBase` pair re-tuned against the eval in the same pass, and
+goldens will move; do it as its own change with a before/after of both
+evals.
+
+### Lead B — splash reach is 160 units, not `rSplash` 380
+
+Same line: `trap_findradius(world, inflictor->origin, damage + 40)`
+(`combat.c:1252`) is the ONLY set of entities `T_RadiusDamage` visits,
+so a 120-base explosion cannot damage anything past 160 units — and the
+cap does not scale with quad, since the quad is applied downstream in
+`T_Damage`. `attribution.go`'s `rSplash = 380` admits projectile
+candidates out to 380, so every candidate between 160 and 380 is one the
+engine could not have produced.
+
+**Disposition: not changed, and not obviously free.** `rSplash` is a
+CANDIDATE-ADMISSION radius, not a damage model, and it is measured to
+sit well above the observed distribution already (`p95 = 199` per the
+constant's own comment) — the population between 160 and 380 is mostly
+explosions our endpoint places further from the victim than the engine
+did, since our distance runs from the pulled-back `TE_EXPLOSION` point
+to the interpolated track ORIGIN while the engine measures to the bbox
+centre at the true detonation point (the same ~2.4-unit bias the splash
+base measurement found). Tightening to 160 + the interpolation slack is
+a real candidate, but it is a recall/precision trade that has to be
+measured, and it interacts with Lead A: the model bounds that would
+reject those candidates on VALUE are the ones Lead A has wrong.

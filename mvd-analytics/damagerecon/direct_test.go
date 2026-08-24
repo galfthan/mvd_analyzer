@@ -1,6 +1,10 @@
 package damagerecon
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
 
 // A rocket that flew INTO the victim is a touch; one that flew PAST them into
 // the wall beside them is not, even though both detonate the same short
@@ -112,6 +116,16 @@ func TestRocketTouchedMagnitudePrior(t *testing.T) {
 	if !fixed.rocketTouched(true, true, killing, 1) {
 		t.Error("a KILLING hit's raw is clamped, so the trajectory decides there")
 	}
+	// A MASKED delta is a death whose respawn hid the health row, so its raw
+	// is no more trustworthy than a killing hit's — the same escape hatch,
+	// and the branch that carries it is separate from `died`.
+	masked := delta{raw: 84, bounded: 84, masked: true}
+	if !fixed.rocketTouched(true, true, masked, 1) {
+		t.Error("a MASKED kill's raw is unreliable too: the trajectory decides")
+	}
+	if fixed.rocketTouched(false, true, masked, 1) {
+		t.Error("...and where the trajectory missed, a masked kill is still splash")
+	}
 	if fixed.rocketTouched(true, false, survived, 1) {
 		t.Error("a detonation far from the hull is not a touch at any magnitude")
 	}
@@ -120,5 +134,38 @@ func TestRocketTouchedMagnitudePrior(t *testing.T) {
 	}
 	if vanilla.rocketTouched(false, true, survived, 1) {
 		t.Error("...including when the value happens to read 110")
+	}
+}
+
+// An obituary-anchored rl/gl kill is named by the frag log, so nothing else
+// ever looks at its geometry — which makes topUpKillRaw the only place its
+// direct/splash verdict can be set, and the zero value (a TOUCH) the wrong
+// thing to leave standing. Every early return must therefore sit BELOW the
+// default, including the one for a victim with no position track at all: no
+// geometry is the strongest form of "no touch was seen".
+func TestTopUpKillRawDefaultsToSplashWithoutGeometry(t *testing.T) {
+	in := &inputs{rlLo: 110, rlHi: 110}
+	for _, w := range []string{"rl", "gl"} {
+		e := reconEvent{t: 1000, attacker: "a", victim: "b", weapon: w, raw: 90, bounded: 90, died: true}
+		in.topUpKillRaw(&e, nil)
+		if !e.isSplash {
+			t.Errorf("%s kill on a trackless victim published as a touch", w)
+		}
+	}
+	// A tracked victim with no explosion anywhere near the instant reaches the
+	// same verdict through the other early return.
+	tracked := &track{pt: &result.PositionTrack{
+		T: []int32{0, 2000}, X: []float32{0, 0}, Y: []float32{0, 0}, Z: []float32{0, 0},
+	}}
+	e := reconEvent{t: 1000, attacker: "a", victim: "b", weapon: "rl", raw: 90, bounded: 90, died: true}
+	in.topUpKillRaw(&e, tracked)
+	if !e.isSplash {
+		t.Error("a rocket kill with no tracked explosion to judge must stay splash")
+	}
+	// A non-projectile kill is not the counter's question and keeps its flag.
+	lg := reconEvent{t: 1000, attacker: "a", victim: "b", weapon: "lg", raw: 30, bounded: 30, died: true}
+	in.topUpKillRaw(&lg, nil)
+	if lg.isSplash {
+		t.Error("the splash default belongs to rl/gl alone")
 	}
 }

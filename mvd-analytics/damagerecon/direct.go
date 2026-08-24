@@ -32,29 +32,23 @@ import "math"
 //     constant is fixed (KTX >= 1.36) the observed magnitude alone almost
 //     decides the question — see rocketTouched.
 //
+// A fourth fact applies to grenades alone: the SPENT FUSE, which proves a
+// grenade died of its 2.5 s think rather than of a touch. Only the negative
+// direction of that signal survives contact with our evidence — see
+// grenadeFuseExpired.
+//
 // The failure mode all this replaces is one endpoint proximity cannot see: a
 // rocket detonating on the wall BESIDE a victim is within 48 units of them
 // and never passed through them. Measured against KTX's own counter, the
 // 48-unit test over-counted rl by 80% (ACCURACY.md).
 //
-// Two things deliberately NOT built, both refuted by measurement rather than
-// by argument:
-//
-//   - EXCLUSIVITY (one explosion touches at most one player, and the touched
-//     player takes no splash from it) is a true engine invariant, and it is
-//     not worth enforcing: over 3 525 rl/gl explosion groups on the dm2/dm3
-//     ground truth the wire violated it 0 times and this classifier violates
-//     it 2 times (0.06%). A cross-victim constraint pass would be a
-//     mechanism carrying two rows.
-//   - the GRENADE FUSE (GrenadeExplode is scheduled 2.5 s after the throw,
-//     weapons.c:1434, and only a player touch detonates one early —
-//     GrenadeTouch bounces off everything whose takedamage is not
-//     DAMAGE_AIM, :1335 — so a flight ending early ended on a player).
-//     Sound physics, but it moved the derived gl counter from 0.36%
-//     aggregate error to 3.57% against the verbatim KTX block, buying 1.4pp
-//     of exact rows on 149. The tracked flight brackets ENTITY VISIBILITY
-//     rather than the fuse, so the signal is noisier than the physics
-//     suggests.
+// One thing deliberately NOT built, refuted by measurement rather than by
+// argument: EXCLUSIVITY (one explosion touches at most one player, and the
+// touched player takes no splash from it) is a true engine invariant, and it
+// is not worth enforcing — over 3 525 rl/gl explosion groups on the dm2/dm3
+// ground truth the wire violated it 0 times and this classifier violates it
+// 2 times (0.06%). A cross-victim constraint pass would be a mechanism
+// carrying two rows.
 const (
 	// The player hull. hullHalf is the horizontal half-extent; the vertical
 	// extents are asymmetric about the origin.
@@ -103,6 +97,11 @@ const (
 	// their own spawn origin; this is for the TRACKLESS ones, whose only
 	// known source point is the shooter's track position.
 	muzzleOffsetZ = 16.0
+
+	// grenadeFuseObservedMs: the observed flight span above which a grenade
+	// is certain to have died of its FUSE rather than of a touch. See
+	// grenadeFuseExpired.
+	grenadeFuseObservedMs = 2400
 
 	// directHullNear bounds how far the detonation point may sit from the
 	// hull for a touch to be entertained AT ALL. It is a sanity gate on the
@@ -202,6 +201,30 @@ func directImpact(weapon string, from, ep, vpos vec3, isSelf bool) bool {
 	f := directFwdReach / l
 	b := vec3{ep.x + d.x*f, ep.y + d.y*f, ep.z + d.z*f}
 	return segHitsHull(ep, b, vpos, hullSlack)
+}
+
+// grenadeFuseExpired reports that this grenade died of its FUSE, which makes
+// it a certain non-touch: GrenadeExplode runs on the 2.5 s think
+// (ktx/src/weapons.c:1434) and GrenadeTouch — the only place KTX's gl `hits`
+// counter increments (:1327-1333) — never ran at all.
+//
+// It is the NEGATIVE half of the fuse signal, and the only half that
+// survives the confound. The positive half ("a flight ending EARLY ended on
+// a player") reads a short bracket as a touch, and a bracket is entity
+// VISIBILITY: a grenade leaving the spectator's PVS ends its bracket without
+// ending its life, so early is not evidence of anything (measured: it moved
+// the derived gl counter from 0.36% to 3.57% aggregate error). The confound
+// is one-sided — it can only make a flight look SHORTER than it was — so a
+// bracket that already spans the whole fuse cannot have been produced by it.
+//
+// Both conditions are needed. The span must cover the fuse (allowing two
+// demo frames of quantization at ~34 ms each, since both ends land on the
+// broadcast grid), and the flight must have ended in a matched TE_EXPLOSION
+// (epExact) rather than at a last-seen position, which is what says the
+// bracket ended because the grenade detonated and not because it went out
+// of sight.
+func grenadeFuseExpired(pr *projectile) bool {
+	return pr.weapon == "gl" && pr.epExact && pr.endT-pr.spawnT >= grenadeFuseObservedMs
 }
 
 // rocketTouched folds the MAGNITUDE prior over a rocket's trajectory

@@ -88,11 +88,10 @@ type DamageResult struct {
 	// since 1.36 (commit c7263e8f, 2008-09-29, which replaced id1's
 	// `100 + g_random()*20`; ktx/src/weapons.c:986).
 	//
-	// Present only on a RECONSTRUCTED section, and only when the demo's own
-	// rocket hits clustered tightly enough to establish it — an older server
-	// spreads them across 100..120 and leaves this ABSENT, as does a demo
-	// with too few rockets to tell. Absence is therefore "this recording did
-	// not establish a constant", never "the constant is not 110".
+	// Present exactly when RocketDirectRegime is RocketRegimeFixed, i.e. on
+	// a RECONSTRUCTED section whose own near-direct rocket hits clustered on
+	// the constant. Read the regime, not this field's absence, for WHY it is
+	// missing — the two absences mean different things.
 	//
 	// It is an era signal with consequences, which is why it is published
 	// rather than kept internal: the direct/splash classifier's magnitude
@@ -109,6 +108,26 @@ type DamageResult struct {
 	// count is off by at most a hit or two anyway, and withholding it there
 	// would substitute the any-path count, which is four times KTX's.
 	RocketDirectDamage int `json:"rocketDirectDamage,omitempty"`
+
+	// RocketDirectRegime (schema v74) says WHICH answer the measurement above
+	// reached, as a three-value total partition of every RECONSTRUCTED
+	// section (absent on `source: "ktx"`, where the wire's own splash flag
+	// makes the question moot). It exists because the constant's absence was
+	// two claims wearing one face:
+	//
+	//   - RocketRegimeFixed — the demo's near-direct hits clustered on 110;
+	//     RocketDirectDamage carries it and the classifier's magnitude prior
+	//     is in force.
+	//   - RocketRegimeSpread — there were enough near-direct hits to test the
+	//     hypothesis and they did NOT cluster. That is what a pre-1.36
+	//     `100 + g_random()*20` server looks like, and the touch count on
+	//     such a row rests on trajectory alone. It is evidence, not proof:
+	//     a noisy reconstruction on a modern server can land here too, which
+	//     is why the token names the OBSERVATION.
+	//   - RocketRegimeUnestablished — fewer near-direct hits than the test
+	//     needs, so nothing was established either way. The low-rocket case,
+	//     where the touch count stays accurate regardless.
+	RocketDirectRegime string `json:"rocketDirectRegime,omitempty"`
 
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
@@ -133,6 +152,14 @@ type DamageResult struct {
 const (
 	DamageSourceKTX           = "ktx"
 	DamageSourceReconstructed = "reconstructed"
+)
+
+// DamageResult.RocketDirectRegime vocabulary — a total partition of the
+// reconstructed sections. See the field for what each verdict claims.
+const (
+	RocketRegimeFixed         = "fixed"
+	RocketRegimeSpread        = "spread"
+	RocketRegimeUnestablished = "unestablished"
 )
 
 // DamageCoverage answers "how much of this match did the reconstruction

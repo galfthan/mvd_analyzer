@@ -390,7 +390,7 @@ the measurement that DECIDES whether it ships.
 fire's own server frame (the axe at its fixed +200 ms traceline delay).
 On those the control is exact to the last row — the join reproduces the
 measured counters from the wire log with zero error — so the whole
-residual is the reconstruction's, and it is ≤1.7pp mean with a small
+residual is the reconstruction's, and it is ≤1.8pp mean with a small
 negative bias (a hit whose delta the reconstruction attributed elsewhere
 is a lost hit; there is no mechanism that invents one).
 
@@ -633,6 +633,14 @@ disambiguate each other:
    whose raw is not the constant cannot have been a lone touch. On a
    killing hit the −99 corpse clamp breaks that guarantee and the
    trajectory keeps the last word.
+3. **The spent grenade fuse** (`grenadeFuseExpired`), for `gl` only.
+   `GrenadeExplode` runs on a 2.5 s think (`weapons.c:1434`); a grenade
+   whose own broadcast flight spans that whole fuse and ends in a
+   matched `TE_EXPLOSION` therefore died of the fuse, which means
+   `GrenadeTouch` — the only place KTX's `gl` counter increments — never
+   ran. A certain non-touch, whatever the detonation point's proximity
+   says. See "the fuse, both directions" below for why only this
+   direction of the signal survives.
 
 **The direct-damage constant is era-dependent, and the era is measured
 rather than assumed.** KTX has dealt a flat **110** since commit
@@ -643,15 +651,21 @@ demo from the demo's own hit distribution, so no version string is
 consulted and a pre-1.36 recording simply falls back to the trajectory
 alone, where the prior says nothing.
 
-**Two things the trajectory does NOT need**, both refuted by
-measurement rather than by argument, and both documented at their
-constants in `direct.go`: an EXCLUSIVITY pass across an explosion's
-victim set (the invariant is real — one explosion touches at most one
-player — but the wire violates it 0 times and this classifier 2 times in
-3 525 explosion groups), and the GRENADE FUSE (a flight ending before
-the 2.5 s fuse ended on a player; sound, but it moved the derived gl
-counter from 0.36% to 3.57% aggregate error, because our flight bracket
-is entity visibility rather than the fuse).
+That verdict is **three-valued**, and published as
+`damage.rocketDirectRegime`, because "no constant" was two different
+claims wearing one face: `fixed` (the demo's near-direct hits clustered
+on 110), `spread` (there were enough of them to test and they did NOT
+cluster — what a pre-1.36 server looks like, and evidence against the
+constant rather than the absence of evidence) and `unestablished`
+(fewer than six such hits, so the question was never put). The split is
+not cosmetic — the three populations score differently, table below.
+
+**One thing the trajectory does NOT need**, refuted by measurement
+rather than by argument and documented at the constant it would have
+needed in `direct.go`: an EXCLUSIVITY pass across an explosion's victim
+set. The invariant is real — one explosion touches at most one player —
+but the wire violates it 0 times and this classifier 2 times in 3 525
+explosion groups.
 
 **Per-explosion accuracy**, against the wire splash flag, over the
 53-demo dm2/dm3 ground-truth corpus (`cmd/qw-recon-eval`, the
@@ -675,16 +689,29 @@ carry, kept in the harness so the gap stays measured.
 | column | rows | exact | aggregate | bias / row | p90 error |
 |---|---|---|---|---|---|
 | `acc.rl.hits` (directImpact, shipped) | 638 | **46.9%** | **1.23%** | −0.13 | 2 |
-| — where the demo established the 110 constant | 567 | 45.9% | **0.62%** | −0.07 | 2 |
-| — where it did not | 71 | 54.9% | 17.7% | −0.58 | 2 |
+| — `rocketDirectRegime: "fixed"` | 567 | 45.9% | **0.62%** | −0.07 | 2 |
+| — `rocketDirectRegime: "spread"` | 16 | 31.2% | 13.0% | −0.94 | 3 |
+| — `rocketDirectRegime: "unestablished"` | 55 | 61.8% | 22.2% | −0.47 | 1 |
 | `acc.rl.direct/wire` (control) | 638 | 100.0% | 0.00% | 0.00 | 0 |
 | `acc.rl.anyDamage/recon` (not published) | 638 | 1.7% | 365% | +37.2 | 69 |
-| `acc.gl.hits` (directImpact, shipped) | 424 | **84.7%** | **0.61%** | −0.01 | 1 |
+| `acc.gl.hits` (directImpact, shipped) | 424 | **88.9%** | 3.91% | −0.08 | 1 |
 | `acc.gl.anyDamage/recon` (not published) | 424 | 43.2% | 55% | +1.06 | 4 |
 | `acc.lg.hits` (the shipped benchmark) | 436 | 65.8% | 0.91% | −0.95 | 3 |
 
-Both land inside the band the already-shipped `lg` row occupies, which
-is the bar this family ships at — so both projectile weapons publish
+The `gl` row's two figures point in opposite directions and both are
+real; the fuse section below is where that is unpacked. The three
+regime rows are why the verdict is published as three values rather
+than as the constant's presence: `spread` — the demos whose own hits
+argue against the fixed constant — is by some way the weakest
+population (31.2% exact, −0.94 per row), while `unestablished` is the
+strongest (61.8%) and only reads a big aggregate because its
+denominators are small. Collapsing them, as the pre-fix field did,
+averaged a population that behaves twice as badly into one that behaves
+better than the pooled row.
+
+Both weapons stay at or under a hit-and-a-bit of per-row error — `rl`
+at −0.13, `gl` at −0.08, against the `lg` benchmark's −0.95 — which is
+the bar this family ships at, so both projectile weapons publish
 `hitsConvention: "directImpact"` on a reconstructed row and the
 `byWeapon` map holds one convention per weapon, exactly as a KTX row
 does. A `derived` row (wire damage log, no KTX block) keeps `anyDamage`
@@ -693,24 +720,37 @@ validated any-path number that nothing asked to redefine.
 
 **How much the magnitude prior carries, and what happens without it.**
 `detectRocketRegime` establishes the constant on 567 of the 638 rows
-here, and the reconstruction publishes what it found as
-`damage.rocketDirectDamage` so a consumer can see which half a row is
-in. The split above is the reason nothing is GATED on it: the 71 rows
-where the regime is unestablished are the LOW-ROCKET ones — a demo needs
-several near-direct hits before the constant is measurable — and they are
-*more* often exact (54.9%) with the same p90 error of 2, the 17.7%
-aggregate being small absolute errors over small counts. Withholding
-there would substitute the any-path count, which is four times KTX's.
+here, and the reconstruction publishes the verdict as
+`damage.rocketDirectRegime` so a consumer can see which population a row
+is in. The split above is the reason nothing is GATED on it: the 55
+`unestablished` rows are the LOW-ROCKET ones — a demo needs several
+near-direct hits before the constant is measurable — and they are the
+*most* often exact of the three (61.8%) with the smallest p90 error, the
+22.2% aggregate being small absolute errors over small counts.
+Withholding there would substitute the any-path count, which is four
+times KTX's. The 16 `spread` rows are the weak ones, and the field is
+what lets a consumer find them without withholding anything.
 
-That is not the same population as a genuinely PRE-1.36 server, which
-this corpus cannot contain: every demo carrying a wire damage log
+That is still not the same population as a genuinely PRE-1.36 server,
+which this corpus cannot contain: every demo carrying a wire damage log
 post-dates the fixed constant by years, so the vanilla `100 +
-g_random()*20` era has no ground truth anywhere and the honest statement
-is a bound, not a measurement. Forcing the prior off — the closest
-available proxy — moves rl from 0.82% to **13.9%** aggregate on a
-59-demo subset of this population. Read the trajectory-only figure as
-what a pre-1.36 recording gets, and `rocketDirectDamage`'s absence as
-the flag for it.
+g_random()*20` era has no ground truth anywhere. Forcing the prior off —
+the closest available proxy — moves rl from 0.82% to **13.9%** aggregate
+on a 59-demo subset of this population.
+
+Read 13.9% as a **proxy and a floor, not a bound**. The proxy population
+is modern demos with the prior switched off, so it exercises the loss of
+the *signal* and nothing else. A real pre-1.36 server ran an extra
+mechanism this population cannot reproduce: its direct damage is `100 +
+g_random()*20`, so a direct hit can read **below** the close-range
+splash envelope (a 100-point direct is exactly what a splash at 40 units
+delivers), and there the geometry and the value point at each other's
+answers. The 110-constant proxy never produces such a row — every direct
+in it reads the one value the prior would have recognised — so whatever
+that mechanism costs is on top of the 13.9%. `rocketDirectRegime:
+"spread"` is the flag for the rows where it might be biting, and their
+31.2%-exact / −0.94-per-row score is the only direct evidence we have
+about them.
 
 **The derivation is a row count, not a join.** One projectile touches at
 most one player, so a touch IS a direct damage row: `aimcore.ReconDirectHits`
@@ -728,14 +768,95 @@ damage through `GrenadeExplode` → `T_RadiusDamage`, so a direct grenade
 touch leaves no non-splash row on the wire either. The wire answers rl's
 question and not gl's; the reconstruction answers both.)
 
+**The grenade fuse, both directions** (2026-08-24). The fuse is a
+2.5 s think (`weapons.c:1434`) and only a player touch detonates a
+grenade early, so the signal looks symmetric and is not. Our flight
+bracket is entity VISIBILITY, and a grenade leaving the spectator's PVS
+ends its bracket without ending its life — a confound that can only make
+a flight look SHORTER than it was.
+
+- **Positive direction — refuted.** "A flight ending early ended on a
+  player" reads every PVS exit as a touch. Measured, it moved the derived
+  gl counter from 0.36% to 3.57% aggregate error for 1.4 pp of exact rows
+  on 149. Not shipped.
+- **Negative direction — shipped.** "A flight spanning the WHOLE fuse and
+  ending in a matched `TE_EXPLOSION` died of the fuse" is immune to that
+  confound by construction, since the confound cannot lengthen a bracket.
+  It is the certain half: `GrenadeExplode` ran on the think, so
+  `GrenadeTouch` never ran, so KTX's counter never incremented.
+
+The threshold is the fuse minus two demo frames (both bracket ends land
+on the ~34 ms broadcast grid, and both round inward), i.e. 2 400 ms, and
+the sweep lands on exactly that knee — false positives are all gone by
+2 400 and only genuine late-fuse touches are lost below it:
+
+| `grenadeFuseObservedMs` | exact | rows over | rows under | mean abs err | aggregate |
+|---|---|---|---|---|---|
+| off (v74 as first shipped) | 84.7% | 28 | 37 | 0.167 | **0.61%** |
+| 2 480 | 86.8% | — | — | — | 2.08% |
+| **2 400 (shipped)** | **88.9%** | **8** | **39** | **0.113** | 3.91% |
+| 2 300 | 88.0% | 8 | 43 | 0.123 | 4.40% |
+| 2 000 | 86.8% | 8 | 48 | 0.134 | 5.01% |
+
+**The aggregate got worse and the classifier got better**, and both
+statements are literal. The rule removes 20 of the 28 over-counting
+player rows and creates 2 new under-counting ones; mean absolute error
+per row falls by a third. What rises is the AGGREGATE, because the old
+0.61% was two-sided error cancelling (28 rows over, 37 under, net −5
+hits of 818) and what remains is one-sided (−32 of 818). Keeping a
+false-positive channel because it happens to offset a false-negative one
+is not an accuracy the pipeline wants, so the rule ships and the residual
+under-count is named instead: 39 rows where a touch left no reconstructed
+row at all — a grenade whose flight was never bracketed, or a touch the
+engine charged no health or armor for (below).
+
+**Touches that leave no evidence at all.** KTX increments `hits` in
+`GrenadeTouch`/`T_MissileTouch` before any damage rule runs, so a touch
+that ends up dealing nothing still counts for KTX and is invisible here —
+there is no health/armor delta to reconstruct. Three engine paths do
+that, and the corpus says how much they matter:
+
+- `teamplay 1` and `3` zero the health share of a teammate hit but still
+  take the armor (`combat.c:634-655` computes `save` before the
+  team-damage check at `:752`), so the delta reads 88/66/33 for a
+  110-point direct on RA/YA/GA — which the magnitude prior refuses,
+  since a lone touch must read the constant. **Not exercised by anything
+  we can measure**: the 53-demo GT corpus publishes `teamplay 2` on 39
+  demos and no key at all on the 14 duels, and an 774-demo archive sample
+  publishes 2 (282), 0 (203), 4 (6) or nothing (280) — not one demo of
+  either corpus publishes 1 or 3. Measured directly on the GT corpus, the
+  classifier's recall on wire-flagged TEAM rocket touches is 94.7%
+  (124 of 131) against 95.6% on enemy touches, and all 131 team touches
+  read exactly 110 or 440 — full teammate damage, the `teamplay 2` rule.
+  So the armor-share magnitude match this would need stays a **lead, not
+  a mechanism**: there is no population to validate it against.
+- `teamplay 4` takes neither health nor armor (`tp4teamdmg`), so a
+  teammate touch leaves nothing whatsoever — unrecoverable in principle,
+  on 6 of 774 archive demos (0.8%).
+- Godmode and pentagram invincibility zero the health share the same way.
+  The pent case is already recovered where it leaves an armor delta and
+  synthesized where it leaves none (`pentSyntheticEvents`).
+
 ### The rocket splash base is 120, not the direct 110 (2026-08-24)
 
 Found while building the classifier above, and worth stating separately
 because it moved the damage numbers. `T_MissileTouch` passes **120** to
 `T_RadiusDamage` (`ktx/src/weapons.c:1006`), the same base as a grenade;
 the 110 is the touch value and belongs to a disjoint victim (the touched
-player is the radius pass's `ignore`). This package modelled rocket
-splash at the direct constant, understating every rocket splash by 10.
+player is the radius pass's `ignore`).
+
+This package modelled rocket splash on the DIRECT constant's range
+instead (`blastDamage` returned `rlLo..rlHi`), so the error was not a
+uniform 10 and depended on what the demo had established about the
+server. Where `detectRocketRegime` found the fixed constant — 567 of the
+638 ground-truth rows — the range collapsed to `110..110` and every
+rocket splash was understated by exactly 10. Where it did not, the model
+carried the vanilla `100..120`: a range whose top end reached the true
+base for the wrong reason (it is the direct roll's ceiling, not the
+radius base) and whose bottom sat 20 under it, so the band was both
+mis-centred and twice as wide as the engine's single value. Grenades
+were already correct — `blastDamage` returned a flat 120 for `gl` — which
+is why only the rocket figures moved.
 
 Measured on the dm2/dm3 ground truth: `value + 0.5·dist` over 2 530
 wire-flagged splash rows has median **122.4**, not 112 — the residual
@@ -752,6 +873,20 @@ under-estimate; feeding it the true base multiplied the 10-point gap by
 the quad on exactly the quad-rocket kills it exists for and cost raw
 accuracy measurably (raw given 2.01% → 2.65% mean per player). The floor
 stays at the pair the eval corpus calibrated it at, and says so.
+
+The **pent synthesiser** did follow it, and then needed the other half of
+the same fact. `pentSyntheticEvents` invents the raw value of a hit a
+pentagram holder absorbed with no health or armor to show for it, and it
+priced every one of them off the radius curve — so an enemy DIRECT rocket
+on a pent holder synthesized ~120 (480 quadded) where the engine dealt
+110 (440), and on a demo with no established constant it priced a direct
+off the vanilla range's low end. It now prices a direct-classified
+ROCKET row at the direct constant and leaves everything else on the
+curve, which is the same asymmetry the classifier rests on: a grenade has
+no touch value at all (`GrenadeTouch` deals nothing itself), so a touched
+grenade victim stays on the falloff curve. Worth `raw ewep` 1.59% →
+1.58% median on the 53-demo corpus — the population is small, but every
+row in it was priced by a formula the engine does not use.
 
 ## Why the errors are what they are
 
@@ -777,7 +912,11 @@ port adds, each verified against ground truth in the eval:
   corpse-cycle spawn-telefrags, with attacker inference from teleport
   arrivals / occupied-pad proximity;
 - corpse (gib) hits kept in the raw family only, as KTX does;
-- engine-exact self-splash halving and quad-before-falloff ordering
+- engine-exact self-splash halving (the quad ORDERING beside it is
+  wrong and known to be: the engine applies the multiplier after the
+  falloff, `4·(120 − 0.5·d)`, measured on 898 wire quad rl splash rows
+  — plan-damage-recon.md §8 lead A, which also says why no published
+  magnitude moves because of it)
   (ktx/src/combat.c T_RadiusDamage) — the sharp self-vs-enemy
   discriminator in close rocket fights;
 - per-demo rocket-damage regime detection (fixed 110 vs vanilla

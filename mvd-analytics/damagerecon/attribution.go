@@ -25,7 +25,7 @@ const (
 	axeSwingJitterMs    = 80     // demo-frame quantization on both timestamps
 	rBeamSeg            = 90.0   // units victim to beam segment (p99 measured 60, max 79)
 	rBeamSrc            = 160.0  // units beam start to attacker eye
-	rSplash             = 380.0  // units projectile end to victim (p95=199)
+	rSplash             = 380.0  // units projectile end to victim (p95=199; the engine's own reach is findradius(damage+40)=160 — plan-damage-recon.md §8 lead B)
 	nailSpeed           = 1000.0 // nails AND rockets fly 1000 ups
 	rocketSpeed         = 1000.0
 	tolFlightMs         = 180.0 // flight-time consistency for the trackless-rocket fallback
@@ -51,6 +51,12 @@ const (
 	// kills the top-up exists for.
 	topUpBase  = 110.0
 	topUpSlack = 60.0
+
+	// regimeMinSamples: how many near-direct rocket observations a demo must
+	// carry before detectRocketRegime's clustering test says anything at all.
+	// Below it the demo is UNESTABLISHED (the question was never put); at or
+	// above it a failure to cluster is evidence in its own right.
+	regimeMinSamples = 6
 )
 
 // candidate is one possible explanation for a delta.
@@ -106,7 +112,9 @@ type reconEvent struct {
 func attribute(in *inputs) []reconEvent {
 	calibrateBloods(in)
 	events := attributePass(in)
-	if lo, hi, fixed := detectRocketRegime(in, events); fixed {
+	lo, hi, regime := detectRocketRegime(in, events)
+	in.rlRegime = regime
+	if regime == result.RocketRegimeFixed {
 		in.rlLo, in.rlHi = lo, hi
 		events = attributePass(in)
 	}
@@ -183,11 +191,23 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		if pr.shooter == victim {
 			selfF = 0.5
 		}
-		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim)
-		// A direct rocket is the flat touch value with no falloff and no
-		// splash on top (ktx/src/weapons.c:998-1006); everything else rides
-		// the radius curve.
+		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim) &&
+			!grenadeFuseExpired(&pr)
+		// A direct ROCKET is the flat touch value with no falloff and no
+		// splash on top — T_MissileTouch deals the constant and then hands
+		// the same victim to T_RadiusDamage as the `ignore` entity
+		// (ktx/src/weapons.c:998-1006) — so pricing it off the 120 radius
+		// curve synthesizes ~120 (480 quadded) where the engine dealt 110
+		// (440). A grenade has no touch value at all: GrenadeTouch does ALL
+		// its damage through GrenadeExplode → T_RadiusDamage (:1327-1333),
+		// so it rides the radius curve whether or not it touched. A direct
+		// self row cannot exist (directImpact short-circuits on isSelf), so
+		// the halving below never applies to the direct branch.
 		raw := int((dLo*q - 0.5*dEnd) * selfF)
+		if direct && pr.weapon == "rl" {
+			dirLo, dirHi := in.directBase()
+			raw = int(0.5 * (dirLo + dirHi) * q)
+		}
 		if raw <= 0 {
 			continue
 		}
@@ -231,7 +251,24 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 // on a fixed-constant server every such observation reads exactly 110
 // (measured in the study: 88.8%% of modern GT directs). Vanilla servers
 // (100+random*20) spread across the range instead.
-func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, fixed bool) {
+//
+// The verdict is THREE-valued, because "no fixed constant" covers two
+// states that are not the same claim and that a consumer reads differently
+// (result.RocketDirectRegime):
+//
+//   - RocketRegimeFixed — the observations clustered on 110, so the
+//     magnitude prior (direct.go rocketTouched) is in force;
+//   - RocketRegimeSpread — there were ENOUGH observations to test the
+//     hypothesis and they did not cluster, which is what a pre-1.36
+//     `100 + g_random()*20` server looks like. Evidence against the fixed
+//     constant, not proof of the roll: a noisy first pass on a modern
+//     server can also land here, which is why the token names what was
+//     seen rather than what the server was;
+//   - RocketRegimeUnestablished — fewer than regimeMinSamples near-direct
+//     observations, i.e. the question was never put. That is the
+//     low-rocket case, and the one whose touch counts stay accurate
+//     anyway (ACCURACY.md).
+func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, regime string) {
 	// High-value (>=95) enemy rocket observations on surviving, unquadded
 	// victims are (near-)directs. Fixed-110 servers put a spike at exactly
 	// 110 and NOTHING above it; vanilla direct damage (100+random*20)
@@ -256,10 +293,13 @@ func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, fixed 
 			above++
 		}
 	}
-	if n >= 6 && float64(at110) >= 0.4*float64(n) && float64(above) <= math.Max(1, 0.1*float64(n)) {
-		return 110, 110, true
+	if n < regimeMinSamples {
+		return 0, 0, result.RocketRegimeUnestablished
 	}
-	return 0, 0, false
+	if float64(at110) >= 0.4*float64(n) && float64(above) <= math.Max(1, 0.1*float64(n)) {
+		return 110, 110, result.RocketRegimeFixed
+	}
+	return 0, 0, result.RocketRegimeSpread
 }
 
 // attributeDelta explains one delta, usually as one event; a same-frame
@@ -518,12 +558,23 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 // is what a "did the projectile hit them" counter must not assume. A kill
 // with no tracked explosion to judge stays splash: not seeing a touch is
 // not seeing one.
+//
+// The default is stamped BEFORE any early return, so no path can leave the
+// zero value standing as a verdict. The trackless-victim return below is the
+// one that could: a victim whose stream carries no position samples has no
+// geometry for anything to judge, which is the strongest form of "no touch
+// was seen" and never a reason to assert one. (Rare — 4 of 4 227 players
+// over 2 433 archive demos, and 0 of 325 622 reconstructed rl/gl rows landed
+// on such a victim — but rarity is not a contract.)
 func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
-	if !e.died || vtrack == nil {
+	if !e.died {
 		return
 	}
 	if e.weapon == "rl" || e.weapon == "gl" {
 		e.isSplash = true
+	}
+	if vtrack == nil {
+		return
 	}
 	q := in.quadFactor(e.attacker, e.t)
 	model := 0.0
@@ -547,7 +598,8 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			}
 			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
 				bestD = d
-				bestDirect = directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == e.victim)
+				bestDirect = directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == e.victim) &&
+					!grenadeFuseExpired(&pr)
 				bestNear = hullDist(pr.ep, vpos) <= directHullNear
 			}
 		}
@@ -756,10 +808,18 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		if isSelf {
 			selfF = 0.5
 		}
-		// Engine order: quad multiplies the BASE damage, THEN the radius
-		// falloff subtracts 0.5*dist (T_RadiusDamage) — so a quad splash is
-		// 4D - 0.5d, not 4(D - 0.5d). Self splash halves the post-falloff
-		// points.
+		// KNOWN-WRONG ORDER, deliberately left standing for now: this
+		// computes 4D - 0.5d, and the engine deals 4(D - 0.5d). The quad
+		// multiplier is applied inside T_Damage (combat.c:537-543), which
+		// T_RadiusDamageApply reaches only AFTER subtracting the falloff
+		// (:1189). Measured on 898 wire quad rl splash rows: 96% land in
+		// [160,400), where this form cannot go below 400. It costs no
+		// published magnitude — every value the section publishes is the
+		// observed delta, and this band only SCORES candidates — but it
+		// mis-scores quad splash and over-floors the quad kill top-up.
+		// Fixing it needs the slack/topUpBase pair re-tuned in the same
+		// pass: plan-damage-recon.md §8 lead A has the evidence and the
+		// method. Self splash halves the post-falloff points.
 		// Splash-distance slack: the tracked-flight endpoint is the last
 		// broadcast entity position (up to a frame short of the detonation)
 		// and the victim position is interpolated — ±60 covers both. An
@@ -941,7 +1001,8 @@ func (in *inputs) projCandidates(victim string, t int32, vpos vec3) []candidate 
 		if dEnd > rSplash {
 			continue
 		}
-		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim)
+		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim) &&
+			!grenadeFuseExpired(&pr)
 		// CanDamage gate: splash reaches only what the explosion traces to.
 		// A touch needs no such trace — the projectile was inside the hull.
 		if !direct && !in.bsp.splashReaches(pr.ep, vpos) {

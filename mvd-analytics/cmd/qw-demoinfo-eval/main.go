@@ -186,14 +186,17 @@ func scoreDemo(path string) ([]row, error) {
 		return nil, fmt.Errorf("recon: %w", err)
 	}
 	res.Damage = rc
-	// Whether the reconstruction could MEASURE the server's direct rocket
-	// constant. The direct-impact classifier's magnitude prior only exists
-	// where it could (damagerecon/direct.go), so the rl rows are reported
-	// split on it as well as pooled — the pooled figure would otherwise hide
-	// which half of the population it describes.
-	rlRegime := "fixed110"
-	if rc.RocketDirectDamage == 0 {
-		rlRegime = "noRegime"
+	// Which of the THREE verdicts the reconstruction reached about the
+	// server's direct rocket constant (damage.rocketDirectRegime). The
+	// classifier's magnitude prior only exists on `fixed`, so the rl rows are
+	// reported split on the regime as well as pooled — the pooled figure
+	// would otherwise hide which part of the population it describes, and the
+	// two non-fixed verdicts are different claims: `spread` is a demo whose
+	// own hits argue AGAINST the constant, `unestablished` one that never put
+	// the question.
+	rlRegime := rc.RocketDirectRegime
+	if rlRegime == "" {
+		rlRegime = "absent"
 	}
 	res.Aim = aimcore.Compute(res, aimcore.Query{})
 	reconAny := aimcore.ReconHitsForEval(res)

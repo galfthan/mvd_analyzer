@@ -130,6 +130,9 @@ type inputs struct {
 	// 100+random*20; narrowed to exactly 110 when detectRocketRegime
 	// recognises a fixed-constant server.
 	rlLo, rlHi float64
+	// rlRegime: which of the three verdicts detectRocketRegime reached
+	// (result.RocketRegime*). Empty until it has run.
+	rlRegime string
 }
 
 type fragKey struct {
