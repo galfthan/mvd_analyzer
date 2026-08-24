@@ -206,8 +206,9 @@ type WeaponAim struct {
 //   - the SG/SSG pellet split (PelletHits / Full / Partial / Miss) — a merged
 //     delta's magnitude is the sum over every hit on that instant, so Σ/4
 //     would credit one shooter with another's pellets;
-//   - RL/GL Direct vs Splash — the reconstruction's IsSplash is a
-//     damage-model verdict, not the server's own contact flag;
+//   - the RL/GL Direct / Splash / Missed per-fire split — DirectHits below
+//     carries the direct-impact COUNT, which is a different (and separately
+//     validated) claim from splitting each fire three ways;
 //   - the LG whiff geometry (Blocked / OutOfRange / Unresolved) — it
 //     classifies MISSES, and a miss here can be a hit the join did not
 //     recover;
@@ -239,14 +240,39 @@ type WeaponAim struct {
 //
 // Accuracy measured against the wire log on demos that carry both:
 // damagerecon/ACCURACY.md §"Aim hit recovery" (mean accuracy error vs the
-// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.7pp, axe 0.5pp, rl 0.6pp,
-// gl 0.3pp).
+// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.8pp, axe 0.6pp, rl 0.7pp,
+// gl 0.4pp).
 type WeaponAimRecon struct {
 	// Hits is the reconstructed count of fires that connected. A zero inside
 	// a present block is a real "linked nothing", not an absence — the block
 	// itself is the presence signal, and it is emitted only for the weapons
 	// whose recovery was validated (see the ACCURACY.md table).
+	//
+	// It counts a fire that landed damage by ANY path, splash included —
+	// HitsAnyDamage in the PlayerStatsAcc.HitsConvention vocabulary.
 	Hits int `json:"hits"`
+
+	// DirectHits (schema v74) is the subset of Hits whose projectile TOUCHED
+	// a player — HitsDirectImpact, the convention KTX's own `acc.rl.hits` /
+	// `acc.gl.hits` counts, because KTX increments that counter in the touch
+	// handler and nowhere else (ktx/src/weapons.c:990-996, :1327-1333).
+	// Publishing it is what lets a pre-instrumentation demo answer the same
+	// question a KTX demoinfo block answers, so the two eras can be compared
+	// at all; `playerStats.accuracy.byWeapon[rl|gl].hits` on a reconstructed
+	// row IS this number.
+	//
+	// PRESENT ONLY FOR rl AND gl. For every other weapon the two conventions
+	// coincide (KTX counts any connecting lg/axe/ng/sng fire) and a separate
+	// field would only invite a spurious distinction. Absent is therefore
+	// "the question does not arise here", never "no direct hits".
+	//
+	// The evidence is damagerecon's per-explosion direct/splash verdict
+	// (damagerecon/direct.go: the flight's trajectory against the victim's
+	// hull, plus the flat-110 magnitude prior on a modern server), joined
+	// through the same flight bracket as Hits. Validated against the verbatim
+	// KTX block in damagerecon/ACCURACY.md §"Can an old demo answer KTX's
+	// rl/gl question?".
+	DirectHits *int `json:"directHits,omitempty"`
 }
 
 // WeaponAimSplit is one victim-class slice (enemy / team / self) of a

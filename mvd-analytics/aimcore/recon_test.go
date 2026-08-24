@@ -158,7 +158,7 @@ func TestReconTierOneFireIsClaimedOnce(t *testing.T) {
 		{t: 50, weapon: "sg", dmg: 8},
 		{t: 150, weapon: "sg", dmg: 12}, // > reconImpactMergeMs later: a second impact
 	}
-	hits, _ := reconHitsByWeapon(shots, dmg, reconTierWeapons)
+	hits := reconHitsByWeapon(shots, dmg, reconTierWeapons)
 	if got := hits["sg"]; got != 1 {
 		t.Errorf("sg recon hits = %d, want 1 — two impacts cannot both claim the "+
 			"one fire whose window covers them", got)
@@ -333,5 +333,60 @@ func TestReconTierGrenadeLinksOnFlightEnd(t *testing.T) {
 	ar := Compute(reconFixture(result.DamageSourceReconstructed, shots, events), Query{})
 	if gl := weaponOf(t, ar, "A", "gl"); gl.Recon == nil || gl.Recon.Hits != 1 {
 		t.Errorf("gl recon = %+v, want hits 1", gl.Recon)
+	}
+}
+
+// ReconDirectHits counts the reconstruction's DIRECT rl/gl rows per attacker
+// — KTX's own convention for those two — and does it by counting rows rather
+// than by joining fires to flights, because one projectile touches at most
+// one player and a touch therefore IS a row.
+//
+// The three properties that make it publishable are all pinned here: a
+// weapon the player FIRED gets an honest zero rather than an absence; a self
+// row is never a touch (a missile cannot collide with its owner); and a
+// splash row never counts however close it landed.
+func TestReconDirectHitsCountsRowsNotFires(t *testing.T) {
+	res := &result.Result{
+		Damage: &result.DamageResult{
+			Source: result.DamageSourceReconstructed,
+			Events: []result.DamageEntry{
+				{Time: 100, Attacker: "a", Victim: "b", Weapon: "rl", Damage: 110},
+				{Time: 100, Attacker: "a", Victim: "c", Weapon: "rl", Damage: 40, IsSplash: true},
+				{Time: 900, Attacker: "a", Victim: "a", Weapon: "rl", Damage: 30, IsSelf: true},
+				{Time: 1500, Attacker: "a", Victim: "b", Weapon: "gl", Damage: 90},
+				{Time: 2000, Attacker: "a", Victim: "b", Weapon: "lg", Damage: 30},
+				{Time: 2600, Attacker: "b", Victim: "a", Weapon: "rl", Damage: 110},
+				{Time: 3000, Attacker: "", Victim: "b", Weapon: "lava", Damage: 20, IsEnv: true},
+			},
+		},
+		Shots: &result.ShotsResult{Shots: []result.Shot{
+			{Time: 50, Player: "a", Weapon: "rl"},
+			{Time: 1400, Player: "a", Weapon: "gl"},
+			{Time: 1900, Player: "a", Weapon: "lg"},
+			{Time: 2550, Player: "b", Weapon: "rl"},
+			{Time: 4000, Player: "c", Weapon: "rl"},
+		}},
+	}
+	got := ReconDirectHits(res)
+	if got["a"]["rl"] != 1 {
+		t.Errorf("a rl = %d, want 1 — the splash row and the self row are not touches", got["a"]["rl"])
+	}
+	if got["a"]["gl"] != 1 {
+		t.Errorf("a gl = %d, want 1", got["a"]["gl"])
+	}
+	if _, ok := got["a"]["lg"]; ok {
+		t.Error("lg carries no direct count: the two conventions coincide there")
+	}
+	if got["b"]["rl"] != 1 {
+		t.Errorf("b rl = %d, want 1", got["b"]["rl"])
+	}
+	// c fired a rocket and touched nobody: a supported zero, not an absence.
+	if n, ok := got["c"]["rl"]; !ok || n != 0 {
+		t.Errorf("c rl = %v/%v, want a present 0 — the weapon was fired", n, ok)
+	}
+	// A wire-measured section has its own counters; this must stay out of it.
+	res.Damage.Source = result.DamageSourceKTX
+	if ReconDirectHits(res) != nil {
+		t.Error("direct hits must be nil on a wire-measured section")
 	}
 }

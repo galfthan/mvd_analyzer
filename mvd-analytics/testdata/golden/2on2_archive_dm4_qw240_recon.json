@@ -4995,6 +4995,7 @@
           },
           {
             "recon": {
+              "directHits": 8,
               "hits": 77
             },
             "shots": 237,
@@ -12438,6 +12439,7 @@
           },
           {
             "recon": {
+              "directHits": 6,
               "hits": 38
             },
             "shots": 81,
@@ -16282,6 +16284,7 @@
           },
           {
             "recon": {
+              "directHits": 6,
               "hits": 47
             },
             "shots": 123,
@@ -20588,6 +20591,7 @@
           },
           {
             "recon": {
+              "directHits": 9,
               "hits": 63
             },
             "shots": 175,
@@ -20595,6 +20599,7 @@
           },
           {
             "recon": {
+              "directHits": 1,
               "hits": 1
             },
             "shots": 9,
@@ -22918,7 +22923,7 @@
         "bounded": {
           "byWeapon": {
             "lg": 2631,
-            "rl": 4408,
+            "rl": 4412,
             "sg": 259,
             "ssg": 40
           },
@@ -22930,13 +22935,13 @@
             "rl": 556,
             "sg": 188
           },
-          "enemyVsBoth": 1701,
+          "enemyVsBoth": 1705,
           "enemyVsLg": 835,
           "enemyVsMid": 200,
           "enemyVsRl": 3117,
           "enemyVsSg": 1485,
-          "ewep": 5653,
-          "given": 7338,
+          "ewep": 5657,
+          "given": 7342,
           "givenSelf": 553,
           "givenTeam": 759,
           "taken": 7436,
@@ -22944,7 +22949,7 @@
         },
         "byWeapon": {
           "lg": 2876,
-          "rl": 5300,
+          "rl": 5304,
           "sg": 284,
           "ssg": 40
         },
@@ -22956,13 +22961,13 @@
           "rl": 742,
           "sg": 287
         },
-        "enemyVsBoth": 1844,
+        "enemyVsBoth": 1848,
         "enemyVsLg": 1071,
         "enemyVsMid": 269,
         "enemyVsRl": 3573,
         "enemyVsSg": 1743,
-        "ewep": 6488,
-        "given": 8500,
+        "ewep": 6492,
+        "given": 8504,
         "givenSelf": 580,
         "givenTeam": 1044,
         "taken": 10317,
@@ -22971,7 +22976,7 @@
       "raket": {
         "bounded": {
           "byWeapon": {
-            "lg": 4347,
+            "lg": 4343,
             "rl": 2504,
             "sg": 268,
             "ssg": 224
@@ -22987,20 +22992,20 @@
             "ssg": 12,
             "unknown": 192
           },
-          "enemyVsBoth": 2259,
+          "enemyVsBoth": 2255,
           "enemyVsLg": 1047,
           "enemyVsMid": 100,
           "enemyVsRl": 2562,
           "enemyVsSg": 1580,
-          "ewep": 5868,
-          "given": 7548,
+          "ewep": 5864,
+          "given": 7544,
           "givenSelf": 468,
           "givenTeam": 613,
           "taken": 8499,
           "takenEnv": 147
         },
         "byWeapon": {
-          "lg": 4907,
+          "lg": 4903,
           "rl": 3065,
           "sg": 367,
           "ssg": 224
@@ -23016,13 +23021,13 @@
           "ssg": 12,
           "unknown": 291
         },
-        "enemyVsBoth": 2635,
+        "enemyVsBoth": 2631,
         "enemyVsLg": 1284,
         "enemyVsMid": 129,
         "enemyVsRl": 2864,
         "enemyVsSg": 1856,
-        "ewep": 6783,
-        "given": 8768,
+        "ewep": 6779,
+        "given": 8764,
         "givenSelf": 514,
         "givenTeam": 740,
         "taken": 9741,
@@ -23146,8 +23151,8 @@
     },
     "byWeapon": {
       "gl": 112,
-      "lg": 14984,
-      "rl": 16971,
+      "lg": 14980,
+      "rl": 16975,
       "sg": 1128,
       "ssg": 344
     },
@@ -23194,6 +23199,7 @@
         "attacker": "ung",
         "bounded": 100,
         "damage": 114,
+        "isSplash": true,
         "time": 4005,
         "victim": "math",
         "victimWep": "lg",
@@ -23220,6 +23226,7 @@
         "bounded": 39,
         "damage": 49,
         "isSelf": true,
+        "isSplash": true,
         "time": 5008,
         "victim": "virus",
         "weapon": "rl"
@@ -23273,6 +23280,7 @@
         "attacker": "virus",
         "bounded": 44,
         "damage": 56,
+        "isSplash": true,
         "time": 12951,
         "victim": "raket",
         "victimWep": "both",
@@ -23367,6 +23375,7 @@
         "bounded": 36,
         "damage": 55,
         "isSelf": true,
+        "isSplash": true,
         "time": 18588,
         "victim": "raket",
         "weapon": "rl"
@@ -23375,6 +23384,7 @@
         "attacker": "raket",
         "bounded": 80,
         "damage": 109,
+        "isSplash": true,
         "time": 18588,
         "victim": "ung",
         "victimWep": "mid",
@@ -23417,6 +23427,7 @@
         "attacker": "ung",
         "bounded": 40,
         "damage": 44,
+        "isSplash": true,
         "time": 23895,
         "victim": "raket",
         "victimWep": "lg",
@@ -23831,6 +23842,7 @@
         "attacker": "math",
         "bounded": 56,
         "damage": 89,
+        "isSplash": true,
         "time": 44494,
         "victim": "ung",
         "victimWep": "rl",
@@ -23866,6 +23878,7 @@
       {
         "attacker": "ung",
         "damage": 118,
+        "isSplash": true,
         "time": 50125,
         "victim": "raket",
         "victimWep": "both",
@@ -23910,6 +23923,7 @@
         "attacker": "math",
         "bounded": 33,
         "damage": 48,
+        "isSplash": true,
         "time": 53116,
         "victim": "virus",
         "victimWep": "lg",
@@ -24119,6 +24133,7 @@
         "attacker": "raket",
         "bounded": 70,
         "damage": 80,
+        "isSplash": true,
         "time": 68970,
         "victim": "virus",
         "victimWep": "rl",
@@ -24161,6 +24176,7 @@
         "attacker": "ung",
         "bounded": 6,
         "damage": 85,
+        "isSplash": true,
         "time": 72761,
         "victim": "math",
         "victimWep": "both",
@@ -24170,6 +24186,7 @@
         "attacker": "math",
         "bounded": 4,
         "damage": 53,
+        "isSplash": true,
         "time": 72761,
         "victim": "ung",
         "victimWep": "rl",
@@ -24209,7 +24226,7 @@
       },
       {
         "attacker": "raket",
-        "damage": 36,
+        "damage": 32,
         "time": 75393,
         "victim": "virus",
         "victimWep": "both",
@@ -24217,7 +24234,7 @@
       },
       {
         "attacker": "math",
-        "damage": 40,
+        "damage": 44,
         "isSplash": true,
         "time": 75393,
         "victim": "virus",
@@ -24581,6 +24598,7 @@
         "attacker": "raket",
         "bounded": 79,
         "damage": 116,
+        "isSplash": true,
         "time": 108508,
         "victim": "virus",
         "victimWep": "rl",
@@ -24817,6 +24835,7 @@
         "attacker": "virus",
         "bounded": 36,
         "damage": 85,
+        "isSplash": true,
         "time": 122726,
         "victim": "raket",
         "victimWep": "lg",
@@ -24835,6 +24854,7 @@
         "attacker": "raket",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 124929,
         "victim": "raket",
         "weapon": "rl"
@@ -25347,6 +25367,7 @@
         "attacker": "ung",
         "bounded": 27,
         "damage": 55,
+        "isSplash": true,
         "time": 158728,
         "victim": "math",
         "victimWep": "lg",
@@ -25560,6 +25581,7 @@
         "attacker": "virus",
         "damage": 48,
         "isSelf": true,
+        "isSplash": true,
         "time": 174940,
         "victim": "virus",
         "weapon": "rl"
@@ -25715,6 +25737,7 @@
         "attacker": "math",
         "bounded": 29,
         "damage": 42,
+        "isSplash": true,
         "time": 186941,
         "victim": "virus",
         "victimWep": "both",
@@ -25766,6 +25789,7 @@
         "attacker": "ung",
         "bounded": 20,
         "damage": 56,
+        "isSplash": true,
         "time": 190619,
         "victim": "raket",
         "victimWep": "lg",
@@ -26058,6 +26082,7 @@
         "attacker": "math",
         "bounded": 16,
         "damage": 74,
+        "isSplash": true,
         "time": 202312,
         "victim": "ung",
         "victimWep": "lg",
@@ -26067,6 +26092,7 @@
         "attacker": "math",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 203102,
         "victim": "math",
         "weapon": "rl"
@@ -26167,6 +26193,7 @@
         "attacker": "raket",
         "bounded": 1,
         "damage": 44,
+        "isSplash": true,
         "time": 208372,
         "victim": "virus",
         "victimWep": "rl",
@@ -26220,6 +26247,7 @@
         "attacker": "virus",
         "bounded": 75,
         "damage": 110,
+        "isSplash": true,
         "time": 216222,
         "victim": "math",
         "victimWep": "both",
@@ -26253,6 +26281,7 @@
         "attacker": "virus",
         "bounded": 100,
         "damage": 109,
+        "isSplash": true,
         "time": 218273,
         "victim": "math",
         "victimWep": "sg",
@@ -26422,6 +26451,7 @@
         "attacker": "math",
         "damage": 47,
         "isSelf": true,
+        "isSplash": true,
         "time": 235218,
         "victim": "math",
         "weapon": "rl"
@@ -26493,6 +26523,7 @@
         "attacker": "math",
         "bounded": 102,
         "damage": 120,
+        "isSplash": true,
         "time": 242013,
         "victim": "ung",
         "victimWep": "both",
@@ -26537,6 +26568,7 @@
       {
         "attacker": "math",
         "damage": 105,
+        "isSplash": true,
         "time": 249172,
         "victim": "virus",
         "victimWep": "rl",
@@ -26546,6 +26578,7 @@
         "attacker": "ung",
         "bounded": 62,
         "damage": 95,
+        "isSplash": true,
         "time": 249382,
         "victim": "raket",
         "victimWep": "both",
@@ -26564,6 +26597,7 @@
         "attacker": "math",
         "bounded": 129,
         "damage": 228,
+        "isSplash": true,
         "time": 251750,
         "victim": "ung",
         "victimWep": "rl",
@@ -26591,6 +26625,7 @@
         "attacker": "virus",
         "bounded": 66,
         "damage": 73,
+        "isSplash": true,
         "time": 252801,
         "victim": "math",
         "victimWep": "both",
@@ -26635,6 +26670,7 @@
         "attacker": "math",
         "bounded": 100,
         "damage": 114,
+        "isSplash": true,
         "time": 255593,
         "victim": "ung",
         "victimWep": "sg",
@@ -26677,7 +26713,6 @@
       {
         "attacker": "math",
         "damage": 104,
-        "isSplash": true,
         "time": 265014,
         "victim": "ung",
         "victimWep": "rl",
@@ -26811,6 +26846,7 @@
         "attacker": "virus",
         "bounded": 100,
         "damage": 116,
+        "isSplash": true,
         "time": 274010,
         "victim": "math",
         "victimWep": "lg",
@@ -26829,6 +26865,7 @@
         "attacker": "raket",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 274855,
         "victim": "raket",
         "weapon": "rl"
@@ -26878,6 +26915,7 @@
         "attacker": "math",
         "bounded": 40,
         "damage": 45,
+        "isSplash": true,
         "time": 277436,
         "victim": "ung",
         "victimWep": "lg",
@@ -27093,6 +27131,7 @@
         "attacker": "virus",
         "bounded": 40,
         "damage": 71,
+        "isSplash": true,
         "time": 295363,
         "victim": "math",
         "victimWep": "both",
@@ -27169,6 +27208,7 @@
         "attacker": "virus",
         "bounded": 8,
         "damage": 46,
+        "isSplash": true,
         "time": 301729,
         "victim": "math",
         "victimWep": "lg",
@@ -27245,6 +27285,7 @@
         "attacker": "virus",
         "bounded": 76,
         "damage": 95,
+        "isSplash": true,
         "time": 307456,
         "victim": "raket",
         "victimWep": "lg",
@@ -27381,6 +27422,7 @@
         "attacker": "virus",
         "bounded": 23,
         "damage": 73,
+        "isSplash": true,
         "time": 315653,
         "victim": "raket",
         "victimWep": "lg",
@@ -27480,6 +27522,7 @@
         "attacker": "ung",
         "bounded": 32,
         "damage": 49,
+        "isSplash": true,
         "time": 318443,
         "victim": "raket",
         "victimWep": "sg",
@@ -27506,6 +27549,7 @@
         "attacker": "raket",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 321177,
         "victim": "raket",
         "weapon": "rl"
@@ -27580,6 +27624,7 @@
         "attacker": "raket",
         "bounded": 11,
         "damage": 95,
+        "isSplash": true,
         "time": 323549,
         "victim": "virus",
         "victimWep": "lg",
@@ -27654,6 +27699,7 @@
         "attacker": "virus",
         "damage": 49,
         "isSelf": true,
+        "isSplash": true,
         "time": 326650,
         "victim": "virus",
         "weapon": "rl"
@@ -27732,6 +27778,7 @@
         "bounded": 20,
         "damage": 1120,
         "isSelf": true,
+        "isSplash": true,
         "time": 330389,
         "victim": "ung",
         "weapon": "lg"
@@ -27740,6 +27787,7 @@
         "attacker": "ung",
         "bounded": 231,
         "damage": 1911,
+        "isSplash": true,
         "isTeam": true,
         "time": 330389,
         "victim": "virus",
@@ -27801,6 +27849,7 @@
         "attacker": "raket",
         "bounded": 49,
         "damage": 101,
+        "isSplash": true,
         "time": 338126,
         "victim": "ung",
         "victimWep": "rl",
@@ -27853,6 +27902,7 @@
         "attacker": "ung",
         "bounded": 31,
         "damage": 62,
+        "isSplash": true,
         "time": 344181,
         "victim": "math",
         "victimWep": "both",
@@ -28168,6 +28218,7 @@
         "attacker": "math",
         "bounded": 83,
         "damage": 119,
+        "isSplash": true,
         "time": 360826,
         "victim": "virus",
         "victimWep": "rl",
@@ -28194,6 +28245,7 @@
         "attacker": "virus",
         "bounded": 52,
         "damage": 69,
+        "isSplash": true,
         "time": 366656,
         "victim": "raket",
         "victimWep": "both",
@@ -28239,6 +28291,7 @@
         "attacker": "ung",
         "bounded": 63,
         "damage": 91,
+        "isSplash": true,
         "time": 371078,
         "victim": "math",
         "victimWep": "both",
@@ -28265,6 +28318,7 @@
         "attacker": "raket",
         "bounded": 58,
         "damage": 96,
+        "isSplash": true,
         "time": 373973,
         "victim": "ung",
         "victimWep": "both",
@@ -28319,6 +28373,7 @@
         "attacker": "raket",
         "bounded": 46,
         "damage": 74,
+        "isSplash": true,
         "time": 378971,
         "victim": "ung",
         "victimWep": "rl",
@@ -28328,6 +28383,7 @@
         "attacker": "raket",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 381180,
         "victim": "raket",
         "weapon": "rl"
@@ -28371,6 +28427,7 @@
         "attacker": "math",
         "bounded": 42,
         "damage": 91,
+        "isSplash": true,
         "time": 387553,
         "victim": "virus",
         "victimWep": "mid",
@@ -28658,6 +28715,7 @@
         "attacker": "virus",
         "bounded": 56,
         "damage": 61,
+        "isSplash": true,
         "time": 410961,
         "victim": "math",
         "victimWep": "lg",
@@ -28708,6 +28766,7 @@
         "attacker": "raket",
         "bounded": 35,
         "damage": 63,
+        "isSplash": true,
         "time": 415341,
         "victim": "virus",
         "victimWep": "both",
@@ -28792,6 +28851,7 @@
         "attacker": "math",
         "bounded": 10,
         "damage": 96,
+        "isSplash": true,
         "time": 423341,
         "victim": "ung",
         "victimWep": "sg",
@@ -28847,6 +28907,7 @@
         "attacker": "virus",
         "bounded": 111,
         "damage": 112,
+        "isSplash": true,
         "time": 427132,
         "victim": "raket",
         "victimWep": "both",
@@ -28865,6 +28926,7 @@
         "attacker": "raket",
         "bounded": 35,
         "damage": 77,
+        "isSplash": true,
         "time": 427239,
         "victim": "virus",
         "victimWep": "both",
@@ -28874,6 +28936,7 @@
         "attacker": "raket",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 430131,
         "victim": "raket",
         "weapon": "rl"
@@ -28977,6 +29040,7 @@
         "attacker": "raket",
         "bounded": 87,
         "damage": 90,
+        "isSplash": true,
         "time": 432762,
         "victim": "ung",
         "victimWep": "both",
@@ -28995,6 +29059,7 @@
         "attacker": "math",
         "bounded": 30,
         "damage": 73,
+        "isSplash": true,
         "time": 435712,
         "victim": "virus",
         "victimWep": "rl",
@@ -29047,6 +29112,7 @@
         "attacker": "math",
         "bounded": 9,
         "damage": 84,
+        "isSplash": true,
         "time": 440446,
         "victim": "virus",
         "victimWep": "lg",
@@ -29102,6 +29168,7 @@
         "attacker": "virus",
         "bounded": 100,
         "damage": 101,
+        "isSplash": true,
         "time": 446135,
         "victim": "math",
         "victimWep": "rl",
@@ -29111,6 +29178,7 @@
         "attacker": "math",
         "bounded": 70,
         "damage": 118,
+        "isSplash": true,
         "time": 446135,
         "victim": "virus",
         "victimWep": "rl",
@@ -29228,6 +29296,7 @@
         "attacker": "virus",
         "damage": 52,
         "isSelf": true,
+        "isSplash": true,
         "time": 450030,
         "victim": "virus",
         "weapon": "rl"
@@ -29355,6 +29424,7 @@
         "attacker": "ung",
         "bounded": 97,
         "damage": 99,
+        "isSplash": true,
         "time": 460712,
         "victim": "raket",
         "victimWep": "lg",
@@ -29364,6 +29434,7 @@
         "attacker": "math",
         "bounded": 77,
         "damage": 79,
+        "isSplash": true,
         "time": 462083,
         "victim": "virus",
         "victimWep": "both",
@@ -29397,6 +29468,7 @@
         "attacker": "ung",
         "bounded": 71,
         "damage": 72,
+        "isSplash": true,
         "time": 465295,
         "victim": "math",
         "victimWep": "both",
@@ -29406,6 +29478,7 @@
         "attacker": "math",
         "bounded": 10,
         "damage": 73,
+        "isSplash": true,
         "time": 465347,
         "victim": "ung",
         "victimWep": "rl",
@@ -29432,6 +29505,7 @@
         "attacker": "ung",
         "damage": 47,
         "isSelf": true,
+        "isSplash": true,
         "time": 468555,
         "victim": "ung",
         "weapon": "rl"
@@ -29745,6 +29819,7 @@
         "attacker": "virus",
         "bounded": 19,
         "damage": 73,
+        "isSplash": true,
         "time": 487085,
         "victim": "math",
         "victimWep": "lg",
@@ -29779,6 +29854,7 @@
         "attacker": "virus",
         "bounded": 40,
         "damage": 59,
+        "isSplash": true,
         "time": 489033,
         "victim": "raket",
         "victimWep": "lg",
@@ -29788,6 +29864,7 @@
         "attacker": "math",
         "bounded": 92,
         "damage": 110,
+        "isSplash": true,
         "time": 489033,
         "victim": "ung",
         "victimWep": "rl",
@@ -29797,6 +29874,7 @@
         "attacker": "ung",
         "bounded": 77,
         "damage": 79,
+        "isSplash": true,
         "time": 489136,
         "victim": "math",
         "victimWep": "rl",
@@ -29815,6 +29893,7 @@
         "attacker": "virus",
         "bounded": 39,
         "damage": 61,
+        "isSplash": true,
         "time": 495241,
         "victim": "raket",
         "victimWep": "rl",
@@ -29908,6 +29987,7 @@
         "attacker": "virus",
         "bounded": 32,
         "damage": 98,
+        "isSplash": true,
         "time": 501765,
         "victim": "raket",
         "victimWep": "lg",
@@ -30027,6 +30107,7 @@
         "attacker": "virus",
         "bounded": 1,
         "damage": 69,
+        "isSplash": true,
         "time": 508823,
         "victim": "math",
         "victimWep": "lg",
@@ -30063,6 +30144,7 @@
         "attacker": "virus",
         "bounded": 100,
         "damage": 111,
+        "isSplash": true,
         "time": 512402,
         "victim": "math",
         "victimWep": "lg",
@@ -30099,6 +30181,7 @@
         "attacker": "virus",
         "bounded": 77,
         "damage": 89,
+        "isSplash": true,
         "time": 519087,
         "victim": "raket",
         "victimWep": "rl",
@@ -30126,6 +30209,7 @@
         "attacker": "virus",
         "bounded": 51,
         "damage": 71,
+        "isSplash": true,
         "time": 521665,
         "victim": "raket",
         "victimWep": "sg",
@@ -30135,6 +30219,7 @@
         "attacker": "ung",
         "bounded": 58,
         "damage": 71,
+        "isSplash": true,
         "time": 522295,
         "victim": "math",
         "victimWep": "rl",
@@ -30231,6 +30316,7 @@
         "attacker": "raket",
         "bounded": 84,
         "damage": 98,
+        "isSplash": true,
         "time": 531347,
         "victim": "virus",
         "victimWep": "both",
@@ -30257,6 +30343,7 @@
         "attacker": "ung",
         "bounded": 46,
         "damage": 53,
+        "isSplash": true,
         "time": 532927,
         "victim": "raket",
         "victimWep": "rl",
@@ -30351,6 +30438,7 @@
         "attacker": "virus",
         "bounded": 16,
         "damage": 44,
+        "isSplash": true,
         "time": 551727,
         "victim": "raket",
         "victimWep": "sg",
@@ -30556,6 +30644,7 @@
         "attacker": "raket",
         "bounded": 42,
         "damage": 76,
+        "isSplash": true,
         "time": 564409,
         "victim": "virus",
         "victimWep": "both",
@@ -30591,6 +30680,7 @@
         "attacker": "math",
         "bounded": 19,
         "damage": 86,
+        "isSplash": true,
         "time": 566783,
         "victim": "virus",
         "victimWep": "sg",
@@ -30599,7 +30689,6 @@
       {
         "attacker": "raket",
         "damage": 102,
-        "isSplash": true,
         "isTeam": true,
         "time": 566994,
         "victim": "math",
@@ -30909,11 +30998,11 @@
         "attacker": "math",
         "byWeapon": {
           "lg": 1281,
-          "rl": 2600,
+          "rl": 2604,
           "sg": 160,
           "ssg": 16
         },
-        "damage": 4057,
+        "damage": 4061,
         "victim": "virus"
       },
       {
@@ -30930,12 +31019,12 @@
       {
         "attacker": "raket",
         "byWeapon": {
-          "lg": 2621,
+          "lg": 2617,
           "rl": 1456,
           "sg": 120,
           "ssg": 152
         },
-        "damage": 4349,
+        "damage": 4345,
         "victim": "virus"
       },
       {
@@ -43785,8 +43874,8 @@
             },
             "rl": {
               "attacks": 237,
-              "hits": 77,
-              "hitsConvention": "anyDamage"
+              "hits": 8,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 89,
@@ -43803,7 +43892,7 @@
         },
         "damage": {
           "byEnemyWeapon": {
-            "both": 1701,
+            "both": 1705,
             "lg": 835,
             "mid": 200,
             "rl": 3117,
@@ -43811,7 +43900,7 @@
           },
           "byWeapon": {
             "lg": 2631,
-            "rl": 4408,
+            "rl": 4412,
             "sg": 259,
             "ssg": 40
           },
@@ -43823,8 +43912,8 @@
             "rl": 556,
             "sg": 188
           },
-          "enemyWeapons": 5653,
-          "given": 7338,
+          "enemyWeapons": 5657,
+          "given": 7342,
           "givenSelf": 553,
           "givenTeam": 759,
           "src": "reconstructed",
@@ -44039,8 +44128,8 @@
             },
             "rl": {
               "attacks": 81,
-              "hits": 38,
-              "hitsConvention": "anyDamage"
+              "hits": 6,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 81,
@@ -44057,14 +44146,14 @@
         },
         "damage": {
           "byEnemyWeapon": {
-            "both": 2259,
+            "both": 2255,
             "lg": 1047,
             "mid": 100,
             "rl": 2562,
             "sg": 1580
           },
           "byWeapon": {
-            "lg": 4347,
+            "lg": 4343,
             "rl": 2504,
             "sg": 268,
             "ssg": 224
@@ -44080,8 +44169,8 @@
             "ssg": 12,
             "unknown": 192
           },
-          "enemyWeapons": 5868,
-          "given": 7548,
+          "enemyWeapons": 5864,
+          "given": 7544,
           "givenSelf": 468,
           "givenTeam": 613,
           "src": "reconstructed",
@@ -44278,7 +44367,7 @@
             "gl": {
               "attacks": 9,
               "hits": 1,
-              "hitsConvention": "anyDamage"
+              "hitsConvention": "directImpact"
             },
             "lg": {
               "attacks": 393,
@@ -44287,8 +44376,8 @@
             },
             "rl": {
               "attacks": 175,
-              "hits": 63,
-              "hitsConvention": "anyDamage"
+              "hits": 9,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 93,
@@ -44535,8 +44624,8 @@
             },
             "rl": {
               "attacks": 123,
-              "hits": 47,
-              "hitsConvention": "anyDamage"
+              "hits": 6,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 94,
@@ -44779,8 +44868,8 @@
             },
             "rl": {
               "attacks": 318,
-              "hits": 115,
-              "hitsConvention": "anyDamage"
+              "hits": 14,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 170,
@@ -44804,8 +44893,8 @@
             "sg": 3065
           },
           "byWeapon": {
-            "lg": 6978,
-            "rl": 6912,
+            "lg": 6974,
+            "rl": 6916,
             "sg": 527,
             "ssg": 264
           },
@@ -45023,7 +45112,7 @@
             "gl": {
               "attacks": 9,
               "hits": 1,
-              "hitsConvention": "anyDamage"
+              "hitsConvention": "directImpact"
             },
             "lg": {
               "attacks": 728,
@@ -45032,8 +45121,8 @@
             },
             "rl": {
               "attacks": 298,
-              "hits": 110,
-              "hitsConvention": "anyDamage"
+              "hits": 15,
+              "hitsConvention": "directImpact"
             },
             "sg": {
               "attacks": 187,
@@ -121524,50 +121613,6 @@
     }
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "ung",
-        "attackerTeam": "nme",
-        "attackerUserID": 2643,
-        "damage": 95,
-        "height": 149.21875,
-        "heightAboveAttacker": 149.125,
-        "lethal": true,
-        "loc": "low",
-        "time": 249382,
-        "victim": "raket",
-        "victimTeam": "korv",
-        "victimUserID": 2647
-      },
-      {
-        "attacker": "math",
-        "attackerTeam": "korv",
-        "attackerUserID": 2650,
-        "damage": 48,
-        "height": 148.5,
-        "heightAboveAttacker": -130.875,
-        "lethal": true,
-        "loc": "Quad.stairs",
-        "time": 53116,
-        "victim": "virus",
-        "victimTeam": "nme",
-        "victimUserID": 2639
-      },
-      {
-        "attacker": "math",
-        "attackerTeam": "korv",
-        "attackerUserID": 2650,
-        "damage": 53,
-        "height": 126.96875,
-        "heightAboveAttacker": 0.125,
-        "lethal": true,
-        "loc": "high",
-        "time": 72761,
-        "victim": "ung",
-        "victimTeam": "nme",
-        "victimUserID": 2643
-      }
-    ],
     "deathEvents": [
       {
         "player": "math",

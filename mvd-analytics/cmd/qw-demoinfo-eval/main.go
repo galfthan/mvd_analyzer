@@ -27,8 +27,10 @@
 //
 //   - sg/ssg accuracy — KTX counts PELLETS on both sides of the ratio, this
 //     pipeline counts trigger pulls and fires that connected;
-//   - rl/gl hits — KTX's is the direct-impact count, ours counts a fire that
-//     landed damage by any path including splash;
+//   - rl/gl hits on a WIRE-linked row — KTX's is the direct-impact count and
+//     the wire-linked tier counts any damage path. A RECONSTRUCTED row (what
+//     this harness scores) publishes the direct-impact count since v74, so
+//     acc.rl.hits / acc.gl.hits below ARE comparable with the block;
 //   - spree.max — KTX increments a player's own streak on their SUICIDE
 //     wherever teamplay is off (see result.PlayerStatsScore.MaxSpree). The
 //     `ktxSpree` column replays KTX's gate instead of ours, so the residual
@@ -43,11 +45,11 @@
 //   - spree.max/ktxConvention — KTX's own gate, run on the frag log;
 //   - acc.{rl,gl}.direct/wire — the direct-impact count read off the WIRE
 //     damage log's splash flag, i.e. the control: what the server itself said;
-//   - acc.{rl,gl}.direct/recon — the same count derived the only way an old
-//     demo could, from the reconstruction's geometric direct/splash verdict.
+//   - acc.{rl,gl}.anyDamage/recon — the OTHER convention for the two weapons
+//     whose derived row publishes the direct-impact one (v74), so the size of
+//     the gap between the conventions stays measured.
 //
-// The verdicts are in damagerecon/ACCURACY.md; briefly, the wire answers rl
-// exactly and gl not at all, and the reconstruction the other way round.
+// The verdicts are in damagerecon/ACCURACY.md.
 package main
 
 import (
@@ -184,8 +186,17 @@ func scoreDemo(path string) ([]row, error) {
 		return nil, fmt.Errorf("recon: %w", err)
 	}
 	res.Damage = rc
+	// Whether the reconstruction could MEASURE the server's direct rocket
+	// constant. The direct-impact classifier's magnitude prior only exists
+	// where it could (damagerecon/direct.go), so the rl rows are reported
+	// split on it as well as pooled — the pooled figure would otherwise hide
+	// which half of the population it describes.
+	rlRegime := "fixed110"
+	if rc.RocketDirectDamage == 0 {
+		rlRegime = "noRegime"
+	}
 	res.Aim = aimcore.Compute(res, aimcore.Query{})
-	reconDirect := aimcore.ReconDirectHitsForEval(res)
+	reconAny := aimcore.ReconHitsForEval(res)
 	blind := analyzer.DerivedStatsForEval(res)
 	if blind == nil {
 		return nil, fmt.Errorf("blind re-derivation returned nothing")
@@ -256,20 +267,28 @@ func scoreDemo(path string) ([]row, error) {
 			add("acc."+w+".attacks", float64(wv.Acc.Attacks), float64(acc.Attacks))
 			if acc.Hits != nil {
 				add("acc."+w+".hits", float64(wv.Acc.Hits), float64(*acc.Hits))
+				if w == "rl" {
+					add("acc.rl.hits/"+rlRegime, float64(wv.Acc.Hits), float64(*acc.Hits))
+				}
 			}
-			// The KTX-convention alternatives for the two weapons whose
-			// any-path count is not the block's quantity. `direct/wire` is
-			// the control (what the server itself flagged), `direct/recon`
-			// the derivation an old demo could actually publish.
+			// rl/gl only from here: they are the two weapons whose block
+			// counter is the DIRECT-impact count, which since v74 is what a
+			// reconstructed row publishes for them too — so `acc.rl.hits`
+			// above is already the shipped comparison.
 			if w != "rl" && w != "gl" {
 				continue
 			}
-			// Always scored, zero included: a player who landed no direct
-			// impact is a row where the two conventions agree at 0, and
-			// dropping it would grade the derivation only where it fired.
+			// `direct/wire` is the definitional control: the same count taken
+			// off the WIRE log's splash flag, i.e. what the server itself
+			// said. Always scored, zero included — a player who landed no
+			// direct impact is a row where the conventions agree at 0, and
+			// dropping it would grade only where it fired.
 			add("acc."+w+".direct/wire", float64(wv.Acc.Hits), float64(wireDirect[r.Name][w]))
-			if d, ok := reconDirect[r.Name][w]; ok {
-				add("acc."+w+".direct/recon", float64(wv.Acc.Hits), float64(d))
+			// `anyDamage/recon` is the convention the row does NOT publish
+			// for these two, kept so the size of the gap between them stays
+			// measured rather than argued.
+			if d, ok := reconAny[r.Name][w]; ok {
+				add("acc."+w+".anyDamage/recon", float64(wv.Acc.Hits), float64(d))
 			}
 		}
 	}

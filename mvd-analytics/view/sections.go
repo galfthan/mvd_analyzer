@@ -626,10 +626,12 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	out.Dmg = d.Dmg
 	out.BoundedMode = d.BoundedMode
 	out.Source = d.Source
-	// Coverage is a whole-match provenance stamp on the reconstruction, like
-	// Source and BoundedMode — not an aggregate over the shown hits — so it
-	// rides a filtered response unchanged rather than being rescoped.
+	// Coverage and the measured rocket constant are whole-match provenance
+	// stamps on the reconstruction, like Source and BoundedMode — not
+	// aggregates over the shown hits — so they ride a filtered response
+	// unchanged rather than being rescoped.
 	out.Coverage = d.Coverage
+	out.RocketDirectDamage = d.RocketDirectDamage
 	out.Events = events
 	switch {
 	case fam == "bounded":

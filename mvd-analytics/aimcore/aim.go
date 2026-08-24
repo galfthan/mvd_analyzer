@@ -198,6 +198,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	hitsSource := ""
 	reconTier := false
 	var reconByPlayer map[string][]*dmgRec
+	var reconDirectByPlayer map[string]map[string]int
 	switch {
 	case hitsMeasured:
 		hitsSource = result.AimHitsSourceKTX
@@ -205,6 +206,10 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		hitsSource = result.AimHitsSourceReconstructed
 		reconTier = true
 		reconByPlayer = reconDamageByAttacker(res)
+		// Match-wide like the damage pool, and for the same reason: the
+		// touch count is a property of the whole match's log, not of the
+		// queried window's fires.
+		reconDirectByPlayer = ReconDirectHits(res)
 	}
 
 	// The RL/GL direct/splash split needs projectile linking to have filled
@@ -227,7 +232,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -290,7 +295,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -620,13 +625,23 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// nobody has a supported zero, and gating on his damage would publish it as
 	// the same absence a withheld weapon gets.
 	if reconTier {
-		reconHits, _ := reconHitsByWeapon(shots, reconDmg, reconTierWeapons)
+		reconHits := reconHitsByWeapon(shots, reconDmg, reconTierWeapons)
 		for w, hits := range reconHits {
 			if wa := wagg[w]; wa != nil {
 				if hits > wa.Shots {
 					hits = wa.Shots // a claim per fire makes this unreachable; belt and braces
 				}
 				wa.Recon = &result.WeaponAimRecon{Hits: hits}
+				// The rl/gl touch count rides the same block but is NOT that
+				// join's output (see ReconDirectHits): it counts direct rows,
+				// so it can exceed Hits where a rocket touched without its
+				// entity ever being broadcast. It cannot exceed the fires.
+				if d, ok := reconDirect[w]; ok {
+					if d > wa.Shots {
+						d = wa.Shots
+					}
+					wa.Recon.DirectHits = &d
+				}
 			}
 		}
 	}

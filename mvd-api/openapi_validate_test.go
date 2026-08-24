@@ -355,6 +355,13 @@ func addReconAimTier(am *result.AimResult) {
 			*w = result.WeaponAim{Weapon: w.Weapon, Shots: w.Shots}
 			if tier[w.Weapon] {
 				w.Recon = &result.WeaponAimRecon{Hits: w.Shots / 3}
+				// rl/gl also carry the v74 direct-impact count — KTX's own
+				// convention for them, and the number the reconstructed
+				// player-stats row publishes.
+				if w.Weapon == "rl" || w.Weapon == "gl" {
+					d := w.Shots / 8
+					w.Recon.DirectHits = &d
+				}
 			}
 		}
 	}
@@ -368,9 +375,11 @@ func addReconAimTier(am *result.AimResult) {
 // can ever reach a served body.
 //
 // What only this shape carries: `src: "reconstructed"`, the per-weapon
-// withhold that leaves ng/sng with NO hits, and `hitsConvention: "anyDamage"`
-// beside the hits that do exist — all omitempty or optional, so without a
-// served body they would be validated against their own absence.
+// withhold that leaves ng/sng with NO hits, and both hit conventions side by
+// side — `anyDamage` on lg and, since v74, `directImpact` on rl, which is the
+// whole point of the reconstructed row (it answers KTX's own rl/gl question).
+// All omitempty or optional, so without a served body they would be validated
+// against their own absence.
 func reconAccuracyResult() *result.Result {
 	hits := func(n int) *int { return &n }
 	return &result.Result{
@@ -382,7 +391,7 @@ func reconAccuracyResult() *result.Result {
 				Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 12, Deaths: 9},
 				Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcReconstructed,
 					ByWeapon: map[string]result.PlayerStatsAcc{
-						"rl": {Attacks: 90, Hits: hits(31), HitsConvention: result.HitsAnyDamage},
+						"rl": {Attacks: 90, Hits: hits(31), HitsConvention: result.HitsDirectImpact},
 						"lg": {Attacks: 400, Hits: hits(122), HitsConvention: result.HitsAnyDamage},
 						// Outside the validated tier: the withhold inherits,
 						// so neither the count nor the marker appears.
@@ -398,7 +407,8 @@ func reconAccuracyResult() *result.Result {
 }
 
 // reconDamageResult is a served /damage body in the v74 RECONSTRUCTED shape:
-// `source: "reconstructed"` with the `coverage` object beside it. Like
+// `source: "reconstructed"` with the `coverage` object and the measured
+// `rocketDirectDamage` era signal beside it. Like
 // reconAccuracyResult it has to be its own demo — every golden-corpus demo
 // carries the wire KTX damage stream, so its section is `source: "ktx"` and
 // coverage is absent BY CONTRACT there, which left the whole sub-schema
@@ -419,6 +429,10 @@ func reconDamageResult() *result.Result {
 			BoundedMode: "standard",
 			Dmg:         "both",
 			Coverage:    &result.DamageCoverage{Kills: 40, Covered: 30, Ratio: 0.75},
+			// The direct-damage constant this demo's own hits established —
+			// omitempty, so without a value here the field is validated
+			// against its own absence exactly like `coverage` was.
+			RocketDirectDamage: 110,
 			Events: []result.DamageEntry{
 				{Time: 30000, Attacker: "old", Victim: "older", Weapon: "rl", Damage: 100, Bounded: b(100)},
 				{Time: 120000, Attacker: "older", Victim: "old", Weapon: "lg", Damage: 60, Bounded: b(60)},
@@ -577,7 +591,7 @@ func validationCases(t *testing.T) []validationCase {
 		// stays reconstructed and carries the per-weapon withhold.
 		{name: "player-stats-reconstructed", url: "/v1/demos/gameId:46/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
 			mustContain: []string{`"src":"reconstructed"`, `"hitsConvention":"anyDamage"`,
-				`"sng":{"attacks":60}`}},
+				`"hitsConvention":"directImpact"`, `"sng":{"attacks":60}`}},
 		{name: "player-stats-filtered", url: "/v1/demos/gameId:42/player-stats?players=nlk", path: "/v1/demos/{id}/player-stats", status: 200},
 
 		{name: "frags", url: "/v1/demos/gameId:42/frags", path: "/v1/demos/{id}/frags", status: 200},
@@ -603,7 +617,8 @@ func validationCases(t *testing.T) []validationCase {
 		// WHOLE-MATCH stamp, so a players/time filter carries it through
 		// unchanged rather than rescoping it to the shown hits.
 		{name: "damage-reconstructed", url: "/v1/demos/gameId:47/damage", path: "/v1/demos/{id}/damage", status: 200,
-			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`}},
+			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`,
+				`"rocketDirectDamage":110`}},
 		{name: "damage-reconstructed-filtered", url: "/v1/demos/gameId:47/damage?players=old&from=60&to=300",
 			path: "/v1/demos/{id}/damage", status: 200,
 			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`}},
@@ -622,7 +637,7 @@ func validationCases(t *testing.T) []validationCase {
 		// unpinned: it recomputes over the demo's own (wire) damage section, so
 		// it is measured, and it is here for the windowed projection.
 		{name: "aim", url: "/v1/demos/gameId:42/aim", path: "/v1/demos/{id}/aim", status: 200,
-			mustContain:    []string{`"hitsMeasured":false`, `"hitsSource":"reconstructed"`, `"recon":{"hits":`},
+			mustContain:    []string{`"hitsMeasured":false`, `"hitsSource":"reconstructed"`, `"recon":{"hits":`, `"directHits":`},
 			mustNotContain: []string{`"hitsMeasured":true`, `"pellets":`, `"pelletHits":`, `"blocked":`}},
 		{name: "aim-summary", url: "/v1/demos/gameId:42/aim?summary=1", path: "/v1/demos/{id}/aim", status: 200,
 			mustContain: []string{`"hitsSource":"reconstructed"`, `"recon":{"hits":`}},

@@ -933,7 +933,8 @@ func TestDeriveAccuracyReconTierFillsHits(t *testing.T) {
 	}}}
 	res := &Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}
 	// Only lg is in the validated tier, so only lg carries a Recon block.
-	acc := deriveAccuracy(res, "a", map[string]map[string]int{"a": {"lg": 61}})
+	acc := deriveAccuracy(res, "a", map[string]map[string]reconHit{
+		"a": {"lg": {n: 61, convention: result.HitsAnyDamage}}})
 	if acc.Src != result.SrcReconstructed {
 		t.Errorf("src = %q, want %q — a recovered hit is not a wire measurement",
 			acc.Src, result.SrcReconstructed)
@@ -967,6 +968,7 @@ func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
 			HitsSource: src,
 			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
 				{Weapon: "lg", Shots: 10, Recon: &result.WeaponAimRecon{Hits: 4}},
+				{Weapon: "rl", Shots: 20, Recon: &result.WeaponAimRecon{Hits: 12, DirectHits: intp(5)}},
 				{Weapon: "ng", Shots: 10},
 			}}},
 		}
@@ -975,8 +977,14 @@ func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
 		t.Errorf("recon hits on a wire-measured demo = %v, want nil", got)
 	}
 	got := deriveReconHits(&Result{Aim: aim(result.AimHitsSourceReconstructed)})
-	if len(got["a"]) != 1 || got["a"]["lg"] != 4 {
+	if len(got["a"]) != 2 || got["a"]["lg"] != (reconHit{n: 4, convention: result.HitsAnyDamage}) {
 		t.Errorf("recon hits = %v, want only the weapons carrying a Recon block", got)
+	}
+	// rl carries the tier's DIRECT-impact count, and says so: that is KTX's
+	// own convention for rl/gl and the whole reason an old demo's row can be
+	// compared with a block-carrying one (schema v74).
+	if got["a"]["rl"] != (reconHit{n: 5, convention: result.HitsDirectImpact}) {
+		t.Errorf("rl recon hit = %v, want the directImpact 5", got["a"]["rl"])
 	}
 }
 

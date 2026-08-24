@@ -118,7 +118,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 }
 
 // buildPlayerStatsRow assembles one streamed player's row.
-func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills, sprees map[string]*spreeCounts, reconHits map[string]map[string]int) result.PlayerStatsRow {
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills, sprees map[string]*spreeCounts, reconHits map[string]map[string]reconHit) result.PlayerStatsRow {
 	present := presenceWindow(p, matchMs)
 	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
 
@@ -639,7 +639,7 @@ func deathsOf(res *Result, name string) int {
 // enough to compare the two sources weapon for weapon.
 //
 // Returns nil when the demo decoded no weapon fires for this player.
-func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]int) *result.PlayerStatsAccuracy {
+func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]reconHit) *result.PlayerStatsAccuracy {
 	if res.Shots == nil {
 		return nil
 	}
@@ -672,11 +672,15 @@ func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]in
 				continue
 			}
 			e := result.PlayerStatsAcc{Attacks: w.Shots}
-			// Both branches count the same thing — a fire that landed damage
-			// by any path — because both are the same join over two grades of
-			// damage log. KTX's own counter is NOT that for rl/gl/sg/ssg,
-			// which is why the convention is published rather than implied by
-			// src (result.PlayerStatsAcc.HitsConvention).
+			// The convention is published rather than implied by src
+			// (result.PlayerStatsAcc.HitsConvention), because the two
+			// branches do NOT count the same thing. The wire-linked branch
+			// counts a fire that landed damage by any path — the same join
+			// for every weapon. The reconstructed branch counts that too,
+			// except for rl/gl, where it publishes the direct-impact count
+			// KTX's block uses (schema v74): the wire-linked tier cannot,
+			// because its `hits` is also the aim section's measured counter
+			// and that is a validated any-path number.
 			switch {
 			case linkable:
 				hits := w.Hits
@@ -687,8 +691,8 @@ func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]in
 				// withhold rather than laundering a zero through this
 				// section. See result.WeaponAimRecon.
 				if hits, ok := recon[w.Weapon]; ok {
-					h := hits
-					e.Hits, e.HitsConvention = &h, result.HitsAnyDamage
+					h := hits.n
+					e.Hits, e.HitsConvention = &h, hits.convention
 					reconUsed = true
 				}
 			}
@@ -748,11 +752,11 @@ func DerivedStatsForEval(res *Result) *result.PlayerStatsResult {
 // construction instead of being restated here. Returns nil unless the aim
 // section says its hits came from a reconstruction; on a wire-measured demo
 // the accuracy family links its own fires and this map must stay out of it.
-func deriveReconHits(res *Result) map[string]map[string]int {
+func deriveReconHits(res *Result) map[string]map[string]reconHit {
 	if res.Aim == nil || res.Aim.HitsSource != result.AimHitsSourceReconstructed {
 		return nil
 	}
-	out := map[string]map[string]int{}
+	out := map[string]map[string]reconHit{}
 	for i := range res.Aim.Players {
 		pa := &res.Aim.Players[i]
 		for j := range pa.Weapons {
@@ -761,12 +765,32 @@ func deriveReconHits(res *Result) map[string]map[string]int {
 				continue
 			}
 			if out[pa.Player] == nil {
-				out[pa.Player] = map[string]int{}
+				out[pa.Player] = map[string]reconHit{}
 			}
-			out[pa.Player][w.Weapon] = w.Recon.Hits
+			// rl/gl publish the DIRECT-impact count where the tier recovered
+			// one: that is the convention KTX's own block uses for those two
+			// weapons, so an old demo's row and a KTX row answer the same
+			// question and may be compared. Every other weapon keeps the
+			// any-path count, which is also what KTX counts there.
+			h := reconHit{n: w.Recon.Hits, convention: result.HitsAnyDamage}
+			if w.Recon.DirectHits != nil {
+				h = reconHit{n: *w.Recon.DirectHits, convention: result.HitsDirectImpact}
+			}
+			out[pa.Player][w.Weapon] = h
 		}
 	}
 	return out
+}
+
+// reconHit is one weapon's recovered hit count together with the convention
+// it counts under — the two travel as a pair because the aim recon tier
+// answers a different question for rl/gl (a projectile that TOUCHED a
+// player) than for the rest (a fire that landed damage by any path), and
+// publishing a number without saying which is exactly the ambiguity
+// PlayerStatsAcc.HitsConvention exists to end.
+type reconHit struct {
+	n          int
+	convention string
 }
 
 // deriveLogins maps player name to the `*auth` login from userinfo — the

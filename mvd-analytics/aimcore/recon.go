@@ -219,37 +219,67 @@ func ReconHitsForEval(res *result.Result) map[string]map[string]int {
 	dmg := reconDamageByAttacker(res)
 	out := make(map[string]map[string]int, len(byPlayer))
 	for p, shots := range byPlayer {
-		if h, _ := reconHitsByWeapon(shots, dmg[p], reconEvalWeapons); len(h) > 0 {
+		if h := reconHitsByWeapon(shots, dmg[p], reconEvalWeapons); len(h) > 0 {
 			out[p] = h
 		}
 	}
 	return out
 }
 
-// ReconDirectHitsForEval is ReconHitsForEval's KTX-convention twin: for rl and
-// gl it counts the connecting fires whose projectile TOUCHED a player, which is
-// the only event KTX's own `hits` counter increments on (ktx/src/weapons.c:994,
-// :1329). Other weapons are absent — for them the two conventions coincide.
+// ReconDirectHits counts, per player per weapon, the rl/gl projectiles the
+// reconstruction says TOUCHED a player — the convention KTX's own
+// `acc.rl.hits` / `acc.gl.hits` counts, because KTX increments that counter
+// in the touch handler and nowhere else (ktx/src/weapons.c:990-996, :1327-1333).
+// Nil unless res carries a reconstructed damage section.
 //
-// Like ReconHitsForEval it exists for the harnesses and nothing else: whether
-// this convention is derivable well enough to publish is the measurement
-// cmd/qw-demoinfo-eval makes, and that measurement must not be gated on it
-// having shipped.
-func ReconDirectHitsForEval(res *result.Result) map[string]map[string]int {
+// It is not a join at all, and that is the point. One projectile touches at
+// most one player, so a touch IS a direct row: counting the reconstructed
+// log's non-splash rl/gl rows per attacker is the whole derivation. The same
+// count taken over the WIRE log reproduces the verbatim KTX block on 638 of
+// 638 player rows, so this is the wire control's own arithmetic applied to
+// the reconstructed log — which is what makes the two eras comparable.
+//
+// Deliberately NOT routed through the fire→flight join that produces
+// WeaponAimRecon.Hits. That join asks whether a FIRE connected and treats a
+// rocket whose entity was never broadcast as a miss, matching this
+// pipeline's measured `hits` counter. KTX's touch counter has no such
+// notion — a point-blank rocket that touches still increments it — so
+// joining through the flight throws those away: measured against the
+// verbatim block, the flight-joined variant runs 9.5% aggregate error where
+// this one runs 0.65% (damagerecon/ACCURACY.md).
+//
+// Weapons the player FIRED are seeded at zero, so "fired ten rockets and
+// touched nobody" is a supported zero rather than an absence. Self rows are
+// excluded: a missile never touches its owner (weapons.c:951, :1315), so a
+// direct self row would be a contradiction, not a hit.
+func ReconDirectHits(res *result.Result) map[string]map[string]int {
 	if res == nil || res.Shots == nil || res.Damage == nil ||
 		res.Damage.Source != result.DamageSourceReconstructed {
 		return nil
 	}
-	byPlayer := make(map[string][]result.Shot)
-	for _, s := range res.Shots.Shots {
-		byPlayer[s.Player] = append(byPlayer[s.Player], s)
-	}
-	dmg := reconDamageByAttacker(res)
-	out := make(map[string]map[string]int, len(byPlayer))
-	for p, shots := range byPlayer {
-		if _, d := reconHitsByWeapon(shots, dmg[p], reconEvalWeapons); len(d) > 0 {
-			out[p] = d
+	out := make(map[string]map[string]int)
+	seed := func(player, weapon string) {
+		if out[player] == nil {
+			out[player] = map[string]int{}
 		}
+		if _, ok := out[player][weapon]; !ok {
+			out[player][weapon] = 0
+		}
+	}
+	for _, s := range res.Shots.Shots {
+		if reconFlightWeapons[s.Weapon] {
+			seed(s.Player, s.Weapon)
+		}
+	}
+	for _, d := range res.Damage.Events {
+		if d.Attacker == "" || d.IsEnv || d.IsSelf || d.IsSplash {
+			continue
+		}
+		if !reconFlightWeapons[d.Weapon] {
+			continue
+		}
+		seed(d.Attacker, d.Weapon)
+		out[d.Attacker][d.Weapon]++
 	}
 	return out
 }
@@ -286,9 +316,9 @@ func ReconDirectHitsForEval(res *result.Result) map[string]map[string]int {
 // (ktx/src/weapons.c:994 T_MissileTouch, :1329 GrenadeTouch), so it is that
 // count, not the any-path one, that a KTX demoinfo block reports. See
 // cmd/qw-demoinfo-eval for what the two are worth against a verbatim block.
-func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool) (map[string]int, map[string]int) {
+func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool) map[string]int {
 	if len(shots) == 0 {
-		return nil, nil
+		return nil
 	}
 	// Fires per weapon, time-ordered, with a claim flag. end carries the
 	// fire's tracked-flight impact time (Shot.FlightEnd) for the flight
@@ -308,7 +338,7 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 		fires[w] = append(fires[w], &fire{t: shots[i].Time, end: shots[i].FlightEnd})
 	}
 	if len(fires) == 0 {
-		return nil, nil
+		return nil
 	}
 	for w := range fires {
 		f := fires[w]
@@ -325,12 +355,8 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 		byWeapon[d.weapon] = append(byWeapon[d.weapon], d)
 	}
 	out := make(map[string]int, len(fires))
-	direct := make(map[string]int)
 	for w, f := range fires {
 		out[w] = 0 // an honest zero: the weapon was fired and linked nothing
-		if reconFlightWeapons[w] {
-			direct[w] = 0
-		}
 		recs := byWeapon[w]
 		sort.SliceStable(recs, func(i, j int) bool { return recs[i].t < recs[j].t })
 		ts := make([]int32, len(recs))
@@ -345,7 +371,7 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 				}
 			}
 			sort.Slice(ends, func(i, j int) bool { return ends[i] < ends[j] })
-			out[w], direct[w] = reconFlightHits(ends, recs)
+			out[w] = reconFlightHits(ends, recs)
 			continue
 		}
 		if len(ts) == 0 {
@@ -382,7 +408,7 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 			}
 		}
 	}
-	return out, direct
+	return out
 }
 
 // reconFlightHits is the PROJECTILE join: it counts how many of one player's
@@ -414,12 +440,12 @@ func reconHitsByWeapon(shots []result.Shot, dmg []*dmgRec, tier map[string]bool)
 // The second return value is the KTX-convention subset: a claimed impact whose
 // rows include a non-splash, non-self one is a projectile that TOUCHED a
 // player, which is the only thing KTX's own hits counter increments on.
-func reconFlightHits(ends []int32, damage []*dmgRec) (int, int) {
+func reconFlightHits(ends []int32, damage []*dmgRec) int {
 	if len(ends) == 0 || len(damage) == 0 {
-		return 0, 0
+		return 0
 	}
 	used := make([]bool, len(damage))
-	hits, direct := 0, 0
+	hits := 0
 	// start is the first damage instant a flight can still reach: ends are
 	// ordered, so an instant before this flight's window — or already claimed
 	// — is dead for every later flight too.
@@ -439,7 +465,6 @@ func reconFlightHits(ends []int32, damage []*dmgRec) (int, int) {
 			continue
 		}
 		hits++
-		touched := false
 		// Consume the whole impact instant: one explosion damaging several
 		// victims writes one row per victim, all on the same stat frame (see
 		// reconImpactMergeMs), and none of them is another flight's evidence.
@@ -456,13 +481,7 @@ func reconFlightHits(ends []int32, damage []*dmgRec) (int, int) {
 		// stays the one the granularity argument justifies.
 		for i := claimed; i < len(damage) && damage[i].t-damage[claimed].t <= reconImpactMergeMs; i++ {
 			used[i] = true
-			if !damage[i].splash && !damage[i].self {
-				touched = true
-			}
-		}
-		if touched {
-			direct++
 		}
 	}
-	return hits, direct
+	return hits
 }
