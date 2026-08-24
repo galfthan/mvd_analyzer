@@ -11,7 +11,14 @@
 //     givenTeam / givenSelf) — the headline goal is ~1% here;
 //   - per-event instant coverage: how many ground-truth damage instants the
 //     delta extraction reproduced and how many values match exactly;
-//   - attribution accuracy on matched enemy instants.
+//   - attribution accuracy on matched enemy instants;
+//   - direct/splash classification per rl/gl damage instant against the wire's
+//     own splash flag, which is raised only inside T_RadiusDamage
+//     (ktx/src/combat.c:1207-1227) and is therefore exact for rl. It is NOT
+//     ground truth for gl — GrenadeTouch does all its damage through
+//     GrenadeExplode → T_RadiusDamage, so every gl row is splash-flagged on
+//     the wire whether or not the grenade touched anybody, and the gl line is
+//     printed only to keep that asymmetry visible.
 //
 // Usage: go run ./mvd-analytics/cmd/qw-recon-eval [-dir mvd-analytics/testdata/cache] [-min-gt 200] [-worst 8]
 package main
@@ -57,6 +64,7 @@ func main() {
 	var evCovered, evTotal, evExact, attMatched, attTotal int
 	confusion := map[string]*confCell{}
 	weaponStats := map[string]*wepCell{}
+	splashStats := map[string]*splashCell{}
 	for _, path := range paths {
 		reg := analyzer.NewDefaultRegistry()
 		reg.BuildShotStreams = true
@@ -92,6 +100,7 @@ func main() {
 			collectConfusion(gt, rc, confusion)
 		}
 		collectWeaponStats(gt, rc, weaponStats)
+		collectSplashStats(gt, rc, splashStats)
 	}
 
 	fmt.Printf("demos scored: %d\n", len(paths))
@@ -105,6 +114,7 @@ func main() {
 		}
 	}
 	printWeaponStats(weaponStats)
+	printSplashStats(splashStats)
 	if *diag {
 		printConfusion(confusion)
 	}
@@ -215,6 +225,117 @@ func printWeaponStats(m map[string]*wepCell) {
 		fmt.Printf("   %-6s %8d %9d %8.1f%% %9.1f%% %10.1f%% %10.1f%%\n",
 			k, c.instants, c.dmg, pct(c.covered, c.instants),
 			pct(c.valExact, c.covered), pct(c.attRight, c.attTotal), pct(c.classRight, c.attTotal))
+	}
+}
+
+// splashCell accumulates the direct/splash confusion for one weapon over
+// paired rl/gl damage instants: `direct` means the projectile TOUCHED the
+// victim, which for rl is exactly what the wire's unflagged row says and what
+// KTX's own hits counter increments on.
+type splashCell struct {
+	paired             int
+	gtDirect, rcDirect int
+	truePos, falsePos  int
+	falseNeg, trueNeg  int
+	missing            int // GT instant the reconstruction never produced
+}
+
+// collectSplashStats pairs each single-source rl/gl GT damage instant with the
+// reconstruction's instant for the same victim at the same millisecond and
+// scores the direct/splash verdict. Self rows are excluded on both sides: a
+// missile never touches its own owner (T_MissileTouch / GrenadeTouch return on
+// `other == owner`, ktx/src/weapons.c:951, :1315), so those are splash by
+// construction and would only pad the agreement rate.
+func collectSplashStats(gt, rc *result.DamageResult, out map[string]*splashCell) {
+	type key struct {
+		victim string
+		t      int32
+	}
+	type inst struct {
+		weapon string
+		direct bool
+		multi  bool
+	}
+	collect := func(evs []result.DamageEntry) map[key]*inst {
+		m := map[key]*inst{}
+		for i := range evs {
+			e := &evs[i]
+			if e.IsEnv || e.IsSelf || (e.Weapon != "rl" && e.Weapon != "gl") {
+				continue
+			}
+			k := key{e.Victim, e.Time}
+			if g, ok := m[k]; ok {
+				if g.weapon != e.Weapon {
+					g.multi = true
+				}
+				// One instant, several rows: the instant counts as a direct
+				// touch if ANY of its rows is one.
+				g.direct = g.direct || !e.IsSplash
+				continue
+			}
+			m[k] = &inst{weapon: e.Weapon, direct: !e.IsSplash}
+		}
+		return m
+	}
+	gtI, rcI := collect(gt.Events), collect(rc.Events)
+	for k, g := range gtI {
+		if g.multi {
+			continue
+		}
+		c, ok := out[g.weapon]
+		if !ok {
+			c = &splashCell{}
+			out[g.weapon] = c
+		}
+		r, ok := rcI[k]
+		if !ok || r.multi || r.weapon != g.weapon {
+			c.missing++
+			continue
+		}
+		c.paired++
+		if g.direct {
+			c.gtDirect++
+		}
+		if r.direct {
+			c.rcDirect++
+		}
+		switch {
+		case g.direct && r.direct:
+			c.truePos++
+		case !g.direct && r.direct:
+			c.falsePos++
+		case g.direct && !r.direct:
+			c.falseNeg++
+		default:
+			c.trueNeg++
+		}
+	}
+}
+
+func printSplashStats(m map[string]*splashCell) {
+	if len(m) == 0 {
+		return
+	}
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	fmt.Printf("\n== direct/splash verdict vs the wire splash flag (paired rl/gl instants, non-self)\n")
+	fmt.Printf("   the gl line is NOT ground truth: GrenadeTouch damages only through\n")
+	fmt.Printf("   T_RadiusDamage, so every wire gl row is splash-flagged (ktx/src/weapons.c:1327)\n")
+	fmt.Printf("   %-6s %8s %9s %10s %8s %8s %10s %9s %9s\n",
+		"weapon", "paired", "unpaired", "gt-direct", "recon", "correct", "precision", "recall", "count-err")
+	for _, k := range keys {
+		c := m[k]
+		countErr := 0.0
+		if c.gtDirect > 0 {
+			countErr = 100 * float64(c.rcDirect-c.gtDirect) / float64(c.gtDirect)
+		}
+		fmt.Printf("   %-6s %8d %9d %10d %8d %7.1f%% %9.1f%% %8.1f%% %+8.1f%%\n",
+			k, c.paired, c.missing, c.gtDirect, c.rcDirect,
+			pct(c.truePos+c.trueNeg, c.paired), pct(c.truePos, c.rcDirect),
+			pct(c.truePos, c.gtDirect), countErr)
 	}
 }
 

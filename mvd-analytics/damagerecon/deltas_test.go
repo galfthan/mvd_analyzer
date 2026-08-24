@@ -165,11 +165,17 @@ func TestDamageModelScoreSelfRocketCeiling(t *testing.T) {
 
 func TestDamageModelScoreQuadBeforeFalloff(t *testing.T) {
 	in := &inputs{rlLo: 110, rlHi: 110}
-	// Quad splash at 200u: engine computes 440 - 100 = 340 (base×4 first).
-	// The wrong order 4×(110-100) = 40 would reject 340.
-	c := &candidate{weapon: "rl", kind: "proj", dEnd: 200}
-	if pen, ok := in.damageModelScore(340, false, c, false, true); !ok || pen != 0 {
-		t.Fatalf("quad splash 340 at 200u must fit exactly, got pen=%v ok=%v", pen, ok)
+	// Quad splash at 200u: the engine computes 4×120 - 100 = 380 (base×4
+	// first). The wrong order 4×(120-100) = 80 would reject 380.
+	//
+	// The base is the T_RadiusDamage argument — 120 for a rocket as for a
+	// grenade (ktx/src/weapons.c:1006) — NOT the 110 the touch deals; and
+	// isSplash is what selects the falloff branch at all now that the
+	// direct/splash verdict is a trajectory question rather than a distance
+	// one (direct.go). A rocket 200 units away has plainly touched nobody.
+	c := &candidate{weapon: "rl", kind: "proj", dEnd: 200, isSplash: true}
+	if pen, ok := in.damageModelScore(380, false, c, false, true); !ok || pen != 0 {
+		t.Fatalf("quad splash 380 at 200u must fit exactly, got pen=%v ok=%v", pen, ok)
 	}
 }
 

@@ -26,7 +26,6 @@ const (
 	rBeamSeg            = 90.0   // units victim to beam segment (p99 measured 60, max 79)
 	rBeamSrc            = 160.0  // units beam start to attacker eye
 	rSplash             = 380.0  // units projectile end to victim (p95=199)
-	rDirect             = 48.0   // below this, treat as a possible direct hit
 	nailSpeed           = 1000.0 // nails AND rockets fly 1000 ups
 	rocketSpeed         = 1000.0
 	tolFlightMs         = 180.0 // flight-time consistency for the trackless-rocket fallback
@@ -39,6 +38,19 @@ const (
 	tolLGAmmoMs         = 250   // cells stat update to damage frame (old low-fps recordings lag)
 	sgAimGateDeg        = 50.0  // real sg hits are within ~25° (p95); hard gate at 2×
 	rlSoundAimGateDeg   = 60.0
+
+	// The KILL raw top-ups compute their floor from these rather than from
+	// splashBase()'s engine-true 120 and the attribution model's own slack.
+	// A top-up only ever RAISES a value, so it has to UNDER-estimate, and
+	// this pair is what the eval corpus calibrated it at; the wide slack is
+	// deliberate on top of that, because a top-up fires on kills, where the
+	// victim is moving fastest and the position interpolation is worst.
+	// Feeding it the true base instead cost raw accuracy measurably — 2.01%
+	// → 2.65% mean per-player error on the 53-demo dm2/dm3 corpus — because
+	// the 10-point gap is multiplied by the quad, exactly on the quad-rocket
+	// kills the top-up exists for.
+	topUpBase  = 110.0
+	topUpSlack = 60.0
 )
 
 // candidate is one possible explanation for a delta.
@@ -52,6 +64,9 @@ type candidate struct {
 	hasEP    bool
 	epExact  bool // ep is a TE_EXPLOSION detonation point, not an interpolated track end
 	isSplash bool
+	// hullNear: the detonation point is close enough to the victim's hull
+	// for a touch to be entertained at all (direct.go directHullNear).
+	hullNear bool
 	// mLo/mHi: precomputed damage-model bounds for the kinds whose range
 	// depends on per-candidate state the generic model cannot see
 	// ("discharge": 35*cells; "env": the engine's lava/slime/drown/fall
@@ -162,26 +177,31 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 		if !in.bsp.splashReaches(pr.ep, vpos) {
 			continue
 		}
-		dLo, _ := in.blastDamage(pr.weapon)
+		dLo, _ := splashBase()
 		q := in.quadFactor(pr.shooter, pr.endT)
 		selfF := 1.0
 		if pr.shooter == victim {
 			selfF = 0.5
 		}
+		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim)
+		// A direct rocket is the flat touch value with no falloff and no
+		// splash on top (ktx/src/weapons.c:998-1006); everything else rides
+		// the radius curve.
 		raw := int((dLo*q - 0.5*dEnd) * selfF)
 		if raw <= 0 {
 			continue
 		}
 		e := in.mkEventSplash(delta{t: pr.endT, raw: raw, bounded: 0},
-			pr.shooter, victim, pr.weapon, "pent-synth", dEnd >= rDirect)
+			pr.shooter, victim, pr.weapon, "pent-synth", !direct)
 		e.dEnd = dEnd
 		out = append(out, e)
 	}
 	// Trackless self rockets — the pent rocket jump: a point-blank rocket
 	// explodes before its entity is ever broadcast, so the projectile pass
-	// above cannot see it. The explosion is at the shooter's feet; the
-	// nominal explosion distance below folds into ~0.5·(D − 0.5·30) ≈ 48
-	// raw per jump (GT pent-jump observations run 32–54).
+	// above cannot see it. A rocket never touches its own owner, so this is
+	// pure radius damage; the explosion is at the shooter's feet and the
+	// nominal distance below folds into ~0.5·(120 − 0.5·30) ≈ 52 raw per
+	// jump (GT pent-jump observations run 32–54).
 	const pentJumpNominalDist = 30.0
 	for _, s := range in.shots {
 		if s.weapon != "rl" || s.player != victim {
@@ -194,7 +214,8 @@ func (in *inputs) pentSyntheticEvents(victim string, p *result.PlayerStream, vtr
 			continue
 		}
 		q := in.quadFactor(victim, s.t)
-		raw := int((in.rlLo*q - 0.5*pentJumpNominalDist) * 0.5)
+		sLo, _ := splashBase()
+		raw := int((sLo*q - 0.5*pentJumpNominalDist) * 0.5)
 		if raw <= 0 {
 			continue
 		}
@@ -278,7 +299,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	var cands []candidate
 	cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.lgAmmoCandidates(victim, d.t, vpos)...)
-	cands = append(cands, in.projCandidates(d.t, vpos)...)
+	cands = append(cands, in.projCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
@@ -352,8 +373,10 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	dj := delta{t: d.t, raw: d.raw - di.raw, bounded: d.bounded - di.bounded}
 	e1 := in.mkEventSplash(di, bi.c.attacker, victim, bi.c.weapon, bi.c.kind, bi.c.isSplash)
 	e1.dEnd = bi.c.dEnd
+	in.stampRocketVerdict(&e1, &bi.c, di)
 	e2 := in.mkEventSplash(dj, bj.c.attacker, victim, bj.c.weapon, bj.c.kind, bj.c.isSplash)
 	e2.dEnd = bj.c.dEnd
+	in.stampRocketVerdict(&e2, &bj.c, dj)
 	return []reconEvent{e1, e2}, true
 }
 
@@ -417,7 +440,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		vpos := vtrack.posAt(d.t)
 		cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.lgAmmoCandidates(victim, d.t, vpos)...)
-		cands = append(cands, in.projCandidates(d.t, vpos)...)
+		cands = append(cands, in.projCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.explosionCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 		cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
@@ -451,6 +474,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 	}
 	e := in.mkEventSplash(d, best.attacker, victim, best.weapon, best.kind, best.isSplash)
 	e.dEnd = best.dEnd
+	in.stampRocketVerdict(&e, &best, d)
 	if d.died && best.kind == "discharge" {
 		// The clamp hides most of a discharge's raw value (35*cells reaches
 		// four digits); the expected value rides in dEnd.
@@ -463,7 +487,6 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// killing hit; the damage model still knows the floor the wire
 		// value cannot have been under (quad rockets are the big case:
 		// 440-ish raw vs ~200 observable). Only ever raises raw.
-		dLo, _ := in.blastDamage(best.weapon)
 		q := in.quadFactor(best.attacker, d.t)
 		selfF := 1.0
 		if e.isSelf {
@@ -473,7 +496,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// geometry: it fires on KILLS, where the victim is typically moving
 		// fast and the victim-side interpolation error dominates — the tight
 		// exact-point slack over-raised raw measurably (eval corpus).
-		modelMin := (dLo*q - 0.5*(best.dEnd+60.0)) * selfF
+		modelMin := (topUpBase*q - 0.5*(best.dEnd+topUpSlack)) * selfF
 		if m := int(modelMin); m > e.raw {
 			e.raw = m
 		}
@@ -487,17 +510,28 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 // observable. Geometry comes from the killing explosion (nearest tracked
 // projectile end) for rl/gl, and from the same-frame beam count for lg.
 // Only ever raises; a survived or unmodeled kill keeps the observation.
+//
+// It is also where an OBITUARY-anchored rl/gl kill gets its direct/splash
+// verdict. Such an event is named by the frag log, not by a scored
+// candidate, so nothing else ever looks at its geometry — and leaving the
+// zero value in place published every rocket kill as a direct touch, which
+// is what a "did the projectile hit them" counter must not assume. A kill
+// with no tracked explosion to judge stays splash: not seeing a touch is
+// not seeing one.
 func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 	if !e.died || vtrack == nil {
 		return
+	}
+	if e.weapon == "rl" || e.weapon == "gl" {
+		e.isSplash = true
 	}
 	q := in.quadFactor(e.attacker, e.t)
 	model := 0.0
 	switch e.weapon {
 	case "rl", "gl":
-		dLo, _ := in.blastDamage(e.weapon)
 		vpos := vtrack.posAt(e.t)
 		bestD := -1.0
+		bestDirect, bestNear := false, false
 		lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= e.t-tolProjBeforeMs })
 		for i := lo; i < len(in.projs) && in.projs[i].endT <= e.t+tolProjAfterMs; i++ {
 			pr := in.projs[i]
@@ -513,11 +547,21 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 			}
 			if d := pr.ep.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
 				bestD = d
+				bestDirect = directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == e.victim)
+				bestNear = hullDist(pr.ep, vpos) <= directHullNear
 			}
 		}
 		if bestD < 0 {
 			// Trackless kill (point-blank, no entity broadcast): the
-			// unclaimed TE_EXPLOSION at the instant is the exact geometry.
+			// unclaimed TE_EXPLOSION at the instant is the exact geometry,
+			// and the attacker's own muzzle is the only source point the
+			// trajectory test can use (ktx/src/weapons.c:1086-1088).
+			var muzzle vec3
+			hasMuzzle := false
+			if atr := in.tracks[e.attacker]; atr != nil {
+				mp := atr.posAt(e.t)
+				muzzle, hasMuzzle = vec3{mp.x, mp.y, mp.z + muzzleOffsetZ}, true
+			}
 			elo := sort.Search(len(in.explosions), func(i int) bool { return in.explosions[i].t >= e.t-tolBlastMs })
 			for i := elo; i < len(in.explosions) && in.explosions[i].t <= e.t+tolBlastMs; i++ {
 				ex := &in.explosions[i]
@@ -526,14 +570,23 @@ func (in *inputs) topUpKillRaw(e *reconEvent, vtrack *track) {
 				}
 				if d := ex.p.distTo(vpos); d <= rSplash && (bestD < 0 || d < bestD) {
 					bestD = d
+					bestDirect = hasMuzzle && directImpact(e.weapon, muzzle, ex.p, vpos, e.attacker == e.victim)
+					bestNear = hullDist(ex.p, vpos) <= directHullNear
 				}
 			}
 		}
 		if bestD < 0 {
 			return // no geometry at all: keep the observation
 		}
+		e.isSplash = !bestDirect
+		if e.weapon == "rl" && !e.isSelf {
+			// Same magnitude prior the scored path applies, on the value as
+			// OBSERVED — the top-up below only raises it.
+			e.isSplash = !in.rocketTouched(bestDirect, bestNear,
+				delta{t: e.t, raw: e.raw, bounded: e.bounded, died: e.died}, q)
+		}
 		// Full slack even on exact geometry — see the attributeOne top-up.
-		model = dLo*q - 0.5*(bestD+60.0)
+		model = topUpBase*q - 0.5*(bestD+topUpSlack)
 	case "lg":
 		// A discharge kill (35*cells radius blast) hides almost all of its
 		// raw value behind the clamp; the discharger's cells count knows it.
@@ -692,7 +745,7 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		// nullifies the health share (povdmm4-style).
 		lo, hi = 9.0*q, 60.0*q
 	case "proj", "rl-sound":
-		dLo, dHi := in.blastDamage(weapon)
+		dLo, dHi := splashBase()
 		// Self splash is HALVED by the engine (T_RadiusDamage,
 		// ktx/src/combat.c:1183-1194: points = damage - 0.5*dist, then
 		// *0.5 when head == attacker), and a direct self-hit is impossible
@@ -716,19 +769,18 @@ func (in *inputs) modelBounds(c *candidate, isSelf, quad bool) (float64, float64
 		if c.epExact {
 			slack = 24.0
 		}
-		if kind == "rl-sound" || dEnd < 0 || dEnd < rDirect {
-			// Direct hit (or unknown explosion point): full damage possible
-			// for an enemy; splash-only ceiling for self.
-			lo, hi = dLo*q*selfF, dHi*q*selfF
-			if kind == "rl-sound" {
-				// Unknown geometry: splash values allowed, but a tiny delta
-				// is far likelier another cause.
-				lo = 25.0 * q * selfF
-			} else if isSelf && dEnd >= 0 {
-				// Tracked explosion right at the shooter: pure close splash.
-				lo = math.Max(1.0, (dLo*q-0.5*(dEnd+slack))*selfF)
-			}
-		} else {
+		switch {
+		case kind == "rl-sound" || dEnd < 0:
+			// Unknown explosion point: full damage possible for an enemy,
+			// splash-only ceiling for self. Splash values are allowed, but a
+			// tiny delta is far likelier another cause.
+			lo, hi = 25.0*q*selfF, dHi*q*selfF
+		default:
+			// Radius damage — including a grenade that DID touch the victim:
+			// GrenadeTouch deals nothing itself and detonates through
+			// GrenadeExplode → T_RadiusDamage with ignore = world
+			// (ktx/src/weapons.c:1300, :1335), so a touched grenade victim is
+			// still on the falloff curve.
 			lo = (dLo*q - 0.5*(dEnd+slack)) * selfF
 			hi = (dHi*q - 0.5*math.Max(0, dEnd-slack)) * selfF
 			if hi <= 0 {
@@ -874,8 +926,10 @@ func (in *inputs) lgAmmoCandidates(victim string, t int32, vpos vec3) []candidat
 }
 
 // projCandidates: tracked rocket/grenade flights ending near the victim at
-// the same frame.
-func (in *inputs) projCandidates(t int32, vpos vec3) []candidate {
+// the same frame. The direct/splash verdict comes from the flight's
+// TRAJECTORY (direct.go), not from endpoint proximity: a rocket detonating
+// on the wall beside the victim is endpoint-near and never touched them.
+func (in *inputs) projCandidates(victim string, t int32, vpos vec3) []candidate {
 	var out []candidate
 	lo := sort.Search(len(in.projs), func(i int) bool { return in.projs[i].endT >= t-tolProjBeforeMs })
 	for i := lo; i < len(in.projs) && in.projs[i].endT <= t+tolProjAfterMs; i++ {
@@ -887,14 +941,16 @@ func (in *inputs) projCandidates(t int32, vpos vec3) []candidate {
 		if dEnd > rSplash {
 			continue
 		}
+		direct := directImpact(pr.weapon, pr.sp, pr.ep, vpos, pr.shooter == victim)
 		// CanDamage gate: splash reaches only what the explosion traces to.
-		if dEnd >= rDirect && !in.bsp.splashReaches(pr.ep, vpos) {
+		// A touch needs no such trace — the projectile was inside the hull.
+		if !direct && !in.bsp.splashReaches(pr.ep, vpos) {
 			continue
 		}
 		out = append(out, candidate{
 			geom: dEnd / rSplash * 0.5, attacker: pr.shooter, weapon: pr.weapon,
 			kind: "proj", dEnd: dEnd, ep: pr.ep, hasEP: true, epExact: pr.epExact,
-			isSplash: dEnd >= rDirect,
+			isSplash: !direct, hullNear: hullDist(pr.ep, vpos) <= directHullNear,
 		})
 	}
 	return out
@@ -921,9 +977,6 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 		if dEnd > rSplash {
 			continue
 		}
-		if dEnd >= rDirect && !in.bsp.splashReaches(ex.p, vpos) {
-			continue
-		}
 		slo := sort.Search(len(in.shots), func(k int) bool { return in.shots[k].t >= ex.t-2000 })
 		for k := slo; k < len(in.shots) && in.shots[k].t <= ex.t+40; k++ {
 			s := in.shots[k]
@@ -938,6 +991,15 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 				continue
 			}
 			spos := tr.posAt(s.t)
+			// The line the projectile flew: a trackless rocket has no entity
+			// track, so its only known source is the shooter's muzzle
+			// (origin + '0 0 16', ktx/src/weapons.c:1086-1088). A grenade
+			// ignores the line entirely (direct.go).
+			muzzle := vec3{spos.x, spos.y, spos.z + muzzleOffsetZ}
+			direct := directImpact(s.weapon, muzzle, ex.p, vpos, s.player == victim)
+			if !direct && !in.bsp.splashReaches(ex.p, vpos) {
+				continue
+			}
 			apen := 0.0
 			ferr := 0.0
 			if s.weapon == "rl" {
@@ -970,7 +1032,7 @@ func (in *inputs) explosionCandidates(victim string, t int32, vpos vec3) []candi
 				geom:     0.1 + dEnd/rSplash*0.4 + ferr/tolFlightMs*0.15 + apen,
 				attacker: s.player, weapon: s.weapon, kind: "proj",
 				dEnd: dEnd, ep: ex.p, hasEP: true, epExact: true,
-				isSplash: dEnd >= rDirect,
+				isSplash: !direct, hullNear: hullDist(ex.p, vpos) <= directHullNear,
 			})
 		}
 	}
@@ -1277,23 +1339,34 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		}
 		out = append(out, candidate{
 			geom: 0.1, attacker: dc.player, weapon: "lg",
-			kind: "discharge", dEnd: expected,
+			kind: "discharge", dEnd: expected, isSplash: true,
 			mLo: expected*0.75 - 10, mHi: expected*1.1 + 10,
 		})
 	}
 	return out
 }
 
-// blastDamage is a radius weapon's base damage range before the falloff:
-// the demo's calibrated rocket range (vanilla 100..120, exactly 110 on a
-// fixed-constant server — see detectRocketRegime) for rl, the engine's
-// fixed 120 for gl.
-func (in *inputs) blastDamage(weapon string) (lo, hi float64) {
-	if weapon == "rl" {
-		return in.rlLo, in.rlHi
-	}
-	return 120.0, 120.0
-}
+// splashBase is the base damage a radius weapon hands T_RadiusDamage before
+// the falloff: 120 for BOTH the rocket and the grenade
+// (ktx/src/weapons.c:1006 and :1300, and id1 before them).
+//
+// It is emphatically not the rocket's direct value. T_MissileTouch deals its
+// own constant to the entity it touched and then passes that entity as
+// T_RadiusDamage's `ignore` (weapons.c:998-1006), so the two numbers belong
+// to disjoint victims and only coincide by accident. Modelling rocket splash
+// at the direct constant — as this package did until the direct/splash
+// verdict became a trajectory question — understates every rocket splash by
+// 10: measured on the dm2/dm3 ground truth, `value + 0.5·dist` over 2 530
+// wire-flagged splash rows has median 122.4, not 112.
+func splashBase() (lo, hi float64) { return 120.0, 120.0 }
+
+// directBase is what T_MissileTouch deals to the player the rocket touched:
+// a flat 110 since KTX 1.36 (ktx/src/weapons.c:986; commit c7263e8f,
+// 2008-09-29, replaced the id1 `100 + g_random()*20` — v1.35 and earlier
+// still roll it). Which regime a demo's server ran is detected from the
+// demo itself rather than from a version string (detectRocketRegime), so the
+// range starts at the vanilla 100..120 and narrows to 110..110 on evidence.
+func (in *inputs) directBase() (lo, hi float64) { return in.rlLo, in.rlHi }
 
 // hasQuad reports whether the player held the quad at t; quadFactor is the
 // same signal as the engine's ×4 damage multiplier. An unknown name (world,

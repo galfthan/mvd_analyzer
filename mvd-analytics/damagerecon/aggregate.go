@@ -99,6 +99,13 @@ func aggregate(in *inputs, events []reconEvent) *result.DamageResult {
 
 	out.Matrix = flattenMatrix(matrix)
 	setCoverage(in, out)
+	// The measured direct-damage regime, published because a consumer of the
+	// rl touch count needs to know whether it could be measured at all: the
+	// magnitude prior that makes that count trustworthy only exists where the
+	// constant is fixed (direct.go rocketTouched, detectRocketRegime).
+	if in.rlLo == in.rlHi {
+		out.RocketDirectDamage = int(in.rlLo)
+	}
 	return out
 }
 

@@ -83,6 +83,33 @@ type DamageResult struct {
 	// could actually see (nil on a KTX-sourced section — see DamageCoverage).
 	Coverage *DamageCoverage `json:"coverage,omitempty"`
 
+	// RocketDirectDamage (schema v74) is the server's DIRECT rocket damage
+	// constant, as measured from this demo's own hits — 110 on every KTX
+	// since 1.36 (commit c7263e8f, 2008-09-29, which replaced id1's
+	// `100 + g_random()*20`; ktx/src/weapons.c:986).
+	//
+	// Present only on a RECONSTRUCTED section, and only when the demo's own
+	// rocket hits clustered tightly enough to establish it — an older server
+	// spreads them across 100..120 and leaves this ABSENT, as does a demo
+	// with too few rockets to tell. Absence is therefore "this recording did
+	// not establish a constant", never "the constant is not 110".
+	//
+	// It is an era signal with consequences, which is why it is published
+	// rather than kept internal: the direct/splash classifier's magnitude
+	// prior (damagerecon/direct.go) only exists where the constant is fixed,
+	// so it is what tells a consumer of the rl touch count
+	// (aim.players[].weapons[].recon.directHits) whether the sharper of that
+	// classifier's two signals was available. Measured against the verbatim
+	// KTX block, the rl counter runs 1.2% aggregate error with the prior in
+	// force and 13.9% with it disabled.
+	//
+	// Nothing is GATED on it. On this pipeline's ground-truth population the
+	// rows where it is absent are the low-rocket ones — a demo needs several
+	// near-direct hits before the regime is establishable — where the touch
+	// count is off by at most a hit or two anyway, and withholding it there
+	// would substitute the any-path count, which is four times KTX's.
+	RocketDirectDamage int `json:"rocketDirectDamage,omitempty"`
+
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
 	// end-of-match scoreboard totals (demoInfo.players[].dmg +
