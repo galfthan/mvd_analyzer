@@ -1,6 +1,7 @@
 package damagerecon
 
 import (
+	"math"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -421,6 +422,112 @@ func TestDischargeNeverPairsWithOwnBeam(t *testing.T) {
 	cands := in.beamCandidates("v", 1000, vec3{})
 	if len(cands) != 1 || cands[0].attacker != "a" || cands[0].geom != 0 {
 		t.Fatalf("beam candidates = %+v, want one geom-0 candidate from a", cands)
+	}
+}
+
+// TestAttributeDeltaSplitsDischargeMerge drives the water fight through the
+// FULL delta path rather than calling trySplitPair directly, which is the only
+// way to see the two gates between a discharge and the split:
+//
+//   - attributeDelta's trigger switch. A discharge is the cheaper geometric
+//     fit, so it wins the single pass on a merge (here total 1.63 against the
+//     rocket's 8.8) — and while "discharge" was missing from that switch the
+//     whole 200-point delta was charged to the discharger and the pair code
+//     was unreachable from production;
+//   - the misfit probe, which rebuilds a candidate from the event. A
+//     discharge's model band is per-candidate state, so it has to travel on
+//     the event (reconEvent.mLo/mHi); without it modelBounds answers "no
+//     opinion" and the probe reads a perfect fit.
+func TestAttributeDeltaSplitsDischargeMerge(t *testing.T) {
+	in := waterFightInputs()
+	evs := in.attributeDelta("v", in.tracks["v"], delta{t: 1000, raw: 200, bounded: 200})
+	if len(evs) != 2 {
+		t.Fatalf("attributeDelta returned %d events, want the 2-author split; got %+v", len(evs), evs)
+	}
+	byAttacker := map[string]reconEvent{}
+	for _, e := range evs {
+		byAttacker[e.attacker] = e
+	}
+	if _, ok := byAttacker["a"]; !ok {
+		t.Errorf("no share charged to the discharger: %+v", evs)
+	}
+	if _, ok := byAttacker["b"]; !ok {
+		t.Errorf("no share charged to the rocketeer: %+v", evs)
+	}
+	// The single pass really does hand the delta to the discharge — without
+	// that this test would pass through the ordinary "proj" trigger and pin
+	// nothing about the discharge gate.
+	one := in.attributeOne("v", in.tracks["v"], delta{t: 1000, raw: 200, bounded: 200})
+	if one.kind != "discharge" || one.attacker != "a" {
+		t.Fatalf("single-pass winner = %s/%s, want the discharge from a", one.attacker, one.kind)
+	}
+	if one.mLo <= 0 || one.mHi <= one.mLo {
+		t.Fatalf("winner carries no model band (mLo=%v mHi=%v): the misfit probe cannot see the misfit", one.mLo, one.mHi)
+	}
+}
+
+// TestDischargeGeomPricedByRange pins the discharge geometry prior as a
+// DISTANCE, not a constant. A 20-cell blast reaches ~740 units, so a flat prior
+// made a discharge that merely happened somewhere in the pool the cheapest
+// candidate on the board — cheaper than a rocket detonating on the victim's
+// head — and its only guard was the ±25% value band, which is ~90 points wide
+// at this magnitude and admits the quad rocket's range wholesale.
+func TestDischargeGeomPricedByRange(t *testing.T) {
+	in := &inputs{
+		order:   []string{"v", "a", "b"},
+		players: map[string]*result.PlayerStream{"b": {Quad: []result.Interval{{Start: 0, End: 5000}}}},
+		// 20 cells at 700 units: 35·20 − 0.5·700 = 350 expected, band 252..395.
+		discharges: []discharge{{t: 1000, player: "a", cells: 20}},
+		// Quad rocket 100 units off the victim: 4·(120 − 0.5·d), band 232..328.
+		projs: []projectile{{
+			weapon: "rl", shooter: "b", endT: 1000,
+			sp: vec3{0, 600, 0}, ep: vec3{0, 100, 0}, epExact: true,
+		}},
+		tracks: map[string]*track{
+			"v": staticTrack(vec3{}),
+			"a": staticTrack(vec3{700, 0, 0}),
+			"b": staticTrack(vec3{0, 600, 0}),
+		},
+	}
+	d := delta{t: 1000, raw: 300, bounded: 300}
+	var cands []candidate
+	cands = append(cands, in.projCandidates("v", d.t, vec3{})...)
+	cands = append(cands, in.dischargeCandidates("v", d.t, vec3{})...)
+	var dis, proj *candidate
+	for i := range cands {
+		switch cands[i].kind {
+		case "discharge":
+			dis = &cands[i]
+		case "proj":
+			proj = &cands[i]
+		}
+	}
+	if dis == nil || proj == nil {
+		t.Fatalf("want both a discharge and a proj candidate, got %+v", cands)
+	}
+	// Both explain the value perfectly — the tie is decided by geometry alone,
+	// which is exactly the situation a flat prior gets wrong.
+	for _, c := range []*candidate{dis, proj} {
+		if pen, ok := in.damageModelScore(d.bounded, false, c, false, in.hasQuad(c.attacker, d.t)); !ok || pen != 0 {
+			t.Fatalf("%s candidate does not fit 300 (pen=%v ok=%v); the test no longer isolates geometry", c.kind, pen, ok)
+		}
+	}
+	if dis.geom <= proj.geom {
+		t.Fatalf("discharge geom %v at 700u is not dearer than a rocket's %v at 100u", dis.geom, proj.geom)
+	}
+	best, ok := in.scoreCandidates("v", in.tracks["v"], d, cands)
+	if !ok || best.kind != "proj" {
+		t.Fatalf("winner = %+v, want the rocket that actually reached the victim", best)
+	}
+	// ... and the near-range pool fight the family exists for is untouched:
+	// at ~52 units the prior is still the 0.1 it used to charge everywhere.
+	in.tracks["a"] = staticTrack(vec3{52, 0, 0})
+	near := in.dischargeCandidates("v", d.t, vec3{})
+	if len(near) != 1 {
+		t.Fatalf("near discharge candidates = %+v, want 1", near)
+	}
+	if math.Abs(near[0].geom-0.1) > 0.005 {
+		t.Errorf("close-range discharge geom = %v, want ~0.1", near[0].geom)
 	}
 }
 

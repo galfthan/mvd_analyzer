@@ -113,9 +113,21 @@ type reconEvent struct {
 	isEnv    bool
 	isSplash bool
 	dEnd     float64 // winning candidate's explosion-to-victim distance; <0 unknown
-	// kind records the evidence class that won the attribution:
-	// frag-anchor | positional | beam | proj | hitscan | nail | rl-sound |
-	// masked-kill | none.
+	// mLo/mHi carry the winning candidate's PRECOMPUTED damage-model band
+	// for the two kinds whose range is per-candidate state the generic
+	// model cannot rederive ("discharge": 35·cells at the measured
+	// distance; "env": the engine tick at the measured liquid state).
+	// attributeDelta's misfit probe rebuilds a candidate from the event to
+	// ask "does the winner explain the value?", and without these
+	// modelBounds answers (0, 0) — "no magnitude opinion" — which reads as
+	// a perfect fit and silently skips the pair split.
+	mLo, mHi float64
+	// kind records the evidence class that won the attribution — either a
+	// scored candidate family (beam | proj | hitscan | nail | rl-sound |
+	// discharge | env) or an anchored/unmodelled one (frag-anchor |
+	// positional | masked-kill | teamkill-anchor | env-anchor | env-fallback
+	// | pent-synth | none). Only the scored families carry a damage-model
+	// band, which is what attributeDelta's pair-split trigger turns on.
 	kind string
 }
 
@@ -328,14 +340,43 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 	if d.died || d.masked || vtrack == nil {
 		return single
 	}
+	// TRIGGERING is not the same as PARTNERING. This switch names the kinds
+	// whose winning single explanation may be challenged; trySplitPair's
+	// candidate list is wider, because a family can be the second author of
+	// a merge without ever being the first. The two sets differ on purpose:
+	//
+	//   - "env" only ever partners. An env candidate is scored on engine-
+	//     exact tick values and damageModelScore refuses it outright when the
+	//     value is outside its band (the `kind == "env"` branch returns
+	//     feasible=false, not a penalty), so an env win is by construction an
+	//     exact-value match and the misfit test below scores it 0. Listing it
+	//     here would be dead code, not a behaviour change.
+	//   - "discharge" DOES trigger. It is the exact merge the pair path
+	//     exists for — a pool fight where one player discharges while
+	//     another's rocket lands on the same victim in the same server frame
+	//     — and the discharge is what WINS that merge's single pass: its
+	//     ±25% value band absorbs a merged value the rocket's narrow splash
+	//     band cannot (TestAttributeDeltaSplitsDischargeMerge scores 1.63
+	//     against the rocket's 8.8 on a 200-point merge). Leaving it out
+	//     made the pair path unreachable from production for precisely the
+	//     deltas it was added to explain.
+	//   - every remaining kind is an ANCHORED or unmodelled attribution
+	//     (frag / telefrag / teamkill / env anchors, the env fallback,
+	//     "none"): none of them won by a scored candidate, so modelBounds
+	//     has no opinion on their value — (0, 0) — and the misfit test
+	//     below would score them 0 as well.
 	switch e.kind {
-	case "beam", "proj", "hitscan", "nail", "rl-sound":
+	case "beam", "proj", "hitscan", "nail", "rl-sound", "discharge":
 	default:
 		return single
 	}
 	// Only bother when the winning single explanation misfits the value.
+	// mLo/mHi have to travel with the event: a "discharge" candidate's band
+	// is per-candidate state (35·cells at the measured distance), and
+	// rebuilding the probe without it makes modelBounds answer (0, 0) — "no
+	// magnitude opinion" — which reads as a perfect fit and skips the split.
 	quad := in.hasQuad(e.attacker, d.t)
-	pen, ok := in.damageModelScore(d.bounded, false, &candidate{weapon: e.weapon, kind: e.kind, dEnd: e.dEnd}, e.isSelf, quad)
+	pen, ok := in.damageModelScore(d.bounded, false, &candidate{weapon: e.weapon, kind: e.kind, dEnd: e.dEnd, mLo: e.mLo, mHi: e.mHi}, e.isSelf, quad)
 	if !ok || pen < 0.5 {
 		return single
 	}
@@ -355,15 +396,26 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 // missing here is a delta the single path can explain badly but the pair path
 // cannot explain at all. Still absent is explosionCandidates (trackless
 // TE_EXPLOSION rockets) — a separate, much larger population that has not been
-// measured. The LG discharge is admitted on exactly the same terms as the
-// rest — it is radius damage like a rocket's
+// measured. The LG discharge is a member: it is radius damage like a rocket's
 // (T_RadiusDamage(self, self, 35*cells, world, dtLG_DIS),
 // ktx/src/weapons.c:1208, :1225), so a water fight where one player discharges
 // while another lands a rocket on the same victim in the same frame merges
-// into one delta with two authors. What keeps it honest is its VALUE band,
-// not its geometry: a discharge's flat 0.1 geom makes it the cheapest partner
-// in the pair score, and the only thing refusing a wrong one is the ±25%
-// window dischargeCandidates computes around 35·cells − 0.5·d.
+// into one delta with two authors. Note that being in this list is only half
+// of it: the caller's trigger switch decides which kinds may CHALLENGE a
+// single explanation, and it is a narrower set — see attributeDelta.
+//
+// What refuses a wrong discharge partner is its VALUE band plus its distance:
+// the ±25%+10 window dischargeCandidates computes around 35·cells − 0.5·d is
+// ~90 points wide at E = 200, so the geometry prior has to be priced by range
+// — flat, a discharge anywhere in the pool is the cheapest candidate there is.
+//
+// The family is measured INERT, and structurally so. Over a 2 400-demo archive
+// sweep the split entertains 68 discharge candidates over 61 discharge-
+// triggered entries and pairs none of them: on every one the observed delta
+// sits BELOW the discharge's own band, and a pair only ever ADDS damage. That
+// is the survived-delta ceiling — a victim who lives absorbs at most 299
+// points — against a band floor of 0.75·(35·cells − 0.5·d) − 10. See the
+// trySplitPair bullet in plan-archive-features.md for the full table.
 //
 // The one pair the engine forbids is beam+discharge from the SAME attacker:
 // W_FireLightning's underwater branch returns before WS_Mark(wpLG), before the
@@ -553,6 +605,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 	}
 	e := in.mkEventSplash(d, best.attacker, victim, best.weapon, best.kind, best.isSplash)
 	e.dEnd = best.dEnd
+	e.mLo, e.mHi = best.mLo, best.mHi
 	in.stampRocketVerdict(&e, &best, d)
 	if d.died && best.kind == "discharge" {
 		// The clamp hides most of a discharge's raw value (35*cells reaches
@@ -1447,8 +1500,19 @@ func (in *inputs) dischargeCandidates(victim string, t int32, vpos vec3) []candi
 		if !in.bsp.reachesBody(eyeOf(spos), vpos) {
 			continue
 		}
+		// Geometry prior, priced like a projectile's (d/geomNorm·0.5). The
+		// flat 0.1 this used to charge made a discharge the cheapest
+		// candidate on the board at ANY distance inside its reach — and that
+		// reach is 35·cells + 40: 390 units at the 10-cell detection floor,
+		// 740 at 20 cells, 3 540 at a 100-cell wipe. So a discharge
+		// that merely happened somewhere in the pool could undercut a
+		// candidate that actually has the victim in front of it, guarded only
+		// by the ±25%+10 value band, which is ~90 points wide at E = 200 and
+		// spans a whole quad rocket's range. Distance-priced, the close pool
+		// fight the family exists for is unchanged (still 0.1 at ~52 units)
+		// while a coincidental long-range one pays for its range.
 		out = append(out, candidate{
-			geom: 0.1, attacker: dc.player, weapon: "lg",
+			geom: d / geomNorm * 0.5, attacker: dc.player, weapon: "lg",
 			kind: "discharge", dEnd: expected, isSplash: true,
 			mLo: expected*0.75 - 10, mHi: expected*1.1 + 10,
 		})

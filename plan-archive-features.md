@@ -348,27 +348,100 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   (`.reports/…/eval-gt-archive.txt` outliers).
 - **Old-FFA taken errors** (archive GT eval, small denominators) —
   uninvestigated.
-- **`trySplitPair` lacks explosion/discharge candidate families** — the
-  DISCHARGE half is DONE and **carries no load**: `dischargeCandidates`
-  now joins the pair list, so a pool fight's "someone discharged AND
-  someone rocketed me in the same server frame" merge can be split
-  between its two authors. Instrumented, the mechanism never fires. On
-  the 60-demo dm2/dm3 ground truth (53 reconstructable) the pair path is
-  entered 257 times and 105 discharges are detected, and **not one of
-  those 257 instants has a discharge within ±100 ms** — 0 candidates
-  admitted, 0 pairs, and every `qw-recon-eval` number unchanged (the only
-  textual diff is two equal-damage confusion rows swapping places). On
-  a 2 400-demo random archive sweep (1 227 reconstructed, 679 discharges
-  over 267 demos — 183 of them dm4) the same three counters are 0 against
-  1 357 pair splits, and re-running just those 267 discharge-carrying
-  demos gives 1 330 pair-path entries with **again zero** within ±100 ms
-  of a discharge. The reason is structural, not corpus luck: the split is
-  only tried on a SURVIVED delta, and a discharge big enough to be
-  detected (≥10 cells, so ≥350 base) mostly kills what it reaches. It
-  ships as correctness-by-symmetry plus two unit tests
-  (`TestSplitPairAdmitsDischarge`, and
+- **`trySplitPair` lacks an `explosionCandidates` family** — the
+  DISCHARGE half is DONE and, measured with the gate actually open, it
+  **still carries no load**. `dischargeCandidates` joined the pair list
+  in `6fe4691`; the review of that commit found the family could never
+  be reached from production, so the numbers that commit reported were
+  an artifact of the suppression rather than a measurement of the
+  population. Two gates stood between a discharge and the split, and
+  both are now open:
+  - `attributeDelta`'s trigger switch listed the kinds allowed to
+    CHALLENGE a single explanation and `"discharge"` was not among them.
+    Since the discharge is exactly what WINS the merge the pair path
+    exists for, the gate suppressed precisely the deltas the feature
+    targets.
+  - the misfit probe rebuilds a candidate from the winning event, and a
+    discharge's model band is per-candidate state. Without it
+    `modelBounds` answered `(0, 0)` — "no magnitude opinion" — which
+    reads as a perfect fit. The band now travels on `reconEvent.mLo/mHi`.
+
+  Re-measured with both open (2 400-demo random archive sweep, 2 172
+  reconstructed, 317 carrying 809 discharges; and the 53-demo dm2/dm3
+  ground truth, 105 discharges):
+
+  | | GT (53 demos) | archive (2 172 demos) |
+  |---|---|---|
+  | survived deltas the split may challenge | 66 978 | ~1.256 M |
+  | … within ±100 ms of a discharge | 33 | 290 |
+  | … with an admissible discharge candidate | 18 | 220 |
+  | deltas a discharge won outright | 1 | 65 |
+  | pair-path entries — gate closed → open | 131 → 131 | 7 822 → 7 883 |
+  | … at an instant near a discharge | 0 → 0 | **0 → 61** |
+  | discharge candidates admitted | 0 → 0 | **0 → 68** |
+  | pairs containing a discharge | 0 | 0 |
+
+  So `6fe4691`'s "0 candidates admitted, 0 pairs, not one pair instant
+  within ±100 ms of a discharge" was, on the archive, 100% the gate: all
+  61 discharge-carrying pair entries and all 68 admitted candidates are
+  the ones it removed. On the ground truth the gate happens to be a
+  no-op — the single discharge win there fits its own band well enough
+  that the misfit test refuses the split anyway — which is why the GT
+  numbers alone could not have caught this.
+
+  The honest ranking of what keeps the mechanism inert, now that it is
+  reachable:
+  1. **The trigger gate**, until this commit — it accounted for every
+     zero above.
+  2. **Band arithmetic**, and this one IS structural. With the gate open
+     the pair loop really runs (61 entries, 68 bounded candidates, 25 of
+     them with a second attacker on the board) and not one discharge
+     pair's ranges bracket the observation. The direction is one-sided:
+     on all 61 entries the delta sits BELOW the discharge's band, never
+     above it. A pair can only ADD damage, so a discharge whose modelled
+     value already exceeds the entire observed delta can never be
+     rescued by a partner — which is the survived-delta ceiling in
+     disguise, since a live victim cannot lose more than 100 h + 200
+     armor while a ≥10-cell blast's band floor is
+     `0.75·(35·cells − 0.5·d) − 10`. The split can only ever help a
+     discharge that UNDER-explains its delta, and a detected discharge
+     essentially never does.
+  3. **Base-rate rarity.** 290 of 1.26 M archive survived deltas (0.02%)
+     sit inside a discharge's ±100 ms window and 220 have an admissible
+     candidate. That predicts ≈1.8 co-occurrences among the 7 822
+     gate-closed archive pair entries — P(0) ≈ 0.16 — so rarity alone
+     does NOT explain the archive zeros. It does explain the GT ones:
+     33/66 978 over 131 entries is ≈0.07 expected, P(0) ≈ 0.94.
+  4. **The kill bias**, real but weakest, and previously overstated. "A
+     discharge big enough to detect mostly kills what it reaches" is not
+     true: 65 SURVIVED archive deltas were attributed to a discharge. A
+     victim who lives absorbs at most 299 points (100 health + 200
+     armor, less the 1 hp that keeps them alive), so a 10-cell blast
+     (350 base, `35·cells − 0.5·d`) is survivable by a 100 h + 200 RA
+     player past ~102 units and by a 100 h + 150 YA one past ~202, out
+     to its 390-unit reach. It takes ≥12 cells before a discharge kills
+     such a victim across even half its own radius and ≥17 before it
+     does so across 90% of it.
+
+  It therefore ships as correctness-by-symmetry, plus a distance-priced
+  geometry prior (see below) and four unit tests:
+  `TestSplitPairAdmitsDischarge`, `TestAttributeDeltaSplitsDischargeMerge`
+  (the two gates, driven through the production path),
+  `TestDischargeGeomPricedByRange`, and
   `TestDischargeNeverPairsWithOwnBeam` for the engine invariant that a
-  discharging fire deals no beam damage — `ktx/src/weapons.c:1174-1229`).
+  discharging fire deals no beam damage (`ktx/src/weapons.c:1174-1229`).
+  The same review found the discharge's flat `0.1` geometry prior made it
+  the cheapest candidate on the board at ANY distance inside a reach that
+  runs to 740 units at 20 cells, guarded only by a ±25%+10 value band
+  ~90 points wide; it is now priced `d/geomNorm·0.5` like a projectile's,
+  which is identical at ~52 units and dearer at range. That is the only
+  change of the batch with any measurable effect, and it is not an
+  accuracy win: `qw-recon-eval`'s headline rows (coverage, value-exact,
+  attacker-correct, bounded given/taken/ewep) are unchanged to the digit
+  and only the small-denominator self/team families move, in both
+  directions (raw givenSelf mean 5.49→4.90 and p90 12.75→11.66; raw
+  givenTeam p90 38.5→42.7; bounded givenTeam median 1.39→1.43).
+
   The EXPLOSION half is **still open**: `explosionCandidates` (trackless
   TE_EXPLOSION rockets) is a far larger population and needs its own
   before/after eval, so this bullet stays.

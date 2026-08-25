@@ -35,8 +35,15 @@ implemented:
   explosion-snapped detonation point, 220 from a tracked flight's last
   broadcast position. The LG water discharge, the third radius source,
   gets the same treatment at `35·cells + 40` — and it is now also a
-  candidate in the same-frame pair split, which is completeness only: no
-  delta in the ground truth or in a 2 400-demo archive sweep pairs one.
+  candidate in the same-frame pair split, and a trigger for it. That is
+  completeness, not accuracy: across a 2 400-demo archive sweep the
+  split entertains 68 discharge candidates and pairs none of them. The
+  `qw-recon-eval` headlines — event coverage, attacker-correct, bounded
+  given / taken / ewep — are unchanged to the digit; only the
+  small-denominator self and team families move, in both directions. Its
+  geometry prior is priced by distance like a projectile's rather than
+  flat, so a discharge that merely happened somewhere in the pool can no
+  longer be the cheapest candidate on the board.
 
 The kill top-ups' two calibration constants are **gone**: they existed to
 absorb the quad-ordering error, and with it fixed the raw error falls

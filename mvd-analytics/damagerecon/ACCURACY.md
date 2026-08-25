@@ -37,7 +37,7 @@ The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
 per-machine report directory; fetched with `cmd/fetch-eval-corpus`)
 scores comparably: bounded given median **0.58%** (mean 0.79%, p90
-1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.71%, raw taken 0.66%.
+1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.70%, raw taken 0.68%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
@@ -969,6 +969,21 @@ measured against:
 | raw givenTeam | 9.67% / 16.35% | **7.39% / 14.56%** | 7.39% / 14.62% |
 | raw givenSelf | 2.28% / 8.16% | 2.28% / 5.81% | **1.98% / 5.49%** |
 
+One later change moves rows in this table: pricing the LG discharge's
+geometry prior by distance instead of flat (`dischargeCandidates`, after
+the review of the pair-split trigger — see the `trySplitPair` bullet in
+[`plan-archive-features.md`](../../plan-archive-features.md)). It leaves
+the headline rows untouched — coverage, value-exact, attacker-correct and
+bounded given / taken / ewep are unchanged to the digit, and the whole
+golden-cache eval is identical — and moves only the small-denominator
+self and team families, in both directions: bounded `givenTeam`
+1.39% → 1.43%, bounded `givenSelf` 1.28% → 1.26%, raw given
+0.71% → 0.70%, raw taken 0.66% → 0.68%, raw `givenTeam` mean
+14.62% → 14.83%, raw `givenSelf` **1.98% / 5.49% → 1.94% / 4.90%**. It
+was taken for the failure mode rather than the numbers: a flat prior made
+a discharge the cheapest candidate on the board anywhere inside a reach
+that runs to 740 units at 20 cells.
+
 and per attacker weapon, attacker-correct on unambiguous enemy instants,
 before → now: `ng` 96.4% → **97.2%**, `sng` 97.5% → **97.9%**, `ssg`
 98.1% → 98.1%, `rl` 99.7% → 99.6%, everything else unchanged; the pooled
@@ -1260,7 +1275,11 @@ port adds, each verified against ground truth in the eval:
   hides it (quad rockets, discharges);
 - same-frame pair splitting: a merged multi-attacker instant that no
   single candidate's damage range can explain, but a pair of different
-  attackers sums to, is split between them (range-midpoint proportional);
+  attackers sums to, is split between them (range-midpoint proportional).
+  LG water discharges both partner in and trigger the split; instrumented
+  over a 2 400-demo archive sweep the split entertains them and pairs
+  none, so the family is inert (`trySplitPair` bullet in
+  [`plan-archive-features.md`](../../plan-archive-features.md));
 - temp-entity hit telemetry (`streams.pointEffects`, 2026-08-15):
   TE_EXPLOSION snaps tracked flight endpoints to the exact detonation
   point and anchors the point-blank rockets/grenades whose entity never
