@@ -348,8 +348,30 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   (`.reports/…/eval-gt-archive.txt` outliers).
 - **Old-FFA taken errors** (archive GT eval, small denominators) —
   uninvestigated.
-- **`trySplitPair` lacks explosion/discharge candidate families** —
-  looks like an omission (simplification-agent finding); eval-verify.
+- **`trySplitPair` lacks explosion/discharge candidate families** — the
+  DISCHARGE half is DONE and **carries no load**: `dischargeCandidates`
+  now joins the pair list, so a pool fight's "someone discharged AND
+  someone rocketed me in the same server frame" merge can be split
+  between its two authors. Instrumented, the mechanism never fires. On
+  the 60-demo dm2/dm3 ground truth (53 reconstructable) the pair path is
+  entered 257 times and 105 discharges are detected, and **not one of
+  those 257 instants has a discharge within ±100 ms** — 0 candidates
+  admitted, 0 pairs, and every `qw-recon-eval` number unchanged (the only
+  textual diff is two equal-damage confusion rows swapping places). On
+  a 2 400-demo random archive sweep (1 227 reconstructed, 679 discharges
+  over 267 demos — 183 of them dm4) the same three counters are 0 against
+  1 357 pair splits, and re-running just those 267 discharge-carrying
+  demos gives 1 330 pair-path entries with **again zero** within ±100 ms
+  of a discharge. The reason is structural, not corpus luck: the split is
+  only tried on a SURVIVED delta, and a discharge big enough to be
+  detected (≥10 cells, so ≥350 base) mostly kills what it reaches. It
+  ships as correctness-by-symmetry plus two unit tests
+  (`TestSplitPairAdmitsDischarge`, and
+  `TestDischargeNeverPairsWithOwnBeam` for the engine invariant that a
+  discharging fire deals no beam damage — `ktx/src/weapons.c:1174-1229`).
+  The EXPLOSION half is **still open**: `explosionCandidates` (trackless
+  TE_EXPLOSION rockets) is a far larger population and needs its own
+  before/after eval, so this bullet stays.
 - **`ktxver` feature-gating helper** — parse `ktxver` (+fork handling)
   once, use it where behavior is generation-dependent.
 - ~~REST endpoint for `streams.pointEffects`~~ — SHIPPED in PR #132

@@ -350,6 +350,28 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 // proportionally to the range midpoints (each share clamped into its own
 // range). Survived deltas only — a killing delta's bounded cap breaks the
 // sum identity.
+//
+// The family list wants to be the same set attributeOne scores: a family
+// missing here is a delta the single path can explain badly but the pair path
+// cannot explain at all. Still absent is explosionCandidates (trackless
+// TE_EXPLOSION rockets) — a separate, much larger population that has not been
+// measured. The LG discharge is admitted on exactly the same terms as the
+// rest — it is radius damage like a rocket's
+// (T_RadiusDamage(self, self, 35*cells, world, dtLG_DIS),
+// ktx/src/weapons.c:1208, :1225), so a water fight where one player discharges
+// while another lands a rocket on the same victim in the same frame merges
+// into one delta with two authors. What keeps it honest is its VALUE band,
+// not its geometry: a discharge's flat 0.1 geom makes it the cheapest partner
+// in the pair score, and the only thing refusing a wrong one is the ±25%
+// window dischargeCandidates computes around 35·cells − 0.5·d.
+//
+// The one pair the engine forbids is beam+discharge from the SAME attacker:
+// W_FireLightning's underwater branch returns before WS_Mark(wpLG), before the
+// TE_LIGHTNING2 multicast and before LightningDamage (weapons.c:1174-1229), so
+// a discharging fire deals no beam damage at all, and the wipe to zero cells
+// makes every later call take the `ammo_cells < 1` early return (:1163). The
+// different-attackers guard below already excludes it; no extra branch is
+// needed, and TestDischargeNeverPairsWithOwnBeam pins that.
 func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEvent, bool) {
 	vpos := vtrack.posAt(d.t)
 	var cands []candidate
@@ -359,6 +381,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.dischargeCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.envCandidates(victim, d.t, vpos, vtrack)...)
 
 	type bounded struct {

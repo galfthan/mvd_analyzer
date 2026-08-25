@@ -34,7 +34,9 @@ implemented:
   reach plus the measured slack of our own distance — 184 units from an
   explosion-snapped detonation point, 220 from a tracked flight's last
   broadcast position. The LG water discharge, the third radius source,
-  gets the same treatment at `35·cells + 40`.
+  gets the same treatment at `35·cells + 40` — and it is now also a
+  candidate in the same-frame pair split, which is completeness only: no
+  delta in the ground truth or in a 2 400-demo archive sweep pairs one.
 
 The kill top-ups' two calibration constants are **gone**: they existed to
 absorb the quad-ordering error, and with it fixed the raw error falls

@@ -312,6 +312,118 @@ func TestDischargeReachGate(t *testing.T) {
 	}
 }
 
+// staticTrack: a player parked at p for the whole match.
+func staticTrack(p vec3) *track {
+	return &track{pt: &result.PositionTrack{
+		T: []int32{0, 5000},
+		X: []float32{float32(p.x), float32(p.x)},
+		Y: []float32{float32(p.y), float32(p.y)},
+		Z: []float32{float32(p.z), float32(p.z)},
+	}}
+}
+
+// waterFightInputs: the dm4/e1m2 pool geometry the discharge pair exists for.
+// "v" is the victim at the origin, "a" discharges 10 cells 400 units away
+// (35·10 − 0.5·400 = 150 expected, inside the 450-unit findradius), and "b"
+// lands a rocket that detonates 100 units off the victim (a 58..82 splash).
+// Neither range alone covers a 200-point merge; together they do.
+func waterFightInputs() *inputs {
+	return &inputs{
+		order:      []string{"v", "a", "b"},
+		players:    map[string]*result.PlayerStream{},
+		discharges: []discharge{{t: 1000, player: "a", cells: 10}},
+		projs: []projectile{{
+			weapon: "rl", shooter: "b", endT: 1000,
+			sp: vec3{0, 600, 0}, ep: vec3{0, 100, 0}, epExact: true,
+		}},
+		tracks: map[string]*track{
+			"v": staticTrack(vec3{}),
+			"a": staticTrack(vec3{400, 0, 0}),
+			"b": staticTrack(vec3{0, 600, 0}),
+		},
+	}
+}
+
+// TestSplitPairAdmitsDischarge pins the LG water discharge as a member of the
+// same-frame pair split. A discharge is radius damage exactly as a rocket is
+// (T_RadiusDamage(self, self, 35*cells, world, dtLG_DIS),
+// ktx/src/weapons.c:1208, :1225), so a pool fight where one player discharges
+// while another's rocket lands on the same victim in the same server frame
+// merges into a single h/a delta with two authors — and before the family was
+// in trySplitPair's list that delta could only ever be charged to one of them.
+func TestSplitPairAdmitsDischarge(t *testing.T) {
+	in := waterFightInputs()
+	evs, ok := in.trySplitPair("v", in.tracks["v"], delta{t: 1000, raw: 200, bounded: 200})
+	if !ok {
+		t.Fatal("discharge + enemy rocket did not split a 200-point merge")
+	}
+	if len(evs) != 2 {
+		t.Fatalf("split returned %d events, want 2", len(evs))
+	}
+	byAttacker := map[string]reconEvent{}
+	for _, e := range evs {
+		byAttacker[e.attacker] = e
+	}
+	dis, okA := byAttacker["a"]
+	rock, okB := byAttacker["b"]
+	if !okA || !okB {
+		t.Fatalf("split authors = %v, want one share each for a and b", byAttacker)
+	}
+	if dis.kind != "discharge" || dis.weapon != "lg" || !dis.isSplash {
+		t.Errorf("a's share = %+v, want a splash lg discharge", dis)
+	}
+	if rock.kind != "proj" || rock.weapon != "rl" {
+		t.Errorf("b's share = %+v, want a proj rl", rock)
+	}
+	if dis.bounded+rock.bounded != 200 {
+		t.Errorf("shares %d + %d do not sum to the observed 200", dis.bounded, rock.bounded)
+	}
+	// Each share has to land inside its own model range, which is the whole
+	// point of splitting rather than halving: the rocket's splash band at
+	// 100 units is 58..82, the discharge's is 0.75..1.1 around 150.
+	if rock.bounded < 58 || rock.bounded > 82 {
+		t.Errorf("rocket share %d outside the 58..82 splash band at 100u", rock.bounded)
+	}
+	if dis.bounded < 102 || dis.bounded > 175 {
+		t.Errorf("discharge share %d outside the band around the 150 expected", dis.bounded)
+	}
+}
+
+// TestDischargeNeverPairsWithOwnBeam pins an ENGINE invariant, not a code
+// branch: a discharging LG fire deals no beam damage in the same frame, so a
+// discharge and a beam from the SAME attacker can never both explain one
+// delta. W_FireLightning's underwater branch zeroes ammo_cells and returns
+// before WS_Mark(wpLG), before the TE_LIGHTNING2 multicast and before
+// LightningDamage (ktx/src/weapons.c:1174-1229); every later call then takes
+// the `ammo_cells < 1` early return (:1163).
+//
+// trySplitPair's different-attackers guard already enforces it, and the test
+// is built so that guard is load-bearing: the discharger's own beam passes
+// straight through the victim (geom 0), so the forbidden a+a pair scores
+// BETTER than the legal a+b one and would win without it.
+func TestDischargeNeverPairsWithOwnBeam(t *testing.T) {
+	in := waterFightInputs()
+	in.beams = []beam{{t: 1000, s: vec3{400, 0, 0}, e: vec3{-100, 0, 0}}}
+	evs, ok := in.trySplitPair("v", in.tracks["v"], delta{t: 1000, raw: 200, bounded: 200})
+	if !ok {
+		t.Fatal("the legal discharge + enemy rocket pair must still split")
+	}
+	if evs[0].attacker == evs[1].attacker {
+		t.Fatalf("split charged both shares to %q: a discharge and a beam cannot co-occur", evs[0].attacker)
+	}
+	for _, e := range evs {
+		if e.attacker == "a" && e.kind == "beam" {
+			t.Fatalf("the discharger's own beam was paired with their discharge: %+v", e)
+		}
+	}
+	// The beam candidate really is present and really is the cheaper partner —
+	// without it this test would pass for the wrong reason.
+	cands := in.beamCandidates("v", 1000, vec3{})
+	if len(cands) != 1 || cands[0].attacker != "a" || cands[0].geom != 0 {
+		t.Fatalf("beam candidates = %+v, want one geom-0 candidate from a", cands)
+	}
+}
+
 // TestKillFloorSplitsOnVerdict pins that both kill top-ups price a DIRECT
 // rocket at T_MissileTouch's flat constant and everything else on the radius
 // curve. The engine hands the touched entity to T_RadiusDamage as its
