@@ -969,8 +969,9 @@ measured against:
 | raw givenTeam | 9.67% / 16.35% | **7.39% / 14.56%** | 7.39% / 14.62% |
 | raw givenSelf | 2.28% / 8.16% | 2.28% / 5.81% | **1.98% / 5.49%** |
 
-One later change moves rows in this table: pricing the LG discharge's
-geometry prior by distance instead of flat (`dischargeCandidates`, after
+Two later changes move rows in this table. The first is pricing the LG
+discharge's geometry prior by distance instead of flat
+(`dischargeCandidates`, after
 the review of the pair-split trigger — see the `trySplitPair` bullet in
 [`plan-archive-features.md`](../../plan-archive-features.md)). It leaves
 the headline rows untouched — coverage, value-exact, attacker-correct and
@@ -983,6 +984,14 @@ self and team families, in both directions: bounded `givenTeam`
 was taken for the failure mode rather than the numbers: a flat prior made
 a discharge the cheapest candidate on the board anywhere inside a reach
 that runs to 740 units at 20 cells.
+
+The second is admitting trackless explosions to the same-frame pair split
+(§"Trackless explosions in the pair split"), and it moves exactly two
+rows, both in the `givenSelf` family and both by a hair: bounded
+`givenSelf` median 1.26% → 1.28%, raw `givenSelf` 1.94% / 4.90% →
+1.98% / 4.91%. Everything else here is unchanged to the digit, as are
+coverage, value-exact and attacker-correct — and the golden cache moves
+the other way (bounded `givenSelf` median 1.58% → **1.46%**).
 
 and per attacker weapon, attacker-correct on unambiguous enemy instants,
 before → now: `ng` 96.4% → **97.2%**, `sng` 97.5% → **97.9%**, `ssg`
