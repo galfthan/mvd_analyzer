@@ -36,13 +36,13 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
 per-machine report directory; fetched with `cmd/fetch-eval-corpus`)
-scores comparably: bounded given median **0.58%** (mean 0.79%, p90
-1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.70%, raw taken 0.68%.
+scores comparably: bounded given median **0.57%** (mean 0.77%, p90
+1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.72%, raw taken 0.68%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
 value exactly; attacker attribution is 98.5% on unambiguous enemy
-instants (rl 99.6%, lg 99.5%, sg 97.9%, ssg 98.1%, gl 99.7%, axe 98%).
+instants (rl 99.7%, lg 99.5%, sg 97.9%, ssg 98.1%, gl 99.7%, axe 98%).
 The same run also scores the direct/splash verdict per rl explosion
 against the wire's own flag — see §"Can an old demo answer KTX's rl/gl
 question?".
@@ -958,7 +958,7 @@ measured against:
 
 The third column is a CHECKPOINT, not the current numbers: the two
 changes described under it moved four of its rows afterwards (raw
-`givenSelf` mean 5.49% → **4.91%** is the big one), and each move is
+`givenSelf` mean 5.49% → **4.88%** is the big one), and each move is
 recorded in the paragraphs that follow rather than by rewriting the
 column — the column's job is to isolate what A+B and the review fixes
 did.
@@ -999,6 +999,16 @@ rows, both in the `givenSelf` family and both by a hair: bounded
 1.98% / 4.91%. Everything else here is unchanged to the digit, as are
 coverage, value-exact and attacker-correct — and the golden cache moves
 the other way (bounded `givenSelf` median 1.58% → **1.46%**).
+
+The third is the direct-constant exemption (§"The direct constant is not
+a merge"), which moves the table's bounded rows the right way and one
+raw row the wrong way: bounded given **0.58% / 0.79% → 0.57% / 0.77%**,
+bounded `ewep` 0.87% / 1.50% → **0.85% / 1.48%**, bounded `givenSelf`
+1.28% → **1.26%**, raw `givenSelf` 1.98% / 4.91% → **1.94% / 4.88%**,
+against raw given 0.70% → 0.72%. It also takes `rl` attacker-correct
+99.6% → **99.7%** (the weapon list below is stated against the
+checkpoint, before that move) and leaves the golden cache unchanged to
+the byte.
 
 and per attacker weapon, attacker-correct on unambiguous enemy instants,
 before → now: `ng` 96.4% → **97.2%**, `sng` 97.5% → **97.9%**, `ssg`
@@ -1276,6 +1286,64 @@ the probe change alone). The scorer ranks explanations; the probe
 decides whether to entertain inventing a second attacker, and the wider
 band is hysteresis on that decision. It stays, documented in
 `attributeDelta`.
+
+### The direct constant is not a merge (2026-08-26)
+
+The pair split's false positives had a single shape, and it was
+measurable. Scored against the KTX damage rows at the same instant, all
+**9** false splits the shipped pair path produced on the 53-demo dm2/dm3
+ground truth were an enemy rocket delta of exactly **110** — the fixed
+direct constant `detectRocketRegime` measured for those demos — given a
+second author, and in **9 of 9** that author was the VICTIM's own rocket.
+The mechanism is not randomness: a `"proj"` band is the radius curve at
+the measured detonation distance, and `T_MissileTouch`'s constant is not
+on that curve at all (the touched entity is passed to `T_RadiusDamage`
+as its `ignore`, `ktx/src/weapons.c:998-1006`), so as soon as our
+distance to the victim's interpolated position runs ~50 units long the
+probe calls a whole direct hit a misfit — and the cheapest way to pay
+for the gap at point-blank range is the self splash the victim's own
+rocket can almost always supply.
+
+`attributeDelta` now refuses the challenge there: on a demo whose regime
+is `RocketRegimeFixed`, a live victim's non-self rocket delta equal to
+the constant is one whole hit. Measured on three wire-scored corpora:
+
+| | pairs | correct attacker pair | false splits | Σ\|share − wire\| |
+|---|---|---|---|---|
+| dm2/dm3 GT (53 demos) | 61 → **52** | 48 → **48** | 9 → **0** | 998 → **547** |
+| golden cache (13) | 16 → 16 | 15 → 15 | 1 → 1 | 166 → 166 |
+| archive-era GT (350) | 231 → **216** | 184 → **184** | 26 → **11** | 3 421 → **2 667** |
+
+Not one wire-confirmed correct split sits at the constant on any of
+them, so the guard removes false splits and nothing else; the golden
+cache is unchanged to the byte. `qw-recon-eval` on the dm2/dm3 corpus
+moves the bounded family the right way — bounded `given` 0.58% → 0.57%
+(mean 0.79% → 0.77%, ≤1% 74.8% → 75.1%, ≤2% 92.8% → 93.1%), bounded
+`ewep` 0.87% → 0.85% (p90 3.98 → 3.87), bounded `givenSelf` 1.28% →
+1.26%, raw `givenSelf` 1.98% → 1.94% and `rl` attacker-correct 99.6% →
+**99.7%** — against raw `given` 0.70% → 0.72% and raw `givenSelf` p90
+11.66 → 12.50 the other way.
+
+**Two neighbouring changes were measured in the same round and
+refused.** Both are in the `trySplitPair` bullet of
+[`plan-archive-features.md`](../../plan-archive-features.md) with their
+tables:
+
+- *A physical-identity guard on the pair* — refusing a pair whose two
+  members are anchored on the SAME `TE_EXPLOSION`. Those pairs are real
+  (8 per attribution pass over 179 archive-era GT demos, 0 on dm2/dm3
+  and the golden cache) but they are not fabrications: the wire scores
+  **8 of 8** as the right attacker pair, because the situation that
+  produces them is a mutual point-blank exchange in which two rockets
+  really did detonate, a few units apart, and the pair happens to hang
+  both candidates on the same recorded one. Guarding it changes 4 rows
+  of 120, leaves every attacker set and the summed share error
+  identical, and gains two exactly-right shares — mechanism with no
+  load, so the invariant is recorded here instead of enforced.
+- *Probing an rl-sound winner against a same-shooter detonation's exact
+  band.* It fires often (110 per pass on dm2/dm3) and buys 2 more
+  correct pairs there at the cost of 15 more splits naming an author the
+  wire does not have.
 
 ## Why the errors are what they are
 

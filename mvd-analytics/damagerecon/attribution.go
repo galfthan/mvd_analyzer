@@ -370,6 +370,34 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 	default:
 		return single
 	}
+	// The rocket TOUCH constant is not a merge. On a demo whose direct regime
+	// detectRocketRegime measured as the fixed 110, a live victim's 110-point
+	// rocket delta is exactly what T_MissileTouch deals to the entity the
+	// rocket touched (ktx/src/weapons.c:986) — one whole hit, by one attacker.
+	// The probe below cannot see that: a "proj" band is the RADIUS curve at
+	// the measured detonation distance (T_MissileTouch's victim is handed to
+	// T_RadiusDamage as its `ignore`, so the two numbers are disjoint), and it
+	// calls the same 110 a misfit as soon as our distance to the victim's
+	// interpolated position runs ~50 units long — which at a point-blank
+	// touch, where the victim is moving and the endpoint is snapped 8 units
+	// back from the true origin, is ordinary.
+	//
+	// What the split then does with it is systematic rather than random.
+	// Wire-scored against the KTX damage rows at the same instant, ALL 9 false
+	// splits the pair path produced on the 53-demo dm2/dm3 ground truth were
+	// an enemy direct at exactly 110 given a second author, and in 9 of 9 that
+	// author was the VICTIM's own rocket — the model paying for the misfit
+	// with the self splash it can always find at point-blank range.
+	//
+	// Refusing the challenge there costs nothing measurable: 0 of the 48
+	// wire-confirmed correct splits on that corpus sit at the constant, nor do
+	// any of the 184 on a 350-demo archive-era ground truth (where the same
+	// guard removes 15 of 26 false splits), and the golden cache is unchanged
+	// to the byte. See §"The direct constant is not a merge" in ACCURACY.md.
+	if e.weapon == "rl" && !e.isSelf && in.rlRegime == result.RocketRegimeFixed &&
+		float64(d.bounded) == in.rlLo {
+		return single
+	}
 	// Only bother when the winning single explanation misfits the value.
 	// mLo/mHi have to travel with the event: a "discharge" candidate's band
 	// is per-candidate state (35·cells at the measured distance), and

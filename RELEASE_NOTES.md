@@ -66,6 +66,23 @@ implemented:
   `qw-recon-eval` headline row is unchanged; the golden cache's self
   family improves (bounded `givenSelf` median 1.58% → 1.46%) and the
   dm2/dm3 small-denominator rows move both ways.
+- **A rocket hit worth exactly the direct constant is no longer split.**
+  On a demo whose direct regime measures as the fixed 110, that value is
+  what `T_MissileTouch` deals to the entity the rocket touched — one
+  whole hit — and it is not on the radius curve the pair split's misfit
+  probe rebuilds, so a point-blank direct whose measured detonation
+  distance runs long looked like a merge and got a second author.
+  Wire-scored against the KTX damage log, that was the shape of **every**
+  false split the pair path produced: 9 of 9 on the 53-demo dm2/dm3
+  ground truth, each handing part of an enemy direct to the victim's own
+  rocket, and 15 more of 26 on a 350-demo archive-era ground truth.
+  Refusing to split there removes them all and costs no correct split
+  (48 → 48 and 184 → 184 wire-confirmed attacker pairs), so reconstructed
+  `damage` loses a slice of fabricated self damage on point-blank rocket
+  play. `qw-recon-eval`: bounded `given` 0.58% → **0.57%** median (mean
+  0.79% → 0.77%), bounded `ewep` 0.87% → 0.85%, `rl` attacker-correct
+  99.6% → **99.7%**, raw `given` 0.70% → 0.72% the other way; the golden
+  cache is unchanged to the byte.
 
 The kill top-ups' two calibration constants are **gone**: they existed to
 absorb the quad-ordering error, and with it fixed the raw error falls

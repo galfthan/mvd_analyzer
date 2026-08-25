@@ -437,7 +437,11 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   statement is that the wire-checkable population showed zero
   false-split creation and the archive's 1.7% is bounded by the same
   guards (different attackers, band-sum feasibility, the +0.3 pair
-  prior, distance-priced geometry).
+  prior, distance-priced geometry). **The 2026-08-26 round scored the
+  same population indirectly**: on 350 archive-era demos that DO carry a
+  damage log the family creates 5 splits, and the wire confirms the
+  attacker pair on 5 of 5 with shares within 2–5 points (see the round's
+  record below).
 
   `qw-recon-eval`, before → after: on the 60-demo dm2/dm3 ground truth
   every headline row is unchanged (coverage, value-exact,
@@ -486,8 +490,143 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   same question — the scorer ranks explanations, the probe decides
   whether to entertain inventing a second attacker — and the wider band
   is hysteresis on that decision. It stays, now as a documented decision
-  in `attributeDelta` rather than an accident waiting to be
-  re-discovered as a bug.
+  in `attributeDelta`.
+
+  That first record stopped one step short, and the review of it said
+  so: it never named the shape of the false splits, and it measured only
+  the two corners of the question. The round below does both — and the
+  anatomy turned out to be a shippable fix on its own.
+
+  ### The 2026-08-26 round: the anatomy, the 2×2, and two refusals
+
+  Raw outputs (untracked, per-machine):
+  `.reports/explosion-pair-review-2026-08-26/`, whose README names each
+  file's corpus and policy.
+
+  **Protocol.** The measurements below come from a throwaway harness —
+  `mvd-analytics/cmd/zz-pairwire` plus a `damagerecon/zz_instr.go`, both
+  deleted with the round — reproducible as follows. The instrumentation
+  logs every split `trySplitPair` SHIPS (both members with attacker,
+  weapon, kind, candidate family and share, plus the single explanation
+  it replaced) and **clears the log at the start of every
+  `attributePass`**: `attribute()` runs the pass twice on a fixed-110
+  demo and only the SECOND pass's events ship, so a log that accumulates
+  both scores splits the pipeline threw away — this invalidated the
+  round's first set of numbers before it was caught. The harness then
+  runs the full pipeline on demos that carry a KTX damage log, keeps
+  that log as truth, re-runs `damagerecon.Compute` blind, and scores each
+  shipped split against the wire rows at the same (victim, instant):
+  attacker set exactly right / one right / neither, whether the instant
+  was genuinely multi-attacker, whether the single explanation would have
+  been right (a FALSE SPLIT), and Σ|share − wire| over the shares whose
+  attacker the wire confirms. Counters used, all per attribution pass:
+  `probeFired`, `feasPair.*`, `chosenPair.sameDetonation`,
+  `shipped.withExpl{,.createdByFamily,.reprised}`,
+  `f2.rlSoundWinnerExactWouldFire`, `winner.rlSound{,.fires}`,
+  `winner.rlDirect{,.atConst}`, `dirConstSuppressed`. Policies were
+  env-gated so one binary could run the grid.
+
+  Four corpora: the 53 of the 60 pinned dm2/dm3 GT demos that
+  reconstruct; the 13-demo golden cache; a **350-demo archive-era GT
+  corpus** (demos from the 51k archive whose `source` is `ktx` in
+  `data/readability-51k.csv` — they carry a damage log, so the blind
+  reconstruction can be scored on them); and a 366-demo unscored archive
+  sample.
+
+  **The anatomy.** Every false split the SHIPPED pair path produces on
+  dm2/dm3 — 9 of 9 — is an enemy rocket delta of exactly 110, the fixed
+  direct constant, handed a second author, and in 9 of 9 that author is
+  the VICTIM's own rocket. (The earlier "10 of 12 rows" reading came off
+  a print truncated at 12.) The cause is that `T_MissileTouch`'s constant
+  is not on the radius curve the probe rebuilds, so a long-measured
+  detonation distance turns a whole direct hit into a misfit, and the
+  cheapest way to pay for it at point-blank range is self splash.
+
+  **The 2×2, wire-scored on dm2/dm3** (the exemption is "obs at the
+  direct constant of a fixed-regime demo ⇒ don't challenge"; "tight
+  shares" is "wide band, but refuse a pair that only fits by clamping a
+  share onto its band edge"):
+
+  | policy | splits | right pair | one right | FALSE | Σ\|share − wire\| (mean) |
+  |---|---|---|---|---|---|
+  | shipped | 61 | 48 | 13 | 9 | 998 (9.16) |
+  | + exemption | **52** | **48** | 4 | **0** | **547** (5.47) |
+  | probe widening | 81 | **64** | 17 | 13 | 1 354 (9.34) |
+  | widening + exemption | 70 | **64** | 6 | 2 | 819 (6.11) |
+  | widening + tight shares | 54 | 41 | 13 | 12 | 997 (10.49) |
+
+  Three readings, and only one of them ships:
+
+  - **The exemption alone is a win and it SHIPPED** (`attributeDelta`,
+    ACCURACY.md §"The direct constant is not a merge"). It removes 9 of
+    9 false splits and costs zero correct ones, reproduces on the
+    archive-era GT corpus (231 → 216 splits, 184 → 184 right pairs, 26 →
+    11 false), and leaves the golden cache unchanged to the byte.
+  - **"Tight shares" is refuted**: 41 right pairs against the shipped
+    48. It deletes correct splits, not false ones.
+  - **The probe widening stays WITHHELD, and the exemption is not what
+    was missing.** With the exemption in place the widening looks clean
+    at split level (64 right pairs, 2 false) and the dm2/dm3 aggregate
+    likes it — bounded given 0.58% / 0.79% → 0.57% / 0.77%, bounded
+    `ewep` 0.87% → 0.85%, bounded `givenSelf` 1.28% / 4.00% → 1.21% /
+    3.83% — but the golden-cache regression that blocked it SURVIVES:
+    bounded `given` ≤2% 90.7% → 89.3% (was 88.0% without the exemption),
+    bounded `ewep` median 0.84% → **0.97%** unchanged by it, raw
+    `givenTeam` p90 23.0 → **26.2** unchanged by it. So the widening's
+    cost is not the false splits it creates; it is what splitting does to
+    per-player totals at all — a split trades one event carrying a share
+    error for two, and the widening's extra splits are mostly at
+    instants where the pair prior was right to be sceptical. A future
+    attempt should target the SHARE values, not the trigger.
+
+  **Two refusals from the same round.**
+
+  - *An identity guard on the pair* (reject two members anchored on the
+    same `TE_EXPLOSION` — "one detonation, one author"). It is reachable:
+    8 chosen pairs per pass over the 179 archive-era GT demos first
+    sampled, 6 per pass on the unscored archive, 0 on dm2/dm3 and the
+    golden cache. But the wire says they are RIGHT — 8 of 8 name exactly
+    the two attackers the damage log has, with shares like 109/55 against
+    a wire 110/54. The situation that creates them is the mutual
+    point-blank exchange: two rockets really did detonate a few units
+    apart, and the pair simply hangs both candidates on the same recorded
+    blast. Guarding it changes 4 rows of 120, leaves every attacker set
+    and the summed share error identical, and gains 2 exactly-right
+    shares — mechanism with no load. Recorded as an invariant in
+    ACCURACY.md instead of enforced in code. (If anything is available
+    here it is re-anchoring each member to its own blast, and the wire
+    says the shares are already within a few points.)
+  - *Probing an rl-sound winner against the exact band of a same-shooter
+    trackless detonation.* The counter the review asked for:
+    `f2.rlSoundWinnerExactWouldFire` = **110** per pass on dm2/dm3, 24 on
+    the golden cache, 163 on the archive-era GT and 322 on the archive
+    sample — against `winner.rlSound` of 1 331 / 320 / 2 756 / 4 438 with
+    only 22 / 10 / 62 / 122 firing today, so the family's trigger
+    population would grow roughly sixfold. Wire-scored, that buys 2 more
+    right pairs on dm2/dm3 (48 → 50) and pays 15 more splits naming an
+    author the wire does not have (13 → 28) plus 5 more false splits
+    (9 → 14); the golden cache goes 15 → 17 right pairs and 1 → 3 false.
+    Aggregate is a wash tilting negative (golden bounded `ewep` median
+    0.84% → 0.90%, bounded `givenSelf` 1.46% → 1.58%; dm2/dm3 bounded
+    given p90 1.68 → 1.75, raw `givenSelf` median 1.98% → 2.02%).
+    Refused on the fuse precedent: the withheld probe bought 16 right for
+    4 wrong and was still refused; this buys 2 for 15.
+
+  **The 22 unscored archive splits, now sampled and scored.** The
+  trackless-explosion family's own creations can be counted directly:
+  `shipped.withExpl` splits `createdByFamily` (no feasible pair exists
+  without the family) from `reprised` (the same two attackers, better
+  price). Per pass: dm2/dm3 20 / 0 / 20, golden cache 4 / 0 / 4 — nothing
+  created, matching the round's "no new splits" — the archive sample 92 /
+  4 / 88, and the 350-demo archive-era GT corpus 5 shipped creations.
+  Those 5 are wire-scored, and **5 of 5 name exactly the right attacker
+  pair** with shares within 2–5 points (e.g. 60/20 against a wire 56/24;
+  105/53 against 110/48; 95/43 against 97/41). Nothing was re-authored
+  anywhere: the family never changes WHO, only the price, except where it
+  creates. The mirrored-merge check on the unscored archive agrees: the
+  one mutual point-blank exchange among the created splits reads
+  consistently from both victims (enemy blast 111 + own 53 on one side,
+  enemy 109 + own 52 on the other).
 
   ### The discharge half (record)
 

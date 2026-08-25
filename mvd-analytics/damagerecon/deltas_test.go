@@ -679,6 +679,72 @@ func TestSplitPairPrefersTheMeasuredDetonation(t *testing.T) {
 	}
 }
 
+// directConstantInputs: a TRACKED enemy rocket whose detonation point measures
+// 140 units from the victim's interpolated position — far enough that the
+// radius band it implies (38..62) cannot explain a 110-point delta — plus a
+// shotgun blast that could complete the pair. On a fixed-110 server that delta
+// is not a merge at all: it is T_MissileTouch's flat constant, one whole hit.
+//
+// The flight is tracked rather than trackless on purpose: a fire SOUND would
+// also raise an rlSoundCandidates explanation whose 25..120 band swallows a
+// 110 without misfitting, and the delta would never reach the split at all.
+func directConstantInputs() *inputs {
+	return &inputs{
+		order:    []string{"v", "a", "s"},
+		players:  map[string]*result.PlayerStream{},
+		rlRegime: result.RocketRegimeFixed,
+		rlLo:     110,
+		rlHi:     110,
+		projs: []projectile{{
+			weapon: "rl", shooter: "a", spawnT: 1700, endT: 2000,
+			sp: vec3{0, 440, 0}, ep: vec3{0, 140, 0}, epExact: true,
+		}},
+		shots: []firedShot{{t: 2000, player: "s", weapon: "ssg"}},
+		tracks: map[string]*track{
+			"v": staticTrack(vec3{}),
+			"a": staticTrack(vec3{0, 440, 0}),
+			"s": staticTrack(vec3{0, -800, 0}),
+		},
+	}
+}
+
+// TestAttributeDeltaKeepsTheDirectConstantWhole pins the direct-constant
+// exemption: a rocket delta of exactly the demo's measured direct constant is
+// never challenged by the pair split.
+//
+// The misfit is real and the pair is feasible — that is the point. The
+// winner's radius band at 140 units is 38..62 and the probe's (which rebuilds
+// with the wider un-snapped slack) is 20..80, so a 110 misfits it by 30, and
+// 110 sits inside the 42..119 the rocket and the ssg sum to. Every gate the
+// split needs is open; only the constant closes it.
+//
+// The control at 109 is what makes this a test of the constant rather than of
+// the geometry: one point off, the same fixture splits.
+func TestAttributeDeltaKeepsTheDirectConstantWhole(t *testing.T) {
+	in := directConstantInputs()
+	d := delta{t: 2000, raw: 110, bounded: 110}
+	one := in.attributeOne("v", in.tracks["v"], d)
+	if one.attacker != "a" || one.weapon != "rl" {
+		t.Fatalf("single-pass winner = %s/%s, want the rocketeer this test is about", one.attacker, one.weapon)
+	}
+	if evs := in.attributeDelta("v", in.tracks["v"], d); len(evs) != 1 {
+		t.Errorf("a %d-point delta at the fixed direct constant returned %d events, want the single whole hit; got %+v",
+			d.bounded, len(evs), evs)
+	}
+	off := delta{t: 2000, raw: 109, bounded: 109}
+	if evs := in.attributeDelta("v", in.tracks["v"], off); len(evs) != 2 {
+		t.Fatalf("one point off the constant returned %d events, want the split — the exemption has to be about the CONSTANT, not about this geometry; got %+v",
+			len(evs), evs)
+	}
+	// A demo whose regime was never established keeps the old behaviour: the
+	// constant is only known where the evidence established it.
+	spread := directConstantInputs()
+	spread.rlRegime, spread.rlLo, spread.rlHi = result.RocketRegimeSpread, 100, 120
+	if evs := spread.attributeDelta("v", spread.tracks["v"], d); len(evs) != 2 {
+		t.Errorf("on a demo with no fixed-110 regime the same delta returned %d events, want the split", len(evs))
+	}
+}
+
 // TestKillFloorSplitsOnVerdict pins that both kill top-ups price a DIRECT
 // rocket at T_MissileTouch's flat constant and everything else on the radius
 // curve. The engine hands the touched entity to T_RadiusDamage as its
