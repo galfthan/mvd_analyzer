@@ -1213,6 +1213,54 @@ unmodelable. It is NOT part of `SkipModeReason`: that one also gates the
 KTX-side bounded pass, which reads the server's own values and does not
 care which multiplier produced them.
 
+### Trackless explosions in the pair split (2026-08-25)
+
+`trySplitPair` scored every candidate family the single pass does except
+`explosionCandidates` — the point-blank rockets and contact grenades
+whose entity was never broadcast and whose only geometry is the
+TE_EXPLOSION the server wrote. It is in the list now, and the family's
+job is not to supply a new AUTHOR so much as a better measurement of
+one: `rlSoundCandidates` already offers the same shooter off the same
+fire sound, but with `dEnd < 0` its band is the whole 25..120 radius
+range and a share handed to it is unconstrained. A grenade has no
+rl-sound analogue at all, so a contact grenade merging with another
+attacker's hit previously had exactly one candidate author.
+
+**Scored directly against the wire.** Every split the blind
+reconstruction produces on a demo that also carries a KTX damage log can
+be checked against the rows at that instant — who dealt what, exactly.
+Over the 53-demo dm2/dm3 ground truth and the 13-demo golden cache the
+family produced **no new splits at all** (61 and 16, unchanged), so it
+cannot steal on any corpus where stealing is checkable; it re-priced 12
+of them, and all 10 whose attackers the wire confirms landed on exactly
+the right pair. Total |share − wire| over the correct-attacker shares
+falls 442 → 436 (dm2/dm3) and 146 → **124** (golden), with exactly-right
+shares up 8 → 10 on the latter — one golden instant the wire records as
+48/43 read 53/38 before and reads 48/43 now.
+
+Aggregate `qw-recon-eval` movement is small and one-sided in the right
+direction on the golden cache — bounded `givenSelf` median 1.58% →
+**1.46%**, raw `givenSelf` p90 10.80 → **10.63**, worst self row 11.53%
+→ **10.83%** — with every headline row unchanged on both corpora and
+only small-denominator dm2/dm3 rows moving either way (bounded `ewep`
+≤1% 55.0% → 54.7%, raw `givenSelf` median 1.94% → 1.98%). On the
+archive, where nothing can score it, the family adds 22 splits to 1 307
+(+1.7%) and appears in 331 of the resulting 1 329.
+
+**One change was measured and NOT taken.** The misfit probe that decides
+whether to challenge a single explanation rebuilds a `"proj"` band from
+`dEnd` widened by `splashSlack(epExact)`, and `epExact` does not travel
+on the event — so a detonation-snapped winner is probed against a band
+36 points wider than the one that chose it. Carrying it raises split
+attempts 83% and adds 20 dm2/dm3 splits of which the wire says 16 name
+exactly the right pair, but it costs the golden cache bounded `given`
+≤2% 90.7% → 88.0%, bounded `ewep` median 0.84% → 0.97% and raw
+`givenTeam` p90 23.0 → 26.2 (isolated: the regression reproduces with
+the probe change alone). The scorer ranks explanations; the probe
+decides whether to entertain inventing a second attacker, and the wider
+band is hysteresis on that decision. It stays, documented in
+`attributeDelta`.
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the
@@ -1276,10 +1324,15 @@ port adds, each verified against ground truth in the eval:
 - same-frame pair splitting: a merged multi-attacker instant that no
   single candidate's damage range can explain, but a pair of different
   attackers sums to, is split between them (range-midpoint proportional).
-  LG water discharges both partner in and trigger the split; instrumented
-  over a 2 400-demo archive sweep the split entertains them and pairs
-  none, so the family is inert (`trySplitPair` bullet in
-  [`plan-archive-features.md`](../../plan-archive-features.md));
+  The partner list is now the same set the single pass scores. The two
+  families that joined it late measure opposite: LG water discharges
+  pair NEVER (over a 2 400-demo archive sweep the split entertains 68
+  and pairs 0 — the observation sits BELOW the discharge's band on all
+  61 entries, and a pair only ever ADDS damage), while trackless
+  TE_EXPLOSION rockets and contact grenades sit ABOVE their band on 480
+  of 537 entries and end up in 331 of the sweep's 1 329 pairs. See
+  §"Trackless explosions in the pair split" and the `trySplitPair`
+  bullet in [`plan-archive-features.md`](../../plan-archive-features.md);
 - temp-entity hit telemetry (`streams.pointEffects`, 2026-08-15):
   TE_EXPLOSION snaps tracked flight endpoints to the exact detonation
   point and anchors the point-blank rockets/grenades whose entity never

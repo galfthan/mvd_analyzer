@@ -531,6 +531,133 @@ func TestDischargeGeomPricedByRange(t *testing.T) {
 	}
 }
 
+// tracklessGrenadeInputs: a merge whose second author has NO tracked flight
+// at all. "g" lobs a grenade that detonates on contact 100 units from the
+// victim within a frame of launch — too early for the entity to have been
+// broadcast, so the only wire evidence is the fire sound plus the
+// TE_EXPLOSION — while "s" lands an ssg blast in the same server frame.
+//
+// The grenade is the sharp case for the family: rlSoundCandidates covers
+// "rl" only (a grenade lobs, so no flight model applies), so before
+// explosionCandidates joined trySplitPair's list this instant had exactly
+// ONE candidate author and could not be split however badly the single
+// explanation misfit the value.
+func tracklessGrenadeInputs() *inputs {
+	return &inputs{
+		order:      []string{"v", "g", "s"},
+		players:    map[string]*result.PlayerStream{},
+		explosions: []pointFx{{t: 1100, p: vec3{0, 100, 0}}},
+		shots: []firedShot{
+			{t: 1000, player: "g", weapon: "gl"},
+			{t: 1100, player: "s", weapon: "ssg"},
+		},
+		tracks: map[string]*track{
+			"v": staticTrack(vec3{}),
+			"g": staticTrack(vec3{0, 300, 0}),
+			"s": staticTrack(vec3{0, -800, 0}),
+		},
+	}
+}
+
+// TestAttributeDeltaSplitsTracklessExplosionMerge drives the trackless
+// grenade + shotgun merge through the FULL delta path, not trySplitPair
+// directly: a family in the candidate list is only half of it, and the
+// discharge round shipped a pair that production could never reach because
+// its test called the split function itself.
+//
+// The 138-point delta has two authors and neither can explain it alone: the
+// blast's radius band at 100 units is 58..82 and the ssg's is 4..56.
+func TestAttributeDeltaSplitsTracklessExplosionMerge(t *testing.T) {
+	in := tracklessGrenadeInputs()
+	d := delta{t: 1100, raw: 130, bounded: 130}
+	evs := in.attributeDelta("v", in.tracks["v"], d)
+	if len(evs) != 2 {
+		t.Fatalf("attributeDelta returned %d events, want the 2-author split; got %+v", len(evs), evs)
+	}
+	byAttacker := map[string]reconEvent{}
+	for _, e := range evs {
+		byAttacker[e.attacker] = e
+	}
+	gr, okG := byAttacker["g"]
+	sg, okS := byAttacker["s"]
+	if !okG || !okS {
+		t.Fatalf("split authors = %v, want one share each for g and s", byAttacker)
+	}
+	if gr.kind != "proj" || gr.weapon != "gl" {
+		t.Errorf("g's share = %+v, want a gl proj", gr)
+	}
+	if gr.dEnd != 100 {
+		t.Errorf("g's share carries dEnd %v, want the measured 100 units to the detonation point", gr.dEnd)
+	}
+	if gr.bounded+sg.bounded != 130 {
+		t.Errorf("shares %d + %d do not sum to the observed 130", gr.bounded, sg.bounded)
+	}
+	if gr.bounded < 58 || gr.bounded > 82 {
+		t.Errorf("grenade share %d outside its 58..82 radius band at 100u", gr.bounded)
+	}
+	if sg.bounded < 4 || sg.bounded > 56 {
+		t.Errorf("ssg share %d outside its 4..56 band", sg.bounded)
+	}
+	// The trigger really is reached through the ordinary "proj" arm: the
+	// detonation wins the single pass and misfits the merged value.
+	one := in.attributeOne("v", in.tracks["v"], d)
+	if one.attacker != "g" || one.kind != "proj" {
+		t.Fatalf("single-pass winner = %s/%s, want the trackless grenade", one.attacker, one.kind)
+	}
+}
+
+// TestSplitPairPrefersTheMeasuredDetonation pins WHICH rocket candidate the
+// split takes when both are on the board. A point-blank rocket has two
+// possible explanations: rlSoundCandidates, which knows only that a fire
+// sound is flight-time-consistent with the victim's position and therefore
+// spans the whole 25..120 radius range, and explosionCandidates, which knows
+// where the rocket actually went off. Only the second can price the share.
+//
+// Here the detonation is 100 units from the victim (a 58..82 splash) and the
+// merge is 138 with an ssg. The exact candidate is both the cheaper geometry
+// and the only one that constrains the value; the guess would hand the
+// rocketeer 98 of the 138.
+func TestSplitPairPrefersTheMeasuredDetonation(t *testing.T) {
+	in := &inputs{
+		order:      []string{"v", "a", "s"},
+		players:    map[string]*result.PlayerStream{},
+		explosions: []pointFx{{t: 1500, p: vec3{0, 100, 0}}},
+		shots: []firedShot{
+			{t: 1200, player: "a", weapon: "rl"},
+			{t: 1500, player: "s", weapon: "ssg"},
+		},
+		tracks: map[string]*track{
+			"v": staticTrack(vec3{}),
+			"a": staticTrack(vec3{0, 400, 0}),
+			"s": staticTrack(vec3{0, -800, 0}),
+		},
+	}
+	d := delta{t: 1500, raw: 138, bounded: 138}
+	// Both explanations for a really are present — without that this test
+	// would pass for the wrong reason.
+	if got := len(in.rlSoundCandidates("v", d.t, vec3{})); got != 1 {
+		t.Fatalf("rl-sound candidates = %d, want the 1 this test is about", got)
+	}
+	evs := in.attributeDelta("v", in.tracks["v"], d)
+	if len(evs) != 2 {
+		t.Fatalf("attributeDelta returned %d events, want a 2-author split; got %+v", len(evs), evs)
+	}
+	byAttacker := map[string]reconEvent{}
+	for _, e := range evs {
+		byAttacker[e.attacker] = e
+	}
+	rock, ok := byAttacker["a"]
+	if !ok {
+		t.Fatalf("split authors = %v, want a share for the rocketeer", byAttacker)
+	}
+	if rock.kind != "proj" || rock.dEnd != 100 {
+		t.Fatalf("a's share = %s (dEnd %v), want the measured detonation, not the rl-sound guess", rock.kind, rock.dEnd)
+	}
+	if rock.bounded < 58 || rock.bounded > 82 {
+		t.Errorf("rocket share %d outside the 58..82 band the detonation point implies", rock.bounded)
+	}
+}
+
 // TestKillFloorSplitsOnVerdict pins that both kill top-ups price a DIRECT
 // rocket at T_MissileTouch's flat constant and everything else on the radius
 // curve. The engine hands the touched entity to T_RadiusDamage as its

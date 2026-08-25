@@ -44,6 +44,25 @@ implemented:
   geometry prior is priced by distance like a projectile's rather than
   flat, so a discharge that merely happened somewhere in the pool can no
   longer be the cheapest candidate on the board.
+- **The same-frame pair split can now price a trackless explosion.** The
+  point-blank rockets and contact grenades whose entity was never
+  broadcast — the ones TE_EXPLOSION anchors — were scored by the single
+  pass but not by the split, so a merged two-author instant could only
+  be split using the geometry-less fire-sound fallback, whose band is
+  the whole 25..120 radius range and constrains no share at all (and a
+  grenade has no fire-sound fallback, so a contact grenade merging with
+  another attacker's hit could not be split at all). Reconstructed
+  `damage` values move on demos with point-blank rocket play: a handful
+  of split shares per demo are re-priced off the measured detonation
+  distance. Scored directly against the KTX damage log on the demos that
+  carry one, the change creates **no new splits** (dm2/dm3 61, golden
+  cache 16, both unchanged), so no instant is split that was not being
+  split before; it re-prices 12, all 10 with wire-confirmed attackers
+  landing on the right pair, and the summed share error against the wire
+  falls (golden cache 146 → 124, one instant now exactly right). Every
+  `qw-recon-eval` headline row is unchanged; the golden cache's self
+  family improves (bounded `givenSelf` median 1.58% → 1.46%) and the
+  dm2/dm3 small-denominator rows move both ways.
 
 The kill top-ups' two calibration constants are **gone**: they existed to
 absorb the quad-ordering error, and with it fixed the raw error falls

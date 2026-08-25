@@ -375,6 +375,29 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 	// is per-candidate state (35·cells at the measured distance), and
 	// rebuilding the probe without it makes modelBounds answer (0, 0) — "no
 	// magnitude opinion" — which reads as a perfect fit and skips the split.
+	//
+	// epExact deliberately does NOT travel, and that is a MEASURED decision
+	// rather than the same oversight. A "proj" band is rebuilt from dEnd and
+	// widens by splashSlack — 24 points around a detonation-snapped endpoint,
+	// 60 around an interpolated one — so leaving the flag false probes every
+	// snapped winner (every trackless explosion by construction) against a
+	// band 36 points wider than the one that CHOSE it. The scorer and the
+	// probe are not the same question: the scorer ranks explanations, the
+	// probe decides whether to entertain inventing a second attacker, and the
+	// wider band is hysteresis on that decision. Carrying the flag was built
+	// and measured: over a 2 400-demo archive sweep it raises split attempts
+	// by 83% (6 348 → 11 609 per attribution pass) and splits actually
+	// produced by 58% (1 307 → 2 060), and it takes the dm2/dm3 ground truth
+	// from 61 splits to 81. Those 20 extra are not junk — scored against the
+	// wire damage log at the same instant, 16 name exactly the two attackers
+	// that were really there and 4 split a single-author instant. But they
+	// cost accuracy where accuracy is scored: on the golden cache bounded
+	// `given` ≤2% falls 90.7% → 88.0%, bounded `ewep` median
+	// rises 0.84% → 0.97%, raw `ewep` median 0.81% → 0.91% and raw
+	// `givenTeam` p90 23.0 → 26.2, with dm2/dm3 a wash and the per-share
+	// value error worse (mean 4.60 → 4.95). So the hysteresis stays, as a
+	// documented decision rather than a bug waiting to be re-discovered
+	// (plan-archive-features.md, trySplitPair bullet).
 	quad := in.hasQuad(e.attacker, d.t)
 	pen, ok := in.damageModelScore(d.bounded, false, &candidate{weapon: e.weapon, kind: e.kind, dEnd: e.dEnd, mLo: e.mLo, mHi: e.mHi}, e.isSelf, quad)
 	if !ok || pen < 0.5 {
@@ -392,30 +415,52 @@ func (in *inputs) attributeDelta(victim string, vtrack *track, d delta) []reconE
 // range). Survived deltas only — a killing delta's bounded cap breaks the
 // sum identity.
 //
-// The family list wants to be the same set attributeOne scores: a family
-// missing here is a delta the single path can explain badly but the pair path
-// cannot explain at all. Still absent is explosionCandidates (trackless
-// TE_EXPLOSION rockets) — a separate, much larger population that has not been
-// measured. The LG discharge is a member: it is radius damage like a rocket's
+// The family list IS the set attributeOne scores, and that is the invariant to
+// keep: a family missing here is a delta the single path can explain badly but
+// the pair path cannot explain at all, or — subtler, and what the trackless
+// explosions actually were — can only explain with a WEAKER member of the same
+// physical evidence. Note that being in this list is only half of it: the
+// caller's trigger switch decides which kinds may CHALLENGE a single
+// explanation, and it is a narrower set — see attributeDelta.
+//
+// Two members joined late, for opposite reasons.
+//
+// explosionCandidates (trackless TE_EXPLOSION rockets and contact grenades) is
+// the one that carries load. It is not a new AUTHOR so much as a better
+// measurement of one: for a rocket, rlSoundCandidates already offers the same
+// shooter from the same fire sound, but with no idea where the rocket went off
+// — dEnd < 0, so its band is the whole 25..120 radius range and any share it is
+// handed is unconstrained. The detonation point turns that into 120 − 0.5·d ±
+// the snapped slack, ~24 points wide, which is what actually prices the split.
+// For a GRENADE there is no rl-sound analogue at all (a lob has no flight
+// model), so a short contact grenade merging with another attacker's hit had
+// exactly one candidate author and could not be split at all.
+//
+// The LG discharge is the other, and it is radius damage on the same terms
 // (T_RadiusDamage(self, self, 35*cells, world, dtLG_DIS),
-// ktx/src/weapons.c:1208, :1225), so a water fight where one player discharges
-// while another lands a rocket on the same victim in the same frame merges
-// into one delta with two authors. Note that being in this list is only half
-// of it: the caller's trigger switch decides which kinds may CHALLENGE a
-// single explanation, and it is a narrower set — see attributeDelta.
+// ktx/src/weapons.c:1208, :1225): a water fight where one player discharges
+// while another lands a rocket on the same victim in the same frame merges into
+// one delta with two authors.
+//
+// The two families measure OPPOSITE, and the sign of the mismatch is why. On
+// the same 2 400-demo archive sweep the discharge is entertained 68 times over
+// 61 entries and pairs NONE: on every one the observed delta sits BELOW the
+// discharge's own band, and a pair only ever ADDS damage — the survived-delta
+// ceiling (a victim who lives absorbs at most 299 points) against a band floor
+// of 0.75·(35·cells − 0.5·d) − 10. The trackless explosion sits the other way
+// round, ABOVE its band on 480 of the 537 entries that carry one, which is the
+// definition of a delta a partner can complete; 331 of the sweep's 1 329 pairs
+// end up containing one. See the trySplitPair bullet in
+// plan-archive-features.md for both tables.
 //
 // What refuses a wrong discharge partner is its VALUE band plus its distance:
 // the ±25%+10 window dischargeCandidates computes around 35·cells − 0.5·d is
 // ~90 points wide at E = 200, so the geometry prior has to be priced by range
 // — flat, a discharge anywhere in the pool is the cheapest candidate there is.
-//
-// The family is measured INERT, and structurally so. Over a 2 400-demo archive
-// sweep the split entertains 68 discharge candidates over 61 discharge-
-// triggered entries and pairs none of them: on every one the observed delta
-// sits BELOW the discharge's own band, and a pair only ever ADDS damage. That
-// is the survived-delta ceiling — a victim who lives absorbs at most 299
-// points — against a band floor of 0.75·(35·cells − 0.5·d) − 10. See the
-// trySplitPair bullet in plan-archive-features.md for the full table.
+// A trackless explosion is guarded by construction instead: it exists only
+// where the wire wrote a detonation, its band is the narrowest any radius
+// candidate carries, and its geometry prior is the same distance price
+// (0.1 + d/geomNorm·0.4) plus a flight-time and aim term.
 //
 // The one pair the engine forbids is beam+discharge from the SAME attacker:
 // W_FireLightning's underwater branch returns before WS_Mark(wpLG), before the
@@ -430,6 +475,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	cands = append(cands, in.beamCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.lgAmmoCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.projCandidates(victim, d.t, vpos)...)
+	cands = append(cands, in.explosionCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.hitscanCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.nailCandidates(victim, d.t, vpos)...)
 	cands = append(cands, in.rlSoundCandidates(victim, d.t, vpos)...)

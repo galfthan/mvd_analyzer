@@ -348,9 +348,151 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   (`.reports/…/eval-gt-archive.txt` outliers).
 - **Old-FFA taken errors** (archive GT eval, small denominators) —
   uninvestigated.
-- **`trySplitPair` lacks an `explosionCandidates` family** — the
-  DISCHARGE half is DONE and, measured with the gate actually open, it
-  **still carries no load**. `dischargeCandidates` joined the pair list
+- ~~**`trySplitPair` lacks an `explosionCandidates` family**~~ — **BOTH
+  HALVES DONE.** The family list now IS the set `attributeOne` scores.
+  The two halves landed with opposite results and the contrast is the
+  point: the discharge is measured INERT, the trackless explosion
+  carries load. The explosion half is written up first, then the
+  discharge record it was split from.
+
+  ### The explosion half (SHIPPED)
+
+  `explosionCandidates` — trackless TE_EXPLOSION rockets and short
+  contact grenades — joined the pair list. Only ONE of the three gates
+  the discharge round hit was actually shut for it:
+
+  - the **partner list**: shut, and this is the change.
+  - the **trigger switch**: already open. An explosion candidate stamps
+    `kind: "proj"`, which the switch has always listed, so no merge the
+    family could partner was being suppressed. (17 071 archive deltas
+    per pass are WON outright by a trackless explosion, so this matters:
+    had the kind been its own string the population would have been
+    invisible, exactly as the discharge's was.)
+  - the **misfit-probe band**: shut, but deliberately LEFT shut. See
+    "the probe band, measured and withheld" below.
+
+  It is not a new AUTHOR so much as a better measurement of one. For a
+  rocket, `rlSoundCandidates` already offers the same shooter off the
+  same fire sound but with no idea where the rocket detonated — `dEnd <
+  0`, so its band is the whole 25..120 radius range and a share handed
+  to it is unconstrained. The detonation point turns that into
+  `120 − 0.5·d` ± 24, which is what actually prices the split. For a
+  GRENADE there is no rl-sound analogue at all (a lob has no flight
+  model), so a contact grenade merging with another attacker's hit had
+  exactly ONE candidate author and could not be split at all.
+
+  Population, with the family admitted (counts are per attribution
+  pass — `attribute()` runs the pass twice on demos whose fixed-110
+  rocket regime is detected):
+
+  | | GT dm2/dm3 (53) | golden cache (13) | archive (1 207 recon of a 2 400 sample) |
+  |---|---|---|---|
+  | survived deltas the split may challenge | 130 515 | 34 852 | 821 675 |
+  | … within ±40 ms of an admissible trackless explosion | 4 147 | 994 | 27 322 |
+  | deltas a trackless explosion won outright | 3 249 | 730 | 17 071 |
+  | split attempts (pair-path entries) | 257 | 92 | 6 348 |
+  | … carrying ≥1 explosion candidate | 26 | 12 | 537 |
+  | explosion candidates admitted (all bounded) | 38 | 12 | 644 |
+  | … entries with a second attacker on the board | 22 | 4 | 451 |
+  | observation vs the explosion's band — below / in / above | 4 / 0 / 22 | 6 / 0 / 6 | 57 / 0 / **480** |
+  | feasible pairs containing one | 50 | 4 | 595 |
+  | pairs formed, before → after | 118 → 118 | 32 → 32 | 1 307 → **1 329** |
+  | … containing a trackless explosion | 20 | 4 | **331** |
+
+  **The band asymmetry is the whole difference from the discharge.** A
+  pair only ever ADDS damage, so a family can only help a delta that
+  sits ABOVE its own band. The discharge sat below on 61 of 61 archive
+  entries — structurally, since a live victim absorbs at most 299 points
+  while a detectable blast's band floor is `0.75·(35·cells − 0.5·d) −
+  10` — and paired zero times. The trackless explosion sits ABOVE on 480
+  of 537, and pairs 331 times.
+
+  **Wire-scored split precision** (blind reconstruction, every produced
+  split compared against the KTX damage rows at the same instant;
+  deduplicated to the splits that actually ship):
+
+  | | GT dm2/dm3 | golden cache |
+  |---|---|---|
+  | splits, before → after | 61 → **61** | 16 → **16** |
+  | … at a genuinely 2-author instant | 50 | 15 |
+  | … naming exactly the right attacker pair | 48 → 48 | 15 → 15 |
+  | … naming one of two | 13 → 13 | 1 → 1 |
+  | … naming NEITHER | 0 | 0 |
+  | splits gaining an explosion share | 10 | 2 |
+  | … of those, at a 2-author instant with the right pair | **8 of 8** | **2 of 2** |
+  | Σ\|share − wire\| over correct-attacker shares | 442 → **436** | 146 → **124** |
+  | exactly-right shares | 20 → 22 | 8 → **10** |
+
+  So on both wire-instrumented corpora the family **produced no new
+  splits at all** — it cannot steal there, because every instant it
+  partners was already being split with the coarser rl-sound candidate —
+  and it re-priced 12 of them, all 10 whose attackers the wire confirms
+  landing on the right pair. Both golden re-prices improved: an instant
+  the wire records as 30/48 read 38/40 and now reads 32/46, and one
+  recorded as 48/43 read 53/38 and now reads 48/43 exactly.
+
+  On the ARCHIVE the family does create 22 new splits (1 307 → 1 329,
+  +1.7%). Those 22 are **unscored** — the demos carry no damage log,
+  which is why the reconstruction runs on them at all — and the honest
+  statement is that the wire-checkable population showed zero
+  false-split creation and the archive's 1.7% is bounded by the same
+  guards (different attackers, band-sum feasibility, the +0.3 pair
+  prior, distance-priced geometry).
+
+  `qw-recon-eval`, before → after: on the 60-demo dm2/dm3 ground truth
+  every headline row is unchanged (coverage, value-exact,
+  attacker-correct, bounded given / taken) and only small-denominator
+  rows move, both ways — bounded `ewep` ≤1% 55.0% → 54.7%, bounded
+  `givenSelf` median 1.26% → 1.28%, raw `ewep` p90 5.36 → 5.41, raw
+  `givenSelf` median 1.94% → 1.98%, `ssg` class 98.8% → 98.7%. On the
+  golden cache there are no regressions at all: bounded `givenSelf`
+  median 1.58% → **1.46%**, raw `givenSelf` p90 10.80 → **10.63**, and
+  the worst self row (212535 wd.dilbert) 11.53% → **10.83%** bounded and
+  10.80% → **10.14%** raw. Raw eval outputs and the pair logs:
+  `.reports/explosion-pair-2026-08-25/`.
+
+  Tests: `TestAttributeDeltaSplitsTracklessExplosionMerge` (the contact
+  grenade, driven through `attributeDelta` rather than `trySplitPair`,
+  because the discharge round's test bypassed the gates and hid a bug)
+  and `TestSplitPairPrefersTheMeasuredDetonation` (both rocket
+  explanations on the board; the measured one has to win and has to
+  price the share). Each fails with the change reverted.
+
+  ### The probe band: measured and WITHHELD
+
+  The third gate is real and was NOT taken. `attributeDelta`'s misfit
+  probe rebuilds a candidate from the winning event, and a `"proj"` band
+  is rebuilt from `dEnd` widened by `splashSlack(epExact)` — 24 points
+  around a detonation-snapped endpoint, 60 around an interpolated one.
+  `epExact` does not travel on `reconEvent`, so every snapped winner —
+  every trackless explosion by construction — is probed against a band
+  36 points wider than the one that chose it.
+
+  Carrying it was implemented and measured. It raises split attempts by
+  83% (archive 6 348 → 11 609 per pass), the archive's shipped splits by
+  58% (1 307 → 2 060) and the dm2/dm3 ground truth from 61 splits to 81,
+  and the 20 extra are NOT junk:
+  wire-scored, 16 name exactly the two attackers that were really there
+  and 4 split a single-author instant. But it costs accuracy where
+  accuracy is scored — on the golden cache bounded `given` ≤2% falls
+  90.7% → 88.0%, bounded `ewep` median rises 0.84% → 0.97%, raw `ewep`
+  median 0.81% → 0.91% and raw `givenTeam` p90 23.0 → 26.2, with dm2/dm3
+  a wash and the per-share value error worse (mean 4.60 → 4.95). The
+  isolation is clean: re-running the probe change WITHOUT the explosion
+  family reproduces the whole golden regression, so it belongs entirely
+  to the probe.
+
+  The reading that survives is that the scorer and the probe are not the
+  same question — the scorer ranks explanations, the probe decides
+  whether to entertain inventing a second attacker — and the wider band
+  is hysteresis on that decision. It stays, now as a documented decision
+  in `attributeDelta` rather than an accident waiting to be
+  re-discovered as a bug.
+
+  ### The discharge half (record)
+
+  Measured with the gate actually open, it **carries no load**.
+  `dischargeCandidates` joined the pair list
   in `6fe4691`; the review of that commit found the family could never
   be reached from production, so the numbers that commit reported were
   an artifact of the suppression rather than a measurement of the
@@ -442,9 +584,12 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
   directions (raw givenSelf mean 5.49→4.90 and p90 12.75→11.66; raw
   givenTeam p90 38.5→42.7; bounded givenTeam median 1.39→1.43).
 
-  The EXPLOSION half is **still open**: `explosionCandidates` (trackless
-  TE_EXPLOSION rockets) is a far larger population and needs its own
-  before/after eval, so this bullet stays.
+  Note the SECOND gate above is the one the explosion half re-opened as
+  a question and answered the other way (`epExact`, withheld). They are
+  not the same fix: the discharge's band was ABSENT from the probe —
+  `(0, 0)`, "no opinion", a certain false negative — while the
+  explosion's is present and merely WIDER than the scorer's, which turns
+  out to be load-bearing hysteresis.
 - **`ktxver` feature-gating helper** — parse `ktxver` (+fork handling)
   once, use it where behavior is generation-dependent.
 - ~~REST endpoint for `streams.pointEffects`~~ — SHIPPED in PR #132
