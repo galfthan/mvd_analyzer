@@ -565,8 +565,9 @@ func tracklessGrenadeInputs() *inputs {
 // discharge round shipped a pair that production could never reach because
 // its test called the split function itself.
 //
-// The 138-point delta has two authors and neither can explain it alone: the
-// blast's radius band at 100 units is 58..82 and the ssg's is 4..56.
+// The 130-point delta has two authors and neither can explain it alone: the
+// blast's radius band at 100 units is 58..82 and the ssg's is 4..56, so the
+// value only exists inside their 62..138 sum.
 func TestAttributeDeltaSplitsTracklessExplosionMerge(t *testing.T) {
 	in := tracklessGrenadeInputs()
 	d := delta{t: 1100, raw: 130, bounded: 130}
@@ -614,9 +615,29 @@ func TestAttributeDeltaSplitsTracklessExplosionMerge(t *testing.T) {
 // where the rocket actually went off. Only the second can price the share.
 //
 // Here the detonation is 100 units from the victim (a 58..82 splash) and the
-// merge is 138 with an ssg. The exact candidate is both the cheaper geometry
-// and the only one that constrains the value; the guess would hand the
-// rocketeer 98 of the 138.
+// merge is 138 with an ssg (4..56). The exact candidate is both the cheaper
+// geometry (0.25 against the fire sound's 0.49) and the only one that
+// constrains the value; the guess would hand the rocketeer 98 of the 138.
+//
+// 138 is not free: the fixture works only inside a 135..138 window, and both
+// edges are the point of the test.
+//
+//   - The single-pass winner here is the rl-sound guess, not the detonation —
+//     at a merged value its 25..120 band misfits least. So the SPLIT is
+//     entertained at all only once the probe's misfit clears 0.5 against
+//     THAT band: (obs − 120) / max(10, 0.25·120) ≥ 0.5, i.e. obs ≥ 135.
+//     Below it the delta returns one rl-sound event and nothing is measured.
+//   - 138 is exactly 82 + 56, the two bands' tops. At 139 trySplitPair's ±1
+//     feasibility slack still admits the pair but the share clamp has to push
+//     the rocket to 83 — one point outside its own band, which the assertion
+//     below rejects — and at 140 the measured pair is infeasible altogether,
+//     so the split falls back to the rl-sound guess: the exact regression
+//     this test exists to catch, arriving for the wrong reason.
+//
+// A failure here therefore means one of two things: the split stopped
+// preferring the measured detonation (the regression), or a band/probe
+// constant moved and the fixture's window no longer contains 138 — check the
+// four numbers above before touching the assertions.
 func TestSplitPairPrefersTheMeasuredDetonation(t *testing.T) {
 	in := &inputs{
 		order:      []string{"v", "a", "s"},

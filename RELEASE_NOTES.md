@@ -56,10 +56,13 @@ implemented:
   of split shares per demo are re-priced off the measured detonation
   distance. Scored directly against the KTX damage log on the demos that
   carry one, the change creates **no new splits** (dm2/dm3 61, golden
-  cache 16, both unchanged), so no instant is split that was not being
-  split before; it re-prices 12, all 10 with wire-confirmed attackers
-  landing on the right pair, and the summed share error against the wire
-  falls (golden cache 146 → 124, one instant now exactly right). Every
+  cache 16, both unchanged) — on those corpora nothing is split that was
+  not being split before; it re-prices 12, all 10 with wire-confirmed
+  attackers landing on the right pair, and the summed share error against
+  the wire falls (golden cache 146 → 124, one instant now exactly right).
+  On demos with no damage log — where the reconstruction actually runs —
+  the family does add splits: 1.7% more (1 307 → 1 329) over a 2 400-demo
+  archive sweep, which nothing can score directly. Every
   `qw-recon-eval` headline row is unchanged; the golden cache's self
   family improves (bounded `givenSelf` median 1.58% → 1.46%) and the
   dm2/dm3 small-denominator rows move both ways.

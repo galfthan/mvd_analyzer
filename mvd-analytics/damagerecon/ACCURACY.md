@@ -31,7 +31,7 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 | raw taken | 0.51% | 0.85% | 1.64% | 73% | 93% |
 | bounded ewep | 0.84% | 1.39% | 3.08% | 55% | 75% |
 | bounded givenTeam | 2.3% | 5.1% | — | small denominators (200–700) |
-| bounded givenSelf | 1.6% | 4.0% | — | small denominators |
+| bounded givenSelf | 1.5% | 4.0% | — | small denominators |
 
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
@@ -956,7 +956,14 @@ normalizer, both below); it is shown separately because the middle
 column is what the isolation runs in the rest of this section were
 measured against:
 
-| family | before | A+B as first shipped | + review fixes |
+The third column is a CHECKPOINT, not the current numbers: the two
+changes described under it moved four of its rows afterwards (raw
+`givenSelf` mean 5.49% → **4.91%** is the big one), and each move is
+recorded in the paragraphs that follow rather than by rewriting the
+column — the column's job is to isolate what A+B and the review fixes
+did.
+
+| family | before | A+B as first shipped | + review fixes (checkpoint) |
 |---|---|---|---|
 | bounded given | 0.58% / 0.76% | 0.57% / 0.80% | 0.58% / 0.79% |
 | bounded taken | 0.04% / 0.14% | 0.04% / 0.14% | 0.04% / 0.14% |
