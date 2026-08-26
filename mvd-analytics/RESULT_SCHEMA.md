@@ -159,6 +159,18 @@ nothing — the opposite of what the flag means.
 | Killer | `killer` | string |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `axe`, `hook`, `rail`, `tele`, `stomp`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`, plus `unknown`/`suicide`/`teamkill` for obituaries whose phrasing hides the weapon; the closed set is `view.fragWeaponVocab`) |
+
+`teamkill` is a **cause-less** placeholder, not the cause of every
+teamkill. KTX prints the killer-named phrasings ("X checks his glasses",
+"X loses another friend", "X mows down a teammate", "X gets a frag for
+the other team") from a random pick with no deathtype in them, so those
+are all a consumer can be told. The victim-named ones ARE per-deathtype
+(`ktx/src/client.c:5355-5384`) and keep their real weapon: `tele` for
+"was telefragged by his teammate", `stomp` for "was jumped/crushed by his
+teammate" — with `isTeamKill` set either way. The distinction is
+load-bearing downstream: `tele`/`stomp` are positional instant kills that
+the damage sections fold as capacity rather than pricing on the damage
+curve (see "Positional kills" below).
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
 
@@ -317,6 +329,17 @@ value as `bounded` (plus `damage` when the raw fold diverged, and
 `boundedMode: skipped:*` demos — given/taken and the buckets revert to
 pure v53 exclusion there. The kill still appears in `FragResult` and as
 a `frag` event.
+
+A `source: "reconstructed"` section reaches the same lists by a different
+route: it has no deathtype on the wire, so it reads the CAUSE out of the
+obituary (`FragEntry.weapon` — `tele`/`stomp`, including the teammate
+phrasings, see FragEntry above). Until 2026-08-26 the teammate forms
+carried the cause-less `teamkill` token, so a reconstructed section
+listed no TEAM telefrags at all and charged each one as ordinary team
+damage at the victim's observed corpse drop — 99 raw points more than
+the capacity, KTX's `-99` clamp
+([damagerecon/ACCURACY.md](damagerecon/ACCURACY.md) §"Team telefrags were
+not damage").
 
 | Field | JSON key | Type |
 |---|---|---|

@@ -343,6 +343,47 @@ withheld, marked `.stat-recon` and captioned with `damage.coverage`. See
 
 ## 7. Smaller / opportunistic
 
+- ~~**The `PHANTOM → team` channel** — `raw givenTeam` runs 7.4% / 14.8%
+  against `raw given`'s 0.7% / 1.2%, and the flows are additive rather
+  than cancelling (13 738 bounded in over 235 instants against 1 554 out
+  over 68, 8.8:1), dominated by 10 775 damage over 104 instants the wire
+  logs nothing for. `self` is the control: comparable denominator,
+  balanced flows.~~ — **CLOSED 2026-08-26, root cause found by
+  classifying every instant** (throwaway probe; protocol in
+  `.reports/team-damage-2026-08-26/README.md`). Of the 105 instants,
+  **98 are a GT TELEFRAG at the same instant**, 2 a GT stomp, 5 a
+  `pent-synth` row and **0 anything else** — no invented hits at all.
+  Two defects stacked:
+
+  1. the eval could not SEE positional kills (they live in
+     `Telefrags`/`Stomps`, not `Events`, on both sides), so a correct
+     routing read as a PHANTOM. `collectConfusion` now folds both sides'
+     positional lists in as their own class and prints the GT class
+     TOTALS beside the flows, so a flow can be read as a rate;
+  2. the reconstruction really was booking team telefrags as team weapon
+     damage, because `parser.ObituaryPatterns` flattened KTX's SIX
+     per-deathtype victim-named teamkill markers ("was telefragged by his
+     teammate", "was jumped/crushed by his teammate",
+     `ktx/src/client.c:5355-5384`) to the cause-less `teamkill`
+     placeholder that only the killer-named phrasings deserve. With the
+     cause gone `killerFragAt` (which skips teamkills) could not route
+     them, and each one was charged at the victim's corpse drop —
+     **+99 raw, KTX's `-99` clamp** — instead of their capacity.
+
+  Fixed in the two layers that own the two halves: the parser table gives
+  the six markers `tele`/`stomp`, and `damagerecon.positionalAnchor`
+  (was `telefragAnchor`) takes any positional weapon and prefers the
+  killer `frags-final` recovered over its own track inference. 60-demo
+  GT: **raw `givenTeam` 7.40% / 14.83% → 2.91% / 6.76%** (p90 42.7 →
+  17.3), **raw taken 0.68% / 1.14% → 0.48% / 0.95%**, bounded
+  `givenTeam` 1.43 / 5.10 → 1.20 / 4.50, raw given 0.72 → 0.70; no family
+  regresses and coverage / value-exact / attacker-correct are unchanged
+  to the digit. Both positional flows vanish from `-diag` and no new flow
+  appears. This also closes the 2026-07 API-audit deferral "recovering
+  the real weapon behind `teamkill` frag rows". What REMAINS in the team
+  family is the simultaneous-shotgunner confusion the rest of the
+  accuracy report already names, and it carries no team-selection bias —
+  see `damagerecon/ACCURACY.md` §"Team telefrags were not damage".
 - **Crush/squish candidates from MoverStream** — skull-map crushers hide
   ~29k GT raw per demo; mover poses are already tracked
   (`.reports/…/eval-gt-archive.txt` outliers).

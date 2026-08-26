@@ -7,6 +7,46 @@ detail.
 
 ## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
+### A team telefrag is a telefrag: `frags[].weapon` keeps the cause (schema v74)
+
+**Behaviour change, no shape change.** KTX prints a teammate telefrag as
+`"<victim> was telefragged by his teammate"` and a teammate stomp as
+`"<victim> was jumped/crushed by his teammate"` — one phrasing per
+deathtype (`ktx/src/client.c:5355-5384`), so the CAUSE of the kill is on
+the wire even though the killer's name is not. The obituary table
+flattened all six markers to the placeholder weapon `teamkill`, which is
+the right answer only for the killer-named phrasings ("X checks his
+glasses", "X loses another friend") — those are a random pick with no
+deathtype in them. `frags[].weapon` now reads `tele` / `stomp` on the
+victim-named forms, with `isTeamKill` unchanged; `messages` events built
+from the same lines follow. (This closes an item deferred from the
+2026-07 API audit: "recovering the real weapon behind `teamkill` frag
+rows".)
+
+**The reconstructed `damage` section is where it mattered.** A telefrag
+is a positional instant kill, not weapon damage: both the KTX-derived and
+the reconstructed section keep them out of `events` and list them in
+`telefrags` / `stomps`, folding the victim's CAPACITY (armor + remaining
+health) into `given`/`givenTeam`/`taken`. With the cause erased,
+`damagerecon` could not recognise these kills — `killerFragAt` skips
+teamkills by construction — so they were emitted as ordinary team damage
+valued at the observed corpse drop, which runs to KTX's −99 clamp: **99
+raw points per team telefrag that the engine never dealt**. Classifying
+all 105 instants of the `PHANTOM → team` channel the accuracy report had
+recorded as an unexplained pathology found 98 telefrags, 2 stomps, 5
+synthesized pentagram rows and nothing else.
+
+Measured on the 60-demo dm2/dm3 ground truth, per-player relative error
+(median / mean): reconstructed **`givenTeam` raw 7.40% / 14.83% → 2.91%
+/ 6.76%** (p90 42.7% → 17.3%), **`taken` raw 0.68% / 1.14% → 0.48% /
+0.95%**, bounded `givenTeam` 1.43% / 5.10% → 1.20% / 4.50%, raw `given`
+0.72% → 0.70%. No family regresses; event coverage, value-exact and
+attacker-correct are unchanged to the digit. `damage.telefrags` on a
+reconstructed section now contains the team telefrags it was silently
+dropping. Detail:
+[damagerecon/ACCURACY.md](mvd-analytics/damagerecon/ACCURACY.md) §"Team
+telefrags were not damage".
+
 ### Radius damage now follows the engine's own order and reach (schema v74)
 
 No new field, no shape change — a **correctness fix** to the

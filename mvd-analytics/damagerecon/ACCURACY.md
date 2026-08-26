@@ -10,7 +10,7 @@ Reproduce with:
 
 ```
 MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-recon-eval           # metrics
-MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-recon-eval -diag    # + misattribution flows
+MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-recon-eval -diag    # + class totals and misattribution flows
 ```
 
 over the golden-corpus cache (`mvd-analytics/testdata/cache/`, 13 demos:
@@ -25,19 +25,19 @@ Per-player match totals, relative error vs the KTX log. Golden cache
 
 | metric | median | mean | p90 | ≤1% | ≤2% |
 |---|---|---|---|---|---|
-| bounded given | 0.58% | 0.82% | 1.95% | 72% | 91% |
+| bounded given | 0.58% | 0.81% | 1.95% | 72% | 91% |
 | bounded taken | 0.05% | 0.21% | 0.52% | 96% | 100% |
-| raw given | 0.65% | 1.06% | 2.34% | 68% | 88% |
-| raw taken | 0.51% | 0.85% | 1.64% | 73% | 93% |
+| raw given | 0.65% | 1.04% | 2.13% | 68% | 89% |
+| raw taken | 0.48% | 0.79% | 1.63% | 79% | 95% |
 | bounded ewep | 0.84% | 1.39% | 3.08% | 55% | 75% |
-| bounded givenTeam | 2.3% | 5.1% | — | small denominators (200–700) |
+| bounded givenTeam | 2.5% | 5.1% | — | small denominators (200–700) |
 | bounded givenSelf | 1.5% | 4.0% | — | small denominators |
 
 The larger blind corpus (60 fresh dm2/dm3 hub demos, 321 rows — raw
 eval outputs in `.reports/quad-splash-2026-08-24/`, an untracked
 per-machine report directory; fetched with `cmd/fetch-eval-corpus`)
-scores comparably: bounded given median **0.57%** (mean 0.77%, p90
-1.68%, ≤2% 93%), bounded taken 0.04%, raw given 0.72%, raw taken 0.68%.
+scores comparably: bounded given median **0.57%** (mean 0.76%, p90
+1.62%, ≤2% 94%), bounded taken 0.04%, raw given 0.70%, raw taken 0.48%.
 
 Event level (60-demo corpus): 99.6% of ground-truth damage instants have
 a same-instant reconstructed delta; 98.9% of those match the bounded
@@ -1345,6 +1345,139 @@ tables:
   correct pairs there at the cost of 15 more splits naming an author the
   wire does not have.
 
+## Team telefrags were not damage (2026-08-26)
+
+The `raw givenTeam` row above ran at **7.40% / 14.83%** against `raw
+given`'s 0.72% / 1.22%, and the bullet below used to record that as a
+confirmed pathology with no mechanism: bounded damage flowing INTO the
+team class ~9× what flowed out, dominated by a single `PHANTOM → team`
+channel of 10 775 damage over 104 instants — reconstructed hits on a
+teammate at a (victim, ms) the wire logged nothing at. On the current
+pipeline that channel measures 10 875 over 105 instants; classifying
+every one of them (throwaway probe; protocol in
+`.reports/team-damage-2026-08-26/README.md`) named the mechanism
+completely — 60-demo dm2/dm3 ground truth, 53 demos scored:
+
+| bucket | instants | bounded | recon raw |
+|---|---|---|---|
+| a GT **telefrag** at the same instant | 98 | 10 861 | 20 464 |
+| a GT **stomp** at the same instant | 2 | 14 | 21 |
+| `pent-synth` (synthesized, no wire row) | 5 | 0 | 175 |
+| anything else | **0** | 0 | 0 |
+
+Not one instant was an invented hit. The telefrag bucket agrees with the
+wire on the value (bounded matches the KTX telefrag row's own value on
+**98 of 98**) and on the attacker (**96 of 98**, and both exceptions are
+the probe's ±500 ms window picking up a neighbouring match-start
+telefrag). The victim's health broadcast reads exactly −99 on all 98:
+KTX's corpse clamp (`Killed`, `ktx/src/combat.c:257`), which only ever
+appears on overkill of that size.
+
+(105 is the TEAM-classed subset of the dump. Five more team positional
+kills were being booked as ENEMY or SELF damage rather than as team
+damage; the eval's own fold, which keys on the exact instant, counts 108
+mis-routed `positional:team` instants in all, and the flow list below
+accounts for every one.)
+
+Two separate defects were hiding behind each other.
+
+**The eval could not see positional kills.** A telefrag/stomp is an
+instant kill, not weapon damage: both `analyzer/damage.go` and this
+package's `aggregate.go` keep them out of `Events` and surface them in
+`Telefrags`/`Stomps`. `collectConfusion` compared the two `Events` logs
+alone, so a correctly-routed positional kill on the reconstruction side
+had no GT row to pair with and was reported as a PHANTOM. It now folds
+both sides' positional lists in as their own class, which is what turns
+the old `PHANTOM → team` line into a truthful `positional:team → team`,
+and it prints the GT class totals beside the flows so a flow can be read
+as a rate rather than as a bias (see the bullet below).
+
+**And the reconstruction really was booking them as weapon damage.** KTX
+prints a teammate telefrag as `"<victim> was telefragged by his
+teammate"` and a teammate stomp as `"<victim> was jumped/crushed by his
+teammate"` (`ktx/src/client.c:5355-5384`) — one phrasing per deathtype,
+so the CAUSE is on the wire even though the killer's name is not. The
+obituary table flattened all six markers to the placeholder weapon
+`teamkill`, the same token the killer-named phrasings ("checks his
+glasses") carry because they genuinely have no cause in them. With the
+cause gone, `damagerecon` could not recognise the kill as positional:
+`killerFragAt` skips teamkills by construction, so these fell through to
+the teamkill anchor and were emitted as ordinary team damage — charged at
+the observed corpse drop, i.e. the victim's capacity **plus the 99 points
+of clamp**. Summed over the corpus that is 20 464 raw where the wire's own
+telefrag rows say 10 861.
+
+The fix is in the two layers that own the two halves. `parser.ObituaryPatterns`
+gives the six victim-named markers their real weapon (`tele`, `stomp`) and
+leaves the killer-named ones at `teamkill`; `damagerecon`'s
+`positionalAnchor` (was `telefragAnchor`) accepts any positional weapon
+and prefers the killer the obituary's own recovery named
+(`analyzer/teamkill_telefrag.go`) over the track inference it needed for
+the killer-less enemy form. Nothing in this package guesses that a kill
+was a telefrag — the wire says so.
+
+Measured in isolation on the 60-demo ground truth, per-player relative
+error (median / mean), same harness on both sides:
+
+| family | before | after |
+|---|---|---|
+| bounded given | 0.57% / 0.77% | 0.57% / **0.76%** |
+| bounded taken | 0.04% / 0.14% | 0.04% / 0.14% |
+| bounded ewep | 0.85% / 1.48% | 0.85% / 1.48% |
+| bounded givenTeam | 1.43% / 5.10% | **1.20% / 4.50%** |
+| bounded givenSelf | 1.26% / 3.93% | 1.26% / **3.81%** |
+| raw given | 0.72% / 1.22% | **0.70% / 1.18%** |
+| **raw taken** | 0.68% / 1.14% | **0.48% / 0.95%** |
+| raw ewep | 1.19% / 2.28% | 1.19% / 2.28% |
+| **raw givenTeam** | 7.40% / 14.83% | **2.91% / 6.76%** |
+| raw givenSelf | 1.94% / 4.88% | 1.93% / **4.56%** |
+
+No family regresses; `raw givenTeam`'s p90 falls 42.67% → **17.33%** and
+`raw taken`'s ≤1% share rises 63.0% → **75.2%** (the victim side of the
+same 99 points). Event coverage, value-exact and attacker-correct are
+unchanged to the digit (99.6% / 98.9% / 98.5%), as is every per-weapon
+row and the direct/splash table.
+
+In the `-diag` table four flows disappear and none appears: `positional:team
+→ team` (10 774 over 99), `→ self` (286 over 2), `→ enemy:sng` (212 over
+2) and `→ enemy:rl` (200 over 1) — 11 472 bounded damage over 104
+instants, five of which were being charged to an ENEMY or to the victim
+themself rather than to the team family, which is where `bounded given`
+and `bounded givenSelf` pick up their share of the gain. What remains is
+`positional:team → env:unknown`, 216 over 4: team telefrags whose killer
+the obituary never named and `frags-final` could not recover, so no frag
+entry exists to type the delta at all. Those are the honest floor of this
+fix — the wire says a teammate did it and nothing says which one.
+
+The golden cache agrees on raw and is a wash on bounded: raw `givenTeam`
+**4.24% / 8.35% → 3.73% / 5.39%** (p90 23.01% → **13.53%**, the 65.7% and
+39.3% outlier rows gone), raw taken 0.51% / 0.85% → **0.48% / 0.79%**,
+raw given p90 2.34% → **2.13%**; bounded `givenTeam` median 2.33% →
+2.47% with the mean flat at 5.1% and p90 unchanged — its worst row
+(23.06%) is fixed and the median moves because a couple of small rows
+swap places, which is what a 53-row median does. Bounded was never the
+broken family here: the value was already right on 98 of 98 instants, and
+only the handful of instants where a same-frame shotgun candidate had
+outscored the anchor change hands.
+
+Two corpora outside the ground truth check the same change where nothing
+scores it. The **obituary oracle** over a 400-demo archive sample (the
+un-instrumented eras E0–E4) leaves every attribution figure identical —
+kill coverage, attacker / weapon / class accuracy, per-era and per-weapon
+— and moves exactly the two shares this touches: reconstructed damage
+carried in `events` under the team class **2.44% → 2.28%** of bounded
+damage, and the UNATTRIBUTED share **1.09% → 0.93%**, improving in every
+single era (E0 1.27→1.14, E1 0.87→0.65, E2 0.95→0.78, E3 0.88→0.72,
+E4 1.02→0.74). Both movements are the same rows leaving the events log
+for `telefrags` — a team telefrag used to be emitted with weapon
+`unknown` (the teamkill anchor names an attacker but no cause), so it was
+counted as unattributed damage on top of everything else. The
+given-vs-taken bookkeeping identity, which was off by 125 points in E3,
+now balances exactly in every era. The **188-demo derived-summary
+protocol** (`cmd/qw-demoinfo-eval`, 186 scored) is **byte-identical**
+except for one cell: a reconstructed `acc.sg.hits` of 181 → 180, the
+shotgun hit that had been credited for one of these telefrags.
+
 ## Why the errors are what they are
 
 - **Taken needs no attribution** — the victim's own h/a deltas ARE the
@@ -1358,26 +1491,41 @@ tables:
 - **givenTeam / givenSelf** run on totals ~10× smaller, so the same
   absolute flips read as big percentages. Their absolute errors are on
   the order of one rocket.
-- **`raw givenTeam` (median 7.39%, mean 14.56%) is NOT just that
-  denominator, and the diag flows say which part is.** The arithmetic
-  gets you most of the way — raw given's 0.71% median over a denominator
-  ~10× smaller lands at ≈7%, and the worst GT team totals on the corpus
-  run 218–731 against ~10 000 for `given` — but a pure denominator
-  effect would need the errors to be symmetric, and they are not. Summing
-  the `-diag` confusion by bounded damage: **13 738 damage over 235
-  instants flows INTO the team class** against **1 554 over 68 flowing
-  out** — 8.8:1, so team errors add rather than cancel. The dominant
-  single channel is `PHANTOM → team`, 10 775 damage over 104 instants:
-  reconstructed hits on a teammate at a (victim, ms) where the wire log
-  records nothing at all, and only 18 instants of `team → MISSING` exist
-  to absorb them as frame-offset pairings of real hits. `self` is the
-  control that makes this a team finding rather than a small-denominator
-  one: it has a comparable denominator and near-balanced flows (3 784 in
-  over 149 instants, 4 045 out over 161, 0.94:1), and its relative error
-  is correspondingly a third of `givenTeam`'s. What the asymmetry does
-  NOT tell us is the mechanism — a teammate standing in a rocket's
-  splash radius is the obvious candidate for an invented hit, and no
-  measurement here separates that from a missing wire row.
+- **`raw givenTeam` was the worst family in this document, and it was
+  not a denominator effect — it was 98 telefrags.** The old text here
+  recorded the in/out asymmetry (13 738 bounded damage over 235 instants
+  INTO the team class against 1 554 over 68 out, 8.8:1) as a confirmed
+  pathology of unknown mechanism, with `PHANTOM → team` — 10 775 over 104
+  — as its dominant channel. Every one of those instants is classified in
+  §"Team telefrags were not damage": 98 are a wire TELEFRAG, 2 a stomp, 5
+  a synthesized pentagram row, none an invented hit. Routing them
+  positionally takes the family to **2.91% / 6.76%**.
+- **What is left in the team family IS the base rate, and the harness now
+  prints the denominators that show it.** Re-measured on the current
+  pipeline the same asymmetry is 13 903 in over 240 instants against
+  1 846 over 89 out; with the positional kills routed it is **3 028 over
+  135 against 1 846 over 89, 1.6:1**. The GT class totals put both in
+  proportion:
+  the team class holds 85 734 bounded damage over 2 172 instants against
+  2 298 295 over ~72 000 for the enemy classes. So the leak INTO team
+  runs at 0.13% of the enemy classes' damage while the leak OUT runs at
+  2.2% of the team class's: per instant the reconstruction is wrong about
+  a team hit *more* often than about an enemy one, and the inbound flow
+  is still the larger number only because the source class is 27× bigger.
+  That is the arithmetic the old "8.8:1, so errors add rather than
+  cancel" sentence was missing, and it is why a rule that preferred
+  `unknown` over `team` on thin evidence would be paid for out of real
+  team damage.
+- **The residual channel is the simultaneous shotgunner**, the same class
+  §"Given inherits attribution" names — `enemy:sg → team` 2 016 over 98
+  instants against `team → enemy:sg` 330 over 18 — and it shows **no
+  team-selection bias**: when a shotgun instant's attacker is misnamed
+  the wrong name is a TEAMMATE of the victim on 98 of 365 occasions
+  (26.8%), against the 50% a blind wrong pick would give. (50% in ANY
+  symmetric team game, not just a 4on4: once the true attacker is removed
+  from the pool the victim has exactly as many remaining teammates as
+  remaining enemies.) The model is not reaching for teammates; it is
+  confusing shooters, and some of them happen to be teammates.
 
 ## What the reconstruction models beyond the prototype
 
