@@ -187,10 +187,11 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   and rejects an unknown token with `400 invalid_param` (naming the valid
   set) rather than matching nothing: core codes are `rl,lg,gl,ssg,sng,ng,
   sg,axe`; `/damage` also takes the pseudo-codes `tele`/`stomp` (positional
-  kills) plus death-type/environmental codes (`explobox,squish,lava,slime,
-  drown,fall,trigger,suicide,unknown`); `/frags` also takes the obituary
-  cause codes (`hook,rail,squish,fall,lava,slime,water,world,tele,stomp,
-  unknown,suicide,teamkill`); `/backpacks` accepts only `rl,lg`;
+  kills) plus death-type/environmental codes (`hook,explobox,squish,lava,
+  slime,drown,fall,trigger,suicide,unknown`); `/frags` also takes the
+  obituary cause codes (`hook,rail,squish,explobox,fall,lava,slime,water,
+  world,tele,stomp,unknown,suicide,teamkill`); `/backpacks` accepts only
+  `rl,lg`;
   `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/top-windows` the
   vocabulary follows the chosen `metric`'s **own source** — the frag one for
   `frags`/`deaths`/`netFrags`, the damage one for the damage metrics, and

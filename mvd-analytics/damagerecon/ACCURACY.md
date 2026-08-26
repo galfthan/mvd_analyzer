@@ -1409,7 +1409,23 @@ telefrag rows say 10 861.
 
 The fix is in the two layers that own the two halves. `parser.ObituaryPatterns`
 gives the six victim-named markers their real weapon (`tele`, `stomp`) and
-leaves the killer-named ones at `teamkill`; `damagerecon`'s
+leaves the cause-less killer-named ones at `teamkill` — a later row-by-row
+audit of the whole table against `ClientObituary` found a seventh
+cause-carrying teamkill marker, "X squished a teammate" (`dtSQUISH`,
+`client.c:5362`), which is the only one that names the killer instead of
+the victim. It now carries `squish`, but a mover crush is ordinary damage
+on the wire (KTX deals it through `T_Damage` with the door's activator as
+the attacker, `ktx/src/doors.c:68`), so it is NOT routed positionally: the
+teamkill anchor simply stops stamping `unknown` over a cause the wire
+printed.
+
+The crush population is measured, not assumed: this ground truth carries
+**239 wire damage rows with weapon `squish`** — 50 enemy (1 664 bounded),
+21 team (297), 31 self (62) and 137 world-attacker (260) — and the print
+stream carries 2 "squished a teammate" lines, 12 "X squishes Y" and 2
+"X was squished". Over a 6 000-demo archive sweep of the print stream the
+same three phrasings run 45 / 351 / 62 lines. Nothing here is a
+zero-population engine-only change. `damagerecon`'s
 `positionalAnchor` (was `telefragAnchor`) accepts any positional weapon
 and prefers the killer the obituary's own recovery named
 (`analyzer/teamkill_telefrag.go`) over the track inference it needed for
@@ -1443,11 +1459,46 @@ In the `-diag` table four flows disappear and none appears: `positional:team
 2) and `→ enemy:rl` (200 over 1) — 11 472 bounded damage over 104
 instants, five of which were being charged to an ENEMY or to the victim
 themself rather than to the team family, which is where `bounded given`
-and `bounded givenSelf` pick up their share of the gain. What remains is
-`positional:team → env:unknown`, 216 over 4: team telefrags whose killer
-the obituary never named and `frags-final` could not recover, so no frag
-entry exists to type the delta at all. Those are the honest floor of this
-fix — the wire says a teammate did it and nothing says which one.
+and `bounded givenSelf` pick up their share of the gain. What remained
+was `positional:team → env:unknown`, 216 over 4, recorded here at the
+time as "the honest floor of this fix — the wire says a teammate did it
+and nothing says which one".
+
+**That framing was wrong, and the four instants split two ways.** Two of
+them (10 and 6 bounded) are NON-LETHAL team stomps: `damage.stomps`
+carries every `dtSTOMP` row the wire logged, not only the killing ones,
+and a stomp that does not kill prints no obituary at all. There is no
+cause on the wire for those and `env:unknown` at `world` is the truthful
+answer; they are a floor, but of the *eval's* pairing, not of this fix.
+The other two (100 bounded each, both at t=0 of one demo — a match-start
+spawn pile) DID have obituaries: `frags-final` could not name the killer,
+and the unrecovered entry was then **dropped**, so `anyFragAt` found
+nothing and the arrival detector was never consulted. That was plumbing,
+not evidence. Those obituaries now reach the Result as
+`frags.unpaired[]` (schema v75) and the anchor fires on them: the flow is
+gone and both instants route positionally, taking 2 × 99 raw points of
+corpse clamp off `taken` (`raw taken` median 0.48% → **0.47%**, mean
+0.95% → **0.94%**, ≤1% share 75.2% → **75.5%**; every other family
+identical to the digit).
+
+**What the anchor may infer on such a row is bounded by what the
+obituary established.** A teamkill obituary proves a TEAMMATE of the
+victim did it; `teleportArrivalAt` ranks every player on the map, so on a
+teamkill row its candidate set is now restricted to the victim's team,
+and if no teammate survives the gates the attacker stays `world` — the
+delta is still typed positional, but nobody is named. Constraining the
+SET rather than vetoing the winner matters: filtering afterwards would
+drop a legitimate second-place teammate along with an inadmissible
+leader. On these two the constrained detector does name a teammate for
+both, and is right on one of the two (a spawn pile puts three teammates
+inside the same hull, so co-location cannot separate them). The residual
+now shows as `positional:team → positional:team:WRONG-ATTACKER`, 100 over
+1: the class and the value are right, the name is not. Note that a team
+telefrag costs its killer **no** frag under default KTX rules — the −1 is
+gated on `k_tp_tele_death` (`ktx/src/client.c:5348`) — so the frag-penalty
+half of `frags-final`'s two-signal recovery is mute for most of them and
+co-location is carrying the recovery alone. That is why the residual
+looks like a spawn pile.
 
 The golden cache agrees on raw and is a wash on bounded: raw `givenTeam`
 **4.24% / 8.35% → 3.73% / 5.39%** (p90 23.01% → **13.53%**, the 65.7% and
@@ -1518,14 +1569,98 @@ shotgun hit that had been credited for one of these telefrags.
   team damage.
 - **The residual channel is the simultaneous shotgunner**, the same class
   §"Given inherits attribution" names — `enemy:sg → team` 2 016 over 98
-  instants against `team → enemy:sg` 330 over 18 — and it shows **no
-  team-selection bias**: when a shotgun instant's attacker is misnamed
-  the wrong name is a TEAMMATE of the victim on 98 of 365 occasions
-  (26.8%), against the 50% a blind wrong pick would give. (50% in ANY
-  symmetric team game, not just a 4on4: once the true attacker is removed
-  from the pool the victim has exactly as many remaining teammates as
-  remaining enemies.) The model is not reaching for teammates; it is
-  confusing shooters, and some of them happen to be teammates.
+  instants against `team → enemy:sg` 330 over 18. When a shotgun
+  instant's attacker is misnamed, the wrong name is a TEAMMATE of the
+  victim on 98 of 365 occasions, **26.8%**. The question is what to
+  compare that against, and the first answer this document gave — 50%,
+  "what a blind wrong pick would give" — is **the wrong null**. It is
+  arithmetically right about the roster (measured over the same 365
+  instants: remove the true attacker and the victim's live roster is
+  50.5% teammates on average, median exactly 50.0%), but the model never
+  picks from the roster. `hitscanCandidates` admits only shooters that
+  fired in range, held line of sight and had the victim inside a ~25° aim
+  cone, and that pool is plausibly enemy-skewed — in which case 26.8%
+  could be *over*-selection rather than the comfortable margin the
+  comparison implied.
+
+  Re-running the candidate probe over all 365 instants and recording the
+  admitted pool, minus the victim and minus the true attacker — i.e. the
+  set the wrong name was actually drawn from — measures the null directly:
+
+  | null | teammate share of the wrong-name pool |
+  |---|---|
+  | roster availability (the old comparison) | mean **50.5%**, median 50.0% |
+  | admitted candidates, any kind | mean **27.8%**, pooled 112 / 394 = **28.4%** |
+  | admitted hitscan candidates only | mean **23.9%**, pooled 90 / 367 = **24.5%** |
+  | **observed** wrong names that were teammates | **26.8%** (98 / 365) |
+
+  So the honest verdict is **no measurable team selection in either
+  direction**: 26.8% observed against a 27.8% admitted-candidate null is a
+  wash, and the apparent 23-point safety margin against the roster null was
+  an artifact of comparing to a pool the model does not draw from. The
+  admission gates, not the scorer, are what keep teammates out — they
+  reduce a 50% roster to a 28% candidate pool — and the scorer is neutral
+  with respect to team once a shooter is admitted.
+
+  One further measurement sharpens what "misnamed" means here: on **336 of
+  the 365** instants the admitted pool contains exactly ONE name other than
+  the true attacker (29 contain two, none more). In 92% of these the
+  reconstruction is not choosing between rivals at all — the true shooter
+  failed a gate, one alternative survived, and it won by default. The
+  channel is a coverage problem in the hitscan admission, not a preference
+  in the scoring.
+
+- **The rest of the in-flow, enumerated.** The named shotgun channel is
+  2 016 of the 3 028 bounded damage flowing INTO the team class (66.6%)
+  over 98 of the 135 instants (72.6%). `cmd/qw-recon-eval -diag -flow-min 1`
+  prints every remaining flow — the default table stops at 100 damage, which
+  is why this list was previously unstated:
+
+  | flow | bounded | instants |
+  |---|---|---|
+  | `enemy:sg → team` | 2 016 | 98 |
+  | `mixed → team` | 252 | 4 |
+  | `self → team` | 237 | 9 |
+  | `enemy:sng → team` | 180 | 10 |
+  | `enemy:lg → team` | 150 | 5 |
+  | `enemy:ssg → team` | 128 | 5 |
+  | `enemy:rl → team` | 46 | 1 |
+  | `env:fall → team` | 10 | 2 |
+  | `enemy:ng → team` | 9 | 1 |
+  | **total** | **3 028** | **135** |
+
+  Grouping by mechanism rather than by weapon, the picture is the one
+  §"Given inherits attribution" already names and nothing else: **2 483 over
+  119 (82% of the damage, 88% of the instants) is one attacker confused for
+  another** — sg, sng, ssg, ng and lg are the same simultaneous-shooter
+  class in five weapons. Of the remaining 545 over 16, `self → team` (237
+  over 9) is the close-range rocket self/enemy flip and `mixed → team` (252
+  over 4) is a same-frame multi-attacker merge where the single credited
+  name landed on a teammate; both are the other two classes that bullet
+  lists. `env:fall`'s 10 over 2 is a landing tick charged to a nearby
+  player. There is no fourth mechanism hiding under the print floor.
+
+- **The mega-health rot exclusion is bounded to single ticks, and that
+  bound is untested off the hub.** `victimDeltas` drops a 1-HP drop on a
+  victim above 100 with no armor change as KTX's mega rot rather than
+  damage (`deltas.go`). KTX rots 1 HP per second, so two rot ticks landing
+  in one broadcast instant present as a 2-point drop and pass straight
+  through as damage. Measured on this ground truth, widening the test to a
+  2-point drop would be **free**: there are **0** wire damage rows worth
+  exactly 2 on a victim above 100 with armor unchanged (nor any worth 3).
+  That is not evidence for the change. The corpus is modern hub timing,
+  where a broadcast rarely spans two seconds of rot, so it contains neither
+  the merged pairs the widened rule would catch NOR the 2-point hits it
+  would eat — the zero is the absence of both. The regime where both appear
+  is the archive's low-fps recording, and **no oracle covers it**. Unable to
+  validate in either direction, the rule stays where the evidence reaches
+  and the gap is named here rather than papered over.
+
+  The single-tick rule is not free either, and the same measurement prices
+  it: it eats **9 real 1-point wire rows** on this corpus (9 bounded damage
+  in total, none of them team-class). That is the cost of not being able to
+  tell a rot tick from a 1-point hit, and it is the reason the exclusion is
+  as narrow as it is.
 
 ## What the reconstruction models beyond the prototype
 

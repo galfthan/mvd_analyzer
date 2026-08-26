@@ -5,7 +5,79 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
+## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v75
+
+### The obituary table, audited row by row against the engine (schema v75)
+
+The team-telefrag fix below asked one question of one corner of
+`parser.ObituaryPatterns`; this asks it of **every row**: does the cause
+we stamp match what the KTX branch that printed the line actually
+implies? Five answers changed, each engine-attested and each with its
+archive population measured over a 6 000-demo sweep of the print stream.
+
+- **`frags[].weapon` is `squish` on "X squished a teammate"**
+  (45 lines / 36 demos). KTX's team branch tests three deathtypes by name
+  before falling through to its random phrasing pick
+  (`ktx/src/client.c:5343-5410`) — `dtTELE1`, `dtSQUISH`, `dtSTOMP` — so
+  the seventh cause-carrying teamkill marker was still flattened to the
+  placeholder `teamkill`. It is the only one that names the KILLER rather
+  than the victim, which is why the earlier pass missed it. Unlike a
+  telefrag or stomp a mover crush **is** ordinary damage on the wire —
+  KTX deals it through `T_Damage` with the door's activator as the
+  attacker (`ktx/src/doors.c:68`) — so it prices normally, exactly like
+  its enemy twin "X squishes Y"; only the cause word changes. The
+  reconstruction's teamkill anchor now carries that cause instead of
+  `unknown`.
+- **KTX's double-pentagram telefrag is a SUICIDE** (24 lines / 11 demos).
+  "X was telefragged by Y's Satan's power" (`dtTELE3`,
+  `client.c:5228-5237`) prints the ordinary telefrag verb but books
+  `logfrag(targ, targ)` — Y is credited nothing. The generic kill marker
+  was swallowing the line and handing Y a frag the server never gave.
+  `isSuicide` is now set with killer = victim = X.
+- **`frags[].weapon` is `explobox`, not `world`, on "X blew up"** (1 line
+  / 1 demo) — the same `dtEXPLO_BOX` the wire damage log already spells
+  `explobox`. Same-deathtype-two-spellings is exactly what the audit was
+  looking for.
+- **`damage.events[].weapon` is `hook` on a grapple kill** (7 lines /
+  3 demos): `mvd.DeathTypeToWeapon` had no `dtHOOK` case and returned
+  `unknown`, while the obituary table has spelled it `hook` all along.
+- **`frags.unpaired[]` (new, `omitempty`)** carries the teamkill
+  obituaries whose other party neither recovery could name. They cannot
+  join `frags[]` — every entry there names both sides, which is what
+  makes the log usable for per-player tallies — but the obituary is on the
+  wire and dropping it lost a real death. Consumers must not fold them
+  into per-player counts; the value is the CAUSE, which is what lets the
+  reconstruction book an unattributed team telefrag as a positional kill
+  instead of pricing the victim's corpse drop as team damage.
+
+Three obituaries genuinely establish nothing finer than `world` and keep
+it, now with the reason recorded in the table: "X was spiked" (one string
+for both `dtNG` and `dtSNG` from a non-player attacker — picking either
+would be a guess), "X was zapped" (`dtLASER`) and "X ate a lavaball"
+(`dtFIREBALL`), the latter two having no token of their own in either
+vocabulary. Two engine prints remain unmatched by design, both measured
+at **zero** occurrences in the sweep: KTX's own unknown-death fallback
+`"%s killed by %s ?"` (`client.c:5662`, a short marker that would be an
+ordering hazard against " was killed by ") and the 17 monster obituaries
+(`sp_client.c`, bloodfest / coop only).
+
+### An unnamed teammate is never named as an enemy (schema v75)
+
+`positionalAnchor` types a team telefrag from the obituary and, when the
+killer was not recovered, infers him from the track. That inference ranks
+every player on the map, so it could answer with an ENEMY — contradicting
+the very teamkill obituary that typed the row. The candidate set is now
+constrained by what the obituary established: on a teamkill row only a
+teammate of the victim may be admitted, and with no admissible teammate
+the delta stays positional (the wire said so) with the attacker left as
+`world`. Nobody is invented either way.
+
+Together with `frags.unpaired[]` this closes the four-instant residual
+the previous entry called an honest floor. Two of the four were never
+obituary-backed at all (non-lethal team stomps, which print nothing); the
+other two are match-start spawn telefrags whose obituaries the recovery
+dropped, and they now route positionally — `taken` raw improves and the
+199-raw corpse-clamp charge on each becomes the honest 100.
 
 ### A team telefrag is a telefrag: `frags[].weapon` keeps the cause (schema v74)
 

@@ -584,7 +584,11 @@ they re-enter `frags.frags` as complete killer↔victim pairs: killer-named
 `DeathEvent`; victim-named ("X was telefragged by his teammate") fill in
 the killer by combining position co-location with the teamkiller's −1
 frag-delta. Across the test corpus this brings per-player teamkills to an
-exact match with KTX's authoritative `tk`. Schema v18 adds
+exact match with KTX's authoritative `tk`. Schema v75 publishes the
+leftovers instead of dropping them: an obituary whose other party neither
+recovery could name lands in `frags.unpaired[]`, out of `frags.frags` and
+out of every per-player tally (one side is the placeholder "teammate"),
+but carrying the death and its cause. Schema v18 adds
 `timelineAnalysis.killEvents`: a per-player enemy-kill stream (`{time,
 player, team}`) keyed on the killer, parallel to `deathEvents` and sourced
 from the canonical frag log (suicides/teamkills excluded), so the Timeline

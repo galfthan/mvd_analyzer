@@ -186,11 +186,13 @@ its engine deathtype carries in the wire damage log's own vocabulary
 (`mvd.DeathTypeToWeapon` / `EnvironmentalDamageType`), so filtering on a
 cause returns the obituary rows and the damage rows alike. `explobox` (KTX
 "X blew up", `dtEXPLO_BOX`) and `hook` are spelled the same on both sides.
-Three obituaries genuinely establish nothing finer than `world` and keep
+Four obituaries genuinely establish nothing finer than `world` and keep
 it: "X was spiked" (the print collapses `dtNG` and `dtSNG` from a non-player
-attacker into one string), "X was zapped" (`dtLASER`) and "X ate a lavaball"
-(`dtFIREBALL`) — the latter two have no token of their own in either
-vocabulary.
+attacker into one string), "X died" (`dtTRIGGER_HURT` and KTX's world-branch
+catch-all share that one string, which is why `trigger` appears on the
+damage side only — there the wire carries the deathtype itself), "X was
+zapped" (`dtLASER`) and "X ate a lavaball" (`dtFIREBALL`) — the last two
+have no token of their own in either vocabulary.
 
 A self-kill carries the **weapon/cause that produced it**
 (`rl`/`gl`/`lg` for weapon self-detonations, env labels for lava/fall/etc.)

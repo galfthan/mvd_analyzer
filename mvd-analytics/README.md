@@ -381,7 +381,10 @@ re-running its join, which is what makes that tier's per-weapon
 withholds inherit rather than be restated.) **Two publish a named final artifact** rather
 than anonymously patching an earlier node's output:
 `recoverTelefragTeamkills` is node `frags-final`, which
-appends recovered telefrag team-kills to the raw `frag` log and publishes
+appends recovered telefrag team-kills to the raw `frag` log — and, since
+v75, publishes the ones it could NOT complete as `frags.unpaired[]`
+instead of dropping them, so `damage-recon` downstream can still read the
+CAUSE such an obituary carries — and publishes
 `frags:final`; `scoreboardStatsPost` is node `match-final`, which folds the
 corrected kills/deaths/suicides into `match` and publishes `match:final`.
 Because `match-final` *requires* `frags:final` (not the raw `frag`), an
