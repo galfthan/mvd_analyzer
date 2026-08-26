@@ -363,6 +363,16 @@ func classify(weapon string, isEnv, isSelf, isTeam bool) string {
 // collectConfusion aggregates, per GT instant (victim+time), where the
 // reconstruction routed its bounded damage: same class, a flipped class, or
 // nowhere. Enemy instants further split correct-vs-wrong attacker.
+//
+// Positional instant kills (telefrags/stomps) are folded in on BOTH sides as
+// their own class. They live outside Events on either side — analyzer/damage.go
+// and damagerecon/aggregate.go both surface them in Telefrags/Stomps — so
+// comparing the Events logs alone reported every correctly-routed positional
+// kill as a PHANTOM (recon emitted an instant the GT Events log has no row
+// for) and every mis-routed one as a class the GT could not answer. That is
+// how the team-telefrag channel hid inside "PHANTOM → team" until the
+// 2026-08-26 classification pass: 100 of the 105 instants there were the same
+// kill, booked as weapon damage by one side and as a telefrag by the other.
 func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 	type key struct {
 		victim string
@@ -373,42 +383,47 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 		attacker string
 		bounded  int
 	}
-	gtI := map[key]*inst{}
-	for i := range gt.Events {
-		e := &gt.Events[i]
-		b := e.Damage
-		if e.Bounded != nil {
-			b = *e.Bounded
-		}
-		k := key{e.Victim, e.Time}
-		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
-		if g, ok := gtI[k]; ok {
-			g.bounded += b
-			if g.class != c {
-				g.class = "mixed"
+	fold := func(evs []result.DamageEntry, tele, stomp []result.PositionalKill) map[key]*inst {
+		m := map[key]*inst{}
+		add := func(k key, c, attacker string, b int) {
+			if g, ok := m[k]; ok {
+				g.bounded += b
+				if g.class != c {
+					g.class = "mixed"
+				}
+				return
 			}
-		} else {
-			gtI[k] = &inst{class: c, attacker: e.Attacker, bounded: b}
+			m[k] = &inst{class: c, attacker: attacker, bounded: b}
 		}
-	}
-	rcI := map[key]*inst{}
-	for i := range rc.Events {
-		e := &rc.Events[i]
-		b := e.Damage
-		if e.Bounded != nil {
-			b = *e.Bounded
-		}
-		k := key{e.Victim, e.Time}
-		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
-		if g, ok := rcI[k]; ok {
-			g.bounded += b
-			if g.class != c {
-				g.class = "mixed"
+		for i := range evs {
+			e := &evs[i]
+			b := e.Damage
+			if e.Bounded != nil {
+				b = *e.Bounded
 			}
-		} else {
-			rcI[k] = &inst{class: c, attacker: e.Attacker, bounded: b}
+			add(key{e.Victim, e.Time}, classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam), e.Attacker, b)
 		}
+		for _, lst := range [2][]result.PositionalKill{tele, stomp} {
+			for i := range lst {
+				p := &lst[i]
+				b := p.Damage
+				if p.Bounded != nil {
+					b = *p.Bounded
+				}
+				c := "positional"
+				switch {
+				case p.IsTeam:
+					c = "positional:team"
+				case p.Attacker == p.Victim:
+					c = "positional:self"
+				}
+				add(key{p.Victim, p.Time}, c, p.Attacker, b)
+			}
+		}
+		return m
 	}
+	gtI := fold(gt.Events, gt.Telefrags, gt.Stomps)
+	rcI := fold(rc.Events, rc.Telefrags, rc.Stomps)
 	add := func(from, to string, bounded int) {
 		cell, ok := out[from+" -> "+to]
 		if !ok {
@@ -419,15 +434,25 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 		cell.bounded += bounded
 	}
 	for k, g := range gtI {
+		// The ground-truth denominator of the class, so a flow can be read as
+		// a RATE. Without it the table invites the base-rate mistake: enemy
+		// instants outnumber team ones ~20:1, so an equal per-instant error
+		// rate still moves far more damage INTO the small class than out of
+		// it, and the resulting asymmetry looks like a bias.
+		add(g.class, "=TOTAL", g.bounded)
 		r, ok := rcI[k]
 		switch {
 		case !ok:
 			add(g.class, "MISSING", g.bounded)
 		case r.class == g.class:
-			if strings.HasPrefix(g.class, "enemy:") && r.attacker != g.attacker {
-				add(g.class, "enemy:WRONG-ATTACKER", g.bounded)
+			if r.attacker == g.attacker {
+				break // same class, right attacker: not interesting
 			}
-			// same class, right attacker: not interesting
+			if strings.HasPrefix(g.class, "enemy:") {
+				add(g.class, "enemy:WRONG-ATTACKER", g.bounded)
+			} else if strings.HasPrefix(g.class, "positional") {
+				add(g.class, g.class+":WRONG-ATTACKER", g.bounded)
+			}
 		default:
 			add(g.class, r.class, g.bounded)
 		}
@@ -449,9 +474,17 @@ func printConfusion(m map[string]*confCell) {
 		rows = append(rows, row{k, c})
 	}
 	sort.Slice(rows, func(i, j int) bool { return rows[i].c.bounded > rows[j].c.bounded })
+	fmt.Printf("\n== ground-truth class totals (the flow denominators)\n")
+	for _, r := range rows {
+		if !strings.HasSuffix(r.k, " -> =TOTAL") {
+			continue
+		}
+		fmt.Printf("   %7d dmg  %5d instants  %s\n", r.c.bounded, r.c.instants,
+			strings.TrimSuffix(r.k, " -> =TOTAL"))
+	}
 	fmt.Printf("\n== misattribution flows (by bounded damage moved)\n")
 	for _, r := range rows {
-		if r.c.bounded < 100 {
+		if r.c.bounded < 100 || strings.HasSuffix(r.k, " -> =TOTAL") {
 			continue
 		}
 		fmt.Printf("   %7d dmg  %5d instants  %s\n", r.c.bounded, r.c.instants, r.k)
