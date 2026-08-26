@@ -1243,7 +1243,7 @@ package result
 //     when `streams` is absent; `/overview` republishes it beside
 //     `errors[]`.
 //
-// v75 — the teamkill obituaries the recoveries could not complete stop being
+// v74 — the teamkill obituaries the recoveries could not complete stop being
 // dropped.
 //   - ADDED on `frags`: `unpaired[]` — teamkill obituaries that name only one
 //     party (the other is the placeholder "teammate") and whose missing side
@@ -1262,7 +1262,7 @@ package result
 //     filtering `squish` now gets all three forms.
 //
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 75
+const CurrentSchemaVersion = 74
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

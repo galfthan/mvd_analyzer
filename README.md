@@ -584,7 +584,7 @@ they re-enter `frags.frags` as complete killer↔victim pairs: killer-named
 `DeathEvent`; victim-named ("X was telefragged by his teammate") fill in
 the killer by combining position co-location with the teamkiller's −1
 frag-delta. Across the test corpus this brings per-player teamkills to an
-exact match with KTX's authoritative `tk`. Schema v75 publishes the
+exact match with KTX's authoritative `tk`. Schema v74 publishes the
 leftovers instead of dropping them: an obituary whose other party neither
 recovery could name lands in `frags.unpaired[]`, out of `frags.frags` and
 out of every per-player tally (one side is the placeholder "teammate"),

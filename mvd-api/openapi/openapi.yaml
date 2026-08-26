@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "75"
+  version: "74"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -4140,7 +4140,7 @@ components:
           description: |
             Teamkill obituaries that name only ONE party and whose other side
             the recovery could not identify — exactly one of `killer` /
-            `victim` is the placeholder string `"teammate"` (schema v75).
+            `victim` is the placeholder string `"teammate"` (schema v74).
 
             These are NOT in `frags`, NOT counted in `totalFrags`, `byWeapon`
             or `byPlayer`, and must not be folded into per-player tallies: a

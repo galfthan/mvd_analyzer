@@ -1400,7 +1400,7 @@ func toLowerSet(vals []string) map[string]bool {
 // the wire names no one, mirroring the frag analyzer's own exclusion
 // (analyzer.isGenericPlayer). The "teammate" forms are what a phrasing
 // teamkill puts on the side it did not name — they reach the read side in
-// FragResult.Unpaired (schema v75), so a name filter must never let one
+// FragResult.Unpaired (schema v74), so a name filter must never let one
 // through as if it were a player.
 func isGenericName(n string) bool {
 	switch strings.ToLower(n) {

@@ -42,7 +42,7 @@ type FragResult struct {
 	// weapon (tele / stomp — KTX prints one phrasing per deathtype), which
 	// is what lets the damage reconstruction type such a kill positionally
 	// instead of pricing the victim's whole corpse drop as team damage.
-	// Schema v75.
+	// Schema v74.
 	Unpaired []FragEntry `json:"unpaired,omitempty"`
 }
 

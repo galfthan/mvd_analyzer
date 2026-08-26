@@ -5,9 +5,9 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v75
+## unreleased (old-demo-summary) — a derived demoinfo summary for the half of the archive without one, schema v74
 
-### The obituary table, audited row by row against the engine (schema v75)
+### The obituary table, audited row by row against the engine (schema v74)
 
 The team-telefrag fix below asked one question of one corner of
 `parser.ObituaryPatterns`; this asks it of **every row**: does the cause
@@ -61,7 +61,7 @@ at **zero** occurrences in the sweep: KTX's own unknown-death fallback
 ordering hazard against " was killed by ") and the 17 monster obituaries
 (`sp_client.c`, bloodfest / coop only).
 
-### An unnamed teammate is never named as an enemy (schema v75)
+### An unnamed teammate is never named as an enemy (schema v74)
 
 `positionalAnchor` types a team telefrag from the obituary and, when the
 killer was not recovered, infers him from the track. That inference ranks

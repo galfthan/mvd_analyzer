@@ -124,7 +124,7 @@ Defined in `result/frag.go`.
 | ByWeapon | `byWeapon` | map[string]int — **enemy kills only** (suicides/teamkills excluded) |
 | ByPlayer | `byPlayer` | map[string]*PlayerFrags |
 | KillsMeasured | `killsMeasured` | bool — the demo-global kill-**attribution** verdict (schema v65). Not `omitempty`; always emitted. |
-| Unpaired | `unpaired` | []FragEntry, omitempty — v75; teamkill obituaries whose other party the recovery could not name. **Not** part of `frags`, `totalFrags`, `byWeapon` or `byPlayer`. See [FragResult.unpaired](#fragresultunpaired). |
+| Unpaired | `unpaired` | []FragEntry, omitempty — v74; teamkill obituaries whose other party the recovery could not name. **Not** part of `frags`, `totalFrags`, `byWeapon` or `byPlayer`. See [FragResult.unpaired](#fragresultunpaired). |
 
 #### `killsMeasured` — the one measuredness bit of this section
 
@@ -234,7 +234,7 @@ corpse drop as team weapon damage.
 
 Measured on a 6 000-demo archive sweep, victim-named teamkill obituaries
 run about 2 000 lines over ~900 demos and the recovery names the killer on
-the large majority; the residual is what lands here. Schema v75 — before
+the large majority; the residual is what lands here. Schema v74 — before
 it, these obituaries were dropped from the Result entirely and were only
 visible in `MessagesResult.Events[type=frag]`.
 

@@ -1475,7 +1475,7 @@ spawn pile) DID have obituaries: `frags-final` could not name the killer,
 and the unrecovered entry was then **dropped**, so `anyFragAt` found
 nothing and the arrival detector was never consulted. That was plumbing,
 not evidence. Those obituaries now reach the Result as
-`frags.unpaired[]` (schema v75) and the anchor fires on them: the flow is
+`frags.unpaired[]` (schema v74) and the anchor fires on them: the flow is
 gone and both instants route positionally, taking 2 × 99 raw points of
 corpse clamp off `taken` (`raw taken` median 0.48% → **0.47%**, mean
 0.95% → **0.94%**, ≤1% share 75.2% → **75.5%**; every other family

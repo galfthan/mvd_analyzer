@@ -284,7 +284,7 @@ func filterFixture() *result.Result {
 	}
 }
 
-// Unpaired teamkill obituaries (schema v75) take the SAME predicates as the
+// Unpaired teamkill obituaries (schema v74) take the SAME predicates as the
 // frag log so a scoped response stays internally consistent — but never join
 // any aggregate: the "teammate" placeholder is not a player, and totalFrags
 // counts the frag log only.
