@@ -184,24 +184,99 @@ harness.
 
 ## 5. Validate reconstruction on E0–E2 (the un-established 40%)
 
-Blood/gunshot telemetry is 10–50× sparser on pre-MVDSV-0.30 demos and
-no GT eval covers them (archive GT demos are E4/E5). Method that needs
-no KTX log: the internal oracle — on survived hits the h/a delta IS the
-raw damage — plus frag-log anchoring and given/taken symmetry, run at
-scale over the E0–E2 slice of `data/mvd/` (extend `qw-corpus-survey`
-with oracle metrics or a sibling tool). Expect weaker sg attribution
-there; measure it, then decide whether E0–E2 needs its own trust tier
-in ACCURACY.md.
+**SHIPPED** on `archive-parsing` (measurement only — no behaviour, schema
+or output changed). `cmd/qw-recon-oracle` scores the reconstruction on
+demos with no KTX log by withholding the frag log from ATTRIBUTION
+(`damagerecon.Options.WithholdObituaries`, delta extraction untouched) and
+comparing the evidence-only verdict at each kill instant against the
+killer and weapon the obituary names. **15 254 demos, 1 678 259 scored
+kills, 54 min on 3 workers.** Verdict: **E0–E2 is not the weak half — it
+scores at or above the GT-instrumented eras**: attacker accuracy E0
+**97.6%** / E1 98.0% / E2 **98.2%** / E3 98.3% vs E4-GT 96.8% and E5-GT
+96.3%, and the ordering survives the real confounder (team size: duels
+98.4–99.2%, 4on4s E0 97.3% / E2 97.7% vs E4 95.4% / E5 95.8%). Calibrated
+on 3 920 instrumented demos, the oracle reproduces the withheld run's
+true accuracy to 0.1 pp and understates the SHIPPED pipeline by 2.3–2.5
+pp (it anchors those instants; obituary-vs-GT label noise is 0.1%), so
+those figures are floors. **No per-era trust tier and no era gating** —
+ACCURACY.md now says so with the numbers.
 
-## 6. Aim hit recovery on reconstructed demos (design-gated)
+Two of the three proposed oracles turned out to certify nothing, and
+ACCURACY.md records why: the h/a delta IS the reconstruction's bounded
+value (`deltas.go`), so it cannot validate magnitude; and given/taken
+symmetry is an identity `aggregate.go` enforces, not a test (it does
+expose one real gap — an attacker-less `world` telefrag charges the
+victim's `taken` with no `given` anywhere and no `takenEnv`: 12 demos of
+15 254). The expected weak spot was absent too: sg attribution on E0 (0.27
+TE_BLOOD/shot in 4on4) reads 96.2% against E5's 95.4% at 1.48. The
+"10–50× sparser" density gap is real but is a TEAM-GAME phenomenon —
+duels sit at 0.02 blood/shot in every era including E5.
 
-The hits:0 fabrication is fixed (withheld + `aim.hitsMeasured`); the
-recovery half remains: link reconstructed damage events back to fires
-(the same join `ShotsAnalyzer` does) and emit hit counters labelled
-`src:"reconstructed"`. Survey says view angles are fine on 98% of the
-archive — hit linkage was the only gap. Per-era honesty: E0–E2 recovery
-will be much weaker (see lead 5); decide the labelling story before
-building.
+What the old half does cost, measured: **2.1% of E0 demos (80 of 3 876,
+concentrated on QWSV 2.30 — 18 of 23 sampled; 101 such demos archive-wide)
+barely broadcast the health stat channel**, so the section reports 83
+bounded damage per kill where a healthy demo reports ~300. The
+reconstruction is not wrong there, but nothing in the output says the
+section is a fraction of the match — the named follow-up is a per-demo
+coverage figure on `damage`. Frozen weapon bits (`ewep` withheld) also
+turned out NOT to be an old-demo speciality: 18% of E0 against 39% of E3
+and 35% of E5. Method, tables, circularity analysis and the reproduction
+commands live in `damagerecon/ACCURACY.md` §per-era validation; the
+sampler, per-demo CSVs and aggregation in
+`.reports/qw-recon-oracle-2026-08-19/`.
+
+## 6. Aim hit recovery on reconstructed demos
+
+**SHIPPED** on `aim-recovery`, schema v73. `aimcore` re-runs the
+fire→damage join against the reconstructed damage log and publishes the
+recovered count as `aim.players[].weapons[].recon.hits`, with the new
+`aim.hitsSource` (`ktx` | `reconstructed` | absent) naming the evidence.
+`hitsMeasured` is untouched — still `false` on a reconstructed section,
+every measured counter still withheld — so the two tiers live in
+different fields and a reconstructed hit can never be read as a measured
+one. The `aim` node now binds `damage:final`.
+
+The design gate lead 5 was supposed to decide (per-era labelling) turned
+out to be a non-question: no era gating, one trust statement, per lead
+5's measurement. The real gate was per-WEAPON, and the harness the change
+ships with (`cmd/qw-aim-eval`) decided it. Withhold-and-compare on 53
+dm2/dm3 demos carrying the KTX log — keep the measured aim, swap in the
+blind reconstruction of the same match, recompute, pair per player and
+weapon — with the same join ALSO run against the wire log as a control,
+which separates the join method's error from the reconstruction's:
+
+| weapon | mean \|Δacc\| vs measured | control (join on the wire log) | shipped |
+|---|---|---|---|
+| lg | 0.3pp | exact | yes |
+| sg | 1.3pp | exact | yes |
+| ssg | 1.7pp | exact | yes |
+| axe | 0.5pp | 0.1pp | yes |
+| rl | 7.4pp | **+7.3pp — the same error** | no |
+| gl | 1.3pp | +1.0pp | no |
+
+rl/gl/ng/sng are withheld because the gap is not reconstruction error:
+the control reproduces it exactly. Their fire→impact link needs the
+entity-flight bracket `ShotsAnalyzer` builds and discards, so from a
+finished Result the join can only count impacts — a different question
+than the measured counter asks (it counts fires whose flight LINKED, so a
+point-blank rocket that never broadcast its entity is measured as a
+miss). **Follow-up if rl accuracy is wanted on old demos: carry the
+fire→flight association into the Result** (a per-shot flight id, or the
+linked impact time on `Shot`), and the projectile side joins on the
+measured definition.
+
+Also withheld on a reconstructed section, per field, in
+`result.WeaponAimRecon` and RESULT_SCHEMA: per-fire `hit` columns, the
+pellet split, direct/splash, the LG whiff classes, the enemy/team/self
+slices — all of them defeated by the same two properties, the
+victim-stat-instant anchor and same-instant delta merging. Tables and
+method: `damagerecon/ACCURACY.md` §"Aim hit recovery"; raw eval output in
+`.reports/qw-aim-eval-2026-08-19/`.
+
+Deliberately not done: the web Aim tab still renders "—" for hits on
+these demos (truthful, since `hitsMeasured` is false) — surfacing the
+`recon` tier in the frontend is a separate, purely presentational
+change.
 
 ## 7. Smaller / opportunistic
 

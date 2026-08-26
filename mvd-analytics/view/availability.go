@@ -98,9 +98,11 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 		if len(players) == 0 {
 			base = r.Aim
 		} else {
-			// Carry HitsMeasured: dropping it would claim "not measured"
-			// on a wire-damage demo whose copied rows still hold real hits.
-			base = &result.AimResult{HitsMeasured: r.Aim.HitsMeasured}
+			// Carry HitsMeasured/HitsSource: dropping them would claim "not
+			// measured" on a wire-damage demo whose copied rows still hold
+			// real hits, and would leave the copied `recon` blocks on an
+			// old demo with nothing naming their provenance.
+			base = &result.AimResult{HitsMeasured: r.Aim.HitsMeasured, HitsSource: r.Aim.HitsSource}
 			for i := range r.Aim.Players {
 				if players[r.Aim.Players[i].Player] {
 					base.Players = append(base.Players, r.Aim.Players[i])
@@ -139,7 +141,11 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 
 	// Summary: drop the big per-fire sample blocks, keep the aggregates. Copy
 	// each PlayerAim so the shared stored values are never mutated.
-	out := &result.AimResult{Players: make([]result.PlayerAim, len(base.Players)), HitsMeasured: base.HitsMeasured}
+	out := &result.AimResult{
+		Players:      make([]result.PlayerAim, len(base.Players)),
+		HitsMeasured: base.HitsMeasured,
+		HitsSource:   base.HitsSource,
+	}
 	for i := range base.Players {
 		pa := base.Players[i]
 		pa.Crosshair = nil

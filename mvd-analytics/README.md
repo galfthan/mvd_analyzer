@@ -508,12 +508,12 @@ flowchart TB
     los["los"]
   end
   subgraph d5["depth 5"]
-    aim["aim"]
     match_final["match-final"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
+    aim["aim"]
     airgibs["airgibs"]
     player_stats["player-stats"]
     backpack_linkage["backpack-linkage"]
@@ -532,8 +532,8 @@ flowchart TB
   clock -->|"clock"| timeline
   clock -->|"clock"| wall_clock
   clock -->|"clock"| weapon_pickups
-  damage -->|"damage"| aim
   damage -->|"damage"| damage_recon
+  damage_recon -->|"damage:final"| aim
   damage_recon -->|"damage:final"| airgibs
   damage_recon -->|"damage:final"| player_stats
   demoinfo -->|"demoinfo"| airgibs

@@ -319,6 +319,46 @@ func addReconstructedBackpacks(r *result.Result) {
 	)
 }
 
+// addReconAimTier turns the served aim into the v73 RECONSTRUCTED tier. Same
+// reason as the helpers above: every corpus demo carries the wire damage
+// stream, so `hitsSource` is always "ktx" there and the `recon` block — which
+// only ever appears on a reconstructed section — would never be validated.
+//
+// It applies the withholding contract in full rather than only stamping
+// `hitsSource`: on a reconstructed section every Shot.Hit is false by
+// construction, so hitsMeasured is false, every measured counter is absent and
+// the per-fire `hit`/`team` columns are omitted (aimcore/aim.go). Leaving the
+// corpus's measured hits in place would validate a response the pipeline can
+// never emit — measured counters beside a recon block — which is exactly the
+// mixture the tier exists to make impossible.
+func addReconAimTier(am *result.AimResult) {
+	if am == nil || len(am.Players) == 0 {
+		return
+	}
+	am.HitsMeasured = false
+	am.HitsSource = result.AimHitsSourceReconstructed
+	// The shipped tier (aimcore reconTierWeapons): same-server-frame weapons.
+	tier := map[string]bool{"lg": true, "sg": true, "ssg": true, "axe": true}
+	for i := range am.Players {
+		pa := &am.Players[i]
+		if pa.Crosshair != nil {
+			pa.Crosshair.Hit, pa.Crosshair.Team = nil, nil
+		}
+		if pa.LGRamp != nil {
+			pa.LGRamp.Hit, pa.LGRamp.Team = nil, nil
+		}
+		for j := range pa.Weapons {
+			w := &pa.Weapons[j]
+			// Shots is measurement-grade either way; everything hit-derived
+			// goes, including the enemy/team/self splits.
+			*w = result.WeaponAim{Weapon: w.Weapon, Shots: w.Shots}
+			if tier[w.Weapon] {
+				w.Recon = &result.WeaponAimRecon{Hits: w.Shots / 3}
+			}
+		}
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -342,6 +382,11 @@ type validationCase struct {
 	// case was added for validates just as happily as one that carries it —
 	// this is how such a case says which field it is here for.
 	mustContain []string
+	// mustNotContain is the mirror: substrings the response must NOT carry.
+	// For contracts phrased as "these fields are WITHHELD here", the schema
+	// alone cannot help — every one of them is omitempty, so a response that
+	// leaked them validates too.
+	mustNotContain []string
 }
 
 // gzipDemoBody is a tiny valid gzip stream used as the upload request body.
@@ -415,8 +460,20 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "damage-dmg-invalid", url: "/v1/demos/gameId:42/damage?dmg=nope", path: "/v1/demos/{id}/damage", status: 400},
 		{name: "err-bounded-unavailable", url: "/v1/demos/gameId:44/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 422},
 		{name: "shots", url: "/v1/demos/gameId:42/shots", path: "/v1/demos/{id}/shots", status: 200},
-		{name: "aim", url: "/v1/demos/gameId:42/aim", path: "/v1/demos/{id}/aim", status: 200},
-		{name: "aim-summary", url: "/v1/demos/gameId:42/aim?summary=1", path: "/v1/demos/{id}/aim", status: 200},
+		// The unwindowed cases serve the stored aim, which addReconAimTier has
+		// turned into the v73 reconstructed tier — the only shape that
+		// exercises `recon` + the withholding contract, since every corpus demo
+		// carries wire damage. Both halves are pinned: the recon block and
+		// hitsSource (omitempty and optional — a projection that dropped them
+		// would validate exactly as happily), and the measured counters that
+		// must NOT be there beside them. `aim-windowed` is deliberately
+		// unpinned: it recomputes over the demo's own (wire) damage section, so
+		// it is measured, and it is here for the windowed projection.
+		{name: "aim", url: "/v1/demos/gameId:42/aim", path: "/v1/demos/{id}/aim", status: 200,
+			mustContain:    []string{`"hitsMeasured":false`, `"hitsSource":"reconstructed"`, `"recon":{"hits":`},
+			mustNotContain: []string{`"hitsMeasured":true`, `"pellets":`, `"pelletHits":`, `"blocked":`}},
+		{name: "aim-summary", url: "/v1/demos/gameId:42/aim?summary=1", path: "/v1/demos/{id}/aim", status: 200,
+			mustContain: []string{`"hitsSource":"reconstructed"`, `"recon":{"hits":`}},
 		{name: "aim-windowed", url: "/v1/demos/gameId:42/aim?from=60&to=300", path: "/v1/demos/{id}/aim", status: 200},
 
 		{name: "loc-graph", url: "/v1/demos/gameId:42/loc-graph", path: "/v1/demos/{id}/loc-graph", status: 200},
@@ -585,6 +642,9 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// Same reason for the v72 pickup linkage: the corpus is hint-carrying, so
 	// no served row was ever `reconstructed` or carried a fate.
 	addReconstructedBackpacks(res)
+	// Same reason for the v73 aim tier: the corpus demo carries wire damage,
+	// so its aim is measured and grows no `recon` block of its own.
+	addReconAimTier(res.Aim)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
 		// gameId:43 is a well-formed but capability-empty Result for the
@@ -662,6 +722,11 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			for _, want := range tc.mustContain {
 				if !bytes.Contains(body, []byte(want)) {
 					t.Errorf("response does not contain %s — the case would validate vacuously; body: %.300s", want, body)
+				}
+			}
+			for _, unwanted := range tc.mustNotContain {
+				if bytes.Contains(body, []byte(unwanted)) {
+					t.Errorf("response contains %s, which this case's contract withholds; body: %.300s", unwanted, body)
 				}
 			}
 			schema, hasJSON := sd.responseSchema(t, tc.path, method, fmt.Sprintf("%d", tc.status))

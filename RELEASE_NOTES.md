@@ -66,6 +66,79 @@ published as the match's biggest airgib.
   "Airborne Rocket Gibs" is now **"Direct Rocket Air Hits"** — the table lists
   direct rocket hits on airborne victims whether or not they killed, and the
   gibs are the subset the Lethal column already badges.
+
+## unreleased (aim-recovery) — accuracy on the un-instrumented half, in a field of its own, schema v73
+
+### `aim.hitsSource` + `weapons[].recon.hits`
+
+Since v71 the aim block tells the truth about old demos by staying
+silent: with no KTX damage stream there is no wire hit to link a fire
+to, so `hitsMeasured` is false and every hit-derived counter is
+withheld rather than fabricated as a zero. The silence was correct and
+also unnecessary — the demo's damage log now exists, reconstructed
+(v71), and it carries an attacker, a weapon and a time per hit. That is
+exactly what the fire→damage join needs.
+
+So `aimcore` re-runs that join against the reconstructed log and
+publishes what it recovers **in a new field**:
+`aim.players[].weapons[].recon.hits`, beside the weapon's
+measurement-grade `shots`. Accuracy on old demos is `recon.hits /
+shots`.
+
+`hitsMeasured` does not move — it is still `false` on a reconstructed
+section, and every measured counter is still withheld there. The new
+`aim.hitsSource` (`ktx` | `reconstructed`, absent when the demo carries
+no damage section at all) names which evidence produced the tier, and
+also splits apart the two states v71 could not distinguish: "damage was
+reconstructed" vs "there is no damage section". A consumer that has
+never heard of `recon` sees exactly the pre-v73 behaviour.
+
+**Covered: `lg`, `sg`, `ssg`, `axe`** — the weapons whose damage lands
+in the fire's own server frame (the axe at its fixed +200 ms traceline
+delay). Measured with the harness the change ships with
+(`cmd/qw-aim-eval`, 53 dm2/dm3 demos with the KTX log): keep the
+measured aim, replace the damage section with the blind reconstruction
+of the same match, recompute, compare per player and weapon. The block
+is there for every covered weapon a player FIRED — a shooter the
+reconstruction credits with no damage at all reads `hits: 0`, so a
+supported zero never looks like a withheld weapon. Mean
+accuracy error vs the measured counter: **lg 0.3 pp, sg 1.3 pp, ssg
+1.7 pp, axe 0.5 pp**, with a small negative bias — a hit the
+reconstruction attributed elsewhere is a lost hit, and nothing invents
+one. The harness also runs the join against the WIRE log as a control,
+where it reproduces the measured counters with **zero** error, so the
+residual above is the reconstruction's and not the join's.
+
+**Not covered: `rl`, `gl`, `ng`, `sng`** — and the control is why. What
+pins which rocket caused which impact is the entity-flight bracket the
+shots analyzer builds and discards; from a finished Result the join can
+only count impacts, which answers a different question than the
+measured counter (that one counts fires whose flight LINKED, so a
+point-blank rocket that never broadcast its entity is measured as a
+miss). On the wire log itself the two differ by 7.3 pp on rl. Shipping
+it would put a reconstructed rl accuracy seven points above the
+measured convention with nothing saying so, so those weapons carry no
+`recon` block at all — its absence means "not recovered for this
+weapon", never "no hits".
+
+Everything below the hit COUNT stays withheld on a reconstructed
+section, per field and for stated reasons: the per-fire `hit` columns
+on `crosshair`/`lgRamp` (a merged delta moves a hit between shooters
+silently, and one misjoin is a visibly wrong dot on the heatmap), the
+SG/SSG pellet split (Σ damage / 4 over a merged magnitude would credit
+one shooter with another's pellets), `direct`/`splash` (the
+reconstruction's `isSplash` is a damage-model verdict, not the server's
+contact flag), the LG whiff classes (they classify misses, and a miss
+here can be a hit the join did not recover) and the enemy/team/self
+slices (the weakest part of the reconstruction). Full method and
+tables: [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+§"Aim hit recovery".
+
+Pipeline note: the `aim` node now binds `damage:final` instead of the
+raw `damage` artifact, so it runs after `damage-recon` and can see a
+reconstructed section. Old-era goldens gain the two new fields and
+nothing else.
+
 ## unreleased (archive-parsing) — a wall clock, a scoreline, backpacks (dropped and taken) on the old half, and a reader that says what it could not read, schema v72
 
 ### Backpack drops on the other half of the archive: `backpacks[].source`
@@ -482,6 +555,46 @@ contradicted stamp is deliberately not back-shifted. Measured on a
 260-demo stratified archive sample: wall-clock coverage 24.8% → ~95%
 (100% of the `matchdate` demos, 82% of the dateless ones — the rest
 carry a non-date `matchkey` variant like `9-195923-1626`).
+
+### Reconstructed damage on the oldest 40%: measured, not caveated
+
+No schema or behaviour change — a trust claim replaced by a measurement.
+`damage.source: "reconstructed"` used to carry an explicit warning that
+pre-MVDSV-0.30 recordings (eras E0–E2, ~40% of the archive) were
+"unvalidated estimates", because every accuracy corpus behind
+`damagerecon/ACCURACY.md` was a modern demo carrying a KTX damage log to
+score against. Those demos have no log — but they do broadcast an
+**obituary** for every kill, on a channel the reconstruction can be told
+to ignore. The new `cmd/qw-recon-oracle` reruns it with the frag log cut
+out of attribution (`damagerecon.Options.WithholdObituaries`; delta
+extraction keeps its anchors, so both runs see the same instants at the
+same magnitudes — verified at 11 431 334 shared instants against 13
+differing) and scores the evidence-only verdict at each kill instant
+against the killer and weapon the obituary names.
+
+Over **15 254 archive demos and 1 678 259 scored kills**, the old half is
+not the weak half: attacker accuracy **E0 97.6% / E1 98.0% / E2 98.2% /
+E3 98.3%** against **E4 96.8% / E5 96.3%** on the instrumented eras, and
+the ordering holds when team size is controlled (duels 98.4–99.2%; 4on4s
+E0 97.3% and E2 97.7% against E4 95.4% and E5 95.8%). Run side by side
+with the KTX log on 3 920 instrumented demos, the oracle reproduces the
+withheld run's true accuracy to 0.1 pp and understates the shipped
+pipeline by 2.3–2.5 pp, so those era figures are floors. The expected
+weak spot — shotguns on demos with almost no TE_BLOOD — is absent (E0 sg
+96.2% at 0.27 blood/shot vs E5 95.4% at 1.48). **There is therefore no
+per-era trust tier and no era gate**; `ACCURACY.md` now states the single
+claim with the numbers behind it, plus why two of the three obvious
+oracles certify nothing (the h/a delta IS the reconstruction's bounded
+value; given-vs-taken symmetry is an identity the aggregation enforces).
+
+What the oldest recordings do cost is per-demo, not per-era: **2.1% of
+qwsv demos** (concentrated on QWSV 2.30) barely broadcast the health stat
+channel, so the section carries ~83 bounded damage per kill where a
+healthy demo carries ~300 — honest as far as it goes, but nothing in the
+output says the section is a fraction of the match. And frozen weapon
+bits, which withhold `ewep`, turned out to be commoner on NEW demos than
+old (18% of E0, 39% of E3, 35% of E5) — `ACCURACY.md` said the opposite
+and now says the measurement.
 
 ## unreleased (reconstruct-damage) — damage on every demo, schema v71
 

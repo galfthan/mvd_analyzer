@@ -362,7 +362,7 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 // is inferable: the player whose track TELEPORTS onto the victim's spot at
 // that instant, or "world" when none is identifiable.
 func (in *inputs) telefragAnchor(victim string, d delta) (reconEvent, bool) {
-	f := in.fragAnyAt[fragKey{victim, d.t}]
+	f := in.anyFragAt(victim, d.t)
 	if f == nil || f.Weapon != "tele" {
 		return reconEvent{}, false
 	}
@@ -376,7 +376,7 @@ func (in *inputs) telefragAnchor(victim string, d delta) (reconEvent, bool) {
 func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent {
 	// Frag anchor: a non-suicide non-teamkill frag at the exact instant
 	// names killer + weapon authoritatively.
-	if f := in.fragAt[fragKey{victim, d.t}]; f != nil && f.Killer != "world" {
+	if f := in.killerFragAt(victim, d.t); f != nil && f.Killer != "world" {
 		if isPositionalWeapon(f.Weapon) {
 			return in.mkEvent(d, f.Killer, victim, f.Weapon, "positional")
 		}
@@ -405,7 +405,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// Environmental deaths carry typed suicide obituaries ("burst into
 		// flames" → lava): the category is authoritative there, no model
 		// needed.
-		if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.IsSuicide {
+		if f := in.anyFragAt(victim, d.t); f != nil && f.IsSuicide {
 			if w := envObituaryWeapon(f.Weapon); w != "" {
 				return in.mkEvent(d, "world", victim, w, "env-anchor")
 			}
@@ -432,7 +432,7 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 		// glasses"), so a killing delta with a named teamkiller and no
 		// evidence candidate still has a truthful attacker.
 		if d.died {
-			if f := in.fragAnyAt[fragKey{victim, d.t}]; f != nil && f.IsTeamKill && f.Killer != "" && f.Killer != victim {
+			if f := in.anyFragAt(victim, d.t); f != nil && f.IsTeamKill && f.Killer != "" && f.Killer != victim {
 				return in.mkEvent(d, f.Killer, victim, "unknown", "teamkill-anchor")
 			}
 		}

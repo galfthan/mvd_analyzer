@@ -294,8 +294,12 @@ Two consequences worth knowing:
   friendly fire DEALT. It is measured whenever the damage family is present
   (on `src: "reconstructed"` demos — pre-instrumentation, rebuilt damage —
   read every damage figure as a ~1% estimate rather than a measurement;
-  the Aim tab's Hits/Hit % cells render `—` there, since hit linkage
-  needs the wire damage stream),
+  the Aim tab's Hits/Hit % cells render `—` there, because those cells are
+  the MEASURED counters and those stay withheld. Since schema v73 the
+  Result does carry a recovered hit count for such demos in a field of its
+  own — `aim.players[].weapons[].recon.hits`, lg/sg/ssg/axe only — which
+  this frontend does not render yet; `—` here means "not rendered", not
+  "not recoverable"),
   so `0` there is a real reading rather than a gap, and it is deliberately
   *not* folded into the victim's `Taken`-side story: this is what the player
   put into teammates, a different question from `TK` (which counts only the

@@ -440,7 +440,12 @@ scoreboard — see `scoreboard` for the cross-check.
 Per-player aim analysis. Check the top-level `hitsMeasured` flag first:
 when false (reconstructed/absent damage — most old demos) every
 hit-derived counter is withheld rather than fabricated as zero, and
-only shots, crosshair error and ramp timing remain. Start with
+only shots, crosshair error and ramp timing remain. `hitsSource` says
+which evidence there was (`ktx` / `reconstructed` / absent): on a
+`reconstructed` demo the measured counters stay withheld, but a
+recovered hit count is published separately as
+`weapons[].recon.hits` — accuracy is `recon.hits / shots`, for
+`lg`/`sg`/`ssg`/`axe` only, and never merged into `hits`. Start with
 `players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
 full/partial/miss fires, RL/GL direct/splash/missed, the LG
 miss/blocked/out-of-range whiff split); the

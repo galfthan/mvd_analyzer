@@ -1,6 +1,7 @@
 {
   "aim": {
     "hitsMeasured": false,
+    "hitsSource": "reconstructed",
     "players": [
       {
         "crosshair": {
@@ -4972,14 +4973,23 @@
         "team": "korv",
         "weapons": [
           {
+            "recon": {
+              "hits": 95
+            },
             "shots": 486,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 19
+            },
             "shots": 89,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 2
+            },
             "shots": 3,
             "weapon": "ssg"
           },
@@ -12403,14 +12413,23 @@
         "team": "korv",
         "weapons": [
           {
+            "recon": {
+              "hits": 165
+            },
             "shots": 746,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 15
+            },
             "shots": 81,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 12
+            },
             "shots": 17,
             "weapon": "ssg"
           },
@@ -16235,14 +16254,23 @@
         "team": "nme",
         "weapons": [
           {
+            "recon": {
+              "hits": 74
+            },
             "shots": 335,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 14
+            },
             "shots": 94,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 2
+            },
             "shots": 2,
             "weapon": "ssg"
           },
@@ -20529,14 +20557,23 @@
         "team": "nme",
         "weapons": [
           {
+            "recon": {
+              "hits": 101
+            },
             "shots": 393,
             "weapon": "lg"
           },
           {
+            "recon": {
+              "hits": 15
+            },
             "shots": 93,
             "weapon": "sg"
           },
           {
+            "recon": {
+              "hits": 1
+            },
             "shots": 1,
             "weapon": "ssg"
           },
@@ -45148,7 +45185,7 @@
       }
     ]
   },
-  "schemaVersion": 72,
+  "schemaVersion": 73,
   "shots": {
     "byPlayer": [
       {
@@ -120827,6 +120864,50 @@
     }
   },
   "timelineAnalysis": {
+    "airgibs": [
+      {
+        "attacker": "ung",
+        "attackerTeam": "nme",
+        "attackerUserID": 2643,
+        "damage": 95,
+        "height": 149.21875,
+        "heightAboveAttacker": 149.125,
+        "lethal": true,
+        "loc": "low",
+        "time": 249382,
+        "victim": "raket",
+        "victimTeam": "korv",
+        "victimUserID": 2647
+      },
+      {
+        "attacker": "math",
+        "attackerTeam": "korv",
+        "attackerUserID": 2650,
+        "damage": 48,
+        "height": 148.5,
+        "heightAboveAttacker": -130.875,
+        "lethal": true,
+        "loc": "Quad.stairs",
+        "time": 53116,
+        "victim": "virus",
+        "victimTeam": "nme",
+        "victimUserID": 2639
+      },
+      {
+        "attacker": "math",
+        "attackerTeam": "korv",
+        "attackerUserID": 2650,
+        "damage": 53,
+        "height": 126.96875,
+        "heightAboveAttacker": 0.125,
+        "lethal": true,
+        "loc": "high",
+        "time": 72761,
+        "victim": "ung",
+        "victimTeam": "nme",
+        "victimUserID": 2643
+      }
+    ],
     "deathEvents": [
       {
         "player": "math",

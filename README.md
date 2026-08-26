@@ -486,7 +486,9 @@ aim (per-player aim analysis derived from shots + streams + damage —
 normalized crosshair-error samples for hitscan, LG ramp-onto-target, rocket
 direct/splash, LG reach/whiff, and enemy/team/self hit-counter slices;
 exact target attribution in duels, a labeled nearest-crosshair heuristic
-in team games),
+in team games; `aim.hitsSource` names the damage evidence, and on a
+reconstructed section the hit counts appear only in the separate
+`weapons[].recon` tier),
 backpacks (RL/LG drops attributed to the dropping player, each row
 stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
 where the mod predates that hint — a replay of KTX's own `DropBackpack`
@@ -917,8 +919,13 @@ diff -r /tmp/before /tmp/after
    delta IS the bounded value) but attribution is inference: per-player
    match totals run ~1% median error against ground truth, individual
    hits can be misattributed, and team/self splits are indicative only.
-   Pre-MVDSV-0.30 recordings additionally carry far sparser hit
-   telemetry and are not yet ground-truth-validated. Full accuracy
+   That holds across every server generation: pre-MVDSV-0.30 recordings
+   carry far sparser hit telemetry but were measured, on 15 254 demos
+   against the obituary with the frag log withheld from attribution, to
+   attribute at or above the instrumented eras. What those recordings do
+   cost is elsewhere — on 2.1% of qwsv demos the health stat channel is
+   barely broadcast, so the section reports only the fraction of the
+   match the wire showed, and nothing yet says so. Full accuracy
    tables and trust guidance:
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md);
    the feature's design/validation history lives in
@@ -1129,6 +1136,26 @@ diff -r /tmp/before /tmp/after
    disambiguate. Hit counts include team and self hits (server parity) —
    the v45 `victimKinds` / per-bucket splits let consumers separate them
    (a rocket jump is a self hit, not an enemy hit).
+
+9b. **Accuracy on old demos is a second, separately-named tier (schema
+   v73).** Demos with no KTX damage stream have no wire hit to link a
+   fire to, so `aim.hitsMeasured` is false there and every measured hit
+   counter is withheld (schema v71) — that has not changed. What is new
+   is that the RECONSTRUCTED damage log is now joined back to the fires,
+   and the recovered count published as `weapons[].recon.hits`, with
+   `aim.hitsSource` naming the evidence (`ktx` / `reconstructed` /
+   absent). The two tiers live in different fields and are never merged,
+   so a reconstructed count cannot be mistaken for a measured one. It
+   covers `lg`/`sg`/`ssg`/`axe` — the weapons whose damage lands in the
+   fire's own server frame, where the join measured 0.3–1.7 percentage
+   points of accuracy error against the wire-linked counter — and
+   deliberately NOT `rl`/`gl`/`ng`/`sng`, whose fire→impact link needs a
+   projectile-flight bracket that a finished Result does not carry.
+   Everything below the hit COUNT stays withheld on those demos too: no
+   per-fire hit flags, no pellet split, no direct/splash, no LG whiff
+   classes, no enemy/team/self slices. Method and per-weapon tables:
+   [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
+   §aim hit recovery.
 
 ## Reference sources
 

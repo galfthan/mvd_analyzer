@@ -56,10 +56,32 @@ var (
 	ErrSkippedMode = errors.New("damagerecon: server mode not reconstructable")
 )
 
+// Options selects a non-default reconstruction run. The zero value is the
+// production configuration; the flags exist for the accuracy harnesses.
+type Options struct {
+	// WithholdObituaries cuts the frag log out of the ATTRIBUTION side: a
+	// killing delta is then explained by geometry and the damage model
+	// alone, exactly like the survived hits around it, instead of taking
+	// the killer and weapon the obituary names.
+	//
+	// Delta EXTRACTION keeps its frag anchors (deltas.go's killAnchors), so
+	// a withheld run observes the same instants at the same magnitudes —
+	// only the attacker/weapon verdict changes. That is what makes the
+	// obituary usable as ground truth for attribution on demos with no KTX
+	// damage log (cmd/qw-recon-oracle): the thing under test can no longer
+	// read the answer.
+	WithholdObituaries bool
+}
+
 // Compute reconstructs a DamageResult from the assembled Result's state
 // streams. It never reads res.Damage (the caller decides whether a wire
 // damage stream takes precedence) nor any damage-derived field.
 func Compute(res *result.Result) (*result.DamageResult, error) {
+	return ComputeWithOptions(res, Options{})
+}
+
+// ComputeWithOptions is Compute with the harness knobs of Options.
+func ComputeWithOptions(res *result.Result, opt Options) (*result.DamageResult, error) {
 	if res == nil || res.Streams == nil || len(res.Streams.Players) == 0 {
 		return nil, ErrNoStreams
 	}
@@ -71,6 +93,7 @@ func Compute(res *result.Result) (*result.DamageResult, error) {
 	}
 
 	in := buildInputs(res)
+	in.noObituary = opt.WithholdObituaries
 	in.bsp = loadBSPGate(res)
 	events := attribute(in)
 	return aggregate(in, events), nil

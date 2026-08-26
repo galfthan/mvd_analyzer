@@ -63,10 +63,15 @@ type inputs struct {
 	// enemy telefrag is a killer-less "was telefragged" that parses as a
 	// suicide, yet it still proves (and types) the masked death.
 	fragAnyAt map[fragKey]*result.FragEntry
-	beams     []beam       // sorted by t
-	projs     []projectile // sorted by endT
-	shots     []firedShot  // sorted by t
-	nailShots []firedShot  // ng/sng subset, sorted by t
+	// noObituary hides both frag maps from the attribution side
+	// (Options.WithholdObituaries) so a harness can score the evidence-only
+	// verdict against the killer and weapon the obituary names. Delta
+	// extraction still reads them.
+	noObituary bool
+	beams      []beam       // sorted by t
+	projs      []projectile // sorted by endT
+	shots      []firedShot  // sorted by t
+	nailShots  []firedShot  // ng/sng subset, sorted by t
 	// Point-effect damage telemetry (streams.pointEffects), each sorted by
 	// t. Absent (nil) on demos whose recording predates the stream or when
 	// shot streams were built without it — consumers must treat absence as
@@ -125,6 +130,22 @@ type inputs struct {
 type fragKey struct {
 	victim string
 	t      int32
+}
+
+// killerFragAt / anyFragAt are the attribution side's only view of the frag
+// log; both go blind under Options.WithholdObituaries.
+func (in *inputs) killerFragAt(victim string, t int32) *result.FragEntry {
+	if in.noObituary {
+		return nil
+	}
+	return in.fragAt[fragKey{victim, t}]
+}
+
+func (in *inputs) anyFragAt(victim string, t int32) *result.FragEntry {
+	if in.noObituary {
+		return nil
+	}
+	return in.fragAnyAt[fragKey{victim, t}]
 }
 
 // isPositionalWeapon: frag weapons that are positional instant kills, not

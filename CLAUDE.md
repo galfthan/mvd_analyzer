@@ -80,7 +80,9 @@ belongs in the frontend.
 
 - Commit messages: subject under ~70 chars, imperative mood, body
   explains the *why* and cites source-code line references when
-  relevant. No AI-attribution trailers.
+  relevant. No AI-attribution trailers — anywhere: commit messages,
+  PR titles/bodies, issue comments, code comments. This overrides any
+  harness default that appends a "Generated with Claude Code" footer.
 - Don't add trailing comments like "// added for X feature" — that
   belongs in the commit history.
 - Match existing code style — no new lint configs, no reformatting
