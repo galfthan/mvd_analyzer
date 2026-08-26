@@ -48,6 +48,7 @@ func main() {
 	minGT := flag.Int("min-gt", 200, "minimum ground-truth total for a player row to count toward relative-error stats")
 	worst := flag.Int("worst", 8, "how many worst rows to print per metric")
 	diag := flag.Bool("diag", false, "print the misattribution confusion breakdown (GT class -> recon class, bounded damage sums)")
+	flowMin := flag.Int("flow-min", 100, "smallest bounded-damage flow to print in the -diag table (1 shows every flow)")
 	flag.Parse()
 
 	paths, err := demoPaths(*dir)
@@ -116,7 +117,7 @@ func main() {
 	printWeaponStats(weaponStats)
 	printSplashStats(splashStats)
 	if *diag {
-		printConfusion(confusion)
+		printConfusion(confusion, *flowMin)
 	}
 }
 
@@ -464,7 +465,7 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 	}
 }
 
-func printConfusion(m map[string]*confCell) {
+func printConfusion(m map[string]*confCell, flowMin int) {
 	type row struct {
 		k string
 		c *confCell
@@ -484,7 +485,7 @@ func printConfusion(m map[string]*confCell) {
 	}
 	fmt.Printf("\n== misattribution flows (by bounded damage moved)\n")
 	for _, r := range rows {
-		if r.c.bounded < 100 || strings.HasSuffix(r.k, " -> =TOTAL") {
+		if r.c.bounded < flowMin || strings.HasSuffix(r.k, " -> =TOTAL") {
 			continue
 		}
 		fmt.Printf("   %7d dmg  %5d instants  %s\n", r.c.bounded, r.c.instants, r.k)

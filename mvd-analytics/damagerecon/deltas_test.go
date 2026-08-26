@@ -939,4 +939,67 @@ func TestTeamTelefragRoutesPositional(t *testing.T) {
 	if e := mk("teamkill").attributeOne("v", nil, d); e.kind == "positional" {
 		t.Errorf("a cause-less teamkill obituary must not become a positional kill: %+v", e)
 	}
+
+	// A mover crush IS ordinary damage — KTX deals it through T_Damage with
+	// the door's activator as the attacker (ktx/src/doors.c:68) — so the
+	// deathtype-tested "X squished a teammate" phrasing must keep its cause
+	// without being rerouted positionally.
+	if e := mk("squish").attributeOne("v", nil, d); e.kind == "positional" {
+		t.Errorf("a team squish is damage, not a positional instant kill: %+v", e)
+	} else if e.weapon != "squish" || e.attacker != "a" || !e.isTeam {
+		t.Errorf("team squish = %+v, want the obituary's cause and killer in the team family", e)
+	}
+}
+
+// A TEAMKILL obituary establishes that a TEAMMATE of the victim did it and
+// nothing more. When the analyzer's recovery could not name the killer the
+// entry arrives killer-less, and the arrival/co-location inference — which
+// otherwise ranks every player on the map — must be constrained to the
+// victim's team: naming an ENEMY there would contradict the very obituary
+// that typed the row. With no admissible teammate the delta is still typed
+// positional (the wire says so) but nobody is named.
+func TestKillerlessTeamTelefragNeverNamesAnEnemy(t *testing.T) {
+	// One teammate and one enemy, both standing on the victim's corpse spot.
+	mk := func(teamOfB string) *inputs {
+		in := &inputs{
+			players: map[string]*result.PlayerStream{
+				"v": {Name: "v", Alive: []result.Interval{{Start: 0, End: 9000}}},
+				"b": {Name: "b", Alive: []result.Interval{{Start: 0, End: 9000}}},
+			},
+			tracks:    map[string]*track{},
+			teams:     map[string]string{"v": "red", "b": teamOfB},
+			order:     []string{"b", "v"},
+			fragAt:    map[fragKey]*result.FragEntry{},
+			fragAnyAt: map[fragKey]*result.FragEntry{},
+			rlLo:      100, rlHi: 120,
+		}
+		at := func(name string, x float32) {
+			pt := &result.PositionTrack{
+				T: []int32{900, 1000, 1100},
+				X: []float32{x, x, x}, Y: []float32{0, 0, 0}, Z: []float32{0, 0, 0},
+			}
+			in.tracks[name] = &track{pt: pt}
+		}
+		at("v", 0)
+		at("b", 0) // co-located: the "nearest live player" mechanism would pick b
+		// Killer-less: the recovery published this as FragResult.Unpaired, so
+		// Killer is the generic placeholder no player map resolves.
+		in.fragAnyAt[fragKey{"v", 1000}] = &result.FragEntry{
+			Time: 1000, Killer: "teammate", Victim: "v", Weapon: "tele", IsTeamKill: true,
+		}
+		return in
+	}
+	d := delta{t: 1000, raw: 199, bounded: 100, died: true}
+
+	mate := mk("red").attributeOne("v", nil, d)
+	if mate.kind != "positional" || mate.attacker != "b" {
+		t.Errorf("an admissible teammate must be named: %+v", mate)
+	}
+	enemy := mk("blue").attributeOne("v", nil, d)
+	if enemy.kind != "positional" {
+		t.Errorf("the wire typed this kill; it must stay positional: %+v", enemy)
+	}
+	if enemy.attacker != "world" {
+		t.Errorf("attacker = %q — the obituary proves a TEAMMATE did it, so an enemy may never be named", enemy.attacker)
+	}
 }

@@ -595,10 +595,20 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 //     none is identifiable;
 //   - the TEAM telefrag/stomp ("X was telefragged by his teammate", "X was
 //     jumped by his teammate" — ktx/src/client.c:5355-5384), which is a
-//     teamkill and so never reaches killerFragAt. Its killer IS known here:
-//     analyzer's frags-final node recovers him from co-location plus the
-//     teamkill frag penalty, so the obituary's own name is used and the
-//     track inference is only the fallback.
+//     teamkill and so never reaches killerFragAt. Its killer is often known
+//     here: analyzer's frags-final node recovers him from co-location plus
+//     the teamkill frag penalty, so the obituary's own name is used and the
+//     track inference is only the fallback. When the recovery could not name
+//     him the entry arrives killer-less (result.FragEntry.Killer == "") and
+//     only the CAUSE is on the wire.
+//
+// What the obituary established bounds what may be inferred. A teamkill row
+// proves a TEAMMATE of the victim did it and nothing more, so on those the
+// arrival/co-location inference — which otherwise ranks every player on the
+// map — is restricted to the victim's team. If no teammate survives the
+// gates the attacker stays "world": the delta is still typed positional (the
+// wire says so) but nobody is named. Naming an ENEMY there would contradict
+// the very obituary that typed the row.
 //
 // Routing these positionally is what keeps them off the damage curve. A
 // telefrag's honest value is the victim's capacity (armor + remaining
@@ -616,7 +626,15 @@ func (in *inputs) positionalAnchor(victim string, d delta) (reconEvent, bool) {
 		att = f.Killer
 	}
 	if att == "" {
-		att = in.teleportArrivalAt(victim, d.t)
+		var admit func(string) bool
+		if f.IsTeamKill {
+			vTeam := in.teams[victim]
+			admit = func(name string) bool {
+				t, ok := in.teams[name]
+				return ok && vTeam != "" && t == vTeam
+			}
+		}
+		att = in.teleportArrivalAt(victim, d.t, admit)
 	}
 	if att == "" {
 		att = "world"
@@ -680,12 +698,21 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 
 	best, ok := in.scoreCandidates(victim, vtrack, d, cands)
 	if !ok {
-		// KTX teamkill obituaries are weapon-less jokes ("checks his
+		// Most KTX teamkill obituaries are weapon-less jokes ("checks his
 		// glasses"), so a killing delta with a named teamkiller and no
-		// evidence candidate still has a truthful attacker.
+		// evidence candidate still has a truthful attacker. The one
+		// killer-named form that IS deathtype-tested is the mover crush
+		// ("<killer> squished a teammate", ktx/src/client.c:5362) — a crush
+		// is ordinary damage, not a positional instant kill, so it takes the
+		// same route as its enemy twin ("<killer> squishes <victim>", which
+		// reaches killerFragAt above) and keeps the cause the wire printed.
 		if d.died {
 			if f := in.anyFragAt(victim, d.t); f != nil && f.IsTeamKill && f.Killer != "" && f.Killer != victim {
-				return in.mkEvent(d, f.Killer, victim, "unknown", "teamkill-anchor")
+				w := "unknown"
+				if f.Weapon != "" && f.Weapon != "teamkill" {
+					w = f.Weapon
+				}
+				return in.mkEvent(d, f.Killer, victim, w, "teamkill-anchor")
 			}
 		}
 		// No weapon candidate fit — but an environmental candidate whose
