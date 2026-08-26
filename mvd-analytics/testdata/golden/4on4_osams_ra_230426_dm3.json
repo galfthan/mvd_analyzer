@@ -58975,7 +58975,7 @@
         "killer": "doberman",
         "time": 0,
         "victim": "nlk",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "clox",
@@ -60537,7 +60537,7 @@
         "killer": "marksuzu",
         "time": 791733,
         "victim": "clox",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "[cmd] witka",
@@ -61263,7 +61263,7 @@
         "killer": "nlk",
         "time": 1186894,
         "victim": "sCorp",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "apa",
@@ -77785,7 +77785,7 @@
         "time": 0,
         "type": "frag",
         "victim": "nlk",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "doberman was telefragged by clox",
@@ -85900,7 +85900,7 @@
         "time": 791733,
         "type": "frag",
         "victim": "clox",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "\rnlk ## {\u0026cff072\u0026cfff}/26 [{ra-low}] {\u0026cf0frlg\u0026cfff}:99/27",
@@ -89706,7 +89706,7 @@
         "time": 1186894,
         "type": "frag",
         "victim": "sCorp",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "\r{\u0026cfc3lak}{\u0026cfff} {\u0026cf2apack\u0026cfff} at [{pent}]",

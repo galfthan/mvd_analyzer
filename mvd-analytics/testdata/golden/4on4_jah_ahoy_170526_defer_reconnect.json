@@ -67376,7 +67376,7 @@
         "killer": "paniagua",
         "time": 594540,
         "victim": "rusti",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "sailorman",
@@ -67849,7 +67849,7 @@
         "killer": "nexus",
         "time": 793705,
         "victim": "[nW].Veggie",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "sailorman",
@@ -88203,7 +88203,7 @@
         "time": 594540,
         "type": "frag",
         "victim": "rusti",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "gandi rides sailorman's rocket",
@@ -90046,7 +90046,7 @@
         "time": 793705,
         "type": "frag",
         "victim": "[nW].Veggie",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "rusti rides sailorman's rocket",

@@ -52,10 +52,16 @@ func TestParseObituaryLine(t *testing.T) {
 		{"gibbed rocket", "prey was gibbed by killa's rocket", "killa", "prey", "rl", false, false},
 		{"gibbed grenade", "prey was gibbed by killa's grenade", "killa", "prey", "gl", false, false},
 
-		// Phrasing teamkills carry the generic "teammate" placeholder.
+		// Phrasing teamkills carry the generic "teammate" placeholder. The
+		// killer-named forms are a random pick with no deathtype in them, so
+		// their cause really is unknown ("teamkill"); the victim-named ones
+		// are printed per deathtype (ktx/src/client.c:5355-5384) and keep the
+		// real weapon, which is what routes them as positional instant kills.
 		{"tk killer-named", "killa loses another friend", "killa", "teammate", "teamkill", false, true},
 		{"tk other-team frag", "killa gets a frag for the other team", "killa", "teammate", "teamkill", true, true},
-		{"tk victim-named", "prey was telefragged by his teammate", "teammate", "prey", "teamkill", false, true},
+		{"tk victim-named tele", "prey was telefragged by his teammate", "teammate", "prey", "tele", false, true},
+		{"tk victim-named stomp", "prey was jumped by his teammate", "teammate", "prey", "stomp", false, true},
+		{"tk victim-named crushed", "prey was crushed by her teammate", "teammate", "prey", "stomp", false, true},
 
 		// Satan's-power self-telefrag (infix suicide).
 		{"satan deflect", "Satan's power deflects nexus's telefrag", "nexus", "nexus", "tele", true, false},

@@ -585,20 +585,43 @@ func (in *inputs) trySplitPair(victim string, vtrack *track, d delta) ([]reconEv
 	return []reconEvent{e1, e2}, true
 }
 
-// telefragAnchor types a delta whose obituary is a telefrag the frag log
-// left killer-less ("X was telefragged" parses as a suicide). The attacker
-// is inferable: the player whose track TELEPORTS onto the victim's spot at
-// that instant, or "world" when none is identifiable.
-func (in *inputs) telefragAnchor(victim string, d delta) (reconEvent, bool) {
+// positionalAnchor types a delta whose obituary names a positional instant
+// kill the killer-frag map does not carry — the two forms KTX prints without
+// a killer's name in them:
+//
+//   - the killer-less enemy telefrag ("X was telefragged" parses as a
+//     suicide), where the attacker is inferable from the track: the player
+//     who TELEPORTS onto the victim's spot at that instant, or "world" when
+//     none is identifiable;
+//   - the TEAM telefrag/stomp ("X was telefragged by his teammate", "X was
+//     jumped by his teammate" — ktx/src/client.c:5355-5384), which is a
+//     teamkill and so never reaches killerFragAt. Its killer IS known here:
+//     analyzer's frags-final node recovers him from co-location plus the
+//     teamkill frag penalty, so the obituary's own name is used and the
+//     track inference is only the fallback.
+//
+// Routing these positionally is what keeps them off the damage curve. A
+// telefrag's honest value is the victim's capacity (armor + remaining
+// health); the observed delta runs to KTX's -99 corpse clamp, so booking one
+// as ordinary weapon damage charges the attacker ~99 raw points the engine
+// never dealt — measured as the dominant PHANTOM → team channel on the
+// dm2/dm3 ground truth (ACCURACY.md §"Team telefrags were not damage").
+func (in *inputs) positionalAnchor(victim string, d delta) (reconEvent, bool) {
 	f := in.anyFragAt(victim, d.t)
-	if f == nil || f.Weapon != "tele" {
+	if f == nil || !isPositionalWeapon(f.Weapon) {
 		return reconEvent{}, false
 	}
-	att := in.teleportArrivalAt(victim, d.t)
+	att := ""
+	if f.Killer != "" && f.Killer != "world" && f.Killer != victim && in.players[f.Killer] != nil {
+		att = f.Killer
+	}
+	if att == "" {
+		att = in.teleportArrivalAt(victim, d.t)
+	}
 	if att == "" {
 		att = "world"
 	}
-	return in.mkEvent(d, att, victim, "tele", "positional"), true
+	return in.mkEvent(d, att, victim, f.Weapon, "positional"), true
 }
 
 func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent {
@@ -618,16 +641,17 @@ func (in *inputs) attributeOne(victim string, vtrack *track, d delta) reconEvent
 	}
 	if d.masked {
 		// Masked death with no killer-naming frag — still typed (and often
-		// attributed) by the killer-less telefrag obituary.
-		if e, ok := in.telefragAnchor(victim, d); ok {
+		// attributed) by a killer-less or teamkill positional obituary.
+		if e, ok := in.positionalAnchor(victim, d); ok {
 			return e
 		}
 		return in.mkEvent(d, "world", victim, "unknown", "masked-kill")
 	}
 
 	if d.died {
-		// A visible killing delta whose obituary is a killer-less telefrag.
-		if e, ok := in.telefragAnchor(victim, d); ok {
+		// A visible killing delta whose obituary is a killer-less or
+		// teamkill telefrag/stomp.
+		if e, ok := in.positionalAnchor(victim, d); ok {
 			return e
 		}
 		// Environmental deaths carry typed suicide obituaries ("burst into

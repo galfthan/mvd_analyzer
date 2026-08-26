@@ -214,12 +214,25 @@ var ObituaryPatterns = []ObituaryPattern{
 	// --- Phrasing teamkills naming only the victim. --------------------
 	// Must precede the non-team " was telefragged by " / " was crushed by "
 	// / " was jumped by " kill markers so those don't steal the line.
-	{Marker: " was telefragged by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was telefragged by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was crushed by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was crushed by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was jumped by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was jumped by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	//
+	// These carry the REAL weapon, not the "teamkill" placeholder the
+	// killer-named forms below use. KTX's team branch of ClientObituary
+	// prints one phrasing per deathtype — dtTELE1 → "was telefragged by his
+	// teammate", dtSTOMP → "was jumped/crushed by his teammate"
+	// (ktx/src/client.c:5355-5384) — so the death CAUSE is on the wire here
+	// even though the killer's name is not. Only the killer-named forms
+	// ("checks his glasses" & co, printed from a random pick with no
+	// deathtype in them) are genuinely cause-less. Consumers that treat
+	// tele/stomp as positional instant kills rather than weapon damage
+	// (mvd-analytics/damagerecon, analyzer/damage.go) need the distinction:
+	// booking a team telefrag as ordinary team damage charges the
+	// telefragger the victim's whole corpse drop instead of their capacity.
+	{Marker: " was telefragged by his teammate", Weapon: "tele", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was telefragged by her teammate", Weapon: "tele", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by his teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by her teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by his teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by her teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
 
 	// --- Phrasing teamkills naming only the killer. --------------------
 	// " gets a frag for the other team" is a self-inflicted team frag; the

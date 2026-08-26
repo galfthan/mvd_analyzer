@@ -76,6 +76,48 @@ func TestFindObituaryVictim_TeammatePrefersTKPattern(t *testing.T) {
 	if !pat.TeamKill {
 		t.Errorf("expected TeamKill=true, got pattern %+v", pat)
 	}
+	if pat.Weapon != "tele" {
+		t.Errorf("weapon = %q, want tele: KTX prints this phrasing only for dtTELE1", pat.Weapon)
+	}
+}
+
+// The victim-named teamkill phrasings are printed PER DEATHTYPE
+// (ktx/src/client.c:5355-5384), so they carry the real cause; only the
+// killer-named ones, picked at random with no deathtype in them, are
+// genuinely cause-less and keep the "teamkill" placeholder. Downstream the
+// difference decides whether the kill is priced on the damage curve or folded
+// as a positional instant kill (mvd-analytics/damagerecon).
+func TestTeamkillPatternsKeepTheirCause(t *testing.T) {
+	want := map[string]string{
+		" was telefragged by his teammate": "tele",
+		" was telefragged by her teammate": "tele",
+		" was crushed by his teammate":     "stomp",
+		" was crushed by her teammate":     "stomp",
+		" was jumped by his teammate":      "stomp",
+		" was jumped by her teammate":      "stomp",
+		" mows down a teammate":            "teamkill",
+		" squished a teammate":             "teamkill",
+		" checks his glasses":              "teamkill",
+		" loses another friend":            "teamkill",
+		" gets a frag for the other team":  "teamkill",
+	}
+	seen := 0
+	for _, p := range ObituaryPatterns {
+		w, ok := want[p.Marker]
+		if !ok {
+			continue
+		}
+		seen++
+		if !p.TeamKill {
+			t.Errorf("%q: TeamKill = false", p.Marker)
+		}
+		if p.Weapon != w {
+			t.Errorf("%q: weapon = %q, want %q", p.Marker, p.Weapon, w)
+		}
+	}
+	if seen != len(want) {
+		t.Errorf("matched %d of %d teamkill markers — the table lost one", seen, len(want))
+	}
 }
 
 // Obit-derived DeathEvent must NOT fire before the parser observes a

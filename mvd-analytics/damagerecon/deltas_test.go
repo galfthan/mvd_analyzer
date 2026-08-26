@@ -878,3 +878,65 @@ func TestQuadRegimeGateIsNarrow(t *testing.T) {
 		t.Errorf("the shared server-mode detection must not learn about dmm4, got %q", got)
 	}
 }
+
+// TestTeamTelefragRoutesPositional pins the team-telefrag channel that the
+// 2026-08-26 classification pass found under "PHANTOM → team": KTX prints a
+// teammate telefrag as "<victim> was telefragged by his teammate"
+// (ktx/src/client.c:5355), which is a TEAMKILL obituary, so killerFragAt —
+// which skips teamkills — never sees it and the kill used to fall through to
+// the teamkill anchor as ordinary team weapon damage. The victim's health
+// broadcast runs to KTX's -99 corpse clamp, so that booked the telefragger for
+// the whole corpse drop instead of the victim's capacity: 199 raw where the
+// wire's own telefrag row says 100.
+func TestTeamTelefragRoutesPositional(t *testing.T) {
+	mk := func(weapon string) *inputs {
+		in := &inputs{
+			players:   map[string]*result.PlayerStream{"v": {Name: "v"}, "a": {Name: "a"}},
+			tracks:    map[string]*track{},
+			teams:     map[string]string{"v": "red", "a": "red"},
+			order:     []string{"a", "v"},
+			fragAt:    map[fragKey]*result.FragEntry{},
+			fragAnyAt: map[fragKey]*result.FragEntry{},
+			rlLo:      100, rlHi: 120,
+		}
+		f := &result.FragEntry{Time: 1000, Killer: "a", Victim: "v", Weapon: weapon, IsTeamKill: true}
+		in.fragAnyAt[fragKey{"v", 1000}] = f
+		return in
+	}
+	// The victim died at 100 health; the corpse row reads -99, so the raw
+	// observation carries 99 points of clamp the engine never dealt.
+	d := delta{t: 1000, raw: 199, bounded: 100, died: true}
+
+	e := mk("tele").attributeOne("v", nil, d)
+	if e.kind != "positional" || e.weapon != "tele" {
+		t.Fatalf("team telefrag routed as %s/%s, want positional/tele", e.kind, e.weapon)
+	}
+	if e.attacker != "a" {
+		t.Errorf("attacker = %q, want the killer the obituary's recovery named", e.attacker)
+	}
+	if !e.isTeam {
+		t.Errorf("a telefrag between teammates must stay in the team family")
+	}
+	// aggregate is what applies the telefrag's raw == bounded rule; check it
+	// end to end, since that is where the 99 points were being charged.
+	in := mk("tele")
+	out := aggregate(in, []reconEvent{e})
+	if len(out.Events) != 0 {
+		t.Errorf("a positional kill must not appear in the Events log: %+v", out.Events)
+	}
+	if len(out.Telefrags) != 1 {
+		t.Fatalf("Telefrags = %+v, want the one kill", out.Telefrags)
+	}
+	if got := out.ByPlayer["a"].GivenTeam; got != 100 {
+		t.Errorf("raw givenTeam = %d, want the victim's capacity 100 (not the -99 corpse drop)", got)
+	}
+	if got := out.ByPlayer["a"].BoundedNest().GivenTeam; got != 100 {
+		t.Errorf("bounded givenTeam = %d, want 100", got)
+	}
+
+	// The killer-named teamkill phrasings ("checks his glasses") carry no
+	// deathtype, so they must NOT be routed positionally.
+	if e := mk("teamkill").attributeOne("v", nil, d); e.kind == "positional" {
+		t.Errorf("a cause-less teamkill obituary must not become a positional kill: %+v", e)
+	}
+}
