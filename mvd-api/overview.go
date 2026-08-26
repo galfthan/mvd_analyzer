@@ -27,9 +27,23 @@ type Overview struct {
 	// equals Map — the common case where the map has no distinct title
 	// (repo precedent: MessageClean elides when identical to the raw
 	// message).
-	MapTitle   string           `json:"mapTitle,omitempty"`
-	GameDir    string           `json:"gameDir,omitempty"`
-	Mode       string           `json:"mode,omitempty"`
+	MapTitle string `json:"mapTitle,omitempty"`
+	GameDir  string `json:"gameDir,omitempty"`
+	// Mode is the server's own DISPLAY spelling of the mode, verbatim: the
+	// KTX countdown centerprint's Mode row ("Duel", "FFA", "Clan Arena")
+	// where the demo has one, else result.MatchResult.Mode (the demoinfo /
+	// //finalscores vocabulary — "duel", "team", "FFA"). Two vocabularies,
+	// neither normalised, and the precedence between them is the reverse of
+	// the one MatchResult.Mode itself resolves. It stays that way because it
+	// is a label for a human, and because clients have been reading it since
+	// v1 — anything that needs to BRANCH on the mode reads GameMode below,
+	// which is one normalised verdict with provenance.
+	Mode string `json:"mode,omitempty"`
+	// GameMode is the normalised mode descriptor (schema v75): canonical
+	// shape, whether teamplay was in force, whether the score is rounds, the
+	// submode tokens, and which vocabulary decided each. Absent on a Result
+	// cached before v75.
+	GameMode   *result.GameMode `json:"gameMode,omitempty"`
 	Matchtag   string           `json:"matchtag,omitempty"`
 	Duration   int32            `json:"duration"`
 	MatchStart int32            `json:"matchStart"`
@@ -210,14 +224,17 @@ func BuildOverview(r *result.Result) Overview {
 		ov.Mode = r.Metadata.MatchSettings.Mode
 		ov.Matchtag = r.Metadata.MatchSettings.Matchtag
 	}
-	if ov.Mode == "" && r.Match != nil {
-		// The countdown centerprint above is a KTX-era signal; Match.Mode
-		// resolves the demoinfo / //finalscores vocabulary instead, which is
-		// what the pre-ktxstats half of the archive has (schema v72). It is a
-		// different spelling of the same idea ("duel" vs "Duel") — hence the
-		// fallback rather than a merge; result.MatchResult.Sources.Mode names
-		// which one a demo got.
-		ov.Mode = r.Match.Mode
+	if r.Match != nil {
+		if ov.Mode == "" {
+			// The countdown centerprint above is a KTX-era signal; Match.Mode
+			// resolves the demoinfo / //finalscores vocabulary instead, which is
+			// what the pre-ktxstats half of the archive has (schema v72). It is a
+			// different spelling of the same idea ("duel" vs "Duel") — hence the
+			// fallback rather than a merge; result.MatchResult.Sources.Mode names
+			// which one a demo got.
+			ov.Mode = r.Match.Mode
+		}
+		ov.GameMode = r.Match.GameMode
 	}
 	if r.TimelineAnalysis != nil {
 		ov.LocCount = len(r.TimelineAnalysis.LocTable)

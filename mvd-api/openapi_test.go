@@ -11,8 +11,10 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
+	"gopkg.in/yaml.v3"
 )
 
 // --- Served-asset behaviour: /openapi.yaml, /docs, /docs/rapidoc-min.js ---
@@ -422,5 +424,38 @@ func TestResultSchemaServed(t *testing.T) {
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("GET /docs/marked.min.js = %d, want 200", resp.StatusCode)
+	}
+}
+
+// TestBoundedModeEnumCoversSkipReasons pins the `boundedMode` enum in
+// openapi.yaml against damagerecon.SkipModeReasons, the Go-side vocabulary it
+// publishes. The enum is a hand-mirrored copy — it lagged once already, when
+// the clan-arena family joined the skip set — and a value the server can emit
+// but the spec does not list makes every response carrying it fail schema
+// validation for consumers that enforce the spec.
+func TestBoundedModeEnumCoversSkipReasons(t *testing.T) {
+	var raw map[string]any
+	if err := yaml.Unmarshal(openapiSpec, &raw); err != nil {
+		t.Fatalf("yaml parse: %v", err)
+	}
+	schemas, _ := raw["components"].(map[string]any)["schemas"].(map[string]any)
+	damage, _ := schemas["Damage"].(map[string]any)
+	props, _ := damage["properties"].(map[string]any)
+	bounded, _ := props["boundedMode"].(map[string]any)
+	rawEnum, _ := bounded["enum"].([]any)
+	if len(rawEnum) == 0 {
+		t.Fatalf("Damage.boundedMode has no enum in openapi.yaml")
+	}
+	listed := map[string]bool{}
+	for _, v := range rawEnum {
+		listed[fmt.Sprint(v)] = true
+	}
+	if !listed["standard"] {
+		t.Errorf("boundedMode enum is missing the un-skipped value %q", "standard")
+	}
+	for _, r := range damagerecon.SkipModeReasons {
+		if want := "skipped:" + r; !listed[want] {
+			t.Errorf("boundedMode enum is missing %q — add it when damagerecon.SkipModeReasons grows", want)
+		}
 	}
 }

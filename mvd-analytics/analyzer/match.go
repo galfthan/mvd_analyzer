@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -497,6 +498,7 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		mr.Map, mr.Sources.Map = mr.MapTitle, MatchSrcLevelTitle
 	}
 	mr.Mode, mr.Sources.Mode = a.resolveMode()
+	mr.GameMode = a.core.Mode()
 
 	// Collect team stats
 	teamFrags := make(map[string]int)
@@ -562,18 +564,26 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 
 	// Build team stats - only include valid team names. Sort by name so the
 	// output is byte-stable across runs (Go map iteration is randomized).
-	teamNames := make([]string, 0, len(teamFrags))
-	for team := range teamFrags {
-		if !isSpectatorTeam(team) {
-			teamNames = append(teamNames, team)
+	//
+	// Skipped entirely in an individual mode: the tags in teamFrags name no
+	// sides there, and summing them produces exactly the pseudo-teams this
+	// work removed (on ffa_1[tox] a "red" row of 29 frags built from one
+	// player and a "rr" row of 53 from another). rebuildIndividualMatch
+	// below builds the one-row-per-player layout instead.
+	if !a.individual() {
+		teamNames := make([]string, 0, len(teamFrags))
+		for team := range teamFrags {
+			if !isSpectatorTeam(team) {
+				teamNames = append(teamNames, team)
+			}
 		}
-	}
-	sort.Strings(teamNames)
-	for _, team := range teamNames {
-		mr.Teams = append(mr.Teams, TeamStat{
-			Name:  team,
-			Frags: teamFrags[team],
-		})
+		sort.Strings(teamNames)
+		for _, team := range teamNames {
+			mr.Teams = append(mr.Teams, TeamStat{
+				Name:  team,
+				Frags: teamFrags[team],
+			})
+		}
 	}
 
 	result.Match = mr
@@ -598,13 +608,45 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 			}
 			r.noteMatchParticipants(names)
 		}
-		if r.Duel() {
-			rebuildDuelMatch(mr, a.core.DemoInfo)
+		// The duel promotion above can only have made the verdict MORE
+		// individual, so refresh the descriptor before the layout reads it.
+		a.refineGameMode(mr)
+		if a.individual() {
+			rebuildIndividualMatch(mr, a.core.DemoInfo, r.Duel())
 		}
 	}
 
 	a.applyFinalScoresTeams(mr)
 	return nil
+}
+
+// individual reports whether this match gets the one-side-per-player layout.
+// Reads the shared CoreOutputs predicate so the scoreboard, the team-kill
+// flags and the player-stats aggregate cannot disagree.
+func (a *MatchAnalyzer) individual() bool { return a.core.IndividualMode() }
+
+// refineGameMode folds MatchAnalyzer's own duel promotion back into the
+// published descriptor.
+//
+// The resolver runs in the roster node, before this scoreboard exists, so on
+// a demo with no demoinfo block it cannot see the two-participant shape that
+// noteMatchParticipants has just established — it reports canonical
+// "unknown" with whatever the serverinfo teamplay cvar said. Correcting it
+// here is what keeps `match.gameMode` consistent with the layout the very
+// same Finalize is about to apply; the descriptor is a pointer shared with
+// CoreOutputs, so every producer scheduled after `match` sees the correction
+// too.
+func (a *MatchAnalyzer) refineGameMode(mr *MatchResult) {
+	gm := mr.GameMode
+	if gm == nil || !a.core.IsDuel() {
+		return
+	}
+	if gm.Canonical == "" || gm.Canonical == result.GameModeUnknown {
+		gm.Canonical, gm.Sources.Canonical = result.GameModeDuel, result.GameModeSrcRoster
+	}
+	if gm.Canonical == result.GameModeDuel && gm.TeamBased {
+		gm.TeamBased, gm.Sources.TeamBased = false, result.GameModeSrcMode
+	}
 }
 
 // resolveMap resolves the canonical map SHORTNAME and names its source. The
@@ -666,7 +708,20 @@ func (a *MatchAnalyzer) resolveMode() (string, string) {
 // It runs after the duel rebuild so it sees the final rows.
 func (a *MatchAnalyzer) applyFinalScoresTeams(mr *MatchResult) {
 	if len(mr.Teams) > 0 {
-		mr.Sources.Teams = MatchSrcDerived
+		if a.individual() {
+			mr.Sources.Teams = result.MatchSrcIndividual
+		} else {
+			mr.Sources.Teams = MatchSrcDerived
+		}
+		return
+	}
+	// In an individual mode `//finalscores` names the top-two PLAYERS, not
+	// two teams (ktx/src/commands.c:6963-6977 fills team1/team2 from the
+	// scoreboard's first two rows when there are no teams to name) — on
+	// ffa_1[dm2] that is `":f" 36 "SMOK" 35`. Adopting them as teams is
+	// exactly the invented-side bug the individual layout exists to remove,
+	// and the rows are still published verbatim on metadata.finalScores.
+	if a.individual() {
 		return
 	}
 	if a.core == nil || a.core.FinalScores == nil {
@@ -683,22 +738,35 @@ func (a *MatchAnalyzer) applyFinalScoresTeams(mr *MatchResult) {
 	mr.Sources.Teams = MatchSrcFinalScores
 }
 
-// rebuildDuelMatch reconstructs MatchResult.Players and .Teams for a 1v1 around
-// the synthetic one-player-per-team layout (team == the player's own name).
+// rebuildIndividualMatch reconstructs MatchResult.Players and .Teams around
+// the one-side-per-player layout (team == the player's own name) for every
+// mode with no teams: a 1v1, and — since v75 — FFA, race and anything else
+// the descriptor resolved as not team-based.
 //
-// When demoinfo is present it is the source of truth for participants — its
-// end-of-match snapshot always lists every player it tracked stats for, so this
-// recovers a participant the Finalize spectator gate dropped (a teamless
-// frogbot) while merging in any per-player frag count already tracked. With no
-// demoinfo it falls back to the existing two-player list, just relabelling
-// teams. Mirrors the old normalizeDuelTeams Match block exactly.
-func rebuildDuelMatch(mr *MatchResult, di *DemoInfoResult) {
+// It is the same layout in both cases, which is the point: the API shape a
+// consumer sees for an FFA is the one it already handles for a duel (the
+// frontend's shape test is literally `every p.team === p.name`), so no
+// consumer needs a mode string to render an individual scoreboard.
+//
+// demoinfo, where present, is the source of truth for PARTICIPANTS on a duel:
+// its end-of-match snapshot always lists every player it tracked stats for,
+// so this recovers a participant the Finalize spectator gate dropped (a
+// teamless frogbot) while merging in any per-player frag count already
+// tracked. On a non-duel individual mode the derived scoreboard is used
+// instead even when demoinfo exists: players come and go in FFA and the
+// scoreboard has already reconciled their occupancies (a mid-match leaver's
+// announced score, a slot that changed hands), which the demoinfo snapshot's
+// flat name list would flatten back out.
+//
+// The raw userinfo tag survives on PlayerStat.RawTeam — it is real
+// information (clan membership), it just names no side.
+func rebuildIndividualMatch(mr *MatchResult, di *DemoInfoResult, duel bool) {
 	existing := make(map[string]PlayerStat, len(mr.Players))
 	for _, p := range mr.Players {
 		existing[p.Name] = p
 	}
 	rebuilt := make([]PlayerStat, 0, len(existing))
-	if di != nil && len(di.Players) > 0 {
+	if duel && di != nil && len(di.Players) > 0 {
 		for _, dp := range di.Players {
 			ps, ok := existing[dp.Name]
 			if !ok {
@@ -714,6 +782,11 @@ func rebuildDuelMatch(mr *MatchResult, di *DemoInfoResult) {
 		for _, p := range mr.Players {
 			p.Team = p.Name
 			rebuilt = append(rebuilt, p)
+		}
+	}
+	for i := range rebuilt {
+		if raw := existing[rebuilt[i].Name].Team; raw != "" && raw != rebuilt[i].Name {
+			rebuilt[i].RawTeam = raw
 		}
 	}
 	mr.Players = rebuilt

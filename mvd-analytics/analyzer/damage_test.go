@@ -679,6 +679,10 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	co.DemoInfo = &DemoInfoResult{Mode: "ffa", Players: []DemoInfoPlayer{
 		{Name: "alpha", Team: "red"}, {Name: "gmate", Team: "red"}, {Name: "bsg", Team: "blue"},
 	}}
+	// The mode verdict reaches the damage layer through the descriptor
+	// (schema v75), so resolve it the way the roster node does.
+	gm := resolveGameMode(co.DemoInfo, nil, nil, map[string]string{"teamplay": "1"}, nil, nil)
+	co.GameMode = &gm
 	a.UseCoreOutputs(co)
 	var res Result
 	if err := a.Finalize(&res); err != nil {

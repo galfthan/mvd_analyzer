@@ -365,7 +365,7 @@ func packTouchRulesOf(res *Result) packTouchRules {
 	on := func(key string) bool { v := si[key]; return v != "" && v != "0" }
 	r.midair, r.instagib = on("k_midair"), on("k_instagib")
 	r.lgc = on("k_lgcmode")
-	for _, sub := range strings.Split(si["mode"], "-") {
+	for _, sub := range result.ParseServerinfoMode(si["mode"]).Submodes {
 		switch sub {
 		case "midair":
 			r.midair = true

@@ -106,7 +106,7 @@ func TestRebuildDuelMatch_FromDemoInfo(t *testing.T) {
 		},
 		Teams: []TeamStat{{Name: "blue", Frags: 223}},
 	}
-	rebuildDuelMatch(mr, di)
+	rebuildIndividualMatch(mr, di, true)
 
 	if len(mr.Players) != 2 {
 		t.Fatalf("match.Players after rebuild: got %d players, want 2", len(mr.Players))

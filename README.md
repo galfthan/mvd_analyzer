@@ -476,7 +476,15 @@ implementation backed by MVD files.
 
 Defined in [`mvd-analytics/result`](mvd-analytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
-match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
+match (map, duration, the scoreboard, and since v75 `match.gameMode` —
+the one normalised mode verdict: `canonical` shape, `teamBased`,
+`rounds`, `submodes[]`, each with a `sources` entry naming which of the
+server's five mode vocabularies decided it. When `teamBased` is false —
+every duel, FFA, race — the match is laid out with one side per player
+(`match.teams` one row per player, `players[].team` equal to the
+player's own name, the raw userinfo tag kept on `players[].rawTeam`), so
+a team tag is never read as a side),
+frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
 damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
@@ -1063,9 +1071,11 @@ diff -r /tmp/before /tmp/after
    and the wire carries no origin to rebase onto; that is the rest of plan
    lead 8 stage (b) in
    [`plan-archive-features.md`](plan-archive-features.md). FFA MODE
-   semantics — teams are decoration in FFA, and `match.teams` / teamkill
-   attribution / the aim enemy set still read the userinfo team tag — are
-   PR B of [`plan-ffa-support.md`](plan-ffa-support.md).
+   semantics landed in the same version: `match.gameMode` is now the one
+   normalised mode verdict, and a mode with no teams
+   (`gameMode.teamBased` false) is laid out with one side per player, so a
+   userinfo team tag is never read as a side. See
+   [`plan-ffa-support.md`](plan-ffa-support.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of

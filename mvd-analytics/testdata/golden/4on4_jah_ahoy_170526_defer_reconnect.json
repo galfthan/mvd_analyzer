@@ -64636,6 +64636,7 @@
   },
   "demoInfo": {
     "date": "2026-05-17 21:53:13 +0100",
+    "deathmatch": 1,
     "demo": "4on4_jah_vs_ahoy[defer]20260517-2132.mvd",
     "duration": 1200,
     "hostname": "dm6.uk #1 antilag",
@@ -66156,6 +66157,7 @@
       }
     ],
     "port": 28501,
+    "teamplay": 2,
     "teams": [
       "jah",
       "ahoy"
@@ -82899,6 +82901,14 @@
   "match": {
     "duration": 1200101,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "defer",
     "mapTitle": "Coup de Fer",
     "mode": "team",

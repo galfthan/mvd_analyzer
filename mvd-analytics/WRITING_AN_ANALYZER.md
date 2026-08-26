@@ -57,7 +57,9 @@ handed to you via the `CoreConsumer` hook. The field → producing node map:
 | `FragEntries` | `frag` | The canonical **raw** kill log (pre-telefrag-recovery — see `frags:final` below) |
 | `VictimNamedTeamkills` | `frag` | Teamkill obituaries with no named killer (input to `frags-final`) |
 | `Clock` | `clock` | The match time base — call `co.Clock.ToMatch(t)` (or `co.MatchStartMs()`) so your timestamps are **born match-relative**; nil-safe |
-| `Roster` | `roster` | Final team labels — call `co.TeamFor(name, rawTeam)` so duel demos get name-as-team labels **at birth**; nil-safe |
+| `Roster` | `roster` | Final team labels — call `co.TeamFor(name, rawTeam)` so an individual mode (every duel, FFA, race) gets name-as-team labels **at birth**; nil-safe |
+| `GameMode` | `roster` | The normalised mode descriptor (`result.GameMode`). Never branch on a mode string of your own: call `co.IndividualMode()` for "does a team tag name a side here" and `co.ModeAllowsTeamplay()` for "does the teamplay cvar mean anything". Both nil-safe |
+| `ServerInfo` / `MatchSettings` | `metadata` | The merged `fullserverinfo` cvar table and the parsed countdown settings — one copy, read by the mode resolver and the ruleset gates instead of each reaching into `result.Metadata` |
 | `ServerInfoMap` | `metadata` | The serverinfo `map` key — read via `co.EffectiveMap()` (demoinfo map, else this) so BSP-derived passes resolve the map on demoinfo-less demos; nil-safe |
 | `ServerStatus` | `metadata` | The serverinfo `status` key as a timeline (`AtOpen`, `RunningSeen`) rather than the last-write-wins value in `metadata.serverInfo` — what the server said the game state was at demo OPEN, and whether it ever said a game was running. Read by `no-match`; zero-valued when the demo carried no `status` key |
 

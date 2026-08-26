@@ -3606,6 +3606,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 18:27:08 +0200",
+    "deathmatch": 3,
     "demo": "duel_betowen_vs_banan_falco[dm2]260424-1816-duel1.mvd",
     "duration": 600,
     "hostname": "play.quake1.pl - duel #1",
@@ -10288,6 +10289,14 @@
   "match": {
     "duration": 599980,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "dm2",
     "mapTitle": "Claustrophobopolis",
     "mode": "duel",
@@ -10297,6 +10306,7 @@
         "frags": 7,
         "kills": 10,
         "name": "betowen",
+        "rawTeam": "red",
         "suicides": 3,
         "team": "betowen"
       },
@@ -10305,6 +10315,7 @@
         "frags": 16,
         "kills": 19,
         "name": "banan falco",
+        "rawTeam": "coop",
         "suicides": 3,
         "team": "banan falco"
       }
@@ -10312,7 +10323,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

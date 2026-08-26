@@ -3164,6 +3164,15 @@ components:
     Overview:
       additionalProperties: false
       properties:
+        gameMode:
+          description: >
+            Normalised mode descriptor (schema v75). `mode` on this envelope
+            stays the server's own DISPLAY spelling (the countdown Mode row,
+            else `match.mode`); anything that needs to BRANCH on the mode
+            reads this instead.
+          oneOf:
+            - $ref: "#/components/schemas/GameMode"
+            - type: "null"
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         duration:
           description: "Match duration, int32 ms."
@@ -3805,6 +3814,18 @@ components:
         mode:
           description: "Match mode (KTX)."
           type: string
+        deathmatch:
+          description: "KTX's `dm` key — the deathmatch cvar in force at match end (schema v75). Omitted when the server wrote no key, which KTX does when the cvar is 0."
+          type: integer
+        teamplay:
+          description: >
+            KTX's `tp` key — the teamplay cvar in force at match end (schema
+            v75). KTX writes it only when non-zero, and FixRules makes
+            `teamplay > 0` equivalent to "this is a team / CTF / coop game" in
+            both directions, so its ABSENCE from a block that named a mode is
+            itself the verdict. It is the strongest input to
+            `match.gameMode.teamBased`.
+          type: integer
         players:
           description: "Per-player KTX stat blocks."
           items:
@@ -7479,6 +7500,67 @@ components:
             - "null"
             - object
       type: object
+    GameMode:
+      description: >
+        The pipeline's NORMALISED game-mode verdict (schema v75) — one block
+        every consumer that needs to branch on the mode reads, in place of the
+        five unrelated server vocabularies (`match.mode`,
+        `metadata.serverInfo.mode`, `metadata.matchSettings.mode`,
+        `//finalscores`, the hub search facet) that are still published
+        verbatim beside it. `sources` names which vocabulary decided each
+        field. Absent on a demo analysed before v75.
+      additionalProperties: false
+      properties:
+        canonical:
+          description: >
+            Mode SHAPE, normalised: `duel` | `team` | `ffa` | `ctf` | `ca` |
+            `wipeout` | `race` | `hoony` | `ra` | `coop` | `unknown`. Ruleset
+            modifiers (midair, instagib, lgc, …) are NOT canonical values —
+            an instagib game is still an FFA or a 4on4 — they are in
+            `submodes`.
+          type: string
+          enum: [duel, team, ffa, ctf, ca, wipeout, race, hoony, ra, coop, unknown]
+        teamBased:
+          description: >
+            Whether teamplay was in force, i.e. whether a player's team tag
+            names a SIDE rather than decoration. Mirrors KTX's own `tp_num()`
+            gate (`(isTeam() || isCTF() || coop) ? teamplay : 0`): the mode
+            must be a team mode AND the teamplay cvar non-zero. False for
+            duel, ffa, race and rocket arena. When it is false the match is
+            laid out INDIVIDUALLY — `match.teams` is one row per player and
+            every `match.players[].team` equals the player's own name, with
+            the raw tag kept on `rawTeam`; `playerStats.teams` is absent and
+            region control reports no sides.
+          type: boolean
+        rounds:
+          description: "Score is ROUNDS WON, not frags (clan arena, wipeout, rocket arena, hoonymode). Published for consumers comparing a scoreline against a frag total; nothing in the pipeline gates on it. Omitted when false."
+          type: boolean
+        submodes:
+          description: "Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf`) plus the ones the legacy `k_*` cvars and the countdown table name. Omitted when the demo named none."
+          items:
+            type: string
+          type: array
+        sources:
+          description: "Which vocabulary decided each field."
+          additionalProperties: false
+          properties:
+            canonical:
+              description: "`ktx` (demoinfo `mode`) | `serverinfo` (the composite `mode` key's umode) | `countdown` (the KTX countdown Mode row) | `finalscores` | `roster` (the participant shape — a two-player match is a duel). Empty when canonical is `unknown`."
+              type: string
+            teamBased:
+              description: "`ktx` (demoinfo `tp`) | `serverinfo` (the `teamplay` cvar) | `countdown` | `mode` (the canonical mode alone decides) | `roster` (the weakest: a team with more than one member). Never empty."
+              type: string
+            rounds:
+              description: "`mode` — the canonical mode alone decides. Empty when rounds is false."
+              type: string
+            submodes:
+              description: "`serverinfo` | `countdown`. Empty when there are none."
+              type: string
+          type: object
+      required:
+        - canonical
+        - teamBased
+      type: object
     Match:
       additionalProperties: false
       properties:
@@ -7506,6 +7588,13 @@ components:
             read `sources.mode` for the source. Neither the serverinfo `mode`
             key (`1on1`, `4on4-midair`) nor the countdown table's `Duel`.
           type: string
+        gameMode:
+          description: >
+            Normalised mode descriptor (schema v75) — the block to branch on.
+            `mode` above stays the verbatim server spelling beside it.
+          oneOf:
+            - $ref: "#/components/schemas/GameMode"
+            - type: "null"
         sources:
           description: >
             Where the resolved identity fields came from (schema v72), so a
@@ -7521,7 +7610,7 @@ components:
               description: "`ktx` (demoinfo) | `finalscores`."
               type: string
             teams:
-              description: "`derived` (the per-player scoreboard summed by team, the normal case) | `finalscores` (the scoreboard produced no team rows, so the two sides come from KTX's end-of-match stuffcmd)."
+              description: "`derived` (the per-player scoreboard summed by team, the normal case) | `individual` (schema v75 — the mode has no teams, so the rows are one per PLAYER, named after the player) | `finalscores` (the scoreboard produced no team rows, so the two sides come from KTX's end-of-match stuffcmd)."
               type: string
           type: object
         players:
@@ -7545,7 +7634,10 @@ components:
                 description: "Suicide deaths."
                 type: integer
               team:
-                description: "Team name."
+                description: "Team name. In an individual mode (`gameMode.teamBased` false, including every duel) this is the player's own name — the one-side-per-player layout."
+                type: string
+              rawTeam:
+                description: "The userinfo `team` tag as it stood on the wire, kept when the individual layout replaced `team` with the player's name (schema v75). In FFA those tags are real clan decoration that names no side. Omitted when it would repeat `team`, and when the tag was empty."
                 type: string
             required:
               - name

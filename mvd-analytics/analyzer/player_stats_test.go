@@ -467,51 +467,61 @@ func TestWeaponsNotDoubleCountedFromItems(t *testing.T) {
 
 // --- teamplay gate ------------------------------------------------------
 
+// isTeamplay now reads the mode descriptor rather than re-deriving the
+// precedence, so the cases below build the descriptor with the same resolver
+// the roster node runs. The duel short-circuit is still isTeamplay's own —
+// the match node can promote a no-demoinfo two-player match to duel after
+// the descriptor was resolved.
 func TestIsTeamplayGate(t *testing.T) {
+	mode := func(ms *result.MatchSettings, si map[string]string, counts map[string]int) *CoreOutputs {
+		gm := resolveGameMode(nil, nil, ms, si, nil, counts)
+		return &CoreOutputs{GameMode: &gm}
+	}
+
 	duelRoster := &Roster{isDuel: true}
 	if isTeamplay(&Result{}, &CoreOutputs{Roster: duelRoster}) {
 		t.Error("duel must not count as teamplay — KTX gates transfers on isTeam()")
 	}
-	tp := &Result{Metadata: &result.MetadataResult{MatchSettings: &result.MatchSettings{Teamplay: 2}}}
-	if !isTeamplay(tp, &CoreOutputs{}) {
+	if !isTeamplay(&Result{}, mode(&result.MatchSettings{Mode: "Team", Teamplay: 2}, nil, nil)) {
 		t.Error("teamplay 2 should count")
 	}
-	ffa := &Result{
-		Metadata: &result.MetadataResult{ServerInfo: map[string]string{"teamplay": "0"}},
-		Match:    &result.MatchResult{Players: []result.PlayerStat{{Name: "a", Team: "1"}, {Name: "b", Team: "2"}}},
-	}
-	if isTeamplay(ffa, &CoreOutputs{}) {
+	ffaCo := mode(nil, map[string]string{"mode": "ffa", "teamplay": "0"}, nil)
+	ffa := &Result{Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "a", Team: "1"}, {Name: "b", Team: "2"}}}}
+	if isTeamplay(ffa, ffaCo) {
 		t.Error("teamplay 0 must not count even when players carry colour teams")
 	}
-	// No cvar at all: fall back to the roster shape.
-	noCvar := &Result{Match: &result.MatchResult{Players: []result.PlayerStat{
+	// No cvar and no mode at all: fall back to the roster shape.
+	noCvar := mode(nil, nil, map[string]int{"red": 2, "blue": 1})
+	if !isTeamplay(&Result{}, noCvar) {
+		t.Error("two players sharing a team should count as teamplay when no cvar is present")
+	}
+	// No descriptor at all (a hand-built registry with no roster node):
+	// isTeamplay keeps its own roster-shape fallback over match.players.
+	noDesc := &Result{Match: &result.MatchResult{Players: []result.PlayerStat{
 		{Name: "a", Team: "red"}, {Name: "b", Team: "red"}, {Name: "c", Team: "blue"},
 	}}}
-	if !isTeamplay(noCvar, &CoreOutputs{}) {
-		t.Error("two players sharing a team should count as teamplay when no cvar is present")
+	if !isTeamplay(noDesc, &CoreOutputs{}) {
+		t.Error("with no descriptor, two players sharing a team should still count")
 	}
 }
 
 // KTX gates its transfer counters on the MODE (isTeam(), k_mode ==
-// gtTeam), not on the teamplay cvar, and the two disagree: the
-// ffa_5[dm4] corpus demo runs FFA with `teamplay 2` set. Trusting the
+// gtTeam), not on the teamplay cvar, and the two disagree: an FFA server can
+// run with `teamplay 2` left over from the previous game. Trusting the
 // cvar there made DropperTeam == Team trivially true (most players carry
 // no team at all) and invented a transfer for every backpack picked up.
 func TestIsTeamplayGate_FFAModeBeatsTeamplayCvar(t *testing.T) {
-	ffa := &Result{Metadata: &result.MetadataResult{
-		MatchSettings: &result.MatchSettings{Mode: "FFA", Teamplay: 2},
-		ServerInfo:    map[string]string{"teamplay": "2"},
-	}}
-	if isTeamplay(ffa, &CoreOutputs{}) {
+	gmFFA := resolveGameMode(nil, nil,
+		&result.MatchSettings{Mode: "FFA", Teamplay: 2},
+		map[string]string{"teamplay": "2"}, nil, nil)
+	if isTeamplay(&Result{}, &CoreOutputs{GameMode: &gmFFA}) {
 		t.Error("FFA must not count as teamplay even with teamplay 2 — KTX's isTeam() is mode-gated")
 	}
-	// CTF is deliberately NOT in the non-team list: its teams are real and
+	// CTF is deliberately NOT in the individual list: its teams are real and
 	// the transfers happened, even though KTX's isTeam() declines to count
-	// them. Unrecognised modes fall through to the cvar.
-	ctf := &Result{Metadata: &result.MetadataResult{
-		MatchSettings: &result.MatchSettings{Mode: "CTF", Teamplay: 2},
-	}}
-	if !isTeamplay(ctf, &CoreOutputs{}) {
+	// them.
+	gmCTF := resolveGameMode(nil, nil, &result.MatchSettings{Mode: "CTF", Teamplay: 2}, nil, nil, nil)
+	if !isTeamplay(&Result{}, &CoreOutputs{GameMode: &gmCTF}) {
 		t.Error("CTF should still count as teamplay")
 	}
 }

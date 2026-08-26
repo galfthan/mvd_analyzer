@@ -255,14 +255,15 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// flattened + sorted for deterministic output.
 	matrix := make(map[string]*DamagePair)
 
-	// In a 1v1 any non-self hit is enemy damage by definition, but two
-	// duelers sharing a non-empty colour team would classify every hit as
-	// IsTeam — silently emptying airgibs, zeroing the aim enemy splits and
-	// contradicting the duel-classified Shots.VictimKinds (F20). Read the duel
-	// verdict from the roster (the shared CoreOutputs table every producer reads), so
-	// the victim-weapon buckets and the matrix are built once, correctly,
-	// instead of being rebuilt after the fact.
-	duel := a.core.IsDuel()
+	// In any individual mode — a 1v1, an FFA, a race — every non-self hit is
+	// enemy damage by definition, but two players sharing a non-empty colour
+	// tag would classify every hit between them as IsTeam: silently emptying
+	// airgibs, zeroing the aim enemy splits and contradicting the
+	// individually-classified Shots.VictimKinds (F20). Read the verdict from
+	// the shared CoreOutputs predicate (roster duel + mode descriptor) so the
+	// victim-weapon buckets and the matrix are built once, correctly, instead
+	// of being rebuilt after the fact.
+	individual := a.core.IndividualMode()
 
 	// Bounded reconstruction setup. boundedSkip names a server mode whose
 	// T_Damage rewrites are not observable per hit (see boundedSkipReason);
@@ -270,13 +271,13 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// tp_num() (g_utils.c:1586): the raw teamplay cvar counts ONLY in
 	// team/CTF/coop modes — a duel's colour-team artifact, or an FFA demo
 	// with a leftover teamplay cvar from a previous team game, must not
-	// trigger the teamplay nullification rules. The KTX demoinfo mode
-	// string carries the gt* verdict ("team"/"ctf" vs "duel"/"ffa"); with
-	// no demoinfo we fall back to the non-duel gate alone (team
-	// classification still requires matching non-empty team strings).
+	// trigger the teamplay nullification rules. The mode descriptor carries
+	// that gt* verdict (CoreOutputs.ModeTeamShaped), resolved from KTX's
+	// demoinfo `mode` where it exists and from the serverinfo / countdown
+	// vocabularies where it does not.
 	boundedSkip := a.boundedSkipReason(result)
 	tp := 0
-	if !duel && a.tpModeApplies() {
+	if a.core.ModeAllowsTeamplay() {
 		tp, _ = strconv.Atoi(a.serverInfo["teamplay"])
 	}
 	// enemyTakenBounded feeds DamageDeltaBounded.StreamTaken: KTX dmg_t
@@ -310,12 +311,12 @@ func (a *DamageAnalyzer) Finalize(result *Result) error {
 	// for the standard mode; nil when the bounded family is skipped.
 	var boundedNew []int
 	if boundedSkip == "" {
-		boundedNew = a.computeBounded(tp, duel, inMatchWindow)
+		boundedNew = a.computeBounded(tp, individual, inMatchWindow)
 	}
 
 	for i := range a.raw {
 		d := a.raw[i]
-		hc := a.classifyHit(d, duel)
+		hc := a.classifyHit(d, individual)
 		if hc.victim == "" {
 			// Can't attribute the hit to a known victim; skip rather than
 			// inventing a slot-numbered name.
@@ -663,9 +664,9 @@ type hitInfo struct {
 
 // classifyHit resolves a raw hit's attacker/victim identities at hit time and
 // derives the world/self/env/tele/stomp/team flags + the resolved weapon
-// (environmental category folded in). duel forces enemy classification for a
-// colour-team 1v1 (F20).
-func (a *DamageAnalyzer) classifyHit(d rawDamage, duel bool) hitInfo {
+// (environmental category folded in). individual forces enemy classification
+// for a colour-tagged 1v1 (F20) and for every other mode with no teams.
+func (a *DamageAnalyzer) classifyHit(d rawDamage, individual bool) hitInfo {
 	h := hitInfo{}
 	h.isWorld = d.attacker < 0
 	h.isSelf = !h.isWorld && d.attacker == d.victim
@@ -693,7 +694,7 @@ func (a *DamageAnalyzer) classifyHit(d rawDamage, duel bool) hitInfo {
 			h.weapon = env
 		}
 	}
-	h.isTeam = !duel && !h.isWorld && !h.isSelf && attackerTeam != "" &&
+	h.isTeam = !individual && !h.isWorld && !h.isSelf && attackerTeam != "" &&
 		victimTeam != "" && attackerTeam == victimTeam
 	return h
 }
@@ -729,7 +730,7 @@ func (a *DamageAnalyzer) classifyHit(d rawDamage, duel bool) hitInfo {
 // hit is bounded to its armor share (save), a tp4 team hit to 0, all skipped
 // for dtSUICIDE (combat.c:722). Telefrags are handled separately (the wire
 // 9999 clamp breaks the raw+deathValue identity) and excluded here.
-func (a *DamageAnalyzer) computeBounded(tp int, duel bool, inMatchWindow func(int32) bool) []int {
+func (a *DamageAnalyzer) computeBounded(tp int, individual bool, inMatchWindow func(int32) bool) []int {
 	b := make([]int, len(a.raw))
 
 	type frameKey struct {
@@ -745,7 +746,7 @@ func (a *DamageAnalyzer) computeBounded(tp int, duel bool, inMatchWindow func(in
 
 	for i := range a.raw {
 		d := a.raw[i]
-		hc := a.classifyHit(d, duel)
+		hc := a.classifyHit(d, individual)
 		if hc.victim == "" || !inMatchWindow(d.tMs) {
 			continue
 		}
@@ -914,22 +915,6 @@ func armorFraction(items int) float64 {
 		return 0.3
 	}
 	return 0
-}
-
-// tpModeApplies reports whether the demo's mode lets the teamplay cvar
-// count, mirroring tp_num()'s isTeam()||isCTF()||coop gate
-// (ktx/src/g_utils.c:1586). The KTX demoinfo mode string carries the
-// verdict; without demoinfo we can't tell and let the caller's other
-// gates decide (returns true).
-func (a *DamageAnalyzer) tpModeApplies() bool {
-	if a.core == nil || a.core.DemoInfo == nil || a.core.DemoInfo.Mode == "" {
-		return true
-	}
-	switch strings.ToLower(a.core.DemoInfo.Mode) {
-	case "team", "ctf", "coop":
-		return true
-	}
-	return false
 }
 
 // boundedSkipReason names the server mode that makes the bounded

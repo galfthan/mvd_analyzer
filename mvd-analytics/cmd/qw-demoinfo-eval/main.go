@@ -303,15 +303,15 @@ func scoreDemo(path string) ([]row, error) {
 // exact gate StatsHandler's spree increment reads (client.c:4865), so the
 // diagnostic has to read the same thing.
 //
-// Every demo this harness scores carries a KTX demoinfo block, so the mode
-// verdict is always available — no roster-shape fallback is reachable here.
-// The earlier proxy (`len(teams) > 1`) misread two populations in opposite
-// directions: a clan-tagged duel or an FFA whose players carry colour teams
-// looked like teamplay, and a team game whose block named one team did not.
+// The mode half of the gate is the published descriptor's TeamShaped
+// (schema v75) — the same predicate the damage analyzer's bounded pass uses
+// — rather than the verbatim copy of the demoinfo-mode switch this used to
+// carry. The earlier proxy (`len(teams) > 1`) misread two populations in
+// opposite directions: a clan-tagged duel or an FFA whose players carry
+// colour teams looked like teamplay, and a team game whose block named one
+// team did not.
 func ktxTPNum(res *analyzer.Result) int {
-	switch strings.ToLower(res.DemoInfo.Mode) {
-	case "team", "ctf", "coop":
-	default:
+	if res.Match == nil || !res.Match.GameMode.TeamShaped() {
 		return 0
 	}
 	if res.Metadata == nil {

@@ -55,6 +55,13 @@ type MetadataAnalyzer struct {
 	finalScores  *FinalScores
 	timing       MatchTimingDetector
 
+	// Finalize's outputs, kept for PopulateCore (which runs right after it):
+	// the countdown-derived settings table and the defensive copy of the
+	// serverinfo map that Result carries. Both are published on CoreOutputs
+	// so the mode resolver and the ruleset gates read one copy.
+	settings      *MatchSettings
+	serverInfoOut map[string]string
+
 	// The `status` key tracked over time rather than last-write-wins, for
 	// the no-match marker (nomatch.go). serverInfo["status"] is the value
 	// at demo END; statusOpen / statusRunng are "what the server said in
@@ -271,6 +278,10 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 	}
 
 	mr.FinalScores = a.finalScores
+	// Kept for PopulateCore, which runs after this and publishes both onto
+	// CoreOutputs — the settings table is built here and nowhere else.
+	a.settings = mr.MatchSettings
+	a.serverInfoOut = mr.ServerInfo
 
 	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" && mr.FinalScores == nil {
 		return nil
@@ -283,10 +294,13 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 // (timeline: loc / floor-height / liquid / region control) can resolve the map
 // even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap —
 // plus the `//finalscores` record, which the match node reads for the map,
-// mode and team scores it could not resolve itself.
+// mode and team scores it could not resolve itself, and the serverinfo table
+// + countdown settings the mode resolver (roster node) reads.
 func (a *MetadataAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.ServerInfoMap = a.serverInfo["map"]
 	co.FinalScores = a.finalScores
+	co.ServerInfo = a.serverInfoOut
+	co.MatchSettings = a.settings
 	co.ServerStatus = ServerStatus{
 		AtOpen:      a.statusOpen,
 		RunningSeen: a.statusRunng,

@@ -2,20 +2,33 @@ package result
 
 // DemoInfoResult contains parsed KTX embedded JSON stats (authoritative).
 type DemoInfoResult struct {
-	Version   int              `json:"version,omitempty"`
-	Date      string           `json:"date,omitempty"`
-	Map       string           `json:"map,omitempty"`
-	Hostname  string           `json:"hostname,omitempty"`
-	IP        string           `json:"ip,omitempty"`
-	Port      int              `json:"port,omitempty"`
-	Mode      string           `json:"mode,omitempty"`
-	Timelimit int              `json:"timelimit,omitempty"`
-	Fraglimit int              `json:"fraglimit,omitempty"`
-	Duration  int              `json:"duration,omitempty"`
-	Demo      string           `json:"demo,omitempty"`
-	Teams     []string         `json:"teams,omitempty"`
-	Players   []DemoInfoPlayer `json:"players,omitempty"`
-	RawJSON   string           `json:"rawJson,omitempty"` // For debugging failed parses
+	Version   int    `json:"version,omitempty"`
+	Date      string `json:"date,omitempty"`
+	Map       string `json:"map,omitempty"`
+	Hostname  string `json:"hostname,omitempty"`
+	IP        string `json:"ip,omitempty"`
+	Port      int    `json:"port,omitempty"`
+	Mode      string `json:"mode,omitempty"`
+	Timelimit int    `json:"timelimit,omitempty"`
+	Fraglimit int    `json:"fraglimit,omitempty"`
+	// Deathmatch and Teamplay are KTX's `dm` / `tp` keys — the deathmatch
+	// and teamplay cvars in force at match end (ktx/src/stats_json.c:
+	// 492-502). Both were parsed and then dropped before schema v75, which
+	// left the pipeline guessing at teamplay from serverinfo on demos whose
+	// server had already written the answer down.
+	//
+	// KTX writes each key only when the cvar is non-zero, so 0 here means
+	// "the server said zero, or this build wrote no key" — and for Teamplay
+	// on a KTX server those are the same statement, because FixRules forces
+	// teamplay to 0 outside team/ctf/coop and to 2 inside them
+	// (ktx/src/world.c:1674-1691).
+	Deathmatch int              `json:"deathmatch,omitempty"`
+	Teamplay   int              `json:"teamplay,omitempty"`
+	Duration   int              `json:"duration,omitempty"`
+	Demo       string           `json:"demo,omitempty"`
+	Teams      []string         `json:"teams,omitempty"`
+	Players    []DemoInfoPlayer `json:"players,omitempty"`
+	RawJSON    string           `json:"rawJson,omitempty"` // For debugging failed parses
 }
 
 // DemoInfoPlayer contains player stats from KTX JSON.

@@ -37668,6 +37668,7 @@
   },
   "demoInfo": {
     "date": "2026-04-25 13:17:15 +0200",
+    "deathmatch": 3,
     "demo": "2on2_1_vs_n_n[dm4]20260425-1307.mvd",
     "duration": 600,
     "hostname": "Malmo KTX Server #1",
@@ -38383,6 +38384,7 @@
       }
     ],
     "port": 27500,
+    "teamplay": 2,
     "teams": [
       "1",
       "n n"
@@ -49029,6 +49031,14 @@
   "match": {
     "duration": 600050,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "dm4",
     "mapTitle": "The Bad Place",
     "mode": "team",

@@ -7278,6 +7278,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 16:26:13 +0000",
+    "deathmatch": 3,
     "demo": "duel_ahemlockslie_vs_42[skull]20260424-1616.mvd",
     "duration": 600,
     "hostname": "nl.quake.world:27502 [QW-Group]",
@@ -13101,6 +13102,14 @@
   "match": {
     "duration": 599993,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "skull",
     "mapTitle": "Skull Hunt",
     "mode": "duel",
@@ -13110,6 +13119,7 @@
         "frags": 9,
         "kills": 10,
         "name": "AHemlocksLie",
+        "rawTeam": "'tro",
         "suicides": 1,
         "team": "AHemlocksLie"
       },
@@ -13118,6 +13128,7 @@
         "frags": 20,
         "kills": 21,
         "name": "42",
+        "rawTeam": "red",
         "suicides": 1,
         "team": "42"
       }
@@ -13125,7 +13136,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

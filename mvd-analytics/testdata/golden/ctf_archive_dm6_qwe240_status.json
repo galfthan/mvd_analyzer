@@ -30899,6 +30899,14 @@
   "match": {
     "duration": 887601,
     "gameDir": "ctf",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "roster",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "dm6",
     "mapTitle": "The Dark Zone",
     "players": [
@@ -30907,6 +30915,7 @@
         "frags": 5,
         "kills": 3,
         "name": "Chipie",
+        "rawTeam": "red",
         "suicides": 3,
         "team": "Chipie"
       },
@@ -30915,13 +30924,14 @@
         "frags": 539,
         "kills": 47,
         "name": "Pain",
+        "rawTeam": "blue",
         "suicides": 0,
         "team": "Pain"
       }
     ],
     "sources": {
       "map": "serverinfo",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

@@ -1088,6 +1088,14 @@
   "match": {
     "duration": 3167,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "serverinfo",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "dm6",
     "mapTitle": "The Dark Zone",
     "mode": "FFA",
@@ -1105,6 +1113,7 @@
         "frags": 0,
         "kills": 0,
         "name": "SMOK",
+        "rawTeam": "rr",
         "suicides": 0,
         "team": "SMOK"
       }
@@ -1112,7 +1121,7 @@
     "sources": {
       "map": "serverinfo",
       "mode": "finalscores",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

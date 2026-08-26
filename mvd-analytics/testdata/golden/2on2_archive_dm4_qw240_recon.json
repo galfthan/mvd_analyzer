@@ -41164,6 +41164,14 @@
   "match": {
     "duration": 600053,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "countdown",
+        "teamBased": "serverinfo"
+      },
+      "teamBased": true
+    },
     "map": "dm4",
     "mapTitle": "The Bad Place",
     "players": [

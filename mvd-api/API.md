@@ -913,7 +913,18 @@ server also renders standalone at **`GET /docs/result-schema`**.
 Common frontend features → the call that backs them.
 
 - **Match header / scoreboard** → `GET /overview` (one call: teams,
-  players, top streaks/powerups, degraded flag).
+  players, top streaks/powerups, degraded flag). **Branch on
+  `gameMode.teamBased`, never on the mode string.** `overview.mode` is the
+  server's own DISPLAY spelling (`Duel`, `FFA`, `Clan Arena`) and there are
+  five such vocabularies in the archive with no translation between them;
+  `gameMode` (schema v75) is the normalised verdict, with a `sources` block
+  naming which vocabulary decided each field. When `teamBased` is false —
+  every duel, FFA, race — the match is laid out with ONE SIDE PER PLAYER:
+  `teams` is one row per player, every `players[].team` equals the player's
+  own name (the raw clan tag rides on `match.players[].rawTeam`), and there
+  are no team aggregates or region control to render. That is the same shape
+  duels have always returned, so a client that already handles a duel
+  scoreboard handles FFA with no new code.
 - **Kill feed with obituaries** → `GET /events?types=frag` (use
   `/frags` if you need the `isSuicide`/`isTeamKill` flags instead).
 - **Score-over-time line** → `GET /events?types=frag`, accumulate

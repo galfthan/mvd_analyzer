@@ -9384,6 +9384,14 @@
   "match": {
     "duration": 359983,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "serverinfo",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "nova",
     "mapTitle": "Nova -",
     "mode": "FFA",
@@ -9393,6 +9401,7 @@
         "frags": 3,
         "kills": 3,
         "name": "nexus",
+        "rawTeam": "'tro",
         "suicides": 0,
         "team": "nexus"
       },
@@ -9401,6 +9410,7 @@
         "frags": 19,
         "kills": 20,
         "name": "SMOK",
+        "rawTeam": "rr",
         "suicides": 1,
         "team": "SMOK"
       }
@@ -9408,7 +9418,7 @@
     "sources": {
       "map": "serverinfo",
       "mode": "finalscores",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

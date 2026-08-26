@@ -1367,37 +1367,35 @@ func longestMs(iv []result.Interval) int32 {
 }
 
 // isTeamplay reports whether this match had real teams, mirroring KTX's
-// isTeam() gate on the transfer counters. The serverinfo/countdown
-// teamplay cvar is the direct signal; the roster's duel verdict and a
-// team-membership count back it up on demos that carry neither.
+// isTeam() gate on the transfer counters. It is the mode descriptor's
+// TeamBased verdict (analyzer/gamemode.go), which resolves KTX's demoinfo
+// `tp`, the serverinfo / countdown teamplay cvars, the mode vocabularies and
+// the roster shape in that order — the precedence this function used to
+// carry inline, minus its own ad-hoc solo-mode table.
+//
+// The duel check stays in front of it: MatchAnalyzer can promote a
+// no-demoinfo two-player match to duel AFTER the descriptor was resolved,
+// and this post-processor runs later still, so the roster is the fresher
+// signal on exactly that population.
 //
 // KTX's own gate is the MODE (`k_mode == gtTeam`, ktx/src/g_utils.c:1581),
 // not the cvar, and the two disagree: an FFA server can run with
-// `teamplay 2` set — the ffa_5[dm4] demo in the test corpus does — and
-// then every player sits on their own "team" (often the empty string).
-// Trusting the cvar there made `DropperTeam == Team` trivially true and
-// invented a pack transfer for every backpack anyone picked up. So a mode
-// KTX would not count for is rejected before the cvar is consulted.
+// `teamplay 2` set and then every player sits on their own "team" (often the
+// empty string). Trusting the cvar there made `DropperTeam == Team`
+// trivially true and invented a pack transfer for every backpack anyone
+// picked up. The descriptor rejects a mode KTX would not count for before
+// the cvar is consulted, which is where that rule now lives.
 func isTeamplay(res *Result, co *CoreOutputs) bool {
 	if co.IsDuel() {
 		return false
 	}
-	if res.Metadata != nil {
-		if ms := res.Metadata.MatchSettings; ms != nil {
-			if isNonTeamMode(ms.Mode) {
-				return false
-			}
-			if ms.Teamplay > 0 {
-				return true
-			}
-		}
-		if tp, ok := res.Metadata.ServerInfo["teamplay"]; ok {
-			return tp != "" && tp != "0"
-		}
+	if gm := co.Mode(); gm != nil {
+		return gm.TeamBased
 	}
-	// No cvar: fall back to the roster shape — teams exist and at least
-	// one holds more than a single player (an FFA scoreboard lists each
-	// player under their own colour, which is not teamplay).
+	// No descriptor at all — a hand-built registry with no roster node.
+	// Fall back to the roster shape: teams exist and at least one holds more
+	// than a single player (an FFA scoreboard lists each player under their
+	// own colour, which is not teamplay).
 	if res.Match == nil {
 		return false
 	}
@@ -1411,19 +1409,6 @@ func isTeamplay(res *Result, co *CoreOutputs) bool {
 		if n > 1 {
 			return true
 		}
-	}
-	return false
-}
-
-// isNonTeamMode reports whether the countdown's Mode line names a mode
-// where every player fights alone, so "the dropper's team" is not a real
-// team. The names come from KTX's countdown centerprint (metadata.go
-// flattens "F F A" to "FFA"); anything unrecognised — including CTF, where
-// the teams ARE real — falls through to the cvar and roster checks.
-func isNonTeamMode(mode string) bool {
-	switch strings.ToLower(mode) {
-	case "ffa", "duel", "1on1", "race", "bloodfest":
-		return true
 	}
 	return false
 }

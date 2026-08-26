@@ -61647,6 +61647,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 22:23:21 +0100",
+    "deathmatch": 1,
     "demo": "4on4_ahoy_vs_bhb[obsidian]20260424-2203.mvd",
     "duration": 1200,
     "hostname": "dm6.uk #1 antilag",
@@ -63044,6 +63045,7 @@
       }
     ],
     "port": 28501,
+    "teamplay": 2,
     "teams": [
       "ahoy",
       "BhB"
@@ -78083,6 +78085,14 @@
   "match": {
     "duration": 1200128,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "obsidian",
     "mapTitle": "Obsidian",
     "mode": "team",

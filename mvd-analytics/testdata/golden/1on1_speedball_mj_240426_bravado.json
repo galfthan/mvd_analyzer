@@ -10692,6 +10692,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 22:54:38 +0000",
+    "deathmatch": 3,
     "demo": "duel_speedball_vs_mj[bravado]20260424-2244.mvd",
     "duration": 600,
     "hostname": "dm6.nl #1 antilag",
@@ -17034,6 +17035,14 @@
   "match": {
     "duration": 600001,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "bravado",
     "mapTitle": "Bravado -",
     "mode": "duel",
@@ -17051,6 +17060,7 @@
         "frags": 6,
         "kills": 6,
         "name": "mj",
+        "rawTeam": "red",
         "suicides": 0,
         "team": "mj"
       }
@@ -17058,7 +17068,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {

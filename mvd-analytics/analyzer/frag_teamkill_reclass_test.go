@@ -153,3 +153,50 @@ func TestFragFinalizeTeamkillDemotionMovesTeamKills(t *testing.T) {
 		t.Errorf("global byWeapon[gl] = %d, want 0", n)
 	}
 }
+
+// In an individual mode nothing is a team kill. The userinfo `team` tag in
+// FFA is clan decoration — on ffa-demos/ffa_1[dm2]260116-2057.mvd three
+// players wear `red` and kill each other — and KTX's teamkill obituaries are
+// unreachable outside team / CTF / coop anyway (client.c:5342-5343). Before
+// v75 the tag comparison alone flagged 34 of that demo's 211 kills.
+func TestFragFinalizeIndividualModeHasNoTeamkills(t *testing.T) {
+	build := func(individual bool) *Result {
+		a := NewFragAnalyzer()
+		ctx := &Context{}
+		ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "toast", Team: "red"}
+		ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "Amr", Team: "red"}
+		_ = a.Init(ctx)
+		a.timing.Started = true
+
+		co := &CoreOutputs{}
+		if individual {
+			gm := resolveGameMode(nil, nil, nil, map[string]string{"mode": "ffa"}, nil, nil)
+			co.GameMode = &gm
+		} else {
+			gm := resolveGameMode(nil, nil, nil, map[string]string{"mode": "4on4", "teamplay": "2"}, nil, nil)
+			co.GameMode = &gm
+		}
+		a.UseCoreOutputs(co)
+
+		_ = a.OnEvent(&events.PrintEvent{Level: 1, Message: "Amr eats toast's pineapple\n", TimeMs: 1000})
+		var res Result
+		if err := a.Finalize(&res); err != nil {
+			t.Fatal(err)
+		}
+		return &res
+	}
+
+	ffa := build(true)
+	if len(ffa.Frags.Frags) != 1 || ffa.Frags.Frags[0].IsTeamKill {
+		t.Errorf("FFA frag = %+v, want a plain kill", ffa.Frags.Frags)
+	}
+	if pf := ffa.Frags.ByPlayer["toast"]; pf == nil || pf.Kills != 1 || pf.TeamKills != 0 {
+		t.Errorf("FFA toast = %+v, want kills 1 / teamkills 0", pf)
+	}
+
+	// The same wire on a team game keeps the tag comparison.
+	team := build(false)
+	if len(team.Frags.Frags) != 1 || !team.Frags.Frags[0].IsTeamKill {
+		t.Errorf("4on4 frag = %+v, want a team kill", team.Frags.Frags)
+	}
+}

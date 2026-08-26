@@ -56767,6 +56767,7 @@
   },
   "demoInfo": {
     "date": "2026-04-17 20:13:08 +0000",
+    "deathmatch": 1,
     "demo": "4on4_'_vs_'tbg[schloss]20260417-1952.mvd",
     "duration": 1200,
     "hostname": "dm6.nl #2 antilag",
@@ -58157,6 +58158,7 @@
       }
     ],
     "port": 28502,
+    "teamplay": 2,
     "teams": [
       "'\u003e\u003c\u003e",
       "'tbg"
@@ -75796,6 +75798,14 @@
   "match": {
     "duration": 1200017,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "schloss",
     "mapTitle": "Schloss Adler",
     "mode": "team",

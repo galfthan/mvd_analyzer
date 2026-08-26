@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (better-ffa-support) — schema v75: the match boundary becomes a Layer-1 event; matchless FFA demos become analyzable
+## unreleased (better-ffa-support) — schema v75: the match boundary becomes a Layer-1 event; matchless FFA demos become analyzable; one game-mode descriptor replaces five vocabularies
 
 **KTX servers running `k_matchless 1` (continuous FFA / CTF play) never
 broadcast "The match has begun!"** — `ktx/src/match.c:1294-1297` gates that
@@ -82,9 +82,81 @@ which demos have one at all.
   the only golden coverage of the `status` signal end to end; the wire
   shape itself is pinned in `mvd-reader/parser/matchstart_test.go`.
 
-FFA still has no mode semantics — team tags are decoration in FFA, and
-`match.teams`, teamkill attribution and the aim enemy set still read them.
-That is `plan-ffa-support.md` PR B.
+### There are no teams in FFA
+
+**A userinfo `team` tag in FFA is clan decoration, not a side.** KTX forces
+`teamplay 0` there (`ktx/src/world.c:1652-1655`) and the players still wear
+their tags: on `ffa-demos/ffa_1[dm2]260116-2057.mvd` three of the eight wear
+`red` and spend the match killing each other. Every team-sensitive surface
+read the tag anyway — **34 of that demo's 211 kills came out flagged as team
+kills**, those three were dropped from each other's aim enemy sets, their
+hits were classified as team damage, and `match.teams` reported four
+pseudo-teams with `playerStats.teams` aggregating five of them.
+
+- **ADDED: `match.gameMode`** — one normalised mode verdict with per-field
+  provenance: `canonical` (`duel` | `team` | `ffa` | `ctf` | `ca` |
+  `wipeout` | `race` | `hoony` | `ra` | `coop` | `unknown`), `teamBased`,
+  `rounds`, `submodes[]`, `sources`. It replaces five unrelated vocabularies
+  that had no translation between them (KTX's demoinfo `mode`, the
+  `//finalscores` mode name, the countdown centerprint's display spelling,
+  the composite serverinfo `mode` key, the hub search facet) and the four
+  independent hand-written "is this a solo mode" tables that disagreed with
+  each other. All five raw vocabularies stay published verbatim beside it.
+  Republished on `/overview` as `gameMode`; `overview.mode` keeps its
+  existing display-string behaviour and is now documented as such.
+- **ADDED on `demoInfo`: `deathmatch` and `teamplay`** — KTX's own `dm` /
+  `tp` keys (`ktx/src/stats_json.c:492-502`), parsed since v1 and dropped on
+  the floor until now. `tp` is the strongest teamplay signal there is:
+  FixRules forces teamplay to 0 outside team/CTF/coop and to 2 inside them
+  (`world.c:1674-1691`), so on a KTX server `teamplay > 0` and "this is a
+  team game" are the same statement in both directions.
+- **CHANGED: a mode with no teams is laid out INDIVIDUALLY** — `match.teams`
+  is one row per player, every `match.players[].team` equals the player's own
+  name, and `match.sources.teams` reads `individual` (new value). This is the
+  layout duels have always produced, generalised: a consumer needs no mode
+  string to render an individual scoreboard, and the web UI's existing
+  `team === name` shape test keeps working. `playerStats.teams` is absent,
+  as it already was on most FFA demos.
+- **ADDED: `match.players[].rawTeam`** — the userinfo tag the individual
+  layout replaced, kept because it is real information (clan membership); it
+  just names no side. Omitted when it would repeat `team`.
+- **CHANGED: team kills, team damage and the aim enemy set** all read the
+  descriptor now. On the 13-demo FFA set the team-kill count is 0 everywhere
+  (was 34 / 37 / 17 / 7 / 1 on five of them); those kills now count as kills.
+  KTX cannot print a team-kill obituary outside team/CTF/coop at all
+  (`ktx/src/client.c:5342-5343`), so this removes a misfire rather than a
+  signal.
+- **CHANGED: `//finalscores` is no longer adopted as a team list in an
+  individual mode.** There it names the top-two PLAYERS
+  (`ktx/src/commands.c:6963-6977`) — on `ffa_1[dm2]` `":f" 36 "SMOK" 35`.
+  The directive is still published verbatim on `metadata.finalScores`.
+- **CHANGED: region control is absent by design on a non-team mode** of more
+  than two participants, instead of falling out empty by accident on the
+  "needs exactly two labels" test. A duel — and a two-player FFA, which is
+  the same match — still gets it, with the two players as the sides. The
+  timeline's baked `regionControl.teamA/teamB` were being filled from the raw
+  tags (`'tro` vs `dojo` over eight players on `ffa_1[dm2]`); they are now
+  empty there.
+- **One parser for the composite serverinfo `mode` key**
+  (`result.ParseServerinfoMode`). Three call sites ran their own
+  `strings.Split(si["mode"], "-")` with three deliberately different token
+  selections; the selections are kept, the splits are not.
+  `damagerecon.SkipModeReasons` now publishes the `boundedMode`
+  `skipped:*` vocabulary, and a drift test pins the OpenAPI enum against it
+  — that enum was a hand-mirrored copy that had already lagged once.
+
+### Web UI
+
+An individual-mode demo shows no team information at all: no Teams panel, no
+"Per Team" aggregates, no Team / TK / TDmg scoreboard columns, and a
+frag-sorted individual scoreboard. Per-player colours come from a separate
+twelve-entry `PLAYER_PALETTE` assigned by frag rank, delivered through the
+same single canonical `TEAM_COLORS` array every surface already indexes — the
+four-entry team palette is assigned by team NAME and has nothing to key on
+for a field of eleven. The topbar names the leader and the field size rather
+than inventing an "A vs B" matchup. Duel rendering is unchanged except that
+its Team column (a copy of the Player column) and its always-empty TK / TDmg
+columns now hide with the rest.
 
 ## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
 

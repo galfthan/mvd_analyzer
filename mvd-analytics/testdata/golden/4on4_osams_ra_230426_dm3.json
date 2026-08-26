@@ -57195,6 +57195,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 01:37:35 +0600",
+    "deathmatch": 1,
     "demo": "4on4_.ra._vs_osams[dm3]260424-0117.mvd",
     "duration": 1200,
     "hostname": "Spider MSK Antilag:28503",
@@ -58844,6 +58845,7 @@
       }
     ],
     "port": 28503,
+    "teamplay": 2,
     "teams": [
       ".ra.",
       "oSaMs"
@@ -77677,6 +77679,14 @@
   "match": {
     "duration": 1200059,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "dm3",
     "mapTitle": "The Abandoned Base",
     "mode": "team",

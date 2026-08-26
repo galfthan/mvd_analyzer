@@ -23450,6 +23450,7 @@
   },
   "demoInfo": {
     "date": "2026-04-25 02:33:08 -0300",
+    "deathmatch": 3,
     "demo": "2on2_wd_vs_pys[aerowalk]20260425-0222.mvd",
     "duration": 600,
     "hostname": "! ring @ ilha :27500",
@@ -24094,6 +24095,7 @@
       }
     ],
     "port": 27500,
+    "teamplay": 2,
     "teams": [
       "wd",
       "pys"
@@ -35754,6 +35756,14 @@
   "match": {
     "duration": 600040,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "aerowalk",
     "mapTitle": "Aerowalk",
     "mode": "team",

@@ -351,8 +351,9 @@ the shared `CoreOutputs` bundle: `clock` (the match time base — start/end,
 demo offset, pauses, wall-clock anchor), [`demoinfo`](analyzer/demoinfo.md)
 (`DemoInfo` / `Names` / `Slots`), [`identity`](analyzer/identity.md)
 (reconnect-unified `Sessions`), [`frag`](analyzer/frag.md) (`FragEntries`),
-and `roster` (the canonical player/team table with the duel
-player-name-as-team rewrite folded in — the duel verdict, participant set,
+and `roster` (the canonical player/team table with the individual
+player-name-as-team rewrite folded in, plus the normalised game-mode
+descriptor `co.GameMode` — the mode verdict, the duel verdict, participant set,
 and `TeamFor(name, rawTeam)`). The rest either implement `CoreConsumer` to
 read those fields — [`metadata`](analyzer/metadata.md),
 [`match`](analyzer/match.md), [`messages`](analyzer/messages.md),
@@ -663,12 +664,15 @@ flowchart TB
   metadata -->|"metadata"| match
   metadata -->|"metadata"| no_match
   metadata -->|"metadata"| player_stats
+  metadata -->|"metadata"| roster
   metadata -->|"metadata"| timeline
   metadata -->|"metadata"| wall_clock
   no_match -->|"no-match"| wall_clock
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
+  roster -->|"roster"| frag
   roster -->|"roster"| items
+  roster -->|"roster"| match
   roster -->|"roster"| messages
   roster -->|"roster"| player_stats
   roster -->|"roster"| shots
@@ -772,7 +776,10 @@ type CoreOutputs struct {
     Sessions             map[int][]ResolvedSession  // per-slot, reconnect-unified occupancies; internal-only
     FragEntries          []FragEntry                // canonical raw frag log — feeds the result.Frags section
     VictimNamedTeamkills []FragEntry                // victim-only teamkill obituaries (input to frags-final); internal-only
-    Roster               *Roster                    // duel-aware team table (co.TeamFor); internal-only
+    Roster               *Roster                    // mode-aware team table (co.TeamFor); internal-only
+    GameMode             *result.GameMode           // normalised mode descriptor — feeds match.gameMode
+    ServerInfo           map[string]string          // merged fullserverinfo cvars; internal-only
+    MatchSettings        *MatchSettings             // parsed countdown settings; internal-only
 }
 ```
 

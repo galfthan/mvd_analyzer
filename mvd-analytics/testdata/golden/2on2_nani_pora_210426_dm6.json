@@ -19154,6 +19154,7 @@
   },
   "demoInfo": {
     "date": "2026-04-21 18:32:10 +0000",
+    "deathmatch": 3,
     "demo": "2on2_nani_vs_pora[dm6]20260421-1822.mvd",
     "duration": 600,
     "hostname": "Hamina KTX Server #1",
@@ -19818,6 +19819,7 @@
       }
     ],
     "port": 27500,
+    "teamplay": 2,
     "teams": [
       "nAnI",
       "pora"
@@ -27453,6 +27455,14 @@
   "match": {
     "duration": 600000,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "dm6",
     "mapTitle": "The Dark Zone",
     "mode": "team",

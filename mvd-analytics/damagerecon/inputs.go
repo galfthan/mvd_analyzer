@@ -3,7 +3,6 @@ package damagerecon
 import (
 	"math"
 	"sort"
-	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -186,12 +185,16 @@ func buildInputs(res *result.Result) *inputs {
 	}
 	sort.Strings(in.order)
 
-	mode := ""
-	if res.DemoInfo != nil {
-		mode = strings.ToLower(res.DemoInfo.Mode)
+	// The duel verdict comes from the published mode descriptor
+	// (match.gameMode, schema v75) — the same one analyzer.CoreOutputs.IsDuel
+	// feeds — instead of this package's own re-reading of the demoinfo mode
+	// string. A pre-v75 cached Result carries no descriptor, so the
+	// two-player shape stays as the fallback.
+	if res.Match != nil && res.Match.GameMode != nil {
+		in.duel = res.Match.GameMode.Canonical == result.GameModeDuel
+	} else {
+		in.duel = len(res.Streams.Players) == 2
 	}
-	in.duel = mode == "duel" || mode == "1on1" ||
-		(mode == "" && len(res.Streams.Players) == 2)
 	// Enemy-attribution prior (study §"The enemy-attribution prior"):
 	// prefer the enemy explanation of an ambiguous delta. Mode-aware — the
 	// bias earns duel recall but costs team-game precision.

@@ -3,6 +3,7 @@ package analyzer
 import (
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -575,5 +576,96 @@ func TestMatchAnalyzer_ConnectionWithoutPlayIsNotAPlayer(t *testing.T) {
 	}
 	if len(res.Match.Players) != 0 {
 		t.Errorf("match.players = %+v, want none — jOn never entered the game", res.Match.Players)
+	}
+}
+
+// ffaCore builds the CoreOutputs an FFA demo produces: no demoinfo block, a
+// serverinfo `mode` of "ffa", so the descriptor resolves individual.
+func ffaCore() *CoreOutputs {
+	gm := resolveGameMode(nil, nil, nil, map[string]string{"mode": "ffa", "deathmatch": "3"}, nil, nil)
+	return &CoreOutputs{Roster: &Roster{participants: map[string]struct{}{}, individual: true}, GameMode: &gm}
+}
+
+// The individual layout: one team per player, team == name, the raw userinfo
+// tag kept on rawTeam, and sources.teams naming the reason. This is the same
+// shape a duel produces, which is the point — a consumer needs no mode string
+// to render an individual scoreboard.
+func TestMatchAnalyzer_IndividualLayout(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	a.UseCoreOutputs(ffaCore())
+
+	// Three players, two of them wearing the SAME clan tag — the shape that
+	// used to produce a two-player "red" pseudo-team.
+	for i, p := range []struct {
+		slot  int
+		uid   int
+		name  string
+		team  string
+		frags int
+	}{
+		{2, 39, "toast", "red", 33},
+		{7, 43, ":f", "red", 35},
+		{8, 45, "SMOK", "rr", 35},
+	} {
+		_ = a.OnEvent(matchUserInfo(p.slot, p.uid, p.name, p.team, 0))
+		if i == 0 {
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 600})
+		}
+		_ = a.OnEvent(&events.SpawnEvent{PlayerNum: p.slot, TimeMs: 1000})
+		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: p.slot, Frags: p.frags, TimeMs: 60000})
+	}
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 3 {
+		t.Fatalf("match.players = %+v, want 3", res.Match.Players)
+	}
+	want := map[string]string{"toast": "red", ":f": "red", "SMOK": "rr"}
+	for _, p := range res.Match.Players {
+		if p.Team != p.Name {
+			t.Errorf("%s: team = %q, want the player's own name", p.Name, p.Team)
+		}
+		if p.RawTeam != want[p.Name] {
+			t.Errorf("%s: rawTeam = %q, want %q", p.Name, p.RawTeam, want[p.Name])
+		}
+	}
+	if len(res.Match.Teams) != 3 {
+		t.Errorf("match.teams = %+v, want one row per player", res.Match.Teams)
+	}
+	if res.Match.Sources.Teams != result.MatchSrcIndividual {
+		t.Errorf("sources.teams = %q, want %q", res.Match.Sources.Teams, result.MatchSrcIndividual)
+	}
+}
+
+// In an individual mode `//finalscores` names the top-two PLAYERS, not two
+// teams, so it must never be adopted as a team list — the invented-side bug
+// the layout exists to remove.
+func TestMatchAnalyzer_FinalScoresNotAdoptedAsTeamsInFFA(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	co := ffaCore()
+	co.FinalScores = &FinalScores{Mode: "FFA", Team1: ":f", Score1: 36, Team2: "SMOK", Score2: 35}
+	a.UseCoreOutputs(co)
+
+	// Nobody participated (a truncated recording), so the derived rows are
+	// empty and the old code would have filled them from //finalscores.
+	_ = a.OnEvent(matchUserInfo(2, 39, "toast", "red", 0))
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Teams) != 0 {
+		t.Errorf("match.teams = %+v, want none — //finalscores names players in FFA", res.Match.Teams)
+	}
+	if res.Match.Sources.Teams != "" {
+		t.Errorf("sources.teams = %q, want empty", res.Match.Sources.Teams)
 	}
 }
