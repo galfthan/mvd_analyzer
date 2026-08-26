@@ -88,7 +88,7 @@ func ComputeWithOptions(res *result.Result, opt Options) (*result.DamageResult, 
 	if !res.Streams.ShotStreamsComputed {
 		return nil, ErrNoSpatialStreams
 	}
-	if mode := SkipModeReasonFromResult(res); mode != "" {
+	if mode := ReconSkipReason(res); mode != "" {
 		return nil, ErrSkippedMode
 	}
 
@@ -97,6 +97,55 @@ func ComputeWithOptions(res *result.Result, opt Options) (*result.DamageResult, 
 	in.bsp = loadBSPGate(res)
 	events := attribute(in)
 	return aggregate(in, events), nil
+}
+
+// ReconSkipReason is this package's complete stand-down reason for an
+// assembled Result — "" when the reconstruction will run. It is the server-
+// mode detection SkipModeReason shares with the KTX-side bounded pass, plus
+// the gates that are damagerecon's alone because they are about the damage
+// MODEL rather than about the wire values.
+func ReconSkipReason(res *result.Result) string {
+	if r := SkipModeReasonFromResult(res); r != "" {
+		return r
+	}
+	return quadRegimeSkipReason(res)
+}
+
+// quadRegimeSkipReason stands the reconstruction down on a recording whose
+// QUAD MULTIPLIER the damage model does not follow. KTX makes the quad an
+// OCTA in deathmatch 4 — `damage *= (deathmatch != 4 ? 4 : tot_mode_enabled()
+// ? FrogbotQuadMultiplier() : 8)`, ktx/src/combat.c:541 — while this package
+// models a flat ×4 everywhere (quadFactor, modelBounds). Every modeled quad
+// hit in such a demo would be published at about half its true value, stamped
+// Source = "reconstructed" with nothing marking it, which is the one thing
+// this pipeline may not do.
+//
+// Deliberately narrow: it fires only when the recording actually contains a
+// quad, so quad-less deathmatch 4 (povdmm4 duels are the population) stays
+// analyzable. `deathmatch` is a plain serverinfo key the pipeline already
+// reads elsewhere (analyzer/backpack_linkage.go:378).
+//
+// Modelling the octa instead of refusing — and the tot_mode custom
+// multiplier, which is not on the wire at all — is plan-damage-recon.md §8
+// lead C. This gate is the interim answer, not the intended one.
+//
+// It is NOT part of SkipModeReason, because that one also gates
+// analyzer/damage.go's bounded reconstruction, which reads the server's own
+// damage values off the wire and does not care which multiplier produced
+// them.
+func quadRegimeSkipReason(res *result.Result) string {
+	if res == nil || res.Metadata == nil || res.Metadata.ServerInfo["deathmatch"] != "4" {
+		return ""
+	}
+	if res.Streams == nil {
+		return ""
+	}
+	for i := range res.Streams.Players {
+		if len(res.Streams.Players[i].Quad) > 0 {
+			return "dmm4-quad"
+		}
+	}
+	return ""
 }
 
 // SkipModeReasonFromResult applies the full two-source skip detection to

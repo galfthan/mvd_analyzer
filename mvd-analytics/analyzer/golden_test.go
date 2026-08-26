@@ -94,6 +94,14 @@ func TestGoldenCorpus(t *testing.T) {
 		t.Fatalf("create golden dir: %v", err)
 	}
 
+	// A BSP-skipped case is a golden comparison that did NOT happen. Left to
+	// t.Skip alone that is invisible without -v, so a misconfigured BSP dir
+	// reports a green suite over zero compared demos (a relative
+	// MVDA_BSP_DIR used to do exactly that). Collect them and say so once, on
+	// stderr, where a passing run still shows it.
+	var bspSkipped []string
+	var compared int
+
 	for _, entry := range corpus {
 		t.Run(entry.Label, func(t *testing.T) {
 			mvdPath := ensureCached(t, cacheDir, entry)
@@ -117,7 +125,8 @@ func TestGoldenCorpus(t *testing.T) {
 				if *updateGolden {
 					t.Fatalf("refusing to regenerate %s — %s; would write a golden missing height/liquid/loc", entry.Label, msg)
 				}
-				t.Skip(msg)
+				bspSkipped = append(bspSkipped, entry.Label+" ("+m+")")
+				t.Skipf("%s", msg)
 			}
 
 			// Line of sight is computed lazily (not by the default pipeline),
@@ -148,11 +157,27 @@ func TestGoldenCorpus(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read golden %s: %v\nrun with -args -update-golden to create it", goldenPath, err)
 			}
+			compared++
 			if !bytes.Equal(expected, actual) {
 				t.Errorf("%s differs from golden — run with -args -update-golden if intended.\nfirst diff line: %s",
 					entry.Label, firstDiffLine(expected, actual))
 			}
 		})
+	}
+
+	if len(bspSkipped) == 0 {
+		return
+	}
+	summary := fmt.Sprintf("compared %d of %d demos — %d skipped, BSP not resolvable (MVDA_BSP_DIR=%q, lookup order: MVDA_BSP_DIR, ./bsps).\n  these demos were NOT checked against their goldens:\n  %s",
+		compared, len(corpus), len(bspSkipped),
+		os.Getenv("MVDA_BSP_DIR"), strings.Join(bspSkipped, "\n  "))
+	fmt.Fprintf(os.Stderr, "\nWARNING: TestGoldenCorpus %s\n  run `make bsps` to populate the repo-root bsps/ map set.\n\n", summary)
+	// An unpopulated repo-root bsps/ is a fresh-clone state: skip, as the
+	// README documents. A dir the caller ASKED for that resolves nothing is a
+	// misconfiguration, and reporting green over zero golden comparisons is
+	// the failure mode this check exists for.
+	if compared == 0 && bspDirExplicit {
+		t.Fatalf("no golden comparison ran: %s", summary)
 	}
 }
 

@@ -93370,27 +93370,33 @@
           "byWeapon": {
             "axe": {
               "attacks": 48,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 4,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 28,
-              "hits": 15
+              "hits": 15,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 443,
-              "hits": 257
+              "hits": 257,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 167,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 50,
-              "hits": 40
+              "hits": 40,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -93594,6 +93600,8 @@
           "efficiency": 0.4492,
           "frags": 44,
           "kills": 53,
+          "maxQuadSpree": 8,
+          "maxSpree": 10,
           "src": "derived",
           "suicides": 5,
           "teamKills": 4
@@ -93620,27 +93628,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 48,
-              "hits": 12
+              "hits": 12,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 1,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 65,
-              "hits": 45
+              "hits": 45,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 387,
-              "hits": 233
+              "hits": 233,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 88,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 92,
-              "hits": 77
+              "hits": 77,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -93837,6 +93851,8 @@
           "efficiency": 0.5286,
           "frags": 68,
           "kills": 74,
+          "maxQuadSpree": 6,
+          "maxSpree": 19,
           "src": "derived",
           "suicides": 1,
           "teamKills": 5
@@ -93863,23 +93879,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 5,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 34,
-              "hits": 27
+              "hits": 27,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 452,
-              "hits": 152
+              "hits": 152,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 145,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 44,
-              "hits": 28
+              "hits": 28,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94064,6 +94085,8 @@
           "efficiency": 0.3298,
           "frags": 30,
           "kills": 31,
+          "maxQuadSpree": 1,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -94090,23 +94113,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 14,
-              "hits": 5
+              "hits": 5,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 85,
-              "hits": 73
+              "hits": 73,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 330,
-              "hits": 233
+              "hits": 233,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 101,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 37,
-              "hits": 33
+              "hits": 33,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94300,6 +94328,8 @@
           "efficiency": 0.6045,
           "frags": 74,
           "kills": 81,
+          "maxQuadSpree": 5,
+          "maxSpree": 16,
           "src": "derived",
           "suicides": 2,
           "teamKills": 5
@@ -94326,31 +94356,38 @@
           "byWeapon": {
             "axe": {
               "attacks": 6,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 11,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 3,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 43,
-              "hits": 30
+              "hits": 30,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 345,
-              "hits": 171
+              "hits": 171,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 226,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 44,
-              "hits": 35
+              "hits": 35,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94554,6 +94591,8 @@
           "efficiency": 0.437,
           "frags": 47,
           "kills": 52,
+          "maxQuadSpree": 7,
+          "maxSpree": 8,
           "src": "derived",
           "suicides": 2,
           "teamKills": 3
@@ -94580,23 +94619,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 7,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 94,
-              "hits": 57
+              "hits": 57,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 330,
-              "hits": 179
+              "hits": 179,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 177,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 31,
-              "hits": 25
+              "hits": 25,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94790,6 +94834,8 @@
           "efficiency": 0.5649,
           "frags": 67,
           "kills": 74,
+          "maxQuadSpree": 1,
+          "maxSpree": 12,
           "src": "derived",
           "suicides": 1,
           "teamKills": 6
@@ -94816,23 +94862,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 42,
-              "hits": 8
+              "hits": 8,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 10,
-              "hits": 6
+              "hits": 6,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 471,
-              "hits": 204
+              "hits": 204,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 223,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 40,
-              "hits": 27
+              "hits": 27,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95024,6 +95075,8 @@
           "efficiency": 0.4556,
           "frags": 39,
           "kills": 41,
+          "maxQuadSpree": 3,
+          "maxSpree": 5,
           "src": "derived",
           "suicides": 1,
           "teamKills": 1
@@ -95050,23 +95103,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 26,
-              "hits": 6
+              "hits": 6,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 10,
-              "hits": 7
+              "hits": 7,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 474,
-              "hits": 210
+              "hits": 210,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 47,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 67,
-              "hits": 48
+              "hits": 48,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95263,6 +95321,8 @@
           "efficiency": 0.3652,
           "frags": 34,
           "kills": 42,
+          "maxQuadSpree": 5,
+          "maxSpree": 9,
           "src": "derived",
           "suicides": 4,
           "teamKills": 4
@@ -95298,27 +95358,33 @@
           "byWeapon": {
             "axe": {
               "attacks": 48,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 67,
-              "hits": 16
+              "hits": 16,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 217,
-              "hits": 151
+              "hits": 151,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1574,
-              "hits": 873
+              "hits": 873,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 668,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 158,
-              "hits": 125
+              "hits": 125,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95528,6 +95594,8 @@
           "efficiency": 0.5264,
           "frags": 224,
           "kills": 249,
+          "maxQuadSpree": 8,
+          "maxSpree": 16,
           "src": "derived",
           "suicides": 9,
           "teamKills": 16
@@ -95544,31 +95612,38 @@
           "byWeapon": {
             "axe": {
               "attacks": 6,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 90,
-              "hits": 20
+              "hits": 20,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 4,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 152,
-              "hits": 109
+              "hits": 109,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1658,
-              "hits": 766
+              "hits": 766,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 506,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 247,
-              "hits": 188
+              "hits": 188,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95777,6 +95852,8 @@
           "efficiency": 0.4252,
           "frags": 179,
           "kills": 199,
+          "maxQuadSpree": 7,
+          "maxSpree": 19,
           "src": "derived",
           "suicides": 8,
           "teamKills": 12
@@ -95790,7 +95867,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -96738,6 +96815,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 9863,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -96819,6 +96897,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 10490,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -96872,6 +96951,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11198,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -96901,6 +96981,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11817,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -97102,6 +97183,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 15402,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -98363,6 +98445,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 39942,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -98743,6 +98826,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 47669,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -98754,6 +98838,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 50136,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -98765,6 +98850,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 51721,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -98772,6 +98858,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 52343,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -99053,6 +99140,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 58655,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -99088,6 +99176,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 59265,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -99232,6 +99321,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 60551,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99266,6 +99356,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 60823,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -99285,6 +99376,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 61473,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99303,6 +99395,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 64515,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -99317,6 +99410,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 62421,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99457,6 +99551,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 68576,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -99486,6 +99581,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 69173,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -99518,6 +99614,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 69775,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -99564,6 +99661,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 70394,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -99614,6 +99712,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 70432,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -99648,6 +99747,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 72069,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99869,6 +99969,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 76717,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99927,6 +100028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 77315,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99968,6 +100070,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 78159,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100137,6 +100240,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 82319,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100164,6 +100268,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 83220,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100200,6 +100305,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 84571,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100387,6 +100493,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 89937,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100747,6 +100854,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 99170,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -100790,6 +100898,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 102105,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -100808,6 +100917,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 100313,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -100833,6 +100943,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 101248,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101014,6 +101125,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 116156,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101057,6 +101169,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 117922,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101244,6 +101357,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 127622,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -101370,6 +101484,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 135479,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -101388,6 +101503,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 133263,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -101509,6 +101625,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 135738,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -101598,6 +101715,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 136374,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101735,6 +101853,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 138984,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -101847,6 +101966,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 142127,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -101854,6 +101974,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 142052,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102020,6 +102141,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 145509,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102204,6 +102326,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 150659,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -102334,6 +102457,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 158086,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102413,6 +102537,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 158404,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -102427,6 +102552,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 158892,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -102478,6 +102604,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159516,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -102492,6 +102619,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 159619,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102613,6 +102741,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 160567,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102695,6 +102824,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 160879,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -102727,6 +102857,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162471,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -102745,6 +102876,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162048,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102835,6 +102967,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 164429,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102867,6 +103000,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 165450,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102911,6 +103045,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 168808,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -102932,6 +103067,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 169437,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -102950,6 +103086,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 167619,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -103000,6 +103137,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 169891,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103062,6 +103200,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 171242,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103117,6 +103256,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 172042,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103178,6 +103318,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 172909,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103392,6 +103533,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 178512,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103526,6 +103668,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 179345,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103629,6 +103772,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 181547,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -103732,6 +103876,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 185626,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -104319,6 +104464,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 204079,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -104452,6 +104598,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 204044,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -104523,6 +104670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 210827,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -104566,6 +104714,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 221122,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -104610,6 +104759,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 221880,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -104704,6 +104854,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 224008,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -104747,6 +104898,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 225582,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -105000,6 +105152,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 233742,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -105036,6 +105189,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 234464,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -105089,6 +105243,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 233706,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -105282,6 +105437,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 244075,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -105343,6 +105499,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 244796,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -105541,6 +105698,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 245139,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -105570,6 +105728,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 248124,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -105577,6 +105736,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 245965,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -105635,6 +105795,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 248909,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -105642,6 +105803,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 246720,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -105806,6 +105968,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 252360,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -105838,6 +106001,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253013,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -105870,6 +106034,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253629,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -105978,6 +106143,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253219,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -106063,6 +106229,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 258536,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -106144,6 +106311,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 265897,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -106193,6 +106361,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 268565,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -106253,6 +106422,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 267595,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -106328,6 +106498,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 267562,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -106367,6 +106538,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 269928,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -106413,6 +106585,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 268046,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -106436,6 +106609,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 270549,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -106496,6 +106670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 271201,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -106561,6 +106736,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 270408,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -106801,6 +106977,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 273881,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -106862,6 +107039,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 274829,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -106890,6 +107068,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 277709,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -108352,6 +108531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 306550,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -109794,6 +109974,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 328872,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -109830,6 +110011,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 332265,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -109855,6 +110037,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 332924,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -109869,6 +110052,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 333755,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -109876,6 +110060,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 334873,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -109894,6 +110079,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 333997,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -109912,6 +110098,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 334803,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -109923,6 +110110,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337239,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -109941,6 +110129,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 339417,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -109968,6 +110157,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 340005,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -109986,6 +110176,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 340628,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -110018,6 +110209,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 341251,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -110132,6 +110324,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 343989,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -110150,6 +110343,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 344612,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -110164,6 +110358,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 345235,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -110380,6 +110575,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 347697,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -110967,6 +111163,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 355606,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -110981,6 +111178,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 356364,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -111010,6 +111208,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 357194,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111037,6 +111236,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 357403,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -111242,6 +111442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 360055,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -111263,6 +111464,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 360674,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111338,6 +111540,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 363129,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111403,6 +111606,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 363856,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111501,6 +111705,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 369279,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111654,6 +111859,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373674,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -111665,6 +111871,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 374155,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -111774,6 +111981,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 377360,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112052,6 +112260,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 385881,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -112068,6 +112277,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386064,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112100,6 +112310,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 391597,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112125,6 +112336,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 392395,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112157,6 +112369,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 393675,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112168,6 +112381,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 393712,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112179,6 +112393,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 394356,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112190,6 +112405,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 394894,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -112197,6 +112413,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 395426,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -112337,6 +112554,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 398439,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112373,6 +112591,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 399419,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112384,6 +112603,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 399490,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -112402,6 +112622,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 400453,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112424,6 +112645,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 400778,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -112438,6 +112660,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 401172,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -112450,6 +112673,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 401465,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112497,6 +112721,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 402984,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -112504,6 +112729,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 406218,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -112555,6 +112781,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 408815,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -112580,6 +112807,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 407909,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112607,6 +112835,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 408971,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -112643,6 +112872,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 413347,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -112661,6 +112891,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 413945,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -112679,6 +112910,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 411960,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112702,6 +112934,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 417365,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -112783,6 +113016,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 418108,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -112890,6 +113124,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 419061,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -113132,6 +113367,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 420957,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -113178,6 +113414,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 423087,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -113252,6 +113489,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 423838,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -113294,6 +113532,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 424794,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -113319,6 +113558,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 425221,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -113372,6 +113612,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 426149,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -113483,6 +113724,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 427957,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -113559,6 +113801,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 431917,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -113838,6 +114081,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 436839,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -114429,6 +114673,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 446440,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -114489,6 +114734,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 446648,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -114507,6 +114753,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 447502,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -114536,6 +114783,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 447786,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -114614,6 +114862,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 451045,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -114621,6 +114870,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 451079,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -114680,6 +114930,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 451865,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -114744,6 +114995,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 452743,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -114787,6 +115039,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 453745,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -114937,6 +115190,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 455694,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -115104,6 +115358,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 461466,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -115122,6 +115377,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 463622,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -115176,6 +115432,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 464933,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -115212,6 +115469,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 467122,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -115219,6 +115477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467302,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -115237,6 +115496,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468721,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -115635,6 +115895,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 477485,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -115653,6 +115914,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 477897,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -115736,6 +115998,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 481049,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -116048,6 +116311,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 487809,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -116145,6 +116409,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 497093,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -116187,6 +116452,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 500495,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -116212,6 +116478,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 501199,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -116280,6 +116547,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 499423,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -116513,6 +116781,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 503051,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -116720,6 +116989,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 509033,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116858,6 +117128,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 510079,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117021,6 +117292,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 513891,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117101,6 +117373,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 515071,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117198,6 +117471,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 517111,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117245,6 +117519,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 518294,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -117334,6 +117609,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 520357,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117639,6 +117915,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 525909,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117682,6 +117959,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 527089,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117693,6 +117971,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528240,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117704,6 +117983,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528274,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117720,6 +118000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 528867,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117769,6 +118050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 530886,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -117780,6 +118062,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 530921,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -117849,6 +118132,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 532168,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -117883,6 +118167,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 534145,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117901,6 +118186,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 537500,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -117919,6 +118205,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 538011,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -117941,6 +118228,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 538430,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -117955,6 +118243,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 538778,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -118009,6 +118298,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 539989,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118060,6 +118350,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 540568,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118202,6 +118493,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 542060,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118290,6 +118582,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 544375,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118326,6 +118619,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 545824,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118349,6 +118643,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 546933,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -118370,6 +118665,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 547655,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -119246,6 +119542,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 566371,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -119304,6 +119601,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 564657,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -119945,6 +120243,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 582708,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -119956,6 +120255,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582462,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -120332,6 +120632,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 593617,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -120439,6 +120740,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 594045,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -120558,6 +120860,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 594816,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -120641,6 +120944,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 597869,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -120681,6 +120985,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 598331,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -120748,6 +121053,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 599097,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -120871,6 +121177,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 602811,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -120911,6 +121218,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 604001,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -120922,6 +121230,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 606200,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -120969,6 +121278,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 606407,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -120990,6 +121300,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 607164,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -121019,6 +121330,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 607927,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -121121,6 +121433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 611459,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121178,6 +121491,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 612974,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121243,6 +121557,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 614844,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121268,6 +121583,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 616082,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121482,6 +121798,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 623487,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121540,6 +121857,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 624143,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121586,6 +121904,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 625072,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121615,6 +121934,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 625795,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121739,6 +122059,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 631124,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121801,6 +122122,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 631990,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121904,6 +122226,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 633554,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121925,6 +122248,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 636800,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121954,6 +122278,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 637345,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121976,6 +122301,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 638098,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -121999,6 +122325,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 639330,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122061,6 +122388,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 640461,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -122068,6 +122396,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 640565,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -122093,6 +122422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 641252,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -122111,6 +122441,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 641423,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122240,6 +122571,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 646182,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122276,6 +122608,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 649112,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122298,6 +122631,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 647047,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122327,6 +122661,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 649842,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122359,6 +122694,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 647910,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122421,6 +122757,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 653966,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -122446,6 +122783,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 652364,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122489,6 +122827,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 654901,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -122522,6 +122861,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 652884,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -122544,6 +122884,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 653167,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -122902,6 +123243,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 665937,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -123077,6 +123419,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 669398,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -123130,6 +123473,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 671268,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123166,6 +123510,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 672203,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123195,6 +123540,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 672479,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -123319,6 +123665,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 675765,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -123348,6 +123695,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 676421,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -123510,6 +123858,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 680782,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -123642,6 +123991,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 681959,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -123746,6 +124096,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 683834,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -123782,6 +124133,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 684496,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -123914,6 +124266,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 688373,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -123997,6 +124350,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 688685,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -124015,6 +124369,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 688826,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -124080,6 +124435,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 689274,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -124141,6 +124497,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 690631,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -124191,6 +124548,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 691628,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -124590,6 +124948,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 700403,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -124640,6 +124999,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 701442,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -124741,6 +125101,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 704022,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124782,6 +125143,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 705023,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125019,6 +125381,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 712200,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125196,6 +125559,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 722234,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125236,6 +125600,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 723132,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125261,6 +125626,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 724235,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125300,6 +125666,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 725287,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -125307,6 +125674,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 725424,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -125323,6 +125691,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 726049,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125334,6 +125703,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 728458,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -125363,6 +125733,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 728355,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -125489,6 +125860,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 731882,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -125734,6 +126106,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 740880,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126034,6 +126407,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 747589,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126067,6 +126441,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 748317,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126168,6 +126543,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 752802,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126212,6 +126588,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 753492,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126959,6 +127336,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 762970,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126995,6 +127373,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 764087,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127027,6 +127406,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 764588,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -127045,6 +127425,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 765596,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -127052,6 +127433,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 765881,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127068,6 +127450,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 766476,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -127125,6 +127508,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 768094,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -127165,6 +127549,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 769035,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127212,6 +127597,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 771956,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127259,6 +127645,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 770606,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127331,6 +127718,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 771112,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127435,6 +127823,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 772171,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127625,6 +128014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 773730,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127672,6 +128062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 774894,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127942,6 +128333,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 783663,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127971,6 +128363,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 784747,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127985,6 +128378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 787698,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -127992,6 +128386,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 785721,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128010,6 +128405,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 789371,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128024,6 +128420,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 789981,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128045,6 +128442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 788232,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128096,6 +128494,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 789119,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -128107,6 +128506,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 789046,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -128123,6 +128523,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 789085,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128146,6 +128547,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 789942,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -128168,6 +128570,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 789981,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128186,6 +128589,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 790305,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -128250,6 +128654,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 797486,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -128283,6 +128688,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 798045,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128294,6 +128700,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 798253,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -128313,6 +128720,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 800343,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -128338,6 +128746,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 802571,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128345,6 +128754,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 800759,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128370,6 +128780,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 800967,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -128395,6 +128806,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 801897,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -128413,6 +128825,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 803200,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -128442,6 +128855,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 805512,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128467,6 +128881,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 806148,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128481,6 +128896,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 806736,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -128596,6 +129012,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 806389,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128653,6 +129070,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 807435,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -128692,6 +129110,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 808164,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -129096,6 +129515,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 819436,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -129197,6 +129617,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 820786,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -129204,6 +129625,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 823138,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -129211,6 +129633,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 823793,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -129218,6 +129641,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 821444,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129254,6 +129678,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822410,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -129354,6 +129779,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 825385,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -129436,6 +129862,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 827405,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129458,6 +129885,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 828001,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129502,6 +129930,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 828871,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129607,6 +130036,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 829912,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129693,6 +130123,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 831722,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129910,6 +130341,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 834634,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -129939,6 +130371,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 835538,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -130474,6 +130907,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 848221,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -130652,6 +131086,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 854631,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -130703,6 +131138,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 855623,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -130750,6 +131186,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 858644,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -130779,6 +131216,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 859241,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -130808,6 +131246,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 860184,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -130855,6 +131294,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 859909,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -130884,6 +131324,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 861585,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -131146,6 +131587,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 868782,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -131208,6 +131650,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 869438,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -131655,6 +132098,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 885041,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -131669,6 +132113,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 883198,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -131696,6 +132141,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 885717,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -131732,6 +132178,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 886375,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -131739,6 +132186,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 884619,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -131797,6 +132245,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 884864,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -132294,6 +132743,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 890860,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -132359,6 +132809,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 892309,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -133498,6 +133949,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 913359,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -133570,6 +134022,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 914534,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -133620,6 +134073,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 920759,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -133649,6 +134103,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 921797,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -134105,6 +134560,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 939694,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134134,6 +134590,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 938202,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -134163,6 +134620,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 939728,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -134375,6 +134833,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 946621,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134382,6 +134841,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 947212,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134389,6 +134849,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 947838,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134396,6 +134857,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 948465,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134403,6 +134865,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 949127,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134410,6 +134873,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 950453,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134417,6 +134881,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 951070,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134424,6 +134889,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 951732,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134431,6 +134897,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 952357,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134438,6 +134905,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 952980,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134445,6 +134913,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 953608,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134466,6 +134935,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 954231,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134696,6 +135166,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 957790,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -134743,6 +135214,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 956195,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -134772,6 +135244,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 959106,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -135106,6 +135579,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 961401,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -135183,6 +135657,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 963413,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -135234,6 +135709,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 967707,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -135252,6 +135728,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 966457,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -135274,6 +135751,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 968918,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -135281,6 +135759,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 967360,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -135317,6 +135796,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 969544,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -135324,6 +135804,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 967463,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -135364,6 +135845,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 967950,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -135389,6 +135871,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 968295,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -135614,6 +136097,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 974802,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -135692,6 +136176,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 978953,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -135699,6 +136184,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 977152,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -135733,6 +136219,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 980022,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -135858,6 +136345,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 981794,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -135936,6 +136424,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 982420,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136004,6 +136493,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 983008,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136434,6 +136924,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 998881,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -136452,6 +136943,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 999504,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -136470,6 +136962,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1000125,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -136477,6 +136970,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1000469,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136484,6 +136978,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1000708,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -136491,6 +136986,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1001331,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -136498,6 +136994,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1001782,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136505,6 +137002,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1002816,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136512,6 +137010,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1003433,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136519,6 +137018,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1004023,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136547,6 +137047,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1005919,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -136637,6 +137138,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1009909,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136666,6 +137168,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1008175,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -136677,6 +137180,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1008243,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -136741,6 +137245,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1011953,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -136874,6 +137379,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1011364,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -136954,6 +137460,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1012779,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -137223,6 +137730,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1016693,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -137241,6 +137749,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1016832,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -137252,6 +137761,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1019143,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -137270,6 +137780,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1019936,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -137281,6 +137792,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1020767,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -137310,6 +137822,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1021771,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -137335,6 +137848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1022602,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -137410,6 +137924,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1023364,
         "hit": true,
         "player": "KreatoR",
         "source": "sound",
@@ -137559,6 +138074,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1028921,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
@@ -138934,6 +139450,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1063596,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -139028,6 +139545,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1066403,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -139051,6 +139569,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1069550,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -139171,6 +139690,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1070652,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -139285,6 +139805,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1071519,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -139410,6 +139931,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1075119,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -139460,6 +139982,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1075986,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -139485,6 +140008,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1078306,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -139844,6 +140368,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1096194,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -139937,6 +140462,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1097233,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -140036,6 +140562,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1100800,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -140076,6 +140603,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1099380,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140205,6 +140733,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1104774,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140234,6 +140763,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1107854,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -140241,6 +140771,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1105777,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140266,6 +140797,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1108859,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -140287,6 +140819,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1106712,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140316,6 +140849,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1109553,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -140334,6 +140868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1107647,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -140363,6 +140898,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1110140,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -140377,6 +140913,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1108270,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140431,6 +140968,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1109517,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -140502,6 +141040,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1113015,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140538,6 +141077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1124111,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140588,6 +141128,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1124936,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140653,6 +141194,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1125597,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -140696,6 +141238,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1128655,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -140703,6 +141246,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1126467,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -140920,6 +141464,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1136863,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -140934,6 +141479,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1135686,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -140990,6 +141536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1136413,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -141009,6 +141556,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1136689,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -141053,6 +141601,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1137902,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -141064,6 +141613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1138006,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -141143,6 +141693,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1140010,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -141303,6 +141854,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1142883,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -141372,6 +141924,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1144960,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
@@ -141379,6 +141932,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1145376,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -141412,6 +141966,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1146243,
         "hit": true,
         "player": "rghst",
         "source": "sound",
@@ -141469,6 +142024,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1149186,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -141491,6 +142047,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1149636,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -141502,6 +142059,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1150191,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -141767,6 +142325,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1154004,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -141881,6 +142440,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1154836,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -142471,6 +143031,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1168993,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -142530,6 +143091,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1170677,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -142662,6 +143224,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1172288,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -142689,6 +143252,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1174697,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -142722,6 +143286,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1175495,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -142877,6 +143442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1180658,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -142956,6 +143522,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1182355,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
@@ -142981,6 +143548,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1183397,
         "hit": true,
         "player": "Doomie",
         "source": "sound",
@@ -143003,6 +143571,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1185711,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -143075,6 +143644,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1185815,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -143169,6 +143739,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1187342,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -143201,6 +143772,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1188448,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -143287,6 +143859,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1190109,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -143347,6 +143920,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1190560,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -143379,6 +143953,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1191153,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -143415,6 +143990,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1191534,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
@@ -143498,6 +144074,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1192854,
         "hit": true,
         "player": "ThundeR",
         "source": "sound",
@@ -143671,6 +144248,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1197485,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -143743,6 +144321,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1199753,
         "hit": true,
         "player": "nexus",
         "source": "sound",

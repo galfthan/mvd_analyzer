@@ -293,6 +293,9 @@ func TestArtifact_TimeUnitEcho(t *testing.T) {
 		"frag":      true, "damage": true, "shots": true, "aim": true, "opening": true,
 		"match": true, "messages": true, "timeline": true, "items": true,
 		"backpacks": true, "weapon-pickups": true,
+		// no-match carries the date markers' atMs (demo-clock ms) and
+		// unixMs (epoch ms).
+		"no-match": true,
 		// player-stats carries window.*Ms and hold.*.ms/longestMs; its
 		// shares and efficiency are unitless ratios.
 		"player-stats": true,

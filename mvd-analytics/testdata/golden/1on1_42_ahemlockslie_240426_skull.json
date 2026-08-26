@@ -13723,19 +13723,23 @@
           "byWeapon": {
             "gl": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 70,
-              "hits": 19
+              "hits": 19,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 121,
-              "hits": 56
+              "hits": 56,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 9,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -13898,6 +13902,8 @@
           "efficiency": 0.3125,
           "frags": 9,
           "kills": 10,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -13924,19 +13930,23 @@
           "byWeapon": {
             "lg": {
               "attacks": 321,
-              "hits": 96
+              "hits": 96,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 119,
-              "hits": 55
+              "hits": 55,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 5,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 1,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -14103,6 +14113,8 @@
           "efficiency": 0.6563,
           "frags": 20,
           "kills": 21,
+          "maxQuadSpree": 0,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -14133,7 +14145,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -14272,6 +14284,7 @@
     },
     "shots": [
       {
+        "flightEnd": 3065,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14310,6 +14323,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 3974,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14321,6 +14335,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 5870,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -14328,6 +14343,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 7623,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -14335,6 +14351,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8432,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14349,6 +14366,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 9785,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -14374,6 +14392,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 12231,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14381,6 +14400,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 11938,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14392,6 +14412,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13090,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -14399,6 +14420,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13623,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14410,6 +14432,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 13887,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14417,6 +14440,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14636,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14428,6 +14452,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14935,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14449,6 +14474,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 32649,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -14456,6 +14482,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 32783,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14599,6 +14626,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 39493,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14659,6 +14687,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 40467,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -14670,6 +14699,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 40574,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -14681,6 +14711,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 49106,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14688,6 +14719,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 58158,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14695,6 +14727,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59389,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -14968,6 +15001,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 67635,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15047,6 +15081,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 67934,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15110,6 +15145,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 68589,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15137,6 +15173,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 76194,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15144,6 +15181,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 76652,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15151,6 +15189,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 77129,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15162,6 +15201,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 77155,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15173,6 +15213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 77823,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15184,6 +15225,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 77887,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15195,6 +15237,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 83755,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15206,6 +15249,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84820,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15217,6 +15261,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 94080,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15224,6 +15269,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 95466,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15235,6 +15281,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96272,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15242,6 +15289,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96389,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15249,6 +15297,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96885,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15265,6 +15314,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 97115,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15276,6 +15326,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111885,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15503,6 +15554,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 123012,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15510,6 +15562,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 123778,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15517,6 +15570,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 123778,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15524,6 +15578,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 124963,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15531,6 +15586,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 124817,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15542,6 +15598,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 125873,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15549,6 +15606,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 125834,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15565,6 +15623,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 126583,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15576,6 +15635,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 127037,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15583,6 +15643,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 127557,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15601,6 +15662,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 130115,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15608,6 +15670,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 130609,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15619,6 +15682,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 130700,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15630,6 +15694,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 147232,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15637,6 +15702,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 147310,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15648,6 +15714,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 148206,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15655,6 +15722,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 148482,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15666,6 +15734,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149180,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15677,6 +15746,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149232,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15688,6 +15758,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149946,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15699,6 +15770,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 150079,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15710,6 +15782,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161024,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15721,6 +15794,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161193,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15732,6 +15806,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161936,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15739,6 +15814,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 162131,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15746,6 +15822,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 162985,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15753,6 +15830,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163946,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15760,6 +15838,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 164517,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15774,6 +15853,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 167738,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15781,6 +15861,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 167816,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15788,6 +15869,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 168966,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15795,6 +15877,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 168686,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15802,6 +15885,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 169634,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15809,6 +15893,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 171725,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -15816,6 +15901,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 173767,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15827,6 +15913,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 174754,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -15838,6 +15925,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 175066,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15849,6 +15937,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 175868,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15860,6 +15949,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 176543,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15867,6 +15957,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 187868,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15878,6 +15969,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188637,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -15885,6 +15977,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188881,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15903,6 +15996,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 198153,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -15995,6 +16089,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 199416,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16006,6 +16101,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199650,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16017,6 +16113,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200517,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16024,6 +16121,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 201491,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16031,6 +16129,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202777,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16042,6 +16141,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 203556,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16053,6 +16153,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 203793,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16060,6 +16161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 204751,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16067,6 +16169,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 205361,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16177,6 +16280,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 215361,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16184,6 +16288,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 216137,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16191,6 +16296,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 216052,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16207,6 +16313,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 217222,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16214,6 +16321,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 219517,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16221,6 +16329,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 219854,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16232,6 +16341,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 220026,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16243,6 +16353,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 241075,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16250,6 +16361,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 241036,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16257,6 +16369,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 241919,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16268,6 +16381,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 242598,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16279,6 +16393,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 242698,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16295,6 +16410,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243338,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -16311,6 +16427,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243802,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16322,6 +16439,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244477,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16568,6 +16686,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 271857,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16647,6 +16766,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 272714,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16694,6 +16814,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 284399,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16701,6 +16822,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 285529,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16789,6 +16911,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 288802,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -16880,6 +17003,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 289974,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16887,6 +17011,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 297620,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -16894,6 +17019,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 298558,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -16983,6 +17109,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 299658,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17058,6 +17185,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 300944,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17065,6 +17193,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 304009,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17072,6 +17201,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 307542,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17083,6 +17213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 308077,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17099,6 +17230,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 309048,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17110,6 +17242,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 310739,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17121,6 +17254,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 311308,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17171,6 +17305,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 315350,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17187,6 +17322,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 323282,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17198,6 +17334,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 324207,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17205,6 +17342,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 324727,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17221,6 +17359,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 325455,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17228,6 +17367,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 325778,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17239,6 +17379,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 325921,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17246,6 +17387,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 326846,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17257,6 +17399,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 326970,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17264,6 +17407,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 327830,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17303,6 +17447,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 338468,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17310,6 +17455,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 339454,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17317,6 +17463,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 340022,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17328,6 +17475,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 340479,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17335,6 +17483,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341220,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17346,6 +17495,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341528,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17353,6 +17503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341801,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17364,6 +17515,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 342609,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17371,6 +17523,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 342817,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17378,6 +17531,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 343996,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17385,6 +17539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 345544,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17392,6 +17547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346087,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17399,6 +17555,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346489,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17406,6 +17563,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 347336,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17413,6 +17571,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 348099,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17420,6 +17579,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351138,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17427,6 +17587,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 352813,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17434,6 +17595,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354711,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17441,6 +17603,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 355879,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17448,6 +17611,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 359037,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17455,6 +17619,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 360346,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17462,6 +17627,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 360021,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17473,6 +17639,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 361048,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17480,6 +17647,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 363970,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -17509,6 +17677,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 365333,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17557,6 +17726,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 366580,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17689,6 +17859,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 371476,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17729,6 +17900,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 372359,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17769,6 +17941,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 388933,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -17780,6 +17953,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 390362,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -17854,6 +18028,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 395076,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -17933,6 +18108,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 396063,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18034,6 +18210,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 403046,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18050,6 +18227,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 404010,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18057,6 +18235,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405372,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18064,6 +18243,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405683,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18075,6 +18255,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 410463,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18082,6 +18263,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411515,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18093,6 +18275,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 415670,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18100,6 +18283,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 416346,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18107,6 +18291,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 416255,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18114,6 +18299,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 417985,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18125,6 +18311,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 418488,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18157,6 +18344,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 423450,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18243,6 +18431,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 424452,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18382,6 +18571,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 426218,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18389,6 +18579,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426584,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18405,6 +18596,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 426826,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18412,6 +18604,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427618,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18423,6 +18616,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427660,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18430,6 +18624,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 431021,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18437,6 +18632,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 431982,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18444,6 +18640,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 436059,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18455,6 +18652,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 436643,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18466,6 +18664,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 441696,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18477,6 +18676,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 441630,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18493,6 +18693,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 443163,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18500,6 +18701,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 443372,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18507,6 +18709,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 444345,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18514,6 +18717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446579,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18647,6 +18851,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 453865,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18661,6 +18866,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 454581,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18668,6 +18874,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 461333,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18717,6 +18924,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 467672,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18724,6 +18932,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467033,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18731,6 +18940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 475111,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18738,6 +18948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 475970,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18745,6 +18956,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 479773,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18756,6 +18968,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 480748,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18763,6 +18976,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 481098,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18770,6 +18984,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482695,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18777,6 +18992,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 482695,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18788,6 +19004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483464,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -18795,6 +19012,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483396,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18811,6 +19029,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 484048,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -18827,6 +19046,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 484295,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -18838,6 +19058,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 486737,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -18927,6 +19148,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 498308,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19102,6 +19324,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 510772,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19173,6 +19396,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 511642,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19230,6 +19454,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 512215,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19252,6 +19477,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 512760,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19268,6 +19494,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 512954,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19297,6 +19524,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 526488,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19457,6 +19685,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 531500,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19464,6 +19693,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 532543,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19471,6 +19701,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540253,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -19478,6 +19709,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541122,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19489,6 +19721,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541122,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19500,6 +19733,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541957,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19507,6 +19741,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542851,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19518,6 +19753,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542981,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19529,6 +19765,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543658,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19545,6 +19782,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543788,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19556,6 +19794,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 544450,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19572,6 +19811,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 544528,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19590,6 +19830,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 566473,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19597,6 +19838,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 577929,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19604,6 +19846,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 579589,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -19611,6 +19854,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580552,
         "player": "42",
         "source": "sound",
         "team": "42",
@@ -19618,6 +19862,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580644,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -19625,6 +19870,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 581085,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19641,6 +19887,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582018,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",
@@ -19648,6 +19895,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582031,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19659,6 +19907,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582748,
         "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
@@ -19670,6 +19919,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 583125,
         "hit": true,
         "player": "42",
         "source": "sound",
@@ -19681,6 +19931,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 583746,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "AHemlocksLie",

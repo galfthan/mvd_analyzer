@@ -540,6 +540,37 @@ func TestPlayerStatsAccuracySwappedWholesale(t *testing.T) {
 	}
 }
 
+// A KTX block is NOT uniform in what its hits counter counts, which is why
+// the marker is per weapon rather than per family: lg is one fire that
+// damaged, rl/gl only a projectile that TOUCHED a player
+// (ktx/src/weapons.c:994, :1329), sg/ssg pellets on both sides of the ratio
+// (:812, :387). Without this, a consumer diffing an archive demo's derived rl
+// hits against a modern demo's KTX hits reads a ~4x definition change as a
+// trend.
+func TestPlayerStatsKTXHitsConventionIsPerWeapon(t *testing.T) {
+	want := map[string]string{
+		"lg": result.HitsAnyDamage, "axe": result.HitsAnyDamage,
+		"ng": result.HitsAnyDamage, "sng": result.HitsAnyDamage,
+		"rl": result.HitsDirectImpact, "gl": result.HitsDirectImpact,
+		"sg": result.HitsPellets, "ssg": result.HitsPellets,
+	}
+	for w, c := range want {
+		if got := ktxHitsConvention(w); got != c {
+			t.Errorf("ktxHitsConvention(%q) = %q, want %q", w, got, c)
+		}
+	}
+	// End to end through the overlay: the served row must carry it beside
+	// the number it describes.
+	got := mustPlayerStats(t, storedResult(true), PlayerStatsOptions{})
+	rl := got.Players[0].Accuracy.ByWeapon["rl"]
+	if rl.Hits == nil {
+		t.Fatal("overlaid rl carries no hits")
+	}
+	if rl.HitsConvention != result.HitsDirectImpact {
+		t.Errorf("overlaid rl hitsConvention = %q, want %q", rl.HitsConvention, result.HitsDirectImpact)
+	}
+}
+
 func storedAccuracy(t *testing.T) *result.PlayerStatsAccuracy {
 	t.Helper()
 	r := storedResult(true)

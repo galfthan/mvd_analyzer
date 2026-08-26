@@ -1178,26 +1178,50 @@ func markersAgree(a, b candidate) bool {
 // projection onto match time needs the match window the timeline publishes on
 // Streams.Global.
 func wallClockPost(res *Result, co *CoreOutputs) {
-	if res == nil || res.Streams == nil {
+	if res == nil {
 		return
 	}
-	g := &res.Streams.Global
-
-	in := wallClockInputs{
-		DemoStartUnix: g.DemoStartUnixMs,
-		DemoStartAcc:  g.DemoStartAccuracyMs,
-		DemoOffsetMs:  g.DemoOffset,
-		MatchLengthMs: g.MatchEnd - g.MatchStart,
+	// A result with no `streams` block has no GlobalStream to write onto and
+	// no match window to project against, but the wire's date stamps were
+	// still read — they were simply dropped here until schema v74. The
+	// no-match marker is their home on such a result; the inputs below then
+	// describe a zero-width, zero-offset window, which resolveWallClock is
+	// already written for (see its wallKindMatchStart case).
+	//
+	// `res.Streams != nil` is the SAME predicate noMatchPost stamps on
+	// (nomatch.go), spelled the same way on purpose: the two branches here
+	// are exactly "has a GlobalStream" and "has a no-match marker", and no
+	// result can be in both.
+	var g *GlobalStream
+	if res.Streams != nil {
+		g = &res.Streams.Global
+	} else if res.NoMatch == nil {
+		return
 	}
-	for _, p := range g.Pauses {
-		// Only pauses INSIDE the match count. MatchLengthMs is the wall-clock
-		// width of the match-start → match-end window, and a countdown pause
-		// (AtMs < 0, the clock frozen before the match began) sits outside it —
-		// adding it walks a match-end stamp back past match start and can
-		// invent a marker disagreement on a demo whose stamps all agree.
-		if p.AtMs > 0 {
-			in.MatchLengthMs += p.DurationMs
+
+	var in wallClockInputs
+	if g != nil {
+		in = wallClockInputs{
+			DemoStartUnix: g.DemoStartUnixMs,
+			DemoStartAcc:  g.DemoStartAccuracyMs,
+			DemoOffsetMs:  g.DemoOffset,
+			MatchLengthMs: g.MatchEnd - g.MatchStart,
 		}
+		for _, p := range g.Pauses {
+			// Only pauses INSIDE the match count. MatchLengthMs is the wall-clock
+			// width of the match-start → match-end window, and a countdown pause
+			// (AtMs < 0, the clock frozen before the match began) sits outside it —
+			// adding it walks a match-end stamp back past match start and can
+			// invent a marker disagreement on a demo whose stamps all agree.
+			if p.AtMs > 0 {
+				in.MatchLengthMs += p.DurationMs
+			}
+		}
+	} else if co != nil && co.Clock != nil {
+		// The timeline copies these onto Streams.Global; with no Streams they
+		// have to come off the clock directly.
+		in.DemoStartUnix = co.Clock.DemoStartUnixMs
+		in.DemoStartAcc = co.Clock.DemoStartAccuracyMs
 	}
 	if co != nil && co.Clock != nil {
 		in.Markers = append(in.Markers, co.Clock.DateMarkers...)
@@ -1223,10 +1247,11 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 			in.FinalScores = &st
 		}
 	}
+	var markers []WallClockMarker
 	if len(in.Markers) > 0 {
-		g.DateMarkers = append([]WallClockMarker(nil), in.Markers...)
+		markers = append([]WallClockMarker(nil), in.Markers...)
 	}
-	if g.DemoStartSource == "" {
+	if g != nil && g.DemoStartSource == "" {
 		g.DemoStartSource = in.DemoStartSrc
 	}
 
@@ -1234,8 +1259,19 @@ func wallClockPost(res *Result, co *CoreOutputs) {
 	// The `//finalscores` marker is appended last because it is resolved last —
 	// its year comes out of the anchor the other markers produced.
 	if anchor.FinalScoresMarker != nil {
-		g.DateMarkers = append(g.DateMarkers, *anchor.FinalScoresMarker)
+		markers = append(markers, *anchor.FinalScoresMarker)
 	}
+	if g == nil {
+		// Markers only. The graded anchor beside them on GlobalStream is a
+		// projection through the match window (DemoOffset for the start
+		// prints, match length for the end stamps), and this result has no
+		// match window — see NoMatchResult.DateMarkers. resolveWallClock still
+		// ran, for the one thing it does that needs no window: completing the
+		// year-less `//finalscores` stamp.
+		res.NoMatch.DateMarkers = markers
+		return
+	}
+	g.DateMarkers = markers
 	if anchor.MatchStartUnixMs == 0 {
 		return
 	}

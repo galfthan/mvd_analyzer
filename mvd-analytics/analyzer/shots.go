@@ -77,6 +77,13 @@ type rawShot struct {
 	victims     []string
 	victimKinds []string // parallel to victims: "enemy" | "team" | "self"
 	linked      bool     // a projectile has already claimed this fire
+
+	// flightEndTMs is the despawn time of the tracked flight this fire
+	// launched (linkProjectiles), valid only while linked is set. Published
+	// as Shot.FlightEnd so consumers get the fire→flight association this
+	// analyzer used to compute Hit and then discard — the reconstructed-aim
+	// tier re-runs the impact join against it (aimcore/recon.go).
+	flightEndTMs int32
 }
 
 // rawShotDmg is a DamageEvent (hitscan sg/ssg/lg, or projectile rl/gl) kept
@@ -387,11 +394,16 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 		if !inMatchWindow(s.tMs) {
 			continue
 		}
-		out.Shots = append(out.Shots, Shot{
+		sh := Shot{
 			Time: s.tMs, Player: s.name, Team: team,
 			Weapon: s.weapon, Source: s.source, Hit: s.hit, Victims: s.victims,
 			VictimKinds: emitKinds(s.victimKinds),
-		})
+		}
+		if s.linked {
+			end := s.flightEndTMs
+			sh.FlightEnd = &end
+		}
+		out.Shots = append(out.Shots, sh)
 		ag := aggByName[s.name]
 		if ag == nil {
 			ag = &shotAgg{team: team, weapons: make(map[string]*weaponAgg)}
@@ -444,6 +456,9 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	if ms := a.core.MatchStartMs(); ms > 0 {
 		for i := range out.Shots {
 			out.Shots[i].Time -= ms
+			if fe := out.Shots[i].FlightEnd; fe != nil {
+				*fe -= ms
+			}
 		}
 	}
 	a.rebaseSpatialStreams(result)
@@ -585,6 +600,7 @@ func (a *ShotsAnalyzer) linkProjectiles(flights []rawProjectile, dmgBySlot map[i
 			continue
 		}
 		best.linked = true
+		best.flightEndTMs = p.despawnTMs
 		var victims, kinds []string
 		seen := make(map[string]bool)
 		for _, d := range dmgBySlot[best.slot] {

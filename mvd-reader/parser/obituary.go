@@ -61,16 +61,25 @@ const (
 )
 
 // ObituaryPattern is one death-print marker with its classification.
-// `Marker` is the identifying substring; `Suffix` bounds the victim for
-// the infix / killer-first kinds (empty otherwise); `Weapon` is the
-// canonical short code for downstream attribution (rl, lg, sg, …, plus the
-// synthetic "suicide", "water", "lava", "world", "fall", "squish",
-// "tele", "teamkill", "unknown"); `Suicide` / `TeamKill` flag the variants
-// consumers bucket separately.
+// `Marker` is the identifying substring; `Suffix` bounds the victim for the
+// infix / killer-first kinds and, on a SUICIDE row, is an extra REQUIRED
+// substring that disambiguates a marker shared with a kill row (KTX's
+// dtTELE3 double-pentagram telefrag prints the ordinary " was telefragged
+// by " verb but books the death as the victim's own suicide); empty
+// otherwise. `Weapon` is the canonical short code for downstream
+// attribution (rl, lg, sg, …, plus the synthetic "suicide", "water",
+// "lava", "world", "explobox", "fall", "squish", "tele", "teamkill",
+// "unknown"); `Suicide` / `TeamKill` flag the variants consumers bucket
+// separately.
 type ObituaryPattern struct {
-	Marker   string
-	Suffix   string
-	Weapon   string
+	Marker string
+	Suffix string
+	Weapon string
+	// LineEnd requires the marker to END the line rather than merely appear
+	// in it. Set on markers short enough that a player NAME could contain
+	// them (" died"); both engine prints that produce it put it last, so the
+	// anchor costs nothing and removes the substring hazard.
+	LineEnd  bool
 	Suicide  bool
 	TeamKill bool
 	Kind     ObituaryKind
@@ -88,7 +97,7 @@ var ObituaryPatterns = []ObituaryPattern{
 
 	// Rocket Launcher self-damage.
 	{Marker: " discovers blast radius", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
-	// KTX catch-all self-kill of unknown cause (client.c:5254). Must precede
+	// KTX catch-all self-kill of unknown cause (client.c:5330). Must precede
 	// the shorter " becomes bored with life" substring it contains; cause
 	// unknown, so it stays "suicide".
 	{Marker: " somehow becomes bored with life", Weapon: "suicide", Suicide: true, Kind: ObituarySuicide},
@@ -123,24 +132,58 @@ var ObituaryPatterns = []ObituaryPattern{
 	{Marker: " fell to his death", Weapon: "fall", Suicide: true, Kind: ObituarySuicide},
 	{Marker: " fell to her death", Weapon: "fall", Suicide: true, Kind: ObituarySuicide},
 
-	// Environmental (world).
-	{Marker: " was spiked", Weapon: "world", Suicide: true, Kind: ObituarySuicide},     // nails from world
+	// Environmental (world). KTX prints these only from the
+	// `attacker->ct != ctPlayer` branch, so the killer is the map, and the
+	// print does not carry a finer cause than that:
+	//   - " was spiked" is dtNG *or* dtSNG (client.c:5711) with a non-player
+	//     attacker. The two deathtypes share one string, so picking `ng` or
+	//     `sng` here would be a guess; `world` is what the line actually
+	//     establishes. (mvd/types.go still spells the deathtype ng/sng on the
+	//     damage side, where the wire carries the deathtype itself.)
+	//   - dtLASER and dtFIREBALL have no token of their own in either
+	//     vocabulary.
+	{Marker: " was spiked", Weapon: "world", Suicide: true, Kind: ObituarySuicide},     // nails, non-player attacker
 	{Marker: " was zapped", Weapon: "world", Suicide: true, Kind: ObituarySuicide},     // laser
 	{Marker: " ate a lavaball", Weapon: "world", Suicide: true, Kind: ObituarySuicide}, // fireball
-	{Marker: " blew up", Weapon: "world", Suicide: true, Kind: ObituarySuicide},        // explosive box
 	{Marker: " was squished", Weapon: "squish", Suicide: true, Kind: ObituarySuicide},  // squish
 	{Marker: " tried to leave", Weapon: "world", Suicide: true, Kind: ObituarySuicide}, // changelevel
+	// dtEXPLO_BOX. The damage log spells this deathtype "explobox"
+	// (mvd/types.go DeathTypeToWeapon), so the obituary does too rather than
+	// flattening it into the generic "world".
+	{Marker: " blew up", Weapon: "explobox", Suicide: true, Kind: ObituarySuicide},
 
 	// Legacy.
 	{Marker: " blew himself up", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
 	{Marker: " blew herself up", Weapon: "rl", Suicide: true, Kind: ObituarySuicide},
 	{Marker: " finds a way out", Weapon: "suicide", Suicide: true, Kind: ObituarySuicide},
 
-	// KTX k_spawnicide variants (client.c:5164, dtTELE4). Only emitted when
-	// k_spawnicide is enabled; counted as a suicide (KTX logfrag(targ, targ)).
+	// KTX k_spawnicide variants (client.c:5240-5261, dtTELE4). Only emitted
+	// when k_spawnicide is enabled; counted as a suicide (KTX
+	// logfrag(targ, targ)).
 	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
 	{Marker: " got too close to the baby factory", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
 	{Marker: " was fragged by poor life choices", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+
+	// dtTELE3, the double-pentagram telefrag (client.c:5228-5237): BOTH
+	// players hold 666, so the would-be telefragger's victim survives and the
+	// telefragger dies. KTX prints the ordinary " was telefragged by " verb
+	// with the suffix "'s Satan's power" and then books it as the victim's
+	// own suicide — `targ->s.v.frags -= 1; logfrag(targ, targ)`, the attacker
+	// gets nothing. Without this row the generic kill marker below swallows
+	// the line and credits the surviving player a frag the server never gave
+	// them. Suffix is a REQUIRED extra substring here, not a victim bound
+	// (the victim is still the whole prefix), and the suicide run is scanned
+	// before the kill run in both consumers, so this wins.
+	{Marker: " was telefragged by ", Suffix: "'s Satan's power", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+
+	// dtTRIGGER_HURT and the world branch's unenumerated catch-all
+	// (client.c:5775-5782) share ONE string, so the print cannot say which,
+	// and "world" — a world-dealt death of unstated cause — is all it
+	// establishes. (`trigger` stays a damage-log-only token: the wire carries
+	// the deathtype there, this line does not.) Marker last in the suicide
+	// run and LineEnd-anchored: " died" is short enough to sit inside a
+	// player name, and both engine prints put it at the end.
+	{Marker: " died", LineEnd: true, Weapon: "world", Suicide: true, Kind: ObituarySuicide},
 
 	// --- Kills (victim is the prefix; killer follows the marker). -------
 	// Telefrag (dtTELE1).
@@ -214,20 +257,46 @@ var ObituaryPatterns = []ObituaryPattern{
 	// --- Phrasing teamkills naming only the victim. --------------------
 	// Must precede the non-team " was telefragged by " / " was crushed by "
 	// / " was jumped by " kill markers so those don't steal the line.
-	{Marker: " was telefragged by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was telefragged by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was crushed by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was crushed by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was jumped by his teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
-	{Marker: " was jumped by her teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	//
+	// These carry the REAL weapon, not the "teamkill" placeholder. KTX's
+	// team branch of ClientObituary (ktx/src/client.c:5343-5410) tests three
+	// deathtypes by name before it reaches its random phrasing pick, and each
+	// gets its own message: dtTELE1 → "was telefragged by his teammate"
+	// (:5355), dtSQUISH → "<killer> squished a teammate" (:5362, the one
+	// cause-carrying form that names the KILLER instead — see below), dtSTOMP
+	// → "was jumped/crushed by his teammate" (:5368). For all three the death
+	// CAUSE is on the wire; only the random four (:5386-5408) are genuinely
+	// cause-less. Consumers that treat tele/stomp as positional instant kills
+	// rather than weapon damage (mvd-analytics/damagerecon, analyzer/damage.go)
+	// need the distinction: booking a team telefrag as ordinary team damage
+	// charges the telefragger the victim's whole corpse drop instead of their
+	// capacity.
+	{Marker: " was telefragged by his teammate", Weapon: "tele", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was telefragged by her teammate", Weapon: "tele", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by his teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was crushed by her teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by his teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
+	{Marker: " was jumped by her teammate", Weapon: "stomp", TeamKill: true, Kind: ObituaryTeamkillVictim},
 
 	// --- Phrasing teamkills naming only the killer. --------------------
-	// " gets a frag for the other team" is a self-inflicted team frag; the
-	// analytics frag mapper tags it suicide until the real victim is
-	// recovered (recoverTeamkills).
+	// " squished a teammate" is the third of the team branch's deathtype-
+	// tested messages (dtSQUISH, ktx/src/client.c:5362-5367) and is the only
+	// cause-carrying one that names the killer rather than the victim, so it
+	// keeps the real weapon "squish" — the same token the non-team form
+	// "<killer> squishes <victim>" (:5447) carries. A mover crush is ordinary
+	// damage on the wire (KTX logs it through T_Damage with the door's
+	// activator as the attacker, ktx/src/doors.c:68), NOT a positional
+	// instant kill, so this weapon is cause information only and changes no
+	// routing.
+	//
+	// The other four are the random pick at :5386-5408 — no deathtype in
+	// them, so "teamkill" is all a consumer can be told. " gets a frag for
+	// the other team" is a self-inflicted team frag; the analytics frag
+	// mapper tags it suicide until the real victim is recovered
+	// (recoverTeamkills).
+	{Marker: " squished a teammate", Weapon: "squish", TeamKill: true, Kind: ObituaryTeamkillKiller},
 	{Marker: " gets a frag for the other team", Weapon: "teamkill", Suicide: true, TeamKill: true, Kind: ObituaryTeamkillKiller},
 	{Marker: " mows down a teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
-	{Marker: " squished a teammate", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
 	{Marker: " checks his glasses", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
 	{Marker: " checks her glasses", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
 	{Marker: " loses another friend", Weapon: "teamkill", TeamKill: true, Kind: ObituaryTeamkillKiller},
@@ -238,7 +307,7 @@ var ObituaryPatterns = []ObituaryPattern{
 	{Marker: " squishes ", Weapon: "squish", Kind: ObituaryKillerFirst},               // "X squishes Y"
 
 	// --- Infix (victim bracketed by prefix + suffix). ------------------
-	// KTX pentagram-deflection self-telefrag (dtTELE2, client.c:5141): the
+	// KTX pentagram-deflection self-telefrag (dtTELE2, client.c:5219): the
 	// would-be telefragger dies, booked as a suicide.
 	{Marker: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele", Suicide: true, Kind: ObituaryInfix},
 }
@@ -276,6 +345,15 @@ func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 		p := &obituaryVictimScan[i]
 		idx := strings.Index(msg, p.Marker)
 		if idx <= 0 {
+			continue
+		}
+		// A suicide row may carry Suffix as a REQUIRED discriminator when its
+		// marker is shared with a kill row (dtTELE3).
+		if p.Kind == ObituarySuicide && p.Suffix != "" &&
+			!strings.Contains(msg[idx+len(p.Marker):], p.Suffix) {
+			continue
+		}
+		if p.LineEnd && strings.TrimRight(msg[idx+len(p.Marker):], " \t\r\n") != "" {
 			continue
 		}
 		victim := strings.TrimSpace(msg[:idx])

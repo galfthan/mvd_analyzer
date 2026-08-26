@@ -137,8 +137,23 @@ that downstream consumers render, summarise, or feed to an agent.
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs
   the reconstruction blind on wire-instrumented demos and scores it
-  against the KTX log (tables in `damagerecon/ACCURACY.md`); `-diag`
-  prints misattribution flows.
+  against the KTX log (tables in `damagerecon/ACCURACY.md`), including
+  the per-explosion direct/splash verdict against the wire's own splash
+  flag; `-diag` prints misattribution flows.
+- `cmd/qw-aim-eval/` — aim hit-recovery harness: scores the reconstructed
+  hit tier (`aim.players[].weapons[].recon`) against this pipeline's own
+  wire-measured counter on demos carrying both, per weapon (tables in
+  `damagerecon/ACCURACY.md` §"Aim hit recovery").
+- `cmd/qw-demoinfo-eval/` — derived-summary harness: scores the whole
+  `playerStats` section against the verbatim KTX demoinfo block on demos
+  that carry one, with the wire damage log withheld and replaced by the
+  blind reconstruction (tables in `damagerecon/ACCURACY.md` §"The whole
+  derived summary vs the verbatim KTX block"). It also carries the
+  DIAGNOSTIC columns that decide definition questions — the
+  KTX-convention spree replay, the wire-flag control for the rl/gl
+  direct-impact counters, and the any-path alternative a reconstructed
+  row no longer publishes for them — which is why the measurement is not
+  gated on what shipped.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
@@ -353,17 +368,23 @@ whole-Result rebase or duel rewrite.
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
 produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `wallClockPost`,
+`scoreboardStatsPost`, `locGraphPost`, `noMatchPost`, `wallClockPost`,
 `regionControlPost`, `openingPost`,
 [`playerStatsPost`](analyzer/player_stats.md),
 `damageReconPost`, `backpackReconPost`. They come in
 three shapes. **One creates a section of its own**: `playerStatsPost` is
-node `player-stats`, publishing `playerStats` — it consumes twelve
+node `player-stats`, publishing `playerStats` — it consumes thirteen
 artifacts and writes a top-level section no other node touches, so it
-carries no `mutates` flag. **Two publish a named final artifact** rather
+carries no `mutates` flag. (The thirteenth is `aim`, added in v74 so the
+accuracy family can read the published reconstructed hit tier instead of
+re-running its join, which is what makes that tier's per-weapon
+withholds inherit rather than be restated.) **Two publish a named final artifact** rather
 than anonymously patching an earlier node's output:
 `recoverTelefragTeamkills` is node `frags-final`, which
-appends recovered telefrag team-kills to the raw `frag` log and publishes
+appends recovered telefrag team-kills to the raw `frag` log — and, since
+v74, publishes the ones it could NOT complete as `frags.unpaired[]`
+instead of dropping them, so `damage-recon` downstream can still read the
+CAUSE such an obituary carries — and publishes
 `frags:final`; `scoreboardStatsPost` is node `match-final`, which folds the
 corrected kills/deaths/suicides into `match` and publishes `match:final`.
 Because `match-final` *requires* `frags:final` (not the raw `frag`), an
@@ -380,6 +401,37 @@ from the state streams — package
 `source: "reconstructed"` — and it registers LAST so the damage-consuming
 posts above keep binding the wire-measured artifact only. A measured
 section is never touched.
+
+It stands down (leaving no section at all, exactly as before the node
+existed) on the `skipped:*` server modes `SkipModeReason` shares with the
+KTX-side bounded pass, and — since schema v74 — on one gate that is this
+package's alone: a `deathmatch 4` recording that contains a quad, because
+KTX makes the quad an OCTA there (`ktx/src/combat.c:541`) and the damage
+model follows a flat ×4. It is deliberately narrow (quad-less dmm4 still
+reconstructs; 4 demos in a random 2 000-demo archive sample) and interim —
+see [`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §"deathmatch 4
+with a quad stands down". Every reconstructed section also carries
+`coverage` (schema v74): the share of the frag log's weapon kills whose
+lethal instant the reconstructed log accounts for, which is how a
+consumer tells a quiet match from a recording whose stat channel was
+barely broadcast. It is a magnitude, not a flag — 99.0% of
+reconstructions read ≥ 0.95, 0.80% below 0.50, and 0.18% between — and it
+scores the FRAG-LOG-VISIBLE match, so a loss that drops obituaries and
+damage together still reads 1.000. The riders (`playerStats`' damage family, its
+reconstructed accuracy hits, `aim`'s recon tier) inherit that one field
+rather than restating it — see
+[`damagerecon/ACCURACY.md`](damagerecon/ACCURACY.md) §per-demo coverage.
+
+A reconstructed section also carries `rocketDirectRegime` (schema v74) —
+`fixed` | `spread` | `unestablished`, a total partition of what the
+demo's own rocket hits established about the server's DIRECT rocket
+damage constant, with `rocketDirectDamage` beside it on `fixed`. It is
+the era signal the rl touch count (`aim`'s `recon.directHits`) leans on:
+the classifier's magnitude prior only exists where the constant is fixed,
+and `spread` — a demo whose hits argue AGAINST the constant — is a
+materially weaker population than `unestablished`, which is merely a demo
+with too few rockets to tell. Nothing is gated on it.
+
 
 `backpackReconPost` is node `backpack-recon`, publishing
 `backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
@@ -401,6 +453,23 @@ plus `timeline` (positions, liveness, RL/LG possession) and `items` (the
 world spawner positions that disqualify a weapon-bit tie-break). A
 hint-carrying demo is never touched — `//ktx bp` already names the picker.
 
+`noMatchPost` is node `no-match`: it stamps `noMatch` on a Result whose
+**`streams` block is absent**, naming why (schema v74). That is the single
+predicate — `buildStreamsResult` returns nil rather than an empty block, so
+"no `streams`" and "no player streams" are one state and a result cannot
+carry both `streams` and `noMatch`. Streams are built
+only inside the detected match window — every recording path in the
+timeline analyzer is gated on a match-start broadcast having been seen —
+so a demo whose start was never announced produces nothing at all, and
+before v74 it produced it silently: 2.03% of the archive with empty
+sections and an empty `errors[]`. The reason comes off the serverinfo
+`status` key tracked over time (published on `CoreOutputs.ServerStatus`,
+since `metadata.serverInfo` is last-write-wins and names the state at demo
+END), the frag log and the stream-abort entry in `errors[]`; `*gamedir`
+rides along as evidence and is deliberately never a reason of its own. It
+is not an `errors[]` entry because `errors[]` means the pipeline failed
+and this is a fact about the demo.
+
 `wallClockPost` is node `wall-clock`: it resolves the wire date markers
 the clock collected (`matchdate:` / `matchkey:` prints), the ktxstats
 `date` string, the year-less `//finalscores` stamp on the metadata
@@ -412,7 +481,10 @@ the match window `timeline` publishes. The `//finalscores` stamp is the one
 marker that can never anchor: it carries no year, so it is resolved last —
 year and timezone borrowed from the marker that *did* anchor (reported as
 `dateMarkers[].yearFrom`), then cross-checked on the month/day/hour/minute
-that are its own.
+that are its own. On a result with no `streams` block it writes the raw
+markers onto `noMatch.dateMarkers` instead — which is why it binds the
+`no-match` node — and stops there: the graded anchor is a projection
+through the match window, and there is none.
 
 One further node, `los`, is **lazy**: materialised on demand rather than in
 the eager parse (see "The dependency DAG").
@@ -502,22 +574,26 @@ flowchart TB
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
-    wall_clock["wall-clock"]
     region_control["region-control"]
     opening["opening"]
     los["los"]
   end
   subgraph d5["depth 5"]
     match_final["match-final"]
+    no_match["no-match"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
   subgraph d6["depth 6"]
     aim["aim"]
     airgibs["airgibs"]
-    player_stats["player-stats"]
+    wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
+  subgraph d7["depth 7"]
+    player_stats["player-stats"]
+  end
+  aim -->|"aim"| player_stats
   backpack_recon -->|"backpacks:final"| backpack_linkage
   backpack_recon -->|"backpacks:final"| player_stats
   backpacks -->|"backpacks"| backpack_recon
@@ -560,6 +636,7 @@ flowchart TB
   frags_final -->|"frags:final"| backpack_recon
   frags_final -->|"frags:final"| damage_recon
   frags_final -->|"frags:final"| match_final
+  frags_final -->|"frags:final"| no_match
   frags_final -->|"frags:final"| player_stats
   identity -->|"identity"| backpacks
   identity -->|"identity"| damage
@@ -581,9 +658,11 @@ flowchart TB
   metadata -->|"metadata"| damage_recon
   metadata -->|"metadata"| los
   metadata -->|"metadata"| match
+  metadata -->|"metadata"| no_match
   metadata -->|"metadata"| player_stats
   metadata -->|"metadata"| timeline
   metadata -->|"metadata"| wall_clock
+  no_match -->|"no-match"| wall_clock
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items
@@ -603,6 +682,7 @@ flowchart TB
   timeline -->|"timeline"| frags_final
   timeline -->|"timeline"| loc_graph
   timeline -->|"timeline"| los
+  timeline -->|"timeline"| no_match
   timeline -->|"timeline"| opening
   timeline -->|"timeline"| player_stats
   timeline -->|"timeline"| region_control
@@ -610,7 +690,7 @@ flowchart TB
   timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
+  class frags_final,aim,airgibs,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
 ```
@@ -1419,11 +1499,21 @@ Four layers exercise different things:
    `TestMain` (`setup_test.go`) points `MVDA_BSP_DIR` at the repo-root
    `bsps/` directory, which feeds both the locvis visibility filter
    (loc names) and the mapclip floor-height column (`pos.h`,
-   `airgibs`). Run `make bsps` before regenerating. If a demo's BSP is
+   `airgibs`). Run `make bsps` before regenerating. A **relative**
+   `MVDA_BSP_DIR` is resolved against the repo root too — `mapbsp`
+   would otherwise resolve it against the package directory, which
+   holds no BSPs, so the repo's own documented `MVDA_BSP_DIR=./bsps`
+   invocation silently skipped every golden comparison while the suite
+   reported success. An absolute value is honoured verbatim.
+   If a demo's BSP is
    not resolvable the test no longer degrades silently — it **skips**
    that demo in compare mode and **hard-fails** an `-update-golden`
    run, so a machine without the BSP corpus can't overwrite a good
-   golden with V1/no-height data.
+   golden with V1/no-height data. Skips are reported once at suite
+   level (which demos, which dir), and a run that compared **nothing**
+   while the caller explicitly named a BSP dir is a hard failure — an
+   unpopulated repo-root `bsps/` stays a skip, since that is the
+   fresh-clone state.
 
    `filePath` is stripped before comparison (per-machine cache path).
    At schema v7 the parse-time `highResBuckets` is gone; the canonical

@@ -206,21 +206,30 @@ type WeaponAim struct {
 //   - the SG/SSG pellet split (PelletHits / Full / Partial / Miss) — a merged
 //     delta's magnitude is the sum over every hit on that instant, so Σ/4
 //     would credit one shooter with another's pellets;
-//   - RL/GL Direct vs Splash — the reconstruction's IsSplash is a
-//     damage-model verdict, not the server's own contact flag;
+//   - the RL/GL Direct / Splash / Missed per-fire split — DirectHits below
+//     carries the direct-impact COUNT, which is a different (and separately
+//     validated) claim from splitting each fire three ways;
 //   - the LG whiff geometry (Blocked / OutOfRange / Unresolved) — it
 //     classifies MISSES, and a miss here can be a hit the join did not
 //     recover;
 //   - the enemy/team/self splits — team and self attribution is the weakest
 //     part of the reconstruction (damagerecon/ACCURACY.md).
 //
-// Emitted only for the weapons whose damage lands in the fire's own server
-// frame — lg, sg, ssg and the axe (at its fixed +200 ms traceline delay) —
-// where the join was validated exact against the wire log. rl/gl/ng/sng carry
-// NO block: their fire→impact association needs the projectile-flight bracket
-// the shots analyzer discards, and counting impacts instead reads ~7 points
-// above the measured rl convention. An absent block is "not recovered for this
-// weapon", never "no hits".
+// Emitted for two weapon families. The same-frame weapons — lg, sg, ssg and
+// the axe (at its fixed +200 ms traceline delay) — link a fire to damage in
+// the fire's own server frame, where the join was validated exact against the
+// wire log. rl and gl link through the fire's TRACKED FLIGHT (Shot.FlightEnd,
+// schema v74): the flight's impact instant is joined to the reconstructed
+// damage there, and a fire whose projectile was never tracked counts as a miss
+// — the measured counter's own definition, which is why the two are
+// comparable. Before v74 published that association the join could only count
+// impacts, a different question that read ~7 points above the measured rl
+// convention.
+//
+// ng/sng carry NO block: nail flights are bracketed only when nail decoding is
+// enabled, so their measured counter is zero on every validation row and there
+// is nothing to check a recovery against. An absent block is "not recovered for
+// this weapon", never "no hits".
 //
 // Presence is keyed on the damage SECTION being reconstructed and this player
 // having FIRED the weapon — never on him appearing in the reconstructed log. A
@@ -230,14 +239,58 @@ type WeaponAim struct {
 // weapon gets.
 //
 // Accuracy measured against the wire log on demos that carry both:
-// damagerecon/ACCURACY.md §"Aim hit recovery" (lg mean 0.3pp, sg 1.3pp,
-// ssg 1.7pp, axe 0.5pp of accuracy error vs the measured counter).
+// damagerecon/ACCURACY.md §"Aim hit recovery" (mean accuracy error vs the
+// measured counter: lg 0.3pp, sg 1.3pp, ssg 1.8pp, axe 0.6pp, rl 0.5pp,
+// gl 0.4pp).
 type WeaponAimRecon struct {
 	// Hits is the reconstructed count of fires that connected. A zero inside
 	// a present block is a real "linked nothing", not an absence — the block
 	// itself is the presence signal, and it is emitted only for the weapons
 	// whose recovery was validated (see the ACCURACY.md table).
+	//
+	// It counts a fire that landed damage by ANY path, splash included —
+	// HitsAnyDamage in the PlayerStatsAcc.HitsConvention vocabulary.
 	Hits int `json:"hits"`
+
+	// DirectHits (schema v74) is the count of this player's rl (or gl)
+	// projectiles the reconstruction says TOUCHED somebody —
+	// HitsDirectImpact, the convention KTX's own `acc.rl.hits` /
+	// `acc.gl.hits` counts, because KTX increments that counter in the touch
+	// handler and nowhere else (ktx/src/weapons.c:990-996, :1327-1333).
+	// Publishing it is what lets a pre-instrumentation demo answer the same
+	// question a KTX demoinfo block answers, so the two eras can be compared
+	// at all; `playerStats.accuracy.byWeapon[rl|gl].hits` on a reconstructed
+	// row IS this number.
+	//
+	// NOT a subset of Hits, and NOT the same join. Hits asks whether a FIRE
+	// connected and answers it through the fire's tracked flight, so a
+	// point-blank rocket whose entity the server never broadcast is a miss
+	// there — the measured counter's own definition. A touch has no such
+	// notion: one projectile touches at most one player, so a touch simply IS
+	// a non-splash damage row, and DirectHits counts those rows
+	// (aimcore.ReconDirectHits). DirectHits > Hits is therefore possible and
+	// meaningful — it is exactly the untracked-flight population — and
+	// routing this count through the flight join instead measured 9.5%
+	// aggregate error against the verbatim block where the row count runs
+	// 0.65% (damagerecon/ACCURACY.md).
+	//
+	// What a consumer CAN rely on: DirectHits <= Shots (the publisher clamps
+	// it, since a fire cannot touch twice), both numbers scope to the same
+	// query window, and both are absent together with the block. Nothing
+	// orders it against Hits.
+	//
+	// PRESENT ONLY FOR rl AND gl. For every other weapon the two conventions
+	// coincide (KTX counts any connecting lg/axe/ng/sng fire) and a separate
+	// field would only invite a spurious distinction. Absent is therefore
+	// "the question does not arise here", never "no direct hits".
+	//
+	// The evidence is damagerecon's per-explosion direct/splash verdict
+	// (damagerecon/direct.go: the flight's trajectory against the victim's
+	// hull, the flat-110 magnitude prior on a server whose constant the demo
+	// established, and the spent grenade fuse as a certain non-touch).
+	// Validated against the verbatim KTX block in damagerecon/ACCURACY.md
+	// §"Can an old demo answer KTX's rl/gl question?".
+	DirectHits *int `json:"directHits,omitempty"`
 }
 
 // WeaponAimSplit is one victim-class slice (enemy / team / self) of a

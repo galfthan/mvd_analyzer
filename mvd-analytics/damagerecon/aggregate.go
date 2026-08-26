@@ -98,7 +98,67 @@ func aggregate(in *inputs, events []reconEvent) *result.DamageResult {
 	}
 
 	out.Matrix = flattenMatrix(matrix)
+	setCoverage(in, out)
+	// The measured direct-damage regime, published because a consumer of the
+	// rl touch count needs to know whether it could be measured at all: the
+	// magnitude prior that makes that count trustworthy only exists where the
+	// constant is fixed (direct.go rocketTouched, detectRocketRegime). The
+	// verdict rides beside the value so an absent constant still says WHICH
+	// of the two absences it is.
+	out.RocketDirectRegime = in.rlRegime
+	if in.rlLo == in.rlHi {
+		out.RocketDirectDamage = int(in.rlLo)
+	}
 	return out
+}
+
+// setCoverage stamps result.DamageCoverage: the share of the frag log's
+// weapon kills whose lethal instant the reconstructed Events log accounts
+// for. It is the one self-check the reconstruction can run on any demo —
+// every named kill is a place where damage provably happened, so a demo
+// whose stat channel was barely broadcast reads far below 1 while its
+// positions and frag log stay intact.
+//
+// This is the in-pipeline form of cmd/qw-recon-oracle's kill-delta
+// coverage (killsDelta/killsScored), and deliberately scores the same
+// denominator: enemy kills by a weapon, both players on the roster.
+// Positional kills are excluded because they carry no damage arithmetic and
+// aggregate outside Events. The obituary withhold does not reach here —
+// coverage is a property of delta EXTRACTION, which keeps its frag anchors
+// either way — so a withheld run reports the same figure as production.
+func setCoverage(in *inputs, out *result.DamageResult) {
+	hit := make(map[fragKey]bool, len(out.Events))
+	for i := range out.Events {
+		hit[fragKey{out.Events[i].Victim, out.Events[i].Time}] = true
+	}
+	var kills, covered int
+	for i := range in.frags {
+		f := &in.frags[i]
+		if f.IsSuicide || f.IsTeamKill || isPositionalWeapon(f.Weapon) {
+			continue
+		}
+		if f.Killer == "" || f.Killer == "world" || f.Killer == f.Victim {
+			continue
+		}
+		if in.players[f.Killer] == nil || in.players[f.Victim] == nil {
+			continue
+		}
+		kills++
+		if hit[fragKey{f.Victim, f.Time}] {
+			covered++
+		}
+	}
+	if kills == 0 {
+		// No denominator — an empty frag log or one naming only suicides,
+		// team kills and telefrags. Report nothing rather than a bogus 0:
+		// coverage would be claiming an assessment it never made.
+		return
+	}
+	out.Coverage = &result.DamageCoverage{
+		Kills:   kills,
+		Covered: covered,
+		Ratio:   float64(covered) / float64(kills),
+	}
 }
 
 // aggregatePositional folds one telefrag/stomp into the aggregates,

@@ -111,6 +111,15 @@ type CoreOutputs struct {
 	// (parseable) directive.
 	FinalScores *FinalScores
 
+	// ServerStatus is the serverinfo `status` key tracked over time rather
+	// than last-write-wins, published by the metadata node (PopulateCore).
+	// The no-match post-processor reads it: `metadata.serverInfo["status"]`
+	// names the state at demo END, while "what did the server say at demo
+	// open" and "did it ever say a game was running" are what separate a
+	// recording that begins mid-game from one that caught an idle server.
+	// Zero-valued when the demo carried no `status` key at all.
+	ServerStatus ServerStatus
+
 	// PackEntities is every continuous appearance of a `progs/backpack.mdl`
 	// entity on the wire, in match-relative ms, published by the backpacks
 	// node (PopulateCore). It is the raw entity evidence the backpack-linkage

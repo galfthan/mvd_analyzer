@@ -71,7 +71,8 @@ func (e *invalidFilterError) Is(target error) bool { return target == ErrInvalid
 // matcher expands one to the other (view.weaponMatcher).
 var fragWeaponVocab = []string{
 	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "hook", "rail",
-	"tele", "stomp", "squish", "fall", "lava", "slime", "water", "world",
+	"tele", "stomp", "squish", "explobox", "fall", "lava", "slime", "water",
+	"world",
 	"unknown", "suicide", "teamkill",
 	"drown", // alias of "water"; never emitted
 }
@@ -83,9 +84,9 @@ var fragWeaponVocab = []string{
 // DamageOptions.Weapons).
 // "water" is an accepted alias of "drown" here — see fragWeaponVocab.
 var damageWeaponVocab = []string{
-	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "stomp", "tele",
-	"squish", "explobox", "unknown", "lava", "slime", "drown", "fall",
-	"trigger", "suicide",
+	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "hook", "stomp",
+	"tele", "squish", "explobox", "unknown", "lava", "slime", "drown",
+	"fall", "trigger", "suicide",
 	"water", // alias of "drown"; never emitted
 }
 
@@ -179,10 +180,13 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 	weapons := weaponFilterSet(opts.Weapons)
 	if len(players) == 0 && len(weapons) == 0 && opts.From == 0 && opts.To == 0 {
 		if opts.Summary {
-			// Shallow copy so we can drop the log without mutating the shared
+			// Shallow copy so we can drop the logs without mutating the shared
 			// stored Result; the aggregate maps stay shared by reference.
+			// Unpaired is a log too — it goes with Frags, not with the
+			// aggregates (which never counted it in the first place).
 			cp := *r.Frags
 			cp.Frags = nil
+			cp.Unpaired = nil
 			return &cp, nil
 		}
 		return r.Frags, nil
@@ -192,21 +196,37 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 	endMs := opts.To
 
 	// Filter the log to the entries the caller asked for.
-	var filtered []result.FragEntry
-	for _, fe := range r.Frags.Frags {
+	keep := func(fe result.FragEntry) bool {
 		if len(weapons) > 0 && !weapons[strings.ToLower(fe.Weapon)] {
-			continue
+			return false
 		}
 		if len(players) > 0 && !players[fe.Killer] && !players[fe.Victim] {
-			continue
+			return false
 		}
 		if startMs != 0 && fe.Time < startMs {
-			continue
+			return false
 		}
 		if endMs != 0 && fe.Time > endMs {
+			return false
+		}
+		return true
+	}
+	var filtered []result.FragEntry
+	for _, fe := range r.Frags.Frags {
+		if keep(fe) {
+			filtered = append(filtered, fe)
+		}
+	}
+	// Unpaired takes the SAME predicates, so a scoped response stays
+	// internally consistent: one filter, one meaning. The one difference is
+	// that its `players` test only ever looks at the NAMED side — see
+	// keepUnpaired.
+	var unpaired []result.FragEntry
+	for _, fe := range r.Frags.Unpaired {
+		if !keepUnpaired(fe, players, weapons, startMs, endMs) {
 			continue
 		}
-		filtered = append(filtered, fe)
+		unpaired = append(unpaired, fe)
 	}
 
 	// Recompute all aggregates from the filtered log, mirroring the frag
@@ -227,6 +247,9 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 		// log would say "unmeasured" for any filter that happens to match
 		// nothing, which is the opposite of what the flag means.
 		KillsMeasured: r.Frags.KillsMeasured,
+		// NOT folded into any aggregate above — a placeholder is not a
+		// player, and totalFrags counts the frag log only.
+		Unpaired: unpaired,
 	}
 	get := func(name string) *result.PlayerFrags {
 		if len(players) > 0 && !players[name] {
@@ -626,6 +649,13 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 	out.Dmg = d.Dmg
 	out.BoundedMode = d.BoundedMode
 	out.Source = d.Source
+	// Coverage and the measured rocket regime are whole-match provenance
+	// stamps on the reconstruction, like Source and BoundedMode — not
+	// aggregates over the shown hits — so they ride a filtered response
+	// unchanged rather than being rescoped.
+	out.Coverage = d.Coverage
+	out.RocketDirectDamage = d.RocketDirectDamage
+	out.RocketDirectRegime = d.RocketDirectRegime
 	out.Events = events
 	switch {
 	case fam == "bounded":
@@ -1366,11 +1396,16 @@ func toLowerSet(vals []string) map[string]bool {
 	return s
 }
 
-// isGenericName matches the placeholder killers the obituary parser emits when
-// the wire names no one, mirroring the frag analyzer's own exclusion.
+// isGenericName matches the placeholder names the obituary parser emits when
+// the wire names no one, mirroring the frag analyzer's own exclusion
+// (analyzer.isGenericPlayer). The "teammate" forms are what a phrasing
+// teamkill puts on the side it did not name — they reach the read side in
+// FragResult.Unpaired (schema v74), so a name filter must never let one
+// through as if it were a player.
 func isGenericName(n string) bool {
 	switch strings.ToLower(n) {
-	case "", "world", "unknown", "someone":
+	case "", "world", "unknown", "someone",
+		"teammate", "his teammate", "her teammate":
 		return true
 	}
 	return false
@@ -1383,4 +1418,34 @@ func baseName(n string) string {
 		return n[:i]
 	}
 	return n
+}
+
+// keepUnpaired applies the frag-log filters to a FragResult.Unpaired entry.
+// It differs from the frag-log predicate in one way: exactly one of
+// Killer / Victim is the "teammate" placeholder, and a `players` filter must
+// match only the side the wire actually named. Otherwise `players=teammate`
+// would select rows as though the placeholder were a contestant.
+func keepUnpaired(fe result.FragEntry, players, weapons map[string]bool, startMs, endMs int32) bool {
+	if len(weapons) > 0 && !weapons[strings.ToLower(fe.Weapon)] {
+		return false
+	}
+	if len(players) > 0 {
+		named := false
+		if !isGenericName(fe.Killer) && players[fe.Killer] {
+			named = true
+		}
+		if !isGenericName(fe.Victim) && players[fe.Victim] {
+			named = true
+		}
+		if !named {
+			return false
+		}
+	}
+	if startMs != 0 && fe.Time < startMs {
+		return false
+	}
+	if endMs != 0 && fe.Time > endMs {
+		return false
+	}
+	return true
 }

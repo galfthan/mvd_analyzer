@@ -65,6 +65,14 @@ type Overview struct {
 	// /player-stats' per-row sessions[] carries every one of a player's
 	// ids with the window it was live in — the lossless form of this map.
 	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
+	// NoMatch is present only when this demo yielded no analyzable match:
+	// `players` is empty, `available.*` is false almost throughout, and
+	// this block says WHY (schema v74). It is the difference between "the
+	// recording holds no match" and "the parse failed" — the latter is
+	// Errors below, and only the `demoUnreadable` reason implies both.
+	// 2.0% of the QuakeWorld archive lands here. Omitted on every demo
+	// with players, which is the normal case.
+	NoMatch *result.NoMatchResult `json:"noMatch,omitempty"`
 	// Errors carries the analyzer's non-fatal errors verbatim (a
 	// sub-analyzer's Finalize failed but the pipeline continued). A
 	// non-empty list means the result is degraded — some sections may
@@ -140,6 +148,7 @@ func BuildOverview(r *result.Result) Overview {
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
 	ov.ParseWarnings = r.ParseWarnings
+	ov.NoMatch = r.NoMatch
 
 	// map = the canonical shortname, mapTitle = the display-only level title.
 	// Match publishes both (result/match.go), but EffectiveMap stays the

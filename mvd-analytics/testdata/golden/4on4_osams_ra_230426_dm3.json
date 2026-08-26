@@ -58975,7 +58975,7 @@
         "killer": "doberman",
         "time": 0,
         "victim": "nlk",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "clox",
@@ -60537,7 +60537,7 @@
         "killer": "marksuzu",
         "time": 791733,
         "victim": "clox",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "[cmd] witka",
@@ -61263,7 +61263,7 @@
         "killer": "nlk",
         "time": 1186894,
         "victim": "sCorp",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "apa",
@@ -77785,7 +77785,7 @@
         "time": 0,
         "type": "frag",
         "victim": "nlk",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "doberman was telefragged by clox",
@@ -85900,7 +85900,7 @@
         "time": 791733,
         "type": "frag",
         "victim": "clox",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "\rnlk ## {\u0026cff072\u0026cfff}/26 [{ra-low}] {\u0026cf0frlg\u0026cfff}:99/27",
@@ -89706,7 +89706,7 @@
         "time": 1186894,
         "type": "frag",
         "victim": "sCorp",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "\r{\u0026cfc3lak}{\u0026cfff} {\u0026cf2apack\u0026cfff} at [{pent}]",
@@ -89992,31 +89992,38 @@
           "byWeapon": {
             "gl": {
               "attacks": 15,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 203,
-              "hits": 81
+              "hits": 81,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 10,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 84,
-              "hits": 33
+              "hits": 33,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 354,
-              "hits": 174
+              "hits": 174,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 13,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 17,
-              "hits": 11
+              "hits": 11,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -90254,6 +90261,8 @@
           "efficiency": 0.5185,
           "frags": 49,
           "kills": 56,
+          "maxQuadSpree": 2,
+          "maxSpree": 13,
           "src": "derived",
           "suicides": 3,
           "teamKills": 4
@@ -90280,31 +90289,38 @@
           "byWeapon": {
             "axe": {
               "attacks": 107,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 9,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 25,
-              "hits": 7
+              "hits": 7,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 66,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 50,
-              "hits": 30
+              "hits": 30,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 434,
-              "hits": 203
+              "hits": 203,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 10,
-              "hits": 6
+              "hits": 6,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -90508,6 +90524,8 @@
           "efficiency": 0.369,
           "frags": 28,
           "kills": 31,
+          "maxQuadSpree": 4,
+          "maxSpree": 10,
           "src": "derived",
           "suicides": 1,
           "teamKills": 2
@@ -90534,27 +90552,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 133,
-              "hits": 48
+              "hits": 48,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 115,
-              "hits": 52
+              "hits": 52,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 176,
-              "hits": 105
+              "hits": 105,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 6,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 19,
-              "hits": 14
+              "hits": 14,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -90783,6 +90807,8 @@
           "efficiency": 0.6512,
           "frags": 50,
           "kills": 56,
+          "maxQuadSpree": 7,
+          "maxSpree": 24,
           "src": "derived",
           "suicides": 1,
           "teamKills": 5
@@ -90809,23 +90835,28 @@
           "byWeapon": {
             "lg": {
               "attacks": 43,
-              "hits": 12
+              "hits": 12,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 38,
-              "hits": 21
+              "hits": 21,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 351,
-              "hits": 162
+              "hits": 162,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 334,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 21,
-              "hits": 9
+              "hits": 9,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -91058,6 +91089,8 @@
           "efficiency": 0.4412,
           "frags": 43,
           "kills": 45,
+          "maxQuadSpree": 5,
+          "maxSpree": 11,
           "src": "derived",
           "suicides": 1,
           "teamKills": 1
@@ -91084,31 +91117,38 @@
           "byWeapon": {
             "gl": {
               "attacks": 9,
-              "hits": 5
+              "hits": 5,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 27,
-              "hits": 8
+              "hits": 8,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 13,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 66,
-              "hits": 28
+              "hits": 28,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 369,
-              "hits": 173
+              "hits": 173,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 179,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 26,
-              "hits": 18
+              "hits": 18,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -91358,6 +91398,8 @@
           "efficiency": 0.4639,
           "frags": 42,
           "kills": 45,
+          "maxQuadSpree": 4,
+          "maxSpree": 10,
           "src": "derived",
           "suicides": 1,
           "teamKills": 2
@@ -91384,27 +91426,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 15,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 88,
-              "hits": 35
+              "hits": 35,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 59,
-              "hits": 35
+              "hits": 35,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 313,
-              "hits": 184
+              "hits": 184,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 39,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 22,
-              "hits": 16
+              "hits": 16,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -91644,6 +91692,8 @@
           "efficiency": 0.5567,
           "frags": 51,
           "kills": 54,
+          "maxQuadSpree": 2,
+          "maxSpree": 10,
           "src": "derived",
           "suicides": 0,
           "teamKills": 3
@@ -91670,31 +91720,38 @@
           "byWeapon": {
             "gl": {
               "attacks": 17,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 72,
-              "hits": 24
+              "hits": 24,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 1,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 59,
-              "hits": 25
+              "hits": 25,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 338,
-              "hits": 147
+              "hits": 147,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 25,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 7,
-              "hits": 4
+              "hits": 4,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -91907,6 +91964,8 @@
           "efficiency": 0.4268,
           "frags": 34,
           "kills": 35,
+          "maxQuadSpree": 3,
+          "maxSpree": 15,
           "src": "derived",
           "suicides": 0,
           "teamKills": 1
@@ -91933,27 +91992,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 7,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 90,
-              "hits": 31
+              "hits": 31,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 56,
-              "hits": 30
+              "hits": 30,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 260,
-              "hits": 149
+              "hits": 149,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 6,
-              "hits": 4
+              "hits": 4,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -92171,6 +92236,8 @@
           "efficiency": 0.4096,
           "frags": 32,
           "kills": 34,
+          "maxQuadSpree": 4,
+          "maxSpree": 13,
           "src": "derived",
           "suicides": 0,
           "teamKills": 2
@@ -92206,35 +92273,43 @@
           "byWeapon": {
             "axe": {
               "attacks": 107,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 41,
-              "hits": 6
+              "hits": 6,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 449,
-              "hits": 171
+              "hits": 171,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 76,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 308,
-              "hits": 150
+              "hits": 150,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1277,
-              "hits": 666
+              "hits": 666,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 58,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 68,
-              "hits": 47
+              "hits": 47,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -92495,6 +92570,8 @@
           "efficiency": 0.5253,
           "frags": 178,
           "kills": 197,
+          "maxQuadSpree": 7,
+          "maxSpree": 24,
           "src": "derived",
           "suicides": 5,
           "teamKills": 14
@@ -92511,31 +92588,38 @@
           "byWeapon": {
             "gl": {
               "attacks": 33,
-              "hits": 10
+              "hits": 10,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 232,
-              "hits": 75
+              "hits": 75,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 14,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 219,
-              "hits": 104
+              "hits": 104,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1318,
-              "hits": 631
+              "hits": 631,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 540,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 60,
-              "hits": 35
+              "hits": 35,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -92795,6 +92879,8 @@
           "efficiency": 0.4368,
           "frags": 151,
           "kills": 159,
+          "maxQuadSpree": 5,
+          "maxSpree": 15,
           "src": "derived",
           "suicides": 2,
           "teamKills": 6
@@ -92808,7 +92894,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -93615,6 +93701,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1575,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -95176,6 +95263,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 31956,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -95203,6 +95291,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 32968,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -95503,6 +95592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 38436,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -95589,6 +95679,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 39220,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -95671,6 +95762,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 40475,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -95876,6 +95968,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 58735,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -95897,6 +95990,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 57607,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -95934,6 +96028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 57653,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -95941,6 +96036,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 58185,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -95985,6 +96081,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 58321,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -96063,6 +96160,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 59126,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -96081,6 +96179,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 61528,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -96219,6 +96318,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 60693,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -96355,6 +96455,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 63242,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -96622,6 +96723,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 66563,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -96684,6 +96786,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 67316,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -96705,6 +96808,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 68162,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -96766,6 +96870,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 72187,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -96918,6 +97023,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 73598,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -97007,6 +97113,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 74465,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -97143,6 +97250,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 75517,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -97204,6 +97312,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 76568,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -97269,6 +97378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 77294,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -97979,6 +98089,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 95451,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -98028,6 +98139,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 96398,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -98071,6 +98183,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 98084,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -98093,6 +98206,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 98879,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -98104,6 +98218,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 100647,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -98161,6 +98276,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 104505,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -98201,6 +98317,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 105271,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -98489,6 +98606,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 108712,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -98594,6 +98712,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 109759,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -98679,6 +98798,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 110299,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -98715,6 +98835,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 110624,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -98757,6 +98878,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 110915,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -98782,6 +98904,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 112175,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -98811,6 +98934,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 111736,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -98852,6 +98976,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 112811,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -98891,6 +99016,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 113227,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -98990,6 +99116,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 114798,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99001,6 +99128,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 115083,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -99019,6 +99147,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 115543,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99030,6 +99159,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116560,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -99066,6 +99196,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 122222,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99277,6 +99408,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 129240,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99327,6 +99459,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 129295,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -99350,6 +99483,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 130007,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99368,6 +99502,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 130786,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -99386,6 +99521,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131646,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99482,6 +99618,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 132685,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99593,6 +99730,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 135646,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99680,6 +99818,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 136631,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -99825,6 +99964,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 143233,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99883,6 +100023,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 143852,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99944,6 +100085,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 144802,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -99973,6 +100115,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 146072,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -99991,6 +100134,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 146647,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -100009,6 +100153,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 148747,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -100282,6 +100427,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159129,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -100354,6 +100500,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162971,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -100435,6 +100582,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 163842,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -100460,6 +100608,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 164909,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -100507,6 +100656,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 165501,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -100547,6 +100697,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 166215,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -100576,6 +100727,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 167103,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -100598,6 +100750,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 168261,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -100925,6 +101078,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 177068,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -101004,6 +101158,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 177752,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -101241,6 +101396,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 181683,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -101355,6 +101511,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 182647,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -101440,6 +101597,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 183399,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -101497,6 +101655,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 185438,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -101680,6 +101839,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 188351,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -101746,6 +101906,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 192425,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -102029,6 +102190,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 199609,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -102068,6 +102230,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 200530,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -102303,6 +102466,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 208894,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -102348,6 +102512,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 209765,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -102366,6 +102531,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 211957,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -102398,6 +102564,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 213127,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -102497,6 +102664,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 214312,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -102670,6 +102838,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 215730,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -102688,6 +102857,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 215774,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -102759,6 +102929,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 216634,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -102815,6 +102986,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 217163,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -102852,6 +103024,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 217454,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -102945,6 +103118,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 222836,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -102977,6 +103151,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 223771,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -102984,6 +103159,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 223745,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -103024,6 +103200,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 224836,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -103231,6 +103408,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 228284,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -103261,6 +103439,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 229015,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -103372,6 +103551,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 231881,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -103480,6 +103660,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 235761,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -103704,6 +103885,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 244631,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -103779,6 +103961,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 245372,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -103869,6 +104052,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 246178,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -103973,6 +104157,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 247011,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -104016,6 +104201,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 248060,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -104214,6 +104400,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 259099,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -104228,6 +104415,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 258610,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -104374,6 +104562,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 262657,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -104388,6 +104577,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 262531,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -104516,6 +104706,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 269817,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -104551,6 +104742,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 271752,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -104562,6 +104754,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 271895,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -104764,6 +104957,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 276211,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -104811,6 +105005,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 280819,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -104840,6 +105035,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 281109,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -104854,6 +105050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 281626,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -104886,6 +105083,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 282269,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -104919,6 +105117,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 285374,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -104940,6 +105139,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 284834,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -104994,6 +105194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 291675,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -105037,6 +105238,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 291125,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -105231,6 +105433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 297827,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -105339,6 +105542,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 300400,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -105417,6 +105621,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 299871,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -105505,6 +105710,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 301165,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -105519,6 +105725,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 301191,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -105548,6 +105755,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 301918,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -105587,6 +105795,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 302498,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -105616,6 +105825,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 302866,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -105643,6 +105853,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 305598,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -105825,6 +106036,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 307191,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -105970,6 +106182,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 309793,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -106013,6 +106226,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 311116,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -106183,6 +106397,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 317788,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -106367,6 +106582,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 329166,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -106414,6 +106630,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 329693,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -106545,6 +106762,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 332021,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -106619,6 +106837,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 332781,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -106633,6 +106852,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 335247,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -106676,6 +106896,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 336029,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -106837,6 +107058,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 336892,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -106883,6 +107105,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 337937,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -107061,6 +107284,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 343295,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -107075,6 +107299,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 342034,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -107216,6 +107441,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 345028,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -107263,6 +107489,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 345823,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -107274,6 +107501,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346250,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -107299,6 +107527,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 348052,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -107321,6 +107550,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 347937,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -107365,6 +107595,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 350725,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -107372,6 +107603,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 351338,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -107397,6 +107629,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 351963,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -107476,6 +107709,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 353455,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -107754,6 +107988,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 362863,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -107765,6 +108000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 364751,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -108102,6 +108338,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 368195,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -108367,6 +108604,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373808,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -108566,6 +108804,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 378542,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -108649,6 +108888,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 379989,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -108709,6 +108949,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 382699,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -108734,6 +108975,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 385510,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -108741,6 +108983,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 383361,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -108766,6 +109009,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 384288,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -108809,6 +109053,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 386939,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -108877,6 +109122,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 385626,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -108949,6 +109195,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 389071,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -108992,6 +109239,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 390611,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -109006,6 +109254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 389345,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -109122,6 +109371,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 394189,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -109187,6 +109437,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 395092,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -109753,6 +110004,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 413644,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -109850,6 +110102,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 418353,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -109924,6 +110177,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 419198,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -109973,6 +110227,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 420550,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -109994,6 +110249,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 422681,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110072,6 +110328,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 423536,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110119,6 +110376,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 429447,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110133,6 +110391,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 433275,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110140,6 +110399,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 434069,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110147,6 +110407,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 435824,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110333,6 +110594,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 438233,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110405,6 +110667,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 440837,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110462,6 +110725,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 438859,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110648,6 +110912,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 445401,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110741,6 +111006,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 452344,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110748,6 +111014,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 453770,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -110755,6 +111022,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 455951,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110769,6 +111037,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455864,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -110776,6 +111045,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 458462,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -110783,6 +111053,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 456913,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -110790,6 +111061,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 457565,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -110891,6 +111163,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 465955,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -111010,6 +111283,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 466659,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -111085,6 +111359,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 467236,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -111115,6 +111390,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 467934,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -111147,6 +111423,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468825,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -111172,6 +111449,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 469401,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -111226,6 +111504,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 470184,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -111244,6 +111523,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 470350,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -111497,6 +111777,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 476804,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -111526,6 +111807,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 477642,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -111540,6 +111822,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 478127,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -111569,6 +111852,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 478579,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -111619,6 +111903,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 479078,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -111730,6 +112015,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482259,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -112290,6 +112576,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 494953,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -112407,6 +112694,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 498665,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -112654,6 +112942,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 506360,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -112765,6 +113054,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 510096,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -112786,6 +113076,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 510541,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -112825,6 +113116,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 511607,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -112860,6 +113152,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 512150,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -113364,6 +113657,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 530510,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -113391,6 +113685,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 531180,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -113420,6 +113715,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 531883,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -113459,6 +113755,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 532497,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -113491,6 +113788,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 533101,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -114329,6 +114627,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 549624,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -114595,6 +114894,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 556416,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -114627,6 +114927,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 557269,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -114688,6 +114989,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 561734,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -114716,6 +115018,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 562452,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -114745,6 +115048,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 563273,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -114859,6 +115163,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 564727,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -115597,6 +115902,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 582154,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -116279,6 +116585,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 604962,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -116313,6 +116620,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 602812,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -116349,6 +116657,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 605577,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -116485,6 +116794,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 604684,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -116526,6 +116836,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 607687,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -116551,6 +116862,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 605681,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -116569,6 +116881,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 608448,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -116583,6 +116896,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 606919,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -116590,6 +116904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 609078,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -116626,6 +116941,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 607546,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -117124,6 +117440,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 630213,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -117643,6 +117960,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 650580,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -117735,6 +118053,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 651144,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117742,6 +118061,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 651902,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117749,6 +118069,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 653346,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117814,6 +118135,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 654288,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117835,6 +118157,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 655313,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117871,6 +118194,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 657404,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -117993,6 +118317,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 658053,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -118004,6 +118329,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 658842,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -118029,6 +118355,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 658842,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -118036,6 +118363,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 659707,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -118693,6 +119021,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 666534,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -118863,6 +119192,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 667132,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -118932,6 +119262,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 667703,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -119133,6 +119464,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 672133,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -119631,6 +119963,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 682834,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -119677,6 +120010,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 687164,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -119716,6 +120050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 690786,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -119723,6 +120058,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 691496,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -119748,6 +120084,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 692522,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -119812,6 +120149,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 697451,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -120059,6 +120397,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 706645,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -120087,6 +120426,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 707958,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -120101,6 +120441,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 707394,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -120135,6 +120476,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 706436,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -120153,6 +120495,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 709202,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -120178,6 +120521,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 708977,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -120185,6 +120529,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 709810,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -120214,6 +120559,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 710671,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -120350,6 +120696,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 713758,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -120620,6 +120967,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 722968,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -120649,6 +120997,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 723823,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -120688,6 +121037,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 730034,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -120770,6 +121120,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 730862,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -120945,6 +121296,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 733875,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -120990,6 +121342,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 735757,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -121041,6 +121394,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 736631,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -121063,6 +121417,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 736815,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -121228,6 +121583,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 745471,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -121235,6 +121591,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 746705,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -121242,6 +121599,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 749357,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -121282,6 +121640,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 750563,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -121304,6 +121663,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 751509,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -121311,6 +121671,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 753748,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -121325,6 +121686,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 754464,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -121535,6 +121897,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 757813,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -121846,6 +122209,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 765824,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -121939,6 +122303,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 767552,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -122037,6 +122402,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 776799,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -122048,6 +122414,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 778440,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -122504,6 +122871,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 786824,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -122603,6 +122971,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 787955,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -122682,6 +123051,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 788734,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -122739,6 +123109,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 790473,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -122768,6 +123139,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 790501,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -122793,6 +123165,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 791159,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -122886,6 +123259,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 802114,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -122923,6 +123297,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 803458,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -122991,6 +123366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 804579,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -123002,6 +123378,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 804593,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -123213,6 +123590,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 816747,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123238,6 +123616,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 817161,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123245,6 +123624,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 817902,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -123292,6 +123672,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 819147,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -123353,6 +123734,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 819620,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -123385,6 +123767,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 820477,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123410,6 +123793,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 821160,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123442,6 +123826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 821654,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -123485,6 +123870,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822889,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -123517,6 +123903,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822731,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -123531,6 +123918,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 823216,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -123588,6 +123976,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 826045,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123602,6 +123991,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 826759,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -123624,6 +124014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 827633,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -123642,6 +124033,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 828915,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123649,6 +124041,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 828523,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123667,6 +124060,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 829180,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123692,6 +124086,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 830255,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123738,6 +124133,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 829959,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123765,6 +124161,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 831128,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -123812,6 +124209,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 832151,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -123855,6 +124253,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 833178,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -123876,6 +124275,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 833037,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -123936,6 +124336,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 833920,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -124235,6 +124636,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 839632,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -124246,6 +124648,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 840304,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124264,6 +124667,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 841903,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124310,6 +124714,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 851074,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124324,6 +124729,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 851933,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124342,6 +124748,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 852698,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124468,6 +124875,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 861604,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124475,6 +124883,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 861661,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -124489,6 +124898,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 864672,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124503,6 +124913,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 865606,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124524,6 +124935,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 866556,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124531,6 +124943,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 867373,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124545,6 +124958,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 868526,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124566,6 +124980,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 870659,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124580,6 +124995,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 870293,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -124587,6 +125003,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 871669,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124598,6 +125015,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 870685,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -124627,6 +125045,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 871395,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -124656,6 +125075,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 871322,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -124716,6 +125136,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 872244,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -124748,6 +125169,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 874201,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124762,6 +125184,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 874856,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124769,6 +125192,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 876361,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124776,6 +125200,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 877219,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124783,6 +125208,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 878356,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124801,6 +125227,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 879486,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124808,6 +125235,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 880720,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -124815,6 +125243,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 880239,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -124844,6 +125273,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 881513,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -124990,6 +125420,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 884595,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -125022,6 +125453,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 887803,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -125082,6 +125514,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 895089,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -125216,6 +125649,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 897219,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -125237,6 +125671,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 896838,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -125269,6 +125704,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 897773,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -125396,6 +125832,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 898473,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -125447,6 +125884,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 900981,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -125589,6 +126027,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 899582,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -125596,6 +126035,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 901790,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -125649,6 +126089,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 900504,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -125732,6 +126173,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 901131,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -125760,6 +126202,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902058,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -125800,6 +126243,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902739,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -125821,6 +126265,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 903542,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -125849,6 +126294,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 905142,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -125856,6 +126302,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 906076,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -125916,6 +126363,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 906545,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -126008,6 +126456,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 909016,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -126061,6 +126510,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 909700,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -126086,6 +126536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 909843,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -126126,6 +126577,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 910668,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -126193,6 +126645,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 917311,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -126200,6 +126653,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 916946,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -126372,6 +126826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 925324,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -126390,6 +126845,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 928136,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -126404,6 +126860,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 929024,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -126532,6 +126989,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 933086,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -126672,6 +127130,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 934493,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -126694,6 +127153,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 935396,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -126705,6 +127165,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 936038,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -126719,6 +127180,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 936539,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -126726,6 +127188,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 937441,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -126762,6 +127225,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 940739,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -126776,6 +127240,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 939219,
         "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
@@ -126806,6 +127271,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 942422,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -126855,6 +127321,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 943091,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -126922,6 +127389,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 941857,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -127048,6 +127516,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 946753,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -127223,6 +127692,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 949675,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -127234,6 +127704,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 950478,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -127241,6 +127712,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 950844,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -127248,6 +127720,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 950728,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -127288,6 +127761,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 951428,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -127315,6 +127789,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 951468,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -127348,6 +127823,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 952168,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -127359,6 +127835,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 952390,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -127420,6 +127897,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 953072,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -127427,6 +127905,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 953196,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -127470,6 +127949,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 954104,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -127530,6 +128010,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 959169,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -127555,6 +128036,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 960352,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -127680,6 +128162,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 964955,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -127895,6 +128378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 970366,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -127952,6 +128436,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 971319,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -127963,6 +128448,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 971376,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -128106,6 +128592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 974906,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -128124,6 +128611,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 977247,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -128153,6 +128641,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 980898,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128211,6 +128700,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 982028,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128494,6 +128984,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 987143,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -128537,6 +129028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 988299,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -128601,6 +129093,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 989650,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -128626,6 +129119,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 991256,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128633,6 +129127,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 990831,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -128651,6 +129146,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 991353,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -128658,6 +129154,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 992099,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128672,6 +129169,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 992417,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -128686,6 +129184,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 992583,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128739,6 +129238,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 993372,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -128842,6 +129342,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 994444,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -129022,6 +129523,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 996405,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129124,6 +129626,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 998527,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -129163,6 +129666,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1001194,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129344,6 +129848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1003410,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129461,6 +129966,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1005034,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129508,6 +130014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1005795,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129570,6 +130077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1006787,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129613,6 +130121,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1007788,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -129655,6 +130164,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1008450,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129746,6 +130256,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1010522,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -129859,6 +130370,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1011891,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -130216,6 +130728,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1024303,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -130245,6 +130758,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1024416,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -130370,6 +130884,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1027963,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -130428,6 +130943,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1028693,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -130686,6 +131202,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1035281,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -130744,6 +131261,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1036375,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -131114,6 +131632,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1049702,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -131121,6 +131640,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1050082,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131349,6 +131869,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1056810,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131498,6 +132019,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1073984,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -131523,6 +132045,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1075382,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131541,6 +132064,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1076343,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131584,6 +132108,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1077572,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131623,6 +132148,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1078334,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131634,6 +132160,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1079365,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131659,6 +132186,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1079944,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -131673,6 +132201,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1079944,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131698,6 +132227,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1080366,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131721,6 +132251,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1080901,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131760,6 +132291,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1081846,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131795,6 +132327,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1081932,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131865,6 +132398,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1082536,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -131906,6 +132440,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1083650,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -131913,6 +132448,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1083562,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -131954,6 +132490,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1084637,
         "hit": true,
         "player": "doberman",
         "source": "sound",
@@ -131965,6 +132502,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1085117,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -131976,6 +132514,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1085864,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -131990,6 +132529,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1087261,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132040,6 +132580,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1088061,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -132062,6 +132603,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1088127,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132069,6 +132611,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1089094,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132183,6 +132726,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1092755,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -132241,6 +132785,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1093547,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -132255,6 +132800,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1093919,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -132287,6 +132833,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1094329,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -132305,6 +132852,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1094763,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132312,6 +132860,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1095157,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -132330,6 +132879,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1095295,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -132348,6 +132898,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1095803,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -132359,6 +132910,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1095988,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -132380,6 +132932,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1096681,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132412,6 +132965,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1098907,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -132440,6 +132994,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1100179,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -132465,6 +133020,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1101504,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -132476,6 +133032,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1104682,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -132483,6 +133040,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1102564,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132529,6 +133087,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1104347,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132547,6 +133106,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1104503,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -132561,6 +133121,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1105197,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -132575,6 +133136,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1105336,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -132614,6 +133176,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1108599,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132632,6 +133195,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1109695,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132657,6 +133221,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1112257,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132686,6 +133251,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1113945,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -132704,6 +133270,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1114236,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132814,6 +133381,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1115937,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -132839,6 +133407,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1116321,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -132929,6 +133498,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1119452,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -132940,6 +133510,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1120579,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -132951,6 +133522,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1121366,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -132958,6 +133530,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1122239,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -132976,6 +133549,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1122859,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -133001,6 +133575,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1123184,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -133012,6 +133587,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1126660,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -133023,6 +133599,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1127872,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -133044,6 +133621,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1128323,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -133062,6 +133640,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1129216,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -133080,6 +133659,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1130586,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -133094,6 +133674,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1136943,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -133105,6 +133686,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1137093,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -133112,6 +133694,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1139669,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133119,6 +133702,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1138850,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -133126,6 +133710,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1140517,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133133,6 +133718,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1141171,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133140,6 +133726,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1142041,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133182,6 +133769,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1142801,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -133287,6 +133875,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1145989,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -133301,6 +133890,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1148193,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133350,6 +133940,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1148802,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -133364,6 +133955,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1146743,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -133375,6 +133967,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1146977,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -133382,6 +133975,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1148021,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -133393,6 +133987,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1148283,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -133447,6 +134042,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1148732,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -133458,6 +134054,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1150990,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -133469,6 +134066,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1151431,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -133480,6 +134078,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1151997,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -133487,6 +134086,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1152637,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -133498,6 +134098,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1152669,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -133505,6 +134106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1152749,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -133519,6 +134121,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1156596,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133526,6 +134129,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1157203,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133533,6 +134137,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1155041,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -133544,6 +134149,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1155055,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -133555,6 +134161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1155791,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -133566,6 +134173,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1155706,
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -133580,6 +134188,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1159004,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133587,6 +134196,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1156976,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -133612,6 +134222,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1159855,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133630,6 +134241,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1160465,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133648,6 +134260,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1161082,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133688,6 +134301,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1162465,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
@@ -133785,6 +134399,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1164279,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -134074,6 +134689,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 1174297,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
@@ -134081,6 +134697,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1175142,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -134088,6 +134705,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1176321,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134102,6 +134720,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1178049,
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -134138,6 +134757,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1178186,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -134163,6 +134783,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1178730,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -134202,6 +134823,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1180782,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134234,6 +134856,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1180947,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134241,6 +134864,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1181289,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134248,6 +134872,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1181724,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -134255,6 +134880,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1181750,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134262,6 +134888,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1182302,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134269,6 +134896,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1182387,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -134347,6 +134975,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1183289,
         "hit": true,
         "player": "nlk",
         "source": "sound",
@@ -134405,6 +135034,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1183787,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -134453,6 +135083,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1184596,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -134550,6 +135181,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1189036,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134597,6 +135229,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1189802,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -134631,6 +135264,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1190554,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -134675,6 +135309,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1191137,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134710,6 +135345,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1191576,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -134728,6 +135364,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1191506,
         "hit": true,
         "player": "apa",
         "source": "sound",
@@ -134783,6 +135420,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1192329,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134825,6 +135463,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1193244,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134832,6 +135471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1193202,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -134879,6 +135519,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1194207,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -134936,6 +135577,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1194913,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -134950,6 +135592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1194635,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -134986,6 +135629,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1195536,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -135004,6 +135648,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1196306,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -135029,6 +135674,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1197038,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -135050,6 +135696,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1197549,
         "hit": true,
         "player": "sCorp",
         "source": "sound",
@@ -135082,6 +135729,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1197891,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
@@ -135100,6 +135748,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1198763,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
@@ -135154,6 +135803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1199019,
         "hit": true,
         "player": "marksuzu",
         "source": "sound",
@@ -135208,6 +135858,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1200059,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",

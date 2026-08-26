@@ -67376,7 +67376,7 @@
         "killer": "paniagua",
         "time": 594540,
         "victim": "rusti",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "sailorman",
@@ -67849,7 +67849,7 @@
         "killer": "nexus",
         "time": 793705,
         "victim": "[nW].Veggie",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "killer": "sailorman",
@@ -88203,7 +88203,7 @@
         "time": 594540,
         "type": "frag",
         "victim": "rusti",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "gandi rides sailorman's rocket",
@@ -90046,7 +90046,7 @@
         "time": 793705,
         "type": "frag",
         "victim": "[nW].Veggie",
-        "weapon": "teamkill"
+        "weapon": "tele"
       },
       {
         "message": "rusti rides sailorman's rocket",
@@ -93942,35 +93942,43 @@
           "byWeapon": {
             "axe": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 45,
-              "hits": 9
+              "hits": 9,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 138,
-              "hits": 54
+              "hits": 54,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 1,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 28,
-              "hits": 15
+              "hits": 15,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 539,
-              "hits": 325
+              "hits": 325,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 24,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 15,
-              "hits": 9
+              "hits": 9,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94190,6 +94198,8 @@
           "efficiency": 0.3918,
           "frags": 32,
           "kills": 38,
+          "maxQuadSpree": 5,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 3,
           "teamKills": 3
@@ -94216,27 +94226,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 18,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 32,
-              "hits": 7
+              "hits": 7,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 78,
-              "hits": 39
+              "hits": 39,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 304,
-              "hits": 139
+              "hits": 139,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 5,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 47,
-              "hits": 40
+              "hits": 40,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94450,6 +94466,8 @@
           "efficiency": 0.5217,
           "frags": 44,
           "kills": 48,
+          "maxQuadSpree": 0,
+          "maxSpree": 8,
           "src": "derived",
           "suicides": 2,
           "teamKills": 2
@@ -94476,27 +94494,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 13,
-              "hits": 2
+              "hits": 2,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 132,
-              "hits": 36
+              "hits": 36,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 99,
-              "hits": 41
+              "hits": 41,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 315,
-              "hits": 150
+              "hits": 150,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 65,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 28,
-              "hits": 24
+              "hits": 24,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94723,6 +94747,8 @@
           "efficiency": 0.4792,
           "frags": 44,
           "kills": 46,
+          "maxQuadSpree": 4,
+          "maxSpree": 14,
           "src": "derived",
           "suicides": 1,
           "teamKills": 1
@@ -94756,31 +94782,38 @@
           "byWeapon": {
             "axe": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 7,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 41,
-              "hits": 17
+              "hits": 17,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 468,
-              "hits": 221
+              "hits": 221,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 81,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 15,
-              "hits": 13
+              "hits": 13,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -94982,6 +95015,8 @@
           "efficiency": 0.3636,
           "frags": 31,
           "kills": 32,
+          "maxQuadSpree": 3,
+          "maxSpree": 3,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -95008,27 +95043,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 92,
-              "hits": 42
+              "hits": 42,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 134,
-              "hits": 83
+              "hits": 83,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 309,
-              "hits": 212
+              "hits": 212,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 5,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 25,
-              "hits": 23
+              "hits": 23,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95249,6 +95290,8 @@
           "efficiency": 0.629,
           "frags": 73,
           "kills": 78,
+          "maxQuadSpree": 4,
+          "maxSpree": 20,
           "src": "derived",
           "suicides": 2,
           "teamKills": 3
@@ -95275,31 +95318,38 @@
           "byWeapon": {
             "gl": {
               "attacks": 15,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 94,
-              "hits": 33
+              "hits": 33,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 1,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 57,
-              "hits": 31
+              "hits": 31,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 299,
-              "hits": 145
+              "hits": 145,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 284,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 39,
-              "hits": 32
+              "hits": 32,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95528,6 +95578,8 @@
           "efficiency": 0.4904,
           "frags": 48,
           "kills": 51,
+          "maxQuadSpree": 4,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 0,
           "teamKills": 3
@@ -95554,31 +95606,38 @@
           "byWeapon": {
             "axe": {
               "attacks": 25,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 3,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 34,
-              "hits": 10
+              "hits": 10,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 72,
-              "hits": 38
+              "hits": 38,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 279,
-              "hits": 146
+              "hits": 146,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 20,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 89,
-              "hits": 60
+              "hits": 60,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -95802,6 +95861,8 @@
           "efficiency": 0.4353,
           "frags": 36,
           "kills": 37,
+          "maxQuadSpree": 2,
+          "maxSpree": 7,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -95828,27 +95889,33 @@
           "byWeapon": {
             "gl": {
               "attacks": 23,
-              "hits": 5
+              "hits": 5,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 156,
-              "hits": 43
+              "hits": 43,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 67,
-              "hits": 27
+              "hits": 27,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 474,
-              "hits": 223
+              "hits": 223,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 23,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 16,
-              "hits": 11
+              "hits": 11,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -96078,6 +96145,8 @@
           "efficiency": 0.5126,
           "frags": 60,
           "kills": 61,
+          "maxQuadSpree": 5,
+          "maxSpree": 13,
           "src": "derived",
           "suicides": 0,
           "teamKills": 1
@@ -96113,35 +96182,43 @@
           "byWeapon": {
             "axe": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 99,
-              "hits": 19
+              "hits": 19,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 458,
-              "hits": 140
+              "hits": 140,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 1,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 272,
-              "hits": 122
+              "hits": 122,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1632,
-              "hits": 837
+              "hits": 837,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 117,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 106,
-              "hits": 84
+              "hits": 84,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -96392,6 +96469,8 @@
           "efficiency": 0.4777,
           "frags": 180,
           "kills": 193,
+          "maxQuadSpree": 5,
+          "maxSpree": 14,
           "src": "derived",
           "suicides": 6,
           "teamKills": 7
@@ -96408,35 +96487,43 @@
           "byWeapon": {
             "axe": {
               "attacks": 27,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "gl": {
               "attacks": 20,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 227,
-              "hits": 88
+              "hits": 88,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 3,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 304,
-              "hits": 169
+              "hits": 169,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 1355,
-              "hits": 724
+              "hits": 724,
+              "hitsConvention": "anyDamage"
             },
             "sng": {
               "attacks": 390,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 168,
-              "hits": 128
+              "hits": 128,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -96687,6 +96774,8 @@
           "efficiency": 0.4938,
           "frags": 188,
           "kills": 198,
+          "maxQuadSpree": 4,
+          "maxSpree": 20,
           "src": "derived",
           "suicides": 4,
           "teamKills": 6
@@ -96700,7 +96789,7 @@
       }
     ]
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -97639,6 +97728,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 10575,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -97657,6 +97747,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11198,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -97671,6 +97762,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11822,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -97696,6 +97788,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 12968,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98115,6 +98208,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 20951,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98143,6 +98237,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 21544,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98192,6 +98287,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 22167,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98210,6 +98306,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 22894,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98217,6 +98314,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 23485,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -98246,6 +98344,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 22237,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -98323,6 +98422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 23310,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -98573,6 +98673,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 27263,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -98699,6 +98800,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 29618,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -98841,6 +98943,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 32218,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -98900,6 +99003,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 32841,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -98960,6 +99064,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 34703,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99035,6 +99140,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 39202,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -99057,6 +99163,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 41729,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -99085,6 +99192,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 40897,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -99096,6 +99204,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 41072,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -99168,6 +99277,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 41381,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -99354,6 +99464,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 49455,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -99510,6 +99621,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 52190,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -99528,6 +99640,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 52883,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -99964,6 +100077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 72560,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -99989,6 +100103,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 73177,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -100179,6 +100294,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 78945,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -100197,6 +100313,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 79738,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -100289,6 +100406,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 82140,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -100310,6 +100428,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 83005,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -100328,6 +100447,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 81759,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -100339,6 +100459,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81931,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -100474,6 +100595,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 86597,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100503,6 +100625,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 86736,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -100565,6 +100688,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 87496,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -100644,6 +100768,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 92158,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -100658,6 +100783,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 92919,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -100721,6 +100847,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 95204,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -100793,6 +100920,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 98113,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -100804,6 +100932,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98248,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100815,6 +100944,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99222,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -100822,6 +100952,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98871,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -100836,6 +100967,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 99845,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -100865,6 +100997,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 102754,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -100940,6 +101073,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 104211,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -100958,6 +101092,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 104245,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -100972,6 +101107,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 105480,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101185,6 +101321,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 111678,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -101231,6 +101368,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 114409,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -101238,6 +101376,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118080,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -101278,6 +101417,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 118703,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101340,6 +101480,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 119742,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -101365,6 +101506,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 119467,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -101422,6 +101564,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 119979,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -101440,6 +101583,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 120291,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -101451,6 +101595,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 120605,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -101458,6 +101603,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 121019,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -101469,6 +101615,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 121365,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -101534,6 +101681,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 122262,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -101584,6 +101732,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 123716,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -101661,6 +101810,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 126053,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -101723,6 +101873,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 127295,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -101730,6 +101881,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 127192,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -101787,6 +101939,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131785,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -101902,6 +102055,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 134888,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -102011,6 +102165,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 138249,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -102076,6 +102231,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 138798,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -102278,6 +102434,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 147102,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -102314,6 +102471,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 147752,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -102328,6 +102486,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 146454,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102349,6 +102508,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 148370,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -102367,6 +102527,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 148991,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -102374,6 +102535,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 146932,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102388,6 +102550,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149578,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -102474,6 +102637,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 150513,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102589,6 +102753,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 152583,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102621,6 +102786,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 153515,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -102737,6 +102903,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 156866,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -102813,6 +102980,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 157582,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -102860,6 +103028,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 158228,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -102893,6 +103062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 158574,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102907,6 +103077,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159060,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -102954,6 +103125,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159402,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -102972,6 +103144,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 159402,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -103108,6 +103281,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 161929,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -103122,6 +103296,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 162310,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -103158,6 +103333,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 163310,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -103201,6 +103377,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 166248,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -103248,6 +103425,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 167011,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -103388,6 +103566,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 168213,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103413,6 +103592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 168284,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -103471,6 +103651,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 168388,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103500,6 +103681,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 168838,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -103557,6 +103739,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 169319,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -103638,6 +103821,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 170938,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103677,6 +103861,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 171109,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -103789,6 +103974,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 173945,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103825,6 +104011,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 174737,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103896,6 +104083,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 176119,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -103918,6 +104106,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 176119,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -103973,6 +104162,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 177017,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -104020,6 +104210,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 177981,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -104189,6 +104380,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 188684,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -104251,6 +104443,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 189845,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -104312,6 +104505,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 191075,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -104330,6 +104524,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 191941,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -104362,6 +104557,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 192904,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -104390,6 +104586,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 194187,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -104440,6 +104637,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 194843,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -104472,6 +104670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 194568,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -104494,6 +104693,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 195083,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -104548,6 +104748,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 195735,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -104602,6 +104803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 196360,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -104744,6 +104946,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 203168,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -105078,6 +105281,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 208949,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -105142,6 +105346,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 209539,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -105616,6 +105821,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 223646,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -105793,6 +105999,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 226646,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -106012,6 +106219,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 238017,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -106030,6 +106238,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 241640,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106072,6 +106281,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 242471,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -106157,6 +106367,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 243198,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -106232,6 +106443,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 243579,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -106262,6 +106474,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 243855,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106409,6 +106622,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 245683,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106473,6 +106687,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 246133,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -106491,6 +106706,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 250582,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106574,6 +106790,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 253682,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -106697,6 +106914,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 258777,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106711,6 +106929,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 257539,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -106732,6 +106951,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 259849,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106739,6 +106959,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 258537,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106746,6 +106967,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 261511,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106753,6 +106975,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 260438,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -106760,6 +106983,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 263577,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -106829,6 +107053,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 264271,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -106872,6 +107097,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 264931,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -106890,6 +107116,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 265759,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -106980,6 +107207,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 272920,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -107062,6 +107290,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 275862,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -107102,6 +107331,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 276485,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -107207,6 +107437,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 276624,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -107332,6 +107563,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 284294,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107368,6 +107600,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 285883,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107375,6 +107608,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 286574,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107382,6 +107616,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 288449,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -107404,6 +107639,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 288484,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107411,6 +107647,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 288311,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -107451,6 +107688,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 289970,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107465,6 +107703,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 290142,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -107483,6 +107722,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 290765,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -107494,6 +107734,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 291457,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -107501,6 +107742,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 291769,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107515,6 +107757,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 292669,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -107547,6 +107790,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 292838,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -107554,6 +107798,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 293354,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107568,6 +107813,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 294185,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107575,6 +107821,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294254,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107618,6 +107865,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 294322,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107643,6 +107891,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 298701,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -107661,6 +107910,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 297639,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107675,6 +107925,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 297951,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -107693,6 +107944,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 298565,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -107700,6 +107952,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 299113,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -107711,6 +107964,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 299839,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107718,6 +107972,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 300743,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107764,6 +108019,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 301746,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107789,6 +108045,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 302475,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107896,6 +108153,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 307253,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -107946,6 +108204,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 308365,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -108000,6 +108259,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 310754,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -108101,6 +108361,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 316325,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -108177,6 +108438,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 316980,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -108411,6 +108673,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 323377,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -108527,6 +108790,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 324969,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -108541,6 +108805,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 325623,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -108555,6 +108820,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 326766,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -109014,6 +109280,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 340811,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -109222,6 +109489,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 344331,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -109251,6 +109519,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 345101,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -109276,6 +109545,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 345770,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -109299,6 +109569,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 348731,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -109328,6 +109599,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 349400,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -109437,6 +109709,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 356452,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -109525,6 +109798,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 357490,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -109575,6 +109849,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 358048,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110004,6 +110279,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 376593,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110011,6 +110287,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 376764,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -110022,6 +110299,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 376450,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110029,6 +110307,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 376414,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -110036,6 +110315,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 377556,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110043,6 +110323,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378633,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110050,6 +110331,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 379523,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110064,6 +110346,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 386345,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110186,6 +110469,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 388626,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -110229,6 +110513,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 389383,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -110247,6 +110532,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 390318,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110279,6 +110565,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 390007,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -110290,6 +110577,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 392055,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -110297,6 +110585,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 393097,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110308,6 +110597,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 395335,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -110319,6 +110609,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 396204,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110326,6 +110617,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 397216,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -110344,6 +110636,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 396870,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -110362,6 +110655,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 397009,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -110373,6 +110667,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 397182,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110398,6 +110693,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 397599,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -110414,6 +110710,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 397980,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -110432,6 +110729,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 398294,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -110453,6 +110751,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 399203,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -110525,6 +110824,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 400112,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110627,6 +110927,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 402399,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110848,6 +111149,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 409139,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -110925,6 +111227,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 410138,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110950,6 +111253,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 411069,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -110961,6 +111265,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411242,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -110972,6 +111277,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 413225,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -110997,6 +111303,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 413953,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -111044,6 +111351,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 415160,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -111330,6 +111638,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 422784,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -111351,6 +111660,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 423195,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -111728,6 +112038,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 431773,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -111897,6 +112208,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 434037,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -111937,6 +112249,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 435083,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -111958,6 +112271,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 436119,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -111983,6 +112297,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 436807,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -112407,6 +112722,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 449760,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -112577,6 +112893,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455004,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -112646,6 +112963,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455696,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -112718,6 +113036,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 457592,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -112786,6 +113105,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 458771,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -112826,6 +113146,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 459701,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -112869,6 +113190,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 461114,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -112887,6 +113209,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 462014,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -112905,6 +113228,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 462875,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -112930,6 +113254,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 467274,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -112976,6 +113301,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 465850,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -113019,6 +113345,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 466749,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113079,6 +113406,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 467761,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -113097,6 +113425,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468629,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -113104,6 +113433,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469602,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -113136,6 +113466,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 470359,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -113187,6 +113518,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 471775,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113233,6 +113565,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 473065,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -113269,6 +113602,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 475871,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -113304,6 +113638,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 477364,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -113333,6 +113668,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 478088,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -113369,6 +113705,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 479024,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113416,6 +113753,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 479994,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113478,6 +113816,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 480959,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -113528,6 +113867,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 482897,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113549,6 +113889,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 483312,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113618,6 +113959,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 484491,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -113747,6 +114089,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 487432,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -114168,6 +114511,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 496305,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -114230,6 +114574,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 501608,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -114259,6 +114604,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 499777,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -114282,6 +114628,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 503276,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -114289,6 +114636,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 503897,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -114303,6 +114651,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 504479,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -114476,6 +114825,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 505614,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -114620,6 +114970,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 506891,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -114663,6 +115014,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 507849,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -115151,6 +115503,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 522583,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -115195,6 +115548,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 523240,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -115514,6 +115868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 528740,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -115651,6 +116006,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 530499,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -115745,6 +116101,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 532399,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116061,6 +116418,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 537142,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116104,6 +116462,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 538761,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -116165,6 +116524,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 539454,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -116245,6 +116605,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 540147,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116374,6 +116735,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 543913,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116410,6 +116772,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 544780,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116421,6 +116784,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 545823,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -116428,6 +116792,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 546545,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -116534,6 +116899,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 552441,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -116923,6 +117289,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 561733,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -117042,6 +117409,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 562891,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117097,6 +117465,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 563575,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -117183,6 +117552,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 564229,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -117294,6 +117664,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 565229,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117514,6 +117885,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 568885,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117592,6 +117964,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 569598,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -117681,6 +118054,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 570665,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -117749,6 +118123,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 571386,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -117832,6 +118207,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 573247,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -117871,6 +118247,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 574037,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -117889,6 +118266,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 574385,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -117922,6 +118300,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 575212,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118078,6 +118457,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 583171,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118107,6 +118487,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 585989,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118114,6 +118495,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 583928,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118132,6 +118514,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 585150,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -118154,6 +118537,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 588672,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118161,6 +118545,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 589266,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118179,6 +118564,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 587174,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -118197,6 +118583,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 589926,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118233,6 +118620,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 589402,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -118247,6 +118635,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 590620,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118293,6 +118682,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 589857,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -118307,6 +118697,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 590278,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -118438,6 +118829,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 595404,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118474,6 +118866,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 595992,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118503,6 +118896,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 596591,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118517,6 +118911,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 597617,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118535,6 +118930,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 595992,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -118560,6 +118956,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 600318,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118607,6 +119004,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 600942,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118675,6 +119073,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 600250,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118716,6 +119115,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 602744,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118734,6 +119134,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 603478,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118762,6 +119163,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 602467,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118795,6 +119197,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 604715,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -118817,6 +119220,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 605335,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -118912,6 +119316,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 605300,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -119038,6 +119443,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 607450,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -119271,6 +119677,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 613101,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -119305,6 +119712,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 614303,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -119359,6 +119767,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 619943,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -119388,6 +119797,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 620527,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -119406,6 +119816,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 621155,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -119438,6 +119849,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 620322,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -119456,6 +119868,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 621121,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -119586,6 +119999,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 629428,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -119857,6 +120271,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 641654,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -119864,6 +120279,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 641690,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -119871,6 +120287,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 642383,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119882,6 +120299,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 642383,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -119893,6 +120311,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 643146,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -119900,6 +120319,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 643075,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -119921,6 +120341,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 643941,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -119946,6 +120367,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 645256,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -119968,6 +120390,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 645782,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -119979,6 +120402,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 645920,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -120004,6 +120428,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 648244,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -120026,6 +120451,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 646573,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -120042,6 +120468,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 646573,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -120071,6 +120498,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 649703,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -120078,6 +120506,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 647862,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -120085,6 +120514,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 650392,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -120106,6 +120536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 650359,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -120146,6 +120577,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 651365,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -120422,6 +120854,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 657827,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -120462,6 +120895,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 658484,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -120692,6 +121126,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 661068,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -120786,6 +121221,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 663274,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -120930,6 +121366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668042,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -121009,6 +121446,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 668008,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -121100,6 +121538,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 668884,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -121129,6 +121568,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 669338,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -121197,6 +121637,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 670532,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -121204,6 +121645,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 670600,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -121218,6 +121660,7 @@
         "weapon": "axe"
       },
       {
+        "flightEnd": 671651,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -121244,6 +121687,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 672865,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -121495,6 +121939,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 679560,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -121531,6 +121976,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 679986,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -121542,6 +121988,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 679844,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -121604,6 +122051,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 681423,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -121618,6 +122066,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 681599,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -121654,6 +122103,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 682648,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -121661,6 +122111,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 683141,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -121859,6 +122310,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 684962,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -121870,6 +122322,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 687810,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121895,6 +122348,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 688429,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -121902,6 +122356,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 686316,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -121956,6 +122411,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 687845,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -121981,6 +122437,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 688811,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -122010,6 +122467,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 689117,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -122017,6 +122475,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 689884,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122067,6 +122526,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 689780,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -122078,6 +122538,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 690650,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122089,6 +122550,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 691979,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -122096,6 +122558,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 691486,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122110,6 +122573,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 692296,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122128,6 +122592,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 693519,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -122142,6 +122607,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 693449,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122149,6 +122615,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 694351,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -122396,6 +122863,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 697549,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -122475,6 +122943,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 698659,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122564,6 +123033,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 704102,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122589,6 +123059,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 704960,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122635,6 +123106,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 705786,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122642,6 +123114,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 706341,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -122739,6 +123212,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 706581,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -122768,6 +123242,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 706821,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -122793,6 +123268,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 708445,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -122861,6 +123337,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 710256,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -122896,6 +123373,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 710601,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122921,6 +123399,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 711565,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -122928,6 +123407,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 711357,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -122953,6 +123433,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 712219,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123067,6 +123548,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 713496,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123149,6 +123631,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 714081,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123253,6 +123736,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 718084,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123278,6 +123762,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 719216,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123321,6 +123806,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 720976,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -123328,6 +123814,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 724243,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123335,6 +123822,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 721977,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -123346,6 +123834,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 722353,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123357,6 +123846,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 724278,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -123375,6 +123865,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 724621,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -123382,6 +123873,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 725002,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -123400,6 +123892,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 725414,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123411,6 +123904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 725483,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -123440,6 +123934,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 726768,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123465,6 +123960,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 726731,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -123476,6 +123972,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 727980,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123523,6 +124020,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 729150,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -123559,6 +124057,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 729698,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -123592,6 +124091,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 731945,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123643,6 +124143,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 730355,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -123697,6 +124198,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 731392,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123754,6 +124256,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 732744,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -123812,6 +124315,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 733537,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123855,6 +124359,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 734227,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -123873,6 +124378,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 734295,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -123928,6 +124434,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 735611,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -123981,6 +124488,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 735746,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124039,6 +124547,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 736679,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -124064,6 +124573,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 736645,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124172,6 +124682,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 738611,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -124233,6 +124744,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 742579,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -124247,6 +124759,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 743372,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -124442,6 +124955,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 746340,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124536,6 +125050,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 747246,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124669,6 +125184,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 751379,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -124683,6 +125199,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 752146,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -124690,6 +125207,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 752389,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -124740,6 +125258,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 753321,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -124816,6 +125335,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 754992,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -124827,6 +125347,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 754992,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -124892,6 +125413,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 756233,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -124921,6 +125443,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 756095,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125053,6 +125576,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 760051,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125100,6 +125624,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 760926,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125159,6 +125684,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 761479,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125210,6 +125736,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 762240,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125406,6 +125933,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 767865,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125435,6 +125963,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 767865,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -125596,6 +126125,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 770785,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -125614,6 +126144,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 769845,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125636,6 +126167,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 770505,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125661,6 +126193,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 771305,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -125708,6 +126241,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 774148,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125740,6 +126274,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 777919,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125751,6 +126286,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 778610,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -125812,6 +126348,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 779654,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125848,6 +126385,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 780457,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -125928,6 +126466,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 781220,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126012,6 +126551,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 781950,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126059,6 +126599,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 782854,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -126113,6 +126654,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 783997,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -126142,6 +126684,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 783686,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -126224,6 +126767,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 784688,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126282,6 +126826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 787324,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -126300,6 +126845,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 787601,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -126412,6 +126958,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 794051,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126419,6 +126966,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 793048,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -126437,6 +126985,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 792840,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126467,6 +127016,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 794778,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -126474,6 +127024,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 793600,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126492,6 +127043,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 794466,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126546,6 +127098,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 799203,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126557,6 +127110,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 801294,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126618,6 +127172,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 799858,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126747,6 +127302,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 801535,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126772,6 +127328,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 805600,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126801,6 +127358,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 806294,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126808,6 +127366,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 804177,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126826,6 +127385,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 804665,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -126833,6 +127393,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 807093,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126840,6 +127401,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 805185,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -126862,6 +127424,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 807717,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126876,6 +127439,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 805738,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -126894,6 +127458,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 808306,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126919,6 +127484,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 808939,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126937,6 +127503,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809630,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126990,6 +127557,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 810254,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -126997,6 +127565,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 808062,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127043,6 +127612,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809008,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127080,6 +127650,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809630,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -127099,6 +127670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 809976,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -127167,6 +127739,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 811400,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -127310,6 +127883,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 813755,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127363,6 +127937,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 814625,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127521,6 +128096,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 818074,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -127616,6 +128192,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 820681,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127637,6 +128214,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 821241,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127658,6 +128236,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822391,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127665,6 +128244,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 822112,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127694,6 +128274,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 823188,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -127719,6 +128300,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 822911,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127763,6 +128345,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 825066,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -127943,6 +128526,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 829052,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -127965,6 +128549,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 829603,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128540,6 +129125,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 843272,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128558,6 +129144,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 843858,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128655,6 +129242,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 850167,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128691,6 +129279,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 850583,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128738,6 +129327,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 851691,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -128760,6 +129350,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 851934,
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -128771,6 +129362,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 851829,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -129201,6 +129793,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 863794,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -129258,6 +129851,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 866543,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -129373,6 +129967,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 876793,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -129391,6 +129986,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 876585,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -129726,6 +130322,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 889475,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -129733,6 +130330,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 887636,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -129740,6 +130338,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 890099,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -129747,6 +130346,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 888990,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -129754,6 +130354,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 891281,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -129786,6 +130387,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 893116,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -129850,6 +130452,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 895675,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -129907,6 +130510,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 898129,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -129953,6 +130557,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 896747,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -130040,6 +130645,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 897648,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -130151,6 +130757,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 898440,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -130388,6 +130995,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 901690,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -130499,6 +131107,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 902106,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -130715,6 +131324,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 905461,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -130985,6 +131595,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 911136,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -131003,6 +131614,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 912805,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -131028,6 +131640,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 913465,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -131064,6 +131677,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 914610,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -131313,6 +131927,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 921901,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -131353,6 +131968,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 922523,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -131407,6 +132023,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 925984,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -131651,6 +132268,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 930035,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -132257,6 +132875,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 951574,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -132361,6 +132980,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 957079,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -132600,6 +133220,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 960606,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -132686,6 +133307,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 961229,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -132887,6 +133509,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 964036,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -132905,6 +133528,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 964623,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -132966,6 +133590,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 965974,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -135088,6 +135713,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 999079,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -135133,6 +135759,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1002405,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135220,6 +135847,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1003336,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135273,6 +135901,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1003957,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135624,6 +136253,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1008036,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135765,6 +136395,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1013019,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135772,6 +136403,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1013633,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135790,6 +136422,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1014217,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135815,6 +136448,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1014813,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135868,6 +136502,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1015447,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135875,6 +136510,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1013600,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -135933,6 +136569,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1016073,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -135951,6 +136588,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1014569,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -136002,6 +136640,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1015759,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -136052,6 +136691,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1018161,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -136195,6 +136835,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1030266,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136302,6 +136943,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1031747,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136391,6 +137033,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1032516,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -136455,6 +137098,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1032968,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -136892,6 +137536,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1040253,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -136903,6 +137548,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1040811,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -136938,6 +137584,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1041522,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -137039,6 +137686,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1043315,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -137187,6 +137835,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1045868,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -137245,6 +137894,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1046744,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -137352,6 +138002,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1052030,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -137386,6 +138037,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1053048,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -137426,6 +138078,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1053638,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -137473,6 +138126,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1056153,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -137502,6 +138156,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1057105,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -137559,6 +138214,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1058347,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -137786,6 +138442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1063814,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -137822,6 +138479,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1064403,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -137883,6 +138541,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1064887,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -137894,6 +138553,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1065372,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -137916,6 +138576,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1068197,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -137941,6 +138602,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1068818,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -137990,6 +138652,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1069411,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -138039,6 +138702,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1070039,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -138580,6 +139244,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1075432,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -138701,6 +139366,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1076026,
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -138932,6 +139598,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1083033,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -138939,6 +139606,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1083899,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -138950,6 +139618,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1084747,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -138957,6 +139626,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1085935,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -138982,6 +139652,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1090864,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -138989,6 +139660,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1088708,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -138996,6 +139668,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1091486,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -139003,6 +139676,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1093051,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -139021,6 +139695,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1093687,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -139104,6 +139779,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1095302,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -139111,6 +139787,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 1093051,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -139172,6 +139849,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1094988,
         "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
@@ -139493,6 +140171,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1100326,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139554,6 +140233,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1101127,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139593,6 +140273,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1101997,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139611,6 +140292,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1102863,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -139632,6 +140314,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1103702,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139646,6 +140329,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1104539,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -139660,6 +140344,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1104675,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139718,6 +140403,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1105854,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -139988,6 +140674,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1110840,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -140031,6 +140718,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1111821,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -140148,6 +140836,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1113234,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -140243,6 +140932,7 @@
         "weapon": "sng"
       },
       {
+        "flightEnd": 1113649,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -140283,6 +140973,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1114514,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -140429,6 +141120,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1116456,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -140454,6 +141146,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1117354,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -140479,6 +141172,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1117248,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -140497,6 +141191,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1117706,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -140565,6 +141260,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1118568,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -140662,6 +141358,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1120321,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -140738,6 +141435,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1121678,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -140800,6 +141498,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1122683,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -140915,6 +141614,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1124587,
         "hit": true,
         "player": "paniagua",
         "source": "sound",
@@ -141116,6 +141816,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1131123,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -141141,6 +141842,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1132128,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141162,6 +141864,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1133612,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141183,6 +141886,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1136777,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141212,6 +141916,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1137297,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -141237,6 +141942,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1138508,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141266,6 +141972,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1139411,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -141288,6 +141995,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 1140527,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141295,6 +142003,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1141231,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -141345,6 +142054,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1143205,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -141629,6 +142339,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1147210,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -141702,6 +142413,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1148867,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -141810,6 +142522,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1149526,
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -141965,6 +142678,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1150982,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -142058,6 +142772,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1151957,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -142080,6 +142795,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1152339,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -142135,6 +142851,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1152825,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -142198,6 +142915,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1153656,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142209,6 +142927,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1153728,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -142294,6 +143013,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1155968,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -142323,6 +143043,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1156266,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142352,6 +143073,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1156591,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -142514,6 +143236,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1172226,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -142521,6 +143244,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1172525,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -142528,6 +143252,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1173382,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142603,6 +143328,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 1176383,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -142610,6 +143336,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1178810,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -142617,6 +143344,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1178955,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -142624,6 +143352,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1179363,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142642,6 +143371,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1179914,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -142757,6 +143487,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1181264,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -142792,6 +143523,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1182084,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142872,6 +143604,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1183368,
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -142937,6 +143670,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1186047,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -142951,6 +143685,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1186465,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -142958,6 +143693,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1186683,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -142980,6 +143716,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1187049,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -142991,6 +143728,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1189666,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -143020,6 +143758,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1190569,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -143034,6 +143773,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1191601,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -143045,6 +143785,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1191408,
         "hit": true,
         "player": "rusti",
         "source": "sound",
@@ -143085,6 +143826,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1192071,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -143096,6 +143838,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1192381,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -143114,6 +143857,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1193069,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -143125,6 +143869,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1193225,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -143143,6 +143888,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1196004,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -143171,6 +143917,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1196629,
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
@@ -143203,6 +143950,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1195549,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -143210,6 +143958,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1195794,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -143228,6 +143977,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1196290,
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -143239,6 +143989,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 1196697,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -143311,6 +144062,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 1198361,
         "hit": true,
         "player": "paniagua",
         "source": "sound",

@@ -187,10 +187,11 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   and rejects an unknown token with `400 invalid_param` (naming the valid
   set) rather than matching nothing: core codes are `rl,lg,gl,ssg,sng,ng,
   sg,axe`; `/damage` also takes the pseudo-codes `tele`/`stomp` (positional
-  kills) plus death-type/environmental codes (`explobox,squish,lava,slime,
-  drown,fall,trigger,suicide,unknown`); `/frags` also takes the obituary
-  cause codes (`hook,rail,squish,fall,lava,slime,water,world,tele,stomp,
-  unknown,suicide,teamkill`); `/backpacks` accepts only `rl,lg`;
+  kills) plus death-type/environmental codes (`hook,explobox,squish,lava,
+  slime,drown,fall,trigger,suicide,unknown`); `/frags` also takes the
+  obituary cause codes (`hook,rail,squish,explobox,fall,lava,slime,water,
+  world,tele,stomp,unknown,suicide,teamkill`); `/backpacks` accepts only
+  `rl,lg`;
   `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/top-windows` the
   vocabulary follows the chosen `metric`'s **own source** — the frag one for
   `frags`/`deaths`/`netFrags`, the damage one for the damage metrics, and
@@ -281,7 +282,32 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   sounds / position tracks / the frag log). Reconstructed magnitudes are
   near-exact; attribution is best-effort — treat per-player match totals
   as ~1% estimates and prefer aggregates over individual hits (accuracy
-  tables: `mvd-analytics/damagerecon/ACCURACY.md`). Distinct from
+  tables: `mvd-analytics/damagerecon/ACCURACY.md`). That ~1% assumes the
+  recording carried the evidence, so a reconstructed section also carries
+  **`coverage`** (schema v74) — `{kills, covered, ratio}`, the share of
+  the frag log's weapon kills whose damage it accounts for. **Read it
+  before quoting a reconstructed figure as a match total**: a small class
+  of archive recordings barely broadcast the health/armor stat channel,
+  and `ratio` is what distinguishes a quiet match from a section that is
+  a fraction of the frag-log-visible one. Measured over the full
+  10 702-demo sweep: 99.0% read ≥ 0.95 (median 1.000), 0.80% are that
+  broken class (0.182 median, 0.488 worst), 0.18% fall between them
+  spanning 0.500–0.944 — a hard bimodal core with a thin gradient tail,
+  so read `ratio` as a magnitude, not as a two-valued flag. **Its
+  denominator is the frag log**, which bounds what it can see: a loss
+  that removes obituaries and damage evidence TOGETHER — a recording that
+  starts late, a hole in the stream, a demo cut short — shrinks `kills`
+  and `covered` in step and reads a clean 1.000 over the surviving
+  fraction. Check the match clock and `/demoinfo` / `//finalscores`
+  against that; `coverage` answers how much of the frag-log-visible match
+  is in the section, not whether the recording was complete. It is also
+  one number for the whole demo: it does not localize to a player, so a
+  mid-band figure may be one unobserved victim beside a perfect one.
+  Nothing is gated on it. Absent on `source: "ktx"`, whose coverage would
+  be the constant 1, and on a reconstructed section whose frag log names
+  no scoreable kill — there the absence means completeness was never
+  assessed, not that it was zero. Whole-match like `source` itself — a
+  filter carries it through unrescoped. Distinct from
   `boundedSource` above, which records the KTX-scoreboard substitution
   WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
   reconstruction (detonation points, blood telemetry) is itself
@@ -473,7 +499,25 @@ there is exactly the `422` you would have received. It is the only way to
 learn the BSP-derived ones (`height`, `liquid`, `los`) — those turn on the
 server's map provisioning rather than on the demo, so the same demo answers
 differently on two deployments. Use it (with `errors` and, for
-reader-level gaps, `parseWarnings`) to hide panels up front. Endpoints whose data
+reader-level gaps, `parseWarnings`) to hide panels up front.
+
+When almost every flag reads `false` at once, look at **`noMatch`**
+(schema v74) before concluding anything went wrong — and read it before
+`errors` / `parseWarnings` in general, since it decides whether those
+describe a partial match or nothing at all. It is present exactly when the
+`streams` block is absent — 2% of the QuakeWorld archive — and it names the
+reason: `midMatchRecording` (the recording starts after the match began),
+`matchStartUnannounced` (the server ran a match but announced it in a form
+the pipeline does not recognise), `noMatchDeclared` (no match declaration
+this pipeline can see, yet kills were parsed — usually unmanaged play on a
+mod with no match state, see `gameDir`, but possibly a managed match on a
+mod whose declarations we cannot read), `noPlayRecorded` (the same absent
+declaration and no kills parsed — usually an idle or aborted server) or
+`demoUnreadable` (a truncated read — the only reason that ALSO means a
+failure, with the reader's message in `errors`). `detail` is the same
+verdict as a sentence you can show a user; it is unstable display text, so
+never parse it — every fact in it is a structured field beside it. Such a
+demo is not a failed parse and retrying it changes nothing. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.
@@ -917,7 +961,15 @@ Common frontend features → the call that backs them.
   time in one row per player and per team, on **every** demo including
   ones with no KTX block. Prefer it over stitching `/demoinfo` +
   `/frags` + `/damage` yourself; read each family's `src` to see whether
-  a number came from KTX or was derived here.
+  a number came from KTX, was derived here, or was reconstructed.
+  `score.maxSpree` / `score.maxQuadSpree` (longest kill run between
+  deaths, and while holding the quad) are the derived equivalent of the
+  KTX block's `spree.max` / `spree.quad` — so they answer "best streak?"
+  on the pre-ktxstats half of the archive too. They are never overlaid
+  from KTX and are gated with `kills`; a team row carries the best any
+  member ran, not a sum. They deliberately exclude the self-kill that
+  KTX's own gate lets bump a streak wherever teamplay is off, so a duel
+  with suicides reads 1 lower per affected streak than the KTX block.
 - **"Are these two rows the same person?" / "which userid do I `track=`
   at time t?"** → `GET /player-stats`, read `identity` and `sessions[]`.
   A player who reconnects while their old connection is still spawned is
@@ -945,6 +997,25 @@ Common frontend features → the call that backs them.
 - **Weapon effectiveness** → `GET /player-stats` (accuracy + per-weapon
   pickups + hold time), `GET /demoinfo` (KTX's own verbatim numbers, the
   audit trail), or `/weapon-pickups` (kills-before-next-death).
+  Check `accuracy.src` before you trust the hit side: on a demo with no
+  wire damage stream `accuracy.byWeapon[].hits` is filled from the aim
+  reconstruction tier and the family reads `"reconstructed"` — a weaker
+  evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
+  `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
+  is not the same as no hits). `attacks` is shot-derived on every demo
+  and matches KTX to the row on the single-projectile weapons. On a
+  `reconstructed` family `rl` / `gl` publish KTX's OWN direct-impact
+  count (schema v74) and agree with `/demoinfo` to 1.2% / 0.6% in
+  aggregate; on a `derived` one they count any damage path and read
+  ~4x higher on `rl`. Either way, do not diff `hits` against
+  `/demoinfo` naively — `sg` / `ssg` are pellets on KTX's side and
+  trigger pulls on ours on every family. Read
+  `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
+  — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
+  is, per WEAPON because one `src: "ktx"` row uses all three at once.
+  Two rows are comparable exactly when weapon and convention match, so
+  gate any cross-demo or cross-era aggregation on it; ignoring it turns
+  a ~4x definition change on `rl` into a trend.
 - **Analyze a local demo file (no hub gameId)** → upload it, then use the
   returned `demoId` with any per-demo GET:
 

@@ -11,7 +11,14 @@
 //     givenTeam / givenSelf) — the headline goal is ~1% here;
 //   - per-event instant coverage: how many ground-truth damage instants the
 //     delta extraction reproduced and how many values match exactly;
-//   - attribution accuracy on matched enemy instants.
+//   - attribution accuracy on matched enemy instants;
+//   - direct/splash classification per rl/gl damage instant against the wire's
+//     own splash flag, which is raised only inside T_RadiusDamage
+//     (ktx/src/combat.c:1207-1227) and is therefore exact for rl. It is NOT
+//     ground truth for gl — GrenadeTouch does all its damage through
+//     GrenadeExplode → T_RadiusDamage, so every gl row is splash-flagged on
+//     the wire whether or not the grenade touched anybody, and the gl line is
+//     printed only to keep that asymmetry visible.
 //
 // Usage: go run ./mvd-analytics/cmd/qw-recon-eval [-dir mvd-analytics/testdata/cache] [-min-gt 200] [-worst 8]
 package main
@@ -41,6 +48,7 @@ func main() {
 	minGT := flag.Int("min-gt", 200, "minimum ground-truth total for a player row to count toward relative-error stats")
 	worst := flag.Int("worst", 8, "how many worst rows to print per metric")
 	diag := flag.Bool("diag", false, "print the misattribution confusion breakdown (GT class -> recon class, bounded damage sums)")
+	flowMin := flag.Int("flow-min", 100, "smallest bounded-damage flow to print in the -diag table (1 shows every flow)")
 	flag.Parse()
 
 	paths, err := demoPaths(*dir)
@@ -57,6 +65,7 @@ func main() {
 	var evCovered, evTotal, evExact, attMatched, attTotal int
 	confusion := map[string]*confCell{}
 	weaponStats := map[string]*wepCell{}
+	splashStats := map[string]*splashCell{}
 	for _, path := range paths {
 		reg := analyzer.NewDefaultRegistry()
 		reg.BuildShotStreams = true
@@ -92,6 +101,7 @@ func main() {
 			collectConfusion(gt, rc, confusion)
 		}
 		collectWeaponStats(gt, rc, weaponStats)
+		collectSplashStats(gt, rc, splashStats)
 	}
 
 	fmt.Printf("demos scored: %d\n", len(paths))
@@ -105,8 +115,9 @@ func main() {
 		}
 	}
 	printWeaponStats(weaponStats)
+	printSplashStats(splashStats)
 	if *diag {
-		printConfusion(confusion)
+		printConfusion(confusion, *flowMin)
 	}
 }
 
@@ -218,6 +229,117 @@ func printWeaponStats(m map[string]*wepCell) {
 	}
 }
 
+// splashCell accumulates the direct/splash confusion for one weapon over
+// paired rl/gl damage instants: `direct` means the projectile TOUCHED the
+// victim, which for rl is exactly what the wire's unflagged row says and what
+// KTX's own hits counter increments on.
+type splashCell struct {
+	paired             int
+	gtDirect, rcDirect int
+	truePos, falsePos  int
+	falseNeg, trueNeg  int
+	missing            int // GT instant the reconstruction never produced
+}
+
+// collectSplashStats pairs each single-source rl/gl GT damage instant with the
+// reconstruction's instant for the same victim at the same millisecond and
+// scores the direct/splash verdict. Self rows are excluded on both sides: a
+// missile never touches its own owner (T_MissileTouch / GrenadeTouch return on
+// `other == owner`, ktx/src/weapons.c:951, :1315), so those are splash by
+// construction and would only pad the agreement rate.
+func collectSplashStats(gt, rc *result.DamageResult, out map[string]*splashCell) {
+	type key struct {
+		victim string
+		t      int32
+	}
+	type inst struct {
+		weapon string
+		direct bool
+		multi  bool
+	}
+	collect := func(evs []result.DamageEntry) map[key]*inst {
+		m := map[key]*inst{}
+		for i := range evs {
+			e := &evs[i]
+			if e.IsEnv || e.IsSelf || (e.Weapon != "rl" && e.Weapon != "gl") {
+				continue
+			}
+			k := key{e.Victim, e.Time}
+			if g, ok := m[k]; ok {
+				if g.weapon != e.Weapon {
+					g.multi = true
+				}
+				// One instant, several rows: the instant counts as a direct
+				// touch if ANY of its rows is one.
+				g.direct = g.direct || !e.IsSplash
+				continue
+			}
+			m[k] = &inst{weapon: e.Weapon, direct: !e.IsSplash}
+		}
+		return m
+	}
+	gtI, rcI := collect(gt.Events), collect(rc.Events)
+	for k, g := range gtI {
+		if g.multi {
+			continue
+		}
+		c, ok := out[g.weapon]
+		if !ok {
+			c = &splashCell{}
+			out[g.weapon] = c
+		}
+		r, ok := rcI[k]
+		if !ok || r.multi || r.weapon != g.weapon {
+			c.missing++
+			continue
+		}
+		c.paired++
+		if g.direct {
+			c.gtDirect++
+		}
+		if r.direct {
+			c.rcDirect++
+		}
+		switch {
+		case g.direct && r.direct:
+			c.truePos++
+		case !g.direct && r.direct:
+			c.falsePos++
+		case g.direct && !r.direct:
+			c.falseNeg++
+		default:
+			c.trueNeg++
+		}
+	}
+}
+
+func printSplashStats(m map[string]*splashCell) {
+	if len(m) == 0 {
+		return
+	}
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	fmt.Printf("\n== direct/splash verdict vs the wire splash flag (paired rl/gl instants, non-self)\n")
+	fmt.Printf("   the gl line is NOT ground truth: GrenadeTouch damages only through\n")
+	fmt.Printf("   T_RadiusDamage, so every wire gl row is splash-flagged (ktx/src/weapons.c:1327)\n")
+	fmt.Printf("   %-6s %8s %9s %10s %8s %8s %10s %9s %9s\n",
+		"weapon", "paired", "unpaired", "gt-direct", "recon", "correct", "precision", "recall", "count-err")
+	for _, k := range keys {
+		c := m[k]
+		countErr := 0.0
+		if c.gtDirect > 0 {
+			countErr = 100 * float64(c.rcDirect-c.gtDirect) / float64(c.gtDirect)
+		}
+		fmt.Printf("   %-6s %8d %9d %10d %8d %7.1f%% %9.1f%% %8.1f%% %+8.1f%%\n",
+			k, c.paired, c.missing, c.gtDirect, c.rcDirect,
+			pct(c.truePos+c.trueNeg, c.paired), pct(c.truePos, c.rcDirect),
+			pct(c.truePos, c.gtDirect), countErr)
+	}
+}
+
 // confCell accumulates one GT-class → recon-class flow.
 type confCell struct {
 	instants int
@@ -242,6 +364,16 @@ func classify(weapon string, isEnv, isSelf, isTeam bool) string {
 // collectConfusion aggregates, per GT instant (victim+time), where the
 // reconstruction routed its bounded damage: same class, a flipped class, or
 // nowhere. Enemy instants further split correct-vs-wrong attacker.
+//
+// Positional instant kills (telefrags/stomps) are folded in on BOTH sides as
+// their own class. They live outside Events on either side — analyzer/damage.go
+// and damagerecon/aggregate.go both surface them in Telefrags/Stomps — so
+// comparing the Events logs alone reported every correctly-routed positional
+// kill as a PHANTOM (recon emitted an instant the GT Events log has no row
+// for) and every mis-routed one as a class the GT could not answer. That is
+// how the team-telefrag channel hid inside "PHANTOM → team" until the
+// 2026-08-26 classification pass: 100 of the 105 instants there were the same
+// kill, booked as weapon damage by one side and as a telefrag by the other.
 func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 	type key struct {
 		victim string
@@ -252,42 +384,47 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 		attacker string
 		bounded  int
 	}
-	gtI := map[key]*inst{}
-	for i := range gt.Events {
-		e := &gt.Events[i]
-		b := e.Damage
-		if e.Bounded != nil {
-			b = *e.Bounded
-		}
-		k := key{e.Victim, e.Time}
-		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
-		if g, ok := gtI[k]; ok {
-			g.bounded += b
-			if g.class != c {
-				g.class = "mixed"
+	fold := func(evs []result.DamageEntry, tele, stomp []result.PositionalKill) map[key]*inst {
+		m := map[key]*inst{}
+		add := func(k key, c, attacker string, b int) {
+			if g, ok := m[k]; ok {
+				g.bounded += b
+				if g.class != c {
+					g.class = "mixed"
+				}
+				return
 			}
-		} else {
-			gtI[k] = &inst{class: c, attacker: e.Attacker, bounded: b}
+			m[k] = &inst{class: c, attacker: attacker, bounded: b}
 		}
-	}
-	rcI := map[key]*inst{}
-	for i := range rc.Events {
-		e := &rc.Events[i]
-		b := e.Damage
-		if e.Bounded != nil {
-			b = *e.Bounded
-		}
-		k := key{e.Victim, e.Time}
-		c := classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam)
-		if g, ok := rcI[k]; ok {
-			g.bounded += b
-			if g.class != c {
-				g.class = "mixed"
+		for i := range evs {
+			e := &evs[i]
+			b := e.Damage
+			if e.Bounded != nil {
+				b = *e.Bounded
 			}
-		} else {
-			rcI[k] = &inst{class: c, attacker: e.Attacker, bounded: b}
+			add(key{e.Victim, e.Time}, classify(e.Weapon, e.IsEnv, e.IsSelf, e.IsTeam), e.Attacker, b)
 		}
+		for _, lst := range [2][]result.PositionalKill{tele, stomp} {
+			for i := range lst {
+				p := &lst[i]
+				b := p.Damage
+				if p.Bounded != nil {
+					b = *p.Bounded
+				}
+				c := "positional"
+				switch {
+				case p.IsTeam:
+					c = "positional:team"
+				case p.Attacker == p.Victim:
+					c = "positional:self"
+				}
+				add(key{p.Victim, p.Time}, c, p.Attacker, b)
+			}
+		}
+		return m
 	}
+	gtI := fold(gt.Events, gt.Telefrags, gt.Stomps)
+	rcI := fold(rc.Events, rc.Telefrags, rc.Stomps)
 	add := func(from, to string, bounded int) {
 		cell, ok := out[from+" -> "+to]
 		if !ok {
@@ -298,15 +435,25 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 		cell.bounded += bounded
 	}
 	for k, g := range gtI {
+		// The ground-truth denominator of the class, so a flow can be read as
+		// a RATE. Without it the table invites the base-rate mistake: enemy
+		// instants outnumber team ones ~20:1, so an equal per-instant error
+		// rate still moves far more damage INTO the small class than out of
+		// it, and the resulting asymmetry looks like a bias.
+		add(g.class, "=TOTAL", g.bounded)
 		r, ok := rcI[k]
 		switch {
 		case !ok:
 			add(g.class, "MISSING", g.bounded)
 		case r.class == g.class:
-			if strings.HasPrefix(g.class, "enemy:") && r.attacker != g.attacker {
-				add(g.class, "enemy:WRONG-ATTACKER", g.bounded)
+			if r.attacker == g.attacker {
+				break // same class, right attacker: not interesting
 			}
-			// same class, right attacker: not interesting
+			if strings.HasPrefix(g.class, "enemy:") {
+				add(g.class, "enemy:WRONG-ATTACKER", g.bounded)
+			} else if strings.HasPrefix(g.class, "positional") {
+				add(g.class, g.class+":WRONG-ATTACKER", g.bounded)
+			}
 		default:
 			add(g.class, r.class, g.bounded)
 		}
@@ -318,7 +465,7 @@ func collectConfusion(gt, rc *result.DamageResult, out map[string]*confCell) {
 	}
 }
 
-func printConfusion(m map[string]*confCell) {
+func printConfusion(m map[string]*confCell, flowMin int) {
 	type row struct {
 		k string
 		c *confCell
@@ -328,9 +475,17 @@ func printConfusion(m map[string]*confCell) {
 		rows = append(rows, row{k, c})
 	}
 	sort.Slice(rows, func(i, j int) bool { return rows[i].c.bounded > rows[j].c.bounded })
+	fmt.Printf("\n== ground-truth class totals (the flow denominators)\n")
+	for _, r := range rows {
+		if !strings.HasSuffix(r.k, " -> =TOTAL") {
+			continue
+		}
+		fmt.Printf("   %7d dmg  %5d instants  %s\n", r.c.bounded, r.c.instants,
+			strings.TrimSuffix(r.k, " -> =TOTAL"))
+	}
 	fmt.Printf("\n== misattribution flows (by bounded damage moved)\n")
 	for _, r := range rows {
-		if r.c.bounded < 100 {
+		if r.c.bounded < flowMin || strings.HasSuffix(r.k, " -> =TOTAL") {
 			continue
 		}
 		fmt.Printf("   %7d dmg  %5d instants  %s\n", r.c.bounded, r.c.instants, r.k)

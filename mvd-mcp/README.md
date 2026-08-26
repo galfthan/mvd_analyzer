@@ -288,8 +288,17 @@ see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
 Carries the per-demo capability manifest (`available`), the
 `timing.matchStart*` anchor family that answers "when was this match
 played" (schema v72 — always read `matchStartConfidence` with the value),
-and the two separate degradation signals `errors` (analyzer level) and
-`parseWarnings` (reader level, omitted on a clean parse).
+and THREE signals about the health of the result, deliberately separate:
+`errors` (analyzer level), `parseWarnings` (reader level, omitted on a
+clean parse) and `noMatch` (schema v74) on the 2% of the archive that
+yields no analyzable match. `noMatch` is present exactly when the `streams`
+block is absent, and names the reason (`midMatchRecording` /
+`matchStartUnannounced` / `noMatchDeclared` / `noPlayRecorded` /
+`demoUnreadable`) with the wire evidence behind it, so "no match here" is
+distinguishable from "the parse failed" without guessing. Read it FIRST —
+it decides whether the other two describe a partial match or nothing at
+all, and `demoUnreadable` is the one reason that means both. Such a demo
+is not a failed parse: do not report it as one and do not retry it.
 
 #### `getDemoInfo({demoId})`
 
@@ -318,25 +327,93 @@ demoinfo block.
 | `teams` | `string[]` | restrict to these teams |
 
 Output: `result.PlayerStatsResult` — per row `score` (corrected
-frags/kills/deaths/suicides/teamKills + `efficiency`), `damage`,
-`accuracy`, `pickups.byKind`, and `hold` (`weapons` / `armor` /
-`powerups`), plus a `window` carrying the denominators
-(`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
+frags/kills/deaths/suicides/teamKills + `efficiency`, plus `maxSpree` /
+`maxQuadSpree`), `damage`, `accuracy`, `pickups.byKind`, and `hold`
+(`weapons` / `armor` / `powerups`), plus a `window` carrying the
+denominators (`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
 
 Every family carries `src` (`"derived"` | `"ktx"` |
 `"derived:unbounded"` on damage | `"reconstructed"` on damage rebuilt
-for a pre-instrumentation demo), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
+for a pre-instrumentation demo, and on `accuracy` whose `hits` come from
+the aim reconstruction tier), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
 The response keeps the same shape regardless of demo age: on a demo with
 no KTX block, `accuracy` is reconstructed from the decoded fire stream
 (trigger pulls, not KTX's pellets — check `src` before comparing across
 demos), `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
 `login` from the `*auth` userinfo key. A value that cannot be measured
 stays ABSENT rather than becoming a zero — notably
-`accuracy.byWeapon[].hits` when the demo has no WIRE damage stream (a
-reconstructed damage section does not count — the shot linker never saw
-those events).
+`accuracy.byWeapon[].hits` on a demo with no WIRE damage stream for the
+weapons the aim reconstruction tier does not cover (see below).
 `efficiency`, `shareAlive` and `shareMatch` are RATIOS in [0,1], not
 percentages.
+
+**Reconstructed accuracy hits.** On a demo whose damage section is
+itself `reconstructed` (no wire `mvdhidden_dmgdone` stream),
+`accuracy.byWeapon[].hits` is FILLED from the published aim
+reconstruction tier — the same counts `getAim` publishes as
+`weapons[].recon.hits` — instead of being withheld, and the family's
+`src` becomes `"reconstructed"` to mark the evidence grade. Only the
+weapons that tier validated carry a number: `lg`, `sg`, `ssg`, `axe`,
+`rl`, `gl`. `ng` / `sng` keep `hits` ABSENT — the tier validated no nail
+recovery, so the withhold inherits; read that absence as "not recovered
+for this weapon", never as "no hits". A family whose weapons all fall
+outside the tier stays `src: "derived"`, `attacks` being shot-derived
+either way. Grade the numbers before diffing against KTX: on a
+`reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
+(1.25%, 46.5% of rows exact) and `gl` (3.55% aggregate but 89.6% of rows
+exact, one-sided by design), because since schema v74 those two publish
+KTX's OWN direct-impact count. On a `derived` family they do not — there
+`hits` counts a fire that landed damage by any path and reads ~4x higher
+on `rl`, ~1.5x on `gl`, against KTX's touch counter
+(`ktx/src/weapons.c:994`, `:1329`). `attacks` matches KTX to the row on
+every single-projectile weapon (98–100% exact).
+
+**`hitsConvention` is the machine-readable form of that warning**, and
+the field to gate a cross-demo comparison on — `src` states the evidence
+GRADE and says nothing about what is counted. It sits on every weapon
+that carries `hits`: `anyDamage` (a fire that landed damage by any path;
+every `derived` weapon, `lg` / `sg` / `ssg` / `axe` of a
+`reconstructed` one, plus KTX's own `lg` / `axe` / `ng` / `sng`),
+`directImpact` (the projectile TOUCHED a player: KTX's `rl` / `gl`, and
+a `reconstructed` family's `rl` / `gl` since v74) or `pellets` (KTX's
+`sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON, because
+one `src: "ktx"` row uses all three at once. Two rows are comparable
+exactly when weapon AND convention match; absent beside a present `hits`
+only on a `src: "mixed"` team row. Deriving KTX's own convention on an
+old demo took two attempts: the wire damage log's splash flag reproduces
+KTX's `rl` count on every row, the pre-instrumentation half carries no
+such flag, and the first substitute — an explosion endpoint within 48
+units — answered `gl` and not `rl` (+80%). v74 replaces it with the
+flight's trajectory against the player hull plus the flat-110
+direct-damage constant, at 1.25% / 3.55% aggregate (46.5% / 89.6% of
+rows exact).
+
+**Sprees.** `score.maxSpree` is the longest run of kills between deaths;
+`score.maxQuadSpree` the longest run of kills made while holding the
+quad (it resets on death *and* on a fresh quad pickup, mirroring KTX
+`items.c:2180`). They are the derived equivalent of the KTX demoinfo
+block's `spree.max` / `spree.quad`, which 54% of the archive has no
+block to carry — always derived, never overlaid from KTX. They ride
+`score.kills`' `killsMeasured` gate, i.e. they are present and absent
+together with `kills` / `suicides` / `teamKills` / `efficiency` /
+`byWeapon` / `byEnemyWeapon` / `byWeaponVsEnemyWeapon`, so a `0` inside a
+present family is an observed zero. A team
+row carries the BEST any member ran, never a sum. One deliberate
+divergence from KTX: its increment gate is `strneq(attackerteam,
+targteam) || !tp_num()` (`ktx/src/client.c:4865`), so wherever teamplay
+is OFF — every duel, every FFA — a player's own SUICIDE bumps their
+streak in the same call that latches it. Ours counts only the kills
+`score.kills` counts, so a duel with self-kills reads exactly 1 lower
+per affected streak. Withheld-and-compared against the verbatim KTX
+block on 188 archive demos / 665 player rows: `maxQuadSpree` 99.8%
+exact, `maxSpree` 92.9% overall, 96.5% on rows whose `kills` already
+agrees with KTX, and 99.6% on rows where kills agree and the player
+never suicided. The large disagreements have an observable signature:
+`kills: 0` beside a large positive `frags` means the streak inherited
+the kill side's gap and is unknown, not zero. A reconnect does NOT reset
+the streak (KTX restores the whole stats struct from its ghost entity,
+`ktx/src/client.c:1515`), and a mid-match team switch cannot happen —
+KTX refuses one while a match is in progress.
 
 **Possession time is unique to this tool.** KTX never writes weapon hold
 time into the demoinfo block, and its armor hold time overcounts (the
@@ -445,7 +522,8 @@ which evidence there was (`ktx` / `reconstructed` / absent): on a
 `reconstructed` demo the measured counters stay withheld, but a
 recovered hit count is published separately as
 `weapons[].recon.hits` — accuracy is `recon.hits / shots`, for
-`lg`/`sg`/`ssg`/`axe` only, and never merged into `hits`. Start with
+`lg`/`sg`/`ssg`/`axe` and (schema v74) `rl`/`gl`, never for `ng`/`sng`,
+and never merged into `hits`. Start with
 `players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
 full/partial/miss fires, RL/GL direct/splash/missed, the LG
 miss/blocked/out-of-range whiff split); the

@@ -79,6 +79,56 @@ type DamageResult struct {
 	// which records a view-time substitution WITHIN a KTX-sourced payload.
 	Source string `json:"source,omitempty"`
 
+	// Coverage reports how much of the match a RECONSTRUCTED damage section
+	// could actually see (nil on a KTX-sourced section — see DamageCoverage).
+	Coverage *DamageCoverage `json:"coverage,omitempty"`
+
+	// RocketDirectDamage (schema v74) is the server's DIRECT rocket damage
+	// constant, as measured from this demo's own hits — 110 on every KTX
+	// since 1.36 (commit c7263e8f, 2008-09-29, which replaced id1's
+	// `100 + g_random()*20`; ktx/src/weapons.c:986).
+	//
+	// Present exactly when RocketDirectRegime is RocketRegimeFixed, i.e. on
+	// a RECONSTRUCTED section whose own near-direct rocket hits clustered on
+	// the constant. Read the regime, not this field's absence, for WHY it is
+	// missing — the two absences mean different things.
+	//
+	// It is an era signal with consequences, which is why it is published
+	// rather than kept internal: the direct/splash classifier's magnitude
+	// prior (damagerecon/direct.go) only exists where the constant is fixed,
+	// so it is what tells a consumer of the rl touch count
+	// (aim.players[].weapons[].recon.directHits) whether the sharper of that
+	// classifier's two signals was available. Measured against the verbatim
+	// KTX block, the rl counter runs 1.2% aggregate error with the prior in
+	// force and 13.9% with it disabled.
+	//
+	// Nothing is GATED on it. On this pipeline's ground-truth population the
+	// rows where it is absent are the low-rocket ones — a demo needs several
+	// near-direct hits before the regime is establishable — where the touch
+	// count is off by at most a hit or two anyway, and withholding it there
+	// would substitute the any-path count, which is four times KTX's.
+	RocketDirectDamage int `json:"rocketDirectDamage,omitempty"`
+
+	// RocketDirectRegime (schema v74) says WHICH answer the measurement above
+	// reached, as a three-value total partition of every RECONSTRUCTED
+	// section (absent on `source: "ktx"`, where the wire's own splash flag
+	// makes the question moot). It exists because the constant's absence was
+	// two claims wearing one face:
+	//
+	//   - RocketRegimeFixed — the demo's near-direct hits clustered on 110;
+	//     RocketDirectDamage carries it and the classifier's magnitude prior
+	//     is in force.
+	//   - RocketRegimeSpread — there were enough near-direct hits to test the
+	//     hypothesis and they did NOT cluster. That is what a pre-1.36
+	//     `100 + g_random()*20` server looks like, and the touch count on
+	//     such a row rests on trajectory alone. It is evidence, not proof:
+	//     a noisy reconstruction on a modern server can land here too, which
+	//     is why the token names the OBSERVATION.
+	//   - RocketRegimeUnestablished — fewer near-direct hits than the test
+	//     needs, so nothing was established either way. The low-rocket case,
+	//     where the touch count stays accurate regardless.
+	RocketDirectRegime string `json:"rocketDirectRegime,omitempty"`
+
 	// BoundedSource records where a SUMMARY response's bounded per-player
 	// figures came from: "ktx" when they were substituted with KTX's exact
 	// end-of-match scoreboard totals (demoInfo.players[].dmg +
@@ -103,6 +153,67 @@ const (
 	DamageSourceKTX           = "ktx"
 	DamageSourceReconstructed = "reconstructed"
 )
+
+// DamageResult.RocketDirectRegime vocabulary — a total partition of the
+// reconstructed sections. See the field for what each verdict claims.
+const (
+	RocketRegimeFixed         = "fixed"
+	RocketRegimeSpread        = "spread"
+	RocketRegimeUnestablished = "unestablished"
+)
+
+// DamageCoverage answers "how much of this match did the reconstruction
+// actually see?" for a Source == "reconstructed" section. It exists because
+// a small class of recordings barely broadcasts the health/armor stat
+// channel the reconstruction reads: positions and the frag log are intact,
+// the damage simply is not observable, and without this field the section
+// looks like a quiet match rather than a partial recording.
+//
+// The figure is the frag log's own cross-check. Every kill the log names is
+// a place where damage provably happened; Covered counts the ones whose
+// lethal instant the reconstructed Events log accounts for. Kills counts
+// only the kills that carry damage arithmetic to account for: an enemy kill
+// (not a suicide, team kill, world/nameless killer) by a weapon (telefrags
+// and stomps are positional and live outside Events) on two players the
+// roster names. Ratio is Covered/Kills in [0,1].
+//
+// Whole-match by construction: it describes the demo's reconstruction, like
+// Source and BoundedMode, and is never rescoped by a player / weapon / time
+// filter.
+//
+// Absent when the section is KTX-sourced (the wire log records every
+// T_Damage call, so coverage is 1 by construction — measured exactly 1.000
+// on all 65 GT demos) and when the frag log names no scoreable kill. That
+// second absence means "no anchor existed, completeness UNASSESSED" — not
+// zero coverage, and not full coverage. Every consumer that rides the damage
+// section inherits its coverage: the playerStats damage family, derived
+// accuracy hits, and the aim recon tier all read this one field rather than
+// restating it.
+//
+// Measured over the full 10 702-demo oracle sweep (damagerecon/ACCURACY.md
+// §per-demo coverage): 99.0% of reconstructions read >= 0.95 (median 1.000,
+// 96% of them exactly 1.000), 0.80% are the silent-channel class at 0.182
+// median / 0.488 worst, and 0.18% — 19 demos, 18 of them qwsv-era — fall
+// BETWEEN, spanning 0.500 to 0.944 on 18-287-kill denominators. A hard
+// bimodal core with a thin gradient tail, so Ratio is a magnitude to read,
+// not a two-valued flag. There is no threshold in the code: the number is
+// published, never used to gate or withhold.
+//
+// Two limits it does not state itself. The denominator IS the frag log, so a
+// loss correlated with it — a late-started recording, a hole in the stream —
+// drops obituaries and damage evidence together, shrinks Kills and Covered
+// in step, and reads a clean 1.000 over the fraction that survived. The
+// question answered is "how much of the FRAG-LOG-VISIBLE match is in this
+// section", not "was the recording complete". And one scalar covers the
+// whole demo: it does not localize, so a mid-band duel is equally consistent
+// with one unbroadcast victim beside one perfectly observed one (the
+// reconstruction reads health/armor per victim) as with both degraded.
+// Per-victim coverage is a recorded follow-up, not a shipped field.
+type DamageCoverage struct {
+	Kills   int     `json:"kills"`   // frag-log kills that carry damage arithmetic
+	Covered int     `json:"covered"` // ... whose lethal instant the Events log accounts for
+	Ratio   float64 `json:"ratio"`   // Covered/Kills, in [0,1]
+}
 
 // PositionalKill is one telefrag (deathtype "tele") or stomp (deathtype
 // "stomp") — an instant kill from occupying a player's space rather than

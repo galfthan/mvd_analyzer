@@ -184,6 +184,23 @@ func victimDeltas(p *result.PlayerStream, killAnchors map[int32]bool) []delta {
 		}
 		if dh == 1 && ph > 100 && da == 0 {
 			// Mega-health rot tick, not damage.
+			//
+			// SCOPE: single ticks only. KTX rots 1 HP per second while health
+			// is over 100, so two rot ticks landing in one broadcast instant
+			// present as dh == 2 and pass through here as damage. Widening
+			// the test to dh <= 2 measures FREE on the dm2/dm3 ground truth
+			// (zero wire damage rows worth exactly 2 land on a >100 victim
+			// with armor unchanged) — but that is not evidence FOR it: the
+			// same corpus is modern hub timing, where a broadcast rarely
+			// spans two seconds of rot, so it contains neither the merged
+			// pairs the change would catch nor the 2-point hits it would
+			// eat. The regime where both appear is the low-fps archive, and
+			// no oracle covers it. Unvalidatable in both directions, so the
+			// rule stays where the evidence reaches. (The dh == 1 rule is not
+			// free either: it eats 9 real 1-point wire rows on this corpus,
+			// 9 bounded damage in total, none of them team-class.)
+			// ACCURACY.md §"Why the errors are what they are" carries the
+			// measurement.
 			ph, pa = nh, na
 			continue
 		}

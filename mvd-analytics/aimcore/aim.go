@@ -191,17 +191,27 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// differs from the measured one in what it drops, because it asks a
 	// different question — LINKAGE, not magnitude: a self hit is a fire that
 	// connected and is kept (the wire join counts those too), while an
-	// environmental row has no shooter to credit and is not.
+	// environmental row has no shooter to credit and is not. It is also NOT
+	// windowed, unlike the magnitude pool above: a projectile's damage lands a
+	// whole flight after its fire, so the window that scopes the fires cannot
+	// also scope their evidence (see reconDamageByAttacker).
 	hitsSource := ""
 	reconTier := false
 	var reconByPlayer map[string][]*dmgRec
+	var reconDirectByPlayer map[string]map[string]int
 	switch {
 	case hitsMeasured:
 		hitsSource = result.AimHitsSourceKTX
 	case res.Damage != nil && res.Damage.Source == result.DamageSourceReconstructed:
 		hitsSource = result.AimHitsSourceReconstructed
 		reconTier = true
-		reconByPlayer = reconDamageByAttacker(res, inWindow)
+		reconByPlayer = reconDamageByAttacker(res)
+		// WINDOWED, unlike the pool above. The pool is match-wide because a
+		// window scopes whose FIRES are counted, not what evidence a join may
+		// judge them on; this is not a join — the rows are the count itself —
+		// so leaving it match-wide would publish the whole match's touches
+		// inside a window-scoped block. See ReconDirectHits.
+		reconDirectByPlayer = ReconDirectHits(res, q)
 	}
 
 	// The RL/GL direct/splash split needs projectile linking to have filled
@@ -224,7 +234,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -237,13 +247,15 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 // dmgRec is one damage event by the player (for sizing pellet hits and direct
 // contacts); used marks it consumed by a same-frame hitscan fire. team splits
 // the pellet/direct counters by victim class (self damage is excluded at
-// collection, so enemy is simply !team).
+// collection for the measured counters, so enemy is simply !team there; the
+// reconstructed pool in recon.go keeps self rows and carries the flag).
 type dmgRec struct {
 	t      int32
 	weapon string
 	dmg    int
 	splash bool
 	team   bool
+	self   bool
 	used   bool
 }
 
@@ -285,7 +297,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -615,12 +627,23 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// nobody has a supported zero, and gating on his damage would publish it as
 	// the same absence a withheld weapon gets.
 	if reconTier {
-		for w, hits := range reconHitsByWeapon(shots, reconDmg, reconTierWeapons) {
+		reconHits := reconHitsByWeapon(shots, reconDmg, reconTierWeapons)
+		for w, hits := range reconHits {
 			if wa := wagg[w]; wa != nil {
 				if hits > wa.Shots {
 					hits = wa.Shots // a claim per fire makes this unreachable; belt and braces
 				}
 				wa.Recon = &result.WeaponAimRecon{Hits: hits}
+				// The rl/gl touch count rides the same block but is NOT that
+				// join's output (see ReconDirectHits): it counts direct rows,
+				// so it can exceed Hits where a rocket touched without its
+				// entity ever being broadcast. It cannot exceed the fires.
+				if d, ok := reconDirect[w]; ok {
+					if d > wa.Shots {
+						d = wa.Shots
+					}
+					wa.Recon.DirectHits = &d
+				}
 			}
 		}
 	}

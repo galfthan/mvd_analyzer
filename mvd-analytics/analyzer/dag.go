@@ -180,10 +180,16 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "locGraph",
 		desc:      "Per-map loc adjacency graph with directed transition weights derived from player movement.",
 	},
+	"noMatchPost": {
+		name:      "no-match",
+		requires:  []string{"timeline", "metadata", "frags:final"},
+		resultKey: "noMatch",
+		desc:      "Explicit marker on a result whose `streams` block is absent, naming why there is no analyzable match (midMatchRecording / matchStartUnannounced / noMatchDeclared / noPlayRecorded / demoUnreadable) with the wire evidence behind the verdict. Present exactly when `streams` is absent — one predicate, so no result carries both.",
+	},
 	"wallClockPost": {
 		name: "wall-clock", mutates: true,
-		requires: []string{"clock", "demoinfo", "metadata", "timeline"},
-		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted).",
+		requires: []string{"clock", "demoinfo", "metadata", "timeline", "no-match"},
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted). On a result with no streams the raw markers land on `noMatch.dateMarkers` instead — which is why it binds that node — and the graded anchor is NOT published there: it is a projection through a match window such a result does not have.",
 	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,
@@ -192,9 +198,9 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata"},
+		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata", "aim"},
 		resultKey: "playerStats",
-		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
+		desc:      "Canonical per-player and per-team statistics: corrected scoreboard (including the derived kill-spree maxima), damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. Binds `aim` for the reconstructed hit tier, which fills the accuracy family's `hits` on demos with no wire damage stream (src=reconstructed) — reading the published tier rather than re-running the join is what makes its weapon-level withholds inherit here.",
 	},
 	"openingPost": {
 		name: "opening", mutates: true,

@@ -541,7 +541,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 
 	t.Run("measured", func(t *testing.T) {
 		r := base()
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		if s.Frags != 62 || s.Deaths != 18 {
 			t.Errorf("frags/deaths = %d/%d, want 62/18", s.Frags, s.Deaths)
 		}
@@ -567,7 +567,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		r := base()
 		r.Frags.Frags = nil
 		r.Frags.KillsMeasured = killsMeasurable(r) // false: protocol deaths in ByPlayer
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		// Both measured sides survive — this is the whole point of not
 		// dropping the family wholesale.
 		if s.Frags != 62 || s.Deaths != 18 {
@@ -588,7 +588,7 @@ func TestDeriveScoreKillSide(t *testing.T) {
 		// so a demo where nobody died has both at zero.
 		r.Frags.ByPlayer["a"].Kills, r.Frags.ByPlayer["a"].Deaths = 0, 0
 		r.Frags.KillsMeasured = killsMeasurable(r) // true: nothing to contradict
-		s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+		s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 		if s.Kills == nil || *s.Kills != 0 {
 			t.Errorf("kills = %v, want an honest 0 — an empty log contradicts nothing here", s.Kills)
 		}
@@ -615,7 +615,7 @@ func TestDeriveScoreOffScoreboardRecoversSuicides(t *testing.T) {
 			},
 		},
 	}
-	s := deriveScore(r, "a", deriveEnemyWeaponKills(r))
+	s := deriveScore(r, "a", deriveEnemyWeaponKills(r), deriveSprees(r))
 	if s.Kills == nil || *s.Kills != 11 || s.Deaths != 7 {
 		t.Fatalf("kills/deaths = %v/%d, want the frag log's 11/7", s.Kills, s.Deaths)
 	}
@@ -872,7 +872,7 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 		ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 63, Hits: 0}},
 	}}}
 
-	acc := deriveAccuracy(&Result{Shots: shots}, "a")
+	acc := deriveAccuracy(&Result{Shots: shots}, "a", nil)
 	if acc == nil {
 		t.Fatal("derived accuracy is nil — the family must survive a missing damage stream")
 	}
@@ -890,18 +890,101 @@ func TestDeriveAccuracyOmitsHitsWithoutDamageStream(t *testing.T) {
 		t.Error("real/virtual are KTX-only and must never appear on a derived block")
 	}
 
+	if rl.HitsConvention != "" {
+		t.Errorf("hitsConvention = %q with no hits, want empty — it describes a number that is not there", rl.HitsConvention)
+	}
+
 	// With a WIRE damage stream the link is meaningful, so hits appears.
-	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a")
+	withDmg := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceKTX}}, "a", nil)
 	if h := withDmg.ByWeapon["rl"].Hits; h == nil || *h != 0 {
 		t.Errorf("hits with a damage stream = %v, want an observed 0", h)
 	}
+	// Our rl hits count a fire that landed damage by any path; KTX's count
+	// direct impacts only and run ~4x lower. The marker is what stops the two
+	// being averaged into one trendline (result.HitsDirectImpact).
+	if c := withDmg.ByWeapon["rl"].HitsConvention; c != result.HitsAnyDamage {
+		t.Errorf("hitsConvention = %q, want %q — a wire-linked hit is any damage path", c, result.HitsAnyDamage)
+	}
 
 	// A RECONSTRUCTED damage section is not linkage: the shot linker never
-	// saw a wire damage event there, so hits must stay absent — presence of
-	// the section alone must not re-fabricate the zero.
-	recon := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}, "a")
+	// saw a wire damage event there, so hits must stay absent unless the aim
+	// recon tier recovered one — presence of the section alone must not
+	// re-fabricate the zero.
+	recon := deriveAccuracy(&Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}, "a", nil)
 	if h := recon.ByWeapon["rl"].Hits; h != nil {
 		t.Errorf("hits with reconstructed damage = %d, want ABSENT", *h)
+	}
+	if recon.Src != result.SrcDerived {
+		t.Errorf("src with no recovered hits = %q, want %q — attacks alone are shot-derived either way",
+			recon.Src, result.SrcDerived)
+	}
+}
+
+// The old-demo path (schema v74): the aim recon tier fills `hits`, the family
+// says which grade it is, and a weapon the tier withheld inherits the
+// withhold rather than reading as a measured zero.
+func TestDeriveAccuracyReconTierFillsHits(t *testing.T) {
+	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
+		Player: "a",
+		ByWeapon: []result.WeaponShots{
+			{Weapon: "lg", Shots: 200, Hits: 0},
+			{Weapon: "sng", Shots: 40, Hits: 0},
+		},
+	}}}
+	res := &Result{Shots: shots, Damage: &result.DamageResult{Source: result.DamageSourceReconstructed}}
+	// Only lg is in the validated tier, so only lg carries a Recon block.
+	acc := deriveAccuracy(res, "a", map[string]map[string]reconHit{
+		"a": {"lg": {n: 61, convention: result.HitsAnyDamage}}})
+	if acc.Src != result.SrcReconstructed {
+		t.Errorf("src = %q, want %q — a recovered hit is not a wire measurement",
+			acc.Src, result.SrcReconstructed)
+	}
+	if h := acc.ByWeapon["lg"].Hits; h == nil || *h != 61 {
+		t.Errorf("lg hits = %v, want 61 from the recon tier", h)
+	}
+	if h := acc.ByWeapon["sng"].Hits; h != nil {
+		t.Errorf("sng hits = %d, want ABSENT — the tier validated no nail recovery", *h)
+	}
+	if acc.ByWeapon["sng"].Attacks != 40 {
+		t.Error("a withheld hit count must not cost the weapon its fires")
+	}
+	// The recon tier reproduces the wire join, so it answers the same
+	// question — the convention is the evidence-independent half of the
+	// contract and must not move with `src`.
+	if c := acc.ByWeapon["lg"].HitsConvention; c != result.HitsAnyDamage {
+		t.Errorf("hitsConvention = %q, want %q", c, result.HitsAnyDamage)
+	}
+	if c := acc.ByWeapon["sng"].HitsConvention; c != "" {
+		t.Errorf("withheld sng carries hitsConvention %q, want empty", c)
+	}
+}
+
+// deriveReconHits must read the PUBLISHED tier and only when the aim section
+// says its hits came from a reconstruction — on a wire-measured demo the
+// accuracy family links its own fires and this map must stay out of it.
+func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
+	aim := func(src string) *result.AimResult {
+		return &result.AimResult{
+			HitsSource: src,
+			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
+				{Weapon: "lg", Shots: 10, Recon: &result.WeaponAimRecon{Hits: 4}},
+				{Weapon: "rl", Shots: 20, Recon: &result.WeaponAimRecon{Hits: 12, DirectHits: intp(5)}},
+				{Weapon: "ng", Shots: 10},
+			}}},
+		}
+	}
+	if got := deriveReconHits(&Result{Aim: aim(result.AimHitsSourceKTX)}); got != nil {
+		t.Errorf("recon hits on a wire-measured demo = %v, want nil", got)
+	}
+	got := deriveReconHits(&Result{Aim: aim(result.AimHitsSourceReconstructed)})
+	if len(got["a"]) != 2 || got["a"]["lg"] != (reconHit{n: 4, convention: result.HitsAnyDamage}) {
+		t.Errorf("recon hits = %v, want only the weapons carrying a Recon block", got)
+	}
+	// rl carries the tier's DIRECT-impact count, and says so: that is KTX's
+	// own convention for rl/gl and the whole reason an old demo's row can be
+	// compared with a block-carrying one (schema v74).
+	if got["a"]["rl"] != (reconHit{n: 5, convention: result.HitsDirectImpact}) {
+		t.Errorf("rl recon hit = %v, want the directImpact 5", got["a"]["rl"])
 	}
 }
 
@@ -909,7 +992,7 @@ func TestDeriveAccuracyNilForUnknownPlayer(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a", ByWeapon: []result.WeaponShots{{Weapon: "rl", Shots: 1}},
 	}}}
-	if got := deriveAccuracy(&Result{Shots: shots}, "nobody"); got != nil {
+	if got := deriveAccuracy(&Result{Shots: shots}, "nobody", nil); got != nil {
 		t.Errorf("deriveAccuracy for an unknown player = %v, want nil", got)
 	}
 }
@@ -994,10 +1077,29 @@ func TestTeamAggregationAccuracyMixedSrcIsRecorded(t *testing.T) {
 		{Name: "a", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcKTX,
 			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 10, Hits: intp(4)}}}},
 		{Name: "b", Team: "red", Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
-			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1)}}}},
+			ByWeapon: map[string]result.PlayerStatsAcc{"rl": {Attacks: 5, Hits: intp(1),
+				HitsConvention: result.HitsAnyDamage}}}},
 	}
-	if got := aggregateTeamRows(players, 600000)[0].Accuracy.Src; got != result.SrcMixed {
-		t.Errorf("team accuracy src = %q, want mixed", got)
+	// The KTX member's rl hits are direct impacts and the derived member's
+	// are any damage path, so the sum answers no single question — the
+	// per-weapon marker goes unnamed rather than claiming one of them.
+	acc := aggregateTeamRows(players, 600000)[0].Accuracy
+	if acc.Src != result.SrcMixed {
+		t.Errorf("team accuracy src = %q, want mixed", acc.Src)
+	}
+	if c := acc.ByWeapon["rl"].HitsConvention; c != "" {
+		t.Errorf("team rl hitsConvention = %q, want empty — the members counted different things", c)
+	}
+
+	// Members that DO agree carry theirs up.
+	for i := range players {
+		players[i].Accuracy.Src = result.SrcKTX
+		e := players[i].Accuracy.ByWeapon["rl"]
+		e.HitsConvention = result.HitsDirectImpact
+		players[i].Accuracy.ByWeapon["rl"] = e
+	}
+	if c := aggregateTeamRows(players, 600000)[0].Accuracy.ByWeapon["rl"].HitsConvention; c != result.HitsDirectImpact {
+		t.Errorf("team rl hitsConvention = %q, want %q", c, result.HitsDirectImpact)
 	}
 }
 

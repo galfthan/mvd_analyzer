@@ -10856,19 +10856,23 @@
           "byWeapon": {
             "gl": {
               "attacks": 27,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
               "attacks": 2,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 159,
-              "hits": 54
+              "hits": 54,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 28,
-              "hits": 9
+              "hits": 9,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -11012,6 +11016,8 @@
           "efficiency": 0.3125,
           "frags": 7,
           "kills": 10,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 3,
           "teamKills": 0
@@ -11038,19 +11044,23 @@
           "byWeapon": {
             "gl": {
               "attacks": 8,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 168,
-              "hits": 62
+              "hits": 62,
+              "hitsConvention": "anyDamage"
             },
             "sg": {
               "attacks": 19,
-              "hits": 7
+              "hits": 7,
+              "hitsConvention": "anyDamage"
             },
             "ssg": {
               "attacks": 6,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             }
           },
           "src": "derived"
@@ -11199,6 +11209,8 @@
           "efficiency": 0.5938,
           "frags": 16,
           "kills": 19,
+          "maxQuadSpree": 0,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 3,
           "teamKills": 0
@@ -11229,7 +11241,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 73,
+  "schemaVersion": 74,
   "shots": {
     "byPlayer": [
       {
@@ -11379,6 +11391,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8675,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11386,6 +11399,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 10455,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11400,6 +11414,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14922,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11407,6 +11422,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 19597,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11414,6 +11430,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 20139,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11421,6 +11438,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 23961,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11437,6 +11455,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24078,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11453,6 +11472,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25039,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11460,6 +11480,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24883,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11467,6 +11488,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25844,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11506,6 +11528,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 35571,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11513,6 +11536,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 37377,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11520,6 +11544,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 37377,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11527,6 +11552,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38078,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11538,6 +11564,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38507,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11545,6 +11572,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38663,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11556,6 +11584,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 39091,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11586,6 +11615,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 45233,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11597,6 +11627,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 45973,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11608,6 +11639,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 49532,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11622,6 +11654,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51117,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11629,6 +11662,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51662,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11636,6 +11670,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52130,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11643,6 +11678,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51896,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11654,6 +11690,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52468,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11661,6 +11698,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52545,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11675,6 +11713,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53130,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11686,6 +11725,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53402,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11693,6 +11733,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 54103,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11704,6 +11745,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 54337,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11722,6 +11764,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 59000,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11740,6 +11783,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 59896,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11751,6 +11795,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59856,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11762,6 +11807,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65064,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11773,6 +11819,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65636,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11784,6 +11831,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 69506,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11798,6 +11846,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 79454,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11809,6 +11858,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 80116,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11843,6 +11893,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 80935,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11859,6 +11910,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84610,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11870,6 +11922,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 85388,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11888,6 +11941,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 89468,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11895,6 +11949,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 89544,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11909,6 +11964,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 91869,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11920,6 +11976,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 92531,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11927,6 +11984,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 92649,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11934,6 +11992,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 93739,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11941,6 +12000,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 93700,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11948,6 +12008,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 94324,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11955,6 +12016,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 94285,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11962,6 +12024,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96883,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11969,6 +12032,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 97583,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11976,6 +12040,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98830,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11983,6 +12048,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99649,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11990,6 +12056,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 100506,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12008,6 +12075,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111181,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12019,6 +12087,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112057,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12030,6 +12099,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113102,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12037,6 +12107,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113102,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12044,6 +12115,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113570,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12065,6 +12137,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116635,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12072,6 +12145,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116869,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12079,6 +12153,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116596,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12086,6 +12161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116830,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12104,6 +12180,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 117804,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12111,6 +12188,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118349,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12118,6 +12196,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118537,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12125,6 +12204,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119674,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12132,6 +12212,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119674,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12139,6 +12220,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 120017,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12146,6 +12228,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 121454,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12153,6 +12236,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 122778,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12192,6 +12276,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131182,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12221,6 +12306,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131882,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12243,6 +12329,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 132701,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12264,6 +12351,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 133401,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12287,6 +12375,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 148375,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12294,6 +12383,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 152661,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12301,6 +12391,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 152816,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12308,6 +12399,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 155739,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12315,6 +12407,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 153985,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12326,6 +12419,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 156440,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12333,6 +12427,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 157213,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12340,6 +12435,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 155621,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12347,6 +12443,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 156362,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12358,6 +12455,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 159661,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12365,6 +12463,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 157557,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12372,6 +12471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160284,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12379,6 +12479,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 158492,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12390,6 +12491,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160908,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12397,6 +12499,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 159193,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12404,6 +12507,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161524,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12411,6 +12515,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 162141,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12418,6 +12523,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 160284,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12429,6 +12535,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 162726,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12436,6 +12543,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161063,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12443,6 +12551,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163349,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12450,6 +12559,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161757,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12461,6 +12571,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161986,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12468,6 +12579,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 164556,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12475,6 +12587,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 162921,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12482,6 +12595,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 165167,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12489,6 +12603,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 163738,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12496,6 +12611,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 165946,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12503,6 +12619,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 165479,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12514,6 +12631,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 164595,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12528,6 +12646,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 165400,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12535,6 +12654,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 166570,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12567,6 +12687,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 182219,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12574,6 +12695,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 184699,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12588,6 +12710,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188556,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12599,6 +12722,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188790,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12613,6 +12737,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 192024,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12620,6 +12745,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 190154,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12627,6 +12753,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 190738,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12641,6 +12768,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 197110,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12648,6 +12776,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197726,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12655,6 +12784,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197842,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12666,6 +12796,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 198530,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12673,6 +12804,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199154,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12684,6 +12816,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199231,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12698,6 +12831,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200004,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12709,6 +12843,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200270,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12720,6 +12855,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200803,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12731,6 +12867,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200998,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12742,6 +12879,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202009,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12749,6 +12887,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202043,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12760,6 +12899,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202895,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12771,6 +12911,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 207141,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12785,6 +12926,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 209815,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12792,6 +12934,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 211595,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12799,6 +12942,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 225101,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12806,6 +12950,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 227465,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12820,6 +12965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230406,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12827,6 +12973,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 238692,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12841,6 +12988,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243114,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12848,6 +12996,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243880,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12862,6 +13011,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244698,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12873,6 +13023,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244660,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12953,6 +13104,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 253959,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12960,6 +13112,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 253374,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12974,6 +13127,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 263166,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12988,6 +13142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 268803,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12995,6 +13150,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 269465,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13002,6 +13158,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 270087,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13009,6 +13166,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 270673,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13016,6 +13174,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 271296,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13023,6 +13182,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 271919,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13030,6 +13190,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 272581,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13037,6 +13198,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273166,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13044,6 +13206,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273789,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13051,6 +13214,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 274413,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13062,6 +13226,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 274997,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13069,6 +13234,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273673,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13076,6 +13242,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 275614,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13090,6 +13257,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 277737,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13101,6 +13269,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 278167,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13108,6 +13277,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 278672,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13115,6 +13285,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279218,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13122,6 +13293,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279296,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13143,6 +13315,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 280802,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13154,6 +13327,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 280802,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13161,6 +13335,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 281542,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13172,6 +13347,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 281932,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13183,6 +13359,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 283633,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13197,6 +13374,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 305892,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13204,6 +13382,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 309892,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13211,6 +13390,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 310516,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13218,6 +13398,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 309542,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13225,6 +13406,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 313282,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13232,6 +13414,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 314399,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13253,6 +13436,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 336788,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13269,6 +13453,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336788,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13285,6 +13470,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337879,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13292,6 +13478,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337684,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13310,6 +13497,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 338348,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13333,6 +13521,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346244,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13340,6 +13529,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349009,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13347,6 +13537,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349516,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13358,6 +13549,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350061,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13369,6 +13561,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350528,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13376,6 +13569,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350568,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13383,6 +13577,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351308,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13394,6 +13589,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351308,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13405,6 +13601,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 352411,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13416,6 +13613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 352528,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13430,6 +13628,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 356774,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13437,6 +13636,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 358633,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13458,6 +13658,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 372892,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13491,6 +13692,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373852,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13538,6 +13740,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 379606,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13545,6 +13748,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 379917,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13563,6 +13767,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 382580,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13570,6 +13775,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383268,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13577,6 +13783,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383191,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13584,6 +13791,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 384281,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13598,6 +13806,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 385002,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13605,6 +13814,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386165,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13612,6 +13822,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 387476,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13637,6 +13848,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 398631,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13644,6 +13856,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 399178,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13651,6 +13864,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 399801,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13658,6 +13872,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 400229,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13665,6 +13880,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 401125,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13672,6 +13888,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 402593,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13679,6 +13896,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403593,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13686,6 +13904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403893,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13693,6 +13912,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403930,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13704,6 +13924,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 404514,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13711,6 +13932,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405099,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13718,6 +13940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405871,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13725,6 +13948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 406177,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13732,6 +13956,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 407034,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13739,6 +13964,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 408276,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13746,6 +13972,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 410125,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13753,6 +13980,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411164,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13764,6 +13992,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411164,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13775,6 +14004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411748,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13791,6 +14021,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411819,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13807,6 +14038,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 414269,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13840,6 +14072,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 414775,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13861,6 +14094,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 417281,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13872,6 +14106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 417203,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13886,6 +14121,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427781,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13893,6 +14129,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 428358,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13904,6 +14141,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 428788,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13911,6 +14149,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429022,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13922,6 +14161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429372,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13929,6 +14169,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429762,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13945,6 +14186,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 443786,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13952,6 +14194,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 444449,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13970,6 +14213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 445489,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13981,6 +14225,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446099,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13992,6 +14237,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446761,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14003,6 +14249,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446878,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14010,6 +14257,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 447579,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14017,6 +14265,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 447658,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14028,6 +14277,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 448515,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14035,6 +14285,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 448827,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14042,6 +14293,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 449411,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14049,6 +14301,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 449684,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14056,6 +14309,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 451046,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14063,6 +14317,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 451280,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14077,6 +14332,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455034,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14084,6 +14340,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 455968,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14091,6 +14348,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 456982,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14112,6 +14370,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 459397,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14126,6 +14385,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 464722,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14133,6 +14393,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466241,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14140,6 +14401,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466436,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14147,6 +14409,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466930,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14154,6 +14417,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467345,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14165,6 +14429,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467761,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14172,6 +14437,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468325,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14179,6 +14445,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468177,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14190,6 +14457,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468982,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14197,6 +14465,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468943,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14208,6 +14477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469800,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14215,6 +14485,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469683,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14222,6 +14493,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470852,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14233,6 +14505,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470891,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14244,6 +14517,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471397,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14251,6 +14525,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471592,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14258,6 +14533,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472293,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14269,6 +14545,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472371,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14308,6 +14585,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 493046,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14329,6 +14607,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 494553,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14364,6 +14643,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 506559,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14371,6 +14651,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 513682,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14378,6 +14659,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514306,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14385,6 +14667,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514306,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14396,6 +14679,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 516475,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14410,6 +14694,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518526,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14417,6 +14702,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519488,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14424,6 +14710,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519838,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14460,6 +14747,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 526539,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14476,6 +14764,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 529527,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14487,6 +14776,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 529527,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14516,6 +14806,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 539150,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14527,6 +14818,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540539,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14538,6 +14830,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540890,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14545,6 +14838,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541240,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14561,6 +14855,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541786,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14572,6 +14867,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542565,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14583,6 +14879,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542760,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14594,6 +14891,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543227,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14605,6 +14903,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543383,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14632,6 +14931,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 545709,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14650,6 +14950,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 546565,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14679,6 +14980,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 556890,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14714,6 +15016,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563279,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14721,6 +15024,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563747,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14728,6 +15032,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563902,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14739,6 +15044,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 564604,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14753,6 +15059,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 569006,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14767,6 +15074,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 576032,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14774,6 +15082,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580434,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14781,6 +15090,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 587006,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14788,6 +15098,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 587896,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14795,6 +15106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 588734,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14802,6 +15114,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590668,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14813,6 +15126,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590980,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14820,6 +15134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591564,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14827,6 +15142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591681,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14838,6 +15154,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 592259,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14854,6 +15171,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593032,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14861,6 +15179,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593577,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14868,6 +15187,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 594046,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14875,6 +15195,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593928,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14889,6 +15210,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 594785,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14900,6 +15222,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595020,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14907,6 +15230,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595558,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14923,6 +15247,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595791,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14930,6 +15255,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 596635,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",

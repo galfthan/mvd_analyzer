@@ -45,6 +45,16 @@ type ShotsResult struct {
 // rl/gl self-splash such as a rocket jump) — mirroring the Damage layer's
 // IsSelf/IsTeam semantics. Omitted when every victim is an enemy (the common
 // case); when present it is parallel to Victims.
+//
+// FlightEnd publishes the fire→flight half of the projectile link (schema
+// v74): the time the tracked rocket/grenade/nail this fire launched died. It
+// is the evidence Hit rests on for a projectile weapon, and it is set whether
+// or not that impact damaged anyone — so a consumer with no wire damage stream
+// can still tell a fire whose projectile WAS tracked (and when it landed) from
+// one that never broadcast an entity at all. Absent on hitscan fires, and on a
+// projectile fire whose flight was never tracked: an entity the server never
+// broadcast (a rocket that detonates in the muzzle frame), a flight still open
+// when the recording ended, or — for ng/sng — a parse without nail decoding.
 type Shot struct {
 	Time        int32    `json:"time"`
 	Player      string   `json:"player"`
@@ -54,6 +64,19 @@ type Shot struct {
 	Hit         bool     `json:"hit,omitempty"`
 	Victims     []string `json:"victims,omitempty"`
 	VictimKinds []string `json:"victimKinds,omitempty"`
+	// FlightEnd is match-relative ms (same clock as Time) of the despawn
+	// frame that ended this fire's tracked projectile flight — its impact.
+	// A pointer because 0 is a legal time; absence is "no flight tracked",
+	// never "impacted at t=0". See the type comment.
+	//
+	// It is the observed despawn frame, NOT a flight duration: Time and the
+	// entity update are quantized independently, so a point-blank impact can
+	// land up to about one demo frame BEFORE its own fire sound (measured: 6
+	// of 37974 tracked rl/gl flights over the 53-demo dm2/dm3 eval corpus,
+	// worst −29 ms). Consumers differencing FlightEnd−Time must tolerate a
+	// small negative rather than assume it is a positive time of flight.
+	// Nothing here is clamped: the despawn frame is what the wire showed.
+	FlightEnd *int32 `json:"flightEnd,omitempty"`
 }
 
 // PlayerShots is one player's match-time fire counts per weapon.

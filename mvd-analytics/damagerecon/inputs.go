@@ -58,6 +58,11 @@ type inputs struct {
 	teams   map[string]string
 	order   []string // deterministic player iteration order
 
+	// frags is the frag log as the flat list, read only by setCoverage.
+	// Deliberately outside the noObituary gate below: coverage scores delta
+	// EXTRACTION, which keeps its frag anchors in either run.
+	frags []result.FragEntry
+
 	fragAt map[fragKey]*result.FragEntry
 	// fragAnyAt also holds suicide/teamkill entries — the obituary for an
 	// enemy telefrag is a killer-less "was telefragged" that parses as a
@@ -125,6 +130,9 @@ type inputs struct {
 	// 100+random*20; narrowed to exactly 110 when detectRocketRegime
 	// recognises a fixed-constant server.
 	rlLo, rlHi float64
+	// rlRegime: which of the three verdicts detectRocketRegime reached
+	// (result.RocketRegime*). Empty until it has run.
+	rlRegime string
 }
 
 type fragKey struct {
@@ -198,6 +206,17 @@ func buildInputs(res *result.Result) *inputs {
 	}
 
 	if res.Frags != nil {
+		in.frags = res.Frags.Frags
+		// Unpaired first, so a complete entry at the same instant wins the
+		// key. These name only the victim (Killer is the "teammate"
+		// placeholder, which no player map resolves) but they carry the
+		// CAUSE, which is what positionalAnchor needs to keep a team telefrag
+		// off the damage curve. They stay out of in.frags: that slice is the
+		// coverage denominator and wants complete kills only.
+		for i := range res.Frags.Unpaired {
+			f := &res.Frags.Unpaired[i]
+			in.fragAnyAt[fragKey{f.Victim, f.Time}] = f
+		}
 		for i := range res.Frags.Frags {
 			f := &res.Frags.Frags[i]
 			in.fragAnyAt[fragKey{f.Victim, f.Time}] = f
@@ -610,7 +629,14 @@ const (
 // The victim's position is sampled just AFTER t: in the respawn+instant-
 // telefrag cycle the victim's only wire-visible position near t is the new
 // corpse on the contested pad.
-func (in *inputs) teleportArrivalAt(victim string, t int32) string {
+//
+// `admit`, when non-nil, restricts the candidate set to the players the
+// caller's own evidence allows. Both mechanisms rank every player on the
+// map, so a caller that already knows something about the killer (a TEAMKILL
+// obituary establishes he is a teammate of the victim) has to constrain the
+// SET rather than veto the winner: filtering afterwards would drop a
+// legitimate second-place teammate along with the inadmissible leader.
+func (in *inputs) teleportArrivalAt(victim string, t int32, admit func(string) bool) string {
 	vtrack := in.tracks[victim]
 	if vtrack == nil {
 		return ""
@@ -620,6 +646,9 @@ func (in *inputs) teleportArrivalAt(victim string, t int32) string {
 	standBest, standDist := "", teleStandMaxDist
 	for _, name := range in.order {
 		if name == victim {
+			continue
+		}
+		if admit != nil && !admit(name) {
 			continue
 		}
 		tr := in.tracks[name]
