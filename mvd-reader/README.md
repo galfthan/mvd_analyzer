@@ -148,6 +148,22 @@ parsing, not a protocol signal — so the derivation logic stays in
 mvd-analytics, but there is now a single shared table, not two drifting
 copies).
 
+**A teamkill obituary hides a name, not always the cause.** KTX's team
+branch (`ktx/src/client.c:5343-5410`) tests three death types by name before
+falling through to a random pick of four generic phrasings, so seven of the
+eight teamkill markers in the table are cause-carrying and three of them are:
+`dtTELE1` → `"X was telefragged by his teammate"` (weapon `tele`), `dtSQUISH`
+→ `"X squished a teammate"` (weapon `squish`, the one that names the KILLER
+instead), `dtSTOMP` → `"X was jumped/crushed by his teammate"` (weapon
+`stomp`). Each uses the SAME cause token as its non-team sibling, so
+filtering on a cause returns both spellings. Only the random four ("checks
+his glasses", "loses another friend", "mows down a teammate", "gets a frag
+for the other team") carry the placeholder weapon `teamkill`, which means
+*the phrasing had no cause in it* — `TeamKill` is the flag that says a
+teamkill happened. The table in
+[`MVD_FORMAT.md`](MVD_FORMAT.md#obituary-messages-frag-detection) lists all eight
+with their KTX line numbers.
+
 `ItemSpawnEvent` and `ItemStateEvent` are derived events synthesised
 from the entity-state stream (`svc_spawnbaseline`,
 `svc_packetentities`, `svc_deltapacketentities` — see

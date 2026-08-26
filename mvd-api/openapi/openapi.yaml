@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "74"
+  version: "75"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -2137,10 +2137,10 @@ components:
         more silent empty result:
 
         - **/frags** additionally accepts the obituary environmental / cause
-          codes (hook, rail, squish, fall, lava, slime, water, world, tele,
-          stomp, unknown, suicide, teamkill);
-        - **/damage** the death-type + environmental codes (explobox, squish,
-          lava, slime, drown, fall, trigger, suicide, unknown);
+          codes (hook, rail, squish, explobox, fall, lava, slime, water,
+          world, tele, stomp, unknown, suicide, teamkill);
+        - **/damage** the death-type + environmental codes (hook, explobox,
+          squish, lava, slime, drown, fall, trigger, suicide, unknown);
         - **/backpacks** accepts rl/lg only;
         - **/weapon-pickups** ssg,ng,sng,gl,rl,lg;
         - **/top-kills** filters the KILLING weapon (which is also the
@@ -2156,9 +2156,12 @@ components:
 
         On `/frags`, `teamkill` selects only the teamkills whose obituary
         phrasing has no cause in it ("X checks his glasses" and its siblings,
-        which KTX picks at random). A teammate telefrag or stomp is printed
-        per deathtype and so carries its real code — filter `tele` / `stomp`
-        for those, and `isTeamKill` to separate them from enemy ones.
+        which KTX picks at random). KTX's team branch tests three deathtypes
+        by name before that random pick, and those keep their real code —
+        filter `tele` (teammate telefrag), `stomp` (teammate jump/crush) or
+        `squish` (teammate mover crush) for them, and `isTeamKill` to
+        separate any of these from the enemy-facing rows carrying the same
+        code.
 
         The pre-16.2 singular spelling `weapon` is an accepted legacy alias;
         `weapons` wins when both are present.
@@ -4133,6 +4136,59 @@ components:
             matchable or unmatchable. This is the same verdict `/top-windows`
             and `/lives` publish as `measured.frags`.
           type: boolean
+        unpaired:
+          description: |
+            Teamkill obituaries that name only ONE party and whose other side
+            the recovery could not identify — exactly one of `killer` /
+            `victim` is the placeholder string `"teammate"` (schema v75).
+
+            These are NOT in `frags`, NOT counted in `totalFrags`, `byWeapon`
+            or `byPlayer`, and must not be folded into per-player tallies: a
+            placeholder is not a player. They are published so a consumer can
+            still see that the death happened and read its CAUSE — the
+            victim-named forms carry the real weapon (`tele` / `stomp`),
+            which is what lets the reconstructed `damage` section book such a
+            kill as a positional instant kill rather than pricing the
+            victim's whole corpse drop as team damage.
+
+            Omitted when empty, which is the common case. The
+            `weapons` / `from` / `to` filters narrow this list exactly as they
+            narrow `frags`; `players` matches only the side the wire actually
+            named, so filtering on the literal `teammate` selects nothing.
+            `summary=true` drops it along with `frags` — it is a log, not an
+            aggregate.
+          items:
+            additionalProperties: false
+            properties:
+              isSuicide:
+                description: "Suicide frag."
+                type: boolean
+              isTeamKill:
+                description: "Team-kill frag."
+                type: boolean
+              killer:
+                description: "Killer (attacker) name, or the placeholder \"teammate\"."
+                type: string
+              time:
+                description: "Event/sample time, int32 ms since match start."
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
+              victim:
+                description: "Victim (killed player) name, or the placeholder \"teammate\"."
+                type: string
+              weapon:
+                description: "Cause the obituary carried (tele/stomp for the victim-named forms, teamkill when the phrasing had none)."
+                type: string
+            required:
+              - time
+              - killer
+              - victim
+              - weapon
+            type: object
+          type:
+            - "null"
+            - array
         totalFrags:
           description: "Total frags in the log."
           type: integer

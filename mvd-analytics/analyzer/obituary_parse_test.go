@@ -52,19 +52,31 @@ func TestParseObituaryLine(t *testing.T) {
 		{"gibbed rocket", "prey was gibbed by killa's rocket", "killa", "prey", "rl", false, false},
 		{"gibbed grenade", "prey was gibbed by killa's grenade", "killa", "prey", "gl", false, false},
 
-		// Phrasing teamkills carry the generic "teammate" placeholder. The
-		// killer-named forms are a random pick with no deathtype in them, so
-		// their cause really is unknown ("teamkill"); the victim-named ones
-		// are printed per deathtype (ktx/src/client.c:5355-5384) and keep the
-		// real weapon, which is what routes them as positional instant kills.
+		// Phrasing teamkills carry the generic "teammate" placeholder. KTX's
+		// team branch tests three deathtypes by name before its random pick
+		// (ktx/src/client.c:5343-5410), so those three keep the real cause —
+		// including the one that names the KILLER, dtSQUISH — and only the
+		// random four carry the cause-less "teamkill".
 		{"tk killer-named", "killa loses another friend", "killa", "teammate", "teamkill", false, true},
 		{"tk other-team frag", "killa gets a frag for the other team", "killa", "teammate", "teamkill", true, true},
+		{"tk squish killer-named", "killa squished a teammate", "killa", "teammate", "squish", false, true},
 		{"tk victim-named tele", "prey was telefragged by his teammate", "teammate", "prey", "tele", false, true},
 		{"tk victim-named stomp", "prey was jumped by his teammate", "teammate", "prey", "stomp", false, true},
 		{"tk victim-named crushed", "prey was crushed by her teammate", "teammate", "prey", "stomp", false, true},
 
 		// Satan's-power self-telefrag (infix suicide).
 		{"satan deflect", "Satan's power deflects nexus's telefrag", "nexus", "nexus", "tele", true, false},
+		// dtTELE3, the double-pentagram telefrag: shares the plain kill verb
+		// but KTX books it as the victim's own suicide (client.c:5228-5237).
+		{"satan double-666", "prey was telefragged by killa's Satan's power", "prey", "prey", "tele", true, false},
+		{"plain telefrag stays a kill", "prey was telefragged by killa", "killa", "prey", "tele", false, false},
+
+		// dtEXPLO_BOX carries the damage log's own token, not generic "world".
+		{"explo box", "nexus blew up", "nexus", "nexus", "explobox", true, false},
+		// dtTRIGGER_HURT / world catch-all share one string, so "world" is
+		// all the print establishes. LineEnd-anchored.
+		{"died", "nexus died", "nexus", "nexus", "world", true, false},
+		{"died inside a name stays a kill", "x died rides killa's rocket", "killa", "x died", "rl", false, false},
 
 		// SSG buckshot "ate N loads".
 		{"ate buckshot ssg", "prey ate 2 loads of killa's buckshot", "killa", "prey", "ssg", false, false},

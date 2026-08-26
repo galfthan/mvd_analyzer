@@ -124,6 +124,7 @@ Defined in `result/frag.go`.
 | ByWeapon | `byWeapon` | map[string]int — **enemy kills only** (suicides/teamkills excluded) |
 | ByPlayer | `byPlayer` | map[string]*PlayerFrags |
 | KillsMeasured | `killsMeasured` | bool — the demo-global kill-**attribution** verdict (schema v65). Not `omitempty`; always emitted. |
+| Unpaired | `unpaired` | []FragEntry, omitempty — v75; teamkill obituaries whose other party the recovery could not name. **Not** part of `frags`, `totalFrags`, `byWeapon` or `byPlayer`. See [FragResult.unpaired](#fragresultunpaired). |
 
 #### `killsMeasured` — the one measuredness bit of this section
 
@@ -158,28 +159,49 @@ nothing — the opposite of what the flag means.
 | Time | `time` | int32 (match-relative ms) |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
-| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `axe`, `hook`, `rail`, `tele`, `stomp`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`, plus `unknown`/`suicide`/`teamkill` for obituaries whose phrasing hides the weapon; the closed set is `view.fragWeaponVocab`) |
-
-`teamkill` is a **cause-less** placeholder, not the cause of every
-teamkill. KTX prints the killer-named phrasings ("X checks his glasses",
-"X loses another friend", "X mows down a teammate", "X gets a frag for
-the other team") from a random pick with no deathtype in them, so those
-are all a consumer can be told. The victim-named ones ARE per-deathtype
-(`ktx/src/client.c:5355-5384`) and keep their real weapon: `tele` for
-"was telefragged by his teammate", `stomp` for "was jumped/crushed by his
-teammate" — with `isTeamKill` set either way. The distinction is
-load-bearing downstream: `tele`/`stomp` are positional instant kills that
-the damage sections fold as capacity rather than pricing on the damage
-curve (see "Positional kills" below).
+| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `axe`, `hook`, `rail`, `tele`, `stomp`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`/`explobox`, plus `unknown`/`suicide`/`teamkill` for obituaries whose phrasing hides the weapon; the closed set is `view.fragWeaponVocab`) |
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
+
+`teamkill` is a **cause-less** placeholder, not the cause of every
+teamkill. KTX's team branch tests three deathtypes by name before it
+reaches its random phrasing pick (`ktx/src/client.c:5343-5410`), and all
+three keep their real weapon: `tele` for "X was telefragged by his
+teammate", `stomp` for "X was jumped/crushed by his teammate", `squish`
+for "X squished a teammate" (the one cause-carrying phrasing that names
+the killer instead of the victim). Only the random four — "X checks his
+glasses", "X loses another friend", "X mows down a teammate", "X gets a
+frag for the other team" — have no deathtype in them, and those are the
+rows that carry `teamkill`. `isTeamKill` is set on all of them.
+
+The distinction is load-bearing downstream: `tele`/`stomp` are positional
+instant kills that the damage sections fold as capacity rather than
+pricing on the damage curve (see "Positional kills" below). `squish` is
+NOT positional — a mover crush is ordinary damage on the wire, attributed
+to the player who triggered the mover — so it prices normally, exactly
+like its enemy-facing twin "X squishes Y".
+
+The same rule holds outside the team branch: every marker stamps the cause
+its engine deathtype carries in the wire damage log's own vocabulary
+(`mvd.DeathTypeToWeapon` / `EnvironmentalDamageType`), so filtering on a
+cause returns the obituary rows and the damage rows alike. `explobox` (KTX
+"X blew up", `dtEXPLO_BOX`) and `hook` are spelled the same on both sides.
+Three obituaries genuinely establish nothing finer than `world` and keep
+it: "X was spiked" (the print collapses `dtNG` and `dtSNG` from a non-player
+attacker into one string), "X was zapped" (`dtLASER`) and "X ate a lavaball"
+(`dtFIREBALL`) — the latter two have no token of their own in either
+vocabulary.
 
 A self-kill carries the **weapon/cause that produced it**
 (`rl`/`gl`/`lg` for weapon self-detonations, env labels for lava/fall/etc.)
 with `isSuicide` set; only the `/kill` console command (KTX "X suicides",
 −2 frags) keeps weapon `suicide`. So a real `/kill` is distinguishable
 from a weapon self-detonation, and recovered teamkills never carry a stale
-`isSuicide` (killer ≠ victim).
+`isSuicide` (killer ≠ victim). One kill-shaped phrasing is a self-kill:
+KTX's double-pentagram telefrag "X was telefragged by Y's Satan's power"
+(`dtTELE3`, `client.c:5228-5237`) prints the ordinary telefrag verb but
+books `logfrag(targ, targ)` — Y is credited nothing — so it carries
+`isSuicide` with killer = victim = X.
 
 Includes **teamkills** recovered from both kinds whose obituary
 names only one party. *Killer-named* ("X loses another friend") fill in
@@ -187,9 +209,32 @@ the victim by matching the coincident authoritative `DeathEvent` on the
 killer's team. *Victim-named* ("X was telefragged by his teammate") fill
 in the killer by combining position co-location with the teamkiller's −1
 frag-delta (the two signals must agree, so a rare alias can't
-misattribute) — these recover only when the position/score evidence is
-unambiguous; a few may stay unattributed (readable from
-`MessagesResult.Events[type=frag]`).
+misattribute). Both recoveries can come up empty — a team telefrag costs
+its killer no frag under default KTX rules (the −1 is gated on
+`k_tp_tele_death`), so a spawn pile can leave both signals mute — and the
+leftovers are published in `unpaired[]` below rather than dropped.
+
+### FragResult.unpaired
+
+`unpaired[]` carries the teamkill obituaries that name only one party and
+whose other side neither recovery could identify. Exactly one of `killer` /
+`victim` is the placeholder string `"teammate"`.
+
+They are **not** in `frags[]` and are **not** counted in `totalFrags`,
+`byWeapon` or `byPlayer`: every entry of the frag log names both sides,
+which is what makes it usable for per-player tallies, and a placeholder is
+not a player. Consumers must not fold `unpaired[]` into per-player counts
+either. What it is for is the two things the wire really did say — that the
+death happened, and what CAUSED it. The victim-named forms carry the real
+weapon (`tele` / `stomp`), which is what lets the reconstructed damage
+section type such a kill positionally instead of pricing the victim's whole
+corpse drop as team weapon damage.
+
+Measured on a 6 000-demo archive sweep, victim-named teamkill obituaries
+run about 2 000 lines over ~900 demos and the recovery names the killer on
+the large majority; the residual is what lands here. Schema v75 — before
+it, these obituaries were dropped from the Result entirely and were only
+visible in `MessagesResult.Events[type=frag]`.
 
 ### PlayerFrags
 

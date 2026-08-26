@@ -104,6 +104,19 @@ func parseObituaryLine(msg string) *parsedObituary {
 func matchSuicide(msg string) *parsedObituary {
 	for _, p := range suicidePatterns {
 		if idx := strings.Index(msg, p.Marker); idx > 0 {
+			// Suffix on a suicide row is a REQUIRED discriminator, not a
+			// victim bound: KTX's dtTELE3 prints the same " was telefragged
+			// by " verb the kill row uses but books the death as the
+			// victim's own suicide (parser.ObituaryPatterns).
+			if p.Suffix != "" && !strings.Contains(msg[idx+len(p.Marker):], p.Suffix) {
+				continue
+			}
+			// LineEnd anchors a marker short enough to hide inside a player
+			// name (" died") to the end of the line, where both engine
+			// prints that produce it put it.
+			if p.LineEnd && strings.TrimSpace(msg[idx+len(p.Marker):]) != "" {
+				continue
+			}
 			victim := strings.TrimSpace(msg[:idx])
 			if victim != "" {
 				return &parsedObituary{Killer: victim, Victim: victim, Weapon: p.Weapon, Suicide: true}

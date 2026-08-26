@@ -1634,19 +1634,50 @@ Kill messages appear at `PRINT_MEDIUM` (level 1). Common patterns:
 | `"X sleeps with the fishes"` | Drowning |
 | `"X sucks it down"` | Slime |
 | `"X burst into flames"` | Lava |
+| `"X blew up"` | Explosive box (`dtEXPLO_BOX`, weapon `explobox` — the same token the wire damage log uses) |
+| `"X died"` | `dtTRIGGER_HURT` or the world branch's catch-all; one string for both, so weapon `world` |
+| `"X was telefragged by Y's Satan's power"` | `dtTELE3` — a suicide despite the kill-shaped verb; see the KTX telefrag-variants table below |
 
-**Team Kills**:
-| Pattern | Description |
-|---------|-------------|
-| `"X mows down a teammate"` | Team kill |
-| `"X gets a frag for the other team"` | Self-damage hurting team |
+**Team Kills** (`ktx/src/client.c:5343-5410`). KTX's team branch of
+`ClientObituary` tests three death types by name and prints a dedicated
+message for each *before* it falls through to a random pick of four generic
+phrasings. So a teamkill obituary hides one of the two players' names, but
+for three death types it does NOT hide the cause. `ObituaryPatterns` carries
+that split: the three deathtype-tested rows keep the same cause token their
+non-team siblings use, and only the random four carry the cause-less
+placeholder `teamkill`. All eight rows set `TeamKill: true`.
+
+| Pattern | Death type | Weapon | Which name is on the wire |
+|---|---|---|---|
+| `"X was telefragged by his/her teammate"` | `dtTELE1` (:5355) | `tele` | victim |
+| `"X squished a teammate"` | `dtSQUISH` (:5362) | `squish` | killer |
+| `"X was jumped by his/her teammate"` | `dtSTOMP` (:5368) | `stomp` | victim |
+| `"X was crushed by his/her teammate"` | `dtSTOMP` (:5368) | `stomp` | victim |
+| `"X checks his/her glasses"` | — (:5386) | `teamkill` | killer |
+| `"X loses another friend"` | — (:5386) | `teamkill` | killer |
+| `"X gets a frag for the other team"` | — (:5386) | `teamkill` | killer (also `Suicide`) |
+| `"X mows down a teammate"` | — (:5386) | `teamkill` | killer |
+
+The cause tokens are deliberately the SAME words the non-team forms use —
+`tele` for `"X was telefragged by Y"`, `stomp` for `"X was jumped by Y"`,
+`squish` for `"X squishes Y"` and the world crush `"X was squished"` — so a
+consumer filtering on a cause gets the team and non-team spellings alike.
+`teamkill` means *the phrasing carried no cause*, not *this was a teamkill*;
+`TeamKill` (`isTeamKill` downstream) is the flag for that.
+
+Two consequences downstream, both in mvd-analytics: a teammate telefrag or
+stomp is a positional instant kill and must not be priced on the damage curve
+(the observed corpse drop runs to KTX's −99 clamp, so booking one as team
+weapon damage charges ~99 points the engine never dealt), while a teammate
+crush IS ordinary damage — KTX deals it through `T_Damage` with the door's
+activator as the attacker (`ktx/src/doors.c:68`) — and prices normally.
 
 **KTX special telefrag variants** (`ktx/src/client.c:5141-5185`, death types `dtTELE2`–`dtTELE4`):
 
 | Pattern | Death type | Note |
 |---|---|---|
 | `"Satan's power deflects X's telefrag"` | `dtTELE2` | Pent player is the survivor; X (the would-be telefragger) dies. Infix form — victim is bracketed by the prefix `"Satan's power deflects "` and the suffix `"'s telefrag"`. KTX counts this against X's deathcount even though no `DF_DEAD` or stat transition may appear on the wire — see [Death / Spawn Detection](#death--spawn-detection--three-signal-sources). |
-| `"X was telefragged by Y's Satan's power"` | `dtTELE3` | Pent-vs-pent double-666 telefrag. Victim-prefix; killer suffix is `"'s Satan's power"`. |
+| `"X was telefragged by Y's Satan's power"` | `dtTELE3` | Pent-vs-pent double-666 telefrag. Victim-prefix; killer suffix is `"'s Satan's power"`. **This is a SUICIDE, not a kill**: KTX runs `targ->s.v.frags -= 1; logfrag(targ, targ)` and credits Y nothing (`client.c:5228-5237`). It shares the ordinary telefrag verb, so `ObituaryPatterns` carries a suicide row whose `Suffix` is a REQUIRED discriminator; the suicide run is scanned before the kill run in both consumers, so it wins. |
 | `"X couldn't resist the shiny spawn point"` | `dtTELE4` | Spawnicide variant (random 1-of-3 when `k_spawnicide` is enabled). |
 | `"X got too close to the baby factory"` | `dtTELE4` | Spawnicide variant. |
 | `"X was fragged by poor life choices"` | `dtTELE4` | Spawnicide variant. |
@@ -2565,7 +2596,7 @@ Obituary messages are sent via `svc_print` at `PRINT_MEDIUM` (level 1). All patt
 | Pattern | Weapon ID | Category |
 |---------|-----------|----------|
 | `"X suicides"` | 0 (die) | /kill command |
-| `"X died"` | 0 (die) | Generic death |
+| `"X died"` | 0 (die) | `dtTRIGGER_HURT` **and** the world branch's catch-all `else` — KTX prints the same string for both (`ktx/src/client.c:5775-5782`), so the line establishes only "the map killed them". `ObituaryPatterns` stamps `world` (not `trigger`, which stays a damage-log-only token) and anchors the marker to the END of the line, since a player name can contain it |
 | `"X tried to leave"` | 0 (die) | Changelevel |
 | `"X becomes bored with life"` | 7 (rl) | Self-rocket |
 | `"X discovers blast radius"` | 7 (rl) | Self-rocket |
@@ -2648,6 +2679,13 @@ Obituary messages are sent via `svc_print` at `PRINT_MEDIUM` (level 1). All patt
 | `"X checks his glasses"` | 16 | Teamkill (male) |
 | `"X checks her glasses"` | 16 | Teamkill (female) |
 | `"X loses another friend"` | 16 | Teamkill |
+
+`sv_mod_frags.h:107` buckets `"X squished a teammate"` under 16 (`team`)
+with the rest, but KTX's own source shows it is deathtype-tested — the team
+branch prints it only for `dtSQUISH` (`ktx/src/client.c:5362`), *before* the
+random pick that produces the other four. `parser.ObituaryPatterns` follows
+the engine and stamps it `squish`; see the Team Kills table under
+[Obituary Messages](#obituary-messages-frag-detection).
 
 ### Team Kill Patterns (1-player, victim only)
 

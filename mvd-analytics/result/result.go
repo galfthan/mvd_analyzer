@@ -1243,8 +1243,26 @@ package result
 //     when `streams` is absent; `/overview` republishes it beside
 //     `errors[]`.
 //
+// v75 — the teamkill obituaries the recoveries could not complete stop being
+// dropped.
+//   - ADDED on `frags`: `unpaired[]` — teamkill obituaries that name only one
+//     party (the other is the placeholder "teammate") and whose missing side
+//     neither recovery could identify. They cannot join `frags[]`, whose
+//     entries all name both sides, but the obituary is on the wire and
+//     dropping it lost a real death. Per-player tallies must skip them; the
+//     value is the CAUSE, which the victim-named forms carry (`tele` /
+//     `stomp`), and which lets the damage reconstruction type such a kill
+//     positionally instead of pricing the victim's corpse drop as team
+//     weapon damage.
+//   - CHANGED on `frags[].weapon`: `squish` on the teamkill phrasing
+//     "X squished a teammate" — the third deathtype-tested message in KTX's
+//     team branch (dtSQUISH, ktx/src/client.c:5362), previously flattened to
+//     the cause-less `teamkill`. Same cause token its non-teamkill siblings
+//     already use ("X squishes Y", "X was squished"), so a consumer
+//     filtering `squish` now gets all three forms.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 74
+const CurrentSchemaVersion = 75
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

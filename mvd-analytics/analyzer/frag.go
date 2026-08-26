@@ -37,6 +37,10 @@ type FragAnalyzer struct {
 	// the recoverTelefragTeamkills post-processor can recover the killer
 	// from position co-location + the teamkiller's frag-penalty.
 	victimNamedTeamkills []FragEntry
+	// unpaired are the teamkill obituaries whose other party neither
+	// recovery could name; they are published as FragResult.Unpaired rather
+	// than dropped. See that field for why they cannot join frags.
+	unpaired []FragEntry
 }
 
 // slotDeath is one match-time death pinned to the wire slot that died
@@ -249,6 +253,7 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		Frags:      a.frags,
 		ByWeapon:   a.byWeapon,
 		ByPlayer:   a.byPlayer,
+		Unpaired:   a.unpaired,
 	}
 
 	// Born-correct timestamps: emit the frag log on the match clock. The shift
@@ -265,6 +270,14 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 			shifted[i].Time -= ms
 		}
 		result.Frags.Frags = shifted
+		if len(a.unpaired) > 0 {
+			up := make([]FragEntry, len(a.unpaired))
+			copy(up, a.unpaired)
+			for i := range up {
+				up[i].Time -= ms
+			}
+			result.Frags.Unpaired = up
+		}
 	}
 	return nil
 }
@@ -337,6 +350,8 @@ func (a *FragAnalyzer) recoverTeamkills() {
 			// it's a teamkill, not a suicide (killer != victim).
 			entry.IsSuicide = false
 			a.frags = append(a.frags, entry)
+		} else {
+			a.unpaired = append(a.unpaired, tk)
 		}
 	}
 
