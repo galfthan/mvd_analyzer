@@ -247,7 +247,7 @@ All fields optional; an empty filter returns the most recent matches.
 | `matchtag` | `string`   | — | Tournament/event tag, case-insensitive substring (e.g. `qwsl`) |
 | `from`     | `string`   | — | ISO date lower bound, inclusive (YYYY-MM-DD) |
 | `to`       | `string`   | — | ISO date upper bound, inclusive (YYYY-MM-DD) |
-| `limit`    | `int`      | 20 | Max rows; capped at 100. Omit for the default; an explicit `0` is rejected `400 invalid_param` |
+| `limit`    | `int`      | 20 | Max rows per page; capped at 1000 (the hub's own page ceiling). Omit for the default; an explicit `0` is rejected `400 invalid_param` |
 | `offset`   | `int`      | 0 | Pagination offset |
 | `roster`   | `bool`     | `false` | `true` = verbatim hub rows with full roster detail (per-player `ping`, `color` arrays, `name_color`, `team_color`, `is_bot`). Default = compact rows: `players` projected to `{name, team, frags}`. |
 

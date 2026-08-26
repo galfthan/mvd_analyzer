@@ -259,7 +259,9 @@ func staticETag(kind string) string {
 }
 
 func (s *server) writeStaticCacheHeaders(w http.ResponseWriter, kind string) {
-	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	// no-cache + a schema-versioned ETag: revalidate every use so a deploy
+	// that bumps the schema is picked up immediately (see setCacheHeaders).
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("X-Schema-Version", fmt.Sprintf("%d", result.CurrentSchemaVersion))
 	w.Header().Set("ETag", staticETag(kind))
 }

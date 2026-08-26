@@ -35,8 +35,8 @@ const gamesSearchTimeout = 15 * time.Second
 //	mode      exact game mode (1on1, 2on2, 4on4, FFA, …)
 //	matchtag  case-insensitive substring of the tournament/event tag
 //	from,to   ISO date bounds, inclusive (YYYY-MM-DD)
-//	limit     max rows (omit for the default 20; explicit 0, > 100, or
-//	          negative → 400 invalid_param)
+//	limit     max rows (omit for the default 20; explicit 0, above
+//	          hubfetch.MaxSearchLimit, or negative → 400 invalid_param)
 //	offset    pagination offset
 //	roster    1/true = verbatim hub rows; default = compact {name,team,frags}
 //
@@ -89,20 +89,21 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	// limit/offset are bounded at the API boundary rather than silently
 	// clamped downstream (v57 reject-loudly posture): a limit above the hub's
-	// 100-row page cap, or a negative limit/offset, 400s here instead of being
-	// quietly corrected. An OMITTED limit stays "default" (hubfetch resolves it
-	// to 20); an EXPLICIT limit=0 is distinguishable from absent and is rejected
-	// loudly — a caller who typed 0 wants zero rows, which is never useful, so
-	// point them at omitting the param instead. hubfetch keeps its own clamp as
-	// a server-side belt (search.go).
+	// page ceiling (hubfetch.MaxSearchLimit — PostgREST truncates any larger
+	// page to 1000 rows upstream), or a negative limit/offset, 400s here
+	// instead of being quietly corrected. An OMITTED limit stays "default"
+	// (hubfetch resolves it to 20); an EXPLICIT limit=0 is distinguishable
+	// from absent and is rejected loudly — a caller who typed 0 wants zero
+	// rows, which is never useful, so point them at omitting the param
+	// instead. hubfetch keeps its own clamp as a server-side belt (search.go).
 	if limitPresent && params.Limit == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			"limit must be 1..100; omit it for the default 20")
+			fmt.Sprintf("limit must be 1..%d; omit it for the default 20", hubfetch.MaxSearchLimit))
 		return
 	}
-	if params.Limit > 100 {
+	if params.Limit > hubfetch.MaxSearchLimit {
 		writeError(w, http.StatusBadRequest, "invalid_param",
-			fmt.Sprintf("invalid limit=%d (max 100)", params.Limit))
+			fmt.Sprintf("invalid limit=%d (max %d)", params.Limit, hubfetch.MaxSearchLimit))
 		return
 	}
 	if params.Limit < 0 {

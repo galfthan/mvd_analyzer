@@ -212,7 +212,13 @@ func cacheState(meta democache.CacheMeta) string {
 }
 
 func setCacheHeaders(w http.ResponseWriter, meta democache.CacheMeta) {
-	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	// no-cache = store, but revalidate on every use. The ETag embeds the
+	// schema version, so the mandatory revalidation is a version check: a
+	// schema bump misses the ETag and re-downloads, an unchanged result is
+	// a cheap 304. The previous max-age=86400+immutable let clients serve
+	// day-old shapes after a schema bump because immutable suppresses the
+	// revalidation that would have noticed the new ETag.
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("X-Schema-Version", fmt.Sprintf("%d", meta.SchemaVersion))
 	w.Header().Set("X-Cache", cacheState(meta))
 	w.Header().Set("ETag", fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion))

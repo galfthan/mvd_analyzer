@@ -228,6 +228,36 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
+// Version handshake: `make build` stamps <meta name="build"> in index.html
+// with the git hash, and the wasm reports the hash it was built from. Both
+// deploy as one unit, so a mismatch means the browser is running mixed
+// cached versions (a deploy landed between fetching the page and the wasm,
+// or a cache served a stale asset). Reload once — assets are served
+// Cache-Control: no-cache, so the reload revalidates everything — and if
+// the mismatch survives the reload (deploy still propagating), just flag it
+// in the version tag instead of looping.
+function checkBuildCoherence(v) {
+    const meta = document.querySelector('meta[name="build"]');
+    const pageBuild = meta ? meta.content : '';
+    const wasmBuild = v && v.hash ? v.hash : '';
+    if (!pageBuild || pageBuild === 'dev') return;
+    if (!wasmBuild || wasmBuild === 'dev' || wasmBuild === 'unknown') return;
+    if (pageBuild === wasmBuild) return;
+
+    const guard = 'mvd-build-reload';
+    const attempted = (() => { try { return sessionStorage.getItem(guard); } catch { return null; } })();
+    const key = `${pageBuild}:${wasmBuild}`;
+    if (attempted !== key) {
+        try { sessionStorage.setItem(guard, key); } catch {}
+        location.reload();
+        return;
+    }
+    const tag = document.getElementById('version-tag');
+    if (tag) {
+        tag.appendChild(document.createTextNode(' — new version available, reload the page'));
+    }
+}
+
 function setLoadingOverlayMessage(text) {
     const overlay = document.getElementById('wasm-loading');
     if (!overlay) return;
@@ -261,6 +291,7 @@ worker.onmessage = (e) => {
             tag.appendChild(a);
             tag.appendChild(document.createTextNode(`) — ${v.date}`));
         }
+        checkBuildCoherence(v);
     } else if (e.data.type === 'buckets') {
         // Deferred 50ms bucket + region-control payload — arrives a few
         // seconds after 'result'. Stash it and render the Timeline/Map
@@ -471,12 +502,18 @@ async function fetchGameFromHub(gameId) {
 const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
 const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
 
-async function searchHub(filters) {
+// Page size for the search tab. The hub itself pages at 1000 (PostgREST
+// max-rows); 100 keeps a single response light (~90 KB) while "Load more"
+// walks offset pages until every match is shown.
+const SEARCH_PAGE_SIZE = 100;
+
+async function searchHub(filters, offset = 0) {
     const parts = [
         `select=${encodeURIComponent(SEARCH_SELECT)}`,
         `order=timestamp.desc`,
-        `limit=20`,
+        `limit=${SEARCH_PAGE_SIZE}`,
     ];
+    if (offset > 0) parts.push(`offset=${offset}`);
     if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
     if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
     if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
@@ -489,11 +526,23 @@ async function searchHub(filters) {
         headers: {
             'apikey': SUPABASE_API_KEY,
             'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-            'accept-profile': 'public'
+            'accept-profile': 'public',
+            // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so
+            // the UI can say "N of M" and know when every match is shown. With
+            // a count preference a partial page answers 206 — still resp.ok.
+            'Prefer': 'count=exact'
         }
     });
     if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
-    return await resp.json();
+    const games = await resp.json();
+    let total = null;
+    const cr = resp.headers.get('content-range') || '';
+    const slash = cr.lastIndexOf('/');
+    if (slash >= 0 && cr.slice(slash + 1) !== '*') {
+        const n = parseInt(cr.slice(slash + 1), 10);
+        if (!isNaN(n)) total = n;
+    }
+    return { games, total };
 }
 
 async function downloadDemoFromHub(game) {
@@ -951,8 +1000,13 @@ function setupSearch() {
     });
 }
 
-async function runSearch() {
-    const filters = readSearchFilters();
+// Paging state for the search tab: the filters the shown results belong to,
+// how many rows are rendered, and the hub-reported total (null = unknown).
+let searchPaging = { filters: null, shown: 0, total: null };
+
+async function runSearch(loadMore = false) {
+    const filters = loadMore && searchPaging.filters ? searchPaging.filters : readSearchFilters();
+    const offset = loadMore ? searchPaging.shown : 0;
     const status = document.getElementById('search-status');
     const submit = document.getElementById('search-submit');
     const resultsEl = document.getElementById('search-results');
@@ -962,19 +1016,51 @@ async function runSearch() {
     submit.disabled = true;
 
     try {
-        const games = await searchHub(filters);
+        const { games, total } = await searchHub(filters, offset);
         status.textContent = '';
         status.className = 'status';
-        renderSearchResults(games);
+        renderSearchResults(games, loadMore);
+        searchPaging = {
+            filters,
+            shown: offset + games.length,
+            total: total !== null ? total : searchPaging.total,
+        };
+        renderSearchPager();
         lastExecutedSearch = filters;
         updateUrlState();
     } catch (err) {
         status.textContent = 'Error: ' + err.message;
         status.className = 'status error';
-        resultsEl.innerHTML = '';
+        if (!loadMore) resultsEl.innerHTML = '';
     } finally {
         submit.disabled = false;
     }
+}
+
+// Footer under the result list: "N of M matches" plus a Load-more button
+// while the hub reports more pages. Rebuilt after every page.
+function renderSearchPager() {
+    const el = document.getElementById('search-results');
+    const old = el.querySelector('.search-pager');
+    if (old) old.remove();
+    const { shown, total } = searchPaging;
+    if (!shown) return;
+
+    const pager = document.createElement('div');
+    pager.className = 'search-pager';
+    const label = document.createElement('span');
+    label.className = 'search-pager-count';
+    label.textContent = total !== null ? `${shown} of ${total} matches` : `${shown} matches`;
+    pager.appendChild(label);
+    if (total !== null && shown < total) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'search-submit search-pager-more';
+        btn.textContent = 'Load more';
+        btn.addEventListener('click', () => runSearch(true));
+        pager.appendChild(btn);
+    }
+    el.appendChild(pager);
 }
 
 const SEARCH_MODE_LABELS = {
@@ -1552,10 +1638,10 @@ function updateTopbarDemoInfo(result) {
         : 'MVD Analyzer';
 }
 
-function renderSearchResults(games) {
+function renderSearchResults(games, append = false) {
     const el = document.getElementById('search-results');
-    el.innerHTML = '';
-    if (!games || games.length === 0) {
+    if (!append) el.innerHTML = '';
+    if ((!games || games.length === 0) && !append) {
         el.innerHTML = '<div class="search-empty">No demos match these filters.</div>';
         return;
     }

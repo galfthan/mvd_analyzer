@@ -52,11 +52,13 @@ info:
     times.
 
     ### Caching
-    Per-demo 2xx responses carry `Cache-Control: public, max-age=86400,
-    immutable` and an `ETag` of the form `"<sha>-v<schemaVersion>"`
-    (per-artifact: `"<sha>-<name>@v<n>"`; binary-statics: `"<kind>-v<n>"`).
-    A demo's analysis never changes for a given schema version — cache
-    aggressively and revalidate with `If-None-Match` for cheap 304s.
+    Per-demo 2xx responses carry `Cache-Control: no-cache` and an `ETag`
+    of the form `"<sha>-v<schemaVersion>"` (per-artifact:
+    `"<sha>-<name>@v<n>"`; binary-statics: `"<kind>-v<n>"`). no-cache
+    means store-but-revalidate: send `If-None-Match` on every reuse. The
+    ETag embeds the schema version, so the mandatory revalidation is a
+    version check — an unchanged result is a cheap 304, a schema bump
+    re-downloads immediately (nothing serves a stale shape from cache).
 
     ### Availability — the 422 rule
     Object-shaped sections that need a demo capability return
@@ -2866,13 +2868,16 @@ components:
         Max rows per page. Omit for the default 20. An explicit `limit=0`
         is distinguishable from an absent one and is rejected with `400
         invalid_param` (omit the param for the default instead); a value
-        above 100 or a negative value is likewise rejected — no longer
-        silently clamped.
+        above 1000 or a negative value is likewise rejected — no longer
+        silently clamped. 1000 is the hub's own page ceiling (its
+        PostgREST truncates any larger page), so a bigger single page is
+        impossible upstream — page with `offset` against `total` to walk
+        every match.
       schema:
         type: integer
         default: 20
         minimum: 1
-        maximum: 100
+        maximum: 1000
     SearchOffset:
       name: offset
       in: query
@@ -3120,7 +3125,7 @@ components:
       properties:
         limit:
           type: integer
-          description: Page size actually applied (the request's limit clamped to 1..100).
+          description: Page size actually applied (the request's limit, 1..1000).
         offset:
           type: integer
           description: Pagination offset echoed from the request.

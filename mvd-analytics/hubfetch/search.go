@@ -15,9 +15,17 @@ import (
 // web's SEARCH_SELECT and the fields the MCP searchGames tool documents.
 const SearchSelect = "id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname"
 
+// MaxSearchLimit is the largest page a single search may request. It equals
+// the hub's own PostgREST page ceiling (Supabase db-max-rows, measured
+// 2026-08: limit above 1000 silently returns 1000 rows), so asking for more
+// per page is impossible upstream — consumers wanting every match page with
+// limit/offset against the reported total. mvd-api's search handler enforces
+// the same bound at the API boundary (reject-loudly, not clamp).
+const MaxSearchLimit = 1000
+
 // SearchParams are the filters for a hub game search. All fields are
 // optional; an empty SearchParams returns the most recent matches. The
-// zero value of Limit resolves to 20 (capped at 100).
+// zero value of Limit resolves to 20 (capped at MaxSearchLimit).
 type SearchParams struct {
 	Players  []string // FTS on players_fts, AND'd across multiple
 	Teams    []string // team names that must appear in team_names (contains)
@@ -26,7 +34,7 @@ type SearchParams struct {
 	Matchtag string   // tournament/event tag, case-insensitive substring
 	From     string   // ISO date lower bound, inclusive (YYYY-MM-DD)
 	To       string   // ISO date upper bound, inclusive (YYYY-MM-DD)
-	Limit    int      // max rows (default 20, capped at 100)
+	Limit    int      // max rows (default 20, capped at MaxSearchLimit)
 	Offset   int      // pagination offset
 	Roster   bool     // true = verbatim hub rows; false = compact {name,team,frags}
 }
@@ -49,10 +57,12 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 		limit = 20
 	}
 	// Server-side belt: mvd-api's search handler already 400s a limit above
-	// 100, so this clamp only fires for a direct hubfetch caller (e.g. a test
-	// or CLI) that bypasses the API boundary.
-	if limit > 100 {
-		limit = 100
+	// MaxSearchLimit, so this clamp only fires for a direct hubfetch caller
+	// (e.g. a test or CLI) that bypasses the API boundary. Above this the hub
+	// truncates to 1000 rows anyway, so the clamp keeps the echoed `limit`
+	// honest about what a page can actually hold.
+	if limit > MaxSearchLimit {
+		limit = MaxSearchLimit
 	}
 	parts = append(parts, "limit="+strconv.Itoa(limit))
 	if params.Offset > 0 {
