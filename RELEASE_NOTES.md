@@ -5,6 +5,75 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (better-ffa-support) — schema v75: the match boundary becomes a Layer-1 event; matchless FFA demos become analyzable
+
+**KTX servers running `k_matchless 1` (continuous FFA / CTF play) never
+broadcast "The match has begun!"** — `ktx/src/match.c:1294-1297` gates that
+line on `!k_matchLess`. The whole pipeline keyed on that one line, so those
+demos detected no match start at all: no `streams`, and therefore no
+buckets / damage / `playerStats` / `locGraph` / aim, plus zero deaths on a
+demo full of frags (the parser's obituary corroborator is gated on the same
+verdict). They came out marked `noMatch.reason = matchStartUnannounced`.
+
+**The match start is now a Layer-1 event** — `MatchStartEvent`, emitted once
+per demo by `mvd-reader/parser/matchstart.go`, at the FIRST of four wire
+signals to arrive:
+
+| Source | Wire form | ktx |
+|---|---|---|
+| `matchdate` | broadcast print, line-initial `matchdate: …` | `match.c:1291` |
+| `print` | a broadcast matching `MatchStartPatterns` ("The match has begun!", kmod/qwe's "The duel has begun!") | `match.c:1296` |
+| `ktx-matchstart` | `//ktx matchstart` stuffcmd (STUFFCMD_DEMOONLY, no cvar gate at all) | `match.c:1372` |
+| `status` | a serverinfo `status` update moving to a running clock from a value that was not one | `match.c:1337` |
+
+`StartMatch()` emits the first three in the same server frame on modern
+KTX, so the match-start TIME is unchanged on every demo that already had
+one — the golden corpus and a 1 500-demo healthy archive control both come
+out with the match start at the same millisecond. What changed is which
+demos have one at all.
+
+- **ADDED on `streams.global`: `matchStartSignal`** (`ktx-matchstart` |
+  `print` | `matchdate` | `status`) — which signal declared the start.
+  Republished on `/overview` as `timing.matchStartSignal`. It is NOT
+  `matchStartSource`, which names where the wall-clock VALUE came from; the
+  two vocabularies share the token `matchdate` and answer different
+  questions.
+- **`noMatch.reason = matchStartUnannounced` is now essentially unreachable.**
+  Re-running the 138 demos that carried it in the 50 951-demo sweep, all 138
+  now detect a start and produce a full result: 104 on `matchdate`, 34 on
+  the `status` transition alone (including every one of the 24 `fortress`
+  and 8 `ctf` demos, whose mods write their own running clock into the key).
+  The reason keeps its name and now means "the server moved `status` to a
+  running clock and still no analyzable match came out". This is
+  `plan-archive-features.md` lead 8 stage (b) for the KTX half.
+- **Layer 2 stopped re-scanning prints for the start.**
+  `MatchTimingDetector` gains `OnMatchStart` and its `OnPrint` is now the
+  match-END half only; the ten analyzers that embed it feed the new event.
+  The parser's own `matchStarted` gate and the analyzers' verdict are now
+  the same latch by construction — that duplication is how the two layers
+  came to disagree on matchless demos in the first place.
+  `statusNamesRunningGame` moved to Layer 1 as
+  `events.StatusNamesRunningGame` for the same reason.
+- **Fixed, exposed by the new corpus: a post-match disconnect no longer
+  fabricates a frag event.** `TimelineAnalyzer.handleFragUpdate` gated on
+  "match started" but not on "match ended", so `SV_DropClient` zeroing a
+  leaving slot's scoreboard (`mvdsv/src/sv_main.c:419-428`) landed in
+  `timelineAnalysis.fragEvents` with a negative delta dated past `matchEnd`
+  — the `Vacated` handler that drops that phantom is itself inside the match
+  window. It needs a recording that keeps running after the match ends,
+  which is normal on a matchless server (`ffa_matchless_nova_260704`: nexus
+  drops 3.7 s past the match-over print). The gate is now the same
+  `Started && !Ended` every other recording path uses; the 14 existing
+  goldens do not move.
+- **Golden corpus** gains four local-only FFA entries: three matchless
+  (`nova` full 6 min / 2 players, `dm2` 8 players with a mid-match leaver
+  and a slot-reuse reconnect, `dm6` a 3.2 s map-voted-off match with zero
+  kills) and one countdown-style FFA control that must not change.
+
+FFA still has no mode semantics — team tags are decoration in FFA, and
+`match.teams`, teamkill attribution and the aim enemy set still read them.
+That is `plan-ffa-support.md` PR B.
+
 ## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
 
 No schema change. Two operational fixes:

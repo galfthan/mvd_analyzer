@@ -188,6 +188,8 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		a.handleDeath(e)
 	case *events.SpawnEvent:
 		a.handleSpawn(e)
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
@@ -390,7 +392,17 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 
 func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	if !a.timing.Started {
+	// Match window only, the same gate every other recording path here uses
+	// (positions, occupancy). The !Ended half is what keeps the post-match
+	// scoreboard out of the frag timeline: SV_DropClient zeroes a leaving
+	// slot's score and broadcasts it (mvdsv/src/sv_main.c:419-428), and the
+	// Vacated handler that drops that phantom event is itself inside the
+	// match window — so a player who quits after intermission used to
+	// contribute a negative frag event dated past matchEnd. Reachable on a
+	// KTX matchless server, where the recording keeps running after the match
+	// ends: `ffa_matchless_nova_260704`, nexus drops at demo t=364.3 s,
+	// 3.7 s past the match-over print.
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 

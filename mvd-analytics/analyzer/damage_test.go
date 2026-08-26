@@ -141,7 +141,7 @@ func TestDamageAnalyzer_OutOfMatchDroppedEverywhere(t *testing.T) {
 
 	// Pre-match (warmup) hit — dropped from BOTH the aggregates AND the log.
 	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtSGTest, TimeMs: 1000})
-	a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	// In-match hit — counts and appears in the log.
 	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtSGTest, TimeMs: 6000})
 	// Post-match hit — also dropped everywhere.

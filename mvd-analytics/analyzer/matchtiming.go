@@ -10,8 +10,20 @@ import (
 // for analyzers that need to know whether the match is currently
 // running. Every analyzer that previously maintained its own
 // matchStarted / matchEnded flags + per-file keyword list now embeds
-// one of these so the keyword sets cannot drift apart.
+// one of these so the boundaries cannot drift apart.
 //
+// The START half is Layer 1's verdict: the parser emits exactly one
+// events.MatchStartEvent per stream, at the first of the four wire
+// signals it recognises (a match-start print, KTX's `matchdate:` stamp,
+// the `//ktx matchstart` stuffcmd, or a serverinfo `status` transition
+// into a running clock — see mvd-reader/parser/matchstart.go). This
+// detector just latches it. Scanning prints here as well was how the
+// two layers came to disagree on matchless FFA demos, where the parser's
+// own gate and the analyzers both waited for a "The match has begun!"
+// line KTX never prints.
+//
+// The END half is still analytics-only: the end phrases below gate no
+// parser behaviour, and svc_intermission is read straight off the wire.
 // Pattern coverage is the union of the lists previously hard-coded
 // across match.go, timeline.go, backpacks.go, items.go, weapon_pickups.go,
 // and metadata.go. Matches are case-insensitive — the previous match.go
@@ -25,15 +37,14 @@ import (
 type MatchTimingDetector struct {
 	Started   bool
 	Ended     bool
-	StartTime int32 // demo-clock ms of the match-start print
-	EndTime   int32 // demo-clock ms of the match-end print / intermission (0 if unseen)
+	StartTime int32 // demo-clock ms of the match-start signal
+	// StartSource names which Layer-1 signal raised the start —
+	// "ktx-matchstart" | "print" | "matchdate" | "status". Published on
+	// the result as streams.global.matchStartSignal. Empty when no start
+	// was detected.
+	StartSource string
+	EndTime     int32 // demo-clock ms of the match-end print / intermission (0 if unseen)
 }
-
-// matchStartPatterns is the canonical Layer 1 table (events.MatchStartPatterns),
-// re-exported from mvd-reader so the parser's obituary-death gate and this
-// detector share one definition. Match-END phrases gate no parser behaviour,
-// so they stay analytics-only below.
-var matchStartPatterns = events.MatchStartPatterns
 
 var matchEndPatterns = []string{
 	"match is over",
@@ -44,32 +55,35 @@ var matchEndPatterns = []string{
 	"fraglimit hit",
 }
 
-// OnPrint feeds a print event into the detector. Idempotent: a second
-// matching start (or end) print is ignored.
+// OnMatchStart latches Layer 1's match-start verdict. Idempotent: the
+// parser emits the event once per stream, but a detector fed from a
+// replayed or concatenated event stream must not move its origin.
+func (d *MatchTimingDetector) OnMatchStart(e *events.MatchStartEvent) {
+	if d.Started {
+		return
+	}
+	d.Started = true
+	d.StartTime = e.TimeMs
+	d.StartSource = e.Source
+}
+
+// OnPrint feeds a print event into the detector's END half. Idempotent: a
+// second matching end print is ignored, and end phrases before a start are
+// ignored too.
 func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
-	// Only broadcast prints (bprint) start or end a match. KTX emits every
+	// Only broadcast prints (bprint) end a match. KTX emits every
 	// match-boundary line at PRINT_MEDIUM/PRINT_HIGH (level <= 2); PRINT_CHAT
-	// (level 3) is player say/say_team, which must never flip Started/Ended
-	// — otherwise a pre-match "go go go!" or a mid-match "gg game over" chat
-	// line would start recording warmup or freeze every stream for the rest
-	// of the demo. (ktx/include/g_consts.h: PRINT_MEDIUM=1 death, PRINT_CHAT=3.)
+	// (level 3) is player say/say_team, which must never flip Ended —
+	// otherwise a mid-match "gg game over" chat line would freeze every
+	// stream for the rest of the demo. (ktx/include/g_consts.h:
+	// PRINT_MEDIUM=1 death, PRINT_CHAT=3.)
 	if e.Level == events.PrintChat {
 		return
 	}
+	if !d.Started || d.Ended {
+		return
+	}
 	msg := strings.ToLower(e.Message)
-	if !d.Started {
-		for _, p := range matchStartPatterns {
-			if strings.Contains(msg, p) {
-				d.Started = true
-				d.StartTime = e.TimeMs
-				return
-			}
-		}
-		return
-	}
-	if d.Ended {
-		return
-	}
 	for _, p := range matchEndPatterns {
 		if strings.Contains(msg, p) {
 			d.Ended = true

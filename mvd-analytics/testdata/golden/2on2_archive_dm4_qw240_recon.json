@@ -45340,7 +45340,7 @@
       }
     ]
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -80605,6 +80605,7 @@
       "matchStartAccuracyMs": 50400000,
       "matchStartConfidence": "unverified",
       "matchStartNote": "tz-unknown: the marker named no timezone, UTC assumed",
+      "matchStartSignal": "print",
       "matchStartSource": "matchkey",
       "matchStartUnixMs": 1028461495000
     },

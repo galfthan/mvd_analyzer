@@ -264,6 +264,8 @@ func (a *ItemAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.co = co }
 
 func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:

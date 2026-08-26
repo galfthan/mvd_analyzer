@@ -95,6 +95,8 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	a.durationMs = event.EventTimeMs()
 
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.PlayerDepartureEvent:

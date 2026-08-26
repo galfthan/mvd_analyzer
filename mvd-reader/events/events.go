@@ -98,6 +98,7 @@ type (
 	BackpackExpireHintEvent = parser.BackpackExpireHintEvent
 	DemoMarkEvent           = parser.DemoMarkEvent
 	FinalScoresEvent        = parser.FinalScoresEvent
+	MatchStartEvent         = parser.MatchStartEvent
 	ItemPickupPrintEvent    = parser.ItemPickupPrintEvent
 	PlayerDepartureEvent    = parser.PlayerDepartureEvent
 	PlayerRejoinEvent       = parser.PlayerRejoinEvent
@@ -150,6 +151,24 @@ const (
 // single definition without importing the parser package directly. It is
 // read-only; do not mutate the returned slice.
 var MatchStartPatterns = parser.MatchStartPatterns
+
+// MatchStartEvent.Source vocabulary, re-exported from Layer 1. The parser
+// emits the event once per stream at the first of the four signals that
+// reaches the wire; consumers that publish the source (result
+// `streams.global.matchStartSignal`) read these names.
+const (
+	MatchStartSourceKtxDirective = parser.MatchStartSourceKtxDirective
+	MatchStartSourcePrint        = parser.MatchStartSourcePrint
+	MatchStartSourceMatchDate    = parser.MatchStartSourceMatchDate
+	MatchStartSourceStatus       = parser.MatchStartSourceStatus
+)
+
+// StatusNamesRunningGame re-exports the Layer 1 reading of the serverinfo
+// `status` key: does this value say a game is under way? Shared by the
+// parser's match-start detector and the analytics no-match marker, for the
+// same reason MatchStartPatterns is — one definition, and the dependency
+// arrow points only one way.
+var StatusNamesRunningGame = parser.StatusNamesRunningGame
 
 // Stat indices for StatUpdateEvent.StatIndex — KTX/QW stat slot IDs.
 const (

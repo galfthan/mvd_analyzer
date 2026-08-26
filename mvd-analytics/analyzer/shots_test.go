@@ -618,7 +618,7 @@ func TestShots_WarmupGating(t *testing.T) {
 	a.timing.Started = false // start in warmup
 
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 100)) // warmup rl
-	_ = a.OnEvent(&events.PrintEvent{Message: "fight!", TimeMs: 200})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 200})
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 300)) // match rl
 
 	r := &Result{}

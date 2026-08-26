@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "74"
+  version: "75"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -3430,6 +3430,25 @@ components:
             matchStartNote:
               description: "Names the checks behind a non-`exact` matchStartConfidence. Schema v72."
               type: string
+            matchStartSignal:
+              description: >-
+                Which WIRE SIGNAL the match start was detected from:
+                `ktx-matchstart` (KTX's `//ktx matchstart` stuffcmd),
+                `print` (a match-start broadcast such as "The match has
+                begun!"), `matchdate` (the `matchdate:` stamp) or `status`
+                (a serverinfo `status` transition into a running clock).
+                The reader raises the start on the FIRST of the four to
+                reach the wire; on a modern KTX demo three of them land in
+                the same server frame, so this names which byte arrived
+                first, not a different instant. NOT the same field as
+                `matchStartSource`, which names where the wall-clock VALUE
+                came from. Schema v75.
+              enum:
+                - ktx-matchstart
+                - print
+                - matchdate
+                - status
+              type: string
             matchStartSource:
               description: >-
                 Which marker matchStartUnixMs was derived from: `mvdhidden`,
@@ -3499,9 +3518,12 @@ components:
             Why there is no match. `midMatchRecording`: the serverinfo
             `status` key already named a running game at demo open, so the
             match started before the first frame. `matchStartUnannounced`:
-            `status` became a running game DURING the recording but no
-            match-start broadcast was recognised — the server ran a match and
-            announced it in a form (or on a mod) outside the known set.
+            `status` became a running game DURING the recording and none of
+            the four match-start signals the reader knows produced an
+            analyzable match. Schema v75 emptied this bucket: all 138 demos
+            that carried it in the archive sweep now detect a start (104 from
+            the `matchdate:` stamp, 34 from the `status` transition alone) and
+            return a full result, so treat it as rare.
             `noMatchDeclared`: no match declaration this pipeline can see —
             `status` never named a running game — yet the frag log parsed
             kills. Usually unmanaged play (TeamFortress, CTF, custom

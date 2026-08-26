@@ -159,6 +159,8 @@ func (a *WeaponPickupsAnalyzer) Init(ctx *Context) error {
 
 func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:

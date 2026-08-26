@@ -1442,7 +1442,7 @@ const NO_MATCH_TITLES = {
 const NO_MATCH_ACTIONS = {
     demoUnreadable: 'The file may be truncated, or not an MVD at all — try downloading it again.',
     midMatchRecording: 'Nothing is wrong with the file; it simply began after the match did. Per-match stats need a recording that covers the match start.',
-    matchStartUnannounced: 'The match was played, but its start was announced in a form this tool does not read — usually a server mod other than KTX.',
+    matchStartUnannounced: 'The match was played, but none of the start signals this tool reads reached it — usually a server mod other than KTX.',
     noMatchDeclared: 'People were playing, but no managed match was declared — there is no start, no end and no scoreboard to measure between.',
     noPlayRecorded: 'There is nothing to measure here: no match declared and no kills in the frag log. Usually an idle server or an aborted recording.',
 };

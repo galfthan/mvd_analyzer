@@ -97,6 +97,8 @@ func (a *ClockAnalyzer) Init(ctx *Context) error { return nil }
 
 func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 		// The date markers ride level-2 BROADCAST prints, the same level the

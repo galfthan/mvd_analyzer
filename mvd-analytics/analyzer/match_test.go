@@ -19,7 +19,7 @@ func TestMatchAnalyzer_PostMatchFragResetIgnored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 34, TimeMs: 1197000})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 1210000})
 	// Post-match reconnect: the server re-inits the slot's scoreboard.
@@ -50,7 +50,7 @@ func TestMatchAnalyzer_InMatchFragUpdatesApply(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, TimeMs: 571000})
 	// Mid-match reconnect: re-init to 0, then the server restores.
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, TimeMs: 613000})
@@ -112,7 +112,7 @@ func TestMatchAnalyzer_DepartureFragsFromBroadcast(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 20000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 20000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 20100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 20, TimeMs: 1000000})
 	// Timeout: broadcast, then the slot is cleared, then the empty userinfo.
@@ -157,7 +157,7 @@ func TestMatchAnalyzer_DepartureBroadcastDoesNotBleedToAnotherOccupancy(t *testi
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "bob", "aaa", 0))
 	_ = a.OnEvent(matchUserInfo(2, 12, "bob", "bbb", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 2, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 3, TimeMs: 60000})
@@ -205,7 +205,7 @@ func TestMatchAnalyzer_OverlappingOccupanciesAreNotOneIdentity(t *testing.T) {
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "player", "aaa", 0))
 	_ = a.OnEvent(matchUserInfo(2, 12, "player!", "bbb", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 2, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 3, TimeMs: 60000})
@@ -258,7 +258,7 @@ func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
 			a.UseCoreOutputs(&CoreOutputs{Sessions: sessions})
 
 			_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 0))
-			_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 16, TimeMs: 60000})
 			// The ghost lands while slot 7's occupancy is still open.
@@ -298,7 +298,7 @@ func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing
 		7: {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
 	}})
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	// The ghost first, on the lower slot, carrying a copy of the frags.
 	_ = a.OnEvent(matchUserInfo(3, 0, "# rusti", "jah", 2000))
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 16, TimeMs: 2000})
@@ -328,7 +328,7 @@ func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "rusti", "jah", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 16, TimeMs: 60000})
 	_ = a.OnEvent(departure("rusti", 16, 70000))
@@ -362,7 +362,7 @@ func TestMatchAnalyzer_PostMatchDepartureBroadcastIgnored(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(4, 35, "dilbert", "pys", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 0})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 21, TimeMs: 586894})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 600009})
@@ -394,7 +394,7 @@ func TestMatchAnalyzer_AnonymousRecordAfterVacateIsNotTheDepartedPlayer(t *testi
 	}})
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 26, TimeMs: 900000})
 	_ = a.OnEvent(departure("shiva", 26, 1000000))
@@ -423,7 +423,7 @@ func TestMatchAnalyzer_SpectatorFragSentinelIgnored(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(2, 77, "cam", "oc", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 2, Frags: -999, TimeMs: 60000})
 
 	var res Result
@@ -448,7 +448,7 @@ func TestMatchAnalyzer_SpectatorFragSentinelIgnoredInDepartureBroadcast(t *testi
 	}
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 26, TimeMs: 60000})
 	_ = a.OnEvent(departure("shiva", -999, 90000))
@@ -476,7 +476,7 @@ func TestMatchAnalyzer_DepartureResetRolledBack(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(1, 5, "test", "sdf", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 5, TimeMs: 50000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 4, TimeMs: 60000}) // suicide
@@ -504,7 +504,7 @@ func TestMatchAnalyzer_PostMatchSpectatorKeepsRow(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(4, 35, "wd.dilbert", "pys", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 0})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 21, TimeMs: 586894})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 600009})
@@ -535,7 +535,7 @@ func TestMatchAnalyzer_FFAEmptyTeamIsNotSpectator(t *testing.T) {
 	obs := matchUserInfo(6, 12, "adm<ego", "", 0)
 	obs.Player.Spectator = true
 	_ = a.OnEvent(obs)
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 8, TimeMs: 60000})
 	// A spectator that some mods publish with a large negative sentinel.
@@ -565,7 +565,7 @@ func TestMatchAnalyzer_ConnectionWithoutPlayIsNotAPlayer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(matchUserInfo(13, 1315, "jOn", "oc", 702432))
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 13, Frags: 0, TimeMs: 702432})
 

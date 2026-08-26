@@ -894,6 +894,20 @@ salvage pass on them can be validated against an authoritative
 scoreboard. A salvaged result would then also unlock the graded wall
 clock above.
 
+**The `matchStartUnannounced` half of stage (b) is DONE** (schema v75,
+`plan-ffa-support.md` PR A). The salvage did not need a demo-clock
+fallback: both signals named above are now Layer-1 match-START signals,
+so those demos get a real match origin and an ordinary match-relative
+result. `MatchStartEvent` fires on the `matchdate:` print, KTX's
+`//ktx matchstart` stuffcmd, or the `status` transition, whichever
+reaches the wire first (`mvd-reader/parser/matchstart.go`). Measured over
+the 138 demos: all 138 gained streams — 104 on `matchdate`, 34 on the
+`status` transition alone (which includes every one of the 24 `fortress`
+and 8 `ctf` demos). What remains of stage (b) is the 68
+`midMatchRecording` demos, where the match started before the first frame
+and there is no origin on the wire to rebase onto — that half still needs
+the demo-clock fallback described above.
+
 **Contract moves stage (b) must make, decided now.** `noMatch` is
 present exactly when `streams` is absent, so salvage does not "add data
 beside the marker" — it removes the marker. Four consequences, settled

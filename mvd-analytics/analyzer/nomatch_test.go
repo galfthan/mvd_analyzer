@@ -7,62 +7,6 @@ import (
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
-// TestStatusNamesRunningGame pins the two remaining-time spellings the
-// archive carries against every idle / pre-match value beside them. The
-// distinction is load-bearing twice over: it is what separates
-// midMatchRecording from the rest, and it is what separates
-// matchStartUnannounced from noMatchDeclared.
-//
-// "20 min left" is the regression case: the digit sits at the FRONT of the
-// reading, not against the " left" suffix, so a test that looks at the
-// character before the suffix reads KTX's own format as idle.
-//
-// The idle list carries the whole non-reading vocabulary the census found
-// (see statusNamesRunningGame for the counts) plus the near-misses a looser
-// "ends in ` left`" test would accept: mods DO write their own words into
-// this key ("Round 1/15", "Game Ended"), so a value that merely ends in
-// " left" is not evidence of a clock.
-func TestStatusNamesRunningGame(t *testing.T) {
-	running := []string{
-		"20 min left",  // ktx/src/match.c:596,723,1330 — the common case
-		"1 min left",   //
-		"0 min left",   // the last tick before the match ends
-		"19:35 left",   // the CTF mod's mm:ss reading
-		"00:01 left",   // its zero-padded low end
-		"14:59 left",   //
-		"120 min left", // no upper bound on the reading
-	}
-	idle := []string{
-		"",              // no status key at all (pre-KTX servers, foreign mods)
-		"Standby",       // ktx/src/world.c:543
-		"Countdown",     // ktx/src/match.c:2475 — about to start is not started
-		"Forcestart",    // ktx/src/admin.c:693
-		"Normal",        // observed on gamedir fortress
-		"Game Ended",    // the CTF mod's terminal status
-		"Round 1/15",    // gamedir arena, a round counter — not a clock
-		"Round 11/15",   //
-		"left",          // suffix with nothing in front of it
-		" left",         //
-		"min left",      // a reading with no number is not a reading
-		"2 rounds left", // a countable that is not a remaining time
-		"3 players left",
-		"2 cool 4 u left", // free text that happens to end in the suffix
-		"20 min",          // a reading with no suffix
-		"19:5 left",       // seconds are always two digits
-		"1:02:30 left",    // no h:mm:ss spelling occurs
-	}
-	for _, v := range running {
-		if !statusNamesRunningGame(v) {
-			t.Errorf("statusNamesRunningGame(%q) = false, want true", v)
-		}
-	}
-	for _, v := range idle {
-		if statusNamesRunningGame(v) {
-			t.Errorf("statusNamesRunningGame(%q) = true, want false", v)
-		}
-	}
-}
-
 // TestNoMatchVerdict walks the reason precedence with one case per branch,
 // including the two orderings that matter: a truncated read outranks every
 // positive signal (the evidence past the truncation is unknown), and a

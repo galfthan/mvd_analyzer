@@ -55,7 +55,7 @@ func TestFragDeaths_GatedToMatchTime(t *testing.T) {
 	// Warmup death (before any start print): ignored.
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, TimeMs: 1_000})
 	// Match starts.
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	// In-match death: counted.
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 3, TimeMs: 6_000})
 	// Match ends (intermission), then a post-match death: ignored.

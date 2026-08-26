@@ -484,6 +484,20 @@ type GlobalStream struct {
 	// normal match-relative result. We cannot invent a time origin —
 	// flagging honestly beats coercing (schema v52).
 	TimeBase string `json:"timeBase,omitempty"`
+	// MatchStartSignal names the WIRE SIGNAL the match start was detected
+	// from (schema v75): "ktx-matchstart" (KTX's `//ktx matchstart`
+	// stuffcmd, ktx/src/match.c:1372), "print" (a match-start broadcast such
+	// as "The match has begun!", match.c:1296), "matchdate" (the
+	// `matchdate:` stamp, match.c:1291) or "status" (a serverinfo `status`
+	// transition into a running clock, match.c:1337). The parser raises the
+	// event at the FIRST of the four to reach the wire, so on a modern KTX
+	// demo — where three of them land in the same server frame — this names
+	// which byte arrived first, not a different instant.
+	//
+	// Distinct from MatchStartSource below, which names where the WALL-CLOCK
+	// value MatchStartUnixMs was read from. The two vocabularies overlap on
+	// "matchdate" and mean different things.
+	MatchStartSignal string `json:"matchStartSignal,omitempty"`
 	// DemoOffset is ms from demo open (demo t=0, ≈ countdown start) to match
 	// start; it bridges match-relative time and demo time.
 	DemoOffset int32 `json:"demoOffset,omitempty"`

@@ -1261,8 +1261,36 @@ package result
 //     already use ("X squishes Y", "X was squished"), so a consumer
 //     filtering `squish` now gets all three forms.
 //
+// v75 — the match boundary becomes a Layer-1 event, and KTX matchless
+// servers (FFA / CTF with `k_matchless 1`) get an analyzable result at all.
+//   - ADDED on `streams.global`: `matchStartSignal` — which wire signal the
+//     match start was detected from: `ktx-matchstart` | `print` |
+//     `matchdate` | `status`. The parser now raises the start on any of the
+//     four (mvd-reader/parser/matchstart.go) instead of on a match-start
+//     print alone, because a matchless KTX server never prints one
+//     (ktx/src/match.c:1294-1297 gates "The match has begun!" on
+//     `!k_matchLess`) while still printing `matchdate:` (:1291), stuffing
+//     `//ktx matchstart` (:1372) and moving `status` to a running clock
+//     (:1337).
+//   - CHANGED: demos that previously came out with `noMatch.reason =
+//     matchStartUnannounced` and no `streams` now carry a full result.
+//     Measured over the 138 such demos in the 50 951-demo archive sweep,
+//     all 138 gained streams (104 on `matchdate`, 34 on `status`). The
+//     reason keeps its name and now means "the server moved `status` to a
+//     running clock and none of the four signals produced an analyzable
+//     match".
+//   - FIXED: `timelineAnalysis.fragEvents` no longer carries the scoreboard
+//     zeroing that `SV_DropClient` broadcasts when a player quits AFTER the
+//     match ended (the timeline recorded frag updates on "started" alone,
+//     never on "not ended"). Needs a recording that runs past match end,
+//     which is normal on a matchless server; no existing golden moves.
+//   - UNCHANGED: match-relative timestamps on every existing demo. All four
+//     signals land in the same server frame on modern KTX; measured across
+//     the golden corpus and the 1 500-demo healthy archive control, no
+//     demo's match start moved.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 74
+const CurrentSchemaVersion = 75
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -1319,10 +1347,24 @@ const (
 	// table in RESULT_SCHEMA.md.
 	NoMatchMidMatchRecording = "midMatchRecording"
 	// NoMatchStartUnannounced: `status` was not running at demo open but
-	// became running during the recording, and no match-start broadcast
-	// this pipeline recognises was ever seen. The server started a match
-	// under our watch and announced it in a form (or on a mod) outside
-	// events.MatchStartPatterns.
+	// became running during the recording, and NONE of the four Layer-1
+	// match-start signals fired — no match-start print
+	// (events.MatchStartPatterns), no `matchdate:` stamp, no
+	// `//ktx matchstart` stuffcmd, and no `status` transition the parser
+	// could read as one (see mvd-reader/parser/matchstart.go). The server
+	// started a match under our watch and declared it in a form this
+	// pipeline does not read — in practice a foreign mod.
+	//
+	// Schema v75 narrowed this reason to near-nothing. Re-running the
+	// 138 demos that carried it in the 50 951-demo archive sweep, ALL 138
+	// now detect a match start and produce a full result: 104 from the
+	// `matchdate:` stamp (the KTX matchless FFA servers, which skip the
+	// "The match has begun!" broadcast — ktx/src/match.c:1294-1297 gates
+	// it on `!k_matchLess`) and 34 from the `status` transition alone
+	// (the ktx 1.38 / 1.40-beta demos, and every one of the 24 `fortress`
+	// + 8 `ctf` demos, whose mods write their own running clock into the
+	// key). What is left for this reason is a server that moves `status`
+	// to a running clock and yet yields no player stream at all.
 	NoMatchStartUnannounced = "matchStartUnannounced"
 	// NoMatchNoMatchDeclared: no match declaration this pipeline can see —
 	// the `status` key never named a running game — yet the frag log

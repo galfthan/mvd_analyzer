@@ -217,7 +217,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 
 	// Match-start phrase flips the gate.
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match has begun!\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match has begun!\n")
 	if !p.matchStarted {
 		t.Fatalf("matchStarted gate did not flip on start phrase")
 	}
@@ -245,7 +245,7 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 		"Fight!\n",
 	} {
 		p := NewParser(nil)
-		p.updateMatchStartedFromPrint(mvd.PrintHigh, msg)
+		mustMatchStartFromPrint(t, p, mvd.PrintHigh, msg)
 		if !p.matchStarted {
 			t.Errorf("matchStarted did not flip on %q", msg)
 		}
@@ -253,7 +253,7 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 
 	// A line that merely mentions the match must not open the gate.
 	p := NewParser(nil)
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match will begin when both players are ready\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match will begin when both players are ready\n")
 	if p.matchStarted {
 		t.Errorf("matchStarted flipped on a non-start line")
 	}
@@ -262,7 +262,7 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 	// "go go go!" would otherwise arm the obituary-death path for the
 	// whole demo.
 	chat := NewParser(nil)
-	chat.updateMatchStartedFromPrint(mvd.PrintChat, "lets go! the duel has begun i guess\n")
+	mustMatchStartFromPrint(t, chat, mvd.PrintChat, "lets go! the duel has begun i guess\n")
 	if chat.matchStarted {
 		t.Errorf("matchStarted flipped on a PRINT_CHAT line")
 	}

@@ -116,10 +116,14 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 			Team2:  e.Team2,
 			Score2: e.Score2,
 		}
-	case *events.PrintEvent:
+	case *events.MatchStartEvent:
 		// Latch the match start so we stop overwriting countdownRaw with
-		// any post-match centerprint that happens to mention "Countdown".
-		a.timing.OnPrint(e)
+		// any post-match centerprint that happens to mention "Countdown",
+		// and so the Fairpacks broadcast is only read pre-match. This
+		// analyzer reads no match END, so it feeds the detector nothing
+		// else.
+		a.timing.OnMatchStart(e)
+	case *events.PrintEvent:
 		a.captureBroadcastSetting(e)
 	}
 	return nil
@@ -200,56 +204,9 @@ func (a *MetadataAnalyzer) parseFullserverinfo(cmd string) {
 // marker's running flag — at demo open or in a later update. The value at
 // open is captured in parseFullserverinfo, from the opening dump alone.
 func (a *MetadataAnalyzer) observeStatus(v string) {
-	if statusNamesRunningGame(v) {
+	if events.StatusNamesRunningGame(v) {
 		a.statusRunng = true
 	}
-}
-
-// statusNamesRunningGame reports whether a serverinfo `status` value says a
-// game is under way. Two spellings, and only two, are a running reading:
-// KTX's `"%d min left"` (ktx/src/match.c:596, :723, :1330, :1337) and a
-// CTF mod's `"%d:%02d left"`.
-//
-// The test is deliberately the exact pair of clock formats rather than
-// something looser like "ends in ` left`", and that is a decision from the
-// census, not from taste. Across the 1 032 stream-less demos of the
-// 50 951-demo archive sweep the `status` key takes 1 198 distinct values:
-// 1 183 remaining-time readings, EVERY one of which matches one of these
-// two forms, and 15 that are not readings at all — "Standby"
-// (ktx/src/world.c:543), "Countdown" (match.c:2475), "Forcestart"
-// (admin.c:693) and the foreign-mod "Normal", "Game Ended" (the CTF mod's
-// terminal status) and "Round 1/15"…"Round 11/15" (gamedir `arena`). Those
-// last three prove mods write their own vocabulary into this key, which is
-// exactly why a looser test is the riskier one: "2 rounds left" from some
-// mod would read as a running clock and move a demo to
-// midMatchRecording/matchStartUnannounced on no evidence. A mod that spells
-// its clock in a THIRD way is read as idle instead — the failure this
-// direction is a demo landing in noMatchDeclared / noPlayRecorded with its
-// verbatim `status` published as evidence, which a reader can see, rather
-// than a fabricated match verdict, which they cannot.
-func statusNamesRunningGame(v string) bool {
-	rest, ok := strings.CutSuffix(v, " left")
-	if !ok {
-		return false
-	}
-	if mins, ok := strings.CutSuffix(rest, " min"); ok {
-		return allDigits(mins)
-	}
-	mins, secs, ok := strings.Cut(rest, ":")
-	return ok && allDigits(mins) && len(secs) == 2 && allDigits(secs)
-}
-
-// allDigits reports whether s is a non-empty run of ASCII digits.
-func allDigits(s string) bool {
-	if s == "" {
-		return false
-	}
-	for i := 0; i < len(s); i++ {
-		if s[i] < '0' || s[i] > '9' {
-			return false
-		}
-	}
-	return true
 }
 
 // parseInfoString parses a `fullserverinfo "\key\value\..."` stufftext into

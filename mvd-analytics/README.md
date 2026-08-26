@@ -459,10 +459,13 @@ predicate — `buildStreamsResult` returns nil rather than an empty block, so
 "no `streams`" and "no player streams" are one state and a result cannot
 carry both `streams` and `noMatch`. Streams are built
 only inside the detected match window — every recording path in the
-timeline analyzer is gated on a match-start broadcast having been seen —
-so a demo whose start was never announced produces nothing at all, and
+timeline analyzer is gated on Layer 1 having raised `MatchStartEvent` —
+so a demo whose start was never declared produces nothing at all, and
 before v74 it produced it silently: 2.03% of the archive with empty
-sections and an empty `errors[]`. The reason comes off the serverinfo
+sections and an empty `errors[]`. Schema v75 shrank the
+`matchStartUnannounced` slice of that to nothing measurable by giving the
+parser three more start signals besides the broadcast line (see
+[MVD_FORMAT.md](../mvd-reader/MVD_FORMAT.md#match-start-detection)). The reason comes off the serverinfo
 `status` key tracked over time (published on `CoreOutputs.ServerStatus`,
 since `metadata.serverInfo` is last-write-wins and names the state at demo
 END), the frag log and the stream-abort entry in `errors[]`; `*gamedir`

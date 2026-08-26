@@ -65,6 +65,7 @@ const (
 	EventPlayerRejoin
 	EventPointEffect
 	EventFinalScores
+	EventMatchStart
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -150,8 +151,14 @@ type Parser struct {
 	playerDead      [mvd.MaxClients]bool
 	playerDeadKnown [mvd.MaxClients]bool
 	playerSeenInfo  [mvd.MaxClients]bool
-	// matchStarted flips on the first svc_print whose text matches one
-	// of the canonical match-start phrases (see matchStartedFromPrint).
+	// matchStarted flips on the first match-start signal the wire
+	// carried — a match-start print, the `matchdate:` stamp, KTX's
+	// `//ktx matchstart` stuffcmd, or a serverinfo `status` transition
+	// to a running clock (see matchstart.go). It is also the
+	// once-per-stream latch for MatchStartEvent: the flag flips and the
+	// event is emitted in the same step, so Layer 2's verdict and this
+	// gate cannot disagree.
+	//
 	// It gates the obituary-derived DeathEvent path in
 	// tryEmitObituaryDeath: telefrag obits that fire at the *exact*
 	// wire time of the start print arrive in the event stream before
@@ -161,6 +168,12 @@ type Parser struct {
 	// on this flag keeps warmup obits silent and lets the dedup state
 	// flow normally once the match is live.
 	matchStarted bool
+	// statusRunning is the last serverinfo `status` reading's verdict
+	// (StatusNamesRunningGame), from the opening `fullserverinfo` dump
+	// or a later svc_serverinfo update. The match-start detector needs
+	// the PREVIOUS reading to tell a transition into a running game
+	// from the once-a-minute countdown ticks that follow it.
+	statusRunning bool
 	// printLines buffers svc_print fragments per (level, dem_single
 	// target) until the line they belong to is terminated. See
 	// assemblePrintLine in print.go.
@@ -457,6 +470,16 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			if err := p.tryEmitKtxHints(s, msg.TimeMs); err != nil {
 				return err
 			}
+			// `//ktx matchstart` is KTX's own match-boundary directive and
+			// the opening `fullserverinfo` dump carries the baseline
+			// `status` reading the serverinfo detector compares against;
+			// both feed the once-per-stream MatchStartEvent (matchstart.go).
+			if err := p.tryEmitMatchStartFromStuffText(s, msg.TimeMs); err != nil {
+				return err
+			}
+			if err := p.observeFullServerInfoStatus(s, msg.TimeMs); err != nil {
+				return err
+			}
 			// A `//demomark` stuffcmd is attributed by the demo block's
 			// target: mvdsv writes it as a dem_single addressed at the
 			// marking player's slot. Non-slot-addressed blocks carry no
@@ -502,6 +525,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, TimeMs: msg.TimeMs}); err != nil {
 				return err
+			}
+			if k == "status" {
+				if err := p.observeServerInfoStatus(v, msg.TimeMs, true); err != nil {
+					return err
+				}
 			}
 
 		case mvd.SvcSpawnBaseline:

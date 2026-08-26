@@ -119,6 +119,8 @@ func (a *BackpackAnalyzer) Init(ctx *Context) error {
 
 func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:

@@ -417,6 +417,11 @@ broadcasts — "left the game with N frags", "rejoins the game with N
 frags", "reenters the game without stats"; decoded once in the parser
 because the wire fragments them at arbitrary points, including inside
 the number),
+`MatchStartEvent` (the match went live — emitted once per demo at the
+first of four wire signals: the `matchdate:` stamp, a match-start print,
+the `//ktx matchstart` stuffcmd or a serverinfo `status` transition into a
+running clock; the three non-print ones are what make KTX **matchless**
+servers analyzable, since they never print a start line),
 `DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
 `FinalScoresEvent` (KTX `//finalscores` end-of-match scoreline — the
 server's own mode, map and final result, on 64% of the archive against
@@ -747,7 +752,10 @@ entirely — not "what went wrong" but "why is there nothing here": it is
 present exactly when the `streams` block is absent, and names the
 reason (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared`
 / `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it.
-2% of the archive carries it; see the known-limitations list below. Check
+2% of the archive carries it; see the known-limitations list below.
+(v75 removed the whole `matchStartUnannounced` slice of that by detecting
+the match start from three more wire signals — see
+[MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#match-start-detection).) Check
 it FIRST of the three: it decides whether `errors[]` and `parseWarnings`
 describe a partial match or nothing at all, and `demoUnreadable` is the
 one reason that means both.
@@ -1023,17 +1031,19 @@ diff -r /tmp/before /tmp/after
 
 0c. **2% of the archive holds no analyzable match — and now says so.**
    Streams are built only inside the DETECTED match window, so a demo
-   whose match-start broadcast was never seen produces no player streams
-   and, with them, no damage / `playerStats` / `locGraph` / buckets. Over
-   the 50 951-demo readability sweep that is 1 032 demos (2.03%), and
-   until v74 every one of them came out silent — empty sections and an
-   empty `errors[]`, with no way to tell "this recording holds no match"
-   from "the recording starts mid-game" from "the parse failed". The v74
-   `noMatch` block is present on exactly those results and names the
-   reason: `midMatchRecording` (68 — the serverinfo `status` key already
-   read "13 min left" at demo open), `matchStartUnannounced` (138 — the
-   server started a match under our watch but announced it in a form we
-   do not recognise; 32 of them carry a full KTX demoinfo block),
+   whose match start was never declared on the wire produces no player
+   streams and, with them, no damage / `playerStats` / `locGraph` /
+   buckets. Over the 50 951-demo readability sweep that is 1 032 demos
+   (2.03%), and until v74 every one of them came out silent — empty
+   sections and an empty `errors[]`, with no way to tell "this recording
+   holds no match" from "the recording starts mid-game" from "the parse
+   failed". The v74 `noMatch` block is present on exactly those results
+   and names the reason: `midMatchRecording` (68 — the serverinfo
+   `status` key already read "13 min left" at demo open),
+   `matchStartUnannounced` (138 before v75, **0 after** — the server
+   started a match under our watch and none of the four match-start
+   signals reached us; v75 gave the reader three signals besides the
+   broadcast line and every one of the 138 is now analyzable),
    `noMatchDeclared` (170 — no match declaration we can see, yet kills
    were parsed; usually unmanaged play, 165 on a foreign `*gamedir` like
    `fortress` / `jteams` / `ctf`, but 168 send no `status` key at all, so
@@ -1044,10 +1054,18 @@ diff -r /tmp/before /tmp/after
    not an `errors[]` entry: that list means the pipeline failed, and this
    is a fact about the demo.
    Zero markers on a 1 500-demo control drawn from the demos that DO
-   produce streams. What is still NOT done is SALVAGE — the ~206
-   recordings that demonstrably hold a real match are marked, not
-   analyzed; that is plan lead 8 stage (b) in
-   [`plan-archive-features.md`](plan-archive-features.md).
+   produce streams. Half the SALVAGE work is now done: v75 made the match
+   start a Layer-1 event with four wire signals instead of one broadcast
+   line, and all 138 `matchStartUnannounced` demos — the KTX matchless
+   FFA servers that never print a start line, plus the `fortress` / `ctf`
+   mods — now produce a full result. What is still NOT salvaged is the 68
+   `midMatchRecording` demos, where the match began before the first frame
+   and the wire carries no origin to rebase onto; that is the rest of plan
+   lead 8 stage (b) in
+   [`plan-archive-features.md`](plan-archive-features.md). FFA MODE
+   semantics — teams are decoration in FFA, and `match.teams` / teamkill
+   attribution / the aim enemy set still read the userinfo team tag — are
+   PR B of [`plan-ffa-support.md`](plan-ffa-support.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of

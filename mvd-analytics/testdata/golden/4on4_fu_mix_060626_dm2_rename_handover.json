@@ -111,6 +111,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "mvdhidden",
       "matchStartUnixMs": 1780776305330,
       "pauses": [

@@ -253,24 +253,24 @@ func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
 	const row = "Fairpacks setting: best weapon\n"
 	for _, tc := range []struct {
 		name    string
-		prints  []*events.PrintEvent
+		prints  []events.Event
 		wantSet bool
 	}{
-		{"the real broadcast", []*events.PrintEvent{
-			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		{"the real broadcast", []events.Event{
+			&events.PrintEvent{Level: events.PrintHigh, Message: row, TimeMs: 1000},
 		}, true},
-		{"chat line quoting it", []*events.PrintEvent{
-			{Level: events.PrintChat, Message: row, TimeMs: 1000},
+		{"chat line quoting it", []events.Event{
+			&events.PrintEvent{Level: events.PrintChat, Message: row, TimeMs: 1000},
 		}, false},
-		{"chat line embedding it", []*events.PrintEvent{
-			{Level: events.PrintChat, Message: "gnu: lol Fairpacks setting: best weapon\n", TimeMs: 1000},
+		{"chat line embedding it", []events.Event{
+			&events.PrintEvent{Level: events.PrintChat, Message: "gnu: lol Fairpacks setting: best weapon\n", TimeMs: 1000},
 		}, false},
-		{"a bprint that merely mentions it", []*events.PrintEvent{
-			{Level: events.PrintHigh, Message: "gnu changed Fairpacks setting: best weapon\n", TimeMs: 1000},
+		{"a bprint that merely mentions it", []events.Event{
+			&events.PrintEvent{Level: events.PrintHigh, Message: "gnu changed Fairpacks setting: best weapon\n", TimeMs: 1000},
 		}, false},
-		{"after the match started", []*events.PrintEvent{
-			{Level: events.PrintHigh, Message: "The match has begun!\n", TimeMs: 500},
-			{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		{"after the match started", []events.Event{
+			&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 500},
+			&events.PrintEvent{Level: events.PrintHigh, Message: row, TimeMs: 1000},
 		}, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

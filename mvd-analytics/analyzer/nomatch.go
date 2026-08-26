@@ -3,12 +3,14 @@ package analyzer
 import (
 	"fmt"
 	"strings"
+
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // ServerStatus is the serverinfo `status` key as a timeline rather than a
 // last-write-wins value: what the server said at demo open, and whether it
 // ever said a game was running. Published by the metadata node; read by
-// noMatchPost. See MetadataAnalyzer.observeStatus for the spellings.
+// noMatchPost. See events.StatusNamesRunningGame for the spellings.
 type ServerStatus struct {
 	// AtOpen is the `status` value in the OPENING `fullserverinfo` dump,
 	// verbatim. Empty when that dump carried no `status` key — including
@@ -110,7 +112,7 @@ func noMatchVerdict(errs []string, status ServerStatus, gameDir string, kills in
 	if hasStreamAbort(errs) {
 		return NoMatchDemoUnreadable, "the event stream aborted before the demo was read to the end, so whether it holds a match is unknown; see errors[] for the reader's reason"
 	}
-	if statusNamesRunningGame(status.AtOpen) {
+	if events.StatusNamesRunningGame(status.AtOpen) {
 		return NoMatchMidMatchRecording, fmt.Sprintf(
 			"the recording starts mid-game: the server already reported %q at demo open, so the match-start announcement this pipeline keys on happened before the first frame%s",
 			status.AtOpen, killsClause(kills))

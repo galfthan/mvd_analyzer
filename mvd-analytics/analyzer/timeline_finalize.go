@@ -353,6 +353,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEndMs); streams != nil {
 		result.Streams = streams
 
+		// Which wire signal declared the match start. Read off the same
+		// detector that supplied StartTime above, so the two cannot disagree.
+		result.Streams.Global.MatchStartSignal = a.timing.StartSource
+
 		// As of schema v23 the demo/wall-clock anchor lives on Streams.Global —
 		// it describes how to map a stream's match time to wall-clock time, so
 		// it belongs next to the match window rather than in TimelineAnalysis.

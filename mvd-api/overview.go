@@ -106,13 +106,19 @@ type OverviewTeam struct {
 // against ~25% for the server-clock sources behind demoStartUnixMs.
 // matchStartConfidence grades it — see RESULT_SCHEMA.md's GlobalStream section.
 //
-// All fields omitempty; the block itself is omitted when no wall-clock source
-// is present. Pauses reuses the result shape: {atMs, durationMs}.
+// matchStartSignal (schema v75) is the odd one out: it names the WIRE SIGNAL
+// the match start was detected from, not a wall-clock value, and it is set on
+// every result that holds a match — so it also brings the block into
+// existence on a demo carrying no clock at all.
+//
+// All fields omitempty; the block itself is omitted when the result holds no
+// match. Pauses reuses the result shape: {atMs, durationMs}.
 type OverviewTiming struct {
 	DemoOffset           int32                  `json:"demoOffset,omitempty"`
 	DemoStartUnixMs      int64                  `json:"demoStartUnixMs,omitempty"`
 	DemoStartAccuracyMs  int32                  `json:"demoStartAccuracyMs,omitempty"`
 	DemoStartSource      string                 `json:"demoStartSource,omitempty"`
+	MatchStartSignal     string                 `json:"matchStartSignal,omitempty"`
 	MatchStartUnixMs     int64                  `json:"matchStartUnixMs,omitempty"`
 	MatchStartAccuracyMs int32                  `json:"matchStartAccuracyMs,omitempty"`
 	MatchStartSource     string                 `json:"matchStartSource,omitempty"`
@@ -183,7 +189,7 @@ func BuildOverview(r *result.Result) Overview {
 		g := r.Streams.Global
 		ov.MatchStart = g.MatchStart
 		ov.MatchEnd = g.MatchEnd
-		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || g.MatchStartUnixMs != 0 || len(g.Pauses) > 0 {
+		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || g.MatchStartUnixMs != 0 || len(g.Pauses) > 0 || g.MatchStartSignal != "" {
 			ov.Timing = &OverviewTiming{
 				DemoOffset:           g.DemoOffset,
 				DemoStartUnixMs:      g.DemoStartUnixMs,
@@ -191,6 +197,7 @@ func BuildOverview(r *result.Result) Overview {
 				DemoStartSource:      g.DemoStartSource,
 				MatchStartUnixMs:     g.MatchStartUnixMs,
 				MatchStartAccuracyMs: g.MatchStartAccuracyMs,
+				MatchStartSignal:     g.MatchStartSignal,
 				MatchStartSource:     g.MatchStartSource,
 				MatchStartConfidence: g.MatchStartConfidence,
 				MatchStartNote:       g.MatchStartNote,

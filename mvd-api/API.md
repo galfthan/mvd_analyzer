@@ -514,8 +514,10 @@ When almost every flag reads `false` at once, look at **`noMatch`**
 describe a partial match or nothing at all. It is present exactly when the
 `streams` block is absent — 2% of the QuakeWorld archive — and it names the
 reason: `midMatchRecording` (the recording starts after the match began),
-`matchStartUnannounced` (the server ran a match but announced it in a form
-the pipeline does not recognise), `noMatchDeclared` (no match declaration
+`matchStartUnannounced` (the server ran a match and none of the four
+match-start signals the reader knows produced an analyzable result — rare
+since schema v75, which salvaged every demo carrying this reason in the
+archive sweep), `noMatchDeclared` (no match declaration
 this pipeline can see, yet kills were parsed — usually unmanaged play on a
 mod with no match state, see `gameDir`, but possibly a managed match on a
 mod whose declarations we cannot read), `noPlayRecorded` (the same absent
