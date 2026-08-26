@@ -482,6 +482,48 @@ worse prints the DAY plus its ± instead — `~2002-08-04 UTC ±14 h`, not
 `formatUtcStamp` switches on the number, like `formatAccuracyMs` beside it,
 so a new rung on the accuracy ladder needs no change here.
 
+### A mode with no teams (FFA, race — and every duel)
+
+`match.gameMode.teamBased` (schema v75) is the pipeline's one verdict on
+whether a player's team tag names a SIDE. When it is false the Go side lays
+the match out with one side per player — `match.teams` one row per player,
+every `players[].team` equal to the player's own name, the raw clan tag kept
+on `players[].rawTeam` — which is the layout duels have always produced.
+
+`isIndividualMode(result)` reads that flag, falling back to the same
+`team === name` shape test `isDuel` uses (minus the player count) for a
+result cached before v75, and `displayResults` puts an `individual-mode`
+class on `<body>`. The CSS then hides **every team surface**: the Teams
+panel, the "Per Team" aggregates in all three tabs, and the scoreboard's
+`Team` column (a copy of `Player`) plus `TK` / `TDmg`, which are
+structurally 0 when nobody has a teammate. Region control is NOT in that
+list — it needs a binary side layout, the API withholds it above two
+participants, and its panels are already hidden until their data arrives.
+
+**Colours are per player, from a different palette.** CLAUDE.md's rule
+stands: `TEAM_COLORS[i]` is the colour of `timelineState.teams[i]` and every
+surface indexes that one array. What changes in individual mode is WHICH
+palette fills it: `timelineState.teams` is the frag-sorted PLAYER list (each
+row's `team` IS its name, so every existing `teamOrder.indexOf(row.team)`
+lookup resolves to the player's rank unchanged), and `setCanonicalTeams`
+fills the array from `PLAYER_PALETTE` — twelve entries assigned by rank —
+instead of `assignTeamColors`, whose four entries are assigned by team NAME
+so a matchup colours identically in every demo. Name-keyed assignment has
+nothing to key on for a field of eleven strangers, and four entries do not
+cover them.
+
+The topbar names the leader and the field size (`toast 33 · 8 players`)
+rather than inventing an "A vs B" matchup; a two-player individual match — a
+duel, or a 1v1 FFA — still renders as "A vs B", which is what it is.
+
+**Known rough edge.** The Timeline tab's diverging panels (Team Status,
+Score, Powerups, Weapons, Team Health/Armor) are structurally two-sided:
+they draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
+match; on a multi-player FFA it is the top two PLAYERS — correctly named and
+coloured, but only two of N. Their per-player `<details>` expanders (Frags
+per player, Weapons per player) cover the whole field and are the ones to
+open there. Making the diverging charts N-sided is separate work.
+
 ### A recording with no match in it
 
 `result.noMatch` (schema v74) is present exactly when `streams` is absent —

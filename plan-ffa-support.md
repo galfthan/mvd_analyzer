@@ -1,7 +1,32 @@
 # Plan: matchless FFA support + a single home for mode logic
 
-Status: **PR A landed** (schema v75) — §2 and §5 are implemented; §3, §4 and
-§6's FFA-mode half remain as PR B. Branch `better-ffa-support`.
+Status: **PR A and PR B landed** (schema v75, one unreleased entry) — §2,
+§3, §4, §5 and §6 are implemented. Branch `better-ffa-support`.
+
+PR B against what §3/§4 predicted: the descriptor is `result.GameMode`
+(`result/gamemode.go`) resolved once in `analyzer/gamemode.go` from the
+roster node, and published as `match.gameMode` + `CoreOutputs.GameMode`.
+`Matchless` was dropped from the struct — nothing consumes it and
+`streams.global.matchStartSignal` already answers the question. `Submodes`
+is a sorted `[]string`, not a `map[string]bool`, so the JSON is stable.
+The consumers all read ONE predicate, `CoreOutputs.IndividualMode()`
+("does a team tag name a side here"), which is the roster's duel verdict
+OR a descriptor verdict from a source that actually saw a mode or a cvar —
+the weakest source (roster shape) is deliberately refused, since it is an
+inference over the very tags the layout would discard. `Rounds` is
+resolved and published; its consumers are still out of scope.
+
+Two deviations worth naming. `mvd-api/overview.go`'s `mode` KEEPS its
+inverted precedence and its display vocabulary — it is a label for a human
+and clients have read it since v1 — and the branching answer moved to a new
+`overview.gameMode` beside it, which is documented in both places. And the
+spectate golden is `ffa_matchless_shifter_260119_spectate`, not the `tox`
+recording §5 named: `tox` is a map with no BSP, loc or entity corpus on
+this machine, so the golden harness refuses to regenerate it; shifter is
+BSP-resolvable, is the biggest FFA in the set (11 players) and carries a
+spectator JOINING mid-match plus a slot handover. The `tox` 18-frag case is
+pinned by `TestMatchAnalyzer_MidMatchSpectateFreezesFrags`, which cites it.
+
 Location: repo root beside `plan-archive-features.md`, linked from
 `README.md`'s known-limitations list (CLAUDE.md: plan files must be
 reachable from a README).

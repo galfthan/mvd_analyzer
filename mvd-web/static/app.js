@@ -9,6 +9,23 @@
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
+// Per-PLAYER palette, used in individual modes (FFA, race, duel) where every
+// player is their own side and there is no team to name a colour after. It is
+// deliberately NOT the team palette: that one is four entries assigned by team
+// NAME so a matchup colours identically in every demo, which means nothing for
+// a field of eleven strangers and runs out after four of them. These are
+// assigned by frag rank instead — the same index convention TEAM_COLORS uses,
+// so every existing `TEAM_COLORS[teamOrder.indexOf(row.team)]` call site keeps
+// working unchanged, with `row.team` being the player's own name.
+//
+// Twelve hues, ordered so adjacent ranks stay distinguishable, and chosen to
+// read against the dark panel background.
+const PLAYER_PALETTE = [
+    '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
+    '#c084fc', '#7ee787', '#ff8fab', '#f97316',
+    '#38bdf8', '#a3e635', '#e879f9', '#94a3b8',
+];
+
 // Per-match team colours. TEAM_COLORS[i] is the colour of
 // timelineState.teams[i] — the winner-first index convention every call site
 // uses — but WHICH palette entry lands at each index is decided by team NAME
@@ -52,9 +69,15 @@ function assignTeamColors(teams) {
 // the order goes through here, so timelineState.teams, TEAM_COLORS and the
 // CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
 // "A vs B" spans, anything on var(--team-*)) can never disagree.
-function setCanonicalTeams(teams) {
+function setCanonicalTeams(teams, individual = false) {
     timelineState.teams = teams;
-    TEAM_COLORS = assignTeamColors(teams);
+    // In an individual mode `teams` is the frag-sorted PLAYER list, so the
+    // name-keyed team assignment has nothing to key on and only four entries
+    // to give out. Rank order over the wider player palette instead — same
+    // array, same index convention, so every call site is unchanged.
+    TEAM_COLORS = individual
+        ? teams.map((_, i) => PLAYER_PALETTE[i % PLAYER_PALETTE.length])
+        : assignTeamColors(teams);
     const rootStyle = document.documentElement.style;
     ['--team-a', '--team-b', '--team-c', '--team-d'].forEach((v, i) =>
         rootStyle.setProperty(v, TEAM_COLORS[i]));
@@ -994,6 +1017,19 @@ function writeSearchFiltersToForm(filters) {
 }
 
 function setupSearch() {
+    // The mode facet list lives in ONE place — SEARCH_MODE_LABELS, which also
+    // labels the result rows. index.html ships only the "Any" option and this
+    // fills the rest, so a facet cannot be offered in the dropdown and render
+    // as a raw token in the rows below it.
+    const modeSel = document.getElementById('search-mode');
+    if (modeSel) {
+        for (const [value, label] of Object.entries(SEARCH_MODE_LABELS)) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label;
+            modeSel.appendChild(opt);
+        }
+    }
     document.getElementById('search-form').addEventListener('submit', (e) => {
         e.preventDefault();
         runSearch();
@@ -1608,7 +1644,19 @@ function updateTopbarDemoInfo(result) {
     }
 
     const parts = [];
-    if (teams.length >= 2) {
+    // An individual match with more than two players is not a matchup, and
+    // "toast vs SMOK" over a field of eight reads as one. Name the leader and
+    // the size of the field instead; a two-player one (a duel, or a 1v1 FFA)
+    // still renders as "A vs B" below, which is what it is.
+    const individualField = isIndividualMode(result) && teams.length > 2;
+    if (individualField) {
+        const a = teams[0];
+        parts.push(
+            `<span class="topbar-team-a">${escapeHtml(a)}</span>` +
+            (a in teamScores ? ` <span class="topbar-score">${teamScores[a]}</span>` : '')
+        );
+        parts.push(`<span class="topbar-field">${teams.length} players</span>`);
+    } else if (teams.length >= 2) {
         const a = teams[0];
         const b = teams[1];
         parts.push(
@@ -1631,7 +1679,8 @@ function updateTopbarDemoInfo(result) {
     el.innerHTML = parts.join('<span class="topbar-sep">·</span>');
 
     const titleParts = [];
-    if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
+    if (individualField) titleParts.push(teams[0]);
+    else if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
     if (map) titleParts.push(map);
     document.title = titleParts.length
         ? `MVD | ${titleParts.join(' ')}`
@@ -1770,23 +1819,36 @@ function displayResults(result) {
     // exists on demos with no KTX block at all), with demoInfo/match retained
     // only to enumerate the team NAMES.
     {
+        const individual = isIndividualMode(result);
         const psTeams = playerStatsTeamRows(result);
         let teams = [];
-        if (psTeams.length) {
+        if (individual) {
+            // One side per player. playerStats carries the corrected net
+            // score, so the frag-sorted PLAYER list is the canonical order —
+            // and since every row's `team` IS its name, every existing
+            // `teamOrder.indexOf(row.team)` colour lookup resolves to the
+            // player's rank without a second mapping.
+            teams = sortByFragsDesc(playerStatsRows(result)).map(p => p.name);
+            if (!teams.length && result.match?.players) {
+                teams = [...result.match.players]
+                    .sort((a, b) => (b.frags || 0) - (a.frags || 0))
+                    .map(p => p.name);
+            }
+        } else if (psTeams.length) {
             teams = psTeams.map(t => t.name);
         } else if (demoInfo?.teams) {
             teams = [...demoInfo.teams];
         } else if (result.match?.teams) {
             teams = result.match.teams.map(t => t.name);
         }
-        if (teams.length >= 2) {
+        if (!individual && teams.length >= 2) {
             const rows = playerStatsRows(result);
             const teamFrags = psTeams.length
                 ? Object.fromEntries(psTeams.map(t => [t.name, fragsOfRow(t)]))
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        setCanonicalTeams(teams);
+        setCanonicalTeams(teams, individual);
     }
 
     // Teams summary box. Rows come from playerStats where it exists so the
@@ -2085,7 +2147,7 @@ function displayPlayerStats(rows) {
         const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
         return `
             <td>${escapeHtml(player.name)}${botBadge}</td>
-            <td>${escapeHtml(player.team || '')}</td>
+            <td class="team-col">${escapeHtml(player.team || '')}</td>
             ${handicapCell}
             <td>${s.frags || 0}</td>
             <td>${effPct(s)}</td>
@@ -2093,12 +2155,12 @@ function displayPlayerStats(rows) {
             <td>${enemyWeaponKillCell(s, 'rl')}</td>
             <td>${enemyWeaponKillCell(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
-            <td>${s.teamKills ?? '-'}</td>
+            <td class="team-col">${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
             <td>${s.maxSpree ?? '-'}</td>
             <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
-            <td>${d?.givenTeam ?? '-'}</td>
+            <td class="team-col">${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>${d?.takenToDie ?? '-'}</td>
@@ -2128,12 +2190,37 @@ function isDuel(result) {
     return players.length === 2 && players.every(p => p.team === p.name);
 }
 
+// isIndividualMode reports whether this demo has no teams AT ALL — FFA, race,
+// and every duel, which is the two-player case of the same layout. The Go side
+// then lays the match out with one side per player (match.teams one row per
+// player, every match.players[].team equal to the player's own name, the raw
+// clan tag kept on rawTeam) and publishes the verdict on match.gameMode.
+//
+// Read the descriptor where it exists — it is the authority, and it covers a
+// two-player FFA and a duel identically. The shape test behind it is the
+// pre-v75 fallback for a cached result with no descriptor: it is the SAME test
+// isDuel uses, minus the player count, because "team === name for everyone" is
+// exactly what the individual layout looks like from outside.
+function isIndividualMode(result) {
+    const gm = result?.match?.gameMode;
+    if (gm && typeof gm.teamBased === 'boolean') return !gm.teamBased;
+    const players = playerStatsRows(result);
+    if (!players.length) return false;
+    return players.every(p => p.team && p.team === p.name);
+}
+
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
     // cleanly on demo reload without leaking stale display:none values
     // onto unrelated elements.
     document.body.classList.toggle('duel-mode', isDuel(result));
+    // FFA and friends: no teams anywhere, so every team surface goes — the
+    // Teams box, the per-team aggregates, the Team / TK / TDmg scoreboard
+    // columns (structurally 0 when nobody has a teammate), and the team
+    // colour legends. Region control needs a binary side layout and the API
+    // already withholds it, so its panels stay hidden by their own data gate.
+    document.body.classList.toggle('individual-mode', isIndividualMode(result));
     // FFA has no teams at all, so playerStats omits the section and the
     // three Summary "Per Team" tables rendered as headers over nothing —
     // duel mode was the only thing hiding them, and it does not fire at
@@ -4019,10 +4106,11 @@ function resetUIToCleanState() {
     hide('pickups-empty');
     // pickups-items-panel is shown by displayPickupsTab when item data exists
 
-    // Body classes — duel-mode / no-team-rows / no-match collapse some panels
-    // via CSS; clear them so a teamplay demo loaded after a duel, an FFA or a
-    // match-less recording doesn't inherit the layout.
+    // Body classes — duel-mode / individual-mode / no-team-rows / no-match
+    // collapse some panels via CSS; clear them so a teamplay demo loaded after
+    // a duel, an FFA or a match-less recording doesn't inherit the layout.
     document.body.classList.remove('duel-mode');
+    document.body.classList.remove('individual-mode');
     document.body.classList.remove('no-team-rows');
     document.body.classList.remove('no-match');
 
@@ -4122,10 +4210,11 @@ function displayTimelineAnalysis(result) {
 
     // Teams already set (frag-sorted) in displayResults; only set if missing
     if (!timelineState.teams || timelineState.teams.length === 0) {
-        if (demoInfo?.teams) {
-            setCanonicalTeams([...demoInfo.teams]);
+        const individual = isIndividualMode(result);
+        if (!individual && demoInfo?.teams) {
+            setCanonicalTeams([...demoInfo.teams], false);
         } else if (result.match?.teams) {
-            setCanonicalTeams(result.match.teams.map(t => t.name));
+            setCanonicalTeams(result.match.teams.map(t => t.name), individual);
         }
     }
     const teams = timelineState.teams;

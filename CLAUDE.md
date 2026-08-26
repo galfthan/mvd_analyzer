@@ -103,7 +103,14 @@ belongs in the frontend.
   the Summary but red elsewhere. Use `getTeamOrder()` /
   `timelineState.teams` to map a team name to its color index. The CSS
   mirror is `--team-a..--team-d`, re-pointed per match by
-  `setCanonicalTeams()`.
+  `setCanonicalTeams()`. In an **individual mode**
+  (`match.gameMode.teamBased` false — every duel, FFA, race) each player
+  is their own side, so `timelineState.teams` is the frag-sorted PLAYER
+  list and every row's `team` equals its name;
+  `setCanonicalTeams(teams, true)` fills that same one canonical array
+  from `PLAYER_PALETTE` (twelve entries, assigned by rank) instead of
+  `assignTeamColors`. The array, its index convention and every call
+  site are unchanged — only which palette fills it.
 - **Always run tests.** `make test` (which runs
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...` —
   mvd-web is wasm-only and is exercised by `make build` instead)

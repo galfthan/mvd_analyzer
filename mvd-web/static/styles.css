@@ -736,6 +736,34 @@ body.no-team-rows #tab-summary .per-player-heading {
     display: none !important;
 }
 
+/* --- Individual mode: FFA, race, and every duel ---
+ *
+ * `match.gameMode.teamBased` is false, so the Go side lays the match out with
+ * one side per player (team == the player's own name, the raw clan tag kept
+ * on `match.players[].rawTeam`) and there is no team anywhere to show. This
+ * covers everything duel-mode already hid — the Teams panel and the "Per
+ * Team" aggregates, which exist in all three tabs, not just Summary — plus
+ * the scoreboard columns that only mean something between teammates: Team
+ * (a copy of the Player column), TK and TDmg (structurally 0 when nobody has
+ * a teammate).
+ *
+ * Region control is NOT listed here: it needs a binary side layout, the API
+ * withholds it on a non-team mode of more than two players, and its panels
+ * are already display:none until their data arrives. */
+body.individual-mode .team-aggregate-panel,
+body.individual-mode .team-aggregate-heading,
+body.individual-mode .team-aggregate-table,
+body.individual-mode .per-player-heading,
+body.individual-mode #scoreboard .team-col {
+    display: none !important;
+}
+
+/* Field size beside the leader in the topbar of a multi-player individual
+ * match, where "A vs B" would be a matchup that does not exist. */
+.topbar-field {
+    color: #8a9bb8;
+}
+
 /* Explanatory note under a panel heading — used where a number deviates
  * from the server's own end-of-match table on purpose (the possession
  * columns of Item Pickups) and the viewer deserves to know why without a
