@@ -18,7 +18,7 @@ import (
 // modern KTX demo the TimeMs is the same whichever one is seen first and
 // the Source names only which byte arrived first, not a different instant.
 // The reason all four exist is the demos where only some are present: a
-// matchless FFA/CTX server (k_matchless 1, ktx/src/world.c:1874-1877)
+// matchless FFA/CTF server (k_matchless 1, ktx/src/world.c:1874-1877)
 // SKIPS the "The match has begun!" broadcast — `match.c:1294-1297` gates
 // it on `!k_matchLess || cvar("k_matchless_countdown")` — while still
 // printing `matchdate:`, stuffing `//ktx matchstart` and moving the

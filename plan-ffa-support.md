@@ -308,10 +308,16 @@ comparing rounds to frags, Teams panel), the `items` no-match gate.
   `statusNamesRunningGame` tests move with the function; `noMatchVerdict`
   still classifies the foreign-mod cases.
 - Golden corpus: add local-only `file` entries (`mvd-analytics/testdata/
-  demos/`, sha256 in `corpus.json`) for one matchless FFA
-  (`ffa_1[dranzdm8]260704-1550.mvd`, 1.1 MB, 2 players, full 6 min) and one
-  countdown FFA (archive `52c1421d…` = `ffa_3[dm6]`, 3 players), plus the
-  3.8 s `ffa_1[dm6]` edge case. Commit the goldens.
+  demos/`, sha256 in `corpus.json`) for one matchless FFA (landed as
+  `ffa_matchless_nova_260704`, 2 players, full 6 min — the `dranzdm8`
+  recording first picked for this slot has no BSP on this machine, so the
+  golden would have skipped its floor-height and loc columns), one
+  countdown FFA (archive `52c1421d…` = `ffa_countdown_dm6_260106`,
+  3 players) and the 3.2 s `ffa_matchless_dm6_260704_3s` edge case, plus
+  `ffa_matchless_dm2_260116_joiners` for the mid-match leaver / slot-reuse
+  reconnect. `ctf_archive_dm6_qwe240_status` (archive `2a2ed2e9ca…`, qwe
+  2.40 CTF on dm6) covers the `status` signal, the only one of the four
+  with no golden otherwise. Commit the goldens.
 - Existing 14 goldens: expect byte-identical output; any drift must be
   explained by the one-frame `matchdate:` case and reported.
 - Re-run the `.reports/nomatch-marker` probe over `marked-1032.csv` and

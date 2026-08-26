@@ -91,8 +91,15 @@ func noMatchPost(res *Result, co *CoreOutputs) {
 //   - `status` at open naming a running game is a direct statement by the
 //     server that the recording began after the match did.
 //   - `status` reaching a running value later is the same statement about an
-//     instant inside the recording — the server did start a match, and the
-//     announcement it made was not one this pipeline recognises.
+//     instant inside the recording — the server did start a match, and no
+//     analyzable player stream came out of it. Since v75 that transition is
+//     itself one of the four Layer-1 match-start signals
+//     (mvd-reader/parser/matchstart.go), so this case is no longer "the
+//     start was never announced": what is left is either a start signal that
+//     DID fire and opened a window holding no reconstructible play, or a
+//     running clock that only ever arrived in a bulk `fullserverinfo` dump —
+//     a statement of the server's state rather than a transition, which by
+//     construction cannot raise the event (observeServerInfoStatus).
 //   - Otherwise no match declaration reached this pipeline, and the only
 //     question left is what the frag log parsed.
 //
@@ -119,7 +126,7 @@ func noMatchVerdict(errs []string, status ServerStatus, gameDir string, kills in
 	}
 	if status.RunningSeen {
 		return NoMatchStartUnannounced, fmt.Sprintf(
-			"the server started a match during the recording (its `status` key went to a running game) but never broadcast a match-start line this pipeline recognises%s%s",
+			"the server started a match during the recording (its `status` key went to a running game) but no analyzable player stream came out of it — a start signal fired over a window holding no play this pipeline could reconstruct, or none of the four start signals reached the wire at all%s%s",
 			gameDirClause(gameDir), killsClause(kills))
 	}
 	if kills > 0 {

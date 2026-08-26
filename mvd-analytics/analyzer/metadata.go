@@ -34,15 +34,20 @@ import (
 //
 //  4. svc_centerprint (cmd 26) — KTX renders the full match-settings
 //     table here every second of the 10-second countdown (match.c
-//     PrintCountdown). The last centerprint we see before the
-//     "match has begun!" print is the canonical match settings dump:
+//     PrintCountdown). The last centerprint we see before the match start —
+//     Layer 1's events.MatchStartEvent, whichever of its four wire signals
+//     raised it, not the "match has begun!" print specifically — is the
+//     canonical match settings dump:
 //     Mode / Deathmatch / Spawnmodel / Antilag / Teamplay / Timelimit /
 //     Fraglimit / Overtime / Powerups / Dmgfrags / NoItems / Midair /
 //     Instagib / Yawnmode / Airstep / VWep / Noweapon / matchtag.
 //
-// We do not try to interpret //ktx-style stufftexts (`//ktx matchstart`,
-// `//wps 0 lg 31 17`, `//ktx drop 49 64 3`) — those are client HUD hints,
-// not server metadata.
+// We do not try to interpret //ktx-style HUD-hint stufftexts (`//wps 0 lg
+// 31 17`, `//ktx drop 49 64 3`) here — those are client hints, not server
+// metadata. `//ktx matchstart` is the exception, and it is not read here
+// either: Layer 1 turns it into one of the four signals behind
+// events.MatchStartEvent (mvd-reader/parser/matchstart.go), which this
+// analyzer latches as an event like any other.
 type MetadataAnalyzer struct {
 	serverInfo   map[string]string
 	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)

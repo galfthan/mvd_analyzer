@@ -287,7 +287,7 @@ func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 // parser behaviour and stay in the analyzer.
 //
 // Only ONE phrase here is a verified modern-KTX server broadcast:
-// "has begun" (G_bprint at PRINT_MEDIUM, ktx/src/match.c:1296). The other
+// "has begun" (G_bprint at PRINT_HIGH, ktx/src/match.c:1296). The other
 // five are not reachable from a current KTX server through svc_print —
 // "fight!" is a G_centerprint / G_cp2all (ktx/src/arena.c:602,617-618;
 // clan_arena.c:1402-1403,1537), "go!" is a G_cp2all (race.c:2614),

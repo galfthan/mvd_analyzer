@@ -29,8 +29,9 @@ signals to arrive:
 `StartMatch()` emits the first three in the same server frame on modern
 KTX, so the match-start TIME is unchanged on every demo that already had
 one — the golden corpus and a 1 500-demo healthy archive control both come
-out with the match start at the same millisecond. What changed is which
-demos have one at all.
+out with the match start at the same millisecond
+(`.reports/nomatch-marker/recensus-v75-healthy-1500.csv`). What changed is
+which demos have one at all.
 
 - **ADDED on `streams.global`: `matchStartSignal`** (`ktx-matchstart` |
   `print` | `matchdate` | `status`) — which signal declared the start.
@@ -43,6 +44,11 @@ demos have one at all.
   now detect a start and produce a full result: 104 on `matchdate`, 34 on
   the `status` transition alone (including every one of the 24 `fortress`
   and 8 `ctf` demos, whose mods write their own running clock into the key).
+  Per-demo output for both populations is written to the local (untracked)
+  report directory beside the v74 census it supersedes:
+  `.reports/nomatch-marker/recensus-v75-unannounced-138.csv` and
+  `recensus-v75-healthy-1500.csv`, with the probe that wrote them — and the
+  command line to rerun it — in `recensus-v75-probe.go.txt`.
   The reason keeps its name and now means "the server moved `status` to a
   running clock and still no analyzable match came out". This is
   `plan-archive-features.md` lead 8 stage (b) for the KTX half.
@@ -65,10 +71,16 @@ demos have one at all.
   drops 3.7 s past the match-over print). The gate is now the same
   `Started && !Ended` every other recording path uses; the 14 existing
   goldens do not move.
-- **Golden corpus** gains four local-only FFA entries: three matchless
-  (`nova` full 6 min / 2 players, `dm2` 8 players with a mid-match leaver
-  and a slot-reuse reconnect, `dm6` a 3.2 s map-voted-off match with zero
-  kills) and one countdown-style FFA control that must not change.
+- **Golden corpus** gains five local-only entries: four FFA — three
+  matchless (`nova` full 6 min / 2 players, `dm2` 8 players with a
+  mid-match leaver and a slot-reuse reconnect, `dm6` a 3.2 s
+  map-voted-off match with zero kills) and one countdown-style FFA
+  control that must not change — plus
+  `ctf_archive_dm6_qwe240_status`, a qwe 2.40 CTF recording on dm6 whose
+  start is raised at 991 ms by the `status` transition alone (`Standby`
+  → `"14:59 left"`, no `matchdate:` and no start print). That last one is
+  the only golden coverage of the `status` signal end to end; the wire
+  shape itself is pinned in `mvd-reader/parser/matchstart_test.go`.
 
 FFA still has no mode semantics — team tags are decoration in FFA, and
 `match.teams`, teamkill attribution and the aim enemy set still read them.

@@ -12,9 +12,11 @@ import (
 // wire. Three of them exist, in three different eras:
 //
 //   - `matchdate: 2008-01-05 20:05:38 CET` — KTX bprints this at match start,
-//     one frame before "The match has begun!" (ktx/src/match.c:1291), with the
-//     strftime layout "%Y-%m-%d %H:%M:%S %Z". Older builds print the ctime
-//     layout instead (`matchdate: Mon Jul 03, 01:01:14 2006`).
+//     in the SAME server frame as "The match has begun!" and a few lines
+//     ahead of it (both come out of StartMatch, ktx/src/match.c:1291 and
+//     :1296), with the strftime layout "%Y-%m-%d %H:%M:%S %Z". Measured: the
+//     two carry an identical TimeMs on every golden. Older builds print the
+//     ctime layout instead (`matchdate: Mon Jul 03, 01:01:14 2006`).
 //   - `matchkey: 8-2005-8-13:19-56-18` — the kmod / KTeam-era predecessor,
 //     also a level-2 broadcast print, `<matchid>-<y>-<m>-<d>:<h>-<mm>-<ss>`
 //     with no timezone at all.

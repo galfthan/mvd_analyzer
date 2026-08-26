@@ -3375,7 +3375,15 @@ components:
             - "null"
             - array
         timing:
-          description: "Wall-clock anchor + pause data mapping match game-time to real time."
+          description: >-
+            Wall-clock anchor + pause data mapping match game-time to real
+            time. Present on every result that HOLDS a match, not only on one
+            with a wall-clock anchor: since schema v75 `matchStartSignal` is
+            set whenever a match start was detected, and that field alone
+            brings the block into existence — so a demo carrying no date
+            marker and no server clock still gets a `timing` with just the
+            signal in it. Omitted when the result holds no match at all (see
+            `noMatch`).
           additionalProperties: false
           properties:
             demoOffset:

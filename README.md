@@ -1041,9 +1041,9 @@ diff -r /tmp/before /tmp/after
    and names the reason: `midMatchRecording` (68 — the serverinfo
    `status` key already read "13 min left" at demo open),
    `matchStartUnannounced` (138 before v75, **0 after** — the server
-   started a match under our watch and none of the four match-start
-   signals reached us; v75 gave the reader three signals besides the
-   broadcast line and every one of the 138 is now analyzable),
+   started a match under our watch and no analyzable player stream came
+   out; v75 gave the reader three signals besides the broadcast line and
+   every one of the 138 is now analyzable),
    `noMatchDeclared` (170 — no match declaration we can see, yet kills
    were parsed; usually unmanaged play, 165 on a foreign `*gamedir` like
    `fortress` / `jteams` / `ctf`, but 168 send no `status` key at all, so

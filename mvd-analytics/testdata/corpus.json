@@ -94,5 +94,11 @@
     "mode": "ffa",
     "file": "demos/ffa_countdown_dm6_260106.mvd.gz",
     "sha256": "52c1421d09a29416ecec769cb485c2e7684e5c59811280e7d282f1d4fc46b038"
+  },
+  {
+    "label": "ctf_archive_dm6_qwe240_status",
+    "mode": "ctf",
+    "file": "demos/ctf_archive_dm6_qwe240_status.mvd.gz",
+    "sha256": "2a2ed2e9ca6216463f36d52edc3d2068998728df90d2159fcd1a81ab8207cf9b"
   }
 ]
