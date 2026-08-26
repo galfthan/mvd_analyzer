@@ -145,6 +145,43 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
   `skipped:*` vocabulary, and a drift test pins the OpenAPI enum against it
   — that enum was a hand-mirrored copy that had already lagged once.
 
+### Players who leave by going spectator
+
+**mvdsv's `join` / `observe` move a client between player and spectator
+without a reconnect** (`sv_user.c:2680-2830`): the same slot, the same
+userid, one full `svc_updateuserinfo` with `*spectator` flipped. Each calls
+the mod's `ClientDisconnect` first, which on KTX broadcasts "<name> left the
+game with N frags" while the match is running (`client.c:3022-3027`), and
+then zeroes `old_frags`.
+
+The pipeline treated it as a plain userinfo update, so the occupancy ran to
+the end of the recording: on `ffa-demos/ffa_1[tox]260818-1903.mvd` nexus left
+at 263.7 s with 18 frags and was served **0**, with a published session
+claiming he was still playing at 360 s.
+
+- **CHANGED: a player↔spectator transition now ends the occupancy and opens
+  a new one** on the same connection — the same treatment a drop gets, so the
+  score freezes through the existing rollback + announced-frags recovery and
+  the participation gate reads the new stint as spectator-only. nexus now
+  reports 18 frags and a session closing at 263.7 s.
+- **CHANGED: `streams.players[].sessions` publishes PLAY windows.** The
+  spectating half of a transition is withheld (it answers none of the
+  questions the list exists for — there is no player entity to track), while
+  a connection that only ever carried the `*spectator` key without ever
+  crossing the line is untouched: pre-KTX servers set that key on players,
+  and on `2on2_archive_dm4_qw240_recon` `math` streams 562 s of play under
+  one such userinfo. Visible in the existing corpus on
+  `4on4_fu_mix_060626_dm2_rename_handover`, where rusti's published window
+  now starts at his join (620599) instead of at the spectator connection that
+  preceded it (609644).
+- **Golden corpus** gains a sixth FFA entry,
+  `ffa_matchless_shifter_260119_spectate` — an 11-player FFA pinning the
+  individual layout at scale (eleven one-player teams, nine distinct
+  `rawTeam` tags, zero team kills), a spectator joining mid-match on a slot
+  he was already watching from, and a slot handover on top of it. It is a
+  projected golden: the eleven full streams would add megabytes the other
+  FFA goldens already pin.
+
 ### Web UI
 
 An individual-mode demo shows no team information at all: no Teams panel, no

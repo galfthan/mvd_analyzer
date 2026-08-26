@@ -669,3 +669,38 @@ func TestMatchAnalyzer_FinalScoresNotAdoptedAsTeamsInFFA(t *testing.T) {
 		t.Errorf("sources.teams = %q, want empty", res.Match.Sources.Teams)
 	}
 }
+
+// A live player going spectator is a departure: mvdsv's Cmd_Observe_f
+// (sv_user.c:2757-2830) calls the mod's ClientDisconnect — which broadcasts
+// "<name> left the game with N frags" (ktx/src/client.c:3022-3027) — then
+// zeroes old_frags and re-broadcasts the userinfo on the SAME slot and
+// userid. Measured on ffa-demos/ffa_1[tox]260818-1903.mvd at 263681 ms,
+// where nexus's 18 frags were served as 0.
+func TestMatchAnalyzer_MidMatchSpectateFreezesFrags(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	a.UseCoreOutputs(ffaCore())
+
+	_ = a.OnEvent(matchUserInfo(4, 52, "nexus", "'tro", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 600})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 18, TimeMs: 200000})
+	_ = a.OnEvent(&events.PlayerDepartureEvent{Name: "nexus", Frags: 18, FragsKnown: true, TimeMs: 263681})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 263681})
+	spec := matchUserInfo(4, 52, "nexus", "'tro", 263681)
+	spec.Player.Spectator = true
+	_ = a.OnEvent(spec)
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 {
+		t.Fatalf("match.players = %+v, want one row for nexus", res.Match.Players)
+	}
+	if got := res.Match.Players[0].Frags; got != 18 {
+		t.Errorf("frags = %d, want 18 (the announced score, frozen at the spectate)", got)
+	}
+}

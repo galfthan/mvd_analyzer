@@ -373,6 +373,21 @@ var partialGoldenDemos = map[string][]string{
 		"match.players", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
+	// The 11-player FFA (schema v75). It pins what no other golden can: the
+	// individual match layout at scale (eleven one-player teams, nine
+	// distinct clan tags on match.players[].rawTeam, zero team kills), a
+	// spectator who JOINS mid-match on a slot he was already watching from
+	// (anus, uid 50, at 21926 ms — the player↔spectator occupancy split), and
+	// a slot handover on top of it (xuxi leaves slot 4 on 10 frags at 63290,
+	// SMOK takes it at 76007). Projected rather than full: the eleven streams
+	// would add ~15 MB the other FFA goldens already pin, and these are the
+	// rows the demo was added for.
+	"ffa_matchless_shifter_260119_spectate": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+		"playerStats.teams",
+	},
 }
 
 // projectPaths reduces m to only the given dotted paths, preserving the

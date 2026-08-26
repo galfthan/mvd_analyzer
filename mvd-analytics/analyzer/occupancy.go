@@ -13,8 +13,8 @@ import (
 // recycled: when a client leaves, the next connection can land on the same
 // index. Anything keyed on the slot alone (frags, item state, streams)
 // therefore attributes the previous occupant's data to the new one unless
-// the handover is modelled explicitly. Two wire signals bound an
-// occupancy, and both are needed:
+// the handover is modelled explicitly. Three wire signals bound an
+// occupancy, and all three are needed:
 //
 //   - a *userid change* on the slot's svc_updateuserinfo — a fresh
 //     connection took the slot (SV_GenerateUserID, mvdsv/src/sv_main.c:538-556,
@@ -29,7 +29,13 @@ import (
 //   - a *vacate* — the empty-userinfo broadcast the server sends when it
 //     drops a client (see events.UserInfoEvent.Vacated). This one is the
 //     only signal available when nobody takes the freed slot afterwards,
-//     which is the common case for a timeout near the end of a match.
+//     which is the common case for a timeout near the end of a match;
+//   - a *player↔spectator transition* — the `*spectator` userinfo key
+//     flipping on a slot the same connection keeps. mvdsv's join / observe
+//     commands do exactly that without a reconnect (sv_user.c:2680-2830),
+//     and the mod treats it as a disconnect + connect, so the pipeline must
+//     too: the departing player's score is announced and then zeroed, and
+//     the stint that follows is not play. See onUserInfo.
 //
 // A drop ends an occupancy, full stop. There is no "the client came back
 // on the same userid so the drop did not count" rule: the wire never
@@ -97,6 +103,17 @@ type occupancyRecord struct {
 	// (as opposed to one that merely ran to the end of the demo, or was
 	// superseded by a new connection on the same slot).
 	vacated bool
+
+	// spectateStint marks the SPECTATING side of a player↔spectator split
+	// (see onUserInfo): the stint a live player entered by going spectator,
+	// and the stint a spectator left by joining. It is narrower than
+	// spectatorThroughout, which is also true of a connection that only ever
+	// spectated and of a slot whose single userinfo merely carries the
+	// `*spectator` key — pre-KTX servers set that key on players, and on
+	// 2on2_archive_dm4_qw240_recon `math` streams 562 s of play under one
+	// such userinfo. Only this flag is safe to withhold a published session
+	// for.
+	spectateStint bool
 }
 
 // spectatorThroughout reports whether every userinfo seen for this
@@ -169,7 +186,8 @@ func (t *occupancyTracker) countForSlot(slot int) int {
 // records it closed and opened, either of which may be nil:
 //
 //	(nil, rec)  a slot became occupied
-//	(old, new)  a new connection took over an occupied slot
+//	(old, new)  a new connection took over an occupied slot, or the same
+//	            connection crossed the player/spectator line
 //	(old, nil)  the server dropped the slot's client
 //	(nil, nil)  a plain userinfo update to the open occupancy, or an event
 //	            that carries no occupancy information at all
@@ -237,6 +255,48 @@ func (t *occupancyTracker) onUserInfo(e *events.UserInfoEvent) (closed, opened *
 	if uid != 0 && cur.userID != 0 && uid != cur.userID {
 		cur.endMs = e.TimeMs
 		return cur, t.open(slot, uid, e.Player, e.TimeMs)
+	}
+	// A player↔spectator transition ends the occupancy and starts a new one
+	// on the SAME connection.
+	//
+	// mvdsv's `join` / `observe` commands move a client between the two
+	// without a reconnect (Cmd_Join_f / Cmd_Observe_f, sv_user.c:2680-2830):
+	// each calls PR_GameClientDisconnect, resets `old_frags` to 0, flips
+	// `sv_client->spectator`, rewrites the `*spectator` userinfo key and sets
+	// `sendinfo`, so the wire carries one full svc_updateuserinfo on the same
+	// slot with the same userid. On the KTX side PR_GameClientDisconnect is
+	// ClientDisconnect, which broadcasts "<name> left the game with N frags"
+	// while `match_in_progress == 2` (client.c:3022-3027) — the same
+	// departure line a real drop produces, and the only wire statement of the
+	// leaver's score before old_frags zeroes it.
+	//
+	// Without the split the occupancy ran to the end of the demo: the
+	// scoreboard read the post-transition 0 (on ffa_1[tox] nexus's 18 frags
+	// became 0) and the published session claimed a play window that had
+	// ended six minutes earlier. Splitting here hands both to the machinery
+	// that already handles a drop — closeOccupancy's frag rollback plus the
+	// announced-frags recovery, and the participation gate, which reads the
+	// new record as spectator-throughout.
+	//
+	// Both userids must be the SAME non-zero id, which is what makes this a
+	// transition of one connection rather than anything else on the slot: a
+	// userid-0 record (KTX's ghost row, an inferred occupancy) carries a
+	// spectator flag that means nothing, and folding the next real
+	// connection into it is the documented adoption below — on gameId 222649
+	// splitting there instead published herbie's userid under the ghost's
+	// `# bogojoker` name. sawInfo guards the first userinfo of a record,
+	// whose flag is simply what the wire says.
+	if cur.sawInfo && cur.identified() && uid == cur.userID && cur.spectator != e.Player.Spectator {
+		cur.endMs = e.TimeMs
+		if cur.spectatorThroughout() {
+			// The spectating half on the JOIN side: this client watched
+			// until it entered the game. Marked for the same reason as the
+			// leaving side — it is not a play window.
+			cur.spectateStint = true
+		}
+		next := t.open(slot, uid, e.Player, e.TimeMs)
+		next.spectateStint = e.Player.Spectator
+		return cur, next
 	}
 	if cur.userID == 0 && uid != 0 {
 		cur.userID = uid

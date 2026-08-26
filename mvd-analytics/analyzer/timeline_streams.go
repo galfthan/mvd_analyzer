@@ -625,7 +625,14 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 			// identity. Guarded on a known match end (0 on a demo with no
 			// detected match, where nothing may be withheld).
 			postgame := matchEndMs > 0 && sess.OccStartMs >= matchEndMs
-			if sess.UserID != 0 && !postgame {
+			// A spectate stint is withheld for the same reason. It is a
+			// real connection, but not a PLAY window: after a live player
+			// types `observe` (mvdsv sv_user.c:2757-2830) the client keeps
+			// its slot and userid with no player entity, and publishing it
+			// would restate the leaver's window as running to the end of the
+			// recording — on ffa_1[tox] nexus left the game at 263681 and
+			// his session claimed 359981.
+			if sess.UserID != 0 && !postgame && !sess.SpectateStint {
 				// Published window: the observed occupancy, with the only
 				// synthetic bound being a client still connected when the
 				// recording stopped (no wire event to report — close it

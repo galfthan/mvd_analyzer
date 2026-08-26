@@ -137,3 +137,38 @@ func TestStreams_PhantomSessionDropped(t *testing.T) {
 		t.Error("phantom Luk should have been dropped")
 	}
 }
+
+// A live player who goes spectator mid-match keeps his slot and userid, so
+// without the occupancy split the published session ran to the end of the
+// recording. Measured on ffa-demos/ffa_1[tox]260818-1903.mvd: nexus left the
+// game at 263681 ms and his session claimed 359981.
+//
+// The spectate stint that follows resolves — an event on the slot still
+// belongs to whoever is there — but is not published: it is not a play
+// window, and the userid it names cannot be tracked.
+func TestStreams_SpectateStintIsNotAPublishedSession(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	a.timing.Started = true
+	a.playerState[4] = newStreamState(0, 263_681)
+	a.UseCoreOutputs(&CoreOutputs{Sessions: map[int][]ResolvedSession{
+		4: {
+			{StartMs: minInt32, EndMs: 263_681, OccStartMs: 0, OccEndMs: 263_681,
+				Name: "nexus", WireName: "nexus", UserID: 52, IdentityKey: "s4u52"},
+			{StartMs: 263_681, EndMs: maxInt32, OccStartMs: 263_681, OccEndMs: 359_981,
+				Name: "nexus", WireName: "nexus", UserID: 52, IdentityKey: "s4u52",
+				SpectateStint: true},
+		},
+	}})
+
+	streams := a.buildStreamsResult(nil, nil, 0, 359_981)
+	if streams == nil || len(streams.Players) != 1 {
+		t.Fatalf("streams = %+v, want one player", streams)
+	}
+	got := streams.Players[0].Sessions
+	if len(got) != 1 {
+		t.Fatalf("sessions = %+v, want only the play window", got)
+	}
+	if got[0].StartMs != 0 || got[0].EndMs != 263_681 || got[0].UserID != 52 {
+		t.Errorf("session = %+v, want [0, 263681) on userid 52", got[0])
+	}
+}

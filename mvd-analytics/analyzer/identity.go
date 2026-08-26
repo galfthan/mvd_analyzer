@@ -238,8 +238,9 @@ func (a *IdentityAnalyzer) PopulateCore(co *CoreOutputs) {
 			// already splits a session where the userid changes
 			// (occupancy.go:196-198), so this is the connection that was
 			// live for exactly this window.
-			UserID:      s.userID,
-			IdentityKey: keyOf[root],
+			UserID:        s.userID,
+			SpectateStint: s.spectateStint,
+			IdentityKey:   keyOf[root],
 		})
 	}
 	for slot := range sessions {

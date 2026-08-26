@@ -304,8 +304,14 @@ type ResolvedSession struct {
 	// after a handover or a rejoin. 0 when the occupancy carried no userid
 	// of its own (see occupancyRecord.identified — an inferred occupancy,
 	// a userid-0 resend, or KTX's ghost scoreboard row).
-	UserID      int
-	IdentityKey string
+	UserID int
+	// SpectateStint marks the occupancy a live player on this slot entered
+	// by going spectator (see occupancyRecord.spectateStint). Such a session
+	// is resolved against — an event on the slot still belongs to whoever is
+	// there — but is not PUBLISHED as a play window: it answers none of the
+	// questions result.PlayerSession exists for.
+	SpectateStint bool
+	IdentityKey   string
 }
 
 // SlotInfo holds the per-slot resolved player name and team that
