@@ -738,18 +738,20 @@ body.no-team-rows #tab-summary .per-player-heading {
 
 /* --- Individual mode: FFA, race, and every duel ---
  *
- * `match.gameMode.teamBased` is false, so the Go side lays the match out with
- * one side per player (team == the player's own name, the raw clan tag kept
- * on `match.players[].rawTeam`) and there is no team anywhere to show. This
+ * The match is laid out with one side per player (`match.sources.teams` =
+ * `individual`: team == the player's own name, the raw clan tag kept on
+ * `match.players[].rawTeam`), so there is no team anywhere to show. This
  * covers everything duel-mode already hid — the Teams panel and the "Per
  * Team" aggregates, which exist in all three tabs, not just Summary — plus
  * the scoreboard columns that only mean something between teammates: Team
  * (a copy of the Player column), TK and TDmg (structurally 0 when nobody has
  * a teammate).
  *
- * Region control is NOT listed here: it needs a binary side layout, the API
- * withholds it on a non-team mode of more than two players, and its panels
- * are already display:none until their data arrives. */
+ * Region control is NOT listed here, and NOT because its data is missing:
+ * the result ships `timelineAnalysis.regionControl.regions` for every demo,
+ * since the region geometry is a property of the map. It needs a binary side
+ * layout, so app.js's initRegionControl hides its two panels itself whenever
+ * the layout is individual with more than two participants. */
 body.individual-mode .team-aggregate-panel,
 body.individual-mode .team-aggregate-heading,
 body.individual-mode .team-aggregate-table,

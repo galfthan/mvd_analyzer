@@ -490,27 +490,46 @@ the match out with one side per player — `match.teams` one row per player,
 every `players[].team` equal to the player's own name, the raw clan tag kept
 on `players[].rawTeam` — which is the layout duels have always produced.
 
-`isIndividualMode(result)` reads that flag, falling back to the same
-`team === name` shape test `isDuel` uses (minus the player count) for a
-result cached before v75, and `displayResults` puts an `individual-mode`
-class on `<body>`. The CSS then hides **every team surface**: the Teams
-panel, the "Per Team" aggregates in all three tabs, and the scoreboard's
-`Team` column (a copy of `Player`) plus `TK` / `TDmg`, which are
-structurally 0 when nobody has a teammate. Region control is NOT in that
-list — it needs a binary side layout, the API withholds it above two
-participants, and its panels are already hidden until their data arrives.
+**Two questions, two predicates.** The frontend asks "is every player their
+own side here?" (LAYOUT) and "was the teamplay ruleset in force?"
+(SEMANTICS), and they have different answers on the same demo — a 1v1 on a
+CTF server is laid out individually and genuinely was teamplay. So:
 
-**Colours are per player, from a different palette.** CLAUDE.md's rule
-stands: `TEAM_COLORS[i]` is the colour of `timelineState.teams[i]` and every
-surface indexes that one array. What changes in individual mode is WHICH
-palette fills it: `timelineState.teams` is the frag-sorted PLAYER list (each
+| Question | Helper | Reads | Decides |
+|---|---|---|---|
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'`, else the `team === name` shape test (a pre-v75 cache) | Which panels exist, which palette, the scoreboard shape |
+| Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased`, else `!isIndividualLayout` | Whether a same-team quantity can exist |
+| Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
+
+`displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
+predicate. The CSS then hides **every team surface**: the Teams panel, the
+"Per Team" aggregates in all three tabs, and the scoreboard's `Team` column
+(a copy of `Player`) plus `TK` / `TDmg`, which are structurally 0 when
+nobody has a teammate. Region control is not driven by that class:
+`initRegionControl` hides its two panels itself whenever the layout is
+individual and there are more than two participants, because the result
+ships `timelineAnalysis.regionControl.regions` (the region GEOMETRY, a
+property of the map) for every demo — the panels are NOT hidden by a
+missing-data gate, and before this they rendered an editor whose Apply
+button only logged a warning. A two-participant match keeps them: it has two
+sides.
+
+**Colours in a field of players come from a different palette.**
+CLAUDE.md's rule stands, including its stability property: `TEAM_COLORS[i]`
+is the colour of `timelineState.teams[i]`, every surface indexes that one
+array, and WHICH palette entry lands at each index is decided by NAME, never
+by rank, so the colours do not move when the scoreline does.
+
+A **duel** is unchanged from before individual modes existed: two players
+are a matchup, so it keeps `assignTeamColors` and the four-entry team
+palette (`red`/`blue` claim their own entries, the rest go in name sort
+order). Only an individual layout with MORE than two players switches
+palettes — `timelineState.teams` is then the frag-sorted PLAYER list (each
 row's `team` IS its name, so every existing `teamOrder.indexOf(row.team)`
-lookup resolves to the player's rank unchanged), and `setCanonicalTeams`
-fills the array from `PLAYER_PALETTE` — twelve entries assigned by rank —
-instead of `assignTeamColors`, whose four entries are assigned by team NAME
-so a matchup colours identically in every demo. Name-keyed assignment has
-nothing to key on for a field of eleven strangers, and four entries do not
-cover them.
+lookup resolves unchanged) and `setCanonicalTeams` fills the array via
+`assignPlayerColors`, twelve `PLAYER_PALETTE` entries handed out in name
+sort order. Four entries do not cover a field of eleven; assigning them by
+frag RANK instead recoloured the whole board when the result changed.
 
 The topbar names the leader and the field size (`toast 33 · 8 players`)
 rather than inventing an "A vs B" matchup; a two-player individual match — a

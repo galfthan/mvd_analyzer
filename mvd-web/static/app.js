@@ -9,16 +9,20 @@
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
-// Per-PLAYER palette, used in individual modes (FFA, race, duel) where every
-// player is their own side and there is no team to name a colour after. It is
-// deliberately NOT the team palette: that one is four entries assigned by team
-// NAME so a matchup colours identically in every demo, which means nothing for
-// a field of eleven strangers and runs out after four of them. These are
-// assigned by frag rank instead — the same index convention TEAM_COLORS uses,
-// so every existing `TEAM_COLORS[teamOrder.indexOf(row.team)]` call site keeps
-// working unchanged, with `row.team` being the player's own name.
+// Per-PLAYER palette, used in individual modes with more than two players
+// (FFA, race) where every player is their own side and there is no team to
+// name a colour after. It is deliberately NOT the team palette: that one is
+// four entries, which runs out after four of a field of eleven.
 //
-// Twelve hues, ordered so adjacent ranks stay distinguishable, and chosen to
+// It is assigned exactly the way TEAM_PALETTE is — by NAME, in sort order
+// (assignPlayerColors) — so CLAUDE.md's stability property holds here too: a
+// player keeps the same colour in every demo of the same field regardless of
+// who won. Assigning by frag RANK instead (which this briefly did) recoloured
+// the whole scoreboard when the result changed. A DUEL is not routed here at
+// all: two players are a matchup, and it keeps the team palette so the
+// familiar red/blue reading of a 1v1 is unchanged.
+//
+// Twelve hues, ordered so adjacent entries stay distinguishable, and chosen to
 // read against the dark panel background.
 const PLAYER_PALETTE = [
     '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
@@ -65,18 +69,35 @@ function assignTeamColors(teams) {
     return colors;
 }
 
+// The player-palette twin of assignTeamColors: entries are handed out in
+// code-unit sort order of the player NAMES, and the returned array is aligned
+// with the caller's (frag-sorted) `players` order, so TEAM_COLORS keeps its
+// index convention while a player's colour depends only on who is in the
+// game. Beyond the palette's length it wraps — twelve distinct hues is the
+// practical limit of a legend anyway.
+function assignPlayerColors(players) {
+    const byName = players.map((_, i) => i)
+        .sort((a, b) => (players[a] < players[b] ? -1 : players[a] > players[b] ? 1 : 0));
+    const colors = new Array(players.length);
+    byName.forEach((idx, rank) => {
+        colors[idx] = PLAYER_PALETTE[rank % PLAYER_PALETTE.length];
+    });
+    return colors;
+}
+
 // Single entry point for the canonical team order: every path that decides
 // the order goes through here, so timelineState.teams, TEAM_COLORS and the
 // CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
 // "A vs B" spans, anything on var(--team-*)) can never disagree.
-function setCanonicalTeams(teams, individual = false) {
+function setCanonicalTeams(teams, perPlayer = false) {
     timelineState.teams = teams;
-    // In an individual mode `teams` is the frag-sorted PLAYER list, so the
-    // name-keyed team assignment has nothing to key on and only four entries
-    // to give out. Rank order over the wider player palette instead — same
-    // array, same index convention, so every call site is unchanged.
-    TEAM_COLORS = individual
-        ? teams.map((_, i) => PLAYER_PALETTE[i % PLAYER_PALETTE.length])
+    // In an individual mode `teams` is the frag-sorted PLAYER list. The
+    // four-entry team palette cannot cover it, so the wider player palette is
+    // handed out instead — by NAME sort order, never by rank, so the colours
+    // do not move when the scoreline does. Same array, same index convention,
+    // so every call site is unchanged.
+    TEAM_COLORS = perPlayer
+        ? assignPlayerColors(teams)
         : assignTeamColors(teams);
     const rootStyle = document.documentElement.style;
     ['--team-a', '--team-b', '--team-c', '--team-d'].forEach((v, i) =>
@@ -1107,6 +1128,14 @@ const SEARCH_MODE_LABELS = {
     'ctf':  'CTF',
 };
 
+// Which of those hub facets name a mode with no teams. This is the HUB's
+// vocabulary on a HUB search row — not a Result — so it cannot read
+// match.gameMode: the row is a listing from hub.quakeworld.nu carrying its
+// own `mode` string, and no demo has been analysed at that point. It lives
+// here beside the facet table so the pair stays in step (it used to be an
+// inline `mode !== '1on1' && mode !== 'ffa'` at the one call site).
+const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
+
 function escapeHtml(s) {
     if (s == null) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1648,7 +1677,7 @@ function updateTopbarDemoInfo(result) {
     // "toast vs SMOK" over a field of eight reads as one. Name the leader and
     // the size of the field instead; a two-player one (a duel, or a 1v1 FFA)
     // still renders as "A vs B" below, which is what it is.
-    const individualField = isIndividualMode(result) && teams.length > 2;
+    const individualField = isIndividualLayout(result) && teams.length > 2;
     if (individualField) {
         const a = teams[0];
         parts.push(
@@ -1705,7 +1734,7 @@ function renderSearchResults(games, append = false) {
         const dateText = (game.timestamp || '').slice(0, 10);
 
         // Pick contestants: top-2 teams for team modes, top-2 players otherwise.
-        const isTeamMode = game.mode && game.mode !== '1on1' && game.mode !== 'ffa';
+        const isTeamMode = !!game.mode && !SEARCH_INDIVIDUAL_MODES.has(game.mode);
         let contestants = '—';
         if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
             const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
@@ -1819,7 +1848,7 @@ function displayResults(result) {
     // exists on demos with no KTX block at all), with demoInfo/match retained
     // only to enumerate the team NAMES.
     {
-        const individual = isIndividualMode(result);
+        const individual = isIndividualLayout(result);
         const psTeams = playerStatsTeamRows(result);
         let teams = [];
         if (individual) {
@@ -1848,7 +1877,9 @@ function displayResults(result) {
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        setCanonicalTeams(teams, individual);
+        // Duels keep the team palette (usesPlayerPalette), so a 1v1 colours
+        // exactly as it did before individual modes existed.
+        setCanonicalTeams(teams, usesPlayerPalette(result));
     }
 
     // Teams summary box. Rows come from playerStats where it exists so the
@@ -2190,23 +2221,57 @@ function isDuel(result) {
     return players.length === 2 && players.every(p => p.team === p.name);
 }
 
-// isIndividualMode reports whether this demo has no teams AT ALL — FFA, race,
-// and every duel, which is the two-player case of the same layout. The Go side
-// then lays the match out with one side per player (match.teams one row per
-// player, every match.players[].team equal to the player's own name, the raw
-// clan tag kept on rawTeam) and publishes the verdict on match.gameMode.
+// The frontend asks TWO different questions about teams, and they have two
+// different answers on the same demo. Keep them apart:
 //
-// Read the descriptor where it exists — it is the authority, and it covers a
-// two-player FFA and a duel identically. The shape test behind it is the
-// pre-v75 fallback for a cached result with no descriptor: it is the SAME test
-// isDuel uses, minus the player count, because "team === name for everyone" is
-// exactly what the individual layout looks like from outside.
-function isIndividualMode(result) {
-    const gm = result?.match?.gameMode;
-    if (gm && typeof gm.teamBased === 'boolean') return !gm.teamBased;
+//   isIndividualLayout — "is every player their own side here?" It decides
+//     LAYOUT: which panels exist, which colour palette is handed out, whether
+//     the scoreboard is per player. It is a property of the RESULT, so it
+//     reads the layout the Go side actually applied: match.sources.teams ===
+//     'individual' (rebuildIndividualMatch's own stamp), with the shape test
+//     as the fallback for a cached pre-v75 result, where the layout is
+//     visible as "every row's team is its own name" but the source key still
+//     reads 'derived'.
+//
+//   isTeamBasedMode — "was the teamplay ruleset in force?" It decides team
+//     SEMANTICS: whether a team kill or a team-damage figure is a thing that
+//     can happen. It reads match.gameMode.teamBased, the resolved descriptor.
+//
+// They disagree on a 1v1 played on a teamplay server (a CTF server's duel,
+// archive 2a2ed2e9ca…): the layout is individual — two participants, one side
+// each — while the ruleset genuinely was teamplay. Deriving either from the
+// other is what put a meaningless Team filter on an FFA aim tab and, in the
+// other direction, would put team colours on a duel.
+function isIndividualLayout(result) {
+    if (result?.match?.sources?.teams === 'individual') return true;
     const players = playerStatsRows(result);
     if (!players.length) return false;
     return players.every(p => p.team && p.team === p.name);
+}
+
+// isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
+// tag names a side. Falls back to the layout on a cached result with no
+// descriptor, which is the pre-v75 reading.
+function isTeamBasedMode(result) {
+    const gm = result?.match?.gameMode;
+    if (gm && typeof gm.teamBased === 'boolean') return gm.teamBased;
+    return !isIndividualLayout(result);
+}
+
+// hasTeammates reports whether any player in this demo has a team-mate: the
+// ruleset was teamplay AND the match is not laid out one side per player.
+// Everything that renders a same-team quantity (team kills, team damage, the
+// aim tab's Team victim filter) is empty without it.
+function hasTeammates(result) {
+    return isTeamBasedMode(result) && !isIndividualLayout(result);
+}
+
+// usesPlayerPalette reports whether this demo's colours come from the
+// per-player palette rather than the four-entry team palette: an individual
+// layout with more than two sides. A duel (or a two-player FFA) keeps the
+// team palette — see PLAYER_PALETTE and CLAUDE.md's team-colour rule.
+function usesPlayerPalette(result) {
+    return isIndividualLayout(result) && !isDuel(result);
 }
 
 function applyDuelModeUI(result) {
@@ -2218,9 +2283,10 @@ function applyDuelModeUI(result) {
     // FFA and friends: no teams anywhere, so every team surface goes — the
     // Teams box, the per-team aggregates, the Team / TK / TDmg scoreboard
     // columns (structurally 0 when nobody has a teammate), and the team
-    // colour legends. Region control needs a binary side layout and the API
-    // already withholds it, so its panels stay hidden by their own data gate.
-    document.body.classList.toggle('individual-mode', isIndividualMode(result));
+    // colour legends. Region control needs a binary side layout; its panels
+    // are hidden by initRegionControl, NOT by a missing-data gate — the
+    // result ships `timelineAnalysis.regionControl.regions` for every map.
+    document.body.classList.toggle('individual-mode', isIndividualLayout(result));
     // FFA has no teams at all, so playerStats omits the section and the
     // three Summary "Per Team" tables rendered as headers over nothing —
     // duel mode was the only thing hiding them, and it does not fire at
@@ -4210,11 +4276,11 @@ function displayTimelineAnalysis(result) {
 
     // Teams already set (frag-sorted) in displayResults; only set if missing
     if (!timelineState.teams || timelineState.teams.length === 0) {
-        const individual = isIndividualMode(result);
+        const individual = isIndividualLayout(result);
         if (!individual && demoInfo?.teams) {
             setCanonicalTeams([...demoInfo.teams], false);
         } else if (result.match?.teams) {
-            setCanonicalTeams(result.match.teams.map(t => t.name), individual);
+            setCanonicalTeams(result.match.teams.map(t => t.name), usesPlayerPalette(result));
         }
     }
     const teams = timelineState.teams;
@@ -7673,7 +7739,16 @@ function initRegionControl(result) {
     const rc = result.timelineAnalysis?.regionControl;
     const panel = document.getElementById('region-control-panel');
     const statusPanel = document.getElementById('region-status-panel');
-    if (!rc || !rc.regions || rc.regions.length === 0) {
+    // Region control is a two-SIDES display: the map tint, the legend and the
+    // stats table are all "team A vs team B" (view/region_control.go builds
+    // buckets only for exactly two labels). An individual layout with more
+    // than two players has no such pair — the Go side ships `regions` for it
+    // all the same, because the region GEOMETRY is a property of the map, and
+    // the editor rendered from it had an Apply button whose only effect was a
+    // console warning. A two-participant match (a duel, a 1v1 FFA) does have
+    // two sides and keeps the panels.
+    const noSides = isIndividualLayout(result) && !isDuel(result);
+    if (!rc || !rc.regions || rc.regions.length === 0 || noSides) {
         if (panel) panel.style.display = 'none';
         if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
@@ -12102,16 +12177,21 @@ function buildAimChips(result) {
 }
 
 // buildAimVictimToggle wires the Enemy/Team/Self/All filter buttons (static
-// in the HTML) and hides the Team option in duels — there are no teammates,
-// while Enemy vs All still differ via RL/GL self-splash.
+// in the HTML) and hides the Team option wherever nobody has a team-mate —
+// every duel and every FFA. Enemy vs All still differ there via RL/GL
+// self-splash, so the rest of the toggle stays.
+//
+// The verdict comes from the mode descriptor (hasTeammates), not from the aim
+// rows' own `mode` field: that field says "team" on an FFA — it names the
+// enemy-set rule the aim join applied, not the ruleset — so keying on it put
+// a filter that can never match anything on every FFA aim tab.
 function buildAimVictimToggle(result) {
     const box = document.getElementById('aim-victim-toggle');
     if (!box) return;
-    const players = (result && result.aim && result.aim.players) || [];
-    const duel = players.length > 0 && players.every(p => p.mode === 'duel');
+    const teamless = !hasTeammates(result);
     const teamBtn = box.querySelector('.aim-chip[data-kind="team"]');
-    if (teamBtn) teamBtn.style.display = duel ? 'none' : '';
-    if (duel && aimVictimFilter === 'team') aimVictimFilter = 'all';
+    if (teamBtn) teamBtn.style.display = teamless ? 'none' : '';
+    if (teamless && aimVictimFilter === 'team') aimVictimFilter = 'all';
     if (!box._aimWired) {
         box.querySelectorAll('.aim-chip').forEach(btn => {
             btn.addEventListener('click', () => {
