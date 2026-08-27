@@ -1,7 +1,23 @@
 # Plan: matchless FFA support + a single home for mode logic
 
 Status: **PR A and PR B landed** (schema v75, one unreleased entry) — §2,
-§3, §4, §5 and §6 are implemented. Branch `better-ffa-support`.
+§3, §5 and §6 are implemented; §4 all but item 5, which is **deliberately
+not migrated** (see below). Branch `better-ffa-support`.
+
+A four-reviewer pass over PR B changed four things worth recording here.
+(a) The mode's "first word" over `TeamBased` now belongs only to a canonical
+an explicit source NAMED: a roster-inferred duel was vetoing a live
+`teamplay` cvar, publishing a CTF server's 1v1 as `teamBased: false,
+sources.teamBased: "mode"`. (b) The countdown Mode row outranks the
+serverinfo `mode` key, which names the last usermode COMMAND that ran
+(`world.c:1482` over `commands.c:4848`) rather than the settings in force.
+(c) `match` now publishes a `roster:final` artifact, because its `Finalize`
+mutates the shared Roster and GameMode on a demo with no demoinfo block and
+the DAG did not say so — `frag` read the pre-promotion verdict while the
+nodes after `match` read the promoted one. (d) The individual team
+relabelling reaches `demoInfo` too; leaving the clan tags there kept
+`locGraph.byTeam` and several frontend surfaces keyed on labels nothing else
+used.
 
 PR B against what §3/§4 predicted: the descriptor is `result.GameMode`
 (`result/gamemode.go`) resolved once in `analyzer/gamemode.go` from the
@@ -320,6 +336,15 @@ per field. Consumers to migrate, in value order:
 4. `mvd-api/overview.go:202` → `match.gameMode.canonical` (fixes the
    inverted precedence).
 5. `app.js:1659` search-row branch → hub row shape or a server flag.
+   **Not migrated, and this is the resolution rather than a deferral.**
+   That branch reads a HUB SEARCH ROW, not a `Result`: the row is a listing
+   from hub.quakeworld.nu carrying its own `mode` facet (V5 in the table
+   above), and no demo has been analysed at that point, so there is no
+   descriptor to read and no server flag on the row to read instead. What
+   landed is the single-source fix the duplication actually deserved: the
+   `{1on1, ffa}` set is now `SEARCH_INDIVIDUAL_MODES`, declared beside
+   `SEARCH_MODE_LABELS` (the facet list itself), instead of an inline
+   `mode !== '1on1' && mode !== 'ffa'` at the one call site.
 6. Drift test: `openapi.yaml` `boundedMode` enum ⊇ `SkipModeReason` tokens.
 
 Not in scope now, worth a ticket: `Rounds` consumers (`applyFinalScoresTeams`

@@ -104,6 +104,15 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
   each other. All five raw vocabularies stay published verbatim beside it.
   Republished on `/overview` as `gameMode`; `overview.mode` keeps its
   existing display-string behaviour and is now documented as such.
+  Precedence for `canonical` is demoinfo `mode` → countdown Mode row →
+  serverinfo `mode` umode → `//finalscores` → roster shape: the serverinfo
+  key names the last usermode COMMAND that ran (`world.c:1482` over
+  `commands.c:4848`), which a plain `teamplay` change leaves stale, while
+  the countdown states the settings the match started under. And a
+  canonical the ROSTER inferred never vetoes a teamplay cvar — a CTF
+  server's 1v1 (`*gamedir=ctf`, `teamplay=419`) is `canonical: duel` from
+  the roster AND `teamBased: true` from the serverinfo, laid out
+  individually because two participants are two sides.
 - **ADDED on `demoInfo`: `deathmatch` and `teamplay`** — KTX's own `dm` /
   `tp` keys (`ktx/src/stats_json.c:492-502`), parsed since v1 and dropped on
   the floor until now. `tp` is the strongest teamplay signal there is:
@@ -116,7 +125,13 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
   layout duels have always produced, generalised: a consumer needs no mode
   string to render an individual scoreboard, and the web UI's existing
   `team === name` shape test keeps working. `playerStats.teams` is absent,
-  as it already was on most FFA demos.
+  as it already was on most FFA demos. The relabelling reaches `demoInfo`
+  too — `demoInfo.players[].team` and `demoInfo.teams`, the one section
+  otherwise published verbatim — because it is where several consumers look
+  FIRST for a name→team map: leaving the clan tags there kept
+  `locGraph.locs[].byTeam` keyed on `{red, tsc}` and left the web UI's map
+  symbols, loc heatmap and per-team player lists empty on an FFA with a KTX
+  block.
 - **ADDED: `match.players[].rawTeam`** — the userinfo tag the individual
   layout replaced, kept because it is real information (clan membership); it
   just names no side. Omitted when it would repeat `team`.
@@ -136,7 +151,21 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
   the same match — still gets it, with the two players as the sides. The
   timeline's baked `regionControl.teamA/teamB` were being filled from the raw
   tags (`'tro` vs `dojo` over eight players on `ffa_1[dm2]`); they are now
-  empty there.
+  empty there. The region GEOMETRY (`regionControl.regions`) still ships for
+  every demo — it is a property of the map — so the web UI hides the
+  region-control panels itself rather than waiting for absent data.
+- **FIXED: a player who leaves and comes back keeps the frags he left
+  with.** The scoreboard kept one row per identity and let the later stint
+  REPLACE the score, on the premise of KTX's ghost restore — which matchless
+  mode never performs (`MakeGhost` returns at `ktx/src/client.c:2897`, "no
+  ghost in matchless mode"). On `ffa_1[dm2]` nexus left slot 4 with 14 frags
+  at 281.6 s, rejoined on slot 3 at 321.0 s and left again with 0, and the
+  row reported **0 frags against 15 kills** — breaking the
+  `frags == kills − suicides − teamKills` identity the frag log maintains.
+  A stint that OPENS at or above the total the identity had already reached
+  still replaces it (that is the ghost scoreboard row, `ghost2scores`,
+  `g_utils.c:2272-2356`, and the restore itself, `client.c:1513-1517`);
+  every other stint now ADDS. nexus reports 14.
 - **One parser for the composite serverinfo `mode` key**
   (`result.ParseServerinfoMode`). Three call sites ran their own
   `strings.Split(si["mode"], "-")` with three deliberately different token
@@ -185,15 +214,28 @@ claiming he was still playing at 360 s.
 ### Web UI
 
 An individual-mode demo shows no team information at all: no Teams panel, no
-"Per Team" aggregates, no Team / TK / TDmg scoreboard columns, and a
-frag-sorted individual scoreboard. Per-player colours come from a separate
-twelve-entry `PLAYER_PALETTE` assigned by frag rank, delivered through the
-same single canonical `TEAM_COLORS` array every surface already indexes — the
-four-entry team palette is assigned by team NAME and has nothing to key on
-for a field of eleven. The topbar names the leader and the field size rather
-than inventing an "A vs B" matchup. Duel rendering is unchanged except that
-its Team column (a copy of the Player column) and its always-empty TK / TDmg
-columns now hide with the rest.
+"Per Team" aggregates, no Team / TK / TDmg scoreboard columns, no region
+control, and a frag-sorted individual scoreboard. The topbar names the
+leader and the field size rather than inventing an "A vs B" matchup.
+
+**Colours.** A field of MORE than two players draws from a separate
+twelve-entry `PLAYER_PALETTE`, delivered through the same single canonical
+`TEAM_COLORS` array every surface already indexes — the four-entry team
+palette runs out. Its entries are handed out in player-NAME sort order, the
+same stability property CLAUDE.md states for the team palette: the board
+does not recolour when the scoreline changes. **Duel colours are unchanged**
+— two players are a matchup, so a 1v1 keeps `assignTeamColors` and the team
+palette exactly as before. What does change for a duel is that its Team
+column (a copy of the Player column) and its always-empty TK / TDmg columns
+now hide with the rest.
+
+**Two predicates, not one.** The UI decides LAYOUT (panels, palette,
+scoreboard) from `match.sources.teams === 'individual'` and team SEMANTICS
+(the aim tab's Team victim filter) from `match.gameMode.teamBased`, because
+they differ on a 1v1 played on a teamplay server. The Team victim filter
+used to key on the aim rows' own `mode` field, which reads `team` on an FFA
+— it names the enemy-set rule the join applied, not the ruleset — so every
+FFA aim tab offered a filter that could never match anything.
 
 ## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
 

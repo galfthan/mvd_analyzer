@@ -79,22 +79,44 @@ normalisation on top.
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Canonical | `canonical` | string | Mode SHAPE: `duel` \| `team` \| `ffa` \| `ctf` \| `ca` \| `wipeout` \| `race` \| `hoony` \| `ra` \| `coop` \| `unknown`. Ruleset modifiers are NOT canonical values — an instagib game is still an FFA or a 4on4 — they are in `submodes`. |
-| TeamBased | `teamBased` | bool | **Whether a player's team tag names a SIDE rather than decoration.** Mirrors KTX's own `tp_num()` gate, `(isTeam() \|\| isCTF() \|\| coop) ? teamplay : 0` (`ktx/src/g_utils.c:1586-1588`): the mode must be a team mode AND the teamplay cvar non-zero. False for duel, ffa, race and rocket arena. |
+| TeamBased | `teamBased` | bool | **Whether a player's team tag names a SIDE rather than decoration.** Mirrors KTX's own `tp_num()` gate, `(isTeam() \|\| isCTF() \|\| coop) ? teamplay : 0` (`ktx/src/g_utils.c:1586-1588`): the mode must be a team mode AND the teamplay cvar non-zero. False for duel, ffa, race and rocket arena **when a mode source named that mode** — a canonical the roster merely inferred does not veto a teamplay cvar (see Precedence). |
 | Rounds | `rounds` | bool, omitempty | The score is ROUNDS WON, not frags (ca, wipeout, ra, hoony — `ktx/src/commands.c:6867-6886`). Published for consumers comparing a scoreline against a frag total; **nothing in the pipeline gates on it yet**. |
 | Submodes | `submodes` | []string, omitempty | Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf` — `SetMode4ServerInfo`, `ktx/src/world.c:1475-1543`) plus the ones the legacy `k_*` cvars and the countdown table name. |
 | Sources | `sources` | GameModeSources | Which vocabulary decided each field. |
 
-`sources.canonical`: `ktx` (demoinfo `mode`) | `serverinfo` (the composite
-`mode` key's umode) | `countdown` (the KTX countdown Mode row) |
+`sources.canonical`: `ktx` (demoinfo `mode`) | `countdown` (the KTX
+countdown Mode row) | `serverinfo` (the composite `mode` key's umode) |
 `finalscores` | `roster` (the participant shape — a two-player match is a
 duel). Empty when `canonical` is `unknown`.
 
 `sources.teamBased`: `ktx` (demoinfo `tp`) | `serverinfo` (the `teamplay`
 cvar) | `countdown` | `mode` (the canonical mode alone decides) | `roster`
-(the weakest: a team holding more than one player). **Never empty** — the
-resolver always reaches a verdict. `roster` is the one source the individual
-LAYOUT refuses to act on: it is an inference over the very tags the layout
-would discard.
+(the participant shape: a 1v1 has no sides, or — weakest of all — no tag
+held more than one player). **Never empty** — the resolver always reaches a
+verdict. `roster` is the one source the individual LAYOUT refuses to act on
+when it decided `teamBased`: it is an inference over the very tags the
+layout would discard.
+
+**Precedence.** Strongest first, per field:
+
+- `canonical`: demoinfo `mode` → countdown Mode row → serverinfo `mode`
+  umode → `//finalscores` mode → roster shape. The countdown outranks the
+  serverinfo `mode` key because that key names the last usermode COMMAND
+  that ran (`um_name_byidx(current_umode - 1)`,
+  `ktx/src/world.c:1482`, assigned only in `UserMode()`,
+  `commands.c:4848`), which a plain `teamplay` change leaves stale, while
+  the countdown centerprint states the settings the match started under.
+- `teamBased`: an **explicitly named** individual canonical (the mode alone
+  decides — KTX's `tp_num()` gate closes on it) → demoinfo `tp` →
+  serverinfo `teamplay` → countdown Teamplay → an explicitly named
+  team-shaped canonical → the roster shape.
+
+A canonical the ROSTER inferred never gets the mode's first word: "two
+participants" says how many sides played, not whether the teamplay ruleset
+was in force. A CTF server's 1v1 (`*gamedir=ctf`, `teamplay=419`) is
+`canonical: duel, sources.canonical: roster` **and** `teamBased: true,
+sources.teamBased: serverinfo` — with the individual LAYOUT all the same,
+because that is `Roster.Duel()`.
 
 `sources.rounds`: `mode`, or empty when `rounds` is false.
 `sources.submodes`: `serverinfo` | `countdown`, or empty when there are none.
@@ -1097,8 +1119,15 @@ obit text. Pick the one whose shape matches your consumer's needs; see
 
 ## DemoInfoResult (`demoInfo`)
 
-Defined in `result/demoinfo.go`. **Verbatim from KTX's STUFFCMD
-demoinfo JSON; never transformed.** Treat this as authoritative for
+Defined in `result/demoinfo.go`. **Verbatim from KTX's STUFFCMD demoinfo
+JSON**, with exactly one transformation: under the individual layout
+(`match.sources.teams` = `individual` — every duel, every FFA) each
+`players[].team` is rewritten to the player's own name and `teams` is
+rebuilt as one entry per player, so this section agrees with every other
+one instead of being the last place the decorative clan tags survive.
+Consumers reading it as a name→team map (a loc heatmap, a map legend) get
+the same answer here as from `match.players[]`; the raw userinfo tag is on
+`match.players[].rawTeam`. Otherwise treat this as authoritative for
 accuracy, damage breakdown, item pickups, bot info.
 
 **Units island.** This section is the one deliberate exception to the
@@ -2588,24 +2617,29 @@ when the demo has no pauses or the server does not embed the block.
 
 ### PlayerSession (`streams.players[].sessions[]`)
 
-One contiguous occupancy of a wire client slot by **one connection** of this
-player (schema v66) — the validity window of a userid.
+One contiguous **play** window on a wire client slot (schema v66; since v75
+a connection may contribute more than one — see below). Within it the slot's
+userid is constant, so it is also the validity window of that userid.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| StartMs | `startMs` | int32 ms | First userinfo that attested this connection. **Not clamped to the match window**: a player connected during the countdown reports a NEGATIVE start (same policy as `demoMarkers` and `global.pauses` — the wire said it). |
-| EndMs | `endMs` | int32 ms | The drop broadcast, or the next connection's userinfo. Half-open `[startMs, endMs)`. **Synthetic in two cases**, both reading exactly match end: a client still connected when the recording ended (no wire event exists to report), and a drop broadcast landing *after* match end (the event exists, but the window is closed on the match clock every other time here lives on). So an `endMs` at match end does not by itself mean "still connected". |
+| StartMs | `startMs` | int32 ms | Where this window opens: the first userinfo that attested the connection, or — since v75 — the `join` that turned a connected spectator into a player, which is the same userid re-entering the game (on `4on4_fu_mix_060626_dm2_rename_handover` `rusti`'s window opens at his join, 620 599, not at the spectator connection at 609 644). **Not clamped to the match window**: a player connected during the countdown reports a NEGATIVE start (same policy as `demoMarkers` and `global.pauses` — the wire said it). |
+| EndMs | `endMs` | int32 ms | Where it closes: the drop broadcast, the next connection's userinfo, or — since v75 — an `observe` (the player going spectator), which the mod announces as a departure and which therefore ends the window exactly as a drop does. Half-open `[startMs, endMs)`. **Synthetic in two cases**, both reading exactly match end: a client still connected when the recording ended (no wire event exists to report), and a drop broadcast landing *after* match end (the event exists, but the window is closed on the match clock every other time here lives on). So an `endMs` at match end does not by itself mean "still connected". |
 | Slot | `slot` | int | Wire client slot (0-based) — the index `svc_*` messages address this connection by. |
 | UserID | `userId` | int | The connection's userid: the value a hub `?track=` link must carry to follow this player **inside this window, and only then**. Always **non-zero** — an occupancy the wire gave no userid is not published as a session at all (see below), so there is no 0 to interpret. |
 | Name | `name` | string (omitempty) | The netname this connection carried, where the row's `name` is the identity's canonical one. They differ after a rename or an mvdsv `(N)` prefix; this is the one to match against a live engine roster at an instant inside the window. Folded through the same Quake normalization as every other name here (`qNormalizeTable`), so it is not the raw wire bytes. |
 
-Since v75 these are **play windows**, not merely connections. mvdsv's `join`
-/ `observe` commands move a client between player and spectator without a
-reconnect (`sv_user.c:2680-2830`) — same slot, same userid, one full
+Since v75 these are **play windows**, not merely connections — so one
+connection can appear as several entries, split at each player↔spectator
+crossing, and the userid repeats across them. mvdsv's `join` / `observe`
+commands move a client between player and spectator without a reconnect
+(`sv_user.c:2680-2830`) — same slot, same userid, one full
 `svc_updateuserinfo` with `*spectator` flipped, and the mod's
 `ClientDisconnect` run first, which on KTX broadcasts `"<name> left the game
 with N frags"` while the match is running (`client.c:3022-3027`). That is a
-departure, so the occupancy ends there and the SPECTATING half is withheld:
+departure, so the occupancy ends there and the SPECTATING half (the
+*spectate stint*: the stint a live player entered by going spectator, or a
+spectator left by joining) is withheld:
 it has no player entity, and publishing it restated the leaver's window as
 running to the end of the recording (on `ffa_1[tox]260818-1903.mvd` nexus
 left at 263 681 ms and his session claimed 359 981). A connection that only
@@ -4720,7 +4754,8 @@ Pick the shape that matches your consumer:
 | Loc names | `timelineAnalysis.locTable` | `locationData[].name` | …you need integer indexing from `Li`. |
 | Loc names | `locationData[]` | `locTable[]` | …you need the world coordinates. |
 
-`demoInfo` is **verbatim from KTX** and never transformed; if a
+`demoInfo` is **verbatim from KTX** apart from the individual-layout team
+relabelling described under [DemoInfoResult](#demoinforesult-demoinfo); if a
 duplication exists, the canonical fix lives on the other side.
 
 ## Schema versioning history

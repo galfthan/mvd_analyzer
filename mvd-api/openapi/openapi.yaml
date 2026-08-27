@@ -7863,9 +7863,11 @@ components:
           type: string
         sessions:
           description: |
-            Every wire-slot occupancy behind this row, in time order — one
-            entry per CONNECTION, so a player who timed out and rejoined has
-            two, with two userids. This is the lossless form of the answer
+            Every wire-slot play window behind this row, in time order — a
+            player who timed out and rejoined has two, with two userids, and
+            one who went spectator and rejoined has two with the SAME userid
+            (the spectating stretch between them is not a play window and is
+            not listed). This is the lossless form of the answer
             `/overview`'s `playerUserIDs` gives once per player: use `userId`
             for a `?track=` link at an instant inside the window. Absent with
             `identity` (team and scoreboard-only rows).
@@ -7881,6 +7883,12 @@ components:
               the published window closes at match end, so it would emit
               startMs > endMs, and it describes nothing trackable inside the
               match.
+            - A SPECTATE stint — the stretch a live player entered by going
+              spectator, or a spectator left by joining. It has no player
+              entity, and publishing it restated a leaver's window as running
+              to the end of the recording. A connection that merely carries
+              the `*spectator` key without ever crossing the line is
+              untouched: pre-KTX servers set that key on players.
           items: { $ref: "#/components/schemas/PlayerSession" }
           type: array
         ping:
@@ -8248,17 +8256,21 @@ components:
       type: object
     PlayerSession:
       description: >
-        One contiguous occupancy of a wire client slot by ONE connection of
-        this player — the validity window of a userid. A userid names a
-        connection, not a person (mvdsv reissues them from a rotating pool),
-        so the same human reconnecting draws a new one and the slot they left
-        hands its old one to whoever takes it next.
+        One contiguous PLAY window on a wire client slot. Within it the
+        slot's userid is constant, so it is also the validity window of that
+        userid. A userid names a connection, not a person (mvdsv reissues
+        them from a rotating pool), so the same human reconnecting draws a
+        new one and the slot they left hands its old one to whoever takes it
+        next — while ONE connection can contribute several windows, split at
+        each player/spectator crossing, all carrying the same userid.
       additionalProperties: false
       properties:
         startMs:
           description: >
-            First userinfo that attested this connection, int32 ms on the
-            match clock. NOT clamped to the match window: a player connected
+            Where the window opens, int32 ms on the match clock: the first
+            userinfo that attested the connection, or the `join` that turned
+            an already-connected spectator into a player (same slot, same
+            userid). NOT clamped to the match window: a player connected
             during the countdown reports a NEGATIVE value, the same policy as
             the timeline's demo markers and the pause anchors.
           maximum: 2.147483647e+09
@@ -8266,7 +8278,10 @@ components:
           type: integer
         endMs:
           description: >
-            The drop broadcast, or the next connection's userinfo — half-open
+            Where it closes: the drop broadcast, the next connection's
+            userinfo, or an `observe` (the player going spectator, which the
+            mod announces as a departure and which ends the window exactly as
+            a drop does) — half-open
             [startMs, endMs). Synthetic in TWO cases, both reading exactly
             match end: a client still connected when the recording ended (no
             wire event exists to report), and a drop broadcast that lands
