@@ -139,25 +139,6 @@ func (g *GameMode) TeamShaped() bool {
 	return g != nil && CanonicalIsTeamShaped(g.Canonical)
 }
 
-// HasSubmode reports whether the named submode token is set.
-func (g *GameMode) HasSubmode(name string) bool {
-	if g == nil {
-		return false
-	}
-	for _, s := range g.Submodes {
-		if s == name {
-			return true
-		}
-	}
-	return false
-}
-
-// IsTeamBased is the nil-safe read of TeamBased. A nil descriptor (a demo
-// analysed by a hand-built registry, or a cached Result from before v75)
-// reports false, which is the individual layout — callers that need to tell
-// "no descriptor" from "no teams" must check for nil themselves.
-func (g *GameMode) IsTeamBased() bool { return g != nil && g.TeamBased }
-
 // ServerinfoMode is the parsed form of KTX's composite serverinfo `mode`
 // key: `umode[-submode...]`, built once per level by SetMode4ServerInfo
 // (ktx/src/world.c:1475-1543). Umode is the base user mode ("4on4", "ffa",
@@ -188,14 +169,4 @@ func ParseServerinfoMode(v string) ServerinfoMode {
 		m.Submodes = parts[1:]
 	}
 	return m
-}
-
-// HasSubmode reports whether the parsed key carried the given submode token.
-func (m ServerinfoMode) HasSubmode(tok string) bool {
-	for _, s := range m.Submodes {
-		if s == tok {
-			return true
-		}
-	}
-	return false
 }

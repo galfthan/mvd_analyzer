@@ -106,5 +106,11 @@
     "mode": "ffa",
     "file": "demos/ffa_matchless_shifter_260119_spectate.mvd.gz",
     "sha256": "b5a885f6098be63de5767d5927ef9dfab269872c72e3afc21035281e9deeade9"
+  },
+  {
+    "label": "duel_archive_dm3_arena_teamplay",
+    "mode": "1on1",
+    "file": "demos/duel_archive_dm3_arena_teamplay.mvd.gz",
+    "sha256": "e57be1ab53347a3a65705f891dccb0b61dd06f15813686f58829ad99c8f4f94e"
   }
 ]

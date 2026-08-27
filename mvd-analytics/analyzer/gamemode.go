@@ -22,10 +22,11 @@ import (
 //
 // Precedence, per field, strongest first:
 //
-//	Canonical  demoinfo `mode` → serverinfo `mode` umode → countdown Mode
-//	           row → //finalscores mode → roster shape
-//	TeamBased  demoinfo `tp` → serverinfo `teamplay` → countdown Teamplay
-//	           → the canonical mode alone → roster shape
+//	Canonical  demoinfo `mode` → countdown Mode row → serverinfo `mode`
+//	           umode → //finalscores mode → roster shape
+//	TeamBased  an EXPLICIT individual canonical → demoinfo `tp` →
+//	           serverinfo `teamplay` → countdown Teamplay → the canonical
+//	           mode alone → roster shape
 //	Submodes   serverinfo (composite `mode` key + legacy k_* cvars) and the
 //	           countdown table, unioned
 //	Rounds     the canonical mode alone
@@ -33,6 +34,27 @@ import (
 // The demoinfo block wins because it is the same server one code path over
 // (ktx/src/stats.c:309 GetMode, stats_json.c:478-502 for `tp`/`dm`), written
 // at match end from the values that were actually in force.
+//
+// The countdown outranks the serverinfo `mode` key because that key does not
+// name the mode the match is being played in: SetMode4ServerInfo writes the
+// last usermode COMMAND that ran, `um_name_byidx(current_umode - 1)`
+// (ktx/src/world.c:1482); `current_umode` is assigned only by UserMode()
+// (ktx/src/commands.c:4848 — a `/4on4`, an election, or a server-invoked
+// mode change), so a plain `teamplay` or `k_mode` change afterwards leaves
+// it stating the previous game. The countdown centerprint is printed by
+// ShowMatchSettings from the settings actually in force when the match
+// started. Archive demo b95c35735c4d… is the case: serverinfo `mode=1on1`,
+// countdown Mode row `Team`, demoinfo `mode=team` with `tp 2`.
+//
+// TeamBased's "the mode gets the first word" rule applies only to a canonical
+// an explicit mode SOURCE named (demoinfo / countdown / serverinfo /
+// //finalscores). A canonical inferred from the ROSTER shape may not veto a
+// teamplay ruleset: a CTF server running a 1v1 (archive 2a2ed2e9ca…,
+// `*gamedir=ctf`, `teamplay=419`, Chipie [red] vs Pain [blue]) is two
+// participants and still a teamplay game, and the roster is the weakest
+// source in the table (RESULT_SCHEMA.md's source vocabulary). The match still
+// gets the individual LAYOUT there — that is Roster.Duel(), a statement about
+// how many sides there are, not about whether the cvar was set.
 
 // canonicalIsIndividual reports whether the mode is one where every player
 // fights alone, so a userinfo `team` tag is decoration. This is the positive
@@ -237,11 +259,14 @@ func resolveGameMode(di *DemoInfoResult, fs *FinalScores, ms *MatchSettings, si 
 	switch {
 	case ktx && canonicalFromKTXMode(di.Mode) != "":
 		gm.Canonical, gm.Sources.Canonical = canonicalFromKTXMode(di.Mode), result.GameModeSrcKTX
+	case ms != nil && canonicalFromCountdown(ms.Mode) != "":
+		// Ahead of the serverinfo `mode` key: that key names the last
+		// usermode COMMAND (world.c:1482 over commands.c:4848), the
+		// countdown names the settings the match actually started under.
+		gm.Canonical, gm.Sources.Canonical = canonicalFromCountdown(ms.Mode), result.GameModeSrcCountdown
 	case canonicalFromUmode(result.ParseServerinfoMode(si["mode"]).Umode) != "":
 		gm.Canonical = canonicalFromUmode(result.ParseServerinfoMode(si["mode"]).Umode)
 		gm.Sources.Canonical = result.GameModeSrcServerInfo
-	case ms != nil && canonicalFromCountdown(ms.Mode) != "":
-		gm.Canonical, gm.Sources.Canonical = canonicalFromCountdown(ms.Mode), result.GameModeSrcCountdown
 	case fs != nil && canonicalFromKTXMode(fs.Mode) != "":
 		gm.Canonical, gm.Sources.Canonical = canonicalFromKTXMode(fs.Mode), result.GameModeSrcFinalScores
 	case roster.Duel():
@@ -261,12 +286,21 @@ func resolveGameMode(di *DemoInfoResult, fs *FinalScores, ms *MatchSettings, si 
 
 	// ── TeamBased ──
 	//
-	// The mode gets the first word, because KTX's own gate does: tp_num()
-	// returns `(isTeam() || isCTF() || coop) ? teamplay : 0`
+	// An EXPLICITLY named mode gets the first word, because KTX's own gate
+	// does: tp_num() returns `(isTeam() || isCTF() || coop) ? teamplay : 0`
 	// (ktx/src/g_utils.c:1586-1588), so on a mode where every player fights
 	// alone the cvar cannot apply however it is set. That is not
 	// hypothetical — an FFA server running with a `teamplay 2` left over
 	// from the previous team game is in the corpus.
+	//
+	// A canonical the ROSTER inferred does not get that word. "Two
+	// participants" is a statement about how many sides played, not about
+	// whether the teamplay ruleset was in force, and letting it veto a
+	// non-zero `teamplay` published a CTF server's 1v1 (archive
+	// 2a2ed2e9ca…, `*gamedir=ctf`, `teamplay=419`) as `teamBased: false,
+	// sources.teamBased: "mode"` — a shape inference wearing the
+	// provenance of a mode source. It still decides the LAYOUT (one side
+	// per player) via Roster.Duel(); the two questions are separate.
 	//
 	// After that KTX's demoinfo `tp` is decisive, in both directions:
 	// FixRules forces teamplay to 0 when the gametype is not team/ctf/coop
@@ -276,17 +310,22 @@ func resolveGameMode(di *DemoInfoResult, fs *FinalScores, ms *MatchSettings, si 
 	// when teamplay is non-zero (stats_json.c:498-502), so its ABSENCE from
 	// a demoinfo block that named a mode is itself the verdict — but only
 	// from such a block, since a build that wrote neither key says nothing.
+	// modeNamed is "an explicit source named this canonical" — everything
+	// but the roster shape (and "unknown", which names nothing).
+	modeNamed := gm.Sources.Canonical != "" && gm.Sources.Canonical != result.GameModeSrcRoster
 	switch {
-	case canonicalIsIndividual(gm.Canonical):
+	case modeNamed && canonicalIsIndividual(gm.Canonical):
 		gm.TeamBased, gm.Sources.TeamBased = false, result.GameModeSrcMode
 	case ktx && di.Teamplay > 0:
 		gm.TeamBased, gm.Sources.TeamBased = true, result.GameModeSrcKTX
-	case ktx && gm.Canonical != result.GameModeUnknown:
+	case gm.Sources.Canonical == result.GameModeSrcKTX:
 		// `tp` absent from a block that DID name a mode: FixRules'
 		// biconditional makes that "teamplay was 0". The mode condition is
 		// load-bearing — a block with neither key is one this build wrote
 		// no mode into, and reading its silence as a verdict would strip
-		// the sides off a real team game.
+		// the sides off a real team game. It is this block's OWN mode that
+		// licenses the reading: a canonical some other source named says
+		// nothing about what this build writes.
 		gm.TeamBased, gm.Sources.TeamBased = false, result.GameModeSrcKTX
 	case si["teamplay"] != "":
 		gm.TeamBased, gm.Sources.TeamBased = si["teamplay"] != "0", result.GameModeSrcServerInfo
@@ -294,6 +333,14 @@ func resolveGameMode(di *DemoInfoResult, fs *FinalScores, ms *MatchSettings, si 
 		gm.TeamBased, gm.Sources.TeamBased = true, result.GameModeSrcCountdown
 	case result.CanonicalIsTeamShaped(gm.Canonical):
 		gm.TeamBased, gm.Sources.TeamBased = true, result.GameModeSrcMode
+	case canonicalIsIndividual(gm.Canonical):
+		// A roster-inferred individual canonical, with no cvar and no
+		// countdown to read: two participants are two sides, so nothing
+		// here is a team. Provenance stays "roster" — this is the shape
+		// talking, and a consumer must be able to tell it from a mode
+		// source. It outranks the tag census below, which would call two
+		// duellists who both picked `red` a team.
+		gm.TeamBased, gm.Sources.TeamBased = false, result.GameModeSrcRoster
 	default:
 		// Nothing named a mode and nothing named a teamplay cvar. The
 		// scoreboard shape is all that is left: an FFA lists every player

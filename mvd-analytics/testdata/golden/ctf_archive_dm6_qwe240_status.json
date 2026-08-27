@@ -30903,9 +30903,9 @@
       "canonical": "duel",
       "sources": {
         "canonical": "roster",
-        "teamBased": "mode"
+        "teamBased": "serverinfo"
       },
-      "teamBased": false
+      "teamBased": true
     },
     "map": "dm6",
     "mapTitle": "The Dark Zone",

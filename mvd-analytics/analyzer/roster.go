@@ -182,18 +182,37 @@ func (a *RosterAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.GameMode = &gm
 	r.individual = individualLayoutFromMode(&gm)
 
-	// DemoInfo team rewrite (the old normalizeDuelTeams DemoInfo block). In a
-	// duel each player's team becomes their own name and DemoInfo.Teams is
-	// rebuilt as the one-player-per-team layout in player order. The NameTable
-	// (built from the raw teams earlier in demoinfo.PopulateCore) is left
-	// untouched, so producers still resolve raw teams and apply the roster label
-	// on top.
-	if r.isDuel && co.DemoInfo != nil {
+	// DemoInfo team rewrite (the old normalizeDuelTeams DemoInfo block). In
+	// EVERY individual layout — a duel and, since v75, an FFA or any other
+	// mode with no teamplay — each player's team becomes their own name and
+	// DemoInfo.Teams is rebuilt as the one-player-per-team layout in player
+	// order. The NameTable (built from the raw teams earlier in
+	// demoinfo.PopulateCore) is left untouched, so producers still resolve
+	// raw teams and apply the roster label on top.
+	//
+	// Applying it to duels alone left `demoInfo.players[].team` carrying the
+	// decorative clan tags on an FFA with a KTX block while every other
+	// section named players — and demoInfo is the FIRST place several
+	// consumers look for a name→team map, so they came out keyed on tags
+	// nothing else used or, in the frontend's case, empty (the map tab's
+	// player symbols, the loc heatmap, the timeline's per-team player
+	// lists). The two Go readers with the same shape are locgraph's byTeam
+	// and view.regionControl's name→team fallback.
+	//
+	// The raw userinfo tag is NOT lost: match.players[].rawTeam carries it
+	// verbatim (rebuildIndividualMatch).
+	if r.Individual() && co.DemoInfo != nil && len(co.DemoInfo.Players) > 0 {
+		teams := make([]string, 0, len(co.DemoInfo.Players))
+		seen := make(map[string]bool, len(co.DemoInfo.Players))
 		for i := range co.DemoInfo.Players {
-			co.DemoInfo.Players[i].Team = co.DemoInfo.Players[i].Name
+			name := co.DemoInfo.Players[i].Name
+			co.DemoInfo.Players[i].Team = name
+			if name == "" || seen[name] {
+				continue
+			}
+			seen[name] = true
+			teams = append(teams, name)
 		}
-		teams := make([]string, len(r.order))
-		copy(teams, r.order)
 		co.DemoInfo.Teams = teams
 	}
 }

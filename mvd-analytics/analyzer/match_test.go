@@ -704,3 +704,112 @@ func TestMatchAnalyzer_MidMatchSpectateFreezesFrags(t *testing.T) {
 		t.Errorf("frags = %d, want 18 (the announced score, frozen at the spectate)", got)
 	}
 }
+
+// A player who leaves and comes back on a server with no ghost keeps the
+// frags he announced on the way out. KTX makes no ghost in matchless mode
+// (MakeGhost returns at ktx/src/client.c:2897), so the second connection's
+// scoreboard row starts at zero and the "left the game with N frags"
+// broadcast is the only record of the first stint.
+//
+// Shape from ffa-demos/ffa_1[dm2]260116-2057.mvd: nexus leaves slot 4 (uid
+// 41) with 14 frags at 281.608 s, rejoins on slot 3 (uid 49) at 320.953 s
+// and leaves again with 0 at 326.443 s. Taking the latest stint reported 0
+// frags against 15 kills.
+func TestMatchAnalyzer_MatchlessRejoinKeepsAnnouncedFrags(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(4, 41, "nexus", "red", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourceMatchDate, TimeMs: 600})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 14, TimeMs: 270000})
+	_ = a.OnEvent(departure("nexus", 14, 281608))
+	_ = a.OnEvent(matchVacate(4, 41, "nexus", "red", 281608))
+	// Back, on another slot, with a scoreboard row the server re-created.
+	_ = a.OnEvent(matchUserInfo(3, 49, "nexus", "red", 320953))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 321000})
+	_ = a.OnEvent(departure("nexus", 0, 326443))
+	_ = a.OnEvent(matchVacate(3, 49, "nexus", "red", 326443))
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 14 {
+		t.Errorf("match.players = %+v, want one nexus row on 14 (14 + a 0-frag second stint)", res.Match.Players)
+	}
+}
+
+// The other half of the same rule: a stint that OPENS at the total the
+// identity had already reached continues it and must not be added on top.
+// That is KTX's ghost scoreboard row — ghost2scores republishes a departed
+// player's frags on a spare slot the instant the drop lands
+// (ktx/src/g_utils.c:2272-2356) — and equally the ghost RESTORE on
+// reconnect (client.c:1513-1517), which the server re-broadcasts as an
+// svc_updatefrags.
+//
+// Shape from hub 220637 (4on4_fu_mix…): rusti drops from slot 5 on 14 frags
+// at 630704 and the same 14 reappear on slot 10 in the same frame.
+func TestMatchAnalyzer_GhostRowContinuesTheScore(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(5, 37, "rusti (FU)", "-fu-", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 5, TimeMs: 1100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 5, Frags: 14, TimeMs: 600000})
+	_ = a.OnEvent(departure("rusti (FU)", 14, 630704))
+	_ = a.OnEvent(matchVacate(5, 37, "rusti (FU)", "-fu-", 630704))
+	_ = a.OnEvent(matchUserInfo(10, 43, "rusti (FU)", "-fu-", 630704))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 10, TimeMs: 630704})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 10, Frags: 14, TimeMs: 630704})
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 14 {
+		t.Errorf("match.players = %+v, want one rusti row on 14 — the carried-over score is not a second stint", res.Match.Players)
+	}
+}
+
+// A server that DID restore the score announces it, and the announcement is
+// read per netname over the whole demo — because the restore can land on a
+// different scoreboard row from the departure it restores. Two occupancies
+// of one name that were live at the same instant are deliberately kept as
+// separate rows (rowForKey), which is exactly the shape archive
+// 2eb485602a7a… has: callen leaves with 3 frags at 101 930 ms, "callen
+// [liu] rejoins the game with 3 frags" lands at 141 997, and the 3 are then
+// inside his final 36. Summing would report 39 against a serverinfo `score`
+// key that says 36.
+func TestMatchAnalyzer_AnnouncedRestoreIsNotSummed(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(0, 777, "callen", "liu", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 3, TimeMs: 90000})
+	_ = a.OnEvent(departure("callen", 3, 101930))
+	_ = a.OnEvent(matchVacate(0, 777, "callen", "liu", 101930))
+	_ = a.OnEvent(&events.PlayerRejoinEvent{Prefix: "callen [liu]", Frags: 3, FragsKnown: true, WithStats: true, TimeMs: 141997})
+	_ = a.OnEvent(matchUserInfo(4, 781, "callen", "liu", 141997))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 142000})
+	// The restore itself is re-broadcast, then he plays on to 36.
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 3, TimeMs: 142100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 36, TimeMs: 500000})
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 36 {
+		t.Errorf("match.players = %+v, want one callen row on 36 — the restored 3 are already in it", res.Match.Players)
+	}
+}

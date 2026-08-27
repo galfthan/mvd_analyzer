@@ -24269,7 +24269,7 @@
       },
       {
         "deaths": 34,
-        "frags": 0,
+        "frags": 14,
         "kills": 15,
         "name": "nexus",
         "rawTeam": "'tro",
@@ -24341,7 +24341,7 @@
         "name": "toast"
       },
       {
-        "frags": 0,
+        "frags": 14,
         "name": "nexus"
       },
       {
@@ -26868,7 +26868,7 @@
           },
           "deaths": 34,
           "efficiency": 0.3061,
-          "frags": 0,
+          "frags": 14,
           "kills": 15,
           "maxQuadSpree": 0,
           "maxSpree": 3,

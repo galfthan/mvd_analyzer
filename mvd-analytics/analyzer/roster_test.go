@@ -1,6 +1,9 @@
 package analyzer
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 // TestRoster_DuelDetection ports the old isDuelResult cases onto the roster
 // seams that replaced it: newRoster is the demoinfo authority, and
@@ -217,5 +220,75 @@ func TestMergeFragEventsByTime(t *testing.T) {
 		if fe.Time != wantTimes[i] {
 			t.Errorf("merged[%d].Time = %v, want %v", i, fe.Time, wantTimes[i])
 		}
+	}
+}
+
+// The individual layout applies to demoInfo too, not just to the duel case
+// it started as. demoInfo is where several consumers look FIRST for a
+// name→team map — locgraph's byTeam, view.regionControl's fallback, and on
+// the frontend the map tab's player symbols, the loc heatmap and the
+// timeline's per-team player lists — so leaving the decorative clan tags on
+// it while every other section named players left those surfaces keyed on
+// labels nothing else used.
+//
+// Shape from the ffa_countdown_dm6_260106 golden (archive 52c1421d…): a KTX
+// block with teams ["", "tsc", "red"] over an FFA.
+func TestRosterAnalyzer_IndividualRelabelsDemoInfo(t *testing.T) {
+	a := NewRosterAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	co := &CoreOutputs{
+		DemoInfo: &DemoInfoResult{
+			Version: 3, Mode: "ffa",
+			Players: []DemoInfoPlayer{
+				{Name: "Polish Rifle", Team: ""},
+				{Name: "keith", Team: "tsc"},
+				{Name: "rdleifriaf", Team: "red"},
+			},
+		},
+		ServerInfo: map[string]string{"mode": "ffa", "deathmatch": "3"},
+	}
+	a.PopulateCore(co)
+
+	if !co.Roster.Individual() || co.Roster.Duel() {
+		t.Fatalf("roster = %+v, want individual and not a duel", co.Roster)
+	}
+	for _, p := range co.DemoInfo.Players {
+		if p.Team != p.Name {
+			t.Errorf("demoInfo player %q: team = %q, want its own name", p.Name, p.Team)
+		}
+	}
+	want := []string{"Polish Rifle", "keith", "rdleifriaf"}
+	if !reflect.DeepEqual(co.DemoInfo.Teams, want) {
+		t.Errorf("demoInfo.teams = %v, want %v", co.DemoInfo.Teams, want)
+	}
+}
+
+// A team game is untouched: the rewrite is gated on the individual layout,
+// and a 4on4's tags name real sides.
+func TestRosterAnalyzer_TeamGameKeepsDemoInfoTags(t *testing.T) {
+	a := NewRosterAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	co := &CoreOutputs{
+		DemoInfo: &DemoInfoResult{
+			Version: 3, Mode: "team", Teamplay: 2,
+			Players: []DemoInfoPlayer{
+				{Name: "a", Team: "red"}, {Name: "b", Team: "red"},
+				{Name: "c", Team: "blue"}, {Name: "d", Team: "blue"},
+			},
+			Teams: []string{"red", "blue"},
+		},
+		ServerInfo: map[string]string{"mode": "2on2", "teamplay": "2"},
+	}
+	a.PopulateCore(co)
+
+	if co.Roster.Individual() {
+		t.Fatalf("roster = %+v, want a team layout", co.Roster)
+	}
+	if co.DemoInfo.Players[0].Team != "red" || !reflect.DeepEqual(co.DemoInfo.Teams, []string{"red", "blue"}) {
+		t.Errorf("demoInfo teams rewritten on a team game: %+v / %v", co.DemoInfo.Players, co.DemoInfo.Teams)
 	}
 }

@@ -30,6 +30,12 @@ type MatchAnalyzer struct {
 	// broadcasts, the authoritative recovery for a departing player's
 	// score (see closeOccupancy).
 	leaves []leaveBroadcast
+
+	// restorePrefixes are the leading texts of the "rejoins the game with N
+	// frags" broadcasts — KTX announcing that a reconnecting client was
+	// matched to its ghost and its score put back
+	// (ktx/src/client.c:1513-1543). See foldStintFrags.
+	restorePrefixes []string
 }
 
 // occupancyScore is one occupancy's svc_updatefrags cursor plus the
@@ -42,6 +48,15 @@ type occupancyScore struct {
 	movedAny  bool  // ... anywhere in the demo
 	played    bool  // spawn / death / position sample inside the match window
 	playedAny bool  // ... anywhere in the demo
+
+	// firstFrags is the first value the wire attested for this occupancy
+	// and sawFrags whether it attested any. Together they say whether the
+	// occupancy's score CONTINUES an earlier one on the same identity (it
+	// opened at or above the total that identity had already reached) or
+	// restarted from zero — the difference between a scoreboard row the
+	// server carried over and one it re-created. See foldStintFrags.
+	firstFrags int
+	sawFrags   bool
 
 	final     int // frozen score, once the occupancy ended
 	finalized bool
@@ -102,6 +117,12 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 		a.timing.OnPrint(e)
 	case *events.PlayerDepartureEvent:
 		a.noteLeaveBroadcast(e)
+	case *events.PlayerRejoinEvent:
+		// Only the stats-restoring form. "reenters the game without stats"
+		// (ktx/src/client.c:1546-1553) is the server saying the opposite.
+		if e.WithStats {
+			a.restorePrefixes = append(a.restorePrefixes, e.Prefix)
+		}
 	case *events.IntermissionEvent:
 		a.timing.OnIntermission(e.TimeMs)
 	case *events.UserInfoEvent:
@@ -157,6 +178,9 @@ func (a *MatchAnalyzer) onFragUpdate(e *events.FragUpdateEvent) {
 		return
 	}
 	if e.Frags != sc.frags {
+		if !sc.sawFrags {
+			sc.sawFrags, sc.firstFrags = true, e.Frags
+		}
 		sc.prevFrags = sc.frags
 		sc.frags = e.Frags
 		sc.fragsAtMs = e.TimeMs
@@ -285,6 +309,48 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 	return best, found
 }
 
+// restoredNames resolves the "rejoins the game with N frags" broadcasts to
+// the normalized netnames they named.
+//
+// The broadcast's prefix is not a bare netname — in team modes KTX prints
+// "<netname> [<team>]" with no delimiter (ktx/src/client.c:1529-1534) — so
+// it is matched against the known occupancy netnames by longest prefix, the
+// same resolution IdentityAnalyzer.reconnectedNames applies to the same
+// lines.
+//
+// The verdict is per NETNAME and covers the whole demo, because the score
+// it carries can cross a scoreboard ROW: two occupancies of one name that
+// were live at the same instant are deliberately kept as separate rows
+// (rowForKey), and on archive 2eb485602a7a… callen's restore lands on the
+// other row from the departure it restores. Reading the broadcast as "this
+// name's stints are cumulative" is the conservative direction — it is the
+// one that cannot double-count.
+func (a *MatchAnalyzer) restoredNames() map[string]bool {
+	out := make(map[string]bool)
+	if len(a.restorePrefixes) == 0 {
+		return out
+	}
+	recs := a.occ.all()
+	names := make([]string, 0, len(recs))
+	seen := make(map[string]bool)
+	for _, rec := range recs {
+		if rec.name != "" && !seen[rec.name] {
+			seen[rec.name] = true
+			names = append(names, rec.name)
+		}
+	}
+	sort.Slice(names, func(i, j int) bool { return len(names[i]) > len(names[j]) })
+	for _, prefix := range a.restorePrefixes {
+		for _, n := range names {
+			if prefix == n || strings.HasPrefix(prefix, n+" ") {
+				out[normalizePlayerName(n)] = true
+				break
+			}
+		}
+	}
+	return out
+}
+
 // finalFrags is the occupancy's scoreboard value: the frozen one when it
 // ended mid-demo, else the live cursor (which the match-end guard in
 // onFragUpdate already protects from post-match re-inits).
@@ -393,6 +459,64 @@ type rosterRow struct {
 	slot    int
 	startMs int32
 	windows []rosterWindow
+	// stints is one entry per occupancy folded into this row, in the order
+	// the occupancy list produced them. foldStintFrags turns them into the
+	// row's score.
+	stints []stintScore
+}
+
+// stintScore is one occupancy's frozen score as it enters the identity fold:
+// when it started, what it finished on, and the first frag value the wire
+// attested for it.
+type stintScore struct {
+	startMs    int32
+	frags      int
+	firstFrags int
+	sawFrags   bool
+	// restored is set when the server ANNOUNCED a ghost restore for this
+	// netname anywhere in the demo (restoredNames).
+	restored bool
+}
+
+// foldStintFrags turns an identity's occupancies into one scoreboard score.
+//
+// A stint that OPENED at or above the total this identity had already
+// reached continues it: its own final value already contains everything
+// earlier, so it replaces the running total. That is KTX's ghost scoreboard
+// row, which republishes a departed player's frags on a spare slot the
+// instant the drop lands (ghost2scores, ktx/src/g_utils.c:2272-2356). So
+// does a stint the server ANNOUNCED as a restore ("<name> rejoins the game
+// with N frags", ktx/src/client.c:1513-1543) — read per netname over the
+// whole demo, since a restore can land on a different scoreboard row from
+// the departure it restores (archive 2eb485602a7a…, callen).
+//
+// Every other stint ADDS, because its score restarted from zero. There is no
+// ghost at all in matchless mode (MakeGhost returns at
+// ktx/src/client.c:2897, `if (k_matchLess) // no ghost in matchless mode`),
+// so a player who leaves and comes back there starts again at zero and the
+// server's "left the game with N frags" broadcast for the earlier stint is
+// the only record it happened. On ffa-demos/ffa_1[dm2]…, nexus left slot 4
+// with 14 frags at 281.6 s and rejoined on slot 3 at 321.0 s, leaving again
+// with 0 — and taking the latest stint reported 0 frags against 15 kills,
+// breaking the frags == kills − suicides − teamKills identity the frag log
+// maintains.
+//
+// A stint the wire never attested a frag value for cannot have continued
+// anything: it adds, which is a no-op unless a departure broadcast gave it a
+// score of its own.
+func foldStintFrags(stints []stintScore) int {
+	ordered := make([]stintScore, len(stints))
+	copy(ordered, stints)
+	sort.SliceStable(ordered, func(i, j int) bool { return ordered[i].startMs < ordered[j].startMs })
+	total := 0
+	for _, st := range ordered {
+		if st.restored || (st.sawFrags && st.firstFrags >= total) {
+			total = st.frags
+			continue
+		}
+		total += st.frags
+	}
+	return total
 }
 
 // rosterWindow is one folded occupancy's half-open [start, end) span, with
@@ -509,6 +633,7 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// score of their latest stint, which is the total the server restored
 	// and re-asserted (ktx/src/client.c:1464-1490).
 	a.occ.closeOpen(a.durationMs)
+	restored := a.restoredNames()
 	var rows []*rosterRow
 	byKey := make(map[string][]*rosterRow)
 	for _, rec := range a.occ.all() {
@@ -540,6 +665,13 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 			row.stat, row.slot, row.startMs = stat, rec.slot, rec.startMs
 		}
 		row.windows = append(row.windows, rosterWindow{rec.startMs, rec.endMs, rec.identified()})
+		row.stints = append(row.stints, stintScore{
+			startMs:    rec.startMs,
+			frags:      sc.finalFrags(),
+			firstFrags: sc.firstFrags,
+			sawFrags:   sc.sawFrags,
+			restored:   restored[normalizePlayerName(name)],
+		})
 	}
 	// Emit in wire-slot order of each identity's kept occupancy, which is
 	// the order the previous slot-keyed loop produced and is stable across
@@ -552,6 +684,9 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 	})
 	for _, row := range rows {
 		stat := row.stat
+		// The score spans every stint this identity played, not just the
+		// last one — see foldStintFrags.
+		stat.Frags = foldStintFrags(row.stints)
 		// A player who legitimately finishes on 0 frags (kills cancelled by
 		// suicides, a short but real appearance) is still a participant — the
 		// surface-authoritative-data policy says report them rather than guess
@@ -644,8 +779,15 @@ func (a *MatchAnalyzer) refineGameMode(mr *MatchResult) {
 	if gm.Canonical == "" || gm.Canonical == result.GameModeUnknown {
 		gm.Canonical, gm.Sources.Canonical = result.GameModeDuel, result.GameModeSrcRoster
 	}
-	if gm.Canonical == result.GameModeDuel && gm.TeamBased {
-		gm.TeamBased, gm.Sources.TeamBased = false, result.GameModeSrcMode
+	// Only a TeamBased verdict the TAG CENSUS produced is superseded — the
+	// two-participant shape is the better roster-level reading of the same
+	// evidence (two duellists who both picked `red` are not a team). A
+	// verdict a teamplay cvar, a countdown row or a demoinfo block reached
+	// stands: a roster-inferred duel does not get to veto a ruleset that
+	// was demonstrably in force (see gamemode.go's precedence note and
+	// the CTF-on-dm6 archive demo behind it).
+	if gm.Canonical == result.GameModeDuel && gm.Sources.TeamBased == result.GameModeSrcRoster {
+		gm.TeamBased = false
 	}
 }
 

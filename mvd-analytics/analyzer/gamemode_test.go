@@ -14,12 +14,18 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 	ktxDuel := &DemoInfoResult{Version: 3, Mode: "duel", Players: []DemoInfoPlayer{{Name: "a"}, {Name: "b"}}}
 	ktxTeam := &DemoInfoResult{Version: 3, Mode: "team", Teamplay: 2, Players: []DemoInfoPlayer{{Name: "a"}, {Name: "b"}, {Name: "c"}, {Name: "d"}}}
 
+	// A two-participant roster, the shape a duel verdict is inferred from
+	// when nothing else names a mode.
+	duelRoster := &Roster{isDuel: true, demoDecided: true,
+		participants: map[string]struct{}{"a": {}, "b": {}}, order: []string{"a", "b"}}
+
 	cases := []struct {
 		name       string
 		di         *DemoInfoResult
 		fs         *FinalScores
 		ms         *MatchSettings
 		si         map[string]string
+		roster     *Roster
 		counts     map[string]int
 		canonical  string
 		srcCanon   string
@@ -67,6 +73,52 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 			teamBased: false, srcTeam: result.GameModeSrcMode, individual: true,
 		},
 		{
+			// The countdown states the settings the match STARTED under; the
+			// serverinfo `mode` key states the last usermode command that ran
+			// (world.c:1482 over commands.c:4848), which a plain teamplay
+			// change leaves stale. Shape from archive b95c35735c4d…:
+			// serverinfo mode=1on1, countdown Mode=Team, tp 2.
+			name:      "countdown outranks the serverinfo umode",
+			ms:        &MatchSettings{Mode: "Team", Teamplay: 2},
+			si:        map[string]string{"mode": "1on1"},
+			canonical: result.GameModeTeam, srcCanon: result.GameModeSrcCountdown,
+			teamBased: true, srcTeam: result.GameModeSrcCountdown, individual: false,
+		},
+		{
+			// A roster-inferred duel may NOT veto a teamplay ruleset that
+			// was demonstrably in force. Shape from archive 2a2ed2e9ca…:
+			// *gamedir=ctf, teamplay=419, Chipie [red] vs Pain [blue], no
+			// demoinfo block and no countdown.
+			name:   "roster duel does not veto a teamplay cvar",
+			roster: duelRoster,
+			si:     map[string]string{"teamplay": "419", "*gamedir": "ctf"},
+			counts: map[string]int{"red": 1, "blue": 1},
+			// The LAYOUT is still individual — that is Roster.Duel(), not
+			// this field: individualLayoutFromMode refuses a roster verdict.
+			canonical: result.GameModeDuel, srcCanon: result.GameModeSrcRoster,
+			teamBased: true, srcTeam: result.GameModeSrcServerInfo, individual: false,
+		},
+		{
+			name:   "roster duel with no cvar has no teams",
+			roster: duelRoster,
+			// Both duellists happen to have picked the same colour tag; the
+			// tag census would call that a team.
+			counts:    map[string]int{"red": 2},
+			canonical: result.GameModeDuel, srcCanon: result.GameModeSrcRoster,
+			teamBased: false, srcTeam: result.GameModeSrcRoster, individual: false,
+		},
+		{
+			// A demoinfo block that named no mode does not get to have its
+			// silence about `tp` read as "teamplay 0" — the mode some OTHER
+			// source named says nothing about what this build writes.
+			name:      "demoinfo with no mode defers to the teamplay cvar",
+			di:        &DemoInfoResult{Version: 1, Players: []DemoInfoPlayer{{Name: "a"}, {Name: "b"}, {Name: "c"}, {Name: "d"}}},
+			ms:        &MatchSettings{Mode: "4on4"},
+			si:        map[string]string{"teamplay": "2"},
+			canonical: result.GameModeTeam, srcCanon: result.GameModeSrcCountdown,
+			teamBased: true, srcTeam: result.GameModeSrcServerInfo, individual: false,
+		},
+		{
 			name:      "roster shape is the last resort and does NOT drive the layout",
 			counts:    map[string]int{"red": 4, "blue": 4},
 			canonical: result.GameModeUnknown, srcCanon: "",
@@ -92,7 +144,7 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			gm := resolveGameMode(c.di, c.fs, c.ms, c.si, nil, c.counts)
+			gm := resolveGameMode(c.di, c.fs, c.ms, c.si, c.roster, c.counts)
 			if gm.Canonical != c.canonical {
 				t.Errorf("canonical = %q, want %q", gm.Canonical, c.canonical)
 			}

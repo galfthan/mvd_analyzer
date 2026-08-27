@@ -354,7 +354,14 @@ demo offset, pauses, wall-clock anchor), [`demoinfo`](analyzer/demoinfo.md)
 and `roster` (the canonical player/team table with the individual
 player-name-as-team rewrite folded in, plus the normalised game-mode
 descriptor `co.GameMode` — the mode verdict, the duel verdict, participant set,
-and `TeamFor(name, rawTeam)`). The rest either implement `CoreConsumer` to
+and `TeamFor(name, rawTeam)`). Neither is FINAL when `roster` publishes it:
+on a demo with no usable demoinfo block, `match`'s `Finalize` is what
+establishes the two-participant duel verdict from the scoreboard it just
+built and refines the descriptor from it, mutating both shared structs. That
+is why `match` publishes the pseudo-artifact **`roster:final`** and every
+reader of `co.Roster` / `co.GameMode` declares an edge on THAT rather than on
+`roster` — without it the verdict a node saw depended on where the scheduler
+put it. The rest either implement `CoreConsumer` to
 read those fields — [`metadata`](analyzer/metadata.md),
 [`match`](analyzer/match.md), [`messages`](analyzer/messages.md),
 [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), `damage`,
@@ -563,18 +570,20 @@ flowchart TB
     roster["roster"]
   end
   subgraph d2["depth 2"]
-    frag["frag"]
     match["match"]
+  end
+  subgraph d3["depth 3"]
+    frag["frag"]
     messages["messages"]
     items["items"]
     damage["damage"]
     backpacks["backpacks"]
   end
-  subgraph d3["depth 3"]
+  subgraph d4["depth 4"]
     timeline["timeline"]
     weapon_pickups["weapon-pickups"]
   end
-  subgraph d4["depth 4"]
+  subgraph d5["depth 5"]
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
@@ -582,19 +591,19 @@ flowchart TB
     opening["opening"]
     los["los"]
   end
-  subgraph d5["depth 5"]
+  subgraph d6["depth 6"]
     match_final["match-final"]
     no_match["no-match"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
-  subgraph d6["depth 6"]
+  subgraph d7["depth 7"]
     aim["aim"]
     airgibs["airgibs"]
     wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
-  subgraph d7["depth 7"]
+  subgraph d8["depth 8"]
     player_stats["player-stats"]
   end
   aim -->|"aim"| player_stats
@@ -654,8 +663,16 @@ flowchart TB
   items -->|"items"| backpack_linkage
   items -->|"items"| opening
   items -->|"items"| player_stats
+  match -->|"roster:final"| backpacks
+  match -->|"roster:final"| damage
+  match -->|"roster:final"| frag
+  match -->|"roster:final"| items
   match -->|"match"| match_final
+  match -->|"roster:final"| messages
   match -->|"match"| region_control
+  match -->|"roster:final"| shots
+  match -->|"roster:final"| timeline
+  match -->|"roster:final"| weapon_pickups
   match_final -->|"match:final"| player_stats
   metadata -->|"metadata"| backpack_recon
   metadata -->|"metadata"| damage
@@ -668,16 +685,8 @@ flowchart TB
   metadata -->|"metadata"| timeline
   metadata -->|"metadata"| wall_clock
   no_match -->|"no-match"| wall_clock
-  roster -->|"roster"| backpacks
-  roster -->|"roster"| damage
-  roster -->|"roster"| frag
-  roster -->|"roster"| items
   roster -->|"roster"| match
-  roster -->|"roster"| messages
   roster -->|"roster"| player_stats
-  roster -->|"roster"| shots
-  roster -->|"roster"| timeline
-  roster -->|"roster"| weapon_pickups
   shots -->|"shots"| aim
   shots -->|"shots"| damage_recon
   shots -->|"shots"| player_stats

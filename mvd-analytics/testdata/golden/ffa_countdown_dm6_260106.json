@@ -9060,7 +9060,7 @@
           "kills": 2,
           "suicides": 2
         },
-        "team": "",
+        "team": "Polish Rifle",
         "weapons": {
           "gl": {
             "acc": {
@@ -9225,7 +9225,7 @@
           "kills": 40,
           "suicides": 1
         },
-        "team": "tsc",
+        "team": "keith",
         "topColor": 4,
         "weapons": {
           "gl": {
@@ -9381,7 +9381,7 @@
           "kills": 8,
           "suicides": 1
         },
-        "team": "red",
+        "team": "rdleifriaf",
         "topColor": 4,
         "weapons": {
           "gl": {
@@ -9515,6 +9515,11 @@
       }
     ],
     "port": 28502,
+    "teams": [
+      "Polish Rifle",
+      "keith",
+      "rdleifriaf"
+    ],
     "timelimit": 8,
     "version": 3
   },
@@ -12532,8 +12537,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 1
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
           },
           "total": 3
         },
@@ -12543,8 +12549,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 1
+          "Polish Rifle": 6,
+          "keith": 1,
+          "rdleifriaf": 3
         },
         "from": "GA",
         "kind": "normal",
@@ -12556,7 +12563,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 5,
+            "rdleifriaf": 2
           },
           "total": 7
         }
@@ -12567,7 +12575,8 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1
+          "Polish Rifle": 1,
+          "rdleifriaf": 1
         },
         "from": "GA",
         "kind": "normal",
@@ -12579,7 +12588,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
           },
           "total": 2
         }
@@ -12592,8 +12602,9 @@
             "rdleifriaf": 4
           },
           "byTeam": {
-            "red": 4,
-            "tsc": 3
+            "Polish Rifle": 5,
+            "keith": 3,
+            "rdleifriaf": 4
           },
           "total": 12
         },
@@ -12603,8 +12614,9 @@
           "rdleifriaf": 7
         },
         "byTeam": {
-          "red": 7,
-          "tsc": 3
+          "Polish Rifle": 11,
+          "keith": 3,
+          "rdleifriaf": 7
         },
         "from": "GA",
         "kind": "normal",
@@ -12616,7 +12628,8 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3
+            "Polish Rifle": 6,
+            "rdleifriaf": 3
           },
           "total": 9
         }
@@ -12629,8 +12642,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 1
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
           },
           "total": 3
         },
@@ -12640,8 +12654,9 @@
           "rdleifriaf": 8
         },
         "byTeam": {
-          "red": 8,
-          "tsc": 2
+          "Polish Rifle": 6,
+          "keith": 2,
+          "rdleifriaf": 8
         },
         "from": "GA",
         "kind": "teleport",
@@ -12654,8 +12669,9 @@
             "rdleifriaf": 7
           },
           "byTeam": {
-            "red": 7,
-            "tsc": 1
+            "Polish Rifle": 5,
+            "keith": 1,
+            "rdleifriaf": 7
           },
           "total": 13
         }
@@ -12667,7 +12683,8 @@
             "keith": 4
           },
           "byTeam": {
-            "tsc": 4
+            "Polish Rifle": 1,
+            "keith": 4
           },
           "total": 5
         },
@@ -12677,8 +12694,9 @@
           "rdleifriaf": 7
         },
         "byTeam": {
-          "red": 7,
-          "tsc": 5
+          "Polish Rifle": 9,
+          "keith": 5,
+          "rdleifriaf": 7
         },
         "from": "GA.cells",
         "kind": "normal",
@@ -12691,8 +12709,9 @@
             "rdleifriaf": 7
           },
           "byTeam": {
-            "red": 7,
-            "tsc": 1
+            "Polish Rifle": 8,
+            "keith": 1,
+            "rdleifriaf": 7
           },
           "total": 16
         }
@@ -12705,8 +12724,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 2
+            "Polish Rifle": 1,
+            "keith": 2,
+            "rdleifriaf": 1
           },
           "total": 4
         },
@@ -12716,8 +12736,9 @@
           "rdleifriaf": 7
         },
         "byTeam": {
-          "red": 7,
-          "tsc": 2
+          "Polish Rifle": 8,
+          "keith": 2,
+          "rdleifriaf": 7
         },
         "from": "GA.cells",
         "kind": "normal",
@@ -12729,7 +12750,8 @@
             "rdleifriaf": 6
           },
           "byTeam": {
-            "red": 6
+            "Polish Rifle": 7,
+            "rdleifriaf": 6
           },
           "total": 13
         }
@@ -12740,7 +12762,8 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3
+          "Polish Rifle": 8,
+          "rdleifriaf": 3
         },
         "from": "GA.hide",
         "kind": "normal",
@@ -12752,7 +12775,8 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3
+            "Polish Rifle": 8,
+            "rdleifriaf": 3
           },
           "total": 11
         }
@@ -12764,7 +12788,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
           },
           "total": 4
         },
@@ -12773,7 +12798,8 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3
+          "Polish Rifle": 5,
+          "rdleifriaf": 3
         },
         "from": "GA.shells",
         "kind": "normal",
@@ -12785,7 +12811,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
           },
           "total": 4
         }
@@ -12798,8 +12825,9 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 4
+            "Polish Rifle": 1,
+            "keith": 4,
+            "rdleifriaf": 2
           },
           "total": 7
         },
@@ -12809,8 +12837,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 4
+          "Polish Rifle": 5,
+          "keith": 4,
+          "rdleifriaf": 3
         },
         "from": "GA.shells",
         "kind": "normal",
@@ -12822,7 +12851,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
           },
           "total": 5
         }
@@ -12834,7 +12864,8 @@
             "keith": 5
           },
           "byTeam": {
-            "tsc": 5
+            "Polish Rifle": 1,
+            "keith": 5
           },
           "total": 6
         },
@@ -12844,8 +12875,9 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2,
-          "tsc": 5
+          "Polish Rifle": 1,
+          "keith": 5,
+          "rdleifriaf": 2
         },
         "from": "GL",
         "kind": "normal",
@@ -12856,7 +12888,7 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "rdleifriaf": 2
           },
           "total": 2
         }
@@ -12868,8 +12900,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 5
+            "keith": 5,
+            "rdleifriaf": 1
           },
           "total": 6
         },
@@ -12879,8 +12911,9 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 6
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 1
         },
         "from": "GL",
         "kind": "normal",
@@ -12892,7 +12925,8 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "Polish Rifle": 2,
+            "keith": 1
           },
           "total": 3
         }
@@ -12903,7 +12937,8 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2
+          "Polish Rifle": 2,
+          "rdleifriaf": 2
         },
         "from": "GL",
         "kind": "normal",
@@ -12915,7 +12950,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
           },
           "total": 4
         }
@@ -12926,7 +12962,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -12934,7 +12970,7 @@
           "keith": 1
         },
         "byTeam": {
-          "tsc": 1
+          "keith": 1
         },
         "from": "GL",
         "kind": "normal",
@@ -12947,7 +12983,7 @@
             "keith": 8
           },
           "byTeam": {
-            "tsc": 8
+            "keith": 8
           },
           "total": 8
         },
@@ -12957,8 +12993,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 8
+          "Polish Rifle": 2,
+          "keith": 8,
+          "rdleifriaf": 3
         },
         "from": "GL",
         "kind": "normal",
@@ -12970,7 +13007,8 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
           },
           "total": 5
         }
@@ -12981,7 +13019,7 @@
             "keith": 16
           },
           "byTeam": {
-            "tsc": 16
+            "keith": 16
           },
           "total": 16
         },
@@ -12990,7 +13028,8 @@
           "keith": 16
         },
         "byTeam": {
-          "tsc": 16
+          "Polish Rifle": 2,
+          "keith": 16
         },
         "from": "GL.RA",
         "kind": "normal",
@@ -12998,6 +13037,9 @@
         "total": 18,
         "unarmed": {
           "byPlayer": {
+            "Polish Rifle": 2
+          },
+          "byTeam": {
             "Polish Rifle": 2
           },
           "total": 2
@@ -13010,8 +13052,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 4
+            "keith": 4,
+            "rdleifriaf": 1
           },
           "total": 5
         },
@@ -13020,8 +13062,8 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 5
+          "keith": 5,
+          "rdleifriaf": 1
         },
         "from": "GL.RA",
         "kind": "normal",
@@ -13032,7 +13074,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         }
@@ -13043,7 +13085,7 @@
             "keith": 9
           },
           "byTeam": {
-            "tsc": 9
+            "keith": 9
           },
           "total": 9
         },
@@ -13053,8 +13095,9 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 9
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 1
         },
         "from": "GL.below",
         "kind": "normal",
@@ -13066,7 +13109,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
           },
           "total": 2
         }
@@ -13079,8 +13123,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 6
+            "Polish Rifle": 3,
+            "keith": 6,
+            "rdleifriaf": 1
           },
           "total": 10
         },
@@ -13090,8 +13135,9 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 6
+          "Polish Rifle": 4,
+          "keith": 6,
+          "rdleifriaf": 1
         },
         "from": "GL.below",
         "kind": "normal",
@@ -13099,6 +13145,9 @@
         "total": 11,
         "unarmed": {
           "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
             "Polish Rifle": 1
           },
           "total": 1
@@ -13111,8 +13160,9 @@
           "rdleifriaf": 5
         },
         "byTeam": {
-          "red": 5,
-          "tsc": 1
+          "Polish Rifle": 4,
+          "keith": 1,
+          "rdleifriaf": 5
         },
         "from": "GL.hide",
         "kind": "normal",
@@ -13125,8 +13175,9 @@
             "rdleifriaf": 5
           },
           "byTeam": {
-            "red": 5,
-            "tsc": 1
+            "Polish Rifle": 4,
+            "keith": 1,
+            "rdleifriaf": 5
           },
           "total": 10
         }
@@ -13138,8 +13189,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 9
+            "keith": 9,
+            "rdleifriaf": 1
           },
           "total": 10
         },
@@ -13148,8 +13199,8 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 9
+          "keith": 9,
+          "rdleifriaf": 1
         },
         "from": "LG",
         "kind": "teleport",
@@ -13163,7 +13214,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 3,
+            "rdleifriaf": 2
           },
           "total": 5
         },
@@ -13172,7 +13224,8 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2
+          "Polish Rifle": 3,
+          "rdleifriaf": 2
         },
         "from": "MH",
         "kind": "teleport",
@@ -13186,7 +13239,8 @@
             "rdleifriaf": 4
           },
           "byTeam": {
-            "red": 4
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
           },
           "total": 5
         },
@@ -13195,7 +13249,8 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
         },
         "from": "MH",
         "kind": "normal",
@@ -13210,8 +13265,9 @@
             "rdleifriaf": 13
           },
           "byTeam": {
-            "red": 13,
-            "tsc": 6
+            "Polish Rifle": 2,
+            "keith": 6,
+            "rdleifriaf": 13
           },
           "total": 21
         },
@@ -13221,8 +13277,9 @@
           "rdleifriaf": 13
         },
         "byTeam": {
-          "red": 13,
-          "tsc": 6
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 13
         },
         "from": "MH",
         "kind": "normal",
@@ -13236,7 +13293,8 @@
             "rdleifriaf": 4
           },
           "byTeam": {
-            "red": 4
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
           },
           "total": 5
         },
@@ -13245,7 +13303,8 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
         },
         "from": "MH.behind",
         "kind": "normal",
@@ -13259,8 +13318,8 @@
             "rdleifriaf": 8
           },
           "byTeam": {
-            "red": 8,
-            "tsc": 5
+            "keith": 5,
+            "rdleifriaf": 8
           },
           "total": 13
         },
@@ -13269,8 +13328,8 @@
           "rdleifriaf": 9
         },
         "byTeam": {
-          "red": 9,
-          "tsc": 5
+          "keith": 5,
+          "rdleifriaf": 9
         },
         "from": "MH.pipe",
         "kind": "normal",
@@ -13281,7 +13340,7 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "rdleifriaf": 1
           },
           "total": 1
         }
@@ -13292,7 +13351,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -13300,7 +13359,7 @@
           "keith": 1
         },
         "byTeam": {
-          "tsc": 1
+          "keith": 1
         },
         "from": "MH.pipe",
         "kind": "normal",
@@ -13315,8 +13374,9 @@
             "rdleifriaf": 4
           },
           "byTeam": {
-            "red": 4,
-            "tsc": 4
+            "Polish Rifle": 2,
+            "keith": 4,
+            "rdleifriaf": 4
           },
           "total": 10
         },
@@ -13326,8 +13386,9 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4,
-          "tsc": 4
+          "Polish Rifle": 2,
+          "keith": 4,
+          "rdleifriaf": 4
         },
         "from": "MH.pipe",
         "kind": "normal",
@@ -13340,7 +13401,7 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "rdleifriaf": 1
           },
           "total": 1
         },
@@ -13348,7 +13409,7 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1
+          "rdleifriaf": 1
         },
         "from": "MH.pipe",
         "kind": "normal",
@@ -13361,7 +13422,7 @@
             "keith": 15
           },
           "byTeam": {
-            "tsc": 15
+            "keith": 15
           },
           "total": 15
         },
@@ -13370,7 +13431,8 @@
           "keith": 15
         },
         "byTeam": {
-          "tsc": 15
+          "Polish Rifle": 1,
+          "keith": 15
         },
         "from": "RA",
         "kind": "normal",
@@ -13378,6 +13440,9 @@
         "total": 16,
         "unarmed": {
           "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
             "Polish Rifle": 1
           },
           "total": 1
@@ -13391,8 +13456,9 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 2
+            "Polish Rifle": 2,
+            "keith": 2,
+            "rdleifriaf": 2
           },
           "total": 6
         },
@@ -13402,8 +13468,9 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2,
-          "tsc": 2
+          "Polish Rifle": 2,
+          "keith": 2,
+          "rdleifriaf": 2
         },
         "from": "RA",
         "kind": "normal",
@@ -13416,7 +13483,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -13425,7 +13492,8 @@
           "keith": 1
         },
         "byTeam": {
-          "tsc": 1
+          "Polish Rifle": 1,
+          "keith": 1
         },
         "from": "RA",
         "kind": "normal",
@@ -13433,6 +13501,9 @@
         "total": 2,
         "unarmed": {
           "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
             "Polish Rifle": 1
           },
           "total": 1
@@ -13446,8 +13517,9 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 5
+            "Polish Rifle": 3,
+            "keith": 5,
+            "rdleifriaf": 2
           },
           "total": 10
         },
@@ -13457,8 +13529,9 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2,
-          "tsc": 5
+          "Polish Rifle": 3,
+          "keith": 5,
+          "rdleifriaf": 2
         },
         "from": "RA",
         "kind": "normal",
@@ -13471,7 +13544,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -13481,8 +13554,9 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 3
+          "Polish Rifle": 3,
+          "keith": 3,
+          "rdleifriaf": 1
         },
         "from": "RA.behind",
         "kind": "normal",
@@ -13495,8 +13569,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 2
+            "Polish Rifle": 3,
+            "keith": 2,
+            "rdleifriaf": 1
           },
           "total": 6
         }
@@ -13509,8 +13584,9 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3,
-            "tsc": 9
+            "Polish Rifle": 1,
+            "keith": 9,
+            "rdleifriaf": 3
           },
           "total": 13
         },
@@ -13520,8 +13596,9 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4,
-          "tsc": 9
+          "Polish Rifle": 5,
+          "keith": 9,
+          "rdleifriaf": 4
         },
         "from": "RA.tunnel",
         "kind": "normal",
@@ -13533,7 +13610,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
           },
           "total": 5
         }
@@ -13546,8 +13624,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 10
+            "Polish Rifle": 3,
+            "keith": 10,
+            "rdleifriaf": 1
           },
           "total": 14
         },
@@ -13557,8 +13636,9 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4,
-          "tsc": 10
+          "Polish Rifle": 3,
+          "keith": 10,
+          "rdleifriaf": 4
         },
         "from": "RA.tunnel",
         "kind": "normal",
@@ -13569,7 +13649,7 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3
+            "rdleifriaf": 3
           },
           "total": 3
         }
@@ -13582,8 +13662,9 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 1
+            "Polish Rifle": 2,
+            "keith": 1,
+            "rdleifriaf": 2
           },
           "total": 5
         },
@@ -13593,8 +13674,9 @@
           "rdleifriaf": 4
         },
         "byTeam": {
-          "red": 4,
-          "tsc": 1
+          "Polish Rifle": 3,
+          "keith": 1,
+          "rdleifriaf": 4
         },
         "from": "big",
         "kind": "teleport",
@@ -13606,7 +13688,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
           },
           "total": 3
         }
@@ -13617,7 +13700,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -13625,7 +13708,7 @@
           "keith": 1
         },
         "byTeam": {
-          "tsc": 1
+          "keith": 1
         },
         "from": "big",
         "kind": "normal",
@@ -13638,7 +13721,7 @@
             "keith": 1
           },
           "byTeam": {
-            "tsc": 1
+            "keith": 1
           },
           "total": 1
         },
@@ -13646,7 +13729,7 @@
           "keith": 1
         },
         "byTeam": {
-          "tsc": 1
+          "keith": 1
         },
         "from": "big",
         "kind": "normal",
@@ -13661,8 +13744,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 13
+            "Polish Rifle": 1,
+            "keith": 13,
+            "rdleifriaf": 1
           },
           "total": 15
         },
@@ -13672,8 +13756,9 @@
           "rdleifriaf": 2
         },
         "byTeam": {
-          "red": 2,
-          "tsc": 13
+          "Polish Rifle": 4,
+          "keith": 13,
+          "rdleifriaf": 2
         },
         "from": "big",
         "kind": "normal",
@@ -13685,7 +13770,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
           },
           "total": 4
         }
@@ -13696,7 +13782,7 @@
             "keith": 4
           },
           "byTeam": {
-            "tsc": 4
+            "keith": 4
           },
           "total": 4
         },
@@ -13705,8 +13791,8 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1,
-          "tsc": 4
+          "keith": 4,
+          "rdleifriaf": 1
         },
         "from": "big",
         "kind": "normal",
@@ -13717,7 +13803,7 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "rdleifriaf": 1
           },
           "total": 1
         }
@@ -13730,8 +13816,9 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 12
+            "Polish Rifle": 2,
+            "keith": 12,
+            "rdleifriaf": 2
           },
           "total": 16
         },
@@ -13741,8 +13828,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 12
+          "Polish Rifle": 2,
+          "keith": 12,
+          "rdleifriaf": 3
         },
         "from": "big",
         "kind": "normal",
@@ -13753,7 +13841,7 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "rdleifriaf": 1
           },
           "total": 1
         }
@@ -13766,8 +13854,9 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3,
-            "tsc": 16
+            "Polish Rifle": 3,
+            "keith": 16,
+            "rdleifriaf": 3
           },
           "total": 22
         },
@@ -13777,8 +13866,9 @@
           "rdleifriaf": 6
         },
         "byTeam": {
-          "red": 6,
-          "tsc": 16
+          "Polish Rifle": 5,
+          "keith": 16,
+          "rdleifriaf": 6
         },
         "from": "big",
         "kind": "normal",
@@ -13790,7 +13880,8 @@
             "rdleifriaf": 3
           },
           "byTeam": {
-            "red": 3
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
           },
           "total": 5
         }
@@ -13801,7 +13892,7 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "rdleifriaf": 1
           },
           "total": 1
         },
@@ -13809,7 +13900,7 @@
           "rdleifriaf": 1
         },
         "byTeam": {
-          "red": 1
+          "rdleifriaf": 1
         },
         "from": "big.hatch",
         "kind": "normal",
@@ -13823,8 +13914,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2,
-            "tsc": 9
+            "keith": 9,
+            "rdleifriaf": 2
           },
           "total": 11
         },
@@ -13834,8 +13925,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 9
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 3
         },
         "from": "big.hatch",
         "kind": "normal",
@@ -13847,7 +13939,8 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
           },
           "total": 2
         }
@@ -13860,8 +13953,9 @@
             "rdleifriaf": 1
           },
           "byTeam": {
-            "red": 1,
-            "tsc": 7
+            "Polish Rifle": 2,
+            "keith": 7,
+            "rdleifriaf": 1
           },
           "total": 10
         },
@@ -13871,8 +13965,9 @@
           "rdleifriaf": 3
         },
         "byTeam": {
-          "red": 3,
-          "tsc": 7
+          "Polish Rifle": 3,
+          "keith": 7,
+          "rdleifriaf": 3
         },
         "from": "big.hatch",
         "kind": "normal",
@@ -13884,7 +13979,8 @@
             "rdleifriaf": 2
           },
           "byTeam": {
-            "red": 2
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
           },
           "total": 3
         }
@@ -13899,8 +13995,9 @@
             "rdleifriaf": 26942
           },
           "byTeam": {
-            "red": 26942,
-            "tsc": 19460
+            "Polish Rifle": 23890,
+            "keith": 19460,
+            "rdleifriaf": 26942
           },
           "total": 70292
         },
@@ -13910,8 +14007,9 @@
           "rdleifriaf": 77004
         },
         "byTeam": {
-          "red": 77004,
-          "tsc": 21796
+          "Polish Rifle": 87863,
+          "keith": 21796,
+          "rdleifriaf": 77004
         },
         "name": "GA",
         "total": 186663,
@@ -13922,8 +14020,9 @@
             "rdleifriaf": 50062
           },
           "byTeam": {
-            "red": 50062,
-            "tsc": 2336
+            "Polish Rifle": 63973,
+            "keith": 2336,
+            "rdleifriaf": 50062
           },
           "total": 116371
         },
@@ -13939,8 +14038,9 @@
             "rdleifriaf": 2130
           },
           "byTeam": {
-            "red": 2130,
-            "tsc": 13650
+            "Polish Rifle": 4516,
+            "keith": 13650,
+            "rdleifriaf": 2130
           },
           "total": 20296
         },
@@ -13950,8 +14050,9 @@
           "rdleifriaf": 23081
         },
         "byTeam": {
-          "red": 23081,
-          "tsc": 14303
+          "Polish Rifle": 38052,
+          "keith": 14303,
+          "rdleifriaf": 23081
         },
         "name": "GA.cells",
         "total": 75436,
@@ -13962,8 +14063,9 @@
             "rdleifriaf": 20951
           },
           "byTeam": {
-            "red": 20951,
-            "tsc": 653
+            "Polish Rifle": 33536,
+            "keith": 653,
+            "rdleifriaf": 20951
           },
           "total": 55140
         },
@@ -13977,7 +14079,8 @@
           "rdleifriaf": 4475
         },
         "byTeam": {
-          "red": 4475
+          "Polish Rifle": 12279,
+          "rdleifriaf": 4475
         },
         "name": "GA.hide",
         "total": 16754,
@@ -13987,7 +14090,8 @@
             "rdleifriaf": 4475
           },
           "byTeam": {
-            "red": 4475
+            "Polish Rifle": 12279,
+            "rdleifriaf": 4475
           },
           "total": 16754
         },
@@ -14003,8 +14107,9 @@
             "rdleifriaf": 16966
           },
           "byTeam": {
-            "red": 16966,
-            "tsc": 8423
+            "Polish Rifle": 11565,
+            "keith": 8423,
+            "rdleifriaf": 16966
           },
           "total": 36954
         },
@@ -14014,8 +14119,9 @@
           "rdleifriaf": 34819
         },
         "byTeam": {
-          "red": 34819,
-          "tsc": 8423
+          "Polish Rifle": 25633,
+          "keith": 8423,
+          "rdleifriaf": 34819
         },
         "name": "GA.shells",
         "total": 68875,
@@ -14025,7 +14131,8 @@
             "rdleifriaf": 17853
           },
           "byTeam": {
-            "red": 17853
+            "Polish Rifle": 14068,
+            "rdleifriaf": 17853
           },
           "total": 31921
         },
@@ -14041,8 +14148,9 @@
             "rdleifriaf": 16838
           },
           "byTeam": {
-            "red": 16838,
-            "tsc": 68242
+            "Polish Rifle": 5261,
+            "keith": 68242,
+            "rdleifriaf": 16838
           },
           "total": 90341
         },
@@ -14052,8 +14160,9 @@
           "rdleifriaf": 65607
         },
         "byTeam": {
-          "red": 65607,
-          "tsc": 69476
+          "Polish Rifle": 47733,
+          "keith": 69476,
+          "rdleifriaf": 65607
         },
         "name": "GL",
         "total": 182816,
@@ -14064,8 +14173,9 @@
             "rdleifriaf": 48769
           },
           "byTeam": {
-            "red": 48769,
-            "tsc": 1234
+            "Polish Rifle": 42472,
+            "keith": 1234,
+            "rdleifriaf": 48769
           },
           "total": 92475
         },
@@ -14080,8 +14190,8 @@
             "rdleifriaf": 1666
           },
           "byTeam": {
-            "red": 1666,
-            "tsc": 27764
+            "keith": 27764,
+            "rdleifriaf": 1666
           },
           "total": 29430
         },
@@ -14091,8 +14201,9 @@
           "rdleifriaf": 1666
         },
         "byTeam": {
-          "red": 1666,
-          "tsc": 28776
+          "Polish Rifle": 6261,
+          "keith": 28776,
+          "rdleifriaf": 1666
         },
         "name": "GL.RA",
         "total": 36703,
@@ -14102,7 +14213,8 @@
             "keith": 1012
           },
           "byTeam": {
-            "tsc": 1012
+            "Polish Rifle": 6261,
+            "keith": 1012
           },
           "total": 7273
         },
@@ -14118,8 +14230,9 @@
             "rdleifriaf": 4221
           },
           "byTeam": {
-            "red": 4221,
-            "tsc": 51596
+            "Polish Rifle": 6767,
+            "keith": 51596,
+            "rdleifriaf": 4221
           },
           "total": 62584
         },
@@ -14129,8 +14242,9 @@
           "rdleifriaf": 6883
         },
         "byTeam": {
-          "red": 6883,
-          "tsc": 51596
+          "Polish Rifle": 13749,
+          "keith": 51596,
+          "rdleifriaf": 6883
         },
         "name": "GL.below",
         "total": 72228,
@@ -14140,7 +14254,8 @@
             "rdleifriaf": 2662
           },
           "byTeam": {
-            "red": 2662
+            "Polish Rifle": 6982,
+            "rdleifriaf": 2662
           },
           "total": 9644
         },
@@ -14155,8 +14270,9 @@
           "rdleifriaf": 6434
         },
         "byTeam": {
-          "red": 6434,
-          "tsc": 909
+          "Polish Rifle": 12789,
+          "keith": 909,
+          "rdleifriaf": 6434
         },
         "name": "GL.hide",
         "total": 20132,
@@ -14167,8 +14283,9 @@
             "rdleifriaf": 6434
           },
           "byTeam": {
-            "red": 6434,
-            "tsc": 909
+            "Polish Rifle": 12789,
+            "keith": 909,
+            "rdleifriaf": 6434
           },
           "total": 20132
         },
@@ -14184,8 +14301,9 @@
             "rdleifriaf": 9506
           },
           "byTeam": {
-            "red": 9506,
-            "tsc": 13529
+            "Polish Rifle": 51757,
+            "keith": 13529,
+            "rdleifriaf": 9506
           },
           "total": 74792
         },
@@ -14195,8 +14313,9 @@
           "rdleifriaf": 9561
         },
         "byTeam": {
-          "red": 9561,
-          "tsc": 13529
+          "Polish Rifle": 52196,
+          "keith": 13529,
+          "rdleifriaf": 9561
         },
         "name": "LG",
         "total": 75286,
@@ -14206,7 +14325,8 @@
             "rdleifriaf": 55
           },
           "byTeam": {
-            "red": 55
+            "Polish Rifle": 439,
+            "rdleifriaf": 55
           },
           "total": 494
         },
@@ -14222,8 +14342,9 @@
             "rdleifriaf": 61071
           },
           "byTeam": {
-            "red": 61071,
-            "tsc": 10614
+            "Polish Rifle": 21365,
+            "keith": 10614,
+            "rdleifriaf": 61071
           },
           "total": 93050
         },
@@ -14233,8 +14354,9 @@
           "rdleifriaf": 67814
         },
         "byTeam": {
-          "red": 67814,
-          "tsc": 11174
+          "Polish Rifle": 43367,
+          "keith": 11174,
+          "rdleifriaf": 67814
         },
         "name": "MH",
         "total": 122355,
@@ -14245,8 +14367,9 @@
             "rdleifriaf": 6743
           },
           "byTeam": {
-            "red": 6743,
-            "tsc": 560
+            "Polish Rifle": 22002,
+            "keith": 560,
+            "rdleifriaf": 6743
           },
           "total": 29305
         },
@@ -14261,7 +14384,8 @@
             "rdleifriaf": 12544
           },
           "byTeam": {
-            "red": 12544
+            "Polish Rifle": 12631,
+            "rdleifriaf": 12544
           },
           "total": 25175
         },
@@ -14270,7 +14394,8 @@
           "rdleifriaf": 12544
         },
         "byTeam": {
-          "red": 12544
+          "Polish Rifle": 12631,
+          "rdleifriaf": 12544
         },
         "name": "MH.behind",
         "total": 25175,
@@ -14286,8 +14411,9 @@
             "rdleifriaf": 53488
           },
           "byTeam": {
-            "red": 53488,
-            "tsc": 21401
+            "Polish Rifle": 2493,
+            "keith": 21401,
+            "rdleifriaf": 53488
           },
           "total": 77382
         },
@@ -14297,8 +14423,9 @@
           "rdleifriaf": 55010
         },
         "byTeam": {
-          "red": 55010,
-          "tsc": 21401
+          "Polish Rifle": 2493,
+          "keith": 21401,
+          "rdleifriaf": 55010
         },
         "name": "MH.pipe",
         "total": 78904,
@@ -14307,7 +14434,7 @@
             "rdleifriaf": 1522
           },
           "byTeam": {
-            "red": 1522
+            "rdleifriaf": 1522
           },
           "total": 1522
         },
@@ -14323,8 +14450,9 @@
             "rdleifriaf": 19056
           },
           "byTeam": {
-            "red": 19056,
-            "tsc": 111904
+            "Polish Rifle": 14241,
+            "keith": 111904,
+            "rdleifriaf": 19056
           },
           "total": 145201
         },
@@ -14334,8 +14462,9 @@
           "rdleifriaf": 22252
         },
         "byTeam": {
-          "red": 22252,
-          "tsc": 115083
+          "Polish Rifle": 23241,
+          "keith": 115083,
+          "rdleifriaf": 22252
         },
         "name": "RA",
         "total": 160576,
@@ -14346,8 +14475,9 @@
             "rdleifriaf": 3196
           },
           "byTeam": {
-            "red": 3196,
-            "tsc": 3179
+            "Polish Rifle": 9000,
+            "keith": 3179,
+            "rdleifriaf": 3196
           },
           "total": 15375
         },
@@ -14361,7 +14491,7 @@
             "keith": 479
           },
           "byTeam": {
-            "tsc": 479
+            "keith": 479
           },
           "total": 479
         },
@@ -14371,8 +14501,9 @@
           "rdleifriaf": 2027
         },
         "byTeam": {
-          "red": 2027,
-          "tsc": 3678
+          "Polish Rifle": 18945,
+          "keith": 3678,
+          "rdleifriaf": 2027
         },
         "name": "RA.behind",
         "total": 24650,
@@ -14383,8 +14514,9 @@
             "rdleifriaf": 2027
           },
           "byTeam": {
-            "red": 2027,
-            "tsc": 3199
+            "Polish Rifle": 18945,
+            "keith": 3199,
+            "rdleifriaf": 2027
           },
           "total": 24171
         },
@@ -14400,8 +14532,9 @@
             "rdleifriaf": 12106
           },
           "byTeam": {
-            "red": 12106,
-            "tsc": 39494
+            "Polish Rifle": 19658,
+            "keith": 39494,
+            "rdleifriaf": 12106
           },
           "total": 71258
         },
@@ -14411,8 +14544,9 @@
           "rdleifriaf": 30506
         },
         "byTeam": {
-          "red": 30506,
-          "tsc": 39494
+          "Polish Rifle": 28673,
+          "keith": 39494,
+          "rdleifriaf": 30506
         },
         "name": "RA.tunnel",
         "total": 98673,
@@ -14422,7 +14556,8 @@
             "rdleifriaf": 18400
           },
           "byTeam": {
-            "red": 18400
+            "Polish Rifle": 9015,
+            "rdleifriaf": 18400
           },
           "total": 27415
         },
@@ -14438,8 +14573,9 @@
             "rdleifriaf": 15019
           },
           "byTeam": {
-            "red": 15019,
-            "tsc": 64620
+            "Polish Rifle": 9714,
+            "keith": 64620,
+            "rdleifriaf": 15019
           },
           "total": 89353
         },
@@ -14449,8 +14585,9 @@
           "rdleifriaf": 32495
         },
         "byTeam": {
-          "red": 32495,
-          "tsc": 64620
+          "Polish Rifle": 17973,
+          "keith": 64620,
+          "rdleifriaf": 32495
         },
         "name": "big",
         "total": 115088,
@@ -14460,7 +14597,8 @@
             "rdleifriaf": 17476
           },
           "byTeam": {
-            "red": 17476
+            "Polish Rifle": 8259,
+            "rdleifriaf": 17476
           },
           "total": 25735
         },
@@ -14476,8 +14614,9 @@
             "rdleifriaf": 2929
           },
           "byTeam": {
-            "red": 2929,
-            "tsc": 9764
+            "Polish Rifle": 1076,
+            "keith": 9764,
+            "rdleifriaf": 2929
           },
           "total": 13769
         },
@@ -14487,8 +14626,9 @@
           "rdleifriaf": 4110
         },
         "byTeam": {
-          "red": 4110,
-          "tsc": 9764
+          "Polish Rifle": 2375,
+          "keith": 9764,
+          "rdleifriaf": 4110
         },
         "name": "big.hatch",
         "total": 16249,
@@ -14498,7 +14638,8 @@
             "rdleifriaf": 1181
           },
           "byTeam": {
-            "red": 1181
+            "Polish Rifle": 1299,
+            "rdleifriaf": 1181
           },
           "total": 2480
         },
