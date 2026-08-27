@@ -71,16 +71,17 @@ which demos have one at all.
   drops 3.7 s past the match-over print). The gate is now the same
   `Started && !Ended` every other recording path uses; the 14 existing
   goldens do not move.
-- **Golden corpus** gains five local-only entries: four FFA — three
-  matchless (`nova` full 6 min / 2 players, `dm2` 8 players with a
-  mid-match leaver and a slot-reuse reconnect, `dm6` a 3.2 s
-  map-voted-off match with zero kills) and one countdown-style FFA
-  control that must not change — plus
-  `ctf_archive_dm6_qwe240_status`, a qwe 2.40 CTF recording on dm6 whose
-  start is raised at 991 ms by the `status` transition alone (`Standby`
-  → `"14:59 left"`, no `matchdate:` and no start print). That last one is
-  the only golden coverage of the `status` signal end to end; the wire
-  shape itself is pinned in `mvd-reader/parser/matchstart_test.go`.
+- **Golden corpus** gains four local-only FFA entries: three matchless
+  (`nova` full 6 min / 2 players, kept whole; `dm2` 8 players with a
+  mid-match leaver and a slot-reuse reconnect, projected to scoreboard +
+  sessions + per-player windows; `dm6` a 3.2 s map-voted-off match with
+  zero kills) and one countdown-style FFA control projected to the
+  sections the individual rewrite touches (`match`, `demoInfo`,
+  `locGraph`). The `status`-only start signal (archive `2a2ed2e9ca…`, a
+  qwe 2.40 CTF recording: `Standby` → `"14:59 left"`, no `matchdate:`,
+  no start print) is pinned by the wire-level test in
+  `mvd-reader/parser/matchstart_test.go`, not by a golden — CTF itself
+  (runes, captures, the >5 score jumps) is not modelled here yet.
 
 ### There are no teams in FFA
 

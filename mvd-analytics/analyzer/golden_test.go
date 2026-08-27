@@ -388,6 +388,33 @@ var partialGoldenDemos = map[string][]string{
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 		"playerStats.teams",
 	},
+	// The 8-player matchless FFA with a mid-match leaver (Player36 at
+	// 85.7 s), a leave-and-rejoin on a different slot with a real player in
+	// between (nexus: slot 4 → xra → slot 3) and the frag fold that rejoin
+	// exercises (14 announced on leaving, 0 on the second stint, 14 on the
+	// row — MakeGhost returns in matchless mode, ktx/src/client.c:2897).
+	// Projected to the scoreboard, the sessions and the per-player windows:
+	// the eight full streams were 8 MB of what `nova` already pins.
+	"ffa_matchless_dm2_260116_joiners": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+		"playerStats.players[].name", "playerStats.players[].score",
+		"playerStats.players[].window", "playerStats.players[].sessions",
+		"playerStats.teams",
+		"frags.frags",
+	},
+	// The countdown-style FFA (`The match has begun!` at 10 s, KTX demoinfo
+	// block). It pins what the matchless ones cannot: the individual
+	// rewrite applied to demoInfo.players[].team / demoInfo.teams, and the
+	// locGraph occupancy keyed by player name rather than clan tag. Its
+	// streams / shots / aim are the same shape the 1on1 goldens pin.
+	"ffa_countdown_dm6_260106": {
+		"match", "demoInfo", "locGraph",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+		"playerStats.teams",
+	},
 }
 
 // projectPaths reduces m to only the given dotted paths, preserving the

@@ -351,9 +351,9 @@ func TestMatchStartFromWire_KtxDirective(t *testing.T) {
 // `status` transition (ktx/src/match.c:1337) through parseNetworkMessage:
 // an opening `fullserverinfo` dump saying `Standby`, then a single-key
 // update carrying a running clock. Both observed clock spellings are
-// exercised — the CTF mod's mm:ss (the shape of the qwe 2.40 golden
-// `ctf_archive_dm6_qwe240_status`, whose start is raised at 991 ms by
-// exactly this path) and KTX's "%d min left".
+// exercised — the CTF mod's mm:ss (the shape of archive demo
+// `2a2ed2e9ca…`, a qwe 2.40 CTF recording whose start is raised at 991 ms
+// by exactly this path) and KTX's "%d min left".
 func TestMatchStartFromWire_StatusTransition(t *testing.T) {
 	for _, tc := range []struct {
 		name  string

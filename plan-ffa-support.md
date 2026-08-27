@@ -365,9 +365,10 @@ comparing rounds to frags, Teams panel), the `items` no-match gate.
   countdown FFA (archive `52c1421d…` = `ffa_countdown_dm6_260106`,
   3 players) and the 3.2 s `ffa_matchless_dm6_260704_3s` edge case, plus
   `ffa_matchless_dm2_260116_joiners` for the mid-match leaver / slot-reuse
-  reconnect. `ctf_archive_dm6_qwe240_status` (archive `2a2ed2e9ca…`, qwe
-  2.40 CTF on dm6) covers the `status` signal, the only one of the four
-  with no golden otherwise. Commit the goldens.
+  reconnect (projected). The `status`-only start (archive `2a2ed2e9ca…`,
+  qwe 2.40 CTF on dm6) is pinned by the parser wire test, not a golden —
+  CTF is not modelled and a golden of it would only pin what we do not
+  stand behind. Commit the goldens.
 - Existing 14 goldens: expect byte-identical output; any drift must be
   explained by the one-frame `matchdate:` case and reported.
 - Re-run the `.reports/nomatch-marker` probe over `marked-1032.csv` and

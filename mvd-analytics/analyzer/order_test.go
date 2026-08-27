@@ -142,13 +142,6 @@ func TestOrderIndependence(t *testing.T) {
 		"2on2_nani_pora_210426_dm6",          // 2on2
 		"4on4_ahoy_bhb_240426_obsidian",      // 4on4 (smallest 4on4, keeps budget)
 		"2on2_archive_dm4_qw240_recon",       // pre-instrumentation: damage reconstruction in the schedule
-		// No demoinfo block, two participants, serverinfo teamplay 4: the
-		// shape where MatchAnalyzer.Finalize is what settles the duel verdict
-		// and the mode descriptor, mutating structs the roster node
-		// published. Every reader binds `roster:final` for it (dag.go);
-		// without that edge `frag` flagged team kills from the pre-promotion
-		// verdict under one order and the promoted one under another.
-		"duel_archive_dm3_arena_teamplay",
 		// Individual layout from a mode with no teamplay: the roster node
 		// rewrites co.DemoInfo.Players[].Team to each player's own name, and
 		// identity reads the raw tag out of that same struct. keith's

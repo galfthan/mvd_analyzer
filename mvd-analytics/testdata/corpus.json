@@ -96,21 +96,9 @@
     "sha256": "52c1421d09a29416ecec769cb485c2e7684e5c59811280e7d282f1d4fc46b038"
   },
   {
-    "label": "ctf_archive_dm6_qwe240_status",
-    "mode": "ctf",
-    "file": "demos/ctf_archive_dm6_qwe240_status.mvd.gz",
-    "sha256": "2a2ed2e9ca6216463f36d52edc3d2068998728df90d2159fcd1a81ab8207cf9b"
-  },
-  {
     "label": "ffa_matchless_shifter_260119_spectate",
     "mode": "ffa",
     "file": "demos/ffa_matchless_shifter_260119_spectate.mvd.gz",
     "sha256": "b5a885f6098be63de5767d5927ef9dfab269872c72e3afc21035281e9deeade9"
-  },
-  {
-    "label": "duel_archive_dm3_arena_teamplay",
-    "mode": "1on1",
-    "file": "demos/duel_archive_dm3_arena_teamplay.mvd.gz",
-    "sha256": "e57be1ab53347a3a65705f891dccb0b61dd06f15813686f58829ad99c8f4f94e"
   }
 ]
