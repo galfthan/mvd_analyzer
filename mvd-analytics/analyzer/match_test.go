@@ -289,6 +289,13 @@ func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
 // Backing out either conjunct of the veto splits rusti in two: without
 // rec.identified() the previous test fails, without w.identified this one
 // does.
+//
+// The overlap is what a real reconnect looks like on the wire: KTX removes
+// the ghost entity only once the restore has run (ent_remove at
+// ktx/src/client.c:1544), so the ghost row and the connection that
+// supersedes it are both live for an instant — and the restore that made
+// that happen is announced, which is what keeps the two stints from
+// summing.
 func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing.T) {
 	a := NewMatchAnalyzer()
 	if err := a.Init(&Context{}); err != nil {
@@ -304,6 +311,7 @@ func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing
 	_ = a.OnEvent(matchUserInfo(3, 0, "# rusti", "jah", 2000))
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 16, TimeMs: 2000})
 	// Then the connection it shadows, still live at the same instant.
+	_ = a.OnEvent(&events.PlayerRejoinEvent{Prefix: "rusti", Frags: 16, FragsKnown: true, WithStats: true, TimeMs: 3000})
 	_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 3000))
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 3100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 17, TimeMs: 60000})
@@ -321,7 +329,12 @@ func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing
 }
 
 // The same identity key on two occupancies that do NOT overlap is one
-// human reconnecting, and stays one row carrying the later stint's score.
+// human reconnecting, and stays one row.
+//
+// Neither carry-over signal is present here — no userid-0 ghost row, no
+// "rejoins the game with N frags" — so the two stints add (16 + 19), the
+// same fold TestMatchAnalyzer_MatchlessRejoinKeepsAnnouncedFrags exercises.
+// What this test pins is the row identity: one human, one line.
 func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	a := NewMatchAnalyzer()
 	if err := a.Init(&Context{}); err != nil {
@@ -343,8 +356,8 @@ func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	if err := a.Finalize(&res); err != nil {
 		t.Fatal(err)
 	}
-	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 19 {
-		t.Errorf("match.players = %+v, want one rusti row on 19 (the later stint)", res.Match.Players)
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 35 {
+		t.Errorf("match.players = %+v, want one rusti row on 35 (16 + 19, neither stint carried over)", res.Match.Players)
 	}
 }
 
@@ -742,13 +755,12 @@ func TestMatchAnalyzer_MatchlessRejoinKeepsAnnouncedFrags(t *testing.T) {
 	}
 }
 
-// The other half of the same rule: a stint that OPENS at the total the
-// identity had already reached continues it and must not be added on top.
-// That is KTX's ghost scoreboard row — ghost2scores republishes a departed
-// player's frags on a spare slot the instant the drop lands
-// (ktx/src/g_utils.c:2272-2356) — and equally the ghost RESTORE on
-// reconnect (client.c:1513-1517), which the server re-broadcasts as an
-// svc_updatefrags.
+// The other half of the same rule: a KTX ghost scoreboard row continues the
+// identity's total and must not be added on top of it. ghost2scores
+// republishes a departed player's frags on a spare slot the instant the
+// drop lands (ktx/src/g_utils.c:2272-2356), and the svc_updateuserinfo it
+// writes for that slot hardcodes userid 0 (:2318) — which is what tells the
+// fold this row is a copy rather than a second stint.
 //
 // Shape from hub 220637 (4on4_fu_mix…): rusti drops from slot 5 on 14 frags
 // at 630704 and the same 14 reappear on slot 10 in the same frame.
@@ -764,7 +776,7 @@ func TestMatchAnalyzer_GhostRowContinuesTheScore(t *testing.T) {
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 5, Frags: 14, TimeMs: 600000})
 	_ = a.OnEvent(departure("rusti (FU)", 14, 630704))
 	_ = a.OnEvent(matchVacate(5, 37, "rusti (FU)", "-fu-", 630704))
-	_ = a.OnEvent(matchUserInfo(10, 43, "rusti (FU)", "-fu-", 630704))
+	_ = a.OnEvent(matchUserInfo(10, 0, "rusti (FU)", "-fu-", 630704))
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 10, TimeMs: 630704})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 10, Frags: 14, TimeMs: 630704})
 
@@ -811,5 +823,64 @@ func TestMatchAnalyzer_AnnouncedRestoreIsNotSummed(t *testing.T) {
 	}
 	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 36 {
 		t.Errorf("match.players = %+v, want one callen row on 36 — the restored 3 are already in it", res.Match.Players)
+	}
+}
+
+// The ≤1 and negative boundary of the matchless rejoin, which the frag
+// values themselves cannot separate.
+//
+// onFragUpdate records a stint's first attested value only on a CHANGE from
+// the 0 cursor (the connect-time svc_updatefrags 0 is discarded), so a
+// freshly re-created scoreboard row's first attested value is its first kill
+// or suicide — 1 or -1. Comparing that against the identity's running total
+// therefore reads a continuation wherever the total is small or negative,
+// and the second stint silently replaces the first instead of adding to it.
+// Only the two value-free signals (a userid-0 ghost row, an announced
+// restore) can tell the two apart, and matchless has neither: MakeGhost
+// returns at ktx/src/client.c:2897.
+func TestMatchAnalyzer_MatchlessRejoinAtTheLowFragBoundary(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		leftWith   int
+		secondFrag int
+		want       int
+	}{
+		// Left on 1, came back and scored 5 more: the second row opens on
+		// 1 (its first kill), which is >= the running total of 1.
+		{"left on one frag", 1, 5, 6},
+		// Left on -2 (lava), came back and scored 3: the second row opens
+		// on 1, which is >= the running total of -2.
+		{"left on a negative score", -2, 3, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMatchAnalyzer()
+			if err := a.Init(&Context{}); err != nil {
+				t.Fatal(err)
+			}
+
+			_ = a.OnEvent(matchUserInfo(4, 41, "nexus", "", 0))
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourceMatchDate, TimeMs: 600})
+			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: tc.leftWith, TimeMs: 270000})
+			_ = a.OnEvent(departure("nexus", tc.leftWith, 281608))
+			_ = a.OnEvent(matchVacate(4, 41, "nexus", "", 281608))
+			// Back on another slot, on a scoreboard row the server
+			// re-created from zero — no ghost, no restore announcement.
+			_ = a.OnEvent(matchUserInfo(3, 49, "nexus", "", 320953))
+			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 321000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 1, TimeMs: 322000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: tc.secondFrag, TimeMs: 400000})
+
+			var res Result
+			if err := a.Finalize(&res); err != nil {
+				t.Fatal(err)
+			}
+			if len(res.Match.Players) != 1 {
+				t.Fatalf("match.players = %+v, want one nexus row", res.Match.Players)
+			}
+			if got := res.Match.Players[0].Frags; got != tc.want {
+				t.Errorf("frags = %d, want %d (%d + %d)", got, tc.want, tc.leftWith, tc.secondFrag)
+			}
+		})
 	}
 }

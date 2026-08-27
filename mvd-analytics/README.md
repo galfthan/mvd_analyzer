@@ -567,23 +567,25 @@ flowchart TB
   end
   subgraph d1["depth 1"]
     identity["identity"]
-    roster["roster"]
   end
   subgraph d2["depth 2"]
-    match["match"]
+    roster["roster"]
   end
   subgraph d3["depth 3"]
+    match["match"]
+  end
+  subgraph d4["depth 4"]
     frag["frag"]
     messages["messages"]
     items["items"]
     damage["damage"]
     backpacks["backpacks"]
   end
-  subgraph d4["depth 4"]
+  subgraph d5["depth 5"]
     timeline["timeline"]
     weapon_pickups["weapon-pickups"]
   end
-  subgraph d5["depth 5"]
+  subgraph d6["depth 6"]
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
@@ -591,19 +593,19 @@ flowchart TB
     opening["opening"]
     los["los"]
   end
-  subgraph d6["depth 6"]
+  subgraph d7["depth 7"]
     match_final["match-final"]
     no_match["no-match"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
-  subgraph d7["depth 7"]
+  subgraph d8["depth 8"]
     aim["aim"]
     airgibs["airgibs"]
     wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
-  subgraph d8["depth 8"]
+  subgraph d9["depth 9"]
     player_stats["player-stats"]
   end
   aim -->|"aim"| player_stats
@@ -657,6 +659,7 @@ flowchart TB
   identity -->|"identity"| items
   identity -->|"identity"| match
   identity -->|"identity"| player_stats
+  identity -->|"identity"| roster
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
@@ -669,6 +672,7 @@ flowchart TB
   match -->|"roster:final"| items
   match -->|"match"| match_final
   match -->|"roster:final"| messages
+  match -->|"roster:final"| player_stats
   match -->|"match"| region_control
   match -->|"roster:final"| shots
   match -->|"roster:final"| timeline
@@ -686,7 +690,6 @@ flowchart TB
   metadata -->|"metadata"| wall_clock
   no_match -->|"no-match"| wall_clock
   roster -->|"roster"| match
-  roster -->|"roster"| player_stats
   shots -->|"shots"| aim
   shots -->|"shots"| damage_recon
   shots -->|"shots"| player_stats

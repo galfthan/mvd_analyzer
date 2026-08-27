@@ -40,9 +40,23 @@ consumers (web UI, CLI) read first.
    same index — so the analyser splits each slot with the shared
    [`occupancyTracker`](occupancy.go) and scores each occupancy
    separately. Occupancies that resolve to the same identity (a player who
-   reconnected onto another slot) collapse into one row carrying the
-   latest stint's score, which is the total the server restored and
-   re-asserted (`ktx/src/client.c:1464-1490`). Two occupancies that were
+   reconnected onto another slot) collapse into one row whose score is the
+   FOLD of every stint (`foldStintFrags`), not the latest one. A stint
+   REPLACES the running total when either of two value-free signals says the
+   server carried the score over: it is a KTX ghost scoreboard row — userid
+   0, which `ghost2scores` hardcodes and is the only writer of
+   (`ktx/src/g_utils.c:2318`) — or the server ANNOUNCED the restore
+   (`"<name> rejoins the game with N frags"`, `ktx/src/client.c:1513-1543`,
+   read per netname over the whole demo because a restore can land on a
+   different scoreboard row from the departure it restores). Every other
+   stint ADDS, because its scoreboard row restarted from zero: matchless
+   mode makes no ghost at all (`MakeGhost` returns at
+   `ktx/src/client.c:2897`), so a player who leaves and comes back there
+   keeps both stints' frags, the earlier one recovered from the departure
+   broadcast. The discriminator is deliberately value-free — comparing a
+   stint's first attested frag value against the running total misreads
+   every low or negative total, because the first value a re-created row
+   attests is its first kill or suicide (±1). Two occupancies that were
    *live at the same instant* never collapse, however good the identity
    key looks: without demoinfo, `*auth` or a KTX reconnect print the key
    degrades to the normalized netname, and two people called `Player` and

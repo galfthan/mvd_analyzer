@@ -135,6 +135,18 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
 - **ADDED: `match.players[].rawTeam`** — the userinfo tag the individual
   layout replaced, kept because it is real information (clan membership); it
   just names no side. Omitted when it would repeat `team`.
+- **FIXED: `rawTeam` was schedule-dependent.** The individual rewrite
+  OVERWRITES `demoInfo.players[].team` in place, and `co.DemoInfo`,
+  `ctx.DemoInfo` and `result.demoInfo` are one pointer — while `identity`
+  copies that same field into every session it resolves. The two nodes had
+  no edge between them, so under a valid topological order that ran `roster`
+  first the sessions carried the player's own name, the scoreboard saw
+  `raw == name`, and `rawTeam` was omitted (`betowen`'s `red`, `keith`'s
+  `tsc`). The `roster` node now declares a `requires` edge on `identity` —
+  the write-after-read order — and `TestOrderIndependence` gained a
+  deterministic adversarial schedule (run one named node as late as its
+  edges allow) that reproduces the omission whenever the edge is missing,
+  where the three fixed random seeds happened not to.
 - **CHANGED: team kills, team damage and the aim enemy set** all read the
   descriptor now. On the 13-demo FFA set the team-kill count is 0 everywhere
   (was 34 / 37 / 17 / 7 / 1 on five of them); those kills now count as kills.
@@ -162,10 +174,18 @@ pseudo-teams with `playerStats.teams` aggregating five of them.
   at 281.6 s, rejoined on slot 3 at 321.0 s and left again with 0, and the
   row reported **0 frags against 15 kills** — breaking the
   `frags == kills − suicides − teamKills` identity the frag log maintains.
-  A stint that OPENS at or above the total the identity had already reached
-  still replaces it (that is the ghost scoreboard row, `ghost2scores`,
-  `g_utils.c:2272-2356`, and the restore itself, `client.c:1513-1517`);
-  every other stint now ADDS. nexus reports 14.
+  A stint still REPLACES the total when either of two value-free signals
+  says the server carried the score over: it is a KTX ghost scoreboard row
+  (userid 0 — `ghost2scores` hardcodes it at `g_utils.c:2318` and is the only
+  writer that does), or the server ANNOUNCED the restore ("<name> rejoins the
+  game with N frags", `client.c:1513-1543`, read per netname because a
+  restore can land on a different scoreboard row from the departure it
+  restores). Every other stint now ADDS. nexus reports 14. The signals are
+  deliberately value-free: comparing a stint's first attested frag value
+  against the running total misreads every low or negative total, because
+  the first value a re-created row attests is its first kill or suicide
+  (±1) — a matchless player who left on 1 and scored 5 more folded to 5
+  instead of 6, one who left on −2 and scored 3 folded to 3 instead of 1.
 - **One parser for the composite serverinfo `mode` key**
   (`result.ParseServerinfoMode`). Three call sites ran their own
   `strings.Split(si["mode"], "-")` with three deliberately different token

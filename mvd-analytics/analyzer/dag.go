@@ -99,8 +99,8 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Player identity sessions — the slot→name/userid/team resolution every downstream producer reads."},
 	"frag": {name: "frag", requires: []string{"clock", "demoinfo", "identity", "roster:final"}, resultKey: "frags",
 		desc: "Raw frag aggregates and the chronological kill log (weapon, suicide, team-kill flags). In-pipeline consumers wanting the telefrag-recovered log require `frags:final`; the served `frags` key is final by serve time since all nodes run."},
-	"roster": {name: "roster", requires: []string{"demoinfo", "metadata"},
-		desc: "Canonical player roster with team labels (the individual player-as-team rewrite applied to duels and to every mode with no teamplay) plus the normalised game-mode descriptor, read by every team-aware producer — which binds `roster:final` (published by `match`) rather than this node, since a demo with no demoinfo block gets its duel verdict from the match scoreboard. Requires `metadata` because the mode resolver reads the serverinfo cvars and the countdown settings table."},
+	"roster": {name: "roster", requires: []string{"demoinfo", "identity", "metadata"},
+		desc: "Canonical player roster with team labels (the individual player-as-team rewrite applied to duels and to every mode with no teamplay) plus the normalised game-mode descriptor, read by every team-aware producer — which binds `roster:final` (published by `match`) rather than this node, since a demo with no demoinfo block gets its duel verdict from the match scoreboard. Requires `metadata` because the mode resolver reads the serverinfo cvars and the countdown settings table, and `identity` because the individual rewrite OVERWRITES co.DemoInfo.Players[].Team in place (roster.go) — identity copies the raw tag out of the same struct into its session table, so it has to read first."},
 
 	// Derived consumers / independent peers.
 	"metadata": {name: "metadata", resultKey: "metadata",
@@ -210,7 +210,7 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata", "aim"},
+		requires:  []string{"clock", "identity", "roster:final", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata", "aim"},
 		resultKey: "playerStats",
 		desc:      "Canonical per-player and per-team statistics: corrected scoreboard (including the derived kill-spree maxima), damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. Binds `aim` for the reconstructed hit tier, which fills the accuracy family's `hits` on demos with no wire damage stream (src=reconstructed) — reading the published tier rather than re-running the join is what makes its weapon-level withholds inherit here.",
 	},

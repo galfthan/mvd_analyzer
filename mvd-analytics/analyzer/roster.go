@@ -200,7 +200,15 @@ func (a *RosterAnalyzer) PopulateCore(co *CoreOutputs) {
 	// and view.regionControl's name→team fallback.
 	//
 	// The raw userinfo tag is NOT lost: match.players[].rawTeam carries it
-	// verbatim (rebuildIndividualMatch).
+	// verbatim (rebuildIndividualMatch) — but only because this rewrite is
+	// scheduled after `identity`. co.DemoInfo, ctx.DemoInfo and
+	// result.DemoInfo are ONE pointer (demoinfo.go), so the assignment
+	// below is destructive: IdentityAnalyzer.PopulateCore copies dp.Team
+	// into every session it resolves, and with roster running first it
+	// copied the player's own name and rebuildIndividualMatch then saw
+	// raw == name and omitted rawTeam. That is why the roster node declares
+	// a `requires` edge on `identity` (dag.go) even though it reads nothing
+	// identity publishes: the edge is the write-after-read order.
 	if r.Individual() && co.DemoInfo != nil && len(co.DemoInfo.Players) > 0 {
 		teams := make([]string, 0, len(co.DemoInfo.Players))
 		seen := make(map[string]bool, len(co.DemoInfo.Players))

@@ -49,15 +49,6 @@ type occupancyScore struct {
 	played    bool  // spawn / death / position sample inside the match window
 	playedAny bool  // ... anywhere in the demo
 
-	// firstFrags is the first value the wire attested for this occupancy
-	// and sawFrags whether it attested any. Together they say whether the
-	// occupancy's score CONTINUES an earlier one on the same identity (it
-	// opened at or above the total that identity had already reached) or
-	// restarted from zero — the difference between a scoreboard row the
-	// server carried over and one it re-created. See foldStintFrags.
-	firstFrags int
-	sawFrags   bool
-
 	final     int // frozen score, once the occupancy ended
 	finalized bool
 }
@@ -178,9 +169,6 @@ func (a *MatchAnalyzer) onFragUpdate(e *events.FragUpdateEvent) {
 		return
 	}
 	if e.Frags != sc.frags {
-		if !sc.sawFrags {
-			sc.sawFrags, sc.firstFrags = true, e.Frags
-		}
 		sc.prevFrags = sc.frags
 		sc.frags = e.Frags
 		sc.fragsAtMs = e.TimeMs
@@ -322,9 +310,9 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 // it carries can cross a scoreboard ROW: two occupancies of one name that
 // were live at the same instant are deliberately kept as separate rows
 // (rowForKey), and on archive 2eb485602a7a… callen's restore lands on the
-// other row from the departure it restores. Reading the broadcast as "this
-// name's stints are cumulative" is the conservative direction — it is the
-// one that cannot double-count.
+// other row from the departure it restores. Reading the broadcast as "every
+// stint of this name continued the running total rather than restarting it"
+// is the conservative direction — it is the one that cannot double-count.
 func (a *MatchAnalyzer) restoredNames() map[string]bool {
 	out := make(map[string]bool)
 	if len(a.restorePrefixes) == 0 {
@@ -466,13 +454,15 @@ type rosterRow struct {
 }
 
 // stintScore is one occupancy's frozen score as it enters the identity fold:
-// when it started, what it finished on, and the first frag value the wire
-// attested for it.
+// when it started, what it finished on, and the two signals that say whether
+// it continued the identity's running total or restarted from zero.
 type stintScore struct {
-	startMs    int32
-	frags      int
-	firstFrags int
-	sawFrags   bool
+	startMs int32
+	frags   int
+	// identified is occupancyRecord.identified() — whether the wire gave
+	// this occupancy a userid of its own. A userid-0 row is not a client
+	// connection and so cannot be a fresh stint.
+	identified bool
 	// restored is set when the server ANNOUNCED a ghost restore for this
 	// netname anywhere in the demo (restoredNames).
 	restored bool
@@ -480,17 +470,25 @@ type stintScore struct {
 
 // foldStintFrags turns an identity's occupancies into one scoreboard score.
 //
-// A stint that OPENED at or above the total this identity had already
-// reached continues it: its own final value already contains everything
-// earlier, so it replaces the running total. That is KTX's ghost scoreboard
-// row, which republishes a departed player's frags on a spare slot the
-// instant the drop lands (ghost2scores, ktx/src/g_utils.c:2272-2356). So
-// does a stint the server ANNOUNCED as a restore ("<name> rejoins the game
-// with N frags", ktx/src/client.c:1513-1543) — read per netname over the
-// whole demo, since a restore can land on a different scoreboard row from
-// the departure it restores (archive 2eb485602a7a…, callen).
+// A stint CONTINUES the identity's running total — its own value already
+// contains everything earlier, so it REPLACES the total — when either of two
+// value-free signals says the server carried the score over:
 //
-// Every other stint ADDS, because its score restarted from zero. There is no
+//   - the stint is a KTX ghost scoreboard row (`!identified`, i.e. userid 0).
+//     ghost2scores republishes a departed player's frags on a spare slot the
+//     instant the drop lands, and it hardcodes userid 0 in the
+//     svc_updateuserinfo it writes (ktx/src/g_utils.c:2318) — it is the only
+//     writer that does. The other two things that land on a userid-0 record
+//     (an occupancy `ensure` opened for a frag or a position on a slot with
+//     no userinfo, and a userid-0 resend) are not connections either, so
+//     none of them can be a fresh stint whose score restarted from zero.
+//   - the server ANNOUNCED a restore for it ("<name> rejoins the game with N
+//     frags", ktx/src/client.c:1513-1543) — read per netname over the whole
+//     demo, since a restore can land on a different scoreboard row from the
+//     departure it restores (archive 2eb485602a7a…, callen).
+//
+// Every other stint — an identified connection the server never announced a
+// restore for — ADDS, because its score restarted from zero. There is no
 // ghost at all in matchless mode (MakeGhost returns at
 // ktx/src/client.c:2897, `if (k_matchLess) // no ghost in matchless mode`),
 // so a player who leaves and comes back there starts again at zero and the
@@ -501,16 +499,22 @@ type stintScore struct {
 // breaking the frags == kills − suicides − teamKills identity the frag log
 // maintains.
 //
-// A stint the wire never attested a frag value for cannot have continued
-// anything: it adds, which is a no-op unless a departure broadcast gave it a
-// score of its own.
+// The discriminator is deliberately value-free. It used to compare the first
+// frag value the wire attested for a stint against the running total
+// (continue iff it opened at or above it), which is wrong wherever the total
+// is small or negative — and it is exactly a matchless rejoiner's total that
+// is: onFragUpdate records the first value on a CHANGE from the 0 cursor, so
+// a fresh row's first attested value is its first kill or suicide, ±1. A
+// player who left matchless on 1 frag and scored 5 more on the second row
+// folded to 5 instead of 6; one who left on −2 (lava) and scored 3 folded to
+// 3 instead of 1.
 func foldStintFrags(stints []stintScore) int {
 	ordered := make([]stintScore, len(stints))
 	copy(ordered, stints)
 	sort.SliceStable(ordered, func(i, j int) bool { return ordered[i].startMs < ordered[j].startMs })
 	total := 0
 	for _, st := range ordered {
-		if st.restored || (st.sawFrags && st.firstFrags >= total) {
+		if st.restored || !st.identified {
 			total = st.frags
 			continue
 		}
@@ -629,9 +633,10 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 
 	// One row per participating *identity*. Occupancies are the unit of
 	// scoring (a slot can change hands), but a player who reconnected onto
-	// another slot owns several of them and must appear once — with the
-	// score of their latest stint, which is the total the server restored
-	// and re-asserted (ktx/src/client.c:1464-1490).
+	// another slot owns several of them and must appear once, with every
+	// stint folded into one score: a stint the server carried the total
+	// over to REPLACES it (a userid-0 ghost row, or an announced restore),
+	// every other stint ADDS. See foldStintFrags.
 	a.occ.closeOpen(a.durationMs)
 	restored := a.restoredNames()
 	var rows []*rosterRow
@@ -668,8 +673,7 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		row.stints = append(row.stints, stintScore{
 			startMs:    rec.startMs,
 			frags:      sc.finalFrags(),
-			firstFrags: sc.firstFrags,
-			sawFrags:   sc.sawFrags,
+			identified: rec.identified(),
 			restored:   restored[normalizePlayerName(name)],
 		})
 	}

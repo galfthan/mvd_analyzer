@@ -7526,11 +7526,23 @@ components:
             names a SIDE rather than decoration. Mirrors KTX's own `tp_num()`
             gate (`(isTeam() || isCTF() || coop) ? teamplay : 0`): the mode
             must be a team mode AND the teamplay cvar non-zero. False for
-            duel, ffa, race and rocket arena. When it is false the match is
-            laid out INDIVIDUALLY — `match.teams` is one row per player and
-            every `match.players[].team` equals the player's own name, with
-            the raw tag kept on `rawTeam`; `playerStats.teams` is absent and
-            region control reports no sides.
+            duel, ffa, race and rocket arena.
+
+            This is the RULESET, not the layout. What names the layout is
+            `match.sources.teams`: `individual` means one side per player —
+            `match.teams` is one row per player, every `match.players[].team`
+            equals the player's own name with the raw tag kept on `rawTeam`,
+            `playerStats.teams` is absent and region control reports no
+            sides. `teamBased: false` produces that layout only when the
+            verdict came from a source that actually saw a mode or a cvar
+            (`sources.teamBased` = `ktx` | `serverinfo` | `countdown` |
+            `mode`), or when the roster independently established a duel.
+            A `teamBased: false` whose `sources.teamBased` is `roster` — the
+            weakest inference, a shape read off the very tags the rewrite
+            would discard — keeps the derived team layout on three or more
+            participants, because a mode-less, cvar-less 4on4 would otherwise
+            have its real team tags erased on the strength of a scoreboard
+            that has not been read yet.
           type: boolean
         rounds:
           description: "Score is ROUNDS WON, not frags (clan arena, wipeout, rocket arena, hoonymode). Published for consumers comparing a scoreline against a frag total; nothing in the pipeline gates on it. Omitted when false."
@@ -7634,7 +7646,7 @@ components:
                 description: "Suicide deaths."
                 type: integer
               team:
-                description: "Team name. In an individual mode (`gameMode.teamBased` false, including every duel) this is the player's own name — the one-side-per-player layout."
+                description: "Team name. In the individual layout (`match.sources.teams` = `individual`, which every duel produces) this is the player's own name; see `GameMode.teamBased` for when a non-team ruleset does and does not produce that layout."
                 type: string
               rawTeam:
                 description: "The userinfo `team` tag as it stood on the wire, kept when the individual layout replaced `team` with the player's name (schema v75). In FFA those tags are real clan decoration that names no side. Omitted when it would repeat `team`, and when the tag was empty."

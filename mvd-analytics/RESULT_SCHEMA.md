@@ -121,14 +121,26 @@ because that is `Roster.Duel()`.
 `sources.rounds`: `mode`, or empty when `rounds` is false.
 `sources.submodes`: `serverinfo` | `countdown`, or empty when there are none.
 
-**Individual layout.** When `teamBased` is false the pipeline lays the match
+**Individual layout.** `teamBased` is the RULESET; the LAYOUT is named by
+`match.sources.teams`. When it is `individual` the pipeline has laid the match
 out with one side per player: `match.teams` one row per player,
 `match.players[].team` equal to the player's own name, the raw tag on
-`rawTeam`, `match.sources.teams` = `individual`, `playerStats.teams` absent,
-and region control withheld on anything wider than two participants. This is
-the layout duels have always produced — a consumer needs no mode string to
-render an individual scoreboard, and the shape test "every `team === name`"
-identifies it.
+`rawTeam`, `playerStats.teams` absent, and region control withheld on
+anything wider than two participants. This is the layout duels have always
+produced — a consumer needs no mode string to render an individual
+scoreboard, and the shape test "every `team === name`" identifies it.
+
+`teamBased: false` produces that layout only when the verdict came from a
+source that actually saw a mode or a cvar (`sources.teamBased` = `ktx` |
+`serverinfo` | `countdown` | `mode`), or when the roster independently
+established a duel (`Roster.Duel()`, two participants). A `teamBased: false`
+whose `sources.teamBased` is `roster` — the weakest inference, a shape read
+off the very tags the rewrite would discard — keeps the DERIVED team layout
+on three or more participants: a mode-less, cvar-less demo with three
+participants wearing three distinct tags stays `sources.teams: derived` with
+three one-player team rows, rather than having real tags erased on the
+strength of a scoreboard that has not been read yet
+(`analyzer/gamemode.go`, `individualLayoutFromMode`).
 
 **Why the tag is not a side in FFA.** KTX forces `teamplay 0` there
 (`ktx/src/world.c:1652-1655`) and players keep their clan tags anyway: on
@@ -165,9 +177,9 @@ normalisation `startTime` was always 0 and `endTime` always equalled
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Name | `name` | string | Display name. |
-| Team | `team` | string | Team name. In an **individual mode** (`gameMode.teamBased` false — every duel, FFA, race) it is the player's own name. |
+| Team | `team` | string | Team name. In the **individual layout** (`match.sources.teams` = `individual` — every duel, and any FFA / race whose non-team ruleset was named by a mode or a cvar) it is the player's own name; see *Individual layout* above for the exact rule. |
 | RawTeam | `rawTeam` | string, omitempty | v75 — the userinfo `team` tag as it stood on the wire, kept when the individual layout replaced `Team` with the player's name. In FFA those tags are real (clan membership) but name no side. Omitted when it would repeat `Team`, and when the tag was empty. Nothing in the pipeline reads it back. |
-| Frags | `frags` | int | Canonical QW net score. Normally the `svc_updatefrags` scoreboard cursor, frozen at match end. For a player the server dropped mid-match it is the mod's own departure broadcast (`"<name> left the game with N frags"`) when the demo carries one, because `SV_DropClient` zeroes the slot's scoreboard entry in the same server frame as the drop — see [`analyzer/match.md`](analyzer/match.md). |
+| Frags | `frags` | int | Canonical QW net score. Normally the `svc_updatefrags` scoreboard cursor, frozen at match end. For a player the server dropped mid-match it is the mod's own departure broadcast (`"<name> left the game with N frags"`) when the demo carries one, because `SV_DropClient` zeroes the slot's scoreboard entry in the same server frame as the drop. A player who reconnected owns several occupancies, and their scores are FOLDED: a stint the server carried the total over to (a userid-0 KTX ghost row, or one the server announced as `"<name> rejoins the game with N frags"`) replaces the running total, every other stint adds to it — so a matchless rejoiner, who gets neither signal because KTX makes no ghost there, keeps both stints' frags. See [`analyzer/match.md`](analyzer/match.md). |
 | Kills | `kills` | int | Gross kills, frag-log-corrected. Supersedes KTX demoinfo `stats.kills` (which over-counts pentagram-deflect telefrags); `0` when the demo had no frag log. |
 | Deaths | `deaths` | int | Deaths, frag-log-corrected. `0` when the demo had no frag log. |
 | Suicides | `suicides` | int | Self-inflicted deaths, frag-log-corrected. Counts every `IsSuicide` frag entry (incl. fall / lava / squish / drown), which KTX demoinfo `stats.suicides` undercounts — world-dealt deaths bump the world entity's counter, not the victim's (`ktx/src/client.c:4951`). `0` when the demo had no frag log. |
