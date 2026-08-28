@@ -535,13 +535,44 @@ The topbar names the leader and the field size (`toast 33 · 8 players`)
 rather than inventing an "A vs B" matchup; a two-player individual match — a
 duel, or a 1v1 FFA — still renders as "A vs B", which is what it is.
 
-**Known rough edge.** The Timeline tab's diverging panels (Team Status,
-Score, Powerups, Weapons, Team Health/Armor) are structurally two-sided:
-they draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
-match; on a multi-player FFA it is the top two PLAYERS — correctly named and
-coloured, but only two of N. Their per-player `<details>` expanders (Frags
-per player, Weapons per player) cover the whole field and are the ones to
-open there. Making the diverging charts N-sided is separate work.
+**The Timeline tab drops its two-sided views.** Team Status and the Score /
+Weapons / Team Health/Armor diverging graphs are structurally two-sided: they
+draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
+match; on a multi-player FFA it is the top two PLAYERS and nobody else. So
+when the layout is individual with more than two participants —
+`individualTimelineLayout(result)`, the same test `initRegionControl` applies —
+`setIndividualTimelineLayout` puts an `individual-timeline` class on `<body>`,
+and the tab becomes the per-player views:
+
+- CSS hides Team Status and the three A↑/B↓ graphs, which takes their
+  Team A / Team B legends with them.
+- The three per-player drill-downs leave their collapsed `<details>` and
+  become panels of their own, in order: **Frags / deaths per player**,
+  **Weapons per player**, **Health / armor per player**. The live nodes are
+  RE-PARENTED into the panel bodies, never cloned — they own the canvases and
+  the `_sig` / `_cells` rebuild cache, and a second copy would render into a
+  detached tree. The selected-range label rides along from the Weapons
+  heading. The move reverses on the next demo load: `resetUIToCleanState`
+  restores the two-sided layout, then `applyDuelModeUI` re-promotes if the new
+  demo wants it, so an FFA → 4on4 → duel walk lands on the right layout each
+  time.
+- Rows are taller there — mini charts 44 → 60 px, weapon-span rows 20 → 28 px
+  (`ppMiniHeight` / `ppSpanRowHeight`) — since these three views now carry the
+  tab instead of hiding under a graph.
+- `timelinePlayersByTeam` returns one group per entry in
+  `timelineState.teams` instead of always two, so EVERY player gets a row.
+  Before, only the players whose team matched `teams[0]` / `teams[1]` did —
+  in an individual layout that is two of N. Group index is still the
+  `TEAM_COLORS` index, so the rows carry the player palette exactly as
+  CLAUDE.md's rule requires. A player's side is their own name there, so no
+  roster lookup is involved.
+- **Powerups is hidden.** Its rows are per powerup TYPE, coloured by which of
+  two TEAMS holds it, so a field of N paints the top two and greys every
+  other run as `other`. `updatePowerupTimeline` hides the panel itself, the
+  way `initRegionControl` hides region control. Colouring those spans per
+  player is separate work.
+
+A duel (or a 1v1 FFA) is A-vs-B and keeps every panel exactly as before.
 
 ### A recording with no match in it
 

@@ -2274,6 +2274,65 @@ function usesPlayerPalette(result) {
     return isIndividualLayout(result) && !isDuel(result);
 }
 
+// individualTimelineLayout reports whether the Timeline tab should drop its
+// two-sided views. Same rule initRegionControl applies to region control, for
+// the same reason: "Team A ↑ / Team B ↓" needs a pair of sides, and an
+// individual layout with more than two participants has none — the top two
+// players are not a matchup, and everyone else does not appear at all. A
+// two-participant match (a duel, or a 1v1 FFA) IS the two-sided view and keeps
+// it. Reads the same test as usesPlayerPalette; the two are kept apart because
+// they answer different questions (which panels exist vs which palette).
+function individualTimelineLayout(result) {
+    return isIndividualLayout(result) && !isDuel(result);
+}
+
+// individualTimelineActive reports the layout currently applied to the tab.
+// The render paths read the body class rather than re-deriving from the result
+// so the DOM, the row grouping and the row heights can never disagree.
+function individualTimelineActive() {
+    return document.body.classList.contains('individual-timeline');
+}
+
+// The three per-player drill-downs and where each lives in the two layouts:
+// `node` is the content that MOVES, `home` the <details> it sits in under its
+// team graph, `host` the body of the panel it is promoted into. The node is
+// re-parented, never cloned — it owns live canvases plus the `_sig` / `_cells`
+// rebuild cache, and a second copy would render into a detached tree.
+const PER_PLAYER_VIEWS = [
+    { node: 'frags-per-player',        home: 'frags-per-player-details',   host: 'frags-per-player-host',   panel: 'frags-per-player-panel'   },
+    { node: 'weapons-per-player-rows', home: 'weapons-per-player-details', host: 'weapons-per-player-host', panel: 'weapons-per-player-panel' },
+    { node: 'ha-per-player',           home: 'ha-per-player-details',      host: 'ha-per-player-host',      panel: 'ha-per-player-panel'      },
+];
+
+function setIndividualTimelineLayout(on) {
+    document.body.classList.toggle('individual-timeline', on);
+    for (const v of PER_PLAYER_VIEWS) {
+        const panel = document.getElementById(v.panel);
+        if (panel) panel.style.display = on ? '' : 'none';
+        const node = document.getElementById(v.node);
+        const target = document.getElementById(on ? v.host : v.home);
+        if (!node || !target || node.parentElement === target) continue;
+        target.appendChild(node);
+    }
+    // The selected-range suffix rides along: its only home is the Weapons
+    // heading, which this layout hides.
+    const rangeLabel = document.getElementById('time-range-label');
+    const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
+    if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
+}
+
+// Row heights for the per-player views. The compact pair is what a collapsed
+// drill-down under a team graph uses; promoted to a panel of their own these
+// rows carry the tab, with no team graph above them competing for the fold, so
+// they get more pixels each.
+function ppMiniHeight() {
+    return individualTimelineActive() ? 60 : 44;
+}
+
+function ppSpanRowHeight() {
+    return individualTimelineActive() ? 28 : RC_ROW_H;
+}
+
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
@@ -2293,6 +2352,9 @@ function applyDuelModeUI(result) {
     // five players. Drive it off the rows themselves, which covers every
     // demo class with nothing to aggregate.
     document.body.classList.toggle('no-team-rows', playerStatsTeamRows(result).length === 0);
+    // Timeline tab: the A-vs-B graphs describe a matchup an FFA does not have.
+    // Hide them and promote the three per-player views to panels of their own.
+    setIndividualTimelineLayout(individualTimelineLayout(result));
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -4090,6 +4152,10 @@ function resetUIToCleanState() {
     }
     hide('powerup-timeline-panel');
     hide('region-control-timeline-panel');
+    // Timeline layout back to the two-sided default: the per-player views
+    // return to their <details> under the team graphs. applyDuelModeUI
+    // re-promotes them below if this demo wants the individual layout.
+    setIndividualTimelineLayout(false);
     hide('unified-timeline');
     setText('time-range-label', '');
     setHTML('team-status-a', '');
@@ -4833,29 +4899,37 @@ function buildHASegments(td) {
 // (timelineState.bucketView.players[name], read via playerValAt/playerAliveAt)
 // plus timelineState.backpacks for weapon-drop dots — no extra data fetch.
 
-// Group the bucket-view players into [teamAPlayers, teamBPlayers] following
-// timelineState.teams order. Team membership mirrors updateTeamStatus: prefer
-// demoInfo.players, fall back to the map's playerSymbols. Players whose team
-// can't be resolved (spectators, mid-game joiners) are dropped.
+// Group the bucket-view players by side, following timelineState.teams order,
+// so group index == TEAM_COLORS index. Team membership mirrors updateTeamStatus:
+// prefer demoInfo.players, fall back to the map's playerSymbols. Players whose
+// team can't be resolved (spectators, mid-game joiners) are dropped.
+//
+// In the individual layout every player IS a side, so there is one group per
+// entry in timelineState.teams (the frag-sorted player list) and a player's
+// side is their own name — no roster lookup needed. Before this, the grouping
+// hard-coded two sides and resolved everyone to teams[0] / teams[1], so an
+// FFA drill-down drew two rows of N. The two-sided panels keep exactly two
+// groups, so a team demo is unchanged.
 function timelinePlayersByTeam() {
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    const out = [[], []];
+    const individual = individualTimelineActive();
+    const groupCount = Math.max(2, individual ? teams.length : 2);
+    const out = Array.from({ length: groupCount }, () => []);
     if (teams.length < 2 || !view || !view.players) return out;
     const demoPlayers = currentResult?.demoInfo?.players || [];
     const teamOf = (name) => {
+        if (individual) return name;
         const dp = demoPlayers.find(p => p.name === name);
         if (dp?.team) return dp.team;
         return mapState.playerSymbols?.[name]?.team;
     };
     for (const name of Object.keys(view.players)) {
-        const t = teamOf(name);
-        const ti = t === teams[0] ? 0 : t === teams[1] ? 1 : -1;
-        if (ti < 0) continue;
+        const ti = teams.indexOf(teamOf(name));
+        if (ti < 0 || ti >= out.length) continue;
         out[ti].push(name);
     }
-    out[0].sort();
-    out[1].sort();
+    for (const group of out) group.sort();
     return out;
 }
 
@@ -4943,7 +5017,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `ha-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -4988,7 +5062,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     for (const { name, cid } of container._cells) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = ''; // let the cell reflow on resize
-        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: 44 });
+        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: ppMiniHeight() });
     }
     renderSharedTimeAxis(container, startTime, endTime);
 }
@@ -5131,7 +5205,7 @@ function renderFragsPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `fd-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -5173,7 +5247,7 @@ function renderFragsPerPlayer(startTime, endTime) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = '';
         // Per-player max (symmetric about 0): each row uses its full height.
-        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: 44 });
+        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: ppMiniHeight() });
     }
     updateFragsPerPlayerStats();
     renderSharedTimeAxis(container, startTime, endTime);
@@ -5239,7 +5313,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     const grouped = timelinePlayersByTeam();
     const rows = [];
     const rowPlayers = [];
-    for (let ti = 0; ti < 2; ti++) {
+    for (let ti = 0; ti < grouped.length; ti++) {
         for (const name of grouped[ti]) {
             rows.push({
                 name,
@@ -5264,7 +5338,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     }
 
     renderSpansTimeline('weapons-per-player-canvas', 'weapons-per-player-labels', {
-        startTime, endTime, rows,
+        startTime, endTime, rows, rowH: ppSpanRowHeight(),
         stateColors: { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rllg: GRAPH_COLORS.RLLG },
         dropMarks,
     });
@@ -6082,6 +6156,10 @@ function renderChatColumnFull(container, events) {
 function updateDetailGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    // Individual layout: the A↑/B↓ graph is hidden and the per-player view is
+    // a panel of its own, so render that and skip the series prep for a
+    // display:none canvas — this runs on every pan/zoom frame.
+    if (individualTimelineActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepWeaponsData(startTime, endTime, teams);
     const dropMarks = computeBackpackDrops(startTime, endTime, teams);
     const legendA = document.getElementById('legend-weapons-team-a');
@@ -6191,6 +6269,7 @@ ${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
 function updateHealthArmorGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualTimelineActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
     const { points, max } = prepHealthArmorData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-health-team-a');
     const legendB = document.getElementById('legend-health-team-b');
@@ -6209,6 +6288,7 @@ function updateHealthArmorGraph(startTime, endTime) {
 function updateScoreTimeline(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualTimelineActive()) { renderFragsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepScoreData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
@@ -6283,14 +6363,18 @@ function prepRegionControlData(startTime, endTime, teams) {
 // dropMarks (optional): [{row, time, color}] — small dots painted in a
 // row, e.g. weapon-drop events on the per-player weapons timeline. Callers
 // that don't pass it (powerups, region control) render unchanged.
-function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks }) {
+function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks, rowH }) {
     const labelsEl = document.getElementById(labelsId);
     if (!labelsEl) return;
-    const setup = setupGraphCanvas(canvasId, rows.length * RC_ROW_H + RC_AXIS_H);
+    // rowH lets a caller stretch the rows (the per-player weapons view does in
+    // the individual layout); the region-control and powerup rows take RC_ROW_H,
+    // which their hover hit-tests assume.
+    const ROW_H_CSS = rowH || RC_ROW_H;
+    const setup = setupGraphCanvas(canvasId, rows.length * ROW_H_CSS + RC_AXIS_H);
     if (!setup) return;
     const { ctx, Wcss, W, dpr } = setup;
 
-    const ROW_H = Math.round(RC_ROW_H * dpr);
+    const ROW_H = Math.round(ROW_H_CSS * dpr);
     const ROW_PAD = Math.max(1, Math.round(dpr));
 
     // Label column, one DOM element per row, sized to match the canvas
@@ -6299,8 +6383,8 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     for (const r of rows) {
         const lab = document.createElement('div');
         lab.className = 'region-timeline-label';
-        lab.style.height = RC_ROW_H + 'px';
-        lab.style.lineHeight = RC_ROW_H + 'px';
+        lab.style.height = ROW_H_CSS + 'px';
+        lab.style.lineHeight = ROW_H_CSS + 'px';
         if (r.color) lab.style.color = r.color;
         lab.textContent = r.name;
         lab.title = r.name;
@@ -6408,6 +6492,11 @@ function updatePowerupTimeline(startTime, endTime) {
     if (!panel) return;
     const teams = timelineState.teams;
     if (teams.length < 2) { panel.style.display = 'none'; return; }
+    // The rows are per powerup TYPE coloured by which of two TEAMS holds it,
+    // so an individual layout with more than two players paints the top two
+    // and greys every other run as 'other'. Hidden rather than recoloured —
+    // same call initRegionControl makes for the same reason.
+    if (individualTimelineActive()) { panel.style.display = 'none'; return; }
 
     const data = prepPowerupRowsData(startTime, endTime, teams);
     if (!data) { panel.style.display = 'none'; return; }
@@ -6558,6 +6647,14 @@ function updateTeamStatus() {
     const containerA = document.getElementById('team-status-a');
     const containerB = document.getElementById('team-status-b');
     if (!containerA || !containerB) return;
+
+    // Individual layout: the two-sided status panel is hidden, so don't
+    // rebuild its rows on every playhead tick.
+    if (individualTimelineActive()) {
+        containerA.innerHTML = '';
+        containerB.innerHTML = '';
+        return;
+    }
 
     const teams = timelineState.teams;
     const view = timelineState.bucketView;

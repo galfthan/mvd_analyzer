@@ -239,6 +239,20 @@ An individual-mode demo shows no team information at all: no Teams panel, no
 control, and a frag-sorted individual scoreboard. The topbar names the
 leader and the field size rather than inventing an "A vs B" matchup.
 
+**The Timeline tab is per player there.** Team Status and the Score,
+Weapons and Team Health/Armor graphs are "team A ↑ / team B ↓" by
+construction — over a field of eight that is the top two players and nobody
+else — so on an individual layout of more than two participants they go,
+along with the Powerups rows, whose spans are coloured by which of two teams
+holds the powerup. In their place the three per-player views come out from
+behind their collapsed `<details>` and become panels of their own — Frags /
+deaths per player, Weapons per player, Health / armor per player, with
+taller rows now that they carry the tab. They also show the WHOLE field for
+the first time: the grouping behind them resolved every player to one of two
+sides, so an FFA drew rows for two players out of N. Rows carry the player
+palette through the same canonical `TEAM_COLORS` index as everything else.
+A duel (or a 1v1 FFA) is a matchup and keeps every panel exactly as before.
+
 **Colours.** A field of MORE than two players draws from a separate
 twelve-entry `PLAYER_PALETTE`, delivered through the same single canonical
 `TEAM_COLORS` array every surface already indexes — the four-entry team

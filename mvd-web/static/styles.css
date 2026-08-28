@@ -760,6 +760,31 @@ body.individual-mode #scoreboard .team-col {
     display: none !important;
 }
 
+/* Timeline tab, individual layout (one side per player, more than two of
+ * them). The two-sided views there describe a matchup that does not exist:
+ * the Team Status row, and the Score / Weapons / Health-Armor graphs whose
+ * whole grammar is "Team A ↑, Team B ↓" over the top two players. They go,
+ * and the three per-player views that used to hide inside a collapsed
+ * <details> under them become first-class panels — app.js
+ * setIndividualTimelineLayout re-parents the live nodes into the panel
+ * bodies, and gives them taller rows now that they carry the tab.
+ *
+ * Powerups and Region Control are NOT listed here: both are per-team span
+ * timelines that hide themselves in app.js (updatePowerupTimeline /
+ * initRegionControl), the same way region control already did. */
+body.individual-timeline #tab-timeline .team-status-panel,
+body.individual-timeline #score-timeline-panel,
+body.individual-timeline #weapons-timeline-panel,
+body.individual-timeline #health-armor-timeline-panel {
+    display: none !important;
+}
+
+/* Promoted per-player panels. Row heights come from the renderers (they size
+ * their canvases in JS); this only spaces the block under its heading. */
+.per-player-panel-body {
+    margin-top: 4px;
+}
+
 /* Field size beside the leader in the topbar of a multi-player individual
  * match, where "A vs B" would be a matchup that does not exist. */
 .topbar-field {
@@ -2355,7 +2380,12 @@ body.graph-scrubbing * {
     top: 50%;    /* grows down from the zero line */
 }
 
+/* Selected-range suffix on a timeline heading. It has no fixed home: the
+ * individual layout hides the Weapons panel, so app.js moves this span into
+ * the promoted "Weapons per player" heading — hence the margin instead of a
+ * literal space in the markup. */
 #time-range-label {
+    margin-left: 0.4em;
     font-size: 0.85rem;
     color: #888;
     font-weight: normal;

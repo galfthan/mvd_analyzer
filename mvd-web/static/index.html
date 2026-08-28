@@ -461,8 +461,28 @@
                     </div>
                 </div>
 
+                <!-- Per-player views, promoted to first-class panels when the
+                     match is laid out one side per player and there are more
+                     than two of them (a real FFA). The three bodies below are
+                     EMPTY in the markup on purpose: setIndividualTimelineLayout
+                     re-parents the existing per-player nodes into them, so the
+                     canvases and their row caches move with them and there is
+                     never a second copy to keep in sync. -->
+                <div class="panel per-player-panel" id="frags-per-player-panel" style="display: none;">
+                    <h3>Frags / deaths per player</h3>
+                    <div class="per-player-panel-body" id="frags-per-player-host"></div>
+                </div>
+                <div class="panel per-player-panel" id="weapons-per-player-panel" style="display: none;">
+                    <h3 id="weapons-per-player-heading">Weapons per player</h3>
+                    <div class="per-player-panel-body" id="weapons-per-player-host"></div>
+                </div>
+                <div class="panel per-player-panel" id="ha-per-player-panel" style="display: none;">
+                    <h3>Health / armor per player</h3>
+                    <div class="per-player-panel-body" id="ha-per-player-host"></div>
+                </div>
+
                 <!-- Cumulative Frags Timeline -->
-                <div class="panel timeline-health-panel-full">
+                <div class="panel timeline-health-panel-full" id="score-timeline-panel">
                     <h3>Score Timeline</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="score-y-axis">
@@ -502,8 +522,8 @@
                 </div>
 
                 <!-- Weapons (full width) -->
-                <div class="panel timeline-detail-graph-panel-full">
-                    <h3>Weapons <span id="time-range-label"></span></h3>
+                <div class="panel timeline-detail-graph-panel-full" id="weapons-timeline-panel">
+                    <h3 id="weapons-timeline-heading">Weapons<span id="time-range-label"></span></h3>
                     <div class="detail-graph-wrapper">
                         <div class="timeline-y-axis" id="detail-y-axis">
                             <span class="y-label y-top">4</span>
@@ -526,7 +546,7 @@
                     </div>
                     <details class="per-player-detail" id="weapons-per-player-details">
                         <summary>Per-player weapons</summary>
-                        <div class="region-timeline-wrapper per-player-rows">
+                        <div class="region-timeline-wrapper per-player-rows" id="weapons-per-player-rows">
                             <div class="region-timeline-labels" id="weapons-per-player-labels"></div>
                             <div class="region-timeline-outer">
                                 <canvas class="timeline-canvas" id="weapons-per-player-canvas"></canvas>
@@ -537,7 +557,7 @@
                 </div>
 
                 <!-- Health/Armor (diverging style) -->
-                <div class="panel timeline-health-panel-full">
+                <div class="panel timeline-health-panel-full" id="health-armor-timeline-panel">
                     <h3>Team Health/Armor</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="health-y-axis">
