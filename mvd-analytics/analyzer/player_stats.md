@@ -167,10 +167,11 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   measured counters — `pellets`/`pelletHits` for sg/ssg, `direct` for rl
   — instead of recomputing them. Measured against the verbatim block on
   186 instrumented archive demos (`cmd/qw-demoinfo-eval`, the
-  `/measured` columns): sg/ssg `attacks` 100.0% row-exact at 0.00%
-  aggregate, `rl.hits` 99.8% / 0.02%, `sg.hits` 65.9% / 1.03%,
-  `ssg.hits` 75.9% / 6.75% — the shotgun residual is entirely quad
-  (100.0% exact on players who took none) and never negative.
+  `/measured` columns): sg/ssg `attacks` AND `hits` 100.0% row-exact at
+  0.00% aggregate on both weapons, `rl.hits` 99.8% / 0.02%. The shotgun
+  `hits` are an estimate — a fire's same-frame damage sum over the 4 a
+  pellet does, or the 16 it does under the shooter's quad — and dividing
+  by the quad state at fire time is what closed their last residual.
   `gl` keeps `anyDamage` on a wire-linked row: KTX counts a grenade that
   TOUCHED a player (`ktx/src/weapons.c:1331`) and the touch detonates it,
   so every damage row the server writes is splash-flagged and the wire

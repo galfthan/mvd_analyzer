@@ -1341,7 +1341,7 @@ one-directional — never read ours as the higher of the two.
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency`, `byWeapon`, `byEnemyWeapon`, `byWeaponVsEnemyWeapon`, `maxSpree` and `maxQuadSpree` **optional together** — see below. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS for sg/ssg on **every** source since v75 (KTX's unit, 6/14 per fire) and TRIGGER PULLS elsewhere; `hits` is **absent** — not zero — when nothing could count it: no WIRE damage stream to link fires against and no recovery from the aim recon tier for that weapon (`src: "reconstructed"`, v74 — ng/sng always, since the tier validated no nail recovery), or (v75) a `derived` ng/sng row on a parse without nail decoding, the only way a nail fire can be linked to its damage at all; **`hitsConvention`** (v74) names what `hits` counts and is present whenever it is — see below; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS exactly where `hitsConvention` is `pellets` (KTX's unit, 6/14 per fire — KTX's own sg/ssg rows, and since v75 a WIRE-LINKED `derived` sg/ssg row) and TRIGGER PULLS on every other row, a `reconstructed` sg/ssg one included; `hits` is **absent** — not zero — when nothing could count it: no WIRE damage stream to link fires against and no recovery from the aim recon tier for that weapon (`src: "reconstructed"`, v74 — ng/sng always, since the tier validated no nail recovery), or (v75) a `derived` ng/sng row on a parse without nail decoding, the only way a nail fire can be linked to its damage at all; **`hitsConvention`** (v74) names what `hits` counts and is present whenever it is — see below; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
 
@@ -1356,7 +1356,7 @@ machine-readable answer, present on every weapon that carries `hits`.
 |---|---|---|
 | `anyDamage` | one **fire that landed damage by any path**, splash included | `lg`/`ng`/`sng`/`axe` on every source — KTX's own counter for those four, whose single damage path makes "any" and "direct" the same event — plus `gl` on a `derived` (wire-linked) family, where the wire cannot see the touch KTX counts (below), and `sg`/`ssg` on a `reconstructed` one, where the pellet split cannot be recovered (`result.WeaponAimRecon`) |
 | `directImpact` | the projectile **touched a player** (`ktx/src/weapons.c:994` `T_MissileTouch`, `:1331` `GrenadeTouch`) — a rocket that killed by splash alone is not a hit | KTX's `rl` / `gl`; (v74) the `rl` / `gl` of a `reconstructed` family; (v75) the `rl` of a `derived` one |
-| `pellets` | **pellets**, on BOTH sides of the ratio: `attacks += bullets` (`:746`, `:812`, `:869`) and one `hits++` per pellet that connected (`:387`, `:392`) | KTX's `sg` / `ssg`, and (v75) the `sg` / `ssg` of a `derived` family |
+| `pellets` | **pellets**, on BOTH sides of the ratio: `attacks += bullets` (`:812` for the shotgun's 6, `:869` for the super shotgun's 14) and one `hits++` per pellet that connected (`:387`, `:392`) | KTX's `sg` / `ssg`, and (v75) the `sg` / `ssg` of a `derived` family |
 
 **Since v75 a `derived` row answers KTX's question too** (schema v74 did
 it for `reconstructed`). The wire-linked tier no longer publishes a
@@ -1432,19 +1432,26 @@ WIRE-LINKED family scored against the same demo's verbatim block:
 |---|---|---|
 | `sg.attacks` | 0.0% exact / 83.33% | **100.0% / 0.00%** |
 | `ssg.attacks` | 0.0% / 92.86% | **100.0% / 0.00%** |
-| `sg.hits` | 6.0% / 76.95% | **65.9% / 1.03%** |
-| `ssg.hits` | 5.9% / 85.62% | **75.9% / 6.75%** |
+| `sg.hits` | 6.0% / 76.95% | **100.0% / 0.00%** |
+| `ssg.hits` | 5.9% / 85.62% | **100.0% / 0.00%** |
 | `rl.hits` | 1.6% / 355.17% | **99.8% / 0.02%** |
 | `gl.hits` | 42.9% / 55.13% | unchanged (see above) |
 | `lg.hits` / `axe.hits` | 99.3% / 0.00%, 100.0% / 0.00% | unchanged |
 | `ng.hits` / `sng.hits` (with nails) | — | 65.5% / 32.11%, 48.5% / 22.81% |
 
-The shotgun residual is **entirely quad**, and one-sided: on the 264 sg
-and 144 ssg rows whose player never took a quad, both reproduce the block
-on **100.0%** of rows at 0.00% aggregate; no row anywhere under-counts.
-The pellet estimator divides the fire's damage by 4, so a quad pellet (16)
-reads as four, clamped at the fire's 6/14 — an over-count that only exists
-where a quad was carried.
+`sg`/`ssg` `hits` are an ESTIMATE that happens to land exactly: aim sizes a
+fire's pellet hits from the magnitude of its same-frame damage, `Σ / 4`,
+clamped at the fire's 6/14. That first shipped with a flat divisor and left
+a residual which was **entirely quad** and one-sided (65.9% / 1.03% on sg,
+75.9% / 6.75% on ssg, bias +4.13 / +6.85, no row anywhere under-counting) —
+`T_Damage` multiplies the attacker's damage by 4 while the quad runs
+(`ktx/src/combat.c:540-546`), so a quad pellet's 16 read as four pellets and
+a two-pellet quad fire saturated the clamp. Dividing by 16 while the SHOOTER
+holds the quad at fire time closes it: 534 of 534 sg and 390 of 390 ssg rows
+now reproduce the block to the unit. Two per-fire pellet counts remain
+unmodelled and are stated, not guarded — `k_instagib`'s single-slug sg
+(`ktx/src/weapons.c:806-810`) and `k_yawnmode`'s 21-pellet ssg (`:858`);
+neither mode appears in the measured population.
 
 `ng`/`sng` are on KTX's scale (one nail connecting is one hit on both
 sides — `ktx/src/weapons.c:1549`, `:1620`, one spike per `attacks++`) but

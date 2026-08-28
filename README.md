@@ -995,9 +995,11 @@ diff -r /tmp/before /tmp/after
    off; and `gl` `hits` on a `derived` family is not KTX's number — KTX
    counts a grenade that TOUCHED a player, and the touch detonates it,
    so every damage row the wire carries is flagged splash and the touch
-   is unobservable. Everything else is on KTX's own scale per weapon
-   since v75 (`sg`/`ssg` pellets, `rl` direct impacts, the rest a
-   connecting fire). That is stated in the payload rather than only in
+   is unobservable. Everything else on that family is on KTX's own scale
+   per weapon since v75 (`sg`/`ssg` pellets, `rl` direct impacts, the rest
+   a connecting fire); a `reconstructed` family reaches it for `rl`/`gl`
+   and keeps trigger pulls on `sg`/`ssg`, whose pellet split its rebuilt
+   log cannot carry. That is stated in the payload rather than only in
    prose: every weapon carrying `hits` carries `hitsConvention`
    (`anyDamage` | `directImpact` | `pellets`), so a consumer can gate a
    cross-era comparison instead of re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer

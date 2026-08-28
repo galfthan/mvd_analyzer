@@ -250,9 +250,13 @@ tier, so the two sections cannot disagree):
 
 - **`sg` / `ssg`** — `attacks` and `hits` are PELLETS on both sides, from
   `aim.players[].weapons[].pellets` / `pelletHits`. KTX's own unit
-  (`attacks += bullets`, `ktx/src/weapons.c:746`, `:812`, `:869`; `hits++`
-  per pellet, `:387`, `:392`). Withheld and unresolved fires still count as
-  attacks, which is what keeps the unit comparable.
+  (`attacks += bullets`, `ktx/src/weapons.c:812` for the shotgun's 6,
+  `:869` for the super shotgun's 14; `hits++` per pellet, `:387`, `:392`).
+  Withheld and unresolved fires still count as attacks, which is what keeps
+  the unit comparable. `hits` is an ESTIMATE — aim sizes a fire's pellet
+  hits from the magnitude of its same-frame damage, `Σ / 4`, or `Σ / 16`
+  while the shooter holds the quad (`T_Damage` multiplies by 4,
+  `ktx/src/combat.c:540-546`), clamped to the fire's 6 or 14.
 - **`rl`** — `hits` is the DIRECT-impact count, from
   `aim.players[].weapons[].direct`. KTX increments its counter in
   `T_MissileTouch` and nowhere else (`:994`); splash victims go to the
@@ -268,15 +272,19 @@ Measured against the verbatim block on 186 instrumented archive demos
 | row | before | after |
 |---|---|---|
 | `sg.attacks` / `ssg.attacks` | 0.0% exact, 83% / 93% off | **100.0% exact, 0.00%** |
-| `sg.hits` | 6.0% / 76.95% | **65.9% / 1.03%** |
-| `ssg.hits` | 5.9% / 85.62% | **75.9% / 6.75%** |
+| `sg.hits` | 6.0% / 76.95% | **100.0% / 0.00%** |
+| `ssg.hits` | 5.9% / 85.62% | **100.0% / 0.00%** |
 | `rl.hits` | 1.6% / 355.17% | **99.8% / 0.02%** |
 | `lg.hits` / `axe.hits` (control) | 99.3% / 100.0% at 0.00% | unchanged |
 
-The shotgun residual is entirely quad and never negative: on the 264 `sg`
-and 144 `ssg` rows whose player took no quad, both reproduce the block on
-**100.0%** of rows at 0.00%. The pellet estimator divides a fire's damage
-by 4, so a quad pellet reads as four.
+The shotgun rows reproduce the block EXACTLY — every one of 534 `sg` and
+390 `ssg` player rows. They did not at first: the pellet estimator divided
+every fire's damage by 4, and a quad pellet does 16, so a quad fire with two
+pellets in read as a full six. That residual was one-sided (bias +4.13 sg /
++6.85 ssg, never negative) and lived entirely on players who took a quad —
+the 264 `sg` and 144 `ssg` rows whose player took none were already 100.0%
+exact. Dividing by the shooter's quad state at fire time closed it to zero
+on both weapons.
 
 **Two honest exceptions, named rather than papered over.**
 

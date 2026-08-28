@@ -5201,7 +5201,7 @@ components:
                           description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
-                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
+                          description: "Pellet hits, ESTIMATED from magnitude: the fire's same-frame damage sum / 4 (/ 16 while the shooter holds the quad), clamped to the fire's 6 or 14. Reproduces KTX acc.hits exactly on every row of the 186-demo archive eval."
                           type: integer
                       type:
                         - "null"
@@ -5225,10 +5225,10 @@ components:
                       description: "This bucket is a short trailing window."
                       type: integer
                     pelletHits:
-                      description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
+                      description: "Pellet hits, ESTIMATED from magnitude: the fire's same-frame damage sum / 4 (/ 16 while the shooter holds the quad), clamped to the fire's 6 or 14. Reproduces KTX acc.hits exactly on every row of the 186-demo archive eval."
                       type: integer
                     pellets:
-                      description: "Pellets fired (shots × 6/14)."
+                      description: "Pellets fired (shots × 6/14 — every fire, including ones the damage join could not resolve, which is what keeps it on KTX's `attacks += bullets` footing)."
                       type: integer
                     recon:
                       description: >-
@@ -5302,7 +5302,7 @@ components:
                           description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
-                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
+                          description: "Pellet hits, ESTIMATED from magnitude: the fire's same-frame damage sum / 4 (/ 16 while the shooter holds the quad), clamped to the fire's 6 or 14. Reproduces KTX acc.hits exactly on every row of the 186-demo archive eval."
                           type: integer
                       type:
                         - "null"
@@ -5333,7 +5333,7 @@ components:
                           description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
-                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
+                          description: "Pellet hits, ESTIMATED from magnitude: the fire's same-frame damage sum / 4 (/ 16 while the shooter holds the quad), clamped to the fire's 6 or 14. Reproduces KTX acc.hits exactly on every row of the 186-demo archive eval."
                           type: integer
                       type:
                         - "null"
@@ -8125,8 +8125,9 @@ components:
             - **src=ktx** is KTX's server-side counter (attacks = PELLETS for
               sg/ssg, with a real/virtual split);
             - **src=derived** is reconstructed from the decoded fire stream
-              (attacks = TRIGGER PULLS, no real/virtual, and hits absent when
-              the demo has no damage stream to link against);
+              and linked to the wire damage log (attacks = PELLETS for sg/ssg
+              since schema v75, TRIGGER PULLS otherwise; no real/virtual, and
+              hits absent when the demo has no damage stream to link against);
             - **src=reconstructed** is the same fire stream with `hits`
               recovered from the aim recon tier on a demo whose damage section
               is itself reconstructed — inference, not measurement. Only the
@@ -8143,25 +8144,31 @@ components:
 
             `src` is the evidence GRADE and does not say what the numbers
             count; the per-weapon `hitsConvention` does, and is the field to
-            gate a cross-demo comparison on. Since schema v75 all three
-            sources aim at KTX's own convention per weapon: `pellets` for
-            sg/ssg, `directImpact` for rl (and for gl on `ktx` and
-            `reconstructed` rows), `anyDamage` for lg/axe/ng/sng. Two
-            exceptions are named rather than papered over — a `derived`
-            (wire-linked) gl row stays `anyDamage`, because a grenade that
-            touches a player explodes and every damage row the server then
-            writes is flagged splash, so the wire holds no record of the touch
-            KTX counts; and a `derived` ng/sng row WITHHOLDS `hits` on a parse
-            without nail decoding (the API always builds it, so this never
-            surfaces here).
+            gate a cross-demo comparison on — it, not `src` and not the
+            weapon, is also what says whether `attacks` is pellets or trigger
+            pulls. Each source reaches KTX's convention as far as its evidence
+            allows, and the gaps are named rather than papered over:
+
+            - `ktx` — `pellets` for sg/ssg, `directImpact` for rl/gl,
+              `anyDamage` for lg/axe/ng/sng. The server's own counters.
+            - `derived` (wire-linked, schema v75) — the same, EXCEPT gl, which
+              stays `anyDamage`: a grenade that touches a player explodes and
+              every damage row the server then writes is flagged splash, so
+              the wire holds no record of the touch KTX counts. A `derived`
+              ng/sng row also WITHHOLDS `hits` on a parse without nail
+              decoding (the API always builds it, so this never surfaces
+              here).
+            - `reconstructed` (schema v74) — `directImpact` for rl AND gl,
+              which the rebuilt log CAN answer because it never reads the
+              splash flag. Its sg/ssg rows stay `anyDamage` with `attacks` in
+              trigger pulls: the pellet split needs a per-hit magnitude the
+              rebuilt log does not carry.
 
             Scored against the verbatim block on 186 instrumented archive
             demos (cmd/qw-demoinfo-eval, withhold-and-compare). Wire-linked:
-            rl `hits` **99.8% of 632 rows exact / 0.02% aggregate**, sg
-            `attacks` and ssg `attacks` **100.0% / 0.00%**, sg `hits` 65.9% /
-            1.03%, ssg `hits` 75.9% / 6.75% (the whole residual is quad — on
-            players who never took one, both are 100.0% exact at 0.00%), lg
-            99.3% / 0.00%, axe 100.0% / 0.00%. Reconstructed: rl agrees to
+            rl `hits` **99.8% of 632 rows exact / 0.02% aggregate**, sg and
+            ssg **100.0% / 0.00%** on both `attacks` and `hits` (534 and 390
+            rows), lg 99.3% / 0.00%, axe 100.0% / 0.00%. Reconstructed: rl agrees to
             **1.25%** in aggregate (46.5% of 632 rows exact, p90 error 2), gl
             to **3.55%** at 89.6% of 424 rows exact, lg to 0.9%. The two rows
             that do NOT reproduce the block are gl on a wire-linked row
@@ -8194,7 +8201,7 @@ components:
                   additionalProperties:
                     additionalProperties: false
                     properties:
-                      attacks: { description: "PELLETS when the weapon is sg/ssg (6 per SG fire, 14 per SSG — KTX's own unit, on every src since schema v75); TRIGGER PULLS otherwise. Read `hitsConvention` rather than re-deriving that rule.", type: integer }
+                      attacks: { description: "PELLETS exactly where `hitsConvention` is \"pellets\" (6 per SG fire, 14 per SSG — KTX's own unit, and since schema v75 that of a wire-linked src=derived row); TRIGGER PULLS on every other row, a src=reconstructed sg/ssg one included. Read `hitsConvention`, not the weapon, rather than re-deriving that rule.", type: integer }
                       hits: { description: "Hits landed — read `hitsConvention` for WHAT that counts before comparing two of these. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block, or a derived ng/sng row from a parse without nail decoding — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
                       hitsConvention:
                         description: >

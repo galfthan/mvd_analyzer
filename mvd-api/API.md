@@ -1023,19 +1023,25 @@ Common frontend features → the call that backs them.
   evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
   `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
   is not the same as no hits). `attacks` is shot-derived on every demo
-  and matches KTX to the row on the single-projectile weapons. Since
-  schema v75 EVERY family answers KTX's own question per weapon:
-  `sg`/`ssg` count pellets on both sides of the ratio, `rl` counts
-  direct impacts (`reconstructed` since v74, `derived` since v75, both
-  within 1.3% / 0.02% of `/demoinfo` in aggregate), and
-  `lg`/`ng`/`sng`/`axe` count a connecting fire, which is KTX's own
-  event for them. ONE exception: `gl` on a `derived` family still counts
-  any damage path, because a grenade that touches a player explodes and
-  every damage row the wire then carries is flagged splash — the touch
-  KTX counts is simply not on the wire. Read
+  and matches KTX to the row on the single-projectile weapons. Each
+  family answers KTX's own question as far as its evidence reaches:
+  `rl` counts direct impacts on all three (`reconstructed` since v74,
+  `derived` since v75, both within 1.3% / 0.02% of `/demoinfo` in
+  aggregate), `lg`/`ng`/`sng`/`axe` count a connecting fire, which is
+  KTX's own event for them, and `sg`/`ssg` count pellets on both sides
+  of the ratio on a `ktx` or wire-linked `derived` row (100.0% of the
+  archive eval's rows exact since v75). TWO gaps, both marked: `gl` on
+  a `derived` family still counts any damage path, because a grenade
+  that touches a player explodes and every damage row the wire then
+  carries is flagged splash — the touch KTX counts is simply not on the
+  wire; and `sg`/`ssg` on a `reconstructed` family count fires that
+  landed damage against TRIGGER PULLS, because the pellet split needs a
+  per-hit magnitude the rebuilt log does not carry. Read
   `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
   — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
-  is, per WEAPON because one `src: "ktx"` row uses all three at once.
+  is, per WEAPON because one `src: "ktx"` row uses all three at once. It
+  is also what says which unit `attacks` is in: pellets exactly where
+  the convention is `pellets`, trigger pulls everywhere else.
   Two rows are comparable exactly when weapon and convention match, so
   gate any cross-demo or cross-era aggregation on it; ignoring it turns
   a ~4x definition change on `rl` into a trend.

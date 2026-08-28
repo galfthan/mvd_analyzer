@@ -337,9 +337,13 @@ Every family carries `src` (`"derived"` | `"ktx"` |
 for a pre-instrumentation demo, and on `accuracy` whose `hits` come from
 the aim reconstruction tier), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
 The response keeps the same shape regardless of demo age: on a demo with
-no KTX block, `accuracy` is reconstructed from the decoded fire stream
-(trigger pulls, not KTX's pellets — check `src` before comparing across
-demos), `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
+no KTX block, `accuracy` is derived from the decoded fire stream — linked
+to the wire damage log where the demo carries one (`src: "derived"`, on
+KTX's own convention per weapon since schema v75), rebuilt from the
+reconstruction where it does not (`src: "reconstructed"`, whose `sg`/`ssg`
+count trigger pulls rather than KTX's pellets); read
+`accuracy.byWeapon[].hitsConvention`, not `src`, before comparing across
+demos, `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
 `login` from the `*auth` userinfo key. A value that cannot be measured
 stays ABSENT rather than becoming a zero — notably
 `accuracy.byWeapon[].hits` on a demo with no WIRE damage stream for the
@@ -372,11 +376,13 @@ every single-projectile weapon (98–100% exact).
 the field to gate a cross-demo comparison on — `src` states the evidence
 GRADE and says nothing about what is counted. It sits on every weapon
 that carries `hits`: `anyDamage` (a fire that landed damage by any path;
-every `derived` weapon, `lg` / `sg` / `ssg` / `axe` of a
-`reconstructed` one, plus KTX's own `lg` / `axe` / `ng` / `sng`),
-`directImpact` (the projectile TOUCHED a player: KTX's `rl` / `gl`, and
-a `reconstructed` family's `rl` / `gl` since v74) or `pellets` (KTX's
-`sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON, because
+`lg` / `ng` / `sng` / `axe` on every source, plus `gl` on a `derived`
+family — the wire cannot see the touch KTX counts there — and
+`sg` / `ssg` on a `reconstructed` one), `directImpact` (the projectile
+TOUCHED a player: KTX's `rl` / `gl`, a `reconstructed` family's `rl` /
+`gl` since v74, and a `derived` family's `rl` since v75) or `pellets`
+(KTX's `sg` / `ssg` and, since v75, a `derived` family's — the one
+convention where `attacks` counts pellets too). Per WEAPON, because
 one `src: "ktx"` row uses all three at once. Two rows are comparable
 exactly when weapon AND convention match; absent beside a present `hits`
 only on a `src: "mixed"` team row. Deriving KTX's own convention on an

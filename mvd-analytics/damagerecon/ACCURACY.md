@@ -873,8 +873,8 @@ measurement rather than a claim.
 |---|---|---|---|
 | `acc.sg.attacks` | 534 | 0.0% exact / 83.33% | **100.0% / 0.00%** |
 | `acc.ssg.attacks` | 390 | 0.0% / 92.86% | **100.0% / 0.00%** |
-| `acc.sg.hits` | 534 | 6.0% / 76.95% | **65.9% / 1.03%** |
-| `acc.ssg.hits` | 390 | 5.9% / 85.62% | **75.9% / 6.75%** |
+| `acc.sg.hits` | 534 | 6.0% / 76.95% | **100.0% / 0.00%** |
+| `acc.ssg.hits` | 390 | 5.9% / 85.62% | **100.0% / 0.00%** |
 | `acc.rl.hits` | 632 | 1.6% / 355.17% | **99.8% / 0.02%** |
 | `acc.rl.attacks` | 632 | 99.8% / 0.00% | unchanged |
 | `acc.lg.hits` | 434 | 99.3% / 0.00% | unchanged |
@@ -888,23 +888,61 @@ block on 99.3% and 100.0% of rows without anything changing. That is what
 says the join itself is sound and the pre-v75 residual on the other
 weapons was definition, not derivation.
 
-**The shotgun residual is entirely quad, and one-sided.** Split the rows
-on whether the player took a quad at all:
+**The shotgun residual was entirely quad, and is now gone.** The pellet
+count is an ESTIMATE from magnitude — a fire's same-frame damage sum over
+the 4 a pellet does, clamped to the fire's 6 or 14 (`aimcore/aim.go`) —
+and it first shipped with a flat divisor. That scored 65.9% / 1.03% on
+`acc.sg.hits` and 75.9% / 6.75% on `acc.ssg.hits`, bias +4.13 and +6.85
+per row, with **not one row of 924 under-counting**. Splitting the rows on
+whether the player took a quad at all located it exactly:
 
 | row | quad == 0 | quad > 0 |
 |---|---|---|
 | `acc.sg.hits` | 264 rows, **100.0% exact / 0.00%** | 270 rows, 32.6% / 1.36% |
 | `acc.ssg.hits` | 144 rows, **100.0% exact / 0.00%** | 246 rows, 61.8% / 9.11% |
 
-Not one row of 924 under-counts. The pellet estimator sizes a fire's hits
-as `Σdamage / 4` clamped to the fire's 6 or 14 (`aimcore/aim.go`), so a
-quad pellet's 16 reads as four pellets and a quad fire saturates the
-clamp. It is an over-count that exists only where a quad was carried, it
-is named on `result.WeaponAimSplit` as a known approximation of the aim
-section this tier reads, and closing it needs a per-damage-row quad flag
-the wire does not carry. `hitsConvention: pellets` stays honest — the
-number IS a pellet count on KTX's scale — and the residual is stated here
-rather than hidden behind it.
+`T_Damage` multiplies the attacker's damage by 4 while
+`super_damage_finished > time` (`ktx/src/combat.c:540-546`), so a quad
+pellet writes 16 to the wire log: a flat `/4` read it as four pellets and
+a quad fire with two pellets in saturated the 6-pellet clamp. The fix does
+not need the per-damage-row quad flag the wire lacks — the SHOOTER's quad
+is already on the wire as a possession interval
+(`streams.players[].q`, the same stream `playerStats.hold.powerups` is
+integrated from), and the state to read is the one at FIRE time: the
+hitscan trace and its `T_Damage` calls run in the same server frame as the
+trigger pull, so a quad expiring between them is not a case that exists.
+Dividing by 16 there closes the gap completely:
+
+| row | flat `/4` | `/16` under quad |
+|---|---|---|
+| `acc.sg.hits` | 534 rows, 65.9% / 1.03% | **100.0% / 0.00%**, bias 0.00 |
+| `acc.ssg.hits` | 390 rows, 75.9% / 6.75% | **100.0% / 0.00%**, bias 0.00 |
+
+Every other row in the table is byte-identical across the two runs (the
+`-nails` run too), so this is the whole of what the divisor touched. **No
+residual remains to characterise**: on 924 archive player rows the
+estimate reproduces KTX's own per-pellet counter to the unit, which is as
+strong a statement as `acc.rl.attacks` or `acc.axe.hits` gets.
+
+One caveat worth recording because it turned out NOT to bite: under
+`teamplay 1` / `3` a hit on a teammate has its health share zeroed
+(`ktx/src/combat.c:752-762`), and an unarmored teammate therefore loses
+nothing at all — but KTX still counts the pellet in `wpn[].hits`, so a
+suppressed wire row would cost us one. It is not suppressed. The hidden
+`mvdhidden_dmgdone` message is gated on `unbound_dmg_dealt`, which is the
+armor save plus `virtual_take` — the take captured BEFORE the teamplay,
+godmode and pentagram zeroing (`:733`, `:795`, `:810`) — so the row is
+written carrying the pre-nullification amount and the pellet arithmetic
+still sees its 4. Same reason `DamageEntry.Bounded` can be 0 beside a
+non-zero `Damage`.
+
+Two per-fire pellet counts stay unmodelled, and are STATED rather than
+guarded: `k_instagib` gives the sg slot a railgun and counts one attack
+per fire, not six (`ktx/src/weapons.c:806-810`), and `k_yawnmode` fires 21
+ssg pellets rather than 14 (`:858`). aim's pellet table is an
+unconditional 6/14, so a demo of either kind reads that row off-scale
+against the block. Neither mode is in this 186-demo population, and a
+branch measured against nothing is worse than a documented gap.
 
 **`gl` is the one weapon the wire cannot answer, and it says so.** KTX
 increments `wpn[wpGL].hits` in `GrenadeTouch` (`ktx/src/weapons.c:1331`)
@@ -931,6 +969,17 @@ linker just misses some: run with `-nails`, `acc.ng.hits/measured` is
 65.5% of 139 rows exact at **32.11%** aggregate under-count and
 `acc.sng.hits/measured` 48.5% of 336 at **22.81%**, bias −2.01 and −3.05
 per row, never positive. Nail accuracy is a floor, not an estimate.
+
+**`rl`'s zero is a measured zero, on every demo.** The direct count is
+gated section-wide on the wire damage stream and nowhere per row: under
+that gate `direct` IS the count of the player's non-splash rl damage rows,
+so 0 means "touched nobody" — including on a demo where no rocket landed
+damage at all and aim's direct/splash split therefore never ran (a short
+FFA round, say). What the number is exposed to is the LINKER, not the
+classification: a rocket that touched somebody but whose damage row the
+fire→damage join did not reach reads as a miss, which is the same exposure
+the pre-v75 any-path count always had. `acc.rl.hits/measured` is what
+measures it — 99.8% of 632 rows exact at 0.02% aggregate, above.
 
 Without `-include nails` there is no nail linkage at all, and v75 stops
 publishing the `hits: 0` that produced — the field is withheld, keyed on
