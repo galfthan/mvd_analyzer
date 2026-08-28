@@ -25,11 +25,16 @@
 // across measurements that are NOT the same quantity, and the table marks
 // them:
 //
-//   - sg/ssg accuracy — KTX counts PELLETS on both sides of the ratio, this
-//     pipeline counts trigger pulls and fires that connected;
-//   - rl/gl hits on a WIRE-linked row — KTX's is the direct-impact count and
-//     the wire-linked tier counts any damage path. A RECONSTRUCTED row (what
-//     this harness scores) publishes the direct-impact count since v74, so
+//   - sg/ssg accuracy — KTX counts PELLETS on both sides of the ratio, and a
+//     RECONSTRUCTED row (what the un-suffixed columns score) counts trigger
+//     pulls and fires that connected, since the pellet split needs a per-hit
+//     magnitude the rebuilt log does not carry. The `/measured` columns below
+//     score the wire-linked row, which does publish pellets (v75);
+//   - gl hits on a WIRE-linked row — KTX's is the direct-impact count and the
+//     wire-linked tier counts any damage path there, because a grenade touch
+//     leaves no non-splash row on the wire at all (acc.gl.direct/wire below
+//     measures how far that goes). Both tiers publish the direct-impact count
+//     for rl, and a RECONSTRUCTED row does for gl too since v74, so
 //     acc.rl.hits / acc.gl.hits below ARE comparable with the block;
 //   - spree.max — KTX increments a player's own streak on their SUICIDE
 //     wherever teamplay is off (see result.PlayerStatsScore.MaxSpree). The
@@ -59,7 +64,7 @@
 // off the stored playerStats before the withhold. It is not part of the blind
 // answer and never mixes into those rows; it is here because the wire-linked
 // family also claims to be on KTX's scale per weapon (schema v75: sg/ssg
-// pellets, rl/gl direct impacts, the rest any-damage) and a claim like that
+// pellets, rl direct impacts, the rest any-damage) and a claim like that
 // has to be measured against the block rather than argued from the KTX
 // sources. `-nails` turns on nail decoding so ng/sng carry a hits count at
 // all; without it those rows are (correctly) withheld and simply do not

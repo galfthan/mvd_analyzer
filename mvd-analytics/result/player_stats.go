@@ -521,17 +521,23 @@ type PlayerStatsDamage struct {
 //     count for every other weapon) and Hits counts pellets that connected
 //     (ktx/src/weapons.c:387). Real / Virtual are a SEPARATE rl/gl-only
 //     counter, NOT a split of Hits — see below.
-//   - "derived": reconstructed from the decoded fire stream. Attacks is
-//     always a TRIGGER-PULL count, and Hits counts fires that produced at
-//     least one linked damage event — so shotgun accuracy in particular
-//     reads on a different scale. Real/Virtual have no equivalent and are
-//     absent.
+//   - "derived": linked from the decoded fire stream against the WIRE damage
+//     log. Since schema v75 it counts on KTX's own convention per weapon —
+//     pellets for sg/ssg, direct impacts for rl, a connecting fire for
+//     lg/ng/sng/axe — read out of the aim section rather than recomputed.
+//     The one weapon it cannot: gl, whose touch the wire never records
+//     (analyzer.deriveMeasuredAcc), keeps the any-path count.
+//     Real/Virtual have no equivalent and are absent.
+//   - "reconstructed": Hits recovered from the rebuilt damage log (v74).
+//     KTX's convention on rl/gl; the pellet split cannot be recovered, so
+//     sg/ssg stay a fire count against a trigger-pull Attacks there.
 //
-// So compare accuracies across demos only after checking Src. The derived
-// form is offered because a demo with no KTX block should degrade to a
-// rougher number rather than to a missing field — but it is only as good
-// as the shot attribution underneath it (see the /shots section's own
-// caveats), which on some older demos mislabels a player's weapon.
+// So compare accuracies across demos only after checking the per-weapon
+// HitsConvention. The derived form is offered because a demo with no KTX
+// block should degrade to a rougher number rather than to a missing field —
+// but it is only as good as the shot attribution underneath it (see the
+// /shots section's own caveats), which on some older demos mislabels a
+// player's weapon.
 //
 // Src is the evidence GRADE, and grade is not the same question as what the
 // number counts — PlayerStatsAcc.HitsConvention answers that one, per weapon,
@@ -570,13 +576,18 @@ const (
 
 // PlayerStatsAcc is one weapon's shot accounting for one player.
 type PlayerStatsAcc struct {
-	// Attacks is pellets (KTX, sg/ssg) or trigger pulls (derived, and KTX
-	// for every other weapon) — see PlayerStatsAccuracy.Src.
+	// Attacks is PELLETS for sg/ssg — KTX's own unit, and since schema v75
+	// the unit of a wire-linked `derived` row too — and TRIGGER PULLS
+	// everywhere else. A `reconstructed` sg/ssg row is the exception and
+	// counts trigger pulls, since the pellet split needs a per-hit magnitude
+	// the rebuilt log does not carry. HitsConvention says which is which.
 	Attacks int `json:"attacks"`
 	// Hits is ABSENT rather than zero when there is nothing to count it
 	// against: a derived block on a demo with no damage stream can count
-	// fires but can link none of them, and a zero there would read as "shot
-	// and never hit" instead of "not measurable".
+	// fires but can link none of them, and an ng/sng row on a parse without
+	// nail decoding (the only way a nail fire links to its damage) is the
+	// same case one weapon down. A zero there would read as "shot and never
+	// hit" instead of "not measurable".
 	Hits *int `json:"hits,omitempty"`
 	// HitsConvention names WHAT Hits counts — HitsAnyDamage, HitsDirectImpact
 	// or HitsPellets. Present whenever Hits is, so two rows are comparable

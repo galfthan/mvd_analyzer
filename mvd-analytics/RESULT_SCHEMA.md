@@ -1249,7 +1249,7 @@ never does.
 | `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. The kill side is optional — see "The kill side of `score` is optional" below. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded family of the damage section (wire-derived, or the damage-recon reconstruction on pre-instrumentation demos — `src: "reconstructed"`) | server-side accounting; same rules as `damage.boundedSource`. |
 | `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
-| `accuracy` | **ktx** when present, else **derived** from the fire stream — `src: "reconstructed"` when its `hits` came from the aim recon tier (v74) | not the same measurement — KTX counts PELLETS server-side for sg/ssg, ours counts trigger pulls — so `src` is load-bearing here. Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
+| `accuracy` | **ktx** when present, else **derived** from the fire stream — `src: "reconstructed"` when its `hits` came from the aim recon tier (v74) | `src` is the evidence GRADE; what the numbers COUNT is the per-weapon `hitsConvention`, and since v75 every source aims at KTX's own convention (two named exceptions below). Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
 | `score.maxSpree` / `maxQuadSpree` | always **derived** (v74) | the kill-streak maxima KTX writes as `spree.max` / `spree.quad`. Derived by replaying KTX's own state machine over the corrected frag log, so it inherits `score.kills`' evidence and its absence. Never overlaid, for the reason the whole family is not — plus one of its own: KTX's increment gate is `strneq(attackerteam, targteam) \|\| !tp_num()` (`ktx/src/client.c:4865`), so wherever teamplay is off a player's own SUICIDE bumps their streak in the very call that latches it. See "The derived spree" below for the measured residual. |
 | `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
 | `damage.teamWeapons` | **ktx-only** | KTX's `dmg_tweapon` (`ktx/src/combat.c:1063`), the friendly-fire mirror of `enemyWeapons`. The reconstruction does not bucket team damage by the victim's inventory. |
@@ -1659,11 +1659,13 @@ most questions.
 
 The two overlays resolve differently on purpose. Damage is the **same
 unit** in both sources, so merging key by key loses nothing and recovers
-the keys KTX has no vocabulary for. Accuracy is **not** the same unit:
-KTX's `attacks` is a pellet count for sg/ssg (`ktx/src/weapons.c:812`)
-where the reconstruction counts trigger pulls, so a per-weapon merge
-would put two scales in one map under one `src` — the coercion this
-section exists to prevent.
+the keys KTX has no vocabulary for. Accuracy is **not always** the same
+unit, even after v75 put both computed tiers on KTX's convention where
+their evidence allows: a `reconstructed` sg/ssg row still counts trigger
+pulls against KTX's pellets (`ktx/src/weapons.c:812`), and a `derived`
+gl row still counts any damage path against KTX's touches. A per-weapon
+merge would put two scales in one map under one `src` — the coercion
+this section exists to prevent.
 
 The swap is only lossy if KTX omits a weapon the reconstruction saw
 fired. Measured across all 42 cached corpus demos (every one carrying a
@@ -1831,7 +1833,8 @@ The tier's accuracy against the *measured* (any-path) counter is in
 1.3, ssg 1.8, axe 0.6, rl 0.7, gl 0.4). Against **KTX's own** counters
 the question is partly a definition one, and this table says which
 weapons the two sources are even asking the same thing about — measured
-on the same 188 demos:
+on the same 186 demos. (It describes the RECONSTRUCTED tier only; the
+wire-linked one publishes KTX's pellet unit for sg/ssg since v75.)
 
 | | `attacks` vs KTX | `hits` vs KTX |
 |---|---|---|
