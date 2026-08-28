@@ -629,10 +629,10 @@ func deathsOf(res *Result, name string) int {
 // names it per weapon, because a KTX block is not uniform:
 //
 //   - sg/ssg — PELLETS on both sides of the ratio. KTX advances `attacks` by
-//     the pellet count of the fire (`attacks += bullets`, ktx/src/weapons.c:746
-//     and :812 for the shotgun's 6, :869 for the super shotgun's 14) and
-//     `hits` once per PELLET that connected (:387, :392, inside the pellet
-//     loop of W_FireBullets). Both come off the aim section's Pellets /
+//     the pellet count of the fire (`attacks += bullets`,
+//     ktx/src/weapons.c:812 for the shotgun's 6, :869 for the super shotgun's
+//     14) and `hits` once per PELLET that connected (:387, :392, inside the
+//     pellet loop of W_FireBullets). Both come off the aim section's Pellets /
 //     PelletHits.
 //   - rl — `hits` is the DIRECT-impact count. KTX increments it in the
 //     projectile touch handler and nowhere else (T_MissileTouch,
@@ -875,16 +875,26 @@ type reconHit struct {
 // every in-window fire (aimcore/aim.go: `wa.Pellets = wa.Shots * perFire`) —
 // nothing is dropped for a fire the linker could not resolve — which is what
 // keeps it on the same footing as KTX's `attacks += bullets`, incremented
-// before a single pellet is traced (ktx/src/weapons.c:746, :812).
+// before a single pellet is traced (ktx/src/weapons.c:812, :869).
 //
-// One KTX branch this does NOT model: under `k_instagib` the sg slot is a
-// railgun and KTX counts one attack per fire, not six (:806-810). aim's
-// pellet table has always been unconditional 6/14, so an instagib demo's sg
-// row reads 6x the block there too — the eval corpus (186 demos, all team /
-// duel / ffa) contains none, so the gap is stated rather than guarded
-// against a population nobody has measured.
+// Two KTX branches this does NOT model, both of them a per-fire pellet count
+// other than aim's unconditional 6/14, so a demo of either kind reads its sg
+// or ssg row off-scale against the block:
+//
+//   - `k_instagib` — the sg slot is a railgun and KTX counts ONE attack per
+//     fire, not six (:806-810);
+//   - `k_yawnmode` — the ssg fires 21 pellets, not 14 (:858), and `attacks`
+//     follows.
+//
+// The eval corpus (186 demos, all team / duel / ffa) contains neither mode, so
+// both are STATED, NOT GUARDED — a branch here would be untestable against any
+// population we have measured.
 func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
-	if res.Aim == nil || res.Aim.HitsSource != result.AimHitsSourceKTX {
+	// The SAME predicate deriveAccuracy calls `linkable` and aimcore calls
+	// `hitsMeasured`: the demo carried the wire damage stream. It is the one
+	// gate these counters need — under it aim ran both splits over every row
+	// it emitted, so a zero here is a measured zero.
+	if res.Aim == nil || !res.Aim.HitsMeasured {
 		return nil
 	}
 	out := map[string]map[string]measuredAcc{}
@@ -905,16 +915,26 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 				}
 				m = measuredAcc{attacks: w.Pellets, hits: w.PelletHits, convention: result.HitsPellets}
 			case "rl":
-				// The direct/splash split is emitted only when projectile
-				// linking found evidence, and when it does it partitions the
-				// fires exactly (Direct+Splash+Missed == Shots, documented on
-				// result.WeaponAim). That identity is therefore the presence
-				// test: without it a Direct of 0 is "never classified", not
-				// "touched nobody", and publishing it would be the fabricated
-				// zero this family refuses everywhere else.
-				if w.Direct+w.Splash+w.Missed != w.Shots {
-					continue
-				}
+				// Gated SECTION-WIDE, on the wire damage stream — aimcore's
+				// `hitsMeasured`, this function's entry condition and
+				// deriveAccuracy's `linkable` are one predicate — and not per
+				// row. Under it Direct is the count of the player's non-splash
+				// rl damage rows, so 0 is the measured "touched nobody",
+				// including on a demo where no rocket landed damage at all and
+				// aim's direct/splash split therefore never ran: every rl row
+				// there is honestly 0/N rather than falling back to the
+				// any-path count and taking the consumers' off-scale mark.
+				//
+				// The guarantee is NOT per-rocket, and no per-row test can
+				// make it one. What the count is exposed to is the LINKER: a
+				// rocket that touched somebody but whose damage row the
+				// fire→damage join did not reach leaves no direct row and
+				// reads as a miss (and a demo where the join resolved no rl
+				// fire at all leaves the whole split unrun, i.e. 0). That is
+				// the same exposure the pre-v75 any-path count always had, and
+				// it is measured rather than assumed: acc.rl.hits/measured
+				// reproduces the verbatim KTX block on 99.8% of 632 archive
+				// rows at 0.02% aggregate (damagerecon/ACCURACY.md).
 				m = measuredAcc{hits: w.Direct, convention: result.HitsDirectImpact}
 			default:
 				continue

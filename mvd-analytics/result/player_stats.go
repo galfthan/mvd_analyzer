@@ -576,11 +576,13 @@ const (
 
 // PlayerStatsAcc is one weapon's shot accounting for one player.
 type PlayerStatsAcc struct {
-	// Attacks is PELLETS for sg/ssg — KTX's own unit, and since schema v75
-	// the unit of a wire-linked `derived` row too — and TRIGGER PULLS
-	// everywhere else. A `reconstructed` sg/ssg row is the exception and
-	// counts trigger pulls, since the pellet split needs a per-hit magnitude
-	// the rebuilt log does not carry. HitsConvention says which is which.
+	// Attacks is PELLETS exactly where HitsConvention is HitsPellets —
+	// KTX's own sg/ssg unit, and since schema v75 that of a WIRE-LINKED
+	// `derived` sg/ssg row too — and TRIGGER PULLS on every other row,
+	// including a `reconstructed` sg/ssg one (whose pellet split needs a
+	// per-hit magnitude the rebuilt log does not carry) and a `derived`
+	// sg/ssg row whose aim section did not publish the split. The
+	// convention marker is the test; the weapon and `src` are not.
 	Attacks int `json:"attacks"`
 	// Hits is ABSENT rather than zero when there is nothing to count it
 	// against: a derived block on a demo with no damage stream can count

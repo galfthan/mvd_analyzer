@@ -100,12 +100,14 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// backing the per-shot alive test (aliveAt below).
 	tracks := make(map[string]*result.PositionTrack)
 	aliveOf := make(map[string][]result.Interval)
+	quadOf := make(map[string][]result.Interval)
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
 		if p.Position != nil && len(p.Position.T) > 0 {
 			tracks[p.Name] = p.Position
 		}
 		aliveOf[p.Name] = p.Alive
+		quadOf[p.Name] = p.Quad
 	}
 	aliveAt := func(name string, t int32) bool {
 		return aimAliveAt(aliveOf[name], t)
@@ -234,7 +236,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], quadOf[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -297,7 +299,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, quad []result.Interval, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -449,13 +451,26 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 		}
 	}
 
-	// SG/SSG: size pellet hits from same-frame damage (Σ/4) and split each
-	// fire into full / partial / whiff — overall and per victim class (the
-	// per-fire damage sum splits exactly by dmgRec.team, except when the
-	// perFire clamp triggers, e.g. quad-multiplied damage, where the
-	// enemy/team allocation within that fire is approximate). Withheld
-	// when hits were never measured: classify(0) would stamp every fire a
-	// whiff.
+	// SG/SSG: size pellet hits from same-frame damage (Σ / per-pellet damage)
+	// and split each fire into full / partial / whiff — overall and per victim
+	// class (the per-fire damage sum splits exactly by dmgRec.team, except when
+	// the perFire clamp triggers, where the enemy/team allocation within that
+	// fire is approximate). Withheld when hits were never measured:
+	// classify(0) would stamp every fire a whiff.
+	//
+	// The divisor follows the SHOOTER'S QUAD at fire time: T_Damage multiplies
+	// the attacker's damage by 4 while `super_damage_finished > time`
+	// (ktx/src/combat.c:540-546), so a quad pellet writes 16 to the wire log
+	// and a flat /4 read it as four pellets — a fire with two pellets in
+	// saturated the 6-pellet clamp. Measured against the verbatim KTX block
+	// that was the WHOLE shotgun residual: rows whose player never took a quad
+	// reproduced acc.sg.hits/acc.ssg.hits on 100.0% of rows at 0.00%, quad rows
+	// on 32.6%/61.8% and never under. Fire time, not damage time, is the state
+	// to read: the hitscan trace and its T_Damage calls run in the same frame
+	// as the trigger pull, so a quad expiring between them is not a case that
+	// exists. (dmm4's octa and the CTF strength rune scale the same product by
+	// 8 / by the rune power — stated, not guarded: neither mode is in the
+	// measured population.)
 	pellets := aimPellets
 	if !hitsMeasured {
 		pellets = nil
@@ -492,11 +507,15 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 					sumTeam += d.dmg
 				}
 			}
-			ph := sum / aimPelletDamage
+			perPellet := aimPelletDamage
+			if aimHeldAt(quad, sh.Time) {
+				perPellet *= aimQuadMultiplier
+			}
+			ph := sum / perPellet
 			if ph > perFire {
 				ph = perFire
 			}
-			phTeam := sumTeam / aimPelletDamage
+			phTeam := sumTeam / perPellet
 			if phTeam > ph {
 				phTeam = ph
 			}
@@ -676,10 +695,25 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 }
 
 // aimPellets is the standard pellet count per trigger pull (KTX classic);
-// aimPelletDamage is the per-pellet damage. Used to size SG/SSG pellet hits.
+// aimPelletDamage is the per-pellet damage, aimQuadMultiplier the factor
+// T_Damage applies to it while the shooter holds the quad. Used to size
+// SG/SSG pellet hits.
 var aimPellets = map[string]int{"sg": 6, "ssg": 14}
 
-const aimPelletDamage = 4
+const (
+	aimPelletDamage   = 4
+	aimQuadMultiplier = 4
+)
+
+// aimHeldAt reports whether t falls inside one of the half-open [Start,End)
+// possession intervals of a Streams inventory/powerup stream. Unlike
+// aimAliveAt, an ABSENT stream means "not held" — a player with no quad
+// interval never carried one, whereas a player with no alive interval is one
+// whose liveness the demo did not record.
+func aimHeldAt(iv []result.Interval, t int32) bool {
+	i := sort.Search(len(iv), func(i int) bool { return iv[i].End > t })
+	return i < len(iv) && iv[i].Start <= t
+}
 
 // aimWeaponRank orders the per-weapon rows (lg, sg, ssg, rl, gl, then rest).
 func aimWeaponRank(w string) int {

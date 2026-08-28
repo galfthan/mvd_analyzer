@@ -6283,11 +6283,11 @@
             "weapon": "lg"
           },
           {
-            "full": 9,
+            "full": 8,
             "hits": 18,
             "miss": 65,
-            "partial": 9,
-            "pelletHits": 82,
+            "partial": 10,
+            "pelletHits": 79,
             "pellets": 498,
             "shots": 83,
             "weapon": "sg"
@@ -38051,7 +38051,7 @@
             },
             "sg": {
               "attacks": 498,
-              "hits": 82,
+              "hits": 79,
               "hitsConvention": "pellets"
             }
           },
@@ -39026,7 +39026,7 @@
             },
             "sg": {
               "attacks": 708,
-              "hits": 85,
+              "hits": 82,
               "hitsConvention": "pellets"
             },
             "sng": {

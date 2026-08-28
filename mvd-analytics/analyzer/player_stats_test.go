@@ -1051,23 +1051,52 @@ func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 	}
 }
 
-// The rl direct/splash split is emitted only where projectile linking found
-// evidence; without it Direct is 0 for everyone. Publishing that would be a
-// fabricated zero on the server's scale, so the row falls back to the
-// any-path join and says which convention it is on.
-func TestDeriveMeasuredAccSkipsUnclassifiedProjectiles(t *testing.T) {
-	res := &Result{Aim: &result.AimResult{
-		HitsSource: result.AimHitsSourceKTX,
-		Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
-			{Weapon: "rl", Shots: 40, Hits: 12}, // Direct+Splash+Missed == 0 != Shots
-			{Weapon: "sg", Shots: 30, Hits: 9},  // pellet split withheld
-		}}},
-	}}
-	if got := deriveMeasuredAcc(res); len(got["a"]) != 0 {
-		t.Errorf("measured acc = %v, want nothing — neither split was computed", got)
+// A demo where NO rocket landed damage at all: aim's direct/splash split
+// never ran, so Direct+Splash+Missed is 0 against 40 fires. That is not a
+// withhold — under the wire-damage gate Direct counts the player's non-splash
+// rl damage rows and there are none, which is exactly "touched nobody". The
+// row must publish the measured 0 on KTX's directImpact scale, NOT fall back
+// to the any-path count and take the consumers' off-scale mark.
+//
+// sg in the same fixture is the contrast: a zero PELLETS is the pellet split
+// genuinely withheld (there is no such thing as a fired shotgun with no
+// pellets), and dividing a pellet-hit count by no pellets is the one case
+// that does fall back.
+func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
+	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
+		Player: "a",
+		ByWeapon: []result.WeaponShots{
+			{Weapon: "rl", Shots: 40, Hits: 0},
+			{Weapon: "sg", Shots: 30, Hits: 9},
+		},
+	}}}
+	res := &Result{
+		Shots:  shots,
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX},
+		Aim: &result.AimResult{
+			HitsMeasured: true,
+			HitsSource:   result.AimHitsSourceKTX,
+			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
+				{Weapon: "rl", Shots: 40, Hits: 0}, // no rl damage anywhere: split unrun
+				{Weapon: "sg", Shots: 30, Hits: 9}, // pellet split withheld
+			}}},
+		},
 	}
+	acc := deriveAccuracy(res, "a", nil, deriveMeasuredAcc(res))
+	rl := acc.ByWeapon["rl"]
+	if rl.Attacks != 40 || rl.Hits == nil || *rl.Hits != 0 || rl.HitsConvention != result.HitsDirectImpact {
+		t.Errorf("rl = %+v, want 40 fires / a measured 0 / %q — no rocket touched anybody",
+			rl, result.HitsDirectImpact)
+	}
+	sg := acc.ByWeapon["sg"]
+	if sg.Attacks != 30 || sg.Hits == nil || *sg.Hits != 9 || sg.HitsConvention != result.HitsAnyDamage {
+		t.Errorf("sg = %+v, want the fire-count fallback (30 / 9 / %q) with no pellet split",
+			sg, result.HitsAnyDamage)
+	}
+
 	// And on a reconstructed demo the map stays out of it entirely: the recon
 	// tier owns the field there.
+	res.Aim.HitsMeasured = false
 	res.Aim.HitsSource = result.AimHitsSourceReconstructed
 	if got := deriveMeasuredAcc(res); got != nil {
 		t.Errorf("measured acc on a reconstructed demo = %v, want nil", got)

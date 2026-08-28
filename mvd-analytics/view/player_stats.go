@@ -169,10 +169,16 @@ var ktxItemKind = map[string]string{
 //     means.
 //   - accuracy: KTX's whole block wins when present; the analyzer's
 //     fire-stream derivation stands when it is not. `src` says which
-//     evidence the numbers rest on; since v75 both tiers count on KTX's
-//     OWN convention per weapon (pellets for sg/ssg, direct impacts for
-//     rl — and for gl too where the tier is reconstructed), and
-//     PlayerStatsAcc.HitsConvention states it per row either way. See
+//     evidence the numbers rest on, never what a number counts —
+//     PlayerStatsAcc.HitsConvention says that, per weapon, on every row
+//     that carries `hits`. Since v75 the WIRE-LINKED tier reaches KTX's
+//     own convention where the wire can express it (pellets for sg/ssg,
+//     direct impacts for rl), and the RECONSTRUCTED tier reaches it for
+//     rl/gl (v74) but not for the shotguns, whose pellet split needs a
+//     per-hit magnitude the rebuilt log does not carry. So `pellets`
+//     rows count pellets on both sides of the ratio and every other row
+//     counts trigger pulls — the convention marker, not `src` and not
+//     the weapon, is what tells them apart. See
 //     result.PlayerStatsAccuracy.
 //   - pickups: took / totalTook / dropped from KTX; xfer / xferSelf stay
 //     derived (KTX conflates the two). Ammo kinds have no KTX counterpart

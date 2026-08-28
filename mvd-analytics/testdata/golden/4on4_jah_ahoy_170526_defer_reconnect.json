@@ -4957,34 +4957,34 @@
           },
           {
             "enemy": {
-              "full": 78,
+              "full": 74,
               "hits": 215,
-              "miss": 254,
-              "partial": 136,
-              "pelletHits": 883
+              "miss": 253,
+              "partial": 141,
+              "pelletHits": 876
             },
-            "full": 84,
+            "full": 80,
             "hits": 221,
             "miss": 247,
-            "partial": 137,
-            "pelletHits": 920,
+            "partial": 141,
+            "pelletHits": 911,
             "pellets": 2808,
             "shots": 468,
             "team": {
-              "full": 5,
+              "full": 4,
               "hits": 9,
               "miss": 459,
-              "partial": 4,
-              "pelletHits": 37
+              "partial": 5,
+              "pelletHits": 35
             },
             "weapon": "sg"
           },
           {
-            "full": 2,
+            "full": 1,
             "hits": 13,
             "miss": 2,
-            "partial": 11,
-            "pelletHits": 87,
+            "partial": 12,
+            "pelletHits": 84,
             "pellets": 210,
             "shots": 15,
             "weapon": "ssg"
@@ -12247,17 +12247,17 @@
           },
           {
             "enemy": {
-              "full": 107,
+              "full": 103,
               "hits": 321,
               "miss": 218,
-              "partial": 214,
-              "pelletHits": 1266
+              "partial": 218,
+              "pelletHits": 1249
             },
-            "full": 109,
+            "full": 105,
             "hits": 325,
             "miss": 214,
-            "partial": 216,
-            "pelletHits": 1281,
+            "partial": 220,
+            "pelletHits": 1264,
             "pellets": 3234,
             "shots": 539,
             "team": {
@@ -20979,17 +20979,17 @@
           },
           {
             "enemy": {
-              "full": 58,
+              "full": 56,
               "hits": 142,
               "miss": 157,
-              "partial": 84,
-              "pelletHits": 603
+              "partial": 86,
+              "pelletHits": 590
             },
-            "full": 59,
+            "full": 57,
             "hits": 145,
             "miss": 154,
-            "partial": 86,
-            "pelletHits": 616,
+            "partial": 88,
+            "pelletHits": 603,
             "pellets": 1794,
             "shots": 299,
             "team": {
@@ -25172,17 +25172,17 @@
           },
           {
             "enemy": {
-              "full": 67,
+              "full": 65,
               "hits": 143,
               "miss": 136,
-              "partial": 76,
-              "pelletHits": 620
+              "partial": 78,
+              "pelletHits": 615
             },
-            "full": 69,
+            "full": 67,
             "hits": 146,
             "miss": 133,
-            "partial": 77,
-            "pelletHits": 636,
+            "partial": 79,
+            "pelletHits": 631,
             "pellets": 1674,
             "shots": 279,
             "team": {
@@ -32046,17 +32046,17 @@
           },
           {
             "enemy": {
-              "full": 94,
+              "full": 90,
               "hits": 216,
               "miss": 258,
-              "partial": 122,
-              "pelletHits": 905
+              "partial": 126,
+              "pelletHits": 886
             },
-            "full": 96,
+            "full": 92,
             "hits": 223,
             "miss": 251,
-            "partial": 127,
-            "pelletHits": 933,
+            "partial": 131,
+            "pelletHits": 914,
             "pellets": 2844,
             "shots": 474,
             "team": {
@@ -37306,17 +37306,17 @@
           },
           {
             "enemy": {
-              "full": 59,
+              "full": 54,
               "hits": 149,
               "miss": 166,
-              "partial": 90,
-              "pelletHits": 586
+              "partial": 95,
+              "pelletHits": 564
             },
-            "full": 60,
+            "full": 55,
             "hits": 150,
             "miss": 165,
-            "partial": 90,
-            "pelletHits": 594,
+            "partial": 95,
+            "pelletHits": 572,
             "pellets": 1890,
             "shots": 315,
             "team": {
@@ -41434,11 +41434,11 @@
             "weapon": "lg"
           },
           {
-            "full": 103,
+            "full": 98,
             "hits": 212,
             "miss": 97,
-            "partial": 109,
-            "pelletHits": 966,
+            "partial": 114,
+            "pelletHits": 950,
             "pellets": 1854,
             "shots": 309,
             "weapon": "sg"
@@ -93975,7 +93975,7 @@
             },
             "sg": {
               "attacks": 3234,
-              "hits": 1281,
+              "hits": 1264,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -94513,7 +94513,7 @@
             },
             "sg": {
               "attacks": 1890,
-              "hits": 594,
+              "hits": 572,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -94802,7 +94802,7 @@
             },
             "sg": {
               "attacks": 2808,
-              "hits": 920,
+              "hits": 911,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -94810,7 +94810,7 @@
             },
             "ssg": {
               "attacks": 210,
-              "hits": 87,
+              "hits": 84,
               "hitsConvention": "pellets"
             }
           },
@@ -95056,7 +95056,7 @@
             },
             "sg": {
               "attacks": 1854,
-              "hits": 966,
+              "hits": 950,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -95332,7 +95332,7 @@
             },
             "sg": {
               "attacks": 1794,
-              "hits": 616,
+              "hits": 603,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -95618,7 +95618,7 @@
             },
             "sg": {
               "attacks": 1674,
-              "hits": 636,
+              "hits": 631,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -95894,7 +95894,7 @@
             },
             "sg": {
               "attacks": 2844,
-              "hits": 933,
+              "hits": 914,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -96193,7 +96193,7 @@
             },
             "sg": {
               "attacks": 9792,
-              "hits": 3414,
+              "hits": 3356,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -96494,7 +96494,7 @@
             },
             "sg": {
               "attacks": 8130,
-              "hits": 3138,
+              "hits": 3095,
               "hitsConvention": "pellets"
             },
             "sng": {
@@ -96502,7 +96502,7 @@
             },
             "ssg": {
               "attacks": 2352,
-              "hits": 895,
+              "hits": 892,
               "hitsConvention": "pellets"
             }
           },

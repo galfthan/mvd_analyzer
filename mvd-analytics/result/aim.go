@@ -129,9 +129,17 @@ type LGRampSamples struct {
 // (fires that connected) are populated for every weapon; the rest are
 // weapon-specific and omitempty.
 //
-//   - SG/SSG (per-pellet): Pellets fired (shots × 6/14), PelletHits (Σ damage
-//     / 4 — matches KTX acc.hits), and the per-fire split Full (all pellets
-//     hit) / Partial (some) / Miss (none).
+//   - SG/SSG (per-pellet): Pellets fired (shots × 6/14), PelletHits, and the
+//     per-fire split Full (all pellets hit) / Partial (some) / Miss (none).
+//     PelletHits is ESTIMATED from magnitude — a fire's same-frame damage sum
+//     divided by the 4 a pellet does, or by 16 while the shooter holds the
+//     quad (T_Damage's ×4, ktx/src/combat.c:540-546), clamped to the fire's
+//     6/14. On the 186-demo archive eval that estimate reproduces KTX's own
+//     acc.hits EXACTLY on 534 of 534 sg and 390 of 390 player rows
+//     (damagerecon/ACCURACY.md); the quad divisor is what closed it, and
+//     before it every quad row over-counted. Two per-fire pellet counts it
+//     does not model — k_instagib's single-slug sg and k_yawnmode's 21-pellet
+//     ssg — are stated, not guarded (see analyzer.deriveMeasuredAcc).
 //   - RL/GL: Direct (non-splash contacts ≈ KTX hits), Splash (linked hits that
 //     were splash-only), Missed (fires that linked to no impact);
 //     Direct+Splash+Missed == Shots. Projectile linking runs on every parse;
@@ -297,8 +305,10 @@ type WeaponAimRecon struct {
 // weapon's hit counters — same semantics as the WeaponAim fields of the same
 // names, restricted to that bucket's victims. The SG/SSG per-fire split
 // (Full/Partial/Miss) and PelletHits are exact per fire except when the
-// per-fire pellet clamp triggers (e.g. quad-multiplied damage), where the
-// enemy/team allocation within that fire is approximate. Self hits are
+// per-fire pellet clamp triggers, where the enemy/team allocation within that
+// fire is approximate — the estimator divides the fire's damage sum by the 4
+// a pellet does (16 under the shooter's quad) and cannot tell a saturating
+// fire's victims apart any finer. Self hits are
 // always splash (a missile cannot collide with its owner), so a Self split
 // never sets Direct and never has pellet counters (hitscan cannot self-hit).
 type WeaponAimSplit struct {
