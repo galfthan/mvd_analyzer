@@ -2333,6 +2333,39 @@ function ppSpanRowHeight() {
     return individualTimelineActive() ? 28 : RC_ROW_H;
 }
 
+// individualChatLayout reports whether the Chat tab should collapse its two
+// say columns into one. Same test as individualTimelineLayout, and for the
+// same reason: a column per side needs sides, and in a field of eight the two
+// columns are the top two players while the other six have nowhere to speak.
+// A two-participant match (a duel, or a 1v1 FFA) keeps the split — there each
+// column IS a player. Kept as its own name because it answers its own
+// question; see the note above individualTimelineLayout.
+function individualChatLayout(result) {
+    return isIndividualLayout(result) && !isDuel(result);
+}
+
+// individualChatActive reports the layout currently applied to the tab. Read
+// by buildFullChat and by displayTimelineAnalysis's title write, which runs
+// again from applyDeferredBuckets long after applyDuelModeUI — the body class
+// is what survives that, so it is the authority rather than the result.
+function individualChatActive() {
+    return document.body.classList.contains('individual-chat');
+}
+
+// setIndividualChatLayout switches the Chat tab between its two column sets.
+// Off: Kills + one column per side, each titled after its team. On: Kills +
+// a single "Chat" column carrying every line, with the second say column and
+// its header hidden by CSS off the body class — the columns are flex:1, so
+// the two survivors split the width with no empty third. No node is moved or
+// cloned: the same three containers persist and buildFullChat fills whichever
+// the layout uses.
+function setIndividualChatLayout(on) {
+    document.body.classList.toggle('individual-chat', on);
+    if (!on) return;
+    const title = document.getElementById('team-a-chat-title');
+    if (title) title.textContent = 'Chat';
+}
+
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
@@ -2355,6 +2388,9 @@ function applyDuelModeUI(result) {
     // Timeline tab: the A-vs-B graphs describe a matchup an FFA does not have.
     // Hide them and promote the three per-player views to panels of their own.
     setIndividualTimelineLayout(individualTimelineLayout(result));
+    // Chat tab: same field, same problem — two say columns are two of the
+    // eight players. Collapse them into one column of everybody.
+    setIndividualChatLayout(individualChatLayout(result));
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -4168,6 +4204,9 @@ function resetUIToCleanState() {
     }
     setText('team-a-chat-title', 'Team A Chat');
     setText('team-b-chat-title', 'Team B Chat');
+    // Chat layout back to the two-sided default; applyDuelModeUI collapses it
+    // to the single column below if this demo wants it.
+    setIndividualChatLayout(false);
     chatHideTeam = false;
     const hideTeamCb = document.getElementById('chat-hide-teamsay');
     if (hideTeamCb) hideTeamCb.checked = false;
@@ -4391,8 +4430,13 @@ function displayTimelineAnalysis(result) {
     // Update legend team names
     if (teams.length >= 2) {
         const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
-        setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        // The single-column layout owns both chat titles (setIndividualChatLayout
+        // set the one visible column to "Chat"); teams[0]/[1] are two players
+        // out of the field there, not sides.
+        if (!individualChatActive()) {
+            setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
+            setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        }
         setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
         setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
         setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
@@ -6027,6 +6071,12 @@ function buildFullChat() {
     // match window.
     const events = (timelineState.events || []).filter(e => e.time >= 0 && e.time <= duration);
 
+    // Individual field: one chat column for everybody. Column A is that
+    // column (the B one is hidden by CSS and stays empty), and its rows get a
+    // speaker name — with two sides the column heading said who was talking,
+    // with eight players nothing else does.
+    const single = individualChatActive();
+
     const killEvents = [];
     const teamAEvents = [];
     const teamBEvents = [];
@@ -6035,16 +6085,19 @@ function buildFullChat() {
         if (event.type === 'frag') {
             killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
-            // "Hide team chat" is a display filter over the two say columns
-            // only; frags and public say keep their rows.
+            // "Hide team chat" is a display filter over the say columns only;
+            // frags and public say keep their rows. It filters on message TYPE,
+            // not on side, so it keeps its meaning in an individual field: an
+            // FFA's say_team still goes only to same-tag players.
             if (chatHideTeam && event.type === 'teamsay') continue;
-            if (event.team === teams[0]) teamAEvents.push(event);
+            if (single) teamAEvents.push(event);
+            else if (event.team === teams[0]) teamAEvents.push(event);
             else if (event.team === teams[1]) teamBEvents.push(event);
         }
     }
 
     renderChatColumnFull(killContainer, killEvents);
-    renderChatColumnFull(teamAContainer, teamAEvents);
+    renderChatColumnFull(teamAContainer, teamAEvents, single);
     renderChatColumnFull(teamBContainer, teamBEvents);
 
     if (axisContainer) {
@@ -6123,10 +6176,25 @@ function renderChatTimeAxisFull(container) {
     container.appendChild(inner);
 }
 
-function renderChatColumnFull(container, events) {
+// Speaker colour for the single chat column. CLAUDE.md's team-colour rule:
+// TEAM_COLORS indexed by position in timelineState.teams, which in an
+// individual layout is one entry per player — so a name here is the same
+// colour it carries on the scoreboard, the map and the timeline.
+function chatSpeakerColor(name) {
+    const idx = timelineState.teams.indexOf(name);
+    return (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#ccc';
+}
+
+function renderChatColumnFull(container, events, withSpeaker = false) {
     const inner = document.createElement('div');
     inner.style.position = 'relative';
     inner.style.height = `${chatContentHeight}px`;
+    // Attached before the rows go in so each row's rendered height is
+    // measurable: `.chat-time-marker-msg` wraps (white-space: normal), and a
+    // wrapped row is taller than CHAT_ITEM_HEIGHT — stacking the next event
+    // at the constant would draw it over the second line. The constant stays
+    // the floor, and is all there is when the tab is not laid out (offsetHeight 0).
+    container.appendChild(inner);
 
     let lastBottom = -Infinity;
 
@@ -6144,13 +6212,14 @@ function renderChatColumnFull(container, events) {
         marker.style.top = `${topPx}px`;
 
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        marker.innerHTML = `${prefix}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+        const speaker = withSpeaker && event.player
+            ? `<span class="chat-speaker" style="color: ${chatSpeakerColor(event.player)}">${escapeHtml(event.player)}</span>`
+            : '';
+        marker.innerHTML = `${prefix}${speaker}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         inner.appendChild(marker);
-        lastBottom = topPx + CHAT_ITEM_HEIGHT;
+        lastBottom = topPx + Math.max(CHAT_ITEM_HEIGHT, marker.offsetHeight || 0);
     }
-
-    container.appendChild(inner);
 }
 
 function updateDetailGraph(startTime, endTime) {

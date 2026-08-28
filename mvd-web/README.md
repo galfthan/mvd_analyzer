@@ -224,8 +224,11 @@ sorts names A→Z and numbers biggest-first; clicking the active column
 flips it.
 
 The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
-lines (`event.type === 'teamsay'`) from the two chat columns; frags and
-public `say` are untouched, and the flag resets per demo load.
+lines (`event.type === 'teamsay'`) from the chat column(s); frags and
+public `say` are untouched, and the flag resets per demo load. Its columns
+are Kills plus one per side — or, in an individual field of more than two
+players, Kills plus a single "Chat" column (see *A mode with no teams*
+below).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -573,6 +576,43 @@ and the tab becomes the per-player views:
   player is separate work.
 
 A duel (or a 1v1 FFA) is A-vs-B and keeps every panel exactly as before.
+
+**The Chat tab collapses to one chat column.** Its three columns are Kills,
+`teams[0]` chat and `teams[1]` chat — a column per side, which is a column
+per player only in a duel. In a field of eight, six players' say lines were
+split into no column at all and simply did not render. So on the same test —
+`individualChatLayout(result)`, `isIndividualLayout && !isDuel` —
+`setIndividualChatLayout` puts an `individual-chat` class on `<body>` and:
+
+- CSS hides `#team-b-chat-header` and `#team-b-messages`. Both remaining
+  columns are `flex: 1`, so Kills and Chat split the width; nothing is moved
+  or cloned, the hidden container just stays empty.
+- `buildFullChat` pours EVERY say line — `say` and `say_team` alike — into
+  the one column in time order. In an FFA a `say_team` reaches only the
+  players sharing the speaker's clan tag, which makes it narrower than public
+  chat but still chat; it keeps its own colour (`.chat-time-marker-msg
+  .teamsay`), so the two read apart in the single column.
+- Each row is prefixed with the speaker's name (`.chat-speaker`), coloured by
+  `chatSpeakerColor` = `TEAM_COLORS[timelineState.teams.indexOf(player)]` —
+  CLAUDE.md's canonical index, so a name here is the colour that player
+  carries on the scoreboard, the map and the timeline; a speaker who is not
+  in that list (a spectator under `sv_spectalk 1`, a mid-match rename) gets
+  neutral grey rather than being dropped. With two sides the column heading
+  said who was talking; with eight players nothing else does.
+  The Kills column is unchanged — obituaries name their own players.
+- The heading becomes plain **Chat**. `displayTimelineAnalysis`'s
+  `${teams[0]} Chat` write is skipped while the class is on — it re-runs from
+  `applyDeferredBuckets` long after `applyDuelModeUI`, so the body class, not
+  the result, is what the render paths read.
+- **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
+  side, so it keeps its meaning here.
+- Reverses the same way the Timeline layout does: `resetUIToCleanState` calls
+  `setIndividualChatLayout(false)` and restores the default titles, then
+  `applyDuelModeUI` re-applies for the new demo.
+
+The time axis, the current-time line and scroll-to-current-time are unchanged
+— the axis is its own column and the line spans the scroll inner, so neither
+depends on how many message columns there are.
 
 ### A recording with no match in it
 

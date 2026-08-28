@@ -253,6 +253,19 @@ sides, so an FFA drew rows for two players out of N. Rows carry the player
 palette through the same canonical `TEAM_COLORS` index as everything else.
 A duel (or a 1v1 FFA) is a matchup and keeps every panel exactly as before.
 
+**The Chat tab is one column there.** "Team A Chat" / "Team B Chat" splits
+the say lines between `teams[0]` and `teams[1]`, which in a field of eight
+means six players' chat was rendered nowhere at all — on
+`ffa_1[shifter]260119-2151`, none of the 39 in-match lines (the two
+frag leaders never spoke). On an individual layout
+of more than two participants the second column and its header go and the
+first carries every line — `say` and `say_team` alike — in time order under
+the heading "Chat", each row prefixed with the speaker's name in that
+player's palette colour. Kills keeps its column and the two split the width.
+"Hide team chat" stays: it filters on message TYPE, so it still hides the
+clan-tag `say_team` chatter an FFA does have. A duel keeps the two columns —
+there each one IS a player.
+
 **Colours.** A field of MORE than two players draws from a separate
 twelve-entry `PLAYER_PALETTE`, delivered through the same single canonical
 `TEAM_COLORS` array every surface already indexes — the four-entry team
