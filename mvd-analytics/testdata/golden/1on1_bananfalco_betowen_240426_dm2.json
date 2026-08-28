@@ -10871,19 +10871,17 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 2,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 2
             },
             "rl": {
               "attacks": 159,
-              "hits": 54,
-              "hitsConvention": "anyDamage"
+              "hits": 10,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 28,
-              "hits": 9,
-              "hitsConvention": "anyDamage"
+              "attacks": 168,
+              "hits": 38,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -11060,18 +11058,18 @@
             },
             "rl": {
               "attacks": 168,
-              "hits": 62,
-              "hitsConvention": "anyDamage"
+              "hits": 13,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 19,
-              "hits": 7,
-              "hitsConvention": "anyDamage"
+              "attacks": 114,
+              "hits": 19,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 6,
-              "hits": 1,
-              "hitsConvention": "anyDamage"
+              "attacks": 84,
+              "hits": 10,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"

@@ -47,7 +47,23 @@
 //     damage log's splash flag, i.e. the control: what the server itself said;
 //   - acc.{rl,gl}.anyDamage/recon — the OTHER convention for the two weapons
 //     whose derived row publishes the direct-impact one (v74), so the size of
-//     the gap between the conventions stays measured.
+//     the gap between the conventions stays measured;
+//   - acc.{sg,ssg,rl}.anyDamage/wire and acc.{sg,ssg}.attacks/fires — the
+//     conventions the WIRE-linked family published before v75 (a fire that
+//     landed damage by any path; trigger pulls), kept for the same reason:
+//     what the new conventions bought is a measurement, not a claim.
+//
+// The `/measured` rows are the OTHER tier. Everything above scores the blind
+// re-derivation — the section an old demo publishes. The `/measured` columns
+// score the section THIS demo actually publishes, the wire-linked one, read
+// off the stored playerStats before the withhold. It is not part of the blind
+// answer and never mixes into those rows; it is here because the wire-linked
+// family also claims to be on KTX's scale per weapon (schema v75: sg/ssg
+// pellets, rl/gl direct impacts, the rest any-damage) and a claim like that
+// has to be measured against the block rather than argued from the KTX
+// sources. `-nails` turns on nail decoding so ng/sng carry a hits count at
+// all; without it those rows are (correctly) withheld and simply do not
+// appear.
 //
 // The verdicts are in damagerecon/ACCURACY.md.
 package main
@@ -70,6 +86,12 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
+// buildNails mirrors the -nails flag into the worker goroutines. ng/sng hit
+// attribution rides svc_nails decoding (analyzer.Registry.BuildNails), and
+// without it the accuracy family withholds those weapons' `hits` — so the
+// only way to score them at all is to turn the decode on.
+var buildNails bool
+
 // row is one (demo, player, field) comparison. Values are floats so the
 // counters and the possession seconds share one table.
 type row struct {
@@ -84,6 +106,7 @@ func main() {
 	workers := flag.Int("workers", 4, "parallel demo workers")
 	limit := flag.Int("limit", 0, "score at most this many demos (0 = all)")
 	csvOut := flag.String("csv", "", "write the per-row comparison to this CSV")
+	flag.BoolVar(&buildNails, "nails", false, "decode svc_nails so ng/sng fires link to damage (slow; without it the ng/sng `hits` rows are withheld by the pipeline and never scored)")
 	flag.Parse()
 
 	paths, err := demoPaths(*dir)
@@ -155,6 +178,7 @@ func main() {
 func scoreDemo(path string) ([]row, error) {
 	reg := analyzer.NewDefaultRegistry()
 	reg.BuildShotStreams = true
+	reg.BuildNails = buildNails
 	res, err := reg.Analyze(path)
 	if err != nil {
 		return nil, fmt.Errorf("analyze: %w", err)
@@ -180,6 +204,29 @@ func scoreDemo(path string) ([]row, error) {
 	// so if the convention hypothesis is right this column must agree with the
 	// block exactly.
 	wireDirect := wireDirectHits(res)
+	// The WIRE-LINKED accuracy family, as this demo actually publishes it,
+	// captured before anything is swapped. It is a second tier scored against
+	// the same block, not part of the blind answer — see the package comment.
+	measured := map[string]*result.PlayerStatsAccuracy{}
+	for i := range res.PlayerStats.Players {
+		p := &res.PlayerStats.Players[i]
+		measured[p.Name] = p.Accuracy
+	}
+	// The pre-v75 wire-linked conventions, straight off the shot stream: one
+	// attack per trigger pull, one hit per fire that landed damage by any
+	// path. Kept as a diagnostic so the table says what the convention change
+	// bought rather than asserting it.
+	preV75 := map[string]map[string]result.WeaponShots{}
+	if res.Shots != nil {
+		for i := range res.Shots.ByPlayer {
+			ps := &res.Shots.ByPlayer[i]
+			byW := map[string]result.WeaponShots{}
+			for _, w := range ps.ByWeapon {
+				byW[w.Weapon] = w
+			}
+			preV75[ps.Player] = byW
+		}
+	}
 
 	rc, err := damagerecon.Compute(res)
 	if err != nil {
@@ -258,6 +305,31 @@ func scoreDemo(path string) ([]row, error) {
 				add(kind+".took", float64(item.Took), float64(r.Pickups.ByKind[kind].Took))
 			}
 			add(kind+".timeSec", float64(item.Time), math.Floor(float64(r.Hold.Powerups[kind].Ms)/1000))
+		}
+		// The wire-linked tier: `attacks` and `hits` exactly as published,
+		// against KTX's own counters. A weapon whose `hits` the pipeline
+		// withholds (ng/sng without -nails) contributes its attacks row only.
+		if ma := measured[r.Name]; ma != nil {
+			for w, acc := range ma.ByWeapon {
+				wv := di.Weapons[w]
+				if wv == nil || wv.Acc == nil {
+					continue
+				}
+				add("acc."+w+".attacks/measured", float64(wv.Acc.Attacks), float64(acc.Attacks))
+				if acc.Hits != nil {
+					add("acc."+w+".hits/measured", float64(wv.Acc.Hits), float64(*acc.Hits))
+				}
+				// The same two quantities as this tier published before v75.
+				if ws, ok := preV75[r.Name][w]; ok {
+					switch w {
+					case "sg", "ssg":
+						add("acc."+w+".attacks/fires", float64(wv.Acc.Attacks), float64(ws.Shots))
+						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
+					case "rl":
+						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
+					}
+				}
+			}
 		}
 		if r.Accuracy == nil {
 			continue

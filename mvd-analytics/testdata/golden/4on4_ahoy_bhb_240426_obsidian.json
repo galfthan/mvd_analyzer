@@ -93390,23 +93390,21 @@
             },
             "rl": {
               "attacks": 28,
-              "hits": 15,
-              "hitsConvention": "anyDamage"
+              "hits": 5,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 443,
-              "hits": 257,
-              "hitsConvention": "anyDamage"
+              "attacks": 2658,
+              "hits": 1181,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 167,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 167
             },
             "ssg": {
-              "attacks": 50,
-              "hits": 40,
-              "hitsConvention": "anyDamage"
+              "attacks": 700,
+              "hits": 322,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -93642,29 +93640,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 1,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 1
             },
             "rl": {
               "attacks": 65,
-              "hits": 45,
-              "hitsConvention": "anyDamage"
+              "hits": 11,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 387,
-              "hits": 233,
-              "hitsConvention": "anyDamage"
+              "attacks": 2322,
+              "hits": 1058,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 88,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 88
             },
             "ssg": {
-              "attacks": 92,
-              "hits": 77,
-              "hitsConvention": "anyDamage"
+              "attacks": 1288,
+              "hits": 613,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -93894,23 +93888,21 @@
             },
             "rl": {
               "attacks": 34,
-              "hits": 27,
-              "hitsConvention": "anyDamage"
+              "hits": 2,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 452,
-              "hits": 152,
-              "hitsConvention": "anyDamage"
+              "attacks": 2712,
+              "hits": 659,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 145,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 145
             },
             "ssg": {
-              "attacks": 44,
-              "hits": 28,
-              "hitsConvention": "anyDamage"
+              "attacks": 616,
+              "hits": 173,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -94128,23 +94120,21 @@
             },
             "rl": {
               "attacks": 85,
-              "hits": 73,
-              "hitsConvention": "anyDamage"
+              "hits": 21,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 330,
-              "hits": 233,
-              "hitsConvention": "anyDamage"
+              "attacks": 1980,
+              "hits": 1093,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 101,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 101
             },
             "ssg": {
-              "attacks": 37,
-              "hits": 33,
-              "hitsConvention": "anyDamage"
+              "attacks": 518,
+              "hits": 338,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -94375,29 +94365,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 3,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 3
             },
             "rl": {
               "attacks": 43,
-              "hits": 30,
-              "hitsConvention": "anyDamage"
+              "hits": 7,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 345,
-              "hits": 171,
-              "hitsConvention": "anyDamage"
+              "attacks": 2070,
+              "hits": 801,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 226,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 226
             },
             "ssg": {
-              "attacks": 44,
-              "hits": 35,
-              "hitsConvention": "anyDamage"
+              "attacks": 616,
+              "hits": 278,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -94634,23 +94620,21 @@
             },
             "rl": {
               "attacks": 94,
-              "hits": 57,
-              "hitsConvention": "anyDamage"
+              "hits": 16,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 330,
-              "hits": 179,
-              "hitsConvention": "anyDamage"
+              "attacks": 1980,
+              "hits": 847,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 177,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 177
             },
             "ssg": {
-              "attacks": 31,
-              "hits": 25,
-              "hitsConvention": "anyDamage"
+              "attacks": 434,
+              "hits": 197,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -94877,23 +94861,21 @@
             },
             "rl": {
               "attacks": 10,
-              "hits": 6,
-              "hitsConvention": "anyDamage"
+              "hits": 1,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 471,
-              "hits": 204,
-              "hitsConvention": "anyDamage"
+              "attacks": 2826,
+              "hits": 864,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 223,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 223
             },
             "ssg": {
-              "attacks": 40,
-              "hits": 27,
-              "hitsConvention": "anyDamage"
+              "attacks": 560,
+              "hits": 194,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -95118,23 +95100,21 @@
             },
             "rl": {
               "attacks": 10,
-              "hits": 7,
-              "hitsConvention": "anyDamage"
+              "hits": 0,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 474,
-              "hits": 210,
-              "hitsConvention": "anyDamage"
+              "attacks": 2844,
+              "hits": 946,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 47,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 47
             },
             "ssg": {
-              "attacks": 67,
-              "hits": 48,
-              "hitsConvention": "anyDamage"
+              "attacks": 938,
+              "hits": 323,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -95378,23 +95358,21 @@
             },
             "rl": {
               "attacks": 217,
-              "hits": 151,
-              "hitsConvention": "anyDamage"
+              "hits": 43,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 1574,
-              "hits": 873,
-              "hitsConvention": "anyDamage"
+              "attacks": 9444,
+              "hits": 3985,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 668,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 668
             },
             "ssg": {
-              "attacks": 158,
-              "hits": 125,
-              "hitsConvention": "anyDamage"
+              "attacks": 2212,
+              "hits": 1051,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -95631,29 +95609,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 4,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 4
             },
             "rl": {
               "attacks": 152,
-              "hits": 109,
-              "hitsConvention": "anyDamage"
+              "hits": 20,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 1658,
-              "hits": 766,
-              "hitsConvention": "anyDamage"
+              "attacks": 9948,
+              "hits": 3464,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 506,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 506
             },
             "ssg": {
-              "attacks": 247,
-              "hits": 188,
-              "hitsConvention": "anyDamage"
+              "attacks": 3458,
+              "hits": 1387,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"

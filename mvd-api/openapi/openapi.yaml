@@ -8143,21 +8143,30 @@ components:
 
             `src` is the evidence GRADE and does not say what the numbers
             count; the per-weapon `hitsConvention` does, and is the field to
-            gate a cross-demo comparison on. `derived` `hits` are always
-            `anyDamage` — a fire that landed damage by any path.
-            `reconstructed` `hits` are `anyDamage` too, EXCEPT on rl/gl, which
-            carry `directImpact` since schema v74. KTX's are `anyDamage` for
-            lg/axe/ng/sng, `directImpact` for rl/gl and `pellets` for sg/ssg.
+            gate a cross-demo comparison on. Since schema v75 all three
+            sources aim at KTX's own convention per weapon: `pellets` for
+            sg/ssg, `directImpact` for rl (and for gl on `ktx` and
+            `reconstructed` rows), `anyDamage` for lg/axe/ng/sng. Two
+            exceptions are named rather than papered over — a `derived`
+            (wire-linked) gl row stays `anyDamage`, because a grenade that
+            touches a player explodes and every damage row the server then
+            writes is flagged splash, so the wire holds no record of the touch
+            KTX counts; and a `derived` ng/sng row WITHHOLDS `hits` on a parse
+            without nail decoding (the API always builds it, so this never
+            surfaces here).
 
             Scored against the verbatim block on 186 instrumented archive
-            demos (cmd/qw-demoinfo-eval, withhold-and-compare): reconstructed
-            rl agrees to **1.25%** in aggregate (46.5% of 632 rows exact,
-            p90 error 2), gl to **3.55%** in aggregate at 89.6% of 424 rows
-            exact (one-sided by design), lg to 0.9%.
-            A `derived` rl/gl row does NOT agree — it counts any damage path
-            and reads ~4x above the block on rl, ~1.5x on gl — and sg/ssg
-            never do, being pellet counts on both sides of KTX's ratio and
-            trigger pulls on ours.
+            demos (cmd/qw-demoinfo-eval, withhold-and-compare). Wire-linked:
+            rl `hits` **99.8% of 632 rows exact / 0.02% aggregate**, sg
+            `attacks` and ssg `attacks` **100.0% / 0.00%**, sg `hits` 65.9% /
+            1.03%, ssg `hits` 75.9% / 6.75% (the whole residual is quad — on
+            players who never took one, both are 100.0% exact at 0.00%), lg
+            99.3% / 0.00%, axe 100.0% / 0.00%. Reconstructed: rl agrees to
+            **1.25%** in aggregate (46.5% of 632 rows exact, p90 error 2), gl
+            to **3.55%** at 89.6% of 424 rows exact, lg to 0.9%. The two rows
+            that do NOT reproduce the block are gl on a wire-linked row
+            (any-path, ~1.5x above) and ng/sng, which are on KTX's scale but
+            recover only 68-77% of the nails that connected.
 
             Deriving the direct-impact convention on a demo with no KTX block
             took two goes. The wire log's own splash flag reproduces KTX's rl
@@ -8185,8 +8194,8 @@ components:
                   additionalProperties:
                     additionalProperties: false
                     properties:
-                      attacks: { description: "PELLETS when src=ktx and the weapon is sg/ssg; TRIGGER PULLS otherwise. Read `hitsConvention` rather than re-deriving that rule.", type: integer }
-                      hits: { description: "Hits landed — read `hitsConvention` for WHAT that counts before comparing two of these. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, or a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
+                      attacks: { description: "PELLETS when the weapon is sg/ssg (6 per SG fire, 14 per SSG — KTX's own unit, on every src since schema v75); TRIGGER PULLS otherwise. Read `hitsConvention` rather than re-deriving that rule.", type: integer }
+                      hits: { description: "Hits landed — read `hitsConvention` for WHAT that counts before comparing two of these. ABSENT (not zero) when nothing could count them: a derived block on a demo with no WIRE damage stream, a weapon (ng/sng) the aim recon tier withheld on a src=reconstructed block, or a derived ng/sng row from a parse without nail decoding — a zero would read as 'shot and never hit'. On a TEAM row, absent unless every contributing member measured it.", type: integer }
                       hitsConvention:
                         description: >
                           What `hits` (and, for `pellets`, `attacks` too) COUNTS — the
@@ -8195,21 +8204,22 @@ components:
                           this value match; gate any cross-demo aggregation on it.
 
                           `anyDamage` — one fire that landed damage by any path, splash
-                          included. Every weapon of a `derived` family, lg/sg/ssg/axe of a
-                          `reconstructed` one, and KTX's own counter for the weapons with a
-                          single damage path (lg, axe, ng, sng).
+                          included. KTX's own counter for the weapons with a single damage
+                          path (lg, axe, ng, sng) on every src, plus gl on a `derived`
+                          family, where the wire log cannot see the touch KTX counts.
 
                           `directImpact` — the projectile TOUCHED a player. KTX's rl/gl
-                          counter (ktx/src/weapons.c:994, :1329) — a rocket that killed by
-                          splash alone is not a hit to it — and, since schema v74, the rl/gl
-                          rows of a `reconstructed` family, which reproduce it to 1.25% / 3.55%
-                          aggregate (46.5% / 89.6% of rows exact) on 632 / 424 archive rows.
-                          Measured on the same rows, the
-                          any-path count runs ~4x above this on rl and ~1.5x on gl, so mixing
-                          the two turns a definition change into a trend.
+                          counter (ktx/src/weapons.c:994, :1331) — a rocket that killed by
+                          splash alone is not a hit to it — the rl/gl rows of a
+                          `reconstructed` family since schema v74 (1.25% / 3.55% aggregate,
+                          46.5% / 89.6% of 632 / 424 archive rows exact), and the rl row of a
+                          `derived` family since v75 (99.8% of 632 rows exact, 0.02%).
+                          Measured on the same rows, the any-path count runs ~4.5x above this
+                          on rl, so mixing the two turns a definition change into a trend.
 
                           `pellets` — BOTH counters advance per pellet, not per trigger pull:
-                          KTX's sg/ssg only, 6x and 14x a fire count.
+                          sg/ssg only, 6x and 14x a fire count. KTX's unit, and since schema
+                          v75 the unit of a `derived` sg/ssg row too.
 
                           It is per WEAPON because a single `src: "ktx"` row uses all three at
                           once. Absent, with `hits` present, only on a TEAM row whose members

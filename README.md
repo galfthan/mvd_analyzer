@@ -992,13 +992,15 @@ diff -r /tmp/before /tmp/after
    is absent on a demo whose obituaries never matched. Two things it
    does NOT claim. `maxSpree` deliberately diverges from KTX's, which
    credits a player's own suicide to their streak wherever teamplay is
-   off; and `sg`/`ssg` `hits` are never comparable to KTX's (pellets vs
-   trigger pulls), nor are `rl`/`gl` on a `derived` family (KTX counts
-   direct impacts only, ours any path — ~4x apart on rl). That is stated
-   in the payload rather than only in prose: every weapon carrying
-   `hits` carries `hitsConvention` (`anyDamage` | `directImpact` |
-   `pellets`), so a consumer can gate a cross-era comparison instead of
-   re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
+   off; and `gl` `hits` on a `derived` family is not KTX's number — KTX
+   counts a grenade that TOUCHED a player, and the touch detonates it,
+   so every damage row the wire carries is flagged splash and the touch
+   is unobservable. Everything else is on KTX's own scale per weapon
+   since v75 (`sg`/`ssg` pellets, `rl` direct impacts, the rest a
+   connecting fire). That is stated in the payload rather than only in
+   prose: every weapon carrying `hits` carries `hitsConvention`
+   (`anyDamage` | `directImpact` | `pellets`), so a consumer can gate a
+   cross-era comparison instead of re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
    KTX's question (schema v74): the reconstruction classifies each
    explosion direct-vs-splash from the flight's trajectory against the
    player hull, the flat-110 direct-damage constant where the demo
@@ -1086,9 +1088,10 @@ diff -r /tmp/before /tmp/after
    (it has no per-shot fire sound), which can slip by a single cell at a
    death/discharge boundary. KTX demoinfo stats (when available) remain the
    authoritative reference, and `shots.reconciliation` cross-checks against
-   them — re-measured in v74 on 188 instrumented archive demos, where
+   them — re-measured in v75 on 186 instrumented archive demos, where
    `playerStats` `accuracy.attacks` matches KTX to the row 98-100% of the
-   time on every single-projectile weapon.
+   time on every single-projectile weapon and 100% on both shotguns,
+   whose attacks are now published in KTX's own pellet unit.
 
 2. **Auth name override**: When players authenticate via mvdsv,
    `sv_forcenick` can set the userinfo name to the login. The analyzer

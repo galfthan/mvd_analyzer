@@ -17845,18 +17845,18 @@
             },
             "rl": {
               "attacks": 249,
-              "hits": 77,
-              "hitsConvention": "anyDamage"
+              "hits": 14,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 33,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 198,
+              "hits": 11,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 5,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 70,
+              "hits": 15,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -18089,13 +18089,13 @@
             },
             "rl": {
               "attacks": 257,
-              "hits": 65,
-              "hitsConvention": "anyDamage"
+              "hits": 12,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 48,
-              "hits": 16,
-              "hitsConvention": "anyDamage"
+              "attacks": 288,
+              "hits": 52,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"

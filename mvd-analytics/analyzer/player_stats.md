@@ -7,10 +7,12 @@
             `metadata`, `aim`
             — `identity` supplies the `*auth` login, `shots` the fire
             stream the derived accuracy is reconstructed from, and `aim`
-            the reconstructed hit tier that fills `accuracy.hits` on
-            demos with no wire damage stream
+            both hit tiers: the reconstructed one that fills
+            `accuracy.hits` on demos with no wire damage stream, and
+            (v75) the measured pellet / direct-impact counters the
+            wire-linked branch publishes on the demos that have one
 **Writes to Result:** `result.PlayerStats` (`*PlayerStatsResult`),
-            schema v74
+            schema v75
 
 ## What it does
 
@@ -149,30 +151,37 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   first.
 - **Derived `accuracy` is only as good as the shot attribution.** With
   no KTX block the family is reconstructed from the decoded fire stream
-  (`src: "derived"`), which counts trigger pulls rather than KTX's
-  pellets and inherits `/shots`' own attribution limits — on gameId
-  71035 one player's 552 fires are all labelled `sg`. `hits` is omitted
-  entirely when nothing could count it — no wire damage stream AND no
-  recovery from the aim recon tier for that weapon — since a zero there
-  would read as "shot and never hit".
-- **Derived `hits` are not KTX's `hits` for rl/gl or sg/ssg.** Measured
-  against the verbatim block on 188 instrumented archive demos
-  (`cmd/qw-demoinfo-eval`): `attacks` matches KTX to the row on every
-  single-projectile weapon and lg `hits` agrees to 0.9% in aggregate,
-  but KTX's rl/gl `hits` is the DIRECT-impact count
-  (`ktx/src/weapons.c:994`, `:1329`) while ours counts a fire that landed
-  damage by any path, so ours reads ~4x higher on rl and ~1.5x on gl;
-  sg/ssg are pellets on KTX's side and trigger pulls on ours. A
-  definition gap, not an error — and since v74 the row carries the
-  warning itself: every weapon with `hits` also carries
+  (`src: "derived"`), which inherits `/shots`' own attribution limits —
+  on gameId 71035 one player's 552 fires are all labelled `sg`. `hits`
+  is omitted entirely when nothing could count it — no wire damage
+  stream AND no recovery from the aim recon tier for that weapon, or
+  (v75) a nailgun row on a parse without `-include nails`, the only way
+  a nail fire links to its damage — since a zero there would read as
+  "shot and never hit".
+- **Both tiers now answer KTX's question on most weapons — the two that
+  cannot are named.** Every weapon carrying `hits` also carries
   `hitsConvention` (`anyDamage` | `directImpact` | `pellets`), per
-  weapon, because one `src: "ktx"` row uses all three at once. Closing
-  the gap instead was measured and rejected: the wire log's splash flag
-  reproduces KTX's rl count exactly (638/638 rows), but on a blockless
-  demo the only signal is the reconstruction's geometric direct/splash
-  verdict, which answers gl (1.2% aggregate) and not rl (+80%) — see
-  `damagerecon/ACCURACY.md` §"Can an old demo answer KTX's rl/gl
-  question?".
+  weapon, because one `src: "ktx"` row uses all three at once (v74). v74
+  put the RECONSTRUCTED tier on KTX's rl/gl direct-impact convention;
+  v75 does the same for the WIRE-linked one by reading the aim section's
+  measured counters — `pellets`/`pelletHits` for sg/ssg, `direct` for rl
+  — instead of recomputing them. Measured against the verbatim block on
+  186 instrumented archive demos (`cmd/qw-demoinfo-eval`, the
+  `/measured` columns): sg/ssg `attacks` 100.0% row-exact at 0.00%
+  aggregate, `rl.hits` 99.8% / 0.02%, `sg.hits` 65.9% / 1.03%,
+  `ssg.hits` 75.9% / 6.75% — the shotgun residual is entirely quad
+  (100.0% exact on players who took none) and never negative.
+  `gl` keeps `anyDamage` on a wire-linked row: KTX counts a grenade that
+  TOUCHED a player (`ktx/src/weapons.c:1331`) and the touch detonates it,
+  so every damage row the server writes is splash-flagged and the wire
+  holds no record of the touch at all — counting non-splash gl rows off
+  the wire reproduces 0.00% of the block's total. `sg`/`ssg` keep it on a
+  RECONSTRUCTED row for the mirror reason: a reconstructed delta merges
+  every hit on one instant, so its magnitude cannot be split into pellets
+  (`result.WeaponAimRecon`). `ng`/`sng` are on KTX's scale but the linker
+  recovers only 68-77% of the nails that connected. See
+  `damagerecon/ACCURACY.md` §"The wire-linked accuracy family vs the
+  verbatim block".
 - **`maxSpree` inherits the kill side's residual.** The streak replay is
   exact where the underlying kill attribution is (99.6% of rows whose
   `kills` already agrees with KTX and whose player never suicided); 16 of

@@ -1023,13 +1023,16 @@ Common frontend features → the call that backs them.
   evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
   `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
   is not the same as no hits). `attacks` is shot-derived on every demo
-  and matches KTX to the row on the single-projectile weapons. On a
-  `reconstructed` family `rl` / `gl` publish KTX's OWN direct-impact
-  count (schema v74) and agree with `/demoinfo` to 1.2% / 0.6% in
-  aggregate; on a `derived` one they count any damage path and read
-  ~4x higher on `rl`. Either way, do not diff `hits` against
-  `/demoinfo` naively — `sg` / `ssg` are pellets on KTX's side and
-  trigger pulls on ours on every family. Read
+  and matches KTX to the row on the single-projectile weapons. Since
+  schema v75 EVERY family answers KTX's own question per weapon:
+  `sg`/`ssg` count pellets on both sides of the ratio, `rl` counts
+  direct impacts (`reconstructed` since v74, `derived` since v75, both
+  within 1.3% / 0.02% of `/demoinfo` in aggregate), and
+  `lg`/`ng`/`sng`/`axe` count a connecting fire, which is KTX's own
+  event for them. ONE exception: `gl` on a `derived` family still counts
+  any damage path, because a grenade that touches a player explodes and
+  every damage row the wire then carries is flagged splash — the touch
+  KTX counts is simply not on the wire. Read
   `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
   — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
   is, per WEAPON because one `src: "ktx"` row uses all three at once.

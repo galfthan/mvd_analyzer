@@ -413,29 +413,40 @@ off the wire, and marking half the corpus would make the mark meaningless.
 
 The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
 `withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
-family the demo has — and they are not all counted the same way. KTX's
+family the demo has — and they were not all counted the same way. KTX's
 own counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`;
-the `derived` family counts any fire that landed damage, on every weapon,
-which on `rl` is ~4× the KTX number. Same column, same `%`, different
-question — and the comparison people actually make is between two
-screenshots, where a tooltip does not exist.
+before v75 the `derived` family counted any fire that landed damage, on
+every weapon, which on `rl` is ~4.5× the KTX number. Same column, same
+`%`, different question — and the comparison people actually make is
+between two screenshots, where a tooltip does not exist.
 
 So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
 weapon wears a **`≠`** in the text, with a footnote under the table that
 appears exactly when some cell wears it. The rule is per weapon, not per
-family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`): a
-KTX-overlaid family matches on every weapon and is never marked; a
-`derived` one is marked on `rl`/`gl`/`sg`/`ssg`; a `reconstructed` one is
-marked on `sg`/`ssg` ONLY, because since v74 its `rl`/`gl` publish KTX's
-own direct-impact count (`recon.directHits`) and are on the server's
-scale. `lg`/`ng`/`sng`/`axe` are never marked — KTX counts the same event
-we do. Two `Acc` figures are comparable exactly when weapon **and**
-convention match; the full convention text stays in the tooltip.
+family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`), and since
+v75 both computed tiers publish KTX's convention on most weapons, so the
+mark has shrunk from four cells to two. A KTX-overlaid family matches on
+every weapon and is never marked. A `derived` one is marked on **`gl`
+alone** (its `rl` publishes direct impacts, its `sg`/`ssg` pellets); a
+`reconstructed` one on **`sg`/`ssg` alone** (its `rl`/`gl` publish
+`recon.directHits`, v74). Neither is an oversight. A grenade that touches
+a player detonates and every damage row the server then writes is flagged
+splash, so a wire damage log has no record of the touch KTX counts
+(measured: counting non-splash `gl` rows off the wire reproduces 0.00% of
+the block's total). And a reconstructed damage delta merges every hit
+landing on one instant, so dividing its magnitude into pellets would
+credit one shooter with another's. Two `Acc` figures are comparable
+exactly when weapon **and** convention match; the full convention text
+stays in the tooltip.
 
 The Aim tab's `Hits` column is deliberately the OTHER number on those two
 weapons: it stands in for the withheld measured counter, which is an
 any-path count, so a reconstructed `RL` figure there reads higher than the
-Summary's `Acc`. Both are labelled; neither is a correction of the other.
+Summary's `Acc`. The same split now exists on a wire-measured demo, where
+the Aim tab's `Hits`/`Hit %` are the any-path counters and the Summary's
+`Acc` is KTX's direct-impact question — the Aim tab's own `Direct` column
+is the number the Summary shows. Both are labelled; neither is a
+correction of the other.
 A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
 only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
 convention and the Summary number it differs from, with the size of the

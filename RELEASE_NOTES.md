@@ -232,6 +232,81 @@ claiming he was still playing at 360 s.
   projected golden: the eleven full streams would add megabytes the other
   FFA goldens already pin.
 
+### A modern demo's accuracy is on the server's own scale
+
+`playerStats.accuracy` with `src: "derived"` — the wire-linked family every
+demo carrying the KTX damage stream publishes — used to answer its OWN
+question on every weapon: one attack per trigger pull, one hit per fire that
+landed damage by any path. v74 had already put the RECONSTRUCTED tier on
+KTX's convention for `rl`/`gl`, so the corpus was split the wrong way round:
+a pre-instrumentation demo answered KTX's question and last week's demo did
+not. On a matchless FFA demo, which carries no demoinfo block to overlay,
+that was the only accuracy number a reader ever saw.
+
+The wire-linked family now publishes KTX's convention per weapon, read out
+of the aim section rather than recomputed (`analyzer.deriveMeasuredAcc`
+lifts the published counters the way `deriveReconHits` lifts the recon
+tier, so the two sections cannot disagree):
+
+- **`sg` / `ssg`** — `attacks` and `hits` are PELLETS on both sides, from
+  `aim.players[].weapons[].pellets` / `pelletHits`. KTX's own unit
+  (`attacks += bullets`, `ktx/src/weapons.c:746`, `:812`, `:869`; `hits++`
+  per pellet, `:387`, `:392`). Withheld and unresolved fires still count as
+  attacks, which is what keeps the unit comparable.
+- **`rl`** — `hits` is the DIRECT-impact count, from
+  `aim.players[].weapons[].direct`. KTX increments its counter in
+  `T_MissileTouch` and nowhere else (`:994`); splash victims go to the
+  separate `rhits`/`vhits` (`ktx/src/combat.c:1099-1121`). `attacks` stays
+  the fire count — KTX's own `attacks++` per rocket.
+- **`lg` / `ng` / `sng` / `axe`** — unchanged `anyDamage`, which already WAS
+  KTX's convention for a weapon with one damage path.
+
+Measured against the verbatim block on 186 instrumented archive demos
+(`cmd/qw-demoinfo-eval`, the new `/measured` columns; full tables in
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)):
+
+| row | before | after |
+|---|---|---|
+| `sg.attacks` / `ssg.attacks` | 0.0% exact, 83% / 93% off | **100.0% exact, 0.00%** |
+| `sg.hits` | 6.0% / 76.95% | **65.9% / 1.03%** |
+| `ssg.hits` | 5.9% / 85.62% | **75.9% / 6.75%** |
+| `rl.hits` | 1.6% / 355.17% | **99.8% / 0.02%** |
+| `lg.hits` / `axe.hits` (control) | 99.3% / 100.0% at 0.00% | unchanged |
+
+The shotgun residual is entirely quad and never negative: on the 264 `sg`
+and 144 `ssg` rows whose player took no quad, both reproduce the block on
+**100.0%** of rows at 0.00%. The pellet estimator divides a fire's damage
+by 4, so a quad pellet reads as four.
+
+**Two honest exceptions, named rather than papered over.**
+
+- **`gl` keeps `anyDamage` on a wire-linked row.** KTX counts a grenade that
+  TOUCHED a player (`GrenadeTouch`, `ktx/src/weapons.c:1331`), but the touch
+  detonates the grenade and `T_RadiusDamage` flags every resulting row as
+  splash — so the wire log has no record of a grenade touch at all.
+  Counting non-splash `gl` rows off the wire reproduces 0.00% of the block's
+  total (`acc.gl.direct/wire`, 30.0% of 424 rows exact, bias −1.93, and each
+  of those rows is a player who touched nobody). The reconstructed tier CAN
+  publish gl directs because it never reads the splash flag. So the Summary
+  tab's `≠` mark, which used to sit on four weapons of every derived row,
+  now appears on exactly one cell — and it is the cell where the evidence
+  genuinely cannot answer the question.
+- **`ng` / `sng` `hits` are WITHHELD without nail decoding.** Nail fires link
+  to their damage only through the `svc_nails` id brackets, which
+  `qw-analyze` builds on `-include nails` (mvd-api and the WASM web build
+  always request it). Without them the field used to publish a fabricated
+  `hits: 0` — `ffa_1[dm2]` reported Myagi at `ng` 177 attacks / 0 hits on a
+  default CLI parse and 17 hits with the flag. It is now absent, keyed on
+  `Streams.NailsComputed`, exactly as the reconstructed tier withholds those
+  two weapons. Where the flag IS on, the numbers are on KTX's scale but
+  under-recover — ng 65.5% of rows exact at 32.1% aggregate, sng 48.5% at
+  22.8%, never over — so nail accuracy is a floor, and ACCURACY.md says so.
+
+Schema stays **v75**: this moves values and `hitsConvention` strings, no
+shapes. `cmd/qw-demoinfo-eval` gains the `/measured`, `/fires` and
+`/anyDamage/wire` columns and a `-nails` flag, so the conventions the tier
+does NOT publish stay measured rather than argued.
+
 ### Web UI
 
 An individual-mode demo shows no team information at all: no Teams panel, no

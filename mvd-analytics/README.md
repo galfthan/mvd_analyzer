@@ -259,10 +259,12 @@ that downstream consumers render, summarise, or feed to an agent.
 
   **Nailgun accuracy needs `-include nails`.** ng/sng hit attribution
   requires `svc_nails` decoding, which is off by default because the nail
-  stream is high volume — so `shots`/`aim` omit `hits` for those weapons
-  (omitted, not zeroed: absence means unmeasured). mvd-api always builds
-  them, so this is the one place default CLI output diverges from the same
-  demo over REST; the CLI prints a stderr warning when it happens.
+  stream is high volume — so `shots`/`aim` omit `hits` for those weapons,
+  and (schema v75) `playerStats.accuracy` withholds theirs too, keyed on
+  `Streams.NailsComputed` (omitted, not zeroed: absence means unmeasured).
+  mvd-api always builds them, so this is the one place default CLI output
+  diverges from the same demo over REST; the CLI prints a stderr warning
+  when it happens.
 
   `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
   `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is
@@ -386,7 +388,9 @@ artifacts and writes a top-level section no other node touches, so it
 carries no `mutates` flag. (The thirteenth is `aim`, added in v74 so the
 accuracy family can read the published reconstructed hit tier instead of
 re-running its join, which is what makes that tier's per-weapon
-withholds inherit rather than be restated.) **Two publish a named final artifact** rather
+withholds inherit rather than be restated. Since v75 the WIRE-linked
+branch reads that section too — the measured pellet and direct-impact
+counters — for the same reason: the two sections then cannot disagree.) **Two publish a named final artifact** rather
 than anonymously patching an earlier node's output:
 `recoverTelefragTeamkills` is node `frags-final`, which
 appends recovered telefrag team-kills to the raw `frag` log — and, since

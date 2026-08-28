@@ -168,8 +168,11 @@ var ktxItemKind = map[string]string{
 //     so folding one into the other would silently change what the field
 //     means.
 //   - accuracy: KTX's whole block wins when present; the analyzer's
-//     fire-stream reconstruction stands when it is not. The two are
-//     different measurements, which is what `src` is for — see
+//     fire-stream derivation stands when it is not. `src` says which
+//     evidence the numbers rest on; since v75 both tiers count on KTX's
+//     OWN convention per weapon (pellets for sg/ssg, direct impacts for
+//     rl — and for gl too where the tier is reconstructed), and
+//     PlayerStatsAcc.HitsConvention states it per row either way. See
 //     result.PlayerStatsAccuracy.
 //   - pickups: took / totalTook / dropped from KTX; xfer / xferSelf stay
 //     derived (KTX conflates the two). Ammo kinds have no KTX counterpart
@@ -385,11 +388,13 @@ func derivedTakenToDie(derived *result.PlayerStatsDamage) *int {
 //
 // The KTX block replaces the derived one WHOLESALE — it never reads
 // row.Accuracy — and that is deliberate, unlike the per-weapon merge
-// overlayDamage does. Damage is the same unit in both sources; accuracy
-// is not. KTX counts PELLETS server-side for sg/ssg while the
-// reconstruction counts trigger pulls (result.PlayerStatsAccuracy), so a
-// per-weapon merge would put the two scales side by side in one map under
-// one `src`, which is exactly the coercion this section exists to avoid.
+// overlayDamage does. Damage is the same unit in both sources; accuracy is
+// not necessarily, even now that both tiers publish KTX's convention per
+// weapon (schema v75): gl `hits` on a WIRE-linked row is still the any-path
+// count, because the wire log cannot see a grenade touch at all (see
+// analyzer.deriveMeasuredAcc). A per-weapon merge would put that scale next
+// to KTX's in one map under one `src`, which is exactly the coercion this
+// section exists to avoid.
 //
 // Measured before deciding: across all 42 cached corpus demos, every one
 // of which carries a KTX block, 228 player rows with a derived accuracy

@@ -1245,12 +1245,12 @@ function holdCell(stat, win) {
 
 // What a hits count counts, keyed by playerStats `hitsConvention`. The same
 // weapon's percentage is on a different scale under each, which is why the
-// cell says so instead of leaving the reader to compare a KTX rl figure with
-// a derived one four times its size.
+// cell says so instead of leaving the reader to compare a KTX shotgun figure
+// with a fire-counted one six times smaller.
 const HITS_CONVENTION_TITLES = {
-    anyDamage: 'Hits = fires that landed damage by any path (splash included)',
+    anyDamage: 'Hits = fires that landed damage by any path (splash included) — KTX\'s own convention for LG, NG/SNG and the axe',
     directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
-    pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
+    pellets: 'Hits and attacks are PELLET counts (6 per SG fire, 14 per SSG), KTX\'s own unit for the shotguns',
 };
 
 // What KTX's OWN hits counter counts for one weapon. The mirror of
@@ -1277,20 +1277,27 @@ function ktxHitsConvention(weapon) {
 // hedged date is: this is a figure people screenshot.
 //
 // A KTX-overlaid family (every demo with a demoinfo block) matches by
-// construction and wears nothing. A DERIVED one counts any damage path on
-// every weapon, so its rl/gl (~4x KTX's direct-impact count) and its sg/ssg
-// (trigger pulls, not pellets) are marked. A RECONSTRUCTED one publishes
-// KTX's own direct-impact count on rl/gl (schema v74), so only its sg/ssg is
-// marked — the whole point of that change is that an old demo's rocket
-// accuracy is on the server's scale.
+// construction and wears nothing. Since schema v75 both computed tiers match
+// on most weapons too, so the mark has shrunk to two cells — and each is a
+// place where the tier's evidence genuinely cannot answer KTX's question,
+// not a place where it declined to:
+//
+//   - GL on a DERIVED (wire-linked) row. A grenade that touches a player
+//     detonates on the spot, and every damage row the server then writes is
+//     flagged splash, so the wire log holds no record of the touch KTX
+//     counts. (Its rl publishes direct impacts and its sg/ssg pellets.)
+//   - SG/SSG on a RECONSTRUCTED row. The recon tier counts fires, not
+//     pellets: a reconstructed delta merges every hit landing on one instant,
+//     so dividing its magnitude would credit one shooter with another's
+//     pellets. (Its rl/gl publish KTX's direct-impact count, schema v74.)
 const ACC_OFF_SCALE_MARK = '≠';
 const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
-    'a hit here is any fire that landed damage, where KTX counts pellets (sg/ssg) or direct impacts only (rl/gl, on a demo whose damage came off the wire). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or only the projectiles that TOUCHED a player (GL). ' +
     'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
 // The same statement as the table's footnote, which is where a reader who
 // cannot hover — anyone looking at a screenshot of this panel — meets it.
 const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or direct impacts only (RL/GL). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or direct impacts only (GL). ' +
     'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
 
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
@@ -1318,13 +1325,19 @@ const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, splash inc
 // from the rebuilt damage log on a demo that carries no such stream. The last
 // is MARKED — a recon accuracy is only as complete as damage.coverage, which
 // the panel banner above the table states — while the first two, both
-// measured off the wire, render plainly. The convention rides the tooltip
-// either way: two accuracies are comparable exactly when weapon and
-// hitsConvention match.
+// measured off the wire, render plainly. Grade is not the same question as
+// what the number counts: since schema v75 all three sources answer KTX's
+// question on most weapons (the two that still cannot are marked, below), and
+// the convention rides the tooltip either way — two accuracies are comparable
+// exactly when weapon and hitsConvention match.
+//
+// An entry with attacks and no hits is a WITHHELD count, not a zero: nailgun
+// rows carry one whenever the demo was parsed without nail decoding, which is
+// the only way ng/sng fires can be linked to their damage.
 function formatAccuracyCell(accuracy, wn) {
     const entry = accuracy?.byWeapon?.[wn];
     if (!entry || !entry.attacks) return '-';
-    if (entry.hits == null) return `<span class="stat-muted" title="No damage to link fires against — attacks only">${entry.attacks} atk</span>`;
+    if (entry.hits == null) return `<span class="stat-muted" title="No linked damage to count hits against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
     const notes = [];
     if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
@@ -12453,7 +12466,7 @@ const AIM_COL = {
     fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
     partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
     missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', measured: true, cell: w => w.direct || 0 },
+    direct: { h: 'Direct', t: 'Direct contacts — the server\'s own RL count; GL reads near zero here because a grenade that touches explodes and every row of its damage is flagged splash', measured: true, cell: w => w.direct || 0 },
     splash: { h: 'Splash', t: 'Hits from splash only', measured: true, cell: w => w.splash || 0 },
     missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
     directPct: { h: 'Direct %', t: 'Share of fires that hit directly', measured: true, cell: w => shotShare(w.direct, w) },

@@ -563,14 +563,19 @@ enough that its aggregate swings by 6 points when it does.)
 sources are not measuring the same quantity, and the eval reports them
 only to pin the size of the gap:
 
-- `accuracy.sg/ssg.attacks` and `.hits` — KTX counts PELLETS on both
-  sides of its ratio, this pipeline counts trigger pulls and fires that
+- `accuracy.sg/ssg.attacks` and `.hits` — on a RECONSTRUCTED row (which
+  is what the un-suffixed columns score) KTX counts PELLETS on both sides
+  of its ratio and that tier counts trigger pulls and fires that
   connected. The observed ratios (83% / 93% aggregate) are exactly the
-  6-and-14-pellet spreads.
+  6-and-14-pellet spreads. The WIRE-linked row closed this in v75 — see
+  "The wire-linked accuracy family" below; the reconstructed one cannot,
+  because a merged reconstructed delta's magnitude is the sum over every
+  hit on that instant and dividing it by 4 would credit one shooter with
+  another's pellets (`result.WeaponAimRecon`).
 - `accuracy.rl/gl.anyDamage/recon` — the convention a reconstructed row
   no longer publishes for those two, kept as a diagnostic: a fire that
-  landed damage by ANY path, which reads ~4x above KTX on rl (365%
-  aggregate) and ~1.5x on gl (55%). Until v74 that WAS the published
+  landed damage by ANY path, which reads ~4x above KTX on rl (362%
+  aggregate) and ~1.5x on gl (54%). Until v74 that WAS the published
   number and the gap was named rather than closed; the next section is
   how it was closed.
 
@@ -842,6 +847,106 @@ that, and the corpus says how much they matter:
 - Godmode and pentagram invincibility zero the health share the same way.
   The pent case is already recovered where it leaves an armor delta and
   synthesized where it leaves none (`pentSyntheticEvents`).
+
+### The wire-linked accuracy family vs the verbatim block (2026-08-28)
+
+The section above scores the tier an OLD demo publishes. This one scores
+the tier a modern demo publishes — `playerStats.accuracy` with
+`src: "derived"`, built by linking each decoded fire to the wire
+`mvdhidden_dmgdone` log. Until v75 that tier answered its own question on
+every weapon (`hitsConvention: anyDamage`, one attack per trigger pull),
+which meant the two eras answered KTX's question with *different* halves
+of the corpus: a pre-instrumentation demo published KTX's rl/gl
+direct-impact count while the demo recorded last week did not.
+
+v75 makes the wire-linked tier read the aim section's own measured
+counters — `pellets` / `pelletHits` for the shotguns, `direct` for `rl` —
+so it publishes KTX's convention where the wire can express it. The
+`/measured` columns of `cmd/qw-demoinfo-eval` score exactly that, on the
+same 186 archive demos, against the same verbatim block (the harness
+captures the stored family BEFORE the withhold; it is a second tier, not
+part of the blind answer). `/fires` and `/anyDamage/wire` are the
+pre-v75 quantities, kept in the harness so what the change bought is a
+measurement rather than a claim.
+
+| row | rows | before v75 | after v75 |
+|---|---|---|---|
+| `acc.sg.attacks` | 534 | 0.0% exact / 83.33% | **100.0% / 0.00%** |
+| `acc.ssg.attacks` | 390 | 0.0% / 92.86% | **100.0% / 0.00%** |
+| `acc.sg.hits` | 534 | 6.0% / 76.95% | **65.9% / 1.03%** |
+| `acc.ssg.hits` | 390 | 5.9% / 85.62% | **75.9% / 6.75%** |
+| `acc.rl.hits` | 632 | 1.6% / 355.17% | **99.8% / 0.02%** |
+| `acc.rl.attacks` | 632 | 99.8% / 0.00% | unchanged |
+| `acc.lg.hits` | 434 | 99.3% / 0.00% | unchanged |
+| `acc.axe.hits` | 86 | 100.0% / 0.00% | unchanged |
+| `acc.gl.hits` | 424 | 42.9% / 55.13% | unchanged — see below |
+| `acc.{lg,gl,ng,sng}.attacks` | 434/424/139/336 | 98.4-100.0% / 0.00% | unchanged |
+
+`lg` and `axe` are the control: their any-path count already WAS KTX's
+counter (one trace, one swing, one damage path), and they reproduce the
+block on 99.3% and 100.0% of rows without anything changing. That is what
+says the join itself is sound and the pre-v75 residual on the other
+weapons was definition, not derivation.
+
+**The shotgun residual is entirely quad, and one-sided.** Split the rows
+on whether the player took a quad at all:
+
+| row | quad == 0 | quad > 0 |
+|---|---|---|
+| `acc.sg.hits` | 264 rows, **100.0% exact / 0.00%** | 270 rows, 32.6% / 1.36% |
+| `acc.ssg.hits` | 144 rows, **100.0% exact / 0.00%** | 246 rows, 61.8% / 9.11% |
+
+Not one row of 924 under-counts. The pellet estimator sizes a fire's hits
+as `Σdamage / 4` clamped to the fire's 6 or 14 (`aimcore/aim.go`), so a
+quad pellet's 16 reads as four pellets and a quad fire saturates the
+clamp. It is an over-count that exists only where a quad was carried, it
+is named on `result.WeaponAimSplit` as a known approximation of the aim
+section this tier reads, and closing it needs a per-damage-row quad flag
+the wire does not carry. `hitsConvention: pellets` stays honest — the
+number IS a pellet count on KTX's scale — and the residual is stated here
+rather than hidden behind it.
+
+**`gl` is the one weapon the wire cannot answer, and it says so.** KTX
+increments `wpn[wpGL].hits` in `GrenadeTouch` (`ktx/src/weapons.c:1331`)
+and then detonates the grenade through `GrenadeExplode` →
+`T_RadiusDamage`, which raises `dmg_is_splash` for every row it writes
+(`ktx/src/combat.c:1207`). So a grenade touch leaves NO non-splash row on
+the wire, and the count that reproduces `acc.rl.hits` on 632 of 632 rows
+reproduces **0.00%** of KTX's gl total: `acc.gl.direct/wire` scores 30.0%
+of 424 rows exact with a bias of −1.93, and every one of those exact rows
+is a player who touched nobody. A wire-linked gl row therefore keeps the
+any-path count with `hitsConvention: anyDamage`, and the UI keeps its
+`≠` mark on that cell alone. The RECONSTRUCTED tier can publish gl
+directs (89.6% / 3.55%) precisely because it never reads the splash flag
+— it re-classifies each explosion from the flight geometry and the spent
+fuse (`damagerecon/direct.go`).
+
+**`ng`/`sng` are on KTX's scale but under-recover.** Both weapons launch
+exactly one spike per `attacks++` (`W_FireSuperSpikes`,
+`ktx/src/weapons.c:1640`; `W_FireSpikes`, `:1672` — the super nailgun's
+`-2` is ammo, not a second nail) and KTX's `hits++` fires once per spike
+that touched (`:1620`, `:1549`), so "the fire connected" and "a nail
+connected" are the same event and `anyDamage` is the right label. The
+linker just misses some: run with `-nails`, `acc.ng.hits/measured` is
+65.5% of 139 rows exact at **32.11%** aggregate under-count and
+`acc.sng.hits/measured` 48.5% of 336 at **22.81%**, bias −2.01 and −3.05
+per row, never positive. Nail accuracy is a floor, not an estimate.
+
+Without `-include nails` there is no nail linkage at all, and v75 stops
+publishing the `hits: 0` that produced — the field is withheld, keyed on
+`Streams.NailsComputed`, the same latch the shots analyzer sets. (Before
+v75, `ffa_1[dm2]` reported Myagi at `ng` 177 attacks / 0 hits on a default
+CLI parse and 17 hits with the flag; mvd-api and the WASM build always
+request nails, so only the CLI ever saw the zero.)
+
+Reproduce:
+
+```
+MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-demoinfo-eval \
+    -dir <186 archive demos> -workers 5 -csv demoinfo.csv
+MVDA_BSP_DIR=./bsps go run ./mvd-analytics/cmd/qw-demoinfo-eval \
+    -dir <186 archive demos> -workers 4 -nails -csv demoinfo-nails.csv
+```
 
 ### The rocket splash base is 120, not the direct 110 (2026-08-24)
 
