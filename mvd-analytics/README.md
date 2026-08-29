@@ -272,7 +272,10 @@ that downstream consumers render, summarise, or feed to an agent.
   flight and its 2.5 s fuse (`damagerecon/direct.go`). Without the spatial
   streams there is no flight to read: `aim` withholds gl's `direct`/`splash`
   split and `playerStats.accuracy` falls back to the any-path count, labelled
-  `hitsConvention: "anyDamage"`.
+  `hitsConvention: "anyDamage"`. Withheld means the two fields are ABSENT —
+  they are `*int` since v75, so a present `0` is a measured "touched nobody"
+  and only an absence means "never classified"; that absence is what the
+  accuracy fallback keys on.
 
   mvd-api and the WASM build always request both, so these are the two places
   default CLI output diverges from the same demo over REST; the CLI prints a

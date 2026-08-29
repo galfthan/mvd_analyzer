@@ -12287,11 +12287,13 @@
             "hits": 15,
             "missed": 13,
             "self": {
+              "direct": 0,
               "hits": 4
             },
             "shots": 28,
             "splash": 10,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -16300,11 +16302,13 @@
             "hits": 39,
             "missed": 39,
             "self": {
+              "direct": 0,
               "hits": 4
             },
             "shots": 78,
             "splash": 25,
             "team": {
+              "direct": 0,
               "hits": 4
             },
             "weapon": "rl"
@@ -21018,11 +21022,13 @@
             "hits": 31,
             "missed": 26,
             "self": {
+              "direct": 0,
               "hits": 1
             },
             "shots": 57,
             "splash": 27,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -25213,6 +25219,7 @@
             "shots": 72,
             "splash": 32,
             "team": {
+              "direct": 0,
               "hits": 4
             },
             "weapon": "rl"
@@ -32085,6 +32092,7 @@
             "hits": 27,
             "missed": 40,
             "self": {
+              "direct": 0,
               "hits": 2
             },
             "shots": 67,
@@ -37357,6 +37365,7 @@
             "hits": 41,
             "missed": 58,
             "self": {
+              "direct": 0,
               "hits": 1
             },
             "shots": 99,
@@ -41458,11 +41467,13 @@
             "hits": 83,
             "missed": 51,
             "self": {
+              "direct": 0,
               "hits": 6
             },
             "shots": 134,
             "splash": 69,
             "team": {
+              "direct": 0,
               "hits": 4
             },
             "weapon": "rl"

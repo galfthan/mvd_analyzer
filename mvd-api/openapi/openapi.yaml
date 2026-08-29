@@ -5179,14 +5179,14 @@ components:
                       description: "LG whiffs blocked short by geometry with a live enemy behind."
                       type: integer
                     direct:
-                      description: "Projectiles that TOUCHED a player — KTX's own rl/gl hits counter (ktx/src/weapons.c:994, :1329). RL reads the wire's splash flag, so it is a subset of `hits` and direct+splash+missed == shots. GL cannot: GrenadeTouch does all its damage through T_RadiusDamage, which flags every row splash, so GL's count is re-derived from the grenade's tracked flight and its 2.5s fuse (schema v75) — bounded by the FIRES rather than by `hits`, so it may exceed `hits` where a touch's fire went unlinked, and absent together with GL's `splash` on a parse without the projectile streams (the API always builds them). Measured against the verbatim KTX block on 186 archive demos: rl 99.8% of 632 player rows exact / 0.02% aggregate, gl 92.0% of 424 / 3.79%."
+                      description: "Projectiles that TOUCHED a player — KTX's own rl/gl hits counter (ktx/src/weapons.c:994, :1329). RL reads the wire's splash flag, so it is a subset of `hits` and direct+splash+missed == shots. GL cannot: GrenadeTouch does all its damage through T_RadiusDamage, which flags every row splash, so GL's count is re-derived from the grenade's tracked flight and its 2.5s fuse (schema v75) — bounded by the FIRES rather than by `hits`, so it may exceed `hits` where a touch's fire went unlinked. ABSENCE IS NOT ZERO: `direct` and `splash` are emitted together, exactly when the split ran for this weapon, so a present `0` is a measured \"touched nobody\" and their ABSENCE means the fires were never classified — render it as withheld, never as 0. This API always builds the projectile streams the GL classifier reads, so on responses served from here the pair is absent only where the linker resolved no rl/gl fire at all; a Result produced elsewhere (a bare qw-analyze parse) withholds every GL row. Measured against the verbatim KTX block on 186 archive demos: rl 99.8% of 632 player rows exact / 0.02% aggregate, gl 92.0% of 424 / 3.79%."
                       type: integer
                     enemy:
                       description: "Enemy-victim slice of this weapon's hit counters (emitted when it differs from the top-level counters)."
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not. Absent means the split never ran (the top-level `direct` is absent too), not zero; the self bucket carries a real 0, since a missile cannot touch its own owner. The bucket's splash is `hits - direct`, which an absent `direct` therefore leaves unanswerable."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."
@@ -5287,7 +5287,7 @@ components:
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not. Absent means the split never ran (the top-level `direct` is absent too), not zero; the self bucket carries a real 0, since a missile cannot touch its own owner. The bucket's splash is `hits - direct`, which an absent `direct` therefore leaves unanswerable."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."
@@ -5311,14 +5311,14 @@ components:
                       description: "Weapon fires."
                       type: integer
                     splash:
-                      description: "Linked hits that were splash-only — `hits - direct`, floored at zero (GL's `direct` is not bounded by `hits`; see `direct`). Absent for GL on a parse without the projectile streams, where the touch classification could not run."
+                      description: "Linked hits that were splash-only — `hits - direct`, floored at zero (GL's `direct` is not bounded by `hits`; see `direct`). Emitted together with `direct` and absent together with it: an absent `splash` means the split never ran, NOT that every hit was a direct one. See `direct`."
                       type: integer
                     team:
                       description: "Team-victim slice of this weapon's hit counters (same fields, team victims only)."
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not. Absent means the split never ran (the top-level `direct` is absent too), not zero; the self bucket carries a real 0, since a missile cannot touch its own owner. The bucket's splash is `hits - direct`, which an absent `direct` therefore leaves unanswerable."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."

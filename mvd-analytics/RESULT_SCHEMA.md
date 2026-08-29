@@ -956,8 +956,8 @@ flight-geometry touch classifier for `gl`, whose touch the wire never records
 | Full | `full` | int (sg/ssg) — fires where all pellets hit |
 | Partial | `partial` | int (sg/ssg) — fires where some pellets hit |
 | Miss | `miss` | int (sg/ssg: fires where no pellet hit; lg: aim-error misses — neither blocked nor out of range) |
-| Direct | `direct` | int (rl/gl) — projectiles that TOUCHED a player, KTX's own rl/gl `hits` counter. **`rl`** is the wire's splash flag (a direct `T_MissileTouch` writes an unflagged row), so it is a subset of `hits` and `direct+splash+missed == shots`. **`gl`** cannot be — every gl row on the wire is splash-flagged (`GrenadeTouch` → `T_RadiusDamage`) — and is the flight-geometry classifier's count instead (`damagerecon/direct.go`, v75), bounded by the FIRES rather than by `hits`: it may exceed `hits` where a touch's fire went unlinked, and is then **absent together with `splash`** on a parse without the spatial shot streams. Measured against the verbatim KTX block on 186 archive demos: `rl` 99.8% of 632 player rows exact / 0.02% aggregate, `gl` 92.0% of 424 / 3.79% |
-| Splash | `splash` | int (rl/gl) — linked hits that were splash-only; for `gl` the floor-at-zero remainder `hits − direct` |
+| Direct | `direct` | ***int** (rl/gl, omitempty) — projectiles that TOUCHED a player, KTX's own rl/gl `hits` counter. **`rl`** is the wire's splash flag (a direct `T_MissileTouch` writes an unflagged row), so it is a subset of `hits` and `direct+splash+missed == shots`. **`gl`** cannot be — every gl row on the wire is splash-flagged (`GrenadeTouch` → `T_RadiusDamage`) — and is the flight-geometry classifier's count instead (`damagerecon/direct.go`, v75), bounded by the FIRES rather than by `hits`: it may exceed `hits` where a touch's fire went unlinked. **ABSENT IS NOT ZERO** — see the note under the table. Measured against the verbatim KTX block on 186 archive demos: `rl` 99.8% of 632 player rows exact / 0.02% aggregate, `gl` 92.0% of 424 / 3.79% |
+| Splash | `splash` | ***int** (rl/gl, omitempty) — linked hits that were splash-only; for `gl` the floor-at-zero remainder `hits − direct`. Emitted and withheld together with `direct` |
 | Missed | `missed` | int (rl/gl) — fires that linked to no impact |
 | Blocked | `blocked` | int (lg) — the missed beam stopped short on geometry and its extension to the ~600u max range crosses a live enemy's collision hull (32×32×56 box at the enemy's tracked position): on target and in range, the obstruction denied a would-be hit |
 | OutOfRange | `outOfRange` | int (lg) — the missed beam ran its full ~600u max length and its extension to infinity crosses a live enemy's collision hull: on target, the enemy was beyond reach |
@@ -965,11 +965,31 @@ flight-geometry touch classifier for `gl`, whose touch the wire never records
 
 For LG, `Hits + Blocked + Miss + OutOfRange + Unresolved == Shots`.
 
+**`direct` / `splash`: absent is not zero.** These two are the only aim
+counters carried as POINTERS (`*int`), because for them a zero is a claim.
+They are emitted together, exactly when the split RAN for that weapon:
+
+- **present, including `0`** — classified, and this player's projectiles
+  touched nobody (or none of his hits were splash-only);
+- **absent** — the fires were never classified. Two reachable causes: `gl` on
+  a parse that built no spatial shot streams (the touch classifier's own
+  input — mvd-api and the WASM build always request them, a bare
+  `qw-analyze` parse does not), and `rl`/`gl` on a demo where the linker
+  resolved no rl/gl fire at all (where `hits` is 0 too, so a `direct` of 0
+  would be indistinguishable from a measurement).
+
+Consumers must render an absent value as withheld, never as 0 — and must not
+substitute a global flag for the row's own presence.
+`playerStats.accuracy.byWeapon[rl|gl]` is derived from exactly this signal:
+an absent `direct` is what makes that row fall back to the any-path count
+with `hitsConvention: "anyDamage"`. `missed` does NOT ride the split — it is
+`shots − hits`, which the linker answers on its own.
+
 The pellet stats need the KTX damage stream; the RL/GL direct/splash split
 needs projectile linking, which runs on every parse (the block appears
 whenever any rl/gl fire linked to its flight — no opt-in required); the LG
 miss split needs the opt-in `Streams.Beams`. Absent inputs simply leave
-those fields zero.
+those fields zero (or, for `direct`/`splash`, absent).
 
 ### WeaponAimRecon
 
@@ -1088,9 +1108,10 @@ question?".
 
 One victim-class slice (enemy / team / self) of a weapon's hit counters —
 same semantics as the `WeaponAim` fields of the same names, restricted to
-that bucket's victims (`hits`, `pelletHits`, `full`, `partial`, `miss`,
-`direct`; all int, omitempty). A multi-victim fire counts in every bucket it
-has a victim in.
+that bucket's victims (`hits`, `pelletHits`, `full`, `partial`, `miss`, all
+int omitempty, plus `direct`, `*int` omitempty like its top-level twin —
+absent means the split never ran, not zero). A multi-victim fire counts in
+every bucket it has a victim in.
 
 **Emission rules** (consumers must match them): `team`/`self` appear iff the
 weapon had ≥1 team-/self-victim hit; `enemy` appears iff `team` or `self`
@@ -1101,13 +1122,17 @@ Not split: `shots`, `pellets` and the LG miss classes
 (`blocked`/`miss`/`outOfRange`/`unresolved`) — misses have no victim (the
 miss heuristic targets enemies by construction; note the lg `miss` shares
 its field with the pellet `miss`, which *is* split). Derivable per bucket:
-`splash = hits − direct`, `missed = shots − hits`.
+`splash = hits − direct` (only where `direct` is present — an absent one
+leaves the bucket's splash unanswerable, exactly as at the top level),
+`missed = shots − hits`.
 
 The SG/SSG per-fire split is exact per fire except when the per-fire pellet
 clamp triggers (e.g. quad-multiplied damage), where the enemy/team
 allocation within that fire is approximate. Self hits are always splash (a
-missile cannot collide with its owner), so a `self` split never sets
-`direct` and never has pellet counters (hitscan cannot self-hit).
+missile cannot collide with its owner), so a `self` split's `direct` is a
+certain `0` wherever the split ran — both touch handlers return on
+`other == owner` (`ktx/src/weapons.c:954`, `:1317`) — and it never has pellet
+counters (hitscan cannot self-hit).
 
 ## MessagesResult (`messages`)
 

@@ -539,7 +539,12 @@ recovered hit count is published separately as
 and never merged into `hits`. Start with
 `players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
 full/partial/miss fires, RL/GL direct/splash/missed, the LG
-miss/blocked/out-of-range whiff split); the
+miss/blocked/out-of-range whiff split). RL/GL `direct` and `splash` are
+emitted together and **absent means "not classified", never zero** — a
+present `0` is a measured "touched nobody", while an absence (a payload
+parsed without the projectile streams the GL touch classifier reads, or
+a demo whose linker resolved no RL/GL fire at all) must be rendered as
+withheld; the
 columnar `crosshair` (per-hitscan-fire angular error, normalized so ±1 =
 the hitbox edge, with hit + attributed target) and `lgRamp` (per-LG-cell
 hit vs ms since the shaft opened) blocks are large — reach for them only

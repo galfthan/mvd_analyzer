@@ -149,6 +149,12 @@ type LGRampSamples struct {
 //     fire linked to its flight (absent only when nothing linked — e.g.
 //     non-KTX demos).
 //
+//     Direct and Splash are POINTERS for that reason: nil is "not
+//     classified", a present zero is a measured "touched nobody". The two
+//     are different claims and a consumer reading a bare 0 could not tell
+//     them apart — the row's own presence is the signal, not a global latch
+//     somewhere else in the Result.
+//
 //     The two weapons reach Direct from DIFFERENT evidence, and it matters
 //     to a reader of the number. rl's is the wire's own splash flag: a direct
 //     T_MissileTouch writes its damage as an unflagged row, dmg_is_splash
@@ -217,11 +223,22 @@ type WeaponAim struct {
 	// comment before comparing a gl Direct with an rl one: rl's comes off the
 	// wire's splash flag and partitions its fires with Splash/Missed, gl's
 	// comes off the flight-geometry classifier and is bounded by the fires
-	// alone — and is absent, together with gl's Splash, on a parse that built
-	// no spatial shot streams.
-	Direct int `json:"direct,omitempty"`
-	Splash int `json:"splash,omitempty"`
-	Missed int `json:"missed,omitempty"`
+	// alone.
+	//
+	// NIL IS NOT ZERO. Both are set together, exactly when the split RAN for
+	// this weapon, and are nil when it did not — so nil means "this parse did
+	// not classify these fires" and a present 0 means "classified, and none
+	// of them touched / none of the hits were splash-only". Two reachable nil
+	// cases, and a consumer must render them as withheld rather than as a
+	// zero: gl on a parse that built no spatial shot streams (the classifier's
+	// own input — mvd-api and the WASM build always request them, a bare
+	// qw-analyze parse does not), and rl or gl on a demo where the linker
+	// resolved no rl/gl fire at all, where Hits is likewise 0 and a Direct of
+	// 0 would be indistinguishable from a measurement. Missed does NOT ride
+	// the split: it is shots − hits, which the linker answers on its own.
+	Direct *int `json:"direct,omitempty"`
+	Splash *int `json:"splash,omitempty"`
+	Missed int  `json:"missed,omitempty"`
 
 	Blocked    int `json:"blocked,omitempty"`
 	OutOfRange int `json:"outOfRange,omitempty"`
@@ -342,13 +359,19 @@ type WeaponAimRecon struct {
 // fire is approximate — the estimator divides the fire's damage sum by the 4
 // a pellet does (16 under the shooter's quad) and cannot tell a saturating
 // fire's victims apart any finer. Self hits are
-// always splash (a missile cannot collide with its owner), so a Self split
-// never sets Direct and never has pellet counters (hitscan cannot self-hit).
+// always splash (a missile cannot collide with its owner), so a Self split's
+// Direct is a certain zero and it never has pellet counters (hitscan cannot
+// self-hit).
 type WeaponAimSplit struct {
 	Hits       int `json:"hits,omitempty"`
 	PelletHits int `json:"pelletHits,omitempty"`
 	Full       int `json:"full,omitempty"`
 	Partial    int `json:"partial,omitempty"`
 	Miss       int `json:"miss,omitempty"`
-	Direct     int `json:"direct,omitempty"`
+	// Direct carries WeaponAim.Direct's nil-is-not-zero rule into the bucket:
+	// nil where the split did not run for this weapon, a present 0 where it
+	// ran and this bucket's victims were all reached by splash. The consumer
+	// derives the bucket's splash as hits − direct, which nil forbids and 0
+	// permits.
+	Direct *int `json:"direct,omitempty"`
 }

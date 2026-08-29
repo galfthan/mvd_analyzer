@@ -999,6 +999,11 @@ func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
 	}
 }
 
+// iptr builds the *int a WeaponAim direct/splash counter is: nil means the
+// split never ran, a pointer to 0 means it ran and counted none
+// (result.WeaponAim).
+func iptr(v int) *int { return &v }
+
 // The wire-linked tier publishes KTX'S convention per weapon (schema v75),
 // read out of the aim section: pellets on both sides for sg/ssg, the
 // direct-impact count for rl and gl. gl's is the only one that can be
@@ -1006,7 +1011,8 @@ func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
 // (ktx/src/weapons.c:1331 → GrenadeExplode → T_RadiusDamage, combat.c:1207),
 // so aim reaches it through the flight-geometry classifier and withholds the
 // split where the spatial shot streams that classifier reads were never built.
-// This fixture has none, so gl keeps the any-path count and says so.
+// This fixture's gl row is that withhold — a NIL Direct, which is the whole
+// signal this function reads — so gl keeps the any-path count and says so.
 func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a",
@@ -1025,8 +1031,8 @@ func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 			HitsSource:   result.AimHitsSourceKTX,
 			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
 				{Weapon: "sg", Shots: 100, Hits: 60, Pellets: 600, PelletHits: 214},
-				{Weapon: "rl", Shots: 50, Hits: 30, Direct: 7, Splash: 23, Missed: 20},
-				{Weapon: "gl", Shots: 20, Hits: 9, Direct: 0, Splash: 9, Missed: 11},
+				{Weapon: "rl", Shots: 50, Hits: 30, Direct: iptr(7), Splash: iptr(23), Missed: 20},
+				{Weapon: "gl", Shots: 20, Hits: 9, Missed: 11}, // split withheld: no shot streams
 				{Weapon: "lg", Shots: 400, Hits: 122},
 			}}},
 		},
@@ -1054,29 +1060,28 @@ func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 
 	// With the spatial shot streams built — what mvd-api and the WASM build
 	// always parse with — aim's gl Direct IS the touch classifier's count and
-	// the row goes on KTX's scale like rl's. Same aim section, same 3, one
-	// latch apart: Streams.ShotStreamsComputed, read exactly the way
-	// Streams.NailsComputed is.
-	res.Aim.Players[0].Weapons[2].Direct = 3
-	res.Aim.Players[0].Weapons[2].Splash = 6
-	res.Streams = &result.Streams{ShotStreamsComputed: true}
+	// the row goes on KTX's scale like rl's. Same aim section, one PRESENT
+	// Direct apart: nothing outside the row is consulted, so this function
+	// cannot drift from the condition aim actually withheld on.
+	res.Aim.Players[0].Weapons[2].Direct = iptr(3)
+	res.Aim.Players[0].Weapons[2].Splash = iptr(6)
 	acc = deriveAccuracy(res, "a", nil, deriveMeasuredAcc(res))
 	if gl := acc.ByWeapon["gl"]; gl.Attacks != 20 || gl.Hits == nil || *gl.Hits != 3 || gl.HitsConvention != result.HitsDirectImpact {
 		t.Errorf("gl = %+v, want 20 fires / 3 touches / %q", gl, result.HitsDirectImpact)
 	}
 }
 
-// A demo where NO rocket landed damage at all: aim's direct/splash split
-// never ran, so Direct+Splash+Missed is 0 against 40 fires. That is not a
-// withhold — under the wire-damage gate Direct counts the player's non-splash
-// rl damage rows and there are none, which is exactly "touched nobody". The
-// row must publish the measured 0 on KTX's directImpact scale, NOT fall back
-// to the any-path count and take the consumers' off-scale mark.
+// A player who fired forty rockets and touched nobody, on a demo where the
+// split DID run (Direct present and 0): that is a measurement, not a
+// withhold, and the row must publish the 0 on KTX's directImpact scale rather
+// than fall back to the any-path count and take the consumers' off-scale
+// mark. The contrast is the second half: the same fixture with a NIL Direct —
+// aim's split never ran — where falling back is the honest answer, and the
+// two are indistinguishable to any consumer that reads a bare int.
 //
-// sg in the same fixture is the contrast: a zero PELLETS is the pellet split
-// genuinely withheld (there is no such thing as a fired shotgun with no
-// pellets), and dividing a pellet-hit count by no pellets is the one case
-// that does fall back.
+// sg in the same fixture is the third shape: a zero PELLETS is the pellet
+// split genuinely withheld (there is no such thing as a fired shotgun with no
+// pellets), and dividing a pellet-hit count by no pellets is what falls back.
 func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a",
@@ -1092,7 +1097,8 @@ func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 			HitsMeasured: true,
 			HitsSource:   result.AimHitsSourceKTX,
 			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
-				{Weapon: "rl", Shots: 40, Hits: 0}, // no rl damage anywhere: split unrun
+				// The split ran and this player touched nobody: a measured 0.
+				{Weapon: "rl", Shots: 40, Hits: 0, Direct: iptr(0), Splash: iptr(0), Missed: 40},
 				{Weapon: "sg", Shots: 30, Hits: 9}, // pellet split withheld
 			}}},
 		},
@@ -1107,6 +1113,18 @@ func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 	if sg.Attacks != 30 || sg.Hits == nil || *sg.Hits != 9 || sg.HitsConvention != result.HitsAnyDamage {
 		t.Errorf("sg = %+v, want the fire-count fallback (30 / 9 / %q) with no pellet split",
 			sg, result.HitsAnyDamage)
+	}
+
+	// Same 0 fires, same 0 hits, NIL Direct: aim's split never ran (no rl/gl
+	// fire linked anywhere in the demo), so there is no touch count to
+	// publish and the row falls back with its convention stated. Only the
+	// pointer separates this from the measured 0 above.
+	res.Aim.Players[0].Weapons[0].Direct = nil
+	res.Aim.Players[0].Weapons[0].Splash = nil
+	acc = deriveAccuracy(res, "a", nil, deriveMeasuredAcc(res))
+	if rl := acc.ByWeapon["rl"]; rl.Attacks != 40 || rl.Hits == nil || *rl.Hits != 0 || rl.HitsConvention != result.HitsAnyDamage {
+		t.Errorf("rl = %+v, want the any-path fallback (40 / 0 / %q) — the split never ran",
+			rl, result.HitsAnyDamage)
 	}
 
 	// And on a reconstructed demo the map stays out of it entirely: the recon

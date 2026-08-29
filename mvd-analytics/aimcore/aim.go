@@ -579,6 +579,12 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 	// (glTouchesKnown false) gl's split is WITHHELD — a near-zero Direct and
 	// a Splash equal to Hits would be the splash flag answering rl's
 	// question in gl's row. Missed does not ride the split and is kept.
+	//
+	// Withheld means NIL, not zero: Direct and Splash are pointers precisely
+	// so this branch and a classified "touched nobody" are different wire
+	// shapes (result.WeaponAim). Both nil cases are here — the whole `if`
+	// below (no rl/gl fire linked anywhere, so Hits is 0 and a Direct of 0
+	// would claim a measurement) and the gl `continue` inside it.
 	if projLinked {
 		for _, wn := range []string{"rl", "gl"} {
 			wa := wagg[wn]
@@ -620,14 +626,15 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 			if direct > bound {
 				direct = bound
 			}
-			wa.Direct = direct
+			wa.Direct = &direct
 			// Splash is the fires that connected WITHOUT touching, so it
 			// floors at zero rather than going negative on the gl rows where
 			// the touch count runs above the linked hits.
-			wa.Splash = wa.Hits - direct
-			if wa.Splash < 0 {
-				wa.Splash = 0
+			splash := wa.Hits - direct
+			if splash < 0 {
+				splash = 0
 			}
+			wa.Splash = &splash
 			wa.Missed = wa.Shots - wa.Hits
 			sp := getS(wn)
 			// The per-class split follows the same rule as its total: capped
@@ -641,8 +648,16 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 					directT = sp.team.Hits
 				}
 			}
-			sp.enemy.Direct = directE
-			sp.team.Direct = directT
+			sp.enemy.Direct = &directE
+			sp.team.Direct = &directT
+			// The self bucket's direct is a CERTAIN zero, not a withheld one:
+			// both touch handlers return on `other == owner`
+			// (ktx/src/weapons.c:954, :1317), so a missile cannot touch the
+			// player who fired it and every self hit is splash. Setting it
+			// keeps the bucket's splash = hits − direct derivable, which nil
+			// would forbid.
+			zero := 0
+			sp.self.Direct = &zero
 		}
 	}
 

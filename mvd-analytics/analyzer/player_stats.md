@@ -182,9 +182,12 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   hull and the 2.5 s fuse, by the same classifier a reconstructed row
   uses (`damagerecon/direct.go`, fed the wire rows by
   `damagerecon.WireDirectTouches`) — which is why it is CONDITIONAL on
-  the spatial shot streams (`Streams.ShotStreamsComputed`, read exactly
-  as `Streams.NailsComputed` is): without them the row falls back to the
-  any-path count and says `anyDamage`. `sg`/`ssg` keep `anyDamage` on a
+  the spatial shot streams (`Registry.BuildShotStreams`): without them
+  the row falls back to the any-path count and says `anyDamage`. The
+  condition is read off the AIM ROW ITSELF — `WeaponAim.Direct` is an
+  `*int` and is nil exactly where the split did not run — not re-derived
+  from `Streams.ShotStreamsComputed`, so the two cannot disagree about
+  what was measured. `sg`/`ssg` keep `anyDamage` on a
   RECONSTRUCTED row for the mirror reason to gl's wire problem: a
   reconstructed delta merges every hit on one instant, so its magnitude
   cannot be split into pellets (`result.WeaponAimRecon`). `ng`/`sng` are

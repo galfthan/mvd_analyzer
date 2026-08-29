@@ -874,17 +874,19 @@ type reconHit struct {
 // rows by damagerecon.WireDirectTouches): the grenade's broadcast detonation
 // point against the victim's hull, minus the grenades whose flight spanned
 // the whole 2.5 s fuse and therefore died of it rather than of a touch
-// (weapons.c:1434). That is era-independent evidence, so it answers the
+// (weapons.c:1430). That is era-independent evidence, so it answers the
 // question on a modern demo exactly as it does on an old one, and gl
 // publishes HitsDirectImpact like rl.
 //
 // The classifier needs the spatial shot streams (Registry.BuildShotStreams —
 // mvd-api and the WASM build always request them, a bare qw-analyze parse
-// does not), which is what glTouches gates on: the same latch, read the same
-// way, as nailsTracked in deriveAccuracy. Without them there is no
-// measurement, and the row falls back to the caller's any-path count
-// honestly labelled HitsAnyDamage rather than to a fabricated near-zero
-// claiming to be KTX's number.
+// does not). Without them there is no measurement, and aim says so by leaving
+// the gl row's Direct NIL (result.WeaponAim), which is the one thing gated on
+// here: this function reads the row's own presence rather than re-deriving
+// the condition from Streams.ShotStreamsComputed, so the two cannot drift.
+// A nil row falls back to the caller's any-path count honestly labelled
+// HitsAnyDamage rather than to a fabricated near-zero claiming to be KTX's
+// number.
 //
 // Measured against the verbatim block, gl at 92.0% of 424 archive rows exact
 // and 3.79% aggregate, bias −0.07 per row — above the reconstructed tier
@@ -918,14 +920,6 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 	if res.Aim == nil || !res.Aim.HitsMeasured {
 		return nil
 	}
-	// The gl touch classifier's own input: the spatial shot streams carry
-	// the grenade flights and TE_EXPLOSION points its geometry is read from
-	// (damagerecon.WireDirectTouches). Streams.ShotStreamsComputed is the
-	// pipeline's truthful latch for "they were built", the same shape as
-	// Streams.NailsComputed — and aim withholds gl's direct/splash split
-	// under exactly this condition, so reading Direct without it would
-	// publish a withheld 0 as a measurement.
-	glTouches := res.Streams != nil && res.Streams.ShotStreamsComputed
 	out := map[string]map[string]measuredAcc{}
 	for i := range res.Aim.Players {
 		pa := &res.Aim.Players[i]
@@ -943,41 +937,30 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 					continue
 				}
 				m = measuredAcc{attacks: w.Pellets, hits: w.PelletHits, convention: result.HitsPellets}
-			case "rl":
-				// Gated SECTION-WIDE, on the wire damage stream — aimcore's
-				// `hitsMeasured`, this function's entry condition and
-				// deriveAccuracy's `linkable` are one predicate — and not per
-				// row. Under it Direct is the count of the player's non-splash
-				// rl damage rows, so 0 is the measured "touched nobody",
-				// including on a demo where no rocket landed damage at all and
-				// aim's direct/splash split therefore never ran: every rl row
-				// there is honestly 0/N rather than falling back to the
-				// any-path count and taking the consumers' off-scale mark.
+			case "rl", "gl":
+				// One branch, one gate: the ROW's own Direct. It is a pointer
+				// exactly so this read can tell a classified "touched nobody"
+				// (a present 0) from a split that never ran (nil), which is
+				// what a withheld gl looks like on a parse with no spatial
+				// shot streams — the touch classifier's own input, and the
+				// only reachable difference between the two weapons here. On
+				// nil the row is left out and the caller falls back to its
+				// any-path count with the convention stated, rather than
+				// publishing a withheld 0 as KTX's number.
 				//
-				// The guarantee is NOT per-rocket, and no per-row test can
-				// make it one. What the count is exposed to is the LINKER: a
-				// rocket that touched somebody but whose damage row the
-				// fire→damage join did not reach leaves no direct row and
-				// reads as a miss (and a demo where the join resolved no rl
-				// fire at all leaves the whole split unrun, i.e. 0). That is
-				// the same exposure the pre-v75 any-path count always had, and
-				// it is measured rather than assumed: acc.rl.hits/measured
-				// reproduces the verbatim KTX block on 99.8% of 632 archive
-				// rows at 0.02% aggregate (damagerecon/ACCURACY.md).
-				m = measuredAcc{hits: w.Direct, convention: result.HitsDirectImpact}
-			case "gl":
-				// Same field, same convention, DIFFERENT evidence — and the
-				// only row here that can be unmeasurable. Aim's gl Direct is
-				// the flight-geometry touch classifier's count, not the
-				// splash flag's (see the function comment); where the streams
-				// it reads were never built aim publishes no split at all, and
-				// this row must be absent so the caller falls back to the
-				// any-path count with its convention stated rather than
-				// reading a withheld 0 as "touched nobody".
-				if !glTouches {
+				// The guarantee is NOT per-projectile, and no per-row test
+				// can make it one. What a present count is exposed to is the
+				// LINKER: a rocket that touched somebody but whose damage row
+				// the fire→damage join did not reach leaves no direct row and
+				// reads as a miss. That is the same exposure the pre-v75
+				// any-path count always had, and it is measured rather than
+				// assumed — against the verbatim KTX block, rl 99.8% of 632
+				// archive rows exact at 0.02% aggregate and gl 92.0% of 424
+				// at 3.79% (damagerecon/ACCURACY.md).
+				if w.Direct == nil {
 					continue
 				}
-				m = measuredAcc{hits: w.Direct, convention: result.HitsDirectImpact}
+				m = measuredAcc{hits: *w.Direct, convention: result.HitsDirectImpact}
 			default:
 				continue
 			}

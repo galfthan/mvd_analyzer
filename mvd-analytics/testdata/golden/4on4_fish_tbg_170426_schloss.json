@@ -3412,11 +3412,13 @@
             "hits": 105,
             "missed": 67,
             "self": {
+              "direct": 0,
               "hits": 17
             },
             "shots": 172,
             "splash": 81,
             "team": {
+              "direct": 0,
               "hits": 11
             },
             "weapon": "rl"
@@ -7293,6 +7295,7 @@
             "hits": 36,
             "missed": 39,
             "self": {
+              "direct": 0,
               "hits": 3
             },
             "shots": 75,
@@ -10855,6 +10858,7 @@
             "hits": 61,
             "missed": 60,
             "self": {
+              "direct": 0,
               "hits": 14
             },
             "shots": 121,
@@ -16156,11 +16160,13 @@
             "hits": 84,
             "missed": 54,
             "self": {
+              "direct": 0,
               "hits": 3
             },
             "shots": 138,
             "splash": 60,
             "team": {
+              "direct": 0,
               "hits": 8
             },
             "weapon": "rl"
@@ -21083,11 +21089,13 @@
             "hits": 49,
             "missed": 33,
             "self": {
+              "direct": 0,
               "hits": 8
             },
             "shots": 82,
             "splash": 40,
             "team": {
+              "direct": 0,
               "hits": 4
             },
             "weapon": "rl"
@@ -23786,6 +23794,7 @@
             "hits": 105,
             "missed": 88,
             "self": {
+              "direct": 0,
               "hits": 15
             },
             "shots": 193,
@@ -29323,11 +29332,13 @@
             "hits": 47,
             "missed": 33,
             "self": {
+              "direct": 0,
               "hits": 7
             },
             "shots": 80,
             "splash": 40,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -32583,11 +32594,13 @@
             "hits": 76,
             "missed": 53,
             "self": {
+              "direct": 0,
               "hits": 14
             },
             "shots": 129,
             "splash": 58,
             "team": {
+              "direct": 0,
               "hits": 7
             },
             "weapon": "rl"

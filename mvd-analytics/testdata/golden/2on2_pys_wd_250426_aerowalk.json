@@ -3081,6 +3081,7 @@
             "hits": 99,
             "missed": 127,
             "self": {
+              "direct": 0,
               "hits": 21
             },
             "shots": 226,
@@ -6300,6 +6301,7 @@
             "hits": 60,
             "missed": 92,
             "self": {
+              "direct": 0,
               "hits": 12
             },
             "shots": 152,
@@ -10539,6 +10541,7 @@
             "hits": 99,
             "missed": 108,
             "self": {
+              "direct": 0,
               "hits": 34
             },
             "shots": 207,
@@ -13261,6 +13264,7 @@
             "hits": 63,
             "missed": 100,
             "self": {
+              "direct": 0,
               "hits": 2
             },
             "shots": 163,

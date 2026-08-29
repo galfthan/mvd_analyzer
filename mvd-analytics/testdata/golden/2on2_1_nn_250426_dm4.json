@@ -6612,11 +6612,13 @@
             "hits": 94,
             "missed": 102,
             "self": {
+              "direct": 0,
               "hits": 17
             },
             "shots": 196,
             "splash": 66,
             "team": {
+              "direct": 0,
               "hits": 2
             },
             "weapon": "rl"
@@ -12684,11 +12686,13 @@
             "hits": 71,
             "missed": 124,
             "self": {
+              "direct": 0,
               "hits": 13
             },
             "shots": 195,
             "splash": 54,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -21211,6 +21215,7 @@
             "hits": 38,
             "missed": 62,
             "self": {
+              "direct": 0,
               "hits": 9
             },
             "shots": 100,
@@ -26252,6 +26257,7 @@
             "hits": 74,
             "missed": 106,
             "self": {
+              "direct": 0,
               "hits": 17
             },
             "shots": 180,

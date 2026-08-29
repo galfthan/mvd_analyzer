@@ -321,10 +321,32 @@ but a bare `qw-analyze` parse does not, and there aim publishes no gl
 `direct`/`splash` at all and the accuracy row falls back to `anyDamage` with
 the `≠` mark rather than passing a withheld 0 off as "touched nobody".
 
+**RETYPED so that withhold is visible in the JSON:**
+`aim.players[].weapons[].direct` and `.splash` (and the same `direct` inside
+the `enemy` / `team` / `self` buckets) are now **`*int`** rather than `int`.
+With `omitempty` on a plain int the two states were one wire shape — a row
+that measured zero touches omitted `direct` exactly as a withheld row did,
+and a consumer could only tell them apart by reaching for a global latch
+elsewhere in the Result. Now the pair is emitted together whenever the split
+RAN, so a present `0` is a measured "touched nobody" and an absence means
+"never classified"; `playerStats.accuracy.byWeapon[rl|gl]` is derived from
+that presence rather than from `Streams.ShotStreamsComputed`, which removes
+the duplicated gate that could drift. Consumers must render an absence as
+withheld, never as 0 — the web UI's Aim tab now shows "—" for it. A demo
+where the linker resolved no rl/gl fire at all withholds `rl` too (its `hits`
+is 0 there as well, so a `direct` of 0 would claim a measurement nothing
+made); such a row falls back to the any-path count with the `≠` mark.
+Schema stays **v75** — this shape has not shipped.
+
 With `gl` on KTX's scale, the Summary tab's `≠` mark — which used to sit on
-four weapons of every derived row — no longer appears on a derived row at
-all. The one cell that still wears it is `sg`/`ssg` on a RECONSTRUCTED row,
-where the pellet split genuinely cannot be recovered.
+four weapons of every derived row — no longer appears on a derived row this
+build produces. Two cells can still wear it: `sg`/`ssg` on a RECONSTRUCTED
+row, where the pellet split genuinely cannot be recovered, and `rl`/`gl` on
+a derived row whose direct/splash split never ran (an imported payload
+parsed without the projectile streams). They are marked for DIFFERENT
+reasons — pellets vs touches — so the mark's tooltip is now built per weapon
+from the row's own `hitsConvention` and the server's for that weapon,
+instead of stating the shotgun reason over every marked cell.
 
 **One honest withhold, named rather than papered over.**
 

@@ -1286,6 +1286,16 @@ function ktxHitsConvention(weapon) {
 //     so dividing its magnitude would credit one shooter with another's
 //     pellets. (Its rl/gl publish KTX's direct-impact count, schema v74.)
 //
+//   - RL/GL on a DERIVED row whose direct/splash split never ran — a payload
+//     parsed without the spatial projectile streams (gl, whose touch
+//     classifier reads them) or one where the linker resolved no rl/gl fire
+//     at all. The row falls back to the any-path count, which is a DIFFERENT
+//     quantity from KTX's touch count and about 4x larger on rl.
+//
+// So the mark's explanation is per weapon, not one sentence: what the
+// server's own counter counts differs between the two families above, and a
+// note that named only pellets would be false on every rl/gl cell wearing it.
+//
 // GL on a DERIVED (wire-linked) row wore the mark until v75 and no longer
 // does. The wire log genuinely holds no record of a grenade touch — the touch
 // detonates the grenade and every row the server then writes is flagged splash
@@ -1296,13 +1306,31 @@ function ktxHitsConvention(weapon) {
 // reads, so a gl cell here is always on KTX's scale; a payload from a parse
 // without them says so in `hitsConvention` and is marked like any other cell.
 const ACC_OFF_SCALE_MARK = '≠';
-const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG). ' +
-    'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+// What one hit COUNTS under each convention, in the reader's terms. Both
+// halves of the mark's sentence are looked up here — ours from the row's own
+// `hitsConvention`, the server's from ktxHitsConvention(weapon) — so the note
+// states the actual disagreement for the actual weapon instead of naming one
+// family's.
+const HITS_CONVENTION_PHRASES = {
+    anyDamage: 'any fire that landed damage, splash included',
+    directImpact: 'only a projectile that TOUCHED a player',
+    pellets: 'a PELLET (6 per SG fire, 14 per SSG), on both sides of the ratio',
+};
+function accOffScaleNote(entry, wn) {
+    const ours = HITS_CONVENTION_PHRASES[entry.hitsConvention];
+    const theirs = HITS_CONVENTION_PHRASES[ktxHitsConvention(wn)];
+    const what = (ours && theirs) ? `a hit here is ${ours}, where KTX counts ${theirs}. ` : '';
+    return 'Not on the server\'s own scale for this weapon: ' + what +
+        'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+}
 // The same statement as the table's footnote, which is where a reader who
-// cannot hover — anyone looking at a screenshot of this panel — meets it.
-const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG). ' +
+// cannot hover — anyone looking at a screenshot of this panel — meets it. One
+// line stands under a table of several weapons, so it names both scales the
+// mark can be measured against rather than one, and sends the reader to the
+// cell for which of them applies.
+const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon ` +
+    '(hover the cell for which): KTX counts PELLETS on SG/SSG and only projectiles that TOUCHED a player on RL/GL, ' +
+    'where a marked figure counts fires that landed damage by any path. ' +
     'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
 
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
@@ -1347,7 +1375,7 @@ function formatAccuracyCell(accuracy, wn) {
     const notes = [];
     if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
     const offScale = accOffKtxScale(entry, wn);
-    if (offScale) notes.push(ACC_OFF_SCALE_NOTE);
+    if (offScale) notes.push(accOffScaleNote(entry, wn));
     const recon = accuracy.src === 'reconstructed';
     if (recon) notes.push(RECON_ACCURACY_NOTE);
     const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
@@ -12432,6 +12460,28 @@ function renderAimMode(pa) {
 const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
 const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
+
+// The RL/GL direct/splash pair is withheld PER ROW, not per demo — the one
+// measured-only column that is, which is why it cannot ride aimCol's
+// whole-demo swap below. The analyzer publishes it as a nullable field
+// (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none),
+// and the only case a reader of this UI can hit is a payload from a parse
+// that built no spatial shot streams — the grenade-touch classifier's own
+// input. This build always requests them, so the cell is a "—" for an
+// imported Result, never for a demo analysed here. Rendering the null as 0
+// would publish "no rocket or grenade ever touched anybody" as a measurement.
+const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: the direct/splash split needs ' +
+    'the spatial projectile streams (a grenade touch leaves no trace in the wire damage log, ' +
+    'so the touch is re-derived from the flight), and this Result was produced without them. ' +
+    'Not a zero — the fires were simply never classified.';
+function aimSplitCell(v, fmt) {
+    if (v === null || v === undefined) {
+        return `<span class="aim-na" title="${escapeHtml(AIM_SPLIT_WITHHELD_NOTE)}">—</span>`;
+    }
+    return fmt(v);
+}
+const aimSplitSort = v => (v === null || v === undefined) ? -1 : v;
+
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: {
@@ -12471,11 +12521,24 @@ const AIM_COL = {
     fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
     partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
     missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Projectiles that TOUCHED a player — KTX\'s own RL/GL hits counter. RL is the server\'s own flag; GL is re-derived from the grenade\'s flight and its 2.5s fuse, since a grenade that touches explodes and every row of its damage is flagged splash (92% of archive player rows exact against the KTX block). A GL Direct can exceed its Hits: a touch whose fire the linker missed is still a touch', measured: true, cell: w => w.direct || 0 },
-    splash: { h: 'Splash', t: 'Hits from splash only', measured: true, cell: w => w.splash || 0 },
+    direct: {
+        h: 'Direct',
+        t: 'Projectiles that TOUCHED a player — KTX\'s own RL/GL hits counter. RL is the server\'s own flag; GL is re-derived from the grenade\'s flight and its 2.5s fuse, since a grenade that touches explodes and every row of its damage is flagged splash (92% of archive player rows exact against the KTX block). A GL Direct can exceed its Hits: a touch whose fire the linker missed is still a touch',
+        measured: true, cell: w => aimSplitCell(w.direct, n => String(n)), sort: w => aimSplitSort(w.direct),
+    },
+    splash: {
+        h: 'Splash', t: 'Hits from splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => String(n)), sort: w => aimSplitSort(w.splash),
+    },
     missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
-    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', measured: true, cell: w => shotShare(w.direct, w) },
-    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', measured: true, cell: w => shotShare(w.splash, w) },
+    directPct: {
+        h: 'Direct %', t: 'Share of fires that hit directly',
+        measured: true, cell: w => aimSplitCell(w.direct, n => shotShare(n, w)), sort: w => aimSplitSort(w.direct),
+    },
+    splashPct: {
+        h: 'Splash %', t: 'Share of fires that hit via splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => shotShare(n, w)), sort: w => aimSplitSort(w.splash),
+    },
     missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', measured: true, cell: w => shotShare(w.missed, w) },
     blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', measured: true, cell: w => w.blocked || 0 },
     lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', measured: true, cell: w => w.miss || 0 },
@@ -12562,7 +12625,16 @@ function aimWeaponView(w) {
     if (aimVictimFilter === 'enemy' && !w.enemy) return { ...w, recon: null };
     const s = (aimVictimFilter === 'enemy' ? w.enemy
         : aimVictimFilter === 'team' ? w.team : w.self) || {};
-    const hits = s.hits || 0, direct = s.direct || 0;
+    // The bucket's direct carries the same nil-is-not-zero rule as the
+    // top-level one, and the derived splash rides on it: with no classified
+    // direct there is no "hits that were splash-only" either, so both stay
+    // null and both cells say withheld. An ABSENT bucket is not the same
+    // absence — it means that victim class never connected, i.e. zeros — so
+    // it reads 0 wherever the weapon's split ran at all, and only inherits
+    // the withhold when it did not.
+    const hits = s.hits || 0;
+    const classified = w.direct !== null && w.direct !== undefined;
+    const direct = ('direct' in s) ? s.direct : (classified ? 0 : null);
     return {
         // The recon tier is a single whole-match hit count with no victim
         // splits (RESULT_SCHEMA, WeaponAimRecon), so it cannot ride a
@@ -12573,7 +12645,7 @@ function aimWeaponView(w) {
         pelletHits: s.pelletHits || 0,
         full: s.full || 0, partial: s.partial || 0,
         miss: w.weapon === 'lg' ? (w.miss || 0) : (s.miss || 0),
-        splash: Math.max(0, hits - direct),
+        splash: direct === null ? null : Math.max(0, hits - direct),
         missed: (w.shots || 0) - hits,
     };
 }
