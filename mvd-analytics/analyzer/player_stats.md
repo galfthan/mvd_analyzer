@@ -158,31 +158,39 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   (v75) a nailgun row on a parse without `-include nails`, the only way
   a nail fire links to its damage — since a zero there would read as
   "shot and never hit".
-- **Both tiers now answer KTX's question on most weapons — the two that
-  cannot are named.** Every weapon carrying `hits` also carries
+- **Both tiers now answer KTX's question on every weapon but one, and
+  that one is named.** Every weapon carrying `hits` also carries
   `hitsConvention` (`anyDamage` | `directImpact` | `pellets`), per
   weapon, because one `src: "ktx"` row uses all three at once (v74). v74
   put the RECONSTRUCTED tier on KTX's rl/gl direct-impact convention;
   v75 does the same for the WIRE-linked one by reading the aim section's
-  measured counters — `pellets`/`pelletHits` for sg/ssg, `direct` for rl
-  — instead of recomputing them. Measured against the verbatim block on
-  186 instrumented archive demos (`cmd/qw-demoinfo-eval`, the
+  measured counters — `pellets`/`pelletHits` for sg/ssg, `direct` for
+  rl and gl — instead of recomputing them. Measured against the verbatim
+  block on 186 instrumented archive demos (`cmd/qw-demoinfo-eval`, the
   `/measured` columns): sg/ssg `attacks` AND `hits` 100.0% row-exact at
-  0.00% aggregate on both weapons, `rl.hits` 99.8% / 0.02%. The shotgun
+  0.00% aggregate on both weapons, `rl.hits` 99.8% / 0.02%, `gl.hits`
+  92.0% / 3.79%. The shotgun
   `hits` are an estimate — a fire's same-frame damage sum over the 4 a
   pellet does, or the 16 it does under the shooter's quad — and dividing
   by the quad state at fire time is what closed their last residual.
-  `gl` keeps `anyDamage` on a wire-linked row: KTX counts a grenade that
+  `gl`'s is not a wire reading at all: KTX counts a grenade that
   TOUCHED a player (`ktx/src/weapons.c:1331`) and the touch detonates it,
   so every damage row the server writes is splash-flagged and the wire
-  holds no record of the touch at all — counting non-splash gl rows off
-  the wire reproduces 0.00% of the block's total. `sg`/`ssg` keep it on a
-  RECONSTRUCTED row for the mirror reason: a reconstructed delta merges
-  every hit on one instant, so its magnitude cannot be split into pellets
-  (`result.WeaponAimRecon`). `ng`/`sng` are on KTX's scale but the linker
-  recovers only 68-77% of the nails that connected. See
-  `damagerecon/ACCURACY.md` §"The wire-linked accuracy family vs the
-  verbatim block".
+  holds no record of the touch — counting non-splash gl rows off the wire
+  reproduces 0.00% of the block's total. The touch is re-derived from the
+  grenade's tracked flight, its detonation point against the victim's
+  hull and the 2.5 s fuse, by the same classifier a reconstructed row
+  uses (`damagerecon/direct.go`, fed the wire rows by
+  `damagerecon.WireDirectTouches`) — which is why it is CONDITIONAL on
+  the spatial shot streams (`Streams.ShotStreamsComputed`, read exactly
+  as `Streams.NailsComputed` is): without them the row falls back to the
+  any-path count and says `anyDamage`. `sg`/`ssg` keep `anyDamage` on a
+  RECONSTRUCTED row for the mirror reason to gl's wire problem: a
+  reconstructed delta merges every hit on one instant, so its magnitude
+  cannot be split into pellets (`result.WeaponAimRecon`). `ng`/`sng` are
+  on KTX's scale but the linker recovers only 68-77% of the nails that
+  connected. See `damagerecon/ACCURACY.md` §"The wire-linked accuracy
+  family vs the verbatim block".
 - **`maxSpree` inherits the kill side's residual.** The streak replay is
   exact where the underlying kill attribution is (99.6% of rows whose
   `kills` already agrees with KTX and whose player never suicided); 16 of

@@ -366,21 +366,28 @@ either way. Grade the numbers before diffing against KTX: on a
 `reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
 (1.25%, 46.5% of rows exact) and `gl` (3.55% aggregate but 89.6% of rows
 exact, one-sided by design), because since schema v74 those two publish
-KTX's OWN direct-impact count. On a `derived` family they do not — there
-`hits` counts a fire that landed damage by any path and reads ~4x higher
-on `rl`, ~1.5x on `gl`, against KTX's touch counter
-(`ktx/src/weapons.c:994`, `:1329`). `attacks` matches KTX to the row on
-every single-projectile weapon (98–100% exact).
+KTX's OWN direct-impact count. A `derived` family publishes it too since
+v75 — `rl` off the wire's own splash flag (99.8% of 632 rows exact at
+0.02%) and `gl` off the same flight-geometry classifier the
+reconstruction uses (92.0% of 424 rows at 3.79%), because the wire log
+records no grenade touch at all: the touch detonates the grenade and
+every damage row the server then writes is flagged splash. `attacks`
+matches KTX to the row on every single-projectile weapon (98–100%
+exact). The `gl` classification needs the projectile streams, which
+mvd-api always builds — a payload that lacks them says so, publishing
+`anyDamage`, which reads ~1.5x above KTX's touch counter
+(`ktx/src/weapons.c:994`, `:1329`).
 
 **`hitsConvention` is the machine-readable form of that warning**, and
 the field to gate a cross-demo comparison on — `src` states the evidence
 GRADE and says nothing about what is counted. It sits on every weapon
 that carries `hits`: `anyDamage` (a fire that landed damage by any path;
-`lg` / `ng` / `sng` / `axe` on every source, plus `gl` on a `derived`
-family — the wire cannot see the touch KTX counts there — and
-`sg` / `ssg` on a `reconstructed` one), `directImpact` (the projectile
-TOUCHED a player: KTX's `rl` / `gl`, a `reconstructed` family's `rl` /
-`gl` since v74, and a `derived` family's `rl` since v75) or `pellets`
+`lg` / `ng` / `sng` / `axe` on every source, plus `sg` / `ssg` on a
+`reconstructed` family and `gl` on a `derived` one whose parse lacked the
+projectile streams its touch classifier reads), `directImpact` (the
+projectile TOUCHED a player: KTX's `rl` / `gl`, a `reconstructed`
+family's `rl` / `gl` since v74, and a `derived` family's `rl` and `gl`
+since v75) or `pellets`
 (KTX's `sg` / `ssg` and, since v75, a `derived` family's — the one
 convention where `attacks` counts pellets too). Per WEAPON, because
 one `src: "ktx"` row uses all three at once. Two rows are comparable

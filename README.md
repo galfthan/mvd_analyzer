@@ -992,14 +992,18 @@ diff -r /tmp/before /tmp/after
    is absent on a demo whose obituaries never matched. Two things it
    does NOT claim. `maxSpree` deliberately diverges from KTX's, which
    credits a player's own suicide to their streak wherever teamplay is
-   off; and `gl` `hits` on a `derived` family is not KTX's number — KTX
-   counts a grenade that TOUCHED a player, and the touch detonates it,
-   so every damage row the wire carries is flagged splash and the touch
-   is unobservable. Everything else on that family is on KTX's own scale
-   per weapon since v75 (`sg`/`ssg` pellets, `rl` direct impacts, the rest
-   a connecting fire); a `reconstructed` family reaches it for `rl`/`gl`
-   and keeps trigger pulls on `sg`/`ssg`, whose pellet split its rebuilt
-   log cannot carry. That is stated in the payload rather than only in
+   off; and a `reconstructed` family keeps trigger pulls on `sg`/`ssg`,
+   whose pellet split its rebuilt log cannot carry. A `derived` family is
+   on KTX's own scale per weapon since v75 — `sg`/`ssg` pellets, `rl`/`gl`
+   direct impacts, the rest a connecting fire. `gl`'s is the one that is
+   not a wire reading: KTX counts a grenade that TOUCHED a player, the
+   touch detonates it, and every damage row the wire then carries is
+   flagged splash — so the touch is re-derived from the grenade's flight
+   and its 2.5 s fuse by the same classifier a pre-instrumentation demo
+   uses (92% of 424 archive player rows exact against the verbatim block).
+   That classifier reads the projectile streams, which mvd-api and the web
+   build always request and a bare CLI parse does not; without them the
+   row says `anyDamage` rather than guessing. That is stated in the payload rather than only in
    prose: every weapon carrying `hits` carries `hitsConvention`
    (`anyDamage` | `directImpact` | `pellets`), so a consumer can gate a
    cross-era comparison instead of re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer

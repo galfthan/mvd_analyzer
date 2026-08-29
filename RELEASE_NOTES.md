@@ -262,6 +262,17 @@ tier, so the two sections cannot disagree):
   `T_MissileTouch` and nowhere else (`:994`); splash victims go to the
   separate `rhits`/`vhits` (`ktx/src/combat.c:1099-1121`). `attacks` stays
   the fire count — KTX's own `attacks++` per rocket.
+- **`gl`** — the same DIRECT-impact count, from the same field, but NOT from
+  the same evidence. `GrenadeTouch` increments KTX's counter (`:1331`) and
+  then detonates the grenade through `T_RadiusDamage`, which flags every
+  resulting row splash (`ktx/src/combat.c:1207`), so the wire log holds no
+  record of a grenade touch at all. The touch is re-derived instead — from
+  the grenade's broadcast flight, its detonation point against the victim's
+  32×32×56 hull, and the 2.5 s fuse (`weapons.c:1434`) — by the very
+  classifier a pre-instrumentation demo uses (`damagerecon/direct.go`), fed
+  the wire rows. None of that evidence is era-dependent, which is why the
+  question a modern demo could not answer turns out to be answerable the way
+  an old one answers it.
 - **`lg` / `ng` / `sng` / `axe`** — unchanged `anyDamage`, which already WAS
   KTX's convention for a weapon with one damage path.
 
@@ -275,6 +286,7 @@ Measured against the verbatim block on 186 instrumented archive demos
 | `sg.hits` | 6.0% / 76.95% | **100.0% / 0.00%** |
 | `ssg.hits` | 5.9% / 85.62% | **100.0% / 0.00%** |
 | `rl.hits` | 1.6% / 355.17% | **99.8% / 0.02%** |
+| `gl.hits` | 42.9% / 55.13% | **92.0% / 3.79%** |
 | `lg.hits` / `axe.hits` (control) | 99.3% / 100.0% at 0.00% | unchanged |
 
 The shotgun rows reproduce the block EXACTLY — every one of 534 `sg` and
@@ -286,19 +298,36 @@ the 264 `sg` and 144 `ssg` rows whose player took none were already 100.0%
 exact. Dividing by the shooter's quad state at fire time closed it to zero
 on both weapons.
 
-**Two honest exceptions, named rather than papered over.**
+**`gl` reads BETTER than the tier it borrows the classifier from**, on the
+same 424 archive player rows: 92.0% exact at 3.79% aggregate against the
+reconstructed tier's 89.6% / 3.55%, identically biased (−0.07 per row) and
+with a p90 error of 0 against its 1. The wire row is the stronger input —
+its attacker, victim and weapon are measured rather than inferred, so no
+candidate explosion can win the row for the wrong shooter, and its damage
+value is the server's own. The splash flag is still what `rl` reads (it
+reproduces the block on 632 of 632 rows, which no derivation can beat); the
+classifier run on `rl`'s rows for comparison scores 54.7%, so the flag
+stays. Both numbers are in ACCURACY.md, because what an alternative costs is
+what decides against it.
 
-- **`gl` keeps `anyDamage` on a wire-linked row.** KTX counts a grenade that
-  TOUCHED a player (`GrenadeTouch`, `ktx/src/weapons.c:1331`), but the touch
-  detonates the grenade and `T_RadiusDamage` flags every resulting row as
-  splash — so the wire log has no record of a grenade touch at all.
-  Counting non-splash `gl` rows off the wire reproduces 0.00% of the block's
-  total (`acc.gl.direct/wire`, 30.0% of 424 rows exact, bias −1.93, and each
-  of those rows is a player who touched nobody). The reconstructed tier CAN
-  publish gl directs because it never reads the splash flag. So the Summary
-  tab's `≠` mark, which used to sit on four weapons of every derived row,
-  now appears on exactly one cell — and it is the cell where the evidence
-  genuinely cannot answer the question.
+Two consequences a consumer can see. `gl`'s `direct` is bounded by the FIRES
+rather than by `hits` — a grenade that touched somebody while the fire→flight
+join failed to link its fire is still a touch — so
+`direct + splash + missed` no longer partitions a gl row's fires and
+`splash` floors at zero (measured: clamping to `hits` instead costs 6 points
+of exact rows and doubles the aggregate error). And the classification needs
+the spatial shot streams: mvd-api and the WASM web build always request them,
+but a bare `qw-analyze` parse does not, and there aim publishes no gl
+`direct`/`splash` at all and the accuracy row falls back to `anyDamage` with
+the `≠` mark rather than passing a withheld 0 off as "touched nobody".
+
+With `gl` on KTX's scale, the Summary tab's `≠` mark — which used to sit on
+four weapons of every derived row — no longer appears on a derived row at
+all. The one cell that still wears it is `sg`/`ssg` on a RECONSTRUCTED row,
+where the pellet split genuinely cannot be recovered.
+
+**One honest withhold, named rather than papered over.**
+
 - **`ng` / `sng` `hits` are WITHHELD without nail decoding.** Nail fires link
   to their damage only through the `svc_nails` id brackets, which
   `qw-analyze` builds on `-include nails` (mvd-api and the WASM web build
@@ -311,9 +340,9 @@ on both weapons.
   22.8%, never over — so nail accuracy is a floor, and ACCURACY.md says so.
 
 Schema stays **v75**: this moves values and `hitsConvention` strings, no
-shapes. `cmd/qw-demoinfo-eval` gains the `/measured`, `/fires` and
-`/anyDamage/wire` columns and a `-nails` flag, so the conventions the tier
-does NOT publish stay measured rather than argued.
+shapes. `cmd/qw-demoinfo-eval` gains the `/measured`, `/fires`,
+`/anyDamage/wire` and `/classifier/wire` columns and a `-nails` flag, so the
+conventions the tier does NOT publish stay measured rather than argued.
 
 ### Web UI
 

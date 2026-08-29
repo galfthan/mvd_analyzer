@@ -151,9 +151,11 @@ that downstream consumers render, summarise, or feed to an agent.
   derived summary vs the verbatim KTX block"). It also carries the
   DIAGNOSTIC columns that decide definition questions — the
   KTX-convention spree replay, the wire-flag control for the rl/gl
-  direct-impact counters, and the any-path alternative a reconstructed
-  row no longer publishes for them — which is why the measurement is not
-  gated on what shipped.
+  direct-impact counters, the touch CLASSIFIER run on those same wire
+  rows (which is what said gl should adopt it and rl should keep the
+  flag), and the any-path alternative a reconstructed row no longer
+  publishes for them — which is why the measurement is not gated on what
+  shipped.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
@@ -262,9 +264,19 @@ that downstream consumers render, summarise, or feed to an agent.
   stream is high volume — so `shots`/`aim` omit `hits` for those weapons,
   and (schema v75) `playerStats.accuracy` withholds theirs too, keyed on
   `Streams.NailsComputed` (omitted, not zeroed: absence means unmeasured).
-  mvd-api always builds them, so this is the one place default CLI output
-  diverges from the same demo over REST; the CLI prints a stderr warning
-  when it happens.
+
+  **Grenade accuracy needs `-include projectiles`.** KTX's `gl` hits counter
+  counts grenades that TOUCHED a player and the wire damage log records no
+  such event — the touch detonates the grenade and every row it then writes
+  is flagged splash — so the touch is re-derived from the grenade's tracked
+  flight and its 2.5 s fuse (`damagerecon/direct.go`). Without the spatial
+  streams there is no flight to read: `aim` withholds gl's `direct`/`splash`
+  split and `playerStats.accuracy` falls back to the any-path count, labelled
+  `hitsConvention: "anyDamage"`.
+
+  mvd-api and the WASM build always request both, so these are the two places
+  default CLI output diverges from the same demo over REST; the CLI prints a
+  stderr warning when either happens.
 
   `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
   `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is

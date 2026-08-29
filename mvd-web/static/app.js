@@ -1278,26 +1278,31 @@ function ktxHitsConvention(weapon) {
 //
 // A KTX-overlaid family (every demo with a demoinfo block) matches by
 // construction and wears nothing. Since schema v75 both computed tiers match
-// on most weapons too, so the mark has shrunk to two cells — and each is a
-// place where the tier's evidence genuinely cannot answer KTX's question,
-// not a place where it declined to:
+// on every weapon but one, and that one is a place where the tier's evidence
+// genuinely cannot answer KTX's question, not a place where it declined to:
 //
-//   - GL on a DERIVED (wire-linked) row. A grenade that touches a player
-//     detonates on the spot, and every damage row the server then writes is
-//     flagged splash, so the wire log holds no record of the touch KTX
-//     counts. (Its rl publishes direct impacts and its sg/ssg pellets.)
 //   - SG/SSG on a RECONSTRUCTED row. The recon tier counts fires, not
 //     pellets: a reconstructed delta merges every hit landing on one instant,
 //     so dividing its magnitude would credit one shooter with another's
 //     pellets. (Its rl/gl publish KTX's direct-impact count, schema v74.)
+//
+// GL on a DERIVED (wire-linked) row wore the mark until v75 and no longer
+// does. The wire log genuinely holds no record of a grenade touch — the touch
+// detonates the grenade and every row the server then writes is flagged splash
+// — so that count is not read off the wire at all: it is re-derived from the
+// flight geometry and the 2.5 s fuse by the same classifier a reconstructed
+// row uses (92.0% of 424 archive player rows exact against the verbatim KTX
+// block). This UI's parse always builds the projectile streams that classifier
+// reads, so a gl cell here is always on KTX's scale; a payload from a parse
+// without them says so in `hitsConvention` and is marked like any other cell.
 const ACC_OFF_SCALE_MARK = '≠';
 const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or only the projectiles that TOUCHED a player (GL). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG). ' +
     'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
 // The same statement as the table's footnote, which is where a reader who
 // cannot hover — anyone looking at a screenshot of this panel — meets it.
 const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or direct impacts only (GL). ' +
+    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG). ' +
     'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
 
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
@@ -12466,7 +12471,7 @@ const AIM_COL = {
     fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
     partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
     missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Direct contacts — the server\'s own RL count; GL reads near zero here because a grenade that touches explodes and every row of its damage is flagged splash', measured: true, cell: w => w.direct || 0 },
+    direct: { h: 'Direct', t: 'Projectiles that TOUCHED a player — KTX\'s own RL/GL hits counter. RL is the server\'s own flag; GL is re-derived from the grenade\'s flight and its 2.5s fuse, since a grenade that touches explodes and every row of its damage is flagged splash (92% of archive player rows exact against the KTX block). A GL Direct can exceed its Hits: a touch whose fire the linker missed is still a touch', measured: true, cell: w => w.direct || 0 },
     splash: { h: 'Splash', t: 'Hits from splash only', measured: true, cell: w => w.splash || 0 },
     missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
     directPct: { h: 'Direct %', t: 'Share of fires that hit directly', measured: true, cell: w => shotShare(w.direct, w) },

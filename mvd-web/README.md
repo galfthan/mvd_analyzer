@@ -424,20 +424,30 @@ So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
 weapon wears a **`≠`** in the text, with a footnote under the table that
 appears exactly when some cell wears it. The rule is per weapon, not per
 family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`), and since
-v75 both computed tiers publish KTX's convention on most weapons, so the
-mark has shrunk from four cells to two. A KTX-overlaid family matches on
-every weapon and is never marked. A `derived` one is marked on **`gl`
-alone** (its `rl` publishes direct impacts, its `sg`/`ssg` pellets); a
-`reconstructed` one on **`sg`/`ssg` alone** (its `rl`/`gl` publish
-`recon.directHits`, v74). Neither is an oversight. A grenade that touches
-a player detonates and every damage row the server then writes is flagged
-splash, so a wire damage log has no record of the touch KTX counts
-(measured: counting non-splash `gl` rows off the wire reproduces 0.00% of
-the block's total). And a reconstructed damage delta merges every hit
-landing on one instant, so dividing its magnitude into pellets would
-credit one shooter with another's. Two `Acc` figures are comparable
-exactly when weapon **and** convention match; the full convention text
-stays in the tooltip.
+v75 every computed tier publishes KTX's convention on every weapon but
+one, so the mark has shrunk from four cells to one. A KTX-overlaid family
+matches on every weapon and is never marked. A `derived` one is not marked
+at all here: its `rl`/`gl` publish direct impacts and its `sg`/`ssg`
+pellets. A `reconstructed` one is marked on **`sg`/`ssg` alone** (its
+`rl`/`gl` publish `recon.directHits`, v74), which is not an oversight — a
+reconstructed damage delta merges every hit landing on one instant, so
+dividing its magnitude into pellets would credit one shooter with
+another's.
+
+`gl` wore the mark on a `derived` row until v75 and is the interesting
+case, because the wire genuinely cannot answer its question: a grenade
+that touches a player detonates, and every damage row the server then
+writes is flagged splash, so counting non-splash `gl` rows off the wire
+reproduces 0.00% of the block's total. The touch is re-derived instead —
+from the grenade's tracked flight, its detonation point against the
+victim's hull and the 2.5 s fuse — by the same classifier a
+pre-instrumentation demo uses (92% of 424 archive player rows exact
+against the verbatim block). This build always parses with the projectile
+streams that classifier reads, so a `gl` cell here is always on KTX's
+scale; a payload from a parse without them says `anyDamage` and is marked
+like any other off-scale cell. Two `Acc` figures are comparable exactly
+when weapon **and** convention match; the full convention text stays in
+the tooltip.
 
 The Aim tab's `Hits` column is deliberately the OTHER number on those two
 weapons: it stands in for the withheld measured counter, which is an
@@ -445,8 +455,11 @@ any-path count, so a reconstructed `RL` figure there reads higher than the
 Summary's `Acc`. The same split now exists on a wire-measured demo, where
 the Aim tab's `Hits`/`Hit %` are the any-path counters and the Summary's
 `Acc` is KTX's direct-impact question — the Aim tab's own `Direct` column
-is the number the Summary shows. Both are labelled; neither is a
-correction of the other.
+is the number the Summary shows, on `GL` as well as `RL` since v75. Both
+are labelled; neither is a correction of the other. (A `GL` `Direct` can
+read ABOVE its `Hits`: it is a touch count from the flight geometry, not a
+subset of the fires the linker connected, so a touch whose fire went
+unlinked still counts and `Splash` floors at zero.)
 A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
 only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
 convention and the Summary number it differs from, with the size of the

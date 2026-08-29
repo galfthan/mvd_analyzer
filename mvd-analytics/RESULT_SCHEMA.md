@@ -938,7 +938,9 @@ hit-derived counters are WITHHELD, not zeroed, when `aim.hitsMeasured` is false
 (see [AimResult](#aimresult-aim) for the tier table). With `hitsMeasured` true an
 absent `hits` is a measured zero. `Pellets`/`PelletHits` match the server's
 authoritative SG/SSG per-pellet stats; `Direct` matches the server's RL/GL
-direct-hit count.
+direct-hit count — from the wire's own splash flag for `rl`, and from the
+flight-geometry touch classifier for `gl`, whose touch the wire never records
+(see the `direct` row below).
 
 | Field | JSON key | Type / meaning |
 |---|---|---|
@@ -954,8 +956,8 @@ direct-hit count.
 | Full | `full` | int (sg/ssg) — fires where all pellets hit |
 | Partial | `partial` | int (sg/ssg) — fires where some pellets hit |
 | Miss | `miss` | int (sg/ssg: fires where no pellet hit; lg: aim-error misses — neither blocked nor out of range) |
-| Direct | `direct` | int (rl/gl) — non-splash contacts (≈ server hits) |
-| Splash | `splash` | int (rl/gl) — linked hits that were splash-only |
+| Direct | `direct` | int (rl/gl) — projectiles that TOUCHED a player, KTX's own rl/gl `hits` counter. **`rl`** is the wire's splash flag (a direct `T_MissileTouch` writes an unflagged row), so it is a subset of `hits` and `direct+splash+missed == shots`. **`gl`** cannot be — every gl row on the wire is splash-flagged (`GrenadeTouch` → `T_RadiusDamage`) — and is the flight-geometry classifier's count instead (`damagerecon/direct.go`, v75), bounded by the FIRES rather than by `hits`: it may exceed `hits` where a touch's fire went unlinked, and is then **absent together with `splash`** on a parse without the spatial shot streams. Measured against the verbatim KTX block on 186 archive demos: `rl` 99.8% of 632 player rows exact / 0.02% aggregate, `gl` 92.0% of 424 / 3.79% |
+| Splash | `splash` | int (rl/gl) — linked hits that were splash-only; for `gl` the floor-at-zero remainder `hits − direct` |
 | Missed | `missed` | int (rl/gl) — fires that linked to no impact |
 | Blocked | `blocked` | int (lg) — the missed beam stopped short on geometry and its extension to the ~600u max range crosses a live enemy's collision hull (32×32×56 box at the enemy's tracked position): on target and in range, the obstruction denied a would-be hit |
 | OutOfRange | `outOfRange` | int (lg) — the missed beam ran its full ~600u max length and its extension to infinity crosses a live enemy's collision hull: on target, the enemy was beyond reach |
@@ -1249,7 +1251,7 @@ never does.
 | `score` | always **derived** | KTX over-counts pentagram-deflect telefrags (`dtTELE2`), credits world-dealt suicides to the world entity (`ktx/src/client.c:4951`), and resets after a reconnect. `match` carries the frag-log-corrected counts. The kill side is optional — see "The kill side of `score` is optional" below. |
 | `damage` given / givenTeam / givenSelf / enemyWeapons | **ktx** when present, else the bounded family of the damage section (wire-derived, or the damage-recon reconstruction on pre-instrumentation demos — `src: "reconstructed"`) | server-side accounting; same rules as `damage.boundedSource`. |
 | `damage.taken` | always **derived** (all sources) | KTX's `dmg.taken` is enemy-only (`ktx/src/combat.c:1069`). It is surfaced separately as `takenEnemy` so the two are never conflated. Only the per-hit reconstruction measures it, so it is **absent** (not zero) on a demo carrying a KTX block but no damage stream. |
-| `accuracy` | **ktx** when present, else **derived** from the fire stream — `src: "reconstructed"` when its `hits` came from the aim recon tier (v74) | `src` is the evidence GRADE; what the numbers COUNT is the per-weapon `hitsConvention`, and since v75 every source aims at KTX's own convention (two named exceptions below). Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
+| `accuracy` | **ktx** when present, else **derived** from the fire stream — `src: "reconstructed"` when its `hits` came from the aim recon tier (v74) | `src` is the evidence GRADE; what the numbers COUNT is the per-weapon `hitsConvention`, and since v75 every source aims at KTX's own convention (two conditional rows named below). Emitted anyway because a demo with no KTX block should degrade to a rougher number, not to a missing field. The KTX block replaces the derived one **wholesale**, never per weapon: see below. |
 | `score.maxSpree` / `maxQuadSpree` | always **derived** (v74) | the kill-streak maxima KTX writes as `spree.max` / `spree.quad`. Derived by replaying KTX's own state machine over the corrected frag log, so it inherits `score.kills`' evidence and its absence. Never overlaid, for the reason the whole family is not — plus one of its own: KTX's increment gate is `strneq(attackerteam, targteam) \|\| !tp_num()` (`ktx/src/client.c:4865`), so wherever teamplay is off a player's own SUICIDE bumps their streak in the very call that latches it. See "The derived spree" below for the measured residual. |
 | `damage.takenEnemy` / `takenToDie` | **ktx** when present, else **derived** from the per-hit log | enemy-only hits summed per victim; `takenEnemy / deaths` for the average, matching `ktx/src/stats_json.c:357`. KTX's 99999 no-deaths sentinel is never served as a number. |
 | `damage.teamWeapons` | **ktx-only** | KTX's `dmg_tweapon` (`ktx/src/combat.c:1063`), the friendly-fire mirror of `enemyWeapons`. The reconstruction does not bucket team damage by the victim's inventory. |
@@ -1341,7 +1343,7 @@ one-directional — never read ours as the higher of the two.
 | Window | `window` | PlayerStatsWindow | The denominators — see below. |
 | Score | `score` | PlayerStatsScore | `frags` (svc_updatefrags net score) and `deaths` always; `kills`, `suicides`, `teamKills`, `efficiency`, `byWeapon`, `byEnemyWeapon`, `byWeaponVsEnemyWeapon`, `maxSpree` and `maxQuadSpree` **optional together** — see below. |
 | Damage | `damage` | *PlayerStatsDamage | Omitted when the demo carries no damage information at all. A player who neither dealt nor took a point of damage on a demo that **does** carry the stream gets a **zeroed** family — an observed zero, not an unmeasurable one. |
-| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS exactly where `hitsConvention` is `pellets` (KTX's unit, 6/14 per fire — KTX's own sg/ssg rows, and since v75 a WIRE-LINKED `derived` sg/ssg row) and TRIGGER PULLS on every other row, a `reconstructed` sg/ssg one included; `hits` is **absent** — not zero — when nothing could count it: no WIRE damage stream to link fires against and no recovery from the aim recon tier for that weapon (`src: "reconstructed"`, v74 — ng/sng always, since the tier validated no nail recovery), or (v75) a `derived` ng/sng row on a parse without nail decoding, the only way a nail fire can be linked to its damage at all; **`hitsConvention`** (v74) names what `hits` counts and is present whenever it is — see below; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
+| Accuracy | `accuracy` | *PlayerStatsAccuracy | `byWeapon` map, keyed `axe`/`sg`/`ssg`/`ng`/`sng`/`gl`/`rl`/`lg` (KTX counts axe swings; the derived path emits whatever the fire stream decoded). `attacks` is PELLETS exactly where `hitsConvention` is `pellets` (KTX's unit, 6/14 per fire — KTX's own sg/ssg rows, and since v75 a WIRE-LINKED `derived` sg/ssg row) and TRIGGER PULLS on every other row, a `reconstructed` sg/ssg one included — including every `directImpact` row, where `hits` is a per-projectile touch count against a trigger-pull `attacks`, exactly as KTX's own rl/gl row is; `hits` is **absent** — not zero — when nothing could count it: no WIRE damage stream to link fires against and no recovery from the aim recon tier for that weapon (`src: "reconstructed"`, v74 — ng/sng always, since the tier validated no nail recovery), or (v75) a `derived` ng/sng row on a parse without nail decoding, the only way a nail fire can be linked to its damage at all; **`hitsConvention`** (v74) names what `hits` counts and is present whenever it is — see below; `real`/`virtual` are KTX-only and **not** a split of `hits` — see below. |
 | Pickups | `pickups` | *PlayerStatsPickups | `byKind` map — see vocabulary below. |
 | Hold | `hold` | PlayerStatsHold | `weapons` / `armor` / `powerups` maps of HoldStat. |
 
@@ -1354,33 +1356,41 @@ machine-readable answer, present on every weapon that carries `hits`.
 
 | value | what `hits` counts | where it appears |
 |---|---|---|
-| `anyDamage` | one **fire that landed damage by any path**, splash included | `lg`/`ng`/`sng`/`axe` on every source — KTX's own counter for those four, whose single damage path makes "any" and "direct" the same event — plus `gl` on a `derived` (wire-linked) family, where the wire cannot see the touch KTX counts (below), and `sg`/`ssg` on a `reconstructed` one, where the pellet split cannot be recovered (`result.WeaponAimRecon`) |
-| `directImpact` | the projectile **touched a player** (`ktx/src/weapons.c:994` `T_MissileTouch`, `:1331` `GrenadeTouch`) — a rocket that killed by splash alone is not a hit | KTX's `rl` / `gl`; (v74) the `rl` / `gl` of a `reconstructed` family; (v75) the `rl` of a `derived` one |
+| `anyDamage` | one **fire that landed damage by any path**, splash included | `lg`/`ng`/`sng`/`axe` on every source — KTX's own counter for those four, whose single damage path makes "any" and "direct" the same event — plus `sg`/`ssg` on a `reconstructed` family, where the pellet split cannot be recovered (`result.WeaponAimRecon`), and `gl` on a `derived` one **parsed without the spatial shot streams**, the touch classifier's own input (below) |
+| `directImpact` | the projectile **touched a player** (`ktx/src/weapons.c:994` `T_MissileTouch`, `:1331` `GrenadeTouch`) — a rocket that killed by splash alone is not a hit | KTX's `rl` / `gl`; (v74) the `rl` / `gl` of a `reconstructed` family; (v75) the `rl` and `gl` of a `derived` one |
 | `pellets` | **pellets**, on BOTH sides of the ratio: `attacks += bullets` (`:812` for the shotgun's 6, `:869` for the super shotgun's 14) and one `hits++` per pellet that connected (`:387`, `:392`) | KTX's `sg` / `ssg`, and (v75) the `sg` / `ssg` of a `derived` family |
 
 **Since v75 a `derived` row answers KTX's question too** (schema v74 did
 it for `reconstructed`). The wire-linked tier no longer publishes a
 uniform any-path count: it reads the aim section's own measured counters
-— `pellets` / `pelletHits` for the shotguns, `direct` for `rl` — so a
-row here and a row lifted from a demoinfo block count the same event.
+— `pellets` / `pelletHits` for the shotguns, `direct` for `rl` and `gl` —
+so a row here and a row lifted from a demoinfo block count the same event.
 Read, not recomputed: `analyzer.deriveMeasuredAcc` lifts the published
 aim figures the way `deriveReconHits` lifts the recon tier, so the two
 sections cannot disagree. Withheld and unresolved fires still count as
 attacks (`pellets` is `shots × 6/14` over every fire), which is what
 keeps `attacks` on the same footing as KTX's `attacks += bullets`.
 
-The two exceptions are named, not hidden:
+`gl`'s number is the one that is not read off the wire at all, and the
+two conditional rows are named rather than hidden:
 
-- **`gl` on a wire-linked row stays `anyDamage`.** KTX counts a grenade
-  that TOUCHED a player (`GrenadeTouch`, `ktx/src/weapons.c:1331`), but
-  the touch immediately detonates the grenade and `T_RadiusDamage`
-  flags every resulting row as splash (`ktx/src/combat.c:1207`) — so the
-  wire damage log holds no record of a grenade touch at all. Counting
-  non-splash `gl` rows off the wire reproduces **0.00%** of the block's
-  total (30.0% of 424 archive rows exact, all of them players who
-  touched nobody). The reconstructed tier CAN publish `gl` directs
-  because it never reads the splash flag: it re-classifies each
-  explosion from the flight geometry and the grenade fuse.
+- **`gl` is `directImpact` where the touch could be CLASSIFIED, and
+  `anyDamage` where it could not.** KTX counts a grenade that TOUCHED a
+  player (`GrenadeTouch`, `ktx/src/weapons.c:1331`), but the touch
+  immediately detonates the grenade and `T_RadiusDamage` flags every
+  resulting row as splash (`ktx/src/combat.c:1207`) — so the wire damage
+  log holds no record of a grenade touch at all, and counting non-splash
+  `gl` rows off it reproduces **0.00%** of the block's total (30.0% of
+  424 archive rows exact, all of them players who touched nobody). The
+  touch is therefore re-derived from the grenade's broadcast flight, its
+  detonation point against the victim's hull, and the 2.5 s fuse — the
+  same era-independent classifier a `reconstructed` row uses
+  (`damagerecon/direct.go`) — which scores **92.0% of 424 archive rows
+  exact at 3.79% aggregate**, above the reconstructed tier's own 89.6% /
+  3.55%. That classifier reads the spatial shot streams
+  (`-include projectiles,beams`; mvd-api and the WASM build always
+  request them), so on a parse without them the row falls back to the
+  any-path count and says so.
 - **`ng`/`sng` `hits` need nail decoding** (`-include nails`; mvd-api and
   the WASM build always request it). Without it no nail fire links to
   anything and the field is **withheld**, not zeroed.

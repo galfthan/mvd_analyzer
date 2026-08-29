@@ -1025,18 +1025,22 @@ Common frontend features → the call that backs them.
   is not the same as no hits). `attacks` is shot-derived on every demo
   and matches KTX to the row on the single-projectile weapons. Each
   family answers KTX's own question as far as its evidence reaches:
-  `rl` counts direct impacts on all three (`reconstructed` since v74,
-  `derived` since v75, both within 1.3% / 0.02% of `/demoinfo` in
-  aggregate), `lg`/`ng`/`sng`/`axe` count a connecting fire, which is
-  KTX's own event for them, and `sg`/`ssg` count pellets on both sides
-  of the ratio on a `ktx` or wire-linked `derived` row (100.0% of the
-  archive eval's rows exact since v75). TWO gaps, both marked: `gl` on
-  a `derived` family still counts any damage path, because a grenade
-  that touches a player explodes and every damage row the wire then
-  carries is flagged splash — the touch KTX counts is simply not on the
-  wire; and `sg`/`ssg` on a `reconstructed` family count fires that
-  landed damage against TRIGGER PULLS, because the pellet split needs a
-  per-hit magnitude the rebuilt log does not carry. Read
+  `rl` and `gl` count direct impacts on all three (`reconstructed` since
+  v74, `derived` since v75; against `/demoinfo` in aggregate, `rl` within
+  1.3% / 0.02% and `gl` within 3.6% / 3.8%), `lg`/`ng`/`sng`/`axe` count
+  a connecting fire, which is KTX's own event for them, and `sg`/`ssg`
+  count pellets on both sides of the ratio on a `ktx` or wire-linked
+  `derived` row (100.0% of the archive eval's rows exact since v75).
+  `gl`'s number is the one that is not read off the wire at all: a
+  grenade that touches a player explodes and every damage row the wire
+  then carries is flagged splash, so the touch is re-derived from the
+  grenade's tracked flight and its 2.5 s fuse by the same classifier a
+  `reconstructed` row uses (the API always parses with the projectile
+  streams that needs; a payload lacking them says `anyDamage`). ONE gap
+  remains, and it is marked: `sg`/`ssg` on a `reconstructed` family
+  count fires that landed damage against TRIGGER PULLS, because the
+  pellet split needs a per-hit magnitude the rebuilt log does not carry.
+  Read
   `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
   — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
   is, per WEAPON because one `src: "ktx"` row uses all three at once. It

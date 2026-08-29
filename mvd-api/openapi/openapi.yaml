@@ -5179,14 +5179,14 @@ components:
                       description: "LG whiffs blocked short by geometry with a live enemy behind."
                       type: integer
                     direct:
-                      description: "Direct (non-splash) contacts ≈ KTX hits."
+                      description: "Projectiles that TOUCHED a player — KTX's own rl/gl hits counter (ktx/src/weapons.c:994, :1329). RL reads the wire's splash flag, so it is a subset of `hits` and direct+splash+missed == shots. GL cannot: GrenadeTouch does all its damage through T_RadiusDamage, which flags every row splash, so GL's count is re-derived from the grenade's tracked flight and its 2.5s fuse (schema v75) — bounded by the FIRES rather than by `hits`, so it may exceed `hits` where a touch's fire went unlinked, and absent together with GL's `splash` on a parse without the projectile streams (the API always builds them). Measured against the verbatim KTX block on 186 archive demos: rl 99.8% of 632 player rows exact / 0.02% aggregate, gl 92.0% of 424 / 3.79%."
                       type: integer
                     enemy:
                       description: "Enemy-victim slice of this weapon's hit counters (emitted when it differs from the top-level counters)."
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "Direct (non-splash) contacts ≈ KTX hits."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."
@@ -5287,7 +5287,7 @@ components:
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "Direct (non-splash) contacts ≈ KTX hits."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."
@@ -5311,14 +5311,14 @@ components:
                       description: "Weapon fires."
                       type: integer
                     splash:
-                      description: "Linked hits that were splash-only."
+                      description: "Linked hits that were splash-only — `hits - direct`, floored at zero (GL's `direct` is not bounded by `hits`; see `direct`). Absent for GL on a parse without the projectile streams, where the touch classification could not run."
                       type: integer
                     team:
                       description: "Team-victim slice of this weapon's hit counters (same fields, team victims only)."
                       additionalProperties: false
                       properties:
                         direct:
-                          description: "Direct (non-splash) contacts ≈ KTX hits."
+                          description: "This bucket's projectiles that TOUCHED a player (see the top-level `direct`). RL is capped by the bucket's `hits`; GL is the classifier's row count and is not."
                           type: integer
                         full:
                           description: "Fires where all pellets hit."
@@ -8151,13 +8151,17 @@ components:
 
             - `ktx` — `pellets` for sg/ssg, `directImpact` for rl/gl,
               `anyDamage` for lg/axe/ng/sng. The server's own counters.
-            - `derived` (wire-linked, schema v75) — the same, EXCEPT gl, which
-              stays `anyDamage`: a grenade that touches a player explodes and
+            - `derived` (wire-linked, schema v75) — the same, on every
+              weapon. gl's `directImpact` is the one number here that is not
+              a wire reading: a grenade that touches a player explodes and
               every damage row the server then writes is flagged splash, so
-              the wire holds no record of the touch KTX counts. A `derived`
-              ng/sng row also WITHHOLDS `hits` on a parse without nail
-              decoding (the API always builds it, so this never surfaces
-              here).
+              the wire holds no record of the touch KTX counts, and it is
+              re-derived from the grenade's tracked flight and its 2.5 s fuse
+              by the same classifier a `reconstructed` row uses. That needs
+              the spatial shot streams, which the API always builds; a parse
+              without them falls back to `anyDamage`. A `derived` ng/sng row
+              likewise WITHHOLDS `hits` on a parse without nail decoding (the
+              API always builds that too, so neither surfaces here).
             - `reconstructed` (schema v74) — `directImpact` for rl AND gl,
               which the rebuilt log CAN answer because it never reads the
               splash flag. Its sg/ssg rows stay `anyDamage` with `attacks` in
@@ -8168,12 +8172,14 @@ components:
             demos (cmd/qw-demoinfo-eval, withhold-and-compare). Wire-linked:
             rl `hits` **99.8% of 632 rows exact / 0.02% aggregate**, sg and
             ssg **100.0% / 0.00%** on both `attacks` and `hits` (534 and 390
-            rows), lg 99.3% / 0.00%, axe 100.0% / 0.00%. Reconstructed: rl agrees to
+            rows), lg 99.3% / 0.00%, axe 100.0% / 0.00%, gl **92.0% of 424
+            rows exact / 3.79% aggregate**. Reconstructed: rl agrees to
             **1.25%** in aggregate (46.5% of 632 rows exact, p90 error 2), gl
-            to **3.55%** at 89.6% of 424 rows exact, lg to 0.9%. The two rows
-            that do NOT reproduce the block are gl on a wire-linked row
-            (any-path, ~1.5x above) and ng/sng, which are on KTX's scale but
-            recover only 68-77% of the nails that connected.
+            to **3.55%** at 89.6% of 424 rows exact, lg to 0.9%. The rows that
+            do NOT reproduce the block are ng/sng, which are on KTX's scale
+            but recover only 68-77% of the nails that connected, and a
+            reconstructed sg/ssg row, which counts fires where KTX counts
+            pellets.
 
             Deriving the direct-impact convention on a demo with no KTX block
             took two goes. The wire log's own splash flag reproduces KTX's rl
@@ -8212,17 +8218,20 @@ components:
 
                           `anyDamage` — one fire that landed damage by any path, splash
                           included. KTX's own counter for the weapons with a single damage
-                          path (lg, axe, ng, sng) on every src, plus gl on a `derived`
-                          family, where the wire log cannot see the touch KTX counts.
+                          path (lg, axe, ng, sng) on every src, plus sg/ssg on a
+                          `reconstructed` family, and gl on a `derived` family parsed
+                          WITHOUT the spatial shot streams its touch classifier reads (the
+                          API always builds them, so this does not surface here).
 
                           `directImpact` — the projectile TOUCHED a player. KTX's rl/gl
                           counter (ktx/src/weapons.c:994, :1331) — a rocket that killed by
                           splash alone is not a hit to it — the rl/gl rows of a
                           `reconstructed` family since schema v74 (1.25% / 3.55% aggregate,
-                          46.5% / 89.6% of 632 / 424 archive rows exact), and the rl row of a
-                          `derived` family since v75 (99.8% of 632 rows exact, 0.02%).
-                          Measured on the same rows, the any-path count runs ~4.5x above this
-                          on rl, so mixing the two turns a definition change into a trend.
+                          46.5% / 89.6% of 632 / 424 archive rows exact), and the rl and gl
+                          rows of a `derived` family since v75 (99.8% of 632 rows exact at
+                          0.02%, and 92.0% of 424 at 3.79%). Measured on the same rows, the
+                          any-path count runs ~4.5x above this on rl and ~1.5x on gl, so
+                          mixing the two turns a definition change into a trend.
 
                           `pellets` — BOTH counters advance per pellet, not per trigger pull:
                           sg/ssg only, 6x and 14x a fire count. KTX's unit, and since schema

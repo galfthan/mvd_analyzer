@@ -172,10 +172,12 @@ var ktxItemKind = map[string]string{
 //     evidence the numbers rest on, never what a number counts —
 //     PlayerStatsAcc.HitsConvention says that, per weapon, on every row
 //     that carries `hits`. Since v75 the WIRE-LINKED tier reaches KTX's
-//     own convention where the wire can express it (pellets for sg/ssg,
-//     direct impacts for rl), and the RECONSTRUCTED tier reaches it for
-//     rl/gl (v74) but not for the shotguns, whose pellet split needs a
-//     per-hit magnitude the rebuilt log does not carry. So `pellets`
+//     own convention on every weapon KTX counts differently (pellets for
+//     sg/ssg, direct impacts for rl off the wire's splash flag and for gl
+//     off the touch classifier the reconstruction uses), and the
+//     RECONSTRUCTED tier reaches it for rl/gl (v74) but not for the
+//     shotguns, whose pellet split needs a per-hit magnitude the rebuilt
+//     log does not carry. So `pellets`
 //     rows count pellets on both sides of the ratio and every other row
 //     counts trigger pulls — the convention marker, not `src` and not
 //     the weapon, is what tells them apart. See
@@ -395,10 +397,12 @@ func derivedTakenToDie(derived *result.PlayerStatsDamage) *int {
 // The KTX block replaces the derived one WHOLESALE — it never reads
 // row.Accuracy — and that is deliberate, unlike the per-weapon merge
 // overlayDamage does. Damage is the same unit in both sources; accuracy is
-// not necessarily, even now that both tiers publish KTX's convention per
-// weapon (schema v75): gl `hits` on a WIRE-linked row is still the any-path
-// count, because the wire log cannot see a grenade touch at all (see
-// analyzer.deriveMeasuredAcc). A per-weapon merge would put that scale next
+// not necessarily, even now that every tier publishes KTX's convention per
+// weapon (schema v75): a `reconstructed` row counts sg/ssg fires where KTX
+// counts pellets, and gl `hits` falls back to the any-path count on a parse
+// that built no spatial shot streams — the touch classifier's own input, the
+// wire log having no record of a grenade touch (see
+// analyzer.deriveMeasuredAcc). A per-weapon merge would put those scales next
 // to KTX's in one map under one `src`, which is exactly the coercion this
 // section exists to avoid.
 //
