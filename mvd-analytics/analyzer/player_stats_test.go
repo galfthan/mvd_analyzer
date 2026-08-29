@@ -1001,10 +1001,12 @@ func TestDeriveReconHitsGatedOnAimSource(t *testing.T) {
 
 // The wire-linked tier publishes KTX'S convention per weapon (schema v75),
 // read out of the aim section: pellets on both sides for sg/ssg, the
-// direct-impact count for rl. gl is deliberately NOT converted — a grenade
-// touch leaves no non-splash row on the wire (ktx/src/weapons.c:1331 →
-// GrenadeExplode → T_RadiusDamage, combat.c:1207), so aim's Direct is ~0
-// there and would be a fabricated near-zero claiming the server's scale.
+// direct-impact count for rl and gl. gl's is the only one that can be
+// unmeasurable — a grenade touch leaves no non-splash row on the wire
+// (ktx/src/weapons.c:1331 → GrenadeExplode → T_RadiusDamage, combat.c:1207),
+// so aim reaches it through the flight-geometry classifier and withholds the
+// split where the spatial shot streams that classifier reads were never built.
+// This fixture has none, so gl keeps the any-path count and says so.
 func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a",
@@ -1043,11 +1045,24 @@ func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 	}
 	gl := acc.ByWeapon["gl"]
 	if gl.Attacks != 20 || gl.Hits == nil || *gl.Hits != 9 || gl.HitsConvention != result.HitsAnyDamage {
-		t.Errorf("gl = %+v, want the any-path 9 with %q — the wire cannot see a grenade touch", gl, result.HitsAnyDamage)
+		t.Errorf("gl = %+v, want the any-path 9 with %q — no shot streams, so no touch classification", gl, result.HitsAnyDamage)
 	}
 	lg := acc.ByWeapon["lg"]
 	if lg.Hits == nil || *lg.Hits != 122 || lg.HitsConvention != result.HitsAnyDamage {
 		t.Errorf("lg = %+v, want the join's 122 with %q — KTX counts the same event", lg, result.HitsAnyDamage)
+	}
+
+	// With the spatial shot streams built — what mvd-api and the WASM build
+	// always parse with — aim's gl Direct IS the touch classifier's count and
+	// the row goes on KTX's scale like rl's. Same aim section, same 3, one
+	// latch apart: Streams.ShotStreamsComputed, read exactly the way
+	// Streams.NailsComputed is.
+	res.Aim.Players[0].Weapons[2].Direct = 3
+	res.Aim.Players[0].Weapons[2].Splash = 6
+	res.Streams = &result.Streams{ShotStreamsComputed: true}
+	acc = deriveAccuracy(res, "a", nil, deriveMeasuredAcc(res))
+	if gl := acc.ByWeapon["gl"]; gl.Attacks != 20 || gl.Hits == nil || *gl.Hits != 3 || gl.HitsConvention != result.HitsDirectImpact {
+		t.Errorf("gl = %+v, want 20 fires / 3 touches / %q", gl, result.HitsDirectImpact)
 	}
 }
 

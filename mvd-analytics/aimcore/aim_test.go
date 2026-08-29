@@ -152,3 +152,104 @@ func TestAimHeldAtAbsentStreamIsNotHeld(t *testing.T) {
 		}
 	}
 }
+
+// glDirectFixture: one grenade fire that connected, its tracked flight ending
+// on the victim's hull, and the wire damage row it produced — which the server
+// flags splash like every other gl row, because GrenadeTouch does all its
+// damage through T_RadiusDamage (ktx/src/combat.c:1207). Direct therefore
+// cannot come off that flag and comes off the touch classifier instead.
+func glDirectFixture() *result.Result {
+	ts := []int32{0, 3400, 5000}
+	track := func(x float32) *result.PositionTrack {
+		return &result.PositionTrack{
+			T:   ts,
+			X:   []float32{x, x, x},
+			Y:   []float32{0, 0, 0},
+			Z:   []float32{0, 0, 0},
+			VP:  []int16{0, 0, 0},
+			VYa: []int16{0, 0, 0},
+		}
+	}
+	end := int32(3400)
+	return &result.Result{
+		Shots: &result.ShotsResult{Shots: []result.Shot{
+			{Time: 3000, Player: "A", Weapon: "gl", Hit: true, Victims: []string{"B"}, FlightEnd: &end},
+		}},
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+			{Time: 3400, Attacker: "A", Victim: "B", Weapon: "gl", Damage: 80, IsSplash: true},
+		}},
+		Streams: &result.Streams{
+			ShotStreamsComputed: true,
+			Players: []result.PlayerStream{
+				{Name: "A", Position: track(-400), Alive: []result.Interval{{Start: 0, End: 5000}}},
+				{Name: "B", Position: track(0), Alive: []result.Interval{{Start: 0, End: 5000}}},
+			},
+			Projectiles: &result.ProjectileStreams{
+				Weapon: []string{"gl"},
+				Spawn:  []int32{3000},
+				End:    []int32{3400},
+				Sx:     []float32{-400}, Sy: []float32{0}, Sz: []float32{16},
+				Ex: []float32{0}, Ey: []float32{0}, Ez: []float32{0},
+			},
+		},
+	}
+}
+
+func glRow(t *testing.T, ar *result.AimResult) *result.WeaponAim {
+	t.Helper()
+	if ar == nil {
+		t.Fatal("no aim computed")
+	}
+	for i := range ar.Players {
+		if ar.Players[i].Player != "A" {
+			continue
+		}
+		for j := range ar.Players[i].Weapons {
+			if ar.Players[i].Weapons[j].Weapon == "gl" {
+				return &ar.Players[i].Weapons[j]
+			}
+		}
+	}
+	t.Fatal("no gl row for A")
+	return nil
+}
+
+// gl's Direct is the TOUCH count from the flight-geometry classifier, not the
+// wire's splash flag — which says "splash" on every gl row ever written and
+// would report a grenade landing on somebody's head as a splash-only hit.
+func TestGLDirectComesFromTheTouchClassifier(t *testing.T) {
+	gl := glRow(t, Compute(glDirectFixture(), Query{}))
+	if gl.Direct != 1 || gl.Splash != 0 {
+		t.Errorf("gl direct/splash = %d/%d, want 1/0 — the grenade detonated on the victim's hull",
+			gl.Direct, gl.Splash)
+	}
+}
+
+// Without the spatial shot streams there is no flight to read the geometry
+// off, and the split is WITHHELD rather than filled from the splash flag: a
+// Direct of 0 there would be the flag answering rl's question in gl's row.
+// Missed does not ride the split and is kept.
+func TestGLDirectWithheldWithoutShotStreams(t *testing.T) {
+	res := glDirectFixture()
+	res.Streams.ShotStreamsComputed = false
+	res.Streams.Projectiles = nil
+	gl := glRow(t, Compute(res, Query{}))
+	if gl.Direct != 0 || gl.Splash != 0 {
+		t.Errorf("gl direct/splash = %d/%d, want 0/0 (withheld)", gl.Direct, gl.Splash)
+	}
+	if gl.Missed != gl.Shots-gl.Hits {
+		t.Errorf("gl missed = %d, want %d — missed does not ride the direct/splash split",
+			gl.Missed, gl.Shots-gl.Hits)
+	}
+}
+
+// The touch count is windowed on the DAMAGE instant, exactly as the fires are
+// windowed on their fire time (the same rule ReconDirectHits follows) — so a
+// window that excludes the impact excludes the touch.
+func TestGLDirectIsWindowed(t *testing.T) {
+	to := int32(3200)
+	gl := glRow(t, Compute(glDirectFixture(), Query{ToMs: &to}))
+	if gl.Direct != 0 {
+		t.Errorf("gl direct = %d in a window ending before the impact, want 0", gl.Direct)
+	}
+}

@@ -4842,7 +4842,6 @@
               "hits": 2
             },
             "shots": 9,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -9342,7 +9341,6 @@
             "hits": 2,
             "missed": 15,
             "shots": 17,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -18286,7 +18284,6 @@
               "hits": 1
             },
             "shots": 15,
-            "splash": 2,
             "team": {
               "hits": 1
             },
@@ -22231,7 +22228,6 @@
               "hits": 2
             },
             "shots": 9,
-            "splash": 5,
             "weapon": "gl"
           },
           {
@@ -26081,7 +26077,6 @@
             "hits": 3,
             "missed": 4,
             "shots": 7,
-            "splash": 3,
             "team": {
               "hits": 2
             },
@@ -32561,7 +32556,6 @@
               "hits": 1
             },
             "shots": 15,
-            "splash": 2,
             "weapon": "gl"
           },
           {

@@ -770,8 +770,10 @@ therefore not a subset of `hits` and may exceed it.
 (`acc.gl.direct/wire` is in the table above at 100% under-count. That is
 not a defect: `GrenadeTouch` counts the touch and then does ALL its
 damage through `GrenadeExplode` → `T_RadiusDamage`, so a direct grenade
-touch leaves no non-splash row on the wire either. The wire answers rl's
-question and not gl's; the reconstruction answers both.)
+touch leaves no non-splash row on the wire either. The wire's FLAG answers
+rl's question and not gl's; this classifier answers both, on either era's
+log — since 2026-08-29 a modern demo's gl row is classified the same way,
+see §"The wire-linked accuracy family vs the verbatim block".)
 
 **The grenade fuse, both directions** (2026-08-24). The fuse is a
 2.5 s think (`weapons.c:1434`) and only a player touch detonates a
@@ -860,8 +862,10 @@ of the corpus: a pre-instrumentation demo published KTX's rl/gl
 direct-impact count while the demo recorded last week did not.
 
 v75 makes the wire-linked tier read the aim section's own measured
-counters — `pellets` / `pelletHits` for the shotguns, `direct` for `rl` —
-so it publishes KTX's convention where the wire can express it. The
+counters — `pellets` / `pelletHits` for the shotguns, `direct` for `rl`
+and `gl` — so it publishes KTX's convention on every weapon KTX counts
+differently. `gl`'s is the one that is not a wire reading at all; see
+"the wire cannot see a grenade touch, so it does not read one" below. The
 `/measured` columns of `cmd/qw-demoinfo-eval` score exactly that, on the
 same 186 archive demos, against the same verbatim block (the harness
 captures the stored family BEFORE the withhold; it is a second tier, not
@@ -879,7 +883,7 @@ measurement rather than a claim.
 | `acc.rl.attacks` | 632 | 99.8% / 0.00% | unchanged |
 | `acc.lg.hits` | 434 | 99.3% / 0.00% | unchanged |
 | `acc.axe.hits` | 86 | 100.0% / 0.00% | unchanged |
-| `acc.gl.hits` | 424 | 42.9% / 55.13% | unchanged — see below |
+| `acc.gl.hits` | 424 | 42.9% / 55.13% | **92.0% / 3.79%** |
 | `acc.{lg,gl,ng,sng}.attacks` | 434/424/139/336 | 98.4-100.0% / 0.00% | unchanged |
 
 `lg` and `axe` are the control: their any-path count already WAS KTX's
@@ -944,7 +948,7 @@ unconditional 6/14, so a demo of either kind reads that row off-scale
 against the block. Neither mode is in this 186-demo population, and a
 branch measured against nothing is worse than a documented gap.
 
-**`gl` is the one weapon the wire cannot answer, and it says so.** KTX
+**The wire cannot see a grenade touch, so it does not read one.** KTX
 increments `wpn[wpGL].hits` in `GrenadeTouch` (`ktx/src/weapons.c:1331`)
 and then detonates the grenade through `GrenadeExplode` →
 `T_RadiusDamage`, which raises `dmg_is_splash` for every row it writes
@@ -952,12 +956,70 @@ and then detonates the grenade through `GrenadeExplode` →
 the wire, and the count that reproduces `acc.rl.hits` on 632 of 632 rows
 reproduces **0.00%** of KTX's gl total: `acc.gl.direct/wire` scores 30.0%
 of 424 rows exact with a bias of −1.93, and every one of those exact rows
-is a player who touched nobody. A wire-linked gl row therefore keeps the
-any-path count with `hitsConvention: anyDamage`, and the UI keeps its
-`≠` mark on that cell alone. The RECONSTRUCTED tier can publish gl
-directs (89.6% / 3.55%) precisely because it never reads the splash flag
-— it re-classifies each explosion from the flight geometry and the spent
-fuse (`damagerecon/direct.go`).
+is a player who touched nobody. Until 2026-08-29 that was where the
+question stopped — a wire-linked gl row kept the any-path count
+(42.9% exact, +1.06 per row, **55.13%** aggregate OVER-count) with
+`hitsConvention: anyDamage`, and the UI wore its `≠` mark on that cell.
+
+**It is answered the way an OLD demo answers it.** The reconstruction
+never reads the splash flag either — it re-classifies each explosion from
+the flight geometry and the spent fuse (`direct.go`) — and none of that
+evidence is era-dependent: the grenade's broadcast flight, its detonation
+point against the victim's 32×32×56 hull, and the 2.5 s fuse
+(`weapons.c:1434`) are on a modern demo exactly as they are on a 2004 one.
+So the same classifier is fed the WIRE rows (`damagerecon.WireDirectTouches`
+→ `aim.players[].weapons[].direct` → `playerStats.accuracy.byWeapon.gl`),
+and it lands ABOVE the reconstructed tier it borrows from:
+
+| gl counter, 424 archive player rows | exact | bias / row | p90 \|err\| | aggregate |
+|---|---|---|---|---|
+| `anyDamage` (what a wire row published before) | 42.9% | +1.06 | 4 | 55.13% |
+| `direct/wire` (the splash flag) | 30.0% | −1.93 | 5 | 100.00% |
+| `acc.gl.hits` (RECONSTRUCTED tier, same rows) | 89.6% | −0.07 | 1 | 3.55% |
+| **`acc.gl.hits/measured` (shipped)** | **92.0%** | **−0.07** | **0** | **3.79%** |
+
+Better on three of the four measures than the tier whose classifier it is,
+and identically biased on the fourth. The wire row is the STRONGER input
+of the two eras and the gap is where that shows: its attacker and weapon
+are measured rather than inferred, so a candidate cannot win the row for
+the wrong shooter, and its damage value is the server's own rather than a
+health/armor delta reconstruction. The only work left for this side is the
+lookup — which of that shooter's grenades the row belongs to — where the
+reconstruction has to answer "whose damage is this at all" first.
+
+**What bounds the count is measured too, and it is not `hits`.** rl's
+directs are a subset of the fires the linker connected, so clamping
+`Direct` to `Hits` is belt and braces there. gl's are not: a grenade that
+touched somebody while the fire→flight join failed to link its fire is a
+touch with no `Hit`, and the clamp throws it away. Both were run over the
+same 424 rows:
+
+| gl `Direct` bounded by | exact | bias / row | aggregate |
+|---|---|---|---|
+| `hits` (fires that connected) | 85.6% | −0.15 | 7.58% |
+| **fires (shipped)** | **92.0%** | **−0.07** | **3.79%** |
+
+The fire bound is the one that bounds a touch count physically — one
+grenade per fire, one touch per grenade — and it is the same bound the
+reconstructed tier's `recon.directHits` already carried. It never actually
+bites: `acc.gl.classifier/wire`, the raw unclamped row count, scores
+identically to the shipped column. The cost is that gl's
+`direct` + `splash` + `missed` no longer partitions its fires
+(`splash` floors at zero), which `result.WeaponAim` states per weapon.
+
+**`rl` keeps the flag, and the classifier says by how much.** The same
+run scores `acc.rl.classifier/wire` — the classifier substituted for the
+flag on the very rows the flag answers — at **54.7%** of 632 rows exact,
++0.16 per row, **1.54%** aggregate, against the flag's 100.0% / 0.00%.
+Nothing can beat a count that is the server's own verdict, so rl stays on
+the splash bit and the classifier's rl verdict ships nowhere; the column
+is kept because what an alternative costs is what decides against it.
+(It is worth reading beside the reconstructed tier's rl on the same
+players, 46.5% exact / 1.20%: the wire's exact damage value and measured
+attacker buy the classifier 8 points of exact rows, which is the same
+asymmetry the gl table shows — while the aggregate moves the other way,
+because the residual there is one-sided under-count and here it is a
+smaller two-sided one that does not cancel as neatly.)
 
 **`ng`/`sng` are on KTX's scale but under-recover.** Both weapons launch
 exactly one spike per `attacks++` (`W_FireSuperSpikes`,
@@ -980,6 +1042,15 @@ classification: a rocket that touched somebody but whose damage row the
 fire→damage join did not reach reads as a miss, which is the same exposure
 the pre-v75 any-path count always had. `acc.rl.hits/measured` is what
 measures it — 99.8% of 632 rows exact at 0.02% aggregate, above.
+
+**`gl`'s zero is measured only where its classifier ran.** Unlike rl's, gl's
+count needs the spatial shot streams (`Registry.BuildShotStreams`) for the
+flights and `TE_EXPLOSION` points its geometry reads. mvd-api and the WASM
+build always request them; a bare `qw-analyze` parse does not, and there aim
+publishes no gl direct/splash split at all and the accuracy row falls back to
+the any-path count with `hitsConvention: anyDamage` — the honest label and the
+`≠` mark, rather than a withheld 0 passed off as "touched nobody". Same shape
+as the nail gate below, same latch discipline (`Streams.ShotStreamsComputed`).
 
 Without `-include nails` there is no nail linkage at all, and v75 stops
 publishing the `hits: 0` that produced — the field is withheld, keyed on

@@ -640,10 +640,14 @@ func deathsOf(res *Result, name string) int {
 //     separate rhits/vhits counters instead (ktx/src/combat.c:1099-1121). It
 //     comes off the aim section's Direct. `attacks` stays the FIRE count —
 //     that is KTX's own `attacks++` per rocket launched (:1033).
-//   - gl — KTX counts the same touch (GrenadeTouch, ktx/src/weapons.c:1331),
-//     but the WIRE cannot see it: the touch detonates the grenade and every
-//     resulting damage row is splash-flagged, so this tier keeps the any-path
-//     count and says so. See deriveMeasuredAcc for the measurement.
+//   - gl — KTX counts the same touch (GrenadeTouch, ktx/src/weapons.c:1331)
+//     and the WIRE cannot see it: the touch detonates the grenade and every
+//     resulting damage row is splash-flagged. The touch is re-derived instead,
+//     from the flight geometry and the fuse, by the same classifier a
+//     reconstructed row uses (damagerecon/direct.go) — so gl publishes the
+//     direct-impact count too wherever the spatial shot streams the geometry
+//     needs were built. Without them the row keeps the any-path count and
+//     says so. See deriveMeasuredAcc.
 //   - lg, ng, sng, axe — one trace per fire (`hits++` at
 //     ktx/src/weapons.c:1106 against `attacks++` at :1233), one nail per
 //     spike (:1549, :1620), one swing for the axe (:85, :119). Each has a
@@ -850,26 +854,43 @@ type reconHit struct {
 // Returns nil unless the aim section says its hits were MEASURED off the wire
 // damage stream; on a reconstructed demo the recon tier owns this field.
 //
-// Only sg/ssg and rl appear. Every other weapon has a single damage path, so
-// KTX's counter and the fire→damage join count the same event and the
+// Only sg/ssg, rl and gl appear. Every other weapon has a single damage path,
+// so KTX's counter and the fire→damage join count the same event and the
 // caller's fallback is already right (see deriveAccuracy).
 //
-// GL IS DELIBERATELY ABSENT even though KTX counts its `hits` the same way it
-// counts rl's. Aim's Direct is the count of the attacker's NON-SPLASH damage
-// rows, and a grenade never writes one: GrenadeTouch increments the counter
-// and then detonates through GrenadeExplode → T_RadiusDamage
+// GL'S ROW IS CONDITIONAL, and on a different input from the rest. KTX counts
+// its `hits` exactly the way it counts rl's — in the touch handler — but the
+// WIRE does not record that touch: GrenadeTouch increments the counter and
+// then detonates through GrenadeExplode → T_RadiusDamage
 // (ktx/src/weapons.c:1327-1340), which raises dmg_is_splash for every row it
-// writes (ktx/src/combat.c:1207). So the wire log has no record of a grenade
-// TOUCHING anybody, and a direct-impact count taken off it is ~0 for every
-// player: measured against the verbatim block it runs 100% aggregate error
-// (cmd/qw-demoinfo-eval `acc.gl.direct/wire` — 30.0% of 424 archive rows
-// exact at bias −1.93, and every one of those rows is a player who touched
-// nobody). gl therefore keeps the any-path
-// count, honestly labelled HitsAnyDamage and marked off-scale by the
-// consumers, rather than a near-zero claiming to be KTX's number. The
-// RECONSTRUCTED tier can publish gl's touch count because it does not read
-// the splash flag at all — it re-classifies each explosion from the flight
-// geometry and the grenade fuse (damagerecon/direct.go).
+// writes (ktx/src/combat.c:1207), so a direct-impact count read off the
+// splash flag is ~0 for every player — measured against the verbatim block it
+// ran 100% aggregate under-count on 424 archive rows, 30.0% of them exact at
+// bias −1.93, and every exact one is a player who touched nobody
+// (cmd/qw-demoinfo-eval `acc.gl.direct/wire`).
+//
+// Since v75 aim's gl Direct is not that count. It is the SAME touch
+// classifier the reconstructed tier runs (damagerecon/direct.go, fed the wire
+// rows by damagerecon.WireDirectTouches): the grenade's broadcast detonation
+// point against the victim's hull, minus the grenades whose flight spanned
+// the whole 2.5 s fuse and therefore died of it rather than of a touch
+// (weapons.c:1434). That is era-independent evidence, so it answers the
+// question on a modern demo exactly as it does on an old one, and gl
+// publishes HitsDirectImpact like rl.
+//
+// The classifier needs the spatial shot streams (Registry.BuildShotStreams —
+// mvd-api and the WASM build always request them, a bare qw-analyze parse
+// does not), which is what glTouches gates on: the same latch, read the same
+// way, as nailsTracked in deriveAccuracy. Without them there is no
+// measurement, and the row falls back to the caller's any-path count
+// honestly labelled HitsAnyDamage rather than to a fabricated near-zero
+// claiming to be KTX's number.
+//
+// Measured against the verbatim block, gl at 92.0% of 424 archive rows exact
+// and 3.79% aggregate, bias −0.07 per row — above the reconstructed tier
+// whose classifier it is (89.6% / 3.55% on the same rows), because the wire
+// row names the attacker and the weapon instead of inferring them
+// (damagerecon/ACCURACY.md).
 //
 // WITHHELD FIRES ARE STILL ATTACKS. WeaponAim.Pellets is Shots × 6/14 over
 // every in-window fire (aimcore/aim.go: `wa.Pellets = wa.Shots * perFire`) —
@@ -897,6 +918,14 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 	if res.Aim == nil || !res.Aim.HitsMeasured {
 		return nil
 	}
+	// The gl touch classifier's own input: the spatial shot streams carry
+	// the grenade flights and TE_EXPLOSION points its geometry is read from
+	// (damagerecon.WireDirectTouches). Streams.ShotStreamsComputed is the
+	// pipeline's truthful latch for "they were built", the same shape as
+	// Streams.NailsComputed — and aim withholds gl's direct/splash split
+	// under exactly this condition, so reading Direct without it would
+	// publish a withheld 0 as a measurement.
+	glTouches := res.Streams != nil && res.Streams.ShotStreamsComputed
 	out := map[string]map[string]measuredAcc{}
 	for i := range res.Aim.Players {
 		pa := &res.Aim.Players[i]
@@ -935,6 +964,19 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 				// it is measured rather than assumed: acc.rl.hits/measured
 				// reproduces the verbatim KTX block on 99.8% of 632 archive
 				// rows at 0.02% aggregate (damagerecon/ACCURACY.md).
+				m = measuredAcc{hits: w.Direct, convention: result.HitsDirectImpact}
+			case "gl":
+				// Same field, same convention, DIFFERENT evidence — and the
+				// only row here that can be unmeasurable. Aim's gl Direct is
+				// the flight-geometry touch classifier's count, not the
+				// splash flag's (see the function comment); where the streams
+				// it reads were never built aim publishes no split at all, and
+				// this row must be absent so the caller falls back to the
+				// any-path count with its convention stated rather than
+				// reading a withheld 0 as "touched nobody".
+				if !glTouches {
+					continue
+				}
 				m = measuredAcc{hits: w.Direct, convention: result.HitsDirectImpact}
 			default:
 				continue

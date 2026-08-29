@@ -321,6 +321,22 @@ func detectRocketRegime(in *inputs, events []reconEvent) (lo, hi float64, regime
 			above++
 		}
 	}
+	return regimeVerdict(n, at110, above)
+}
+
+// regimeVerdict turns one demo's near-direct rocket tally into the published
+// three-value verdict: `fixed` (the hits clustered on 110 with essentially
+// nothing above it — a KTX >= 1.36 server, and the magnitude prior is in
+// force), `spread` (there were enough hits to test the hypothesis and they
+// did not cluster, which is evidence AGAINST the constant rather than the
+// absence of evidence) and `unestablished` (fewer hits than the test needs,
+// so the question was never put).
+//
+// Shared by the two callers that count the same population off different
+// logs — detectRocketRegime over the reconstructed events, and
+// detectWireRocketRegime over the wire rows — so the two eras cannot drift
+// into different thresholds for the same verdict name.
+func regimeVerdict(n, at110, above int) (lo, hi float64, regime string) {
 	if n < regimeMinSamples {
 		return 0, 0, result.RocketRegimeUnestablished
 	}

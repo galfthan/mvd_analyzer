@@ -6626,7 +6626,6 @@
             "hits": 1,
             "missed": 1,
             "shots": 2,
-            "splash": 1,
             "team": {
               "hits": 1
             },
@@ -12697,7 +12696,6 @@
           {
             "hits": 3,
             "shots": 3,
-            "splash": 3,
             "weapon": "gl"
           }
         ]
@@ -26272,7 +26270,6 @@
               "hits": 1
             },
             "shots": 5,
-            "splash": 1,
             "weapon": "gl"
           },
           {

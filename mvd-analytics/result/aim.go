@@ -140,11 +140,35 @@ type LGRampSamples struct {
 //     before it every quad row over-counted. Two per-fire pellet counts it
 //     does not model — k_instagib's single-slug sg and k_yawnmode's 21-pellet
 //     ssg — are stated, not guarded (see analyzer.deriveMeasuredAcc).
-//   - RL/GL: Direct (non-splash contacts ≈ KTX hits), Splash (linked hits that
-//     were splash-only), Missed (fires that linked to no impact);
-//     Direct+Splash+Missed == Shots. Projectile linking runs on every parse;
-//     the block is present whenever any rl/gl fire linked to its flight
-//     (absent only when nothing linked — e.g. non-KTX demos).
+//
+//   - RL/GL: Direct (projectiles that TOUCHED a player — KTX's own rl/gl hits
+//     counter, incremented in the touch handler and nowhere else,
+//     ktx/src/weapons.c:994 and :1329), Splash (linked hits that were
+//     splash-only), Missed (fires that linked to no impact). Projectile
+//     linking runs on every parse; the block is present whenever any rl/gl
+//     fire linked to its flight (absent only when nothing linked — e.g.
+//     non-KTX demos).
+//
+//     The two weapons reach Direct from DIFFERENT evidence, and it matters
+//     to a reader of the number. rl's is the wire's own splash flag: a direct
+//     T_MissileTouch writes its damage as an unflagged row, dmg_is_splash
+//     being raised only inside T_RadiusDamage (ktx/src/combat.c:1207), so
+//     Direct is a subset of the fires that connected and
+//     Direct+Splash+Missed == Shots. gl's cannot be — GrenadeTouch does ALL
+//     its damage through T_RadiusDamage, so every gl row on the wire is
+//     splash-flagged whatever the grenade hit — and is instead the
+//     flight-geometry touch classifier's count (damagerecon/direct.go, fed
+//     the wire rows by damagerecon.WireDirectTouches; the same classifier a
+//     reconstructed demo's recon.directHits uses). Two consequences:
+//     gl's Direct is bounded by the FIRES rather than by Hits, so
+//     Direct+Splash+Missed may exceed Shots and Splash floors at zero where
+//     a touch's fire went unlinked; and it is WITHHELD — no Direct, no
+//     Splash — on a parse without the spatial shot streams the geometry
+//     needs (Registry.BuildShotStreams; mvd-api and the WASM build always
+//     request them). Measured against the verbatim KTX block on 186 archive
+//     demos: rl 99.8% of 632 player rows exact at 0.02% aggregate, gl 92.0%
+//     of 424 at 3.79% (damagerecon/ACCURACY.md).
+//
 //   - LG: of the missed fires, Blocked (the beam stopped short of its ~600-
 //     unit max length on geometry and its extension to full range crosses a
 //     live enemy's collision hull — on target and in range, the obstruction
@@ -170,7 +194,9 @@ type WeaponAim struct {
 	// from the top-level counters — consumers fall back to those otherwise).
 	// Shots/Pellets and the LG miss classes are not split: misses have no
 	// victim (the miss heuristic targets enemies by construction). Per bucket,
-	// splash = hits − direct and missed = shots − hits.
+	// splash = hits − direct and missed = shots − hits — for rl; a gl bucket's
+	// direct is a touch count that its hits does not bound (see the type
+	// comment), so there splash is the floor-at-zero remainder.
 	Enemy *WeaponAimSplit `json:"enemy,omitempty"`
 	Team  *WeaponAimSplit `json:"team,omitempty"`
 	Self  *WeaponAimSplit `json:"self,omitempty"`
@@ -186,6 +212,13 @@ type WeaponAim struct {
 	Partial    int `json:"partial,omitempty"`
 	Miss       int `json:"miss,omitempty"` // SG/SSG: zero-pellet fires; LG: aim-error misses (neither blocked nor out of range)
 
+	// Direct is the projectile-TOUCH count, Splash the linked hits that were
+	// splash-only and Missed the fires that linked to nothing. Read the type
+	// comment before comparing a gl Direct with an rl one: rl's comes off the
+	// wire's splash flag and partitions its fires with Splash/Missed, gl's
+	// comes off the flight-geometry classifier and is bounded by the fires
+	// alone — and is absent, together with gl's Splash, on a parse that built
+	// no spatial shot streams.
 	Direct int `json:"direct,omitempty"`
 	Splash int `json:"splash,omitempty"`
 	Missed int `json:"missed,omitempty"`

@@ -7,12 +7,20 @@
 // passes a non-empty Query. Filtering is a pure re-run of the same computation
 // over the windowed shot slice, so every output (weapons accuracy, RL/GL
 // direct/splash, LG ramp, crosshair samples) scopes to the window consistently.
+//
+// Its only non-stdlib imports are result and damagerecon — the latter for the
+// one derivation the aim section cannot state itself, the grenade touch a wire
+// damage row does not record (damagerecon.WireDirectTouches). Both sit BELOW
+// this package in the import graph and neither reaches back, so the
+// analyzer/view split above still holds; damagerecon must never import
+// aimcore.
 package aimcore
 
 import (
 	"math"
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -173,17 +181,36 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// aim documents as wire-only.
 	hitsMeasured := res.Damage != nil && res.Damage.Source == result.DamageSourceKTX
 
+	// The direct-TOUCH verdict per wire row, for the one weapon whose touch
+	// the wire does not record. KTX counts gl `hits` in GrenadeTouch
+	// (ktx/src/weapons.c:1329-1333) and then detonates through
+	// T_RadiusDamage, which flags every resulting row splash
+	// (combat.c:1207) — so the splash bit answers rl's question and not
+	// gl's, and gl's is re-derived from the same flight geometry and fuse an
+	// old demo's is (damagerecon.WireDirectTouches). Nil when that
+	// derivation could not run — no spatial shot streams, no position
+	// tracks — and then the gl direct/splash split is WITHHELD rather than
+	// filled with the near-zero the splash bit yields.
+	glTouchVerdict := damagerecon.WireDirectTouches(res)
+
 	dmgByPlayer := make(map[string][]*dmgRec)
 	if hitsMeasured {
-		for _, d := range res.Damage.Events {
+		for i := range res.Damage.Events {
+			d := &res.Damage.Events[i]
 			if d.IsSelf || d.Attacker == "" {
 				continue
 			}
 			if !inWindow(d.Time) {
 				continue
 			}
+			// direct is the row's TOUCH verdict on KTX's terms: the
+			// server's own splash flag for rl, the classifier's for gl.
+			direct := !d.IsSplash
+			if d.Weapon == "gl" {
+				direct = glTouchVerdict != nil && glTouchVerdict[i]
+			}
 			dmgByPlayer[d.Attacker] = append(dmgByPlayer[d.Attacker],
-				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam})
+				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, direct: direct, team: d.IsTeam})
 		}
 	}
 
@@ -236,7 +263,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], quadOf[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], quadOf[player], res.Streams, aliveAt, projLinked, glTouchVerdict != nil, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -256,6 +283,13 @@ type dmgRec struct {
 	weapon string
 	dmg    int
 	splash bool
+	// direct is the row's DIRECT-TOUCH verdict on KTX's terms, which is not
+	// the negation of splash for both projectiles: rl reads the server's own
+	// flag (a direct T_MissileTouch row reaches the wire unflagged), gl reads
+	// the reconstructed-geometry classifier, because every gl row is
+	// splash-flagged whatever the grenade touched. Meaningless — and unread —
+	// outside the rl/gl split.
+	direct bool
 	team   bool
 	self   bool
 	used   bool
@@ -299,7 +333,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, quad []result.Interval, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, quad []result.Interval, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, glTouchesKnown, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -529,21 +563,35 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 		}
 	}
 
-	// RL/GL: direct (non-splash contacts) vs splash-only vs missed. Only with
+	// RL/GL: direct (touching contacts) vs splash-only vs missed. Only with
 	// linking evidence (a linked rl/gl fire anywhere in the demo), else Hit
 	// is indistinguishable from "linking found nothing". Direct splits by
 	// victim class from the damage records (self direct is protocol-
 	// impossible — a missile ignores its owner for collision — so self hits
 	// are splash-only).
+	//
+	// The two weapons reach the same verdict from different evidence, which
+	// is what dmgRec.direct carries: rl off the wire's own splash flag,
+	// exact because T_MissileTouch's direct T_Damage is the one rl row
+	// T_RadiusDamage never wrote; gl off the flight-geometry classifier,
+	// because GrenadeTouch does all its damage through T_RadiusDamage and
+	// leaves no unflagged row to count. When that classifier could not run
+	// (glTouchesKnown false) gl's split is WITHHELD — a near-zero Direct and
+	// a Splash equal to Hits would be the splash flag answering rl's
+	// question in gl's row. Missed does not ride the split and is kept.
 	if projLinked {
 		for _, wn := range []string{"rl", "gl"} {
 			wa := wagg[wn]
 			if wa == nil {
 				continue
 			}
+			if wn == "gl" && !glTouchesKnown {
+				wa.Missed = wa.Shots - wa.Hits
+				continue
+			}
 			directE, directT := 0, 0
 			for _, d := range dmg {
-				if d.weapon == wn && !d.splash {
+				if d.weapon == wn && d.direct {
 					if d.team {
 						directT++
 					} else {
@@ -552,18 +600,46 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 				}
 			}
 			direct := directE + directT
-			if direct > wa.Hits {
-				direct = wa.Hits
+			// What bounds the count differs with the evidence, and the
+			// difference is measured. rl's directs are a SUBSET of the fires
+			// that connected — the same wire rows Shot.Hit was linked from —
+			// so Direct + Splash = Hits holds and the clamp is belt and
+			// braces. gl's are a row count from an independent classifier: a
+			// grenade that touched somebody while the fire→flight join failed
+			// to link its fire is a touch with no Hit, and clamping to Hits
+			// throws it away. Measured on the 186-demo archive corpus against
+			// the verbatim KTX block, clamping gl to Hits scored 85.6% of 424
+			// rows exact at 7.58% aggregate and clamping to the FIRES 92.0% at
+			// 3.79% — so gl is bounded by the only thing that bounds it
+			// physically (one grenade per fire, one touch per grenade), which
+			// is the same bound the reconstructed tier's DirectHits carries.
+			bound := wa.Hits
+			if wn == "gl" {
+				bound = wa.Shots
+			}
+			if direct > bound {
+				direct = bound
 			}
 			wa.Direct = direct
+			// Splash is the fires that connected WITHOUT touching, so it
+			// floors at zero rather than going negative on the gl rows where
+			// the touch count runs above the linked hits.
 			wa.Splash = wa.Hits - direct
+			if wa.Splash < 0 {
+				wa.Splash = 0
+			}
 			wa.Missed = wa.Shots - wa.Hits
 			sp := getS(wn)
-			if directE > sp.enemy.Hits {
-				directE = sp.enemy.Hits
-			}
-			if directT > sp.team.Hits {
-				directT = sp.team.Hits
+			// The per-class split follows the same rule as its total: capped
+			// by the class's own hits where Direct is a subset of them, left
+			// as the row count where it is not.
+			if wn != "gl" {
+				if directE > sp.enemy.Hits {
+					directE = sp.enemy.Hits
+				}
+				if directT > sp.team.Hits {
+					directT = sp.team.Hits
+				}
 			}
 			sp.enemy.Direct = directE
 			sp.team.Direct = directT

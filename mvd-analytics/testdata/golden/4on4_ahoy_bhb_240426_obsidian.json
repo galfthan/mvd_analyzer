@@ -5510,7 +5510,6 @@
               "hits": 4
             },
             "shots": 26,
-            "splash": 6,
             "team": {
               "hits": 2
             },
@@ -10562,7 +10561,6 @@
             "hits": 1,
             "missed": 4,
             "shots": 5,
-            "splash": 1,
             "weapon": "gl"
           },
           {
@@ -15463,7 +15461,6 @@
               "hits": 3
             },
             "shots": 48,
-            "splash": 12,
             "team": {
               "hits": 1
             },
@@ -20668,7 +20665,6 @@
               "hits": 2
             },
             "shots": 42,
-            "splash": 8,
             "team": {
               "hits": 1
             },
@@ -24374,7 +24370,6 @@
             "hits": 1,
             "missed": 6,
             "shots": 7,
-            "splash": 1,
             "weapon": "gl"
           },
           {
@@ -29415,7 +29410,6 @@
               "hits": 1
             },
             "shots": 4,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -33406,7 +33400,6 @@
               "hits": 1
             },
             "shots": 11,
-            "splash": 1,
             "weapon": "gl"
           },
           {
@@ -37197,7 +37190,6 @@
               "hits": 1
             },
             "shots": 14,
-            "splash": 5,
             "weapon": "gl"
           },
           {

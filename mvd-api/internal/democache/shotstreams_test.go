@@ -64,8 +64,10 @@ func TestColdParseBuildsEnrichedStreams(t *testing.T) {
 		t.Fatalf("Shots/Aim absent: shots=%v aim=%v", res.Shots != nil, res.Aim != nil)
 	}
 	// The stream-derived aim splits are present (they only exist in the
-	// enriched parse): with projectiles linked, RL/GL fires split into
-	// direct+splash+missed == shots.
+	// enriched parse). rl's three classes partition its fires; gl's do NOT,
+	// because its Direct is a TOUCH count from the flight-geometry classifier
+	// rather than a subset of the fires the linker connected (result.WeaponAim
+	// Direct), so it is bounded by the fires and nothing else.
 	streamDerived := false
 	for _, pa := range res.Aim.Players {
 		for _, wa := range pa.Weapons {
@@ -73,11 +75,17 @@ func TestColdParseBuildsEnrichedStreams(t *testing.T) {
 				continue
 			}
 			switch wa.Weapon {
-			case "rl", "gl":
+			case "rl":
 				streamDerived = true
 				if got := wa.Direct + wa.Splash + wa.Missed; got != wa.Shots {
 					t.Errorf("%s %s: direct+splash+missed = %d; want shots = %d",
 						pa.Player, wa.Weapon, got, wa.Shots)
+				}
+			case "gl":
+				streamDerived = true
+				if wa.Direct > wa.Shots || wa.Splash+wa.Missed > wa.Shots {
+					t.Errorf("%s gl: direct=%d splash=%d missed=%d exceed shots=%d",
+						pa.Player, wa.Direct, wa.Splash, wa.Missed, wa.Shots)
 				}
 			}
 		}

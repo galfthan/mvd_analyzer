@@ -553,9 +553,13 @@ type PlayerStatsAccuracy struct {
 // src:"ktx" block uses all three at once, one per weapon.
 const (
 	// HitsAnyDamage — one fire that landed damage by ANY path, splash
-	// included. Every weapon of a derived or reconstructed family, and KTX's
-	// own counter for the weapons with only one damage path (lg, axe,
-	// ng/sng), where "any path" and "direct" are the same event.
+	// included. KTX's own counter for the weapons with only one damage path
+	// (lg, axe, ng/sng), where "any path" and "direct" are the same event;
+	// every weapon of a derived or reconstructed family EXCEPT the two whose
+	// touch count both tiers now publish (rl/gl, HitsDirectImpact) and the
+	// shotguns of a wire-linked one (HitsPellets). It remains gl's convention
+	// on a parse that built no spatial shot streams, where the touch
+	// classification cannot run at all.
 	HitsAnyDamage = "anyDamage"
 	// HitsDirectImpact — the projectile TOUCHED a player. KTX's rl/gl
 	// counter, which increments in the touch handler and nowhere else
@@ -566,6 +570,13 @@ const (
 	// rl records reproduce this counter EXACTLY (100.0% of rows), while the
 	// any-path count runs ~4x above it on rl and ~1.5x on gl. That gap is
 	// what makes an unmarked cross-era rl trendline fiction.
+	//
+	// Every tier reaches it for BOTH projectiles, from three different
+	// evidences (damagerecon/ACCURACY.md): KTX's block verbatim; the wire
+	// log's splash flag for rl (99.8% of 632 rows exact); and the
+	// flight-geometry touch classifier for gl, whose touch the wire does not
+	// record at all — on a wire-linked row 92.0% of 424 rows exact, on a
+	// reconstructed one 89.6%, both from damagerecon/direct.go.
 	HitsDirectImpact = "directImpact"
 	// HitsPellets — PELLETS, not fires, on BOTH sides of the ratio: KTX's
 	// sg/ssg counters advance per pellet fired (`attacks += bullets`,

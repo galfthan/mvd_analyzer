@@ -209,6 +209,11 @@ func scoreDemo(path string) ([]row, error) {
 	// so if the convention hypothesis is right this column must agree with the
 	// block exactly.
 	wireDirect := wireDirectHits(res)
+	// The same question put to the direct-touch CLASSIFIER instead of to the
+	// flag — the derivation an old demo has to use, run on this modern one.
+	// It is the shipped answer for gl (whose flag cannot answer it at all)
+	// and the measurement that decided rl keeps the flag.
+	wireClassifier := wireClassifierHits(res)
 	// The WIRE-LINKED accuracy family, as this demo actually publishes it,
 	// captured before anything is swapped. It is a second tier scored against
 	// the same block, not part of the blind answer — see the package comment.
@@ -330,7 +335,7 @@ func scoreDemo(path string) ([]row, error) {
 					case "sg", "ssg":
 						add("acc."+w+".attacks/fires", float64(wv.Acc.Attacks), float64(ws.Shots))
 						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
-					case "rl":
+					case "rl", "gl":
 						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
 					}
 				}
@@ -364,6 +369,13 @@ func scoreDemo(path string) ([]row, error) {
 			// direct impact is a row where the conventions agree at 0, and
 			// dropping it would grade only where it fired.
 			add("acc."+w+".direct/wire", float64(wv.Acc.Hits), float64(wireDirect[r.Name][w]))
+			// `classifier/wire` is the direct-touch classifier run on the WIRE
+			// rows, unclamped — the row count itself, before aim's clamp to the
+			// weapon's fire count. For gl it is what the published
+			// `acc.gl.hits/measured` above is built from (the two differ only
+			// where the clamp bit); for rl it is the alternative to the flag,
+			// whose own 100.0% is the bar it has to clear.
+			add("acc."+w+".classifier/wire", float64(wv.Acc.Hits), float64(wireClassifier[r.Name][w]))
 			// `anyDamage/recon` is the convention the row does NOT publish
 			// for these two, kept so the size of the gap between them stays
 			// measured rather than argued.
@@ -423,6 +435,38 @@ func wireDirectHits(res *analyzer.Result) map[string]map[string]int {
 		if d.Weapon != "rl" && d.Weapon != "gl" {
 			continue
 		}
+		if out[d.Attacker] == nil {
+			out[d.Attacker] = map[string]int{}
+		}
+		out[d.Attacker][d.Weapon]++
+	}
+	return out
+}
+
+// wireClassifierHits counts, per player, the WIRE rl/gl damage rows the
+// DIRECT-TOUCH CLASSIFIER judges a touch (damagerecon.WireDirectTouches): the
+// grenade's detonation point against the victim's hull and the spent-fuse
+// refutation, the rocket's trajectory folded with the magnitude prior — the
+// derivation a pre-instrumentation demo has to reach KTX's counter by, run
+// here on a demo that also carries the server's own answer.
+//
+// Unclamped on purpose. What the pipeline publishes clamps the count to the
+// weapon's fire count (aimcore), and scoring both says whether the clamp is
+// doing anything.
+func wireClassifierHits(res *analyzer.Result) map[string]map[string]int {
+	out := map[string]map[string]int{}
+	// nil covers the absent damage log too — the classifier reads
+	// res.Damage.Events and returns one verdict per row of it, so the
+	// indices below are the same slice's.
+	verdict := damagerecon.WireDirectTouches(res)
+	if verdict == nil {
+		return out
+	}
+	for i := range verdict {
+		if !verdict[i] {
+			continue
+		}
+		d := &res.Damage.Events[i]
 		if out[d.Attacker] == nil {
 			out[d.Attacker] = map[string]int{}
 		}
