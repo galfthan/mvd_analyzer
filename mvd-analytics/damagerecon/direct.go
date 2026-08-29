@@ -170,7 +170,7 @@ func segHitsHull(a, b, vpos vec3, slack float64) bool {
 //
 // isSelf short-circuits to splash: a missile never touches its own owner —
 // both touch handlers return immediately on `other == owner`
-// (ktx/src/weapons.c:951, :1315) — so a self rocket or grenade is radius
+// (ktx/src/weapons.c:954, :1317) — so a self rocket or grenade is radius
 // damage by construction and the question does not arise.
 //
 // A grenade is decided by the detonation point alone. It detonates early
@@ -205,7 +205,7 @@ func directImpact(weapon string, from, ep, vpos vec3, isSelf bool) bool {
 
 // grenadeFuseExpired reports that this grenade died of its FUSE, which makes
 // it a certain non-touch: GrenadeExplode runs on the 2.5 s think
-// (ktx/src/weapons.c:1434) and GrenadeTouch — the only place KTX's gl `hits`
+// (ktx/src/weapons.c:1430) and GrenadeTouch — the only place KTX's gl `hits`
 // counter increments (:1327-1333) — never ran at all.
 //
 // It is the NEGATIVE half of the fuse signal, and the only half that

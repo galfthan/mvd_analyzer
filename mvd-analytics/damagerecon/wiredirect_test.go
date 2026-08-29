@@ -61,7 +61,7 @@ func TestWireDirectTouchesGrenadeClearOfHull(t *testing.T) {
 }
 
 // A grenade whose observed flight spans the whole 2.5 s fuse died of the fuse
-// (weapons.c:1434), so GrenadeTouch never ran — a certain non-touch however
+// (weapons.c:1430), so GrenadeTouch never ran — a certain non-touch however
 // close the detonation point sits. Needs the TE_EXPLOSION endpoint match
 // (epExact), which is what says the bracket ended in a detonation rather than
 // in a PVS exit.

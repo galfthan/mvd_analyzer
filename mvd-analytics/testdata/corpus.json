@@ -81,7 +81,8 @@
     "label": "ffa_matchless_dm2_260116_joiners",
     "mode": "ffa",
     "file": "demos/ffa_matchless_dm2_260116_joiners.mvd.gz",
-    "sha256": "8bda81144351e5509b665b4bff0bb8fbd024e57050c9cb8d96b504bc8378ab73"
+    "sha256": "8bda81144351e5509b665b4bff0bb8fbd024e57050c9cb8d96b504bc8378ab73",
+    "shotStreams": true
   },
   {
     "label": "ffa_matchless_dm6_260704_3s",

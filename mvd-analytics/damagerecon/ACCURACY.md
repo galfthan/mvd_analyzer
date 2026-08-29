@@ -639,7 +639,7 @@ disambiguate each other:
    killing hit the −99 corpse clamp breaks that guarantee and the
    trajectory keeps the last word.
 3. **The spent grenade fuse** (`grenadeFuseExpired`), for `gl` only.
-   `GrenadeExplode` runs on a 2.5 s think (`weapons.c:1434`); a grenade
+   `GrenadeExplode` runs on a 2.5 s think (`weapons.c:1430`); a grenade
    whose own broadcast flight spans that whole fuse and ends in a
    matched `TE_EXPLOSION` therefore died of the fuse, which means
    `GrenadeTouch` — the only place KTX's `gl` counter increments — never
@@ -776,7 +776,7 @@ log — since 2026-08-29 a modern demo's gl row is classified the same way,
 see §"The wire-linked accuracy family vs the verbatim block".)
 
 **The grenade fuse, both directions** (2026-08-24). The fuse is a
-2.5 s think (`weapons.c:1434`) and only a player touch detonates a
+2.5 s think (`weapons.c:1430`) and only a player touch detonates a
 grenade early, so the signal looks symmetric and is not. Our flight
 bracket is entity VISIBILITY, and a grenade leaving the spectator's PVS
 ends its bracket without ending its life — a confound that can only make
@@ -966,7 +966,7 @@ never reads the splash flag either — it re-classifies each explosion from
 the flight geometry and the spent fuse (`direct.go`) — and none of that
 evidence is era-dependent: the grenade's broadcast flight, its detonation
 point against the victim's 32×32×56 hull, and the 2.5 s fuse
-(`weapons.c:1434`) are on a modern demo exactly as they are on a 2004 one.
+(`weapons.c:1430`) are on a modern demo exactly as they are on a 2004 one.
 So the same classifier is fed the WIRE rows (`damagerecon.WireDirectTouches`
 → `aim.players[].weapons[].direct` → `playerStats.accuracy.byWeapon.gl`),
 and it lands ABOVE the reconstructed tier it borrows from:
@@ -1014,6 +1014,17 @@ flag on the very rows the flag answers — at **54.7%** of 632 rows exact,
 Nothing can beat a count that is the server's own verdict, so rl stays on
 the splash bit and the classifier's rl verdict ships nowhere; the column
 is kept because what an alternative costs is what decides against it.
+
+Read 54.7% as a FLOOR on what the classifier could do, not its ceiling. The
+column runs `wireTouched`, whose `died` — the flag that lets the magnitude
+prior fall back to the trajectory where the −99 corpse clamp hides an
+overkill — is `DamageEntry.Bounded != nil`, i.e. only where the analyzer
+reconstructed a bound. A killing rocket that carries no bound is therefore
+judged on its clamped raw value as if the victim had survived, while the
+wire's damage figure is exact on kills too. Nothing depends on the number
+(rl ships the flag either way), so the looser reading was not worth
+tightening — but a future comparison must not quote it as the best a
+trajectory classifier can do on rl.
 (It is worth reading beside the reconstructed tier's rl on the same
 players, 46.5% exact / 1.20%: the wire's exact damage value and measured
 attacker buy the classifier 8 points of exact rows, which is the same

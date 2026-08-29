@@ -268,7 +268,7 @@ tier, so the two sections cannot disagree):
   resulting row splash (`ktx/src/combat.c:1207`), so the wire log holds no
   record of a grenade touch at all. The touch is re-derived instead — from
   the grenade's broadcast flight, its detonation point against the victim's
-  32×32×56 hull, and the 2.5 s fuse (`weapons.c:1434`) — by the very
+  32×32×56 hull, and the 2.5 s fuse (`weapons.c:1430`) — by the very
   classifier a pre-instrumentation demo uses (`damagerecon/direct.go`), fed
   the wire rows. None of that evidence is era-dependent, which is why the
   question a modern demo could not answer turns out to be answerable the way
@@ -308,7 +308,10 @@ value is the server's own. The splash flag is still what `rl` reads (it
 reproduces the block on 632 of 632 rows, which no derivation can beat); the
 classifier run on `rl`'s rows for comparison scores 54.7%, so the flag
 stays. Both numbers are in ACCURACY.md, because what an alternative costs is
-what decides against it.
+what decides against it — where that 54.7% is also flagged as a FLOOR rather
+than the classifier's ceiling, since the comparison column treats a killing
+rocket as a survived one unless the analyzer reconstructed an overkill
+bound for it.
 
 Two consequences a consumer can see. `gl`'s `direct` is bounded by the FIRES
 rather than by `hits` — a grenade that touched somebody while the fire→flight

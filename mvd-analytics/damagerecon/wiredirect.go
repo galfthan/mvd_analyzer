@@ -42,7 +42,7 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // direct TOUCH or not, returning one verdict per res.Damage.Events entry (the
 // slices are index-parallel). Non-projectile, environmental and self rows are
 // always false: a missile never touches its own owner, both touch handlers
-// returning immediately on `other == owner` (ktx/src/weapons.c:951, :1315).
+// returning immediately on `other == owner` (ktx/src/weapons.c:954, :1317).
 //
 // Returns nil — never an all-false slice — when the classification could not
 // run at all, so a consumer can tell "no touches" from "not measured". Three

@@ -395,14 +395,32 @@ var partialGoldenDemos = map[string][]string{
 	// row — MakeGhost returns in matchless mode, ktx/src/client.c:2897).
 	// Projected to the scoreboard, the sessions and the per-player windows:
 	// the eight full streams were 8 MB of what `nova` already pins.
+	//
+	// It is ALSO the corpus's only `shotStreams: true` entry with a WIRE
+	// (KTX) damage section, which makes it the only golden that can pin the
+	// gl touch classifier's shipped path: every other hub entry parses
+	// without the spatial streams and takes the WITHHELD branch, and the one
+	// other enriched entry (2on2_archive_dm4_qw240_recon) has reconstructed
+	// damage and so runs the reconstructed tier instead. The aim paths below
+	// therefore pin what `aim.players[].weapons[].direct` / `.splash` are on
+	// a modern demo the classifier RAN on — including their presence, which
+	// since v75 is the difference between a measured zero and a withhold
+	// (result.WeaponAim) — and `playerStats.players[].accuracy` pins the
+	// consequence: gl on KTX's own `directImpact` scale rather than the
+	// any-path fallback.
 	"ffa_matchless_dm2_260116_joiners": {
 		"match.players", "match.teams", "match.sources", "match.gameMode",
 		"streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 		"playerStats.players[].name", "playerStats.players[].score",
 		"playerStats.players[].window", "playerStats.players[].sessions",
+		"playerStats.players[].accuracy",
 		"playerStats.teams",
 		"frags.frags",
+		"aim.players[].player",
+		"aim.players[].weapons[].weapon", "aim.players[].weapons[].shots",
+		"aim.players[].weapons[].hits", "aim.players[].weapons[].direct",
+		"aim.players[].weapons[].splash", "aim.players[].weapons[].missed",
 	},
 	// The countdown-style FFA (`The match has begun!` at 10 s, KTX demoinfo
 	// block). It pins what the matchless ones cannot: the individual

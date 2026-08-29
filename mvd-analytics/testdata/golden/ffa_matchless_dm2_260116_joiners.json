@@ -1,4 +1,231 @@
 {
+  "aim": {
+    "players": [
+      {
+        "player": ":f",
+        "weapons": [
+          {
+            "hits": 32,
+            "shots": 75,
+            "weapon": "sg"
+          },
+          {
+            "hits": 5,
+            "shots": 5,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 12,
+            "hits": 51,
+            "missed": 57,
+            "shots": 108,
+            "splash": 39,
+            "weapon": "rl"
+          },
+          {
+            "direct": 1,
+            "hits": 1,
+            "missed": 25,
+            "shots": 26,
+            "splash": 0,
+            "weapon": "gl"
+          }
+        ]
+      },
+      {
+        "player": "Amr",
+        "weapons": [
+          {
+            "hits": 55,
+            "shots": 113,
+            "weapon": "sg"
+          },
+          {
+            "hits": 4,
+            "shots": 6,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 13,
+            "hits": 61,
+            "missed": 68,
+            "shots": 129,
+            "splash": 48,
+            "weapon": "rl"
+          },
+          {
+            "shots": 15,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "Myagi",
+        "weapons": [
+          {
+            "hits": 18,
+            "shots": 68,
+            "weapon": "sg"
+          },
+          {
+            "hits": 2,
+            "shots": 12,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 12,
+            "hits": 21,
+            "missed": 81,
+            "shots": 102,
+            "splash": 9,
+            "weapon": "rl"
+          },
+          {
+            "shots": 177,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "Player36",
+        "weapons": [
+          {
+            "hits": 1,
+            "shots": 8,
+            "weapon": "sg"
+          },
+          {
+            "direct": 4,
+            "hits": 16,
+            "missed": 13,
+            "shots": 29,
+            "splash": 12,
+            "weapon": "rl"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
+          }
+        ]
+      },
+      {
+        "player": "SMOK",
+        "weapons": [
+          {
+            "hits": 21,
+            "shots": 69,
+            "weapon": "sg"
+          },
+          {
+            "hits": 3,
+            "shots": 3,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 13,
+            "hits": 65,
+            "missed": 52,
+            "shots": 117,
+            "splash": 52,
+            "weapon": "rl"
+          },
+          {
+            "shots": 25,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "aj-reprogramming",
+        "weapons": [
+          {
+            "hits": 25,
+            "shots": 92,
+            "weapon": "sg"
+          },
+          {
+            "hits": 7,
+            "shots": 13,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 6,
+            "hits": 32,
+            "missed": 58,
+            "shots": 90,
+            "splash": 26,
+            "weapon": "rl"
+          }
+        ]
+      },
+      {
+        "player": "nexus",
+        "weapons": [
+          {
+            "hits": 41,
+            "shots": 92,
+            "weapon": "sg"
+          },
+          {
+            "hits": 1,
+            "shots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 10,
+            "hits": 21,
+            "missed": 25,
+            "shots": 46,
+            "splash": 11,
+            "weapon": "rl"
+          },
+          {
+            "direct": 3,
+            "hits": 5,
+            "missed": 8,
+            "shots": 13,
+            "splash": 2,
+            "weapon": "gl"
+          }
+        ]
+      },
+      {
+        "player": "toast",
+        "weapons": [
+          {
+            "hits": 32,
+            "shots": 84,
+            "weapon": "sg"
+          },
+          {
+            "hits": 1,
+            "shots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 10,
+            "hits": 49,
+            "missed": 44,
+            "shots": 93,
+            "splash": 39,
+            "weapon": "rl"
+          },
+          {
+            "direct": 2,
+            "hits": 5,
+            "missed": 27,
+            "shots": 32,
+            "splash": 3,
+            "weapon": "gl"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
+          }
+        ]
+      }
+    ]
+  },
   "frags": {
     "frags": [
       {
@@ -1409,6 +1636,36 @@
   "playerStats": {
     "players": [
       {
+        "accuracy": {
+          "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0,
+              "hitsConvention": "anyDamage"
+            },
+            "gl": {
+              "attacks": 32,
+              "hits": 2,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 93,
+              "hits": 10,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 504,
+              "hits": 153,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 14,
+              "hits": 10,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "toast",
         "score": {
           "byEnemyWeapon": {
@@ -1463,6 +1720,31 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 13,
+              "hits": 3,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 46,
+              "hits": 10,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 552,
+              "hits": 191,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 14,
+              "hits": 4,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "nexus",
         "score": {
           "byEnemyWeapon": {
@@ -1521,6 +1803,26 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0,
+              "hitsConvention": "anyDamage"
+            },
+            "rl": {
+              "attacks": 29,
+              "hits": 4,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 48,
+              "hits": 4,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "Player36",
         "score": {
           "byEnemyWeapon": {
@@ -1563,6 +1865,31 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 26,
+              "hits": 1,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 108,
+              "hits": 12,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 450,
+              "hits": 148,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 70,
+              "hits": 20,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": ":f",
         "score": {
           "byEnemyWeapon": {
@@ -1617,6 +1944,29 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 25
+            },
+            "rl": {
+              "attacks": 117,
+              "hits": 13,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 414,
+              "hits": 84,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 42,
+              "hits": 13,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "SMOK",
         "score": {
           "byEnemyWeapon": {
@@ -1665,6 +2015,29 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 177
+            },
+            "rl": {
+              "attacks": 102,
+              "hits": 12,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 408,
+              "hits": 79,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 168,
+              "hits": 3,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "Myagi",
         "score": {
           "byEnemyWeapon": {
@@ -1711,6 +2084,26 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "rl": {
+              "attacks": 90,
+              "hits": 6,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 552,
+              "hits": 130,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 182,
+              "hits": 26,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "aj-reprogramming",
         "score": {
           "byEnemyWeapon": {
@@ -1761,6 +2154,29 @@
         }
       },
       {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 15
+            },
+            "rl": {
+              "attacks": 129,
+              "hits": 13,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 678,
+              "hits": 271,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 84,
+              "hits": 46,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
         "name": "Amr",
         "score": {
           "byEnemyWeapon": {
