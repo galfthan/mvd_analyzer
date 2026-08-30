@@ -45,9 +45,14 @@ func (e *MatchStartEvent) EventTimeMs() int32   { return e.TimeMs }
 const (
 	// MatchStartSourceKtxDirective: the `//ktx matchstart` stuffcmd
 	// (ktx/src/match.c:1372, STUFFCMD_DEMOONLY). Unconditional at every
-	// match start in every KTX mode since the directive exists, and so the
-	// only signal on a hoony-mode or non-deathmatch match, where the
-	// `matchdate:` print is gated off (match.c:1290).
+	// match start in every KTX mode since the directive exists — and the
+	// LAST thing StartMatch emits, after the date print (:1291), the
+	// "has begun" print (:1296) and the status update (:1337), so on a
+	// demo that carries any of those it never arrives first. It is the
+	// only signal on a non-deathmatch match and on every hoony point after
+	// the first, where the `matchdate:` print is gated off (match.c:1287,
+	// `deathmatch && (!isHoonyModeAny() || HM_current_point() == 0)`); the
+	// once-per-stream latch means those later points do not re-raise it.
 	MatchStartSourceKtxDirective = "ktx-matchstart"
 	// MatchStartSourcePrint: a broadcast print matching MatchStartPatterns
 	// — "The match has begun!" (ktx/src/match.c:1296) and the kmod/qwe
@@ -181,23 +186,28 @@ func infoStringValue(s, key string) (string, bool) {
 // KTX's `"%d min left"` (ktx/src/match.c:596, :723, :1330, :1337) and a
 // CTF mod's `"%d:%02d left"`.
 //
+// KTX writes exactly four values into the key, from eleven call sites:
+// that clock, `Standby` (world.c:543, match.c:2565, admin.c:585, :602,
+// :714), `Countdown` (match.c:2475) and `Forcestart` (admin.c:693). All
+// but Forcestart are inherited verbatim from Kombat Teams
+// (kteams/v2.07/SRC/MATCH.QC:270, :394, :505, :520), which is why the
+// oldest archive demos read the same way.
+//
 // The test is deliberately the exact pair of clock formats rather than
 // something looser like "ends in ` left`", and that is a decision from the
-// census, not from taste. Across the 1 032 stream-less demos of the
-// 50 951-demo archive sweep the `status` key takes 1 198 distinct values:
-// 1 183 remaining-time readings, EVERY one of which matches one of these
-// two forms, and 15 that are not readings at all — "Standby"
-// (ktx/src/world.c:543), "Countdown" (match.c:2475), "Forcestart"
-// (admin.c:693) and the foreign-mod "Normal", "Game Ended" (the CTF mod's
-// terminal status) and "Round 1/15"…"Round 11/15" (gamedir `arena`). Those
-// last three prove mods write their own vocabulary into this key, which is
-// exactly why a looser test is the riskier one: "2 rounds left" from some
-// mod would read as a running clock and move a demo to
-// midMatchRecording/matchStartUnannounced on no evidence. A mod that spells
-// its clock in a THIRD way is read as idle instead — the failure this
-// direction is a demo landing in noMatchDeclared / noPlayRecorded with its
-// verbatim `status` published as evidence, which a reader can see, rather
-// than a fabricated match verdict, which they cannot.
+// whole-archive sweep (.reports/vocab-sweep-2026-08-29, probe S3), not from
+// taste. Every running reading in 50 964 demos matches one of the two
+// forms; beside them the key carries 43 spellings from mods that write
+// their own vocabulary into it — the CTF mod's terminal `Game Ended`, the
+// `arena` mod's `Round n/9` … `Round n/15` counters, `fortress`'s `Normal`,
+// one E0 server's `match over`. Those are exactly why a looser test is the
+// riskier one: "2 rounds left" from some mod would read as a running clock
+// and move a demo to midMatchRecording/matchStartUnannounced on no
+// evidence. A mod that spells its clock in a THIRD way is read as idle
+// instead — the failure this direction is a demo landing in
+// noMatchDeclared / noPlayRecorded with its verbatim `status` published as
+// evidence, which a reader can see, rather than a fabricated match
+// verdict, which they cannot.
 //
 // It lives in Layer 1 because two consumers share it: the match-start
 // detector above and the analytics no-match marker (via the events

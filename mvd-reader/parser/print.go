@@ -280,39 +280,47 @@ func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 	return p.forceEmitDeath(slot, timeMs)
 }
 
-// MatchStartPatterns is the canonical set of case-insensitive substrings
-// that mark a match start in a broadcast print line. It is one of the four
-// signals behind MatchStartEvent (see matchstart.go) — the print one, and
-// the only one that reaches pre-KTX servers. Match-END phrases gate no
-// parser behaviour and stay in the analyzer.
+// MatchStartPatterns is the case-insensitive substring table behind the
+// `print` match-start signal (MatchStartSourcePrint, matchstart.go) — one
+// of the four signals, and the only one a pre-KTX server gives. Match-END
+// phrases gate no parser behaviour and live in the analyzer.
 //
-// Only ONE phrase here is a verified modern-KTX server broadcast:
-// "has begun" (G_bprint at PRINT_HIGH, ktx/src/match.c:1296). The other
-// five are not reachable from a current KTX server through svc_print —
-// "fight!" is a G_centerprint / G_cp2all (ktx/src/arena.c:602,617-618;
-// clan_arena.c:1402-1403,1537), "go!" is a G_cp2all (race.c:2614),
-// "game start" only occurs inside the centerprinted countdown "N seconds
-// left before game starts" (admin.c:624), "match started" is a C comment
-// (commands.c:5123), and "begins in 1" has no printed string anywhere in
-// ktx/, mvdsv/ or ezquake-source/. All five are kept anyway: dropping a
-// pattern can only lose match-start detection on some mod nobody here has
-// a demo for, and a centerprint-only phrase costs nothing here because it
-// arrives as svc_centerprint and never reaches the print path. See
-// MVD_FORMAT.md's match-start table for the per-entry provenance.
+// Every entry names the server broadcast that produces it. Three former
+// entries — "fight!", "go!", "game start" — were removed after a sweep of
+// all 50 964 archive demos (.reports/vocab-sweep-2026-08-29, probe S1)
+// found no server broadcast behind any of them. KTX's FIGHT! and GO! are
+// centerprints (ktx/src/arena.c:602,617-618; clan_arena.c:1402-1403,1537;
+// race.c:2614) and svc_centerprint never reaches this matcher; what "go!"
+// DID match, on 12 demos, was obituary and scoreboard lines carrying the
+// player name "RINGO!!!" — a false match start on every one of them — and
+// "game start" matched only KTX's `latejoin ... join a team after the game
+// started` help text. A pattern here is a live path or it is a hazard.
 var MatchStartPatterns = []string{
-	// "has begun" rather than "match has begun": KTX prints "The match has
-	// begun!" (ktx/src/match.c:1296), but kmod/qwe announces the MODE —
-	// "The duel has begun!" — and the narrower pattern missed it. A 2003
-	// kmod duel in the test corpus therefore detected no match start at
-	// all, which left every stream empty (streams only record between
-	// Started and Ended) and silently dropped the whole streams-derived
-	// half of the pipeline. This entry is still tighter than "go!" below.
+	// KTX: "The match has begun!" (ktx/src/match.c:1296, G_bprint at
+	// PRINT_HIGH), inherited verbatim from Kombat Teams
+	// (kteams/v2.07/SRC/MATCH.QC:384, v2.21/SRC/MATCH.QC:759). "has begun"
+	// rather than "match has begun" because kmod/qwe announce the MODE —
+	// "The duel has begun!" — and the narrower pattern missed it: a 2003
+	// kmod duel in the test corpus detected no match start at all, which
+	// left every stream empty (streams only record between Started and
+	// Ended) and silently dropped the streams-derived half of the pipeline.
+	// Reached on 468 of the 3 123-demo census, every era; on a modern KTX
+	// demo `matchdate:` (match.c:1291) arrives first and this is the
+	// backstop.
 	"has begun",
+	// A CTF mod's "Match Started!" broadcast: 55 archive demos, all E0, all
+	// gamedir `ctf` — the same population that writes `mode=1` and an
+	// `M:SS left` status clock. Not a KTX string: the only occurrence in
+	// ktx/ is a C comment (commands.c:5247).
 	"match started",
-	"fight!",
-	"go!",
+	// An arena mod's "Series begins in 10 seconds...": 13 archive demos
+	// (12 gamedir `arena`, 1 `qw`), all E0. The match is on the DIGIT — the
+	// same mod's "Match begins in 5 seconds" does not fire — and it lands
+	// ~10 s before play. Kept because nothing else on those demos declares
+	// a start (the mod's status key is a `Round n/m` counter, not a clock),
+	// and a start 10 s early beats no streams at all. No printed string in
+	// ktx/, mvdsv/ or ezquake-source/ contains it.
 	"begins in 1",
-	"game start",
 }
 
 // lookupSlotByName finds the player slot whose userinfo name matches

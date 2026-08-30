@@ -1471,16 +1471,12 @@ Before a match starts, players are in **warmup mode** where:
 - Frags don't count
 - Player state data is **meaningless for analysis**
 
-The countdown sequence typically looks like:
-```
-"The match begins in 10 seconds"
-"The match begins in 5"
-"The match begins in 4"
-"The match begins in 3"
-"The match begins in 2"
-"The match begins in 1"
-"Fight!"
-```
+On KTX the countdown itself is a **centerprint** — the settings table
+(`PrintCountdown`, `ktx/src/match.c:1454`, via `ShowMatchSettings` at `:2077`) and the per-second "N seconds
+left before game starts" (`admin.c:624`) both travel as `svc_centerprint`,
+so nothing in the countdown reaches the print matchers below. The only
+countdown text that arrives as `svc_print` is what a foreign mod chooses
+to bprint (the arena mod's `Series begins in 10 seconds...`, below).
 
 #### Match Start Detection
 
@@ -1493,9 +1489,9 @@ corroborator and the analytics `MatchTimingDetector` cannot disagree.
 
 | Source | Wire form | Emitted by | Notes |
 |---|---|---|---|
-| `matchdate` | `svc_print` level 2, line-**initial** `matchdate: …` | `ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)` | Gated only on `deathmatch != 0` and non-hoony, so it survives matchless play. First on the wire in every KTX demo measured (13 matchless FFA + the whole golden corpus), which makes it the source that names most modern demos. Line-initial, not "contains": a chat line quoting the stamp must not start a match. |
+| `matchdate` | `svc_print` level 2, line-**initial** `matchdate: …` | `ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)` | Gated only on `deathmatch != 0` and, on hoony, the first point (`match.c:1287`: `deathmatch && (!isHoonyModeAny() \|\| HM_current_point() == 0)`), so it survives matchless play. First on the wire in every KTX demo measured (13 matchless FFA + the whole golden corpus), which makes it the source that names most modern demos. Line-initial, not "contains": a chat line quoting the stamp must not start a match. |
 | `print` | `svc_print` matching `parser.MatchStartPatterns` (table below) | `ktx/src/match.c:1296` (`"The match has begun!"`), kmod/qwe mode spellings | The only signal a pre-KTX server gives. **Absent on matchless servers** — see below. |
-| `ktx-matchstart` | `svc_stufftext` `//ktx matchstart` | `ktx/src/match.c:1372`, `STUFFCMD_DEMOONLY` | Unconditional at every match start in every KTX mode — no cvar gate at all. It is therefore the only signal on a hoony-mode or non-deathmatch match, where `matchdate:` is gated off. |
+| `ktx-matchstart` | `svc_stufftext` `//ktx matchstart` | `ktx/src/match.c:1372`, `STUFFCMD_DEMOONLY` | Unconditional at every match start in every KTX mode — no cvar gate at all — but the **last** thing `StartMatch()` emits, after the date print, the "has begun" print and the status update, so it never arrives first on a demo that carries any of those. It is the only signal on a non-deathmatch match and on every hoony point after the first, where `matchdate:` is gated off; the once-per-demo latch means those later points do not re-raise it. |
 | `status` | `svc_serverinfo` `status` moving to a running clock from a value that was not one | `ktx/src/match.c:1337` (`"%d min left"`); foreign mods write their own `"%d:%02d left"` | Weakest and last of the four on the wire, so it decides only where the others are absent — ktx 1.38 / 1.40-beta demos that print no `matchdate:`, and the `fortress` / `ctf` mods. The **transition** is what counts: the once-a-minute countdown ticks that follow (`match.c:723`) are not a start, and a recording that opens with the clock already running (`fullserverinfo … \status\4 min left`) never fires at all — that demo is a mid-match recording, not a match start. |
 
 **Why four and not one: matchless servers.** A KTX server with
@@ -1527,24 +1523,25 @@ Measured across the golden corpus, no demo's match start moved when the
 three new signals were added.
 
 The print table is `parser.MatchStartPatterns` (`mvd-reader/parser/print.go`),
-reproduced here in its entirety — all six entries, matched as
-case-insensitive substrings:
+reproduced here in its entirety — three entries, matched as
+case-insensitive substrings on non-chat prints:
 
-| Pattern | Provenance | Notes |
-|---------|-----------|-------|
-| `"has begun"` | **verified** in `ktx/` | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1296`, a `G_bprint`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). This is the entry that fires on a modern KTX demo. |
-| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` / `G_cp2all` (`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
-| `"go!"` | **not a broadcast in current KTX** | `GO!` is a `G_cp2all` in the race countdown (`ktx/src/race.c:2614`) — again `svc_centerprint`, not `svc_print`. Also the loosest entry in the table, a bare `"go!"` substring, which is why chat is refused (below). |
-| `"match started"` | **not printed at all** | The only occurrence in the vendored trees is a C comment (`ktx/src/commands.c:5123`). |
-| `"begins in 1"` | unverified | No printed string in `ktx/`, `mvdsv/` or `ezquake-source/`. If some mod does emit it, note it fires ~1 s *before* the start proper. |
-| `"game start"` | **not a broadcast in current KTX** | The only KTX string containing it is the pre-match countdown `"N seconds left before game starts"`, a `G_centerprint` (`ktx/src/admin.c:624`) — so it cannot reach this matcher, and would be a *pre*-start phrase if it could. |
+| Pattern | Producer | Notes |
+|---------|----------|-------|
+| `"has begun"` | **KTX** `"The match has begun!"` (`ktx/src/match.c:1296`, `G_bprint` at PRINT_HIGH), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:384`, `v2.21/SRC/MATCH.QC:759`) | Also catches kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). Reached on 468 of the 3 123-demo census, every era. On a modern KTX demo `matchdate:` arrives first and this is the backstop. |
+| `"match started"` | a **CTF mod**'s `"Match Started!"` broadcast | 55 archive demos, all E0, all gamedir `ctf` — the same population that writes `mode=1` and an `M:SS left` status clock. Not a KTX string: the only occurrence in `ktx/` is a C comment (`commands.c:5247`). |
+| `"begins in 1"` | an **arena mod**'s `"Series begins in 10 seconds..."` broadcast | 13 archive demos (12 gamedir `arena`, 1 `qw`), all E0. The match is on the *digit* — the same mod's `"Match begins in 5 seconds"` does not fire — and lands ~10 s before play. Kept because nothing else on those demos declares a start (the mod's `status` key is a `Round n/m` counter, not a clock). No printed string in `ktx/`, `mvdsv/` or `ezquake-source/` contains it. |
 
-The last five entries predate this table and are kept because removing a
-pattern can only lose match-start detection on a mod nobody here has a
-demo for. None of them is quietly attributed to KTX: the only phrase this
-repo can prove a current KTX server *broadcasts* is `"has begun"`. Four
-of the five do exist in `ktx/`, but as `svc_centerprint` text or a C
-comment, so on a KTX demo they are dead weight rather than a live path.
+Three former entries — `"fight!"`, `"go!"`, `"game start"` — were removed
+after a sweep of all 50 964 archive demos
+(`.reports/vocab-sweep-2026-08-29`, probe S1) found no server broadcast
+behind any of them. KTX's `FIGHT!` / `GO!` are centerprints
+(`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`;
+`race.c:2614`) and never reach this matcher; what `"go!"` *did* match, on
+12 demos, was obituary and scoreboard lines carrying the player name
+`RINGO!!!` — a false match start on every one — and `"game start"` matched
+only KTX's `latejoin ... join a team after the game started` help text.
+A pattern in this table is a live path or it is a hazard.
 
 **Implementation note**: match on the substring `"has begun"`, not
 `"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast
@@ -1625,18 +1622,17 @@ The match ends when one of these messages appears:
 ```
 [0.0s]   Demo recording starts
 [0.5s]   Players connecting, warmup begins
-[5.2s]   "The match begins in 10 seconds"
-[10.2s]  "The match begins in 5"
-...
-[14.2s]  "The match begins in 1"   <- matches the unverified "begins in 1"
-                                     entry, so the gate flips HERE on a mod
-                                     that emits this line
-[15.2s]  "The match has begun!"    <- matchStartTime on a real KTX demo
-                                     (KTX's own "FIGHT!" is a centerprint
-                                     and never reaches this matcher)
+[5.2s]   svc_centerprint "Countdown: 10 ...\nMode  D u e l\n..."   <- settings
+                                     table; never reaches the print matchers
+[14.2s]  svc_centerprint "1 second left before game starts"
+[15.2s]  "matchdate: 2023-01-16 00:10:40 UTC"   <- matchStartTime (first of the
+[15.2s]  "The match has begun!"                    four signals on the wire)
+[15.2s]  svc_serverinfo status "20 min left"
+[15.2s]  svc_stufftext "//ktx matchstart"        <- last of the four
 [15.3s]  First valid player state updates
 ...
 [1215.2s] "The match is over"  <- matchEndTime (20 min match)
+[1215.3s] svc_intermission
 ```
 
 **Match duration** = `matchEndTime - matchStartTime` (not demo duration)
