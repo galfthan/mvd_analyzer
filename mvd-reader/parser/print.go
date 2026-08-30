@@ -289,7 +289,7 @@ func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 // entries — "fight!", "go!", "game start" — were removed after a sweep of
 // all 50 964 archive demos (.reports/vocab-sweep-2026-08-29, probe S1)
 // found no server broadcast behind any of them. KTX's FIGHT! and GO! are
-// centerprints (ktx/src/arena.c:602,617-618; clan_arena.c:1402-1403,1537;
+// centerprints (ktx/src/arena.c:602-618; clan_arena.c:1540,1684;
 // race.c:2614) and svc_centerprint never reaches this matcher; what "go!"
 // DID match, on 12 demos, was obituary and scoreboard lines carrying the
 // player name "RINGO!!!" — a false match start on every one of them — and

@@ -121,7 +121,7 @@ belongs in the frontend.
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it. `make test` also
   gates on `gofmt -l` before running anything; `make fmt` fixes it.
-- Tests come in four layers:
+- Tests come in five layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),
      `mvd-analytics/analyzer/` (backpacks, duel normalisation, items,

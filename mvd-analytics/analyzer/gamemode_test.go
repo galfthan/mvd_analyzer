@@ -244,9 +244,9 @@ func TestCanonicalTables(t *testing.T) {
 			"COOP": result.GameModeCoop, "C O O P": result.GameModeCoop,
 			"RA":      result.GameModeRA,
 			"Wipeout": result.GameModeWipeout, "Hoony": result.GameModeHoony,
-			"BlitzTDM": result.GameModeTeam,
-			// Pre-2022 builds print CA for wipeout too (17 of the archive's
-			// 23): the family, not the shape. The serverinfo umode decides.
+			"BlitzTDM": result.GameModeHoony,
+			// One current server prints CA for wipeout too (17 of the
+			// archive's 23): the family, not the shape. The umode decides.
 			"CA": "",
 			// Rulesets, not shapes — submodeSet takes them.
 			"LGC": "", "BLOODFST": "",
@@ -264,11 +264,17 @@ func TestCanonicalTables(t *testing.T) {
 	})
 
 	t.Run("umode", func(t *testing.T) {
+		// All seventeen um_list rows (ktx/src/commands.c:4537-4553), so
+		// the offline run pins the whole table.
 		for in, want := range map[string]string{
-			"1on1": result.GameModeDuel, "XonX": result.GameModeTeam,
-			"4on4on4": result.GameModeTeam, "blitz4v4": result.GameModeTeam,
-			"tot": result.GameModeFFA, "ca": result.GameModeCA,
-			"hoonymode": result.GameModeHoony,
+			"1on1": result.GameModeDuel,
+			"2on2": result.GameModeTeam, "3on3": result.GameModeTeam, "4on4": result.GameModeTeam,
+			"10on10": result.GameModeTeam, "2on2on2": result.GameModeTeam,
+			"3on3on3": result.GameModeTeam, "4on4on4": result.GameModeTeam, "XonX": result.GameModeTeam,
+			"ffa": result.GameModeFFA, "tot": result.GameModeFFA,
+			"ctf":       result.GameModeCTF,
+			"hoonymode": result.GameModeHoony, "blitz2v2": result.GameModeHoony, "blitz4v4": result.GameModeHoony,
+			"wipeout": result.GameModeWipeout, "ca": result.GameModeCA,
 			// A suffix only (world.c:1487-1490): never a base token.
 			"race": "",
 			// The archive's three foreign base tokens.
@@ -303,9 +309,9 @@ func TestCanonicalTables(t *testing.T) {
 	})
 }
 
-// Archive 144c5e29…: ktx 1.47-dev, countdown Mode "CA", serverinfo
-// `wipeout-wo-df`, //finalscores "Wipeout". The countdown row is the family
-// on that build; the umode is the shape.
+// Archive 144c5e29…: ktx 1.47-dev (QHLAN:28550), countdown Mode "CA",
+// serverinfo `wipeout-wo-df`, //finalscores "Wipeout". The countdown row is
+// the family on that server's build; the umode is the shape.
 func TestResolveGameMode_CountdownCAIsNotAShape(t *testing.T) {
 	gm := resolveGameMode(nil, &FinalScores{Mode: "Wipeout"}, &MatchSettings{Mode: "CA", Teamplay: 2},
 		map[string]string{"mode": "wipeout-wo-df", "teamplay": "2"}, nil, nil)
@@ -316,6 +322,36 @@ func TestResolveGameMode_CountdownCAIsNotAShape(t *testing.T) {
 		map[string]string{"mode": "ca-ca-df", "teamplay": "2"}, nil, nil)
 	if gm.Canonical != result.GameModeCA || gm.Sources.Canonical != result.GameModeSrcServerInfo {
 		t.Errorf("canonical = %q from %q, want ca from serverinfo", gm.Canonical, gm.Sources.Canonical)
+	}
+	// The cost of not trusting the row: with no serverinfo mode the shape
+	// comes from //finalscores (unobserved in the archive — all 23 carry
+	// the umode), and from nothing at all if that is absent too.
+	gm = resolveGameMode(nil, &FinalScores{Mode: "Clan Arena"}, &MatchSettings{Mode: "CA", Teamplay: 2}, nil, nil, nil)
+	if gm.Canonical != result.GameModeCA || gm.Sources.Canonical != result.GameModeSrcFinalScores {
+		t.Errorf("canonical = %q from %q, want ca from finalscores", gm.Canonical, gm.Sources.Canonical)
+	}
+	gm = resolveGameMode(nil, nil, &MatchSettings{Mode: "CA", Teamplay: 2}, nil, nil, nil)
+	if gm.Canonical != result.GameModeUnknown {
+		t.Errorf("canonical = %q, want unknown when nothing but the CA row names a mode", gm.Canonical)
+	}
+}
+
+// A blitz (team hoony) demo with no demoinfo block: the countdown's
+// BlitzTDM row is hoony — the shape GetMode and the lastscores round
+// accounting give it — and the Teamplay row makes it a team game.
+func TestResolveGameMode_BlitzIsRoundScoredHoony(t *testing.T) {
+	gm := resolveGameMode(nil, nil, &MatchSettings{Mode: "BlitzTDM", Teamplay: 2}, nil, nil, nil)
+	if gm.Canonical != result.GameModeHoony || gm.Sources.Canonical != result.GameModeSrcCountdown {
+		t.Errorf("canonical = %q from %q, want hoony from countdown", gm.Canonical, gm.Sources.Canonical)
+	}
+	if !gm.TeamBased || gm.Sources.TeamBased != result.GameModeSrcCountdown {
+		t.Errorf("teamBased = %v from %q, want true from countdown", gm.TeamBased, gm.Sources.TeamBased)
+	}
+	if !gm.Rounds {
+		t.Error("rounds = false, want true")
+	}
+	if individualLayoutFromMode(&gm) {
+		t.Error("a blitz demo laid out individually")
 	}
 }
 

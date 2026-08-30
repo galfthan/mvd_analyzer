@@ -1471,12 +1471,15 @@ Before a match starts, players are in **warmup mode** where:
 - Frags don't count
 - Player state data is **meaningless for analysis**
 
-On KTX the countdown itself is a **centerprint** — the settings table
-(`PrintCountdown`, `ktx/src/match.c:1454`, via `ShowMatchSettings` at `:2077`) and the per-second "N seconds
-left before game starts" (`admin.c:624`) both travel as `svc_centerprint`,
-so nothing in the countdown reaches the print matchers below. The only
-countdown text that arrives as `svc_print` is what a foreign mod chooses
-to bprint (the arena mod's `Series begins in 10 seconds...`, below).
+On KTX the countdown itself is a **centerprint**: `TimerStartThink`
+(`ktx/src/match.c:2018-2075`) calls `PrintCountdown` (`:1454`) once a
+second, which centerprints the settings table headed `Countdown: N`; the
+admin force-start's "N seconds left before game starts" (`admin.c:624`) is
+a centerprint too. (`ShowMatchSettings`, `:2077`, is the separate
+`G_bprint` dump of the same settings.) Nothing in the countdown reaches
+the print matchers below. The only countdown text that arrives as
+`svc_print` is what a foreign mod chooses to bprint (the arena mod's
+`Series begins in 10 seconds...`, below).
 
 #### Match Start Detection
 
@@ -1491,7 +1494,7 @@ corroborator and the analytics `MatchTimingDetector` cannot disagree.
 |---|---|---|---|
 | `matchdate` | `svc_print` level 2, line-**initial** `matchdate: …` | `ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)` | Gated only on `deathmatch != 0` and, on hoony, the first point (`match.c:1287`: `deathmatch && (!isHoonyModeAny() \|\| HM_current_point() == 0)`), so it survives matchless play. First on the wire in every KTX demo measured (13 matchless FFA + the whole golden corpus), which makes it the source that names most modern demos. Line-initial, not "contains": a chat line quoting the stamp must not start a match. |
 | `print` | `svc_print` matching `parser.MatchStartPatterns` (table below) | `ktx/src/match.c:1296` (`"The match has begun!"`), kmod/qwe mode spellings | The only signal a pre-KTX server gives. **Absent on matchless servers** — see below. |
-| `ktx-matchstart` | `svc_stufftext` `//ktx matchstart` | `ktx/src/match.c:1372`, `STUFFCMD_DEMOONLY` | Unconditional at every match start in every KTX mode — no cvar gate at all — but the **last** thing `StartMatch()` emits, after the date print, the "has begun" print and the status update, so it never arrives first on a demo that carries any of those. It is the only signal on a non-deathmatch match and on every hoony point after the first, where `matchdate:` is gated off; the once-per-demo latch means those later points do not re-raise it. |
+| `ktx-matchstart` | `svc_stufftext` `//ktx matchstart` | `ktx/src/match.c:1372`, `STUFFCMD_DEMOONLY` | Unconditional at every match start in every KTX mode — no cvar gate at all. It is the last line of `StartMatch()`, after the date print and the "has begun" print, so it never arrives first on a demo that carries either; but the `serverinfo status` localcmd written before it (`:1337`) only executes at the next frame's `Cbuf_Execute` (`mvdsv/src/sv_main.c:3323`), so on the wire the directive **precedes** the status update. On a non-deathmatch match and on every hoony point after the first, where `matchdate:` is gated off, it is therefore the first signal, with the status transition a frame behind; the once-per-demo latch means those later points do not re-raise it. |
 | `status` | `svc_serverinfo` `status` moving to a running clock from a value that was not one | `ktx/src/match.c:1337` (`"%d min left"`); foreign mods write their own `"%d:%02d left"` | Weakest and last of the four on the wire, so it decides only where the others are absent — ktx 1.38 / 1.40-beta demos that print no `matchdate:`, and the `fortress` / `ctf` mods. The **transition** is what counts: the once-a-minute countdown ticks that follow (`match.c:723`) are not a start, and a recording that opens with the clock already running (`fullserverinfo … \status\4 min left`) never fires at all — that demo is a mid-match recording, not a match start. |
 
 **Why four and not one: matchless servers.** A KTX server with
@@ -1536,8 +1539,7 @@ Three former entries — `"fight!"`, `"go!"`, `"game start"` — were removed
 after a sweep of all 50 964 archive demos
 (`.reports/vocab-sweep-2026-08-29`, probe S1) found no server broadcast
 behind any of them. KTX's `FIGHT!` / `GO!` are centerprints
-(`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`;
-`race.c:2614`) and never reach this matcher; what `"go!"` *did* match, on
+(`ktx/src/arena.c:602-618`; `clan_arena.c:1540,1684`; `race.c:2614`) and never reach this matcher; what `"go!"` *did* match, on
 12 demos, was obituary and scoreboard lines carrying the player name
 `RINGO!!!` — a false match start on every one — and `"game start"` matched
 only KTX's `latejoin ... join a team after the game started` help text.
@@ -1612,7 +1614,7 @@ non-chat print containing the one phrase in `matchEndPatterns`:
 
 | Pattern | Producer | Notes |
 |---------|----------|-------|
-| `"match is over"` | **KTX** `"The match is over"` (`ktx/src/match.c:331`, gated on `deathmatch`), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:139`, `v2.21/SRC/MATCH.QC:172`) | Printed a frame or so before the intermission on a normal end, so it is usually the one that fires. |
+| `"match is over"` | **KTX** `"The match is over"` (`ktx/src/match.c:331` — the `else if (deathmatch)` after the hoony branch at `:324`, so a hoony series never prints it: 0 of 45 archive hoony demos do), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:139`, `v2.21/SRC/MATCH.QC:172`) | Printed a frame or so before the intermission on a normal end, so it is usually the one that fires. |
 
 Five former entries — `"match ended"`, `"match complete"`, `"game over"`,
 `"timelimit hit"`, `"fraglimit hit"` — were removed after a sweep of all
@@ -1642,8 +1644,10 @@ known limitations.
 [14.2s]  svc_centerprint "1 second left before game starts"
 [15.2s]  "matchdate: 2023-01-16 00:10:40 UTC"   <- matchStartTime (first of the
 [15.2s]  "The match has begun!"                    four signals on the wire)
-[15.2s]  svc_serverinfo status "20 min left"
-[15.2s]  svc_stufftext "//ktx matchstart"        <- last of the four
+[15.2s]  svc_stufftext "//ktx matchstart"
+[15.2s]  svc_serverinfo status "20 min left"     <- last of the four: the
+                                     localcmd runs at the next frame's
+                                     Cbuf_Execute, same demo timestamp
 [15.3s]  First valid player state updates
 ...
 [1215.2s] "The match is over"  <- matchEndTime (20 min match)
@@ -3505,7 +3509,7 @@ KTX renders the **complete match-settings table** into an `svc_centerprint` once
 
 | Row label | Meaning | Source |
 |-----------|---------|--------|
-| `Mode` | Game mode (`Duel`, `Team`, `FFA`, `CA`, `CTF`, `LGC`, `BlitzTDM`, `Hoony`, `RACE`, etc.) | `match.c:1410-1447` |
+| `Mode` | Game mode: `D u e l`, `T e a m`, `F F A`, `C T F`, `R A C E`, `C O O P`, `CA`, `RA`, `Wipeout`, `Hoony`, `BlitzTDM`, `LGC`, `BLOODFST`, `Unknown` (redtext; the analyzer strips the spaces). At least one current server build prints `CA` for wipeout too. On a hoony duel the last three frames are `PersonalisedCountdown` (`:1498-1503`) and carry no Mode row. | `match.c:1511-1571` |
 | `Deathmatch` | `deathmatch` cvar value | `match.c:1384` |
 | `Teamplay` | `teamplay` cvar value (only printed in team modes) | `match.c` |
 | `Timelimit` | minutes | `match.c` |

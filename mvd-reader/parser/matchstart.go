@@ -13,10 +13,13 @@ import (
 // obituary gate (p.matchStarted) and the analyzers'.
 //
 // Four independent signals can raise it (see the MatchStartSource*
-// constants). KTX emits three of them from the same StartMatch() call in
-// the same server frame (ktx/src/match.c:1291, :1337, :1372), so on a
-// modern KTX demo the TimeMs is the same whichever one is seen first and
-// the Source names only which byte arrived first, not a different instant.
+// constants). KTX emits three of them from the same StartMatch() call
+// (ktx/src/match.c:1291, :1337, :1372) — the two prints and the stuffcmd go
+// out in that frame, the `serverinfo status` localcmd is queued and runs
+// at the next frame's Cbuf_Execute (mvdsv/src/sv_main.c:3323) — and the
+// demo stamps them with the same time, so on a modern KTX demo the TimeMs
+// is the same whichever one is seen first and the Source names only which
+// byte arrived first, not a different instant.
 // The reason all four exist is the demos where only some are present: a
 // matchless FFA/CTF server (k_matchless 1, ktx/src/world.c:1874-1877)
 // SKIPS the "The match has begun!" broadcast — `match.c:1294-1297` gates
@@ -45,14 +48,19 @@ func (e *MatchStartEvent) EventTimeMs() int32   { return e.TimeMs }
 const (
 	// MatchStartSourceKtxDirective: the `//ktx matchstart` stuffcmd
 	// (ktx/src/match.c:1372, STUFFCMD_DEMOONLY). Unconditional at every
-	// match start in every KTX mode since the directive exists — and the
-	// LAST thing StartMatch emits, after the date print (:1291), the
-	// "has begun" print (:1296) and the status update (:1337), so on a
-	// demo that carries any of those it never arrives first. It is the
-	// only signal on a non-deathmatch match and on every hoony point after
-	// the first, where the `matchdate:` print is gated off (match.c:1287,
-	// `deathmatch && (!isHoonyModeAny() || HM_current_point() == 0)`); the
-	// once-per-stream latch means those later points do not re-raise it.
+	// match start in every KTX mode since the directive exists. It is the
+	// last line of StartMatch, after the date print (:1291) and the "has
+	// begun" print (:1296), so on a demo that carries either of those it
+	// never arrives first; the `serverinfo status` localcmd (:1337) is
+	// written before it in the source but executes at the NEXT frame's
+	// Cbuf_Execute (mvdsv/src/sv_main.c:3323), so on the wire the directive
+	// precedes the status update (archive 0543ac01…: stufftext, then the
+	// status key, same timestamp). On a non-deathmatch match and on every
+	// hoony point after the first, where `matchdate:` is gated off
+	// (match.c:1287, `deathmatch && (!isHoonyModeAny() ||
+	// HM_current_point() == 0)`), it is therefore the FIRST signal, with
+	// the status transition a frame behind it; the once-per-stream latch
+	// means those later points do not re-raise it.
 	MatchStartSourceKtxDirective = "ktx-matchstart"
 	// MatchStartSourcePrint: a broadcast print matching MatchStartPatterns
 	// — "The match has begun!" (ktx/src/match.c:1296) and the kmod/qwe

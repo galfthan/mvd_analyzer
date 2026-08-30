@@ -49,11 +49,12 @@ import (
 // events.MatchStartEvent (mvd-reader/parser/matchstart.go), which this
 // analyzer latches as an event like any other.
 type MetadataAnalyzer struct {
-	serverInfo   map[string]string
-	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
-	fairpacks    string // "best weapon" / "last weapon fired", from the ShowMatchSettings broadcast
-	finalScores  *FinalScores
-	timing       MatchTimingDetector
+	serverInfo    map[string]string
+	countdownRaw  string // the countdown centerprint the settings are read from (post-Q_normalizetext)
+	countdownRank int    // how much structure countdownRaw carried: 2 a Mode row, 1 any known row, 0 none
+	fairpacks     string // "best weapon" / "last weapon fired", from the ShowMatchSettings broadcast
+	finalScores   *FinalScores
+	timing        MatchTimingDetector
 
 	// Finalize's outputs, kept for PopulateCore (which runs right after it):
 	// the countdown-derived settings table and the defensive copy of the
@@ -102,16 +103,32 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		}
 	case *events.CenterPrintEvent:
 		// The KTX countdown centerprint is the only multi-line centerprint
-		// during the pre-match window that contains "Countdown:". We only
-		// want the last one we saw before the match started, because the
-		// final 1-second-remaining centerprint contains the same fields as
-		// the rest and is the cleanest sample.
+		// during the pre-match window that contains "Countdown:". Every
+		// frame of it repeats the settings table (PrintCountdown,
+		// ktx/src/match.c:1454, once a second from TimerStartThink :2057)
+		// — except on a
+		// hoony duel, where the last three frames come from
+		// PersonalisedCountdown instead (:1498-1503, :1393) and carry a
+		// spawn-point row and at most a Timelimit, no Mode. Keeping "the
+		// last frame" therefore lost the whole table on every hoony-duel
+		// demo (archive 0543ac01…: countdownText "Countdown:  1", no
+		// settings). Keep the most structured frame, latest among equals:
+		// one with a Mode row over one with any known row over any at all.
 		if a.timing.Started {
 			return nil
 		}
 		text := events.NormalizeQuakeText([]byte(e.Message))
 		if strings.Contains(text, "Countdown:") {
-			a.countdownRaw = text
+			rank := 0
+			if s := parseCountdownCenterprint(text); s != nil {
+				rank = 1
+				if s.Mode != "" {
+					rank = 2
+				}
+			}
+			if rank >= a.countdownRank {
+				a.countdownRaw, a.countdownRank = text, rank
+			}
 		}
 	case *events.FinalScoresEvent:
 		// Last write wins, like the serverinfo keys above: a demo spanning
@@ -390,10 +407,13 @@ func applyCountdownField(s *MatchSettings, key, value string) bool {
 	// Mode rendering uses "D u e l", "T e a m", "F F A", etc — strip spaces.
 	flat := strings.ReplaceAll(value, " ", "")
 
-	// A pre-KTX table keys the row `Mode:` — three E0 archive demos
-	// (75e18f801f654a92…), found by the whole-archive sweep. KTX never
-	// writes the colon, so trimming it changes nothing on a KTX table.
-	key = strings.TrimSuffix(key, ":")
+	// A pre-KTX table keys this one row `Mode:` (its other rows are
+	// unpunctuated) — three E0 archive demos (75e18f801f654a92…), found by
+	// the whole-archive sweep. Only that row is accepted with the colon;
+	// no producer writes any other.
+	if key == "Mode:" {
+		key = "Mode"
+	}
 
 	switch key {
 	case "Mode":

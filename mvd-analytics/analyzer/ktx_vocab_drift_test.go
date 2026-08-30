@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // The mode vocabularies in gamemode.go are transcriptions of KTX source:
@@ -40,13 +41,15 @@ func ktxRead(t *testing.T, dir, name string) string {
 	return string(b)
 }
 
-// cFuncBody returns the body of a top-level C function whose signature
-// line starts with sig, up to the first line that is a lone "}".
+// cFuncBody returns the body of a top-level C function DEFINITION whose
+// signature line is sig — the anchor is the signature followed by the
+// opening brace on its own line, so a forward declaration of the same
+// signature cannot redirect it — up to the first lone "}" line.
 func cFuncBody(t *testing.T, src, sig string) string {
 	t.Helper()
-	i := strings.Index(src, sig)
+	i := strings.Index(src, sig+"\n{")
 	if i < 0 {
-		t.Fatalf("function %q not found", sig)
+		t.Fatalf("function definition %q not found", sig)
 	}
 	rest := src[i:]
 	j := strings.Index(rest, "\n}\n")
@@ -56,10 +59,22 @@ func cFuncBody(t *testing.T, src, sig string) string {
 	return rest[:j]
 }
 
+// Whitespace-tolerant, and every count below is EXACT for the vendored
+// tree: a KTX change that adds, removes or re-spells a producer fails the
+// test rather than slipping past a "≥ N" threshold, and so does a rewrite
+// the regexp no longer recognises. Update the count and the table together.
 var (
-	reReturnStr = regexp.MustCompile(`return "([^"]+)"`)
-	reRedtext   = regexp.MustCompile(`mode = redtext\("([^"]+)"\)`)
+	reReturnStr = regexp.MustCompile(`return\s*"([^"]+)"`)
+	reRedtext   = regexp.MustCompile(`mode\s*=\s*redtext\s*\(\s*"([^"]+)"\s*\)`)
 	reUmRow     = regexp.MustCompile(`(?m)^\s*\{\s*"([^"]+)"`)
+	reBprintStr = regexp.MustCompile(`G_bprint\s*\([^;]*?"([^"]*)"`)
+)
+
+const (
+	ktxCountdownModeLiterals = 14 // match.c PrintCountdown
+	ktxUmListRows            = 17 // commands.c um_list
+	ktxGetModeReturns        = 11 // stats.c GetMode
+	ktxLastscoresReturns     = 10 // commands.c lastscores2str
 )
 
 func TestKTXVocabularyDrift(t *testing.T) {
@@ -68,8 +83,8 @@ func TestKTXVocabularyDrift(t *testing.T) {
 	t.Run("PrintCountdown Mode literals", func(t *testing.T) {
 		body := cFuncBody(t, ktxRead(t, dir, "match.c"), "void PrintCountdown(int seconds)")
 		lits := reRedtext.FindAllStringSubmatch(body, -1)
-		if len(lits) < 10 {
-			t.Fatalf("found %d Mode literals in PrintCountdown, expected the full chain", len(lits))
+		if len(lits) != ktxCountdownModeLiterals {
+			t.Fatalf("found %d Mode literals in PrintCountdown, want %d — KTX changed or the regexp missed one", len(lits), ktxCountdownModeLiterals)
 		}
 		for _, m := range lits {
 			raw := m[1]
@@ -79,9 +94,9 @@ func TestKTXVocabularyDrift(t *testing.T) {
 			}
 			// The rows that name no shape must be ones the resolver
 			// passes over on purpose: "Unknown" is KTX saying it does not
-			// know either, "CA" is the isCA() family on the builds that
-			// predate the Wipeout branch (see canonicalFromCountdown), and
-			// a ruleset row lands in submodes.
+			// know either, "CA" is the isCA() family on at least one
+			// current server build (see canonicalFromCountdown), and a
+			// ruleset row lands in submodes.
 			if raw == "Unknown" || raw == "CA" {
 				continue
 			}
@@ -100,8 +115,8 @@ func TestKTXVocabularyDrift(t *testing.T) {
 		table := src[i:]
 		table = table[:strings.Index(table, "};")]
 		rows := reUmRow.FindAllStringSubmatch(table, -1)
-		if len(rows) < 15 {
-			t.Fatalf("found %d um_list rows", len(rows))
+		if len(rows) != ktxUmListRows {
+			t.Fatalf("found %d um_list rows, want %d", len(rows), ktxUmListRows)
 		}
 		for _, m := range rows {
 			if canonicalFromUmode(m[1]) == "" {
@@ -112,14 +127,17 @@ func TestKTXVocabularyDrift(t *testing.T) {
 
 	t.Run("GetMode and lastscores2str literals", func(t *testing.T) {
 		noShape := map[string]bool{"instagib": true, "midair": true, "unknown": true}
-		for _, f := range []struct{ file, sig string }{
-			{"stats.c", "const char* GetMode(void)"},
-			{"commands.c", "char* lastscores2str(lsType_t lst)"},
+		for _, f := range []struct {
+			file, sig string
+			want      int
+		}{
+			{"stats.c", "const char* GetMode(void)", ktxGetModeReturns},
+			{"commands.c", "char* lastscores2str(lsType_t lst)", ktxLastscoresReturns},
 		} {
 			body := cFuncBody(t, ktxRead(t, dir, f.file), f.sig)
 			lits := reReturnStr.FindAllStringSubmatch(body, -1)
-			if len(lits) < 8 {
-				t.Fatalf("%s: found %d return literals", f.sig, len(lits))
+			if len(lits) != f.want {
+				t.Fatalf("%s: found %d return literals, want %d", f.sig, len(lits), f.want)
 			}
 			for _, m := range lits {
 				if canonicalFromKTXMode(m[1]) == "" && !noShape[m[1]] {
@@ -130,25 +148,32 @@ func TestKTXVocabularyDrift(t *testing.T) {
 	})
 
 	t.Run("match end broadcasts", func(t *testing.T) {
-		src := ktxRead(t, dir, "match.c")
-		for line, ends := range map[string]bool{
-			`G_bprint(2, "The match is over\n")`: true,
-			`G_bprint(2, "The point is over\n")`: false, // per-point, see matchEndPatterns
-		} {
-			if !strings.Contains(src, line) {
-				t.Errorf("match.c no longer contains %s — the end table's provenance moved", line)
+		// Every G_bprint string in EndMatch that says something is over,
+		// fed to the real detector. Exactly two today: the match line ends
+		// the match, the per-point hoony line does not (matchEndPatterns).
+		body := cFuncBody(t, ktxRead(t, dir, "match.c"), "void EndMatch(float skip_log)")
+		want := map[string]bool{"The match is over": true, "The point is over": false}
+		seen := 0
+		for _, m := range reBprintStr.FindAllStringSubmatch(body, -1) {
+			msg := strings.TrimSuffix(m[1], `\n`)
+			if !strings.Contains(strings.ToLower(msg), "over") {
 				continue
 			}
-			msg := strings.ToLower(line[strings.Index(line, `"`)+1 : strings.LastIndex(line, `\n`)])
-			got := false
-			for _, p := range matchEndPatterns {
-				if strings.Contains(msg, p) {
-					got = true
-				}
+			seen++
+			ends, known := want[msg]
+			if !known {
+				t.Errorf("EndMatch broadcasts %q, which the end table has no verdict on", msg)
+				continue
 			}
-			if got != ends {
-				t.Errorf("%q ends the match = %v, want %v", msg, got, ends)
+			var d MatchTimingDetector
+			d.OnMatchStart(&events.MatchStartEvent{TimeMs: 1000, Source: "matchdate"})
+			d.OnPrint(&events.PrintEvent{Level: events.PrintHigh, Message: msg + "\n", TimeMs: 2000})
+			if d.Ended != ends {
+				t.Errorf("%q ends the match = %v, want %v", msg, d.Ended, ends)
 			}
+		}
+		if seen != len(want) {
+			t.Errorf("found %d 'over' broadcasts in EndMatch, want %d", seen, len(want))
 		}
 	})
 

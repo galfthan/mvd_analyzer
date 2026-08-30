@@ -427,7 +427,12 @@ FFA aim tab offered a filter that could never match anything.
 Every string table the pipeline matches server text against was checked
 against the vendored KTX source and a parser-only sweep of all 50 964
 archive demos (`.reports/vocab-sweep-2026-08-29`, untracked), and the
-Kombat Teams source (`kteams/`, KTX's ancestor) for the oldest era.
+Kombat Teams source (`kteams/`, KTX's ancestor) for the oldest era. The
+sweep's generated verdicts are "keep on any non-chat hit"; four of them
+(`go!`, `game start`, `game over`, `point is over`) were overruled after
+reading the hits — player names, a help line, a spectator's name, and a
+per-point line inside a series — and the reasons are in the code comments
+beside each table.
 
 - **`MatchStartPatterns`** (Layer 1) drops `fight!`, `go!` and
   `game start`: no server broadcasts any of them, and `go!` was a live
@@ -446,9 +451,14 @@ Kombat Teams source (`kteams/`, KTX's ancestor) for the oldest era.
   um_list display names KTX never prints (0 hits); it is now
   `PrintCountdown`'s own literals, so `RA` (28 demos), `Hoony` (44) and
   `BlitzTDM` are read — on the 1.40-beta hoony demo the countdown is the
-  only mode source there is. `CA` is deliberately unmapped: pre-2022 KTX
-  builds print it for wipeout too (17 of 23 archive cases), so the
-  serverinfo umode decides. `BLOODFST` joins `LGC` as a ruleset row
+  only mode source there is — once the countdown latch keeps the frame
+  that carries the table rather than the last frame, which on a hoony
+  duel is `PersonalisedCountdown`'s spawn-point row with no Mode at all
+  (`match.c:1498-1503`; every hoony-duel demo had `matchSettings: null`).
+  `CA` is deliberately unmapped: one current server build prints it for
+  wipeout too (17 of 23 archive cases, all one hostname on ktx 1.47-dev,
+  while other 1.47-dev servers print `Wipeout`), so the serverinfo umode
+  decides. `BLOODFST` joins `LGC` as a ruleset row
   (`submodes: ["bf"]`). A pre-KTX `Mode:` row (colon) is accepted.
   `canonicalFromUmode` loses the suffix-only `race`; `canonicalFromKTXMode`
   loses seven aliases neither `GetMode` nor `lastscores2str` writes. The

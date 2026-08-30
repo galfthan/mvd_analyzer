@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 // The match-start table and the status test are transcriptions of what KTX
@@ -36,28 +38,42 @@ func readVendored(t *testing.T, dir, name string) []byte {
 	return b
 }
 
-func matchesStartPattern(msg string) bool {
-	lower := strings.ToLower(msg)
-	for _, p := range MatchStartPatterns {
-		if strings.Contains(lower, p) {
-			return true
-		}
-	}
-	return false
+// matchesStartPattern drives the real print matcher — a fresh parser fed
+// the line as a PRINT_HIGH broadcast — rather than re-implementing the
+// substring test, so a change to the matcher's gating fails here too.
+func matchesStartPattern(t *testing.T, msg string) bool {
+	t.Helper()
+	p := NewParser(nil)
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, msg+"\n")
+	return p.matchStarted
 }
 
 // A C source literal: the clock writer escapes its quotes, so the value is
-// either \"…\" or a bare word, followed by the literal \n.
-var reStatusWrite = regexp.MustCompile(`serverinfo status (\\"[^\\]*\\"|\S+?)\\n`)
+// either \"…\" or a bare word, followed by the literal \n. Every count
+// below is EXACT for the vendored tree, so a writer the regexp stops
+// recognising fails the test instead of slipping past a threshold.
+var (
+	reStatusWrite = regexp.MustCompile(`serverinfo status\s+(\\"[^\\]*\\"|\S+?)\\n`)
+	reStatusAny   = regexp.MustCompile(`serverinfo status`)
+	reBprintBegun = regexp.MustCompile(`G_bprint\s*\([^;]*?"([^"]*begun[^"]*)"`)
+)
+
+const ktxStatusWriters = 11 // admin.c 4, match.c 6, world.c 1
 
 func TestKTXMatchStartDrift(t *testing.T) {
 	dir := vendoredDir(t, "ktx/src", "match.c")
 	match := readVendored(t, dir, "match.c")
 
-	if !bytes.Contains(match, []byte(`redtext("The match has begun!")`)) {
-		t.Error(`match.c no longer broadcasts "The match has begun!" — MatchStartPatterns' KTX provenance moved`)
-	} else if !matchesStartPattern("The match has begun!") {
-		t.Error(`MatchStartPatterns does not match KTX's "The match has begun!"`)
+	// Every G_bprint in StartMatch whose string says "begun" must be a
+	// start pattern. Exactly one today.
+	begun := reBprintBegun.FindAllSubmatch(match, -1)
+	if len(begun) != 1 {
+		t.Errorf("found %d 'begun' broadcasts in match.c, want 1", len(begun))
+	}
+	for _, m := range begun {
+		if !matchesStartPattern(t, string(m[1])) {
+			t.Errorf("MatchStartPatterns does not match KTX's %q", m[1])
+		}
 	}
 	for _, want := range []string{`"matchdate: %s\n"`, `"//ktx matchstart\n"`} {
 		if !bytes.Contains(match, []byte(want)) {
@@ -67,9 +83,19 @@ func TestKTXMatchStartDrift(t *testing.T) {
 
 	// Every value KTX writes into the status key, from every writer.
 	t.Run("status writers", func(t *testing.T) {
-		seen := 0
-		for _, name := range []string{"match.c", "admin.c", "world.c"} {
-			for _, m := range reStatusWrite.FindAllSubmatch(readVendored(t, dir, name), -1) {
+		seen, any := 0, 0
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, e := range entries {
+			if !strings.HasSuffix(e.Name(), ".c") {
+				continue
+			}
+			src := readVendored(t, dir, e.Name())
+			any += len(reStatusAny.FindAll(src, -1))
+			name := e.Name()
+			for _, m := range reStatusWrite.FindAllSubmatch(src, -1) {
 				seen++
 				v := strings.Trim(string(m[1]), `\"`)
 				if strings.Contains(v, "%d") {
@@ -85,8 +111,8 @@ func TestKTXMatchStartDrift(t *testing.T) {
 				}
 			}
 		}
-		if seen < 11 {
-			t.Errorf("found %d status writers, expected KTX's 11", seen)
+		if seen != ktxStatusWriters || any != seen {
+			t.Errorf("parsed %d of %d `serverinfo status` writers across ktx/src, want %d of %d", seen, any, ktxStatusWriters, ktxStatusWriters)
 		}
 	})
 }
@@ -100,7 +126,7 @@ func TestKTeamsMatchStartDrift(t *testing.T) {
 
 	if !bytes.Contains(qc, []byte(`"The match has begun!\n"`)) {
 		t.Error(`kteams v2.21 MATCH.QC no longer broadcasts "The match has begun!"`)
-	} else if !matchesStartPattern("The match has begun!") {
+	} else if !matchesStartPattern(t, "The match has begun!") {
 		t.Error(`MatchStartPatterns does not match Kombat Teams' start line`)
 	}
 	for _, v := range []string{"Standby", "Countdown"} {

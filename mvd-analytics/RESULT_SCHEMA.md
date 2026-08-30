@@ -72,7 +72,7 @@ unrelated vocabularies with no translation between them** — KTX's demoinfo
 spelling, the composite serverinfo `mode` key, and the hub search facet —
 and answered "is this a team game" four separate times with four
 hand-written tables that disagreed. All five raw vocabularies are still
-published verbatim (`match.mode`, `metadata.serverInfo.mode`,
+published beside it, unnormalised (`match.mode`, `metadata.serverInfo.mode`,
 `metadata.matchSettings.mode`, `metadata.finalScores.mode`); this is the
 normalisation on top.
 
@@ -81,7 +81,7 @@ normalisation on top.
 | Canonical | `canonical` | string | Mode SHAPE: `duel` \| `team` \| `ffa` \| `ctf` \| `ca` \| `wipeout` \| `race` \| `hoony` \| `ra` \| `coop` \| `unknown`. Ruleset modifiers are NOT canonical values — an instagib game is still an FFA or a 4on4 — they are in `submodes`. |
 | TeamBased | `teamBased` | bool | **Whether a player's team tag names a SIDE rather than decoration.** Mirrors KTX's own `tp_num()` gate, `(isTeam() \|\| isCTF() \|\| coop) ? teamplay : 0` (`ktx/src/g_utils.c:1586-1588`): the mode must be a team mode AND the teamplay cvar non-zero. False for duel, ffa, race and rocket arena **when a mode source named that mode** — a canonical the roster merely inferred does not veto a teamplay cvar (see Precedence). |
 | Rounds | `rounds` | bool, omitempty | The score is ROUNDS WON, not frags (ca, wipeout, ra, hoony — `ktx/src/commands.c:6867-6886`). Published for consumers comparing a scoreline against a frag total; **nothing in the pipeline gates on it yet**. |
-| Submodes | `submodes` | []string, omitempty | Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf` — `SetMode4ServerInfo`, `ktx/src/world.c:1475-1543`) plus the ones the legacy `k_*` cvars and the countdown table name. |
+| Submodes | `submodes` | []string, omitempty | Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf` — `SetMode4ServerInfo`, `ktx/src/world.c:1475-1543`) plus the ones a `k_*` cvar exported into the serverinfo by hand (KTX never publishes them itself; `k_fallbunny` is on 31 archive demos) and the countdown table name. |
 | Sources | `sources` | GameModeSources | Which vocabulary decided each field. |
 
 `sources.canonical`: `ktx` (demoinfo `mode`) | `countdown` (the KTX
@@ -4281,6 +4281,19 @@ comparable (duel team labels).
 `dmgfrags`, `noItems`, `midair`, `instagib`, `yawnmode`, `airstep`,
 `vwep`, `noweapon`, `matchtag`, `fairpacks`, `socdv2`. See
 `result/metadata.go` for the per-field intent.
+
+`mode` is `PrintCountdown`'s Mode literal (`ktx/src/match.c:1511-1571`)
+after the Quake-font colouring is removed and the spaces KTX letter-spaces
+it with are stripped — so `D u e l` is published as `Duel`, `C O O P` as
+`COOP`. The producer vocabulary is `Duel`, `Team`, `FFA`, `CTF`, `RACE`,
+`COOP`, `CA`, `RA`, `Wipeout`, `Hoony`, `BlitzTDM`, `LGC`, `BLOODFST`,
+`Unknown`; forks add their own (`Extinction`). It is one input to
+[`gameMode`](#gamemode) — which knows that `LGC` / `BLOODFST` name a
+ruleset and that at least one current server build prints `CA` for
+wipeout too — and should be read through that block rather than compared
+directly. On a hoony duel the last three frames are `PersonalisedCountdown`
+(`match.c:1498-1503`, a spawn-point row, no Mode); the block comes from
+the last frame that carried the table.
 
 `fairpacks` (v72) is the one row that does not come from the countdown
 centerprint: KTX broadcasts `Fairpacks setting: <ruleset>` as a level-2

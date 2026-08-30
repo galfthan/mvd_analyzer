@@ -7548,7 +7548,7 @@ components:
           description: "Score is ROUNDS WON, not frags (clan arena, wipeout, rocket arena, hoonymode). Published for consumers comparing a scoreline against a frag total; nothing in the pipeline gates on it. Omitted when false."
           type: boolean
         submodes:
-          description: "Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf`) plus the ones the legacy `k_*` cvars and the countdown table name. Omitted when the demo named none."
+          description: "Ruleset modifiers, sorted: KTX's own tokens from the composite serverinfo `mode` key (`midair`, `instagib`, `lgc`, `ca`, `wo`, `ra`, `race`, `gm`, `df`, `yw`, `bf`) plus the ones a hand-exported `k_*` serverinfo cvar and the countdown table name. Omitted when the demo named none."
           items:
             type: string
           type: array

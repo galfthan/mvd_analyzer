@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -291,11 +292,45 @@ func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
 	}
 }
 
+// A hoony duel's last three countdown frames are PersonalisedCountdown
+// (ktx/src/match.c:1498-1503): a spawn-point row and at most a Timelimit,
+// no Mode. The settings must come from the last frame that carried the
+// table, not from the last frame. Sequence from archive 0543ac01… (the
+// spacing is KTX's); the 1-second frame is the one the old latch kept.
+func TestMetadata_CountdownKeepsTheFrameWithTheTable(t *testing.T) {
+	a := NewMetadataAnalyzer()
+	frames := []string{
+		"Countdown:  5\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
+		"Countdown:  4\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
+		"Countdown:  3\n\n\nNext   low rl\nTimelimit  10\n",
+		"Countdown:  2\n\n\nNext   low rl\nTimelimit  10\n",
+		"Countdown:  1\n\n\nNext   low rl\n",
+	}
+	for _, f := range frames {
+		if err := a.OnEvent(&events.CenterPrintEvent{Message: f}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var r Result
+	if err := a.Finalize(&r); err != nil {
+		t.Fatal(err)
+	}
+	if r.Metadata.MatchSettings == nil || r.Metadata.MatchSettings.Mode != "Hoony" {
+		t.Fatalf("matchSettings = %+v, want Mode Hoony from the 4-second frame", r.Metadata.MatchSettings)
+	}
+	if r.Metadata.MatchSettings.Timelimit != 10 || r.Metadata.MatchSettings.Deathmatch != 3 {
+		t.Errorf("settings = %+v, want the full table", r.Metadata.MatchSettings)
+	}
+	if !strings.HasPrefix(r.Metadata.CountdownText, "Countdown:  4") {
+		t.Errorf("countdownText is %q, want the frame the settings came from", r.Metadata.CountdownText)
+	}
+}
+
 // A pre-KTX countdown table keys the row `Mode:` — three E0 archive demos
 // (75e18f801f654a92…). The key split takes the first whitespace run, so the
 // colon rode along and the row was dropped as unrecognised.
 func TestParseCountdownCenterprint_ColonKeyedMode(t *testing.T) {
-	got := parseCountdownCenterprint("Countdown: 5\nMode:      Duel\nTimelimit: 10\n")
+	got := parseCountdownCenterprint("Countdown: 5\nMode:      Duel\nTimelimit  10\n")
 	if got == nil {
 		t.Fatal("parseCountdownCenterprint returned nil")
 	}

@@ -148,11 +148,13 @@ func canonicalFromUmode(umode string) string {
 		return result.GameModeFFA
 	case "ctf":
 		return result.GameModeCTF
-	case "hoonymode":
+	case "hoonymode", "blitz2v2", "blitz4v4":
+		// Blitz is HoonyMode's team variant. It is the same shape KTX
+		// reports for all three — GetMode says "hoonymode" for
+		// isHoonyModeAny() and lastscore_add books them as lsHM (round
+		// scored) — so it is hoony here too; TeamBased comes from the
+		// teamplay sources, which is what separates blitz from the duel.
 		return result.GameModeHoony
-	case "blitz2v2", "blitz4v4":
-		// Blitz is HoonyMode's team variant: rounds, but real sides.
-		return result.GameModeTeam
 	case "wipeout":
 		return result.GameModeWipeout
 	case "ca":
@@ -176,27 +178,31 @@ func canonicalFromUmode(umode string) string {
 // Precedence inside PrintCountdown is a chain of if/else: bloodfest beats
 // coop beats RA beats CA/Wipeout beats Hoony beats LGC beats BlitzTDM beats
 // race beats duel/team/ffa/ctf. So a Hoony row means the DUEL variant
-// (isHoonyModeDuel), a BlitzTDM row the team one, and an LGC row hides the
-// shape entirely (450 archive demos — it falls through to the serverinfo
-// umode, which still says "1on1"). "Extinction", from a KTX fork, is the
+// (isHoonyModeDuel), a BlitzTDM row the team one — both are hoony here,
+// as they are in GetMode and the lastscores round accounting, with the
+// teamplay sources telling them apart — and an LGC row hides the
+// shape entirely (450 archive demos; 240 of them carry a serverinfo umode,
+// which still says "1on1", and the rest fall further down the precedence). "Extinction", from a KTX fork, is the
 // one row in the archive this table does not name; it falls through too.
 //
-// "CA" is deliberately NOT mapped. The Wipeout branch of that if/else is
-// ktx commit 1194647 (2022-03-17); the builds before it print "CA" for
-// BOTH k_clan_arena values, and the archive is mostly those: of the 23
-// demos whose countdown says CA, 17 are wipeout matches (ktx 1.47-dev,
-// serverinfo `wipeout-wo-df`, `//finalscores` mode "Wipeout" on every one
-// that carries it) and only the six on 1.42–1.46 are clan arena. The row
-// names the isCA() FAMILY, not a shape; the serverinfo umode — `ca` or
-// `wipeout`, present on all 23 — is the source that tells them apart, and
-// it is next in precedence. A "Wipeout" row is unambiguous and mapped.
+// "CA" is deliberately NOT mapped. Of the 23 archive demos whose countdown
+// says CA, 17 are wipeout matches — serverinfo `wipeout-wo-df`,
+// `//finalscores` mode "Wipeout" on every one that carries it — and all
+// 17 come from ONE server (hostname QHLAN:28550, ktxver 1.47-dev), while
+// ten other servers on the same 1.47-dev print "Wipeout" for the identical
+// mode and table. The Wipeout branch above has been in KTX since
+// 1194647 (2022-03-17), so this is not a version that can be bounded: one
+// current build prints the isCA() FAMILY name for both k_clan_arena
+// values. The serverinfo umode — `ca` or `wipeout`, present on all 23 —
+// is the source that tells them apart, and it is next in precedence. A
+// "Wipeout" row is unambiguous and mapped.
 func canonicalFromCountdown(mode string) string {
 	m := strings.ToLower(strings.TrimSpace(mode))
 	m = strings.ReplaceAll(m, " ", "")
 	switch m {
 	case "duel":
 		return result.GameModeDuel
-	case "team", "blitztdm":
+	case "team":
 		return result.GameModeTeam
 	case "ffa":
 		return result.GameModeFFA
@@ -206,7 +212,7 @@ func canonicalFromCountdown(mode string) string {
 		return result.GameModeWipeout
 	case "race":
 		return result.GameModeRace
-	case "hoony":
+	case "hoony", "blitztdm":
 		return result.GameModeHoony
 	case "ra":
 		return result.GameModeRA
@@ -225,7 +231,7 @@ func canonicalFromCountdown(mode string) string {
 // a consumer has one vocabulary to test.
 //
 // The k_* list is not something KTX publishes: it registers every k_ cvar
-// with flags 0 (`PF_registercvar`, mvdsv/src/pr_cmds.c:2601-2610 — no
+// with flags 0 (`PF_registercvar`, mvdsv/src/pr_cmds.c:2613 — no
 // CVAR_SERVERINFO) and has no `serverinfo k_*` writer anywhere, and the
 // whole-archive sweep found none of these six keys on any demo. They stay
 // because an admin can `serverinfo k_x 1` by hand and some do — the archive
