@@ -226,9 +226,8 @@ flips it.
 The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
 lines (`event.type === 'teamsay'`) from the chat column(s); frags and
 public `say` are untouched, and the flag resets per demo load. Its columns
-are Kills plus one per side — or, in an individual field of more than two
-players, Kills plus a single "Chat" column (see *A mode with no teams*
-below).
+are Kills plus one per side — or, in an individual layout that is not a
+duel, Kills plus a single "Chat" column (see *A mode with no teams* below).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -524,7 +523,7 @@ CTF server is laid out individually and genuinely was teamplay. So:
 
 | Question | Helper | Reads | Decides |
 |---|---|---|---|
-| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: a pre-v75 cache is never opened (democache keys tier 2 as `v<schema>f<format>`) | Which panels exist, which palette, the scoreboard shape |
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (index.html `accept`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
 | Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
 | Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
@@ -535,7 +534,7 @@ predicate. The CSS then hides **every team surface**: the Teams panel, the
 (a copy of `Player`) plus `TK` / `TDmg`, which are structurally 0 when
 nobody has a teammate. Region control is not driven by that class:
 `initRegionControl` hides its two panels itself whenever the layout is
-individual and there are more than two participants, because the result
+individual and not a duel (`isMultiPlayerIndividual`), because the result
 ships `timelineAnalysis.regionControl.regions` (the region GEOMETRY, a
 property of the map) for every demo — the panels are NOT hidden by a
 missing-data gate, and before this they rendered an editor whose Apply
@@ -567,9 +566,10 @@ duel, or a 1v1 FFA — still renders as "A vs B", which is what it is.
 Weapons / Team Health/Armor diverging graphs are structurally two-sided: they
 draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
 match; on a multi-player FFA it is the top two PLAYERS and nobody else. So
-when the layout is individual with more than two participants —
-`isMultiPlayerIndividual(result)`, the same test `initRegionControl` and the
-palette apply — `setIndividualFieldLayout` puts an `individual-field` class
+when the layout is individual and not a duel —
+`isMultiPlayerIndividual(result)`, i.e. `isIndividualLayout && !isDuel`,
+where `isDuel` needs exactly two `playerStats` rows, so a lone player takes
+this layout too; the same test `initRegionControl` and the palette apply — `setIndividualFieldLayout` puts an `individual-field` class
 on `<body>`, and the tab becomes the per-player views:
 
 - CSS hides Team Status and the three A↑/B↓ graphs, which takes their

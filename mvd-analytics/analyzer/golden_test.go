@@ -483,9 +483,9 @@ func projectInto(src, dst map[string]interface{}, parts []string) bool {
 		if !ok {
 			return false
 		}
-		// A present-but-empty array is a pinned value (a fragless demo's
-		// `frags: []`), distinct from an absent key: it matches, and any
-		// suffix trivially matches over zero rows.
+		// A present-but-empty array is a pinned value (`aim.players[]` on
+		// a demo where nobody fired), distinct from an absent key: it
+		// matches, and any suffix trivially matches over zero rows.
 		if len(parts) == 1 || len(items) == 0 {
 			dst[key] = items
 			return true

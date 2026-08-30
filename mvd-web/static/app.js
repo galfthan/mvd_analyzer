@@ -2312,7 +2312,10 @@ function hasTeammates(result) {
 // CLAUDE.md's team-colour rule). None of them has a pair of sides to name
 // here: the top two players are not a matchup and everyone else does not
 // appear at all. A two-participant match (a duel, or a 1v1 FFA) IS the
-// two-sided view and keeps every one of them.
+// two-sided view and keeps every one of them. The test is "not a duel"
+// rather than "more than two": isDuel needs exactly two playerStats rows,
+// so an individual layout with fewer (one player alone on a server) takes
+// the field layout too — it has no pair of sides to show either.
 //
 // It was four copies of this expression under four names. They answered
 // different questions in the prose and the same one in the code, and a
@@ -12432,10 +12435,11 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 // The reachable case is aimcore's `projLinked` gate (aimcore/aim.go): no rl or
 // gl fire anywhere in the demo linked to a projectile, so there is no evidence
 // to split. It is rare where this cell renders at all: the split columns are
-// measured-only, so the 1 800 pre-damage-stream demos of the 3 123-demo reach
-// audit that link no projectile never reach it (aimCol swaps those columns
-// for AIM_MEASURED_ONLY_NOTE first); the residue is 7 demos with hitsMeasured
-// and still no linked rl/gl fire (probe P18). Rendering the null as 0 would
+// measured-only, so of the 1 800 demos in the 3 123-demo reach audit that
+// fired rl/gl and linked no projectile, the 1 793 without a damage stream
+// never reach it (aimCol swaps those columns for AIM_MEASURED_ONLY_NOTE
+// first); the other 7 have hitsMeasured and still no linked rl/gl fire, and
+// they are what this note is for (probe P18). Rendering the null as 0 would
 // publish "no rocket or grenade ever touched anybody" as a measurement.
 const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
     'linked to a projectile, so there is nothing to split into direct hits and splash. ' +

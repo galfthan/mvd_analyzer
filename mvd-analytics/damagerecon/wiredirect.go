@@ -29,7 +29,8 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // WireDirectTouches classifies every gl row of a WIRE damage log as a direct
 // TOUCH or not, returning one verdict per res.Damage.Events entry (the slices
 // are index-parallel); rl rows stay false here — the wire's own splash flag
-// is rl's verdict, and the classifier's rl reading is WireDirectTouchesForEval's. Non-projectile, environmental and self rows are
+// is rl's verdict, and the classifier's rl reading belongs to
+// WireDirectTouchesForEval. Non-projectile, environmental and self rows are
 // always false: a missile never touches its own owner, both touch handlers
 // returning immediately on `other == owner` (ktx/src/weapons.c:954, :1317).
 //
