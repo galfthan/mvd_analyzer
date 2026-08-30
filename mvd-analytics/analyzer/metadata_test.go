@@ -293,18 +293,20 @@ func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
 }
 
 // A hoony duel's last three countdown frames are PersonalisedCountdown
-// (ktx/src/match.c:1498-1503): a spawn-point row and at most a Timelimit,
-// no Mode. The settings must come from the last frame that carried the
-// table, not from the last frame. Sequence from archive 0543ac01… (the
-// spacing is KTX's); the 1-second frame is the one the old latch kept.
+// (ktx/src/match.c:1498-1503, :1393-1447): no table — at most a `Next
+// <spawn>` / `Duration` / `Draw` row, and on a series' first point (archive
+// 0543ac01…, frames 7–9 s) just the "Countdown: N" header. The settings
+// must come from the last frame that carried the table, not from the last
+// frame, which is what the old latch kept. Frames 5–4 are 0543ac01's;
+// the three tails cover the header-only and the later-point forms.
 func TestMetadata_CountdownKeepsTheFrameWithTheTable(t *testing.T) {
 	a := NewMetadataAnalyzer()
 	frames := []string{
 		"Countdown:  5\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
 		"Countdown:  4\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
-		"Countdown:  3\n\n\nNext   low rl\nTimelimit  10\n",
-		"Countdown:  2\n\n\nNext   low rl\nTimelimit  10\n",
-		"Countdown:  1\n\n\nNext   low rl\n",
+		"Countdown:  3\n\n\n",
+		"Countdown:  2\n\n\nNext   low rl\nDuration  90s\n",
+		"Countdown:  1\n\n\n",
 	}
 	for _, f := range frames {
 		if err := a.OnEvent(&events.CenterPrintEvent{Message: f}); err != nil {

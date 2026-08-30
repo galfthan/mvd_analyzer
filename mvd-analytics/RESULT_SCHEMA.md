@@ -4292,8 +4292,8 @@ it with are stripped — so `D u e l` is published as `Duel`, `C O O P` as
 ruleset and that at least one current server build prints `CA` for
 wipeout too — and should be read through that block rather than compared
 directly. On a hoony duel the last three frames are `PersonalisedCountdown`
-(`match.c:1498-1503`, a spawn-point row, no Mode); the block comes from
-the last frame that carried the table.
+(`match.c:1498-1503`: no table, at most a `Next` / `Duration` / `Draw`
+row); the block comes from the last frame that carried the table.
 
 `fairpacks` (v72) is the one row that does not come from the countdown
 centerprint: KTX broadcasts `Fairpacks setting: <ruleset>` as a level-2

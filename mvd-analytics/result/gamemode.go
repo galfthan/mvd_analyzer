@@ -59,7 +59,7 @@ type GameMode struct {
 
 	// Submodes are the ruleset modifiers KTX appends to the serverinfo
 	// `mode` key (`umode[-submode...]`, SetMode4ServerInfo,
-	// ktx/src/world.c:1475-1543) plus the ones the legacy `k_*` cvars and
+	// ktx/src/world.c:1475-1543) plus the ones a hand-exported `k_*` cvar and
 	// the countdown table name: midair, instagib, lgc, dmgfrags, race, ra,
 	// ca, wo, gm, bloodfest, yawnmode. Sorted, so the JSON is stable.
 	// Absent when the demo named none.

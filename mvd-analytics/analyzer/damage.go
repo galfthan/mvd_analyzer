@@ -925,7 +925,7 @@ func armorFraction(items int) float64 {
 // (ca/wipeout/ra/lgc/race) suppresses or rewrites whole damage classes
 // while still multicasting raw values (combat.c:475-491) — none
 // observable per hit. Detection is shared with the damage-recon gate
-// (damagerecon.SkipModeReasonFull): legacy k_* cvar keys, the modern
+// (damagerecon.SkipModeReasonFull): hand-exported k_* cvar keys, the modern
 // composite serverinfo `mode` string (the ONLY place newer KTX exposes
 // the submodes — a wipeout demo reads mode=wipeout-wo-df with no
 // k_dmgfrags key at all), and the countdown-derived MatchSettings (the

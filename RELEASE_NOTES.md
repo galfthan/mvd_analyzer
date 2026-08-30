@@ -453,7 +453,7 @@ beside each table.
   `BlitzTDM` are read — on the 1.40-beta hoony demo the countdown is the
   only mode source there is — once the countdown latch keeps the frame
   that carries the table rather than the last frame, which on a hoony
-  duel is `PersonalisedCountdown`'s spawn-point row with no Mode at all
+  duel is a `PersonalisedCountdown` frame with no table at all
   (`match.c:1498-1503`; every hoony-duel demo had `matchSettings: null`).
   `CA` is deliberately unmapped: one current server build prints it for
   wipeout too (17 of 23 archive cases, all one hostname on ktx 1.47-dev,

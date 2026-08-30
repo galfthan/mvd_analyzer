@@ -18,7 +18,11 @@ type MetadataResult struct {
 	MatchSettings *MatchSettings `json:"matchSettings,omitempty"`
 
 	// CountdownText is the raw, color-stripped multi-line text of the
-	// last countdown centerprint we observed before the match started.
+	// countdown centerprint MatchSettings was read from: the most
+	// structured frame seen before the match start (a Mode row, else any
+	// known row, else any), latest among equals. On a hoony duel that is
+	// the last frame that carried the table, since the final three are
+	// PersonalisedCountdown frames without one.
 	CountdownText string `json:"countdownText,omitempty"`
 
 	// FinalScores is KTX's `//finalscores` end-of-match stuffcmd, verbatim

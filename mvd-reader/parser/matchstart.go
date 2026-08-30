@@ -17,9 +17,10 @@ import (
 // (ktx/src/match.c:1291, :1337, :1372) — the two prints and the stuffcmd go
 // out in that frame, the `serverinfo status` localcmd is queued and runs
 // at the next frame's Cbuf_Execute (mvdsv/src/sv_main.c:3323) — and the
-// demo stamps them with the same time, so on a modern KTX demo the TimeMs
-// is the same whichever one is seen first and the Source names only which
-// byte arrived first, not a different instant.
+// demo usually stamps them with the same time (at worst the status lands
+// one frame, ~13 ms, later), so on a modern KTX demo the TimeMs is the
+// same whichever one is seen first and the Source names only which byte
+// arrived first, not a different instant.
 // The reason all four exist is the demos where only some are present: a
 // matchless FFA/CTF server (k_matchless 1, ktx/src/world.c:1874-1877)
 // SKIPS the "The match has begun!" broadcast — `match.c:1294-1297` gates
@@ -55,7 +56,8 @@ const (
 	// written before it in the source but executes at the NEXT frame's
 	// Cbuf_Execute (mvdsv/src/sv_main.c:3323), so on the wire the directive
 	// precedes the status update (archive 0543ac01…: stufftext, then the
-	// status key, same timestamp). On a non-deathmatch match and on every
+	// status key, usually at the same timestamp, on two of its ten points
+	// one frame later). On a non-deathmatch match and on every
 	// hoony point after the first, where `matchdate:` is gated off
 	// (match.c:1287, `deathmatch && (!isHoonyModeAny() ||
 	// HM_current_point() == 0)`), it is therefore the FIRST signal, with

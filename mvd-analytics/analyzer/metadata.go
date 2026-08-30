@@ -10,7 +10,7 @@ import (
 // MetadataAnalyzer collects server-level and match-level metadata that
 // arrives via non-payload protocol commands rather than via stat updates.
 //
-// Three sources feed it:
+// Four sources feed it:
 //
 //  1. svc_stufftext at connection time — the server sends a single
 //     `fullserverinfo "\key\value\…"` console command containing every
@@ -32,11 +32,14 @@ import (
 //     match node reads it back through CoreOutputs only where a value of its
 //     own is missing.
 //
-//  4. svc_centerprint (cmd 26) — KTX renders the full match-settings
-//     table here every second of the 10-second countdown (match.c
-//     PrintCountdown). The last centerprint we see before the match start —
-//     Layer 1's events.MatchStartEvent, whichever of its four wire signals
-//     raised it, not the "match has begun!" print specifically — is the
+//  4. svc_centerprint (cmd 26) — KTX renders the match-settings table
+//     here every second of the countdown (PrintCountdown, match.c:1454,
+//     from TimerStartThink :2057), except that a hoony duel's last three
+//     frames are PersonalisedCountdown (:1498-1503) and carry no table
+//     (at most a Next / Duration / Draw row).
+//     The most structured frame seen before the match start — Layer 1's
+//     events.MatchStartEvent, whichever of its four wire signals raised
+//     it, not the "match has begun!" print specifically — is the
 //     canonical match settings dump:
 //     Mode / Deathmatch / Spawnmodel / Antilag / Teamplay / Timelimit /
 //     Fraglimit / Overtime / Powerups / Dmgfrags / NoItems / Midair /
@@ -105,15 +108,15 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		// The KTX countdown centerprint is the only multi-line centerprint
 		// during the pre-match window that contains "Countdown:". Every
 		// frame of it repeats the settings table (PrintCountdown,
-		// ktx/src/match.c:1454, once a second from TimerStartThink :2057)
-		// — except on a
-		// hoony duel, where the last three frames come from
-		// PersonalisedCountdown instead (:1498-1503, :1393) and carry a
-		// spawn-point row and at most a Timelimit, no Mode. Keeping "the
-		// last frame" therefore lost the whole table on every hoony-duel
-		// demo (archive 0543ac01…: countdownText "Countdown:  1", no
-		// settings). Keep the most structured frame, latest among equals:
-		// one with a Mode row over one with any known row over any at all.
+		// ktx/src/match.c:1454, once a second from TimerStartThink :2057),
+		// except on a hoony duel, where the last three frames come from
+		// PersonalisedCountdown instead (:1498-1503, :1393) and carry no
+		// table — at most a `Next <spawn>` / `Duration` / `Draw` row, and
+		// on a series' first point just the "Countdown: N" header. Keeping
+		// "the last frame" therefore lost the whole table on every
+		// hoony-duel demo (archive 0543ac01…: countdownText "Countdown:  1",
+		// no settings). Keep the most structured frame, latest among
+		// equals: a Mode row over any known row over any frame at all.
 		if a.timing.Started {
 			return nil
 		}

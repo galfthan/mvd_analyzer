@@ -27,7 +27,7 @@ import (
 //	TeamBased  an EXPLICIT individual canonical → demoinfo `tp` →
 //	           serverinfo `teamplay` → countdown Teamplay → the canonical
 //	           mode alone → roster shape
-//	Submodes   serverinfo (composite `mode` key + legacy k_* cvars) and the
+//	Submodes   serverinfo (composite `mode` key + hand-exported k_* cvars) and the
 //	           countdown table, unioned
 //	Rounds     the canonical mode alone
 //
@@ -42,8 +42,8 @@ import (
 // (ktx/src/commands.c:4848 — a `/4on4`, an election, or a server-invoked
 // mode change), so a plain `teamplay` or `k_mode` change afterwards leaves
 // it stating the previous game. The countdown centerprint is printed by
-// ShowMatchSettings from the settings actually in force when the match
-// started. Archive demo b95c35735c4d… is the case: serverinfo `mode=1on1`,
+// PrintCountdown (match.c:1454, from TimerStartThink :2057) from the
+// settings actually in force when the match started. Archive demo b95c35735c4d… is the case: serverinfo `mode=1on1`,
 // countdown Mode row `Team`, demoinfo `mode=team` with `tp 2`.
 //
 // TeamBased's "the mode gets the first word" rule applies only to a canonical
@@ -189,8 +189,8 @@ func canonicalFromUmode(umode string) string {
 // says CA, 17 are wipeout matches — serverinfo `wipeout-wo-df`,
 // `//finalscores` mode "Wipeout" on every one that carries it — and all
 // 17 come from ONE server (hostname QHLAN:28550, ktxver 1.47-dev), while
-// ten other servers on the same 1.47-dev print "Wipeout" for the identical
-// mode and table. The Wipeout branch above has been in KTX since
+// seven other servers on the same 1.47-dev print "Wipeout" for the
+// identical mode and table. The Wipeout branch above has been in KTX since
 // 1194647 (2022-03-17), so this is not a version that can be bounded: one
 // current build prints the isCA() FAMILY name for both k_clan_arena
 // values. The serverinfo umode — `ca` or `wipeout`, present on all 23 —

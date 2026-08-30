@@ -1647,7 +1647,8 @@ known limitations.
 [15.2s]  svc_stufftext "//ktx matchstart"
 [15.2s]  svc_serverinfo status "20 min left"     <- last of the four: the
                                      localcmd runs at the next frame's
-                                     Cbuf_Execute, same demo timestamp
+                                     Cbuf_Execute; usually the same demo
+                                     timestamp, sometimes one frame later
 [15.3s]  First valid player state updates
 ...
 [1215.2s] "The match is over"  <- matchEndTime (20 min match)
@@ -3509,8 +3510,8 @@ KTX renders the **complete match-settings table** into an `svc_centerprint` once
 
 | Row label | Meaning | Source |
 |-----------|---------|--------|
-| `Mode` | Game mode: `D u e l`, `T e a m`, `F F A`, `C T F`, `R A C E`, `C O O P`, `CA`, `RA`, `Wipeout`, `Hoony`, `BlitzTDM`, `LGC`, `BLOODFST`, `Unknown` (redtext; the analyzer strips the spaces). At least one current server build prints `CA` for wipeout too. On a hoony duel the last three frames are `PersonalisedCountdown` (`:1498-1503`) and carry no Mode row. | `match.c:1511-1571` |
-| `Deathmatch` | `deathmatch` cvar value | `match.c:1384` |
+| `Mode` | Game mode: `D u e l`, `T e a m`, `F F A`, `C T F`, `R A C E`, `C O O P`, `CA`, `RA`, `Wipeout`, `Hoony`, `BlitzTDM`, `LGC`, `BLOODFST`, `Unknown` (redtext; the analyzer strips the spaces). At least one current server build prints `CA` for wipeout too. On a hoony duel the last three frames are `PersonalisedCountdown` (`:1498-1503`) and carry no table — at most a `Next` / `Duration` / `Draw` row. | `match.c:1511-1571` |
+| `Deathmatch` | `deathmatch` cvar value | `match.c:1508` |
 | `Teamplay` | `teamplay` cvar value (only printed in team modes) | `match.c` |
 | `Timelimit` | minutes | `match.c` |
 | `Fraglimit` | frags | `match.c` |
