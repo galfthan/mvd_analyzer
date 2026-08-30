@@ -911,14 +911,20 @@ func rebuildIndividualMatch(mr *MatchResult, di *DemoInfoResult, duel bool) {
 	mr.Teams = teams
 }
 
-// isSpectatorTeam returns true if the team name indicates a spectator
+// isSpectatorTeam reports whether a userinfo `team` tag names a spectator
+// rather than a side, so the scoreboard does not grow a "spec" team row.
+//
+// There is no server producer for any of these: `team` is a client userinfo
+// key (ezquake cl_main.c:252, default ""), KTX never writes it, and a
+// spectator's tag is whatever they last set as a player. The list is the
+// spellings people use; it was not probed by the reach audit and is not
+// measured. The empty tag is the common case — a fresh client, or a
+// server with no teamplay — and is treated as no side either way.
 func isSpectatorTeam(team string) bool {
-	// Empty team is often a spectator
 	if team == "" {
 		return true
 	}
 
-	// Common spectator team names
 	spectatorTeams := []string{
 		"spec", "spectator", "specs", "spectators",
 		"coop", "observe", "observer",

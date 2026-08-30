@@ -405,7 +405,14 @@ func collapseSpaces(s string) string {
 
 // applyCountdownField sets one row of the MatchSettings struct. Returns
 // true if the field was recognised so the caller can tell whether the
-// centerprint produced any structured data at all.
+// centerprint produced any structured data at all. The row labels are
+// PrintCountdown's (ktx/src/match.c:1454-1730: Deathmatch :1508, Mode
+// :1573, Respawns :1599, Antilag :1605, NoItems/Midair/Instagib/Yawnmode/
+// Airstep/VWep :1610-1636, Teamplay :1646, Timelimit :1684, Fraglimit
+// :1689, Overtime :1723) plus the rows a pre-KTX table wrote under the
+// same names; a label KTX has stopped or started printing shows up in
+// TestKTXVocabularyDrift only through the Mode row — the others are
+// numeric or boolean and fail loudly in the goldens instead.
 func applyCountdownField(s *MatchSettings, key, value string) bool {
 	// Mode rendering uses "D u e l", "T e a m", "F F A", etc — strip spaces.
 	flat := strings.ReplaceAll(value, " ", "")
@@ -478,6 +485,11 @@ func atoiSafe(s string) int {
 	return n
 }
 
+// isOn reads a countdown table's boolean row. KTX prints such a row only
+// when the setting is on, and always as redtext "on" (PrintCountdown,
+// ktx/src/match.c:1610-1641); "off" appears once, for Overtime (:1695), and
+// is never read here. "1" / "yes" / "true" have no KTX producer and stand
+// only for a foreign table nobody has a demo of.
 func isOn(v string) bool {
 	v = strings.ToLower(strings.TrimSpace(v))
 	return v == "on" || v == "1" || v == "yes" || v == "true"
