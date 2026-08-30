@@ -271,6 +271,7 @@
             "hits": 62,
             "missed": 106,
             "self": {
+              "direct": 0,
               "hits": 16
             },
             "shots": 168,
@@ -580,6 +581,7 @@
             "hits": 54,
             "missed": 105,
             "self": {
+              "direct": 0,
               "hits": 13
             },
             "shots": 159,
@@ -590,7 +592,6 @@
             "hits": 3,
             "missed": 24,
             "shots": 27,
-            "splash": 3,
             "weapon": "gl"
           },
           {
@@ -3606,6 +3607,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 18:27:08 +0200",
+    "deathmatch": 3,
     "demo": "duel_betowen_vs_banan_falco[dm2]260424-1816-duel1.mvd",
     "duration": 600,
     "hostname": "play.quake1.pl - duel #1",
@@ -10288,6 +10290,14 @@
   "match": {
     "duration": 599980,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "dm2",
     "mapTitle": "Claustrophobopolis",
     "mode": "duel",
@@ -10297,6 +10307,7 @@
         "frags": 7,
         "kills": 10,
         "name": "betowen",
+        "rawTeam": "red",
         "suicides": 3,
         "team": "betowen"
       },
@@ -10305,6 +10316,7 @@
         "frags": 16,
         "kills": 19,
         "name": "banan falco",
+        "rawTeam": "coop",
         "suicides": 3,
         "team": "banan falco"
       }
@@ -10312,7 +10324,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {
@@ -10860,19 +10872,17 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 2,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 2
             },
             "rl": {
               "attacks": 159,
-              "hits": 54,
-              "hitsConvention": "anyDamage"
+              "hits": 10,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 28,
-              "hits": 9,
-              "hitsConvention": "anyDamage"
+              "attacks": 168,
+              "hits": 38,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -11049,18 +11059,18 @@
             },
             "rl": {
               "attacks": 168,
-              "hits": 62,
-              "hitsConvention": "anyDamage"
+              "hits": 13,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 19,
-              "hits": 7,
-              "hitsConvention": "anyDamage"
+              "attacks": 114,
+              "hits": 19,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 6,
-              "hits": 1,
-              "hitsConvention": "anyDamage"
+              "attacks": 84,
+              "hits": 10,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -11241,7 +11251,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -15313,6 +15323,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1000,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "matchdate",
       "matchStartUnixMs": 1777047428000
     },

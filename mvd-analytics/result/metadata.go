@@ -18,7 +18,11 @@ type MetadataResult struct {
 	MatchSettings *MatchSettings `json:"matchSettings,omitempty"`
 
 	// CountdownText is the raw, color-stripped multi-line text of the
-	// last countdown centerprint we observed before the match started.
+	// countdown centerprint MatchSettings was read from: the most
+	// structured frame seen before the match start (a Mode row, else any
+	// known row, else any), latest among equals. On a hoony duel that is
+	// the last frame that carried the table, since the final three are
+	// PersonalisedCountdown frames without one.
 	CountdownText string `json:"countdownText,omitempty"`
 
 	// FinalScores is KTX's `//finalscores` end-of-match stuffcmd, verbatim
@@ -86,7 +90,7 @@ type FinalScores struct {
 // to see the centerprint format strings — and ShowMatchSettings()
 // (match.c:2077-2141) for the broadcast rows.
 type MatchSettings struct {
-	Mode       string `json:"mode,omitempty"`       // "Duel" / "Team" / "FFA" / "LGC" / "CA" / "CTF" / etc.
+	Mode       string `json:"mode,omitempty"`       // PrintCountdown's literal, spaces stripped: "Duel" / "Team" / "FFA" / "CTF" / "RACE" / "COOP" / "CA" / "RA" / "Wipeout" / "Hoony" / "BlitzTDM" / "LGC" / "BLOODFST" (ktx/src/match.c:1511-1571)
 	Deathmatch int    `json:"deathmatch,omitempty"` // 0..5
 	Teamplay   int    `json:"teamplay,omitempty"`   // QW teamplay setting
 	Timelimit  int    `json:"timelimit,omitempty"`  // minutes

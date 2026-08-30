@@ -25,11 +25,16 @@
 // across measurements that are NOT the same quantity, and the table marks
 // them:
 //
-//   - sg/ssg accuracy — KTX counts PELLETS on both sides of the ratio, this
-//     pipeline counts trigger pulls and fires that connected;
-//   - rl/gl hits on a WIRE-linked row — KTX's is the direct-impact count and
-//     the wire-linked tier counts any damage path. A RECONSTRUCTED row (what
-//     this harness scores) publishes the direct-impact count since v74, so
+//   - sg/ssg accuracy — KTX counts PELLETS on both sides of the ratio, and a
+//     RECONSTRUCTED row (what the un-suffixed columns score) counts trigger
+//     pulls and fires that connected, since the pellet split needs a per-hit
+//     magnitude the rebuilt log does not carry. The `/measured` columns below
+//     score the wire-linked row, which does publish pellets (v75);
+//   - gl hits on a WIRE-linked row — KTX's is the direct-impact count and the
+//     wire-linked tier counts any damage path there, because a grenade touch
+//     leaves no non-splash row on the wire at all (acc.gl.direct/wire below
+//     measures how far that goes). Both tiers publish the direct-impact count
+//     for rl, and a RECONSTRUCTED row does for gl too since v74, so
 //     acc.rl.hits / acc.gl.hits below ARE comparable with the block;
 //   - spree.max — KTX increments a player's own streak on their SUICIDE
 //     wherever teamplay is off (see result.PlayerStatsScore.MaxSpree). The
@@ -47,7 +52,23 @@
 //     damage log's splash flag, i.e. the control: what the server itself said;
 //   - acc.{rl,gl}.anyDamage/recon — the OTHER convention for the two weapons
 //     whose derived row publishes the direct-impact one (v74), so the size of
-//     the gap between the conventions stays measured.
+//     the gap between the conventions stays measured;
+//   - acc.{sg,ssg,rl}.anyDamage/wire and acc.{sg,ssg}.attacks/fires — the
+//     conventions the WIRE-linked family published before v75 (a fire that
+//     landed damage by any path; trigger pulls), kept for the same reason:
+//     what the new conventions bought is a measurement, not a claim.
+//
+// The `/measured` rows are the OTHER tier. Everything above scores the blind
+// re-derivation — the section an old demo publishes. The `/measured` columns
+// score the section THIS demo actually publishes, the wire-linked one, read
+// off the stored playerStats before the withhold. It is not part of the blind
+// answer and never mixes into those rows; it is here because the wire-linked
+// family also claims to be on KTX's scale per weapon (schema v75: sg/ssg
+// pellets, rl direct impacts, the rest any-damage) and a claim like that
+// has to be measured against the block rather than argued from the KTX
+// sources. `-nails` turns on nail decoding so ng/sng carry a hits count at
+// all; without it those rows are (correctly) withheld and simply do not
+// appear.
 //
 // The verdicts are in damagerecon/ACCURACY.md.
 package main
@@ -70,6 +91,12 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
+// buildNails mirrors the -nails flag into the worker goroutines. ng/sng hit
+// attribution rides svc_nails decoding (analyzer.Registry.BuildNails), and
+// without it the accuracy family withholds those weapons' `hits` — so the
+// only way to score them at all is to turn the decode on.
+var buildNails bool
+
 // row is one (demo, player, field) comparison. Values are floats so the
 // counters and the possession seconds share one table.
 type row struct {
@@ -84,6 +111,7 @@ func main() {
 	workers := flag.Int("workers", 4, "parallel demo workers")
 	limit := flag.Int("limit", 0, "score at most this many demos (0 = all)")
 	csvOut := flag.String("csv", "", "write the per-row comparison to this CSV")
+	flag.BoolVar(&buildNails, "nails", false, "decode svc_nails so ng/sng fires link to damage (slow; without it the ng/sng `hits` rows are withheld by the pipeline and never scored)")
 	flag.Parse()
 
 	paths, err := demoPaths(*dir)
@@ -155,6 +183,7 @@ func main() {
 func scoreDemo(path string) ([]row, error) {
 	reg := analyzer.NewDefaultRegistry()
 	reg.BuildShotStreams = true
+	reg.BuildNails = buildNails
 	res, err := reg.Analyze(path)
 	if err != nil {
 		return nil, fmt.Errorf("analyze: %w", err)
@@ -180,6 +209,34 @@ func scoreDemo(path string) ([]row, error) {
 	// so if the convention hypothesis is right this column must agree with the
 	// block exactly.
 	wireDirect := wireDirectHits(res)
+	// The same question put to the direct-touch CLASSIFIER instead of to the
+	// flag — the derivation an old demo has to use, run on this modern one.
+	// It is the shipped answer for gl (whose flag cannot answer it at all)
+	// and the measurement that decided rl keeps the flag.
+	wireClassifier := wireClassifierHits(res)
+	// The WIRE-LINKED accuracy family, as this demo actually publishes it,
+	// captured before anything is swapped. It is a second tier scored against
+	// the same block, not part of the blind answer — see the package comment.
+	measured := map[string]*result.PlayerStatsAccuracy{}
+	for i := range res.PlayerStats.Players {
+		p := &res.PlayerStats.Players[i]
+		measured[p.Name] = p.Accuracy
+	}
+	// The pre-v75 wire-linked conventions, straight off the shot stream: one
+	// attack per trigger pull, one hit per fire that landed damage by any
+	// path. Kept as a diagnostic so the table says what the convention change
+	// bought rather than asserting it.
+	preV75 := map[string]map[string]result.WeaponShots{}
+	if res.Shots != nil {
+		for i := range res.Shots.ByPlayer {
+			ps := &res.Shots.ByPlayer[i]
+			byW := map[string]result.WeaponShots{}
+			for _, w := range ps.ByWeapon {
+				byW[w.Weapon] = w
+			}
+			preV75[ps.Player] = byW
+		}
+	}
 
 	rc, err := damagerecon.Compute(res)
 	if err != nil {
@@ -259,6 +316,31 @@ func scoreDemo(path string) ([]row, error) {
 			}
 			add(kind+".timeSec", float64(item.Time), math.Floor(float64(r.Hold.Powerups[kind].Ms)/1000))
 		}
+		// The wire-linked tier: `attacks` and `hits` exactly as published,
+		// against KTX's own counters. A weapon whose `hits` the pipeline
+		// withholds (ng/sng without -nails) contributes its attacks row only.
+		if ma := measured[r.Name]; ma != nil {
+			for w, acc := range ma.ByWeapon {
+				wv := di.Weapons[w]
+				if wv == nil || wv.Acc == nil {
+					continue
+				}
+				add("acc."+w+".attacks/measured", float64(wv.Acc.Attacks), float64(acc.Attacks))
+				if acc.Hits != nil {
+					add("acc."+w+".hits/measured", float64(wv.Acc.Hits), float64(*acc.Hits))
+				}
+				// The same two quantities as this tier published before v75.
+				if ws, ok := preV75[r.Name][w]; ok {
+					switch w {
+					case "sg", "ssg":
+						add("acc."+w+".attacks/fires", float64(wv.Acc.Attacks), float64(ws.Shots))
+						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
+					case "rl", "gl":
+						add("acc."+w+".anyDamage/wire", float64(wv.Acc.Hits), float64(ws.Hits))
+					}
+				}
+			}
+		}
 		if r.Accuracy == nil {
 			continue
 		}
@@ -287,6 +369,13 @@ func scoreDemo(path string) ([]row, error) {
 			// direct impact is a row where the conventions agree at 0, and
 			// dropping it would grade only where it fired.
 			add("acc."+w+".direct/wire", float64(wv.Acc.Hits), float64(wireDirect[r.Name][w]))
+			// `classifier/wire` is the direct-touch classifier run on the WIRE
+			// rows, unclamped — the row count itself, before aim's clamp to the
+			// weapon's fire count. For gl it is what the published
+			// `acc.gl.hits/measured` above is built from (the two differ only
+			// where the clamp bit); for rl it is the alternative to the flag,
+			// whose own 100.0% is the bar it has to clear.
+			add("acc."+w+".classifier/wire", float64(wv.Acc.Hits), float64(wireClassifier[r.Name][w]))
 			// `anyDamage/recon` is the convention the row does NOT publish
 			// for these two, kept so the size of the gap between them stays
 			// measured rather than argued.
@@ -303,15 +392,15 @@ func scoreDemo(path string) ([]row, error) {
 // exact gate StatsHandler's spree increment reads (client.c:4865), so the
 // diagnostic has to read the same thing.
 //
-// Every demo this harness scores carries a KTX demoinfo block, so the mode
-// verdict is always available — no roster-shape fallback is reachable here.
-// The earlier proxy (`len(teams) > 1`) misread two populations in opposite
-// directions: a clan-tagged duel or an FFA whose players carry colour teams
-// looked like teamplay, and a team game whose block named one team did not.
+// The mode half of the gate is the published descriptor's TeamShaped
+// (schema v75) — the same predicate the damage analyzer's bounded pass uses
+// — rather than the verbatim copy of the demoinfo-mode switch this used to
+// carry. The earlier proxy (`len(teams) > 1`) misread two populations in
+// opposite directions: a clan-tagged duel or an FFA whose players carry
+// colour teams looked like teamplay, and a team game whose block named one
+// team did not.
 func ktxTPNum(res *analyzer.Result) int {
-	switch strings.ToLower(res.DemoInfo.Mode) {
-	case "team", "ctf", "coop":
-	default:
+	if res.Match == nil || !res.Match.GameMode.TeamShaped() {
 		return 0
 	}
 	if res.Metadata == nil {
@@ -346,6 +435,39 @@ func wireDirectHits(res *analyzer.Result) map[string]map[string]int {
 		if d.Weapon != "rl" && d.Weapon != "gl" {
 			continue
 		}
+		if out[d.Attacker] == nil {
+			out[d.Attacker] = map[string]int{}
+		}
+		out[d.Attacker][d.Weapon]++
+	}
+	return out
+}
+
+// wireClassifierHits counts, per player, the WIRE rl/gl damage rows the
+// DIRECT-TOUCH CLASSIFIER judges a touch (damagerecon.WireDirectTouchesForEval,
+// the rl-inclusive entry point production does not use): the
+// grenade's detonation point against the victim's hull and the spent-fuse
+// refutation, the rocket's trajectory folded with the magnitude prior — the
+// derivation a pre-instrumentation demo has to reach KTX's counter by, run
+// here on a demo that also carries the server's own answer.
+//
+// Unclamped on purpose. What the pipeline publishes clamps the count to the
+// weapon's fire count (aimcore), and scoring both says whether the clamp is
+// doing anything.
+func wireClassifierHits(res *analyzer.Result) map[string]map[string]int {
+	out := map[string]map[string]int{}
+	// nil covers the absent damage log too — the classifier reads
+	// res.Damage.Events and returns one verdict per row of it, so the
+	// indices below are the same slice's.
+	verdict := damagerecon.WireDirectTouchesForEval(res)
+	if verdict == nil {
+		return out
+	}
+	for i := range verdict {
+		if !verdict[i] {
+			continue
+		}
+		d := &res.Damage.Events[i]
 		if out[d.Attacker] == nil {
 			out[d.Attacker] = map[string]int{}
 		}

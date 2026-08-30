@@ -34,7 +34,13 @@ type MatchResult struct {
 	// is a third vocabulary and stays available verbatim under
 	// metadata.serverInfo, nor the countdown table's display spelling
 	// ("Duel"), which stays under metadata.matchSettings.mode.
-	Mode     string       `json:"mode,omitempty"`
+	Mode string `json:"mode,omitempty"`
+	// GameMode is the pipeline's NORMALISED mode verdict (schema v75) — the
+	// one block every consumer that needs to branch on the mode reads. Mode
+	// above stays the verbatim server vocabulary beside it. Absent only on a
+	// Result produced by a registry with no roster node (hand-built
+	// pipelines, unit tests) or decoded from a pre-v75 cache.
+	GameMode *GameMode    `json:"gameMode,omitempty"`
 	GameDir  string       `json:"gameDir"`
 	Duration int32        `json:"duration"` // ms
 	Players  []PlayerStat `json:"players"`
@@ -57,9 +63,12 @@ type MatchSources struct {
 	// Mode: "ktx" (demoinfo) or "finalscores". Empty with Mode.
 	Mode string `json:"mode,omitempty"`
 	// Teams: "derived" — the rows are the per-player scoreboard summed by
-	// team, the normal case — or "finalscores", meaning the scoreboard
-	// produced no team rows at all and the two sides come from KTX's
-	// end-of-match stuffcmd instead. Empty when there are no team rows.
+	// team, the normal case; "individual" — the mode has no teams
+	// (GameMode.TeamBased false), so the rows are one per PLAYER with
+	// Name == the player's own name; or "finalscores", meaning the
+	// scoreboard produced no team rows at all and the two sides come from
+	// KTX's end-of-match stuffcmd instead. Empty when there are no team
+	// rows.
 	Teams string `json:"teams,omitempty"`
 }
 
@@ -70,6 +79,7 @@ const (
 	MatchSrcFinalScores = "finalscores"
 	MatchSrcLevelTitle  = "levelTitle"
 	MatchSrcDerived     = "derived"
+	MatchSrcIndividual  = "individual"
 )
 
 // PlayerStat is a player's final scoreboard line. Frags is the canonical
@@ -84,8 +94,17 @@ const (
 // IsSuicide frag entries. All 0 when the demo carried no frag log;
 // per-weapon kills stay in FragResult.ByPlayer.ByWeapon.
 type PlayerStat struct {
-	Name     string `json:"name"`
-	Team     string `json:"team"`
+	Name string `json:"name"`
+	Team string `json:"team"`
+	// RawTeam is the userinfo `team` tag as it stood on the wire, kept when
+	// the individual layout replaced Team with the player's own name — a
+	// duel or any mode with GameMode.TeamBased false (schema v75). In FFA
+	// those tags are real (players do wear clan tags) but they name no
+	// side: on ffa_1[dm2] three players carry `red` and kill each other.
+	// Surfacing rather than dropping them is the repo's default; nothing in
+	// the pipeline reads this field back. Absent when it would repeat Team,
+	// and when the tag was empty.
+	RawTeam  string `json:"rawTeam,omitempty"`
 	Frags    int    `json:"frags"`
 	Kills    int    `json:"kills"`
 	Deaths   int    `json:"deaths"`

@@ -12,9 +12,11 @@ import (
 // wire. Three of them exist, in three different eras:
 //
 //   - `matchdate: 2008-01-05 20:05:38 CET` — KTX bprints this at match start,
-//     one frame before "The match has begun!" (ktx/src/match.c:1291), with the
-//     strftime layout "%Y-%m-%d %H:%M:%S %Z". Older builds print the ctime
-//     layout instead (`matchdate: Mon Jul 03, 01:01:14 2006`).
+//     in the SAME server frame as "The match has begun!" and a few lines
+//     ahead of it (both come out of StartMatch, ktx/src/match.c:1291 and
+//     :1296), with the strftime layout "%Y-%m-%d %H:%M:%S %Z". Measured: the
+//     two carry an identical TimeMs on every golden. Older builds print the
+//     ctime layout instead (`matchdate: Mon Jul 03, 01:01:14 2006`).
 //   - `matchkey: 8-2005-8-13:19-56-18` — the kmod / KTeam-era predecessor,
 //     also a level-2 broadcast print, `<matchid>-<y>-<m>-<d>:<h>-<mm>-<ss>`
 //     with no timezone at all.
@@ -634,11 +636,17 @@ func utcDate(y int, m time.Month, d int) int64 {
 // the family: they are builds of that generation, and the earliest of them
 // fixes the bound.
 //
-// The vendored mvdsv/ and ktx/ trees are single-commit snapshots with no tag
-// history, so the bounds are derived from the archive's own version×date
-// distribution rather than from release notes — which is the conservative
-// direction: the archive can only show a family EARLIER than its release, never
-// later, so rounding a year below the observed minimum can only ever loosen it.
+// The bounds are derived from the archive's own version×date distribution
+// rather than from release dates, which is the conservative direction: a
+// family's "-dev" builds run on servers before the tag (1.47-dev demos from
+// January 2026 predate the 1.47 tag of 2026-05-16), so the archive can only
+// show a family EARLIER than its release, and rounding a year below the
+// observed minimum can only ever loosen the floor. The vendored ktx/ carries
+// tags to check against (`git -C ktx for-each-ref refs/tags`: 1.38
+// 2018-06-30, 1.39 2020-09-01, v1.40 2021-09-21, v1.41 2022-09-06, v1.42
+// 2022-11-01, v1.43 2024-03-10, v1.44 2024-10-13, 1.45 2025-02-16, 1.46
+// 2025-09-14, 1.47 2026-05-16); every floor below sits at or under its tag.
+// The vendored mvdsv/ has no tags.
 //
 // Because the entries come from OBSERVATION they are not naturally monotone:
 // a family the archive barely used can show a later first sighting than its

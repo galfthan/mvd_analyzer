@@ -203,11 +203,17 @@ const (
 	syntheticMaxChain = 60
 )
 
-// Standard Quake 1 / KTX / ktpro respawn times in milliseconds, keyed by
-// the compact item kind strings emitted by the parser
-// (qwdemo/parser/entities.go). MH is 20 s only as a fallback — the rot
-// phase that precedes it is handled separately via holder health
-// tracking.
+// KTX's respawn delays in milliseconds, keyed by the compact item kind
+// strings the parser emits (mvd-reader/parser/entities.go). Every value is
+// KTX's own constant (ktx/src/items.c): health 20 s (:370; megahealth :409,
+// counted from the end of its rot), armor 20 s (:544), weapons 30 s
+// (weapon_time, :812, applied at :1061), ammo 30 s (:1342), quad and suit
+// 60 s (:2104 — the powerup_touch default), pent and ring 300 s (:2080). The
+// same numbers as id1 Quake, so ktpro-era demos read the same way. Not
+// modelled here: deathmatch 2 (no respawn at all, :367), k_freshteams'
+// weapon delay (:812), k_practice (every powerup 30 s, :2115) and hoony
+// TDM's shortened pent/ring (:2081-2093) — the //ktx took/timer stuffcmds
+// carry the actual delay on modern demos and take precedence where seen.
 var kindRespawnMs = map[string]int32{
 	"rl":      30000,
 	"lg":      30000,
@@ -264,6 +270,8 @@ func (a *ItemAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.co = co }
 
 func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:

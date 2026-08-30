@@ -151,9 +151,11 @@ that downstream consumers render, summarise, or feed to an agent.
   derived summary vs the verbatim KTX block"). It also carries the
   DIAGNOSTIC columns that decide definition questions — the
   KTX-convention spree replay, the wire-flag control for the rl/gl
-  direct-impact counters, and the any-path alternative a reconstructed
-  row no longer publishes for them — which is why the measurement is not
-  gated on what shipped.
+  direct-impact counters, the touch CLASSIFIER run on those same wire
+  rows (which is what said gl should adopt it and rl should keep the
+  flag), and the any-path alternative a reconstructed row no longer
+  publishes for them — which is why the measurement is not gated on what
+  shipped.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
@@ -259,10 +261,25 @@ that downstream consumers render, summarise, or feed to an agent.
 
   **Nailgun accuracy needs `-include nails`.** ng/sng hit attribution
   requires `svc_nails` decoding, which is off by default because the nail
-  stream is high volume — so `shots`/`aim` omit `hits` for those weapons
-  (omitted, not zeroed: absence means unmeasured). mvd-api always builds
-  them, so this is the one place default CLI output diverges from the same
-  demo over REST; the CLI prints a stderr warning when it happens.
+  stream is high volume — so `shots`/`aim` omit `hits` for those weapons,
+  and (schema v75) `playerStats.accuracy` withholds theirs too, keyed on
+  `Streams.NailsComputed` (omitted, not zeroed: absence means unmeasured).
+
+  **Grenade accuracy needs `-include projectiles`.** KTX's `gl` hits counter
+  counts grenades that TOUCHED a player and the wire damage log records no
+  such event — the touch detonates the grenade and every row it then writes
+  is flagged splash — so the touch is re-derived from the grenade's tracked
+  flight and its 2.5 s fuse (`damagerecon/direct.go`). Without the spatial
+  streams there is no flight to read: `aim` withholds gl's `direct`/`splash`
+  split and `playerStats.accuracy` falls back to the any-path count, labelled
+  `hitsConvention: "anyDamage"`. Withheld means the two fields are ABSENT —
+  they are `*int` since v75, so a present `0` is a measured "touched nobody"
+  and only an absence means "never classified"; that absence is what the
+  accuracy fallback keys on.
+
+  mvd-api and the WASM build always request both, so these are the two places
+  default CLI output diverges from the same demo over REST; the CLI prints a
+  stderr warning when either happens.
 
   `top-windows` segmentation is exclusive: `-mode fixed` (the default) takes
   `-window` and rejects `-gap`; `-mode gap` *requires* `-gap` — there is
@@ -351,9 +368,17 @@ the shared `CoreOutputs` bundle: `clock` (the match time base — start/end,
 demo offset, pauses, wall-clock anchor), [`demoinfo`](analyzer/demoinfo.md)
 (`DemoInfo` / `Names` / `Slots`), [`identity`](analyzer/identity.md)
 (reconnect-unified `Sessions`), [`frag`](analyzer/frag.md) (`FragEntries`),
-and `roster` (the canonical player/team table with the duel
-player-name-as-team rewrite folded in — the duel verdict, participant set,
-and `TeamFor(name, rawTeam)`). The rest either implement `CoreConsumer` to
+and `roster` (the canonical player/team table with the individual
+player-name-as-team rewrite folded in, plus the normalised game-mode
+descriptor `co.GameMode` — the mode verdict, the duel verdict, participant set,
+and `TeamFor(name, rawTeam)`). Neither is FINAL when `roster` publishes it:
+on a demo with no usable demoinfo block, `match`'s `Finalize` is what
+establishes the two-participant duel verdict from the scoreboard it just
+built and refines the descriptor from it, mutating both shared structs. That
+is why `match` publishes the pseudo-artifact **`roster:final`** and every
+reader of `co.Roster` / `co.GameMode` declares an edge on THAT rather than on
+`roster` — without it the verdict a node saw depended on where the scheduler
+put it. The rest either implement `CoreConsumer` to
 read those fields — [`metadata`](analyzer/metadata.md),
 [`match`](analyzer/match.md), [`messages`](analyzer/messages.md),
 [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), `damage`,
@@ -378,7 +403,9 @@ artifacts and writes a top-level section no other node touches, so it
 carries no `mutates` flag. (The thirteenth is `aim`, added in v74 so the
 accuracy family can read the published reconstructed hit tier instead of
 re-running its join, which is what makes that tier's per-weapon
-withholds inherit rather than be restated.) **Two publish a named final artifact** rather
+withholds inherit rather than be restated. Since v75 the WIRE-linked
+branch reads that section too — the measured pellet and direct-impact
+counters — for the same reason: the two sections then cannot disagree.) **Two publish a named final artifact** rather
 than anonymously patching an earlier node's output:
 `recoverTelefragTeamkills` is node `frags-final`, which
 appends recovered telefrag team-kills to the raw `frag` log — and, since
@@ -459,10 +486,13 @@ predicate — `buildStreamsResult` returns nil rather than an empty block, so
 "no `streams`" and "no player streams" are one state and a result cannot
 carry both `streams` and `noMatch`. Streams are built
 only inside the detected match window — every recording path in the
-timeline analyzer is gated on a match-start broadcast having been seen —
-so a demo whose start was never announced produces nothing at all, and
+timeline analyzer is gated on Layer 1 having raised `MatchStartEvent` —
+so a demo whose start was never declared produces nothing at all, and
 before v74 it produced it silently: 2.03% of the archive with empty
-sections and an empty `errors[]`. The reason comes off the serverinfo
+sections and an empty `errors[]`. Schema v75 shrank the
+`matchStartUnannounced` slice of that to nothing measurable by giving the
+parser three more start signals besides the broadcast line (see
+[MVD_FORMAT.md](../mvd-reader/MVD_FORMAT.md#match-start-detection)). The reason comes off the serverinfo
 `status` key tracked over time (published on `CoreOutputs.ServerStatus`,
 since `metadata.serverInfo` is last-write-wins and names the state at demo
 END), the frag log and the stream-abort entry in `errors[]`; `*gamedir`
@@ -556,21 +586,25 @@ flowchart TB
   end
   subgraph d1["depth 1"]
     identity["identity"]
-    roster["roster"]
   end
   subgraph d2["depth 2"]
-    frag["frag"]
+    roster["roster"]
+  end
+  subgraph d3["depth 3"]
     match["match"]
+  end
+  subgraph d4["depth 4"]
+    frag["frag"]
     messages["messages"]
     items["items"]
     damage["damage"]
     backpacks["backpacks"]
   end
-  subgraph d3["depth 3"]
+  subgraph d5["depth 5"]
     timeline["timeline"]
     weapon_pickups["weapon-pickups"]
   end
-  subgraph d4["depth 4"]
+  subgraph d6["depth 6"]
     shots["shots"]
     frags_final["frags-final"]
     loc_graph["loc-graph"]
@@ -578,19 +612,19 @@ flowchart TB
     opening["opening"]
     los["los"]
   end
-  subgraph d5["depth 5"]
+  subgraph d7["depth 7"]
     match_final["match-final"]
     no_match["no-match"]
     damage_recon["damage-recon"]
     backpack_recon["backpack-recon"]
   end
-  subgraph d6["depth 6"]
+  subgraph d8["depth 8"]
     aim["aim"]
     airgibs["airgibs"]
     wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
-  subgraph d7["depth 7"]
+  subgraph d9["depth 9"]
     player_stats["player-stats"]
   end
   aim -->|"aim"| player_stats
@@ -644,14 +678,24 @@ flowchart TB
   identity -->|"identity"| items
   identity -->|"identity"| match
   identity -->|"identity"| player_stats
+  identity -->|"identity"| roster
   identity -->|"identity"| shots
   identity -->|"identity"| timeline
   identity -->|"identity"| weapon_pickups
   items -->|"items"| backpack_linkage
   items -->|"items"| opening
   items -->|"items"| player_stats
+  match -->|"roster:final"| backpacks
+  match -->|"roster:final"| damage
+  match -->|"roster:final"| frag
+  match -->|"roster:final"| items
   match -->|"match"| match_final
+  match -->|"roster:final"| messages
+  match -->|"roster:final"| player_stats
   match -->|"match"| region_control
+  match -->|"roster:final"| shots
+  match -->|"roster:final"| timeline
+  match -->|"roster:final"| weapon_pickups
   match_final -->|"match:final"| player_stats
   metadata -->|"metadata"| backpack_recon
   metadata -->|"metadata"| damage
@@ -660,17 +704,11 @@ flowchart TB
   metadata -->|"metadata"| match
   metadata -->|"metadata"| no_match
   metadata -->|"metadata"| player_stats
+  metadata -->|"metadata"| roster
   metadata -->|"metadata"| timeline
   metadata -->|"metadata"| wall_clock
   no_match -->|"no-match"| wall_clock
-  roster -->|"roster"| backpacks
-  roster -->|"roster"| damage
-  roster -->|"roster"| items
-  roster -->|"roster"| messages
-  roster -->|"roster"| player_stats
-  roster -->|"roster"| shots
-  roster -->|"roster"| timeline
-  roster -->|"roster"| weapon_pickups
+  roster -->|"roster"| match
   shots -->|"shots"| aim
   shots -->|"shots"| damage_recon
   shots -->|"shots"| player_stats
@@ -769,7 +807,10 @@ type CoreOutputs struct {
     Sessions             map[int][]ResolvedSession  // per-slot, reconnect-unified occupancies; internal-only
     FragEntries          []FragEntry                // canonical raw frag log — feeds the result.Frags section
     VictimNamedTeamkills []FragEntry                // victim-only teamkill obituaries (input to frags-final); internal-only
-    Roster               *Roster                    // duel-aware team table (co.TeamFor); internal-only
+    Roster               *Roster                    // mode-aware team table (co.TeamFor); internal-only
+    GameMode             *result.GameMode           // normalised mode descriptor — feeds match.gameMode
+    ServerInfo           map[string]string          // merged fullserverinfo cvars; internal-only
+    MatchSettings        *MatchSettings             // parsed countdown settings; internal-only
 }
 ```
 

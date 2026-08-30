@@ -35,7 +35,7 @@ func TestDirectImpactSeparatesWallBesideFromTouch(t *testing.T) {
 }
 
 // A missile never touches its own owner — both touch handlers return on
-// `other == owner` (ktx/src/weapons.c:951, :1315) — so a self hit is radius
+// `other == owner` (ktx/src/weapons.c:954, :1317) — so a self hit is radius
 // damage however the geometry reads.
 func TestDirectImpactSelfIsAlwaysSplash(t *testing.T) {
 	v := vec3{0, 0, 0}

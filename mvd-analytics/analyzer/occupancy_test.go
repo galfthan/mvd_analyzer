@@ -193,13 +193,24 @@ func TestOccupancyRecord_SpectatorThroughout(t *testing.T) {
 		t.Errorf("current(2) = %+v, want a spectator-throughout occupancy", got)
 	}
 
+	// A live player who goes spectator SPLITS the occupancy (mvdsv
+	// Cmd_Observe_f, sv_user.c:2757-2830 — same slot, same userid, no
+	// reconnect): the stint that played stays a player's and ends there, and
+	// the spectator stint that follows is its own record.
 	tr.onUserInfo(ui(5, 35, "wd.dilbert", 0))
+	played := tr.current(5)
 	postMatchSpec := &events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 5, UserID: 35, Name: "wd.dilbert", Spectator: true},
 		TimeMs: 613971,
 	}
-	tr.onUserInfo(postMatchSpec)
-	if got := tr.current(5); got == nil || got.spectatorThroughout() {
-		t.Errorf("current(5) = %+v, want a player who merely ended as a spectator", got)
+	closed, opened := tr.onUserInfo(postMatchSpec)
+	if closed != played || opened == nil {
+		t.Fatalf("player→spectator: closed=%v opened=%v, want the played record closed and a new one opened", closed, opened)
+	}
+	if played.spectatorThroughout() || played.endMs != 613971 {
+		t.Errorf("played record = %+v, want a player's occupancy ended at 613971", played)
+	}
+	if got := tr.current(5); got == nil || !got.spectatorThroughout() || got.userID != 35 {
+		t.Errorf("current(5) = %+v, want a spectator-throughout record on the same userid", got)
 	}
 }

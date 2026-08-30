@@ -136,13 +136,12 @@
                             </label>
                             <label class="search-field">
                                 <span>Mode</span>
+                                <!-- Options are filled from SEARCH_MODE_LABELS in
+                                     app.js (setupSearch): the facet list and the
+                                     row labels are one table, not two copies that
+                                     can drift. -->
                                 <select id="search-mode">
                                     <option value="">Any</option>
-                                    <option value="1on1">1v1</option>
-                                    <option value="2on2">2v2</option>
-                                    <option value="4on4">4v4</option>
-                                    <option value="ffa">FFA</option>
-                                    <option value="ctf">CTF</option>
                                 </select>
                             </label>
                             <label class="search-field">
@@ -266,7 +265,7 @@
                         <thead>
                             <tr>
                                 <th>Player</th>
-                                <th>Team</th>
+                                <th class="team-col">Team</th>
                                 <th class="handicap-col" title="Player handicap (only shown when at least one player has a non-default handicap)">HC</th>
                                 <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
                                 <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
@@ -274,12 +273,12 @@
                                 <th title="Enemy RLs killed: enemies killed while THEY were holding a rocket launcher (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eRL</th>
                                 <th title="Enemy LGs killed: enemies killed while THEY were holding a lightning gun (includes those holding both RL and LG). Kills made WITH each weapon are in the Weapons tab.">eLG</th>
                                 <th title="Total deaths">Deaths</th>
-                                <th title="Team kills">TK</th>
+                                <th class="team-col" title="Team kills">TK</th>
                                 <th title="Suicides">Bores</th>
                                 <th title="Longest kill streak between deaths, replayed from the frag log. Our gate does not count a suicide as a kill, so this can read one lower than the server's own spree.max on a duel or FFA demo.">Spree</th>
                                 <th title="Longest kill streak run while holding quad, reset by a death or a fresh quad pickup.">QSpree</th>
                                 <th title="Damage given to enemies">Dmg</th>
-                                <th title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Meaningless in a duel, where it is always 0.">TDmg</th>
+                                <th class="team-col" title="Damage dealt to TEAMMATES (friendly fire). Measured whenever the damage family is present, so 0 is a real reading, not a gap — and it is damage DEALT, so it does not appear in the victim&#39;s Dmg column. Hidden in an individual mode, where nobody has a teammate.">TDmg</th>
                                 <th title="Damage taken from ALL sources (enemy, team, self, environment) — not the same quantity as KTX's enemy-only figure">Taken</th>
                                 <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
                                 <th title="Average damage taken to die">ToDie</th>
@@ -462,8 +461,28 @@
                     </div>
                 </div>
 
+                <!-- Per-player views, promoted to first-class panels when the
+                     match is laid out one side per player and there are more
+                     than two of them (a real FFA). The three bodies below are
+                     EMPTY in the markup on purpose: setIndividualFieldLayout
+                     re-parents the existing per-player nodes into them, so the
+                     canvases and their row caches move with them and there is
+                     never a second copy to keep in sync. -->
+                <div class="panel per-player-panel" id="frags-per-player-panel" style="display: none;">
+                    <h3>Frags / deaths per player</h3>
+                    <div class="per-player-panel-body" id="frags-per-player-host"></div>
+                </div>
+                <div class="panel per-player-panel" id="weapons-per-player-panel" style="display: none;">
+                    <h3 id="weapons-per-player-heading">Weapons per player</h3>
+                    <div class="per-player-panel-body" id="weapons-per-player-host"></div>
+                </div>
+                <div class="panel per-player-panel" id="ha-per-player-panel" style="display: none;">
+                    <h3>Health / armor per player</h3>
+                    <div class="per-player-panel-body" id="ha-per-player-host"></div>
+                </div>
+
                 <!-- Cumulative Frags Timeline -->
-                <div class="panel timeline-health-panel-full">
+                <div class="panel timeline-health-panel-full" id="score-timeline-panel">
                     <h3>Score Timeline</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="score-y-axis">
@@ -503,8 +522,8 @@
                 </div>
 
                 <!-- Weapons (full width) -->
-                <div class="panel timeline-detail-graph-panel-full">
-                    <h3>Weapons <span id="time-range-label"></span></h3>
+                <div class="panel timeline-detail-graph-panel-full" id="weapons-timeline-panel">
+                    <h3 id="weapons-timeline-heading">Weapons<span id="time-range-label"></span></h3>
                     <div class="detail-graph-wrapper">
                         <div class="timeline-y-axis" id="detail-y-axis">
                             <span class="y-label y-top">4</span>
@@ -527,7 +546,7 @@
                     </div>
                     <details class="per-player-detail" id="weapons-per-player-details">
                         <summary>Per-player weapons</summary>
-                        <div class="region-timeline-wrapper per-player-rows">
+                        <div class="region-timeline-wrapper per-player-rows" id="weapons-per-player-rows">
                             <div class="region-timeline-labels" id="weapons-per-player-labels"></div>
                             <div class="region-timeline-outer">
                                 <canvas class="timeline-canvas" id="weapons-per-player-canvas"></canvas>
@@ -538,7 +557,7 @@
                 </div>
 
                 <!-- Health/Armor (diverging style) -->
-                <div class="panel timeline-health-panel-full">
+                <div class="panel timeline-health-panel-full" id="health-armor-timeline-panel">
                     <h3>Team Health/Armor</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="health-y-axis">
@@ -597,7 +616,7 @@
                         <div class="chat-columns-wrapper">
                             <div class="chat-column-header"><h3>Kills</h3></div>
                             <div class="chat-column-header"><h3 id="team-a-chat-title">Team A Chat</h3></div>
-                            <div class="chat-column-header"><h3 id="team-b-chat-title">Team B Chat</h3></div>
+                            <div class="chat-column-header" id="team-b-chat-header"><h3 id="team-b-chat-title">Team B Chat</h3></div>
                         </div>
                     </div>
                     <!-- Single scroll viewport for all columns -->

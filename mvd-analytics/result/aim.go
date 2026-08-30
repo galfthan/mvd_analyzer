@@ -129,14 +129,52 @@ type LGRampSamples struct {
 // (fires that connected) are populated for every weapon; the rest are
 // weapon-specific and omitempty.
 //
-//   - SG/SSG (per-pellet): Pellets fired (shots × 6/14), PelletHits (Σ damage
-//     / 4 — matches KTX acc.hits), and the per-fire split Full (all pellets
-//     hit) / Partial (some) / Miss (none).
-//   - RL/GL: Direct (non-splash contacts ≈ KTX hits), Splash (linked hits that
-//     were splash-only), Missed (fires that linked to no impact);
-//     Direct+Splash+Missed == Shots. Projectile linking runs on every parse;
-//     the block is present whenever any rl/gl fire linked to its flight
-//     (absent only when nothing linked — e.g. non-KTX demos).
+//   - SG/SSG (per-pellet): Pellets fired (shots × 6/14), PelletHits, and the
+//     per-fire split Full (all pellets hit) / Partial (some) / Miss (none).
+//     PelletHits is ESTIMATED from magnitude — a fire's same-frame damage sum
+//     divided by the 4 a pellet does, or by 16 while the shooter holds the
+//     quad (T_Damage's ×4, ktx/src/combat.c:540-546), clamped to the fire's
+//     6/14. On the 186-demo archive eval that estimate reproduces KTX's own
+//     acc.hits EXACTLY on 534 of 534 sg and 390 of 390 player rows
+//     (damagerecon/ACCURACY.md); the quad divisor is what closed it, and
+//     before it every quad row over-counted. Two per-fire pellet counts it
+//     does not model — k_instagib's single-slug sg and k_yawnmode's 21-pellet
+//     ssg — are stated, not guarded (see analyzer.deriveMeasuredAcc).
+//
+//   - RL/GL: Direct (projectiles that TOUCHED a player — KTX's own rl/gl hits
+//     counter, incremented in the touch handler and nowhere else,
+//     ktx/src/weapons.c:994 and :1331), Splash (linked hits that were
+//     splash-only), Missed (fires that linked to no impact). Projectile
+//     linking runs on every parse; the block is present whenever any rl/gl
+//     fire linked to its flight (absent only when nothing linked — e.g.
+//     non-KTX demos).
+//
+//     Direct and Splash are POINTERS for that reason: nil is "not
+//     classified", a present zero is a measured "touched nobody". The two
+//     are different claims and a consumer reading a bare 0 could not tell
+//     them apart — the row's own presence is the signal, not a global latch
+//     somewhere else in the Result.
+//
+//     The two weapons reach Direct from DIFFERENT evidence, and it matters
+//     to a reader of the number. rl's is the wire's own splash flag: a direct
+//     T_MissileTouch writes its damage as an unflagged row, dmg_is_splash
+//     being raised only inside T_RadiusDamage (ktx/src/combat.c:1207), so
+//     Direct is a subset of the fires that connected and
+//     Direct+Splash+Missed == Shots. gl's cannot be — GrenadeTouch does ALL
+//     its damage through T_RadiusDamage, so every gl row on the wire is
+//     splash-flagged whatever the grenade hit — and is instead the
+//     flight-geometry touch classifier's count (damagerecon/direct.go, fed
+//     the wire rows by damagerecon.WireDirectTouches; the same classifier a
+//     reconstructed demo's recon.directHits uses). Two consequences:
+//     gl's Direct is bounded by the FIRES rather than by Hits, so
+//     Direct+Splash+Missed may exceed Shots and Splash floors at zero where
+//     a touch's fire went unlinked; and it is WITHHELD — no Direct, no
+//     Splash — on a parse without the spatial shot streams the geometry
+//     needs (Registry.BuildShotStreams; mvd-api and the WASM build always
+//     request them). Measured against the verbatim KTX block on 186 archive
+//     demos: rl 99.8% of 632 player rows exact at 0.02% aggregate, gl 92.0%
+//     of 424 at 3.79% (damagerecon/ACCURACY.md).
+//
 //   - LG: of the missed fires, Blocked (the beam stopped short of its ~600-
 //     unit max length on geometry and its extension to full range crosses a
 //     live enemy's collision hull — on target and in range, the obstruction
@@ -162,7 +200,9 @@ type WeaponAim struct {
 	// from the top-level counters — consumers fall back to those otherwise).
 	// Shots/Pellets and the LG miss classes are not split: misses have no
 	// victim (the miss heuristic targets enemies by construction). Per bucket,
-	// splash = hits − direct and missed = shots − hits.
+	// splash = hits − direct and missed = shots − hits — for rl; a gl bucket's
+	// direct is a touch count that its hits does not bound (see the type
+	// comment), so there splash is the floor-at-zero remainder.
 	Enemy *WeaponAimSplit `json:"enemy,omitempty"`
 	Team  *WeaponAimSplit `json:"team,omitempty"`
 	Self  *WeaponAimSplit `json:"self,omitempty"`
@@ -178,9 +218,27 @@ type WeaponAim struct {
 	Partial    int `json:"partial,omitempty"`
 	Miss       int `json:"miss,omitempty"` // SG/SSG: zero-pellet fires; LG: aim-error misses (neither blocked nor out of range)
 
-	Direct int `json:"direct,omitempty"`
-	Splash int `json:"splash,omitempty"`
-	Missed int `json:"missed,omitempty"`
+	// Direct is the projectile-TOUCH count, Splash the linked hits that were
+	// splash-only and Missed the fires that linked to nothing. Read the type
+	// comment before comparing a gl Direct with an rl one: rl's comes off the
+	// wire's splash flag and partitions its fires with Splash/Missed, gl's
+	// comes off the flight-geometry classifier and is bounded by the fires
+	// alone.
+	//
+	// NIL IS NOT ZERO. Both are set together, exactly when the split RAN for
+	// this weapon, and are nil when it did not — so nil means "this parse did
+	// not classify these fires" and a present 0 means "classified, and none
+	// of them touched / none of the hits were splash-only". Two reachable nil
+	// cases, and a consumer must render them as withheld rather than as a
+	// zero: gl on a parse that built no spatial shot streams (the classifier's
+	// own input — mvd-api and the WASM build always request them, a bare
+	// qw-analyze parse does not), and rl or gl on a demo where the linker
+	// resolved no rl/gl fire at all, where Hits is likewise 0 and a Direct of
+	// 0 would be indistinguishable from a measurement. Missed does NOT ride
+	// the split: it is shots − hits, which the linker answers on its own.
+	Direct *int `json:"direct,omitempty"`
+	Splash *int `json:"splash,omitempty"`
+	Missed int  `json:"missed,omitempty"`
 
 	Blocked    int `json:"blocked,omitempty"`
 	OutOfRange int `json:"outOfRange,omitempty"`
@@ -297,15 +355,23 @@ type WeaponAimRecon struct {
 // weapon's hit counters — same semantics as the WeaponAim fields of the same
 // names, restricted to that bucket's victims. The SG/SSG per-fire split
 // (Full/Partial/Miss) and PelletHits are exact per fire except when the
-// per-fire pellet clamp triggers (e.g. quad-multiplied damage), where the
-// enemy/team allocation within that fire is approximate. Self hits are
-// always splash (a missile cannot collide with its owner), so a Self split
-// never sets Direct and never has pellet counters (hitscan cannot self-hit).
+// per-fire pellet clamp triggers, where the enemy/team allocation within that
+// fire is approximate — the estimator divides the fire's damage sum by the 4
+// a pellet does (16 under the shooter's quad) and cannot tell a saturating
+// fire's victims apart any finer. Self hits are
+// always splash (a missile cannot collide with its owner), so a Self split's
+// Direct is a certain zero and it never has pellet counters (hitscan cannot
+// self-hit).
 type WeaponAimSplit struct {
 	Hits       int `json:"hits,omitempty"`
 	PelletHits int `json:"pelletHits,omitempty"`
 	Full       int `json:"full,omitempty"`
 	Partial    int `json:"partial,omitempty"`
 	Miss       int `json:"miss,omitempty"`
-	Direct     int `json:"direct,omitempty"`
+	// Direct carries WeaponAim.Direct's nil-is-not-zero rule into the bucket:
+	// nil where the split did not run for this weapon, a present 0 where it
+	// ran and this bucket's victims were all reached by splash. The consumer
+	// derives the bucket's splash as hits − direct, which nil forbids and 0
+	// permits.
+	Direct *int `json:"direct,omitempty"`
 }

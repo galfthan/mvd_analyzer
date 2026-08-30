@@ -245,7 +245,7 @@ type splashCell struct {
 // reconstruction's instant for the same victim at the same millisecond and
 // scores the direct/splash verdict. Self rows are excluded on both sides: a
 // missile never touches its own owner (T_MissileTouch / GrenadeTouch return on
-// `other == owner`, ktx/src/weapons.c:951, :1315), so those are splash by
+// `other == owner`, ktx/src/weapons.c:954, :1317), so those are splash by
 // construction and would only pad the agreement rate.
 func collectSplashStats(gt, rc *result.DamageResult, out map[string]*splashCell) {
 	type key struct {

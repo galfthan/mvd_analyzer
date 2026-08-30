@@ -190,7 +190,7 @@ func reconDamageByAttacker(res *result.Result) map[string][]*dmgRec {
 			continue
 		}
 		out[d.Attacker] = append(out[d.Attacker],
-			&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam, self: d.IsSelf})
+			&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, team: d.IsTeam, self: d.IsSelf})
 	}
 	return out
 }
@@ -250,7 +250,7 @@ func ReconHitsForEval(res *result.Result) map[string]map[string]int {
 //
 // Weapons the player FIRED are seeded at zero, so "fired ten rockets and
 // touched nobody" is a supported zero rather than an absence. Self rows are
-// excluded: a missile never touches its owner (weapons.c:951, :1315), so a
+// excluded: a missile never touches its owner (weapons.c:954, :1317), so a
 // direct self row would be a contradiction, not a hit.
 //
 // WINDOWED, unlike the damage pool feeding the fire→damage join. That pool is

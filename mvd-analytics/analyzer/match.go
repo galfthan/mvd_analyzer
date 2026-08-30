@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -29,6 +30,12 @@ type MatchAnalyzer struct {
 	// broadcasts, the authoritative recovery for a departing player's
 	// score (see closeOccupancy).
 	leaves []leaveBroadcast
+
+	// restorePrefixes are the leading texts of the "rejoins the game with N
+	// frags" broadcasts — KTX announcing that a reconnecting client was
+	// matched to its ghost and its score put back
+	// (ktx/src/client.c:1513-1543). See foldStintFrags.
+	restorePrefixes []string
 }
 
 // occupancyScore is one occupancy's svc_updatefrags cursor plus the
@@ -95,10 +102,18 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	a.durationMs = event.EventTimeMs()
 
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.PlayerDepartureEvent:
 		a.noteLeaveBroadcast(e)
+	case *events.PlayerRejoinEvent:
+		// Only the stats-restoring form. "reenters the game without stats"
+		// (ktx/src/client.c:1546-1553) is the server saying the opposite.
+		if e.WithStats {
+			a.restorePrefixes = append(a.restorePrefixes, e.Prefix)
+		}
 	case *events.IntermissionEvent:
 		a.timing.OnIntermission(e.TimeMs)
 	case *events.UserInfoEvent:
@@ -282,6 +297,20 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 	return best, found
 }
 
+// restoredNames resolves the "rejoins the game with N frags" broadcasts to
+// the normalized netnames they named.
+//
+// The verdict is per NETNAME and covers the whole demo, because the score
+// it carries can cross a scoreboard ROW: two occupancies of one name that
+// were live at the same instant are deliberately kept as separate rows
+// (rowForKey), and on archive 2eb485602a7a… callen's restore lands on the
+// other row from the departure it restores. Reading the broadcast as "every
+// stint of this name continued the running total rather than restarting it"
+// is the conservative direction — it is the one that cannot double-count.
+func (a *MatchAnalyzer) restoredNames() map[string]bool {
+	return resolveBroadcastNames(a.restorePrefixes, a.occ.all())
+}
+
 // finalFrags is the occupancy's scoreboard value: the frozen one when it
 // ended mid-demo, else the live cursor (which the match-end guard in
 // onFragUpdate already protects from post-match re-inits).
@@ -390,6 +419,76 @@ type rosterRow struct {
 	slot    int
 	startMs int32
 	windows []rosterWindow
+	// stints is one entry per occupancy folded into this row, in occupancy
+	// order — which is wire order, i.e. non-decreasing start time.
+	// foldStintFrags turns them into the row's score.
+	stints []stintScore
+}
+
+// stintScore is one occupancy's frozen score as it enters the identity fold:
+// what it finished on, and the two signals that say whether it continued the
+// identity's running total or restarted from zero.
+type stintScore struct {
+	frags int
+	// identified is occupancyRecord.identified() — whether the wire gave
+	// this occupancy a userid of its own. A userid-0 row is not a client
+	// connection and so cannot be a fresh stint.
+	identified bool
+	// restored is set when the server ANNOUNCED a ghost restore for this
+	// netname anywhere in the demo (restoredNames).
+	restored bool
+}
+
+// foldStintFrags turns an identity's occupancies into one scoreboard score.
+//
+// A stint CONTINUES the identity's running total — its own value already
+// contains everything earlier, so it REPLACES the total — when either of two
+// value-free signals says the server carried the score over:
+//
+//   - the stint is a KTX ghost scoreboard row (`!identified`, i.e. userid 0).
+//     ghost2scores republishes a departed player's frags on a spare slot the
+//     instant the drop lands, and it hardcodes userid 0 in the
+//     svc_updateuserinfo it writes (ktx/src/g_utils.c:2318) — it is the only
+//     writer that does. The other two things that land on a userid-0 record
+//     (an occupancy `ensure` opened for a frag or a position on a slot with
+//     no userinfo, and a userid-0 resend) are not connections either, so
+//     none of them can be a fresh stint whose score restarted from zero.
+//   - the server ANNOUNCED a restore for it ("<name> rejoins the game with N
+//     frags", ktx/src/client.c:1513-1543) — read per netname over the whole
+//     demo, since a restore can land on a different scoreboard row from the
+//     departure it restores (archive 2eb485602a7a…, callen).
+//
+// Every other stint — an identified connection the server never announced a
+// restore for — ADDS, because its score restarted from zero. There is no
+// ghost at all in matchless mode (MakeGhost returns at
+// ktx/src/client.c:2897, `if (k_matchLess) // no ghost in matchless mode`),
+// so a player who leaves and comes back there starts again at zero and the
+// server's "left the game with N frags" broadcast for the earlier stint is
+// the only record it happened. On ffa-demos/ffa_1[dm2]…, nexus left slot 4
+// with 14 frags at 281.6 s and rejoined on slot 3 at 321.0 s, leaving again
+// with 0 — and taking the latest stint reported 0 frags against 15 kills,
+// breaking the frags == kills − suicides − teamKills identity the frag log
+// maintains.
+//
+// The discriminator is deliberately value-free. It used to compare the first
+// frag value the wire attested for a stint against the running total
+// (continue iff it opened at or above it), which is wrong wherever the total
+// is small or negative — and it is exactly a matchless rejoiner's total that
+// is: onFragUpdate records the first value on a CHANGE from the 0 cursor, so
+// a fresh row's first attested value is its first kill or suicide, ±1. A
+// player who left matchless on 1 frag and scored 5 more on the second row
+// folded to 5 instead of 6; one who left on −2 (lava) and scored 3 folded to
+// 3 instead of 1.
+func foldStintFrags(stints []stintScore) int {
+	total := 0
+	for _, st := range stints {
+		if st.restored || !st.identified {
+			total = st.frags
+			continue
+		}
+		total += st.frags
+	}
+	return total
 }
 
 // rosterWindow is one folded occupancy's half-open [start, end) span, with
@@ -495,16 +594,19 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		mr.Map, mr.Sources.Map = mr.MapTitle, MatchSrcLevelTitle
 	}
 	mr.Mode, mr.Sources.Mode = a.resolveMode()
+	mr.GameMode = a.core.Mode()
 
 	// Collect team stats
 	teamFrags := make(map[string]int)
 
 	// One row per participating *identity*. Occupancies are the unit of
 	// scoring (a slot can change hands), but a player who reconnected onto
-	// another slot owns several of them and must appear once — with the
-	// score of their latest stint, which is the total the server restored
-	// and re-asserted (ktx/src/client.c:1464-1490).
+	// another slot owns several of them and must appear once, with every
+	// stint folded into one score: a stint the server carried the total
+	// over to REPLACES it (a userid-0 ghost row, or an announced restore),
+	// every other stint ADDS. See foldStintFrags.
 	a.occ.closeOpen(a.durationMs)
+	restored := a.restoredNames()
 	var rows []*rosterRow
 	byKey := make(map[string][]*rosterRow)
 	for _, rec := range a.occ.all() {
@@ -536,6 +638,11 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 			row.stat, row.slot, row.startMs = stat, rec.slot, rec.startMs
 		}
 		row.windows = append(row.windows, rosterWindow{rec.startMs, rec.endMs, rec.identified()})
+		row.stints = append(row.stints, stintScore{
+			frags:      sc.finalFrags(),
+			identified: rec.identified(),
+			restored:   restored[normalizePlayerName(name)],
+		})
 	}
 	// Emit in wire-slot order of each identity's kept occupancy, which is
 	// the order the previous slot-keyed loop produced and is stable across
@@ -548,6 +655,9 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 	})
 	for _, row := range rows {
 		stat := row.stat
+		// The score spans every stint this identity played, not just the
+		// last one — see foldStintFrags.
+		stat.Frags = foldStintFrags(row.stints)
 		// A player who legitimately finishes on 0 frags (kills cancelled by
 		// suicides, a short but real appearance) is still a participant — the
 		// surface-authoritative-data policy says report them rather than guess
@@ -560,18 +670,26 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 
 	// Build team stats - only include valid team names. Sort by name so the
 	// output is byte-stable across runs (Go map iteration is randomized).
-	teamNames := make([]string, 0, len(teamFrags))
-	for team := range teamFrags {
-		if !isSpectatorTeam(team) {
-			teamNames = append(teamNames, team)
+	//
+	// Skipped entirely in an individual mode: the tags in teamFrags name no
+	// sides there, and summing them produces exactly the pseudo-teams this
+	// work removed (on ffa_1[tox] a "red" row of 29 frags built from one
+	// player and a "rr" row of 53 from another). rebuildIndividualMatch
+	// below builds the one-row-per-player layout instead.
+	if !a.individual() {
+		teamNames := make([]string, 0, len(teamFrags))
+		for team := range teamFrags {
+			if !isSpectatorTeam(team) {
+				teamNames = append(teamNames, team)
+			}
 		}
-	}
-	sort.Strings(teamNames)
-	for _, team := range teamNames {
-		mr.Teams = append(mr.Teams, TeamStat{
-			Name:  team,
-			Frags: teamFrags[team],
-		})
+		sort.Strings(teamNames)
+		for _, team := range teamNames {
+			mr.Teams = append(mr.Teams, TeamStat{
+				Name:  team,
+				Frags: teamFrags[team],
+			})
+		}
 	}
 
 	result.Match = mr
@@ -596,13 +714,52 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 			}
 			r.noteMatchParticipants(names)
 		}
-		if r.Duel() {
-			rebuildDuelMatch(mr, a.core.DemoInfo)
+		// The duel promotion above can only have made the verdict MORE
+		// individual, so refresh the descriptor before the layout reads it.
+		a.refineGameMode(mr)
+		if a.individual() {
+			rebuildIndividualMatch(mr, a.core.DemoInfo, r.Duel())
 		}
 	}
 
 	a.applyFinalScoresTeams(mr)
 	return nil
+}
+
+// individual reports whether this match gets the one-side-per-player layout.
+// Reads the shared CoreOutputs predicate so the scoreboard, the team-kill
+// flags and the player-stats aggregate cannot disagree.
+func (a *MatchAnalyzer) individual() bool { return a.core.IndividualMode() }
+
+// refineGameMode folds MatchAnalyzer's own duel promotion back into the
+// published descriptor.
+//
+// The resolver runs in the roster node, before this scoreboard exists, so on
+// a demo with no demoinfo block it cannot see the two-participant shape that
+// noteMatchParticipants has just established — it reports canonical
+// "unknown" with whatever the serverinfo teamplay cvar said. Correcting it
+// here is what keeps `match.gameMode` consistent with the layout the very
+// same Finalize is about to apply; the descriptor is a pointer shared with
+// CoreOutputs, so every producer scheduled after `match` sees the correction
+// too.
+func (a *MatchAnalyzer) refineGameMode(mr *MatchResult) {
+	gm := mr.GameMode
+	if gm == nil || !a.core.IsDuel() {
+		return
+	}
+	if gm.Canonical == result.GameModeUnknown {
+		gm.Canonical, gm.Sources.Canonical = result.GameModeDuel, result.GameModeSrcRoster
+	}
+	// Only a TeamBased verdict the TAG CENSUS produced is superseded — the
+	// two-participant shape is the better roster-level reading of the same
+	// evidence (two duellists who both picked `red` are not a team). A
+	// verdict a teamplay cvar, a countdown row or a demoinfo block reached
+	// stands: a roster-inferred duel does not get to veto a ruleset that
+	// was demonstrably in force (see gamemode.go's precedence note and
+	// the CTF-on-dm6 archive demo behind it).
+	if gm.Canonical == result.GameModeDuel && gm.Sources.TeamBased == result.GameModeSrcRoster {
+		gm.TeamBased = false
+	}
 }
 
 // resolveMap resolves the canonical map SHORTNAME and names its source. The
@@ -664,7 +821,20 @@ func (a *MatchAnalyzer) resolveMode() (string, string) {
 // It runs after the duel rebuild so it sees the final rows.
 func (a *MatchAnalyzer) applyFinalScoresTeams(mr *MatchResult) {
 	if len(mr.Teams) > 0 {
-		mr.Sources.Teams = MatchSrcDerived
+		if a.individual() {
+			mr.Sources.Teams = result.MatchSrcIndividual
+		} else {
+			mr.Sources.Teams = MatchSrcDerived
+		}
+		return
+	}
+	// In an individual mode `//finalscores` names the top-two PLAYERS, not
+	// two teams (ktx/src/commands.c:6963-6977 fills team1/team2 from the
+	// scoreboard's first two rows when there are no teams to name) — on
+	// ffa_1[dm2] that is `":f" 36 "SMOK" 35`. Adopting them as teams is
+	// exactly the invented-side bug the individual layout exists to remove,
+	// and the rows are still published verbatim on metadata.finalScores.
+	if a.individual() {
 		return
 	}
 	if a.core == nil || a.core.FinalScores == nil {
@@ -681,22 +851,35 @@ func (a *MatchAnalyzer) applyFinalScoresTeams(mr *MatchResult) {
 	mr.Sources.Teams = MatchSrcFinalScores
 }
 
-// rebuildDuelMatch reconstructs MatchResult.Players and .Teams for a 1v1 around
-// the synthetic one-player-per-team layout (team == the player's own name).
+// rebuildIndividualMatch reconstructs MatchResult.Players and .Teams around
+// the one-side-per-player layout (team == the player's own name) for every
+// mode with no teams: a 1v1, and — since v75 — FFA, race and anything else
+// the descriptor resolved as not team-based.
 //
-// When demoinfo is present it is the source of truth for participants — its
-// end-of-match snapshot always lists every player it tracked stats for, so this
-// recovers a participant the Finalize spectator gate dropped (a teamless
-// frogbot) while merging in any per-player frag count already tracked. With no
-// demoinfo it falls back to the existing two-player list, just relabelling
-// teams. Mirrors the old normalizeDuelTeams Match block exactly.
-func rebuildDuelMatch(mr *MatchResult, di *DemoInfoResult) {
+// It is the same layout in both cases, which is the point: the API shape a
+// consumer sees for an FFA is the one it already handles for a duel (the
+// frontend's shape test is literally `every p.team === p.name`), so no
+// consumer needs a mode string to render an individual scoreboard.
+//
+// demoinfo, where present, is the source of truth for PARTICIPANTS on a duel:
+// its end-of-match snapshot always lists every player it tracked stats for,
+// so this recovers a participant the Finalize spectator gate dropped (a
+// teamless frogbot) while merging in any per-player frag count already
+// tracked. On a non-duel individual mode the derived scoreboard is used
+// instead even when demoinfo exists: players come and go in FFA and the
+// scoreboard has already reconciled their occupancies (a mid-match leaver's
+// announced score, a slot that changed hands), which the demoinfo snapshot's
+// flat name list would flatten back out.
+//
+// The raw userinfo tag survives on PlayerStat.RawTeam — it is real
+// information (clan membership), it just names no side.
+func rebuildIndividualMatch(mr *MatchResult, di *DemoInfoResult, duel bool) {
 	existing := make(map[string]PlayerStat, len(mr.Players))
 	for _, p := range mr.Players {
 		existing[p.Name] = p
 	}
 	rebuilt := make([]PlayerStat, 0, len(existing))
-	if di != nil && len(di.Players) > 0 {
+	if duel && di != nil && len(di.Players) > 0 {
 		for _, dp := range di.Players {
 			ps, ok := existing[dp.Name]
 			if !ok {
@@ -714,6 +897,11 @@ func rebuildDuelMatch(mr *MatchResult, di *DemoInfoResult) {
 			rebuilt = append(rebuilt, p)
 		}
 	}
+	for i := range rebuilt {
+		if raw := existing[rebuilt[i].Name].Team; raw != "" && raw != rebuilt[i].Name {
+			rebuilt[i].RawTeam = raw
+		}
+	}
 	mr.Players = rebuilt
 
 	teams := make([]TeamStat, 0, len(mr.Players))
@@ -723,14 +911,20 @@ func rebuildDuelMatch(mr *MatchResult, di *DemoInfoResult) {
 	mr.Teams = teams
 }
 
-// isSpectatorTeam returns true if the team name indicates a spectator
+// isSpectatorTeam reports whether a userinfo `team` tag names a spectator
+// rather than a side, so the scoreboard does not grow a "spec" team row.
+//
+// There is no server producer for any of these: `team` is a client userinfo
+// key (ezquake cl_main.c:252, default ""), KTX never writes it, and a
+// spectator's tag is whatever they last set as a player. The list is the
+// spellings people use; it was not probed by the reach audit and is not
+// measured. The empty tag is the common case — a fresh client, or a
+// server with no teamplay — and is treated as no side either way.
 func isSpectatorTeam(team string) bool {
-	// Empty team is often a spectator
 	if team == "" {
 		return true
 	}
 
-	// Common spectator team names
 	spectatorTeams := []string{
 		"spec", "spectator", "specs", "spectators",
 		"coop", "observe", "observer",

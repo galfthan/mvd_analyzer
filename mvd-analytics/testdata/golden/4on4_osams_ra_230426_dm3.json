@@ -4783,17 +4783,17 @@
           },
           {
             "enemy": {
-              "full": 96,
+              "full": 94,
               "hits": 195,
               "miss": 239,
-              "partial": 99,
-              "pelletHits": 853
+              "partial": 101,
+              "pelletHits": 844
             },
-            "full": 100,
+            "full": 98,
             "hits": 203,
             "miss": 231,
-            "partial": 103,
-            "pelletHits": 889,
+            "partial": 105,
+            "pelletHits": 880,
             "pellets": 2604,
             "shots": 434,
             "team": {
@@ -4806,11 +4806,10 @@
             "weapon": "sg"
           },
           {
-            "full": 1,
             "hits": 6,
             "miss": 4,
-            "partial": 5,
-            "pelletHits": 38,
+            "partial": 6,
+            "pelletHits": 26,
             "pellets": 140,
             "shots": 10,
             "weapon": "ssg"
@@ -4824,11 +4823,13 @@
             "hits": 30,
             "missed": 20,
             "self": {
+              "direct": 0,
               "hits": 6
             },
             "shots": 50,
             "splash": 23,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -4843,7 +4844,6 @@
               "hits": 2
             },
             "shots": 9,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -9290,17 +9290,17 @@
           },
           {
             "enemy": {
-              "full": 61,
+              "full": 60,
               "hits": 144,
               "miss": 194,
-              "partial": 83,
-              "pelletHits": 595
+              "partial": 84,
+              "pelletHits": 592
             },
-            "full": 63,
+            "full": 62,
             "hits": 147,
             "miss": 191,
-            "partial": 84,
-            "pelletHits": 608,
+            "partial": 85,
+            "pelletHits": 605,
             "pellets": 2028,
             "shots": 338,
             "team": {
@@ -9330,11 +9330,13 @@
             "hits": 25,
             "missed": 34,
             "self": {
+              "direct": 0,
               "hits": 5
             },
             "shots": 59,
             "splash": 18,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -9343,7 +9345,6 @@
             "hits": 2,
             "missed": 15,
             "shots": 17,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -13673,6 +13674,7 @@
             "hits": 21,
             "missed": 17,
             "self": {
+              "direct": 0,
               "hits": 1
             },
             "shots": 38,
@@ -18227,17 +18229,17 @@
           },
           {
             "enemy": {
-              "full": 83,
+              "full": 81,
               "hits": 178,
               "miss": 135,
-              "partial": 95,
-              "pelletHits": 767
+              "partial": 97,
+              "pelletHits": 755
             },
-            "full": 85,
+            "full": 83,
             "hits": 184,
             "miss": 129,
-            "partial": 99,
-            "pelletHits": 792,
+            "partial": 101,
+            "pelletHits": 777,
             "pellets": 1878,
             "shots": 313,
             "team": {
@@ -18245,7 +18247,7 @@
               "hits": 7,
               "miss": 306,
               "partial": 5,
-              "pelletHits": 25
+              "pelletHits": 22
             },
             "weapon": "sg"
           },
@@ -18268,11 +18270,13 @@
             "hits": 35,
             "missed": 24,
             "self": {
+              "direct": 0,
               "hits": 5
             },
             "shots": 59,
             "splash": 29,
             "team": {
+              "direct": 0,
               "hits": 3
             },
             "weapon": "rl"
@@ -18287,7 +18291,6 @@
               "hits": 1
             },
             "shots": 15,
-            "splash": 2,
             "team": {
               "hits": 1
             },
@@ -22188,21 +22191,21 @@
             "weapon": "lg"
           },
           {
-            "full": 62,
+            "full": 60,
             "hits": 173,
             "miss": 196,
-            "partial": 111,
-            "pelletHits": 679,
+            "partial": 113,
+            "pelletHits": 673,
             "pellets": 2214,
             "shots": 369,
             "weapon": "sg"
           },
           {
-            "full": 9,
+            "full": 4,
             "hits": 18,
             "miss": 8,
-            "partial": 9,
-            "pelletHits": 190,
+            "partial": 14,
+            "pelletHits": 142,
             "pellets": 364,
             "shots": 26,
             "weapon": "ssg"
@@ -22218,6 +22221,7 @@
             "shots": 66,
             "splash": 25,
             "team": {
+              "direct": 0,
               "hits": 4
             },
             "weapon": "rl"
@@ -22232,7 +22236,6 @@
               "hits": 2
             },
             "shots": 9,
-            "splash": 5,
             "weapon": "gl"
           },
           {
@@ -26025,25 +26028,25 @@
           },
           {
             "enemy": {
-              "full": 68,
+              "full": 65,
               "hits": 145,
               "miss": 115,
-              "partial": 77,
-              "pelletHits": 622
+              "partial": 80,
+              "pelletHits": 600
             },
-            "full": 71,
+            "full": 67,
             "hits": 149,
             "miss": 111,
-            "partial": 78,
-            "pelletHits": 645,
+            "partial": 82,
+            "pelletHits": 622,
             "pellets": 1560,
             "shots": 260,
             "team": {
-              "full": 2,
+              "full": 1,
               "hits": 6,
               "miss": 254,
-              "partial": 4,
-              "pelletHits": 23
+              "partial": 5,
+              "pelletHits": 22
             },
             "weapon": "sg"
           },
@@ -26066,11 +26069,13 @@
             "hits": 30,
             "missed": 26,
             "self": {
+              "direct": 0,
               "hits": 4
             },
             "shots": 56,
             "splash": 23,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -26082,7 +26087,6 @@
             "hits": 3,
             "missed": 4,
             "shots": 7,
-            "splash": 3,
             "team": {
               "hits": 2
             },
@@ -32543,11 +32547,13 @@
             "hits": 33,
             "missed": 51,
             "self": {
+              "direct": 0,
               "hits": 5
             },
             "shots": 84,
             "splash": 21,
             "team": {
+              "direct": 0,
               "hits": 3
             },
             "weapon": "rl"
@@ -32562,7 +32568,6 @@
               "hits": 1
             },
             "shots": 15,
-            "splash": 2,
             "weapon": "gl"
           },
           {
@@ -36306,13 +36311,13 @@
               "hits": 103,
               "miss": 73,
               "partial": 66,
-              "pelletHits": 411
+              "pelletHits": 408
             },
             "full": 39,
             "hits": 105,
             "miss": 71,
             "partial": 66,
-            "pelletHits": 420,
+            "pelletHits": 417,
             "pellets": 1056,
             "shots": 176,
             "team": {
@@ -36343,6 +36348,7 @@
             "hits": 52,
             "missed": 63,
             "self": {
+              "direct": 0,
               "hits": 3
             },
             "shots": 115,
@@ -57195,6 +57201,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 01:37:35 +0600",
+    "deathmatch": 1,
     "demo": "4on4_.ra._vs_osams[dm3]260424-0117.mvd",
     "duration": 1200,
     "hostname": "Spider MSK Antilag:28503",
@@ -58844,6 +58851,7 @@
       }
     ],
     "port": 28503,
+    "teamplay": 2,
     "teams": [
       ".ra.",
       "oSaMs"
@@ -77677,6 +77685,14 @@
   "match": {
     "duration": 1200059,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "dm3",
     "mapTitle": "The Abandoned Base",
     "mode": "team",
@@ -90001,29 +90017,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 10,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 10
             },
             "rl": {
               "attacks": 84,
-              "hits": 33,
-              "hitsConvention": "anyDamage"
+              "hits": 12,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 354,
-              "hits": 174,
-              "hitsConvention": "anyDamage"
+              "attacks": 2124,
+              "hits": 710,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 13,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 13
             },
             "ssg": {
-              "attacks": 17,
-              "hits": 11,
-              "hitsConvention": "anyDamage"
+              "attacks": 238,
+              "hits": 58,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -90303,24 +90315,22 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 66,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 66
             },
             "rl": {
               "attacks": 50,
-              "hits": 30,
-              "hitsConvention": "anyDamage"
+              "hits": 7,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 434,
-              "hits": 203,
-              "hitsConvention": "anyDamage"
+              "attacks": 2604,
+              "hits": 880,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 10,
-              "hits": 6,
-              "hitsConvention": "anyDamage"
+              "attacks": 140,
+              "hits": 26,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -90562,23 +90572,21 @@
             },
             "rl": {
               "attacks": 115,
-              "hits": 52,
-              "hitsConvention": "anyDamage"
+              "hits": 16,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 176,
-              "hits": 105,
-              "hitsConvention": "anyDamage"
+              "attacks": 1056,
+              "hits": 417,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 6,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 6
             },
             "ssg": {
-              "attacks": 19,
-              "hits": 14,
-              "hitsConvention": "anyDamage"
+              "attacks": 266,
+              "hits": 92,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -90840,23 +90848,21 @@
             },
             "rl": {
               "attacks": 38,
-              "hits": 21,
-              "hitsConvention": "anyDamage"
+              "hits": 6,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 351,
-              "hits": 162,
-              "hitsConvention": "anyDamage"
+              "attacks": 2106,
+              "hits": 673,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 334,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 334
             },
             "ssg": {
-              "attacks": 21,
-              "hits": 9,
-              "hitsConvention": "anyDamage"
+              "attacks": 294,
+              "hits": 73,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -91126,29 +91132,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 13,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 13
             },
             "rl": {
               "attacks": 66,
-              "hits": 28,
-              "hitsConvention": "anyDamage"
+              "hits": 3,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 369,
-              "hits": 173,
-              "hitsConvention": "anyDamage"
+              "attacks": 2214,
+              "hits": 673,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 179,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 179
             },
             "ssg": {
-              "attacks": 26,
-              "hits": 18,
-              "hitsConvention": "anyDamage"
+              "attacks": 364,
+              "hits": 142,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -91436,23 +91438,21 @@
             },
             "rl": {
               "attacks": 59,
-              "hits": 35,
-              "hitsConvention": "anyDamage"
+              "hits": 6,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 313,
-              "hits": 184,
-              "hitsConvention": "anyDamage"
+              "attacks": 1878,
+              "hits": 777,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 39,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 39
             },
             "ssg": {
-              "attacks": 22,
-              "hits": 16,
-              "hitsConvention": "anyDamage"
+              "attacks": 308,
+              "hits": 106,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -91729,29 +91729,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 1,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 1
             },
             "rl": {
               "attacks": 59,
-              "hits": 25,
-              "hitsConvention": "anyDamage"
+              "hits": 7,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 338,
-              "hits": 147,
-              "hitsConvention": "anyDamage"
+              "attacks": 2028,
+              "hits": 605,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 25,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 25
             },
             "ssg": {
-              "attacks": 7,
-              "hits": 4,
-              "hitsConvention": "anyDamage"
+              "attacks": 98,
+              "hits": 21,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -92002,23 +91998,21 @@
             },
             "rl": {
               "attacks": 56,
-              "hits": 30,
-              "hitsConvention": "anyDamage"
+              "hits": 7,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 260,
-              "hits": 149,
-              "hitsConvention": "anyDamage"
+              "attacks": 1560,
+              "hits": 622,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 2,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 2
             },
             "ssg": {
-              "attacks": 6,
-              "hits": 4,
-              "hitsConvention": "anyDamage"
+              "attacks": 84,
+              "hits": 27,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -92287,29 +92281,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 76,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 76
             },
             "rl": {
               "attacks": 308,
-              "hits": 150,
-              "hitsConvention": "anyDamage"
+              "hits": 41,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 1277,
-              "hits": 666,
-              "hitsConvention": "anyDamage"
+              "attacks": 7662,
+              "hits": 2784,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 58,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 58
             },
             "ssg": {
-              "attacks": 68,
-              "hits": 47,
-              "hitsConvention": "anyDamage"
+              "attacks": 952,
+              "hits": 282,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -92597,29 +92587,25 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 14,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 14
             },
             "rl": {
               "attacks": 219,
-              "hits": 104,
-              "hitsConvention": "anyDamage"
+              "hits": 23,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 1318,
-              "hits": 631,
-              "hitsConvention": "anyDamage"
+              "attacks": 7908,
+              "hits": 2573,
+              "hitsConvention": "pellets"
             },
             "sng": {
-              "attacks": 540,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 540
             },
             "ssg": {
-              "attacks": 60,
-              "hits": 35,
-              "hitsConvention": "anyDamage"
+              "attacks": 840,
+              "hits": 263,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -92894,7 +92880,7 @@
       }
     ]
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -135903,6 +135889,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1000,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "epoch",
       "matchStartUnixMs": 1776971855326
     },

@@ -417,6 +417,11 @@ broadcasts — "left the game with N frags", "rejoins the game with N
 frags", "reenters the game without stats"; decoded once in the parser
 because the wire fragments them at arbitrary points, including inside
 the number),
+`MatchStartEvent` (the match went live — emitted once per demo at the
+first of four wire signals: the `matchdate:` stamp, a match-start print,
+the `//ktx matchstart` stuffcmd or a serverinfo `status` transition into a
+running clock; the three non-print ones are what make KTX **matchless**
+servers analyzable, since they never print a start line),
 `DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
 `FinalScoresEvent` (KTX `//finalscores` end-of-match scoreline — the
 server's own mode, map and final result, on 64% of the archive against
@@ -471,7 +476,15 @@ implementation backed by MVD files.
 
 Defined in [`mvd-analytics/result`](mvd-analytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
-match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
+match (map, duration, the scoreboard, and since v75 `match.gameMode` —
+the one normalised mode verdict: `canonical` shape, `teamBased`,
+`rounds`, `submodes[]`, each with a `sources` entry naming which of the
+server's five mode vocabularies decided it. When `teamBased` is false —
+every duel, FFA, race — the match is laid out with one side per player
+(`match.teams` one row per player, `players[].team` equal to the
+player's own name, the raw userinfo tag kept on `players[].rawTeam`), so
+a team tag is never read as a side),
+frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
 damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
@@ -747,7 +760,10 @@ entirely — not "what went wrong" but "why is there nothing here": it is
 present exactly when the `streams` block is absent, and names the
 reason (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared`
 / `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind it.
-2% of the archive carries it; see the known-limitations list below. Check
+2% of the archive carries it; see the known-limitations list below.
+(v75 removed the whole `matchStartUnannounced` slice of that by detecting
+the match start from three more wire signals — see
+[MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#match-start-detection).) Check
 it FIRST of the three: it decides whether `errors[]` and `parseWarnings`
 describe a partial match or nothing at all, and `demoUnreadable` is the
 one reason that means both.
@@ -976,13 +992,21 @@ diff -r /tmp/before /tmp/after
    is absent on a demo whose obituaries never matched. Two things it
    does NOT claim. `maxSpree` deliberately diverges from KTX's, which
    credits a player's own suicide to their streak wherever teamplay is
-   off; and `sg`/`ssg` `hits` are never comparable to KTX's (pellets vs
-   trigger pulls), nor are `rl`/`gl` on a `derived` family (KTX counts
-   direct impacts only, ours any path — ~4x apart on rl). That is stated
-   in the payload rather than only in prose: every weapon carrying
-   `hits` carries `hitsConvention` (`anyDamage` | `directImpact` |
-   `pellets`), so a consumer can gate a cross-era comparison instead of
-   re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
+   off; and a `reconstructed` family keeps trigger pulls on `sg`/`ssg`,
+   whose pellet split its rebuilt log cannot carry. A `derived` family is
+   on KTX's own scale per weapon since v75 — `sg`/`ssg` pellets, `rl`/`gl`
+   direct impacts, the rest a connecting fire. `gl`'s is the one that is
+   not a wire reading: KTX counts a grenade that TOUCHED a player, the
+   touch detonates it, and every damage row the wire then carries is
+   flagged splash — so the touch is re-derived from the grenade's flight
+   and its 2.5 s fuse by the same classifier a pre-instrumentation demo
+   uses (92% of 424 archive player rows exact against the verbatim block).
+   That classifier reads the projectile streams, which mvd-api and the web
+   build always request and a bare CLI parse does not; without them the
+   row says `anyDamage` rather than guessing. That is stated in the payload rather than only in
+   prose: every weapon carrying `hits` carries `hitsConvention`
+   (`anyDamage` | `directImpact` | `pellets`), so a consumer can gate a
+   cross-era comparison instead of re-deriving the rule. On a `reconstructed` family `rl`/`gl` DO answer
    KTX's question (schema v74): the reconstruction classifies each
    explosion direct-vs-splash from the flight's trajectory against the
    player hull, the flat-110 direct-damage constant where the demo
@@ -1023,17 +1047,19 @@ diff -r /tmp/before /tmp/after
 
 0c. **2% of the archive holds no analyzable match — and now says so.**
    Streams are built only inside the DETECTED match window, so a demo
-   whose match-start broadcast was never seen produces no player streams
-   and, with them, no damage / `playerStats` / `locGraph` / buckets. Over
-   the 50 951-demo readability sweep that is 1 032 demos (2.03%), and
-   until v74 every one of them came out silent — empty sections and an
-   empty `errors[]`, with no way to tell "this recording holds no match"
-   from "the recording starts mid-game" from "the parse failed". The v74
-   `noMatch` block is present on exactly those results and names the
-   reason: `midMatchRecording` (68 — the serverinfo `status` key already
-   read "13 min left" at demo open), `matchStartUnannounced` (138 — the
-   server started a match under our watch but announced it in a form we
-   do not recognise; 32 of them carry a full KTX demoinfo block),
+   whose match start was never declared on the wire produces no player
+   streams and, with them, no damage / `playerStats` / `locGraph` /
+   buckets. Over the 50 951-demo readability sweep that is 1 032 demos
+   (2.03%), and until v74 every one of them came out silent — empty
+   sections and an empty `errors[]`, with no way to tell "this recording
+   holds no match" from "the recording starts mid-game" from "the parse
+   failed". The v74 `noMatch` block is present on exactly those results
+   and names the reason: `midMatchRecording` (68 — the serverinfo
+   `status` key already read "13 min left" at demo open),
+   `matchStartUnannounced` (138 before v75, **0 after** — the server
+   started a match under our watch and no analyzable player stream came
+   out; v75 gave the reader three signals besides the broadcast line and
+   every one of the 138 is now analyzable),
    `noMatchDeclared` (170 — no match declaration we can see, yet kills
    were parsed; usually unmanaged play, 165 on a foreign `*gamedir` like
    `fortress` / `jteams` / `ctf`, but 168 send no `status` key at all, so
@@ -1044,10 +1070,20 @@ diff -r /tmp/before /tmp/after
    not an `errors[]` entry: that list means the pipeline failed, and this
    is a fact about the demo.
    Zero markers on a 1 500-demo control drawn from the demos that DO
-   produce streams. What is still NOT done is SALVAGE — the ~206
-   recordings that demonstrably hold a real match are marked, not
-   analyzed; that is plan lead 8 stage (b) in
-   [`plan-archive-features.md`](plan-archive-features.md).
+   produce streams. Half the SALVAGE work is now done: v75 made the match
+   start a Layer-1 event with four wire signals instead of one broadcast
+   line, and all 138 `matchStartUnannounced` demos — the KTX matchless
+   FFA servers that never print a start line, plus the `fortress` / `ctf`
+   mods — now produce a full result. What is still NOT salvaged is the 68
+   `midMatchRecording` demos, where the match began before the first frame
+   and the wire carries no origin to rebase onto; that is the rest of plan
+   lead 8 stage (b) in
+   [`plan-archive-features.md`](plan-archive-features.md). FFA MODE
+   semantics landed in the same version: `match.gameMode` is now the one
+   normalised mode verdict, and a mode with no teams
+   (`gameMode.teamBased` false) is laid out with one side per player, so a
+   userinfo team tag is never read as a side. See
+   [`plan-ffa-support.md`](plan-ffa-support.md).
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
    faster than MVD stat updates, so any *ammo-delta*-based inference of
@@ -1058,9 +1094,10 @@ diff -r /tmp/before /tmp/after
    (it has no per-shot fire sound), which can slip by a single cell at a
    death/discharge boundary. KTX demoinfo stats (when available) remain the
    authoritative reference, and `shots.reconciliation` cross-checks against
-   them — re-measured in v74 on 188 instrumented archive demos, where
+   them — re-measured in v75 on 186 instrumented archive demos, where
    `playerStats` `accuracy.attacks` matches KTX to the row 98-100% of the
-   time on every single-projectile weapon.
+   time on every single-projectile weapon and 100% on both shotguns,
+   whose attacks are now published in KTX's own pellet unit.
 
 2. **Auth name override**: When players authenticate via mvdsv,
    `sv_forcenick` can set the userinfo name to the login. The analyzer
@@ -1252,6 +1289,18 @@ diff -r /tmp/before /tmp/after
    classes, no enemy/team/self slices. Method and per-weapon tables:
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
    §aim hit recovery.
+
+10. **Hoony / blitz points are one match window, not rounds.** A
+   HoonyMode series is a sequence of points; KTX ends each with
+   `"The point is over"` (`ktx/src/match.c:326`), re-readies the players
+   and runs `StartMatch` again, and only the final point reaches
+   `svc_intermission`. The pipeline takes the first `//ktx matchstart` /
+   `matchdate:` and that intermission, so `streams`, `buckets`, `damage`
+   and `playerStats` span the whole series including the between-point
+   countdowns, and `match.gameMode.rounds` is `true` with nothing yet
+   consuming it. The point boundaries are on the wire as
+   `timelineAnalysis.demoMarkers` (`0 round-N`, `match.c:447`); slicing
+   the analysis per point is future work.
 
 ## Reference sources
 

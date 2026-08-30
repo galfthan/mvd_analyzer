@@ -70,5 +70,36 @@
     "file": "demos/2on2_archive_dm4_qw240_recon.mvd.gz",
     "sha256": "47182c2e54c514bd0a6d51171ef71e906d0aa596a20308d03069c73dfe312e36",
     "shotStreams": true
+  },
+  {
+    "label": "ffa_matchless_nova_260704",
+    "mode": "ffa",
+    "file": "demos/ffa_matchless_nova_260704.mvd.gz",
+    "sha256": "0e24cbd1390bc335c99af36d7c1441bd55d07e3fb27b27763758adb73aaacaaa"
+  },
+  {
+    "label": "ffa_matchless_dm2_260116_joiners",
+    "mode": "ffa",
+    "file": "demos/ffa_matchless_dm2_260116_joiners.mvd.gz",
+    "sha256": "8bda81144351e5509b665b4bff0bb8fbd024e57050c9cb8d96b504bc8378ab73",
+    "shotStreams": true
+  },
+  {
+    "label": "ffa_matchless_dm6_260704_3s",
+    "mode": "ffa",
+    "file": "demos/ffa_matchless_dm6_260704_3s.mvd.gz",
+    "sha256": "bfc606006f8052fc51f3cca5a61527c46ff5b40e47ae17a26e7278ff05283ad7"
+  },
+  {
+    "label": "ffa_countdown_dm6_260106",
+    "mode": "ffa",
+    "file": "demos/ffa_countdown_dm6_260106.mvd.gz",
+    "sha256": "52c1421d09a29416ecec769cb485c2e7684e5c59811280e7d282f1d4fc46b038"
+  },
+  {
+    "label": "ffa_matchless_shifter_260119_spectate",
+    "mode": "ffa",
+    "file": "demos/ffa_matchless_shifter_260119_spectate.mvd.gz",
+    "sha256": "b5a885f6098be63de5767d5927ef9dfab269872c72e3afc21035281e9deeade9"
   }
 ]

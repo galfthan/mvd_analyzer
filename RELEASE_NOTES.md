@@ -5,6 +5,496 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (better-ffa-support) — schema v75: the match boundary becomes a Layer-1 event; matchless FFA demos become analyzable; one game-mode descriptor replaces five vocabularies
+
+**KTX servers running `k_matchless 1` (continuous FFA / CTF play) never
+broadcast "The match has begun!"** — `ktx/src/match.c:1294-1297` gates that
+line on `!k_matchLess`. The whole pipeline keyed on that one line, so those
+demos detected no match start at all: no `streams`, and therefore no
+buckets / damage / `playerStats` / `locGraph` / aim, plus zero deaths on a
+demo full of frags (the parser's obituary corroborator is gated on the same
+verdict). They came out marked `noMatch.reason = matchStartUnannounced`.
+
+**The match start is now a Layer-1 event** — `MatchStartEvent`, emitted once
+per demo by `mvd-reader/parser/matchstart.go`, at the FIRST of four wire
+signals to arrive:
+
+| Source | Wire form | ktx |
+|---|---|---|
+| `matchdate` | broadcast print, line-initial `matchdate: …` | `match.c:1291` |
+| `print` | a broadcast matching `MatchStartPatterns` ("The match has begun!", kmod/qwe's "The duel has begun!") | `match.c:1296` |
+| `ktx-matchstart` | `//ktx matchstart` stuffcmd (STUFFCMD_DEMOONLY, no cvar gate at all) | `match.c:1372` |
+| `status` | a serverinfo `status` update moving to a running clock from a value that was not one | `match.c:1337` |
+
+`StartMatch()` emits the first three in the same server frame on modern
+KTX, so the match-start TIME is unchanged on every demo that already had
+one — the golden corpus and a 1 500-demo healthy archive control both come
+out with the match start at the same millisecond
+(`.reports/nomatch-marker/recensus-v75-healthy-1500.csv`). What changed is
+which demos have one at all.
+
+- **ADDED on `streams.global`: `matchStartSignal`** (`ktx-matchstart` |
+  `print` | `matchdate` | `status`) — which signal declared the start.
+  Republished on `/overview` as `timing.matchStartSignal`. It is NOT
+  `matchStartSource`, which names where the wall-clock VALUE came from; the
+  two vocabularies share the token `matchdate` and answer different
+  questions.
+- **`noMatch.reason = matchStartUnannounced` is now essentially unreachable.**
+  Re-running the 138 demos that carried it in the 50 951-demo sweep, all 138
+  now detect a start and produce a full result: 104 on `matchdate`, 34 on
+  the `status` transition alone (including every one of the 24 `fortress`
+  and 8 `ctf` demos, whose mods write their own running clock into the key).
+  Per-demo output for both populations is written to the local (untracked)
+  report directory beside the v74 census it supersedes:
+  `.reports/nomatch-marker/recensus-v75-unannounced-138.csv` and
+  `recensus-v75-healthy-1500.csv`, with the probe that wrote them — and the
+  command line to rerun it — in `recensus-v75-probe.go.txt`.
+  The reason keeps its name and now means "the server moved `status` to a
+  running clock and still no analyzable match came out". This is
+  `plan-archive-features.md` lead 8 stage (b) for the KTX half.
+- **Layer 2 stopped re-scanning prints for the start.**
+  `MatchTimingDetector` gains `OnMatchStart` and its `OnPrint` is now the
+  match-END half only; the ten analyzers that embed it feed the new event.
+  The parser's own `matchStarted` gate and the analyzers' verdict are now
+  the same latch by construction — that duplication is how the two layers
+  came to disagree on matchless demos in the first place.
+  `statusNamesRunningGame` moved to Layer 1 as
+  `events.StatusNamesRunningGame` for the same reason.
+- **Fixed, exposed by the new corpus: a post-match disconnect no longer
+  fabricates a frag event.** `TimelineAnalyzer.handleFragUpdate` gated on
+  "match started" but not on "match ended", so `SV_DropClient` zeroing a
+  leaving slot's scoreboard (`mvdsv/src/sv_main.c:419-428`) landed in
+  `timelineAnalysis.fragEvents` with a negative delta dated past `matchEnd`
+  — the `Vacated` handler that drops that phantom is itself inside the match
+  window. It needs a recording that keeps running after the match ends,
+  which is normal on a matchless server (`ffa_matchless_nova_260704`: nexus
+  drops 3.7 s past the match-over print). The gate is now the same
+  `Started && !Ended` every other recording path uses; the 14 existing
+  goldens do not move.
+- **Golden corpus** gains four local-only FFA entries: three matchless
+  (`nova` 6 min / 2 players, projected to `match`, `streams.global` and
+  `timelineAnalysis.fragEvents` — the post-match drop gate; `dm2` 8 players with a
+  mid-match leaver and a slot-reuse reconnect, projected to scoreboard +
+  sessions + per-player windows; `dm6` a 3.2 s map-voted-off match with
+  zero kills) and one countdown-style FFA control projected to the
+  sections the individual rewrite touches (`match`, `demoInfo`,
+  `locGraph`). The `status`-only start signal (archive `2a2ed2e9ca…`, a
+  qwe 2.40 CTF recording: `Standby` → `"14:59 left"`, no `matchdate:`,
+  no start print) is pinned by the wire-level test in
+  `mvd-reader/parser/matchstart_test.go`, not by a golden — CTF itself
+  (runes, captures, the >5 score jumps) is not modelled here yet.
+
+### There are no teams in FFA
+
+**A userinfo `team` tag in FFA is clan decoration, not a side.** KTX forces
+`teamplay 0` there (`ktx/src/world.c:1652-1655`) and the players still wear
+their tags: on `ffa-demos/ffa_1[dm2]260116-2057.mvd` three of the eight wear
+`red` and spend the match killing each other. Every team-sensitive surface
+read the tag anyway — **34 of that demo's 211 kills came out flagged as team
+kills**, those three were dropped from each other's aim enemy sets, their
+hits were classified as team damage, and `match.teams` reported four
+pseudo-teams with `playerStats.teams` aggregating five of them.
+
+- **ADDED: `match.gameMode`** — one normalised mode verdict with per-field
+  provenance: `canonical` (`duel` | `team` | `ffa` | `ctf` | `ca` |
+  `wipeout` | `race` | `hoony` | `ra` | `coop` | `unknown`), `teamBased`,
+  `rounds`, `submodes[]`, `sources`. It replaces five unrelated vocabularies
+  that had no translation between them (KTX's demoinfo `mode`, the
+  `//finalscores` mode name, the countdown centerprint's display spelling,
+  the composite serverinfo `mode` key, the hub search facet) and the four
+  independent hand-written "is this a solo mode" tables that disagreed with
+  each other. All five raw vocabularies stay published verbatim beside it.
+  Republished on `/overview` as `gameMode`; `overview.mode` keeps its
+  existing display-string behaviour and is now documented as such.
+  Precedence for `canonical` is demoinfo `mode` → countdown Mode row →
+  serverinfo `mode` umode → `//finalscores` → roster shape: the serverinfo
+  key names the last usermode COMMAND that ran (`world.c:1482` over
+  `commands.c:4848`), which a plain `teamplay` change leaves stale, while
+  the countdown states the settings the match started under. And a
+  canonical the ROSTER inferred never vetoes a teamplay cvar — a CTF
+  server's 1v1 (`*gamedir=ctf`, `teamplay=419`) is `canonical: duel` from
+  the roster AND `teamBased: true` from the serverinfo, laid out
+  individually because two participants are two sides.
+- **ADDED on `demoInfo`: `deathmatch` and `teamplay`** — KTX's own `dm` /
+  `tp` keys (`ktx/src/stats_json.c:492-502`), parsed since v1 and dropped on
+  the floor until now. `tp` is the strongest teamplay signal there is:
+  FixRules forces teamplay to 0 outside team/CTF/coop and to 2 inside them
+  (`world.c:1674-1691`), so on a KTX server `teamplay > 0` and "this is a
+  team game" are the same statement in both directions.
+- **CHANGED: a mode with no teams is laid out INDIVIDUALLY** — `match.teams`
+  is one row per player, every `match.players[].team` equals the player's own
+  name, and `match.sources.teams` reads `individual` (new value). This is the
+  layout duels have always produced, generalised: a consumer needs no mode
+  string to render an individual scoreboard, and the web UI's existing
+  `team === name` shape test keeps working. `playerStats.teams` is absent,
+  as it already was on most FFA demos. The relabelling reaches `demoInfo`
+  too — `demoInfo.players[].team` and `demoInfo.teams`, the one section
+  otherwise published verbatim — because it is where several consumers look
+  FIRST for a name→team map: leaving the clan tags there kept
+  `locGraph.locs[].byTeam` keyed on `{red, tsc}` and left the web UI's map
+  symbols, loc heatmap and per-team player lists empty on an FFA with a KTX
+  block.
+- **ADDED: `match.players[].rawTeam`** — the userinfo tag the individual
+  layout replaced, kept because it is real information (clan membership); it
+  just names no side. Omitted when it would repeat `team`.
+- **FIXED: `rawTeam` was schedule-dependent.** The individual rewrite
+  OVERWRITES `demoInfo.players[].team` in place, and `co.DemoInfo`,
+  `ctx.DemoInfo` and `result.demoInfo` are one pointer — while `identity`
+  copies that same field into every session it resolves. The two nodes had
+  no edge between them, so under a valid topological order that ran `roster`
+  first the sessions carried the player's own name, the scoreboard saw
+  `raw == name`, and `rawTeam` was omitted (`betowen`'s `red`, `keith`'s
+  `tsc`). The `roster` node now declares a `requires` edge on `identity` —
+  the write-after-read order — and `TestOrderIndependence` gained a
+  deterministic adversarial schedule (run one named node as late as its
+  edges allow) that reproduces the omission whenever the edge is missing,
+  where the three fixed random seeds happened not to.
+- **CHANGED: team kills, team damage and the aim enemy set** all read the
+  descriptor now. On the 13-demo FFA set the team-kill count is 0 everywhere
+  (was 34 / 37 / 17 / 7 / 1 on five of them); those kills now count as kills.
+  KTX cannot print a team-kill obituary outside team/CTF/coop at all
+  (`ktx/src/client.c:5342-5343`), so this removes a misfire rather than a
+  signal.
+- **CHANGED: `//finalscores` is no longer adopted as a team list in an
+  individual mode.** There it names the top-two PLAYERS
+  (`ktx/src/commands.c:6963-6977`) — on `ffa_1[dm2]` `":f" 36 "SMOK" 35`.
+  The directive is still published verbatim on `metadata.finalScores`.
+- **CHANGED: region control is absent by design on a non-team mode** of more
+  than two participants, instead of falling out empty by accident on the
+  "needs exactly two labels" test. A duel — and a two-player FFA, which is
+  the same match — still gets it, with the two players as the sides. The
+  timeline's baked `regionControl.teamA/teamB` were being filled from the raw
+  tags (`'tro` vs `dojo` over eight players on `ffa_1[dm2]`); they are now
+  empty there. The region GEOMETRY (`regionControl.regions`) still ships for
+  every demo — it is a property of the map — so the web UI hides the
+  region-control panels itself rather than waiting for absent data.
+- **FIXED: a player who leaves and comes back keeps the frags he left
+  with.** The scoreboard kept one row per identity and let the later stint
+  REPLACE the score, on the premise of KTX's ghost restore — which matchless
+  mode never performs (`MakeGhost` returns at `ktx/src/client.c:2897`, "no
+  ghost in matchless mode"). On `ffa_1[dm2]` nexus left slot 4 with 14 frags
+  at 281.6 s, rejoined on slot 3 at 321.0 s and left again with 0, and the
+  row reported **0 frags against 15 kills** — breaking the
+  `frags == kills − suicides − teamKills` identity the frag log maintains.
+  A stint still REPLACES the total when either of two value-free signals
+  says the server carried the score over: it is a KTX ghost scoreboard row
+  (userid 0 — `ghost2scores` hardcodes it at `g_utils.c:2318` and is the only
+  writer that does), or the server ANNOUNCED the restore ("<name> rejoins the
+  game with N frags", `client.c:1513-1543`, read per netname because a
+  restore can land on a different scoreboard row from the departure it
+  restores). Every other stint now ADDS. nexus reports 14. The signals are
+  deliberately value-free: comparing a stint's first attested frag value
+  against the running total misreads every low or negative total, because
+  the first value a re-created row attests is its first kill or suicide
+  (±1) — a matchless player who left on 1 and scored 5 more folded to 5
+  instead of 6, one who left on −2 and scored 3 folded to 3 instead of 1.
+- **One parser for the composite serverinfo `mode` key**
+  (`result.ParseServerinfoMode`). Three call sites ran their own
+  `strings.Split(si["mode"], "-")` with three deliberately different token
+  selections; the selections are kept, the splits are not.
+  `damagerecon.SkipModeReasons` now publishes the `boundedMode`
+  `skipped:*` vocabulary, and a drift test pins the OpenAPI enum against it
+  — that enum was a hand-mirrored copy that had already lagged once.
+
+### Players who leave by going spectator
+
+**mvdsv's `join` / `observe` move a client between player and spectator
+without a reconnect** (`sv_user.c:2680-2830`): the same slot, the same
+userid, one full `svc_updateuserinfo` with `*spectator` flipped. Each calls
+the mod's `ClientDisconnect` first, which on KTX broadcasts "<name> left the
+game with N frags" while the match is running (`client.c:3022-3027`), and
+then zeroes `old_frags`.
+
+The pipeline treated it as a plain userinfo update, so the occupancy ran to
+the end of the recording: on `ffa-demos/ffa_1[tox]260818-1903.mvd` nexus left
+at 263.7 s with 18 frags and was served **0**, with a published session
+claiming he was still playing at 360 s.
+
+- **CHANGED: a player↔spectator transition now ends the occupancy and opens
+  a new one** on the same connection — the same treatment a drop gets, so the
+  score freezes through the existing rollback + announced-frags recovery and
+  the participation gate reads the new stint as spectator-only. nexus now
+  reports 18 frags and a session closing at 263.7 s.
+- **CHANGED: `streams.players[].sessions` publishes PLAY windows.** The
+  spectating half of a transition is withheld (it answers none of the
+  questions the list exists for — there is no player entity to track), while
+  a connection that only ever carried the `*spectator` key without ever
+  crossing the line is untouched: pre-KTX servers set that key on players,
+  and on `2on2_archive_dm4_qw240_recon` `math` streams 562 s of play under
+  one such userinfo. Visible in the existing corpus on
+  `4on4_fu_mix_060626_dm2_rename_handover`, where rusti's published window
+  now starts at his join (620599) instead of at the spectator connection that
+  preceded it (609644).
+- **Golden corpus** gains a sixth FFA entry,
+  `ffa_matchless_shifter_260119_spectate` — an 11-player FFA pinning the
+  individual layout at scale (eleven one-player teams, nine distinct
+  `rawTeam` tags, zero team kills), a spectator joining mid-match on a slot
+  he was already watching from, and a slot handover on top of it. It is a
+  projected golden: the eleven full streams would add megabytes the other
+  FFA goldens already pin.
+
+### A modern demo's accuracy is on the server's own scale
+
+`playerStats.accuracy` with `src: "derived"` — the wire-linked family every
+demo carrying the KTX damage stream publishes — used to answer its OWN
+question on every weapon: one attack per trigger pull, one hit per fire that
+landed damage by any path. v74 had already put the RECONSTRUCTED tier on
+KTX's convention for `rl`/`gl`, so the corpus was split the wrong way round:
+a pre-instrumentation demo answered KTX's question and last week's demo did
+not. On a matchless FFA demo, which carries no demoinfo block to overlay,
+that was the only accuracy number a reader ever saw.
+
+The wire-linked family now publishes KTX's convention per weapon, read out
+of the aim section rather than recomputed (`analyzer.deriveMeasuredAcc`
+lifts the published counters the way `deriveReconHits` lifts the recon
+tier, so the two sections cannot disagree):
+
+- **`sg` / `ssg`** — `attacks` and `hits` are PELLETS on both sides, from
+  `aim.players[].weapons[].pellets` / `pelletHits`. KTX's own unit
+  (`attacks += bullets`, `ktx/src/weapons.c:812` for the shotgun's 6,
+  `:869` for the super shotgun's 14; `hits++` per pellet, `:387`, `:392`).
+  Withheld and unresolved fires still count as attacks, which is what keeps
+  the unit comparable. `hits` is an ESTIMATE — aim sizes a fire's pellet
+  hits from the magnitude of its same-frame damage, `Σ / 4`, or `Σ / 16`
+  while the shooter holds the quad (`T_Damage` multiplies by 4,
+  `ktx/src/combat.c:540-546`), clamped to the fire's 6 or 14.
+- **`rl`** — `hits` is the DIRECT-impact count, from
+  `aim.players[].weapons[].direct`. KTX increments its counter in
+  `T_MissileTouch` and nowhere else (`:994`); splash victims go to the
+  separate `rhits`/`vhits` (`ktx/src/combat.c:1099-1121`). `attacks` stays
+  the fire count — KTX's own `attacks++` per rocket.
+- **`gl`** — the same DIRECT-impact count, from the same field, but NOT from
+  the same evidence. `GrenadeTouch` increments KTX's counter (`:1331`) and
+  then detonates the grenade through `T_RadiusDamage`, which flags every
+  resulting row splash (`ktx/src/combat.c:1207`), so the wire log holds no
+  record of a grenade touch at all. The touch is re-derived instead — from
+  the grenade's broadcast flight, its detonation point against the victim's
+  32×32×56 hull, and the 2.5 s fuse (`weapons.c:1430`) — by the very
+  classifier a pre-instrumentation demo uses (`damagerecon/direct.go`), fed
+  the wire rows. None of that evidence is era-dependent, which is why the
+  question a modern demo could not answer turns out to be answerable the way
+  an old one answers it.
+- **`lg` / `ng` / `sng` / `axe`** — unchanged `anyDamage`, which already WAS
+  KTX's convention for a weapon with one damage path.
+
+Measured against the verbatim block on 186 instrumented archive demos
+(`cmd/qw-demoinfo-eval`, the new `/measured` columns; full tables in
+[`damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)):
+
+| row | before | after |
+|---|---|---|
+| `sg.attacks` / `ssg.attacks` | 0.0% exact, 83% / 93% off | **100.0% exact, 0.00%** |
+| `sg.hits` | 6.0% / 76.95% | **100.0% / 0.00%** |
+| `ssg.hits` | 5.9% / 85.62% | **100.0% / 0.00%** |
+| `rl.hits` | 1.6% / 355.17% | **99.8% / 0.02%** |
+| `gl.hits` | 42.9% / 55.13% | **92.0% / 3.79%** |
+| `lg.hits` / `axe.hits` (control) | 99.3% / 100.0% at 0.00% | unchanged |
+
+The shotgun rows reproduce the block EXACTLY — every one of 534 `sg` and
+390 `ssg` player rows. They did not at first: the pellet estimator divided
+every fire's damage by 4, and a quad pellet does 16, so a quad fire with two
+pellets in read as a full six. That residual was one-sided (bias +4.13 sg /
++6.85 ssg, never negative) and lived entirely on players who took a quad —
+the 264 `sg` and 144 `ssg` rows whose player took none were already 100.0%
+exact. Dividing by the shooter's quad state at fire time closed it to zero
+on both weapons.
+
+**`gl` reads BETTER than the tier it borrows the classifier from**, on the
+same 424 archive player rows: 92.0% exact at 3.79% aggregate against the
+reconstructed tier's 89.6% / 3.55%, identically biased (−0.07 per row) and
+with a p90 error of 0 against its 1. The wire row is the stronger input —
+its attacker, victim and weapon are measured rather than inferred, so no
+candidate explosion can win the row for the wrong shooter, and its damage
+value is the server's own. The splash flag is still what `rl` reads (it
+reproduces the block on 632 of 632 rows, which no derivation can beat); the
+classifier run on `rl`'s rows for comparison scores 54.7%, so the flag
+stays. Both numbers are in ACCURACY.md, because what an alternative costs is
+what decides against it — where that 54.7% is also flagged as a FLOOR rather
+than the classifier's ceiling, since the comparison column treats a killing
+rocket as a survived one unless the analyzer reconstructed an overkill
+bound for it.
+
+Two consequences a consumer can see. `gl`'s `direct` is bounded by the FIRES
+rather than by `hits` — a grenade that touched somebody while the fire→flight
+join failed to link its fire is still a touch — so
+`direct + splash + missed` no longer partitions a gl row's fires and
+`splash` floors at zero (measured: clamping to `hits` instead costs 6 points
+of exact rows and doubles the aggregate error). And the classification needs
+the spatial shot streams: mvd-api and the WASM web build always request them,
+but a bare `qw-analyze` parse does not, and there aim publishes no gl
+`direct`/`splash` at all and the accuracy row falls back to `anyDamage` with
+the `≠` mark rather than passing a withheld 0 off as "touched nobody".
+
+**RETYPED so that withhold is visible in the JSON:**
+`aim.players[].weapons[].direct` and `.splash` (and the same `direct` inside
+the `enemy` / `team` / `self` buckets) are now **`*int`** rather than `int`.
+With `omitempty` on a plain int the two states were one wire shape — a row
+that measured zero touches omitted `direct` exactly as a withheld row did,
+and a consumer could only tell them apart by reaching for a global latch
+elsewhere in the Result. Now the pair is emitted together whenever the split
+RAN, so a present `0` is a measured "touched nobody" and an absence means
+"never classified"; `playerStats.accuracy.byWeapon[rl|gl]` is derived from
+that presence rather than from `Streams.ShotStreamsComputed`, which removes
+the duplicated gate that could drift. Consumers must render an absence as
+withheld, never as 0 — the web UI's Aim tab now shows "—" for it. A demo
+where the linker resolved no rl/gl fire at all withholds `rl` too (its `hits`
+is 0 there as well, so a `direct` of 0 would claim a measurement nothing
+made); such a row falls back to the any-path count with the `≠` mark.
+Schema stays **v75** — this shape has not shipped.
+
+With `gl` on KTX's scale, the Summary tab's `≠` mark — which used to sit on
+four weapons of every derived row — no longer appears on a derived row this
+build produces. Two cells can still wear it: `sg`/`ssg` on a RECONSTRUCTED
+row, where the pellet split genuinely cannot be recovered, and `rl`/`gl` on
+a derived row whose direct/splash split never ran (an imported payload
+parsed without the projectile streams). They are marked for DIFFERENT
+reasons — pellets vs touches — so the mark's tooltip is now built per weapon
+from the row's own `hitsConvention` and the server's for that weapon,
+instead of stating the shotgun reason over every marked cell.
+
+**One honest withhold, named rather than papered over.**
+
+- **`ng` / `sng` `hits` are WITHHELD without nail decoding.** Nail fires link
+  to their damage only through the `svc_nails` id brackets, which
+  `qw-analyze` builds on `-include nails` (mvd-api and the WASM web build
+  always request it). Without them the field used to publish a fabricated
+  `hits: 0` — `ffa_1[dm2]` reported Myagi at `ng` 177 attacks / 0 hits on a
+  default CLI parse and 17 hits with the flag. It is now absent, keyed on
+  `Streams.NailsComputed`, exactly as the reconstructed tier withholds those
+  two weapons. Where the flag IS on, the numbers are on KTX's scale but
+  under-recover — ng 65.5% of rows exact at 32.1% aggregate, sng 48.5% at
+  22.8%, never over — so nail accuracy is a floor, and ACCURACY.md says so.
+
+Schema stays **v75**: this moves values and `hitsConvention` strings, no
+shapes. `cmd/qw-demoinfo-eval` gains the `/measured`, `/fires`,
+`/anyDamage/wire` and `/classifier/wire` columns and a `-nails` flag, so the
+conventions the tier does NOT publish stay measured rather than argued.
+
+### Web UI
+
+An individual-mode demo shows no team information at all: no Teams panel, no
+"Per Team" aggregates, no Team / TK / TDmg scoreboard columns, no region
+control, and a frag-sorted individual scoreboard. The topbar names the
+leader and the field size rather than inventing an "A vs B" matchup.
+
+**The Timeline tab is per player there.** Team Status and the Score,
+Weapons and Team Health/Armor graphs are "team A ↑ / team B ↓" by
+construction — over a field of eight that is the top two players and nobody
+else — so on an individual layout of more than two participants they go,
+along with the Powerups rows, whose spans are coloured by which of two teams
+holds the powerup. In their place the three per-player views come out from
+behind their collapsed `<details>` and become panels of their own — Frags /
+deaths per player, Weapons per player, Health / armor per player, with
+taller rows now that they carry the tab. They also show the WHOLE field for
+the first time: the grouping behind them resolved every player to one of two
+sides, so an FFA drew rows for two players out of N. Rows carry the player
+palette through the same canonical `TEAM_COLORS` index as everything else.
+A duel (or a 1v1 FFA) is a matchup and keeps every panel exactly as before.
+
+**The Chat tab is one column there.** "Team A Chat" / "Team B Chat" splits
+the say lines between `teams[0]` and `teams[1]`, which in a field of eight
+means six players' chat was rendered nowhere at all — on
+`ffa_1[shifter]260119-2151`, none of the 39 in-match lines (the two
+frag leaders never spoke). On an individual layout
+of more than two participants the second column and its header go and the
+first carries every line — `say` and `say_team` alike — in time order under
+the heading "Chat", each row prefixed with the speaker's name in that
+player's palette colour. Kills keeps its column and the two split the width.
+"Hide team chat" stays: it filters on message TYPE, so it still hides the
+clan-tag `say_team` chatter an FFA does have. A duel keeps the two columns —
+there each one IS a player.
+
+**Colours.** A field of MORE than two players draws from a separate
+twelve-entry `PLAYER_PALETTE`, delivered through the same single canonical
+`TEAM_COLORS` array every surface already indexes — the four-entry team
+palette runs out. Its entries are handed out in player-NAME sort order, the
+same stability property CLAUDE.md states for the team palette: the board
+does not recolour when the scoreline changes. **Duel colours are unchanged**
+— two players are a matchup, so a 1v1 keeps `assignTeamColors` and the team
+palette exactly as before. What does change for a duel is that its Team
+column (a copy of the Player column) and its always-empty TK / TDmg columns
+now hide with the rest.
+
+**Two predicates, not one.** The UI decides LAYOUT (panels, palette,
+scoreboard) from `match.sources.teams === 'individual'` and team SEMANTICS
+(the aim tab's Team victim filter) from `match.gameMode.teamBased`, because
+they differ on a 1v1 played on a teamplay server. The Team victim filter
+used to key on the aim rows' own `mode` field, which reads `team` on an FFA
+— it names the enemy-set rule the join applied, not the ruleset — so every
+FFA aim tab offered a filter that could never match anything.
+
+### The mode and match-boundary vocabularies now name their producers
+
+Every string table the pipeline matches server text against was checked
+against the vendored KTX source and a parser-only sweep of all 50 964
+archive demos (`.reports/vocab-sweep-2026-08-29`, untracked), and the
+Kombat Teams source (`kteams/`, KTX's ancestor) for the oldest era. The
+sweep's generated verdicts are "keep on any non-chat hit"; four of them
+(`go!`, `game start`, `game over`, `point is over`) were overruled after
+reading the hits — player names, a help line, a spectator's name, and a
+per-point line inside a series — and the reasons are in the code comments
+beside each table.
+
+- **`MatchStartPatterns`** (Layer 1) drops `fight!`, `go!` and
+  `game start`: no server broadcasts any of them, and `go!` was a live
+  false positive — obituary and scoreboard lines naming the E0 player
+  `RINGO!!!` started a match on 12 demos. The three survivors carry their
+  real producers: KTX/Kombat Teams' `The match has begun!`, a CTF mod's
+  `Match Started!` (55 E0 demos), an arena mod's `Series begins in 10
+  seconds...` (13 E0 demos, matched on the digit, ~10 s early).
+- **`matchEndPatterns`** drops `match ended`, `match complete`,
+  `game over`, `timelimit hit`, `fraglimit hit` — never printed, except one
+  spectator *named* "game over". KTX's per-point `The point is over` is
+  knowingly **not** an end: a hoony/blitz series closes at
+  `svc_intermission` and already spans every point (README known
+  limitation 10).
+- **`match.gameMode` countdown source**: the Mode-row table was keyed on
+  um_list display names KTX never prints (0 hits); it is now
+  `PrintCountdown`'s own literals, so `RA` (28 demos), `Hoony` (44) and
+  `BlitzTDM` are read — on the 1.40-beta hoony demo the countdown is the
+  only mode source there is — once the countdown latch keeps the frame
+  that carries the table rather than the last frame, which on a hoony
+  duel is a `PersonalisedCountdown` frame with no table at all
+  (`match.c:1498-1503`; every hoony-duel demo had `matchSettings: null`).
+  `CA` is deliberately unmapped: one current server build prints it for
+  wipeout too (17 of 23 archive cases, all one hostname on ktx 1.47-dev,
+  while other 1.47-dev servers print `Wipeout`), so the serverinfo umode
+  decides. `BLOODFST` joins `LGC` as a ruleset row
+  (`submodes: ["bf"]`). A pre-KTX `Mode:` row (colon) is accepted.
+  `canonicalFromUmode` loses the suffix-only `race`; `canonicalFromKTXMode`
+  loses seven aliases neither `GetMode` nor `lastscores2str` writes. The
+  three foreign umodes in the archive (`1`, `extinction`, `smashpacktdm`)
+  fall through to the next source rather than being guessed at.
+- **Drift tests** (`TestKTXVocabularyDrift`, `TestKTXMatchStartDrift`,
+  `TestKTeamsMatchStartDrift`) read `PrintCountdown`, `um_list`, `GetMode`,
+  `lastscores2str`, the status writers and the start/end broadcasts out of
+  the vendored `ktx/src` (and `kteams/v2.21`) when present, and skip
+  otherwise; the offline pin is `TestCanonicalTables`.
+
+### Dead weight removed after the reach audit (no change to any pipeline-produced Result)
+
+A 3 123-demo full-pipeline reach audit (`.reports/reach-audit-2026-08-29`,
+untracked) instrumented every guard and fallback the FFA work added or
+touched. The branches it found unreached in every era — and unreachable by
+construction where a stronger argument existed — are gone: the
+descriptor-less `isTeamplay` fallback, the zero-pellet withhold, the
+`Canonical == ""` arms, the defensive stint re-sort, the two-player
+`GameMode == nil` prior in damage reconstruction, an unread `splash` field,
+the pre-v75 cache fallbacks in the web UI, and five duplicate tests. What
+those fallbacks served was a hand-built registry or Result with no mode
+descriptor — a case the schema names but nothing in the pipeline, the API
+or the WASM build produces — and such an input now gets no teamplay
+inference, no duel damage prior and no team stats rather than a guess. Two
+byte-identical name resolvers share one helper; two individual-layout
+predicates are one; the web UI's five spellings of "individual field" are
+one. `WireDirectTouches` classifies only gl in production (rl's verdict is
+eval-only, via `WireDirectTouchesForEval`). The golden corpus projects
+`ffa_matchless_nova` to the sections nothing else pins (22 382 → 234
+lines) and a projection path that matches nothing is now an error. Guards
+the audit proved reachable — the departure-line spectator sentinel, the
+`applyFinalScoresTeams` individual gate, the `OnMatchStart` latch, the
+`//finalscores` map fallback (a documented v72 source) — stay.
+
 ## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
 
 No schema change. Two operational fixes:

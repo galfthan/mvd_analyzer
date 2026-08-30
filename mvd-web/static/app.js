@@ -9,6 +9,27 @@
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
+// Per-PLAYER palette, used in individual modes with more than two players
+// (FFA, race) where every player is their own side and there is no team to
+// name a colour after. It is deliberately NOT the team palette: that one is
+// four entries, which runs out after four of a field of eleven.
+//
+// It is assigned exactly the way TEAM_PALETTE is — by NAME, in sort order
+// (assignPlayerColors) — so CLAUDE.md's stability property holds here too: a
+// player keeps the same colour in every demo of the same field regardless of
+// who won. Assigning by frag RANK instead (which this briefly did) recoloured
+// the whole scoreboard when the result changed. A DUEL is not routed here at
+// all: two players are a matchup, and it keeps the team palette so the
+// familiar red/blue reading of a 1v1 is unchanged.
+//
+// Twelve hues, ordered so adjacent entries stay distinguishable, and chosen to
+// read against the dark panel background.
+const PLAYER_PALETTE = [
+    '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
+    '#c084fc', '#7ee787', '#ff8fab', '#f97316',
+    '#38bdf8', '#a3e635', '#e879f9', '#94a3b8',
+];
+
 // Per-match team colours. TEAM_COLORS[i] is the colour of
 // timelineState.teams[i] — the winner-first index convention every call site
 // uses — but WHICH palette entry lands at each index is decided by team NAME
@@ -48,13 +69,36 @@ function assignTeamColors(teams) {
     return colors;
 }
 
+// The player-palette twin of assignTeamColors: entries are handed out in
+// code-unit sort order of the player NAMES, and the returned array is aligned
+// with the caller's (frag-sorted) `players` order, so TEAM_COLORS keeps its
+// index convention while a player's colour depends only on who is in the
+// game. Beyond the palette's length it wraps — twelve distinct hues is the
+// practical limit of a legend anyway.
+function assignPlayerColors(players) {
+    const byName = players.map((_, i) => i)
+        .sort((a, b) => (players[a] < players[b] ? -1 : players[a] > players[b] ? 1 : 0));
+    const colors = new Array(players.length);
+    byName.forEach((idx, rank) => {
+        colors[idx] = PLAYER_PALETTE[rank % PLAYER_PALETTE.length];
+    });
+    return colors;
+}
+
 // Single entry point for the canonical team order: every path that decides
 // the order goes through here, so timelineState.teams, TEAM_COLORS and the
 // CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
 // "A vs B" spans, anything on var(--team-*)) can never disagree.
-function setCanonicalTeams(teams) {
+function setCanonicalTeams(teams, perPlayer = false) {
     timelineState.teams = teams;
-    TEAM_COLORS = assignTeamColors(teams);
+    // In an individual mode `teams` is the frag-sorted PLAYER list. The
+    // four-entry team palette cannot cover it, so the wider player palette is
+    // handed out instead — by NAME sort order, never by rank, so the colours
+    // do not move when the scoreline does. Same array, same index convention,
+    // so every call site is unchanged.
+    TEAM_COLORS = perPlayer
+        ? assignPlayerColors(teams)
+        : assignTeamColors(teams);
     const rootStyle = document.documentElement.style;
     ['--team-a', '--team-b', '--team-c', '--team-d'].forEach((v, i) =>
         rootStyle.setProperty(v, TEAM_COLORS[i]));
@@ -994,6 +1038,19 @@ function writeSearchFiltersToForm(filters) {
 }
 
 function setupSearch() {
+    // The mode facet list lives in ONE place — SEARCH_MODE_LABELS, which also
+    // labels the result rows. index.html ships only the "Any" option and this
+    // fills the rest, so a facet cannot be offered in the dropdown and render
+    // as a raw token in the rows below it.
+    const modeSel = document.getElementById('search-mode');
+    if (modeSel) {
+        for (const [value, label] of Object.entries(SEARCH_MODE_LABELS)) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label;
+            modeSel.appendChild(opt);
+        }
+    }
     document.getElementById('search-form').addEventListener('submit', (e) => {
         e.preventDefault();
         runSearch();
@@ -1070,6 +1127,14 @@ const SEARCH_MODE_LABELS = {
     'ffa':  'FFA',
     'ctf':  'CTF',
 };
+
+// Which of those hub facets name a mode with no teams. This is the HUB's
+// vocabulary on a HUB search row — not a Result — so it cannot read
+// match.gameMode: the row is a listing from hub.quakeworld.nu carrying its
+// own `mode` string, and no demo has been analysed at that point. It lives
+// here beside the facet table so the pair stays in step (it used to be an
+// inline `mode !== '1on1' && mode !== 'ffa'` at the one call site).
+const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
 function escapeHtml(s) {
     if (s == null) return '';
@@ -1180,12 +1245,12 @@ function holdCell(stat, win) {
 
 // What a hits count counts, keyed by playerStats `hitsConvention`. The same
 // weapon's percentage is on a different scale under each, which is why the
-// cell says so instead of leaving the reader to compare a KTX rl figure with
-// a derived one four times its size.
+// cell says so instead of leaving the reader to compare a KTX shotgun figure
+// with a fire-counted one six times smaller.
 const HITS_CONVENTION_TITLES = {
-    anyDamage: 'Hits = fires that landed damage by any path (splash included)',
+    anyDamage: 'Hits = fires that landed damage by any path (splash included) — KTX\'s own convention for LG, NG/SNG and the axe',
     directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
-    pellets: 'Hits and attacks are PELLET counts (KTX sg/ssg), not trigger pulls',
+    pellets: 'Hits and attacks are PELLET counts (6 per SG fire, 14 per SSG), KTX\'s own unit for the shotguns',
 };
 
 // What KTX's OWN hits counter counts for one weapon. The mirror of
@@ -1212,20 +1277,60 @@ function ktxHitsConvention(weapon) {
 // hedged date is: this is a figure people screenshot.
 //
 // A KTX-overlaid family (every demo with a demoinfo block) matches by
-// construction and wears nothing. A DERIVED one counts any damage path on
-// every weapon, so its rl/gl (~4x KTX's direct-impact count) and its sg/ssg
-// (trigger pulls, not pellets) are marked. A RECONSTRUCTED one publishes
-// KTX's own direct-impact count on rl/gl (schema v74), so only its sg/ssg is
-// marked — the whole point of that change is that an old demo's rocket
-// accuracy is on the server's scale.
+// construction and wears nothing. Since schema v75 both computed tiers match
+// on every weapon but one, and that one is a place where the tier's evidence
+// genuinely cannot answer KTX's question, not a place where it declined to:
+//
+//   - SG/SSG on a RECONSTRUCTED row. The recon tier counts fires, not
+//     pellets: a reconstructed delta merges every hit landing on one instant,
+//     so dividing its magnitude would credit one shooter with another's
+//     pellets. (Its rl/gl publish KTX's direct-impact count, schema v74.)
+//
+//   - RL/GL on a DERIVED row whose direct/splash split never ran — a payload
+//     parsed without the spatial projectile streams (gl, whose touch
+//     classifier reads them) or one where the linker resolved no rl/gl fire
+//     at all. The row falls back to the any-path count, which is a DIFFERENT
+//     quantity from KTX's touch count and about 4x larger on rl.
+//
+// So the mark's explanation is per weapon, not one sentence: what the
+// server's own counter counts differs between the two families above, and a
+// note that named only pellets would be false on every rl/gl cell wearing it.
+//
+// GL on a DERIVED (wire-linked) row wore the mark until v75 and no longer
+// does. The wire log genuinely holds no record of a grenade touch — the touch
+// detonates the grenade and every row the server then writes is flagged splash
+// — so that count is not read off the wire at all: it is re-derived from the
+// flight geometry and the 2.5 s fuse by the same classifier a reconstructed
+// row uses (92.0% of 424 archive player rows exact against the verbatim KTX
+// block). This UI's parse always builds the projectile streams that classifier
+// reads, so a gl cell here is always on KTX's scale; a payload from a parse
+// without them says so in `hitsConvention` and is marked like any other cell.
 const ACC_OFF_SCALE_MARK = '≠';
-const ACC_OFF_SCALE_NOTE = 'Not on the server\'s own scale for this weapon: ' +
-    'a hit here is any fire that landed damage, where KTX counts pellets (sg/ssg) or direct impacts only (rl/gl, on a demo whose damage came off the wire). ' +
-    'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+// What one hit COUNTS under each convention, in the reader's terms. Both
+// halves of the mark's sentence are looked up here — ours from the row's own
+// `hitsConvention`, the server's from ktxHitsConvention(weapon) — so the note
+// states the actual disagreement for the actual weapon instead of naming one
+// family's.
+const HITS_CONVENTION_PHRASES = {
+    anyDamage: 'any fire that landed damage, splash included',
+    directImpact: 'only a projectile that TOUCHED a player',
+    pellets: 'a PELLET (6 per SG fire, 14 per SSG), on both sides of the ratio',
+};
+function accOffScaleNote(entry, wn) {
+    const ours = HITS_CONVENTION_PHRASES[entry.hitsConvention];
+    const theirs = HITS_CONVENTION_PHRASES[ktxHitsConvention(wn)];
+    const what = (ours && theirs) ? `a hit here is ${ours}, where KTX counts ${theirs}. ` : '';
+    return 'Not on the server\'s own scale for this weapon: ' + what +
+        'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+}
 // The same statement as the table's footnote, which is where a reader who
-// cannot hover — anyone looking at a screenshot of this panel — meets it.
-const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon: ` +
-    'a hit here is any fire that landed damage, where KTX counts pellets (SG/SSG) or direct impacts only (RL/GL). ' +
+// cannot hover — anyone looking at a screenshot of this panel — meets it. One
+// line stands under a table of several weapons, so it names both scales the
+// mark can be measured against rather than one, and sends the reader to the
+// cell for which of them applies.
+const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon ` +
+    '(hover the cell for which): KTX counts PELLETS on SG/SSG and only projectiles that TOUCHED a player on RL/GL, ' +
+    'where a marked figure counts fires that landed damage by any path. ' +
     'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
 
 // Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
@@ -1253,18 +1358,24 @@ const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, splash inc
 // from the rebuilt damage log on a demo that carries no such stream. The last
 // is MARKED — a recon accuracy is only as complete as damage.coverage, which
 // the panel banner above the table states — while the first two, both
-// measured off the wire, render plainly. The convention rides the tooltip
-// either way: two accuracies are comparable exactly when weapon and
-// hitsConvention match.
+// measured off the wire, render plainly. Grade is not the same question as
+// what the number counts: since schema v75 all three sources answer KTX's
+// question on most weapons (the two that still cannot are marked, below), and
+// the convention rides the tooltip either way — two accuracies are comparable
+// exactly when weapon and hitsConvention match.
+//
+// An entry with attacks and no hits is a WITHHELD count, not a zero: nailgun
+// rows carry one whenever the demo was parsed without nail decoding, which is
+// the only way ng/sng fires can be linked to their damage.
 function formatAccuracyCell(accuracy, wn) {
     const entry = accuracy?.byWeapon?.[wn];
     if (!entry || !entry.attacks) return '-';
-    if (entry.hits == null) return `<span class="stat-muted" title="No damage to link fires against — attacks only">${entry.attacks} atk</span>`;
+    if (entry.hits == null) return `<span class="stat-muted" title="No linked damage to count hits against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
     const notes = [];
     if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
     const offScale = accOffKtxScale(entry, wn);
-    if (offScale) notes.push(ACC_OFF_SCALE_NOTE);
+    if (offScale) notes.push(accOffScaleNote(entry, wn));
     const recon = accuracy.src === 'reconstructed';
     if (recon) notes.push(RECON_ACCURACY_NOTE);
     const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
@@ -1422,7 +1533,7 @@ function displayMatchDate(result) {
 const NO_MATCH_TITLES = {
     demoUnreadable: 'This recording could not be read to the end',
     midMatchRecording: 'This recording starts mid-match',
-    matchStartUnannounced: 'No match start was announced in this recording',
+    matchStartUnannounced: 'No analyzable match came out of this recording',
     noMatchDeclared: 'No match was declared in this recording',
     noPlayRecorded: 'This recording holds no match',
 };
@@ -1442,7 +1553,7 @@ const NO_MATCH_TITLES = {
 const NO_MATCH_ACTIONS = {
     demoUnreadable: 'The file may be truncated, or not an MVD at all — try downloading it again.',
     midMatchRecording: 'Nothing is wrong with the file; it simply began after the match did. Per-match stats need a recording that covers the match start.',
-    matchStartUnannounced: 'The match was played, but its start was announced in a form this tool does not read — usually a server mod other than KTX.',
+    matchStartUnannounced: 'The server started a match here, but nothing this tool could measure came out of the window it opened — usually a server mod whose match state we do not model.',
     noMatchDeclared: 'People were playing, but no managed match was declared — there is no start, no end and no scoreboard to measure between.',
     noPlayRecorded: 'There is nothing to measure here: no match declared and no kills in the frag log. Usually an idle server or an aborted recording.',
 };
@@ -1608,7 +1719,19 @@ function updateTopbarDemoInfo(result) {
     }
 
     const parts = [];
-    if (teams.length >= 2) {
+    // An individual match with more than two players is not a matchup, and
+    // "toast vs SMOK" over a field of eight reads as one. Name the leader and
+    // the size of the field instead; a two-player one (a duel, or a 1v1 FFA)
+    // still renders as "A vs B" below, which is what it is.
+    const individualField = isMultiPlayerIndividual(result);
+    if (individualField) {
+        const a = teams[0];
+        parts.push(
+            `<span class="topbar-team-a">${escapeHtml(a)}</span>` +
+            (a in teamScores ? ` <span class="topbar-score">${teamScores[a]}</span>` : '')
+        );
+        parts.push(`<span class="topbar-field">${teams.length} players</span>`);
+    } else if (teams.length >= 2) {
         const a = teams[0];
         const b = teams[1];
         parts.push(
@@ -1631,7 +1754,8 @@ function updateTopbarDemoInfo(result) {
     el.innerHTML = parts.join('<span class="topbar-sep">·</span>');
 
     const titleParts = [];
-    if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
+    if (individualField) titleParts.push(teams[0]);
+    else if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
     if (map) titleParts.push(map);
     document.title = titleParts.length
         ? `MVD | ${titleParts.join(' ')}`
@@ -1656,7 +1780,7 @@ function renderSearchResults(games, append = false) {
         const dateText = (game.timestamp || '').slice(0, 10);
 
         // Pick contestants: top-2 teams for team modes, top-2 players otherwise.
-        const isTeamMode = game.mode && game.mode !== '1on1' && game.mode !== 'ffa';
+        const isTeamMode = !!game.mode && !SEARCH_INDIVIDUAL_MODES.has(game.mode);
         let contestants = '—';
         if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
             const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
@@ -1770,23 +1894,39 @@ function displayResults(result) {
     // exists on demos with no KTX block at all), with demoInfo/match retained
     // only to enumerate the team NAMES.
     {
+        const individual = isIndividualLayout(result);
         const psTeams = playerStatsTeamRows(result);
         let teams = [];
-        if (psTeams.length) {
+        if (individual) {
+            // One side per player. playerStats carries the corrected net
+            // score, so the frag-sorted PLAYER list is the canonical order —
+            // and since every row's `team` IS its name, every existing
+            // `teamOrder.indexOf(row.team)` colour lookup resolves to the
+            // player's rank without a second mapping.
+            teams = sortByFragsDesc(playerStatsRows(result)).map(p => p.name);
+            if (!teams.length && result.match?.players) {
+                teams = [...result.match.players]
+                    .sort((a, b) => (b.frags || 0) - (a.frags || 0))
+                    .map(p => p.name);
+            }
+        } else if (psTeams.length) {
             teams = psTeams.map(t => t.name);
         } else if (demoInfo?.teams) {
             teams = [...demoInfo.teams];
         } else if (result.match?.teams) {
             teams = result.match.teams.map(t => t.name);
         }
-        if (teams.length >= 2) {
+        if (!individual && teams.length >= 2) {
             const rows = playerStatsRows(result);
             const teamFrags = psTeams.length
                 ? Object.fromEntries(psTeams.map(t => [t.name, fragsOfRow(t)]))
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        setCanonicalTeams(teams);
+        // Duels keep the team palette (isMultiPlayerIndividual is false at
+        // two participants), so a 1v1 colours exactly as it did before
+        // individual modes existed.
+        setCanonicalTeams(teams, isMultiPlayerIndividual(result));
     }
 
     // Teams summary box. Rows come from playerStats where it exists so the
@@ -2085,7 +2225,7 @@ function displayPlayerStats(rows) {
         const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
         return `
             <td>${escapeHtml(player.name)}${botBadge}</td>
-            <td>${escapeHtml(player.team || '')}</td>
+            <td class="team-col">${escapeHtml(player.team || '')}</td>
             ${handicapCell}
             <td>${s.frags || 0}</td>
             <td>${effPct(s)}</td>
@@ -2093,12 +2233,12 @@ function displayPlayerStats(rows) {
             <td>${enemyWeaponKillCell(s, 'rl')}</td>
             <td>${enemyWeaponKillCell(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
-            <td>${s.teamKills ?? '-'}</td>
+            <td class="team-col">${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
             <td>${s.maxSpree ?? '-'}</td>
             <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
-            <td>${d?.givenTeam ?? '-'}</td>
+            <td class="team-col">${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>${d?.takenToDie ?? '-'}</td>
@@ -2128,18 +2268,145 @@ function isDuel(result) {
     return players.length === 2 && players.every(p => p.team === p.name);
 }
 
+// The frontend asks TWO different questions about teams, and they have two
+// different answers on the same demo. Keep them apart:
+//
+//   isIndividualLayout — "is every player their own side here?" It decides
+//     LAYOUT: which panels exist, which colour palette is handed out, whether
+//     the scoreboard is per player. It is a property of the RESULT, so it
+//     reads the layout the Go side actually applied: match.sources.teams ===
+//     'individual' (rebuildIndividualMatch's own stamp).
+//
+//   isTeamBasedMode — "was the teamplay ruleset in force?" It decides team
+//     SEMANTICS: whether a team kill or a team-damage figure is a thing that
+//     can happen. It reads match.gameMode.teamBased, the resolved descriptor.
+//
+// They disagree on a 1v1 played on a teamplay server (a CTF server's duel,
+// archive 2a2ed2e9ca…): the layout is individual — two participants, one side
+// each — while the ruleset genuinely was teamplay. Deriving either from the
+// other is what put a meaningless Team filter on an FFA aim tab and, in the
+// other direction, would put team colours on a duel.
+function isIndividualLayout(result) {
+    return result?.match?.sources?.teams === 'individual';
+}
+
+// isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
+// tag names a side.
+function isTeamBasedMode(result) {
+    return result?.match?.gameMode?.teamBased === true;
+}
+
+// hasTeammates reports whether any player in this demo has a team-mate: the
+// ruleset was teamplay AND the match is not laid out one side per player.
+// Everything that renders a same-team quantity (team kills, team damage, the
+// aim tab's Team victim filter) is empty without it.
+function hasTeammates(result) {
+    return isTeamBasedMode(result) && !isIndividualLayout(result);
+}
+
+// isMultiPlayerIndividual reports whether this demo is laid out one side per
+// player with MORE than two of them — a field rather than a matchup. Every
+// two-sided surface reads it: the "Team A ↑ / Team B ↓" timeline graphs, the
+// Chat tab's per-side say columns, region control, and the colour palette
+// (per-player rather than the four-entry team one — see PLAYER_PALETTE and
+// CLAUDE.md's team-colour rule). None of them has a pair of sides to name
+// here: the top two players are not a matchup and everyone else does not
+// appear at all. A two-participant match (a duel, or a 1v1 FFA) IS the
+// two-sided view and keeps every one of them. The test is "not a duel"
+// rather than "more than two": isDuel needs exactly two playerStats rows,
+// so an individual layout with fewer (one player alone on a server) takes
+// the field layout too — it has no pair of sides to show either.
+//
+// It was four copies of this expression under four names. They answered
+// different questions in the prose and the same one in the code, and a
+// consumer reading one of them could not tell which.
+function isMultiPlayerIndividual(result) {
+    return isIndividualLayout(result) && !isDuel(result);
+}
+
+// individualFieldActive reports the layout currently applied. The render paths
+// read the body class rather than re-deriving from the result so the DOM, the
+// row grouping and the row heights can never disagree — and displayTimeline-
+// Analysis's title write runs again from applyDeferredBuckets long after
+// applyDuelModeUI, where the class is what survives.
+function individualFieldActive() {
+    return document.body.classList.contains('individual-field');
+}
+
+// The three per-player drill-downs and where each lives in the two layouts:
+// `node` is the content that MOVES, `home` the <details> it sits in under its
+// team graph, `host` the body of the panel it is promoted into. The node is
+// re-parented, never cloned — it owns live canvases plus the `_sig` / `_cells`
+// rebuild cache, and a second copy would render into a detached tree.
+const PER_PLAYER_VIEWS = [
+    { node: 'frags-per-player',        home: 'frags-per-player-details',   host: 'frags-per-player-host',   panel: 'frags-per-player-panel'   },
+    { node: 'weapons-per-player-rows', home: 'weapons-per-player-details', host: 'weapons-per-player-host', panel: 'weapons-per-player-panel' },
+    { node: 'ha-per-player',           home: 'ha-per-player-details',      host: 'ha-per-player-host',      panel: 'ha-per-player-panel'      },
+];
+
+// setIndividualFieldLayout switches every two-sided surface between its two
+// forms, off one body class.
+//
+// Timeline: hide the A-vs-B graphs and promote the three per-player views to
+// panels of their own. Chat: collapse the two say columns into a single "Chat"
+// column carrying every line, the second column and its header hidden by CSS
+// off the class — the columns are flex:1, so the two survivors split the width
+// with no empty third. No chat node is moved or cloned: the same three
+// containers persist and buildFullChat fills whichever the layout uses.
+function setIndividualFieldLayout(on) {
+    document.body.classList.toggle('individual-field', on);
+    for (const v of PER_PLAYER_VIEWS) {
+        const panel = document.getElementById(v.panel);
+        if (panel) panel.style.display = on ? '' : 'none';
+        const node = document.getElementById(v.node);
+        const target = document.getElementById(on ? v.host : v.home);
+        if (!node || !target || node.parentElement === target) continue;
+        target.appendChild(node);
+    }
+    // The selected-range suffix rides along: its only home is the Weapons
+    // heading, which this layout hides.
+    const rangeLabel = document.getElementById('time-range-label');
+    const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
+    if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
+    if (!on) return;
+    const chatTitle = document.getElementById('team-a-chat-title');
+    if (chatTitle) chatTitle.textContent = 'Chat';
+}
+
+// Row heights for the per-player views. The compact pair is what a collapsed
+// drill-down under a team graph uses; promoted to a panel of their own these
+// rows carry the tab, with no team graph above them competing for the fold, so
+// they get more pixels each.
+function ppMiniHeight() {
+    return individualFieldActive() ? 60 : 44;
+}
+
+function ppSpanRowHeight() {
+    return individualFieldActive() ? 28 : RC_ROW_H;
+}
+
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
     // cleanly on demo reload without leaking stale display:none values
     // onto unrelated elements.
     document.body.classList.toggle('duel-mode', isDuel(result));
+    // FFA and friends: no teams anywhere, so every team surface goes — the
+    // Teams box, the per-team aggregates, the Team / TK / TDmg scoreboard
+    // columns (structurally 0 when nobody has a teammate), and the team
+    // colour legends. Region control needs a binary side layout; its panels
+    // are hidden by initRegionControl, NOT by a missing-data gate — the
+    // result ships `timelineAnalysis.regionControl.regions` for every map.
+    document.body.classList.toggle('individual-mode', isIndividualLayout(result));
     // FFA has no teams at all, so playerStats omits the section and the
     // three Summary "Per Team" tables rendered as headers over nothing —
     // duel mode was the only thing hiding them, and it does not fire at
     // five players. Drive it off the rows themselves, which covers every
     // demo class with nothing to aggregate.
     document.body.classList.toggle('no-team-rows', playerStatsTeamRows(result).length === 0);
+    // Timeline and Chat: the A-vs-B graphs and the two say columns both
+    // describe a matchup an FFA does not have.
+    setIndividualFieldLayout(isMultiPlayerIndividual(result));
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -3937,6 +4204,11 @@ function resetUIToCleanState() {
     }
     hide('powerup-timeline-panel');
     hide('region-control-timeline-panel');
+    // Two-sided default for the timeline AND the chat columns: the
+    // per-player views return to their <details> under the team graphs.
+    // applyDuelModeUI re-applies the individual field layout below if this
+    // demo wants it.
+    setIndividualFieldLayout(false);
     hide('unified-timeline');
     setText('time-range-label', '');
     setHTML('team-status-a', '');
@@ -4019,10 +4291,11 @@ function resetUIToCleanState() {
     hide('pickups-empty');
     // pickups-items-panel is shown by displayPickupsTab when item data exists
 
-    // Body classes — duel-mode / no-team-rows / no-match collapse some panels
-    // via CSS; clear them so a teamplay demo loaded after a duel, an FFA or a
-    // match-less recording doesn't inherit the layout.
+    // Body classes — duel-mode / individual-mode / no-team-rows / no-match
+    // collapse some panels via CSS; clear them so a teamplay demo loaded after
+    // a duel, an FFA or a match-less recording doesn't inherit the layout.
     document.body.classList.remove('duel-mode');
+    document.body.classList.remove('individual-mode');
     document.body.classList.remove('no-team-rows');
     document.body.classList.remove('no-match');
 
@@ -4122,10 +4395,11 @@ function displayTimelineAnalysis(result) {
 
     // Teams already set (frag-sorted) in displayResults; only set if missing
     if (!timelineState.teams || timelineState.teams.length === 0) {
-        if (demoInfo?.teams) {
-            setCanonicalTeams([...demoInfo.teams]);
+        const individual = isIndividualLayout(result);
+        if (!individual && demoInfo?.teams) {
+            setCanonicalTeams([...demoInfo.teams], false);
         } else if (result.match?.teams) {
-            setCanonicalTeams(result.match.teams.map(t => t.name));
+            setCanonicalTeams(result.match.teams.map(t => t.name), isMultiPlayerIndividual(result));
         }
     }
     const teams = timelineState.teams;
@@ -4170,8 +4444,13 @@ function displayTimelineAnalysis(result) {
     // Update legend team names
     if (teams.length >= 2) {
         const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
-        setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        // The single-column layout owns both chat titles
+        // (setIndividualFieldLayout set the one visible column to "Chat");
+        // teams[0]/[1] are two players out of the field there, not sides.
+        if (!individualFieldActive()) {
+            setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
+            setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        }
         setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
         setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
         setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
@@ -4678,29 +4957,37 @@ function buildHASegments(td) {
 // (timelineState.bucketView.players[name], read via playerValAt/playerAliveAt)
 // plus timelineState.backpacks for weapon-drop dots — no extra data fetch.
 
-// Group the bucket-view players into [teamAPlayers, teamBPlayers] following
-// timelineState.teams order. Team membership mirrors updateTeamStatus: prefer
-// demoInfo.players, fall back to the map's playerSymbols. Players whose team
-// can't be resolved (spectators, mid-game joiners) are dropped.
+// Group the bucket-view players by side, following timelineState.teams order,
+// so group index == TEAM_COLORS index. Team membership mirrors updateTeamStatus:
+// prefer demoInfo.players, fall back to the map's playerSymbols. Players whose
+// team can't be resolved (spectators, mid-game joiners) are dropped.
+//
+// In the individual layout every player IS a side, so there is one group per
+// entry in timelineState.teams (the frag-sorted player list) and a player's
+// side is their own name — no roster lookup needed. Before this, the grouping
+// hard-coded two sides and resolved everyone to teams[0] / teams[1], so an
+// FFA drill-down drew two rows of N. The two-sided panels keep exactly two
+// groups, so a team demo is unchanged.
 function timelinePlayersByTeam() {
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    const out = [[], []];
+    const individual = individualFieldActive();
+    const groupCount = individual ? Math.max(2, teams.length) : 2;
+    const out = Array.from({ length: groupCount }, () => []);
     if (teams.length < 2 || !view || !view.players) return out;
     const demoPlayers = currentResult?.demoInfo?.players || [];
     const teamOf = (name) => {
+        if (individual) return name;
         const dp = demoPlayers.find(p => p.name === name);
         if (dp?.team) return dp.team;
         return mapState.playerSymbols?.[name]?.team;
     };
     for (const name of Object.keys(view.players)) {
-        const t = teamOf(name);
-        const ti = t === teams[0] ? 0 : t === teams[1] ? 1 : -1;
-        if (ti < 0) continue;
+        const ti = teams.indexOf(teamOf(name));
+        if (ti < 0 || ti >= out.length) continue;
         out[ti].push(name);
     }
-    out[0].sort();
-    out[1].sort();
+    for (const group of out) group.sort();
     return out;
 }
 
@@ -4788,7 +5075,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `ha-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -4833,7 +5120,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     for (const { name, cid } of container._cells) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = ''; // let the cell reflow on resize
-        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: 44 });
+        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: ppMiniHeight() });
     }
     renderSharedTimeAxis(container, startTime, endTime);
 }
@@ -4976,7 +5263,7 @@ function renderFragsPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `fd-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -5018,7 +5305,7 @@ function renderFragsPerPlayer(startTime, endTime) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = '';
         // Per-player max (symmetric about 0): each row uses its full height.
-        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: 44 });
+        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: ppMiniHeight() });
     }
     updateFragsPerPlayerStats();
     renderSharedTimeAxis(container, startTime, endTime);
@@ -5084,7 +5371,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     const grouped = timelinePlayersByTeam();
     const rows = [];
     const rowPlayers = [];
-    for (let ti = 0; ti < 2; ti++) {
+    for (let ti = 0; ti < grouped.length; ti++) {
         for (const name of grouped[ti]) {
             rows.push({
                 name,
@@ -5109,7 +5396,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     }
 
     renderSpansTimeline('weapons-per-player-canvas', 'weapons-per-player-labels', {
-        startTime, endTime, rows,
+        startTime, endTime, rows, rowH: ppSpanRowHeight(),
         stateColors: { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rllg: GRAPH_COLORS.RLLG },
         dropMarks,
     });
@@ -5798,6 +6085,12 @@ function buildFullChat() {
     // match window.
     const events = (timelineState.events || []).filter(e => e.time >= 0 && e.time <= duration);
 
+    // Individual field: one chat column for everybody. Column A is that
+    // column (the B one is hidden by CSS and stays empty), and its rows get a
+    // speaker name — with two sides the column heading said who was talking,
+    // with eight players nothing else does.
+    const single = individualFieldActive();
+
     const killEvents = [];
     const teamAEvents = [];
     const teamBEvents = [];
@@ -5806,16 +6099,19 @@ function buildFullChat() {
         if (event.type === 'frag') {
             killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
-            // "Hide team chat" is a display filter over the two say columns
-            // only; frags and public say keep their rows.
+            // "Hide team chat" is a display filter over the say columns only;
+            // frags and public say keep their rows. It filters on message TYPE,
+            // not on side, so it keeps its meaning in an individual field: an
+            // FFA's say_team still goes only to same-tag players.
             if (chatHideTeam && event.type === 'teamsay') continue;
-            if (event.team === teams[0]) teamAEvents.push(event);
+            if (single) teamAEvents.push(event);
+            else if (event.team === teams[0]) teamAEvents.push(event);
             else if (event.team === teams[1]) teamBEvents.push(event);
         }
     }
 
     renderChatColumnFull(killContainer, killEvents);
-    renderChatColumnFull(teamAContainer, teamAEvents);
+    renderChatColumnFull(teamAContainer, teamAEvents, single);
     renderChatColumnFull(teamBContainer, teamBEvents);
 
     if (axisContainer) {
@@ -5894,10 +6190,25 @@ function renderChatTimeAxisFull(container) {
     container.appendChild(inner);
 }
 
-function renderChatColumnFull(container, events) {
+// Speaker colour for the single chat column. CLAUDE.md's team-colour rule:
+// TEAM_COLORS indexed by position in timelineState.teams, which in an
+// individual layout is one entry per player — so a name here is the same
+// colour it carries on the scoreboard, the map and the timeline.
+function chatSpeakerColor(name) {
+    const idx = timelineState.teams.indexOf(name);
+    return (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#ccc';
+}
+
+function renderChatColumnFull(container, events, withSpeaker = false) {
     const inner = document.createElement('div');
     inner.style.position = 'relative';
     inner.style.height = `${chatContentHeight}px`;
+    // Attached before the rows go in so each row's rendered height is
+    // measurable: `.chat-time-marker-msg` wraps (white-space: normal), and a
+    // wrapped row is taller than CHAT_ITEM_HEIGHT — stacking the next event
+    // at the constant would draw it over the second line. The constant stays
+    // the floor, and is all there is when the tab is not laid out (offsetHeight 0).
+    container.appendChild(inner);
 
     let lastBottom = -Infinity;
 
@@ -5915,18 +6226,23 @@ function renderChatColumnFull(container, events) {
         marker.style.top = `${topPx}px`;
 
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        marker.innerHTML = `${prefix}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+        const speaker = withSpeaker && event.player
+            ? `<span class="chat-speaker" style="color: ${chatSpeakerColor(event.player)}">${escapeHtml(event.player)}</span>`
+            : '';
+        marker.innerHTML = `${prefix}${speaker}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         inner.appendChild(marker);
-        lastBottom = topPx + CHAT_ITEM_HEIGHT;
+        lastBottom = topPx + Math.max(CHAT_ITEM_HEIGHT, marker.offsetHeight || 0);
     }
-
-    container.appendChild(inner);
 }
 
 function updateDetailGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    // Individual layout: the A↑/B↓ graph is hidden and the per-player view is
+    // a panel of its own, so render that and skip the series prep for a
+    // display:none canvas — this runs on every pan/zoom frame.
+    if (individualFieldActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepWeaponsData(startTime, endTime, teams);
     const dropMarks = computeBackpackDrops(startTime, endTime, teams);
     const legendA = document.getElementById('legend-weapons-team-a');
@@ -6036,6 +6352,7 @@ ${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
 function updateHealthArmorGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualFieldActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
     const { points, max } = prepHealthArmorData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-health-team-a');
     const legendB = document.getElementById('legend-health-team-b');
@@ -6054,6 +6371,7 @@ function updateHealthArmorGraph(startTime, endTime) {
 function updateScoreTimeline(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualFieldActive()) { renderFragsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepScoreData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
@@ -6128,14 +6446,18 @@ function prepRegionControlData(startTime, endTime, teams) {
 // dropMarks (optional): [{row, time, color}] — small dots painted in a
 // row, e.g. weapon-drop events on the per-player weapons timeline. Callers
 // that don't pass it (powerups, region control) render unchanged.
-function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks }) {
+function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks, rowH }) {
     const labelsEl = document.getElementById(labelsId);
     if (!labelsEl) return;
-    const setup = setupGraphCanvas(canvasId, rows.length * RC_ROW_H + RC_AXIS_H);
+    // rowH lets a caller stretch the rows (the per-player weapons view does in
+    // the individual layout); the region-control and powerup rows take RC_ROW_H,
+    // which their hover hit-tests assume.
+    const ROW_H_CSS = rowH || RC_ROW_H;
+    const setup = setupGraphCanvas(canvasId, rows.length * ROW_H_CSS + RC_AXIS_H);
     if (!setup) return;
     const { ctx, Wcss, W, dpr } = setup;
 
-    const ROW_H = Math.round(RC_ROW_H * dpr);
+    const ROW_H = Math.round(ROW_H_CSS * dpr);
     const ROW_PAD = Math.max(1, Math.round(dpr));
 
     // Label column, one DOM element per row, sized to match the canvas
@@ -6144,8 +6466,8 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     for (const r of rows) {
         const lab = document.createElement('div');
         lab.className = 'region-timeline-label';
-        lab.style.height = RC_ROW_H + 'px';
-        lab.style.lineHeight = RC_ROW_H + 'px';
+        lab.style.height = ROW_H_CSS + 'px';
+        lab.style.lineHeight = ROW_H_CSS + 'px';
         if (r.color) lab.style.color = r.color;
         lab.textContent = r.name;
         lab.title = r.name;
@@ -6253,6 +6575,11 @@ function updatePowerupTimeline(startTime, endTime) {
     if (!panel) return;
     const teams = timelineState.teams;
     if (teams.length < 2) { panel.style.display = 'none'; return; }
+    // The rows are per powerup TYPE coloured by which of two TEAMS holds it,
+    // so an individual layout with more than two players paints the top two
+    // and greys every other run as 'other'. Hidden rather than recoloured —
+    // same call initRegionControl makes for the same reason.
+    if (individualFieldActive()) { panel.style.display = 'none'; return; }
 
     const data = prepPowerupRowsData(startTime, endTime, teams);
     if (!data) { panel.style.display = 'none'; return; }
@@ -6403,6 +6730,14 @@ function updateTeamStatus() {
     const containerA = document.getElementById('team-status-a');
     const containerB = document.getElementById('team-status-b');
     if (!containerA || !containerB) return;
+
+    // Individual layout: the two-sided status panel is hidden, so don't
+    // rebuild its rows on every playhead tick.
+    if (individualFieldActive()) {
+        containerA.innerHTML = '';
+        containerB.innerHTML = '';
+        return;
+    }
 
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
@@ -7584,7 +7919,15 @@ function initRegionControl(result) {
     const rc = result.timelineAnalysis?.regionControl;
     const panel = document.getElementById('region-control-panel');
     const statusPanel = document.getElementById('region-status-panel');
-    if (!rc || !rc.regions || rc.regions.length === 0) {
+    // Region control is a two-SIDES display: the map tint, the legend and the
+    // stats table are all "team A vs team B" (view/region_control.go builds
+    // buckets only for exactly two labels). An individual layout with more
+    // than two players has no such pair — the Go side ships `regions` for it
+    // all the same, because the region GEOMETRY is a property of the map, and
+    // the editor rendered from it had an Apply button whose only effect was a
+    // console warning. A two-participant match (a duel, a 1v1 FFA) does have
+    // two sides and keeps the panels.
+    if (!rc || !rc.regions || rc.regions.length === 0 || isMultiPlayerIndividual(result)) {
         if (panel) panel.style.display = 'none';
         if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
@@ -12013,16 +12356,21 @@ function buildAimChips(result) {
 }
 
 // buildAimVictimToggle wires the Enemy/Team/Self/All filter buttons (static
-// in the HTML) and hides the Team option in duels — there are no teammates,
-// while Enemy vs All still differ via RL/GL self-splash.
+// in the HTML) and hides the Team option wherever nobody has a team-mate —
+// every duel and every FFA. Enemy vs All still differ there via RL/GL
+// self-splash, so the rest of the toggle stays.
+//
+// The verdict comes from the mode descriptor (hasTeammates), not from the aim
+// rows' own `mode` field: that field says "team" on an FFA — it names the
+// enemy-set rule the aim join applied, not the ruleset — so keying on it put
+// a filter that can never match anything on every FFA aim tab.
 function buildAimVictimToggle(result) {
     const box = document.getElementById('aim-victim-toggle');
     if (!box) return;
-    const players = (result && result.aim && result.aim.players) || [];
-    const duel = players.length > 0 && players.every(p => p.mode === 'duel');
+    const teamless = !hasTeammates(result);
     const teamBtn = box.querySelector('.aim-chip[data-kind="team"]');
-    if (teamBtn) teamBtn.style.display = duel ? 'none' : '';
-    if (duel && aimVictimFilter === 'team') aimVictimFilter = 'all';
+    if (teamBtn) teamBtn.style.display = teamless ? 'none' : '';
+    if (teamless && aimVictimFilter === 'team') aimVictimFilter = 'all';
     if (!box._aimWired) {
         box.querySelectorAll('.aim-chip').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -12074,11 +12422,36 @@ function renderAimMode(pa) {
 // Player column is prepended automatically (with the team-coloured stripe).
 // Every count column has a share-of-fires % twin: counts depend on how much a
 // player fired, so the percentages are what compare across players. hit% keeps
-// the accuracy colour classes; the miss-type shares stay plain (high ≠ good
-// is weapon-dependent).
+// the accuracy colour classes; the miss-type shares stay plain, since whether
+// a high share is good depends on the weapon.
 const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
 const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
+
+// The RL/GL direct/splash pair is withheld PER ROW, not per demo — the one
+// measured-only column that is, which is why it cannot ride aimCol's
+// whole-demo swap below. The analyzer publishes it as a nullable field
+// (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none).
+// The reachable case is aimcore's `projLinked` gate (aimcore/aim.go): no rl or
+// gl fire anywhere in the demo linked to a projectile, so there is no evidence
+// to split. It is rare where this cell renders at all: the split columns are
+// measured-only, so of the 1 800 demos in the 3 123-demo reach audit that
+// fired rl/gl and linked no projectile, the 1 793 without a damage stream
+// never reach it (aimCol swaps those columns for AIM_MEASURED_ONLY_NOTE
+// first); the other 7 have hitsMeasured and still no linked rl/gl fire, and
+// they are what this note is for (probe P18). Rendering the null as 0 would
+// publish "no rocket or grenade ever touched anybody" as a measurement.
+const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
+    'linked to a projectile, so there is nothing to split into direct hits and splash. ' +
+    'Not a zero — the fires were simply never classified.';
+function aimSplitCell(v, fmt) {
+    if (v === null || v === undefined) {
+        return `<span class="aim-na" title="${escapeHtml(AIM_SPLIT_WITHHELD_NOTE)}">—</span>`;
+    }
+    return fmt(v);
+}
+const aimSplitSort = v => (v === null || v === undefined) ? -1 : v;
+
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: {
@@ -12118,11 +12491,24 @@ const AIM_COL = {
     fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
     partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
     missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', measured: true, cell: w => w.direct || 0 },
-    splash: { h: 'Splash', t: 'Hits from splash only', measured: true, cell: w => w.splash || 0 },
+    direct: {
+        h: 'Direct',
+        t: 'Projectiles that TOUCHED a player — KTX\'s own RL/GL hits counter. RL is the server\'s own flag; GL is re-derived from the grenade\'s flight and its 2.5s fuse, since a grenade that touches explodes and every row of its damage is flagged splash (92% of archive player rows exact against the KTX block). A GL Direct can exceed its Hits: a touch whose fire the linker missed is still a touch',
+        measured: true, cell: w => aimSplitCell(w.direct, n => String(n)), sort: w => aimSplitSort(w.direct),
+    },
+    splash: {
+        h: 'Splash', t: 'Hits from splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => String(n)), sort: w => aimSplitSort(w.splash),
+    },
     missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
-    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', measured: true, cell: w => shotShare(w.direct, w) },
-    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', measured: true, cell: w => shotShare(w.splash, w) },
+    directPct: {
+        h: 'Direct %', t: 'Share of fires that hit directly',
+        measured: true, cell: w => aimSplitCell(w.direct, n => shotShare(n, w)), sort: w => aimSplitSort(w.direct),
+    },
+    splashPct: {
+        h: 'Splash %', t: 'Share of fires that hit via splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => shotShare(n, w)), sort: w => aimSplitSort(w.splash),
+    },
     missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', measured: true, cell: w => shotShare(w.missed, w) },
     blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', measured: true, cell: w => w.blocked || 0 },
     lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', measured: true, cell: w => w.miss || 0 },
@@ -12209,7 +12595,16 @@ function aimWeaponView(w) {
     if (aimVictimFilter === 'enemy' && !w.enemy) return { ...w, recon: null };
     const s = (aimVictimFilter === 'enemy' ? w.enemy
         : aimVictimFilter === 'team' ? w.team : w.self) || {};
-    const hits = s.hits || 0, direct = s.direct || 0;
+    // The bucket's direct carries the same nil-is-not-zero rule as the
+    // top-level one, and the derived splash rides on it: with no classified
+    // direct there is no "hits that were splash-only" either, so both stay
+    // null and both cells say withheld. An ABSENT bucket is not the same
+    // absence — it means that victim class never connected, i.e. zeros — so
+    // it reads 0 wherever the weapon's split ran at all, and only inherits
+    // the withhold when it did not.
+    const hits = s.hits || 0;
+    const classified = w.direct !== null && w.direct !== undefined;
+    const direct = ('direct' in s) ? s.direct : (classified ? 0 : null);
     return {
         // The recon tier is a single whole-match hit count with no victim
         // splits (RESULT_SCHEMA, WeaponAimRecon), so it cannot ride a
@@ -12220,7 +12615,7 @@ function aimWeaponView(w) {
         pelletHits: s.pelletHits || 0,
         full: s.full || 0, partial: s.partial || 0,
         miss: w.weapon === 'lg' ? (w.miss || 0) : (s.miss || 0),
-        splash: Math.max(0, hits - direct),
+        splash: direct === null ? null : Math.max(0, hits - direct),
         missed: (w.shots || 0) - hits,
     };
 }

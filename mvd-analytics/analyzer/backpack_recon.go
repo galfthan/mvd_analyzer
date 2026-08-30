@@ -604,7 +604,7 @@ func backpackSkipModeReason(si map[string]string, ms *result.MatchSettings) stri
 			return m.mode
 		}
 	}
-	for _, sub := range strings.Split(si["mode"], "-") {
+	for _, sub := range result.ParseServerinfoMode(si["mode"]).Submodes {
 		switch sub {
 		case "bf":
 			return "bloodfest"

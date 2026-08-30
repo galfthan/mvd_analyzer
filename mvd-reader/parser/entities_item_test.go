@@ -150,3 +150,26 @@ func TestItemEntity_RecycledEdictSameKindStartsANewItem(t *testing.T) {
 		t.Errorf("state[2] = %+v, want the second pack appearing at its own origin", ev.states[2])
 	}
 }
+
+// An edict that was never classified while visible (its model became
+// nameable only as it left the frame — the `kind == "" && o != nil` arm of
+// diffItemEntity) arrives here with s == nil. Archive demo
+// 1a78d75f8bd1234035e2787cd0db2829a933c77e845aa1f4e9b033974fa9c097
+// crashed the parser on that path: the origin was read from s before the
+// nil test. The spawn must come out at the old state's origin instead.
+func TestItemEntity_NameableOnlyOnLeavingDoesNotDereferenceNil(t *testing.T) {
+	p, ev := newItemParser(t)
+	feedPacket(t, p, 1000, projPacket(205, 2, [3]float32{10, 20, 30})) // backpack, classified
+	old := p.entCur[205]
+	p.spawnedItems[205] = "" // never classified while visible
+	if err := p.diffItemEntity(205, nil, &old, 2000); err != nil {
+		t.Fatalf("diffItemEntity: %v", err)
+	}
+	if len(ev.spawns) == 0 {
+		t.Fatalf("spawns = %+v, want the item spawned from its past state", ev.spawns)
+	}
+	last := ev.spawns[len(ev.spawns)-1]
+	if last.Origin != ([3]float32{10, 20, 30}) || last.TimeMs != 2000 {
+		t.Errorf("spawn = %+v, want the old state's origin at 2000ms", last)
+	}
+}

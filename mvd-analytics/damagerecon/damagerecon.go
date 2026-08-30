@@ -35,7 +35,6 @@ package damagerecon
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -181,6 +180,19 @@ func SkipModeReasonFull(si map[string]string, ms *result.MatchSettings) string {
 	return ""
 }
 
+// SkipModeReasons is every value SkipModeReason / SkipModeReasonFull can
+// return, other than "". It is the vocabulary the `boundedMode` field
+// publishes as `skipped:<reason>` (mvd-api openapi.yaml), and the API's
+// drift test asserts that enum covers this list — the enum was a
+// hand-mirrored copy that had already lagged once.
+//
+// TestSkipModeReasonsAreComplete drives every detectable input through the
+// function and checks the answer is in here, so adding a detection without
+// adding its name fails the build rather than the schema.
+var SkipModeReasons = []string{
+	"midair", "instagib", "dmgfrags", "ca", "wipeout", "ra", "lgc", "race",
+}
+
 // SkipModeReason names the server mode that makes damage arithmetic
 // unreconstructable from the wire, or "" when the standard rules apply.
 // Shared by this package's gate and the KTX-side bounded reconstruction
@@ -209,15 +221,12 @@ func SkipModeReason(si map[string]string) string {
 			return m.mode
 		}
 	}
-	parts := strings.Split(si["mode"], "-")
-	if len(parts) == 0 || parts[0] == "" {
-		return ""
-	}
-	switch parts[0] {
+	m := result.ParseServerinfoMode(si["mode"])
+	switch m.Umode {
 	case "wipeout", "ca", "race":
-		return parts[0]
+		return m.Umode
 	}
-	for _, sub := range parts[1:] {
+	for _, sub := range m.Submodes {
 		switch sub {
 		case "midair", "instagib", "lgc", "race":
 			return sub

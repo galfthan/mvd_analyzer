@@ -23,6 +23,14 @@
 // `hits` for those weapons without it — omitted, not zeroed — and a
 // stderr warning says so. mvd-api always builds them.
 //
+// gl accuracy needs -include projectiles for the same reason one step
+// further: KTX counts a grenade that TOUCHED a player and the wire log
+// records no such event, so the touch is re-derived from the grenade's
+// tracked flight. Without the spatial streams there is no flight, and
+// playerStats.accuracy.byWeapon.gl publishes the any-path count under
+// hitsConvention "anyDamage" instead of KTX's directImpact — honest, but a
+// different number from the same demo over REST. Warned about on stderr.
+//
 // The derived views (top-kills, top-windows, lives) take a -dmg damage
 // family whose default is the VIEW default, raw. mvd-api substitutes
 // bounded on the same queries, so an unset -dmg does not reproduce the
@@ -742,8 +750,9 @@ type analyzeOptions struct {
 // The shots rows are honest about it — Hits is omitted rather than zeroed —
 // but "the key is absent" is only a signal to a reader who knows to look, and
 // a consumer doing `.hits // 0` silently reads it as perfect inaccuracy.
-// mvd-api always builds nails (democache sets BuildNails), so this is also
-// the one place default CLI output diverges from the same demo over REST.
+// mvd-api always builds nails (democache sets BuildNails), so this is one of
+// the two places default CLI output diverges from the same demo over REST
+// (warnUnclassifiedGrenades is the other).
 func warnUnlinkedNails(res *result.Result, w io.Writer) {
 	if res == nil || res.Shots == nil {
 		return
@@ -761,6 +770,32 @@ func warnUnlinkedNails(res *result.Result, w io.Writer) {
 	}
 	if shots > 0 {
 		fmt.Fprintf(w, "qw-analyze: %d ng/sng fires have no hit attribution — pass -include nails for nailgun accuracy (mvd-api always builds it, so this run differs from the same demo over REST)\n", shots)
+	}
+}
+
+// warnUnclassifiedGrenades reports gl fires on a demo whose wire damage log
+// this run could not put on KTX's scale, which is what a run without
+// -include projectiles produces: gl's direct-impact count is re-derived from
+// the grenade's tracked flight (result.WeaponAim), and without the spatial
+// shot streams there is no flight to read. The row stays honest, publishing
+// the any-path count under hitsConvention "anyDamage", but that is a
+// DIFFERENT number from the one the same demo returns over REST, which is
+// the same reason the nail warning above exists.
+func warnUnclassifiedGrenades(res *result.Result, w io.Writer) {
+	if res == nil || res.Shots == nil || res.Damage == nil ||
+		res.Damage.Source != result.DamageSourceKTX {
+		return
+	}
+	var shots int
+	for _, p := range res.Shots.ByPlayer {
+		for _, wp := range p.ByWeapon {
+			if wp.Weapon == "gl" {
+				shots += wp.Shots
+			}
+		}
+	}
+	if shots > 0 {
+		fmt.Fprintf(w, "qw-analyze: %d gl fires carry the any-path hit count — pass -include projectiles for KTX's grenade touch count (mvd-api always builds it, so this run differs from the same demo over REST)\n", shots)
 	}
 }
 
@@ -878,6 +913,9 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	if !opts.buildNails {
 		warnUnlinkedNails(res, os.Stderr)
 	}
+	if !opts.buildShotStreams {
+		warnUnclassifiedGrenades(res, os.Stderr)
+	}
 
 	// Position-track columns are opt-in: by default strip the whole
 	// native-rate track from JSON to keep the file small (~12 MB per 4on4
@@ -938,8 +976,13 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 	if err != nil {
 		return err
 	}
-	if !opts.buildNails && (slices.Contains(vopts.views, "shots") || slices.Contains(vopts.views, "aim") || slices.Contains(vopts.views, "full")) {
+	accViews := slices.Contains(vopts.views, "shots") || slices.Contains(vopts.views, "aim") ||
+		slices.Contains(vopts.views, "player-stats") || slices.Contains(vopts.views, "full")
+	if !opts.buildNails && accViews {
 		warnUnlinkedNails(res, os.Stderr)
+	}
+	if !opts.buildShotStreams && accViews {
+		warnUnclassifiedGrenades(res, os.Stderr)
 	}
 
 	enc := json.NewEncoder(w)

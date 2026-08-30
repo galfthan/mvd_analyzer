@@ -337,9 +337,13 @@ Every family carries `src` (`"derived"` | `"ktx"` |
 for a pre-instrumentation demo, and on `accuracy` whose `hits` come from
 the aim reconstruction tier), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
 The response keeps the same shape regardless of demo age: on a demo with
-no KTX block, `accuracy` is reconstructed from the decoded fire stream
-(trigger pulls, not KTX's pellets — check `src` before comparing across
-demos), `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
+no KTX block, `accuracy` is derived from the decoded fire stream — linked
+to the wire damage log where the demo carries one (`src: "derived"`, on
+KTX's own convention per weapon since schema v75), rebuilt from the
+reconstruction where it does not (`src: "reconstructed"`, whose `sg`/`ssg`
+count trigger pulls rather than KTX's pellets); read
+`accuracy.byWeapon[].hitsConvention`, not `src`, before comparing across
+demos, `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
 `login` from the `*auth` userinfo key. A value that cannot be measured
 stays ABSENT rather than becoming a zero — notably
 `accuracy.byWeapon[].hits` on a demo with no WIRE damage stream for the
@@ -362,21 +366,30 @@ either way. Grade the numbers before diffing against KTX: on a
 `reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
 (1.25%, 46.5% of rows exact) and `gl` (3.55% aggregate but 89.6% of rows
 exact, one-sided by design), because since schema v74 those two publish
-KTX's OWN direct-impact count. On a `derived` family they do not — there
-`hits` counts a fire that landed damage by any path and reads ~4x higher
-on `rl`, ~1.5x on `gl`, against KTX's touch counter
-(`ktx/src/weapons.c:994`, `:1329`). `attacks` matches KTX to the row on
-every single-projectile weapon (98–100% exact).
+KTX's OWN direct-impact count. A `derived` family publishes it too since
+v75 — `rl` off the wire's own splash flag (99.8% of 632 rows exact at
+0.02%) and `gl` off the same flight-geometry classifier the
+reconstruction uses (92.0% of 424 rows at 3.79%), because the wire log
+records no grenade touch at all: the touch detonates the grenade and
+every damage row the server then writes is flagged splash. `attacks`
+matches KTX to the row on every single-projectile weapon (98–100%
+exact). The `gl` classification needs the projectile streams, which
+mvd-api always builds — a payload that lacks them says so, publishing
+`anyDamage`, which reads ~1.5x above KTX's touch counter
+(`ktx/src/weapons.c:994`, `:1329`).
 
 **`hitsConvention` is the machine-readable form of that warning**, and
 the field to gate a cross-demo comparison on — `src` states the evidence
 GRADE and says nothing about what is counted. It sits on every weapon
 that carries `hits`: `anyDamage` (a fire that landed damage by any path;
-every `derived` weapon, `lg` / `sg` / `ssg` / `axe` of a
-`reconstructed` one, plus KTX's own `lg` / `axe` / `ng` / `sng`),
-`directImpact` (the projectile TOUCHED a player: KTX's `rl` / `gl`, and
-a `reconstructed` family's `rl` / `gl` since v74) or `pellets` (KTX's
-`sg` / `ssg`, where `attacks` counts pellets too). Per WEAPON, because
+`lg` / `ng` / `sng` / `axe` on every source, plus `sg` / `ssg` on a
+`reconstructed` family and `gl` on a `derived` one whose parse lacked the
+projectile streams its touch classifier reads), `directImpact` (the
+projectile TOUCHED a player: KTX's `rl` / `gl`, a `reconstructed`
+family's `rl` / `gl` since v74, and a `derived` family's `rl` and `gl`
+since v75) or `pellets`
+(KTX's `sg` / `ssg` and, since v75, a `derived` family's — the one
+convention where `attacks` counts pellets too). Per WEAPON, because
 one `src: "ktx"` row uses all three at once. Two rows are comparable
 exactly when weapon AND convention match; absent beside a present `hits`
 only on a `src: "mixed"` team row. Deriving KTX's own convention on an
@@ -526,7 +539,12 @@ recovered hit count is published separately as
 and never merged into `hits`. Start with
 `players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
 full/partial/miss fires, RL/GL direct/splash/missed, the LG
-miss/blocked/out-of-range whiff split); the
+miss/blocked/out-of-range whiff split). RL/GL `direct` and `splash` are
+emitted together and **absent means "not classified", never zero** — a
+present `0` is a measured "touched nobody", while an absence (a payload
+parsed without the projectile streams the GL touch classifier reads, or
+a demo whose linker resolved no RL/GL fire at all) must be rendered as
+withheld; the
 columnar `crosshair` (per-hitscan-fire angular error, normalized so ±1 =
 the hitbox edge, with hit + attributed target) and `lgRamp` (per-LG-cell
 hit vs ms since the shaft opened) blocks are large — reach for them only

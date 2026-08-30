@@ -217,7 +217,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 
 	// Match-start phrase flips the gate.
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match has begun!\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match has begun!\n")
 	if !p.matchStarted {
 		t.Fatalf("matchStarted gate did not flip on start phrase")
 	}
@@ -237,15 +237,20 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 // opened this gate — the demo reported zero deaths and, because stream
 // sampling is gated on the same start, produced no streams at all.
 // Regression: 1on1_]apollyon[_vs_jogi_[dm4], t=10.022s.
+//
+// The other two entries are foreign-mod broadcasts with a named archive
+// population each (print.go): the CTF mod's "Match Started!" and the arena
+// mod's "Series begins in 10 seconds...".
 func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 	for _, msg := range []string{
 		"The match has begun!\n",
 		"The duel has begun!\n",
 		"The team match has begun!\n",
-		"Fight!\n",
+		"Match Started!\n",
+		"Series begins in 10 seconds...\n",
 	} {
 		p := NewParser(nil)
-		p.updateMatchStartedFromPrint(mvd.PrintHigh, msg)
+		mustMatchStartFromPrint(t, p, mvd.PrintHigh, msg)
 		if !p.matchStarted {
 			t.Errorf("matchStarted did not flip on %q", msg)
 		}
@@ -253,7 +258,7 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 
 	// A line that merely mentions the match must not open the gate.
 	p := NewParser(nil)
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match will begin when both players are ready\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match will begin when both players are ready\n")
 	if p.matchStarted {
 		t.Errorf("matchStarted flipped on a non-start line")
 	}
@@ -262,9 +267,29 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 	// "go go go!" would otherwise arm the obituary-death path for the
 	// whole demo.
 	chat := NewParser(nil)
-	chat.updateMatchStartedFromPrint(mvd.PrintChat, "lets go! the duel has begun i guess\n")
+	mustMatchStartFromPrint(t, chat, mvd.PrintChat, "lets go! the duel has begun i guess\n")
 	if chat.matchStarted {
 		t.Errorf("matchStarted flipped on a PRINT_CHAT line")
+	}
+
+	// Nor may a phrase that is merely a substring of a NAME. The table
+	// used to carry a bare "go!", which the whole-archive sweep found
+	// firing on nothing but obituary and scoreboard lines naming the E0
+	// player "RINGO!!!:::>>>>" — a false match start on 12 demos
+	// (.reports/vocab-sweep-2026-08-29, probe S1). Obituaries are
+	// PRINT_MEDIUM broadcasts, so the chat refusal above does not cover
+	// them; only the table's content does.
+	for _, msg := range []string{
+		"skii was gibbed by RINGO!!!:::>>>>\n",
+		"RINGO!!!:::>>>> rides skii's rocket\n",
+		"Fight!\n", // KTX's FIGHT! is a centerprint; a mod bprinting it names no match start
+		"latejoin................. join a team after the game started\n",
+	} {
+		p := NewParser(nil)
+		mustMatchStartFromPrint(t, p, mvd.PrintMedium, msg)
+		if p.matchStarted {
+			t.Errorf("matchStarted flipped on %q", msg)
+		}
 	}
 }
 

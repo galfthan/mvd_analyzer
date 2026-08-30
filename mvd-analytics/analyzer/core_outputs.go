@@ -4,6 +4,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -111,6 +112,30 @@ type CoreOutputs struct {
 	// (parseable) directive.
 	FinalScores *FinalScores
 
+	// ServerInfo is the merged `fullserverinfo` cvar table, published by the
+	// metadata node (PopulateCore) so the mode resolver and the ruleset
+	// gates read one copy instead of each reaching into result.Metadata.
+	// Nil when the demo carried no fullserverinfo at all.
+	ServerInfo map[string]string
+
+	// MatchSettings is the parsed KTX countdown centerprint, published by
+	// the metadata node (PopulateCore) beside ServerInfo. Nil when the demo
+	// carried no countdown (every matchless recording).
+	MatchSettings *MatchSettings
+
+	// GameMode is the normalised mode descriptor (result.GameMode),
+	// published by the roster node (PopulateCore) — which is why roster
+	// requires `metadata`. Every producer that has to decide "were there
+	// teams" reads it through IndividualMode / ModeTeamShaped rather than
+	// re-deriving a mode table of its own. Nil when the roster node was not
+	// registered.
+	//
+	// The match node REFINES it in place after its own duel promotion (a
+	// demo with no demoinfo and exactly two participants), so a producer
+	// finalizing after `match` may see a canonical the earlier ones did
+	// not. Nothing reads Canonical before then.
+	GameMode *result.GameMode
+
 	// ServerStatus is the serverinfo `status` key tracked over time rather
 	// than last-write-wins, published by the metadata node (PopulateCore).
 	// The no-match post-processor reads it: `metadata.serverInfo["status"]`
@@ -175,6 +200,68 @@ func (co *CoreOutputs) IsDuel() bool {
 	return co.Roster.Duel()
 }
 
+// IndividualMode reports whether this match is laid out INDIVIDUALLY: every
+// player is their own side, so a userinfo `team` tag is decoration and no
+// pair of players is ever "on the same team". It is the one predicate the
+// team-sensitive producers share — team-kill flagging (frag.go), team-damage
+// classification (damage.go / shots.go), the scoreboard's team rows
+// (match.go), the per-team player-stats aggregate and the region-control
+// layout — so they cannot disagree about a demo the way the four separate
+// mode tables this replaced did.
+//
+// True for a 1v1 (the roster's own two-participant verdict, which the
+// project already treats as authoritative) and for any mode the descriptor
+// resolved as not team-based from a source that actually saw a mode or a
+// teamplay cvar. Nil-safe: with no CoreOutputs, no roster and no descriptor
+// it is false, which is the pre-v75 behaviour of taking every tag at face
+// value.
+//
+// This replaced Roster.Individual, which cached the same verdict at roster
+// time; the two agreed on 3 123 of 3 123 census demos and agree on every
+// pipeline-constructed state by construction (the roster seeds its layout
+// from this same descriptor, and the only later refinement is the duel
+// promotion Roster.Duel carries). They could differ only on a hand-built
+// roster whose cached flag contradicts its descriptor.
+func (co *CoreOutputs) IndividualMode() bool {
+	if co == nil {
+		return false
+	}
+	if co.Roster.Duel() {
+		return true
+	}
+	return individualLayoutFromMode(co.GameMode)
+}
+
+// Mode returns the published mode descriptor. Nil-safe on co, so a producer
+// with no CoreOutputs (hand-built registry, unit test) simply publishes no
+// descriptor rather than panicking.
+func (co *CoreOutputs) Mode() *result.GameMode {
+	if co == nil {
+		return nil
+	}
+	return co.GameMode
+}
+
+// ModeAllowsTeamplay reports whether the resolved mode leaves KTX's tp_num()
+// gate open — `(isTeam() || isCTF() || coop) ? teamplay : 0`
+// (ktx/src/g_utils.c:1586-1588) — i.e. whether the raw teamplay cvar means
+// anything at all on this demo.
+//
+// An UNRESOLVED mode leaves it open, which is the asymmetry that matters: a
+// demo that named no mode has not told us it was NOT teamplay, and the
+// caller's other gates (a non-empty matching team pair) still have to agree
+// before anything is nullified. Only a mode that positively says every
+// player fights alone closes it. Nil-safe, with the same reading.
+func (co *CoreOutputs) ModeAllowsTeamplay() bool {
+	if co == nil || co.GameMode == nil {
+		return true
+	}
+	if co.GameMode.Canonical == result.GameModeUnknown {
+		return true
+	}
+	return co.GameMode.TeamShaped()
+}
+
 // ResolvedSession is one contiguous occupancy of a wire slot, resolved
 // to the canonical (reconnect-unified) player identity. IdentityKey is
 // equal for every session the same human played, so stream merging can
@@ -223,8 +310,14 @@ type ResolvedSession struct {
 	// after a handover or a rejoin. 0 when the occupancy carried no userid
 	// of its own (see occupancyRecord.identified — an inferred occupancy,
 	// a userid-0 resend, or KTX's ghost scoreboard row).
-	UserID      int
-	IdentityKey string
+	UserID int
+	// SpectateStint marks the occupancy a live player on this slot entered
+	// by going spectator (see occupancyRecord.spectateStint). Such a session
+	// is resolved against — an event on the slot still belongs to whoever is
+	// there — but is not PUBLISHED as a play window: it answers none of the
+	// questions result.PlayerSession exists for.
+	SpectateStint bool
+	IdentityKey   string
 }
 
 // SlotInfo holds the per-slot resolved player name and team that

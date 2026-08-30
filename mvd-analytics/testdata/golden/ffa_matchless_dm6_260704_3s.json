@@ -1,0 +1,1812 @@
+{
+  "frags": {
+    "byPlayer": {},
+    "byWeapon": {},
+    "frags": [],
+    "killsMeasured": true,
+    "totalFrags": 0
+  },
+  "items": {
+    "items": [
+      {
+        "entNum": 85,
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "cells_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 472,
+        "y": -1400,
+        "z": 232
+      },
+      {
+        "entNum": 86,
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "cells_2",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 472,
+        "y": -1352,
+        "z": 232
+      },
+      {
+        "entNum": 82,
+        "kind": "cells",
+        "loc": "LG",
+        "name": "cells_3",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 600,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "entNum": 83,
+        "kind": "cells",
+        "loc": "LG",
+        "name": "cells_4",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 656,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "entNum": 77,
+        "kind": "ga",
+        "loc": "GA",
+        "name": "ga",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 56,
+        "y": -2008,
+        "z": 64
+      },
+      {
+        "entNum": 70,
+        "kind": "gl",
+        "loc": "GL",
+        "name": "gl",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1224,
+        "y": -1088,
+        "z": 232
+      },
+      {
+        "entNum": 57,
+        "kind": "h15",
+        "loc": "GA",
+        "name": "h15_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 232,
+        "y": -1912,
+        "z": 16
+      },
+      {
+        "entNum": 63,
+        "kind": "h15",
+        "loc": "GA",
+        "name": "h15_2",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 304,
+        "y": -1944,
+        "z": 16
+      },
+      {
+        "entNum": 60,
+        "kind": "h15",
+        "loc": "big",
+        "name": "h15_3",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 872,
+        "y": -960,
+        "z": -64
+      },
+      {
+        "entNum": 66,
+        "kind": "h15",
+        "loc": "big",
+        "name": "h15_4",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 920,
+        "y": -1008,
+        "z": -64
+      },
+      {
+        "entNum": 47,
+        "kind": "h15",
+        "loc": "GL",
+        "name": "h15_5",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 928,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "entNum": 48,
+        "kind": "h15",
+        "loc": "GL",
+        "name": "h15_6",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 984,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "entNum": 54,
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "h15_7",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1048,
+        "y": -568,
+        "z": 16
+      },
+      {
+        "entNum": 53,
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "h15_8",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1048,
+        "y": -520,
+        "z": 16
+      },
+      {
+        "entNum": 58,
+        "kind": "h25",
+        "loc": "GA.cells",
+        "name": "h25_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 408,
+        "y": -1064,
+        "z": 232
+      },
+      {
+        "entNum": 51,
+        "kind": "h25",
+        "loc": "RA",
+        "name": "h25_2",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1224,
+        "y": -608,
+        "z": 144
+      },
+      {
+        "entNum": 50,
+        "kind": "h25",
+        "loc": "GL.below",
+        "name": "h25_3",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1696,
+        "y": -1160,
+        "z": 16
+      },
+      {
+        "entNum": 81,
+        "kind": "lg",
+        "loc": "LG",
+        "name": "lg",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 760,
+        "y": -1080,
+        "z": -296
+      },
+      {
+        "entNum": 49,
+        "kind": "mh",
+        "loc": "MH",
+        "name": "mh",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 192,
+        "y": -1264,
+        "z": 88
+      },
+      {
+        "entNum": 52,
+        "kind": "nails",
+        "loc": "RA",
+        "name": "nails_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1264,
+        "y": -344,
+        "z": 144
+      },
+      {
+        "entNum": 62,
+        "kind": "nails",
+        "loc": "RA",
+        "name": "nails_2",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1328,
+        "y": -280,
+        "z": 144
+      },
+      {
+        "entNum": 69,
+        "kind": "ng",
+        "loc": "big",
+        "name": "ng",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1224,
+        "y": -1088,
+        "z": -64
+      },
+      {
+        "entNum": 89,
+        "kind": "ra",
+        "loc": "RA",
+        "name": "ra",
+        "phases": [
+          {
+            "availableFrom": 0,
+            "respawnAt": 21285,
+            "takenAt": 1285,
+            "takenBy": "/ bro",
+            "team": "/ bro"
+          }
+        ],
+        "x": 1736,
+        "y": -344,
+        "z": 144
+      },
+      {
+        "entNum": 84,
+        "kind": "ring",
+        "loc": "LG",
+        "name": "ring",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 512,
+        "y": -1088,
+        "z": -272
+      },
+      {
+        "entNum": 72,
+        "kind": "rl",
+        "loc": "MH",
+        "name": "rl_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 200,
+        "y": -1112,
+        "z": 88
+      },
+      {
+        "entNum": 76,
+        "kind": "rl",
+        "loc": "RA",
+        "name": "rl_2",
+        "phases": [
+          {
+            "availableFrom": 0,
+            "respawnAt": 2567,
+            "takenAt": 2567,
+            "takenBy": "/ bro",
+            "team": "/ bro"
+          },
+          {
+            "availableFrom": 2567
+          }
+        ],
+        "x": 1512,
+        "y": -432,
+        "z": 36
+      },
+      {
+        "entNum": 75,
+        "kind": "rockets",
+        "loc": "GA",
+        "name": "rockets",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 264,
+        "y": -1632,
+        "z": 36
+      },
+      {
+        "entNum": 56,
+        "kind": "shells",
+        "loc": "GA",
+        "name": "shells_1",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 456,
+        "y": -2048,
+        "z": 16
+      },
+      {
+        "entNum": 55,
+        "kind": "shells",
+        "loc": "GA.shells",
+        "name": "shells_2",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 752,
+        "y": -1640,
+        "z": 16
+      },
+      {
+        "entNum": 65,
+        "kind": "shells",
+        "loc": "GA.shells",
+        "name": "shells_3",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 816,
+        "y": -1640,
+        "z": 16
+      },
+      {
+        "entNum": 61,
+        "kind": "shells",
+        "loc": "big",
+        "name": "shells_4",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1244,
+        "y": -1316,
+        "z": -64
+      },
+      {
+        "entNum": 64,
+        "kind": "shells",
+        "loc": "big",
+        "name": "shells_5",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1280,
+        "y": -1272,
+        "z": -64
+      },
+      {
+        "entNum": 74,
+        "kind": "shells",
+        "loc": "GL.RA",
+        "name": "shells_6",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1736,
+        "y": -1112,
+        "z": 144
+      },
+      {
+        "entNum": 71,
+        "kind": "sng",
+        "loc": "GA",
+        "name": "sng",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 424,
+        "y": -2008,
+        "z": 144
+      },
+      {
+        "entNum": 73,
+        "kind": "ssg",
+        "loc": "RA",
+        "name": "ssg",
+        "phases": [
+          {
+            "availableFrom": 0
+          }
+        ],
+        "x": 1392,
+        "y": -584,
+        "z": 16
+      }
+    ]
+  },
+  "locGraph": {
+    "edges": [
+      {
+        "byPlayer": {
+          "/ bro": 1
+        },
+        "from": "RA.behind",
+        "kind": "normal",
+        "to": "RA",
+        "total": 1,
+        "unarmed": {
+          "byPlayer": {
+            "/ bro": 1
+          },
+          "total": 1
+        }
+      }
+    ],
+    "locs": [
+      {
+        "byPlayer": {
+          "SMOK": 3161
+        },
+        "name": "MH",
+        "total": 3161,
+        "unarmed": {
+          "byPlayer": {
+            "SMOK": 3161
+          },
+          "total": 3161
+        },
+        "x": 235.625,
+        "y": -897.5,
+        "z": 136
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "/ bro": 594
+          },
+          "total": 594
+        },
+        "byPlayer": {
+          "/ bro": 2189
+        },
+        "name": "RA",
+        "total": 2189,
+        "unarmed": {
+          "byPlayer": {
+            "/ bro": 1595
+          },
+          "total": 1595
+        },
+        "x": 1543.75,
+        "y": -606,
+        "z": 72
+      },
+      {
+        "byPlayer": {
+          "/ bro": 972
+        },
+        "name": "RA.behind",
+        "total": 972,
+        "unarmed": {
+          "byPlayer": {
+            "/ bro": 972
+          },
+          "total": 972
+        },
+        "x": 1803.5,
+        "y": -191.875,
+        "z": 168
+      }
+    ]
+  },
+  "mapEntities": {
+    "entities": [
+      {
+        "bounds": {
+          "max": [
+            903,
+            -1017,
+            -69
+          ],
+          "min": [
+            777,
+            -1151,
+            -87
+          ]
+        },
+        "class": "func_door_secret",
+        "loc": "big.hatch",
+        "name": "big.hatch",
+        "spawnflags": 4,
+        "type": "door",
+        "x": 840,
+        "y": -1084,
+        "z": -78
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "GA.cells-1",
+        "type": "item",
+        "x": 472,
+        "y": -1400,
+        "z": 232
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "GA.cells-2",
+        "type": "item",
+        "x": 472,
+        "y": -1352,
+        "z": 232
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 600,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 656,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "class": "item_armor1",
+        "kind": "ga",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 56,
+        "y": -2008,
+        "z": 64
+      },
+      {
+        "class": "weapon_grenadelauncher",
+        "kind": "gl",
+        "loc": "GL",
+        "name": "GL",
+        "type": "item",
+        "x": 1224,
+        "y": -1088,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GA",
+        "name": "GA-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 232,
+        "y": -1912,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GA",
+        "name": "GA-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 304,
+        "y": -1944,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GL",
+        "name": "GL-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 928,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GL",
+        "name": "GL-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 984,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 1048,
+        "y": -568,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 1048,
+        "y": -520,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "big",
+        "name": "big-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 872,
+        "y": -960,
+        "z": -64
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "big",
+        "name": "big-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 920,
+        "y": -1008,
+        "z": -64
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "GA.cells",
+        "name": "GA.cells",
+        "type": "item",
+        "x": 408,
+        "y": -1064,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "GL.below",
+        "name": "GL.below",
+        "type": "item",
+        "x": 1696,
+        "y": -1160,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1224,
+        "y": -608,
+        "z": 144
+      },
+      {
+        "class": "weapon_lightning",
+        "kind": "lg",
+        "loc": "LG",
+        "name": "LG",
+        "type": "item",
+        "x": 760,
+        "y": -1080,
+        "z": -296
+      },
+      {
+        "class": "item_health",
+        "kind": "mh",
+        "loc": "MH",
+        "name": "MH",
+        "spawnflags": 2,
+        "type": "item",
+        "x": 192,
+        "y": -1264,
+        "z": 88
+      },
+      {
+        "class": "weapon_nailgun",
+        "kind": "ng",
+        "loc": "big",
+        "name": "big",
+        "type": "item",
+        "x": 1224,
+        "y": -1088,
+        "z": -64
+      },
+      {
+        "class": "item_armorInv",
+        "kind": "ra",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1736,
+        "y": -344,
+        "z": 144
+      },
+      {
+        "class": "item_artifact_invisibility",
+        "kind": "ring",
+        "loc": "LG",
+        "name": "LG",
+        "type": "item",
+        "x": 512,
+        "y": -1088,
+        "z": -272
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "MH",
+        "name": "MH",
+        "type": "item",
+        "x": 200,
+        "y": -1112,
+        "z": 88
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1512,
+        "y": -432,
+        "z": 36
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 264,
+        "y": -1632,
+        "z": 36
+      },
+      {
+        "class": "item_shells",
+        "kind": "shells",
+        "loc": "GL.RA",
+        "name": "GL.RA",
+        "type": "item",
+        "x": 1736,
+        "y": -1112,
+        "z": 144
+      },
+      {
+        "class": "weapon_supernailgun",
+        "kind": "sng",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 424,
+        "y": -2008,
+        "z": 144
+      },
+      {
+        "class": "weapon_supershotgun",
+        "kind": "ssg",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1392,
+        "y": -584,
+        "z": 16
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.cells",
+        "name": "GA.cells-1",
+        "type": "spawn",
+        "x": 408,
+        "y": -1088,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.cells",
+        "name": "GA.cells-2",
+        "type": "spawn",
+        "x": 456,
+        "y": -1504,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.hide",
+        "name": "GA.hide",
+        "type": "spawn",
+        "x": 232,
+        "y": -1512,
+        "z": 40
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GL.hide",
+        "name": "GL.hide",
+        "type": "spawn",
+        "x": 896,
+        "y": -1464,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "MH",
+        "name": "MH",
+        "type": "spawn",
+        "x": 0,
+        "y": -1088,
+        "z": 264
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "RA.behind",
+        "name": "RA.behind",
+        "type": "spawn",
+        "x": 1892,
+        "y": -160,
+        "z": 168
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel",
+        "type": "spawn",
+        "x": 1016,
+        "y": -416,
+        "z": 40
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "GA",
+        "name": "GA",
+        "targetName": "t1",
+        "type": "teleportDst",
+        "x": 308,
+        "y": -1788,
+        "z": 44
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "MH",
+        "name": "MH",
+        "targetName": "t2",
+        "type": "teleportDst",
+        "x": 200,
+        "y": -892,
+        "z": 119
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "big",
+        "name": "big",
+        "targetName": "t3",
+        "type": "teleportDst",
+        "x": 1072,
+        "y": -1096,
+        "z": -32
+      },
+      {
+        "bounds": {
+          "max": [
+            267,
+            -1761,
+            142
+          ],
+          "min": [
+            229,
+            -1807,
+            24
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "GA",
+        "name": "GA",
+        "target": "t2",
+        "type": "teleportSrc",
+        "x": 248,
+        "y": -1784,
+        "z": 83
+      },
+      {
+        "bounds": {
+          "max": [
+            451,
+            -1065,
+            -185
+          ],
+          "min": [
+            413,
+            -1111,
+            -283
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "LG",
+        "name": "LG",
+        "target": "t3",
+        "type": "teleportSrc",
+        "x": 432,
+        "y": -1088,
+        "z": -234
+      },
+      {
+        "bounds": {
+          "max": [
+            223,
+            -829,
+            227
+          ],
+          "min": [
+            177,
+            -867,
+            113
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "MH",
+        "name": "MH",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 200,
+        "y": -848,
+        "z": 170
+      },
+      {
+        "bounds": {
+          "max": [
+            1043,
+            -1073,
+            63
+          ],
+          "min": [
+            1005,
+            -1119,
+            -35
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "big",
+        "name": "big",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 1024,
+        "y": -1096,
+        "z": 14
+      }
+    ],
+    "map": "dm6"
+  },
+  "match": {
+    "duration": 3167,
+    "gameDir": "qw",
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "serverinfo",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
+    "map": "dm6",
+    "mapTitle": "The Dark Zone",
+    "mode": "FFA",
+    "players": [
+      {
+        "deaths": 0,
+        "frags": 0,
+        "kills": 0,
+        "name": "/ bro",
+        "suicides": 0,
+        "team": "/ bro"
+      },
+      {
+        "deaths": 0,
+        "frags": 0,
+        "kills": 0,
+        "name": "SMOK",
+        "rawTeam": "rr",
+        "suicides": 0,
+        "team": "SMOK"
+      }
+    ],
+    "sources": {
+      "map": "serverinfo",
+      "mode": "finalscores",
+      "teams": "individual"
+    },
+    "teams": [
+      {
+        "frags": 0,
+        "name": "/ bro"
+      },
+      {
+        "frags": 0,
+        "name": "SMOK"
+      }
+    ]
+  },
+  "messages": {
+    "messages": []
+  },
+  "metadata": {
+    "finalScores": {
+      "date": "Jul 04, 15:50",
+      "map": "dm6",
+      "mode": "FFA",
+      "score1": 0,
+      "score2": 0,
+      "team1": "/ bro",
+      "team2": "SMOK"
+    },
+    "serverInfo": {
+      "*gamedir": "qw",
+      "*progs": "so",
+      "*qvm": "so",
+      "*version": "MVDSV 1.10",
+      "*z_ext": "511",
+      "deathmatch": "3",
+      "epoch": "1783180197",
+      "fpd": "142",
+      "hostname": "FFA @ qw.servegame.org",
+      "ktxver": "1.45",
+      "map": "dm6",
+      "maxclients": "20",
+      "maxfps": "77",
+      "maxspectators": "12",
+      "mode": "ffa",
+      "needpass": "4",
+      "pm_ktjump": "1",
+      "serverdemo": "ffa_1[dm6]260704-1549.mvd",
+      "status": "Standby",
+      "sv_antilag": "2",
+      "timelimit": "6"
+    }
+  },
+  "opening": {
+    "firstTakes": [
+      {
+        "entNum": 89,
+        "item": "ra",
+        "kind": "ra",
+        "loc": "RA",
+        "takenBy": "/ bro",
+        "team": "/ bro",
+        "time": 1285
+      },
+      {
+        "entNum": 76,
+        "item": "rl_2",
+        "kind": "rl",
+        "loc": "RA",
+        "takenBy": "/ bro",
+        "team": "/ bro",
+        "time": 2567
+      }
+    ],
+    "players": [
+      {
+        "loc": "RA.behind",
+        "name": "/ bro",
+        "team": "/ bro"
+      }
+    ]
+  },
+  "playerStats": {
+    "players": [
+      {
+        "hold": {
+          "armor": {
+            "none": {
+              "longestMs": 1285,
+              "ms": 1285,
+              "runs": 1,
+              "shareAlive": 0.4086,
+              "shareMatch": 0.4057
+            },
+            "ra": {
+              "longestMs": 1860,
+              "ms": 1860,
+              "runs": 1,
+              "shareAlive": 0.5914,
+              "shareMatch": 0.5873
+            }
+          },
+          "src": "derived",
+          "weapons": {
+            "rl": {
+              "longestMs": 578,
+              "ms": 578,
+              "runs": 1,
+              "shareAlive": 0.1838,
+              "shareMatch": 0.1825
+            }
+          }
+        },
+        "identity": "s0u42",
+        "name": "/ bro",
+        "pickups": {
+          "byKind": {
+            "ra": {
+              "took": 1
+            },
+            "rl": {
+              "took": 1,
+              "totalTook": 1
+            }
+          },
+          "src": "derived"
+        },
+        "score": {
+          "deaths": 0,
+          "efficiency": 0,
+          "frags": 0,
+          "kills": 0,
+          "maxQuadSpree": 0,
+          "maxSpree": 0,
+          "src": "derived",
+          "suicides": 0,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 3167,
+            "name": "/ bro",
+            "slot": 0,
+            "startMs": 0,
+            "userId": 42
+          }
+        ],
+        "team": "/ bro",
+        "window": {
+          "aliveMs": 3145,
+          "deadMs": 0,
+          "matchMs": 3167,
+          "presentMs": 3145
+        }
+      },
+      {
+        "hold": {
+          "src": "derived"
+        },
+        "identity": "s3u36",
+        "name": "SMOK",
+        "score": {
+          "deaths": 0,
+          "efficiency": 0,
+          "frags": 0,
+          "kills": 0,
+          "maxQuadSpree": 0,
+          "maxSpree": 0,
+          "src": "derived",
+          "suicides": 0,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 3167,
+            "name": "SMOK",
+            "slot": 3,
+            "startMs": -600,
+            "userId": 36
+          }
+        ],
+        "team": "SMOK",
+        "window": {
+          "aliveMs": 3145,
+          "deadMs": 0,
+          "matchMs": 3167,
+          "presentMs": 3145
+        }
+      }
+    ],
+    "sources": {
+      "hold": "derived",
+      "pickups": "derived",
+      "score": "derived"
+    }
+  },
+  "schemaVersion": 75,
+  "streams": {
+    "global": {
+      "dateMarkers": [
+        {
+          "atMs": 600,
+          "kind": "matchStart",
+          "raw": "2026-07-04 15:49:57 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1783180197000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Jul 04, 15:50",
+          "source": "finalscores",
+          "unixMs": 1783180200000,
+          "yearFrom": "epoch"
+        }
+      ],
+      "demoOffset": 600,
+      "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
+      "demoStartUnixMs": 1783180197000,
+      "matchEnd": 3167,
+      "matchEndUnixMs": 1783180200000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1783180197600
+    },
+    "movers": [
+      {
+        "ent": 78,
+        "sub": 4,
+        "t": [
+          0
+        ],
+        "vis": [
+          true
+        ],
+        "x": [
+          0
+        ],
+        "y": [
+          0
+        ],
+        "z": [
+          0
+        ]
+      }
+    ],
+    "players": [
+      {
+        "a": [
+          {
+            "t": 1285,
+            "v": 200
+          }
+        ],
+        "alive": [
+          {
+            "e": 3161,
+            "s": 0
+          }
+        ],
+        "at": [
+          {
+            "t": 0,
+            "v": ""
+          },
+          {
+            "t": 1285,
+            "v": "ra"
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          }
+        ],
+        "h": [
+          {
+            "t": 0,
+            "v": 100
+          }
+        ],
+        "identity": "s0u42",
+        "li": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 972,
+            "v": 2
+          }
+        ],
+        "name": "/ bro",
+        "rk": [
+          {
+            "t": 2567,
+            "v": 5
+          }
+        ],
+        "rl": [
+          {
+            "e": 3167,
+            "s": 2567
+          }
+        ],
+        "sessions": [
+          {
+            "endMs": 3167,
+            "name": "/ bro",
+            "slot": 0,
+            "startMs": 0,
+            "userId": 42
+          }
+        ],
+        "sh": [
+          {
+            "t": 0,
+            "v": 25
+          }
+        ],
+        "sp": [
+          0
+        ],
+        "team": "/ bro"
+      },
+      {
+        "alive": [
+          {
+            "e": 3161,
+            "s": 0
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          }
+        ],
+        "identity": "s3u36",
+        "li": [
+          {
+            "t": 0,
+            "v": 3
+          }
+        ],
+        "name": "SMOK",
+        "sessions": [
+          {
+            "endMs": 3167,
+            "name": "SMOK",
+            "slot": 3,
+            "startMs": -600,
+            "userId": 36
+          }
+        ],
+        "team": "SMOK"
+      }
+    ]
+  },
+  "timelineAnalysis": {
+    "locTable": [
+      "",
+      "RA.behind",
+      "RA",
+      "MH"
+    ],
+    "locationData": [
+      {
+        "name": "GL",
+        "x": 784.375,
+        "y": -1100.625,
+        "z": 256
+      },
+      {
+        "name": "big",
+        "x": 926,
+        "y": -979.125,
+        "z": -39.875
+      },
+      {
+        "name": "GA",
+        "x": 387.25,
+        "y": -1809.25,
+        "z": 40
+      },
+      {
+        "name": "MH",
+        "x": 235.625,
+        "y": -897.5,
+        "z": 136
+      },
+      {
+        "name": "LG",
+        "x": 505.25,
+        "y": -1091.5,
+        "z": -279.875
+      },
+      {
+        "name": "RA",
+        "x": 1543.75,
+        "y": -606,
+        "z": 72
+      },
+      {
+        "name": "RA.tunnel",
+        "x": 1016.625,
+        "y": -682.375,
+        "z": 40
+      },
+      {
+        "name": "MH.pipe",
+        "x": 466.375,
+        "y": -1094.875,
+        "z": 128
+      },
+      {
+        "name": "GA.shells",
+        "x": 627.5,
+        "y": -1668.125,
+        "z": 40
+      },
+      {
+        "name": "MH.behind",
+        "x": 113.5,
+        "y": -854.875,
+        "z": 136
+      },
+      {
+        "name": "GA.cells",
+        "x": 495.875,
+        "y": -1103.875,
+        "z": 256
+      },
+      {
+        "name": "GL.below",
+        "x": 1784.125,
+        "y": -971.5,
+        "z": 40
+      },
+      {
+        "name": "GL.RA",
+        "x": 1807.875,
+        "y": -1065.375,
+        "z": 168
+      },
+      {
+        "name": "RA.behind",
+        "x": 1803.5,
+        "y": -191.875,
+        "z": 168
+      },
+      {
+        "name": "big.hatch",
+        "x": 850.25,
+        "y": -1074.25,
+        "z": -43.875
+      },
+      {
+        "name": "GL.hide",
+        "x": 872.25,
+        "y": -1440,
+        "z": 256
+      },
+      {
+        "name": "GA.hide",
+        "x": 72,
+        "y": -1541.125,
+        "z": 40
+      }
+    ],
+    "playerUserIDs": {
+      "/ bro": 42,
+      "SMOK": 36
+    },
+    "regionControl": {
+      "bucketStates": {
+        "LG": "_______________________________________________________________",
+        "RA": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAA"
+      },
+      "regions": [
+        {
+          "centroidX": 696.5625,
+          "centroidY": -1105.75,
+          "locs": [
+            "LG"
+          ],
+          "name": "LG",
+          "points": [
+            {
+              "name": "LG",
+              "x": 505.25,
+              "y": -1091.5,
+              "z": -279.875
+            },
+            {
+              "name": "LG",
+              "x": 887.875,
+              "y": -1120,
+              "z": -279.875
+            }
+          ]
+        },
+        {
+          "centroidX": 1487.3096,
+          "centroidY": -591.3333,
+          "locs": [
+            "GL.RA",
+            "RA",
+            "RA.behind",
+            "RA.tunnel"
+          ],
+          "name": "RA",
+          "points": [
+            {
+              "name": "RA",
+              "x": 1779.25,
+              "y": -639,
+              "z": 168
+            },
+            {
+              "name": "RA.tunnel",
+              "x": 1016.625,
+              "y": -682.375,
+              "z": 40
+            },
+            {
+              "name": "RA",
+              "x": 1234,
+              "y": -623.875,
+              "z": 168
+            },
+            {
+              "name": "RA",
+              "x": 1543.75,
+              "y": -606,
+              "z": 72
+            },
+            {
+              "name": "RA",
+              "x": 1407.25,
+              "y": -240,
+              "z": 168
+            },
+            {
+              "name": "RA",
+              "x": 1232,
+              "y": -416.5,
+              "z": 168
+            },
+            {
+              "name": "RA.tunnel",
+              "x": 1021.125,
+              "y": -590,
+              "z": 40
+            },
+            {
+              "name": "GL.RA",
+              "x": 1807.875,
+              "y": -1065.375,
+              "z": 168
+            },
+            {
+              "name": "GL.RA",
+              "x": 1526.25,
+              "y": -1079.75,
+              "z": 207.25
+            },
+            {
+              "name": "RA.behind",
+              "x": 1903.875,
+              "y": -358.25,
+              "z": 168
+            },
+            {
+              "name": "RA",
+              "x": 1803,
+              "y": -421.125,
+              "z": 168
+            },
+            {
+              "name": "RA.behind",
+              "x": 1617.625,
+              "y": -178.25,
+              "z": 168
+            },
+            {
+              "name": "RA",
+              "x": 1633.5,
+              "y": -258.125,
+              "z": 168
+            },
+            {
+              "name": "RA.tunnel",
+              "x": 1208.625,
+              "y": -434.625,
+              "z": 40
+            },
+            {
+              "name": "RA",
+              "x": 1360,
+              "y": -623.875,
+              "z": 40
+            },
+            {
+              "name": "RA",
+              "x": 1712.5,
+              "y": -624,
+              "z": 40
+            },
+            {
+              "name": "RA",
+              "x": 1764.5,
+              "y": -811.625,
+              "z": 168
+            },
+            {
+              "name": "GL.RA",
+              "x": 1756.875,
+              "y": -883.375,
+              "z": 168
+            },
+            {
+              "name": "RA.behind",
+              "x": 1803.5,
+              "y": -191.875,
+              "z": 168
+            },
+            {
+              "name": "RA.tunnel",
+              "x": 1031.75,
+              "y": -898.5,
+              "z": -23.875
+            },
+            {
+              "name": "RA.tunnel",
+              "x": 1069.625,
+              "y": -791.5,
+              "z": 8
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "LG": {
+          "contested": 0,
+          "empty": 100,
+          "teamAControl": 0,
+          "teamAWeakControl": 0,
+          "teamBControl": 0,
+          "teamBWeakControl": 0,
+          "weakContested": 0
+        },
+        "RA": {
+          "byPlayer": {
+            "/ bro": {
+              "armed": 594,
+              "team": "/ bro",
+              "unarmed": 2567
+            }
+          },
+          "contested": 0,
+          "empty": 0.2,
+          "teamAControl": 18.8,
+          "teamAWeakControl": 81.1,
+          "teamBControl": 0,
+          "teamBWeakControl": 0,
+          "weakContested": 0
+        }
+      },
+      "teamA": "/ bro",
+      "teamB": "SMOK"
+    }
+  },
+  "weaponPickups": [
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "player": "/ bro",
+      "source": "world",
+      "team": "/ bro",
+      "time": 2567,
+      "weapon": "rl"
+    }
+  ]
+}

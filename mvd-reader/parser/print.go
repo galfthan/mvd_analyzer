@@ -231,7 +231,13 @@ func (p *Parser) deliverPrintLine(level int, msg string, target int, timeMs int3
 	}); err != nil {
 		return err
 	}
-	p.updateMatchStartedFromPrint(level, msg)
+	// After the PrintEvent above, before the obituary path below: a
+	// consumer of the triggering print still sees the pre-start state,
+	// and the obituary corroborator this gate opens sees the post-start
+	// state from the very next line.
+	if err := p.tryEmitMatchStartFromPrint(level, msg, timeMs); err != nil {
+		return err
+	}
 	if err := p.tryEmitObituaryDeath(msg, timeMs); err != nil {
 		return err
 	}
@@ -274,63 +280,47 @@ func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 	return p.forceEmitDeath(slot, timeMs)
 }
 
-// MatchStartPatterns is the canonical set of case-insensitive substrings
-// that mark a KTX match start in a broadcast print line. It lives in
-// Layer 1 because two independent consumers gate on it — the parser's
-// obituary-death corroborator here (via updateMatchStartedFromPrint) and
-// the analytics MatchTimingDetector (via the events re-export) — and the
-// dependency arrow only allows analytics to import mvd-reader, not the
-// reverse. Keeping a single definition here removes the old mirror pair
-// that could silently drift. Match-END phrases are analytics-only (they
-// gate no parser behaviour) and stay in the analyzer.
+// MatchStartPatterns is the case-insensitive substring table behind the
+// `print` match-start signal (MatchStartSourcePrint, matchstart.go) — one
+// of the four signals, and the only one a pre-KTX server gives. Match-END
+// phrases gate no parser behaviour and live in the analyzer.
+//
+// Every entry names the server broadcast that produces it. Three former
+// entries — "fight!", "go!", "game start" — were removed after a sweep of
+// all 50 964 archive demos (.reports/vocab-sweep-2026-08-29, probe S1)
+// found no server broadcast behind any of them. KTX's FIGHT! and GO! are
+// centerprints (ktx/src/arena.c:602-618; clan_arena.c:1540,1684;
+// race.c:2614) and svc_centerprint never reaches this matcher; what "go!"
+// DID match, on 12 demos, was obituary and scoreboard lines carrying the
+// player name "RINGO!!!" — a false match start on every one of them — and
+// "game start" matched only KTX's `latejoin ... join a team after the game
+// started` help text. A pattern here is a live path or it is a hazard.
 var MatchStartPatterns = []string{
-	// "has begun" rather than "match has begun": KTX prints "The match has
-	// begun!" (ktx/src/match.c:1173), but kmod/qwe announces the MODE —
-	// "The duel has begun!" — and the narrower pattern missed it. A 2003
-	// kmod duel in the test corpus therefore detected no match start at
-	// all, which left every stream empty (streams only record between
-	// Started and Ended) and silently dropped the whole streams-derived
-	// half of the pipeline. This entry is still tighter than "go!" below.
+	// KTX: "The match has begun!" (ktx/src/match.c:1296, G_bprint at
+	// PRINT_HIGH), inherited verbatim from Kombat Teams
+	// (kteams/v2.07/SRC/MATCH.QC:384, v2.21/SRC/MATCH.QC:759). "has begun"
+	// rather than "match has begun" because kmod/qwe announce the MODE —
+	// "The duel has begun!" — and the narrower pattern missed it: a 2003
+	// kmod duel in the test corpus detected no match start at all, which
+	// left every stream empty (streams only record between Started and
+	// Ended) and silently dropped the streams-derived half of the pipeline.
+	// Reached on 468 of the 3 123-demo census, every era; on a modern KTX
+	// demo `matchdate:` (match.c:1291) arrives first and this is the
+	// backstop.
 	"has begun",
+	// A CTF mod's "Match Started!" broadcast: 55 archive demos, all E0, all
+	// gamedir `ctf` — the same population that writes `mode=1` and an
+	// `M:SS left` status clock. Not a KTX string: the only occurrence in
+	// ktx/ is a C comment (commands.c:5247).
 	"match started",
-	"fight!",
-	"go!",
+	// An arena mod's "Series begins in 10 seconds...": 13 archive demos
+	// (12 gamedir `arena`, 1 `qw`), all E0. The match is on the DIGIT — the
+	// same mod's "Match begins in 5 seconds" does not fire — and it lands
+	// ~10 s before play. Kept because nothing else on those demos declares
+	// a start (the mod's status key is a `Round n/m` counter, not a clock),
+	// and a start 10 s early beats no streams at all. No printed string in
+	// ktx/, mvdsv/ or ezquake-source/ contains it.
 	"begins in 1",
-	"game start",
-}
-
-// updateMatchStartedFromPrint flips p.matchStarted on the first
-// observed match-start phrase (case-insensitive). Idempotent.
-//
-// Chat is refused: the gate never resets once flipped, so a single prewar
-// "go go go!" in team chat would open the obituary-death path for the rest
-// of the demo. Same guard the analytics MatchTimingDetector applies
-// (analyzer/matchtiming.go) and the KTX pickup-print matcher above it.
-//
-// Only ONE phrase in the table is a verified server broadcast: "has begun"
-// (G_bprint at PRINT_HIGH, ktx/src/match.c:1173). The other five are not
-// reachable from a current KTX server through svc_print — "fight!" is a
-// G_centerprint / G_cp2all (ktx/src/arena.c:602,617-618;
-// clan_arena.c:1402-1403,1537), "go!" is a G_cp2all (race.c:2614), "game start"
-// only occurs inside the centerprinted countdown "N seconds left before
-// game starts" (admin.c:624), "match started" is a C comment
-// (commands.c:5123), and "begins in 1" has no printed string anywhere in
-// ktx/, mvdsv/ or ezquake-source/. All five are kept anyway: dropping a
-// pattern can only lose match-start detection on some mod nobody here has
-// a demo for, and a centerprint-only phrase costs nothing here because it
-// arrives as svc_centerprint and never reaches this function. See
-// MVD_FORMAT.md's match-start table for the per-entry provenance.
-func (p *Parser) updateMatchStartedFromPrint(level int, msg string) {
-	if p.matchStarted || level == mvd.PrintChat {
-		return
-	}
-	lower := strings.ToLower(msg)
-	for _, phrase := range MatchStartPatterns {
-		if strings.Contains(lower, phrase) {
-			p.matchStarted = true
-			return
-		}
-	}
 }
 
 // lookupSlotByName finds the player slot whose userinfo name matches

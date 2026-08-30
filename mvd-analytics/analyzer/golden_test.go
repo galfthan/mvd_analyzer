@@ -293,7 +293,10 @@ func canonicalJSON(v interface{}, label string) ([]byte, error) {
 		return nil, err
 	}
 	if paths, ok := partialGoldenDemos[label]; ok {
-		m = projectPaths(m, paths)
+		m, err = projectPaths(m, paths)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", label, err)
+		}
 		out, err := json.MarshalIndent(m, "", "  ")
 		if err != nil {
 			return nil, err
@@ -373,6 +376,76 @@ var partialGoldenDemos = map[string][]string{
 		"match.players", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
+	// The 11-player FFA (schema v75). It pins what no other golden can: the
+	// individual match layout at scale (eleven one-player teams, nine
+	// distinct clan tags on match.players[].rawTeam, zero team kills), a
+	// spectator who JOINS mid-match on a slot he was already watching from
+	// (anus, uid 50, at 21926 ms — the player↔spectator occupancy split), and
+	// a slot handover on top of it (xuxi leaves slot 4 on 10 frags at 63290,
+	// SMOK takes it at 76007). Projected rather than full: the eleven streams
+	// would add ~15 MB the other FFA goldens already pin, and these are the
+	// rows the demo was added for.
+	"ffa_matchless_shifter_260119_spectate": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+	},
+	// The two-player matchless FFA on nova (nexus vs SMOK) — the
+	// two-participant end of the individual layout, the one the web lays
+	// out as a duel. Projected to the three things no other golden pins:
+	// `match` (the scoreboard this demo's frag fold produces),
+	// `streams.global`, and `timelineAnalysis.fragEvents` —
+	// the last for the post-match drop gate, where nexus quits 3.7 s past the
+	// match-over print and SV_DropClient's scoreboard zeroing
+	// (mvdsv/src/sv_main.c:419-428) must NOT reach the frag timeline
+	// (TestFragUpdate_AfterMatchEndNotRecorded pins the unit shape; this pins
+	// it on the wire). The full Result was 22 k lines of streams, playerStats
+	// and aim the other goldens already pin.
+	"ffa_matchless_nova_260704": {
+		"match", "streams.global", "timelineAnalysis.fragEvents",
+	},
+	// The 8-player matchless FFA with a mid-match leaver (Player36 at
+	// 85.7 s), a leave-and-rejoin on a different slot with a real player in
+	// between (nexus: slot 4 → xra → slot 3) and the frag fold that rejoin
+	// exercises (14 announced on leaving, 0 on the second stint, 14 on the
+	// row — MakeGhost returns in matchless mode, ktx/src/client.c:2897).
+	// Projected to the scoreboard, the sessions and the per-player windows:
+	// the eight full streams were 8 MB of what `nova` already pins.
+	//
+	// It is ALSO the corpus's only `shotStreams: true` entry with a WIRE
+	// (KTX) damage section, which makes it the only golden that can pin the
+	// gl touch classifier's shipped path: every other hub entry parses
+	// without the spatial streams and takes the WITHHELD branch, and the one
+	// other enriched entry (2on2_archive_dm4_qw240_recon) has reconstructed
+	// damage and so runs the reconstructed tier instead. The aim paths below
+	// therefore pin what `aim.players[].weapons[].direct` / `.splash` are on
+	// a modern demo the classifier RAN on — including their presence, which
+	// since v75 is the difference between a measured zero and a withhold
+	// (result.WeaponAim) — and `playerStats.players[].accuracy` pins the
+	// consequence: gl on KTX's own `directImpact` scale rather than the
+	// any-path fallback.
+	"ffa_matchless_dm2_260116_joiners": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+		"playerStats.players[].name", "playerStats.players[].score",
+		"playerStats.players[].window", "playerStats.players[].sessions",
+		"playerStats.players[].accuracy",
+		"frags.frags",
+		"aim.players[].player",
+		"aim.players[].weapons[].weapon", "aim.players[].weapons[].shots",
+		"aim.players[].weapons[].hits", "aim.players[].weapons[].direct",
+		"aim.players[].weapons[].splash", "aim.players[].weapons[].missed",
+	},
+	// The countdown-style FFA (`The match has begun!` at 10 s, KTX demoinfo
+	// block). It pins what the matchless ones cannot: the individual
+	// rewrite applied to demoInfo.players[].team / demoInfo.teams, and the
+	// locGraph occupancy keyed by player name rather than clan tag. Its
+	// streams / shots / aim are the same shape the 1on1 goldens pin.
+	"ffa_countdown_dm6_260106": {
+		"match", "demoInfo", "locGraph", "streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+	},
 }
 
 // projectPaths reduces m to only the given dotted paths, preserving the
@@ -381,25 +454,41 @@ var partialGoldenDemos = map[string][]string{
 // A `[]` suffix maps the rest of the path over an array:
 // "streams.players[].identity" keeps one small object per player instead of
 // the megabytes of stream a bare "streams.players" would drag in.
-func projectPaths(m map[string]interface{}, paths []string) map[string]interface{} {
+//
+// A path that matches NOTHING is an error, not a silent omission: a
+// projection is the whole statement of what its golden pins, and a path that
+// quietly resolves to nothing pins nothing while reading as though it does.
+// Three of the FFA entries carried `playerStats.teams` that way — always
+// absent, because an individual layout publishes no team rows — so the
+// golden's silence about them was mistaken for a pinned null. (`streams.global`
+// on every projected entry is not redundant: TestTimelineInvariants reads its
+// demoOffset / matchEnd to bound every event time in the golden.)
+func projectPaths(m map[string]interface{}, paths []string) (map[string]interface{}, error) {
 	out := map[string]interface{}{}
 	for _, path := range paths {
-		projectInto(m, out, strings.Split(path, "."))
+		if !projectInto(m, out, strings.Split(path, ".")) {
+			return nil, fmt.Errorf("projection path %q matched nothing in the Result", path)
+		}
 	}
-	return out
+	return out, nil
 }
 
-func projectInto(src, dst map[string]interface{}, parts []string) {
+// projectInto copies one dotted path from src into dst, reporting whether the
+// path resolved to anything at all.
+func projectInto(src, dst map[string]interface{}, parts []string) bool {
 	key := parts[0]
 	if strings.HasSuffix(key, "[]") {
 		key = strings.TrimSuffix(key, "[]")
 		items, ok := src[key].([]interface{})
 		if !ok {
-			return
+			return false
 		}
-		if len(parts) == 1 {
+		// A present-but-empty array is a pinned value (`aim.players[]` on
+		// a demo where nobody fired), distinct from an absent key: it
+		// matches, and any suffix trivially matches over zero rows.
+		if len(parts) == 1 || len(items) == 0 {
 			dst[key] = items
-			return
+			return true
 		}
 		rows, _ := dst[key].([]interface{})
 		if rows == nil {
@@ -410,33 +499,36 @@ func projectInto(src, dst map[string]interface{}, parts []string) {
 			dst[key] = rows
 		}
 		if len(rows) != len(items) {
-			return
+			return false
 		}
+		matched := false
 		for i, item := range items {
 			in, okIn := item.(map[string]interface{})
 			row, okRow := rows[i].(map[string]interface{})
-			if okIn && okRow {
-				projectInto(in, row, parts[1:])
+			if okIn && okRow && projectInto(in, row, parts[1:]) {
+				matched = true
 			}
 		}
-		return
+		return matched
 	}
 	if len(parts) == 1 {
-		if v, ok := src[key]; ok {
-			dst[key] = v
+		v, ok := src[key]
+		if !ok {
+			return false
 		}
-		return
+		dst[key] = v
+		return true
 	}
 	next, ok := src[key].(map[string]interface{})
 	if !ok {
-		return
+		return false
 	}
 	sub, ok := dst[key].(map[string]interface{})
 	if !ok {
 		sub = map[string]interface{}{}
 		dst[key] = sub
 	}
-	projectInto(next, sub, parts[1:])
+	return projectInto(next, sub, parts[1:])
 }
 
 // dropPositionTracks removes streams.players[].pos — the dense

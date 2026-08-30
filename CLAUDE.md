@@ -103,14 +103,25 @@ belongs in the frontend.
   the Summary but red elsewhere. Use `getTeamOrder()` /
   `timelineState.teams` to map a team name to its color index. The CSS
   mirror is `--team-a..--team-d`, re-pointed per match by
-  `setCanonicalTeams()`.
+  `setCanonicalTeams()`. In an **individual layout**
+  (`match.sources.teams` = `individual` — every duel, FFA, race) each
+  player is their own side, so `timelineState.teams` is the frag-sorted
+  PLAYER list and every row's `team` equals its name. A **duel keeps the
+  team palette and `assignTeamColors`** — two players are a matchup.
+  Only a field of MORE than two switches: `setCanonicalTeams(teams,
+  true)` fills the same one canonical array via `assignPlayerColors`,
+  twelve `PLAYER_PALETTE` entries handed out in NAME sort order. Assign
+  a colour by frag RANK in either palette and the stability property
+  above is gone — the board recolours when the scoreline changes. The
+  array, its index convention and every call site are unchanged — only
+  which palette fills it.
 - **Always run tests.** `make test` (which runs
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...` —
   mvd-web is wasm-only and is exercised by `make build` instead)
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it. `make test` also
   gates on `gofmt -l` before running anything; `make fmt` fixes it.
-- Tests come in four layers:
+- Tests come in five layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),
      `mvd-analytics/analyzer/` (backpacks, duel normalisation, items,
@@ -143,6 +154,15 @@ belongs in the frontend.
      into its `testdata/` through the parser in warning-collecting
      mode and applies data-quality invariants on the result. No-op
      when no demos are present.
+  5. **Source drift tests** — `mvd-analytics/analyzer/ktx_vocab_drift_test.go`
+     and `mvd-reader/parser/ktx_vocab_drift_test.go` read the vendored
+     `ktx/src` (and `kteams/v2.21/SRC`) when present and check that every
+     string KTX can write into a vocabulary the pipeline matches on
+     (countdown Mode literals, `um_list`, `GetMode`, `lastscores2str`, the
+     `status` writers, the start/end broadcasts) is one the Go tables name
+     or knowingly pass over. Skip when the trees are absent. When you add
+     an entry to one of those tables, or KTX gains a literal, these are
+     what fail.
 - If the golden test fails on an intended change, regenerate with
   `go test ./mvd-analytics/analyzer/... -run TestGoldenCorpus -args -update-golden`
   (the `-update-golden` flag is registered only in the analyzer

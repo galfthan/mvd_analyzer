@@ -736,6 +736,71 @@ body.no-team-rows #tab-summary .per-player-heading {
     display: none !important;
 }
 
+/* --- Individual mode: FFA, race, and every duel ---
+ *
+ * The match is laid out with one side per player (`match.sources.teams` =
+ * `individual`: team == the player's own name, the raw clan tag kept on
+ * `match.players[].rawTeam`), so there is no team anywhere to show. This
+ * covers everything duel-mode already hid — the Teams panel and the "Per
+ * Team" aggregates, which exist in all three tabs, not just Summary — plus
+ * the scoreboard columns that only mean something between teammates: Team
+ * (a copy of the Player column), TK and TDmg (structurally 0 when nobody has
+ * a teammate).
+ *
+ * Region control is NOT listed here, and NOT because its data is missing:
+ * the result ships `timelineAnalysis.regionControl.regions` for every demo,
+ * since the region geometry is a property of the map. It needs a binary side
+ * layout, so app.js's initRegionControl hides its two panels itself whenever
+ * the layout is individual with more than two participants. */
+body.individual-mode .team-aggregate-panel,
+body.individual-mode .team-aggregate-heading,
+body.individual-mode .team-aggregate-table,
+body.individual-mode .per-player-heading,
+body.individual-mode #scoreboard .team-col {
+    display: none !important;
+}
+
+/* Timeline tab, individual layout (one side per player, more than two of
+ * them). The two-sided views there describe a matchup that does not exist:
+ * the Team Status row, and the Score / Weapons / Health-Armor graphs whose
+ * whole grammar is "Team A ↑, Team B ↓" over the top two players. They go,
+ * and the three per-player views that used to hide inside a collapsed
+ * <details> under them become first-class panels — app.js
+ * setIndividualFieldLayout re-parents the live nodes into the panel
+ * bodies, and gives them taller rows now that they carry the tab.
+ *
+ * Powerups and Region Control are NOT listed here: both are per-team span
+ * timelines that hide themselves in app.js (updatePowerupTimeline /
+ * initRegionControl), the same way region control already did. */
+body.individual-field #tab-timeline .team-status-panel,
+body.individual-field #score-timeline-panel,
+body.individual-field #weapons-timeline-panel,
+body.individual-field #health-armor-timeline-panel {
+    display: none !important;
+}
+
+/* Promoted per-player panels. Row heights come from the renderers (they size
+ * their canvases in JS); this only spaces the block under its heading. */
+.per-player-panel-body {
+    margin-top: 4px;
+}
+
+/* Chat tab, individual layout. Same field as above: a column per side is a
+ * column per player only in a duel, so with more than two of them the second
+ * say column and its header go and app.js (buildFullChat) pours every line —
+ * say and say_team alike — into the first one, titled "Chat". Kills and Chat
+ * are both flex:1, so the two left split the width. */
+body.individual-field #team-b-chat-header,
+body.individual-field #team-b-messages {
+    display: none !important;
+}
+
+/* Field size beside the leader in the topbar of a multi-player individual
+ * match, where "A vs B" would be a matchup that does not exist. */
+.topbar-field {
+    color: #8a9bb8;
+}
+
 /* Explanatory note under a panel heading — used where a number deviates
  * from the server's own end-of-match table on purpose (the possession
  * columns of Item Pickups) and the viewer deserves to know why without a
@@ -1904,6 +1969,15 @@ body.graph-scrubbing * {
     white-space: normal;
 }
 
+/* Speaker name in the single-column chat layout. The colour is written
+ * inline per row (chatSpeakerColor, from TEAM_COLORS). Never shrinks: the row
+ * is a flex line whose message wraps, and a clipped name is worse than a
+ * clipped message. */
+.chat-speaker {
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
 .chat-time-marker-msg.frag { color: #ff6b6b; }
 .chat-time-marker-msg.powerup { color: #ffc107; }
 .chat-time-marker-msg.chat { color: #4ecdc4; }
@@ -2325,7 +2399,12 @@ body.graph-scrubbing * {
     top: 50%;    /* grows down from the zero line */
 }
 
+/* Selected-range suffix on a timeline heading. It has no fixed home: the
+ * individual layout hides the Weapons panel, so app.js moves this span into
+ * the promoted "Weapons per player" heading — hence the margin instead of a
+ * literal space in the markup. */
 #time-range-label {
+    margin-left: 0.4em;
     font-size: 0.85rem;
     color: #888;
     font-weight: normal;

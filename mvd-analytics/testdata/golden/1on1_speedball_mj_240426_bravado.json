@@ -1054,6 +1054,7 @@
             "hits": 65,
             "missed": 192,
             "self": {
+              "direct": 0,
               "hits": 11
             },
             "shots": 257,
@@ -1064,7 +1065,6 @@
             "hits": 1,
             "missed": 19,
             "shots": 20,
-            "splash": 1,
             "weapon": "gl"
           }
         ]
@@ -6379,6 +6379,7 @@
             "hits": 77,
             "missed": 172,
             "self": {
+              "direct": 0,
               "hits": 21
             },
             "shots": 249,
@@ -10692,6 +10693,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 22:54:38 +0000",
+    "deathmatch": 3,
     "demo": "duel_speedball_vs_mj[bravado]20260424-2244.mvd",
     "duration": 600,
     "hostname": "dm6.nl #1 antilag",
@@ -17034,6 +17036,14 @@
   "match": {
     "duration": 600001,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "bravado",
     "mapTitle": "Bravado -",
     "mode": "duel",
@@ -17051,6 +17061,7 @@
         "frags": 6,
         "kills": 6,
         "name": "mj",
+        "rawTeam": "red",
         "suicides": 0,
         "team": "mj"
       }
@@ -17058,7 +17069,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {
@@ -17835,18 +17846,18 @@
             },
             "rl": {
               "attacks": 249,
-              "hits": 77,
-              "hitsConvention": "anyDamage"
+              "hits": 14,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 33,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 198,
+              "hits": 11,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 5,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 70,
+              "hits": 15,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -18079,13 +18090,13 @@
             },
             "rl": {
               "attacks": 257,
-              "hits": 65,
-              "hitsConvention": "anyDamage"
+              "hits": 12,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 48,
-              "hits": 16,
-              "hitsConvention": "anyDamage"
+              "attacks": 288,
+              "hits": 52,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -18302,7 +18313,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -28860,6 +28871,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1000,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "epoch",
       "matchStartUnixMs": 1777070678091
     },

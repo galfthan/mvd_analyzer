@@ -224,8 +224,10 @@ sorts names A→Z and numbers biggest-first; clicking the active column
 flips it.
 
 The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
-lines (`event.type === 'teamsay'`) from the two chat columns; frags and
-public `say` are untouched, and the flag resets per demo load.
+lines (`event.type === 'teamsay'`) from the chat column(s); frags and
+public `say` are untouched, and the flag resets per demo load. Its columns
+are Kills plus one per side — or, in an individual layout that is not a
+duel, Kills plus a single "Chat" column (see *A mode with no teams* below).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -410,29 +412,53 @@ off the wire, and marking half the corpus would make the mark meaningless.
 
 The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
 `withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
-family the demo has — and they are not all counted the same way. KTX's
+family the demo has — and they were not all counted the same way. KTX's
 own counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`;
-the `derived` family counts any fire that landed damage, on every weapon,
-which on `rl` is ~4× the KTX number. Same column, same `%`, different
-question — and the comparison people actually make is between two
-screenshots, where a tooltip does not exist.
+before v75 the `derived` family counted any fire that landed damage, on
+every weapon, which on `rl` is ~4.5× the KTX number. Same column, same
+`%`, different question — and the comparison people actually make is
+between two screenshots, where a tooltip does not exist.
 
 So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
 weapon wears a **`≠`** in the text, with a footnote under the table that
 appears exactly when some cell wears it. The rule is per weapon, not per
-family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`): a
-KTX-overlaid family matches on every weapon and is never marked; a
-`derived` one is marked on `rl`/`gl`/`sg`/`ssg`; a `reconstructed` one is
-marked on `sg`/`ssg` ONLY, because since v74 its `rl`/`gl` publish KTX's
-own direct-impact count (`recon.directHits`) and are on the server's
-scale. `lg`/`ng`/`sng`/`axe` are never marked — KTX counts the same event
-we do. Two `Acc` figures are comparable exactly when weapon **and**
-convention match; the full convention text stays in the tooltip.
+family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`), and since
+v75 every computed tier publishes KTX's convention on every weapon but
+one, so the mark has shrunk from four cells to one. A KTX-overlaid family
+matches on every weapon and is never marked. A `derived` one is not marked
+at all here: its `rl`/`gl` publish direct impacts and its `sg`/`ssg`
+pellets. A `reconstructed` one is marked on **`sg`/`ssg` alone** (its
+`rl`/`gl` publish `recon.directHits`, v74), which is not an oversight — a
+reconstructed damage delta merges every hit landing on one instant, so
+dividing its magnitude into pellets would credit one shooter with
+another's.
+
+`gl` wore the mark on a `derived` row until v75 and is the interesting
+case, because the wire genuinely cannot answer its question: a grenade
+that touches a player detonates, and every damage row the server then
+writes is flagged splash, so counting non-splash `gl` rows off the wire
+reproduces 0.00% of the block's total. The touch is re-derived instead —
+from the grenade's tracked flight, its detonation point against the
+victim's hull and the 2.5 s fuse — by the same classifier a
+pre-instrumentation demo uses (92% of 424 archive player rows exact
+against the verbatim block). This build always parses with the projectile
+streams that classifier reads, so a `gl` cell here is always on KTX's
+scale; a payload from a parse without them says `anyDamage` and is marked
+like any other off-scale cell. Two `Acc` figures are comparable exactly
+when weapon **and** convention match; the full convention text stays in
+the tooltip.
 
 The Aim tab's `Hits` column is deliberately the OTHER number on those two
 weapons: it stands in for the withheld measured counter, which is an
 any-path count, so a reconstructed `RL` figure there reads higher than the
-Summary's `Acc`. Both are labelled; neither is a correction of the other.
+Summary's `Acc`. The same split now exists on a wire-measured demo, where
+the Aim tab's `Hits`/`Hit %` are the any-path counters and the Summary's
+`Acc` is KTX's direct-impact question — the Aim tab's own `Direct` column
+is the number the Summary shows, on `GL` as well as `RL` since v75. Both
+are labelled; neither is a correction of the other. (A `GL` `Direct` can
+read ABOVE its `Hits`: it is a touch count from the flight geometry, not a
+subset of the fires the linker connected, so a touch whose fire went
+unlinked still counts and `Splash` floors at zero.)
 A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
 only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
 convention and the Summary number it differs from, with the size of the
@@ -481,6 +507,137 @@ worse prints the DAY plus its ± instead — `~2002-08-04 UTC ±14 h`, not
 `~2002-08-04 11:44 UTC`. Second-scale and tighter anchors keep the minute.
 `formatUtcStamp` switches on the number, like `formatAccuracyMs` beside it,
 so a new rung on the accuracy ladder needs no change here.
+
+### A mode with no teams (FFA, race — and every duel)
+
+`match.gameMode.teamBased` (schema v75) is the pipeline's one verdict on
+whether a player's team tag names a SIDE. When it is false the Go side lays
+the match out with one side per player — `match.teams` one row per player,
+every `players[].team` equal to the player's own name, the raw clan tag kept
+on `players[].rawTeam` — which is the layout duels have always produced.
+
+**Two questions, two predicates.** The frontend asks "is every player their
+own side here?" (LAYOUT) and "was the teamplay ruleset in force?"
+(SEMANTICS), and they have different answers on the same demo — a 1v1 on a
+CTF server is laid out individually and genuinely was teamplay. So:
+
+| Question | Helper | Reads | Decides |
+|---|---|---|---|
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (index.html `accept`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
+| Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
+| Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
+| Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
+
+`displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
+predicate. The CSS then hides **every team surface**: the Teams panel, the
+"Per Team" aggregates in all three tabs, and the scoreboard's `Team` column
+(a copy of `Player`) plus `TK` / `TDmg`, which are structurally 0 when
+nobody has a teammate. Region control is not driven by that class:
+`initRegionControl` hides its two panels itself whenever the layout is
+individual and not a duel (`isMultiPlayerIndividual`), because the result
+ships `timelineAnalysis.regionControl.regions` (the region GEOMETRY, a
+property of the map) for every demo — the panels are NOT hidden by a
+missing-data gate, and before this they rendered an editor whose Apply
+button only logged a warning. A two-participant match keeps them: it has two
+sides.
+
+**Colours in a field of players come from a different palette.**
+CLAUDE.md's rule stands, including its stability property: `TEAM_COLORS[i]`
+is the colour of `timelineState.teams[i]`, every surface indexes that one
+array, and WHICH palette entry lands at each index is decided by NAME, never
+by rank, so the colours do not move when the scoreline does.
+
+A **duel** is unchanged from before individual modes existed: two players
+are a matchup, so it keeps `assignTeamColors` and the four-entry team
+palette (`red`/`blue` claim their own entries, the rest go in name sort
+order). Only an individual layout with MORE than two players switches
+palettes — `timelineState.teams` is then the frag-sorted PLAYER list (each
+row's `team` IS its name, so every existing `teamOrder.indexOf(row.team)`
+lookup resolves unchanged) and `setCanonicalTeams` fills the array via
+`assignPlayerColors`, twelve `PLAYER_PALETTE` entries handed out in name
+sort order. Four entries do not cover a field of eleven; assigning them by
+frag RANK instead recoloured the whole board when the result changed.
+
+The topbar names the leader and the field size (`toast 33 · 8 players`)
+rather than inventing an "A vs B" matchup; a two-player individual match — a
+duel, or a 1v1 FFA — still renders as "A vs B", which is what it is.
+
+**The Timeline tab drops its two-sided views.** Team Status and the Score /
+Weapons / Team Health/Armor diverging graphs are structurally two-sided: they
+draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
+match; on a multi-player FFA it is the top two PLAYERS and nobody else. So
+when the layout is individual and not a duel —
+`isMultiPlayerIndividual(result)`, i.e. `isIndividualLayout && !isDuel`,
+where `isDuel` needs exactly two `playerStats` rows, so a lone player takes
+this layout too; the same test `initRegionControl` and the palette apply — `setIndividualFieldLayout` puts an `individual-field` class
+on `<body>`, and the tab becomes the per-player views:
+
+- CSS hides Team Status and the three A↑/B↓ graphs, which takes their
+  Team A / Team B legends with them.
+- The three per-player drill-downs leave their collapsed `<details>` and
+  become panels of their own, in order: **Frags / deaths per player**,
+  **Weapons per player**, **Health / armor per player**. The live nodes are
+  RE-PARENTED into the panel bodies, never cloned — they own the canvases and
+  the `_sig` / `_cells` rebuild cache, and a second copy would render into a
+  detached tree. The selected-range label rides along from the Weapons
+  heading. The move reverses on the next demo load: `resetUIToCleanState`
+  restores the two-sided layout, then `applyDuelModeUI` re-promotes if the new
+  demo wants it, so an FFA → 4on4 → duel walk lands on the right layout each
+  time.
+- Rows are taller there — mini charts 44 → 60 px, weapon-span rows 20 → 28 px
+  (`ppMiniHeight` / `ppSpanRowHeight`) — since these three views now carry the
+  tab instead of hiding under a graph.
+- `timelinePlayersByTeam` returns one group per entry in
+  `timelineState.teams` instead of always two, so EVERY player gets a row.
+  Before, only the players whose team matched `teams[0]` / `teams[1]` did —
+  in an individual layout that is two of N. Group index is still the
+  `TEAM_COLORS` index, so the rows carry the player palette exactly as
+  CLAUDE.md's rule requires. A player's side is their own name there, so no
+  roster lookup is involved.
+- **Powerups is hidden.** Its rows are per powerup TYPE, coloured by which of
+  two TEAMS holds it, so a field of N paints the top two and greys every
+  other run as `other`. `updatePowerupTimeline` hides the panel itself, the
+  way `initRegionControl` hides region control. Colouring those spans per
+  player is separate work.
+
+A duel (or a 1v1 FFA) is A-vs-B and keeps every panel exactly as before.
+
+**The Chat tab collapses to one chat column.** Its three columns are Kills,
+`teams[0]` chat and `teams[1]` chat — a column per side, which is a column
+per player only in a duel. In a field of eight, six players' say lines were
+split into no column at all and simply did not render. So on the same test —
+`isMultiPlayerIndividual(result)` — the same `individual-field` body class
+that drives the Timeline also:
+
+- CSS hides `#team-b-chat-header` and `#team-b-messages`. Both remaining
+  columns are `flex: 1`, so Kills and Chat split the width; nothing is moved
+  or cloned, the hidden container just stays empty.
+- `buildFullChat` pours EVERY say line — `say` and `say_team` alike — into
+  the one column in time order. In an FFA a `say_team` reaches only the
+  players sharing the speaker's clan tag, which makes it narrower than public
+  chat but still chat; it keeps its own colour (`.chat-time-marker-msg
+  .teamsay`), so the two read apart in the single column.
+- Each row is prefixed with the speaker's name (`.chat-speaker`), coloured by
+  `chatSpeakerColor` = `TEAM_COLORS[timelineState.teams.indexOf(player)]` —
+  CLAUDE.md's canonical index, so a name here is the colour that player
+  carries on the scoreboard, the map and the timeline; a speaker who is not
+  in that list (a spectator under `sv_spectalk 1`, a mid-match rename) gets
+  neutral grey rather than being dropped. With two sides the column heading
+  said who was talking; with eight players nothing else does.
+  The Kills column is unchanged — obituaries name their own players.
+- The heading becomes plain **Chat**. `displayTimelineAnalysis`'s
+  `${teams[0]} Chat` write is skipped while the class is on — it re-runs from
+  `applyDeferredBuckets` long after `applyDuelModeUI`, so the body class, not
+  the result, is what the render paths read.
+- **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
+  side, so it keeps its meaning here.
+- Reverses with the Timeline layout: `resetUIToCleanState` calls
+  `setIndividualFieldLayout(false)` and restores the default titles, then
+  `applyDuelModeUI` re-applies for the new demo.
+
+The time axis, the current-time line and scroll-to-current-time are unchanged
+— the axis is its own column and the line spans the scroll inner, so neither
+depends on how many message columns there are.
 
 ### A recording with no match in it
 

@@ -24,7 +24,7 @@ func TestStreams_ItemStateDoesNotCrossOccupancyHandover(t *testing.T) {
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 7, UserID: 4948, Name: "shiva"},
 	})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	// shiva picks up an RL and never drops it.
 	_ = a.OnEvent(&events.StatUpdateEvent{
 		PlayerNum: 7, StatIndex: events.StatItems,
@@ -85,7 +85,7 @@ func TestStreams_ChangeStreamDedupResetsAtHandover(t *testing.T) {
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 7, UserID: 4948, Name: "shiva"},
 	})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	// shiva ends his stint on 100 health / 50 armour / 10 rockets.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatHealth, Value: 100, TimeMs: 900_000})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 7, StatIndex: events.StatArmor, Value: 50, TimeMs: 900_000})
@@ -145,7 +145,7 @@ func TestTimeline_FragResetArmedOnVacateThenReconnect(t *testing.T) {
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 0,
 	})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	for i := 1; i <= 16; i++ {
 		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: i, TimeMs: int32(10_000 * i)})
 	}
@@ -200,7 +200,7 @@ func TestTimeline_FragResetArmedOnFirstOccupancyOfSlot(t *testing.T) {
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 7, UserID: 8, Name: "rusti"}, TimeMs: 0,
 	})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	for i := 1; i <= 16; i++ {
 		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: i, TimeMs: int32(10_000 * i)})
 	}
@@ -250,7 +250,7 @@ func TestTimeline_FragResetOnFreshConnectEatsNoDelta(t *testing.T) {
 	if err := a.Init(&Context{}); err != nil {
 		t.Fatal(err)
 	}
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 300_000})
 	_ = a.OnEvent(&events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: 4, UserID: 31, Name: "latecomer"}, TimeMs: 300_000,
@@ -310,7 +310,7 @@ func TestStreams_ActiveWeaponDedupResetsAtPreMatchHandover(t *testing.T) {
 		PlayerNum: 5, StatIndex: events.StatActiveWeapon,
 		Value: events.ITShotgun, TimeMs: 22_000,
 	})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 30_000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 30_000})
 	// In-match they take the RL.
 	_ = a.OnEvent(&events.StatUpdateEvent{
 		PlayerNum: 5, StatIndex: events.StatActiveWeapon,

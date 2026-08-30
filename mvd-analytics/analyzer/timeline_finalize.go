@@ -353,6 +353,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEndMs); streams != nil {
 		result.Streams = streams
 
+		// Which wire signal declared the match start. Read off the same
+		// detector that supplied StartTime above, so the two cannot disagree.
+		result.Streams.Global.MatchStartSignal = a.timing.StartSource
+
 		// As of schema v23 the demo/wall-clock anchor lives on Streams.Global —
 		// it describes how to map a stream's match time to wall-clock time, so
 		// it belongs next to the match window rather than in TimelineAnalysis.
@@ -403,7 +407,15 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 					teamSet[t] = struct{}{}
 				}
 			}
-			if len(teamSet) == 2 {
+			// Region control needs two SIDES. In an individual mode there are
+			// none, and slotToTeam here still holds the raw userinfo tags —
+			// on ffa_countdown_dm6 that is {red, tsc} over three players, one
+			// of whom wears no tag at all, which would have labelled the whole
+			// region timeline with two clan names that named nothing. The
+			// two-player case is left to the view's own inference
+			// (view/region_control.go inferTeamsFromMatch), which resolves it
+			// off the canonical scoreboard.
+			if len(teamSet) == 2 && !a.core.IndividualMode() {
 				teamNames := make([]string, 0, 2)
 				if a.core != nil && a.core.DemoInfo != nil && len(a.core.DemoInfo.Teams) == 2 {
 					di := a.core.DemoInfo.Teams

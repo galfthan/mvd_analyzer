@@ -141,7 +141,7 @@ func TestDamageAnalyzer_OutOfMatchDroppedEverywhere(t *testing.T) {
 
 	// Pre-match (warmup) hit — dropped from BOTH the aggregates AND the log.
 	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 40, DeathType: dtSGTest, TimeMs: 1000})
-	a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	// In-match hit — counts and appears in the log.
 	a.OnEvent(&events.DamageEvent{Attacker: 0, Victim: 1, Damage: 60, DeathType: dtSGTest, TimeMs: 6000})
 	// Post-match hit — also dropped everywhere.
@@ -679,6 +679,10 @@ func TestDamageAnalyzer_BoundedTeamplayRules(t *testing.T) {
 	co.DemoInfo = &DemoInfoResult{Mode: "ffa", Players: []DemoInfoPlayer{
 		{Name: "alpha", Team: "red"}, {Name: "gmate", Team: "red"}, {Name: "bsg", Team: "blue"},
 	}}
+	// The mode verdict reaches the damage layer through the descriptor
+	// (schema v75), so resolve it the way the roster node does.
+	gm := resolveGameMode(co.DemoInfo, nil, nil, map[string]string{"teamplay": "1"}, nil, nil)
+	co.GameMode = &gm
 	a.UseCoreOutputs(co)
 	var res Result
 	if err := a.Finalize(&res); err != nil {

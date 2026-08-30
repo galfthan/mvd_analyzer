@@ -3417,6 +3417,7 @@
             "hits": 55,
             "missed": 64,
             "self": {
+              "direct": 0,
               "hits": 14
             },
             "shots": 119,
@@ -4294,6 +4295,7 @@
             "hits": 56,
             "missed": 65,
             "self": {
+              "direct": 0,
               "hits": 9
             },
             "shots": 121,
@@ -7278,6 +7280,7 @@
   },
   "demoInfo": {
     "date": "2026-04-24 16:26:13 +0000",
+    "deathmatch": 3,
     "demo": "duel_ahemlockslie_vs_42[skull]20260424-1616.mvd",
     "duration": 600,
     "hostname": "nl.quake.world:27502 [QW-Group]",
@@ -13101,6 +13104,14 @@
   "match": {
     "duration": 599993,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "skull",
     "mapTitle": "Skull Hunt",
     "mode": "duel",
@@ -13110,6 +13121,7 @@
         "frags": 9,
         "kills": 10,
         "name": "AHemlocksLie",
+        "rawTeam": "'tro",
         "suicides": 1,
         "team": "AHemlocksLie"
       },
@@ -13118,6 +13130,7 @@
         "frags": 20,
         "kills": 21,
         "name": "42",
+        "rawTeam": "red",
         "suicides": 1,
         "team": "42"
       }
@@ -13125,7 +13138,7 @@
     "sources": {
       "map": "ktx",
       "mode": "ktx",
-      "teams": "derived"
+      "teams": "individual"
     },
     "teams": [
       {
@@ -13733,13 +13746,13 @@
             },
             "rl": {
               "attacks": 121,
-              "hits": 56,
-              "hitsConvention": "anyDamage"
+              "hits": 12,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 9,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 54,
+              "hits": 13,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -13935,18 +13948,18 @@
             },
             "rl": {
               "attacks": 119,
-              "hits": 55,
-              "hitsConvention": "anyDamage"
+              "hits": 11,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 5,
-              "hits": 3,
-              "hitsConvention": "anyDamage"
+              "attacks": 30,
+              "hits": 10,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 1,
-              "hits": 1,
-              "hitsConvention": "anyDamage"
+              "attacks": 14,
+              "hits": 3,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -14145,7 +14158,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -20137,6 +20150,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1000,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "epoch",
       "matchStartUnixMs": 1777047373104
     },

@@ -514,8 +514,10 @@ When almost every flag reads `false` at once, look at **`noMatch`**
 describe a partial match or nothing at all. It is present exactly when the
 `streams` block is absent — 2% of the QuakeWorld archive — and it names the
 reason: `midMatchRecording` (the recording starts after the match began),
-`matchStartUnannounced` (the server ran a match but announced it in a form
-the pipeline does not recognise), `noMatchDeclared` (no match declaration
+`matchStartUnannounced` (the server ran a match and none of the four
+match-start signals the reader knows produced an analyzable result — rare
+since schema v75, which salvaged every demo carrying this reason in the
+archive sweep), `noMatchDeclared` (no match declaration
 this pipeline can see, yet kills were parsed — usually unmanaged play on a
 mod with no match state, see `gameDir`, but possibly a managed match on a
 mod whose declarations we cannot read), `noPlayRecorded` (the same absent
@@ -911,7 +913,18 @@ server also renders standalone at **`GET /docs/result-schema`**.
 Common frontend features → the call that backs them.
 
 - **Match header / scoreboard** → `GET /overview` (one call: teams,
-  players, top streaks/powerups, degraded flag).
+  players, top streaks/powerups, degraded flag). **Branch on
+  `gameMode.teamBased`, never on the mode string.** `overview.mode` is the
+  server's own DISPLAY spelling (`Duel`, `FFA`, `Clan Arena`) and there are
+  five such vocabularies in the archive with no translation between them;
+  `gameMode` (schema v75) is the normalised verdict, with a `sources` block
+  naming which vocabulary decided each field. When `teamBased` is false —
+  every duel, FFA, race — the match is laid out with ONE SIDE PER PLAYER:
+  `teams` is one row per player, every `players[].team` equals the player's
+  own name (the raw clan tag rides on `match.players[].rawTeam`), and there
+  are no team aggregates or region control to render. That is the same shape
+  duels have always returned, so a client that already handles a duel
+  scoreboard handles FFA with no new code.
 - **Kill feed with obituaries** → `GET /events?types=frag` (use
   `/frags` if you need the `isSuicide`/`isTeamKill` flags instead).
 - **Score-over-time line** → `GET /events?types=frag`, accumulate
@@ -1010,16 +1023,29 @@ Common frontend features → the call that backs them.
   evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
   `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
   is not the same as no hits). `attacks` is shot-derived on every demo
-  and matches KTX to the row on the single-projectile weapons. On a
-  `reconstructed` family `rl` / `gl` publish KTX's OWN direct-impact
-  count (schema v74) and agree with `/demoinfo` to 1.2% / 0.6% in
-  aggregate; on a `derived` one they count any damage path and read
-  ~4x higher on `rl`. Either way, do not diff `hits` against
-  `/demoinfo` naively — `sg` / `ssg` are pellets on KTX's side and
-  trigger pulls on ours on every family. Read
+  and matches KTX to the row on the single-projectile weapons. Each
+  family answers KTX's own question as far as its evidence reaches:
+  `rl` and `gl` count direct impacts on all three (`reconstructed` since
+  v74, `derived` since v75; against `/demoinfo` in aggregate, `rl` within
+  1.3% / 0.02% and `gl` within 3.6% / 3.8%), `lg`/`ng`/`sng`/`axe` count
+  a connecting fire, which is KTX's own event for them, and `sg`/`ssg`
+  count pellets on both sides of the ratio on a `ktx` or wire-linked
+  `derived` row (100.0% of the archive eval's rows exact since v75).
+  `gl`'s number is the one that is not read off the wire at all: a
+  grenade that touches a player explodes and every damage row the wire
+  then carries is flagged splash, so the touch is re-derived from the
+  grenade's tracked flight and its 2.5 s fuse by the same classifier a
+  `reconstructed` row uses (the API always parses with the projectile
+  streams that needs; a payload lacking them says `anyDamage`). ONE gap
+  remains, and it is marked: `sg`/`ssg` on a `reconstructed` family
+  count fires that landed damage against TRIGGER PULLS, because the
+  pellet split needs a per-hit magnitude the rebuilt log does not carry.
+  Read
   `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
   — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
-  is, per WEAPON because one `src: "ktx"` row uses all three at once.
+  is, per WEAPON because one `src: "ktx"` row uses all three at once. It
+  is also what says which unit `attacks` is in: pellets exactly where
+  the convention is `pellets`, trigger pulls everywhere else.
   Two rows are comparable exactly when weapon and convention match, so
   gate any cross-demo or cross-era aggregation on it; ignoring it turns
   a ~4x definition change on `rl` into a trend.

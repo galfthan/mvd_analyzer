@@ -161,8 +161,7 @@ func TestPipelineUnmatchedObituariesAreUnmeasured(t *testing.T) {
 			Slot: 0, UserID: 11, Name: "alpha", Team: "red"}},
 		&events.UserInfoEvent{TimeMs: 0, Player: &mvd.PlayerInfo{
 			Slot: 1, UserID: 22, Name: "bravo", Team: "blue"}},
-		&events.PrintEvent{TimeMs: start, Level: 2, TargetPlayerNum: -1,
-			Message: "The match has begun!\n"},
+		&events.MatchStartEvent{TimeMs: start, Source: events.MatchStartSourcePrint},
 	}
 	// Both players move, score and die for a minute. Every death is a protocol
 	// death event with no accompanying obituary line.

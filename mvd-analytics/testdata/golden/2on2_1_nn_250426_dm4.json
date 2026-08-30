@@ -6612,11 +6612,13 @@
             "hits": 94,
             "missed": 102,
             "self": {
+              "direct": 0,
               "hits": 17
             },
             "shots": 196,
             "splash": 66,
             "team": {
+              "direct": 0,
               "hits": 2
             },
             "weapon": "rl"
@@ -6626,7 +6628,6 @@
             "hits": 1,
             "missed": 1,
             "shots": 2,
-            "splash": 1,
             "team": {
               "hits": 1
             },
@@ -12685,11 +12686,13 @@
             "hits": 71,
             "missed": 124,
             "self": {
+              "direct": 0,
               "hits": 13
             },
             "shots": 195,
             "splash": 54,
             "team": {
+              "direct": 0,
               "hits": 1
             },
             "weapon": "rl"
@@ -12697,7 +12700,6 @@
           {
             "hits": 3,
             "shots": 3,
-            "splash": 3,
             "weapon": "gl"
           }
         ]
@@ -21213,6 +21215,7 @@
             "hits": 38,
             "missed": 62,
             "self": {
+              "direct": 0,
               "hits": 9
             },
             "shots": 100,
@@ -26254,6 +26257,7 @@
             "hits": 74,
             "missed": 106,
             "self": {
+              "direct": 0,
               "hits": 17
             },
             "shots": 180,
@@ -26272,7 +26276,6 @@
               "hits": 1
             },
             "shots": 5,
-            "splash": 1,
             "weapon": "gl"
           },
           {
@@ -37668,6 +37671,7 @@
   },
   "demoInfo": {
     "date": "2026-04-25 13:17:15 +0200",
+    "deathmatch": 3,
     "demo": "2on2_1_vs_n_n[dm4]20260425-1307.mvd",
     "duration": 600,
     "hostname": "Malmo KTX Server #1",
@@ -38383,6 +38387,7 @@
       }
     ],
     "port": 27500,
+    "teamplay": 2,
     "teams": [
       "1",
       "n n"
@@ -49029,6 +49034,14 @@
   "match": {
     "duration": 600050,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "ktx"
+      },
+      "teamBased": true
+    },
     "map": "dm4",
     "mapTitle": "The Bad Place",
     "mode": "team",
@@ -54015,18 +54028,18 @@
             },
             "rl": {
               "attacks": 100,
-              "hits": 38,
-              "hitsConvention": "anyDamage"
+              "hits": 9,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 74,
-              "hits": 18,
-              "hitsConvention": "anyDamage"
+              "attacks": 444,
+              "hits": 68,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 9,
-              "hits": 7,
-              "hitsConvention": "anyDamage"
+              "attacks": 126,
+              "hits": 61,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -54272,18 +54285,18 @@
             },
             "rl": {
               "attacks": 195,
-              "hits": 71,
-              "hitsConvention": "anyDamage"
+              "hits": 17,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 54,
-              "hits": 22,
-              "hitsConvention": "anyDamage"
+              "attacks": 324,
+              "hits": 89,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 6,
-              "hits": 6,
-              "hitsConvention": "anyDamage"
+              "attacks": 84,
+              "hits": 23,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -54527,24 +54540,22 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 1,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 1
             },
             "rl": {
               "attacks": 180,
-              "hits": 74,
-              "hitsConvention": "anyDamage"
+              "hits": 11,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 48,
-              "hits": 27,
-              "hitsConvention": "anyDamage"
+              "attacks": 288,
+              "hits": 101,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 5,
-              "hits": 2,
-              "hitsConvention": "anyDamage"
+              "attacks": 70,
+              "hits": 13,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -54779,18 +54790,18 @@
             },
             "rl": {
               "attacks": 196,
-              "hits": 94,
-              "hitsConvention": "anyDamage"
+              "hits": 28,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 79,
-              "hits": 15,
-              "hitsConvention": "anyDamage"
+              "attacks": 474,
+              "hits": 57,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 1,
-              "hits": 1,
-              "hitsConvention": "anyDamage"
+              "attacks": 14,
+              "hits": 5,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -55042,18 +55053,18 @@
             },
             "rl": {
               "attacks": 296,
-              "hits": 132,
-              "hitsConvention": "anyDamage"
+              "hits": 37,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 153,
-              "hits": 33,
-              "hitsConvention": "anyDamage"
+              "attacks": 918,
+              "hits": 125,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 10,
-              "hits": 8,
-              "hitsConvention": "anyDamage"
+              "attacks": 140,
+              "hits": 66,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -55289,24 +55300,22 @@
               "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 1,
-              "hits": 0,
-              "hitsConvention": "anyDamage"
+              "attacks": 1
             },
             "rl": {
               "attacks": 375,
-              "hits": 145,
-              "hitsConvention": "anyDamage"
+              "hits": 28,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 102,
-              "hits": 49,
-              "hitsConvention": "anyDamage"
+              "attacks": 612,
+              "hits": 190,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 11,
-              "hits": 8,
-              "hitsConvention": "anyDamage"
+              "attacks": 154,
+              "hits": 36,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -55532,7 +55541,7 @@
       }
     ]
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -80418,6 +80427,7 @@
       "matchStart": 0,
       "matchStartAccuracyMs": 1000,
       "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
       "matchStartSource": "epoch",
       "matchStartUnixMs": 1777115235160
     },

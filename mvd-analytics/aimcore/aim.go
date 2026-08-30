@@ -7,12 +7,20 @@
 // passes a non-empty Query. Filtering is a pure re-run of the same computation
 // over the windowed shot slice, so every output (weapons accuracy, RL/GL
 // direct/splash, LG ramp, crosshair samples) scopes to the window consistently.
+//
+// Its only non-stdlib imports are result and damagerecon — the latter for the
+// one derivation the aim section cannot state itself, the grenade touch a wire
+// damage row does not record (damagerecon.WireDirectTouches). Both sit BELOW
+// this package in the import graph and neither reaches back, so the
+// analyzer/view split above still holds; damagerecon must never import
+// aimcore.
 package aimcore
 
 import (
 	"math"
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/damagerecon"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
@@ -100,12 +108,14 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// backing the per-shot alive test (aliveAt below).
 	tracks := make(map[string]*result.PositionTrack)
 	aliveOf := make(map[string][]result.Interval)
+	quadOf := make(map[string][]result.Interval)
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
 		if p.Position != nil && len(p.Position.T) > 0 {
 			tracks[p.Name] = p.Position
 		}
 		aliveOf[p.Name] = p.Alive
+		quadOf[p.Name] = p.Quad
 	}
 	aliveAt := func(name string, t int32) bool {
 		return aimAliveAt(aliveOf[name], t)
@@ -171,17 +181,31 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 	// aim documents as wire-only.
 	hitsMeasured := res.Damage != nil && res.Damage.Source == result.DamageSourceKTX
 
+	// The direct-TOUCH verdict per wire row, for the one weapon whose touch
+	// the wire does not record (result.WeaponAim). Nil when the derivation
+	// could not run — no spatial shot streams, no position tracks — and then
+	// the gl direct/splash split is WITHHELD rather than filled with the
+	// near-zero the splash bit yields.
+	glTouchVerdict := damagerecon.WireDirectTouches(res)
+
 	dmgByPlayer := make(map[string][]*dmgRec)
 	if hitsMeasured {
-		for _, d := range res.Damage.Events {
+		for i := range res.Damage.Events {
+			d := &res.Damage.Events[i]
 			if d.IsSelf || d.Attacker == "" {
 				continue
 			}
 			if !inWindow(d.Time) {
 				continue
 			}
+			// direct is the row's TOUCH verdict on KTX's terms: the
+			// server's own splash flag for rl, the classifier's for gl.
+			direct := !d.IsSplash
+			if d.Weapon == "gl" {
+				direct = glTouchVerdict != nil && glTouchVerdict[i]
+			}
 			dmgByPlayer[d.Attacker] = append(dmgByPlayer[d.Attacker],
-				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam})
+				&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, direct: direct, team: d.IsTeam})
 		}
 	}
 
@@ -234,7 +258,7 @@ func Compute(res *result.Result, q Query) *result.AimResult {
 		if q.Players != nil && !q.Players[player] {
 			continue
 		}
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], res.Streams, aliveAt, projLinked, hitsMeasured, reconTier); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], reconByPlayer[player], reconDirectByPlayer[player], quadOf[player], res.Streams, aliveAt, projLinked, glTouchVerdict != nil, hitsMeasured, reconTier); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -253,7 +277,13 @@ type dmgRec struct {
 	t      int32
 	weapon string
 	dmg    int
-	splash bool
+	// direct is the row's DIRECT-TOUCH verdict on KTX's terms, which is not
+	// the negation of splash for both projectiles: rl reads the server's own
+	// flag (a direct T_MissileTouch row reaches the wire unflagged), gl reads
+	// the reconstructed-geometry classifier, because every gl row is
+	// splash-flagged whatever the grenade touched. Meaningless — and unread —
+	// outside the rl/gl split.
+	direct bool
 	team   bool
 	self   bool
 	used   bool
@@ -297,7 +327,7 @@ func shotHasKind(sh *result.Shot, kind string) bool {
 	return false
 }
 
-func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, hitsMeasured, reconTier bool) *result.PlayerAim {
+func computePlayerAim(player string, shots []result.Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg, reconDmg []*dmgRec, reconDirect map[string]int, quad []result.Interval, streams *result.Streams, aliveAt func(string, int32) bool, projLinked, glTouchesKnown, hitsMeasured, reconTier bool) *result.PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -449,13 +479,26 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 		}
 	}
 
-	// SG/SSG: size pellet hits from same-frame damage (Σ/4) and split each
-	// fire into full / partial / whiff — overall and per victim class (the
-	// per-fire damage sum splits exactly by dmgRec.team, except when the
-	// perFire clamp triggers, e.g. quad-multiplied damage, where the
-	// enemy/team allocation within that fire is approximate). Withheld
-	// when hits were never measured: classify(0) would stamp every fire a
-	// whiff.
+	// SG/SSG: size pellet hits from same-frame damage (Σ / per-pellet damage)
+	// and split each fire into full / partial / whiff — overall and per victim
+	// class (the per-fire damage sum splits exactly by dmgRec.team, except when
+	// the perFire clamp triggers, where the enemy/team allocation within that
+	// fire is approximate). Withheld when hits were never measured:
+	// classify(0) would stamp every fire a whiff.
+	//
+	// The divisor follows the SHOOTER'S QUAD at fire time: T_Damage multiplies
+	// the attacker's damage by 4 while `super_damage_finished > time`
+	// (ktx/src/combat.c:540-546), so a quad pellet writes 16 to the wire log
+	// and a flat /4 read it as four pellets — a fire with two pellets in
+	// saturated the 6-pellet clamp. Measured against the verbatim KTX block
+	// that was the WHOLE shotgun residual: rows whose player never took a quad
+	// reproduced acc.sg.hits/acc.ssg.hits on 100.0% of rows at 0.00%, quad rows
+	// on 32.6%/61.8% and never under. Fire time, not damage time, is the state
+	// to read: the hitscan trace and its T_Damage calls run in the same frame
+	// as the trigger pull, so a quad expiring between them is not a case that
+	// exists. (dmm4's octa and the CTF strength rune scale the same product by
+	// 8 / by the rune power — stated, not guarded: neither mode is in the
+	// measured population.)
 	pellets := aimPellets
 	if !hitsMeasured {
 		pellets = nil
@@ -492,11 +535,15 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 					sumTeam += d.dmg
 				}
 			}
-			ph := sum / aimPelletDamage
+			perPellet := aimPelletDamage
+			if aimHeldAt(quad, sh.Time) {
+				perPellet *= aimQuadMultiplier
+			}
+			ph := sum / perPellet
 			if ph > perFire {
 				ph = perFire
 			}
-			phTeam := sumTeam / aimPelletDamage
+			phTeam := sumTeam / perPellet
 			if phTeam > ph {
 				phTeam = ph
 			}
@@ -510,21 +557,33 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 		}
 	}
 
-	// RL/GL: direct (non-splash contacts) vs splash-only vs missed. Only with
+	// RL/GL: direct (touching contacts) vs splash-only vs missed. Only with
 	// linking evidence (a linked rl/gl fire anywhere in the demo), else Hit
 	// is indistinguishable from "linking found nothing". Direct splits by
 	// victim class from the damage records (self direct is protocol-
 	// impossible — a missile ignores its owner for collision — so self hits
-	// are splash-only).
+	// are splash-only). The two weapons reach the verdict from different
+	// evidence, which is what dmgRec.direct carries; result.WeaponAim states
+	// why. Missed does not ride the split and is kept.
+	//
+	// Withheld means NIL, not zero: Direct and Splash are pointers precisely
+	// so this branch and a classified "touched nobody" are different wire
+	// shapes. Both nil cases are here — the whole `if` below (no rl/gl fire
+	// linked anywhere, so Hits is 0 and a Direct of 0 would claim a
+	// measurement) and the gl `continue` inside it.
 	if projLinked {
 		for _, wn := range []string{"rl", "gl"} {
 			wa := wagg[wn]
 			if wa == nil {
 				continue
 			}
+			if wn == "gl" && !glTouchesKnown {
+				wa.Missed = wa.Shots - wa.Hits
+				continue
+			}
 			directE, directT := 0, 0
 			for _, d := range dmg {
-				if d.weapon == wn && !d.splash {
+				if d.weapon == wn && d.direct {
 					if d.team {
 						directT++
 					} else {
@@ -533,21 +592,55 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 				}
 			}
 			direct := directE + directT
-			if direct > wa.Hits {
-				direct = wa.Hits
+			// rl's directs are a SUBSET of the fires that connected, so
+			// Direct + Splash = Hits holds and the clamp is belt and braces.
+			// gl's are a row count from an independent classifier, so a
+			// grenade that touched somebody while the fire→flight join failed
+			// to link its fire would be thrown away by a clamp to Hits: on the
+			// 186-demo archive corpus that scored 85.6% of 424 rows exact at
+			// 7.58% aggregate against 92.0% at 3.79% clamping to the FIRES.
+			// gl is therefore bounded by the only thing that bounds it
+			// physically — one grenade per fire, one touch per grenade — the
+			// same bound the reconstructed tier's DirectHits carries.
+			bound := wa.Hits
+			if wn == "gl" {
+				bound = wa.Shots
 			}
-			wa.Direct = direct
-			wa.Splash = wa.Hits - direct
+			if direct > bound {
+				direct = bound
+			}
+			wa.Direct = &direct
+			// Splash is the fires that connected WITHOUT touching, so it
+			// floors at zero rather than going negative on the gl rows where
+			// the touch count runs above the linked hits.
+			splash := wa.Hits - direct
+			if splash < 0 {
+				splash = 0
+			}
+			wa.Splash = &splash
 			wa.Missed = wa.Shots - wa.Hits
 			sp := getS(wn)
-			if directE > sp.enemy.Hits {
-				directE = sp.enemy.Hits
+			// The per-class split follows the same rule as its total: capped
+			// by the class's own hits where Direct is a subset of them, left
+			// as the row count where it is not.
+			if wn != "gl" {
+				if directE > sp.enemy.Hits {
+					directE = sp.enemy.Hits
+				}
+				if directT > sp.team.Hits {
+					directT = sp.team.Hits
+				}
 			}
-			if directT > sp.team.Hits {
-				directT = sp.team.Hits
-			}
-			sp.enemy.Direct = directE
-			sp.team.Direct = directT
+			sp.enemy.Direct = &directE
+			sp.team.Direct = &directT
+			// The self bucket's direct is a CERTAIN zero, not a withheld one:
+			// both touch handlers return on `other == owner`
+			// (ktx/src/weapons.c:954, :1317), so a missile cannot touch the
+			// player who fired it and every self hit is splash. Setting it
+			// keeps the bucket's splash = hits − direct derivable, which nil
+			// would forbid.
+			zero := 0
+			sp.self.Direct = &zero
 		}
 	}
 
@@ -676,10 +769,25 @@ func computePlayerAim(player string, shots []result.Shot, tracks map[string]*res
 }
 
 // aimPellets is the standard pellet count per trigger pull (KTX classic);
-// aimPelletDamage is the per-pellet damage. Used to size SG/SSG pellet hits.
+// aimPelletDamage is the per-pellet damage, aimQuadMultiplier the factor
+// T_Damage applies to it while the shooter holds the quad. Used to size
+// SG/SSG pellet hits.
 var aimPellets = map[string]int{"sg": 6, "ssg": 14}
 
-const aimPelletDamage = 4
+const (
+	aimPelletDamage   = 4
+	aimQuadMultiplier = 4
+)
+
+// aimHeldAt reports whether t falls inside one of the half-open [Start,End)
+// possession intervals of a Streams inventory/powerup stream. Unlike
+// aimAliveAt, an ABSENT stream means "not held" — a player with no quad
+// interval never carried one, whereas a player with no alive interval is one
+// whose liveness the demo did not record.
+func aimHeldAt(iv []result.Interval, t int32) bool {
+	i := sort.Search(len(iv), func(i int) bool { return iv[i].End > t })
+	return i < len(iv) && iv[i].Start <= t
+}
 
 // aimWeaponRank orders the per-weapon rows (lg, sg, ssg, rl, gl, then rest).
 func aimWeaponRank(w string) int {

@@ -41164,6 +41164,14 @@
   "match": {
     "duration": 600053,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "team",
+      "sources": {
+        "canonical": "countdown",
+        "teamBased": "serverinfo"
+      },
+      "teamBased": true
+    },
     "map": "dm4",
     "mapTitle": "The Bad Place",
     "players": [
@@ -45340,7 +45348,7 @@
       }
     ]
   },
-  "schemaVersion": 74,
+  "schemaVersion": 75,
   "shots": {
     "byPlayer": [
       {
@@ -80605,6 +80613,7 @@
       "matchStartAccuracyMs": 50400000,
       "matchStartConfidence": "unverified",
       "matchStartNote": "tz-unknown: the marker named no timezone, UTC assumed",
+      "matchStartSignal": "print",
       "matchStartSource": "matchkey",
       "matchStartUnixMs": 1028461495000
     },

@@ -521,17 +521,23 @@ type PlayerStatsDamage struct {
 //     count for every other weapon) and Hits counts pellets that connected
 //     (ktx/src/weapons.c:387). Real / Virtual are a SEPARATE rl/gl-only
 //     counter, NOT a split of Hits — see below.
-//   - "derived": reconstructed from the decoded fire stream. Attacks is
-//     always a TRIGGER-PULL count, and Hits counts fires that produced at
-//     least one linked damage event — so shotgun accuracy in particular
-//     reads on a different scale. Real/Virtual have no equivalent and are
-//     absent.
+//   - "derived": linked from the decoded fire stream against the WIRE damage
+//     log. Since schema v75 it counts on KTX's own convention per weapon —
+//     pellets for sg/ssg, direct impacts for rl, a connecting fire for
+//     lg/ng/sng/axe — read out of the aim section rather than recomputed.
+//     The one weapon it cannot: gl, whose touch the wire never records
+//     (analyzer.deriveMeasuredAcc), keeps the any-path count.
+//     Real/Virtual have no equivalent and are absent.
+//   - "reconstructed": Hits recovered from the rebuilt damage log (v74).
+//     KTX's convention on rl/gl; the pellet split cannot be recovered, so
+//     sg/ssg stay a fire count against a trigger-pull Attacks there.
 //
-// So compare accuracies across demos only after checking Src. The derived
-// form is offered because a demo with no KTX block should degrade to a
-// rougher number rather than to a missing field — but it is only as good
-// as the shot attribution underneath it (see the /shots section's own
-// caveats), which on some older demos mislabels a player's weapon.
+// So compare accuracies across demos only after checking the per-weapon
+// HitsConvention. The derived form is offered because a demo with no KTX
+// block should degrade to a rougher number rather than to a missing field —
+// but it is only as good as the shot attribution underneath it (see the
+// /shots section's own caveats), which on some older demos mislabels a
+// player's weapon.
 //
 // Src is the evidence GRADE, and grade is not the same question as what the
 // number counts — PlayerStatsAcc.HitsConvention answers that one, per weapon,
@@ -547,19 +553,30 @@ type PlayerStatsAccuracy struct {
 // src:"ktx" block uses all three at once, one per weapon.
 const (
 	// HitsAnyDamage — one fire that landed damage by ANY path, splash
-	// included. Every weapon of a derived or reconstructed family, and KTX's
-	// own counter for the weapons with only one damage path (lg, axe,
-	// ng/sng), where "any path" and "direct" are the same event.
+	// included. KTX's own counter for the weapons with only one damage path
+	// (lg, axe, ng/sng), where "any path" and "direct" are the same event;
+	// every weapon of a derived or reconstructed family EXCEPT the two whose
+	// touch count both tiers now publish (rl/gl, HitsDirectImpact) and the
+	// shotguns of a wire-linked one (HitsPellets). It remains gl's convention
+	// on a parse that built no spatial shot streams, where the touch
+	// classification cannot run at all.
 	HitsAnyDamage = "anyDamage"
 	// HitsDirectImpact — the projectile TOUCHED a player. KTX's rl/gl
 	// counter, which increments in the touch handler and nowhere else
-	// (ktx/src/weapons.c:994 T_MissileTouch, :1329 GrenadeTouch), so a
+	// (ktx/src/weapons.c:994 T_MissileTouch, :1331 GrenadeTouch), so a
 	// rocket that killed by splash alone is not a hit to it.
 	//
 	// Measured on 638 archive player rows: the wire damage log's non-splash
 	// rl records reproduce this counter EXACTLY (100.0% of rows), while the
 	// any-path count runs ~4x above it on rl and ~1.5x on gl. That gap is
 	// what makes an unmarked cross-era rl trendline fiction.
+	//
+	// Every tier reaches it for BOTH projectiles, from three different
+	// evidences (damagerecon/ACCURACY.md): KTX's block verbatim; the wire
+	// log's splash flag for rl (99.8% of 632 rows exact); and the
+	// flight-geometry touch classifier for gl, whose touch the wire does not
+	// record at all — on a wire-linked row 92.0% of 424 rows exact, on a
+	// reconstructed one 89.6%, both from damagerecon/direct.go.
 	HitsDirectImpact = "directImpact"
 	// HitsPellets — PELLETS, not fires, on BOTH sides of the ratio: KTX's
 	// sg/ssg counters advance per pellet fired (`attacks += bullets`,
@@ -570,13 +587,20 @@ const (
 
 // PlayerStatsAcc is one weapon's shot accounting for one player.
 type PlayerStatsAcc struct {
-	// Attacks is pellets (KTX, sg/ssg) or trigger pulls (derived, and KTX
-	// for every other weapon) — see PlayerStatsAccuracy.Src.
+	// Attacks is PELLETS exactly where HitsConvention is HitsPellets —
+	// KTX's own sg/ssg unit, and since schema v75 that of a WIRE-LINKED
+	// `derived` sg/ssg row too — and TRIGGER PULLS on every other row,
+	// including a `reconstructed` sg/ssg one (whose pellet split needs a
+	// per-hit magnitude the rebuilt log does not carry) and a `derived`
+	// sg/ssg row whose aim section did not publish the split. The
+	// convention marker is the test; the weapon and `src` are not.
 	Attacks int `json:"attacks"`
 	// Hits is ABSENT rather than zero when there is nothing to count it
 	// against: a derived block on a demo with no damage stream can count
-	// fires but can link none of them, and a zero there would read as "shot
-	// and never hit" instead of "not measurable".
+	// fires but can link none of them, and an ng/sng row on a parse without
+	// nail decoding (the only way a nail fire links to its damage) is the
+	// same case one weapon down. A zero there would read as "shot and never
+	// hit" instead of "not measurable".
 	Hits *int `json:"hits,omitempty"`
 	// HitsConvention names WHAT Hits counts — HitsAnyDamage, HitsDirectImpact
 	// or HitsPellets. Present whenever Hits is, so two rows are comparable
@@ -596,7 +620,7 @@ type PlayerStatsAcc struct {
 	// present on rl and gl only. They count VICTIMS DAMAGED BY A BLAST, not
 	// rockets that hit — one rocket splashing three players adds three — so
 	// they routinely EXCEED Hits, which for rl/gl is the direct-impact count
-	// (the rocket entity touching a player, ktx/src/weapons.c:994 for rl, :1329 for gl). They are
+	// (the rocket entity touching a player, ktx/src/weapons.c:994 for rl, :1331 for gl). They are
 	// not a direct/splash split of Hits, and the ratio Real/Attacks is not an
 	// accuracy.
 	//
