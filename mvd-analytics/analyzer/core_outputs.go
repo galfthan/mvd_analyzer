@@ -215,6 +215,13 @@ func (co *CoreOutputs) IsDuel() bool {
 // teamplay cvar. Nil-safe: with no CoreOutputs, no roster and no descriptor
 // it is false, which is the pre-v75 behaviour of taking every tag at face
 // value.
+//
+// This replaced Roster.Individual, which cached the same verdict at roster
+// time; the two agreed on 3 123 of 3 123 census demos and agree on every
+// pipeline-constructed state by construction (the roster seeds its layout
+// from this same descriptor, and the only later refinement is the duel
+// promotion Roster.Duel carries). They could differ only on a hand-built
+// roster whose cached flag contradicts its descriptor.
 func (co *CoreOutputs) IndividualMode() bool {
 	if co == nil {
 		return false

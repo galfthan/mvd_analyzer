@@ -12431,10 +12431,12 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 // (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none).
 // The reachable case is aimcore's `projLinked` gate (aimcore/aim.go): no rl or
 // gl fire anywhere in the demo linked to a projectile, so there is no evidence
-// to split — 1 800 of the 2 810 demos that fired either weapon in the
-// 3 123-demo reach audit, which is the whole pre-damage-stream half of the
-// archive. Rendering the null as 0 would publish "no rocket or grenade ever
-// touched anybody" as a measurement.
+// to split. It is rare where this cell renders at all: the split columns are
+// measured-only, so the 1 800 pre-damage-stream demos of the 3 123-demo reach
+// audit that link no projectile never reach it (aimCol swaps those columns
+// for AIM_MEASURED_ONLY_NOTE first); the residue is 7 demos with hitsMeasured
+// and still no linked rl/gl fire (probe P18). Rendering the null as 0 would
+// publish "no rocket or grenade ever touched anybody" as a measurement.
 const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
     'linked to a projectile, so there is nothing to split into direct hits and splash. ' +
     'Not a zero — the fires were simply never classified.';

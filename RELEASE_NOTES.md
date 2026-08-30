@@ -72,7 +72,8 @@ which demos have one at all.
   `Started && !Ended` every other recording path uses; the 14 existing
   goldens do not move.
 - **Golden corpus** gains four local-only FFA entries: three matchless
-  (`nova` full 6 min / 2 players, kept whole; `dm2` 8 players with a
+  (`nova` 6 min / 2 players, projected to `match`, `streams.global` and
+  `timelineAnalysis.fragEvents` — the post-match drop gate; `dm2` 8 players with a
   mid-match leaver and a slot-reuse reconnect, projected to scoreboard +
   sessions + per-player windows; `dm6` a 3.2 s map-voted-off match with
   zero kills) and one countdown-style FFA control projected to the
@@ -470,7 +471,7 @@ beside each table.
   the vendored `ktx/src` (and `kteams/v2.21`) when present, and skip
   otherwise; the offline pin is `TestCanonicalTables`.
 
-### Dead weight removed after the reach audit (no observable change)
+### Dead weight removed after the reach audit (no change to any pipeline-produced Result)
 
 A 3 123-demo full-pipeline reach audit (`.reports/reach-audit-2026-08-29`,
 untracked) instrumented every guard and fallback the FFA work added or
@@ -479,7 +480,11 @@ construction where a stronger argument existed — are gone: the
 descriptor-less `isTeamplay` fallback, the zero-pellet withhold, the
 `Canonical == ""` arms, the defensive stint re-sort, the two-player
 `GameMode == nil` prior in damage reconstruction, an unread `splash` field,
-the pre-v75 cache fallbacks in the web UI, and five duplicate tests. Two
+the pre-v75 cache fallbacks in the web UI, and five duplicate tests. What
+those fallbacks served was a hand-built registry or Result with no mode
+descriptor — a case the schema names but nothing in the pipeline, the API
+or the WASM build produces — and such an input now gets no teamplay
+inference, no duel damage prior and no team stats rather than a guess. Two
 byte-identical name resolvers share one helper; two individual-layout
 predicates are one; the web UI's five spellings of "individual field" are
 one. `WireDirectTouches` classifies only gl in production (rl's verdict is

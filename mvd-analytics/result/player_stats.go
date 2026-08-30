@@ -563,7 +563,7 @@ const (
 	HitsAnyDamage = "anyDamage"
 	// HitsDirectImpact — the projectile TOUCHED a player. KTX's rl/gl
 	// counter, which increments in the touch handler and nowhere else
-	// (ktx/src/weapons.c:994 T_MissileTouch, :1329 GrenadeTouch), so a
+	// (ktx/src/weapons.c:994 T_MissileTouch, :1331 GrenadeTouch), so a
 	// rocket that killed by splash alone is not a hit to it.
 	//
 	// Measured on 638 archive player rows: the wire damage log's non-splash
@@ -620,7 +620,7 @@ type PlayerStatsAcc struct {
 	// present on rl and gl only. They count VICTIMS DAMAGED BY A BLAST, not
 	// rockets that hit — one rocket splashing three players adds three — so
 	// they routinely EXCEED Hits, which for rl/gl is the direct-impact count
-	// (the rocket entity touching a player, ktx/src/weapons.c:994 for rl, :1329 for gl). They are
+	// (the rocket entity touching a player, ktx/src/weapons.c:994 for rl, :1331 for gl). They are
 	// not a direct/splash split of Hits, and the ratio Real/Attacks is not an
 	// accuracy.
 	//

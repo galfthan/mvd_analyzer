@@ -49,7 +49,10 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 			name: "serverinfo umode when no demoinfo",
 			si:   map[string]string{"mode": "ffa", "deathmatch": "3"},
 			// KTX forces teamplay 0 in FFA (world.c:1652-1655) and the key is
-			// simply absent on these servers.
+			// simply absent on these servers. The tag census would read
+			// "team" (three players wearing `red`, ffa_1[dm2]); the named
+			// individual mode gets the first word.
+			counts:    map[string]int{"red": 3, "'tro": 1, "rr": 1},
 			canonical: result.GameModeFFA, srcCanon: result.GameModeSrcServerInfo,
 			teamBased: false, srcTeam: result.GameModeSrcMode, individual: true,
 		},

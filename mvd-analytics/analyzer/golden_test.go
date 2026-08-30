@@ -390,9 +390,11 @@ var partialGoldenDemos = map[string][]string{
 		"streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
-	// The 11-player matchless FFA on nova. Projected to the three things no
-	// other golden pins: `match` (the individual scoreboard this demo's frag
-	// fold produces), `streams.global`, and `timelineAnalysis.fragEvents` —
+	// The two-player matchless FFA on nova (nexus vs SMOK) — the
+	// two-participant end of the individual layout, the one the web lays
+	// out as a duel. Projected to the three things no other golden pins:
+	// `match` (the scoreboard this demo's frag fold produces),
+	// `streams.global`, and `timelineAnalysis.fragEvents` —
 	// the last for the post-match drop gate, where nexus quits 3.7 s past the
 	// match-over print and SV_DropClient's scoreboard zeroing
 	// (mvdsv/src/sv_main.c:419-428) must NOT reach the frag timeline
@@ -478,10 +480,13 @@ func projectInto(src, dst map[string]interface{}, parts []string) bool {
 	if strings.HasSuffix(key, "[]") {
 		key = strings.TrimSuffix(key, "[]")
 		items, ok := src[key].([]interface{})
-		if !ok || len(items) == 0 {
+		if !ok {
 			return false
 		}
-		if len(parts) == 1 {
+		// A present-but-empty array is a pinned value (a fragless demo's
+		// `frags: []`), distinct from an absent key: it matches, and any
+		// suffix trivially matches over zero rows.
+		if len(parts) == 1 || len(items) == 0 {
 			dst[key] = items
 			return true
 		}

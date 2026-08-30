@@ -143,7 +143,7 @@ type LGRampSamples struct {
 //
 //   - RL/GL: Direct (projectiles that TOUCHED a player — KTX's own rl/gl hits
 //     counter, incremented in the touch handler and nowhere else,
-//     ktx/src/weapons.c:994 and :1329), Splash (linked hits that were
+//     ktx/src/weapons.c:994 and :1331), Splash (linked hits that were
 //     splash-only), Missed (fires that linked to no impact). Projectile
 //     linking runs on every parse; the block is present whenever any rl/gl
 //     fire linked to its flight (absent only when nothing linked — e.g.

@@ -137,11 +137,21 @@ func TestPelletHitsDivideByTheShooterQuad(t *testing.T) {
 
 // aimHeldAt's absent-stream default is the OPPOSITE of aimAliveAt's: a player
 // with no quad interval never held one, and reading that as "held" would
-// divide every pellet fire on a quad-less demo by 16. The interval walk
-// itself is result.Interval's, pinned in the result package.
+// divide every pellet fire on a quad-less demo by 16. The interval walk is
+// aimHeldAt's own sort.Search (nothing in the result package pins one), so
+// its Start-inclusive / End-exclusive / gap semantics are pinned here.
 func TestAimHeldAtAbsentStreamIsNotHeld(t *testing.T) {
 	if aimHeldAt(nil, 500) {
 		t.Error("aimHeldAt(nil) = true, want false — no interval is no possession")
+	}
+	iv := []result.Interval{{Start: 100, End: 200}, {Start: 400, End: 600}}
+	for _, c := range []struct {
+		t    int32
+		want bool
+	}{{99, false}, {100, true}, {199, true}, {200, false}, {500, true}, {600, false}} {
+		if got := aimHeldAt(iv, c.t); got != c.want {
+			t.Errorf("aimHeldAt(t=%d) = %v, want %v", c.t, got, c.want)
+		}
 	}
 }
 

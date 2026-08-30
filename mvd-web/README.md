@@ -524,8 +524,9 @@ CTF server is laid out individually and genuinely was teamplay. So:
 
 | Question | Helper | Reads | Decides |
 |---|---|---|---|
-| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'`, else the `team === name` shape test (a pre-v75 cache) | Which panels exist, which palette, the scoreboard shape |
-| Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased`, else `!isIndividualLayout` | Whether a same-team quantity can exist |
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: a pre-v75 cache is never opened (democache keys tier 2 as `v<schema>f<format>`) | Which panels exist, which palette, the scoreboard shape |
+| Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
+| Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
 
 `displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
@@ -567,9 +568,9 @@ Weapons / Team Health/Armor diverging graphs are structurally two-sided: they
 draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
 match; on a multi-player FFA it is the top two PLAYERS and nobody else. So
 when the layout is individual with more than two participants —
-`individualTimelineLayout(result)`, the same test `initRegionControl` applies —
-`setIndividualTimelineLayout` puts an `individual-timeline` class on `<body>`,
-and the tab becomes the per-player views:
+`isMultiPlayerIndividual(result)`, the same test `initRegionControl` and the
+palette apply — `setIndividualFieldLayout` puts an `individual-field` class
+on `<body>`, and the tab becomes the per-player views:
 
 - CSS hides Team Status and the three A↑/B↓ graphs, which takes their
   Team A / Team B legends with them.
@@ -605,8 +606,8 @@ A duel (or a 1v1 FFA) is A-vs-B and keeps every panel exactly as before.
 `teams[0]` chat and `teams[1]` chat — a column per side, which is a column
 per player only in a duel. In a field of eight, six players' say lines were
 split into no column at all and simply did not render. So on the same test —
-`individualChatLayout(result)`, `isIndividualLayout && !isDuel` —
-`setIndividualChatLayout` puts an `individual-chat` class on `<body>` and:
+`isMultiPlayerIndividual(result)` — the same `individual-field` body class
+that drives the Timeline also:
 
 - CSS hides `#team-b-chat-header` and `#team-b-messages`. Both remaining
   columns are `flex: 1`, so Kills and Chat split the width; nothing is moved
@@ -630,8 +631,8 @@ split into no column at all and simply did not render. So on the same test —
   the result, is what the render paths read.
 - **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
   side, so it keeps its meaning here.
-- Reverses the same way the Timeline layout does: `resetUIToCleanState` calls
-  `setIndividualChatLayout(false)` and restores the default titles, then
+- Reverses with the Timeline layout: `resetUIToCleanState` calls
+  `setIndividualFieldLayout(false)` and restores the default titles, then
   `applyDuelModeUI` re-applies for the new demo.
 
 The time axis, the current-time line and scroll-to-current-time are unchanged
