@@ -40,7 +40,7 @@ func TestArtifactManifestServability(t *testing.T) {
 		"items": "items", "damage": "damage", "shots": "shots",
 		"map-entities": "mapEntities", "backpacks": "backpacks",
 		"weapon-pickups": "weaponPickups", "aim": "aim", "loc-graph": "locGraph",
-		"player-stats": "playerStats",
+		"player-stats": "playerStats", "highlights": "highlights",
 	}
 	for name, key := range wantKey {
 		m := byName[name]
@@ -70,7 +70,7 @@ func TestArtifactManifestServability(t *testing.T) {
 	// Pseudo/internal nodes are never servable.
 	for _, name := range []string{
 		"clock", "roster", "identity",
-		"frags-final", "airgibs", "match-final", "region-control",
+		"frags-final", "match-final", "region-control",
 	} {
 		m := byName[name]
 		if m.Servable || m.ResultKey != "" {

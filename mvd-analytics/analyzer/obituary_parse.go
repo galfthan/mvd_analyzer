@@ -33,6 +33,17 @@ type parsedObituary struct {
 	// to the same team) is deliberately NOT done here: frag.go applies it in
 	// its own mapper against ctx.Players, and messages.go doesn't need it.
 	TeamKill bool
+	// Cause is the pattern row's sub-cause beneath Weapon ("discharge",
+	// "deflect", "spawnicide"; see parser.ObituaryPattern.Cause), plus the
+	// one promotion the table cannot express: "accepts X's discharge" shares
+	// its marker with "accepts X's shaft", so matchKill sets it off the
+	// suffix.
+	Cause string
+	// Other is the named party who is NEITHER killer nor victim: on the
+	// dtTELE3 double-pentagram row ("X was telefragged by Y's Satan's
+	// power") the death is booked as X's own suicide, and Y — the pentagram
+	// holder X died on — would otherwise be lost. Empty everywhere else.
+	Other string
 }
 
 // obituaryPatternsOfKind filters the canonical reader table to one Kind,
@@ -119,7 +130,14 @@ func matchSuicide(msg string) *parsedObituary {
 			}
 			victim := strings.TrimSpace(msg[:idx])
 			if victim != "" {
-				return &parsedObituary{Killer: victim, Victim: victim, Weapon: p.Weapon, Suicide: true}
+				o := &parsedObituary{Killer: victim, Victim: victim, Weapon: p.Weapon, Suicide: true, Cause: p.Cause}
+				if p.Suffix != "" {
+					// The text between marker and suffix names the other
+					// party (dtTELE3: the surviving pentagram holder).
+					rest := msg[idx+len(p.Marker):]
+					o.Other = strings.TrimSpace(rest[:strings.Index(rest, p.Suffix)])
+				}
+				return o
 			}
 		}
 	}
@@ -233,9 +251,18 @@ func matchKill(msg string) *parsedObituary {
 					weapon = "gl"
 				}
 			}
+			// "X accepts Y's shaft" (dtLG_BEAM) vs "X accepts Y's discharge"
+			// (dtLG_DIS, ktx/src/client.c:5656) share the verb — the suffix
+			// carries the cause.
+			cause := p.Cause
+			if p.Marker == " accepts " {
+				if strings.Contains(rest, "'s discharge") || strings.HasSuffix(strings.TrimSpace(rest), "' discharge") {
+					cause = "discharge"
+				}
+			}
 
 			if victim != "" && killer != "" {
-				return &parsedObituary{Killer: killer, Victim: victim, Weapon: weapon}
+				return &parsedObituary{Killer: killer, Victim: victim, Weapon: weapon, Cause: cause}
 			}
 		}
 	}
@@ -284,7 +311,7 @@ func matchSatanDeflect(msg string) *parsedObituary {
 		if victim == "" {
 			continue
 		}
-		return &parsedObituary{Killer: victim, Victim: victim, Weapon: p.Weapon, Suicide: p.Suicide}
+		return &parsedObituary{Killer: victim, Victim: victim, Weapon: p.Weapon, Suicide: p.Suicide, Cause: p.Cause}
 	}
 	return nil
 }

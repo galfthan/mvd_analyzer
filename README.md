@@ -86,10 +86,10 @@ go run ./mvd-analytics/cmd/qw-analyze -view top-kills demo.mvd.gz # one query-AP
 `-view` runs one view instead of the whole Result, covering the same surface
 mvd-api serves: `buckets`, `events`, `stream-slice`, `state-at`, `trails`,
 `region-control`, `top-kills`, `top-windows`, `lives`, `items`,
-`items-summary`, `airgibs`, `frags`, `damage`, `aim`, `chat`, `backpacks`,
-`weapon-pickups`, `player-stats`, `shots`, `loc-graph`, `loc-table`,
-`metadata`, `demoinfo`. It also takes a comma-separated list — `-view
-top-kills,airgibs` returns both from a single analysis pass, keyed by view
+`items-summary`, `highlights`, `frags`, `damage`, `aim`, `chat`,
+`backpacks`, `weapon-pickups`, `player-stats`, `shots`, `loc-graph`,
+`loc-table`, `metadata`, `demoinfo`. It also takes a comma-separated list — `-view
+top-kills,highlights` returns both from a single analysis pass, keyed by view
 name. See [`mvd-analytics/README.md`](mvd-analytics/README.md) for the
 per-view knobs and the two places CLI defaults differ from REST.
 
@@ -519,7 +519,13 @@ world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`), opening (schema v51 — each player's
 match-start spawn loc plus the first take of every contested spawner,
-the one-fetch answer to opening-race questions), and playerStats
+the one-fetch answer to opening-race questions), highlights (schema v76
+— the Key-Moments catalogue: every discharge, quadbore, telefrag and
+airgib as one row shape whose `actor` and `victims` each carry what they
+had at that instant — relation, health / armor / stack read one
+millisecond before the event, weapons, powerups, loc — so toplists are a
+sort; alongside it `frags[].cause` marks the discharge / pentagram-deflect
+/ spawnicide prints beneath their ordinary weapon), and playerStats
 (schema v63 — the canonical per-player and per-team statistics row:
 corrected scoreboard, damage, pickup tallies and **possession time**
 (time with each weapon, each armor type, and with **no armor**), each
@@ -705,18 +711,20 @@ per-sample columns: height above the floor (`h`, v24 — traced through the
 map's BSP clip hull, later refined to a bounding-box footprint in v26 and
 to stand players on moving brush models in v27) and liquid state (`lq`,
 v28 — dry / water / slime / lava plus submersion level). v25 adds
-`timelineAnalysis.airgibs` — direct airborne rocket hits surfaced for Key
-Moments — v29–v30 refine its ranking and uncap the list, and v73 gates on
-pre-impact evidence — clear air at every sample of a 100 ms look-back
+the airgib list — direct airborne rocket hits surfaced for Key
+Moments (since v76 it lives at `highlights.airgibs` with the victim's
+state added; the old `timelineAnalysis.airgibs` field is removed) —
+v29–v30 refine its ranking and uncap the
+list, and v73 gates on pre-impact evidence — clear air at every sample of a 100 ms look-back
 window and no grounded reading beside the hit (samples near the damage
 stamp can already carry the rocket's own knockback, so the hit-time sample
 alone reported standing players as airgibs; the look-back is tunable per
-request via `/airgibs?preMs=`). Schema v58
+request via `/highlights?preMs=`). Schema v58
 adds `timelineAnalysis.demoMarkers` — the bookmarks players insert in-game
 with KTX `/demomark`, attributed to the marking player's slot with an
 optional label and a negative `time` for a warmup mark — and a matching
 `demomark` type in the `/events` default set. The `/events` default set
-also carries `airgib` (from `timelineAnalysis.airgibs`) and `pause`
+also carries `airgib` (from `highlights.airgibs`) and `pause`
 (from `streams.global.pauses`, playerless, `detail.durationMs`) — a
 view-layer addition (no schema bump) that puts both on the MCP surface.
 v31 adds the
@@ -1301,6 +1309,17 @@ diff -r /tmp/before /tmp/after
    consuming it. The point boundaries are on the wire as
    `timelineAnalysis.demoMarkers` (`0 round-N`, `match.c:447`); slicing
    the analysis per point is future work.
+
+11. **Highlights see only what the wire named.** A discharge that killed
+    nobody and left no damage-log hit is invisible — the only evidence
+    of a discharge is an obituary or an LG radius hit. A discharge that
+    killed a *teammate* prints one of KTX's cause-less team-kill lines,
+    so it is attributed to the discharge only by coincidence with the
+    discharger's own evidence inside the 500 ms cluster window. A
+    dtTELE2 pentagram deflect ("Satan's power deflects X's telefrag")
+    names nobody, so the surviving pent holder is resolved from the pent
+    intervals and only when exactly one other player held pent at the
+    instant — otherwise the row names no survivor.
 
 ## Reference sources
 

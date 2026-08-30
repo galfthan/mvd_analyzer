@@ -92,6 +92,10 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
 	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
 	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
+	// highlights is null on a demo with no streams / no frag log, which is
+	// the same "nothing to build from" the curated /highlights 422s on; the
+	// raw artifact serves the null like timeline does.
+	"highlights": {extract: func(r *result.Result) (any, error) { return r.Highlights, nil }, echoMs: true},
 	// player-stats is computed for every demo that produced player streams,
 	// so a missing KTX block never 422s (only a stream-less parse does). It routes
 	// through the view so the artifact carries the same KTX overlay the

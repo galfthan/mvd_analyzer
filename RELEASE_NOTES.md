@@ -5,6 +5,87 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (add-new-highlights) — schema v76: highlight catalogue (discharges, quadbores, telefrags, airgibs) with what everyone had
+
+**Toplists of the classic moments — the biggest discharge, the most quad
+thrown away, the most stacked telefrag victim — need one thing the
+pipeline never published: what everyone involved HAD at the instant.**
+The obituary log knew a telefrag happened and the streams knew the
+victim's health, but nothing joined them; discharges were flattened to
+`lg` everywhere (KTX prints them distinctly and the wire carries
+`dtLG_DIS`, but both the obituary table and `DeathTypeToWeapon` emitted
+the shaft's code); quadbores were derivable but derived nowhere.
+
+- **ADDED top-level `highlights`** (`HighlightsResult`, a servable
+  artifact built by the new `highlights` post-processor): four lists —
+  `discharges`, `quadbores`, `telefrags`, `airgibs` — of one row shape,
+  `HighlightEvent`: an `actor`, the `victims`, `enemyKills` /
+  `teamKills`, the damage-log `damage`, the evidence `sources`
+  (`frags` / `damage`), and per kind the `cells` dumped (the discharge
+  deals 35 × cells), the quad `quadHeldMs` and its `quadFrags`, the
+  `teleKind` (`telefrag` / `deflect` / `spawnicide`) and the airgib
+  heights. Every participant is a `HighlightPlayer`: `relation` to the
+  actor (`self` / `team` / `enemy`), `health` / `armor` / `armorType` /
+  `stack`, the tracked `weapons`, the wielded `activeWeapon`, the
+  `powerups`, the `loc`, and `stateSource`.
+- **The snapshot rule.** Vitals are read from the streams **one
+  millisecond before** the event — the obituary and the death-frame stat
+  broadcast share one MVD frame, so the sample at `t` is already the
+  corpse. Verified against KTX's own figure on gameId 212260: the `t − 1`
+  health + armor equals `damage.telefrags[].bounded` on every telefrag
+  (118 + 180 = 298, 52 + 112 = 164, 8 + 0 = 8). Interval fields
+  (weapons, powerups) count when overlapping `[t − 100 ms, t]`, so the
+  quad KTX strips on the death frame still counts. A sample older than
+  the player's latest spawn is the previous life's corpse — the
+  same-frame spawn telefrag, the deflect on spawn, the match-start
+  telefrag with no sample at all — and reads as the spawn state
+  (100 / 0, `stateSource: "spawn"`), which is what `bounded` says there
+  too.
+- **Discharges** join the obituary cause with the damage log's `lg` +
+  `isSplash` / `isSelf` hits — the LG beam is hitscan and cannot hit its
+  shooter, so that is exactly `T_RadiusDamage` (`ktx/src/weapons.c:1208`),
+  and the reconstruction publishes its candidates the same way, so wire
+  and reconstructed logs join alike — clustered per discharger within
+  500 ms. A discharge teamkill prints one of KTX's cause-less team-kill
+  lines, so a same-killer `teamkill` row in the window is folded in as a
+  killed team victim. Every detected discharge is listed, lethal or not.
+- **Telefrags** are every `tele` death — the ordinary kill, the recovered
+  and the unpaired team telefrags, the pentagram deflections and the
+  spawnicides. A deflect row's actor died and the pent holder they died
+  on rides as a victim with `survived: true`: named by the print for
+  dtTELE3, resolved from the pent intervals for dtTELE2 (only when
+  exactly one other player held pent). Rows rank by the killed victim's
+  `stack`.
+- **ADDED on `frags.frags[]` / `frags.unpaired[]`: `cause`** —
+  `discharge` (weapon stays `lg`, exactly as KTX's own per-weapon stats
+  count it), `deflect` or `spawnicide` — **and `deflector`**, the
+  surviving pent holder when the dtTELE3 print names them. The reader's
+  `ObituaryPattern` gains the matching `Cause` field; "accepts X's
+  discharge", which shares its marker with the shaft kill, is promoted
+  off its suffix by the analytics matcher. `byWeapon` and every
+  per-weapon consumer are unchanged.
+- **Reachable everywhere:** `GET /v1/demos/{id}/highlights` (`kinds=`,
+  `players=`, `preMs=` for the airgib look-back; the envelope always
+  carries all four lists; 422 `highlights_unavailable` on a demo with no
+  streams or frag log), `GET /v1/demos/{id}/artifacts/highlights`, the
+  MCP tool **`getHighlights`**, the `/events` kinds **`discharge`**
+  and **`quadbore`** (in the default set like `airgib` — the `frag` event
+  carries only the score delta, so nothing else in the feed says a death
+  was a discharge), `qw-analyze -view highlights`, and four sortable tables
+  on the web Key Moments tab (Discharges, Quadbores, Telefrags, and the
+  Direct Rocket Air Hits table now reading the highlights list with a
+  "victim had" column).
+- **MOVED: the airgib list.** `timelineAnalysis.airgibs` is removed and
+  `GET /airgibs` retired — `highlights.airgibs` is the list's only home
+  (same detector, the victim's state added). `/highlights?kinds=airgib&preMs=`
+  replaces the endpoint with the same `preMs` semantics, `-view airgibs`
+  gives way to `-view highlights`, and the `airgib` `/events` kind reads
+  the new list with unchanged detail keys.
+- Goldens: every full golden moves by the new `highlights` section; the
+  demos carrying discharge / deflect / spawnicide prints also move by
+  `cause`. The golden corpus holds no quadbore — that path is pinned by
+  the synthetic fixture in `view/highlights_test.go`.
+
 ## unreleased (better-ffa-support) — schema v75: the match boundary becomes a Layer-1 event; matchless FFA demos become analyzable; one game-mode descriptor replaces five vocabularies
 
 **KTX servers running `k_matchless 1` (continuous FFA / CTF play) never

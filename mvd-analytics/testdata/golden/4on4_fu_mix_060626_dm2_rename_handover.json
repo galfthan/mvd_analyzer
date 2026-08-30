@@ -1,4 +1,205 @@
 {
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 72,
+          "armorType": "ra",
+          "health": 144,
+          "loc": "Quad.high",
+          "name": "sailorman",
+          "relation": "self",
+          "stack": 216,
+          "stateSource": "stream",
+          "team": "mix",
+          "userId": 39,
+          "weapons": [
+            "rl",
+            "gl",
+            "ssg"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 348.46875,
+        "heightAboveAttacker": 176.75,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 249314,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 50,
+            "killed": true,
+            "loc": "Quad.high",
+            "name": "Hto   (FU)",
+            "relation": "enemy",
+            "stack": 50,
+            "stateSource": "stream",
+            "team": "-fu-",
+            "userId": 34
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 24,
+          "loc": "high.RL",
+          "name": "rgh   (FU)",
+          "relation": "self",
+          "stack": 24,
+          "stateSource": "stream",
+          "team": "-fu-",
+          "userId": 36,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 170.96875,
+        "heightAboveAttacker": 22.125,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 100125,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 150,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 100,
+            "loc": "Quad",
+            "name": "Silenoz",
+            "relation": "enemy",
+            "stack": 250,
+            "stateSource": "stream",
+            "team": "mix",
+            "userId": 33,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 159,
+          "armorType": "ra",
+          "health": 79,
+          "loc": "Quad.high",
+          "name": "rgh   (FU)",
+          "relation": "self",
+          "stack": 238,
+          "stateSource": "stream",
+          "team": "-fu-",
+          "userId": 36,
+          "weapons": [
+            "rl",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 169.46877,
+        "heightAboveAttacker": -12,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 249402,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 72,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 144,
+            "loc": "Quad.high",
+            "name": "sailorman",
+            "relation": "enemy",
+            "stack": 216,
+            "stateSource": "stream",
+            "team": "mix",
+            "userId": 39,
+            "weapons": [
+              "rl",
+              "gl",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 122,
+          "armorType": "ya",
+          "health": 130,
+          "loc": "big.stairs",
+          "name": "(1)rusti (FU)",
+          "powerups": [
+            "quad"
+          ],
+          "relation": "self",
+          "stack": 252,
+          "stateSource": "stream",
+          "team": "-fu-",
+          "userId": 43,
+          "weapons": [
+            "rl",
+            "gl",
+            "ssg"
+          ]
+        },
+        "damage": 440,
+        "enemyKills": 1,
+        "height": 113.21875,
+        "heightAboveAttacker": -2.75,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 866658,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 180,
+            "armorType": "ra",
+            "damage": 440,
+            "health": 190,
+            "killed": true,
+            "loc": "big.stairs",
+            "name": "sailorman",
+            "relation": "enemy",
+            "stack": 370,
+            "stateSource": "stream",
+            "team": "mix",
+            "userId": 39,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "match": {
     "players": [
       {
@@ -246,62 +447,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "sailorman",
-        "attackerTeam": "mix",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 348.46875,
-        "heightAboveAttacker": 176.75,
-        "lethal": true,
-        "loc": "Quad.high",
-        "time": 249314,
-        "victim": "Hto   (FU)",
-        "victimTeam": "-fu-",
-        "victimUserID": 34
-      },
-      {
-        "attacker": "rgh   (FU)",
-        "attackerTeam": "-fu-",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 170.96875,
-        "heightAboveAttacker": 22.125,
-        "loc": "Quad",
-        "time": 100125,
-        "victim": "Silenoz",
-        "victimTeam": "mix",
-        "victimUserID": 33
-      },
-      {
-        "attacker": "rgh   (FU)",
-        "attackerTeam": "-fu-",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 169.46877,
-        "heightAboveAttacker": -12,
-        "loc": "Quad.high",
-        "time": 249402,
-        "victim": "sailorman",
-        "victimTeam": "mix",
-        "victimUserID": 39
-      },
-      {
-        "attacker": "(1)rusti (FU)",
-        "attackerTeam": "-fu-",
-        "attackerUserID": 43,
-        "damage": 440,
-        "height": 113.21875,
-        "heightAboveAttacker": -2.75,
-        "lethal": true,
-        "loc": "big.stairs",
-        "time": 866658,
-        "victim": "sailorman",
-        "victimTeam": "mix",
-        "victimUserID": 39
-      }
-    ],
     "fragStreaks": [
       {
         "duration": 237548,

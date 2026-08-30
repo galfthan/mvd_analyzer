@@ -451,7 +451,11 @@ func NewDefaultRegistry() *Registry {
 	// Aim reads Shots + Streams + Damage — all born with final team labels — and
 	// writes only Result.Aim; fire/position times are already match-relative.
 	r.RegisterPostProcessor(aimPost)
-	r.RegisterPostProcessor(airgibsPost)
+	// The highlight catalogue reads the final frag log, the streams and the
+	// final damage section — every input born
+	// match-relative — runs the airgib detector, and writes only
+	// Result.Highlights.
+	r.RegisterPostProcessor(highlightsPost)
 	r.RegisterPostProcessor(scoreboardStatsPost)
 	r.RegisterPostProcessor(locGraphPost)
 	// The no-match marker stamps the results that came out with no player
@@ -469,11 +473,8 @@ func NewDefaultRegistry() *Registry {
 	// match:final / frags:final, so the DAG runs it after the two fix-up
 	// nodes.
 	r.RegisterPostProcessor(playerStatsPost)
-	// Damage reconstruction registers after airgibs deliberately: that node
-	// keeps binding the raw wire-measured `damage` artifact only —
-	// reconstructed per-hit attribution is not measurement-grade enough to
-	// drive its shot-level verdicts, so its behaviour on old demos (graceful
-	// degradation) is unchanged. player-stats aggregates per-player totals
+	// Damage reconstruction publishes `damage:final`; execution order comes
+	// from the DAG edges, not this list. player-stats aggregates per-player totals
 	// (the figures the reconstruction validates at ~1%), so it binds the
 	// `damage:final` artifact and its damage family carries
 	// src=reconstructed on old demos; aim binds it too, but only to feed the

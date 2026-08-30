@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "75"
+  version: "76"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -40,7 +40,7 @@ info:
     bucket grid carries no time key at all — its axis is implicit
     (`time(i) = start + i*windowMs`); event-scaled sparse lists and
     singleton timestamps use the descriptive key `time`
-    (frag/damage/shot/chat/backpack/weapon-pickup/airgib/timeline entries,
+    (frag/damage/shot/chat/backpack/weapon-pickup/highlight/timeline entries,
     events rows, row-bucket `time`, state-at `time`, item
     `firstTake.time`). The name never encodes the unit —
     `timeUnit`, where present, is a constant `"ms"` self-description echo.
@@ -1033,7 +1033,7 @@ paths:
         Discrete match events (frags, spawns, pickups, powerups, streaks,
         chat, demo markers, …) in one time-ordered list. `detail` is
         polymorphic per event type. Omit `types` for the default set
-        (includes `pickup`, `demomark`, `airgib`, and `pause`).
+        (includes `pickup`, `demomark`, `airgib`, `discharge`, `quadbore`, and `pause`).
 
         Three event types worth spelling out:
 
@@ -1046,6 +1046,14 @@ paths:
           `attackerTeam?`/`victimTeam?`, `height` (victim feet above the floor
           at the hit), `heightAboveAttacker?`, `loc?`, `damage` (raw), and
           `lethal: true` when the hit killed.
+        - **`discharge`** / **`quadbore`** events (in the default set, like
+          `airgib` — the `frag` event carries only the score delta, so
+          nothing else in the feed says a death was a discharge) are the
+          highlight-catalogue kinds: `player` is the actor and `detail`
+          carries `victims` (names), `enemyKills`, `teamKills`,
+          `actorKilled?`, `damage?`, `team?`, plus `cells?` on a discharge
+          and `weapon`, `quadHeldMs`, `quadFrags` on a quadbore. The full
+          rows with every participant's state are `/highlights`.
         - **`pause`** events mark a game-clock freeze segment and carry NO
           `player` (so a `players=` filter excludes them);
           `detail.durationMs` is the real wall-clock ms the pause consumed.
@@ -1814,37 +1822,45 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
-  /v1/demos/{id}/airgibs:
+  /v1/demos/{id}/highlights:
     get:
-      operationId: getAirgibs
+      operationId: getHighlights
       tags: [timeline]
-      summary: Airgib key moments
+      summary: Highlight catalogue (discharges, quadbores, telefrags, airgibs)
       description: >
-        Every direct enemy rocket hit on an airborne victim above the
-        height threshold, sorted by height descending. Empty (not an
-        error) when the map's BSP was not provisioned at parse time. 422
-        `airgibs_unavailable` when the demo has no timeline analysis.
+        The stored highlight catalogue (`highlights`): every LG water
+        discharge, every quadbore (self-kill by own rocket/grenade while
+        holding quad), every telefrag (incl. the pentagram deflections and
+        spawnicides) and every airgib, as four lists of one row shape. Each
+        row carries an `actor`, its `victims`, enemy/team kill counters, the
+        damage-log figure and the evidence `sources`; every participant
+        carries their relation to the actor and their state read one
+        millisecond before the event — health, armor (+ type), stack,
+        weapons, wielded weapon, powerups, loc — so toplists are a
+        client-side sort (discharges by `enemyKills`/`damage`/`cells`,
+        quadbores by `quadHeldMs` ascending against KTX's 30 s quad,
+        telefrags by `victims[0].stack`, airgibs by `heightAboveAttacker`).
 
 
-        Airborne is measured on pre-impact evidence: every position
-        sample in the `preMs` look-back window (default 100 ms) must
-        read clear air, the preceding tick deciding when the window
-        holds no sample (coarse-tick demos), and no sample beside the
-        hit may read ground contact — samples near the damage stamp can
-        already carry the rocket's own knockback, which over-reports
-        height but cannot fake a grounded reading. `preMs=0` drops the
-        pre-hit gate; the response echoes the effective value.
+        All four lists are always present — `[]` when the match had none
+        or `kinds` excluded them; `kinds` echoes the filter. `players` keeps
+        rows whose actor or a victim is named. `preMs` re-runs only the
+        airgib detection. 422
+        `highlights_unavailable` when the demo has no match streams or no
+        frag log to build the catalogue from.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/HighlightKinds"
+        - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/AirgibPreMs"
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
-          description: The airgib list.
+          description: The highlight catalogue.
           headers: *perDemoHeaders
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Airgibs" }
+              schema: { $ref: "#/components/schemas/Highlights" }
         "304": { $ref: "#/components/responses/NotModified" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -2078,6 +2094,7 @@ components:
           - no-match
           - opening
           - player-stats
+          - highlights
           - los
           # artifact-enum:end
     MapName:
@@ -2114,6 +2131,21 @@ components:
       schema:
         type: array
         items: { type: string }
+    HighlightKinds:
+      name: kinds
+      in: query
+      description: >
+        CSV of highlight kinds to keep: discharge, quadbore, telefrag,
+        airgib. Omit for all four. The unrequested lists still come back,
+        empty; the envelope's `kinds` echoes what applied. An unknown kind
+        400s (invalid_param).
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [discharge, quadbore, telefrag, airgib]
     Players:
       name: players
       in: query
@@ -2252,7 +2284,7 @@ components:
         CSV of event types: frag, powerup, streak, spawn, death, weapon,
         item, chat, pickup (the default set), plus the opt-in
         high-frequency / dedicated lenses damage, health, armor, loc,
-        telefrag, stomp. Omit for the default set. An unknown type value
+        telefrag, stomp, discharge, quadbore. Omit for the default set. An unknown type value
         400s (invalid_param) rather than silently matching nothing.
       style: form
       explode: false
@@ -2280,6 +2312,8 @@ components:
             - health
             - armor
             - loc
+            - discharge
+            - quadbore
             # event-type-enum:end
     EntityTypes:
       name: types
@@ -3007,8 +3041,8 @@ components:
       enum:
         # error-code-enum:begin — pinned to the writeError/writeUnavailable call sites by TestOpenAPIErrorCodesCurrent
         - aim_unavailable
-        - airgibs_unavailable
         - artifact_unknown
+        - highlights_unavailable
         - bounded_unavailable
         - damage_unavailable
         - demo_not_found
@@ -4143,6 +4177,13 @@ components:
           items:
             additionalProperties: false
             properties:
+              cause:
+                description: "Sub-cause beneath weapon for the deathtypes KTX prints distinctly but books under an ordinary weapon: discharge (LG water discharge, weapon stays lg), deflect (pentagram telefrag deflection, weapon tele, a suicide), spawnicide (weapon tele, a suicide). Absent on every other row."
+                type: string
+                enum: [discharge, deflect, spawnicide]
+              deflector:
+                description: "On a deflect row whose print names them: the surviving pentagram holder the teleporter died on (KTX dtTELE3). Absent on the dtTELE2 print, which names nobody."
+                type: string
               isSuicide:
                 description: "Suicide frag."
                 type: boolean
@@ -4216,6 +4257,13 @@ components:
           items:
             additionalProperties: false
             properties:
+              cause:
+                description: "Sub-cause beneath weapon (discharge | deflect | spawnicide), as on frags[]; absent on every other row."
+                type: string
+                enum: [discharge, deflect, spawnicide]
+              deflector:
+                description: "The surviving pentagram holder on a deflect row whose print names them (KTX dtTELE3)."
+                type: string
               isSuicide:
                 description: "Suicide frag."
                 type: boolean
@@ -6011,54 +6059,6 @@ components:
         - timeUnit
         - items
       type: object
-    AirgibEvent:
-      additionalProperties: false
-      properties:
-        attacker:
-          description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
-          type: string
-        attackerTeam:
-          description: "Attacker team name."
-          type: string
-        attackerUserID:
-          description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
-          type: integer
-        damage:
-          description: "Raw rocket damage (unbound, incl. overkill)."
-          type: integer
-        height:
-          description: "Victim feet above the floor at the hit, map units."
-          type: number
-        heightAboveAttacker:
-          description: "Victim origin minus shooter origin at the hit, map units (negative = below)."
-          type: number
-        lethal:
-          description: "The hit killed the victim (matching rocket frag within a short window)."
-          type: boolean
-        loc:
-          description: "Nearest named location from the map .loc file."
-          type: string
-        time:
-          description: "Event/sample time, int32 ms since match start."
-          maximum: 2.147483647e+09
-          minimum: -2.147483648e+09
-          type: integer
-        victim:
-          description: "Victim (killed player) name."
-          type: string
-        victimTeam:
-          description: "Victim team name."
-          type: string
-        victimUserID:
-          description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
-          type: integer
-      required:
-        - time
-        - attacker
-        - victim
-        - height
-        - damage
-      type: object
     TopWindows:
       type: object
       additionalProperties: false
@@ -7061,59 +7061,6 @@ components:
     TimelineAnalysis:
       additionalProperties: false
       properties:
-        airgibs:
-          description: "Airborne rocket-hit highlights, sorted by height descending."
-          items:
-            additionalProperties: false
-            properties:
-              attacker:
-                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
-                type: string
-              attackerTeam:
-                description: "Attacker team name."
-                type: string
-              attackerUserID:
-                description: "Attacker UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
-                type: integer
-              damage:
-                description: "Raw rocket damage (unbound, incl. overkill)."
-                type: integer
-              height:
-                description: "Victim feet above the floor at the hit, map units."
-                type: number
-              heightAboveAttacker:
-                description: "Victim origin minus shooter origin at the hit, map units (negative = below)."
-                type: number
-              lethal:
-                description: "The hit killed the victim (matching rocket frag within a short window)."
-                type: boolean
-              loc:
-                description: "Nearest named location from the map .loc file."
-                type: string
-              time:
-                description: "Event/sample time, int32 ms since match start."
-                maximum: 2.147483647e+09
-                minimum: -2.147483648e+09
-                type: integer
-              victim:
-                description: "Victim (killed player) name."
-                type: string
-              victimTeam:
-                description: "Victim team name."
-                type: string
-              victimUserID:
-                description: "Victim UserID (Hub viewer link), resolved at the hit's own instant — the connection that player held then, not their demo-wide id."
-                type: integer
-            required:
-              - time
-              - attacker
-              - victim
-              - height
-              - damage
-            type: object
-          type:
-            - "null"
-            - array
         deathEvents:
           description: "Per-player death events for the frags/deaths drill-down."
           items:
@@ -8434,7 +8381,7 @@ components:
         when present); detail is omitted for spawn/death without a loc
         sample. Event types: airgib, armor, chat, damage, death, demomark,
         frag, health, item, loc, pause, pickup, powerup, spawn, stomp,
-        streak, telefrag, weapon.
+        streak, telefrag, weapon, discharge, quadbore.
       required: [timeUnit, events]
       additionalProperties: false
       properties:
@@ -8494,6 +8441,13 @@ components:
                   heightAboveAttacker: { type: number, description: "airgib victim origin minus shooter origin at the hit (units; negative = victim below shooter); omitted when 0." }
                   lethal: { type: boolean, description: "airgib hit killed the victim (matching rocket frag near the hit)." }
                   durationMs: { type: integer, description: "pause real wall-clock ms consumed (pause events)." }
+                  victims: { type: array, items: { type: string }, description: "discharge/quadbore: names of everyone else the event touched (killed or hurt)." }
+                  enemyKills: { type: integer, description: "discharge/quadbore: enemies killed." }
+                  teamKills: { type: integer, description: "discharge/quadbore: teammates killed." }
+                  actorKilled: { type: boolean, description: "discharge/quadbore: the actor died in the event." }
+                  cells: { type: integer, description: "discharge: the discharger's cells before firing (35 × cells radius damage)." }
+                  quadHeldMs: { type: integer, description: "quadbore: ms since the quad pickup when the actor died." }
+                  quadFrags: { type: integer, description: "quadbore: the actor's kills in that quad run before the bore." }
     BucketsRow:
       additionalProperties: false
       properties:
@@ -9850,23 +9804,93 @@ components:
           description: "Weapon-pickup list."
           type: array
           items: { $ref: "#/components/schemas/WeaponPickup" }
-    Airgibs:
+    HighlightPlayer:
       type: object
       description: >
-        /airgibs body — `{timeUnit, preMs, airgibs}`; airgibs is sorted
-        by height descending and [] on BSP-less maps. `time` is int32 ms
-        (timeUnit is the constant `ms` echo).
-      required: [timeUnit, preMs, airgibs]
+        One participant of a highlight with their state at the instant,
+        read from the per-player streams one millisecond BEFORE the event
+        (the death frame already carries the corpse values).
+      required: [name, relation]
+      additionalProperties: false
+      properties:
+        name: { type: string, description: "Player display name (or the placeholder \"teammate\" for the party an unattributed team-kill print did not name)." }
+        team: { type: string, description: "Team name." }
+        userId: { type: integer, description: "UserID (Hub viewer link) resolved at the event's own instant." }
+        relation:
+          type: string
+          enum: [self, team, enemy]
+          description: "Side relative to the event's actor: self (the actor), team (same team) or enemy. In an individual layout (duel, FFA) every other player is enemy."
+        killed: { type: boolean, description: "Died in this event." }
+        survived: { type: boolean, description: "The pentagram holder a deflected teleporter died on (deflect rows)." }
+        damage: { type: integer, description: "Damage-log figure for this player in the event (raw family); absent without a log. On a telefrag victim: KTX's own armor+health figure (Damage.Telefrags[].bounded) when the demo carries it." }
+        health: { type: integer, description: "Health just before the event. Absent when no stream recorded a value (stateSource absent)." }
+        armor: { type: integer, description: "Armor just before the event." }
+        armorType: { type: string, enum: [ga, ya, ra], description: "Armor type worn; absent when none." }
+        stack: { type: integer, description: "health + armor — the telefrag ranking scalar." }
+        weapons: { type: array, items: { type: string, enum: [rl, lg, gl, ssg, sng] }, description: "Tracked inventory held (the STAT_ITEMS bits the streams track)." }
+        activeWeapon: { type: string, enum: [sg, ssg, ng, sng, gl, rl, lg, axe], description: "The weapon wielded; absent when the wire never said." }
+        powerups: { type: array, items: { type: string, enum: [quad, pent, ring] }, description: "Powerups held." }
+        loc: { type: string, description: "Nearest named location from the map .loc file at the instant." }
+        stateSource:
+          type: string
+          enum: [stream, spawn]
+          description: "Where the vitals came from: stream (the player's own health/armor streams) or spawn (the player had just spawned and the spawn stats had not reached the wire — the streams still read the previous life's corpse — so the vitals are the spawn state 100/0). Absent when there was no stream to read (every vital absent)."
+    HighlightEvent:
+      type: object
+      description: >
+        One highlight. The four kinds share the shape; the kind-specific
+        fields are absent on the kinds they do not apply to.
+      required: [kind, time, actor, enemyKills, teamKills, sources]
+      additionalProperties: false
+      properties:
+        kind: { type: string, enum: [discharge, quadbore, telefrag, airgib], description: "Highlight kind." }
+        time: { type: integer, minimum: -2147483648, maximum: 2147483647, description: "Event instant, int32 ms since match start." }
+        actor:
+          description: "Who did it — the discharger, the player who bored, the teleporter, the rocketeer — with relation self; actor.killed says whether they died in the event."
+          $ref: "#/components/schemas/HighlightPlayer"
+        victims:
+          type: array
+          items: { $ref: "#/components/schemas/HighlightPlayer" }
+          description: "Everyone else the event touched: killed, or (with a damage log) merely hurt, or on a deflect the surviving pentagram holder. Killed rows first, then by damage. Absent when the actor was the only casualty."
+        enemyKills: { type: integer, description: "Killed victims with relation enemy." }
+        teamKills: { type: integer, description: "Killed victims with relation team." }
+        damage: { type: integer, description: "Damage-log total dealt to the victims (raw family); absent without a log or when none was dealt." }
+        sources: { type: array, items: { type: string, enum: [frags, damage] }, description: "Evidence the row rests on: frags (an obituary named it) and/or damage (the damage log carried it, wire or reconstructed)." }
+        cells: { type: integer, description: "discharge: the discharger's cells just before firing — the discharge deals 35 × cells radius damage, so this is its magnitude. Absent when the stream has no sample." }
+        weapon: { type: string, enum: [rl, gl], description: "quadbore: the weapon." }
+        quadHeldMs: { type: integer, description: "quadbore: ms since the quad pickup when the actor died; KTX quad lasts 30 000 ms, so 30000 − quadHeldMs is the quad thrown away." }
+        quadFrags: { type: integer, description: "quadbore: the actor's non-suicide kills between the pickup and the bore." }
+        teleKind: { type: string, enum: [telefrag, deflect, spawnicide], description: "telefrag: telefrag (the actor killed the victim), deflect (the actor teleported onto a pentagram holder and died — KTX dtTELE2/dtTELE3) or spawnicide (dtTELE4)." }
+        height: { type: number, description: "airgib: victim feet above the floor at the hit, map units." }
+        heightAboveAttacker: { type: number, description: "airgib: victim origin minus shooter origin at the hit, map units (negative = below)." }
+    HighlightsResult:
+      type: object
+      description: >
+        The stored `highlights` section — four lists of HighlightEvent, each
+        absent when the match had none of that kind.
+      additionalProperties: false
+      properties:
+        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every LG water discharge with evidence (an obituary or a damage-log LG radius hit), sorted by enemyKills then damage." }
+        quadbores: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every self-kill by own rocket/grenade while holding quad, sorted by quadHeldMs ascending." }
+        telefrags: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every death booked under the tele weapon, sorted by the killed victim's stack descending (deflects / spawnicides last)." }
+        airgibs: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "The airgib list — direct enemy rocket hits on airborne victims — with the victim's state, height-sorted." }
+    Highlights:
+      type: object
+      description: >
+        /highlights body — `{timeUnit, kinds, preMs, discharges, quadbores,
+        telefrags, airgibs}`. All four lists are always present ([] when
+        the match had none of that kind or `kinds` excluded it). `time` is
+        int32 ms (timeUnit is the constant `ms` echo).
+      required: [timeUnit, kinds, preMs, discharges, quadbores, telefrags, airgibs]
       additionalProperties: false
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
-        preMs:
-          description: "Effective pre-hit look-back in ms the list was detected with (default 100; 0 = the pre-hit airborne gate was off)."
-          type: integer
-        airgibs:
-          description: "Airborne rocket-hit highlights, sorted by height descending."
-          type: array
-          items: { $ref: "#/components/schemas/AirgibEvent" }
+        kinds: { type: array, items: { type: string, enum: [discharge, quadbore, telefrag, airgib] }, description: "The kinds the response carries (the kinds filter that applied, or all four)." }
+        preMs: { type: integer, description: "Effective airgib pre-hit look-back in ms the airgibs list was detected with (default 100; 0 = the pre-hit airborne gate was off)." }
+        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Discharges, sorted by enemyKills then damage then time." }
+        quadbores: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Quadbores, sorted by quadHeldMs ascending then time." }
+        telefrags: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Telefrags, sorted by the killed victim's stack descending then time." }
+        airgibs: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Airgibs, height-sorted." }
     Items:
       description: >
         /items body — per-item phase timelines, or per-item take
@@ -10113,6 +10137,16 @@ components:
               description: Event-shaped derived timeline section (null on demos without it).
               oneOf:
                 - $ref: "#/components/schemas/TimelineAnalysis"
+                - type: "null"
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        - type: object
+          required: [highlights, timeUnit]
+          additionalProperties: false
+          properties:
+            highlights:
+              description: The highlight catalogue section (null on demos with no match streams or no frag log).
+              oneOf:
+                - $ref: "#/components/schemas/HighlightsResult"
                 - type: "null"
             timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object

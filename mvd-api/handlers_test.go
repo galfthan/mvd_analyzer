@@ -677,7 +677,7 @@ func TestUnknownParam_Rejected(t *testing.T) {
 		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
 		"streams/projectiles?extra=1", "streams/beams?extra=1",
 		"streams/nails?extra=1", "streams/point-effects?extra=1",
-		"airgibs?extra=1", "los?extra=1",
+		"highlights?extra=1", "los?extra=1",
 		"artifacts/frag?extra=1",
 	}
 	for _, u := range urls {
@@ -1628,107 +1628,6 @@ func TestDemoInfo_Unavailable(t *testing.T) {
 	}
 }
 
-func TestAirgibs(t *testing.T) {
-	r := &result.Result{
-		SchemaVersion: result.CurrentSchemaVersion,
-		TimelineAnalysis: &result.TimelineAnalysisResult{
-			Airgibs: []result.AirgibEvent{{
-				Time: 60000, Attacker: "bps", Victim: "milton", Height: 120, Damage: 110,
-			}},
-		},
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	arr := unitsList(t, body, "airgibs", "ms")
-	if len(arr) != 1 || arr[0]["attacker"] != "bps" {
-		t.Errorf("airgibs = %s; want one bps hit", body)
-	}
-	// The default serves the stored list and says which detection it is.
-	if got := envelopeInt(t, body, "preMs"); got != view.DefaultAirgibPreMs {
-		t.Errorf("preMs = %d; want the default %d (%s)", got, view.DefaultAirgibPreMs, body)
-	}
-}
-
-// A non-default preMs re-runs detection on the stored Result instead of
-// serving the baked list. The fixture is the knockback false positive the
-// pre-hit gate exists for: grounded at t-200, "airborne" at the hit.
-func TestAirgibs_PreMsRecomputes(t *testing.T) {
-	r := &result.Result{
-		SchemaVersion: result.CurrentSchemaVersion,
-		Streams: &result.Streams{Players: []result.PlayerStream{{
-			Name: "milton", Team: "red",
-			Position: &result.PositionTrack{
-				T: []int32{59_800, 60_000}, X: []float32{0, 0}, Y: []float32{0, 0},
-				Z: []float32{319, 620}, H: []float32{0, 303},
-			},
-		}}},
-		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
-			{Time: 60_000, Attacker: "bps", Victim: "milton", Weapon: "rl", Damage: 110},
-		}},
-		TimelineAnalysis: &result.TimelineAnalysisResult{}, // the default detection found nothing
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-
-	// Default: the stored (empty) list, echoed as the default preMs.
-	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
-		t.Errorf("default airgibs = %s; want none (grounded 200ms before the hit)", body)
-	}
-
-	// preMs=0 turns the pre-hit gate off — the legacy hit-time-only rule,
-	// which admits the knockback-contaminated sample.
-	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?preMs=0")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	arr := unitsList(t, body, "airgibs", "ms")
-	if len(arr) != 1 || arr[0]["victim"] != "milton" {
-		t.Errorf("preMs=0 airgibs = %s; want the ungated hit", body)
-	}
-	if got := envelopeInt(t, body, "preMs"); got != 0 {
-		t.Errorf("preMs echo = %d; want 0 (%s)", got, body)
-	}
-
-	// A short look-back still lands on the grounded sample here.
-	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?preMs=150")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
-		t.Errorf("preMs=150 airgibs = %s; want none", body)
-	}
-	if got := envelopeInt(t, body, "preMs"); got != 150 {
-		t.Errorf("preMs echo = %d; want 150 (%s)", got, body)
-	}
-}
-
-func TestAirgibs_PreMsOutOfRange(t *testing.T) {
-	r := &result.Result{
-		SchemaVersion:    result.CurrentSchemaVersion,
-		TimelineAnalysis: &result.TimelineAnalysisResult{},
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-	for _, q := range []string{"preMs=-1", "preMs=1001", "preMs=abc"} {
-		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs?"+q)
-		if status != 400 {
-			t.Errorf("%s: status = %d; want 400 (%s)", q, status, body)
-			continue
-		}
-		if code := errBodyCode(t, body); code != "invalid_param" {
-			t.Errorf("%s: code = %q, want invalid_param", q, code)
-		}
-	}
-}
-
 // envelopeInt reads a top-level integer field off a JSON envelope.
 func envelopeInt(t *testing.T, body []byte, key string) int {
 	t.Helper()
@@ -1760,36 +1659,6 @@ func unitsList(t *testing.T, body []byte, key, wantUnit string) []map[string]any
 		t.Fatalf("unmarshal %q list: %v (%s)", key, err, body)
 	}
 	return arr
-}
-
-func TestAirgibs_EmptyWithoutBSP(t *testing.T) {
-	// TimelineAnalysis present but no airgibs (no clip hull → no heights):
-	// an empty list, not an error.
-	r := &result.Result{
-		SchemaVersion:    result.CurrentSchemaVersion,
-		TimelineAnalysis: &result.TimelineAnalysisResult{},
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
-		t.Errorf("body = %q; want an empty airgibs list", body)
-	}
-}
-
-func TestAirgibs_Unavailable(t *testing.T) {
-	store := &fakeStore{byID: map[string]*result.Result{
-		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no TimelineAnalysis
-	}}
-	srv := newTestServer(t, store)
-	defer srv.Close()
-	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 422 {
-		t.Errorf("status = %d; want 422 (%s)", status, resp)
-	}
 }
 
 func TestShots(t *testing.T) {
@@ -3827,4 +3696,158 @@ func keysOf(m map[string]any) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// highlightsStore is a Result with a stored highlight catalogue: one
+// telefrag, one discharge, one airgib — plus the streams the airgib
+// recompute reads (an airborne victim so preMs=0 re-detects the hit).
+func highlightsStore() *fakeStore {
+	h := int16(118)
+	a := int16(180)
+	stack := 298
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "milton", Team: "red", Position: &result.PositionTrack{
+				T: []int32{59_800, 60_000}, X: []float32{0, 0}, Y: []float32{0, 0},
+				Z: []float32{180, 200}, H: []float32{120, 150},
+			}},
+			{Name: "bps", Team: "blue"},
+		}},
+		Frags: &result.FragResult{Frags: []result.FragEntry{{Time: 20000, Killer: "bps", Victim: "milton", Weapon: "tele"}}},
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+			{Time: 60000, Attacker: "bps", Victim: "milton", Weapon: "rl", Damage: 110},
+		}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{},
+		Highlights: &result.HighlightsResult{
+			Discharges: []result.HighlightEvent{{Kind: "discharge", Time: 1000, Sources: []string{"frags"},
+				Actor: result.HighlightPlayer{Name: "valla", Relation: "self", Killed: true}}},
+			Telefrags: []result.HighlightEvent{{Kind: "telefrag", Time: 20000, TeleKind: "telefrag", EnemyKills: 1, Sources: []string{"frags"},
+				Actor: result.HighlightPlayer{Name: "bps", Team: "blue", Relation: "self"},
+				Victims: []result.HighlightPlayer{{Name: "milton", Team: "red", Relation: "enemy", Killed: true,
+					Health: &h, Armor: &a, ArmorType: "ra", Stack: &stack, Weapons: []string{"rl"}, StateSource: "stream"}}}},
+			Airgibs: []result.HighlightEvent{{Kind: "airgib", Time: 60000, Height: 120, Damage: 110, Sources: []string{"damage"},
+				Actor:   result.HighlightPlayer{Name: "bps", Relation: "self"},
+				Victims: []result.HighlightPlayer{{Name: "milton", Relation: "enemy", Damage: 110}}}},
+		},
+	}
+	return &fakeStore{byID: map[string]*result.Result{"gameId:42": r}}
+}
+
+func highlightsBody(t *testing.T, body []byte) map[string]any {
+	t.Helper()
+	var env map[string]any
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("unmarshal: %v (%s)", err, body)
+	}
+	return env
+}
+
+func TestHighlights(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if env["timeUnit"] != "ms" {
+		t.Errorf("timeUnit = %v", env["timeUnit"])
+	}
+	for _, k := range []string{"discharges", "quadbores", "telefrags", "airgibs"} {
+		if _, ok := env[k].([]any); !ok {
+			t.Errorf("%s missing or not a list: %v", k, env[k])
+		}
+	}
+	if n := len(env["telefrags"].([]any)); n != 1 {
+		t.Errorf("telefrags = %d, want 1", n)
+	}
+	if n := len(env["quadbores"].([]any)); n != 0 {
+		t.Errorf("quadbores = %d, want an empty list", n)
+	}
+	tf := env["telefrags"].([]any)[0].(map[string]any)
+	victim := tf["victims"].([]any)[0].(map[string]any)
+	if victim["stack"] != float64(298) || victim["armorType"] != "ra" || victim["relation"] != "enemy" {
+		t.Errorf("telefrag victim = %v", victim)
+	}
+	if kinds := env["kinds"].([]any); len(kinds) != 4 {
+		t.Errorf("kinds echo = %v, want all four", kinds)
+	}
+	if got := envelopeInt(t, body, "preMs"); got != view.DefaultAirgibPreMs {
+		t.Errorf("preMs = %d; want the default %d", got, view.DefaultAirgibPreMs)
+	}
+}
+
+func TestHighlights_KindsAndPlayersFilter(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?kinds=telefrag")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if len(env["telefrags"].([]any)) != 1 || len(env["discharges"].([]any)) != 0 || len(env["airgibs"].([]any)) != 0 {
+		t.Errorf("kinds=telefrag: %s", body)
+	}
+	if kinds := env["kinds"].([]any); len(kinds) != 1 || kinds[0] != "telefrag" {
+		t.Errorf("kinds echo = %v", kinds)
+	}
+
+	// players= matches a victim as well as the actor.
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?players=valla")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env = highlightsBody(t, body)
+	if len(env["discharges"].([]any)) != 1 || len(env["telefrags"].([]any)) != 0 {
+		t.Errorf("players=valla: %s", body)
+	}
+
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?kinds=bogus")
+	if status != 400 || errBodyCode(t, body) != "invalid_param" {
+		t.Errorf("kinds=bogus: status %d code %q (%s)", status, errBodyCode(t, body), body)
+	}
+	for _, q := range []string{"preMs=-1", "preMs=5000", "preMs=abc"} {
+		body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?"+q)
+		if status != 400 || errBodyCode(t, body) != "invalid_param" {
+			t.Errorf("%s: status %d code %q (%s)", q, status, errBodyCode(t, body), body)
+		}
+	}
+}
+
+// A non-default preMs re-runs the airgib detection on the stored Result
+// and leaves the other lists as stored.
+func TestHighlights_PreMsRecomputesAirgibs(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?preMs=0")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if got := envelopeInt(t, body, "preMs"); got != 0 {
+		t.Errorf("preMs echo = %d, want 0", got)
+	}
+	ag := env["airgibs"].([]any)
+	if len(ag) != 1 {
+		t.Fatalf("recomputed airgibs = %s", body)
+	}
+	if h := ag[0].(map[string]any)["height"]; h != float64(150) {
+		t.Errorf("recomputed airgib height = %v, want 150 (the hit-sample rule), not the stored 120", h)
+	}
+	if len(env["telefrags"].([]any)) != 1 {
+		t.Errorf("stored telefrags must survive the recompute: %s", body)
+	}
+}
+
+func TestHighlights_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no streams, no frag log → no section
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
+	if status != 422 || errBodyCode(t, resp) != "highlights_unavailable" {
+		t.Errorf("status = %d code = %q; want 422 highlights_unavailable (%s)", status, errBodyCode(t, resp), resp)
+	}
 }

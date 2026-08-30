@@ -25501,6 +25501,452 @@
     "killsMeasured": true,
     "totalFrags": 221
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 132,
+          "armorType": "ya",
+          "health": 188,
+          "loc": "high.RL",
+          "name": "wd.char",
+          "relation": "self",
+          "stack": 320,
+          "stateSource": "stream",
+          "team": "wd",
+          "userId": 32,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 373.84003,
+        "heightAboveAttacker": -10.75,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 316528,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 89,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 86,
+            "loc": "Quad.tele",
+            "name": "psy*overon",
+            "relation": "enemy",
+            "stack": 175,
+            "stateSource": "stream",
+            "team": "pys",
+            "userId": 36,
+            "weapons": [
+              "rl",
+              "lg",
+              "gl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": -20,
+          "loc": "high.RL",
+          "name": "wd.dilbert",
+          "relation": "self",
+          "stack": -20,
+          "stateSource": "stream",
+          "team": "pys",
+          "userId": 35,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 267.84375,
+        "heightAboveAttacker": -262,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 328597,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 200,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 100,
+            "loc": "air.ledge",
+            "name": "wd.char",
+            "relation": "enemy",
+            "stack": 300,
+            "stateSource": "stream",
+            "team": "wd",
+            "userId": 32,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 42,
+          "loc": "MH",
+          "name": "psy*overon",
+          "relation": "self",
+          "stack": 42,
+          "stateSource": "stream",
+          "team": "pys",
+          "userId": 36,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 216.59375,
+        "heightAboveAttacker": 47.75,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 193369,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "air.ledge",
+            "name": "wd.cao",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "wd",
+            "userId": 30,
+            "weapons": [
+              "rl",
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 27,
+          "health": 89,
+          "loc": "yard",
+          "name": "psy*overon",
+          "relation": "self",
+          "stack": 116,
+          "stateSource": "stream",
+          "team": "pys",
+          "userId": 36,
+          "weapons": [
+            "rl",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 201.46875,
+        "heightAboveAttacker": 107.625,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 287207,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 0,
+            "damage": 110,
+            "health": 41,
+            "killed": true,
+            "loc": "Quad.ledge",
+            "name": "wd.char",
+            "relation": "enemy",
+            "stack": 41,
+            "stateSource": "stream",
+            "team": "wd",
+            "userId": 32,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 114,
+          "armorType": "ya",
+          "health": 147,
+          "loc": "MH",
+          "name": "psy*overon",
+          "relation": "self",
+          "stack": 261,
+          "stateSource": "stream",
+          "team": "pys",
+          "userId": 36,
+          "weapons": [
+            "rl",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 158.77754,
+        "heightAboveAttacker": 118.125,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 30532,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 38,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 85,
+            "killed": true,
+            "loc": "Quad.ledge",
+            "name": "wd.char",
+            "relation": "enemy",
+            "stack": 123,
+            "stateSource": "stream",
+            "team": "wd",
+            "userId": 32,
+            "weapons": [
+              "rl",
+              "lg",
+              "sng"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 54,
+          "loc": "high.RL",
+          "name": "wd.char",
+          "relation": "self",
+          "stack": 54,
+          "stateSource": "stream",
+          "team": "wd",
+          "userId": 32,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 152.96875,
+        "heightAboveAttacker": -74.125,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 285209,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 68,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 16,
+            "killed": true,
+            "loc": "high.RL",
+            "name": "wd.dilbert",
+            "relation": "enemy",
+            "stack": 84,
+            "stateSource": "stream",
+            "team": "pys",
+            "userId": 35,
+            "weapons": [
+              "rl",
+              "lg",
+              "sng"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 29,
+          "loc": "Quad.ledge",
+          "name": "wd.cao",
+          "relation": "self",
+          "stack": 29,
+          "stateSource": "stream",
+          "team": "wd",
+          "userId": 30,
+          "weapons": [
+            "rl",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 127.71876,
+        "heightAboveAttacker": -138.375,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 207283,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "Quad.ledge",
+            "name": "wd.dilbert",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "pys",
+            "userId": 35
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 8,
+          "loc": "yard",
+          "name": "wd.cao",
+          "relation": "self",
+          "stack": 8,
+          "stateSource": "stream",
+          "team": "wd",
+          "userId": 30,
+          "weapons": [
+            "rl",
+            "lg",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 106.96504,
+        "heightAboveAttacker": 138.875,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 464738,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 150,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 100,
+            "loc": "yard",
+            "name": "psy*overon",
+            "relation": "enemy",
+            "stack": 250,
+            "stateSource": "stream",
+            "team": "pys",
+            "userId": 36,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ],
+    "quadbores": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 1,
+          "armorType": "ra",
+          "damage": 130,
+          "health": 100,
+          "killed": true,
+          "loc": "air.ledge",
+          "name": "wd.cao",
+          "powerups": [
+            "quad"
+          ],
+          "relation": "self",
+          "stack": 101,
+          "stateSource": "stream",
+          "team": "wd",
+          "userId": 30,
+          "weapons": [
+            "rl",
+            "lg",
+            "gl"
+          ]
+        },
+        "enemyKills": 1,
+        "kind": "quadbore",
+        "quadFrags": 4,
+        "quadHeldMs": 19133,
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 509492,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 0,
+            "health": -99,
+            "killed": true,
+            "loc": "high.RL",
+            "name": "psy*overon",
+            "relation": "enemy",
+            "stack": -99,
+            "stateSource": "stream",
+            "team": "pys",
+            "userId": 36,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ],
+        "weapon": "rl"
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -39487,7 +39933,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -85070,117 +85516,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "wd.char",
-        "attackerTeam": "wd",
-        "attackerUserID": 32,
-        "damage": 110,
-        "height": 373.84003,
-        "heightAboveAttacker": -10.75,
-        "loc": "Quad.tele",
-        "time": 316528,
-        "victim": "psy*overon",
-        "victimTeam": "pys",
-        "victimUserID": 36
-      },
-      {
-        "attacker": "wd.dilbert",
-        "attackerTeam": "pys",
-        "attackerUserID": 35,
-        "damage": 110,
-        "height": 267.84375,
-        "heightAboveAttacker": -262,
-        "loc": "air.ledge",
-        "time": 328597,
-        "victim": "wd.char",
-        "victimTeam": "wd",
-        "victimUserID": 32
-      },
-      {
-        "attacker": "psy*overon",
-        "attackerTeam": "pys",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 216.59375,
-        "heightAboveAttacker": 47.75,
-        "lethal": true,
-        "loc": "air.ledge",
-        "time": 193369,
-        "victim": "wd.cao",
-        "victimTeam": "wd",
-        "victimUserID": 30
-      },
-      {
-        "attacker": "psy*overon",
-        "attackerTeam": "pys",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 201.46875,
-        "heightAboveAttacker": 107.625,
-        "lethal": true,
-        "loc": "Quad.ledge",
-        "time": 287207,
-        "victim": "wd.char",
-        "victimTeam": "wd",
-        "victimUserID": 32
-      },
-      {
-        "attacker": "psy*overon",
-        "attackerTeam": "pys",
-        "attackerUserID": 36,
-        "damage": 110,
-        "height": 158.77754,
-        "heightAboveAttacker": 118.125,
-        "lethal": true,
-        "loc": "Quad.ledge",
-        "time": 30532,
-        "victim": "wd.char",
-        "victimTeam": "wd",
-        "victimUserID": 32
-      },
-      {
-        "attacker": "wd.char",
-        "attackerTeam": "wd",
-        "attackerUserID": 32,
-        "damage": 110,
-        "height": 152.96875,
-        "heightAboveAttacker": -74.125,
-        "lethal": true,
-        "loc": "high.RL",
-        "time": 285209,
-        "victim": "wd.dilbert",
-        "victimTeam": "pys",
-        "victimUserID": 35
-      },
-      {
-        "attacker": "wd.cao",
-        "attackerTeam": "wd",
-        "attackerUserID": 30,
-        "damage": 110,
-        "height": 127.71876,
-        "heightAboveAttacker": -138.375,
-        "lethal": true,
-        "loc": "Quad.ledge",
-        "time": 207283,
-        "victim": "wd.dilbert",
-        "victimTeam": "pys",
-        "victimUserID": 35
-      },
-      {
-        "attacker": "wd.cao",
-        "attackerTeam": "wd",
-        "attackerUserID": 30,
-        "damage": 110,
-        "height": 106.96504,
-        "heightAboveAttacker": 138.875,
-        "loc": "yard",
-        "time": 464738,
-        "victim": "psy*overon",
-        "victimTeam": "pys",
-        "victimUserID": 36
-      }
-    ],
     "deathEvents": [
       {
         "player": "wd.dilbert",

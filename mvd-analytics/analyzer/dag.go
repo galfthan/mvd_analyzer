@@ -110,7 +110,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster:final"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},
 	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster:final", "metadata"}, resultKey: "timelineAnalysis",
-		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, airgibs, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
+		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
 	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster:final"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
 	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster:final", "metadata"}, resultKey: "damage",
@@ -175,10 +175,11 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "aim",
 		desc:      "Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build). Binds `damage:final` so a reconstructed section is visible: the MEASURED counters still gate on damage.source == ktx, and reconstructed damage feeds only the separate `weapons[].recon` hit tier.",
 	},
-	"airgibsPost": {
-		name: "airgibs", mutates: true,
-		requires: []string{"demoinfo", "frag", "timeline", "damage:final"},
-		desc:     "Folds the Key-Moments airgib list into the timeline: direct enemy rocket hits whose victim reads clear air (>= 96 units above floor) at every pre-impact sample of the look-back window (default 100 ms; the preceding tick decides on coarse-tick tracks) with no grounded reading beside the hit. Binds `damage:final` so pre-instrumentation demos get airgibs from the reconstructed damage log — recon direct hits are geometric (explosion-to-victim under 48 units), which is the fidelity the verdict needs.",
+	"highlightsPost": {
+		name:      "highlights",
+		requires:  []string{"demoinfo", "timeline", "frags:final", "damage:final"},
+		resultKey: "highlights",
+		desc:      "Highlight catalogue for Key Moments: every discharge (LG fired in water — obituary-named or a damage-log LG radius hit, clustered per discharger with the cells dumped), quadbore (self-kill by own rocket/grenade while holding quad, with the quad time held and its frags), telefrag (every `tele` death incl. the pentagram deflections and spawnicides, the killed victim's stack as the ranking scalar) and the airgib list (the view.ComputeAirgibs detector, run in here) — one row shape, each participant carrying relation to the actor, health/armor/stack read one millisecond before the event, weapons, powerups and loc. Binds `frags:final` (recovered team telefrags) and `damage:final` (the discharge/telefrag joins and the airgib detector read wire and reconstructed logs alike — pre-instrumentation demos get airgibs from the reconstruction's geometric direct hits). Absent when the demo has no streams or frag log.",
 	},
 	"scoreboardStatsPost": {
 		name: "match-final", mutates: true,
@@ -235,7 +236,7 @@ var postNodeMeta = map[string]nodeMeta{
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
 		provides: []string{"damage:final"},
-		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats, airgibs and aim all bind `damage:final`: player-stats' damage family and airgib detection ride the reconstruction on old demos (src=reconstructed), while aim's measured counters still gate on Damage.Source == ktx and the reconstruction feeds only its separate `recon` hit tier (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats, highlights and aim all bind `damage:final`: player-stats' damage family and the highlights' airgib detection ride the reconstruction on old demos (src=reconstructed), while aim's measured counters still gate on Damage.Source == ktx and the reconstruction feeds only its separate `recon` hit tier (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
 	},
 }
 

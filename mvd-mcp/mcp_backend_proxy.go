@@ -740,6 +740,20 @@ func (p *proxyBackend) GetTopKills(ctx context.Context, in GetTopKillsInput) (an
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
+func (p *proxyBackend) GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/highlights")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("kinds", in.Kinds)
+	q.csv("players", in.Players)
+	// preMs=0 is a real value (gate off), so unset stays out of the query
+	// and an explicit 0 is forwarded — the pointer convention.
+	q.intp("preMs", in.PreMs)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
 func (p *proxyBackend) GetLives(ctx context.Context, in GetLivesInput) (any, error) {
 	path, err := demoPath(in.DemoID, "/lives")
 	if err != nil {

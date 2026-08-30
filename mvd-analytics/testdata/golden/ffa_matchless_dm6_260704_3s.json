@@ -6,6 +6,7 @@
     "killsMeasured": true,
     "totalFrags": 0
   },
+  "highlights": {},
   "items": {
     "items": [
       {
@@ -1314,7 +1315,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "streams": {
     "global": {
       "dateMarkers": [

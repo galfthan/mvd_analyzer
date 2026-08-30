@@ -61077,6 +61077,366 @@
     "killsMeasured": true,
     "totalFrags": 461
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 95,
+          "armorType": "ya",
+          "health": 84,
+          "loc": "cathedral.YA",
+          "name": "anni",
+          "relation": "self",
+          "stack": 179,
+          "stateSource": "stream",
+          "team": "'\u003e\u003c\u003e",
+          "userId": 12,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 187.21875,
+        "heightAboveAttacker": -4.75,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 400368,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 150,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 100,
+            "loc": "cathedral.YA",
+            "name": "nexus",
+            "relation": "enemy",
+            "stack": 250,
+            "stateSource": "stream",
+            "team": "'tbg",
+            "userId": 10
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 200,
+          "armorType": "ra",
+          "health": 71,
+          "loc": "RA",
+          "name": "anni",
+          "relation": "self",
+          "stack": 271,
+          "stateSource": "stream",
+          "team": "'\u003e\u003c\u003e",
+          "userId": 12,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 182.21875,
+        "heightAboveAttacker": -6.75,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 867790,
+        "victims": [
+          {
+            "activeWeapon": "axe",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "cemetary.Ring",
+            "name": ".N3ophyt3.",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "'tbg",
+            "userId": 13
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 65,
+          "armorType": "ya",
+          "health": 66,
+          "loc": "cathedral.YA",
+          "name": "anni",
+          "relation": "self",
+          "stack": 131,
+          "stateSource": "stream",
+          "team": "'\u003e\u003c\u003e",
+          "userId": 12,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 160.09375,
+        "heightAboveAttacker": -31.875,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 404185,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "cathedral.YA",
+            "name": "paniagua",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "'tbg",
+            "userId": 14
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 12,
+          "loc": "Quad",
+          "name": "biggz",
+          "relation": "self",
+          "stack": 12,
+          "stateSource": "stream",
+          "team": "'tbg",
+          "userId": 16,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 153.46875,
+        "heightAboveAttacker": 115.25,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 430798,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "Quad.high",
+            "name": "anni",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "'\u003e\u003c\u003e",
+            "userId": 12
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 102,
+          "armorType": "ra",
+          "health": 100,
+          "loc": "Quad",
+          "name": ".N3ophyt3.",
+          "relation": "self",
+          "stack": 202,
+          "stateSource": "stream",
+          "team": "'tbg",
+          "userId": 13,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 143.59375,
+        "heightAboveAttacker": 143.625,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 728932,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 1,
+            "killed": true,
+            "loc": "Quad.high",
+            "name": "ocoini",
+            "relation": "enemy",
+            "stack": 1,
+            "stateSource": "stream",
+            "team": "'\u003e\u003c\u003e",
+            "userId": 8
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 150,
+          "armorType": "ya",
+          "health": 100,
+          "loc": "Quad.ledge",
+          "name": "paniagua",
+          "relation": "self",
+          "stack": 250,
+          "stateSource": "stream",
+          "team": "'tbg",
+          "userId": 14,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 124.21875,
+        "heightAboveAttacker": 124.25,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 472101,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 72,
+            "killed": true,
+            "loc": "tower",
+            "name": "gore",
+            "relation": "enemy",
+            "stack": 72,
+            "stateSource": "stream",
+            "team": "'\u003e\u003c\u003e",
+            "userId": 5
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 193,
+          "armorType": "ra",
+          "health": 100,
+          "loc": "Quad",
+          "name": "nexus",
+          "relation": "self",
+          "stack": 293,
+          "stateSource": "stream",
+          "team": "'tbg",
+          "userId": 10,
+          "weapons": [
+            "rl",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 120.09375,
+        "heightAboveAttacker": 120.125,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 969348,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 84,
+            "killed": true,
+            "loc": "Quad.high",
+            "name": "ocoini",
+            "relation": "enemy",
+            "stack": 84,
+            "stateSource": "stream",
+            "team": "'\u003e\u003c\u003e",
+            "userId": 8
+          }
+        ]
+      }
+    ],
+    "telefrags": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 76,
+          "loc": "tower.RL",
+          "name": "DobeZz",
+          "relation": "self",
+          "stack": 76,
+          "stateSource": "stream",
+          "team": "'\u003e\u003c\u003e",
+          "userId": 15
+        },
+        "damage": 100,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 240978,
+        "victims": [
+          {
+            "activeWeapon": "axe",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "tower.RL",
+            "name": ".N3ophyt3.",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "'tbg",
+            "userId": 13
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -93442,7 +93802,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -234840,105 +235200,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "anni",
-        "attackerTeam": "'\u003e\u003c\u003e",
-        "attackerUserID": 12,
-        "damage": 110,
-        "height": 187.21875,
-        "heightAboveAttacker": -4.75,
-        "loc": "cathedral.YA",
-        "time": 400368,
-        "victim": "nexus",
-        "victimTeam": "'tbg",
-        "victimUserID": 10
-      },
-      {
-        "attacker": "anni",
-        "attackerTeam": "'\u003e\u003c\u003e",
-        "attackerUserID": 12,
-        "damage": 110,
-        "height": 182.21875,
-        "heightAboveAttacker": -6.75,
-        "lethal": true,
-        "loc": "cemetary.Ring",
-        "time": 867790,
-        "victim": ".N3ophyt3.",
-        "victimTeam": "'tbg",
-        "victimUserID": 13
-      },
-      {
-        "attacker": "anni",
-        "attackerTeam": "'\u003e\u003c\u003e",
-        "attackerUserID": 12,
-        "damage": 110,
-        "height": 160.09375,
-        "heightAboveAttacker": -31.875,
-        "lethal": true,
-        "loc": "cathedral.YA",
-        "time": 404185,
-        "victim": "paniagua",
-        "victimTeam": "'tbg",
-        "victimUserID": 14
-      },
-      {
-        "attacker": "biggz",
-        "attackerTeam": "'tbg",
-        "attackerUserID": 16,
-        "damage": 110,
-        "height": 153.46875,
-        "heightAboveAttacker": 115.25,
-        "lethal": true,
-        "loc": "Quad.high",
-        "time": 430798,
-        "victim": "anni",
-        "victimTeam": "'\u003e\u003c\u003e",
-        "victimUserID": 12
-      },
-      {
-        "attacker": ".N3ophyt3.",
-        "attackerTeam": "'tbg",
-        "attackerUserID": 13,
-        "damage": 110,
-        "height": 143.59375,
-        "heightAboveAttacker": 143.625,
-        "lethal": true,
-        "loc": "Quad.high",
-        "time": 728932,
-        "victim": "ocoini",
-        "victimTeam": "'\u003e\u003c\u003e",
-        "victimUserID": 8
-      },
-      {
-        "attacker": "paniagua",
-        "attackerTeam": "'tbg",
-        "attackerUserID": 14,
-        "damage": 110,
-        "height": 124.21875,
-        "heightAboveAttacker": 124.25,
-        "lethal": true,
-        "loc": "tower",
-        "time": 472101,
-        "victim": "gore",
-        "victimTeam": "'\u003e\u003c\u003e",
-        "victimUserID": 5
-      },
-      {
-        "attacker": "nexus",
-        "attackerTeam": "'tbg",
-        "attackerUserID": 10,
-        "damage": 110,
-        "height": 120.09375,
-        "heightAboveAttacker": 120.125,
-        "lethal": true,
-        "loc": "Quad.high",
-        "time": 969348,
-        "victim": "ocoini",
-        "victimTeam": "'\u003e\u003c\u003e",
-        "victimUserID": 8
-      }
-    ],
     "deathEvents": [
       {
         "player": "nexus",

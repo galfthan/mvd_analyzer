@@ -59700,6 +59700,7 @@
         "weapon": "sg"
       },
       {
+        "cause": "discharge",
         "isSuicide": true,
         "killer": "sCorp",
         "time": 360043,
@@ -59707,12 +59708,14 @@
         "weapon": "lg"
       },
       {
+        "cause": "discharge",
         "killer": "sCorp",
         "time": 360043,
         "victim": "clox",
         "weapon": "lg"
       },
       {
+        "cause": "discharge",
         "killer": "sCorp",
         "time": 360043,
         "victim": "marksuzu",
@@ -60234,6 +60237,7 @@
         "weapon": "sg"
       },
       {
+        "cause": "deflect",
         "isSuicide": true,
         "killer": "nlk",
         "time": 621093,
@@ -60241,6 +60245,7 @@
         "weapon": "tele"
       },
       {
+        "cause": "deflect",
         "isSuicide": true,
         "killer": "nlk",
         "time": 623222,
@@ -61037,12 +61042,14 @@
         "weapon": "sg"
       },
       {
+        "cause": "discharge",
         "killer": "clox",
         "time": 1049053,
         "victim": "sCorp",
         "weapon": "lg"
       },
       {
+        "cause": "discharge",
         "isSuicide": true,
         "killer": "clox",
         "time": 1049053,
@@ -61300,6 +61307,583 @@
     ],
     "killsMeasured": true,
     "totalFrags": 383
+  },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 95,
+          "armorType": "ra",
+          "health": 75,
+          "loc": "RA.low",
+          "name": "marksuzu",
+          "relation": "self",
+          "stack": 170,
+          "stateSource": "stream",
+          "team": "oSaMs",
+          "userId": 8,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 107.34375,
+        "heightAboveAttacker": 100.375,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 951468,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 84,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 105,
+            "loc": "RA.entry",
+            "name": "sCorp",
+            "relation": "enemy",
+            "stack": 189,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 3,
+            "weapons": [
+              "rl",
+              "ssg",
+              "sng"
+            ]
+          }
+        ]
+      }
+    ],
+    "discharges": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "damage": 367,
+          "health": 24,
+          "killed": true,
+          "loc": "water",
+          "name": "sCorp",
+          "relation": "self",
+          "stack": 24,
+          "stateSource": "stream",
+          "team": ".ra.",
+          "userId": 3,
+          "weapons": [
+            "rl",
+            "lg"
+          ]
+        },
+        "cells": 21,
+        "damage": 1195,
+        "enemyKills": 2,
+        "kind": "discharge",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 360043,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 662,
+            "health": 67,
+            "killed": true,
+            "loc": "water",
+            "name": "marksuzu",
+            "relation": "enemy",
+            "stack": 67,
+            "stateSource": "stream",
+            "team": "oSaMs",
+            "userId": 8
+          },
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 533,
+            "health": 56,
+            "killed": true,
+            "loc": "bridge.low",
+            "name": "clox",
+            "relation": "enemy",
+            "stack": 56,
+            "stateSource": "stream",
+            "team": "oSaMs",
+            "userId": 9
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 13,
+          "armorType": "ya",
+          "damage": 839,
+          "health": 17,
+          "killed": true,
+          "loc": "water",
+          "name": "clox",
+          "relation": "self",
+          "stack": 30,
+          "stateSource": "stream",
+          "team": "oSaMs",
+          "userId": 9,
+          "weapons": [
+            "lg"
+          ]
+        },
+        "cells": 48,
+        "damage": 1552,
+        "enemyKills": 1,
+        "kind": "discharge",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 1049053,
+        "victims": [
+          {
+            "activeWeapon": "ssg",
+            "armor": 147,
+            "armorType": "ya",
+            "damage": 1552,
+            "health": 71,
+            "killed": true,
+            "loc": "water",
+            "name": "sCorp",
+            "relation": "enemy",
+            "stack": 218,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 3,
+            "weapons": [
+              "ssg"
+            ]
+          }
+        ]
+      }
+    ],
+    "telefrags": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "SNG.tele",
+          "name": "lakso",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "oSaMs",
+          "userId": 11
+        },
+        "damage": 298,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 348808,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 180,
+            "armorType": "ra",
+            "damage": 298,
+            "health": 118,
+            "killed": true,
+            "loc": "SNG.tele",
+            "name": "nlk",
+            "relation": "enemy",
+            "stack": 298,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 1,
+            "weapons": [
+              "rl",
+              "gl",
+              "sng"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "apa",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "oSaMs",
+          "userId": 7
+        },
+        "damage": 164,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 471865,
+        "victims": [
+          {
+            "activeWeapon": "axe",
+            "armor": 112,
+            "armorType": "ra",
+            "damage": 164,
+            "health": 52,
+            "killed": true,
+            "loc": "RL",
+            "name": "doberman",
+            "relation": "enemy",
+            "stack": 164,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 10,
+            "weapons": [
+              "lg",
+              "gl",
+              "sng"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "clox",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "oSaMs",
+          "userId": 9
+        },
+        "damage": 100,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 0,
+        "victims": [
+          {
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "RL",
+            "name": "doberman",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "spawn",
+            "team": ".ra.",
+            "userId": 10
+          }
+        ]
+      },
+      {
+        "actor": {
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "doberman",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": ".ra.",
+          "userId": 10
+        },
+        "damage": 100,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 0,
+        "victims": [
+          {
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "RL",
+            "name": "nlk",
+            "relation": "team",
+            "stack": 100,
+            "stateSource": "spawn",
+            "team": ".ra.",
+            "userId": 1
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "marksuzu",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "oSaMs",
+          "userId": 8
+        },
+        "damage": 100,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 791733,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "RL",
+            "name": "clox",
+            "relation": "team",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "oSaMs",
+            "userId": 9
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "lakso",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "oSaMs",
+          "userId": 11
+        },
+        "damage": 100,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 947663,
+        "victims": [
+          {
+            "activeWeapon": "axe",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "RL",
+            "name": "doberman",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 10
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "SNG.tele",
+          "name": "nlk",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": ".ra.",
+          "userId": 1
+        },
+        "damage": 100,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 1186894,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "SNG.tele",
+            "name": "sCorp",
+            "relation": "team",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": ".ra.",
+            "userId": 3
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "RL",
+          "name": "doberman",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": ".ra.",
+          "userId": 10
+        },
+        "damage": 8,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 676899,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 8,
+            "health": 8,
+            "killed": true,
+            "loc": "RL",
+            "name": "clox",
+            "relation": "enemy",
+            "stack": 8,
+            "stateSource": "stream",
+            "team": "oSaMs",
+            "userId": 9
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": -4,
+          "killed": true,
+          "loc": "RL",
+          "name": "nlk",
+          "relation": "self",
+          "stack": -4,
+          "stateSource": "stream",
+          "team": ".ra.",
+          "userId": 1
+        },
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags"
+        ],
+        "teamKills": 0,
+        "teleKind": "deflect",
+        "time": 621093,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "health": 62,
+            "loc": "RL",
+            "name": "lakso",
+            "powerups": [
+              "pent"
+            ],
+            "relation": "enemy",
+            "stack": 62,
+            "stateSource": "stream",
+            "survived": true,
+            "team": "oSaMs",
+            "userId": 11
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": -99,
+          "killed": true,
+          "loc": "RL",
+          "name": "nlk",
+          "relation": "self",
+          "stack": -99,
+          "stateSource": "stream",
+          "team": ".ra.",
+          "userId": 1
+        },
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags"
+        ],
+        "teamKills": 0,
+        "teleKind": "deflect",
+        "time": 623222,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "health": 62,
+            "loc": "RL",
+            "name": "lakso",
+            "powerups": [
+              "pent"
+            ],
+            "relation": "enemy",
+            "stack": 62,
+            "stateSource": "stream",
+            "survived": true,
+            "team": "oSaMs",
+            "userId": 11
+          }
+        ]
+      }
+    ]
   },
   "items": {
     "items": [
@@ -92880,7 +93464,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -260197,21 +260781,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "marksuzu",
-        "attackerTeam": "oSaMs",
-        "attackerUserID": 8,
-        "damage": 110,
-        "height": 107.34375,
-        "heightAboveAttacker": 100.375,
-        "loc": "RA.entry",
-        "time": 951468,
-        "victim": "sCorp",
-        "victimTeam": ".ra.",
-        "victimUserID": 3
-      }
-    ],
     "deathEvents": [
       {
         "player": "nlk",

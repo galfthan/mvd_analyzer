@@ -10,7 +10,7 @@ import (
 // same amount when dropping pre-match samples — a column left at its
 // old length ships values attributed to the wrong sample, and the
 // consumers that guard on len(col) == len(T) (BuildLocGraph,
-// view.RegionControl, airgibsPost) silently skip the player.
+// view.RegionControl, view.ComputeAirgibs) silently skip the player.
 func TestShiftAndFilterPosition_TrimsAllColumns(t *testing.T) {
 	pt := &result.PositionTrack{
 		T:   []int32{100, 200, 300, 400},

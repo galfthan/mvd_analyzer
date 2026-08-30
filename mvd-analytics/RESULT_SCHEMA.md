@@ -35,6 +35,7 @@ analyzer are also covered there.
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
 | Streams | `streams` | *Streams | Native-rate per-player + global state-change streams (position/view/health/armor/ammo/items tracks, movers, and the opt-in spatial weapon streams — see the Streams section). |
+| Highlights | `highlights` | *HighlightsResult, omitempty | v76 — the highlight catalogue: `discharges`, `quadbores`, `telefrags`, `airgibs` — four lists of `HighlightEvent`, each row carrying **what everyone involved had** (relation to the actor, health / armor / stack, weapons, powerups, loc) so any consumer can rank them. Absent when the demo has no streams or no frag log; see [HighlightsResult](#highlightsresult-highlights). |
 | NoMatch | `noMatch` | *NoMatchResult, omitempty | v74 — the explicit marker on a result that carries **no analyzable match**: present exactly when `streams` is absent, naming why (`midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` / `noPlayRecorded` / `demoUnreadable`) with the wire evidence behind the verdict. It is a fact about the DEMO, not a pipeline failure — the distinction from `errors` below. See [NoMatchResult](#nomatchresult-nomatch-schema-v74). |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). Includes analyzer `Finalize` failures, an `"event stream aborted: …"` entry when the event source returned a non-EOF error mid-demo (a truncated or corrupt stream — a clean end of demo does **not** appear here), and a `"region control: …"` entry when the region-control post-pass failed. A non-empty `errors` on an otherwise-populated result means the analysis is partial but usable. |
 | ParseWarnings | `parseWarnings` | *ParseWarnings, omitempty | v72 — the READER's census of wire data it could not decode (unknown `svc_*` / temp-entity / hidden-message types, payloads that failed to parse). A **distinct signal from `errors`**: sub-fatal, parse-level, and about events that never reached an analyzer at all. Omitted on a clean parse, which is the normal case. See [ParseWarnings](#parsewarnings-parsewarnings-schema-v72). |
@@ -251,6 +252,8 @@ nothing — the opposite of what the flag means.
 | Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `axe`, `hook`, `rail`, `tele`, `stomp`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`/`explobox`, plus `unknown`/`suicide`/`teamkill` for obituaries whose phrasing hides the weapon; the closed set is `view.fragWeaponVocab`) |
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
+| Cause | `cause` | string (omitempty; v76) — the obituary's **sub-cause beneath `weapon`** for the deathtypes KTX prints distinctly but books under an ordinary weapon: `discharge` (an LG water discharge — `weapon` stays `lg`, exactly as KTX's own per-weapon stats count it: the six self prints `ktx/src/client.c:5292-5325` and the two kill prints `:5645-5660`, one of which — "accepts X's discharge" — shares its marker with the shaft kill and is promoted off its suffix by the analytics matcher), `deflect` (the pentagram telefrag deflections dtTELE2 `:5219` / dtTELE3 `:5228` — `weapon` `tele`, `isSuicide`: the teleporter died) and `spawnicide` (dtTELE4 `:5240-5261`, `weapon` `tele`, `isSuicide`). Empty on every other row; `byWeapon` is unchanged. |
+| Deflector | `deflector` | string (omitempty; v76) — on a `cause: "deflect"` row, the surviving pentagram holder when the print names them: the dtTELE3 line "X was telefragged by **Y**'s Satan's power". The dtTELE2 print names nobody, so the field is empty there even though a pent holder existed (the highlights section resolves them from the pent intervals). |
 
 `teamkill` is a **cause-less** placeholder, not the cause of every
 teamkill. KTX's team branch tests three deathtypes by name before it
@@ -2064,7 +2067,6 @@ read the streams' times, so they sit next to them.
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
 | DemoMarkers | `demoMarkers` | []DemoMarkerEvent (player-inserted `/demomark` bookmarks) |
-| Airgibs | `airgibs` | []AirgibEvent (top airborne rocket hits) |
 | LocationData | `locationData` | []MapLocation — one anchor point per loc name (the medoid of that name's `.loc` points) |
 | LocTable | `locTable` | []string (interned loc names; index 0 = ""). `Streams.Players[].Loc[].V` indexes into this. |
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID). Per **session**, not per wire slot — see [Player userids](#player-userids-schema-v66). |
@@ -2158,85 +2160,14 @@ deduplicated.
 
 ### AirgibEvent
 
-`{ time, attacker, attackerTeam, attackerUserID, victim, victimTeam,
-victimUserID, height, heightAboveAttacker, loc, damage, lethal }`. One
-record per direct
-enemy rocket hit landed on an airborne victim (an "airgib"). `height` is
-the victim's feet above the floor at the hit (`PositionTrack.H` units);
-`heightAboveAttacker` is the victim's origin minus the
-shooter's at the hit — the vertical gap the rocket climbed, negative
-when the victim was below the shooter, `0`/absent when the shooter had
-no position sample near the hit (a genuine dead-level hit also reads
-0); `loc` is the victim's loc there. `lethal` is whether the hit
-killed (a
-matching rocket frag near the hit — a highlight heuristic, see below).
-`attackerUserID` is the one to track for the Hub viewer link (shooter
-perspective). Both are resolved **at the hit's own instant** — the userid of
-the connection that player held then, not their demo-wide id — falling back
-to `playerUserIDs` for a name the session table does not carry. See
-[Player userids](#player-userids-schema-v66).
-
-Detection is **`view.ComputeAirgibs`**, a pure function of the assembled
-`Result` — the per-hit damage log (`Damage.Events`), the streams'
-`PositionTrack.H` column, the frag log, the per-stream session tables and
-the loc table, all on one match-relative clock. A post-processor bakes the
-**default-options** run into the stored `Result`; because the inputs are all
-published, the same function re-runs per request with a caller-tuned
-look-back (`/airgibs?preMs=`, see below), which the stored list cannot
-express.
-
-A hit qualifies when `weapon == "rl"` and it is a **direct
-hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
-world), and the victim reads **clear air** on pre-impact evidence
-(schema v73): every position sample in the look-back window
-`[hit − preMs, hit − 40 ms]` (default **100 ms**) is ≥ 96 units (≈ two
-player models) above the floor, and **no sample beside the hit reads
-ground contact**. The gate rests on which readings can be trusted for
-what: KTX writes the damage message inline in `T_Damage`, and measured
-over 410 direct rocket hits the stamp lands in the same wire frame as
-the first knockback-visible position sample 82% of the time, a frame
-early 12%, and up to two frames (+28 ms) late 6% — so samples within
-40 ms of the stamp may already carry the rocket's own knockback.
-Knockback contamination is one-sided: it can *over*-report height (a
-standing victim blasted off the dm2 `func_train` read 303 units of air
-at the stamp) but cannot fake a grounded reading — so high readings
-near the stamp are ignored, while a grounded one vetoes (a victim who
-fell and *landed* just before the rocket). When the window holds no
-sample within 60 ms of its start — an old demo whose tick cadence
-exceeds the window, or a recording hole — the **preceding tick** (the
-sample carried forward at the window start, up to 250 ms older) decides
-instead; a sample just before a populated window is deliberately NOT
-consulted, so a victim who left a high ledge right after the window
-opened still counts. The 100 ms default is an aesthetic choice, not a
-physics bound: floor-relative height is a step function at ledge edges,
-so a longer window measures time-since-the-edge rather than hang time
-and drops genuinely spectacular ledge-drop hits (a 200 ms window
-measurably lost 300+-unit events from the golden corpus). A `NoFloor`
-sample never counts as airborne. Reported `height`, `loc` and
-`heightAboveAttacker` come from the latest **pre-impact** sample — the
-victim as the rocket found them — not from the possibly
-knockback-contaminated hit-frame sample.
-
-Both damage sources participate (schema v73): the `airgibs` DAG node binds
-`damage:final`, so pre-instrumentation demos get airgibs from the
-**reconstructed** damage log — damagerecon's direct-vs-splash split is
-geometric (direct = the `TE_EXPLOSION` / projectile endpoint within 48
-units of the victim) and its timestamps frame-accurate, which is the
-fidelity this verdict needs. `damage.source` says which evidence a demo's
-list rests on.
-
-Every qualifying hit is emitted (uncapped —
-the ≥ 96 threshold already bounds the list), ordered by `height`
-descending; the web
-view re-sorts client-side. mvd-api's `/airgibs` serves this stored list at
-the default `preMs=100` and recomputes for any other value in `0..1000`
-(`preMs=0` = no pre-hit gate, the pre-v73 rule), echoing the effective value
-as `preMs` on the response envelope. **Empty when the map has no clip hull** (no
-`PositionTrack.H` to read — same BSP provisioning as the
-visibility-aware loc filter). The `lethal` window can over-attribute on a
-rare back-to-back double-rocket exchange (two rockets, same
-attacker→victim, within the window) — fine for a highlight, not an exact
-killing-blow flag.
+Since schema v76 the airgib rows live at
+[`highlights.airgibs`](#highlightsresult-highlights) as `HighlightEvent`
+rows — `timelineAnalysis.airgibs` is removed, and `GET /airgibs` is
+retired in favour of `/highlights?kinds=airgib&preMs=` (same `preMs`
+semantics). `AirgibEvent` remains only as the detector's —
+`view.ComputeAirgibs`' — internal output shape, never serialized. The
+detection rules and the `preMs` knob are documented under
+[Airgib detection](#airgib-detection-viewcomputeairgibs).
 
 ### Player userids (schema v66)
 
@@ -2249,7 +2180,7 @@ Five surfaces publish a hub userid — the `?track=<userId>` parameter of a
 | `fragStreaks[].playerUserID` | the session holding the slot at the streak |
 | `powerupEvents[].playerUserID` | the session holding the slot when the run began |
 | `demoMarkers[].playerUserID` | the session holding the slot at the mark |
-| `airgibs[].attackerUserID` / `.victimUserID` | the session each player held at the hit |
+| `highlights.*[].actor.userId` / `.victims[].userId` | the session each participant held at the event |
 
 A userid identifies one **connection**, not a person: mvdsv hands them out
 from a rotating pool (`SV_GenerateUserID`, `mvdsv/src/sv_main.c:538-556`)
@@ -3366,13 +3297,28 @@ family, so cross-check its figures against `detail.bounded`, not
 The default set also includes `airgib` and `pause` (view-layer change,
 no schema bump — they surface existing Result data on the MCP-reachable
 event stream). An `airgib` event is a direct enemy rocket hit on an
-airborne victim (from `timelineAnalysis.airgibs`): `player` is the
+airborne victim (from `highlights.airgibs`): `player` is the
 attacker and `detail{ victim, height, damage, attackerTeam?, victimTeam?,
 heightAboveAttacker?, loc?, lethal? }` (`lethal` omitted when false). A
 `pause` event is a game-clock freeze segment (from
 `streams.global.pauses`): it has **no** `player` — so a `players=` filter
 excludes it — and carries `detail{ durationMs }` (the real wall-clock ms
 the pause consumed).
+
+The `discharge` / `quadbore` events (v76, view-layer) are the
+[highlights](#highlightsresult-highlights) kinds — one event per
+`highlights.discharges[]` / `highlights.quadbores[]` row. In the default
+set like `airgib`: the `frag` event carries only the score delta, so
+nothing else in the feed says a death was a discharge.
+`player` is the actor (the discharger / the player who bored) and
+`detail{ victims[], enemyKills, teamKills, actorKilled?, damage?, cells?,
+weapon?, quadHeldMs, quadFrags, team? }`: `victims` is every victim's
+name (killed or merely hurt — read the highlights row for the split),
+`actorKilled` is present only when the actor died, `damage` only when
+the damage log dealt some, `cells` only on a discharge with a cells
+sample, `weapon` / `quadHeldMs` / `quadFrags` only on a quadbore, `team`
+the actor's team when known. A `players=` filter matches the actor or
+any victim.
 
 #### StreamSlice
 
@@ -4766,6 +4712,240 @@ that DO produce streams: **zero** controls carry a marker.
 directly (200 with a `null` body value on a demo that holds a match —
 that null is the answer).
 
+## HighlightsResult (`highlights`)
+
+Defined in `result/highlights.go` (schema v76). The Key-Moments highlight
+catalogue: every **discharge**, **quadbore**, **telefrag** and **airgib**
+the match produced, one list per kind, every row carrying what everyone
+involved had at that instant — so a consumer builds "biggest discharge",
+"most stacked telefrag victim", "most quad thrown away" by sorting, with
+no second pass over the streams. Built once by the `highlights`
+post-processor (`analyzer/highlights.go`, a servable artifact:
+`GET /v1/demos/{id}/artifacts/highlights`) from the final frag log
+(`frags:final`, recovered team telefrags included), the per-player
+streams and the damage section in its final form — the airgib detector
+(`view.ComputeAirgibs`) runs inside the compute;
+`view.ComputeHighlights` is the pure function behind it and
+`view.FilterHighlights` the `kinds=` / `players=` selection the REST
+endpoint applies.
+
+**Absent vs empty.** The section is **absent** (nil) when there is
+nothing to build from — no `streams` (no match), no `frags`, or no
+`timelineAnalysis` — and `view.Highlights` reports that as unavailable
+(`/highlights` → 422 `highlights_unavailable`). A **present** section
+with empty lists is a measured zero: the match had none of that kind.
+Each list is `omitempty` in the stored JSON; the `/highlights` envelope
+always carries all four keys as arrays.
+
+| Field | JSON key | Type |
+|---|---|---|
+| Discharges | `discharges` | []HighlightEvent (omitempty) — every LG water discharge with evidence (see below) |
+| Quadbores | `quadbores` | []HighlightEvent (omitempty) — every self-kill by own rocket/grenade while holding quad |
+| Telefrags | `telefrags` | []HighlightEvent (omitempty) — every death booked under the `tele` weapon |
+| Airgibs | `airgibs` | []HighlightEvent (omitempty) — the airgib list ([detection](#airgib-detection-viewcomputeairgibs)), with the victim's state |
+
+### HighlightEvent
+
+One shape for all four kinds, so a consumer renders one row type. The
+kind-specific fields are omitted on the kinds they do not apply to.
+
+| Field | JSON key | Type |
+|---|---|---|
+| Kind | `kind` | string: `discharge` \| `quadbore` \| `telefrag` \| `airgib` |
+| Time | `time` | int32 match-relative ms — the obituary / damage instant |
+| Actor | `actor` | HighlightPlayer — who did it: the discharger, the player who bored, the teleporter, the rocketeer. `relation` is `self`; `killed` says whether they died in the event (a discharge need not kill its shooter; a quadbore and a deflect always do) |
+| Victims | `victims` | []HighlightPlayer (omitempty) — everyone else the event touched: killed (`killed`), merely hurt when a damage log exists (`damage` > 0, `killed` false), or on a pentagram deflect the pent holder the actor died on (`survived`). Ordered killed-first, then by damage, then by name |
+| EnemyKills | `enemyKills` | int — killed victims with `relation: enemy` (always present, 0 included) |
+| TeamKills | `teamKills` | int — killed victims with `relation: team`. The actor's own death is `actor.killed`, never a kill |
+| Damage | `damage` | int (omitempty) — damage-log total dealt to the victims (raw family); 0 without a log |
+| Sources | `sources` | []string — the evidence the row rests on, in fixed order: `frags` (an obituary named it) and/or `damage` (the damage log carried it). A discharge can come from either alone; the other kinds always carry `frags` |
+| Cells | `cells` | *int16 (omitempty; discharge) — the discharger's cell count just before firing. The discharge deals `35 × cells` radius damage (`ktx/src/weapons.c:1208`), so this is the magnitude. Absent when the cells stream has no sample |
+| Weapon | `weapon` | string (omitempty; quadbore) — `rl` \| `gl` |
+| QuadHeldMs | `quadHeldMs` | int32 (omitempty; quadbore) — how long the quad had been held at the death; subtract from the mode's quad duration (30 s in KTX) for the time thrown away |
+| QuadFrags | `quadFrags` | int (omitempty; quadbore) — the actor's non-suicide kills between the quad pickup and the bore |
+| TeleKind | `teleKind` | string (omitempty; telefrag) — `telefrag` (the actor killed the victim), `deflect` (the actor teleported onto a pentagram holder and died — KTX dtTELE2 / dtTELE3), `spawnicide` (dtTELE4) |
+| Height | `height` | float32 (omitempty; airgib) — victim height above the floor at the hit ([detection](#airgib-detection-viewcomputeairgibs)) |
+| HeightAboveAttacker | `heightAboveAttacker` | float32 (omitempty; airgib) — victim origin minus attacker origin (z) |
+
+### HighlightPlayer
+
+One participant with their state at the event's instant.
+
+| Field | JSON key | Type |
+|---|---|---|
+| Name | `name` | string — the frag log's / streams' name. The literal `teammate` is the frag log's placeholder for a party a team-kill print did not name (see [FragResult.unpaired](#fragresultunpaired)); such a row has identity fields only |
+| Team | `team` | string (omitempty) — the stream's team label |
+| UserID | `userId` | int (omitempty) — the connection live at the instant, from the per-stream session table |
+| Relation | `relation` | string — `self` (the actor) \| `team` (same team as the actor, or a print that asserted a team kill) \| `enemy`. In an individual layout (duel, FFA — every player their own team) every other player is `enemy` |
+| Killed | `killed` | bool (omitempty) — died in this event |
+| Survived | `survived` | bool (omitempty) — the pentagram holder a deflected teleporter died on |
+| Damage | `damage` | int (omitempty) — the damage-log figure for this player in the event; on a telefrag victim, KTX's own `Damage.Telefrags[].bounded` (armor + health) when the demo carries it — a cross-check on the snapshot |
+| Health | `health` | *int16 (omitempty) — vitals just before the event (see the snapshot rule). Absent, with the others, only when the player has no stream |
+| Armor | `armor` | *int16 (omitempty) |
+| ArmorType | `armorType` | string (omitempty) — `ga` \| `ya` \| `ra`; empty when no armor |
+| Stack | `stack` | *int (omitempty) — `health + armor`, the telefrag ranking scalar |
+| Weapons | `weapons` | []string (omitempty) — tracked inventory held: the subset of `rl`, `lg`, `gl`, `ssg`, `sng` (the STAT_ITEMS bits the streams track) |
+| ActiveWeapon | `activeWeapon` | string (omitempty) — the wielded weapon (`sg` … `lg`, `axe`), empty when the wire never said |
+| Powerups | `powerups` | []string (omitempty) — the subset of `quad`, `pent`, `ring` held |
+| Loc | `loc` | string (omitempty) — loc name at the instant (an airgib victim carries the detector's pre-impact loc) |
+| StateSource | `stateSource` | string (omitempty) — where the vitals came from: `stream` (read from the player's own streams), `spawn` (the player had just spawned and the spawn stats had not reached the wire; the vitals are the spawn state 100 / 0), or empty (no stream — every vital absent) |
+
+### The snapshot rule
+
+Every `HighlightPlayer` is read from `streams.players[]` **just before**
+the event, not at it:
+
+- **Value streams** (`h`, `a`, `at`, `cl`, `aw`) are read at `t − 1 ms`.
+  The obituary and the death-frame stat broadcast share one MVD frame, so
+  the sample AT `t` is already the corpse (every telefrag victim on gameId
+  212260 carries a `-99` health sample at the frag time); one millisecond
+  earlier is the last pre-hit value. Verified against KTX's own figure:
+  the `t − 1` health + armor equals `damage.telefrags[].bounded` on every
+  telefrag of that corpus demo (118 + 180 = 298, 52 + 112 = 164, 8 + 0 = 8).
+- **Interval streams** (weapons, powerups) count as held when an interval
+  overlaps `[t − 100 ms, t]`. KTX strips the quad on the death frame, so a
+  quad that ends AT `t` still counts; the tolerance is tight on purpose —
+  a rocket landing after the quad expired deals normal damage and is no
+  quadbore.
+- **Stale-life guard.** If the `t − 1` health sample is older than the
+  player's latest spawn at or before `t` (`sp`), or there is no sample at
+  all (the match-start telefrags at `t = 0`), the sample is the previous
+  life's corpse value: the player has just spawned and the spawn stats
+  have not been written yet — the same situation the damage analyzer
+  reconstructs for its telefrag bound. The row reads `health 100`,
+  `armor 0`, `stateSource: "spawn"`; the interval fields stay as read
+  (they are current). Verified on the same demo: the two spawn deflects
+  (`t − 1` reads −4 / −99 with a spawn after the sample) and the
+  832 ms-after-spawn telefrag (sample at the spawn instant, not stale)
+  both resolve to 100, matching `bounded`.
+
+### Detection per kind
+
+- **Discharge.** Evidence is any of: an obituary with `cause:
+  "discharge"` (the discharger's own death print, or a "drains X's
+  batteries" / "accepts X's discharge" kill), or a damage-log hit with
+  `weapon: "lg"` and `isSplash` or `isSelf` — the LG beam is hitscan,
+  never splash, and cannot hit its own shooter, so that is exactly the
+  discharge (KTX fires it through `T_RadiusDamage`, `ktx/src/weapons.c:1208`;
+  the reconstruction publishes its discharge candidates the same way, so
+  wire and reconstructed logs join alike). Evidence is clustered **per
+  discharger within 500 ms** of the first item — one server frame in
+  truth, but the print and the damage stamp can straddle an MVD frame —
+  into one event: `time` the earliest evidence, `cells` the discharger's
+  cells at `t − 1`, `actor.killed` when a suicide print exists,
+  `actor.damage` the self hit, victims the union of the damage-log
+  victims (with `damage`) and the obituary victims (`killed`). A
+  discharge that kills a **teammate** prints one of KTX's cause-less
+  team-kill lines (`ktx/src/client.c:5386-5408`; only dtTELE1 / dtSQUISH
+  keep their cause in the team branch), so those victims are linkable
+  only by coincidence: a same-killer `teamkill` row inside the cluster
+  window is folded in as a killed team victim (a paired row names the
+  victim; an [unpaired](#fragresultunpaired) one keeps the `teammate`
+  placeholder). A discharge that hurt nobody and left no print is not
+  observable. Order: `enemyKills` desc, `damage` desc, `time`.
+- **Quadbore.** A frag-log suicide with `weapon` `rl` or `gl` whose
+  player has a quad interval overlapping `[t − 100, t]`. `quadHeldMs = t −
+  interval start`; `quadFrags` the player's non-suicide kills in
+  `[start, t)`; `actor.damage` the largest `isSelf` damage-log row of the
+  same weapon in `[t − 500, t]`; `victims` the other players this player
+  killed with the same weapon within ±100 ms (the same rocket took them
+  too). Order: `quadHeldMs` asc (most quad thrown away first), `time`.
+- **Telefrag.** Every frag-log row with `weapon: "tele"` — `frags.frags[]`
+  (recovered team telefrags included) plus the `tele` rows of
+  `frags.unpaired[]`, whose killer is the `teammate` placeholder (the
+  death is on the wire; only the teleporter's name is not). `teleKind`
+  is the row's `cause` (`""` → `telefrag`). Actor = the teleporter; the
+  killed victim's `relation` is `team` whenever the print asserted a team
+  kill. On a **deflect** the actor died (`actor.killed`, no killed
+  victim) and the pentagram holder rides as a victim with `survived:
+  true`: named by the print for dtTELE3 (`frags[].deflector`), resolved
+  for dtTELE2 as the ONE other player holding pent in `[t − 100, t]` —
+  pent is single-instance on every stock map, so when zero or several
+  qualify nobody is named rather than guessed. When
+  `damage.telefrags[]` has the same pair within ±200 ms, its `bounded` is
+  copied onto the victim's `damage` and `sources` gains `damage`. Order:
+  the killed victim's `stack` desc (rows with none — deflects,
+  spawnicides — last), `time`.
+- **Airgib.** The `view.ComputeAirgibs` run (default look-back; a
+  `/highlights?preMs=` request re-runs it with the caller's) wrapped row
+  for row: actor = attacker, one victim with `killed = lethal`, `damage`,
+  the detector's pre-impact `loc`, plus `height` / `heightAboveAttacker`.
+  Same order as the detector (height-sorted).
+
+### Airgib detection (`view.ComputeAirgibs`)
+
+One row per direct enemy rocket hit landed on an airborne victim (an
+"airgib"). `height` is the victim's feet above the floor at the hit
+(`PositionTrack.H` units); `heightAboveAttacker` is the victim's origin
+minus the shooter's at the hit — the vertical gap the rocket climbed,
+negative when the victim was below the shooter, `0`/absent when the
+shooter had no position sample near the hit (a genuine dead-level hit
+also reads 0); the victim row's `loc` is the detector's pre-impact loc.
+The victim's `killed` is the lethality heuristic: a matching rocket frag
+near the hit — it can over-attribute on a rare back-to-back
+double-rocket exchange (two rockets, same attacker→victim, within the
+window), fine for a highlight, not an exact killing-blow flag. The
+`actor.userId` / `victims[].userId` are resolved **at the hit's own
+instant** — see [Player userids](#player-userids-schema-v66).
+
+Detection is **`view.ComputeAirgibs`**, a pure function of the assembled
+`Result` — the per-hit damage log (`Damage.Events`), the streams'
+`PositionTrack.H` column, the frag log, the per-stream session tables and
+the loc table, all on one match-relative clock. The `highlights`
+post-processor bakes the **default-options** run into the stored
+`Result`; because the inputs are all published, the same function re-runs
+per request with a caller-tuned look-back (`/highlights?preMs=`), which
+the stored list cannot express.
+
+A hit qualifies when `weapon == "rl"` and it is a **direct
+hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
+world), and the victim reads **clear air** on pre-impact evidence
+(schema v73): every position sample in the look-back window
+`[hit − preMs, hit − 40 ms]` (default **100 ms**) is ≥ 96 units (≈ two
+player models) above the floor, and **no sample beside the hit reads
+ground contact**. The gate rests on which readings can be trusted for
+what: KTX writes the damage message inline in `T_Damage`, and measured
+over 410 direct rocket hits the stamp lands in the same wire frame as
+the first knockback-visible position sample 82% of the time, a frame
+early 12%, and up to two frames (+28 ms) late 6% — so samples within
+40 ms of the stamp may already carry the rocket's own knockback.
+Knockback contamination is one-sided: it can *over*-report height (a
+standing victim blasted off the dm2 `func_train` read 303 units of air
+at the stamp) but cannot fake a grounded reading — so high readings
+near the stamp are ignored, while a grounded one vetoes (a victim who
+fell and *landed* just before the rocket). When the window holds no
+sample within 60 ms of its start — an old demo whose tick cadence
+exceeds the window, or a recording hole — the **preceding tick** (the
+sample carried forward at the window start, up to 250 ms older) decides
+instead; a sample just before a populated window is deliberately NOT
+consulted, so a victim who left a high ledge right after the window
+opened still counts. The 100 ms default is an aesthetic choice, not a
+physics bound: floor-relative height is a step function at ledge edges,
+so a longer window measures time-since-the-edge rather than hang time
+and drops genuinely spectacular ledge-drop hits (a 200 ms window
+measurably lost 300+-unit events from the golden corpus). A `NoFloor`
+sample never counts as airborne. Reported `height`, `loc` and
+`heightAboveAttacker` come from the latest **pre-impact** sample — the
+victim as the rocket found them — not from the possibly
+knockback-contaminated hit-frame sample.
+
+Both damage sources participate (schema v73): the `highlights` DAG node
+binds `damage:final`, so pre-instrumentation demos get airgibs from the
+**reconstructed** damage log — damagerecon's direct-vs-splash split is
+geometric (direct = the `TE_EXPLOSION` / projectile endpoint within 48
+units of the victim) and its timestamps frame-accurate, which is the
+fidelity this verdict needs. `damage.source` says which evidence a demo's
+list rests on.
+
+Every qualifying hit is emitted (uncapped — the ≥ 96 threshold already
+bounds the list), ordered by `height` descending; the web view re-sorts
+client-side. mvd-api's `/highlights` serves the stored list at the
+default `preMs=100` and recomputes the airgib list for any other value in
+`0..1000` (`preMs=0` = no pre-hit gate, the pre-v73 rule), echoing the
+effective value as `preMs` on the envelope. **Empty when the map has no
+clip hull** (no `PositionTrack.H` to read — same BSP provisioning as the
+visibility-aware loc filter).
+
 ## ParseWarnings (`parseWarnings`)
 
 Schema v72. The MVD reader's own census of what it could **not** read
@@ -4889,6 +5069,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v76 | **The highlight catalogue: discharges, quadbores, telefrags and airgibs as one stored section, each row carrying what everyone involved had.** New top-level **`highlights`** ([HighlightsResult](#highlightsresult-highlights)): four lists of `HighlightEvent` — `discharges`, `quadbores`, `telefrags`, `airgibs` — sharing one shape (an `actor`, the `victims`, `enemyKills` / `teamKills`, the damage-log `damage`, the evidence `sources`, and per kind the `cells` dumped, the quad `quadHeldMs` / `quadFrags`, the `teleKind`, the airgib heights). Every participant is a `HighlightPlayer`: `relation` to the actor, `health` / `armor` / `armorType` / `stack` read from the streams **one millisecond before** the event (the death frame already carries the corpse; verified equal to KTX's own `damage.telefrags[].bounded` on every corpus telefrag — 118 + 180 = 298, 52 + 112 = 164, 8 + 0 = 8), the tracked `weapons`, the wielded `activeWeapon`, the `powerups` and the `loc`; a sample older than the player's latest spawn is the previous life's and reads as the spawn state (`stateSource: "spawn"`). Discharges join the obituary cause with the damage log's `lg` + `isSplash` / `isSelf` hits (wire and reconstructed alike), clustered per discharger within 500 ms, with KTX's cause-less team-kill prints folded in by coincidence; a pentagram deflect names the pent holder the teleporter died on (`survived: true`). Built by the `highlights` post-processor (a servable artifact) from `frags:final`, the streams and `damage:final`, the airgib detector running inside the compute; absent when the demo has no streams or no frag log. Served at **`GET /v1/demos/{id}/highlights`** (`kinds=`, `players=`, `preMs=` for the airgib look-back), as the MCP tool **`getHighlights`**, as the default-set `/events` kinds **`discharge`** / **`quadbore`**, and as `qw-analyze -view highlights`. **`frags.frags[]` / `frags.unpaired[]` gain `cause`** — `discharge` (weapon stays `lg`, as KTX's own per-weapon stats count it), `deflect` (dtTELE2 / dtTELE3, weapon `tele`, a suicide) or `spawnicide` (dtTELE4) — and **`deflector`**, the surviving pentagram holder when the dtTELE3 print names them; `byWeapon` is unchanged. **MOVED:** the airgib list — `timelineAnalysis.airgibs` is REMOVED and `GET /airgibs` retired; `highlights.airgibs` (the victim's state added) is the list's only home, `/highlights?kinds=airgib&preMs=` replaces the endpoint with the same `preMs` semantics, `-view airgibs` gives way to `-view highlights`, and the `airgib` `/events` kind reads the new list with unchanged detail keys. Every full golden moves by the new section, and the demos carrying discharge / deflect / spawnicide prints by `cause`. |
 | v75 | **The match boundary becomes a Layer-1 event, and KTX matchless servers become analyzable at all.** New on `streams.global`: **`matchStartSignal`** (`ktx-matchstart` \| `print` \| `matchdate` \| `status`), naming which WIRE SIGNAL declared the match start; republished on `/overview` as `timing.matchStartSignal`. It is not `matchStartSource`, which names where the wall-clock VALUE came from — the two vocabularies share the token `matchdate` and answer different questions. The pipeline used to key the whole match boundary on one broadcast line, and a KTX server running `k_matchless 1` (continuous FFA / CTF play, no ready-up, no countdown) never prints it: `ktx/src/match.c:1294-1297` gates `"The match has begun!"` on `!k_matchLess`. Such a demo detected no match start, so it produced no `streams` and therefore no buckets / damage / `playerStats` / `locGraph` / aim, and — because the parser's obituary-death corroborator is gated on the same verdict — zero deaths on a demo full of frags. The reader now emits one **`MatchStartEvent`** per demo (`mvd-reader/parser/matchstart.go`) at the FIRST of four signals to reach the wire: the line-initial `matchdate:` broadcast (`match.c:1291`), a print matching `MatchStartPatterns` (`match.c:1296`), the `//ktx matchstart` stuffcmd (`match.c:1372`, STUFFCMD_DEMOONLY, no cvar gate at all) or a serverinfo `status` update moving to a running clock from a value that was not one (`match.c:1337`). `StartMatch()` emits the first three in the SAME server frame on modern KTX, so the match-start TIME does not move on any demo that already had one — verified byte-for-byte over the golden corpus and over a 1 500-demo healthy archive control (`.reports/nomatch-marker/recensus-v75-healthy-1500.csv`). What changed is which demos have one: re-running the 138 demos the archive sweep marked `matchStartUnannounced`, **all 138** now detect a start and return a full result — 104 on `matchdate`, 34 on the `status` transition alone (which includes every one of the 24 `fortress` and 8 `ctf` demos, whose mods write their own running clock into the key); per-demo output in `.reports/nomatch-marker/recensus-v75-unannounced-138.csv`. That reason keeps its name and now means "the server moved `status` to a running clock and still no analyzable match came out"; it is `plan-archive-features.md` lead 8 stage (b) for the KTX half. Layer 2 stopped re-scanning prints for the start: `MatchTimingDetector.OnPrint` is now the match-END half only, `OnMatchStart` latches the event, and `statusNamesRunningGame` moved to Layer 1 as `events.StatusNamesRunningGame` — the duplication between the parser's gate and the analyzers' is what let the two layers disagree on matchless demos in the first place. One fix rides along, exposed by the new matchless corpus entries: `timelineAnalysis.fragEvents` no longer carries the scoreboard zeroing `SV_DropClient` broadcasts when a player quits AFTER the match ended (`mvdsv/src/sv_main.c:419-428`) — the timeline recorded frag updates on "started" alone and never on "not ended", and the `Vacated` handler that drops that phantom sits inside the match window, so a post-intermission quit contributed a negative frag dated past `matchEnd`. It needs a recording that runs past match end, which is normal on a matchless server. **The same version also gives the pipeline one game mode.** New: **`match.gameMode`** (`canonical` / `teamBased` / `rounds` / `submodes[]` / `sources`, republished on `/overview` as `gameMode`), **`match.players[].rawTeam`**, **`demoInfo.deathmatch`** and **`demoInfo.teamplay`** (KTX's `dm` / `tp`, parsed since v1 and dropped until now), plus the new `match.sources.teams` value **`individual`**. It replaces five unrelated mode vocabularies and four hand-written "is this a solo mode" tables that disagreed with each other. The verdict that matters is `teamBased`, which mirrors KTX's own `tp_num()` gate (`(isTeam() || isCTF() || coop) ? teamplay : 0`, `g_utils.c:1586-1588`): when it is false the match is laid out INDIVIDUALLY — `match.teams` one row per player, every `match.players[].team` equal to the player's own name, `playerStats.teams` absent, region control withheld above two participants — which is the layout duels already produced, so the `team === name` shape test identifies it with no mode string. In FFA a userinfo `team` tag is clan decoration (KTX forces `teamplay 0`, `world.c:1652-1655`): on `ffa_1[dm2]` three of eight players wear `red`, and reading the tag as a side flagged **34 of 211 kills as team kills**, dropped those three from each other's aim enemy sets and summed them into pseudo-teams. Team kills, team damage, the aim enemy set, the scoreboard team rows, the `playerStats` team aggregate and the region-control layout all read the descriptor now; `//finalscores` is no longer adopted as a team list where it names the top-two PLAYERS. Finally, a player↔spectator transition (mvdsv `join` / `observe`, `sv_user.c:2680-2830` — same slot, same userid, the mod's `ClientDisconnect` run first) now ends the occupancy like a drop, so the leaver's announced score is kept (`ffa_1[tox]`: nexus 0 → **18**) and `streams.players[].sessions` closes at the departure instead of at the end of the recording. Goldens move by the new fields, by the FFA team relabelling, and — on `4on4_fu_mix_060626_dm2_rename_handover` — by one published session now starting at its join rather than at the spectator connection before it. |
 | v74 | **Demos that hold no analyzable match are marked instead of coming out silent.** New top-level **`noMatch`**, present exactly when `streams` is absent: a `reason` from a five-value total partition (`midMatchRecording` \| `matchStartUnannounced` \| `noMatchDeclared` \| `noPlayRecorded` \| `demoUnreadable`), a human `detail` sentence, and the wire evidence behind the verdict — `statusAtOpen` (the serverinfo `status` key at demo OPEN, verbatim; distinct from `metadata.serverInfo.status`, which is last-write-wins and names the state at demo END), `statusRunningSeen`, `gameDir` and `kills`. It exists because absence was previously ambiguous AND silent: 1 032 of the 50 951-demo archive sweep (2.03%) produced empty streams with an entirely EMPTY `errors[]`, so a consumer could not tell "this recording holds no match" from "the recording starts mid-game" from "the parse failed". The v52 `timeBase:"demo"` fallback does not cover it — `flagDemoTimeBase` returns early on `result.Streams == nil`, and streams are nil precisely because every timeline recording path is gated on a match-start broadcast that was never seen; the fallback only ever fires when a start WAS detected but landed at demo `t=0`. Distribution over the 1 032: `noPlayRecorded` 636, `noMatchDeclared` 170 (165 of them on a foreign `*gamedir` — `fortress`, `jteams`, `ctf`, `runes`, `tdw`, `bball` — and 168 sending no `status` key at all), `matchStartUnannounced` 138 (32 carrying a full KTX demoinfo block), `midMatchRecording` 68 (67 with a parsed frag log), `demoUnreadable` 20; every demo marked, no leftovers, and **zero** markers on a 1 500-demo random control drawn from the 49 919 that do produce streams. The gamedir is published as evidence and never used as a reason — a `fortress` server can run a managed match and a stock `qw` server can record nothing. `noMatch` also gives the wall-clock **`dateMarkers`** a home on a stream-less result (104 of the 1 032 carry one): they were read off the wire and then dropped, since the whole family lives on `streams.global`. The graded `matchStartUnixMs` anchor beside them is deliberately NOT published there — it is a projection through the match window, which such a result does not have; that is salvage, plan lead 8 stage (b). Additive: `errors[]` is untouched, `/overview` gains `noMatch` beside it, and the new `no-match` DAG node serves at `/v1/demos/{id}/artifacts/no-match` (200 with a `null` body on a demo that holds a match). Goldens do not move — no healthy demo is affected. |
 | v74 | **Partial damage reconstruction becomes visible per demo.** `damage` gains **`coverage`** `{kills, covered, ratio}` on every `source: "reconstructed"` section — the share of the frag log's weapon kills whose lethal instant the reconstructed `events` log accounts for, i.e. `cmd/qw-recon-oracle`'s kill-delta coverage computed in the normal pass (`damagerecon/aggregate.go setCoverage`). It exists because a small class of archive recordings barely broadcasts the health/armor stat channel: positions and the frag log survive, the damage does not, and until now nothing distinguished "this player dealt little damage" from "the recording did not carry the evidence". Measured over the full 10 702-demo oracle sweep (rescored after v74 shipped from a 200/era subsample): **99.0% read ≥ 0.95** (median 1.000), **0.80% read < 0.50** (the silent-channel class, 0.182 median / 0.488 worst) and **0.18% fall between**, spanning 0.500–0.944 — a hard bimodal core with a thin gradient tail, so `ratio` is a magnitude to read rather than a two-valued flag, and it measures the FRAG-LOG-VISIBLE match (a loss that drops obituaries and damage together still reads 1.000); the same metric over a WIRE damage log reads exactly **1.000 on all 65** ground-truth demos, and thinning the stat channel to one sample in four drops a healthy demo to a 0.35 median while `kills` stays put (both controls pinned in `damagerecon/coverage_test.go`). Bounded damage per kill — the other candidate figure — was measured and rejected: the two populations overlap on it (healthy min 107, silent max 326). Absent on `source: "ktx"` (a wire log records every `T_Damage` call, so coverage is 1 by construction) and when the frag log names no scoreable kill. Whole-match: a `players`/`weapons`/time filter carries it through unchanged, like `source` and `boundedMode`. NOTHING is gated on it — the riders that inherit the signal (`playerStats` damage family, its reconstructed `accuracy.hits`, `aim.players[].weapons[].recon.hits`) point at this one field instead of copying or withholding. Goldens move on the reconstructed-damage demo only. |

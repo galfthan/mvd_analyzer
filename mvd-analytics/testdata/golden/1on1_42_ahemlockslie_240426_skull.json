@@ -7796,6 +7796,61 @@
     "killsMeasured": true,
     "totalFrags": 33
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 70,
+          "armorType": "ya",
+          "health": 66,
+          "loc": "yard",
+          "name": "42",
+          "relation": "self",
+          "stack": 136,
+          "stateSource": "stream",
+          "team": "42",
+          "userId": 21,
+          "weapons": [
+            "rl",
+            "lg",
+            "gl",
+            "ssg"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 107.71875,
+        "heightAboveAttacker": 0.375,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 315350,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "MH",
+            "name": "AHemlocksLie",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "AHemlocksLie",
+            "userId": 20,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -14158,7 +14213,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -37770,22 +37825,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "42",
-        "attackerTeam": "42",
-        "attackerUserID": 21,
-        "damage": 110,
-        "height": 107.71875,
-        "heightAboveAttacker": 0.375,
-        "lethal": true,
-        "loc": "MH",
-        "time": 315350,
-        "victim": "AHemlocksLie",
-        "victimTeam": "AHemlocksLie",
-        "victimUserID": 20
-      }
-    ],
     "deathEvents": [
       {
         "player": "AHemlocksLie",

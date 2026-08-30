@@ -83,6 +83,16 @@ type ObituaryPattern struct {
 	Suicide  bool
 	TeamKill bool
 	Kind     ObituaryKind
+	// Cause is a sub-cause beneath Weapon for the prints whose deathtype
+	// KTX distinguishes but whose weapon accounting it does not: the LG
+	// water discharge (dtLG_DIS / dtLG_DIS_SELF, both wpLG in KTX's own
+	// per-weapon stats, ktx/src/client.c:4935-4938), the pentagram
+	// telefrag deflections (dtTELE2 / dtTELE3) and the spawn telefrag
+	// (dtTELE4). Weapon keeps the canonical code ("lg", "tele") so every
+	// per-weapon consumer stays as it was; Cause is what lets a consumer
+	// pick the discharge out of the shaft kills. Values: "discharge",
+	// "deflect", "spawnicide"; empty for every other row.
+	Cause string
 }
 
 // ObituaryPatterns is the canonical table. Order within a Kind is
@@ -107,12 +117,15 @@ var ObituaryPatterns = []ObituaryPattern{
 	{Marker: " tries to put the pin back in", Weapon: "gl", Suicide: true, Kind: ObituarySuicide},
 
 	// Lightning Gun discharge self-damage.
-	{Marker: " electrocutes himself", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " electrocutes herself", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " heats up the water", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " discharges into the water", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " discharges into the slime", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " discharges into the lava", Weapon: "lg", Suicide: true, Kind: ObituarySuicide},
+	// KTX prints " electrocutes" for the dmm4 flat self-kill (dtLG_DIS_SELF,
+	// client.c:5292) and the four liquid forms for the ordinary radius
+	// discharge (dtLG_DIS, :5300-5325); all six are Cause "discharge".
+	{Marker: " electrocutes himself", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " electrocutes herself", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " heats up the water", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the water", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the slime", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " discharges into the lava", Weapon: "lg", Cause: "discharge", Suicide: true, Kind: ObituarySuicide},
 
 	// Water drowning.
 	{Marker: " sleeps with the fishes", Weapon: "water", Suicide: true, Kind: ObituarySuicide},
@@ -160,9 +173,9 @@ var ObituaryPatterns = []ObituaryPattern{
 	// KTX k_spawnicide variants (client.c:5240-5261, dtTELE4). Only emitted
 	// when k_spawnicide is enabled; counted as a suicide (KTX
 	// logfrag(targ, targ)).
-	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " got too close to the baby factory", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
-	{Marker: " was fragged by poor life choices", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Cause: "spawnicide", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " got too close to the baby factory", Weapon: "tele", Cause: "spawnicide", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " was fragged by poor life choices", Weapon: "tele", Cause: "spawnicide", Suicide: true, Kind: ObituarySuicide},
 
 	// dtTELE3, the double-pentagram telefrag (client.c:5228-5237): BOTH
 	// players hold 666, so the would-be telefragger's victim survives and the
@@ -174,7 +187,7 @@ var ObituaryPatterns = []ObituaryPattern{
 	// them. Suffix is a REQUIRED extra substring here, not a victim bound
 	// (the victim is still the whole prefix), and the suicide run is scanned
 	// before the kill run in both consumers, so this wins.
-	{Marker: " was telefragged by ", Suffix: "'s Satan's power", Weapon: "tele", Suicide: true, Kind: ObituarySuicide},
+	{Marker: " was telefragged by ", Suffix: "'s Satan's power", Weapon: "tele", Cause: "deflect", Suicide: true, Kind: ObituarySuicide},
 
 	// dtTRIGGER_HURT and the world branch's unenumerated catch-all
 	// (client.c:5775-5782) share ONE string, so the print cannot say which,
@@ -190,9 +203,13 @@ var ObituaryPatterns = []ObituaryPattern{
 	{Marker: " was telefragged by ", Weapon: "tele", Kind: ObituaryKill},
 
 	// Lightning Gun (dtLG_BEAM, dtLG_DIS).
-	{Marker: " accepts ", Weapon: "lg", Kind: ObituaryKill},                      // "accepts X's shaft"
+	// " accepts " is shared by the shaft kill ("accepts X's shaft") and one
+	// of the two discharge kill prints ("accepts X's discharge",
+	// client.c:5656); the analytics matcher promotes the latter to Cause
+	// "discharge" off the suffix, since the marker alone cannot.
+	{Marker: " accepts ", Weapon: "lg", Kind: ObituaryKill},                      // "accepts X's shaft" / "accepts X's discharge"
 	{Marker: " gets a natural disaster from ", Weapon: "lg", Kind: ObituaryKill}, // quad gib
-	{Marker: " drains ", Weapon: "lg", Kind: ObituaryKill},                       // "drains X's batteries" (discharge kill)
+	{Marker: " drains ", Weapon: "lg", Cause: "discharge", Kind: ObituaryKill},   // "drains X's batteries" (discharge kill, client.c:5651)
 
 	// Rocket Launcher (dtRL).
 	{Marker: " rides ", Weapon: "rl", Kind: ObituaryKill},             // "rides X's rocket"
@@ -309,7 +326,7 @@ var ObituaryPatterns = []ObituaryPattern{
 	// --- Infix (victim bracketed by prefix + suffix). ------------------
 	// KTX pentagram-deflection self-telefrag (dtTELE2, client.c:5219): the
 	// would-be telefragger dies, booked as a suicide.
-	{Marker: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele", Suicide: true, Kind: ObituaryInfix},
+	{Marker: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele", Cause: "deflect", Suicide: true, Kind: ObituaryInfix},
 }
 
 // obituaryVictimScan is the victim-prefix subset in the order

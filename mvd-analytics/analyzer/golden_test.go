@@ -366,13 +366,13 @@ var partialGoldenDemos = map[string][]string{
 	// no other golden can pin.
 	"4on4_fu_mix_060626_dm2_rename_handover": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
-		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"timelineAnalysis.powerupEvents", "highlights.airgibs",
 		"match.players", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
 	"4on4_blue_red_200626_e1m2_sameslot_rejoin": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
-		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"timelineAnalysis.powerupEvents", "highlights.airgibs",
 		"match.players", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},

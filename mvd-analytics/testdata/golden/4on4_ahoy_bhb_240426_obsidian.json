@@ -66168,6 +66168,113 @@
     "killsMeasured": true,
     "totalFrags": 493
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 57,
+          "loc": "YA",
+          "name": "nexus",
+          "relation": "self",
+          "stack": 57,
+          "stateSource": "stream",
+          "team": "ahoy",
+          "userId": 29,
+          "weapons": [
+            "rl",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 187.59375,
+        "heightAboveAttacker": -12.375,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 101248,
+        "victims": [
+          {
+            "activeWeapon": "ssg",
+            "armor": 67,
+            "armorType": "ga",
+            "damage": 110,
+            "health": 34,
+            "killed": true,
+            "loc": "YA",
+            "name": "Doomie",
+            "relation": "enemy",
+            "stack": 101,
+            "stateSource": "stream",
+            "team": "BhB",
+            "userId": 32,
+            "weapons": [
+              "ssg"
+            ]
+          }
+        ]
+      }
+    ],
+    "quadbores": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 40,
+          "armorType": "ya",
+          "damage": 202,
+          "health": 31,
+          "killed": true,
+          "loc": "Quad",
+          "name": "ThundeR",
+          "powerups": [
+            "quad"
+          ],
+          "relation": "self",
+          "stack": 71,
+          "stateSource": "stream",
+          "team": "BhB",
+          "userId": 25,
+          "weapons": [
+            "gl",
+            "ssg"
+          ]
+        },
+        "enemyKills": 1,
+        "kind": "quadbore",
+        "quadHeldMs": 479,
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 243838,
+        "victims": [
+          {
+            "activeWeapon": "ssg",
+            "armor": 0,
+            "health": 89,
+            "killed": true,
+            "loc": "Quad",
+            "name": "nexus",
+            "relation": "enemy",
+            "stack": 89,
+            "stateSource": "stream",
+            "team": "ahoy",
+            "userId": 29,
+            "weapons": [
+              "ssg"
+            ]
+          }
+        ],
+        "weapon": "gl"
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -95854,7 +95961,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -434058,22 +434165,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "nexus",
-        "attackerTeam": "ahoy",
-        "attackerUserID": 29,
-        "damage": 110,
-        "height": 187.59375,
-        "heightAboveAttacker": -12.375,
-        "lethal": true,
-        "loc": "YA",
-        "time": 101248,
-        "victim": "Doomie",
-        "victimTeam": "BhB",
-        "victimUserID": 32
-      }
-    ],
     "deathEvents": [
       {
         "player": "nexus",

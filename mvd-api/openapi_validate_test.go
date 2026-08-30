@@ -735,7 +735,12 @@ func validationCases(t *testing.T) []validationCase {
 			path: "/v1/demos/{id}/top-kills", status: 200},
 		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
-		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
+		// highlights: mustContain names the four lists, which an empty
+		// catalogue would validate without.
+		{name: "highlights", url: "/v1/demos/gameId:42/highlights", path: "/v1/demos/{id}/highlights", status: 200,
+			mustContain: []string{`"discharges":`, `"quadbores":`, `"telefrags":`, `"airgibs":`}},
+		{name: "highlights-filtered", url: "/v1/demos/gameId:42/highlights?kinds=telefrag,airgib&preMs=200",
+			path: "/v1/demos/{id}/highlights", status: 200},
 		// The timeline artifact is already swept below with every other
 		// servable artifact, but that generic case validates whatever the
 		// body happens to carry. No corpus demo carries a /demomark bookmark,
@@ -749,7 +754,7 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
 		// cases above: overview / events / state-at / stream-slice / loc-trails /
-		// buckets-row / items-summary, the four list envelopes (chat, airgibs,
+		// buckets-row / items-summary, the three list envelopes (chat,
 		// backpacks, weapon-pickups), and the four dense columnar stream bodies
 		// (los, streams/projectiles, streams/beams, streams/nails) all mark
 		// timeUnit `required`, so a 200 that validates confirms the fixed native

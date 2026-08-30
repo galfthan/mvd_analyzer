@@ -10,6 +10,8 @@ import (
 
 	"github.com/mvd-analyzer/mvd-reader/events"
 	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // The invariant that should have caught the stale-userid defect: EVERY
@@ -154,9 +156,15 @@ func checkReportedUserIDs(t *testing.T, res *Result, observed map[string]map[int
 	for i, m := range ta.DemoMarkers {
 		want(fmt.Sprintf("demoMarkers[%d]", i), m.PlayerName, m.PlayerUserID)
 	}
-	for i, a := range ta.Airgibs {
-		want(fmt.Sprintf("airgibs[%d].attacker", i), a.Attacker, a.AttackerUserID)
-		want(fmt.Sprintf("airgibs[%d].victim", i), a.Victim, a.VictimUserID)
+	if hl := res.Highlights; hl != nil {
+		for _, list := range [][]result.HighlightEvent{hl.Discharges, hl.Quadbores, hl.Telefrags, hl.Airgibs} {
+			for i, e := range list {
+				want(fmt.Sprintf("highlights.%s[%d].actor", e.Kind, i), e.Actor.Name, e.Actor.UserID)
+				for j, v := range e.Victims {
+					want(fmt.Sprintf("highlights.%s[%d].victims[%d]", e.Kind, i, j), v.Name, v.UserID)
+				}
+			}
+		}
 	}
 	if checked == 0 {
 		t.Skip("no userid reported on this demo — nothing to falsify")

@@ -11465,6 +11465,211 @@
     "killsMeasured": true,
     "totalFrags": 66
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 115,
+          "armorType": "ra",
+          "health": 99,
+          "loc": "high LG packs",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 214,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "lg",
+            "gl",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 308.46875,
+        "heightAboveAttacker": 164.5,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 400048,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "LG",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 127,
+          "armorType": "ya",
+          "health": 61,
+          "loc": "GA",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 188,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "lg",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 250.34375,
+        "heightAboveAttacker": 250.375,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 81690,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "LG",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 132,
+          "armorType": "ya",
+          "health": 88,
+          "loc": "GL",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 220,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 178.84375,
+        "heightAboveAttacker": -59.75,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 59715,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 174,
+            "loc": "GL",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 174,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 40,
+          "loc": "RL",
+          "name": "mj",
+          "relation": "self",
+          "stack": 40,
+          "stateSource": "stream",
+          "team": "mj",
+          "userId": 70,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 134.59375,
+        "heightAboveAttacker": 134.625,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 533636,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 168,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 92,
+            "loc": "RL",
+            "name": "speedball",
+            "relation": "enemy",
+            "stack": 260,
+            "stateSource": "stream",
+            "team": "speedball",
+            "userId": 72,
+            "weapons": [
+              "rl",
+              "lg",
+              "gl",
+              "sng"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -18313,7 +18518,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -37376,62 +37581,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 308.46875,
-        "heightAboveAttacker": 164.5,
-        "lethal": true,
-        "loc": "LG",
-        "time": 400048,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 250.34375,
-        "heightAboveAttacker": 250.375,
-        "lethal": true,
-        "loc": "LG",
-        "time": 81690,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 178.84375,
-        "heightAboveAttacker": -59.75,
-        "loc": "GL",
-        "time": 59715,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "mj",
-        "attackerTeam": "mj",
-        "attackerUserID": 70,
-        "damage": 110,
-        "height": 134.59375,
-        "heightAboveAttacker": 134.625,
-        "loc": "RL",
-        "time": 533636,
-        "victim": "speedball",
-        "victimTeam": "speedball",
-        "victimUserID": 72
-      }
-    ],
     "deathEvents": [
       {
         "player": "speedball",

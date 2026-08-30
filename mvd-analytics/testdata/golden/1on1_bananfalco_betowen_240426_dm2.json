@@ -4141,6 +4141,106 @@
     "killsMeasured": true,
     "totalFrags": 35
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 161,
+          "armorType": "ra",
+          "health": 160,
+          "loc": "big.stairs",
+          "name": "banan falco",
+          "relation": "self",
+          "stack": 321,
+          "stateSource": "stream",
+          "team": "banan falco",
+          "userId": 39,
+          "weapons": [
+            "rl",
+            "ssg"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 356.34375,
+        "heightAboveAttacker": 304.375,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 156362,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 107,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 169,
+            "loc": "floating",
+            "name": "betowen",
+            "relation": "enemy",
+            "stack": 276,
+            "stateSource": "stream",
+            "team": "betowen",
+            "userId": 37,
+            "weapons": [
+              "gl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 69,
+          "armorType": "ya",
+          "health": 147,
+          "loc": "big",
+          "name": "banan falco",
+          "relation": "self",
+          "stack": 216,
+          "stateSource": "stream",
+          "team": "banan falco",
+          "userId": 39,
+          "weapons": [
+            "rl",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 111.21875,
+        "heightAboveAttacker": 83.5,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 469683,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 144,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 147,
+            "loc": "big.stairs",
+            "name": "betowen",
+            "relation": "enemy",
+            "stack": 291,
+            "stateSource": "stream",
+            "team": "betowen",
+            "userId": 37,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -11251,7 +11351,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -286513,34 +286613,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "banan falco",
-        "attackerTeam": "banan falco",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 356.34375,
-        "heightAboveAttacker": 304.375,
-        "loc": "floating",
-        "time": 156362,
-        "victim": "betowen",
-        "victimTeam": "betowen",
-        "victimUserID": 37
-      },
-      {
-        "attacker": "banan falco",
-        "attackerTeam": "banan falco",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 111.21875,
-        "heightAboveAttacker": 83.5,
-        "loc": "big.stairs",
-        "time": 469683,
-        "victim": "betowen",
-        "victimTeam": "betowen",
-        "victimUserID": 37
-      }
-    ],
     "deathEvents": [
       {
         "player": "banan falco",
