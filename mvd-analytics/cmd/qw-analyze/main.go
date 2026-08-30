@@ -775,10 +775,8 @@ func warnUnlinkedNails(res *result.Result, w io.Writer) {
 
 // warnUnclassifiedGrenades reports gl fires on a demo whose wire damage log
 // this run could not put on KTX's scale, which is what a run without
-// -include projectiles produces. KTX counts a grenade that TOUCHED a player
-// and the wire records no such thing (GrenadeTouch detonates through
-// T_RadiusDamage, which flags every row splash), so the touch is
-// re-derived from the grenade's tracked flight — and without the spatial
+// -include projectiles produces: gl's direct-impact count is re-derived from
+// the grenade's tracked flight (result.WeaponAim), and without the spatial
 // shot streams there is no flight to read. The row stays honest, publishing
 // the any-path count under hitsConvention "anyDamage", but that is a
 // DIFFERENT number from the one the same demo returns over REST, which is

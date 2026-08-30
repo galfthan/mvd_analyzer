@@ -251,7 +251,7 @@ func TestRosterAnalyzer_IndividualRelabelsDemoInfo(t *testing.T) {
 	}
 	a.PopulateCore(co)
 
-	if !co.Roster.Individual() || co.Roster.Duel() {
+	if !co.IndividualMode() || co.Roster.Duel() {
 		t.Fatalf("roster = %+v, want individual and not a duel", co.Roster)
 	}
 	for _, p := range co.DemoInfo.Players {
@@ -285,7 +285,7 @@ func TestRosterAnalyzer_TeamGameKeepsDemoInfoTags(t *testing.T) {
 	}
 	a.PopulateCore(co)
 
-	if co.Roster.Individual() {
+	if co.IndividualMode() {
 		t.Fatalf("roster = %+v, want a team layout", co.Roster)
 	}
 	if co.DemoInfo.Players[0].Team != "red" || !reflect.DeepEqual(co.DemoInfo.Teams, []string{"red", "blue"}) {

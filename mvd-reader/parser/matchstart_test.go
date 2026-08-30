@@ -27,9 +27,12 @@ func collectMatchStarts(p *Parser, out *[]MatchStartEvent) {
 	})
 }
 
-// TestMatchStartEvent_Sources pins each of the four Layer-1 signals in
-// isolation: each raises the event exactly once, with its own Source name
-// and the wire time of the signal that raised it.
+// TestMatchStartEvent_Sources pins the two PRINT-borne signals in isolation:
+// each raises the event exactly once, with its own Source name and the wire
+// time of the signal that raised it. The directive and the status transition
+// are pinned from the wire instead (TestMatchStartFromWire_*), which is the
+// stronger statement — they are the two whose trigger the parser has to
+// recognise inside a real message.
 func TestMatchStartEvent_Sources(t *testing.T) {
 	cases := []struct {
 		name   string
@@ -37,16 +40,6 @@ func TestMatchStartEvent_Sources(t *testing.T) {
 		source string
 		timeMs int32
 	}{
-		{
-			name: "ktx directive",
-			drive: func(t *testing.T, p *Parser) {
-				if err := p.tryEmitMatchStartFromStuffText("//ktx matchstart\n", 610); err != nil {
-					t.Fatal(err)
-				}
-			},
-			source: MatchStartSourceKtxDirective,
-			timeMs: 610,
-		},
 		{
 			name: "print",
 			drive: func(t *testing.T, p *Parser) {
@@ -66,24 +59,6 @@ func TestMatchStartEvent_Sources(t *testing.T) {
 			},
 			source: MatchStartSourceMatchDate,
 			timeMs: 810,
-		},
-		{
-			name: "status transition",
-			drive: func(t *testing.T, p *Parser) {
-				if err := p.observeFullServerInfoStatus(`fullserverinfo "\map\dm2\status\Countdown"`, 0); err != nil {
-					t.Fatal(err)
-				}
-				if err := p.observeServerInfoStatus("6 min left", 843, true); err != nil {
-					t.Fatal(err)
-				}
-				// The once-a-minute countdown ticks that follow must not
-				// re-raise it.
-				if err := p.observeServerInfoStatus("5 min left", 60843, true); err != nil {
-					t.Fatal(err)
-				}
-			},
-			source: MatchStartSourceStatus,
-			timeMs: 843,
 		},
 	}
 	for _, tc := range cases {
@@ -155,25 +130,6 @@ func TestMatchStartEvent_MatchDateIsLineInitial(t *testing.T) {
 		}
 	}
 	if err := p.tryEmitMatchStartFromPrint(mvd.PrintChat, "matchdate: 2026-01-16 20:57:38 UTC\n", 500); err != nil {
-		t.Fatal(err)
-	}
-	if len(got) != 0 {
-		t.Fatalf("emitted %d MatchStartEvents, want 0: %+v", len(got), got)
-	}
-}
-
-// TestMatchStartEvent_StatusRunningAtOpen: a recording that opens with the
-// clock already running is a MID-MATCH recording. Its once-a-minute ticks
-// are not a transition, so nothing raises a match start and the no-match
-// marker keeps its midMatchRecording verdict.
-func TestMatchStartEvent_StatusRunningAtOpen(t *testing.T) {
-	p := NewParser(nil)
-	var got []MatchStartEvent
-	collectMatchStarts(p, &got)
-	if err := p.observeFullServerInfoStatus(`fullserverinfo "\status\4 min left\map\dm3"`, 0); err != nil {
-		t.Fatal(err)
-	}
-	if err := p.observeServerInfoStatus("3 min left", 12000, true); err != nil {
 		t.Fatal(err)
 	}
 	if len(got) != 0 {

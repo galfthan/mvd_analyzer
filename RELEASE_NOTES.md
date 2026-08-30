@@ -470,6 +470,26 @@ beside each table.
   the vendored `ktx/src` (and `kteams/v2.21`) when present, and skip
   otherwise; the offline pin is `TestCanonicalTables`.
 
+### Dead weight removed after the reach audit (no observable change)
+
+A 3 123-demo full-pipeline reach audit (`.reports/reach-audit-2026-08-29`,
+untracked) instrumented every guard and fallback the FFA work added or
+touched. The branches it found unreached in every era — and unreachable by
+construction where a stronger argument existed — are gone: the
+descriptor-less `isTeamplay` fallback, the zero-pellet withhold, the
+`Canonical == ""` arms, the defensive stint re-sort, the two-player
+`GameMode == nil` prior in damage reconstruction, an unread `splash` field,
+the pre-v75 cache fallbacks in the web UI, and five duplicate tests. Two
+byte-identical name resolvers share one helper; two individual-layout
+predicates are one; the web UI's five spellings of "individual field" are
+one. `WireDirectTouches` classifies only gl in production (rl's verdict is
+eval-only, via `WireDirectTouchesForEval`). The golden corpus projects
+`ffa_matchless_nova` to the sections nothing else pins (22 382 → 234
+lines) and a projection path that matches nothing is now an error. Guards
+the audit proved reachable — the departure-line spectator sentinel, the
+`applyFinalScoresTeams` individual gate, the `OnMatchStart` latch, the
+`//finalscores` map fallback (a documented v72 source) — stay.
+
 ## unreleased (better-search) — search pages up to 1000 rows; serving revalidates every use
 
 No schema change. Two operational fixes:

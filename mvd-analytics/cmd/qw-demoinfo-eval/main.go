@@ -444,7 +444,8 @@ func wireDirectHits(res *analyzer.Result) map[string]map[string]int {
 }
 
 // wireClassifierHits counts, per player, the WIRE rl/gl damage rows the
-// DIRECT-TOUCH CLASSIFIER judges a touch (damagerecon.WireDirectTouches): the
+// DIRECT-TOUCH CLASSIFIER judges a touch (damagerecon.WireDirectTouchesForEval,
+// the rl-inclusive entry point production does not use): the
 // grenade's detonation point against the victim's hull and the spent-fuse
 // refutation, the rocket's trajectory folded with the magnitude prior — the
 // derivation a pre-instrumentation demo has to reach KTX's counter by, run
@@ -458,7 +459,7 @@ func wireClassifierHits(res *analyzer.Result) map[string]map[string]int {
 	// nil covers the absent damage log too — the classifier reads
 	// res.Damage.Events and returns one verdict per row of it, so the
 	// indices below are the same slice's.
-	verdict := damagerecon.WireDirectTouches(res)
+	verdict := damagerecon.WireDirectTouchesForEval(res)
 	if verdict == nil {
 		return out
 	}

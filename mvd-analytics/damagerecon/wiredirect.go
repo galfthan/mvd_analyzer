@@ -4,32 +4,20 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 
 // Direct-touch classification on the WIRE damage log.
 //
-// direct.go answers "did this rocket or grenade TOUCH the victim?" from
-// evidence that is era-independent — the projectile's broadcast trajectory,
-// the damage magnitude and the grenade fuse — and the reconstruction runs it
+// direct.go answers "did this rocket or grenade TOUCH the victim?" from the
+// projectile's broadcast trajectory, the damage magnitude and the grenade
+// fuse — evidence that is era-independent — and the reconstruction runs it
 // because a pre-instrumentation demo has no other way to reach KTX's counter.
-// A MODERN demo has one for rl and not for gl:
+// A modern demo needs it for gl only: rl's touch reaches the wire as an
+// unflagged damage row and gl's does not (result.WeaponAim states why).
 //
-//   - rl: T_MissileTouch deals the direct damage as its own T_Damage call
-//     (ktx/src/weapons.c:998-1006) and dmg_is_splash is raised only inside
-//     T_RadiusDamage's loop (combat.c:1207-1227), so the wire row carries the
-//     server's own verdict. Counting non-splash rl rows reproduces the
-//     verbatim KTX block on 638 of 638 archive player rows.
-//   - gl: GrenadeTouch increments the counter (weapons.c:1329-1333) and then
-//     detonates through GrenadeExplode → T_RadiusDamage, so EVERY wire gl row
-//     is splash-flagged whether or not the grenade touched anybody. The wire
-//     simply does not record the event KTX counts: the same row count scored
-//     30.0% exact at 100% aggregate under-count (`acc.gl.direct/wire`).
-//
-// So gl's question is answerable on a modern demo only the way it is on an
-// old one — by re-deriving the touch from the geometry. This file feeds the
-// WIRE rows to that classifier instead of the reconstructed ones. Nothing
-// about direct.go changes: a wire row is an (attacker, victim, weapon, time,
-// exact damage) tuple, which is what a reconstructed delta's attribution
-// produces, so the only work here is finding the projectile candidate the row
-// belongs to — the same projCandidates / explosionCandidates search
-// attribution runs, narrowed to the attacker and weapon the WIRE already
-// names rather than scored against every other explanation.
+// This file feeds the WIRE rows to that same classifier. Nothing about
+// direct.go changes: a wire row is an (attacker, victim, weapon, time, exact
+// damage) tuple, which is what a reconstructed delta's attribution produces,
+// so the only work here is finding the projectile candidate the row belongs
+// to — the same projCandidates / explosionCandidates search attribution runs,
+// narrowed to the attacker and weapon the WIRE already names rather than
+// scored against every other explanation.
 //
 // The wire row is the STRONGER input of the two eras. Its damage value is the
 // server's own, not a health/armor delta reconstruction, so the magnitude
@@ -58,14 +46,32 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 //   - per-player position streams to place the victim's hull at the damage
 //     instant.
 //
-// BOTH weapons are classified, and only gl's verdict is published (aimcore's
-// gl Direct). rl keeps the wire's own splash flag, which is exact; its
-// verdict here is the measurement that decided that — what the classifier
-// would have scored had it replaced the flag — and is read by
-// cmd/qw-demoinfo-eval's `acc.rl.classifier/wire` column. The rule is the one
-// ReconHitsForEval follows: what a derivation costs is what decides whether
-// it ships, so the measurement cannot be gated on it having shipped.
+// Only gl is classified: rl keeps the wire's own splash flag, which is exact.
+// The rl verdict — what the classifier would have scored had it replaced the
+// flag — is the measurement that decided that, and it is an EVAL question,
+// not a production one: WireDirectTouchesForEval below answers it for
+// cmd/qw-demoinfo-eval's `acc.rl.classifier/wire` column.
+//
+// COST: this runs over the whole damage log, and a windowed /aim recomputes
+// it per request (view.Aim → aimcore.Compute), BSP load included, for a
+// verdict that does not depend on the window. Caching it would mean carrying
+// the slice on the Result, which is a schema change; the per-request cost is
+// the geometry search over the gl rows of one demo.
 func WireDirectTouches(res *result.Result) []bool {
+	return wireDirectTouches(res, false)
+}
+
+// WireDirectTouchesForEval classifies rl rows as well as gl ones. Nothing in
+// the pipeline reads the rl verdict — production takes rl's touch count off
+// the wire's own splash flag — so this exists only so the choice stays
+// measured. Same rule as ReconHitsForEval: what a derivation costs is what
+// decides whether it ships, so the measurement cannot be gated on it having
+// shipped.
+func WireDirectTouchesForEval(res *result.Result) []bool {
+	return wireDirectTouches(res, true)
+}
+
+func wireDirectTouches(res *result.Result, withRL bool) []bool {
 	if res == nil || res.Streams == nil || len(res.Streams.Players) == 0 {
 		return nil
 	}
@@ -77,23 +83,25 @@ func WireDirectTouches(res *result.Result) []bool {
 	}
 	in := buildInputs(res)
 	in.bsp = loadBSPGate(res)
-	// Narrow the rocket direct-damage band only where the demo's own hits
-	// ESTABLISHED the fixed constant, exactly as attribute() does: outside
-	// that verdict the band stays buildInputs' vanilla 100..120, which is
-	// what tells rocketTouched the magnitude prior says nothing and the
-	// trajectory has the whole answer. Assigning the detector's (0, 0) there
-	// would instead be a prior demanding a damage of zero, refusing every
-	// survived touch.
-	lo, hi, regime := detectWireRocketRegime(in, res.Damage.Events)
-	in.rlRegime = regime
-	if regime == result.RocketRegimeFixed {
-		in.rlLo, in.rlHi = lo, hi
+	if withRL {
+		// Narrow the rocket direct-damage band only where the demo's own hits
+		// ESTABLISHED the fixed constant, exactly as attribute() does: outside
+		// that verdict the band stays buildInputs' vanilla 100..120, which is
+		// what tells rocketTouched the magnitude prior says nothing and the
+		// trajectory has the whole answer. Assigning the detector's (0, 0)
+		// there would instead be a prior demanding a damage of zero, refusing
+		// every survived touch.
+		lo, hi, regime := detectWireRocketRegime(in, res.Damage.Events)
+		in.rlRegime = regime
+		if regime == result.RocketRegimeFixed {
+			in.rlLo, in.rlHi = lo, hi
+		}
 	}
 
 	out := make([]bool, len(res.Damage.Events))
 	for i := range res.Damage.Events {
 		ev := &res.Damage.Events[i]
-		if ev.Weapon != "rl" && ev.Weapon != "gl" {
+		if ev.Weapon != "gl" && !(withRL && ev.Weapon == "rl") {
 			continue
 		}
 		if ev.Attacker == "" || ev.IsEnv || ev.IsSelf {

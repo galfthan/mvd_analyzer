@@ -300,12 +300,6 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 // restoredNames resolves the "rejoins the game with N frags" broadcasts to
 // the normalized netnames they named.
 //
-// The broadcast's prefix is not a bare netname — in team modes KTX prints
-// "<netname> [<team>]" with no delimiter (ktx/src/client.c:1529-1534) — so
-// it is matched against the known occupancy netnames by longest prefix, the
-// same resolution IdentityAnalyzer.reconnectedNames applies to the same
-// lines.
-//
 // The verdict is per NETNAME and covers the whole demo, because the score
 // it carries can cross a scoreboard ROW: two occupancies of one name that
 // were live at the same instant are deliberately kept as separate rows
@@ -314,29 +308,7 @@ func (a *MatchAnalyzer) announcedFrags(rec *occupancyRecord, tMs int32) (int, bo
 // stint of this name continued the running total rather than restarting it"
 // is the conservative direction — it is the one that cannot double-count.
 func (a *MatchAnalyzer) restoredNames() map[string]bool {
-	out := make(map[string]bool)
-	if len(a.restorePrefixes) == 0 {
-		return out
-	}
-	recs := a.occ.all()
-	names := make([]string, 0, len(recs))
-	seen := make(map[string]bool)
-	for _, rec := range recs {
-		if rec.name != "" && !seen[rec.name] {
-			seen[rec.name] = true
-			names = append(names, rec.name)
-		}
-	}
-	sort.Slice(names, func(i, j int) bool { return len(names[i]) > len(names[j]) })
-	for _, prefix := range a.restorePrefixes {
-		for _, n := range names {
-			if prefix == n || strings.HasPrefix(prefix, n+" ") {
-				out[normalizePlayerName(n)] = true
-				break
-			}
-		}
-	}
-	return out
+	return resolveBroadcastNames(a.restorePrefixes, a.occ.all())
 }
 
 // finalFrags is the occupancy's scoreboard value: the frozen one when it
@@ -447,18 +419,17 @@ type rosterRow struct {
 	slot    int
 	startMs int32
 	windows []rosterWindow
-	// stints is one entry per occupancy folded into this row, in the order
-	// the occupancy list produced them. foldStintFrags turns them into the
-	// row's score.
+	// stints is one entry per occupancy folded into this row, in occupancy
+	// order — which is wire order, i.e. non-decreasing start time.
+	// foldStintFrags turns them into the row's score.
 	stints []stintScore
 }
 
 // stintScore is one occupancy's frozen score as it enters the identity fold:
-// when it started, what it finished on, and the two signals that say whether
-// it continued the identity's running total or restarted from zero.
+// what it finished on, and the two signals that say whether it continued the
+// identity's running total or restarted from zero.
 type stintScore struct {
-	startMs int32
-	frags   int
+	frags int
 	// identified is occupancyRecord.identified() — whether the wire gave
 	// this occupancy a userid of its own. A userid-0 row is not a client
 	// connection and so cannot be a fresh stint.
@@ -509,11 +480,8 @@ type stintScore struct {
 // folded to 5 instead of 6; one who left on −2 (lava) and scored 3 folded to
 // 3 instead of 1.
 func foldStintFrags(stints []stintScore) int {
-	ordered := make([]stintScore, len(stints))
-	copy(ordered, stints)
-	sort.SliceStable(ordered, func(i, j int) bool { return ordered[i].startMs < ordered[j].startMs })
 	total := 0
-	for _, st := range ordered {
+	for _, st := range stints {
 		if st.restored || !st.identified {
 			total = st.frags
 			continue
@@ -671,7 +639,6 @@ func (a *MatchAnalyzer) Finalize(result *Result) error {
 		}
 		row.windows = append(row.windows, rosterWindow{rec.startMs, rec.endMs, rec.identified()})
 		row.stints = append(row.stints, stintScore{
-			startMs:    rec.startMs,
 			frags:      sc.finalFrags(),
 			identified: rec.identified(),
 			restored:   restored[normalizePlayerName(name)],
@@ -780,7 +747,7 @@ func (a *MatchAnalyzer) refineGameMode(mr *MatchResult) {
 	if gm == nil || !a.core.IsDuel() {
 		return
 	}
-	if gm.Canonical == "" || gm.Canonical == result.GameModeUnknown {
+	if gm.Canonical == result.GameModeUnknown {
 		gm.Canonical, gm.Sources.Canonical = result.GameModeDuel, result.GameModeSrcRoster
 	}
 	// Only a TeamBased verdict the TAG CENSUS produced is superseded — the

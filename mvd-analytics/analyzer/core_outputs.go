@@ -249,8 +249,7 @@ func (co *CoreOutputs) ModeAllowsTeamplay() bool {
 	if co == nil || co.GameMode == nil {
 		return true
 	}
-	switch co.GameMode.Canonical {
-	case "", result.GameModeUnknown:
+	if co.GameMode.Canonical == result.GameModeUnknown {
 		return true
 	}
 	return co.GameMode.TeamShaped()

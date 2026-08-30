@@ -325,28 +325,41 @@ func identityKeys(sess []*occupancyRecord, uf *unionFind) map[int]string {
 }
 
 // reconnectedNames resolves each stored rejoin/reenter prefix to the set
-// of normalized netnames that reconnected. The prefix is "<name>" or
-// "<name> [<team>]" with no delimiter between the two, and the netname can
-// itself contain spaces, so we match against the known session netnames by
-// longest prefix rather than trying to tokenize it.
+// of normalized netnames that reconnected.
 func (a *IdentityAnalyzer) reconnectedNames() map[string]bool {
+	return resolveBroadcastNames(a.reconnectPrefixes, a.occ.all())
+}
+
+// resolveBroadcastNames resolves the name prefixes of KTX's rejoin/reenter
+// broadcasts to the set of normalized netnames they named.
+//
+// The prefix is not a bare netname — in team modes KTX prints
+// "<netname> [<team>]" with no delimiter between the two (ktx/src/
+// client.c:1529-1534) — and a netname may itself contain spaces, so the
+// prefixes are matched against the known occupancy netnames longest-first
+// rather than tokenized.
+//
+// Two callers read the same broadcasts for different verdicts:
+// IdentityAnalyzer unions the sessions of a reconnecting player, and
+// MatchAnalyzer's frag fold reads the restore as "this stint continued the
+// running total". They must resolve the prefix identically or the two
+// verdicts land on different names.
+func resolveBroadcastNames(prefixes []string, recs []*occupancyRecord) map[string]bool {
 	out := make(map[string]bool)
-	if len(a.reconnectPrefixes) == 0 {
+	if len(prefixes) == 0 {
 		return out
 	}
-	// Distinct session netnames, longest first for prefix matching.
-	recs := a.occ.all()
 	names := make([]string, 0, len(recs))
 	seen := make(map[string]bool)
-	for _, s := range recs {
-		if s.name != "" && !seen[s.name] {
-			seen[s.name] = true
-			names = append(names, s.name)
+	for _, rec := range recs {
+		if rec.name != "" && !seen[rec.name] {
+			seen[rec.name] = true
+			names = append(names, rec.name)
 		}
 	}
 	sort.Slice(names, func(i, j int) bool { return len(names[i]) > len(names[j]) })
 
-	for _, prefix := range a.reconnectPrefixes {
+	for _, prefix := range prefixes {
 		for _, n := range names {
 			if prefix == n || strings.HasPrefix(prefix, n+" ") {
 				out[normalizePlayerName(n)] = true

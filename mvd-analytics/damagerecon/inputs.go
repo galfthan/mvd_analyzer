@@ -188,13 +188,10 @@ func buildInputs(res *result.Result) *inputs {
 	// The duel verdict comes from the published mode descriptor
 	// (match.gameMode, schema v75) — the same one analyzer.CoreOutputs.IsDuel
 	// feeds — instead of this package's own re-reading of the demoinfo mode
-	// string. A pre-v75 cached Result carries no descriptor, so the
-	// two-player shape stays as the fallback.
-	if res.Match != nil && res.Match.GameMode != nil {
-		in.duel = res.Match.GameMode.Canonical == result.GameModeDuel
-	} else {
-		in.duel = len(res.Streams.Players) == 2
-	}
+	// string. Every Result the pipeline produces carries a descriptor; one
+	// that does not (a hand-built fixture) is not a duel.
+	in.duel = res.Match != nil && res.Match.GameMode != nil &&
+		res.Match.GameMode.Canonical == result.GameModeDuel
 	// Enemy-attribution prior (study §"The enemy-attribution prior"):
 	// prefer the enemy explanation of an ambiguous delta. Mode-aware — the
 	// bias earns duel recall but costs team-game precision.

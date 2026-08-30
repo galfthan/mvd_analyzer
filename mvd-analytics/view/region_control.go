@@ -176,12 +176,15 @@ func inferTeamsFromMatch(r *result.Result) (string, string) {
 		return "", ""
 	}
 	// A mode with no teams has no binary side layout to control regions
-	// with, and this is where that is stated rather than fallen into. The
-	// two-participant case — a duel, and a 2-player FFA, which is the same
-	// match — still resolves: there the "sides" ARE the two players, which
-	// is what region control has always reported on a 1v1. Anything wider
-	// (a 7-player FFA) used to reach the "fewer than two distinct teams"
-	// bail below only by accident, via the >2 label count.
+	// with, and this is where that is stated. The two-participant case — a
+	// duel, and a 2-player FFA, which is the same match — still resolves:
+	// there the "sides" ARE the two players, which is what region control
+	// has always reported on a 1v1. Anything wider did NOT bail before this
+	// guard existed: an individual layout gives every player their own team
+	// label, so `len(seen) < 2` below is false on a 7-player FFA and the
+	// walk picked two of the seven as "sides". The guard is reached on 93
+	// of 3 123 census demos (59 ffa, 20 unknown, 14 duel) and protects a
+	// pass-through reached on 1 251.
 	if r.Match.GameMode != nil && !r.Match.GameMode.TeamBased && len(r.Match.Players) != 2 {
 		return "", ""
 	}

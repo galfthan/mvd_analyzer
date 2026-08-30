@@ -125,10 +125,6 @@ func (r *Roster) TeamFor(name, rawTeam string) string {
 	return rawTeam
 }
 
-// Individual reports whether the match is laid out with one side per player.
-// True for a duel as well — a 1v1 is the two-player case of it. Nil-safe.
-func (r *Roster) Individual() bool { return r != nil && (r.isDuel || r.individual) }
-
 // Participants returns the participant names in their canonical order (demoinfo
 // player order, or match order in the no-demoinfo fallback). Used by the
 // DemoInfo.Teams / Match.Teams rebuilds. The returned slice must not be mutated.
@@ -209,7 +205,7 @@ func (a *RosterAnalyzer) PopulateCore(co *CoreOutputs) {
 	// raw == name and omitted rawTeam. That is why the roster node declares
 	// a `requires` edge on `identity` (dag.go) even though it reads nothing
 	// identity publishes: the edge is the write-after-read order.
-	if r.Individual() && co.DemoInfo != nil && len(co.DemoInfo.Players) > 0 {
+	if co.IndividualMode() && co.DemoInfo != nil && len(co.DemoInfo.Players) > 0 {
 		teams := make([]string, 0, len(co.DemoInfo.Players))
 		seen := make(map[string]bool, len(co.DemoInfo.Players))
 		for i := range co.DemoInfo.Players {

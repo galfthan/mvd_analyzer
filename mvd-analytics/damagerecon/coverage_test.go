@@ -110,6 +110,7 @@ func TestCoverage(t *testing.T) {
 func TestCoverageNoDenominator(t *testing.T) {
 	build := func(frags []result.FragEntry) *result.Result {
 		res := &result.Result{
+			Match: &result.MatchResult{GameMode: &result.GameMode{Canonical: result.GameModeDuel}},
 			Streams: &result.Streams{
 				ShotStreamsComputed: true,
 				Global:              result.GlobalStream{MatchStart: 0, MatchEnd: 60000},

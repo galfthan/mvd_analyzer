@@ -33,7 +33,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 		matchMs = 0
 	}
 
-	teamplay := isTeamplay(res, co)
+	teamplay := isTeamplay(co)
 	// Pack TRANSFERS are observable only where the wire named the pack: the
 	// `//ktx bp` pickup hint carries the dropper, and it ships with the same
 	// KTX generation as the `//ktx drop` hint. A RECONSTRUCTED drops section
@@ -641,13 +641,10 @@ func deathsOf(res *Result, name string) int {
 //     comes off the aim section's Direct. `attacks` stays the FIRE count —
 //     that is KTX's own `attacks++` per rocket launched (:1033).
 //   - gl — KTX counts the same touch (GrenadeTouch, ktx/src/weapons.c:1331)
-//     and the WIRE cannot see it: the touch detonates the grenade and every
-//     resulting damage row is splash-flagged. The touch is re-derived instead,
-//     from the flight geometry and the fuse, by the same classifier a
-//     reconstructed row uses (damagerecon/direct.go) — so gl publishes the
-//     direct-impact count too wherever the spatial shot streams the geometry
-//     needs were built. Without them the row keeps the any-path count and
-//     says so. See deriveMeasuredAcc.
+//     and the wire cannot see it, so it is re-derived from the flight
+//     geometry (result.WeaponAim). gl therefore publishes the direct-impact
+//     count wherever that derivation ran, and the any-path count — labelled —
+//     where it did not. See deriveMeasuredAcc.
 //   - lg, ng, sng, axe — one trace per fire (`hits++` at
 //     ktx/src/weapons.c:1106 against `attacks++` at :1233), one nail per
 //     spike (:1549, :1620), one swing for the axe (:85, :119). Each has a
@@ -858,35 +855,14 @@ type reconHit struct {
 // so KTX's counter and the fire→damage join count the same event and the
 // caller's fallback is already right (see deriveAccuracy).
 //
-// GL'S ROW IS CONDITIONAL, and on a different input from the rest. KTX counts
-// its `hits` exactly the way it counts rl's — in the touch handler — but the
-// WIRE does not record that touch: GrenadeTouch increments the counter and
-// then detonates through GrenadeExplode → T_RadiusDamage
-// (ktx/src/weapons.c:1327-1340), which raises dmg_is_splash for every row it
-// writes (ktx/src/combat.c:1207), so a direct-impact count read off the
-// splash flag is ~0 for every player — measured against the verbatim block it
-// ran 100% aggregate under-count on 424 archive rows, 30.0% of them exact at
-// bias −1.93, and every exact one is a player who touched nobody
-// (cmd/qw-demoinfo-eval `acc.gl.direct/wire`).
-//
-// Since v75 aim's gl Direct is not that count. It is the SAME touch
-// classifier the reconstructed tier runs (damagerecon/direct.go, fed the wire
-// rows by damagerecon.WireDirectTouches): the grenade's broadcast detonation
-// point against the victim's hull, minus the grenades whose flight spanned
-// the whole 2.5 s fuse and therefore died of it rather than of a touch
-// (weapons.c:1430). That is era-independent evidence, so it answers the
-// question on a modern demo exactly as it does on an old one, and gl
-// publishes HitsDirectImpact like rl.
-//
-// The classifier needs the spatial shot streams (Registry.BuildShotStreams —
-// mvd-api and the WASM build always request them, a bare qw-analyze parse
-// does not). Without them there is no measurement, and aim says so by leaving
-// the gl row's Direct NIL (result.WeaponAim), which is the one thing gated on
-// here: this function reads the row's own presence rather than re-deriving
-// the condition from Streams.ShotStreamsComputed, so the two cannot drift.
-// A nil row falls back to the caller's any-path count honestly labelled
-// HitsAnyDamage rather than to a fabricated near-zero claiming to be KTX's
-// number.
+// GL'S ROW IS CONDITIONAL: its Direct comes from the flight-geometry touch
+// classifier rather than off the wire, because the wire cannot see a grenade
+// touch — the whole story is in result.WeaponAim's Direct/Splash doc. What is
+// gated HERE is the row's own presence: this function reads whether aim
+// published a Direct rather than re-deriving the condition from
+// Streams.ShotStreamsComputed, so the two cannot drift. A nil row falls back
+// to the caller's any-path count honestly labelled HitsAnyDamage rather than
+// to a fabricated near-zero claiming to be KTX's number.
 //
 // Measured against the verbatim block, gl at 92.0% of 424 archive rows exact
 // and 3.79% aggregate, bias −0.07 per row — above the reconstructed tier
@@ -928,14 +904,9 @@ func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
 			var m measuredAcc
 			switch w.Weapon {
 			case "sg", "ssg":
-				// Pellets is 0 only where aim withheld the split entirely;
-				// a fired shotgun always has Shots × 6/14 of them. Falling
-				// through then leaves the fire-count row, which is honest
-				// about being a different scale, rather than dividing a
-				// pellet-hit count by no pellets.
-				if w.Pellets == 0 {
-					continue
-				}
+				// Pellets is Shots × 6/14 on every fired shotgun row aim
+				// emits — the split has no withhold of its own, unlike the
+				// projectile one below.
 				m = measuredAcc{attacks: w.Pellets, hits: w.PelletHits, convention: result.HitsPellets}
 			case "rl", "gl":
 				// One branch, one gate: the ROW's own Direct. It is a pointer
@@ -1576,32 +1547,12 @@ func longestMs(iv []result.Interval) int32 {
 // trivially true and invented a pack transfer for every backpack anyone
 // picked up. The descriptor rejects a mode KTX would not count for before
 // the cvar is consulted, which is where that rule now lives.
-func isTeamplay(res *Result, co *CoreOutputs) bool {
+func isTeamplay(co *CoreOutputs) bool {
 	if co.IsDuel() {
 		return false
 	}
-	if gm := co.Mode(); gm != nil {
-		return gm.TeamBased
-	}
-	// No descriptor at all — a hand-built registry with no roster node.
-	// Fall back to the roster shape: teams exist and at least one holds more
-	// than a single player (an FFA scoreboard lists each player under their
-	// own colour, which is not teamplay).
-	if res.Match == nil {
-		return false
-	}
-	counts := map[string]int{}
-	for i := range res.Match.Players {
-		if t := res.Match.Players[i].Team; t != "" {
-			counts[t]++
-		}
-	}
-	for _, n := range counts {
-		if n > 1 {
-			return true
-		}
-	}
-	return false
+	gm := co.Mode()
+	return gm != nil && gm.TeamBased
 }
 
 // aggregateTeamRows sums the player rows per team. Hold shares are

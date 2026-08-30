@@ -18,6 +18,7 @@ func wireGLFixture(ep vec3, spawnT, endT int32) *result.Result {
 		}
 	}
 	return &result.Result{
+		Match: &result.MatchResult{GameMode: &result.GameMode{Canonical: result.GameModeDuel}},
 		Streams: &result.Streams{
 			ShotStreamsComputed: true,
 			Players: []result.PlayerStream{
@@ -102,8 +103,8 @@ func TestWireDirectTouchesWithheldWithoutInputs(t *testing.T) {
 }
 
 // Rows the classifier never entertains: a self hit (a missile returns
-// immediately on `other == owner`, weapons.c:951/:1315) and every non-rl/gl
-// weapon.
+// immediately on `other == owner`, ktx/src/weapons.c:954, :1317) and every
+// weapon but gl — rl is classified only by WireDirectTouchesForEval.
 func TestWireDirectTouchesSkipsSelfAndOtherWeapons(t *testing.T) {
 	res := wireGLFixture(vec3{0, 0, 0}, 3000, 3400)
 	res.Damage.Events = append(res.Damage.Events,

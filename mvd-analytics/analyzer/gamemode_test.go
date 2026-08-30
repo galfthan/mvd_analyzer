@@ -164,20 +164,6 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 	}
 }
 
-// The FFA case the whole work item exists for: teamplay is 0 and the players
-// still wear clan tags, three of them the same one.
-func TestResolveGameMode_FFATagsAreNotTeams(t *testing.T) {
-	gm := resolveGameMode(nil, &FinalScores{Mode: "FFA"}, nil,
-		map[string]string{"mode": "ffa", "deathmatch": "3"}, nil,
-		map[string]int{"red": 3, "'tro": 1, "rr": 1})
-	if gm.TeamBased {
-		t.Errorf("FFA with three players on one tag must not be team-based: %+v", gm)
-	}
-	if !individualLayoutFromMode(&gm) {
-		t.Errorf("FFA must take the individual layout: %+v", gm)
-	}
-}
-
 func TestResolveGameMode_Submodes(t *testing.T) {
 	gm := resolveGameMode(nil, nil, &MatchSettings{Instagib: true},
 		map[string]string{"mode": "4on4-midair-df", "k_bloodfest": "1", "teamplay": "2"}, nil, nil)

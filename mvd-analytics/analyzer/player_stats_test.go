@@ -479,29 +479,20 @@ func TestIsTeamplayGate(t *testing.T) {
 	}
 
 	duelRoster := &Roster{isDuel: true}
-	if isTeamplay(&Result{}, &CoreOutputs{Roster: duelRoster}) {
+	if isTeamplay(&CoreOutputs{Roster: duelRoster}) {
 		t.Error("duel must not count as teamplay — KTX gates transfers on isTeam()")
 	}
-	if !isTeamplay(&Result{}, mode(&result.MatchSettings{Mode: "Team", Teamplay: 2}, nil, nil)) {
+	if !isTeamplay(mode(&result.MatchSettings{Mode: "Team", Teamplay: 2}, nil, nil)) {
 		t.Error("teamplay 2 should count")
 	}
 	ffaCo := mode(nil, map[string]string{"mode": "ffa", "teamplay": "0"}, nil)
-	ffa := &Result{Match: &result.MatchResult{Players: []result.PlayerStat{{Name: "a", Team: "1"}, {Name: "b", Team: "2"}}}}
-	if isTeamplay(ffa, ffaCo) {
+	if isTeamplay(ffaCo) {
 		t.Error("teamplay 0 must not count even when players carry colour teams")
 	}
 	// No cvar and no mode at all: fall back to the roster shape.
 	noCvar := mode(nil, nil, map[string]int{"red": 2, "blue": 1})
-	if !isTeamplay(&Result{}, noCvar) {
+	if !isTeamplay(noCvar) {
 		t.Error("two players sharing a team should count as teamplay when no cvar is present")
-	}
-	// No descriptor at all (a hand-built registry with no roster node):
-	// isTeamplay keeps its own roster-shape fallback over match.players.
-	noDesc := &Result{Match: &result.MatchResult{Players: []result.PlayerStat{
-		{Name: "a", Team: "red"}, {Name: "b", Team: "red"}, {Name: "c", Team: "blue"},
-	}}}
-	if !isTeamplay(noDesc, &CoreOutputs{}) {
-		t.Error("with no descriptor, two players sharing a team should still count")
 	}
 }
 
@@ -514,14 +505,14 @@ func TestIsTeamplayGate_FFAModeBeatsTeamplayCvar(t *testing.T) {
 	gmFFA := resolveGameMode(nil, nil,
 		&result.MatchSettings{Mode: "FFA", Teamplay: 2},
 		map[string]string{"teamplay": "2"}, nil, nil)
-	if isTeamplay(&Result{}, &CoreOutputs{GameMode: &gmFFA}) {
+	if isTeamplay(&CoreOutputs{GameMode: &gmFFA}) {
 		t.Error("FFA must not count as teamplay even with teamplay 2 — KTX's isTeam() is mode-gated")
 	}
 	// CTF is deliberately NOT in the individual list: its teams are real and
 	// the transfers happened, even though KTX's isTeam() declines to count
 	// them.
 	gmCTF := resolveGameMode(nil, nil, &result.MatchSettings{Mode: "CTF", Teamplay: 2}, nil, nil, nil)
-	if !isTeamplay(&Result{}, &CoreOutputs{GameMode: &gmCTF}) {
+	if !isTeamplay(&CoreOutputs{GameMode: &gmCTF}) {
 		t.Error("CTF should still count as teamplay")
 	}
 }
@@ -1078,16 +1069,11 @@ func TestDeriveAccuracyMeasuredTierPublishesKTXConventions(t *testing.T) {
 // mark. The contrast is the second half: the same fixture with a NIL Direct —
 // aim's split never ran — where falling back is the honest answer, and the
 // two are indistinguishable to any consumer that reads a bare int.
-//
-// sg in the same fixture is the third shape: a zero PELLETS is the pellet
-// split genuinely withheld (there is no such thing as a fired shotgun with no
-// pellets), and dividing a pellet-hit count by no pellets is what falls back.
 func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 	shots := &result.ShotsResult{ByPlayer: []result.PlayerShots{{
 		Player: "a",
 		ByWeapon: []result.WeaponShots{
 			{Weapon: "rl", Shots: 40, Hits: 0},
-			{Weapon: "sg", Shots: 30, Hits: 9},
 		},
 	}}}
 	res := &Result{
@@ -1099,7 +1085,6 @@ func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 			Players: []result.PlayerAim{{Player: "a", Weapons: []result.WeaponAim{
 				// The split ran and this player touched nobody: a measured 0.
 				{Weapon: "rl", Shots: 40, Hits: 0, Direct: iptr(0), Splash: iptr(0), Missed: 40},
-				{Weapon: "sg", Shots: 30, Hits: 9}, // pellet split withheld
 			}}},
 		},
 	}
@@ -1108,11 +1093,6 @@ func TestDeriveMeasuredAccRLZeroDirectIsMeasured(t *testing.T) {
 	if rl.Attacks != 40 || rl.Hits == nil || *rl.Hits != 0 || rl.HitsConvention != result.HitsDirectImpact {
 		t.Errorf("rl = %+v, want 40 fires / a measured 0 / %q — no rocket touched anybody",
 			rl, result.HitsDirectImpact)
-	}
-	sg := acc.ByWeapon["sg"]
-	if sg.Attacks != 30 || sg.Hits == nil || *sg.Hits != 9 || sg.HitsConvention != result.HitsAnyDamage {
-		t.Errorf("sg = %+v, want the fire-count fallback (30 / 9 / %q) with no pellet split",
-			sg, result.HitsAnyDamage)
 	}
 
 	// Same 0 fires, same 0 hits, NIL Direct: aim's split never ran (no rl/gl

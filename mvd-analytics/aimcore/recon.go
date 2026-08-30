@@ -190,7 +190,7 @@ func reconDamageByAttacker(res *result.Result) map[string][]*dmgRec {
 			continue
 		}
 		out[d.Attacker] = append(out[d.Attacker],
-			&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, splash: d.IsSplash, team: d.IsTeam, self: d.IsSelf})
+			&dmgRec{t: d.Time, weapon: d.Weapon, dmg: d.Damage, team: d.IsTeam, self: d.IsSelf})
 	}
 	return out
 }
