@@ -154,6 +154,15 @@ belongs in the frontend.
      into its `testdata/` through the parser in warning-collecting
      mode and applies data-quality invariants on the result. No-op
      when no demos are present.
+  5. **Source drift tests** — `mvd-analytics/analyzer/ktx_vocab_drift_test.go`
+     and `mvd-reader/parser/ktx_vocab_drift_test.go` read the vendored
+     `ktx/src` (and `kteams/v2.21/SRC`) when present and check that every
+     string KTX can write into a vocabulary the pipeline matches on
+     (countdown Mode literals, `um_list`, `GetMode`, `lastscores2str`, the
+     `status` writers, the start/end broadcasts) is one the Go tables name
+     or knowingly pass over. Skip when the trees are absent. When you add
+     an entry to one of those tables, or KTX gains a literal, these are
+     what fail.
 - If the golden test fails on an intended change, regenerate with
   `go test ./mvd-analytics/analyzer/... -run TestGoldenCorpus -args -update-golden`
   (the `-update-golden` flag is registered only in the analyzer
