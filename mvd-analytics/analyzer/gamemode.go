@@ -83,17 +83,22 @@ func canonicalIsRounds(canonical string) bool {
 
 // canonicalFromKTXMode maps KTX's demoinfo `mode` string (GetMode,
 // ktx/src/stats.c:309-354) and the `//finalscores` lastscores mode name
-// (commands.c:6755) onto a canonical shape. Both vocabularies are handled
-// here because they are the same enum spelled two ways ("clan-arena" vs
-// "Clan Arena"), and neither is stable across KTX forks.
+// (lastscores2str, commands.c:6755-6790) onto a canonical shape. Both
+// vocabularies are handled here because they are the same enum spelled two
+// ways ("clan-arena" vs "Clan Arena"). The table is exactly the union of
+// the two functions' return literals — a drift test reads them out of the
+// vendored source — after a whole-archive sweep found seven aliases that
+// neither writes ("1on1", "ca", "wo", "hoony", "blitz", "rocket arena",
+// "coop") on 0 of 50 964 demos.
 //
 // GetMode tests k_instagib and k_midair FIRST, so an instagib 4on4 reports
 // "instagib" and says nothing about teams at all. Those two return "" —
 // "this string does not name a shape" — and the caller falls through to the
-// next source. They are still recorded as submodes.
+// next source. They are still recorded as submodes. "unknown", both
+// functions' default, falls through the same way.
 func canonicalFromKTXMode(mode string) string {
 	switch strings.ToLower(strings.TrimSpace(mode)) {
-	case "duel", "1on1":
+	case "duel":
 		return result.GameModeDuel
 	case "team":
 		return result.GameModeTeam
@@ -101,28 +106,38 @@ func canonicalFromKTXMode(mode string) string {
 		return result.GameModeFFA
 	case "ctf":
 		return result.GameModeCTF
-	case "clan arena", "clan-arena", "ca":
+	case "clan arena", "clan-arena":
 		return result.GameModeCA
-	case "wipeout", "wo":
+	case "wipeout":
 		return result.GameModeWipeout
 	case "race":
 		return result.GameModeRace
-	case "hoonymode", "hoony", "blitz":
+	case "hoonymode":
+		// isHoonyModeAny() in GetMode — the duel AND the blitz team
+		// variants both report this, so it may be a team game.
 		return result.GameModeHoony
-	case "ra", "rocket arena", "rocket-arena":
+	case "ra", "rocket-arena":
 		return result.GameModeRA
-	case "coop":
-		return result.GameModeCoop
 	}
 	return ""
 }
 
 // canonicalFromUmode maps the base user-mode name of the composite
-// serverinfo `mode` key onto a canonical shape. The names are um_list's
-// (ktx/src/commands.c:4535-4553); everything of the NonN family — including
-// the three-way NonNonN modes and the open-ended XonX — is a team game.
-// "tot" (Tribe of Tjernobyl) sets `k_mode 3` (gtFFA, commands.c:4511-4533),
-// so it is an FFA.
+// serverinfo `mode` key onto a canonical shape. The names are exactly
+// um_list's seventeen (ktx/src/commands.c:4535-4553; a drift test reads
+// them out of the vendored source): everything of the NonN family —
+// including the three-way NonNonN modes and the open-ended XonX — is a team
+// game, and "tot" (Tribe of Tjernobyl) sets `k_mode 3` (gtFFA,
+// commands.c:4511-4533), so it is an FFA. Race is not a usermode: KTX
+// writes it only as the `-race` SUFFIX (world.c:1487-1490, 84 archive
+// demos, all `ffa-race`), so a base token "race" is unconstructible and the
+// table no longer carries one.
+//
+// Three base tokens in the archive are not KTX's and deliberately fall
+// through to the next source rather than being guessed at: `1` (65 E0
+// demos, the CTF mod that also writes `M:SS left`), `extinction` (87 E5
+// demos, a KTX fork reporting ktxver 1.47-dev) and `smashpacktdm` (5 E5
+// demos, "Quake Smash Mod"). A name is not a shape verdict.
 func canonicalFromUmode(umode string) string {
 	switch strings.ToLower(strings.TrimSpace(umode)) {
 	case "1on1":
@@ -142,51 +157,80 @@ func canonicalFromUmode(umode string) string {
 		return result.GameModeWipeout
 	case "ca":
 		return result.GameModeCA
-	case "race":
-		return result.GameModeRace
 	}
 	return ""
 }
 
 // canonicalFromCountdown maps the countdown centerprint's Mode row onto a
-// canonical shape. The strings are KTX's `displayname` column
-// (um_list, ktx/src/commands.c:4535-4553) after metadata.go flattens the
-// Quake-font digit glyphs — "\223 on \223" renders as "1 on 1" and the
-// parser strips the spaces, so the rows read "1on1", "4on4", "FFA",
-// "HoonyMode", "Clan Arena", "Wipeout". LGC is a submode row that reaches
-// this field on some builds; it names no shape.
+// canonical shape. The row is written by PrintCountdown
+// (ktx/src/match.c:1511-1571) from a fixed set of redtext literals —
+// "D u e l", "T e a m", "F F A", "C T F", "R A C E", "C O O P", "CA", "RA",
+// "Wipeout", "Hoony", "BlitzTDM", plus "LGC" and "BLOODFST", which name
+// rulesets rather than shapes, and "Unknown" — NOT from um_list's
+// displayname column, which an earlier version of this table was
+// transcribed from (fourteen entries, 0 hits on 50 964 demos). The
+// spaced spellings arrive here already flattened ("Duel", "Team", "FFA",
+// "COOP"); the table lower-cases and strips spaces once more so either
+// form matches. A drift test reads the literals out of the vendored source.
+//
+// Precedence inside PrintCountdown is a chain of if/else: bloodfest beats
+// coop beats RA beats CA/Wipeout beats Hoony beats LGC beats BlitzTDM beats
+// race beats duel/team/ffa/ctf. So a Hoony row means the DUEL variant
+// (isHoonyModeDuel), a BlitzTDM row the team one, and an LGC row hides the
+// shape entirely (450 archive demos — it falls through to the serverinfo
+// umode, which still says "1on1"). "Extinction", from a KTX fork, is the
+// one row in the archive this table does not name; it falls through too.
+//
+// "CA" is deliberately NOT mapped. The Wipeout branch of that if/else is
+// ktx commit 1194647 (2022-03-17); the builds before it print "CA" for
+// BOTH k_clan_arena values, and the archive is mostly those: of the 23
+// demos whose countdown says CA, 17 are wipeout matches (ktx 1.47-dev,
+// serverinfo `wipeout-wo-df`, `//finalscores` mode "Wipeout" on every one
+// that carries it) and only the six on 1.42–1.46 are clan arena. The row
+// names the isCA() FAMILY, not a shape; the serverinfo umode — `ca` or
+// `wipeout`, present on all 23 — is the source that tells them apart, and
+// it is next in precedence. A "Wipeout" row is unambiguous and mapped.
 func canonicalFromCountdown(mode string) string {
 	m := strings.ToLower(strings.TrimSpace(mode))
 	m = strings.ReplaceAll(m, " ", "")
 	switch m {
-	case "1on1", "duel":
+	case "duel":
 		return result.GameModeDuel
-	case "2on2", "3on3", "4on4", "10on10", "2on2on2", "3on3on3", "4on4on4", "xonx", "team",
-		"blitz(2v2)", "blitz(4v4)":
+	case "team", "blitztdm":
 		return result.GameModeTeam
-	case "ffa", "tribeoftjernobyl":
+	case "ffa":
 		return result.GameModeFFA
 	case "ctf":
 		return result.GameModeCTF
-	case "clanarena":
-		return result.GameModeCA
 	case "wipeout":
 		return result.GameModeWipeout
 	case "race":
 		return result.GameModeRace
-	case "hoonymode":
+	case "hoony":
 		return result.GameModeHoony
+	case "ra":
+		return result.GameModeRA
+	case "coop":
+		return result.GameModeCoop
 	}
 	return ""
 }
 
 // submodeSet collects the ruleset modifiers, unioned over every source that
-// names one: the composite serverinfo `mode` key's tokens, the legacy k_*
-// cvars older servers published directly, and the countdown table's boolean
+// names one: the composite serverinfo `mode` key's tokens, a k_* cvar
+// exported into the serverinfo by hand, and the countdown table's ruleset
 // rows. The tokens are KTX's own spellings from SetMode4ServerInfo
 // (ktx/src/world.c:1487-1541) — `-race -midair -instagib -lgc -ca -wo -ra
-// -gm -df -yw -bf` — and the legacy cvars map onto the same names so a
-// consumer has one vocabulary to test.
+// -gm -df -yw -bf` — and the other two sources map onto the same names so
+// a consumer has one vocabulary to test.
+//
+// The k_* list is not something KTX publishes: it registers every k_ cvar
+// with flags 0 (`PF_registercvar`, mvdsv/src/pr_cmds.c:2601-2610 — no
+// CVAR_SERVERINFO) and has no `serverinfo k_*` writer anywhere, and the
+// whole-archive sweep found none of these six keys on any demo. They stay
+// because an admin can `serverinfo k_x 1` by hand and some do — the archive
+// carries `k_fallbunny` on 31 demos and three other k_ keys once each — so
+// the list is a hedge over a real practice, costing one map lookup each.
 func submodeSet(si map[string]string, ms *MatchSettings) (subs []string, src string) {
 	set := map[string]bool{}
 	note := func(tok, from string) {
@@ -228,8 +272,14 @@ func submodeSet(si map[string]string, ms *MatchSettings) (subs []string, src str
 		if ms.Yawnmode {
 			note("yw", result.GameModeSrcCountdown)
 		}
+		// Two PrintCountdown Mode literals name a ruleset, not a shape
+		// (match.c:1511-1513, :1538-1540): they land here, and the shape
+		// comes from the next source down.
 		if strings.EqualFold(ms.Mode, "lgc") {
 			note("lgc", result.GameModeSrcCountdown)
+		}
+		if strings.EqualFold(ms.Mode, "bloodfst") {
+			note("bf", result.GameModeSrcCountdown)
 		}
 	}
 	if len(set) == 0 {

@@ -86,7 +86,7 @@ type FinalScores struct {
 // to see the centerprint format strings — and ShowMatchSettings()
 // (match.c:2077-2141) for the broadcast rows.
 type MatchSettings struct {
-	Mode       string `json:"mode,omitempty"`       // "Duel" / "Team" / "FFA" / "LGC" / "CA" / "CTF" / etc.
+	Mode       string `json:"mode,omitempty"`       // PrintCountdown's literal, spaces stripped: "Duel" / "Team" / "FFA" / "CTF" / "RACE" / "COOP" / "CA" / "RA" / "Wipeout" / "Hoony" / "BlitzTDM" / "LGC" / "BLOODFST" (ktx/src/match.c:1511-1571)
 	Deathmatch int    `json:"deathmatch,omitempty"` // 0..5
 	Teamplay   int    `json:"teamplay,omitempty"`   // QW teamplay setting
 	Timelimit  int    `json:"timelimit,omitempty"`  // minutes

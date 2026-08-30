@@ -390,6 +390,11 @@ func applyCountdownField(s *MatchSettings, key, value string) bool {
 	// Mode rendering uses "D u e l", "T e a m", "F F A", etc — strip spaces.
 	flat := strings.ReplaceAll(value, " ", "")
 
+	// A pre-KTX table keys the row `Mode:` — three E0 archive demos
+	// (75e18f801f654a92…), found by the whole-archive sweep. KTX never
+	// writes the colon, so trimming it changes nothing on a KTX table.
+	key = strings.TrimSuffix(key, ":")
+
 	switch key {
 	case "Mode":
 		s.Mode = flat

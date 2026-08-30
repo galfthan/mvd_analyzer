@@ -290,3 +290,19 @@ func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
 		})
 	}
 }
+
+// A pre-KTX countdown table keys the row `Mode:` — three E0 archive demos
+// (75e18f801f654a92…). The key split takes the first whitespace run, so the
+// colon rode along and the row was dropped as unrecognised.
+func TestParseCountdownCenterprint_ColonKeyedMode(t *testing.T) {
+	got := parseCountdownCenterprint("Countdown: 5\nMode:      Duel\nTimelimit: 10\n")
+	if got == nil {
+		t.Fatal("parseCountdownCenterprint returned nil")
+	}
+	if got.Mode != "Duel" {
+		t.Errorf("Mode = %q, want Duel", got.Mode)
+	}
+	if got.Timelimit != 10 {
+		t.Errorf("Timelimit = %d, want 10", got.Timelimit)
+	}
+}

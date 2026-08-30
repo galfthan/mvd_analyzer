@@ -113,7 +113,7 @@ func TestResolveGameMode_Precedence(t *testing.T) {
 			// source named says nothing about what this build writes.
 			name:      "demoinfo with no mode defers to the teamplay cvar",
 			di:        &DemoInfoResult{Version: 1, Players: []DemoInfoPlayer{{Name: "a"}, {Name: "b"}, {Name: "c"}, {Name: "d"}}},
-			ms:        &MatchSettings{Mode: "4on4"},
+			ms:        &MatchSettings{Mode: "Team"},
 			si:        map[string]string{"teamplay": "2"},
 			canonical: result.GameModeTeam, srcCanon: result.GameModeSrcCountdown,
 			teamBased: true, srcTeam: result.GameModeSrcServerInfo, individual: false,
@@ -222,6 +222,113 @@ func TestParseServerinfoMode(t *testing.T) {
 		got := result.ParseServerinfoMode(c.in)
 		if got.Umode != c.umode || !reflect.DeepEqual(got.Submodes, c.subs) {
 			t.Errorf("ParseServerinfoMode(%q) = %+v, want umode=%q subs=%v", c.in, got, c.umode, c.subs)
+		}
+	}
+}
+
+// TestCanonicalTables pins each vocabulary table to the strings its KTX
+// producer actually writes, and pins the fall-throughs: a name that is not
+// KTX's is not guessed at, it yields "" and the resolver moves to the next
+// source. The producers are read out of the vendored source by
+// TestKTXVocabularyDrift; this is the offline half.
+func TestCanonicalTables(t *testing.T) {
+	t.Run("countdown", func(t *testing.T) {
+		// PrintCountdown's literals (ktx/src/match.c:1511-1571), as they
+		// arrive after metadata.go has stripped the spaces, plus the raw
+		// spaced spellings and the archive's foreign row.
+		for in, want := range map[string]string{
+			"Duel": result.GameModeDuel, "D u e l": result.GameModeDuel,
+			"Team": result.GameModeTeam, "T e a m": result.GameModeTeam,
+			"FFA": result.GameModeFFA, "Ffa": result.GameModeFFA,
+			"CTF": result.GameModeCTF, "RACE": result.GameModeRace,
+			"COOP": result.GameModeCoop, "C O O P": result.GameModeCoop,
+			"RA":      result.GameModeRA,
+			"Wipeout": result.GameModeWipeout, "Hoony": result.GameModeHoony,
+			"BlitzTDM": result.GameModeTeam,
+			// Pre-2022 builds print CA for wipeout too (17 of the archive's
+			// 23): the family, not the shape. The serverinfo umode decides.
+			"CA": "",
+			// Rulesets, not shapes — submodeSet takes them.
+			"LGC": "", "BLOODFST": "",
+			"Unknown": "", "": "",
+			// A KTX fork's row (87 archive demos): not named, not guessed.
+			"Extinction": "",
+			// um_list displaynames, which PrintCountdown never writes.
+			"1on1": "", "4on4": "", "Clan Arena": "", "HoonyMode": "",
+			"Blitz (2v2)": "", "Tribe of Tjernobyl": "",
+		} {
+			if got := canonicalFromCountdown(in); got != want {
+				t.Errorf("canonicalFromCountdown(%q) = %q, want %q", in, got, want)
+			}
+		}
+	})
+
+	t.Run("umode", func(t *testing.T) {
+		for in, want := range map[string]string{
+			"1on1": result.GameModeDuel, "XonX": result.GameModeTeam,
+			"4on4on4": result.GameModeTeam, "blitz4v4": result.GameModeTeam,
+			"tot": result.GameModeFFA, "ca": result.GameModeCA,
+			"hoonymode": result.GameModeHoony,
+			// A suffix only (world.c:1487-1490): never a base token.
+			"race": "",
+			// The archive's three foreign base tokens.
+			"1": "", "extinction": "", "smashpacktdm": "",
+		} {
+			if got := canonicalFromUmode(in); got != want {
+				t.Errorf("canonicalFromUmode(%q) = %q, want %q", in, got, want)
+			}
+		}
+	})
+
+	t.Run("ktx mode", func(t *testing.T) {
+		for in, want := range map[string]string{
+			// GetMode (stats.c:309-354) and lastscores2str
+			// (commands.c:6755-6790), every literal.
+			"duel": result.GameModeDuel, "team": result.GameModeTeam,
+			"ffa": result.GameModeFFA, "FFA": result.GameModeFFA,
+			"ctf": result.GameModeCTF, "CTF": result.GameModeCTF,
+			"clan-arena": result.GameModeCA, "Clan Arena": result.GameModeCA,
+			"Wipeout": result.GameModeWipeout, "race": result.GameModeRace,
+			"hoonymode": result.GameModeHoony, "HoonyMode": result.GameModeHoony,
+			"rocket-arena": result.GameModeRA, "RA": result.GameModeRA,
+			"instagib": "", "midair": "", "unknown": "",
+			// Aliases neither function writes (0 of 50 964 demos).
+			"1on1": "", "ca": "", "wo": "", "hoony": "", "blitz": "",
+			"rocket arena": "", "coop": "",
+		} {
+			if got := canonicalFromKTXMode(in); got != want {
+				t.Errorf("canonicalFromKTXMode(%q) = %q, want %q", in, got, want)
+			}
+		}
+	})
+}
+
+// Archive 144c5e29…: ktx 1.47-dev, countdown Mode "CA", serverinfo
+// `wipeout-wo-df`, //finalscores "Wipeout". The countdown row is the family
+// on that build; the umode is the shape.
+func TestResolveGameMode_CountdownCAIsNotAShape(t *testing.T) {
+	gm := resolveGameMode(nil, &FinalScores{Mode: "Wipeout"}, &MatchSettings{Mode: "CA", Teamplay: 2},
+		map[string]string{"mode": "wipeout-wo-df", "teamplay": "2"}, nil, nil)
+	if gm.Canonical != result.GameModeWipeout || gm.Sources.Canonical != result.GameModeSrcServerInfo {
+		t.Errorf("canonical = %q from %q, want wipeout from serverinfo", gm.Canonical, gm.Sources.Canonical)
+	}
+	gm = resolveGameMode(nil, nil, &MatchSettings{Mode: "CA", Teamplay: 2},
+		map[string]string{"mode": "ca-ca-df", "teamplay": "2"}, nil, nil)
+	if gm.Canonical != result.GameModeCA || gm.Sources.Canonical != result.GameModeSrcServerInfo {
+		t.Errorf("canonical = %q from %q, want ca from serverinfo", gm.Canonical, gm.Sources.Canonical)
+	}
+}
+
+// A countdown whose Mode row names a ruleset gives the shape to the next
+// source and the ruleset to submodes — for both such literals.
+func TestResolveGameMode_CountdownRulesetRows(t *testing.T) {
+	for _, c := range []struct{ row, sub string }{{"LGC", "lgc"}, {"BLOODFST", "bf"}} {
+		gm := resolveGameMode(nil, nil, &MatchSettings{Mode: c.row}, map[string]string{"mode": "1on1"}, nil, nil)
+		if gm.Canonical != result.GameModeDuel || gm.Sources.Canonical != result.GameModeSrcServerInfo {
+			t.Errorf("%s: canonical = %q from %q, want duel from serverinfo", c.row, gm.Canonical, gm.Sources.Canonical)
+		}
+		if !reflect.DeepEqual(gm.Submodes, []string{c.sub}) || gm.Sources.Submodes != result.GameModeSrcCountdown {
+			t.Errorf("%s: submodes = %v from %q, want [%s] from countdown", c.row, gm.Submodes, gm.Sources.Submodes, c.sub)
 		}
 	}
 }
