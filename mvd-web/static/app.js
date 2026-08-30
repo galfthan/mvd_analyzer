@@ -3014,6 +3014,9 @@ function displayKeyMoments(result) {
     // Direct rocket air hits (sortable table, default by height).
     displayAirgibs(result);
 
+    // The highlight catalogue: discharges, quadbores, telefrags.
+    displayHighlights(result);
+
     // Top frag runs / top RL / top LG kills — view queries, so they fill in
     // asynchronously and independently of everything above.
     renderTopMoments();
@@ -3206,8 +3209,16 @@ function displayAirgibs(result) {
     if (!table || !body) return;
 
     const hubInfo = currentResult?.hubInfo || null;
-    // `t` is int32 ms on the raw result; keep a seconds copy for seek/hub.
-    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.time * 0.001 }));
+    // `time` is int32 ms on the raw result; keep a seconds copy for seek/hub.
+    // Rows are highlights.airgibs (schema v76, the list's only home):
+    // HighlightEvent — actor / victims[0], the victim row carrying the state.
+    const data = (result.highlights?.airgibs || []).map(h => ({
+        time: h.time, timeSec: h.time * 0.001,
+        height: h.height, heightAboveAttacker: h.heightAboveAttacker,
+        attacker: h.actor?.name, attackerUserID: h.actor?.userId,
+        victim: h.victims?.[0]?.name, lethal: !!h.victims?.[0]?.killed,
+        loc: h.victims?.[0]?.loc, state: h.victims?.[0] || null,
+    }));
 
     if (data.length === 0) {
         body.innerHTML = '';
@@ -3232,16 +3243,6 @@ function displayAirgibs(result) {
     for (const a of data) {
         const tr = document.createElement('tr');
 
-        let watchCell = '-';
-        if (hubInfo && hubInfo.gameId) {
-            const demoOff = timelineState.demoOffset || 0;
-            const fromTime = Math.max(0, Math.floor(a.timeSec + demoOff) - 5);
-            const toTime = Math.floor(a.timeSec + demoOff) + 3;
-            const trackId = a.attackerUserID || 0; // shooter perspective
-            const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
-        }
-
         const lethalCell = a.lethal ? '<span class="airgib-lethal">gib</span>' : '';
         const aboveShooter = a.heightAboveAttacker ?? 0;
 
@@ -3252,14 +3253,195 @@ function displayAirgibs(result) {
             <td>${escapeHtml(a.victim || 'Unknown')}</td>
             <td>${escapeHtml(a.loc || '-')}</td>
             <td data-sort-value="${a.lethal ? 1 : 0}">${lethalCell}</td>
+            <td>${a.state ? highlightStateCell(a.state) : ''}</td>
             <td class="time-cell time-link" data-sort-value="${a.time}">${formatDuration(a.timeSec)}</td>
-            <td>${watchCell}</td>
+            <td>${highlightWatchCell(hubInfo, a.timeSec, a.attackerUserID)}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(a.timeSec));
         body.appendChild(tr);
     }
 
     makeSortable(table);
+}
+
+// ─── Highlight catalogue (discharges / quadbores / telefrags) ───────────────
+//
+// result.highlights (schema v76) is the stored catalogue: one row shape for
+// every kind — an actor, the victims it touched, kill counters — with each
+// participant's state read just before the instant (health/armor/stack,
+// weapons, powerups, loc). The tables below are plain renderings of those
+// lists; the toplist IS the sort, which makeSortable hands to the viewer.
+
+// highlightWatchCell builds the Hub replay link from the actor's userid
+// (the JSON key is `userId` on HighlightPlayer).
+function highlightWatchCell(hubInfo, timeSec, trackId) {
+    if (!hubInfo || !hubInfo.gameId) return '-';
+    const demoOff = timelineState.demoOffset || 0;
+    const fromTime = Math.max(0, Math.floor(timeSec + demoOff) - 5);
+    const toTime = Math.floor(timeSec + demoOff) + 3;
+    const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId || 0 });
+    return `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+}
+
+// highlightStack renders "health/armor+type" ("118/180ra", "100/0"); "?"
+// when the streams never recorded the player (stateSource "").
+function highlightStack(p) {
+    if (!p || p.health == null) return '?';
+    const armor = p.armor ?? 0;
+    const at = armor > 0 && p.armorType ? p.armorType : '';
+    const spawn = p.stateSource === 'spawn' ? ' <span class="hl-spawn">(spawn)</span>' : '';
+    return `<span class="hl-stack">${p.health}/${armor}${escapeHtml(at)}</span>${spawn}`;
+}
+
+// highlightHad renders the tracked inventory and powerups: "rl lg · QUAD".
+function highlightHad(p) {
+    if (!p) return '';
+    const weapons = (p.weapons || []).map(escapeHtml).join(' ');
+    const pus = (p.powerups || []).map(x => `<span class="hl-pu">${escapeHtml(x)}</span>`).join(' ');
+    if (!weapons && !pus) return '';
+    return `<span class="hl-had">${weapons}${weapons && pus ? ' · ' : ''}${pus}</span>`;
+}
+
+// highlightStateCell is the shared "what they had" cell: stack + had.
+function highlightStateCell(p) {
+    const had = highlightHad(p);
+    return `${highlightStack(p)}${had ? ' ' + had : ''}`;
+}
+
+function highlightRelationBadge(rel) {
+    const r = rel === 'team' || rel === 'self' ? rel : 'enemy';
+    return `<span class="hl-badge hl-${r}">${r}</span>`;
+}
+
+// highlightVictimChip renders one victim: relation badge, name, stack, had.
+// Hurt-not-killed victims (damage-log only) are dimmed; a deflect's
+// surviving pentagram holder gets its own badge.
+function highlightVictimChip(v) {
+    const badge = v.survived ? '<span class="hl-badge hl-survived">survived</span>' : highlightRelationBadge(v.relation);
+    const cls = v.killed || v.survived ? 'hl-chip' : 'hl-chip hl-hurt';
+    const dmg = v.damage ? ` <span class="hl-stack">−${v.damage}</span>` : '';
+    return `<span class="${cls}">${badge}<span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}${dmg}</span>`;
+}
+
+// highlightSetup clears a table, resets its header indicators to `defaultSort`
+// and toggles the empty state; returns the tbody or null when there is
+// nothing to render.
+function highlightSetup(id, rows, defaultSort) {
+    const table = document.getElementById(`${id}-table`);
+    const body = document.getElementById(`${id}-body`);
+    const empty = document.getElementById(`${id}-empty`);
+    if (!table || !body) return null;
+    if (rows.length === 0) {
+        body.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return null;
+    }
+    if (empty) empty.style.display = 'none';
+    table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc', 'sort-desc', 'sort-active'));
+    const th = table.querySelector(`thead th[data-sort="${defaultSort}"]`);
+    if (th) th.classList.add('sort-desc');
+    body.innerHTML = '';
+    return { table, body };
+}
+
+function highlightAppendRow(t, html, timeSec) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = html;
+    const link = tr.querySelector('.time-link');
+    if (link) link.addEventListener('click', () => setCurrentTime(timeSec));
+    t.body.appendChild(tr);
+}
+
+const KTX_QUAD_MS = 30000; // KTX quad duration; quadHeldMs is measured, the remainder is derived here
+
+function displayHighlights(result) {
+    const hubInfo = currentResult?.hubInfo || null;
+    const h = result.highlights || {};
+    const withSec = list => (list || []).map(e => ({ ...e, timeSec: e.time * 0.001 }));
+    const timeCell = e => `<td class="time-cell time-link" data-sort-value="${e.time}">${formatDuration(e.timeSec)}</td>`;
+    const locOf = e => e.actor?.loc || e.victims?.[0]?.loc || '';
+
+    // Discharges — enemy kills first, then damage dealt.
+    const discharges = withSec(h.discharges);
+    discharges.sort((a, b) => (b.enemyKills - a.enemyKills) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
+    let t = highlightSetup('discharges', discharges, 'kills');
+    if (t) {
+        for (const e of discharges) {
+            const kills = [];
+            if (e.enemyKills) kills.push(`<span class="hl-badge hl-enemy">${e.enemyKills} enemy</span>`);
+            if (e.teamKills) kills.push(`<span class="hl-badge hl-team">${e.teamKills} team</span>`);
+            if (e.actor?.killed) kills.push('<span class="hl-badge hl-self">self</span>');
+            // Sort value: enemies weigh most, then teammates, then the self death.
+            const killSort = e.enemyKills * 100 + e.teamKills * 10 + (e.actor?.killed ? 1 : 0);
+            const victims = (e.victims || []).map(highlightVictimChip).join('');
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')} ${highlightStateCell(e.actor)}</td>
+                <td data-sort-value="${e.cells ?? -1}">${e.cells ?? '?'}</td>
+                <td data-sort-value="${killSort}">${kills.join('') || '-'}</td>
+                <td data-sort-value="${e.damage || 0}">${e.damage || '-'}</td>
+                <td>${victims || '-'}</td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
+
+    // Quadbores — most quad thrown away first.
+    const quadbores = withSec(h.quadbores).map(e => ({ ...e, quadLeft: Math.max(0, KTX_QUAD_MS - (e.quadHeldMs || 0)) }));
+    quadbores.sort((a, b) => (b.quadLeft - a.quadLeft) || (a.time - b.time));
+    t = highlightSetup('quadbores', quadbores, 'quadLeft');
+    if (t) {
+        for (const e of quadbores) {
+            const victims = (e.victims || []).map(highlightVictimChip).join('');
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')}${victims ? ' <span class="hl-had">took</span> ' + victims : ''}</td>
+                <td>${escapeHtml(e.weapon || '?')}</td>
+                <td data-sort-value="${e.quadLeft}">${(e.quadLeft / 1000).toFixed(1)} s</td>
+                <td data-sort-value="${e.quadFrags || 0}">${e.quadFrags || 0}</td>
+                <td data-sort-value="${e.actor?.stack ?? -1}">${highlightStack(e.actor)}</td>
+                <td>${highlightHad(e.actor) || '-'}</td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
+
+    // Telefrags — most stacked victim first; rows with no killed victim (a
+    // deflect / spawnicide: the teleporter died) sort last.
+    const telefrags = withSec(h.telefrags).map(e => {
+        const victim = (e.victims || []).find(v => v.killed) || null;
+        const survivor = (e.victims || []).find(v => v.survived) || null;
+        return { ...e, victim, survivor, stack: victim?.stack ?? -1 };
+    });
+    telefrags.sort((a, b) => (b.stack - a.stack) || (a.time - b.time));
+    t = highlightSetup('telefrags', telefrags, 'stack');
+    if (t) {
+        for (const e of telefrags) {
+            const kind = e.teleKind || 'telefrag';
+            const subject = e.victim || e.survivor;
+            const relation = e.victim ? highlightRelationBadge(e.victim.relation)
+                : (e.survivor ? '<span class="hl-badge hl-survived">survived</span>' : '-');
+            const victimName = e.victim ? e.victim.name : (e.survivor ? e.survivor.name : '-');
+            // On a deflect / spawnicide the actor is the one who died; say so.
+            const actorCell = `${escapeHtml(e.actor?.name || 'Unknown')}${e.actor?.killed ? ' <span class="hl-badge hl-self">died</span>' : ''}`;
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${actorCell}</td>
+                <td data-sort-value="${escapeHtml(victimName)}">${escapeHtml(victimName)}</td>
+                <td data-sort-value="${escapeHtml(e.victim?.relation || (e.survivor ? 'survived' : ''))}">${relation}</td>
+                <td data-sort-value="${e.stack}">${subject ? highlightStack(subject) : '-'}</td>
+                <td>${subject ? (highlightHad(subject) || '-') : '-'}</td>
+                <td data-sort-value="${kind}"><span class="hl-badge hl-kind">${kind}</span></td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
 }
 
 function getPowerupDisplay(type) {

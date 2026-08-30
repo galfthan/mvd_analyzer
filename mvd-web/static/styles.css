@@ -2757,7 +2757,13 @@ th.sortable.sort-desc::after {
     grid-column: 1 / -1;
 }
 
-/* Sortable table headers (used by the airgibs table). */
+/* The highlight tables (discharges / quadbores / telefrags) carry a
+   victims column of state chips, so they too take the full width. */
+.keymoments-grid.active .highlight-panel {
+    grid-column: 1 / -1;
+}
+
+/* Sortable table headers (used by the airgibs and highlight tables). */
 .sortable-table thead th[data-sort] {
     cursor: pointer;
     user-select: none;
@@ -2779,6 +2785,42 @@ th.sortable.sort-desc::after {
     font-size: 0.78rem;
     letter-spacing: 0.04em;
 }
+
+/* Highlight badges: relation of a participant to the event's actor, the
+ * actor's own death, a deflect survivor, and the reconstructed-spawn
+ * annotation. Fixed colours on purpose, like .airgib-lethal — the team
+ * vars are re-pointed per match and these mean the same thing in every
+ * demo. */
+.hl-badge {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 3px;
+    white-space: nowrap;
+}
+.hl-badge.hl-enemy { color: var(--armor-ra); border: 1px solid var(--armor-ra); }
+.hl-badge.hl-team { color: var(--armor-ya); border: 1px solid var(--armor-ya); }
+.hl-badge.hl-self { color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+.hl-badge.hl-survived { color: var(--armor-ga); border: 1px solid var(--armor-ga); }
+.hl-badge.hl-kind { color: var(--text-muted, #999); border: 1px solid var(--text-muted, #999); }
+
+/* One participant's state: name, stack (h/armor+type), weapons and
+   powerups held. Hurt-not-killed victims are dimmed. */
+.hl-chip {
+    display: inline-block;
+    margin: 1px 6px 1px 0;
+    white-space: nowrap;
+}
+.hl-chip.hl-hurt { opacity: 0.55; }
+.hl-chip .hl-name { font-weight: 600; }
+.hl-stack { font-variant-numeric: tabular-nums; }
+.hl-spawn { font-size: 0.72rem; opacity: 0.7; }
+.hl-had { font-size: 0.78rem; opacity: 0.85; letter-spacing: 0.02em; }
+.hl-had .hl-pu { font-weight: 700; color: var(--accent-cyan); }
 
 /* Powerup-run filter on the Key Moments tab. Same shape as
    .packdrops-filters, but its controls are number inputs. */

@@ -1003,6 +1003,7 @@
                                 <th data-sort="victim">Victim</th>
                                 <th data-sort="loc">Loc</th>
                                 <th data-sort="lethal">Lethal</th>
+                                <th title="What the victim had at the hit: health/armor, weapons, powerups">Victim had</th>
                                 <th data-sort="time">Time</th>
                                 <th>View</th>
                             </tr>
@@ -1011,6 +1012,71 @@
                     </table>
                     <div id="airgibs-empty" class="empty-message" style="display: none;">
                         No direct rocket air hits detected (needs a map BSP for height data).
+                    </div>
+                </div>
+                <div class="panel highlight-panel">
+                    <h3 title="Lightning gun fired in water: every discharge with evidence — the shooter's death, a kill it made, or a damage-log LG radius hit">Discharges</h3>
+                    <table class="stats-table sortable-table" id="discharges-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="time">Time</th>
+                                <th data-sort="player">Player</th>
+                                <th data-sort="cells" title="Cells dumped (damage is 35 × cells)">Cells</th>
+                                <th data-sort="kills" class="sort-desc" title="Enemies / teammates killed; self when the shooter died too">Kills</th>
+                                <th data-sort="damage" title="Damage-log total dealt to others (needs a damage log)">Dmg</th>
+                                <th title="Everyone the discharge hit: stack, weapons and powerups at the instant; dimmed = hurt, not killed">Victims</th>
+                                <th data-sort="loc">Loc</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="discharges-body"></tbody>
+                    </table>
+                    <div id="discharges-empty" class="empty-message" style="display: none;">
+                        No discharges detected.
+                    </div>
+                </div>
+                <div class="panel highlight-panel">
+                    <h3 title="Self-kills by own rocket or grenade while holding quad">Quadbores</h3>
+                    <table class="stats-table sortable-table" id="quadbores-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="time">Time</th>
+                                <th data-sort="player">Player</th>
+                                <th data-sort="weapon">Weapon</th>
+                                <th data-sort="quadLeft" class="sort-desc" title="Quad time thrown away (30 s quad minus time held)">Quad left</th>
+                                <th data-sort="quadFrags" title="Kills made with this quad before the bore">Quad frags</th>
+                                <th data-sort="stack" title="Health/armor lost with the quad">Stack lost</th>
+                                <th title="Weapons and powerups held at the instant">Had</th>
+                                <th data-sort="loc">Loc</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quadbores-body"></tbody>
+                    </table>
+                    <div id="quadbores-empty" class="empty-message" style="display: none;">
+                        No quadbores detected.
+                    </div>
+                </div>
+                <div class="panel highlight-panel">
+                    <h3 title="Every telefrag, ranked by how stacked the victim was; deflects are teleporters who died on a pentagram holder">Telefrags</h3>
+                    <table class="stats-table sortable-table" id="telefrags-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="time">Time</th>
+                                <th data-sort="killer">Killer</th>
+                                <th data-sort="victim">Victim</th>
+                                <th data-sort="relation">Relation</th>
+                                <th data-sort="stack" class="sort-desc" title="Victim health/armor just before the telefrag">Stack</th>
+                                <th title="Victim's weapons and powerups at the instant">Had</th>
+                                <th data-sort="kind">Kind</th>
+                                <th data-sort="loc">Loc</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telefrags-body"></tbody>
+                    </table>
+                    <div id="telefrags-empty" class="empty-message" style="display: none;">
+                        No telefrags in this match.
                     </div>
                 </div>
             </div>
