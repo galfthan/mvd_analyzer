@@ -1078,14 +1078,21 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error 
 		p.spawnedItems[ent] = cur
 		kind = cur
 		if cur != "" {
-			origin := s.Origin
 			// The baseline is an item's designed spawn point and is preferred
 			// for an entity we can only see through its PAST state. When the
 			// entity is visible right now the wire is saying where it is —
 			// and for a recycled edict (a dropped backpack landing on a slot
 			// some map-load entity once baselined) the baseline names a
-			// different object entirely.
-			if s == nil {
+			// different object entirely. Exactly one of s / o can be nil here
+			// (diffEntity skips an entity absent from both frames): s on the
+			// PAST-state path — the `kind == "" && o != nil` arm above, an
+			// entity that became nameable only as it left the frame, which
+			// archive demo 1a78d75f8bd12340… reaches and crashed the parser
+			// on when s was read first — and o on a first appearance.
+			var origin [3]float32
+			if s != nil {
+				origin = s.Origin
+			} else {
 				origin = o.Origin
 				if p.baselineValid[ent] {
 					origin = p.baselines[ent].Origin
