@@ -1723,7 +1723,7 @@ function updateTopbarDemoInfo(result) {
     // "toast vs SMOK" over a field of eight reads as one. Name the leader and
     // the size of the field instead; a two-player one (a duel, or a 1v1 FFA)
     // still renders as "A vs B" below, which is what it is.
-    const individualField = isIndividualLayout(result) && teams.length > 2;
+    const individualField = isMultiPlayerIndividual(result);
     if (individualField) {
         const a = teams[0];
         parts.push(
@@ -1923,9 +1923,10 @@ function displayResults(result) {
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        // Duels keep the team palette (usesPlayerPalette), so a 1v1 colours
-        // exactly as it did before individual modes existed.
-        setCanonicalTeams(teams, usesPlayerPalette(result));
+        // Duels keep the team palette (isMultiPlayerIndividual is false at
+        // two participants), so a 1v1 colours exactly as it did before
+        // individual modes existed.
+        setCanonicalTeams(teams, isMultiPlayerIndividual(result));
     }
 
     // Teams summary box. Rows come from playerStats where it exists so the
@@ -2274,10 +2275,7 @@ function isDuel(result) {
 //     LAYOUT: which panels exist, which colour palette is handed out, whether
 //     the scoreboard is per player. It is a property of the RESULT, so it
 //     reads the layout the Go side actually applied: match.sources.teams ===
-//     'individual' (rebuildIndividualMatch's own stamp), with the shape test
-//     as the fallback for a cached pre-v75 result, where the layout is
-//     visible as "every row's team is its own name" but the source key still
-//     reads 'derived'.
+//     'individual' (rebuildIndividualMatch's own stamp).
 //
 //   isTeamBasedMode — "was the teamplay ruleset in force?" It decides team
 //     SEMANTICS: whether a team kill or a team-damage figure is a thing that
@@ -2289,19 +2287,13 @@ function isDuel(result) {
 // other is what put a meaningless Team filter on an FFA aim tab and, in the
 // other direction, would put team colours on a duel.
 function isIndividualLayout(result) {
-    if (result?.match?.sources?.teams === 'individual') return true;
-    const players = playerStatsRows(result);
-    if (!players.length) return false;
-    return players.every(p => p.team && p.team === p.name);
+    return result?.match?.sources?.teams === 'individual';
 }
 
 // isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
-// tag names a side. Falls back to the layout on a cached result with no
-// descriptor, which is the pre-v75 reading.
+// tag names a side.
 function isTeamBasedMode(result) {
-    const gm = result?.match?.gameMode;
-    if (gm && typeof gm.teamBased === 'boolean') return gm.teamBased;
-    return !isIndividualLayout(result);
+    return result?.match?.gameMode?.teamBased === true;
 }
 
 // hasTeammates reports whether any player in this demo has a team-mate: the
@@ -2312,31 +2304,30 @@ function hasTeammates(result) {
     return isTeamBasedMode(result) && !isIndividualLayout(result);
 }
 
-// usesPlayerPalette reports whether this demo's colours come from the
-// per-player palette rather than the four-entry team palette: an individual
-// layout with more than two sides. A duel (or a two-player FFA) keeps the
-// team palette — see PLAYER_PALETTE and CLAUDE.md's team-colour rule.
-function usesPlayerPalette(result) {
+// isMultiPlayerIndividual reports whether this demo is laid out one side per
+// player with MORE than two of them — a field rather than a matchup. Every
+// two-sided surface reads it: the "Team A ↑ / Team B ↓" timeline graphs, the
+// Chat tab's per-side say columns, region control, and the colour palette
+// (per-player rather than the four-entry team one — see PLAYER_PALETTE and
+// CLAUDE.md's team-colour rule). None of them has a pair of sides to name
+// here: the top two players are not a matchup and everyone else does not
+// appear at all. A two-participant match (a duel, or a 1v1 FFA) IS the
+// two-sided view and keeps every one of them.
+//
+// It was four copies of this expression under four names. They answered
+// different questions in the prose and the same one in the code, and a
+// consumer reading one of them could not tell which.
+function isMultiPlayerIndividual(result) {
     return isIndividualLayout(result) && !isDuel(result);
 }
 
-// individualTimelineLayout reports whether the Timeline tab should drop its
-// two-sided views. Same rule initRegionControl applies to region control, for
-// the same reason: "Team A ↑ / Team B ↓" needs a pair of sides, and an
-// individual layout with more than two participants has none — the top two
-// players are not a matchup, and everyone else does not appear at all. A
-// two-participant match (a duel, or a 1v1 FFA) IS the two-sided view and keeps
-// it. Reads the same test as usesPlayerPalette; the two are kept apart because
-// they answer different questions (which panels exist vs which palette).
-function individualTimelineLayout(result) {
-    return isIndividualLayout(result) && !isDuel(result);
-}
-
-// individualTimelineActive reports the layout currently applied to the tab.
-// The render paths read the body class rather than re-deriving from the result
-// so the DOM, the row grouping and the row heights can never disagree.
-function individualTimelineActive() {
-    return document.body.classList.contains('individual-timeline');
+// individualFieldActive reports the layout currently applied. The render paths
+// read the body class rather than re-deriving from the result so the DOM, the
+// row grouping and the row heights can never disagree — and displayTimeline-
+// Analysis's title write runs again from applyDeferredBuckets long after
+// applyDuelModeUI, where the class is what survives.
+function individualFieldActive() {
+    return document.body.classList.contains('individual-field');
 }
 
 // The three per-player drill-downs and where each lives in the two layouts:
@@ -2350,8 +2341,17 @@ const PER_PLAYER_VIEWS = [
     { node: 'ha-per-player',           home: 'ha-per-player-details',      host: 'ha-per-player-host',      panel: 'ha-per-player-panel'      },
 ];
 
-function setIndividualTimelineLayout(on) {
-    document.body.classList.toggle('individual-timeline', on);
+// setIndividualFieldLayout switches every two-sided surface between its two
+// forms, off one body class.
+//
+// Timeline: hide the A-vs-B graphs and promote the three per-player views to
+// panels of their own. Chat: collapse the two say columns into a single "Chat"
+// column carrying every line, the second column and its header hidden by CSS
+// off the class — the columns are flex:1, so the two survivors split the width
+// with no empty third. No chat node is moved or cloned: the same three
+// containers persist and buildFullChat fills whichever the layout uses.
+function setIndividualFieldLayout(on) {
+    document.body.classList.toggle('individual-field', on);
     for (const v of PER_PLAYER_VIEWS) {
         const panel = document.getElementById(v.panel);
         if (panel) panel.style.display = on ? '' : 'none';
@@ -2365,6 +2365,9 @@ function setIndividualTimelineLayout(on) {
     const rangeLabel = document.getElementById('time-range-label');
     const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
     if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
+    if (!on) return;
+    const chatTitle = document.getElementById('team-a-chat-title');
+    if (chatTitle) chatTitle.textContent = 'Chat';
 }
 
 // Row heights for the per-player views. The compact pair is what a collapsed
@@ -2372,44 +2375,11 @@ function setIndividualTimelineLayout(on) {
 // rows carry the tab, with no team graph above them competing for the fold, so
 // they get more pixels each.
 function ppMiniHeight() {
-    return individualTimelineActive() ? 60 : 44;
+    return individualFieldActive() ? 60 : 44;
 }
 
 function ppSpanRowHeight() {
-    return individualTimelineActive() ? 28 : RC_ROW_H;
-}
-
-// individualChatLayout reports whether the Chat tab should collapse its two
-// say columns into one. Same test as individualTimelineLayout, and for the
-// same reason: a column per side needs sides, and in a field of eight the two
-// columns are the top two players while the other six have nowhere to speak.
-// A two-participant match (a duel, or a 1v1 FFA) keeps the split — there each
-// column IS a player. Kept as its own name because it answers its own
-// question; see the note above individualTimelineLayout.
-function individualChatLayout(result) {
-    return isIndividualLayout(result) && !isDuel(result);
-}
-
-// individualChatActive reports the layout currently applied to the tab. Read
-// by buildFullChat and by displayTimelineAnalysis's title write, which runs
-// again from applyDeferredBuckets long after applyDuelModeUI — the body class
-// is what survives that, so it is the authority rather than the result.
-function individualChatActive() {
-    return document.body.classList.contains('individual-chat');
-}
-
-// setIndividualChatLayout switches the Chat tab between its two column sets.
-// Off: Kills + one column per side, each titled after its team. On: Kills +
-// a single "Chat" column carrying every line, with the second say column and
-// its header hidden by CSS off the body class — the columns are flex:1, so
-// the two survivors split the width with no empty third. No node is moved or
-// cloned: the same three containers persist and buildFullChat fills whichever
-// the layout uses.
-function setIndividualChatLayout(on) {
-    document.body.classList.toggle('individual-chat', on);
-    if (!on) return;
-    const title = document.getElementById('team-a-chat-title');
-    if (title) title.textContent = 'Chat';
+    return individualFieldActive() ? 28 : RC_ROW_H;
 }
 
 function applyDuelModeUI(result) {
@@ -2431,12 +2401,9 @@ function applyDuelModeUI(result) {
     // five players. Drive it off the rows themselves, which covers every
     // demo class with nothing to aggregate.
     document.body.classList.toggle('no-team-rows', playerStatsTeamRows(result).length === 0);
-    // Timeline tab: the A-vs-B graphs describe a matchup an FFA does not have.
-    // Hide them and promote the three per-player views to panels of their own.
-    setIndividualTimelineLayout(individualTimelineLayout(result));
-    // Chat tab: same field, same problem — two say columns are two of the
-    // eight players. Collapse them into one column of everybody.
-    setIndividualChatLayout(individualChatLayout(result));
+    // Timeline and Chat: the A-vs-B graphs and the two say columns both
+    // describe a matchup an FFA does not have.
+    setIndividualFieldLayout(isMultiPlayerIndividual(result));
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -4234,10 +4201,11 @@ function resetUIToCleanState() {
     }
     hide('powerup-timeline-panel');
     hide('region-control-timeline-panel');
-    // Timeline layout back to the two-sided default: the per-player views
-    // return to their <details> under the team graphs. applyDuelModeUI
-    // re-promotes them below if this demo wants the individual layout.
-    setIndividualTimelineLayout(false);
+    // Two-sided default for the timeline AND the chat columns: the
+    // per-player views return to their <details> under the team graphs.
+    // applyDuelModeUI re-applies the individual field layout below if this
+    // demo wants it.
+    setIndividualFieldLayout(false);
     hide('unified-timeline');
     setText('time-range-label', '');
     setHTML('team-status-a', '');
@@ -4250,9 +4218,6 @@ function resetUIToCleanState() {
     }
     setText('team-a-chat-title', 'Team A Chat');
     setText('team-b-chat-title', 'Team B Chat');
-    // Chat layout back to the two-sided default; applyDuelModeUI collapses it
-    // to the single column below if this demo wants it.
-    setIndividualChatLayout(false);
     chatHideTeam = false;
     const hideTeamCb = document.getElementById('chat-hide-teamsay');
     if (hideTeamCb) hideTeamCb.checked = false;
@@ -4431,7 +4396,7 @@ function displayTimelineAnalysis(result) {
         if (!individual && demoInfo?.teams) {
             setCanonicalTeams([...demoInfo.teams], false);
         } else if (result.match?.teams) {
-            setCanonicalTeams(result.match.teams.map(t => t.name), usesPlayerPalette(result));
+            setCanonicalTeams(result.match.teams.map(t => t.name), isMultiPlayerIndividual(result));
         }
     }
     const teams = timelineState.teams;
@@ -4476,10 +4441,10 @@ function displayTimelineAnalysis(result) {
     // Update legend team names
     if (teams.length >= 2) {
         const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        // The single-column layout owns both chat titles (setIndividualChatLayout
-        // set the one visible column to "Chat"); teams[0]/[1] are two players
-        // out of the field there, not sides.
-        if (!individualChatActive()) {
+        // The single-column layout owns both chat titles
+        // (setIndividualFieldLayout set the one visible column to "Chat");
+        // teams[0]/[1] are two players out of the field there, not sides.
+        if (!individualFieldActive()) {
             setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
             setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
         }
@@ -5003,8 +4968,8 @@ function buildHASegments(td) {
 function timelinePlayersByTeam() {
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    const individual = individualTimelineActive();
-    const groupCount = Math.max(2, individual ? teams.length : 2);
+    const individual = individualFieldActive();
+    const groupCount = individual ? Math.max(2, teams.length) : 2;
     const out = Array.from({ length: groupCount }, () => []);
     if (teams.length < 2 || !view || !view.players) return out;
     const demoPlayers = currentResult?.demoInfo?.players || [];
@@ -6121,7 +6086,7 @@ function buildFullChat() {
     // column (the B one is hidden by CSS and stays empty), and its rows get a
     // speaker name — with two sides the column heading said who was talking,
     // with eight players nothing else does.
-    const single = individualChatActive();
+    const single = individualFieldActive();
 
     const killEvents = [];
     const teamAEvents = [];
@@ -6274,7 +6239,7 @@ function updateDetailGraph(startTime, endTime) {
     // Individual layout: the A↑/B↓ graph is hidden and the per-player view is
     // a panel of its own, so render that and skip the series prep for a
     // display:none canvas — this runs on every pan/zoom frame.
-    if (individualTimelineActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
+    if (individualFieldActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepWeaponsData(startTime, endTime, teams);
     const dropMarks = computeBackpackDrops(startTime, endTime, teams);
     const legendA = document.getElementById('legend-weapons-team-a');
@@ -6384,7 +6349,7 @@ ${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
 function updateHealthArmorGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
-    if (individualTimelineActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
+    if (individualFieldActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
     const { points, max } = prepHealthArmorData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-health-team-a');
     const legendB = document.getElementById('legend-health-team-b');
@@ -6403,7 +6368,7 @@ function updateHealthArmorGraph(startTime, endTime) {
 function updateScoreTimeline(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
-    if (individualTimelineActive()) { renderFragsPerPlayer(startTime, endTime); return; }
+    if (individualFieldActive()) { renderFragsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepScoreData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
@@ -6611,7 +6576,7 @@ function updatePowerupTimeline(startTime, endTime) {
     // so an individual layout with more than two players paints the top two
     // and greys every other run as 'other'. Hidden rather than recoloured —
     // same call initRegionControl makes for the same reason.
-    if (individualTimelineActive()) { panel.style.display = 'none'; return; }
+    if (individualFieldActive()) { panel.style.display = 'none'; return; }
 
     const data = prepPowerupRowsData(startTime, endTime, teams);
     if (!data) { panel.style.display = 'none'; return; }
@@ -6765,7 +6730,7 @@ function updateTeamStatus() {
 
     // Individual layout: the two-sided status panel is hidden, so don't
     // rebuild its rows on every playhead tick.
-    if (individualTimelineActive()) {
+    if (individualFieldActive()) {
         containerA.innerHTML = '';
         containerB.innerHTML = '';
         return;
@@ -7959,8 +7924,7 @@ function initRegionControl(result) {
     // the editor rendered from it had an Apply button whose only effect was a
     // console warning. A two-participant match (a duel, a 1v1 FFA) does have
     // two sides and keeps the panels.
-    const noSides = isIndividualLayout(result) && !isDuel(result);
-    if (!rc || !rc.regions || rc.regions.length === 0 || noSides) {
+    if (!rc || !rc.regions || rc.regions.length === 0 || isMultiPlayerIndividual(result)) {
         if (panel) panel.style.display = 'none';
         if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
@@ -12455,8 +12419,8 @@ function renderAimMode(pa) {
 // Player column is prepended automatically (with the team-coloured stripe).
 // Every count column has a share-of-fires % twin: counts depend on how much a
 // player fired, so the percentages are what compare across players. hit% keeps
-// the accuracy colour classes; the miss-type shares stay plain (high ≠ good
-// is weapon-dependent).
+// the accuracy colour classes; the miss-type shares stay plain, since whether
+// a high share is good depends on the weapon.
 const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
 const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
@@ -12464,15 +12428,15 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 // The RL/GL direct/splash pair is withheld PER ROW, not per demo — the one
 // measured-only column that is, which is why it cannot ride aimCol's
 // whole-demo swap below. The analyzer publishes it as a nullable field
-// (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none),
-// and the only case a reader of this UI can hit is a payload from a parse
-// that built no spatial shot streams — the grenade-touch classifier's own
-// input. This build always requests them, so the cell is a "—" for an
-// imported Result, never for a demo analysed here. Rendering the null as 0
-// would publish "no rocket or grenade ever touched anybody" as a measurement.
-const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: the direct/splash split needs ' +
-    'the spatial projectile streams (a grenade touch leaves no trace in the wire damage log, ' +
-    'so the touch is re-derived from the flight), and this Result was produced without them. ' +
+// (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none).
+// The reachable case is aimcore's `projLinked` gate (aimcore/aim.go): no rl or
+// gl fire anywhere in the demo linked to a projectile, so there is no evidence
+// to split — 1 800 of the 2 810 demos that fired either weapon in the
+// 3 123-demo reach audit, which is the whole pre-damage-stream half of the
+// archive. Rendering the null as 0 would publish "no rocket or grenade ever
+// touched anybody" as a measurement.
+const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
+    'linked to a projectile, so there is nothing to split into direct hits and splash. ' +
     'Not a zero — the fires were simply never classified.';
 function aimSplitCell(v, fmt) {
     if (v === null || v === undefined) {
