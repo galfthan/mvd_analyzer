@@ -1290,6 +1290,18 @@ diff -r /tmp/before /tmp/after
    [`mvd-analytics/damagerecon/ACCURACY.md`](mvd-analytics/damagerecon/ACCURACY.md)
    §aim hit recovery.
 
+10. **Hoony / blitz points are one match window, not rounds.** A
+   HoonyMode series is a sequence of points; KTX ends each with
+   `"The point is over"` (`ktx/src/match.c:326`), re-readies the players
+   and runs `StartMatch` again, and only the final point reaches
+   `svc_intermission`. The pipeline takes the first `//ktx matchstart` /
+   `matchdate:` and that intermission, so `streams`, `buckets`, `damage`
+   and `playerStats` span the whole series including the between-point
+   countdowns, and `match.gameMode.rounds` is `true` with nothing yet
+   consuming it. The point boundaries are on the wire as
+   `timelineAnalysis.demoMarkers` (`0 round-N`, `match.c:447`); slicing
+   the analysis per point is future work.
+
 ## Reference sources
 
 | Project | Description |

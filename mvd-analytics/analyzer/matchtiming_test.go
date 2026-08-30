@@ -58,9 +58,27 @@ func TestMatchTimingDetector_EndBeforeStartIgnored(t *testing.T) {
 		}
 
 		// And a later one does not move the end.
-		d.OnPrint(&events.PrintEvent{Level: events.PrintHigh, Message: "timelimit hit\n", TimeMs: 620000})
+		d.OnPrint(&events.PrintEvent{Level: events.PrintHigh, Message: "The match is over\n", TimeMs: 620000})
 		if d.EndTime != 610000 {
 			t.Errorf("EndTime = %d, want 610000 — a second end print moved the boundary", d.EndTime)
+		}
+	})
+
+	// KTX's per-point line on a hoony/blitz series (ktx/src/match.c:326)
+	// must NOT end the match: every point but the last is followed by
+	// another StartMatch on the same series, and the series closes at
+	// svc_intermission. Archive 0543ac01… spans 10 points on that signal;
+	// accepting this line would cut it to the first.
+	t.Run("hoony point end is not a match end", func(t *testing.T) {
+		var d MatchTimingDetector
+		d.OnMatchStart(&events.MatchStartEvent{TimeMs: 10109, Source: "matchdate"})
+		d.OnPrint(&events.PrintEvent{Level: events.PrintHigh, Message: "The point is over\n", TimeMs: 45698})
+		if d.Ended {
+			t.Fatalf("a point end ended the series at %d", d.EndTime)
+		}
+		d.OnIntermission(201606)
+		if !d.Ended || d.EndTime != 201606 {
+			t.Fatalf("Ended=%v EndTime=%d, want true/201606", d.Ended, d.EndTime)
 		}
 	})
 

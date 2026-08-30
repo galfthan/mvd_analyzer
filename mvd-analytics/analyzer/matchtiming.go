@@ -46,13 +46,27 @@ type MatchTimingDetector struct {
 	EndTime     int32 // demo-clock ms of the match-end print / intermission (0 if unseen)
 }
 
+// matchEndPatterns is the case-insensitive substring table behind the
+// print half of the match end; svc_intermission is the other half
+// (OnIntermission). One entry: KTX's "The match is over" (ktx/src/match.c:331,
+// G_bprint at PRINT_HIGH), inherited verbatim from Kombat Teams
+// (kteams/v2.07/SRC/MATCH.QC:139, v2.21/SRC/MATCH.QC:172). Five former
+// entries — "match ended", "match complete", "game over", "timelimit hit",
+// "fraglimit hit" — were removed after a sweep of all 50 964 archive demos
+// (.reports/vocab-sweep-2026-08-29, probe S2) found no non-chat print
+// carrying any of them except one E0 spectator NAMED "game over".
+//
+// KTX's other end line, "The point is over" (match.c:326), is deliberately
+// NOT here. It is the per-POINT end of a hoony/blitz series: for every
+// point but the last, EndMatch resets match_over and re-readies the
+// players (match.c:426-447), StartMatch runs again and the same series
+// goes on. The series itself closes at svc_intermission, which this
+// detector already takes, so a hoony demo spans every point today (archive
+// 0543ac01…: 10 points, 191 s, 10 frags, one `//demomark round-N` per
+// point boundary). Ending the match at the first point end would cut
+// that to point one. Modelling the points as rounds is the open work.
 var matchEndPatterns = []string{
 	"match is over",
-	"match ended",
-	"match complete",
-	"game over",
-	"timelimit hit",
-	"fraglimit hit",
 }
 
 // OnMatchStart latches Layer 1's match-start verdict. Idempotent: the

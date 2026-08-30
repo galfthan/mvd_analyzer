@@ -1606,16 +1606,31 @@ match **end**, not match start.
 
 #### Match End Detection
 
-The match ends when one of these messages appears:
+The match ends at the first of two signals after the start
+(`mvd-analytics/analyzer/matchtiming.go`): `svc_intermission`, or a
+non-chat print containing the one phrase in `matchEndPatterns`:
 
-| Pattern | Cause |
-|---------|-------|
-| `"The match is over"` | Normal end |
-| `"match ended"` | Various |
-| `"Game over"` | Generic end |
-| `"Match complete"` | Some servers |
-| `"Timelimit hit"` | Time ran out |
-| `"Fraglimit hit"` | Frag limit reached |
+| Pattern | Producer | Notes |
+|---------|----------|-------|
+| `"match is over"` | **KTX** `"The match is over"` (`ktx/src/match.c:331`, gated on `deathmatch`), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:139`, `v2.21/SRC/MATCH.QC:172`) | Printed a frame or so before the intermission on a normal end, so it is usually the one that fires. |
+
+Five former entries — `"match ended"`, `"match complete"`, `"game over"`,
+`"timelimit hit"`, `"fraglimit hit"` — were removed after a sweep of all
+50 964 archive demos (`.reports/vocab-sweep-2026-08-29`, probe S2) found
+no non-chat print carrying any of them, except one E0 spectator *named*
+"game over" — which would have ended the match at their connect line.
+
+KTX's other end line, `"The point is over"` (`match.c:326`), is
+deliberately **not** an end pattern. It is the per-*point* end of a
+hoony/blitz series: for every point but the last, `EndMatch` resets
+`match_over` and re-readies the players (`match.c:426-447`), `StartMatch`
+runs again (re-stuffing `//ktx matchstart`, which the once-per-demo latch
+ignores) and the same series continues. The series closes at
+`svc_intermission`, so a hoony demo spans every point — archive
+`0543ac01…` is 10 points over 191 s with one `//demomark 0 round-N`
+(`match.c:447`, surfaced as `timelineAnalysis.demoMarkers`) per point
+boundary. Points are not otherwise modelled; see the top-level README's
+known limitations.
 
 #### Example Timeline
 
