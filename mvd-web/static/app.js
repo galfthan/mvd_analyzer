@@ -3313,6 +3313,15 @@ function highlightRelationBadge(rel) {
     return `<span class="hl-badge hl-${r}">${r}</span>`;
 }
 
+// highlightVictimLine renders one victim as its own line, no relation badge
+// (the column already says the side): name, stack, had, damage taken.
+// Hurt-not-killed victims are dimmed.
+function highlightVictimLine(v) {
+    const cls = v.killed || v.survived ? 'hl-vline' : 'hl-vline hl-hurt';
+    const dmg = v.damage ? ` <span class="hl-stack">−${v.damage}</span>` : '';
+    return `<span class="${cls}"><span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}${dmg}</span>`;
+}
+
 // highlightVictimChip renders one victim: relation badge, name, stack, had.
 // Hurt-not-killed victims (damage-log only) are dimmed; a deflect's
 // surviving pentagram holder gets its own badge.
@@ -3364,23 +3373,27 @@ function displayHighlights(result) {
     // Discharges — enemy kills first, then damage dealt.
     const discharges = withSec(h.discharges);
     discharges.sort((a, b) => (b.enemyKills - a.enemyKills) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
-    let t = highlightSetup('discharges', discharges, 'kills');
+    let t = highlightSetup('discharges', discharges, 'enemy');
     if (t) {
         for (const e of discharges) {
-            const kills = [];
-            if (e.enemyKills) kills.push(`<span class="hl-badge hl-enemy">${e.enemyKills} enemy</span>`);
-            if (e.teamKills) kills.push(`<span class="hl-badge hl-team">${e.teamKills} team</span>`);
-            if (e.actor?.killed) kills.push('<span class="hl-badge hl-self">self</span>');
-            // Sort value: enemies weigh most, then teammates, then the self death.
-            const killSort = e.enemyKills * 100 + e.teamKills * 10 + (e.actor?.killed ? 1 : 0);
-            const victims = (e.victims || []).map(highlightVictimChip).join('');
+            const enemy = e.enemyKills || 0;
+            const team = e.teamKills || 0;
+            const self = e.actor?.killed ? 1 : 0;
+            // KTX scores an enemy kill +1, a teamkill −1, a suicide −1.
+            const delta = enemy - team - self;
+            const enemyV = (e.victims || []).filter(v => v.relation !== 'team').map(highlightVictimLine).join('');
+            const teamV = (e.victims || []).filter(v => v.relation === 'team').map(highlightVictimLine).join('');
             highlightAppendRow(t, `
                 ${timeCell(e)}
                 <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')} ${highlightStateCell(e.actor)}</td>
                 <td data-sort-value="${e.cells ?? -1}">${e.cells ?? '?'}</td>
-                <td data-sort-value="${killSort}">${kills.join('') || '-'}</td>
+                <td data-sort-value="${enemy}">${enemy || '-'}</td>
+                <td data-sort-value="${team}">${team || '-'}</td>
+                <td data-sort-value="${self}">${self || '-'}</td>
+                <td data-sort-value="${delta}">${delta > 0 ? '+' + delta : delta}</td>
                 <td data-sort-value="${e.damage || 0}">${e.damage || '-'}</td>
-                <td>${victims || '-'}</td>
+                <td>${enemyV || '-'}</td>
+                <td>${teamV || '-'}</td>
                 <td>${escapeHtml(locOf(e) || '-')}</td>
                 <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
             `, e.timeSec);

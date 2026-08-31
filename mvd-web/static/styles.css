@@ -2810,6 +2810,11 @@ th.sortable.sort-desc::after {
 
 /* One participant's state: name, stack (h/armor+type), weapons and
    powerups held. Hurt-not-killed victims are dimmed. */
+.hl-vline {
+    display: block;
+    white-space: nowrap;
+}
+
 .hl-chip {
     display: inline-block;
     margin: 1px 6px 1px 0;

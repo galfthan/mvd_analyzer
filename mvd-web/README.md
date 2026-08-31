@@ -178,9 +178,11 @@ the wire, so the spawn state 100/0 is shown):
   vertical gap the rocket climbed). Its rows are empty unless the map's
   BSP is provisioned (height needs the clip hull; see `PositionTrack.h`).
 - **Discharges** (`highlights.discharges`) — every LG water discharge with
-  evidence: the cells dumped, enemy / team / self kill badges, the
-  damage-log total, and one chip per victim (relation, name, stack, gear;
-  dimmed when hurt but not killed). Default sort: enemy kills, then damage.
+  evidence: the cells dumped, numeric Enemy / Team / Self kill columns, the
+  frag delta (enemy − team − self, KTX's scoring), the damage-log total,
+  and the victims split into Enemy / Team columns — one line per victim
+  (name, stack, gear, damage taken; dimmed when hurt but not killed).
+  Default sort: enemy kills, then damage.
 - **Quadbores** (`highlights.quadbores`) — self-kills by own rocket or
   grenade while holding quad: quad left (30 s KTX quad minus the time
   held), the quad's frags before the bore, the stack thrown away, anyone

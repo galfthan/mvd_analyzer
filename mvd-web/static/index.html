@@ -1022,9 +1022,13 @@
                                 <th data-sort="time">Time</th>
                                 <th data-sort="player">Player</th>
                                 <th data-sort="cells" title="Cells dumped (damage is 35 × cells)">Cells</th>
-                                <th data-sort="kills" class="sort-desc" title="Enemies / teammates killed; self when the shooter died too">Kills</th>
+                                <th data-sort="enemy" class="sort-desc" title="Enemies killed">Enemy</th>
+                                <th data-sort="team" title="Teammates killed">Team</th>
+                                <th data-sort="self" title="1 when the shooter died in the discharge (self-kill detection is near-certain, not perfect)">Self</th>
+                                <th data-sort="delta" title="Frag delta: enemy − team − self (KTX scores a teamkill and a suicide −1 each)">Δ</th>
                                 <th data-sort="damage" title="Damage-log total dealt to others (needs a damage log)">Dmg</th>
-                                <th title="Everyone the discharge hit: stack, weapons and powerups at the instant; dimmed = hurt, not killed">Victims</th>
+                                <th title="Enemies the discharge hit, one per line: stack, weapons and powerups at the instant; dimmed = hurt, not killed">Enemy victims</th>
+                                <th title="Teammates the discharge hit, one per line; dimmed = hurt, not killed">Team victims</th>
                                 <th data-sort="loc">Loc</th>
                                 <th>View</th>
                             </tr>
