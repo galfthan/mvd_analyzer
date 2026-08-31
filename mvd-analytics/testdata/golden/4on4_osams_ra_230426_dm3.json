@@ -61382,6 +61382,7 @@
         },
         "cells": 21,
         "damage": 1195,
+        "damageEnemy": 123,
         "enemyKills": 2,
         "kind": "discharge",
         "sources": [
@@ -61442,6 +61443,7 @@
         },
         "cells": 48,
         "damage": 1552,
+        "damageEnemy": 218,
         "enemyKills": 1,
         "kind": "discharge",
         "sources": [

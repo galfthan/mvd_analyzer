@@ -3290,16 +3290,25 @@ function highlightStack(p) {
     const armor = p.armor ?? 0;
     const at = armor > 0 && p.armorType ? p.armorType : '';
     const spawn = p.stateSource === 'spawn' ? ' <span class="hl-spawn">(spawn)</span>' : '';
-    return `<span class="hl-stack">${p.health}/${armor}${escapeHtml(at)}</span>${spawn}`;
+    // Armor value + type carry the timeline's armor colors and caps ("180 RA").
+    const armorStr = at
+        ? `<span class="armor-${escapeHtml(at)}">${armor} ${escapeHtml(at.toUpperCase())}</span>`
+        : `${armor}`;
+    return `<span class="hl-stack">${p.health}/${armorStr}</span>${spawn}`;
 }
 
-// highlightHad renders the tracked inventory and powerups: "rl lg · QUAD".
+// highlightHad renders the tracked inventory and powerups: "RL LG · Quad".
+// Weapons take the timeline's weapon colors and caps; powerups render
+// exactly as the powerup list does (getPowerupDisplay + .powerup-cell
+// colors), full size — a quad is the headline of the row.
 function highlightHad(p) {
     if (!p) return '';
-    const weapons = (p.weapons || []).map(escapeHtml).join(' ');
-    const pus = (p.powerups || []).map(x => `<span class="hl-pu">${escapeHtml(x)}</span>`).join(' ');
-    if (!weapons && !pus) return '';
-    return `<span class="hl-had">${weapons}${weapons && pus ? ' · ' : ''}${pus}</span>`;
+    const weapons = (p.weapons || [])
+        .map(w => `<span class="wep-${escapeHtml(w)}">${escapeHtml(w.toUpperCase())}</span>`).join(' ');
+    const pus = (p.powerups || [])
+        .map(x => `<span class="powerup-cell ${escapeHtml(x)}">${escapeHtml(getPowerupDisplay(x))}</span>`).join(' ');
+    const weps = weapons ? `<span class="hl-had">${weapons}</span>` : '';
+    return `${weps}${weapons && pus ? ' ' : ''}${pus}`;
 }
 
 // highlightStateCell is the shared "what they had" cell: stack + had.
@@ -3318,8 +3327,7 @@ function highlightRelationBadge(rel) {
 // Hurt-not-killed victims are dimmed.
 function highlightVictimLine(v) {
     const cls = v.killed || v.survived ? 'hl-vline' : 'hl-vline hl-hurt';
-    const dmg = v.damage ? ` <span class="hl-stack">−${v.damage}</span>` : '';
-    return `<span class="${cls}"><span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}${dmg}</span>`;
+    return `<span class="${cls}"><span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}</span>`;
 }
 
 // highlightVictimChip renders one victim: relation badge, name, stack, had.
@@ -3391,7 +3399,8 @@ function displayHighlights(result) {
                 <td data-sort-value="${team}">${team || '-'}</td>
                 <td data-sort-value="${self}">${self || '-'}</td>
                 <td data-sort-value="${delta}">${delta > 0 ? '+' + delta : delta}</td>
-                <td data-sort-value="${e.damage || 0}">${e.damage || '-'}</td>
+                <td data-sort-value="${e.damageEnemy || 0}">${e.damageEnemy || '-'}</td>
+                <td data-sort-value="${e.damageTeam || 0}">${e.damageTeam || '-'}</td>
                 <td>${enemyV || '-'}</td>
                 <td>${teamV || '-'}</td>
                 <td>${escapeHtml(locOf(e) || '-')}</td>

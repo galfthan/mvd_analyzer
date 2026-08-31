@@ -32526,6 +32526,7 @@
         },
         "cells": 64,
         "damage": 1911,
+        "damageTeam": 231,
         "enemyKills": 1,
         "kind": "discharge",
         "sources": [

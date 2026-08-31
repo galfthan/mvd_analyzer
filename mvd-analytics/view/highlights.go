@@ -499,6 +499,7 @@ func (c *highlightCtx) dischargeEvent(cluster []dischargeEvidence) result.Highli
 		return &v
 	}
 	fromFrags, fromDamage := false, false
+	boundedBy := map[string]int{}
 	for _, x := range cluster {
 		switch {
 		case x.frag != nil:
@@ -516,6 +517,11 @@ func (c *highlightCtx) dischargeEvent(cluster []dischargeEvidence) result.Highli
 				v := victim(x.dmg.Victim, x.dmg.IsTeam)
 				v.Damage += x.dmg.Damage
 				e.Damage += x.dmg.Damage
+				b := x.dmg.Damage
+				if x.dmg.Bounded != nil {
+					b = *x.dmg.Bounded
+				}
+				boundedBy[x.dmg.Victim] += b
 			}
 		}
 	}
@@ -543,8 +549,17 @@ func (c *highlightCtx) dischargeEvent(cluster []dischargeEvidence) result.Highli
 			victim(highlightPlaceholder, true).Killed = true
 		}
 	}
-	for _, v := range victims {
+	for name, v := range victims {
 		e.Victims = append(e.Victims, *v)
+		// The bounded enemy/team split counts every victim hit, killed
+		// or not — the toplist's "given damage" columns.
+		if b := boundedBy[name]; b > 0 {
+			if v.Relation == "team" {
+				e.DamageTeam += b
+			} else {
+				e.DamageEnemy += b
+			}
+		}
 	}
 	e.Sources = sources(fromFrags, fromDamage)
 	finish(&e)

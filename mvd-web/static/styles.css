@@ -2825,7 +2825,9 @@ th.sortable.sort-desc::after {
 .hl-stack { font-variant-numeric: tabular-nums; }
 .hl-spawn { font-size: 0.72rem; opacity: 0.7; }
 .hl-had { font-size: 0.78rem; opacity: 0.85; letter-spacing: 0.02em; }
-.hl-had .hl-pu { font-weight: 700; color: var(--accent-cyan); }
+/* Weapon codes in state chips: the timeline's weapon palette. */
+.wep-rl { color: rgba(255, 107, 107, 0.9); }
+.wep-lg { color: rgba(0, 217, 255, 0.9); }
 
 /* Powerup-run filter on the Key Moments tab. Same shape as
    .packdrops-filters, but its controls are number inputs. */

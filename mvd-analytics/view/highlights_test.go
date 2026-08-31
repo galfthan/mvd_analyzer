@@ -91,7 +91,7 @@ func highlightTestResult() *result.Result {
 	}
 	dmg := []result.DamageEntry{
 		{Time: 1000, Attacker: "disc", Victim: "disc", Weapon: "lg", Damage: 367, IsSplash: true, IsSelf: true},
-		{Time: 1000, Attacker: "disc", Victim: "foe1", Weapon: "lg", Damage: 533, IsSplash: true},
+		{Time: 1000, Attacker: "disc", Victim: "foe1", Weapon: "lg", Damage: 533, IsSplash: true, Bounded: ip(160)},
 		{Time: 1000, Attacker: "disc", Victim: "foe2", Weapon: "lg", Damage: 100, IsSplash: true},
 		{Time: 1000, Attacker: "disc", Victim: "mate", Weapon: "lg", Damage: 200, IsSplash: true, IsTeam: true},
 		{Time: 2000, Attacker: "tp", Victim: "foe1", Weapon: "lg", Damage: 30}, // a beam hit: never a discharge
@@ -152,6 +152,12 @@ func TestComputeHighlights_Discharge(t *testing.T) {
 	}
 	if d.EnemyKills != 1 || d.TeamKills != 2 || d.Damage != 833 {
 		t.Errorf("counters enemy=%d team=%d damage=%d, want 1/2/833", d.EnemyKills, d.TeamKills, d.Damage)
+	}
+	// Bounded split: foe1's lethal hit counts its bounded 160 (not the raw
+	// 533 overkill), foe2's non-lethal 100 counts too (all victims, not
+	// only the killed); mate's 200 lands on the team side.
+	if d.DamageEnemy != 260 || d.DamageTeam != 200 {
+		t.Errorf("bounded split enemy=%d team=%d, want 260/200", d.DamageEnemy, d.DamageTeam)
 	}
 	if !reflect.DeepEqual(d.Sources, []string{"frags", "damage"}) {
 		t.Errorf("sources = %v", d.Sources)

@@ -4758,6 +4758,8 @@ kind-specific fields are omitted on the kinds they do not apply to.
 | EnemyKills | `enemyKills` | int — killed victims with `relation: enemy` (always present, 0 included) |
 | TeamKills | `teamKills` | int — killed victims with `relation: team`. The actor's own death is `actor.killed`, never a kill |
 | Damage | `damage` | int (omitempty) — damage-log total dealt to the victims (raw family); 0 without a log |
+| DamageEnemy | `damageEnemy` | int (omitempty) — given damage to ENEMY victims, **bounded** family (each hit capped by the death-value rule), summed over every enemy hit, killed or not. Set on discharges |
+| DamageTeam | `damageTeam` | int (omitempty) — given damage to TEAM victims, bounded family, every teammate hit, killed or not. Set on discharges |
 | Sources | `sources` | []string — the evidence the row rests on, in fixed order: `frags` (an obituary named it) and/or `damage` (the damage log carried it). A discharge can come from either alone; the other kinds always carry `frags` |
 | Cells | `cells` | *int16 (omitempty; discharge) — the discharger's cell count just before firing. The discharge deals `35 × cells` radius damage (`ktx/src/weapons.c:1208`), so this is the magnitude. Absent when the cells stream has no sample |
 | Weapon | `weapon` | string (omitempty; quadbore) — `rl` \| `gl` |

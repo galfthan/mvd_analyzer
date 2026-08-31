@@ -60,6 +60,15 @@ type HighlightEvent struct {
 	// Damage is the damage-log total dealt to the Victims (raw family),
 	// 0 when the demo has no damage log or the event dealt none.
 	Damage int `json:"damage,omitempty"`
+	// DamageEnemy / DamageTeam split the given damage by the victims'
+	// relation, in the BOUNDED family (each hit capped by KTX's
+	// death-value rule — DamageEntry.Bounded — so a lethal radius hit
+	// counts what the victim could absorb, not the raw overkill), summed
+	// over every victim hit, killed or not. Set on discharges — the
+	// multi-victim kind; the other kinds carry their figure in Damage /
+	// the victim row. Schema v76.
+	DamageEnemy int `json:"damageEnemy,omitempty"`
+	DamageTeam  int `json:"damageTeam,omitempty"`
 	// Sources names the evidence the row rests on: "frags" (an obituary
 	// named it) and/or "damage" (the damage log carried it). A discharge
 	// can come from either alone; the other kinds always carry "frags".

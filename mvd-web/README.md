@@ -179,9 +179,11 @@ the wire, so the spawn state 100/0 is shown):
   BSP is provisioned (height needs the clip hull; see `PositionTrack.h`).
 - **Discharges** (`highlights.discharges`) — every LG water discharge with
   evidence: the cells dumped, numeric Enemy / Team / Self kill columns, the
-  frag delta (enemy − team − self, KTX's scoring), the damage-log total,
-  and the victims split into Enemy / Team columns — one line per victim
-  (name, stack, gear, damage taken; dimmed when hurt but not killed).
+  frag delta (enemy − team − self, KTX's scoring), the bounded given
+  damage split into enemy / team columns (every victim hit, killed or
+  not), and the victims split into Enemy / Team columns — one line per
+  victim (name, stack, gear; dimmed when hurt but not killed). Armor and
+  powerups carry the timeline's colors and caps ("180 RA", "Quad").
   Default sort: enemy kills, then damage.
 - **Quadbores** (`highlights.quadbores`) — self-kills by own rocket or
   grenade while holding quad: quad left (30 s KTX quad minus the time

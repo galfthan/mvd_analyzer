@@ -9855,6 +9855,8 @@ components:
         enemyKills: { type: integer, description: "Killed victims with relation enemy." }
         teamKills: { type: integer, description: "Killed victims with relation team." }
         damage: { type: integer, description: "Damage-log total dealt to the victims (raw family); absent without a log or when none was dealt." }
+        damageEnemy: { type: integer, description: "Given damage to ENEMY victims in the BOUNDED family (each hit capped by the death-value rule, so a lethal radius hit counts what the victim could absorb, not the raw overkill), summed over every enemy hit — killed or not. Set on discharges; absent without a damage log." }
+        damageTeam: { type: integer, description: "Given damage to TEAM victims in the BOUNDED family, summed over every teammate hit — killed or not. Set on discharges; absent without a damage log." }
         sources: { type: array, items: { type: string, enum: [frags, damage] }, description: "Evidence the row rests on: frags (an obituary named it) and/or damage (the damage log carried it, wire or reconstructed)." }
         cells: { type: integer, description: "discharge: the discharger's cells just before firing — the discharge deals 35 × cells radius damage, so this is its magnitude. Absent when the stream has no sample." }
         weapon: { type: string, enum: [rl, gl], description: "quadbore: the weapon." }

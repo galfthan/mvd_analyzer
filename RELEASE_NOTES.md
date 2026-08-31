@@ -22,7 +22,10 @@ the shaft's code); quadbores were derivable but derived nowhere.
   `HighlightEvent`: an `actor`, the `victims`, `enemyKills` /
   `teamKills`, the damage-log `damage`, the evidence `sources`
   (`frags` / `damage`), and per kind the `cells` dumped (the discharge
-  deals 35 × cells), the quad `quadHeldMs` and its `quadFrags`, the
+  deals 35 × cells) and the given damage split by victim relation —
+  `damageEnemy` / `damageTeam`, **bounded** family (each hit capped at
+  what the victim could absorb), over every victim hit, killed or not —
+  the quad `quadHeldMs` and its `quadFrags`, the
   `teleKind` (`telefrag` / `deflect` / `spawnicide`) and the airgib
   heights. Every participant is a `HighlightPlayer`: `relation` to the
   actor (`self` / `team` / `enemy`), `health` / `armor` / `armorType` /
