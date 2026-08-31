@@ -3378,10 +3378,19 @@ function displayHighlights(result) {
     const timeCell = e => `<td class="time-cell time-link" data-sort-value="${e.time}">${formatDuration(e.timeSec)}</td>`;
     const locOf = e => e.actor?.loc || e.victims?.[0]?.loc || '';
 
-    // Discharges — enemy kills first, then damage dealt.
-    const discharges = withSec(h.discharges);
-    discharges.sort((a, b) => (b.enemyKills - a.enemyKills) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
-    let t = highlightSetup('discharges', discharges, 'enemy');
+    // Discharges — ranked by kill VALUE: killed enemies holding RL or LG,
+    // +1 more per killed enemy with quad (armed kills over respawn
+    // fodder); ties by enemy kills, then bounded enemy damage.
+    const dischargeValue = e => (e.victims || []).reduce((n, v) => {
+        if (!v.killed || v.relation === 'team') return n;
+        const armed = (v.weapons || []).some(w => w === 'rl' || w === 'lg');
+        const quad = (v.powerups || []).includes('quad');
+        return n + (armed ? 1 : 0) + (quad ? 1 : 0);
+    }, 0);
+    const discharges = withSec(h.discharges).map(e => ({ ...e, value: dischargeValue(e) }));
+    discharges.sort((a, b) => (b.value - a.value) || (b.enemyKills - a.enemyKills)
+        || ((b.damageEnemy || 0) - (a.damageEnemy || 0)) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
+    let t = highlightSetup('discharges', discharges, 'value');
     if (t) {
         for (const e of discharges) {
             const enemy = e.enemyKills || 0;
@@ -3395,6 +3404,7 @@ function displayHighlights(result) {
                 ${timeCell(e)}
                 <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')} ${highlightStateCell(e.actor)}</td>
                 <td data-sort-value="${e.cells ?? -1}">${e.cells ?? '?'}</td>
+                <td data-sort-value="${e.value}">${e.value || '-'}</td>
                 <td data-sort-value="${enemy}">${enemy || '-'}</td>
                 <td data-sort-value="${team}">${team || '-'}</td>
                 <td data-sort-value="${self}">${self || '-'}</td>

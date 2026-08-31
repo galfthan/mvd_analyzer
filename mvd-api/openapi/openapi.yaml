@@ -9872,7 +9872,7 @@ components:
         absent when the match had none of that kind.
       additionalProperties: false
       properties:
-        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every LG water discharge with evidence (an obituary or a damage-log LG radius hit), sorted by enemyKills then damage." }
+        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every LG water discharge with evidence (an obituary or a damage-log LG radius hit), sorted by kill value (killed enemies holding RL or LG, +1 more per killed enemy with quad), then enemyKills, then bounded enemy damage." }
         quadbores: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every self-kill by own rocket/grenade while holding quad, sorted by quadHeldMs ascending." }
         telefrags: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Every death booked under the tele weapon, sorted by the killed victim's stack descending (deflects / spawnicides last)." }
         airgibs: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "The airgib list — direct enemy rocket hits on airborne victims — with the victim's state, height-sorted." }
@@ -9889,7 +9889,7 @@ components:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         kinds: { type: array, items: { type: string, enum: [discharge, quadbore, telefrag, airgib] }, description: "The kinds the response carries (the kinds filter that applied, or all four)." }
         preMs: { type: integer, description: "Effective airgib pre-hit look-back in ms the airgibs list was detected with (default 100; 0 = the pre-hit airborne gate was off)." }
-        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Discharges, sorted by enemyKills then damage then time." }
+        discharges: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Discharges, sorted by kill value (killed enemies holding RL or LG, +1 more per killed enemy with quad), then enemyKills, then bounded enemy damage, then time." }
         quadbores: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Quadbores, sorted by quadHeldMs ascending then time." }
         telefrags: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Telefrags, sorted by the killed victim's stack descending then time." }
         airgibs: { type: array, items: { $ref: "#/components/schemas/HighlightEvent" }, description: "Airgibs, height-sorted." }

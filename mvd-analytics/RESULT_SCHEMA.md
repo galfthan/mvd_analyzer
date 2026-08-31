@@ -4844,7 +4844,10 @@ the event, not at it:
   window is folded in as a killed team victim (a paired row names the
   victim; an [unpaired](#fragresultunpaired) one keeps the `teammate`
   placeholder). A discharge that hurt nobody and left no print is not
-  observable. Order: `enemyKills` desc, `damage` desc, `time`.
+  observable. Order: kill value desc — one point per killed ENEMY holding
+  RL or LG, one more per killed enemy carrying quad (armed kills over
+  respawn fodder) — then `enemyKills` desc, `damageEnemy` desc, `damage`
+  desc, `time`.
 - **Quadbore.** A frag-log suicide with `weapon` `rl` or `gl` whose
   player has a quad interval overlapping `[t − 100, t]`. `quadHeldMs = t −
   interval start`; `quadFrags` the player's non-suicide kills in

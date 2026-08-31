@@ -184,7 +184,8 @@ the wire, so the spawn state 100/0 is shown):
   not), and the victims split into Enemy / Team columns — one line per
   victim (name, stack, gear; dimmed when hurt but not killed). Armor and
   powerups carry the timeline's colors and caps ("180 RA", "Quad").
-  Default sort: enemy kills, then damage.
+  Default sort: kill value — killed enemies holding RL or LG, +1 more per
+  killed enemy with quad — then enemy kills, then bounded enemy damage.
 - **Quadbores** (`highlights.quadbores`) — self-kills by own rocket or
   grenade while holding quad: quad left (30 s KTX quad minus the time
   held), the quad's frags before the bore, the stack thrown away, anyone

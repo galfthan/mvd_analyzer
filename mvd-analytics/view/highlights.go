@@ -431,6 +431,34 @@ type dischargeEvidence struct {
 	dmg    *result.DamageEntry
 }
 
+// dischargeValue ranks a discharge by what it actually destroyed: one
+// point per killed ENEMY holding RL or LG (an armed player), plus one
+// more when a killed enemy carried quad. Empty-handed respawn fodder
+// counts nothing here — the tie-breaks (enemy kills, then the bounded
+// enemy damage, then raw) still order those.
+func dischargeValue(e *result.HighlightEvent) int {
+	v := 0
+	for i := range e.Victims {
+		vic := &e.Victims[i]
+		if !vic.Killed || vic.Relation == "team" {
+			continue
+		}
+		for _, w := range vic.Weapons {
+			if w == "rl" || w == "lg" {
+				v++
+				break
+			}
+		}
+		for _, p := range vic.Powerups {
+			if p == "quad" {
+				v++
+				break
+			}
+		}
+	}
+	return v
+}
+
 func (c *highlightCtx) discharges() []result.HighlightEvent {
 	var ev []dischargeEvidence
 	for i := range c.frags {
@@ -467,8 +495,14 @@ func (c *highlightCtx) discharges() []result.HighlightEvent {
 	}
 	sort.SliceStable(out, func(i, j int) bool {
 		a, b := out[i], out[j]
+		if av, bv := dischargeValue(&a), dischargeValue(&b); av != bv {
+			return av > bv
+		}
 		if a.EnemyKills != b.EnemyKills {
 			return a.EnemyKills > b.EnemyKills
+		}
+		if a.DamageEnemy != b.DamageEnemy {
+			return a.DamageEnemy > b.DamageEnemy
 		}
 		if a.Damage != b.Damage {
 			return a.Damage > b.Damage

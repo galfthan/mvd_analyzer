@@ -370,3 +370,32 @@ func TestHighlightsAccessor(t *testing.T) {
 		t.Errorf("present section: %v %v", got, err)
 	}
 }
+
+// TestDischargeValue pins the toplist metric: killed armed (RL/LG)
+// enemies count, a killed enemy's quad counts once more, and killed
+// teammates / hurt-only victims / unarmed kills count nothing.
+func TestDischargeValue(t *testing.T) {
+	ev := func(vs ...result.HighlightPlayer) *result.HighlightEvent {
+		return &result.HighlightEvent{Victims: vs}
+	}
+	cases := []struct {
+		name string
+		e    *result.HighlightEvent
+		want int
+	}{
+		{"armed enemy", ev(result.HighlightPlayer{Relation: "enemy", Killed: true, Weapons: []string{"rl"}}), 1},
+		{"armed quad enemy", ev(result.HighlightPlayer{Relation: "enemy", Killed: true, Weapons: []string{"lg", "gl"}, Powerups: []string{"quad"}}), 2},
+		{"quad only", ev(result.HighlightPlayer{Relation: "enemy", Killed: true, Powerups: []string{"quad"}}), 1},
+		{"unarmed enemy", ev(result.HighlightPlayer{Relation: "enemy", Killed: true, Weapons: []string{"ssg"}}), 0},
+		{"hurt armed enemy", ev(result.HighlightPlayer{Relation: "enemy", Weapons: []string{"rl"}, Damage: 90}), 0},
+		{"armed teammate", ev(result.HighlightPlayer{Relation: "team", Killed: true, Weapons: []string{"rl"}}), 0},
+		{"two armed one quad", ev(
+			result.HighlightPlayer{Relation: "enemy", Killed: true, Weapons: []string{"rl"}},
+			result.HighlightPlayer{Relation: "enemy", Killed: true, Weapons: []string{"lg"}, Powerups: []string{"quad"}}), 3},
+	}
+	for _, c := range cases {
+		if got := dischargeValue(c.e); got != c.want {
+			t.Errorf("%s: value = %d, want %d", c.name, got, c.want)
+		}
+	}
+}
