@@ -38,11 +38,15 @@ that downstream consumers render, summarise, or feed to an agent.
   hand-ordered phase list. Every node is a task with declared
   `Requires`/`Provides` edges; nodes differ only in whether they read the
   event stream (analyzers — 15 of them, five of which publish
-  `CoreOutputs`) or only refine the assembled `Result` (eight
+  `CoreOutputs`) or only refine the assembled `Result` (the
   post-processors: victim-named teamkill recovery → `frags:final`, **aim
-  analysis**, airgib publication (detection itself is `view.ComputeAirgibs`,
-  a pure function of the assembled `Result`, so mvd-api can re-run it with a
-  caller-tuned pre-hit look-back), scoreboard kills/deaths/suicides
+  analysis**, the
+  **highlight catalogue** → `highlights` (discharges, quadbores, telefrags
+  and airgibs, each row with every participant's state;
+  `view.ComputeHighlights`, a pure function of the assembled `Result` with
+  the airgib detector `view.ComputeAirgibs` running inside it, so mvd-api
+  can re-run the airgib list with a caller-tuned pre-hit
+  look-back), scoreboard kills/deaths/suicides
   correction → `match:final`, locgraph synthesis, region-control
   classification, the match-opening projection → `opening`, and the
   canonical per-player statistics join → `playerStats`), plus
@@ -51,8 +55,8 @@ that downstream consumers render, summarise, or feed to an agent.
   "Pipeline architecture" and "The nodes" below). Timestamps and team
   labels are born correct in each producer's Finalize, so the old
   whole-Result time rebase and duel team rewrite are gone. See `aim.go`,
-  `airgibs.go`, `opening.go`, `player_stats.go`, `postprocess.go`, and
-  `teamkill_telefrag.go`.
+  `highlights.go`, `opening.go`, `player_stats.go`,
+  `postprocess.go`, and `teamkill_telefrag.go`.
 - `view/` — **time-parameterised query API** over a finalised
   `*Result`. Nine pure functions (`Buckets`, `Events`, `StreamSlice`,
   `StateAt`, `LocTrails`, `RegionControl`, since v65 the two
@@ -188,7 +192,7 @@ that downstream consumers render, summarise, or feed to an agent.
   | `lives` | `view.Lives` | `-min-life`, `-dmg`, `-summary` |
   | `items-summary` | `view.ItemsSummary` | `-items`, `-kinds` |
   | `items` | `view.Items` | `-items`, `-kinds` (the full phase timeline) |
-  | `airgibs` | `view.Airgibs` (stored list; detection is `view.ComputeAirgibs`) | — |
+  | `highlights` | `view.Highlights` + `view.FilterHighlights` (stored catalogue: discharges, quadbores, telefrags, airgibs; detection is `view.ComputeHighlights`) | — (the REST `kinds`/`players`/`preMs` knobs are not CLI flags; the whole stored catalogue is printed) |
   | `frags` | `view.Frags` | `-weapons`, `-summary` |
   | `damage` | `view.Damage` | `-weapons`, `-summary`, `-dmg` |
   | `aim` | `view.Aim` | `-summary` (`-from`/`-to` *recompute* over the window) |
@@ -203,13 +207,13 @@ that downstream consumers render, summarise, or feed to an agent.
   | `demoinfo` | `view.DemoInfo` | — |
 
   Most lower-half views also take `-players`, `-from` and `-to`; the ones
-  whose view function has no such option (`airgibs`, `shots`, `loc-graph`,
-  `loc-table`, `metadata`, `demoinfo`) accept none, and `player-stats` takes
+  whose view function has no such option (`highlights`, `shots`,
+  `loc-graph`, `loc-table`, `metadata`, `demoinfo`) accept none, and `player-stats` takes
   `-players`/`-teams` but no window.
 
   On every lower-half view, a view-scoped flag belonging to a different view
   is **rejected** rather than ignored — `-view lives -limit 5` and `-view
-  airgibs -bucket 1s` are both errors — mirroring the way every mvd-api
+  highlights -bucket 1s` are both errors — mirroring the way every mvd-api
   handler rejects an unknown query param: a knob that silently does nothing
   reads as one that worked. The error names the views that *would* take it.
   The seven upper-half views keep their pre-existing leniency, but only for
@@ -224,7 +228,7 @@ that downstream consumers render, summarise, or feed to an agent.
   several views share **one** pass instead of one each:
 
   ```
-  qw-analyze -view top-kills,lives,airgibs demo.mvd.gz
+  qw-analyze -view top-kills,lives,highlights demo.mvd.gz
   ```
 
   Two or more views come back in an object keyed by view name, in the order
@@ -392,8 +396,8 @@ whole-Result rebase or duel rewrite.
 
 **Non-event (post-processors).** These run only in the finalize pass,
 refining the assembled `Result` from artifacts other nodes already
-produced: `recoverTelefragTeamkills`, `aimPost`, `airgibsPost`,
-`scoreboardStatsPost`, `locGraphPost`, `noMatchPost`, `wallClockPost`,
+produced: `recoverTelefragTeamkills`, `aimPost`,
+`highlightsPost`, `scoreboardStatsPost`, `locGraphPost`, `noMatchPost`, `wallClockPost`,
 `regionControlPost`, `openingPost`,
 [`playerStatsPost`](analyzer/player_stats.md),
 `damageReconPost`, `backpackReconPost`. They come in
@@ -620,7 +624,7 @@ flowchart TB
   end
   subgraph d8["depth 8"]
     aim["aim"]
-    airgibs["airgibs"]
+    highlights["highlights"]
     wall_clock["wall-clock"]
     backpack_linkage["backpack-linkage"]
   end
@@ -644,14 +648,14 @@ flowchart TB
   clock -->|"clock"| weapon_pickups
   damage -->|"damage"| damage_recon
   damage_recon -->|"damage:final"| aim
-  damage_recon -->|"damage:final"| airgibs
+  damage_recon -->|"damage:final"| highlights
   damage_recon -->|"damage:final"| player_stats
-  demoinfo -->|"demoinfo"| airgibs
   demoinfo -->|"demoinfo"| backpacks
   demoinfo -->|"demoinfo"| damage
   demoinfo -->|"demoinfo"| damage_recon
   demoinfo -->|"demoinfo"| frag
   demoinfo -->|"demoinfo"| frags_final
+  demoinfo -->|"demoinfo"| highlights
   demoinfo -->|"demoinfo"| identity
   demoinfo -->|"demoinfo"| items
   demoinfo -->|"demoinfo"| loc_graph
@@ -663,12 +667,12 @@ flowchart TB
   demoinfo -->|"demoinfo"| shots
   demoinfo -->|"demoinfo"| timeline
   demoinfo -->|"demoinfo"| wall_clock
-  frag -->|"frag"| airgibs
   frag -->|"frag"| frags_final
   frag -->|"frag"| timeline
   frag -->|"frag"| weapon_pickups
   frags_final -->|"frags:final"| backpack_recon
   frags_final -->|"frags:final"| damage_recon
+  frags_final -->|"frags:final"| highlights
   frags_final -->|"frags:final"| match_final
   frags_final -->|"frags:final"| no_match
   frags_final -->|"frags:final"| player_stats
@@ -713,11 +717,11 @@ flowchart TB
   shots -->|"shots"| damage_recon
   shots -->|"shots"| player_stats
   timeline -->|"timeline"| aim
-  timeline -->|"timeline"| airgibs
   timeline -->|"timeline"| backpack_linkage
   timeline -->|"timeline"| backpack_recon
   timeline -->|"timeline"| damage_recon
   timeline -->|"timeline"| frags_final
+  timeline -->|"timeline"| highlights
   timeline -->|"timeline"| loc_graph
   timeline -->|"timeline"| los
   timeline -->|"timeline"| no_match
@@ -728,9 +732,10 @@ flowchart TB
   timeline -->|"timeline"| wall_clock
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,airgibs,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
+  class frags_final,aim,highlights,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
+
 ```
 
 <!-- dag-mermaid:end -->
@@ -1539,8 +1544,8 @@ Four layers exercise different things:
    Golden output depends on the curated BSP corpus: the package's
    `TestMain` (`setup_test.go`) points `MVDA_BSP_DIR` at the repo-root
    `bsps/` directory, which feeds both the locvis visibility filter
-   (loc names) and the mapclip floor-height column (`pos.h`,
-   `airgibs`). Run `make bsps` before regenerating. A **relative**
+   (loc names) and the mapclip floor-height column (`pos.h`, the
+   airgib heights). Run `make bsps` before regenerating. A **relative**
    `MVDA_BSP_DIR` is resolved against the repo root too — `mapbsp`
    would otherwise resolve it against the package directory, which
    holds no BSPs, so the repo's own documented `MVDA_BSP_DIR=./bsps`

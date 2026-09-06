@@ -163,16 +163,42 @@ by the analyzer on such a demo and now renders `—` too. It used to print a
 fabricated `0`, which beside a recovered 22% hit rate read as a measurement
 that contradicted it; the reconstruction recovers hit COUNTS only, never
 the breakdown of how a fire hit or missed.
-The **Key Moments** tab has seven tables in a two-column grid — powerup
+The **Key Moments** tab has ten tables — a two-column grid of powerup
 runs beside the longest frag streaks, **Top Damage Windows (10 s)**
-beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
-full-width **Direct Rocket Air Hits** table — direct enemy rocket hits on
-airborne victims, lethal or not (`timelineAnalysis.airgibs`; the Lethal
-column's `gib` badge marks the ones that killed), sortable by any column
-and defaulting to height-above-shooter descending (the vertical gap the
-rocket climbed).
-Its rows are empty unless the map's BSP is provisioned (height needs the
-clip hull; see `PositionTrack.h`). The **Demo Markers** table lists the
+beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and
+four full-width **highlight** tables read from the stored highlight
+catalogue (`result.highlights`, schema v76), where every row carries what
+each participant HAD at the instant (health/armor+type, tracked weapons,
+powerups, loc; `(spawn)` marks a victim whose spawn stats had not reached
+the wire, so the spawn state 100/0 is shown):
+
+- **Direct Rocket Air Hits** (`highlights.airgibs`) — direct enemy rocket hits on airborne
+  victims, lethal or not (the Lethal column's `gib` badge marks the ones
+  that killed), defaulting to height-above-shooter descending (the
+  vertical gap the rocket climbed). Its rows are empty unless the map's
+  BSP is provisioned (height needs the clip hull; see `PositionTrack.h`).
+- **Discharges** (`highlights.discharges`) — every LG water discharge with
+  evidence: the cells dumped, numeric Enemy / Team / Self kill columns, the
+  frag delta (enemy − team − self, KTX's scoring), the bounded given
+  damage split into enemy / team columns (every victim hit, killed or
+  not), and the victims split into Enemy / Team columns — one line per
+  victim (name, stack, gear; dimmed when hurt but not killed). Armor and
+  powerups carry the timeline's colors and caps ("180 RA", "Quad").
+  Default sort: kill value — killed enemies holding RL or LG, +1 more per
+  killed enemy with quad — then enemy kills, then bounded enemy damage.
+- **Quadbores** (`highlights.quadbores`) — self-kills by own rocket or
+  grenade while holding quad: quad left (30 s KTX quad minus the time
+  held), the quad's frags before the bore, the stack thrown away, anyone
+  the same rocket took along. Default sort: quad left descending.
+- **Telefrags** (`highlights.telefrags`) — every `tele` death: killer,
+  victim, relation, the victim's stack (the ranking scalar), gear, and the
+  kind (`telefrag` / `deflect` — the teleporter died on a pentagram holder,
+  shown as *survived* / `spawnicide`). Default sort: stack descending, with
+  the rows where the teleporter died last.
+
+All four are sortable by any column (`makeSortable`), seek the timeline on
+the time cell, and link the Hub replay from the actor's perspective. The
+**Demo Markers** table lists the
 user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
 Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty

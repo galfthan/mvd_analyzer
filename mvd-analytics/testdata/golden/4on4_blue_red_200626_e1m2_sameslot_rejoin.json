@@ -1,4 +1,59 @@
 {
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 82,
+          "armorType": "ya",
+          "health": 38,
+          "loc": "cross",
+          "name": "Venator",
+          "relation": "self",
+          "stack": 120,
+          "stateSource": "stream",
+          "team": "blue",
+          "userId": 16,
+          "weapons": [
+            "rl",
+            "gl",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 102.71875,
+        "heightAboveAttacker": 110.75,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 1156198,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 110,
+            "health": 2,
+            "killed": true,
+            "loc": "Quad.stairs",
+            "name": "omicron",
+            "relation": "enemy",
+            "stack": 2,
+            "stateSource": "stream",
+            "team": "red",
+            "userId": 13,
+            "weapons": [
+              "rl",
+              "ssg"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "match": {
     "players": [
       {
@@ -236,22 +291,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "Venator",
-        "attackerTeam": "blue",
-        "attackerUserID": 16,
-        "damage": 110,
-        "height": 102.71875,
-        "heightAboveAttacker": 110.75,
-        "lethal": true,
-        "loc": "Quad.stairs",
-        "time": 1156198,
-        "victim": "omicron",
-        "victimTeam": "red",
-        "victimUserID": 13
-      }
-    ],
     "fragStreaks": [
       {
         "duration": 264319,

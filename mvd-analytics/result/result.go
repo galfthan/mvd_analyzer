@@ -1293,8 +1293,39 @@ package result
 //     (`.reports/nomatch-marker/recensus-v75-healthy-1500.csv`), no demo's
 //     match start moved and no demo lost its streams.
 //
+// v76 — the highlight catalogue: discharges, quadbores, telefrags and
+// airgibs as one stored section, each row carrying what everyone involved
+// had.
+//   - ADDED top-level `highlights` (HighlightsResult): four lists of
+//     HighlightEvent — `discharges`, `quadbores`, `telefrags`, `airgibs` —
+//     sharing one shape: an `actor`, the `victims`, enemy/team kill counters,
+//     the damage-log figure, the evidence `sources`, and per kind the cells
+//     dumped, the quad held / its frags, the telefrag sub-kind, the airgib
+//     heights. Every participant is a HighlightPlayer: relation to the
+//     actor, health / armor / armor type / stack read from the streams one
+//     millisecond BEFORE the event (the death frame already carries the
+//     corpse; a sample older than the player's latest spawn is the previous
+//     life's and reads as the spawn state, `stateSource: "spawn"`), the
+//     tracked weapons, the wielded weapon, the powerups and the loc. Built
+//     by the `highlights` post-processor (servable artifact) from the final
+//     frag log, the streams and the damage log when present; absent when
+//     the demo has no streams or no frag log.
+//   - ADDED on `frags.frags[]` / `frags.unpaired[]`: `cause` — the
+//     obituary's sub-cause beneath `weapon` for the deathtypes KTX prints
+//     distinctly but books under an ordinary weapon: "discharge" (weapon
+//     stays "lg", as KTX's own per-weapon stats count it), "deflect" (the
+//     pentagram telefrag deflections, weapon "tele", a suicide) and
+//     "spawnicide" (weapon "tele", a suicide). `deflector` names the
+//     surviving pentagram holder when the print names them (dtTELE3).
+//     `byWeapon` and every per-weapon consumer are unchanged.
+//   - MOVED: the airgib list — `timelineAnalysis.airgibs` is REMOVED and
+//     `GET /airgibs` retired; the same detector's rows live at
+//     `highlights.airgibs` with the victim's state added
+//     (`/highlights?kinds=airgib&preMs=` replaces the endpoint). The
+//     `airgib` /events kind reads the new list with the same detail keys.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 75
+const CurrentSchemaVersion = 76
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -1324,6 +1355,7 @@ type Result struct {
 	Opening          *OpeningResult          `json:"opening,omitempty"`
 	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
+	Highlights       *HighlightsResult       `json:"highlights,omitempty"`
 	NoMatch          *NoMatchResult          `json:"noMatch,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 	ParseWarnings    *ParseWarnings          `json:"parseWarnings,omitempty"`

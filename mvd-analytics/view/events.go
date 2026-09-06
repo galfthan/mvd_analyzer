@@ -44,13 +44,16 @@ type TaggedEvent struct {
 
 // Default Types when EventsFilter.Types is empty (D15: omit the
 // high-frequency change events that drown the discrete-event story).
-// airgib and pause join the default set as rare, discrete key-moment /
-// match-shaping events (same rationale as demomark): airgib surfaces a
-// direct airborne rocket hit; pause marks a game-clock freeze segment and
-// carries no player (so a players= filter naturally excludes it).
+// airgib, discharge, quadbore and pause join the default set as rare,
+// discrete key-moment / match-shaping events (same rationale as demomark):
+// the three highlight kinds surface a direct airborne rocket hit, an LG
+// water discharge and a quad self-kill — none of which the frag event
+// says (it carries only the score delta); pause marks a game-clock freeze
+// segment and carries no player (so a players= filter naturally excludes
+// it).
 var defaultEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
-	"pickup", "demomark", "airgib", "pause",
+	"pickup", "demomark", "airgib", "discharge", "quadbore", "pause",
 }
 
 // KnownEventTypes is every event type Events recognises: the default
@@ -63,6 +66,7 @@ var defaultEventTypes = []string{
 var KnownEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
 	"pickup", "demomark", "airgib", "pause", "damage", "telefrag", "stomp", "health", "armor", "loc",
+	"discharge", "quadbore",
 }
 
 // Events returns a time-ordered list of events matching the filter.
@@ -179,40 +183,103 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			})
 		}
 	}
-	if want["airgib"] && r.TimelineAnalysis != nil {
-		for _, ag := range r.TimelineAnalysis.Airgibs {
+	if want["airgib"] && r.Highlights != nil {
+		// Sourced from highlights.airgibs (v76 — the list's only home); the
+		// detail keys are unchanged from the timelineAnalysis.airgibs era,
+		// so existing consumers see the same rows.
+		for _, ag := range r.Highlights.Airgibs {
 			ts := ag.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
 			// The player filter matches the attacker (the rocketeer), the
 			// TaggedEvent.Player.
-			if !pf.accepts(ag.Attacker) {
+			if !pf.accepts(ag.Actor.Name) {
 				continue
 			}
 			detail := map[string]any{
-				"victim": ag.Victim,
 				"height": ag.Height,
 				"damage": ag.Damage,
 			}
-			if ag.AttackerTeam != "" {
-				detail["attackerTeam"] = ag.AttackerTeam
-			}
-			if ag.VictimTeam != "" {
-				detail["victimTeam"] = ag.VictimTeam
+			if ag.Actor.Team != "" {
+				detail["attackerTeam"] = ag.Actor.Team
 			}
 			if ag.HeightAboveAttacker != 0 {
 				detail["heightAboveAttacker"] = ag.HeightAboveAttacker
 			}
-			if ag.Loc != "" {
-				detail["loc"] = ag.Loc
-			}
-			if ag.Lethal {
-				detail["lethal"] = true
+			if len(ag.Victims) > 0 {
+				v := ag.Victims[0]
+				detail["victim"] = v.Name
+				if v.Team != "" {
+					detail["victimTeam"] = v.Team
+				}
+				if v.Loc != "" {
+					detail["loc"] = v.Loc
+				}
+				if v.Killed {
+					detail["lethal"] = true
+				}
 			}
 			events = append(events, TaggedEvent{
-				T: ts, Type: "airgib", Player: ag.Attacker, Detail: detail,
+				T: ts, Type: "airgib", Player: ag.Actor.Name, Detail: detail,
 			})
+		}
+	}
+	if r.Highlights != nil && (want["discharge"] || want["quadbore"]) {
+		// The highlight-catalogue kinds: one event per discharge / quadbore,
+		// Player = the actor, the victims by name in the detail. In the
+		// default set like airgib — the frag event carries only the score
+		// delta, so nothing else in the feed says a death was a discharge.
+		emit := func(kind string, list []result.HighlightEvent) {
+			for _, h := range list {
+				if !inWindow(h.Time, filter.StartTime, end) {
+					continue
+				}
+				names := make([]string, 0, len(h.Victims))
+				accepted := pf.accepts(h.Actor.Name)
+				for _, v := range h.Victims {
+					names = append(names, v.Name)
+					if pf.accepts(v.Name) {
+						accepted = true
+					}
+				}
+				if !accepted {
+					continue
+				}
+				detail := map[string]any{
+					"victims":    names,
+					"enemyKills": h.EnemyKills,
+					"teamKills":  h.TeamKills,
+				}
+				if h.Actor.Killed {
+					detail["actorKilled"] = true
+				}
+				if h.Damage != 0 {
+					detail["damage"] = h.Damage
+				}
+				if h.Cells != nil {
+					detail["cells"] = *h.Cells
+				}
+				if h.Weapon != "" {
+					detail["weapon"] = h.Weapon
+				}
+				if kind == "quadbore" {
+					detail["quadHeldMs"] = h.QuadHeldMs
+					detail["quadFrags"] = h.QuadFrags
+				}
+				if h.Actor.Team != "" {
+					detail["team"] = h.Actor.Team
+				}
+				events = append(events, TaggedEvent{
+					T: h.Time, Type: kind, Player: h.Actor.Name, Detail: detail,
+				})
+			}
+		}
+		if want["discharge"] {
+			emit("discharge", r.Highlights.Discharges)
+		}
+		if want["quadbore"] {
+			emit("quadbore", r.Highlights.Quadbores)
 		}
 	}
 	if want["pause"] && r.Streams != nil {

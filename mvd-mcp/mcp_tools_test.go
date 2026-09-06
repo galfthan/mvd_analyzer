@@ -34,6 +34,8 @@ func TestInputSchemasHaveNoNullUnions(t *testing.T) {
 		// top-kills likewise carries *int params (gapMs/contestedMs/limit).
 		"getTopKills": inputSchema[GetTopKillsInput](),
 		"getLives":    inputSchema[GetLivesInput](),
+		// highlights carries kinds/players slices and the *int preMs.
+		"getHighlights": inputSchema[GetHighlightsInput](),
 	} {
 		assertNoNullTypes(t, name, s)
 	}
@@ -129,6 +131,9 @@ func (f *fakeBackend) GetTopWindows(_ context.Context, _ GetTopWindowsInput) (an
 }
 func (f *fakeBackend) GetTopKills(_ context.Context, _ GetTopKillsInput) (any, error) {
 	return map[string]any{"gapMs": 3000, "contestedMs": 4000, "kills": []any{}}, nil
+}
+func (f *fakeBackend) GetHighlights(_ context.Context, _ GetHighlightsInput) (any, error) {
+	return map[string]any{"kinds": []any{"discharge", "quadbore", "telefrag", "airgib"}, "discharges": []any{}, "quadbores": []any{}, "telefrags": []any{}, "airgibs": []any{}}, nil
 }
 func (f *fakeBackend) GetLives(_ context.Context, _ GetLivesInput) (any, error) {
 	return map[string]any{"lives": []any{}}, nil
@@ -253,7 +258,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getBackpacks", "getItems", "getMapEntitiesByMap", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getPointEffects", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
-		"getTopWindows", "getTopKills", "getLives",
+		"getTopWindows", "getTopKills", "getLives", "getHighlights",
 		"listArtifacts", "getArtifact",
 	}
 	got := map[string]bool{}

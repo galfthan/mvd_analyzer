@@ -55,6 +55,21 @@ type FragEntry struct {
 	Weapon     string `json:"weapon"`
 	IsSuicide  bool   `json:"isSuicide,omitempty"`
 	IsTeamKill bool   `json:"isTeamKill,omitempty"`
+
+	// Cause is the obituary's sub-cause beneath Weapon, for the deathtypes
+	// KTX prints distinctly but books under an ordinary weapon: "discharge"
+	// (an LG water discharge — Weapon stays "lg", exactly as KTX's own
+	// per-weapon stats count it), "deflect" (a pentagram telefrag
+	// deflection, dtTELE2/dtTELE3 — the teleporter died, Weapon "tele",
+	// IsSuicide) and "spawnicide" (dtTELE4, Weapon "tele", IsSuicide).
+	// Empty on every other row. Schema v76.
+	Cause string `json:"cause,omitempty"`
+	// Deflector names the surviving pentagram holder on a "deflect" row
+	// whose obituary names them — the dtTELE3 double-pentagram print "X
+	// was telefragged by Y's Satan's power" (Y). The dtTELE2 print names
+	// nobody, so the field is empty there even though a pent holder
+	// existed. Schema v76.
+	Deflector string `json:"deflector,omitempty"`
 }
 
 // PlayerFrags holds per-player frag statistics.

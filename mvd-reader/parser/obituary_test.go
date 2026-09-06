@@ -376,3 +376,31 @@ func TestParsePrint_ObituaryFiresDeathAndNextPlayerInfoFiresSpawn(t *testing.T) 
 		t.Errorf("deaths=%d spawns=%d, want 1/1", deaths, spawns)
 	}
 }
+
+// TestObituaryCauseRowsKeepTheirWeapon pins the Cause vocabulary and the
+// rule that a cause never replaces the weapon: every "discharge" row is an
+// "lg" row and every "deflect" / "spawnicide" row is a "tele" row, so the
+// per-weapon consumers see exactly what they saw before the field existed.
+func TestObituaryCauseRowsKeepTheirWeapon(t *testing.T) {
+	wantWeapon := map[string]string{"discharge": "lg", "deflect": "tele", "spawnicide": "tele"}
+	seen := map[string]int{}
+	for _, p := range ObituaryPatterns {
+		if p.Cause == "" {
+			continue
+		}
+		w, ok := wantWeapon[p.Cause]
+		if !ok {
+			t.Errorf("row %q: unknown cause %q", p.Marker, p.Cause)
+			continue
+		}
+		if p.Weapon != w {
+			t.Errorf("row %q: cause %q on weapon %q, want %q", p.Marker, p.Cause, p.Weapon, w)
+		}
+		seen[p.Cause]++
+	}
+	// Six self forms + " drains " (the " accepts " discharge is promoted by
+	// the analytics matcher off the suffix, so it is not a table row).
+	if seen["discharge"] != 7 || seen["deflect"] != 2 || seen["spawnicide"] != 3 {
+		t.Errorf("cause row counts %v, want discharge=7 deflect=2 spawnicide=3", seen)
+	}
+}

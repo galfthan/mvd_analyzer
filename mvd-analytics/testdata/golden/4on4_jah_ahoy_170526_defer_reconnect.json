@@ -68789,6 +68789,196 @@
     "killsMeasured": true,
     "totalFrags": 414
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 100,
+          "armorType": "ga",
+          "health": 128,
+          "loc": "RA.door",
+          "name": "ocoini",
+          "relation": "self",
+          "stack": 228,
+          "stateSource": "stream",
+          "team": "ahoy",
+          "userId": 6,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 197.84375,
+        "heightAboveAttacker": -37.125,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 146760,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 100,
+            "armorType": "ga",
+            "damage": 110,
+            "health": 100,
+            "loc": "RA.door",
+            "name": "rusti",
+            "relation": "enemy",
+            "stack": 200,
+            "stateSource": "stream",
+            "team": "jah",
+            "userId": 8,
+            "weapons": [
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 126,
+          "armorType": "ra",
+          "health": 84,
+          "loc": "RL",
+          "name": "nexus",
+          "relation": "self",
+          "stack": 210,
+          "stateSource": "stream",
+          "team": "ahoy",
+          "userId": 5,
+          "weapons": [
+            "rl",
+            "gl",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 100.34375,
+        "heightAboveAttacker": 57.125,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 345770,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 13,
+            "killed": true,
+            "loc": "RL",
+            "name": "biggz",
+            "relation": "enemy",
+            "stack": 13,
+            "stateSource": "stream",
+            "team": "jah",
+            "userId": 93,
+            "weapons": [
+              "rl",
+              "lg",
+              "ssg"
+            ]
+          }
+        ]
+      }
+    ],
+    "telefrags": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "RL.tele",
+          "name": "nexus",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "stream",
+          "team": "ahoy",
+          "userId": 5
+        },
+        "damage": 107,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 793705,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 61,
+            "armorType": "ga",
+            "damage": 107,
+            "health": 46,
+            "killed": true,
+            "loc": "RL.tele",
+            "name": "[nW].Veggie",
+            "relation": "team",
+            "stack": 107,
+            "stateSource": "stream",
+            "team": "ahoy",
+            "userId": 3,
+            "weapons": [
+              "rl",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "Ring.lift",
+          "name": "paniagua",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "jah",
+          "userId": 11
+        },
+        "damage": 76,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 594540,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 76,
+            "health": 76,
+            "killed": true,
+            "loc": "Ring.lift",
+            "name": "rusti",
+            "relation": "team",
+            "stack": 76,
+            "stateSource": "stream",
+            "team": "jah",
+            "userId": 8
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -96776,7 +96966,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -269590,35 +269780,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "ocoini",
-        "attackerTeam": "ahoy",
-        "attackerUserID": 6,
-        "damage": 110,
-        "height": 197.84375,
-        "heightAboveAttacker": -37.125,
-        "loc": "RA.door",
-        "time": 146760,
-        "victim": "rusti",
-        "victimTeam": "jah",
-        "victimUserID": 8
-      },
-      {
-        "attacker": "nexus",
-        "attackerTeam": "ahoy",
-        "attackerUserID": 5,
-        "damage": 110,
-        "height": 100.34375,
-        "heightAboveAttacker": 57.125,
-        "lethal": true,
-        "loc": "RL",
-        "time": 345770,
-        "victim": "biggz",
-        "victimTeam": "jah",
-        "victimUserID": 93
-      }
-    ],
     "deathEvents": [
       {
         "player": "paniagua",

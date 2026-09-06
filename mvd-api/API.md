@@ -87,18 +87,19 @@ present, is a **constant `"ms"` self-description echo**:
 > all — `/loc-table`, `/metadata`, and the no-time artifacts
 > (`/artifacts/{metadata,map-entities}`) — carry no echo.**
 
-The four formerly bare-array endpoints wrap their array in an object so
-the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
-`{timeUnit, preMs, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
-`/weapon-pickups` → `{timeUnit, pickups:[…]}`. (`/airgibs` also echoes the
-`preMs` pre-hit look-back its list was detected with — see §2.2.)
+The three formerly bare-array endpoints wrap their array in an object so
+the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/backpacks` →
+`{timeUnit, backpacks:[…]}`, `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
+`/highlights` is the multi-list form of the same idea: `{timeUnit, kinds,
+preMs, discharges:[…], quadbores:[…], telefrags:[…], airgibs:[…]}`, all
+four lists always present.
 
 **Field-name conventions — the dense/sparse key rule.** The per-item
 time key follows what the data scales with; both spellings are int32 ms
 (the name never encodes the unit). **Event-scaled** sparse lists and
 singleton timestamps carry the descriptive **`time`**: the event lists
 (`/frags`, `/damage`, `/shots`, `/chat`, `/backpacks`,
-`/weapon-pickups`, `/airgibs`), `/events` rows, `/buckets?layout=row`
+`/weapon-pickups`, `/highlights`), `/events` rows, `/buckets?layout=row`
 rows, `/state-at`'s envelope, and `/items?summary=true`'s `firstTake`.
 **Sample-rate-scaled** dense arrays carry the terse **`t`**: `/aim`'s
 crosshair `t` + `lgRamp` `since`, the columnar `/buckets` grid, and the
@@ -207,7 +208,12 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   no emitted token changed). The pre-16.2 singular
   spelling `weapon` remains an accepted legacy alias; `weapons` wins when
   both are present.
-- **`preMs`** (`/airgibs`) — the pre-hit look-back in ms (default 100,
+- **`kinds`** (`/highlights`) — CSV of `discharge`, `quadbore`, `telefrag`,
+  `airgib`; omit for all four. The unrequested lists still come back,
+  empty, and the envelope's `kinds` echoes what applied. An unknown kind
+  400s. `players` on `/highlights` keeps rows whose **actor or a victim**
+  is named.
+- **`preMs`** (`/highlights`) — the pre-hit look-back in ms (default 100,
   range `0..1000`): an airgib victim must read clear air (at or above the
   airborne height threshold) at every pre-impact sample of
   `[hit − preMs, hit − 40ms]` — the tick preceding the window decides when
@@ -473,7 +479,7 @@ Non-2xx responses use a stable envelope:
 | 422 | `los_unavailable` | `/los` on a map with no usable visibility BSP (no map name, BSP not provisioned, or a provisioned BSP that fails to parse) — never cached, so a retry after provisioning succeeds |
 | 422 | `opening_unavailable` | no detected match start (`/v1/demos/{id}/artifacts/opening`) |
 | 422 | `region_control_unavailable` | no region-control layout for this map |
-| 422 | `airgibs_unavailable` | no timeline analysis (BSP-less maps return `[]`, not this) |
+| 422 | `highlights_unavailable` | no highlight catalogue — the demo has no match streams or no frag log to build one from (a match with no discharges / quadbores / telefrags / airgibs returns four `[]`, not this) |
 | 422 | `top_windows_unavailable` | no source stream for the chosen `metric` (frag log / damage stream / shot stream). Missing loc data only omits `locs`/`eventLocs` — it does not raise this |
 | 422 | `lives_unavailable` | no per-player streams to segment into lives, **or** streams on none of which liveness was measurable (serving `lives: []` there would read as "nobody ever lived"). A missing damage stream does **not** raise it — `/lives` serves those demos with the damage fields at measured zero |
 | 422 | `top_kills_unavailable` | no frag log, no damage log, **or** no measurable liveness — the burst walk is clipped by the victim's current life start, and without that clip the top-ranked rows are exactly the contaminated ones |
@@ -1072,3 +1078,28 @@ Common frontend features → the call that backs them.
 
 When fetching positions or any raw stream in `index` loc mode, fetch
 `/loc-table` once and decode client-side.
+
+### Toplists from `/highlights`
+
+The highlight catalogue (`GET /v1/demos/{id}/highlights`) already carries
+what everyone involved had — relation to the actor, `health` / `armor` /
+`armorType` / `stack`, `weapons`, `powerups`, `loc` — so a toplist is one
+client-side sort:
+
+- **Discharges** — the lists arrive sorted by `enemyKills`, then `damage`;
+  re-sort by `cells` for the biggest dump (35 × cells radius damage), or
+  keep `actor.killed` rows for the suicidal ones. A discharge that killed a
+  teammate shows the teammate under `victims[]` with `relation: "team"`.
+- **Quadbores** — sorted by `quadHeldMs` ascending; the quad thrown away is
+  `30000 − quadHeldMs` (KTX's 30 s quad), and `quadFrags` says what the run
+  yielded before the bore.
+- **Telefrags** — sorted by `victims[0].stack` descending (the victim's
+  health + armor just before the frag; `stateSource: "spawn"` marks a
+  victim who had only just spawned). `teleKind: "deflect"` rows are the
+  teleporter dying on a pentagram holder — the holder is the victim row
+  with `survived: true`.
+- **Airgibs** — `highlights.airgibs` is the airgib list plus the
+  victim's state; sort by `heightAboveAttacker` for the spectacular ones.
+
+`kinds=telefrag` (etc.) trims the body to one list; `players=` keeps rows a
+player took part in on either side.

@@ -304,16 +304,16 @@ func TestEventsPickupPlayerAndWindowFilter(t *testing.T) {
 func TestEventsAirgibDefault(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 60000}},
-		TimelineAnalysis: &result.TimelineAnalysisResult{
-			Airgibs: []result.AirgibEvent{
-				{
-					Time: 5000, Attacker: "shooter", AttackerTeam: "red",
-					Victim: "flyer", VictimTeam: "blue", Height: 128.5,
-					HeightAboveAttacker: 90.0, Loc: "mid", Damage: 110, Lethal: true,
-				},
+		Highlights: &result.HighlightsResult{
+			Airgibs: []result.HighlightEvent{
+				{Kind: "airgib", Time: 5000, Height: 128.5, HeightAboveAttacker: 90.0, Damage: 110,
+					Actor:   result.HighlightPlayer{Name: "shooter", Team: "red", Relation: "self"},
+					Victims: []result.HighlightPlayer{{Name: "flyer", Team: "blue", Relation: "enemy", Killed: true, Loc: "mid"}}},
 				// A dead-level, non-lethal hit: heightAboveAttacker 0 and
 				// lethal false are omitted from detail.
-				{Time: 40000, Attacker: "shooter2", Victim: "flyer2", Height: 100, Damage: 55},
+				{Kind: "airgib", Time: 40000, Height: 100, Damage: 55,
+					Actor:   result.HighlightPlayer{Name: "shooter2", Relation: "self"},
+					Victims: []result.HighlightPlayer{{Name: "flyer2", Relation: "enemy"}}},
 			},
 		},
 	}
@@ -471,5 +471,58 @@ func TestEventsSpawnLoc(t *testing.T) {
 	}
 	if got := v.Events[0].Detail["li"]; got != 3 {
 		t.Fatalf("spawn[0] li = %v, want 3", got)
+	}
+}
+
+func TestEventsHighlightKindsInDefaultSet(t *testing.T) {
+	cells := int16(21)
+	r := &result.Result{
+		Streams: &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000}},
+		Highlights: &result.HighlightsResult{
+			Discharges: []result.HighlightEvent{{Kind: "discharge", Time: 1000, Cells: &cells, Damage: 833, EnemyKills: 1, TeamKills: 1,
+				Actor:   result.HighlightPlayer{Name: "disc", Team: "blue", Relation: "self", Killed: true},
+				Victims: []result.HighlightPlayer{{Name: "foe", Relation: "enemy", Killed: true}, {Name: "mate", Relation: "team", Killed: true}}}},
+			Quadbores: []result.HighlightEvent{{Kind: "quadbore", Time: 5000, Weapon: "rl", QuadHeldMs: 3000, QuadFrags: 2,
+				Actor: result.HighlightPlayer{Name: "qb", Relation: "self", Killed: true}}},
+		},
+	}
+	// In the default set, like airgib: the frag event carries only the
+	// score delta, so nothing else in the feed says a death was a discharge.
+	def, err := Events(r, EventsFilter{})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	seen := map[string]bool{}
+	for _, e := range def.Events {
+		seen[e.Type] = true
+	}
+	if !seen["discharge"] || !seen["quadbore"] {
+		t.Fatalf("default Events should include discharge and quadbore, got %+v", def.Events)
+	}
+	v, err := Events(r, EventsFilter{Types: []string{"discharge", "quadbore"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(v.Events) != 2 {
+		t.Fatalf("events = %+v, want a discharge and a quadbore", v.Events)
+	}
+	d := v.Events[0]
+	if d.Type != "discharge" || d.Player != "disc" || d.T != 1000 || d.Detail["cells"] != int16(21) || d.Detail["enemyKills"] != 1 || d.Detail["actorKilled"] != true {
+		t.Errorf("discharge event = %+v", d)
+	}
+	if names, _ := d.Detail["victims"].([]string); len(names) != 2 || names[0] != "foe" {
+		t.Errorf("discharge victims = %v", d.Detail["victims"])
+	}
+	q := v.Events[1]
+	if q.Type != "quadbore" || q.Player != "qb" || q.Detail["weapon"] != "rl" || q.Detail["quadHeldMs"] != int32(3000) || q.Detail["quadFrags"] != 2 {
+		t.Errorf("quadbore event = %+v", q)
+	}
+	// The player filter matches a victim as well as the actor.
+	fv, err := Events(r, EventsFilter{Types: []string{"discharge", "quadbore"}, Players: []string{"mate"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(fv.Events) != 1 || fv.Events[0].Type != "discharge" {
+		t.Errorf("players=mate: %+v, want only the discharge mate died in", fv.Events)
 	}
 }

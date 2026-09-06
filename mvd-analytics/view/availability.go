@@ -155,21 +155,6 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 	return out, nil
 }
 
-// Airgibs returns the Key Moments airgib list. Availability tracks the
-// timeline-analysis pass, not the map's clip hull: ErrUnavailable only
-// when there is no TimelineAnalysis at all. A present-but-BSP-less demo
-// returns an empty (non-nil) list — an airgib-less map is a 200 [], not
-// a 422.
-func Airgibs(r *result.Result) ([]result.AirgibEvent, error) {
-	if r.TimelineAnalysis == nil {
-		return nil, ErrUnavailable
-	}
-	if r.TimelineAnalysis.Airgibs == nil {
-		return []result.AirgibEvent{}, nil
-	}
-	return r.TimelineAnalysis.Airgibs, nil
-}
-
 // RegionControlAvailable reports ErrUnavailable when the demo has no
 // region-control layout (no TimelineAnalysis, or a nil RegionControl on
 // it). This is the gate the /region-control endpoint checks before

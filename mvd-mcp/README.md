@@ -93,6 +93,7 @@ description says so.
 | `getTopWindows` | `mvd-api` `GET /v1/demos/{id}/top-windows` |
 | `getTopKills` | `mvd-api` `GET /v1/demos/{id}/top-kills` |
 | `getLives` | `mvd-api` `GET /v1/demos/{id}/lives` |
+| `getHighlights` | `mvd-api` `GET /v1/demos/{id}/highlights` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
 
@@ -126,7 +127,8 @@ recover (e.g. by calling `loadDemo` first).
 ### REST endpoints without an MCP tool
 
 A few `mvd-api` REST endpoints have **no** curated MCP tool yet:
-`/los`, `/shots`, `/streams/*`, and `/airgibs`. This asymmetry is
+`/los`, `/shots`, and `/streams/*` (the airgib list's only home is
+`getHighlights` with `kinds: ["airgib"]`). This asymmetry is
 deliberate for now — those views are large or specialised, and adding
 tools is deferred (they can still be fetched at the REST layer, and
 `/los` is reachable generically via `getArtifact name=los`). See
@@ -719,7 +721,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp, discharge, quadbore` (the last two are the highlight-catalogue lenses — `getHighlights` has the full rows) |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
@@ -1024,6 +1026,35 @@ claim from "we could not tell". The envelope's `measured.liveness`
 carries the same fact on the responses that do get served, so it is only
 ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
+
+#### `getHighlights({demoId, kinds?, players?, preMs?})`
+
+`GET /v1/demos/{id}/highlights` — the stored highlight catalogue: every
+**discharge** (LG fired in water), **quadbore** (self-kill by own rl/gl
+while holding quad), **telefrag** (incl. the pentagram deflections and
+spawnicides) and **airgib**, as four lists of one row shape.
+
+| Param | Type | Default | Notes |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `kinds`   | `string[]` | all four | `discharge`, `quadbore`, `telefrag`, `airgib`. The unrequested lists still come back, empty; the envelope's `kinds` echoes what applied. Unknown kind → `400 invalid_param`. |
+| `players` | `string[]` | all | Keep rows whose **actor or a victim** is named. |
+| `preMs`   | `integer` | `100` | Airgib pre-hit look-back (0..1000; `0` = gate off). Recomputes the airgib list only. Omit for the default — an explicit `0` is forwarded. |
+
+Output: `view.HighlightsEnvelope` — `{timeUnit, kinds, preMs, discharges,
+quadbores, telefrags, airgibs}`. Each row is `{kind, time, actor,
+victims[], enemyKills, teamKills, damage?, sources}` plus per kind `cells`
+(discharge — 35 × cells radius damage), `weapon` + `quadHeldMs` +
+`quadFrags` (quadbore — KTX quad lasts 30 000 ms), `teleKind` (`telefrag |
+deflect | spawnicide`), `height` + `heightAboveAttacker` (airgib). Every
+participant carries `relation` (`self | team | enemy`), `killed?`,
+`survived?` (the pent holder on a deflect), `damage?`, `health`, `armor`,
+`armorType`, `stack`, `weapons`, `activeWeapon`, `powerups`, `loc` and
+`stateSource` (`stream`, or `spawn` when the player had only just
+spawned). Toplists are a sort: discharges by `enemyKills`/`damage`/`cells`,
+quadbores by `quadHeldMs` ascending, telefrags by `victims[0].stack`,
+airgibs by `heightAboveAttacker`. `422 highlights_unavailable` when the
+demo has no match streams or no frag log.
 
 #### `listArtifacts({})`
 

@@ -112,8 +112,9 @@ func ValidateAirgibPreMs(preMs int) error {
 // (result.Damage), the streams' floor-height column (PositionTrack.H),
 // the frag log (for lethality), the per-stream session table (for
 // per-hit userids) and the loc table, all in one match-relative time
-// frame — so it can run both as the parse-time post-processor filling
-// TimelineAnalysis.Airgibs (default options) and per-request with a
+// frame — so it can run both at parse time under the highlights
+// post-processor (default options; the rows are published wrapped as
+// Highlights.Airgibs HighlightEvent rows) and per-request with a
 // caller-tuned PreMs.
 //
 // A hit qualifies when three things hold, each judged only on evidence
@@ -146,7 +147,7 @@ func ComputeAirgibs(r *result.Result, opts AirgibsOptions) []result.AirgibEvent 
 		return nil
 	}
 	// Reconstructed damage participates on equal terms with the wire
-	// stream (the airgibsPost DAG node binds `damage:final`, so the
+	// stream (the highlights DAG node binds `damage:final`, so the
 	// stored list always sees the recon-filled section): damagerecon's
 	// direct-vs-splash split is geometric — a hit is direct only when
 	// its TE_EXPLOSION / projectile endpoint lands within 48 units of

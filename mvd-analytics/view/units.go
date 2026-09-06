@@ -121,15 +121,6 @@ type ChatEnvelope struct {
 	Messages []result.MatchEvent `json:"messages"`
 }
 
-// AirgibsEnvelope wraps the /airgibs key-moment list (ms-native). PreMs
-// echoes the pre-hit look-back the list was computed with (0 = the pre-hit
-// gate was off), so a response says which detection it is.
-type AirgibsEnvelope struct {
-	TimeUnit TimeUnit             `json:"timeUnit"`
-	PreMs    int                  `json:"preMs"`
-	Airgibs  []result.AirgibEvent `json:"airgibs"`
-}
-
 // BackpacksEnvelope wraps the /backpacks drop list (ms-native).
 type BackpacksEnvelope struct {
 	TimeUnit  TimeUnit              `json:"timeUnit"`

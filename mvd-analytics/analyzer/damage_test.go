@@ -366,7 +366,7 @@ func TestDamageAnalyzer_PositionalKillFoldIn(t *testing.T) {
 
 // F20: in a 1v1 where both players share a non-empty colour team, damage is
 // classified enemy at birth — consistent with the duel-normalized
-// Shots.VictimKinds instead of contradicting them (airgibsPost and aimPost
+// Shots.VictimKinds instead of contradicting them (view.ComputeAirgibs and aimPost
 // read IsTeam downstream, and the matrix/EWep buckets only fill on the
 // enemy path).
 func TestDamageAnalyzer_DuelSharedTeamClassifiedEnemy(t *testing.T) {

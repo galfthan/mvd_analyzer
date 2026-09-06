@@ -446,6 +446,8 @@ func (a *FragAnalyzer) parseObituary(msg string, timeMs int32) *FragEntry {
 		Victim:    o.Victim,
 		Weapon:    o.Weapon,
 		IsSuicide: o.Suicide,
+		Cause:     o.Cause,
+		Deflector: o.Other,
 	}
 	switch {
 	case o.TeamKill:

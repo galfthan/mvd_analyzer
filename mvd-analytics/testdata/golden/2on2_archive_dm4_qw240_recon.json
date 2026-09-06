@@ -31920,12 +31920,14 @@
         "weapon": "lg"
       },
       {
+        "cause": "discharge",
         "killer": "ung",
         "time": 330389,
         "victim": "math",
         "weapon": "lg"
       },
       {
+        "cause": "discharge",
         "isSuicide": true,
         "killer": "ung",
         "time": 330389,
@@ -32254,6 +32256,7 @@
         "weapon": "tele"
       },
       {
+        "cause": "discharge",
         "isSuicide": true,
         "killer": "raket",
         "time": 477346,
@@ -32500,6 +32503,577 @@
     ],
     "killsMeasured": true,
     "totalFrags": 218
+  },
+  "highlights": {
+    "discharges": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "damage": 1120,
+          "health": 20,
+          "killed": true,
+          "loc": "low.stand",
+          "name": "ung",
+          "relation": "self",
+          "stack": 20,
+          "stateSource": "stream",
+          "team": "nme",
+          "userId": 2643,
+          "weapons": [
+            "lg"
+          ]
+        },
+        "cells": 64,
+        "damage": 1911,
+        "damageTeam": 231,
+        "enemyKills": 1,
+        "kind": "discharge",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "time": 330389,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 150,
+            "armorType": "ya",
+            "damage": 1911,
+            "health": 81,
+            "killed": true,
+            "loc": "high",
+            "name": "virus",
+            "relation": "team",
+            "stack": 231,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2639,
+            "weapons": [
+              "rl"
+            ]
+          },
+          {
+            "activeWeapon": "rl",
+            "armor": 100,
+            "armorType": "ga",
+            "health": 100,
+            "killed": true,
+            "loc": "high",
+            "name": "math",
+            "relation": "enemy",
+            "stack": 200,
+            "stateSource": "stream",
+            "team": "korv",
+            "userId": 2650,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "lg",
+          "armor": 34,
+          "armorType": "ra",
+          "health": 58,
+          "killed": true,
+          "loc": "low",
+          "name": "raket",
+          "relation": "self",
+          "stack": 92,
+          "stateSource": "stream",
+          "team": "korv",
+          "userId": 2647,
+          "weapons": [
+            "rl",
+            "lg"
+          ]
+        },
+        "cells": 9,
+        "enemyKills": 0,
+        "kind": "discharge",
+        "sources": [
+          "frags"
+        ],
+        "teamKills": 0,
+        "time": 477346
+      }
+    ],
+    "telefrags": [
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "low.tele",
+          "name": "ung",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "stream",
+          "team": "nme",
+          "userId": 2643
+        },
+        "damage": 200,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 173570,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 100,
+            "armorType": "ga",
+            "damage": 200,
+            "health": 100,
+            "killed": true,
+            "loc": "low.tele",
+            "name": "math",
+            "relation": "enemy",
+            "stack": 200,
+            "stateSource": "stream",
+            "team": "korv",
+            "userId": 2650,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "axe",
+          "armor": 0,
+          "health": 49,
+          "loc": "YA.entry",
+          "name": "raket",
+          "relation": "self",
+          "stack": 49,
+          "stateSource": "stream",
+          "team": "korv",
+          "userId": 2647,
+          "weapons": [
+            "lg"
+          ]
+        },
+        "damage": 192,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 145775,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 71,
+            "armorType": "ga",
+            "damage": 192,
+            "health": 121,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "math",
+            "relation": "team",
+            "stack": 192,
+            "stateSource": "stream",
+            "team": "korv",
+            "userId": 2650,
+            "weapons": [
+              "rl",
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "YA.entry",
+          "name": "virus",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "stream",
+          "team": "nme",
+          "userId": 2639,
+          "weapons": [
+            "lg"
+          ]
+        },
+        "damage": 172,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 594524,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 150,
+            "armorType": "ya",
+            "damage": 172,
+            "health": 22,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "math",
+            "relation": "enemy",
+            "stack": 172,
+            "stateSource": "stream",
+            "team": "korv",
+            "userId": 2650,
+            "weapons": [
+              "rl",
+              "lg",
+              "ssg",
+              "sng"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "lg",
+          "armor": 0,
+          "health": 100,
+          "loc": "YA.entry",
+          "name": "math",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "korv",
+          "userId": 2650,
+          "weapons": [
+            "rl",
+            "lg"
+          ]
+        },
+        "damage": 144,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 272435,
+        "victims": [
+          {
+            "activeWeapon": "axe",
+            "armor": 68,
+            "armorType": "ga",
+            "damage": 144,
+            "health": 76,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "raket",
+            "relation": "team",
+            "stack": 144,
+            "stateSource": "stream",
+            "team": "korv",
+            "userId": 2647,
+            "weapons": [
+              "lg",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 4,
+          "armorType": "ra",
+          "health": 51,
+          "loc": "high.tele",
+          "name": "virus",
+          "relation": "self",
+          "stack": 55,
+          "stateSource": "stream",
+          "team": "nme",
+          "userId": 2639,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 129,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 251750,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 100,
+            "armorType": "ga",
+            "damage": 129,
+            "health": 29,
+            "killed": true,
+            "loc": "high.tele",
+            "name": "ung",
+            "relation": "team",
+            "stack": 129,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2643,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "sg",
+          "armor": 0,
+          "health": 100,
+          "loc": "YA.entry",
+          "name": "virus",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "nme",
+          "userId": 2639,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 100,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 109509,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "ung",
+            "relation": "team",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2643
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 89,
+          "armorType": "ra",
+          "health": 88,
+          "loc": "low.tele",
+          "name": "raket",
+          "relation": "self",
+          "stack": 177,
+          "stateSource": "stream",
+          "team": "korv",
+          "userId": 2647,
+          "weapons": [
+            "rl",
+            "lg"
+          ]
+        },
+        "damage": 100,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 224643,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "low.tele",
+            "name": "virus",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2639
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 100,
+          "loc": "YA.entry",
+          "name": "ung",
+          "relation": "self",
+          "stack": 100,
+          "stateSource": "spawn",
+          "team": "nme",
+          "userId": 2643,
+          "weapons": [
+            "rl",
+            "ssg"
+          ]
+        },
+        "damage": 100,
+        "enemyKills": 0,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 1,
+        "teleKind": "telefrag",
+        "time": 471347,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 0,
+            "damage": 100,
+            "health": 100,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "virus",
+            "relation": "team",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2639,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "axe",
+          "armor": 200,
+          "armorType": "ra",
+          "health": 34,
+          "loc": "low.tele",
+          "name": "raket",
+          "relation": "self",
+          "stack": 234,
+          "stateSource": "stream",
+          "team": "korv",
+          "userId": 2647,
+          "weapons": [
+            "rl",
+            "lg",
+            "ssg"
+          ]
+        },
+        "damage": 65,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 81973,
+        "victims": [
+          {
+            "activeWeapon": "ssg",
+            "armor": 0,
+            "damage": 65,
+            "health": 65,
+            "killed": true,
+            "loc": "low.tele",
+            "name": "virus",
+            "relation": "enemy",
+            "stack": 65,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2639,
+            "weapons": [
+              "rl",
+              "lg",
+              "gl",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "axe",
+          "armor": 0,
+          "health": 80,
+          "loc": "YA.entry",
+          "name": "raket",
+          "relation": "self",
+          "stack": 80,
+          "stateSource": "stream",
+          "team": "korv",
+          "userId": 2647,
+          "weapons": [
+            "lg",
+            "ssg"
+          ]
+        },
+        "damage": 40,
+        "enemyKills": 1,
+        "kind": "telefrag",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "teleKind": "telefrag",
+        "time": 42498,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 0,
+            "damage": 40,
+            "health": 40,
+            "killed": true,
+            "loc": "YA.entry",
+            "name": "virus",
+            "relation": "enemy",
+            "stack": 40,
+            "stateSource": "stream",
+            "team": "nme",
+            "userId": 2639
+          }
+        ]
+      }
+    ]
   },
   "items": {
     "items": [
@@ -45348,7 +45922,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {

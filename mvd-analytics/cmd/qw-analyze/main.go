@@ -10,9 +10,9 @@
 // data is produced on demand by view.Buckets, accessible via the
 // -view buckets flag below. Other views (events, stream-slice,
 // state-at, trails, region-control, top-kills, top-windows, lives,
-// items, items-summary, airgibs, frags, damage, aim, chat, backpacks,
-// weapon-pickups, player-stats, shots, loc-graph, loc-table, metadata,
-// demoinfo) are also available — the full mvd-api view surface.
+// items, items-summary, highlights, frags, damage, aim, chat,
+// backpacks, weapon-pickups, player-stats, shots, loc-graph, loc-table,
+// metadata, demoinfo) are also available — the full mvd-api view surface.
 //
 // -view player-stats is NOT -view full's playerStats: the view applies
 // the KTX overlay at read time (ping, speed, controlMs), where the
@@ -36,7 +36,7 @@
 // bounded on the same queries, so an unset -dmg does not reproduce the
 // REST response; pass -dmg bounded for that.
 //
-// On those views and items-summary/airgibs, a flag belonging to a
+// On those views and items-summary/highlights, a flag belonging to a
 // different view is rejected rather than ignored — the CLI analogue of
 // mvd-api's unknown-query-param rejection. The seven original views
 // predate the check and keep their existing leniency.
@@ -67,8 +67,8 @@
 //	qw-analyze -view top-windows -mode gap -gap 8s demo.mvd.gz
 //	qw-analyze -view lives -players alice -min-life 5s demo.mvd.gz
 //	qw-analyze -view items-summary -kinds armor demo.mvd.gz
-//	qw-analyze -view airgibs demo.mvd.gz
-//	qw-analyze -view top-kills,airgibs demo.mvd.gz       # both, one analysis pass
+//	qw-analyze -view highlights demo.mvd.gz             # discharges, quadbores, telefrags, airgibs
+//	qw-analyze -view top-kills,highlights demo.mvd.gz       # both, one analysis pass
 //	qw-analyze -view player-stats demo.mvd.gz            # canonical KTX-overlaid rows
 //	qw-analyze -view damage -summary -weapons rl demo.mvd.gz
 //	qw-analyze -view aim -from 2m -to 3m30s demo.mvd.gz  # windowed aim RECOMPUTE
@@ -159,7 +159,7 @@ var derivedViewFlags = map[string]map[string]bool{
 	"lives":          {"min-life": true, "dmg": true, "summary": true, "players": true, "from": true, "to": true},
 	"items-summary":  {"items": true, "kinds": true, "players": true, "from": true, "to": true},
 	"items":          {"items": true, "kinds": true, "players": true, "from": true, "to": true},
-	"airgibs":        {}, // view.Airgibs takes no options at all
+	"highlights":     {}, // the stored catalogue, unfiltered; kinds/players/preMs are REST-only knobs
 	"frags":          {"players": true, "weapons": true, "from": true, "to": true, "summary": true},
 	"damage":         {"players": true, "weapons": true, "from": true, "to": true, "summary": true, "dmg": true},
 	"aim":            {"players": true, "from": true, "to": true, "summary": true, "include": true},
@@ -249,7 +249,7 @@ var derivedOnlyFlags = []string{
 // whatever is being produced. The applicability check consults this list to
 // decide whether an unrecognised-for-this-view flag is its business: the
 // legacy eight belong to specific original views, so they are just as wrong
-// on -view airgibs as -metric is, and get the same rejection.
+// on -view highlights as -metric is, and get the same rejection.
 var viewScopedFlags = append([]string{
 	"players", "from", "to",
 	"bucket", "fields", "reducer", "event-types", "min-dwell", "time",
@@ -264,7 +264,7 @@ func main() {
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
 	parallel := flag.Bool("parallel", false, "use goroutines inside heavy analysis passes (opt-in: leave off when running many analyses concurrently)")
 
-	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | airgibs | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
+	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | highlights | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
 	fieldsStr := flag.String("fields", "", "comma-separated field codes (see mvd-analytics/view docs)")
 	reducerArgs := stringListFlag("reducer", "field=name reducer override; repeatable (e.g. -reducer h=min)")
@@ -1241,12 +1241,16 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 		sv.TimeUnit = view.UnitMs
 		return sv, nil
 
-	case "airgibs":
-		airgibs, err := view.Airgibs(res)
+	case "highlights":
+		h, err := view.Highlights(res)
 		if err != nil {
-			return nil, fmt.Errorf("airgibs unavailable for this demo (no timeline analysis): %w", err)
+			return nil, fmt.Errorf("highlights unavailable for this demo (no match streams or frag log): %w", err)
 		}
-		return view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs}, nil
+		// The stored catalogue, every kind, the default airgib look-back —
+		// what the post-processor baked in. Options are empty by
+		// construction, so the validation error cannot fire.
+		env, _ := view.FilterHighlights(h, view.HighlightsOptions{}, view.DefaultAirgibPreMs)
+		return env, nil
 
 	case "region-control":
 		ta := res.TimelineAnalysis

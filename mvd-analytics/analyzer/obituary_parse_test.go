@@ -128,3 +128,53 @@ func TestMessagesObituaryDriftFixed(t *testing.T) {
 		})
 	}
 }
+
+// TestParseObituaryLine_Cause pins the sub-cause beneath Weapon: the LG
+// water discharge (both the self forms and the two kill prints, one of which
+// shares its marker with the ordinary shaft kill), the pentagram deflections
+// and the spawn telefrag. Weapon must stay the canonical code on every row —
+// the cause is additive, never a reclassification.
+func TestParseObituaryLine_Cause(t *testing.T) {
+	cases := []struct {
+		name   string
+		msg    string
+		killer string
+		victim string
+		weapon string
+		cause  string
+		other  string
+		sui    bool
+	}{
+		{"self water", "sCorp heats up the water", "sCorp", "sCorp", "lg", "discharge", "", true},
+		{"self water 2", "sCorp discharges into the water", "sCorp", "sCorp", "lg", "discharge", "", true},
+		{"self lava", "ung discharges into the lava", "ung", "ung", "lg", "discharge", "", true},
+		{"self slime", "ung discharges into the slime", "ung", "ung", "lg", "discharge", "", true},
+		{"self dmm4", "ung electrocutes himself", "ung", "ung", "lg", "discharge", "", true},
+		{"kill drains", "math drains ung's batteries", "ung", "math", "lg", "discharge", "", false},
+		{"kill accepts discharge", "clox accepts sCorp's discharge", "sCorp", "clox", "lg", "discharge", "", false},
+		{"kill accepts discharge s-name", "clox accepts xs' discharge", "xs", "clox", "lg", "discharge", "", false},
+		{"kill accepts shaft", "clox accepts sCorp's shaft", "sCorp", "clox", "lg", "", "", false},
+		{"deflect tele2", "Satan's power deflects nlk's telefrag", "nlk", "nlk", "tele", "deflect", "", true},
+		{"deflect tele3", "nlk was telefragged by apa's Satan's power", "nlk", "nlk", "tele", "deflect", "apa", true},
+		{"spawnicide", "nlk got too close to the baby factory", "nlk", "nlk", "tele", "spawnicide", "", true},
+		{"plain telefrag", "nlk was telefragged by apa", "apa", "nlk", "tele", "", "", false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			o := parseObituaryLine(c.msg)
+			if o == nil {
+				t.Fatalf("%q: no match", c.msg)
+			}
+			if o.Killer != c.killer || o.Victim != c.victim || o.Weapon != c.weapon || o.Suicide != c.sui {
+				t.Fatalf("%q: got killer=%q victim=%q weapon=%q suicide=%v, want %q/%q/%q/%v",
+					c.msg, o.Killer, o.Victim, o.Weapon, o.Suicide, c.killer, c.victim, c.weapon, c.sui)
+			}
+			if o.Cause != c.cause {
+				t.Errorf("%q: cause %q, want %q", c.msg, o.Cause, c.cause)
+			}
+			if o.Other != c.other {
+				t.Errorf("%q: other %q, want %q", c.msg, o.Other, c.other)
+			}
+		})
+	}
+}

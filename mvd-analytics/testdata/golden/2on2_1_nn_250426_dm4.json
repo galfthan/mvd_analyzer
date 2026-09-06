@@ -39914,6 +39914,108 @@
     "killsMeasured": true,
     "totalFrags": 242
   },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 142,
+          "loc": "low.tele",
+          "name": "squeeze",
+          "relation": "self",
+          "stack": 142,
+          "stateSource": "stream",
+          "team": "1",
+          "userId": 14,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 128.09375,
+        "heightAboveAttacker": 128.125,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 547530,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "GL",
+            "name": "stepcop",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "n n",
+            "userId": 9,
+            "weapons": [
+              "rl",
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 125,
+          "armorType": "ra",
+          "health": 37,
+          "loc": "YA.entry",
+          "name": "stepcop",
+          "relation": "self",
+          "stack": 162,
+          "stateSource": "stream",
+          "team": "n n",
+          "userId": 9,
+          "weapons": [
+            "rl",
+            "lg",
+            "ssg"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 113.09375,
+        "heightAboveAttacker": -14.875,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 483194,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 0,
+            "damage": 110,
+            "health": 71,
+            "killed": true,
+            "loc": "YA",
+            "name": "squeeze",
+            "relation": "enemy",
+            "stack": 71,
+            "stateSource": "stream",
+            "team": "1",
+            "userId": 14,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "items": {
     "items": [
       {
@@ -55541,7 +55643,7 @@
       }
     ]
   },
-  "schemaVersion": 75,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -102386,36 +102488,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "squeeze",
-        "attackerTeam": "1",
-        "attackerUserID": 14,
-        "damage": 110,
-        "height": 128.09375,
-        "heightAboveAttacker": 128.125,
-        "lethal": true,
-        "loc": "GL",
-        "time": 547530,
-        "victim": "stepcop",
-        "victimTeam": "n n",
-        "victimUserID": 9
-      },
-      {
-        "attacker": "stepcop",
-        "attackerTeam": "n n",
-        "attackerUserID": 9,
-        "damage": 110,
-        "height": 113.09375,
-        "heightAboveAttacker": -14.875,
-        "lethal": true,
-        "loc": "YA",
-        "time": 483194,
-        "victim": "squeeze",
-        "victimTeam": "1",
-        "victimUserID": 14
-      }
-    ],
     "deathEvents": [
       {
         "player": "squeeze",

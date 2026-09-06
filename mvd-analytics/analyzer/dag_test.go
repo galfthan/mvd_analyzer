@@ -19,7 +19,7 @@ var registrationOrder = []string{
 	"metadata", "match", "messages", "timeline", "items", "damage",
 	"shots", "map-entities", "backpacks", "weapon-pickups",
 	// post-processors
-	"frags-final", "aim", "airgibs",
+	"frags-final", "aim", "highlights",
 	"match-final", "loc-graph", "no-match", "wall-clock", "region-control", "opening", "player-stats",
 	"damage-recon", "backpack-recon", "backpack-linkage",
 }

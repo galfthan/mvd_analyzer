@@ -2,9 +2,10 @@ package main
 
 // MCP reachability: every demo-scoped REST GET *view* endpoint must be
 // reachable from the MCP surface, so a future endpoint cannot ship
-// MCP-invisible the way /v1/demos/{id}/airgibs did (its data lived only on a
-// REST endpoint no curated tool proxied and on no event type getEvents
-// emitted). The spec's demo-scoped GET paths are the source of truth; each
+// MCP-invisible the way the retired /v1/demos/{id}/airgibs once did (its
+// data lived only on a REST endpoint no curated tool proxied and on no
+// event type getEvents emitted; retired at schema v76 — the list's only
+// home is /highlights, proxied by getHighlights). The spec's demo-scoped GET paths are the source of truth; each
 // must map to one of three reachability kinds:
 //
 //   - tool:      a curated MCP tool proxies the endpoint. The tool list is
@@ -61,6 +62,7 @@ var demoViewCoverage = map[string]mcpCoverage{
 	"/v1/demos/{id}/top-windows":    {tool: "getTopWindows"},
 	"/v1/demos/{id}/top-kills":      {tool: "getTopKills"},
 	"/v1/demos/{id}/lives":          {tool: "getLives"},
+	"/v1/demos/{id}/highlights":     {tool: "getHighlights"},
 
 	// The three projectile/beam/nail dense streams share the getStreamSlice
 	// tool (fields=rk/nl/…), not a per-stream tool.
@@ -76,9 +78,6 @@ var demoViewCoverage = map[string]mcpCoverage{
 	// getArtifact.
 	"/v1/demos/{id}/shots": {artifact: "shots"},
 	"/v1/demos/{id}/los":   {artifact: "los"},
-
-	// Airgibs have no curated tool; their data rides the /events stream.
-	"/v1/demos/{id}/airgibs": {eventType: "airgib"},
 }
 
 // demoViewExempt are demo-scoped GET paths that are NOT view endpoints

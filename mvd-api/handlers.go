@@ -1255,30 +1255,33 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: body})
 }
 
-// handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list
-// (timelineAnalysis.airgibs): every DIRECT enemy rocket hit on an airborne
-// victim above the height threshold, sorted by height descending. Height
-// needs the map's clip hull, so the list is empty (not an error) when the
-// map's BSP was not provisioned at parse time.
+// handleHighlights: GET /v1/demos/{id}/highlights — the highlight catalogue
+// (result.Highlights): every discharge, quadbore, telefrag and airgib, each
+// row carrying what everyone involved had at the instant (relation to the
+// actor, health/armor/stack, weapons, powerups, loc). All four lists are
+// always present in the body — [] when the match had none of that kind or
+// kinds= excluded it — so toplists are built client-side by sorting.
 //
 // Query params:
 //
-//	preMs  int — pre-hit look-back in ms (default 100, range 0..1000): the
-//	             victim must read clear air (>= the height threshold) at
-//	             every pre-impact sample of [hit-preMs, hit-40ms] — the
-//	             preceding tick decides when the window holds no sample
-//	             (coarse-tick demos) — with no grounded reading beside the
-//	             hit. Samples near the damage stamp can already carry the
-//	             rocket's own knockback, which over-reports height but
-//	             cannot fake ground contact; 0 turns the pre-hit gate off
-//	             (the hit-sample-only legacy rule). The default serves the
-//	             stored list; any other value recomputes.
-func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
+//	kinds    csv — discharge | quadbore | telefrag | airgib (default all);
+//	              the unrequested lists come back empty, kinds echoes.
+//	players  csv — keep events whose actor or a victim is named.
+//	preMs    int — the airgib pre-hit look-back
+//	              it (default 100, 0 = gate off); a non-default value
+//	              recomputes the airgib list only, the other three lists are
+//	              stored.
+//
+// 422 highlights_unavailable when the demo has no highlights section — no
+// match streams or no frag log to build one from.
+func (s *server) handleHighlights(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
 		return
 	}
 	p := newQP(r.URL.Query())
+	kinds := p.CSV("kinds")
+	players := p.CSV("players")
 	preMs := p.Int("preMs", view.DefaultAirgibPreMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
@@ -1286,30 +1289,38 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
+	if writeInvalidParam(w, view.ValidateHighlightKinds(kinds)) {
+		return
+	}
 	if writeInvalidParam(w, view.ValidateAirgibPreMs(preMs)) {
 		return
 	}
-	// The availability gate stays on the stored timeline analysis either
-	// way: a recompute of a demo without one is not a different answer.
-	airgibs, err := view.Airgibs(res)
+	h, err := view.Highlights(res)
 	if err != nil {
-		s.writeUnavailable(w, r, err, "airgibs_unavailable",
-			"this demo has no timeline analysis")
+		s.writeUnavailable(w, r, err, "highlights_unavailable",
+			"this demo has no highlights (no match streams or no frag log)")
 		return
 	}
 	if preMs != view.DefaultAirgibPreMs {
-		// 0 means "no pre-hit gate" to the caller; ComputeAirgibs reads 0 as
-		// "default", so hand it a negative to disable.
+		// preMs translation: 0 means "no pre-hit gate" to the
+		// caller, and the compute reads 0 as "stored", so hand it a negative.
 		opt := int32(preMs)
 		if preMs == 0 {
 			opt = -1
 		}
-		airgibs = view.ComputeAirgibs(res, view.AirgibsOptions{PreMs: opt})
-		if airgibs == nil {
-			airgibs = []result.AirgibEvent{}
+		copyH := *h
+		if re := view.ComputeHighlights(res, view.HighlightsOptions{AirgibPreMs: opt}); re != nil {
+			copyH.Airgibs = re.Airgibs
+		} else {
+			copyH.Airgibs = nil
 		}
+		h = &copyH
 	}
-	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, PreMs: preMs, Airgibs: airgibs})
+	env, err := view.FilterHighlights(h, view.HighlightsOptions{Kinds: kinds, Players: players}, preMs)
+	if writeInvalidParam(w, err) {
+		return
+	}
+	writeJSON(w, http.StatusOK, env)
 }
 
 // handleTopWindows: GET /v1/demos/{id}/top-windows — each player's best
