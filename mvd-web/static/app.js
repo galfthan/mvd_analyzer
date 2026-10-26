@@ -7147,9 +7147,12 @@ function teardownPlayer() {
     Object.assign(playerState, {
         blobUrl: null, iframe: null, fte: null, seekTimer: null,
         pendingSeek: null, seekTarget: null, lastTrack: null, lastEnded: false,
-        markIn: null, markOut: null,
+        markIn: null, markOut: null, onReady: null,
     });
     updateClipMarks();
+    // A demo the user loaded ends the run; one the run loaded itself
+    // (loadDemoForRun) carries it on.
+    if (playlistState.run && playlistState.loadingRun !== playlistState.run) playlistState.run = null;
     const bar = document.getElementById('player-pov-bar');
     if (bar) bar.innerHTML = '';
 }
@@ -7443,9 +7446,14 @@ function installPaneDrag(el, head, id) {
         const from = e.dataTransfer.getData('text/x-mvd-pane');
         if (!from || from === id) return;
         e.preventDefault();
-        const order = playerPanes.order.filter(x => x !== from);
-        order.splice(order.indexOf(id), 0, from);
-        playerPanes.order = order;
+        // Same semantics as the playlist's drag: the dragged pane takes the
+        // target's slot, so dropping on the pane below moves it down.
+        const order = playerPanes.order;
+        const fi = order.indexOf(from);
+        const ti = order.indexOf(id);
+        if (fi < 0 || ti < 0) return;
+        order.splice(fi, 1);
+        order.splice(ti, 0, from);
         savePlayerPaneOrder();
         mountPlayerPanes();
     });
@@ -7505,13 +7513,14 @@ function onPlayerPovChanged() {
 const mapPaneState = {
     home: null,          // { parent, next } — where the canvas lives in the Map tab
     savedFollow: null,
+    savedFollowResult: null,   // the follow target belongs to this demo only
     resizeObserver: null,
     follow: true,
     settingFollow: false,
 };
 
 function mountMapPane(body, head) {
-    const canvas = mapState.canvas || document.getElementById('map-canvas');
+    const canvas = mapState.canvas;
     if (!canvas || !mapView) {
         body.textContent = 'No map for this demo.';
         return;
@@ -7530,6 +7539,7 @@ function mountMapPane(body, head) {
 
     mapPaneState.home = { parent: canvas.parentElement, next: canvas.nextSibling };
     mapPaneState.savedFollow = mapState.followPlayer || null;
+    mapPaneState.savedFollowResult = currentResult;
     body.appendChild(canvas);
     mapPaneState.resizeObserver = new ResizeObserver(() => sizeMapPane());
     mapPaneState.resizeObserver.observe(body);
@@ -7545,7 +7555,9 @@ function unmountMapPane() {
     mapPaneState.home = null;
     if (!canvas || !home) return;
     home.parent.insertBefore(canvas, home.next && home.next.parentNode === home.parent ? home.next : null);
-    setMapFollowQuietly(mapPaneState.savedFollow);
+    // A demo loaded meanwhile reset the map's follow; the old demo's target
+    // must not come back onto it.
+    setMapFollowQuietly(mapPaneState.savedFollowResult === currentResult ? mapPaneState.savedFollow : null);
     resizeMapCanvas();
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
@@ -7738,6 +7750,7 @@ const playlistState = {
     // The scripted run: { clips, index, prev, transient }. `clips` is the
     // playlist itself, or a one-clip list for a plain click on a hub link.
     run: null,
+    loadingRun: null,   // the run whose next clip's demo is being loaded
     toastTimer: null,
 };
 
@@ -7859,7 +7872,7 @@ function playRunClip(index) {
     if (!c) return stopPlaylistRun();
     run.index = index;
     run.prev = null;
-    renderPlaylist();
+    markPlaylistRun();
 
     if (!clipIsCurrent(c)) {
         if (c.demo?.gameId) return loadDemoForRun(c);
@@ -7877,12 +7890,27 @@ function playRunClip(index) {
         return;
     }
     const fte = playerState.fte;
-    setCurrentTime(Math.max(0, c.from - off));
+    playerJumpToDemoTime(c.from);
     if (c.track === 'auto') fte.enableAutotrack();
     else fte.track(c.track);
     if (!fte.isPlaying()) fte.play();
     markActivePov();
     updatePlaybackButtons();
+}
+
+// Seek the engine to a demo time directly. setCurrentTime clamps to the
+// match window, so a clip in the countdown or after the match end would
+// land outside itself and its run would never see `to` crossed; the cursor
+// shows the clamped match time meanwhile.
+function playerJumpToDemoTime(demoT) {
+    playerState.syncing = true;
+    try { setCurrentTime(Math.max(0, demoT - (timelineState.demoOffset || 0))); } finally { playerState.syncing = false; }
+    if (playerState.seekTimer) clearTimeout(playerState.seekTimer);
+    playerState.seekTimer = null;
+    playerState.pendingSeek = null;
+    playerState.seekTarget = Math.floor(demoT);
+    playerState.seekIssuedAt = performance.now();
+    playerState.fte.demoJump(demoT);
 }
 
 // One tick of the run, from playerSyncTick. Skipped while a jump is in
@@ -7900,11 +7928,15 @@ function playlistRunTick(demoT) {
     run.clips.forEach((c, i) => { if (clipIsCurrent(c)) local.push(i); });
     const li = local.indexOf(run.index);
     if (li < 0) return;
-    const step = Playlist.playlistStep(local.map(i => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
+    // The demo can run out inside a clip padded past its last frame; FTE
+    // then reports not playing and `to` is never crossed — the clip is done.
+    const step = fte.hasEnded()
+        ? { type: 'end' }
+        : Playlist.playlistStep(local.map(i => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
     run.prev = demoT;
     if (step.type === 'follow') {
         run.index = local[step.index];
-        renderPlaylist();
+        markPlaylistRun();
     } else if (step.type === 'next' || step.type === 'end') {
         if (run.index + 1 < run.clips.length) {
             playRunClip(run.index + 1);
@@ -7922,15 +7954,24 @@ function playlistRunTick(demoT) {
 async function loadDemoForRun(c) {
     const run = playlistState.run;
     playerToast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
+    playlistState.loadingRun = run;
     try {
         const game = await fetchGameFromHub(c.demo.gameId);
         await loadGameFromHub(game);
     } catch (err) {
         playerToast(`Could not load game ${c.demo.gameId}: ${err.message}`);
+        if (playlistState.run === run) stopPlaylistRun();
+        return;
+    } finally {
+        playlistState.loadingRun = null;
+    }
+    if (playlistState.run !== run) return;
+    if (!clipIsCurrent(c)) {
+        // The hub demo is not the one the clip names (a hand-made link).
+        playerToast(`Game ${c.demo.gameId} is not "${c.demo.title}" — stopping`);
         stopPlaylistRun();
         return;
     }
-    if (playlistState.run !== run) return;
     playRunClip(run.index);
 }
 
@@ -7984,7 +8025,6 @@ function renderPlaylist() {
     const list = document.getElementById('playlist-items');
     if (!list) return;
     const clips = playlistState.clips;
-    const run = playlistState.run;
     list.innerHTML = '';
     clips.forEach((c, i) => {
         const li = document.createElement('li');
@@ -7992,7 +8032,6 @@ function renderPlaylist() {
         li.draggable = true;
         const current = clipIsCurrent(c);
         if (!current) li.classList.add('other-demo');
-        if (run && !run.transient && run.clips === clips && run.index === i) li.classList.add('active');
         if (current && c.who) li.style.setProperty('--pov-color', playerColor(c.who));
         const off = c.demo?.offset || 0;
         const when = `${formatDuration(Math.max(0, c.from - off))}–${formatDuration(Math.max(0, c.to - off))}`;
@@ -8005,7 +8044,7 @@ function renderPlaylist() {
             <span class="demo-tag">${current ? '' : escapeHtml(c.demo?.title || c.demo?.key || '')}</span>
             <span class="ops"><button class="up" title="Move up">↑</button><button class="down" title="Move down">↓</button><button class="del" title="Remove">×</button></span>`;
         li.querySelector('.play').addEventListener('click', () => startPlaylistRun(playlistState.clips, i));
-        li.querySelector('.label').addEventListener('change', (e) => {
+        li.querySelector('.label').addEventListener('input', (e) => {
             c.label = e.target.value;
             savePlaylist();
         });
@@ -8036,6 +8075,17 @@ function renderPlaylist() {
     if (count) count.textContent = clips.length ? `(${clips.length})` : '';
     const empty = document.getElementById('playlist-empty');
     if (empty) empty.style.display = clips.length ? 'none' : '';
+    markPlaylistRun();
+}
+
+// The run's position only — rows are not rebuilt, so a label being typed
+// into keeps its text and focus while the run steps.
+function markPlaylistRun() {
+    const run = playlistState.run;
+    const onList = run && !run.transient && run.clips === playlistState.clips;
+    document.querySelectorAll('#playlist-items .playlist-item').forEach((li, i) => {
+        li.classList.toggle('active', !!onList && run.index === i);
+    });
     const stop = document.getElementById('playlist-stop');
     if (stop) stop.disabled = !run;
     const status = document.getElementById('playlist-status');
@@ -8163,8 +8213,8 @@ function copyPlaylistShareLink() {
 function importPlaylistFromHash() {
     const m = location.hash.match(/^#playlist=([A-Za-z0-9_-]+)$/);
     if (!m) return;
-    const decoded = Playlist.decodePlaylist(m[1]);
     history.replaceState(null, '', location.pathname + location.search);
+    const decoded = Playlist.decodePlaylist(m[1]);
     if (!decoded || !decoded.length) return;
     // Opening your own link again must not double the list.
     const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track;

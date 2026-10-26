@@ -49,6 +49,16 @@ test('encode/decode round-trips clips across demos', () => {
     assert.equal(decodePlaylist('garbage!!'), null);
 });
 
+test('decodePlaylist rejects malformed and inconsistent links', () => {
+    const enc = (doc) => Buffer.from(JSON.stringify(doc)).toString('base64url');
+    assert.equal(decodePlaylist(enc({ v: 1, d: [0], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'non-array demo row');
+    assert.equal(decodePlaylist(enc({ v: 1, d: [['hub:5', 6, 't', 0]], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'key/gameId disagree');
+    assert.equal(decodePlaylist(enc({ v: 1, d: [['hub:5', '5 or 1=1', 't', 0]], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'gameId not a number');
+    assert.equal(decodePlaylist(enc({ v: 2, d: [], c: [] })), null, 'unknown version');
+    const ok = decodePlaylist(enc({ v: 1, d: [['hub:5', 5, 't', 1.5]], c: [[1, 2, 'x', '', '', 0]] }));
+    assert.deepEqual(ok, [{ from: 1, to: 2, track: 'auto', who: '', label: '', demo: { key: 'hub:5', gameId: 5, title: 't', offset: 1.5 } }]);
+});
+
 test('playlistStep advances on playback crossing `to`, not on a seek past it', () => {
     const clips = [{ from: 10, to: 20 }, { from: 50, to: 60 }];
     assert.deepEqual(playlistStep(clips, 0, 19.9, 20.05, true), { type: 'next', index: 1 });

@@ -106,6 +106,7 @@ export class FteController {
 
         if (target < current) {
             this._restoreTarget = target;
+            this._restoreFrom = current;
             this._restoreTimer = setInterval(() => this._restorePlayback(), 25);
         }
     }
@@ -164,7 +165,12 @@ export class FteController {
     _restorePlayback(now = false) {
         if (!now) {
             if (!this._restoreTimer) return;
-            if (this.getDemoElapsedTime() - this._restoreTarget > 1) return;
+            // Deviation from hub, which waits for the clock to sit within
+            // 1 s of the target: a slow frame can carry it past that window
+            // and the restore never fires. Arrived = back below where the
+            // jump started and at (or past) the target.
+            const t = this.getDemoElapsedTime();
+            if (!(t < this._restoreFrom - 1 && t >= this._restoreTarget - 0.5)) return;
             clearInterval(this._restoreTimer);
             this._restoreTimer = null;
         }

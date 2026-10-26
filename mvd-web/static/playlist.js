@@ -86,16 +86,29 @@ export function encodePlaylist(clips) {
 }
 
 export function decodePlaylist(str) {
-    let doc;
     try {
-        doc = JSON.parse(base64UrlDecode(str));
+        return decodeRows(JSON.parse(base64UrlDecode(str)));
     } catch {
         return null;
     }
+}
+
+// A share link is untrusted input: anything malformed drops the row (or the
+// whole link), and a demo's key must agree with its gameId — the page loads
+// a clip's demo by gameId and then matches it by key.
+function decodeRows(doc) {
     if (!doc || doc.v !== PLAYLIST_VERSION || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
-    const demos = doc.d.map(([key, gameId, title, offset]) => ({
-        key: String(key), gameId: gameId || null, title: String(title || ''), offset: Number(offset) || 0,
-    }));
+    const demos = doc.d.map((row) => {
+        if (!Array.isArray(row)) return null;
+        const [key, gameId, title, offset] = row;
+        if (typeof key !== 'string') return null;
+        if (gameId) {
+            if (!Number.isInteger(gameId) || gameId <= 0 || key !== `hub:${gameId}`) return null;
+        } else if (!key.startsWith('file:')) {
+            return null;
+        }
+        return { key, gameId: gameId || null, title: String(title || ''), offset: Number(offset) || 0 };
+    });
     const clips = [];
     for (const row of doc.c) {
         if (!Array.isArray(row)) continue;
@@ -105,7 +118,7 @@ export function decodePlaylist(str) {
         if (!demo) continue;
         clips.push({
             from, to,
-            track: Number.isFinite(track) ? track : 'auto',
+            track: Number.isInteger(track) && track > 0 ? track : 'auto',
             who: String(who || ''), label: String(label || ''),
             demo: { ...demo },
         });
