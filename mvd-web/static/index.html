@@ -638,15 +638,49 @@
                 </div>
             </div>
 
-            <!-- Map Tab -->
+            <!-- Player Tab -->
             <div id="tab-player" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel player-panel">
-                    <div class="player-frame-host" id="player-frame-host"></div>
-                    <div class="player-pov-bar" id="player-pov-bar"></div>
+                    <div class="player-layout">
+                        <div class="player-main">
+                            <div class="player-frame-host" id="player-frame-host"></div>
+                            <div class="player-pov-bar" id="player-pov-bar"></div>
+                            <div class="player-clip-bar">
+                                <button id="player-mark-in" class="player-pov-btn" title="Mark the clip start at the player's time (key: i)">⟦ In <span id="player-mark-in-time">–</span></button>
+                                <button id="player-mark-out" class="player-pov-btn" title="Mark the clip end at the player's time (key: o)">Out <span id="player-mark-out-time">–</span> ⟧</button>
+                                <button id="player-add-clip" class="player-pov-btn" title="Add In→Out from the current POV to the playlist (key: c). Without marks: the last 10 s.">+ Add clip</button>
+                                <span class="player-clip-hint">Hub links elsewhere: click plays here · shift-click adds to the playlist · ctrl/middle-click opens hub</span>
+                            </div>
+                            <div class="player-playlist">
+                                <div class="player-playlist-head">
+                                    <h3>Playlist <span id="playlist-count" class="muted"></span></h3>
+                                    <button id="playlist-play" class="player-pov-btn" title="Play the clips in order, here">▶ Play all</button>
+                                    <button id="playlist-stop" class="player-pov-btn" title="Stop the scripted run">■ Stop</button>
+                                    <select id="playlist-generate" title="Append generated clips from this demo">
+                                        <option value="">Generate…</option>
+                                    </select>
+                                    <button id="playlist-hub-link" class="player-pov-btn" title="Copy one hub.quakeworld.nu link playing every clip (one hub demo, up to 20 clips)">Copy hub link</button>
+                                    <button id="playlist-share-link" class="player-pov-btn" title="Copy a link to this page carrying the playlist">Copy share link</button>
+                                    <button id="playlist-clear" class="player-pov-btn" title="Remove every clip">Clear</button>
+                                    <span id="playlist-status" class="player-clip-hint"></span>
+                                </div>
+                                <ol id="playlist-items" class="playlist-items"></ol>
+                                <div id="playlist-empty" class="player-clip-hint">No clips yet — mark In/Out above, shift-click a Hub link on any tab, or pick Generate.</div>
+                            </div>
+                        </div>
+                        <div class="player-panes" id="player-panes">
+                            <div class="player-pane-add">
+                                <select id="player-pane-add" title="Add a pane to this column">
+                                    <option value="">+ Add pane…</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Map Tab -->
             <div id="tab-map" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel map-panel">
@@ -1307,7 +1341,9 @@
          that runs later still. -->
     <script type="module">
         import * as MapView from './map-view/index.js';
+        import * as Playlist from './playlist.js';
         window.MapView = MapView;
+        window.Playlist = Playlist;
         // app.js defines this on its top level (classic scripts run before
         // deferred module ones), and uses it to allocate the camera.
         if (window.onMapViewReady) window.onMapViewReady(MapView);

@@ -604,6 +604,7 @@ function generateDemoFilename(game) {
 document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
+    setupPlayerTab();
     setupSearch();
     setupChatToolbar();
     setupKeyMomentsFilters();
@@ -677,6 +678,7 @@ function setCurrentTime(time) {
     renderMap(mapState.currentTime);
     updateUrlState();
     if (!playerState.syncing && playerDrives()) requestPlayerSeek(mapState.currentTime);
+    schedulePlayerPaneUpdate();
 }
 
 // ─── URL State Sharing ─────────────────────────────────────────────────────
@@ -843,9 +845,13 @@ function setupTabs() {
                 if (mapState.isPlaying) stopPlayback();
                 ensurePlayer();
                 startPlayerSync();
-            } else if (playerState.fte) {
-                stopPlayerSync();
-                playerState.fte.pause();
+                mountPlayerPanes();
+            } else {
+                unmountPlayerPanes();
+                if (playerState.fte) {
+                    stopPlayerSync();
+                    playerState.fte.pause();
+                }
             }
             updatePlaybackButtons();
 
@@ -923,7 +929,7 @@ async function uploadFile(file) {
         startLoadTiming();
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        const playerDemo = snapshotPlayerDemo(bytes);
+        const playerDemo = snapshotPlayerDemo(bytes, file.name);
         const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
@@ -997,7 +1003,7 @@ async function loadGameFromHub(game) {
 
     status.textContent = 'Analyzing...';
     const filename = generateDemoFilename(game);
-    const playerDemo = snapshotPlayerDemo(demoBytes);
+    const playerDemo = snapshotPlayerDemo(demoBytes, filename);
     const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
@@ -2029,7 +2035,12 @@ function displayResults(result) {
 
     // A demo loaded while the Player tab is open: resetUIToCleanState
     // dropped the previous engine and no tab click will boot the new one.
-    if (playerTabActive()) ensurePlayer();
+    if (playerTabActive()) {
+        ensurePlayer();
+        mountPlayerPanes();
+    }
+    renderGenerateMenu();
+    renderPlaylist();
 
     // Reveal the now-populated UI (overlay may already be hidden if the
     // demo was loaded interactively rather than via ?gameId=).
@@ -7051,15 +7062,18 @@ const playerState = {
     seekIssuedAt: 0,
     lastTrack: null,
     lastEnded: false,
+    onReady: null,      // run once when the engine is up (a clip queued before it)
+    markIn: null,       // demo seconds, the clip bar's In / Out marks
+    markOut: null,
 };
 
 // snapshotPlayerDemo copies the demo bytes for the Player tab. Must run
 // BEFORE analyzeInWorker, which transfers (detaches) the buffer. The engine
 // finds the demo by name (config.cfg: `playdemo match`), so the extension
 // has to say whether the bytes are gzipped.
-function snapshotPlayerDemo(bytes) {
+function snapshotPlayerDemo(bytes, name) {
     const gz = bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b;
-    return { blob: new Blob([bytes]), path: gz ? 'qw/match.mvd.gz' : 'qw/match.mvd' };
+    return { blob: new Blob([bytes]), path: gz ? 'qw/match.mvd.gz' : 'qw/match.mvd', name };
 }
 
 function playerTabActive() {
@@ -7093,6 +7107,11 @@ function ensurePlayer() {
                 if (playerTabActive()) startPlayerSync();
                 updatePlaybackButtons();
                 markActivePov();
+                renderPovBar();
+                // A clip asked to play before the engine was up.
+                const onReady = playerState.onReady;
+                playerState.onReady = null;
+                if (onReady) onReady();
             }, (err) => console.error('player:', err));
     }, { once: true });
     playerState.blobUrl = demoUrl;
@@ -7128,7 +7147,9 @@ function teardownPlayer() {
     Object.assign(playerState, {
         blobUrl: null, iframe: null, fte: null, seekTimer: null,
         pendingSeek: null, seekTarget: null, lastTrack: null, lastEnded: false,
+        markIn: null, markOut: null,
     });
+    updateClipMarks();
     const bar = document.getElementById('player-pov-bar');
     if (bar) bar.innerHTML = '';
 }
@@ -7174,7 +7195,9 @@ function playerSyncTick() {
     if (track !== playerState.lastTrack) {
         playerState.lastTrack = track;
         markActivePov();
+        onPlayerPovChanged();
     }
+    playlistRunTick(demoT);
 }
 
 function requestPlayerSeek(matchTime) {
@@ -7210,15 +7233,27 @@ function playerSetSpeed(speed) {
 
 // POV bar: an "Auto" button (FTE's stats-based autotrack) plus one button
 // per player, grouped and coloured by the canonical team order.
+// playerTeamIndex: a player's index in the canonical team order (the
+// TEAM_COLORS index), -1 when unknown. In an individual layout every player
+// is their own side.
+function playerTeamIndex(name) {
+    const teams = timelineState.teams || [];
+    if (individualFieldActive()) return teams.indexOf(name);
+    const demoPlayers = currentResult?.demoInfo?.players || [];
+    const team = demoPlayers.find(p => p.name === name)?.team ?? mapState.playerSymbols?.[name]?.team;
+    return teams.indexOf(team);
+}
+
+function playerColor(name) {
+    return TEAM_COLORS[playerTeamIndex(name)] || '#ccc';
+}
+
 function renderPovBar() {
     const bar = document.getElementById('player-pov-bar');
     if (!bar) return;
     bar.innerHTML = '';
     const ids = currentResult?.timelineAnalysis?.playerUserIDs || {};
-    const teams = timelineState.teams || [];
-    const individual = individualFieldActive();
-    const demoPlayers = currentResult?.demoInfo?.players || [];
-    const teamIdx = (name) => teams.indexOf(individual ? name : demoPlayers.find(p => p.name === name)?.team);
+    const teamIdx = playerTeamIndex;
     const names = Object.keys(ids).sort((a, b) => (teamIdx(a) - teamIdx(b)) || a.localeCompare(b));
 
     const add = (label, userid, color) => {
@@ -7265,6 +7300,930 @@ function markActivePov() {
         const id = btn.dataset.userid;
         btn.classList.toggle('active', id === 'auto' ? auto : Number(id) === track);
     });
+}
+
+// ─── Player Tab: panes ──────────────────────────────────────────────────────
+//
+// A column of panes beside the player, each following the player's clock
+// (setCurrentTime → schedulePlayerPaneUpdate) and its POV. A pane type is
+// { title, mount(body, head), unmount(), update(t) }; which panes are open
+// and in what order is a per-viewer convenience kept in localStorage.
+// Panes are mounted while the tab is active and unmounted when it is left —
+// the Map pane borrows the Map tab's canvas and must hand it back.
+
+const PLAYER_PANES_KEY = 'mvd.playerPanes.v1';
+const PLAYER_PANES_DEFAULT = ['map', 'stack', 'feed'];
+
+const PLAYER_PANE_TYPES = {
+    map: { title: 'Map', mount: mountMapPane, unmount: unmountMapPane, update: () => {} },
+    stack: { title: 'Health / armor', mount: mountStackPane, unmount: () => {}, update: updateStackPane },
+    feed: { title: 'Frag feed', mount: mountFeedPane, unmount: () => {}, update: updateFeedPane },
+};
+
+const playerPanes = {
+    order: null,        // pane ids, top to bottom
+    mounted: [],        // [{ id, el, type }] while the tab is active
+    updateQueued: false,
+};
+
+function loadPlayerPaneOrder() {
+    if (playerPanes.order) return playerPanes.order;
+    let order = null;
+    try {
+        order = JSON.parse(localStorage.getItem(PLAYER_PANES_KEY) || 'null');
+    } catch { /* storage blocked or corrupt: defaults */ }
+    if (!Array.isArray(order)) order = PLAYER_PANES_DEFAULT.slice();
+    playerPanes.order = order.filter((id, i) => PLAYER_PANE_TYPES[id] && order.indexOf(id) === i);
+    return playerPanes.order;
+}
+
+function savePlayerPaneOrder() {
+    try {
+        localStorage.setItem(PLAYER_PANES_KEY, JSON.stringify(playerPanes.order));
+    } catch { /* per-viewer convenience only */ }
+}
+
+function mountPlayerPanes() {
+    unmountPlayerPanes();
+    const column = document.getElementById('player-panes');
+    if (!column || !currentResult) return;
+    const addBox = column.querySelector('.player-pane-add');
+    for (const id of loadPlayerPaneOrder()) {
+        const type = PLAYER_PANE_TYPES[id];
+        const el = document.createElement('div');
+        el.className = 'player-pane';
+        el.dataset.pane = id;
+        const head = document.createElement('div');
+        head.className = 'player-pane-head';
+        head.draggable = true;
+        head.innerHTML = `<span class="title">${escapeHtml(type.title)}</span>`;
+        const body = document.createElement('div');
+        body.className = 'player-pane-body';
+        el.appendChild(head);
+        el.appendChild(body);
+        column.insertBefore(el, addBox);
+        type.mount(body, head);
+        for (const [label, title, fn] of [
+            ['↑', 'Move up', () => movePlayerPane(id, -1)],
+            ['↓', 'Move down', () => movePlayerPane(id, 1)],
+            ['×', 'Close pane', () => closePlayerPane(id)],
+        ]) {
+            const b = document.createElement('button');
+            b.textContent = label;
+            b.title = title;
+            b.addEventListener('click', fn);
+            head.appendChild(b);
+        }
+        installPaneDrag(el, head, id);
+        playerPanes.mounted.push({ id, el, type });
+    }
+    renderPaneAddMenu();
+    updatePlayerPanes();
+}
+
+function unmountPlayerPanes() {
+    for (const { el, type } of playerPanes.mounted) {
+        type.unmount();
+        el.remove();
+    }
+    playerPanes.mounted = [];
+}
+
+function renderPaneAddMenu() {
+    const sel = document.getElementById('player-pane-add');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">+ Add pane…</option>';
+    for (const [id, type] of Object.entries(PLAYER_PANE_TYPES)) {
+        if (playerPanes.order.includes(id)) continue;
+        const o = document.createElement('option');
+        o.value = id;
+        o.textContent = type.title;
+        sel.appendChild(o);
+    }
+    sel.parentElement.style.display = sel.options.length > 1 ? '' : 'none';
+}
+
+function movePlayerPane(id, delta) {
+    const order = playerPanes.order;
+    const i = order.indexOf(id);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= order.length) return;
+    [order[i], order[j]] = [order[j], order[i]];
+    savePlayerPaneOrder();
+    mountPlayerPanes();
+}
+
+function closePlayerPane(id) {
+    playerPanes.order = playerPanes.order.filter(x => x !== id);
+    savePlayerPaneOrder();
+    mountPlayerPanes();
+}
+
+function addPlayerPane(id) {
+    if (!PLAYER_PANE_TYPES[id] || playerPanes.order.includes(id)) return;
+    playerPanes.order.push(id);
+    savePlayerPaneOrder();
+    mountPlayerPanes();
+}
+
+// Drag a pane by its header onto another pane to put it there.
+function installPaneDrag(el, head, id) {
+    head.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/x-mvd-pane', id);
+        e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragover', (e) => {
+        if (!e.dataTransfer.types.includes('text/x-mvd-pane')) return;
+        e.preventDefault();
+        el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', (e) => {
+        el.classList.remove('drag-over');
+        const from = e.dataTransfer.getData('text/x-mvd-pane');
+        if (!from || from === id) return;
+        e.preventDefault();
+        const order = playerPanes.order.filter(x => x !== from);
+        order.splice(order.indexOf(id), 0, from);
+        playerPanes.order = order;
+        savePlayerPaneOrder();
+        mountPlayerPanes();
+    });
+}
+
+// Coalesce the clock's updates (the sync poll and scrubbing can call
+// setCurrentTime several times a frame) into one pane render per frame.
+function schedulePlayerPaneUpdate() {
+    if (playerPanes.updateQueued || !playerPanes.mounted.length) return;
+    playerPanes.updateQueued = true;
+    requestAnimationFrame(() => {
+        playerPanes.updateQueued = false;
+        updatePlayerPanes();
+    });
+}
+
+function updatePlayerPanes() {
+    const t = mapState.currentTime;
+    for (const { type } of playerPanes.mounted) type.update(t);
+}
+
+// The tracked player's name (POV), or null under autotrack-with-nobody /
+// before the engine is up.
+function povPlayerName() {
+    const id = playerState.lastTrack;
+    if (id == null) return null;
+    return playerNameForUserid(id);
+}
+
+function playerNameForUserid(userid) {
+    const ids = currentResult?.timelineAnalysis?.playerUserIDs || {};
+    for (const [name, id] of Object.entries(ids)) if (id === Number(userid)) return name;
+    return null;
+}
+
+function trackPlayerByName(name) {
+    const fte = playerState.fte;
+    const id = currentResult?.timelineAnalysis?.playerUserIDs?.[name];
+    if (!fte || !id) return;
+    fte.track(id);
+    markActivePov();
+}
+
+function onPlayerPovChanged() {
+    mapPaneFollowPov();
+    schedulePlayerPaneUpdate();
+}
+
+// ── Map pane ──
+//
+// Borrows the Map tab's canvas (and with it the one MvdMap and its GL
+// context) rather than mounting a second MvdMap: a second instance needs
+// every state field initMapView and the async geometry/frame loaders push,
+// and the PoC wants to see whether the pane earns that. The map follows the
+// POV; clicking a player on the map switches the POV to them.
+
+const mapPaneState = {
+    home: null,          // { parent, next } — where the canvas lives in the Map tab
+    savedFollow: null,
+    resizeObserver: null,
+    follow: true,
+    settingFollow: false,
+};
+
+function mountMapPane(body, head) {
+    const canvas = mapState.canvas || document.getElementById('map-canvas');
+    if (!canvas || !mapView) {
+        body.textContent = 'No map for this demo.';
+        return;
+    }
+    const label = document.createElement('label');
+    label.title = 'Keep the map centred on the player you are watching';
+    label.innerHTML = '<input type="checkbox"> follow POV';
+    const box = label.querySelector('input');
+    box.checked = mapPaneState.follow;
+    box.addEventListener('change', () => {
+        mapPaneState.follow = box.checked;
+        if (box.checked) mapPaneFollowPov();
+        else setMapFollowQuietly(null);
+    });
+    head.appendChild(label);
+
+    mapPaneState.home = { parent: canvas.parentElement, next: canvas.nextSibling };
+    mapPaneState.savedFollow = mapState.followPlayer || null;
+    body.appendChild(canvas);
+    mapPaneState.resizeObserver = new ResizeObserver(() => sizeMapPane());
+    mapPaneState.resizeObserver.observe(body);
+    sizeMapPane();
+    mapPaneFollowPov();
+}
+
+function unmountMapPane() {
+    const canvas = mapState.canvas;
+    if (mapPaneState.resizeObserver) mapPaneState.resizeObserver.disconnect();
+    mapPaneState.resizeObserver = null;
+    const home = mapPaneState.home;
+    mapPaneState.home = null;
+    if (!canvas || !home) return;
+    home.parent.insertBefore(canvas, home.next && home.next.parentNode === home.parent ? home.next : null);
+    setMapFollowQuietly(mapPaneState.savedFollow);
+    resizeMapCanvas();
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function mapPaneActive() {
+    return !!mapPaneState.home;
+}
+
+// resizeMapCanvas defers here while the canvas sits in the pane: the pane's
+// width, the world's aspect, capped so the column stays scannable.
+function sizeMapPane() {
+    const canvas = mapState.canvas;
+    const body = canvas?.parentElement;
+    if (!body || !mapPaneActive()) return;
+    const cssW = Math.max(200, Math.floor(body.clientWidth - 8));
+    const worldW = mapState.bounds ? (mapState.bounds.maxX - mapState.bounds.minX) : 0;
+    const worldH = mapState.bounds ? (mapState.bounds.maxY - mapState.bounds.minY) : 0;
+    const cssH = worldW > 0 ? Math.round(Math.max(200, Math.min(520, cssW * (worldH / worldW)))) : cssW;
+    mapView.resize(cssW, cssH, window.devicePixelRatio || 1);
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function setMapFollowQuietly(name) {
+    mapPaneState.settingFollow = true;
+    try { mapView.setFollowPlayer(name); } finally { mapPaneState.settingFollow = false; }
+}
+
+function mapPaneFollowPov() {
+    if (!mapPaneActive() || !mapPaneState.follow) return;
+    const name = povPlayerName();
+    if (name && name !== mapState.followPlayer) setMapFollowQuietly(name);
+}
+
+// mapView 'follow' listener (onMapViewReady): a click on a player in the
+// pane's map is a POV switch.
+function onMapFollowChanged(name) {
+    if (mapPaneState.settingFollow || !mapPaneActive() || !name) return;
+    trackPlayerByName(name);
+}
+
+// ── Health / armor pane ──
+//
+// One row per player, grouped and coloured in the canonical team order: a
+// rolling strip of the health/armor stack (the Timeline tab's per-player
+// renderer, renderMiniStack) from STACK_PANE_BEFORE s back to
+// STACK_PANE_AFTER s ahead, the playhead marked, and the values at it.
+
+const STACK_PANE_BEFORE = 45;
+const STACK_PANE_AFTER = 15;
+const STACK_PANE_ROW_H = 22;
+// The strip's fixed scale: a mega (250) under 200 red armor tops out at
+// 450; most of a match sits under 300, so 300 keeps rows comparable and
+// readable, and the rare taller stack clips at the top.
+const STACK_PANE_MAX = 300;
+
+let stackPaneRows = [];
+
+function mountStackPane(body) {
+    stackPaneRows = [];
+    const grouped = timelinePlayersByTeam();
+    let n = 0;
+    for (const names of grouped) {
+        for (const name of names) {
+            const row = document.createElement('div');
+            row.className = 'pp-stack-row';
+            const label = document.createElement('span');
+            label.className = 'name';
+            label.textContent = name;
+            label.title = `${name} — click to watch`;
+            label.style.color = playerColor(name);
+            label.addEventListener('click', () => trackPlayerByName(name));
+            const wrap = document.createElement('div');
+            wrap.className = 'pp-stack-wrap';
+            const canvas = document.createElement('canvas');
+            canvas.id = `pp-stack-${n++}`;
+            wrap.appendChild(canvas);
+            const vals = document.createElement('span');
+            vals.className = 'vals';
+            row.append(label, wrap, vals);
+            body.appendChild(row);
+            stackPaneRows.push({ name, row, cid: canvas.id, vals });
+        }
+    }
+    if (!stackPaneRows.length) body.textContent = 'No per-player streams in this demo.';
+}
+
+function updateStackPane(t) {
+    const view = timelineState.bucketView;
+    if (!view || !view.count) return;
+    const start = t - STACK_PANE_BEFORE;
+    const end = t + STACK_PANE_AFTER;
+    const pov = povPlayerName();
+    const i = bucketIndexAtTime(view, t);
+    for (const { name, row, cid, vals } of stackPaneRows) {
+        const cp = view.players[name];
+        renderMiniStack(cid, {
+            startTime: start, endTime: end,
+            points: prepPlayerHAData(cp, start, end),
+            maxValue: STACK_PANE_MAX, height: STACK_PANE_ROW_H,
+        });
+        const canvas = document.getElementById(cid);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            const x = Math.round(canvas.width * STACK_PANE_BEFORE / (STACK_PANE_BEFORE + STACK_PANE_AFTER));
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(x, 0, Math.max(1, Math.round(window.devicePixelRatio || 1)), canvas.height);
+        }
+        const h = cp && i >= 0 ? playerValAt(cp, 'h', i) : undefined;
+        if (h == null) {
+            vals.textContent = '—';
+            vals.classList.add('dead');
+        } else {
+            const a = playerValAt(cp, 'a', i) || 0;
+            const at = playerValAt(cp, 'at', i) || '';
+            vals.classList.remove('dead');
+            vals.innerHTML = `${h}/<span class="${at ? `armor-${escapeHtml(at)}` : ''}">${a}</span>`;
+        }
+        row.classList.toggle('pov', name === pov);
+    }
+}
+
+// ── Frag feed pane ──
+//
+// The last frags up to the playhead, newest first; those within the last
+// FEED_RECENT_S seconds are lit. Click one to watch it from the killer's
+// view, a few seconds before.
+
+const FEED_ROWS = 12;
+const FEED_RECENT_S = 4;
+const FEED_LEAD_S = 4;
+let feedPaneState = { list: null, lastIdx: -2, lastRecent: -1 };
+
+function mountFeedPane(body) {
+    const list = document.createElement('ol');
+    list.className = 'pp-feed';
+    body.appendChild(list);
+    feedPaneState = { list, lastIdx: -2, lastRecent: -1 };
+}
+
+function updateFeedPane(t) {
+    const frags = currentResult?.frags?.frags || [];
+    const { list } = feedPaneState;
+    if (!list) return;
+    const tMs = t * 1000;
+    // Last frag at or before the playhead (frags are time-ordered).
+    let lo = 0, hi = frags.length;
+    while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (frags[mid].time <= tMs) lo = mid + 1; else hi = mid;
+    }
+    const idx = lo - 1;
+    let recent = 0;
+    for (let k = idx; k >= 0 && tMs - frags[k].time <= FEED_RECENT_S * 1000; k--) recent++;
+    if (idx === feedPaneState.lastIdx && recent === feedPaneState.lastRecent) return;
+    feedPaneState.lastIdx = idx;
+    feedPaneState.lastRecent = recent;
+    list.innerHTML = '';
+    for (let k = idx, n = 0; k >= 0 && n < FEED_ROWS; k--, n++) {
+        const f = frags[k];
+        const li = document.createElement('li');
+        if (n < recent) li.classList.add('recent');
+        const killer = f.isSuicide ? '' : f.killer;
+        li.innerHTML = `<span class="t">${formatDuration(f.time / 1000)}</span>`
+            + (killer ? `<span style="color:${playerColor(killer)}">${escapeHtml(killer)}</span>` : '')
+            + `<span class="w">${escapeHtml(f.cause || f.weapon || '')}</span>`
+            + `<span style="color:${playerColor(f.victim)}">${escapeHtml(f.victim)}</span>`;
+        li.title = 'Watch it from the killer\'s view';
+        li.addEventListener('click', () => {
+            setCurrentTime(Math.max(0, f.time / 1000 - FEED_LEAD_S));
+            trackPlayerByName(killer || f.victim);
+        });
+        list.appendChild(li);
+    }
+}
+
+// ─── Player Tab: clips + playlist ───────────────────────────────────────────
+//
+// Clips and their encodings live in playlist.js (window.Playlist, tested
+// under node); this is the page glue. Clip times are demo-relative seconds
+// (see playlist.js); the page shows them on the match clock via the clip's
+// demo.offset.
+
+const PLAYLIST_KEY = 'mvd.playlist.v1';
+const CLIP_DEFAULT_S = 10;
+
+const playlistState = {
+    clips: [],
+    // The scripted run: { clips, index, prev, transient }. `clips` is the
+    // playlist itself, or a one-clip list for a plain click on a hub link.
+    run: null,
+    toastTimer: null,
+};
+
+// Which demo is loaded, in the playlist's terms.
+function currentDemoRef() {
+    if (!currentResult) return null;
+    const gameId = currentResult.hubInfo?.gameId || null;
+    const teams = (timelineState.teams || []).slice(0, 3).join(' vs ');
+    return {
+        key: gameId ? `hub:${gameId}` : `file:${playerState.demo?.name || 'demo'}`,
+        gameId,
+        title: [mapFileKey(currentResult), teams].filter(Boolean).join(' · '),
+        offset: timelineState.demoOffset || 0,
+    };
+}
+
+function clipIsCurrent(c) {
+    const ref = currentDemoRef();
+    return !!ref && c.demo?.key === ref.key;
+}
+
+function loadPlaylist() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || 'null');
+        if (Array.isArray(saved)) playlistState.clips = saved.filter(c => c && c.to > c.from && c.demo?.key);
+    } catch { /* storage blocked or corrupt: start empty */ }
+}
+
+function savePlaylist() {
+    try {
+        localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlistState.clips));
+    } catch { /* per-viewer convenience; the share link is the durable form */ }
+}
+
+function addClips(clips) {
+    if (!clips.length) return;
+    playlistState.clips.push(...clips);
+    savePlaylist();
+    renderPlaylist();
+}
+
+function playerToast(text) {
+    let el = document.getElementById('player-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'player-toast';
+        el.className = 'player-toast';
+        document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(playlistState.toastTimer);
+    playlistState.toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// The player's clock in demo seconds, or the cursor's before the engine is up.
+function playerDemoNow() {
+    if (playerState.fte) return playerState.fte.getDemoElapsedTime();
+    return mapState.currentTime + (timelineState.demoOffset || 0);
+}
+
+function currentPovTrack() {
+    const fte = playerState.fte;
+    if (!fte || fte.isUsingAutotrack() || playerState.lastTrack == null) return 'auto';
+    return playerState.lastTrack;
+}
+
+function updateClipMarks() {
+    const off = timelineState.demoOffset || 0;
+    const fmt = (v) => v == null ? '–' : formatDuration(Math.max(0, v - off));
+    const i = document.getElementById('player-mark-in-time');
+    const o = document.getElementById('player-mark-out-time');
+    if (i) i.textContent = fmt(playerState.markIn);
+    if (o) o.textContent = fmt(playerState.markOut);
+}
+
+function addClipFromMarks() {
+    const demo = currentDemoRef();
+    if (!demo) return;
+    const now = playerDemoNow();
+    let from = playerState.markIn;
+    let to = playerState.markOut;
+    if (from == null && to == null) { from = now - CLIP_DEFAULT_S; to = now; }
+    else if (to == null) to = Math.max(now, from + CLIP_DEFAULT_S);
+    else if (from == null) from = to - CLIP_DEFAULT_S;
+    from = Math.max(0, Math.floor(from));
+    to = Math.ceil(to);
+    if (to <= from) {
+        playerToast('Out is before In — nothing added');
+        return;
+    }
+    const track = currentPovTrack();
+    const who = track === 'auto' ? '' : (playerNameForUserid(track) || '');
+    const label = `${who || 'Auto'} ${formatDuration(Math.max(0, from - demo.offset))}`;
+    addClips([{ from, to, track, who, label, demo }]);
+    playerState.markIn = null;
+    playerState.markOut = null;
+    updateClipMarks();
+    playerToast(`Added: ${label}`);
+}
+
+// ── Scripted playback ──
+
+function startPlaylistRun(clips, index, transient = false) {
+    if (!clips.length) return;
+    playlistState.run = { clips, index, prev: null, transient };
+    playRunClip(index);
+}
+
+function stopPlaylistRun() {
+    playlistState.run = null;
+    renderPlaylist();
+}
+
+function playRunClip(index) {
+    const run = playlistState.run;
+    if (!run) return;
+    const c = run.clips[index];
+    if (!c) return stopPlaylistRun();
+    run.index = index;
+    run.prev = null;
+    renderPlaylist();
+
+    if (!clipIsCurrent(c)) {
+        if (c.demo?.gameId) return loadDemoForRun(c);
+        playerToast(`Skipping "${c.label}" — load ${c.demo?.title || 'its demo'} to play it`);
+        return playRunClip(index + 1);
+    }
+    const off = timelineState.demoOffset || 0;
+    if (!playerTabActive()) switchTab('player');
+    if (!playerState.fte) {
+        // Engine still booting: park the cursor at the clip (the opening
+        // jump goes there) and start once it is up.
+        setCurrentTime(Math.max(0, c.from - off));
+        playerState.onReady = () => playRunClip(index);
+        ensurePlayer();
+        return;
+    }
+    const fte = playerState.fte;
+    setCurrentTime(Math.max(0, c.from - off));
+    if (c.track === 'auto') fte.enableAutotrack();
+    else fte.track(c.track);
+    if (!fte.isPlaying()) fte.play();
+    markActivePov();
+    updatePlaybackButtons();
+}
+
+// One tick of the run, from playerSyncTick. Skipped while a jump is in
+// flight (the clock is still at the pre-jump time).
+function playlistRunTick(demoT) {
+    const run = playlistState.run;
+    const fte = playerState.fte;
+    if (!run || !fte) return;
+    if (playerState.pendingSeek != null || playerState.seekTarget != null) {
+        run.prev = null;
+        return;
+    }
+    // Step over the clips of this demo only; indices map back to the list.
+    const local = [];
+    run.clips.forEach((c, i) => { if (clipIsCurrent(c)) local.push(i); });
+    const li = local.indexOf(run.index);
+    if (li < 0) return;
+    const step = Playlist.playlistStep(local.map(i => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
+    run.prev = demoT;
+    if (step.type === 'follow') {
+        run.index = local[step.index];
+        renderPlaylist();
+    } else if (step.type === 'next' || step.type === 'end') {
+        if (run.index + 1 < run.clips.length) {
+            playRunClip(run.index + 1);
+        } else {
+            fte.pause();
+            updatePlaybackButtons();
+            if (!run.transient) playerToast('Playlist finished');
+            stopPlaylistRun();
+        }
+    }
+}
+
+// The next clip is from another hub demo: load it (the same path a search
+// click takes) and carry on there once its engine is up.
+async function loadDemoForRun(c) {
+    const run = playlistState.run;
+    playerToast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
+    try {
+        const game = await fetchGameFromHub(c.demo.gameId);
+        await loadGameFromHub(game);
+    } catch (err) {
+        playerToast(`Could not load game ${c.demo.gameId}: ${err.message}`);
+        stopPlaylistRun();
+        return;
+    }
+    if (playlistState.run !== run) return;
+    playRunClip(run.index);
+}
+
+// ── Rerouted hub links ──
+//
+// Every hub link on the other tabs (hubReplayUrl: .viewer-link and
+// .hub-watch-link) for the loaded demo: plain click plays the clip here,
+// shift-click adds it to the playlist, ctrl/cmd-click and middle-click keep
+// the browser's own "open hub in a new tab". Capture phase, so a row's own
+// click handler (seek the cursor) does not also fire.
+
+const HUB_LINK_SELECTOR = 'a.viewer-link, a.hub-watch-link';
+const HUB_LINK_TITLE = 'Click: play in the Player tab · Shift-click: add to playlist · Ctrl/middle-click: open on hub';
+const HUB_LINK_DEFAULT_S = 15;
+
+function clipFromHubLink(a) {
+    const parsed = Playlist.parseHubReplayUrl(a.href);
+    const demo = currentDemoRef();
+    if (!parsed || !demo || parsed.gameId !== demo.gameId) return null;
+    const who = parsed.track === 'auto' ? '' : (playerNameForUserid(parsed.track) || '');
+    const section = a.closest('.panel, section')?.querySelector('h2, h3')?.textContent.trim() || 'Clip';
+    const to = parsed.to != null && parsed.to > parsed.from ? parsed.to : parsed.from + HUB_LINK_DEFAULT_S;
+    const label = `${section} · ${who || 'Auto'} ${formatDuration(Math.max(0, parsed.from - demo.offset))}`;
+    return { from: parsed.from, to, track: parsed.track, who, label, demo };
+}
+
+function installHubLinkRouting() {
+    document.addEventListener('click', (e) => {
+        const a = e.target.closest?.(HUB_LINK_SELECTOR);
+        if (!a || e.button !== 0 || e.ctrlKey || e.metaKey || e.altKey) return;
+        const c = clipFromHubLink(a);
+        if (!c) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.shiftKey) {
+            addClips([c]);
+            playerToast(`Added to playlist: ${c.label}`);
+        } else {
+            startPlaylistRun([c], 0, true);
+        }
+    }, true);
+    document.addEventListener('mouseover', (e) => {
+        const a = e.target.closest?.(HUB_LINK_SELECTOR);
+        if (a && a.title !== HUB_LINK_TITLE) a.title = HUB_LINK_TITLE;
+    }, true);
+}
+
+// ── Playlist UI ──
+
+function renderPlaylist() {
+    const list = document.getElementById('playlist-items');
+    if (!list) return;
+    const clips = playlistState.clips;
+    const run = playlistState.run;
+    list.innerHTML = '';
+    clips.forEach((c, i) => {
+        const li = document.createElement('li');
+        li.className = 'playlist-item';
+        li.draggable = true;
+        const current = clipIsCurrent(c);
+        if (!current) li.classList.add('other-demo');
+        if (run && !run.transient && run.clips === clips && run.index === i) li.classList.add('active');
+        if (current && c.who) li.style.setProperty('--pov-color', playerColor(c.who));
+        const off = c.demo?.offset || 0;
+        const when = `${formatDuration(Math.max(0, c.from - off))}–${formatDuration(Math.max(0, c.to - off))}`;
+        li.innerHTML = `
+            <button class="play" title="Play from this clip on">▶</button>
+            <span class="idx" title="Drag to reorder">${i + 1}</span>
+            <span class="when">${when}</span>
+            <span class="who">${escapeHtml(c.who || 'Auto')}</span>
+            <input class="label" type="text" value="${escapeHtml(c.label || '')}" placeholder="name this clip">
+            <span class="demo-tag">${current ? '' : escapeHtml(c.demo?.title || c.demo?.key || '')}</span>
+            <span class="ops"><button class="up" title="Move up">↑</button><button class="down" title="Move down">↓</button><button class="del" title="Remove">×</button></span>`;
+        li.querySelector('.play').addEventListener('click', () => startPlaylistRun(playlistState.clips, i));
+        li.querySelector('.label').addEventListener('change', (e) => {
+            c.label = e.target.value;
+            savePlaylist();
+        });
+        li.querySelector('.up').addEventListener('click', () => movePlaylistClip(i, i - 1));
+        li.querySelector('.down').addEventListener('click', () => movePlaylistClip(i, i + 1));
+        li.querySelector('.del').addEventListener('click', () => removePlaylistClip(i));
+        li.addEventListener('dragstart', (e) => {
+            if (e.target.closest('input')) return e.preventDefault();
+            e.dataTransfer.setData('text/x-mvd-clip', String(i));
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        li.addEventListener('dragover', (e) => {
+            if (!e.dataTransfer.types.includes('text/x-mvd-clip')) return;
+            e.preventDefault();
+            li.classList.add('drag-over');
+        });
+        li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+        li.addEventListener('drop', (e) => {
+            li.classList.remove('drag-over');
+            const from = Number(e.dataTransfer.getData('text/x-mvd-clip'));
+            if (!Number.isInteger(from)) return;
+            e.preventDefault();
+            movePlaylistClip(from, i);
+        });
+        list.appendChild(li);
+    });
+    const count = document.getElementById('playlist-count');
+    if (count) count.textContent = clips.length ? `(${clips.length})` : '';
+    const empty = document.getElementById('playlist-empty');
+    if (empty) empty.style.display = clips.length ? 'none' : '';
+    const stop = document.getElementById('playlist-stop');
+    if (stop) stop.disabled = !run;
+    const status = document.getElementById('playlist-status');
+    if (status) {
+        status.textContent = run
+            ? (run.transient ? `Playing: ${run.clips[0].label}` : `Playing ${run.index + 1} / ${run.clips.length}`)
+            : '';
+    }
+}
+
+// Keep a running playlist pointing at the same clip across edits.
+function movePlaylistClip(from, to) {
+    const clips = playlistState.clips;
+    if (to < 0 || to >= clips.length || from === to) return;
+    const run = playlistState.run;
+    const playing = run && run.clips === clips ? clips[run.index] : null;
+    const [c] = clips.splice(from, 1);
+    clips.splice(to, 0, c);
+    if (playing) run.index = clips.indexOf(playing);
+    savePlaylist();
+    renderPlaylist();
+}
+
+function removePlaylistClip(i) {
+    const clips = playlistState.clips;
+    const run = playlistState.run;
+    const playing = run && run.clips === clips ? clips[run.index] : null;
+    clips.splice(i, 1);
+    if (playing) {
+        if (playing === clips[i] || !clips.includes(playing)) playlistState.run = null;
+        else run.index = clips.indexOf(playing);
+    }
+    savePlaylist();
+    renderPlaylist();
+}
+
+function renderGenerateMenu() {
+    const sel = document.getElementById('playlist-generate');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Generate…</option>';
+    if (!currentResult) return;
+    for (const [id, g] of Object.entries(Playlist.GENERATORS)) {
+        const o = document.createElement('option');
+        o.value = `gen:${id}`;
+        o.textContent = g.title;
+        sel.appendChild(o);
+    }
+    const names = Object.keys(currentResult.timelineAnalysis?.playerUserIDs || {})
+        .sort((a, b) => (playerTeamIndex(a) - playerTeamIndex(b)) || a.localeCompare(b));
+    if (names.length) {
+        const group = document.createElement('optgroup');
+        group.label = 'Frags of…';
+        for (const name of names) {
+            const o = document.createElement('option');
+            o.value = `frags:${name}`;
+            o.textContent = name;
+            group.appendChild(o);
+        }
+        sel.appendChild(group);
+    }
+}
+
+function generateClips(value) {
+    const demo = currentDemoRef();
+    if (!demo || !value) return;
+    let clips = [];
+    let what = '';
+    if (value.startsWith('gen:')) {
+        const g = Playlist.GENERATORS[value.slice(4)];
+        if (!g) return;
+        clips = g.build(currentResult, demo);
+        what = g.title.toLowerCase();
+    } else if (value.startsWith('frags:')) {
+        const name = value.slice(6);
+        clips = Playlist.playerFragClips(currentResult, demo, name);
+        what = `frags of ${name}`;
+    }
+    if (!clips.length) {
+        playerToast(`No ${what} in this demo`);
+        return;
+    }
+    addClips(clips);
+    playerToast(`Added ${clips.length} clip${clips.length === 1 ? '' : 's'}: ${what}`);
+}
+
+async function copyText(text, what) {
+    try {
+        await navigator.clipboard.writeText(text);
+        playerToast(`${what} copied`);
+    } catch {
+        window.prompt(`Copy the ${what.toLowerCase()}:`, text);
+    }
+}
+
+function copyPlaylistHubLink() {
+    const clips = playlistState.clips;
+    const gameId = Playlist.singleHubGame(clips);
+    if (!gameId) {
+        playerToast(clips.length ? 'A hub link needs every clip from one hub demo — use the share link' : 'The playlist is empty');
+        return;
+    }
+    if (clips.length > Playlist.MAX_HUB_CLIPS) playerToast(`Hub plays only the first ${Playlist.MAX_HUB_CLIPS} clips`);
+    copyText(Playlist.hubClipsUrl(gameId, clips), 'Hub link');
+}
+
+// Share link: this page, opening the first clip's hub demo in the Player
+// tab, with the whole playlist in the fragment (#playlist=…).
+function copyPlaylistShareLink() {
+    const clips = playlistState.clips;
+    if (!clips.length) {
+        playerToast('The playlist is empty');
+        return;
+    }
+    const first = clips.find(c => c.demo?.gameId);
+    const params = new URLSearchParams();
+    if (first) params.set('gameId', first.demo.gameId);
+    params.set('tab', 'player');
+    const url = `${location.origin}${location.pathname}?${params}#playlist=${Playlist.encodePlaylist(clips)}`;
+    copyText(url, 'Share link');
+}
+
+// A share link's #playlist= on page load: append its clips (an empty
+// playlist simply becomes it) and drop the fragment so a reload does not
+// import twice.
+function importPlaylistFromHash() {
+    const m = location.hash.match(/^#playlist=([A-Za-z0-9_-]+)$/);
+    if (!m) return;
+    const decoded = Playlist.decodePlaylist(m[1]);
+    history.replaceState(null, '', location.pathname + location.search);
+    if (!decoded || !decoded.length) return;
+    // Opening your own link again must not double the list.
+    const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track;
+    const clips = decoded.filter(c => !playlistState.clips.some(o => same(o, c)));
+    addClips(clips);
+    playerToast(clips.length
+        ? `Imported ${clips.length} clip${clips.length === 1 ? '' : 's'} into the playlist`
+        : 'Those clips are already in your playlist');
+}
+
+function setupPlayerTab() {
+    loadPlaylist();
+    renderPlaylist();
+    installHubLinkRouting();
+
+    document.getElementById('player-mark-in')?.addEventListener('click', () => {
+        playerState.markIn = playerDemoNow();
+        updateClipMarks();
+    });
+    document.getElementById('player-mark-out')?.addEventListener('click', () => {
+        playerState.markOut = playerDemoNow();
+        updateClipMarks();
+    });
+    document.getElementById('player-add-clip')?.addEventListener('click', addClipFromMarks);
+    document.getElementById('playlist-play')?.addEventListener('click', () => startPlaylistRun(playlistState.clips, 0));
+    document.getElementById('playlist-stop')?.addEventListener('click', stopPlaylistRun);
+    document.getElementById('playlist-hub-link')?.addEventListener('click', copyPlaylistHubLink);
+    document.getElementById('playlist-share-link')?.addEventListener('click', copyPlaylistShareLink);
+    document.getElementById('playlist-clear')?.addEventListener('click', () => {
+        if (playlistState.clips.length > 3 && !window.confirm(`Remove all ${playlistState.clips.length} clips?`)) return;
+        playlistState.clips = [];
+        playlistState.run = null;
+        savePlaylist();
+        renderPlaylist();
+    });
+    const gen = document.getElementById('playlist-generate');
+    gen?.addEventListener('change', () => {
+        generateClips(gen.value);
+        gen.value = '';
+    });
+    const addPane = document.getElementById('player-pane-add');
+    addPane?.addEventListener('change', () => {
+        addPlayerPane(addPane.value);
+        addPane.value = '';
+    });
+
+    // i / o / c mark In, Out and add the clip while the Player tab is open
+    // (keys typed into the engine's iframe stay there).
+    document.addEventListener('keydown', (e) => {
+        if (!playerTabActive() || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+        if (e.key === 'i') document.getElementById('player-mark-in')?.click();
+        else if (e.key === 'o') document.getElementById('player-mark-out')?.click();
+        else if (e.key === 'c') addClipFromMarks();
+        else return;
+        e.preventDefault();
+    });
+
+    importPlaylistFromHash();
 }
 
 // ─── Hub Watch Link Helper ──────────────────────────────────────────────────
@@ -7978,7 +8937,10 @@ window.onMapViewReady = (MapView) => {
     _wtc = mapView.camera;
     // Mirror component-side changes into the page chrome. The elements are
     // looked up at event time — these listeners attach before DOMContentLoaded.
-    mapView.on('follow', () => syncFollowSelectUI());
+    mapView.on('follow', (name) => {
+        syncFollowSelectUI();
+        onMapFollowChanged(name);
+    });
     mapView.on('camera', () => {
         const btn = document.getElementById('map-3d-toggle');
         if (btn) btn.classList.toggle('active', MapView.is3D(_wtc));
@@ -8002,6 +8964,7 @@ const MAP_CANVAS_BASE_WIDTH = 850;
 function resizeMapCanvas() {
     const canvas = mapState.canvas;
     if (!canvas) return;
+    if (mapPaneActive()) return sizeMapPane();
     const worldW = mapState.bounds ? (mapState.bounds.maxX - mapState.bounds.minX) : 0;
     const worldH = mapState.bounds ? (mapState.bounds.maxY - mapState.bounds.minY) : 0;
     const fs = !!(document.fullscreenElement &&

@@ -3767,3 +3767,295 @@ th.sortable.sort-desc::after {
     border-left-color: var(--pov-color, #888);
     color: #fff;
 }
+
+/* Player tab layout: player + POV/clip bars on the left, a column of panes
+ * on the right, the playlist across the bottom. */
+.player-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 30%);
+    gap: 10px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .player-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.player-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.player-clip-bar,
+.player-playlist-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.player-clip-bar .player-pov-btn,
+.player-playlist-head .player-pov-btn {
+    border-left-width: 1px;
+}
+
+.player-clip-hint {
+    color: #888;
+    font-size: 12px;
+}
+
+.player-panes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.player-pane {
+    background: var(--bg-deep);
+    border: 1px solid var(--bg-panel);
+    border-radius: 4px;
+    min-width: 0;
+}
+
+.player-pane.drag-over {
+    border-color: var(--accent-cyan);
+}
+
+.player-pane-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    background: var(--bg-panel);
+    cursor: grab;
+    font-size: 13px;
+    user-select: none;
+}
+
+.player-pane-head .title {
+    flex: 1;
+    font-weight: 600;
+}
+
+.player-pane-head button {
+    background: none;
+    border: 0;
+    color: var(--fg-default);
+    cursor: pointer;
+    padding: 0 3px;
+    font: inherit;
+}
+
+.player-pane-head button:hover {
+    color: var(--accent-cyan);
+}
+
+.player-pane-head label {
+    font-weight: normal;
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.player-pane-body {
+    padding: 4px;
+    position: relative;
+}
+
+.player-pane-body canvas#map-canvas {
+    display: block;
+}
+
+.player-pane-add select,
+.player-playlist-head select {
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 4px 6px;
+    font: inherit;
+}
+
+/* Stack pane: one row per player, a rolling health/armor strip with the
+ * playhead marked, the current values, click a name to watch them. */
+.pp-stack-row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr) 64px;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 1px 0;
+}
+
+.pp-stack-row.pov {
+    background: rgba(0, 217, 255, 0.08);
+}
+
+.pp-stack-row .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.pp-stack-row .vals {
+    text-align: right;
+    font-family: monospace;
+}
+
+.pp-stack-row .vals.dead {
+    color: #666;
+}
+
+.pp-stack-wrap {
+    position: relative;
+    min-width: 0;
+}
+
+/* Frag feed pane. */
+.pp-feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+}
+
+.pp-feed li {
+    display: flex;
+    gap: 6px;
+    padding: 1px 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.pp-feed li:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.pp-feed li.recent {
+    background: rgba(0, 217, 255, 0.08);
+}
+
+.pp-feed .t {
+    color: #888;
+    font-family: monospace;
+}
+
+.pp-feed .w {
+    color: #aaa;
+}
+
+/* Playlist. */
+.player-playlist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.player-playlist-head h3 {
+    margin: 0 8px 0 0;
+    font-size: 15px;
+}
+
+.playlist-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.playlist-item {
+    display: grid;
+    grid-template-columns: 28px 30px 110px 130px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: var(--bg-deep);
+    border-left: 4px solid var(--pov-color, #888);
+    font-size: 13px;
+}
+
+.playlist-item.active {
+    outline: 1px solid var(--accent-cyan);
+}
+
+.playlist-item.other-demo {
+    opacity: 0.75;
+}
+
+.playlist-item.drag-over {
+    outline: 1px dashed var(--accent-cyan);
+}
+
+.playlist-item .idx {
+    color: #888;
+    text-align: right;
+    cursor: grab;
+}
+
+.playlist-item .when {
+    font-family: monospace;
+}
+
+.playlist-item input {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--fg-default);
+    font: inherit;
+    padding: 1px 3px;
+    min-width: 0;
+}
+
+.playlist-item input:hover,
+.playlist-item input:focus {
+    border-color: var(--bg-panel);
+}
+
+.playlist-item .demo-tag {
+    color: #aaa;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.playlist-item button {
+    background: none;
+    border: 0;
+    color: var(--fg-default);
+    cursor: pointer;
+    font: inherit;
+    padding: 0 3px;
+}
+
+.playlist-item button:hover {
+    color: var(--accent-cyan);
+}
+
+.player-toast {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border-left: 3px solid var(--accent-cyan);
+    padding: 8px 12px;
+    border-radius: 3px;
+    z-index: 1000;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.player-toast.show {
+    opacity: 1;
+}

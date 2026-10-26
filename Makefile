@@ -45,7 +45,7 @@ build:
 	@cp $(STATIC_DIR)/index.html $(DIST_DIR)/
 	@sed -i 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' $(DIST_DIR)/index.html
 	@cp $(STATIC_DIR)/styles.css $(DIST_DIR)/
-	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
+	@cp $(STATIC_DIR)/app.js $(STATIC_DIR)/playlist.js $(DIST_DIR)/
 	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
 	@cp -r $(STATIC_DIR)/vendor $(DIST_DIR)/
 	@echo "Copying mvd-map-view component..."
@@ -169,9 +169,9 @@ test:
 # absent rather than failing a Go-only checkout. Explicit glob, not a
 # directory arg: `node --test <dir>` is rejected by some node 22 releases.
 	@if command -v node >/dev/null 2>&1; then \
-		node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js; \
+		node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js mvd-web/test/*.test.js; \
 	else \
-		echo "SKIP mvd-map-view / mvd-fte-player tests (no node on PATH)"; \
+		echo "SKIP mvd-map-view / mvd-fte-player / mvd-web playlist tests (no node on PATH)"; \
 	fi
 
 # Remove dist/.
