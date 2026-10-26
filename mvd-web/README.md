@@ -841,7 +841,7 @@ active and unmounted when it is left. A pane type in `PLAYER_PANE_TYPES` is
 `{ title, mount(body, head), unmount(), update(t) }`; `setCurrentTime`
 schedules one `update` per animation frame. Which panes are open, and their
 order, is a per-viewer convenience in `localStorage` (`mvd.playerPanes.v1`,
-default Map / Health / armor / Frag feed); headers drag to reorder, ↑ ↓ ×
+default Map / Health / armor / Moments / Frag feed); headers drag to reorder, ↑ ↓ ×
 move and close, "+ Add pane…" reopens.
 
 - **Map** borrows the Map tab's `#map-canvas` — the one `MvdMap` — while the
@@ -853,6 +853,10 @@ move and close, "+ Add pane…" reopens.
   colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
   0–300 scale) with the playhead, and the values at it. Click a name to
   watch them.
+- **Moments**: the demo's quad runs, frag streaks and highlights (the
+  playlist generators' clips) in time order; the ones under the playhead
+  are lit and the list keeps the next one in view. Click plays the clip,
+  shift-click adds it to the playlist.
 - **Frag feed**: the last 12 frags up to the playhead, newest first, the
   last 4 s lit. Click one to watch it from the killer's view.
 

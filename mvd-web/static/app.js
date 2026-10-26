@@ -7315,12 +7315,13 @@ function markActivePov() {
 // the Map pane borrows the Map tab's canvas and must hand it back.
 
 const PLAYER_PANES_KEY = 'mvd.playerPanes.v1';
-const PLAYER_PANES_DEFAULT = ['map', 'stack', 'feed'];
+const PLAYER_PANES_DEFAULT = ['map', 'stack', 'moments', 'feed'];
 
 const PLAYER_PANE_TYPES = {
     map: { title: 'Map', mount: mountMapPane, unmount: unmountMapPane, update: () => {} },
     stack: { title: 'Health / armor', mount: mountStackPane, unmount: () => {}, update: updateStackPane },
     feed: { title: 'Frag feed', mount: mountFeedPane, unmount: () => {}, update: updateFeedPane },
+    moments: { title: 'Moments', mount: mountMomentsPane, unmount: () => {}, update: updateMomentsPane },
 };
 
 const playerPanes = {
@@ -7733,6 +7734,59 @@ function updateFeedPane(t) {
         });
         list.appendChild(li);
     }
+}
+
+// ── Moments pane ──
+//
+// Every generated clip of the demo (quad runs, streaks, the highlights) in
+// time order: the ones the playhead is inside are lit, the list scrolls to
+// keep the next one in view. Click plays the clip; shift-click adds it.
+
+const MOMENT_GENERATORS = ['quadRuns', 'fragStreaks', 'quadbores', 'airgibs', 'telefrags', 'discharges'];
+let momentsPaneState = { list: null, rows: [], lastKey: '' };
+
+function mountMomentsPane(body) {
+    const demo = currentDemoRef();
+    const clips = [];
+    for (const id of MOMENT_GENERATORS) clips.push(...Playlist.GENERATORS[id].build(currentResult, demo));
+    clips.sort((a, b) => a.from - b.from);
+    const list = document.createElement('ol');
+    list.className = 'pp-feed pp-moments';
+    const rows = clips.map((c) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="t">${formatDuration(Math.max(0, c.from - demo.offset))}</span>`
+            + `<span style="color:${c.who ? playerColor(c.who) : '#ccc'}">${escapeHtml(c.label)}</span>`;
+        li.title = 'Click: play · Shift-click: add to playlist';
+        li.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+                addClips([{ ...c, demo: { ...c.demo } }]);
+                playerToast(`Added to playlist: ${c.label}`);
+            } else {
+                startPlaylistRun([c], 0, true);
+            }
+        });
+        list.appendChild(li);
+        return { li, c };
+    });
+    if (!rows.length) body.textContent = 'No quad runs, streaks or highlights in this demo.';
+    else body.appendChild(list);
+    list.style.maxHeight = '260px';
+    list.style.overflowY = 'auto';
+    momentsPaneState = { list, rows, lastKey: '' };
+}
+
+function updateMomentsPane(t) {
+    const { list, rows } = momentsPaneState;
+    if (!list || !rows.length) return;
+    const demoT = t + (timelineState.demoOffset || 0);
+    let next = rows.findIndex(r => r.c.from > demoT);
+    if (next < 0) next = rows.length;
+    const key = rows.map(r => (demoT >= r.c.from && demoT < r.c.to ? 1 : 0)).join('') + next;
+    if (key === momentsPaneState.lastKey) return;
+    momentsPaneState.lastKey = key;
+    rows.forEach((r) => r.li.classList.toggle('recent', demoT >= r.c.from && demoT < r.c.to));
+    const anchor = rows[Math.max(0, next - 1)]?.li;
+    if (anchor) list.scrollTop = Math.max(0, anchor.offsetTop - list.offsetTop - 40);
 }
 
 // ─── Player Tab: clips + playlist ───────────────────────────────────────────

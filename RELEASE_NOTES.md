@@ -22,8 +22,9 @@ the same dead end).
 
 Beside the player, a column of panes follows its clock and POV — the map
 (following whoever you watch; click a player to switch to them), a rolling
-health/armor strip per player, and a frag feed (click a frag to watch it
-from the killer's view) — added, closed and reordered at will. Under it, a
+health/armor strip per player, a list of the demo's moments (quad runs,
+streaks, highlights — click to play), and a frag feed (click a frag to
+watch it from the killer's view) — added, closed and reordered at will. Under it, a
 **playlist** of clips: mark In/Out and add from the current POV, or
 generate quad runs, frag streaks, quadbores, airgibs, telefrags, discharges
 or one player's frags; play the list right there as a script (across hub
