@@ -121,13 +121,24 @@ fetch_one() {
     return 1
   fi
 
-  local tmp rc=0
+  local tmp rc attempt
   tmp="$(mktemp)"
-  curl -fsSL --connect-timeout 15 --retry 3 --retry-delay 2 -o "$tmp" "$url" || rc=$?
+  # Retried by hand rather than with curl --retry, which also retries
+  # connect timeouts: a host that does not answer within 15 s is down, and
+  # waiting on it again only delays the fallback. 6 = DNS failure,
+  # 7 = connection refused, 28 = timeout — give up on the host at once.
+  # Anything else (dropped transfer, 5xx) gets up to three more tries.
+  for attempt in 1 2 3 4; do
+    rc=0
+    curl -fsSL --connect-timeout 15 -o "$tmp" "$url" || rc=$?
+    case "$rc" in
+      0) break ;;
+      6|7|28) DEAD_HOSTS+="$host "; break ;;
+    esac
+    (( attempt < 4 )) && sleep 2
+  done
   if (( rc != 0 )); then
     printf "  FAIL  %-12s download failed (curl exit %d): %s\n" "$localname" "$rc" "$url"
-    # 6 = DNS failure, 7 = connection refused, 28 = timeout.
-    case "$rc" in 6|7|28) DEAD_HOSTS+="$host " ;; esac
     rm -f "$tmp"
     return 1
   fi
