@@ -5,6 +5,18 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (player-tab) — watch the demo in a Player tab
+
+No schema change; web UI only. A new **Player** tab plays the loaded demo
+in the FTE engine right on the page, in step with the rest of the UI: the
+unified timeline's cursor follows the playback, scrubbing it or clicking any
+time link seeks the player, the speed buttons set the demo speed, and a POV
+bar switches whose view you watch (or hands it back to autotrack). The
+player is a port of hub.quakeworld.nu's (MIT) served from our own origin —
+hub's own embed accepts no commands from the page around it — and it plays
+the bytes already loaded for analysis, so local files work and nothing is
+downloaded twice. The engine itself loads on the first visit to the tab.
+
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 
 No schema change; web UI only. Supersedes the hybrid described in the entry

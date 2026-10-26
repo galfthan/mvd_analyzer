@@ -41,6 +41,9 @@ talks to it through a JS shim.
     map cell show the shortname and carry the title only as the map
     cell's tooltip — nothing else reads it.
   - `probe.html` — tiny dev page used to probe runtime features.
+- `dist/fte-player/` (built from the sibling [`mvd-fte-player/`](../mvd-fte-player/README.md))
+  — the FTE demo player page the **Player** tab embeds; see
+  [Player tab](#player-tab).
 
 ## Build and deploy
 
@@ -96,8 +99,8 @@ admin contact — + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
-`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`,
-`Pickups`, `Aim Stats`.
+`Timeline`, `Chat`, `Player`, `Map`, `Locs & Regions`, `Key Moments`,
+`Pack Drops`, `Pickups`, `Aim Stats`.
 
 The **Aim Stats** tab (experimental) is a thin renderer over the Go-computed
 `result.aim` block: all-players accuracy tables (counts plus
@@ -798,6 +801,36 @@ This exists to replace guesswork about where load time goes (e.g. "is
 loc the slowest?") with measured data before optimizing. It is what
 surfaced the two big costs — the parse event pass and the (now deferred)
 bucket build.
+
+## Player tab
+
+Watches the loaded demo in the FTE engine
+([`mvd-fte-player`](../mvd-fte-player/README.md), ported from hub's player),
+hosted in a **same-origin** iframe so `app.js` drives it directly through
+`iframe.contentWindow` — seek, POV and speed are instant commands, not
+reloads of a hub embed.
+
+- **Lazy.** The iframe (≈6 MB of wasm plus assets from `a.quake.world`) is
+  created on the first visit to the tab, and dropped on the next demo load
+  (`teardownPlayer` from `resetUIToCleanState`).
+- **No second download.** The analysed bytes are snapshotted into a Blob
+  before `analyzeInWorker` transfers the buffer (`snapshotPlayerDemo`) and
+  handed to the engine as a `blob:` URL — so locally loaded files play too.
+- **One clock.** While the tab is active the engine is the clock: a 100 ms
+  poll pushes its time (demo-relative, minus `demoOffset`) into
+  `setCurrentTime`, and every other `setCurrentTime` — scrubbing the
+  unified timeline, any time link — becomes a throttled `demo_jump`. The
+  tab opens paused at the cursor's current time. A jump suppresses the
+  poll until the engine clock arrives, so the cursor does not snap back.
+- **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
+  running speed pauses). `-1x` is disabled — FTE cannot play backwards.
+  Leaving the tab pauses the engine.
+- **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
+  button per player in canonical team order and colour; the followed
+  player stays lit under autotrack too.
+
+The direction (panes beside the player, a clip playlist, rerouted hub
+links) is sketched in [`plan-player-tab.md`](../plan-player-tab.md).
 
 ## Demo search
 

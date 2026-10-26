@@ -57,6 +57,9 @@
             <button class="sidebar-btn" data-tab="chat" title="Chat">
                 <span class="sidebar-btn-label">Chat</span>
             </button>
+            <button class="sidebar-btn" data-tab="player" title="Player — watch the demo">
+                <span class="sidebar-btn-label">Player</span>
+            </button>
             <button class="sidebar-btn" data-tab="map" title="Map">
                 <span class="sidebar-btn-label">Map</span>
             </button>
@@ -636,6 +639,14 @@
             </div>
 
             <!-- Map Tab -->
+            <div id="tab-player" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
+                <div class="panel player-panel">
+                    <div class="player-frame-host" id="player-frame-host"></div>
+                    <div class="player-pov-bar" id="player-pov-bar"></div>
+                </div>
+            </div>
+
             <div id="tab-map" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel map-panel">

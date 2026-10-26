@@ -676,6 +676,7 @@ function setCurrentTime(time) {
     renderChatMessages();
     renderMap(mapState.currentTime);
     updateUrlState();
+    if (!playerState.syncing && playerDrives()) requestPlayerSeek(mapState.currentTime);
 }
 
 // ─── URL State Sharing ─────────────────────────────────────────────────────
@@ -796,7 +797,7 @@ function setupFileUpload() {
     });
 }
 
-const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
+const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments', 'player'];
 
 // Tab URL aliases. The loc tab's internal data-tab stayed "loc-graph", but
 // the tab is now labelled "Locs & Regions" and the URL prefers the matching
@@ -834,6 +835,19 @@ function setupTabs() {
             if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
                 stopPlayback();
             }
+
+            // The Player tab's clock is the engine's: the map's own playback
+            // loop must not run underneath it, and the engine pauses (not
+            // unloads) when the tab is left.
+            if (tabName === 'player') {
+                if (mapState.isPlaying) stopPlayback();
+                ensurePlayer();
+                startPlayerSync();
+            } else if (playerState.fte) {
+                stopPlayerSync();
+                playerState.fte.pause();
+            }
+            updatePlaybackButtons();
 
             // Sync views on tab switch.
             //
@@ -909,11 +923,13 @@ async function uploadFile(file) {
         startLoadTiming();
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
+        const playerDemo = snapshotPlayerDemo(bytes);
         const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
         setAnalysisStatus(status, result);
         currentResult = result;
+        playerState.demo = playerDemo;
         displayResults(result);
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
@@ -981,11 +997,13 @@ async function loadGameFromHub(game) {
 
     status.textContent = 'Analyzing...';
     const filename = generateDemoFilename(game);
+    const playerDemo = snapshotPlayerDemo(demoBytes);
     const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
     setAnalysisStatus(status, result);
     currentResult = result;
+    playerState.demo = playerDemo;
 
     currentResult.hubInfo = {
         gameId: game.id,
@@ -2008,6 +2026,10 @@ function displayResults(result) {
 
     // Apply URL state (tab, time, segment) if present
     applyUrlState();
+
+    // A demo loaded while the Player tab is open: resetUIToCleanState
+    // dropped the previous engine and no tab click will boot the new one.
+    if (playerTabActive()) ensurePlayer();
 
     // Reveal the now-populated UI (overlay may already be hidden if the
     // demo was loaded interactively rather than via ?gameId=).
@@ -4336,6 +4358,7 @@ let timelineState = {
 // to an FFA demo that simply lacks those fields.
 function resetUIToCleanState() {
     resetTimelineState();
+    teardownPlayer();
 
     document.title = 'MVD Analyzer';
 
@@ -6990,6 +7013,231 @@ function updateTeamStatus() {
         html += `</table>`;
         container.innerHTML = html;
     }
+}
+
+// ─── Player Tab (embedded FTE demo player) ─────────────────────────────────
+
+// The Player tab hosts mvd-fte-player (ftewebgl, controller ported from hub)
+// in a SAME-ORIGIN iframe, fed the bytes of the demo we analysed through a
+// blob URL — no second download, and local files play too. Same origin is
+// the point: we drive the engine directly via iframe.contentWindow (seek,
+// POV, speed) instead of reloading a cross-origin hub embed, which accepts
+// no commands. The engine is booted on first visit to the tab (~6 MB of
+// wasm plus assets) and discarded on the next demo load; one iframe page
+// holds one engine for its lifetime.
+//
+// Clock: FTE runs on demo-relative seconds, this page on match-relative
+// ones; timelineState.demoOffset converts, exactly as in hubReplayUrl().
+// While the tab is active the engine is the clock: a poll pushes its time
+// into setCurrentTime, and any other setCurrentTime (scrub, time links)
+// becomes a throttled demo_jump.
+const PLAYER_SYNC_MS = 100;
+const PLAYER_SEEK_THROTTLE_MS = 150;
+// demo_jump lands on whole seconds and takes a few frames; until the engine
+// clock is near the target (or this long has passed), the sync poll must
+// not drag our cursor back to the pre-jump time.
+const PLAYER_SEEK_SETTLE_MS = 2000;
+
+const playerState = {
+    demo: null,         // { blob, path } of the loaded demo, see snapshotPlayerDemo
+    blobUrl: null,
+    iframe: null,
+    fte: null,          // FteController once the engine is up
+    syncTimer: null,
+    syncing: false,     // set while the sync poll itself calls setCurrentTime
+    seekTimer: null,
+    pendingSeek: null,  // match time awaiting the throttled jump
+    seekTarget: null,   // demo time of the last jump, until the engine reaches it
+    seekIssuedAt: 0,
+    lastTrack: null,
+};
+
+// snapshotPlayerDemo copies the demo bytes for the Player tab. Must run
+// BEFORE analyzeInWorker, which transfers (detaches) the buffer. The engine
+// finds the demo by name (config.cfg: `playdemo match`), so the extension
+// has to say whether the bytes are gzipped.
+function snapshotPlayerDemo(bytes) {
+    const gz = bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b;
+    return { blob: new Blob([bytes]), path: gz ? 'qw/match.mvd.gz' : 'qw/match.mvd' };
+}
+
+function playerTabActive() {
+    return !!document.getElementById('tab-player')?.classList.contains('active');
+}
+
+function playerDrives() {
+    return !!playerState.fte && playerTabActive();
+}
+
+function ensurePlayer() {
+    if (playerState.iframe || !playerState.demo || !currentResult) return;
+    const result = currentResult;
+    const demoUrl = URL.createObjectURL(playerState.demo.blob);
+    const demoPath = playerState.demo.path;
+    const iframe = document.createElement('iframe');
+    iframe.src = 'fte-player/player.html';
+    iframe.title = 'Demo player';
+    iframe.allow = 'fullscreen; autoplay';
+    iframe.addEventListener('load', () => {
+        if (playerState.iframe !== iframe) return;
+        iframe.contentWindow.mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(result) })
+            .then((fte) => waitForDemoClock(fte).then(() => fte))
+            .then((fte) => {
+                if (playerState.iframe !== iframe) return;
+                playerState.fte = fte;
+                // Open where the cursor already is, paused — the same entry
+                // hub's ?from= gives.
+                if (mapState.currentTime > 0) issuePlayerJump(mapState.currentTime);
+                fte.pause();
+                if (playerTabActive()) startPlayerSync();
+                updatePlaybackButtons();
+                markActivePov();
+            }, (err) => console.error('player:', err));
+    }, { once: true });
+    playerState.blobUrl = demoUrl;
+    playerState.iframe = iframe;
+    document.getElementById('player-frame-host').appendChild(iframe);
+    renderPovBar();
+}
+
+// The engine reports ready (Module.getClientState exists) before
+// `playdemo` has started the demo, and a demo_jump sent then is lost —
+// seen as the opening jump landing at 0:00. Wait for the demo clock to move.
+const PLAYER_CLOCK_WAIT_MS = 30000;
+function waitForDemoClock(fte) {
+    return new Promise((resolve) => {
+        const started = performance.now();
+        const poll = setInterval(() => {
+            if (fte.getDemoElapsedTime() > 0 || performance.now() - started > PLAYER_CLOCK_WAIT_MS) {
+                clearInterval(poll);
+                resolve();
+            }
+        }, 50);
+    });
+}
+
+// teardownPlayer drops the engine (removing the iframe frees it) but keeps
+// playerState.demo: displayResults calls this through resetUIToCleanState
+// right after the new demo's snapshot was stored.
+function teardownPlayer() {
+    stopPlayerSync();
+    if (playerState.seekTimer) clearTimeout(playerState.seekTimer);
+    if (playerState.iframe) playerState.iframe.remove();
+    if (playerState.blobUrl) URL.revokeObjectURL(playerState.blobUrl);
+    Object.assign(playerState, {
+        blobUrl: null, iframe: null, fte: null, seekTimer: null,
+        pendingSeek: null, seekTarget: null, lastTrack: null,
+    });
+    const bar = document.getElementById('player-pov-bar');
+    if (bar) bar.innerHTML = '';
+}
+
+function startPlayerSync() {
+    if (playerState.syncTimer || !playerState.fte) return;
+    playerState.syncTimer = setInterval(playerSyncTick, PLAYER_SYNC_MS);
+}
+
+function stopPlayerSync() {
+    if (playerState.syncTimer) clearInterval(playerState.syncTimer);
+    playerState.syncTimer = null;
+}
+
+function playerSyncTick() {
+    const fte = playerState.fte;
+    if (!fte) return;
+    const demoT = fte.getDemoElapsedTime();
+    if (playerState.seekTarget != null) {
+        const arrived = Math.abs(demoT - playerState.seekTarget) < 1.5;
+        if (arrived || performance.now() - playerState.seekIssuedAt > PLAYER_SEEK_SETTLE_MS) {
+            playerState.seekTarget = null;
+        }
+    }
+    if (playerState.pendingSeek == null && playerState.seekTarget == null) {
+        const t = demoT - (timelineState.demoOffset || 0);
+        if (Math.abs(t - mapState.currentTime) > 0.01) {
+            playerState.syncing = true;
+            try { setCurrentTime(t); } finally { playerState.syncing = false; }
+        }
+    }
+    const track = fte.getTrackUserid();
+    if (track !== playerState.lastTrack) {
+        playerState.lastTrack = track;
+        markActivePov();
+    }
+}
+
+function requestPlayerSeek(matchTime) {
+    playerState.pendingSeek = matchTime;
+    if (playerState.seekTimer) return;
+    playerState.seekTimer = setTimeout(() => {
+        playerState.seekTimer = null;
+        const t = playerState.pendingSeek;
+        playerState.pendingSeek = null;
+        if (t != null && playerState.fte) issuePlayerJump(t);
+    }, PLAYER_SEEK_THROTTLE_MS);
+}
+
+function issuePlayerJump(matchTime) {
+    const demoT = matchTime + (timelineState.demoOffset || 0);
+    playerState.seekTarget = Math.floor(demoT);
+    playerState.seekIssuedAt = performance.now();
+    playerState.fte.demoJump(demoT);
+}
+
+// The timeline's speed buttons, mapped onto demo_setspeed (percent). Same
+// toggle semantics as the map's playback: pressing the running speed pauses.
+function playerSetSpeed(speed) {
+    const fte = playerState.fte;
+    if (speed < 0) return;
+    const pct = Math.round(speed * 100);
+    if (fte.isPlaying() && fte.getDemoSpeed() === pct) fte.pause();
+    else fte.setDemoSpeed(pct);
+    updatePlaybackButtons();
+}
+
+// POV bar: an "Auto" button (FTE's stats-based autotrack) plus one button
+// per player, grouped and coloured by the canonical team order.
+function renderPovBar() {
+    const bar = document.getElementById('player-pov-bar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    const ids = currentResult?.timelineAnalysis?.playerUserIDs || {};
+    const teams = timelineState.teams || [];
+    const individual = individualFieldActive();
+    const demoPlayers = currentResult?.demoInfo?.players || [];
+    const teamIdx = (name) => teams.indexOf(individual ? name : demoPlayers.find(p => p.name === name)?.team);
+    const names = Object.keys(ids).sort((a, b) => (teamIdx(a) - teamIdx(b)) || a.localeCompare(b));
+
+    const add = (label, userid, color) => {
+        const btn = document.createElement('button');
+        btn.className = 'player-pov-btn';
+        btn.textContent = label;
+        btn.dataset.userid = userid;
+        if (color) btn.style.setProperty('--pov-color', color);
+        btn.addEventListener('click', () => {
+            const fte = playerState.fte;
+            if (!fte) return;
+            if (userid === 'auto') fte.enableAutotrack();
+            else fte.track(userid);
+            markActivePov();
+        });
+        bar.appendChild(btn);
+    };
+    add('Auto', 'auto', null);
+    for (const name of names) add(name, String(ids[name]), TEAM_COLORS[teamIdx(name)]);
+    markActivePov();
+}
+
+// "Auto" lights while autotrack is on; the followed player lights either
+// way, so autotrack shows whom it picked.
+function markActivePov() {
+    const fte = playerState.fte;
+    const auto = !!fte && fte.isUsingAutotrack();
+    const track = playerState.lastTrack;
+    document.querySelectorAll('#player-pov-bar .player-pov-btn').forEach((btn) => {
+        const id = btn.dataset.userid;
+        btn.classList.toggle('active', id === 'auto' ? auto : Number(id) === track);
+    });
 }
 
 // ─── Hub Watch Link Helper ──────────────────────────────────────────────────
@@ -10920,10 +11168,15 @@ function updatePlaybackButtons() {
         'tl-play-pause': 1,
         'tl-5x': 5
     };
+    const drives = playerDrives();
+    const playing = drives ? playerState.fte.isPlaying() : mapState.isPlaying;
+    const current = drives ? playerState.fte.getDemoSpeed() / 100 : mapState.playbackSpeed;
     for (const [id, speed] of Object.entries(buttons)) {
         const btn = document.getElementById(id);
         if (!btn) continue;
-        if (mapState.isPlaying && mapState.playbackSpeed === speed) {
+        // FTE cannot play a demo backwards.
+        btn.disabled = drives && speed < 0;
+        if (playing && current === speed) {
             btn.classList.add('active');
             btn.textContent = '⏸';
         } else {
@@ -10934,6 +11187,10 @@ function updatePlaybackButtons() {
 }
 
 function startPlaybackAtSpeed(speed) {
+    if (playerDrives()) {
+        playerSetSpeed(speed);
+        return;
+    }
     if (mapState.isPlaying && mapState.playbackSpeed === speed) {
         // Toggle off — pause
         stopPlayback();

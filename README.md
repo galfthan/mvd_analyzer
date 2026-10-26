@@ -861,6 +861,8 @@ mvd-analyzer/
     static/                index.html, app.js, worker.js, styles.css, maps/
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
 
+  mvd-fte-player/          ESM: FTE demo player page for the Player tab (port of hub's, MIT)
+
   demos/                   Corpus for regression + manual testing (untracked)
 ```
 
@@ -877,6 +879,7 @@ mvd-analyzer/
 - [mvd-mcp/README.md](mvd-mcp/README.md) — stdio MCP shim, distribution
 - [mvd-mcp/CLAUDE_DESKTOP.md](mvd-mcp/CLAUDE_DESKTOP.md) — Claude Desktop / Claude Code config snippets
 - [mvd-web/README.md](mvd-web/README.md) — browser UI, build and deploy
+- [mvd-fte-player/README.md](mvd-fte-player/README.md) — the embedded FTE demo player behind the Player tab
 
 ## Testing
 

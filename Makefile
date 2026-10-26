@@ -18,6 +18,7 @@ MAPGEN_MAIN     := ./mvd-analytics/cmd/mapgen
 DIST_DIR   := dist
 STATIC_DIR := mvd-web/static
 MAPVIEW_SRC := mvd-map-view/src
+FTEPLAYER_DIR := mvd-fte-player
 LOC_DATA   := mvd-analytics/loc/data
 MAPENTS_DATA := mvd-analytics/mapents/data
 BSP_DIR    := bsps
@@ -49,6 +50,8 @@ build:
 	@cp -r $(STATIC_DIR)/vendor $(DIST_DIR)/
 	@echo "Copying mvd-map-view component..."
 	@mkdir -p $(DIST_DIR)/map-view && cp $(MAPVIEW_SRC)/*.js $(DIST_DIR)/map-view/
+	@echo "Copying mvd-fte-player..."
+	@mkdir -p $(DIST_DIR)/fte-player/src && cp $(FTEPLAYER_DIR)/player.html $(FTEPLAYER_DIR)/config.cfg $(DIST_DIR)/fte-player/ && cp $(FTEPLAYER_DIR)/src/*.js $(DIST_DIR)/fte-player/src/
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
@@ -166,9 +169,9 @@ test:
 # absent rather than failing a Go-only checkout. Explicit glob, not a
 # directory arg: `node --test <dir>` is rejected by some node 22 releases.
 	@if command -v node >/dev/null 2>&1; then \
-		node --test mvd-map-view/test/*.test.js; \
+		node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js; \
 	else \
-		echo "SKIP mvd-map-view tests (no node on PATH)"; \
+		echo "SKIP mvd-map-view / mvd-fte-player tests (no node on PATH)"; \
 	fi
 
 # Remove dist/.

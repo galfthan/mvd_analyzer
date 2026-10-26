@@ -3711,3 +3711,55 @@ th.sortable.sort-desc::after {
         flex: 1;
     }
 }
+
+/* Player tab — FTE demo player (mvd-fte-player, same-origin iframe) with a
+ * POV bar under it. The iframe is created on first visit to the tab. */
+.player-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-frame-host {
+    position: relative;
+    width: 100%;
+    max-height: 75vh;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.player-frame-host iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.player-pov-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.player-pov-btn {
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border: 1px solid transparent;
+    border-left: 4px solid var(--pov-color, #888);
+    border-radius: 3px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.player-pov-btn:hover {
+    border-color: var(--accent-cyan-dim);
+    border-left-color: var(--pov-color, #888);
+}
+
+.player-pov-btn.active {
+    border-color: var(--accent-cyan);
+    border-left-color: var(--pov-color, #888);
+    color: #fff;
+}
