@@ -17,7 +17,11 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    # SAMEORIGIN, not DENY: the Player tab embeds fte-player/player.html as
+    # a same-origin iframe (it drives the engine through contentWindow).
+    # Other sites still can't frame us.
+    X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "frame-ancestors 'self'"
     # no-cache = store, but revalidate on every use. index.html, app.js,
     # worker.js and analyzer.wasm deploy as one unit under stable URLs, so a
     # cached copy must be checked against the CDN ETag each time it is used —
